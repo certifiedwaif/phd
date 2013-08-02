@@ -1,0 +1,58 @@
+\documentclass{amsart}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\begin{document}
+\section{Splines summary}
+From Elements of Statistical Learning
+
+Assume we have bivariate data X and Y. Consider two random variables X and Y.
+Suppose that we wish to construct a statisical model for the joint distribution 
+P(X, Y), in order to study the relationships between X and Y in our data. We
+could construct a statistical model
+\begin{align*}
+	Y = f(X) + \epsilon	
+\end{align*}
+where the random error has $E(\epsilon) = 0$ and is independent of X. What form
+should the function f take? General functions f can be approximated by linear
+combinations of basis functions of the form
+\begin{align*}
+	f_\theta(x) = \sum_{k=1}^K h_k(x) \theta_k
+\end{align*}
+
+Then we can fit such an $f_\theta$ to our data by minimising the residual
+sum of squares
+\begin{align*}
+	RSS(\theta) = \sum_{i=1}^N (y_i - f_\theta(x_i))^2
+\end{align*}
+
+as a function of $\theta$. We can use least squares % you have this at home
+to fit $\hat{f_{\theta}}$ to our function f in closed form.
+
+\begin{align*}
+	\hat{\theta} = (B^TB + \lambda \Omega)^{-1}B^T y
+\end{align*}
+
+Ormerod and Wand did this using O'Sullivan splines in their 2008 paper. This
+form of spline apparently has numerical advantages. The co-efficient matrix
+$B$ where $\{B\}_{ik} = B_{k}(x_i)$ is
+almost banded, as splines have highly localised support and hence could be
+considered ``almost orthogonal''.
+$\Omega = \int_{-\infty}^{\infty} B''_{k}(x) B''_{k'}(x) dx$
+
+Things I don't understand:
+\begin{enumerate}
+	\item How did Wand and Ormerod change the basis from B Splines to O'Sullivan
+	splines?
+	\item Why was using Simpson's rule to exactly approximate the penalty matrix
+	such a huge win versus the differencing matrix?
+	\item Why do we fit splines as variance components?
+	\item Numerics, OMG? Why does the Cholesky decomposition retain sparsity,
+	LU decomposition, banded matrices
+\end{enumerate}
+
+Penalised splines
+Fit using Least squares
+Numerical advantages to O'Sullivan splines, using in Wand/Ormerod 2008.
+
+\end{document}
