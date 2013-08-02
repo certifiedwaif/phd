@@ -1,0 +1,61 @@
+\documentclass[11pt]{amsart}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\title{Summary of Bayesian Data Analysis}
+\begin{document}
+\maketitle
+\section{Chapter 1}
+The heart of Bayesian analysis is Bayes' Rule, which is
+\[
+	p(\theta|y) = \frac{p(\theta, y)}{p(y)} = \frac{p(y|\theta)p(\theta)}{p(y)}
+\]
+where $p(y) = \sum_\theta p(y|\theta) p(\theta)$ in the discrete case and
+$p(y) = \int p(y|\theta)p(\theta) d\theta$ in the continuous case.
+
+An equivalent form of this omits the factor $p(y)$, which does not depend on 
+$\theta$ and, with fixed $y$, can thus be considered a constant, yielding the
+\emph{unnormalised posterior density} which is the right side of the equation.
+
+\[
+p(\theta|y) \propto p(y|\theta)p(\theta)
+\]
+
+These simple expressions encapsulate the technical core of Bayesian inference:
+the primary task of any specific application is to develop a model $p(\theta, y)$
+and perform the necessary computations to summarise $p(\theta|y)$ in appropriate
+ways.
+
+\section{Chapter 2 - Single parameter models}
+
+% FIXME: Learn how to define macros in LaTeX? You're going to be doing this
+% a lot.
+
+\[
+	p(y|\theta) = \text{Bin}(y|n, \theta) = {n \choose y}\theta^y (1-\theta)^{n-y}
+\]
+
+Assume a uniform $[0, 1]$ prior distribution for $\theta$. Then
+
+\begin{align*}
+p(\theta|y) &=\frac{p(y|\theta)p(\theta)}{p(y)} \\
+	& \propto \theta^y (1-\theta)^{n-y}
+\end{align*}
+
+This is a beta distribution $\theta|y \sim \text{Beta}(y+1, n-y+1)$.
+
+\subsection{Conjugacy}
+The property that the posterior distribution follows the same parametric form
+as the prior distribution is called $\emph{conjugacy}$; the beta prior 
+distribution is a \emph{conjugate family} for the binomial likelihood. The
+conjugate famioly is mathematically convenient in that the posterior distribution
+follows a known parametric form.
+
+Formally, if $\mathcal{F}$ is a class of sampling distributions $p(y|\theta)$,
+and $\mathcal{P}$ is a class of prior distributions for $\theta$, then the class
+$\mathcal{P}$ is \emph{conjugate} for $\mathcal{F}$ if
+\[
+p(\theta|y) \in \mathcal{P}\text{ for all }p(.|\theta)\text{ and }p(.)\in \mathcal{P}
+\]
+
+\end{document}
