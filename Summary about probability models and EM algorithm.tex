@@ -1,0 +1,312 @@
+\documentclass{amsart}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\begin{document}
+\section{Probability models for count data}
+\subsection{Poisson model}
+The classic count data model is the Poisson model is the limiting case of a binomial 
+random variable with small  probability $p$, and $np \to \lambda$. If $X \sim 
+\text{Poisson}(\lambda)$, then
+\begin{align*}
+P(X=x) &= \frac{\lambda^x}{x!} e^{-\lambda}
+\end{align*}
+and $EX = \text{Var}X = \lambda$.
+
+% Talk to Ellis about negative binomial regression
+\subsection{Negative binomial}
+
+The negative binomial distribution is also often used to model count data. It can
+be parameterised in at least two ways.
+
+First, consider a sequence of Bernoulli trials with probability $p$ which continue
+until $r$ failures have occurred. What is the probability of $x$ successes? From
+elementary probability theory, it can be seen that if $X$ is the number of successes,
+then
+
+\begin{align*}
+P(X=x) = {x + r - 1 \choose r - 1} p^x (1-p)^{r-1}
+\end{align*}
+
+$X$ is said to have a $\text{NegBinom}(r, p)$ distribution.
+
+Second, consider a two-stage probability hierarchy, where $\lambda \sim
+\text{Gamma}(\alpha, \beta)$ and $X \sim \text{Poisson}(\lambda)$. Then
+$X \sim \text{NegBinom}()$. Thus, the negative binomial arises as a continuous
+Gamma mixture of Poisson variables.
+
+In both parameterisations, the negative binomial has two parameters, and so can have
+differing expectation and variance. Thus the negative binomial is often used to
+represent over dispersed and under dispersed count data, where the expectation and
+variance differ.
+
+\subsection{Zero-inflated Poisson}
+
+The zero-inflated Poisson is a $\text{Bernoulli}(p)$ mixture of two components, a zero 
+component and a non-zero component. If there is probability $p$ that a random variable 
+will take the value zero, and probability $1-p$ that it will take a non-zero value, say 
+from a left truncated Poisson distribution, then
+
+\begin{align*}
+	P(X=0) &= p\\
+	P(X=x|X>0) &= (1-p) \frac{\lambda^{x-1}}{(x-1)!}e^{-\lambda}
+\end{align*}
+
+% Include diagram of the latent variable hierarchy here
+Count data with ``extra'' zeroes i.e. with more zeroes than would be expected in a
+Poisson or negative binomial distribution arise frequently in applications. Examples
+from public health include physical activity data, where some proportion of the sample
+are sedentary and some proportion are active, and hospital stays, as the majority of
+people do not visit hospital in a given year. Zero-inflated distributions also arise in
+insurance, where the majority of policy holders never claim in any given year.
+
+The $\text{Bernoulli}(p)$ random variable is considered a $\emph{latent}$ variable.
+Corresponding zero-inflated negative binomial and binomial models exist.
+
+\subsection{Hurdle model}
+
+A hurdle model is an extension of a zero-inflated model, where the probability parameter
+of the Bernoulli trial which selects between the zero and non-zero components is itself
+a regression model, such as $\text{logit}(p) = X^T \beta$.
+
+These models are useful in applications, as separate sets of coefficients can be used
+for the hurdle and count portions of the model, allowing researchers to separately 
+examine, for example, both which subjects in a study have a zero count and which subjects
+have greater counts than others.
+
+\subsection{Mixture of Poissons}
+
+A mixture of Poissons model is, as the name suggests, a $\text{multinomial}(1, p)$ mixture
+of Poisson models, each of which can have a separate parameter $\lambda_i$,
+$i=1, \ldots, m$. These models, and related models such as a mixture of Poissons or
+mixture of binomials model, allow greater flexibility in modelling groupings within
+count data. The zero-inflated Poisson model is easily seen to be a special case of a
+two component mixture of Poissons with $\lambda_1$ set to 0.
+
+Mixture models such as this can be seen as a clustering technique.
+
+\subsection{Regression models}
+All of these models can be readily extended to full regression models by having their
+expectations be modelled by $X^T \beta$, for some $\beta \in \mathbb{R}^p$.
+
+\section{Fitting latent variable models with the EM algorithm}
+TODO: Fill this in in more detail later. The important parts are:
+
+% Important questions:
+% * What is Maximum Apriori - MAP?
+% * Why does this depend on the likelihood being in the exponential family?
+
+\section{Latent variable models}
+Summary from Generlized Latent Variable Modelling, Shnondal and Rabe-Hesketh
+\subsection{Chapter 1}
+A latent variable is defined as a random variable whose realisations are hidden from
+is.
+
+\subsubsection{1.2 True variable measured with error}
+If we have several measurements $y_{ij}, i=1, \ldots, n_j$ for each unit $i$ the 
+classical measurement model is
+\begin{align*}
+	y_{ij} = \eta_j + \epsilon_{ij}
+\end{align*}
+
+where the $\epsilon_{ij}$ are assumed to be i.i.d.
+
+% Diagram of probability hierarchy/graphical model
+
+A basic assumption of measurement models, both for continuous and categorical
+variables, is that the measurements are conditionally independent given the latent
+variable. This is reflected in the path diagram where no arrows directly connect
+the observed variables.
+
+\subsubsection{1.4 Unobserved heterogeneity}
+We wish to explain the variability in response variable in terms of variability in observed covariates, sometimes called observed heterogeneity. Including latent variables, in this context typically referred to as random effects, in statistical models is a common way of taking concept heterogeneity into account .
+
+Note that are observed heterogeneity is not a hypothetical construct since it merely represents the combined effect of all unobserved covariates, and is not given any meaning beyond this.
+
+When the units are clustered, shared unobserved heterogeneity may induce inter-cluster dependence among responses, even after conditioning on observed covariates, for example Figure 1.4 for 10 clusters with two units each and no covariates.
+
+One way of accounting ofr unobserved heterogeneity is to include a random intercept in the regression model. In the case of clustered data, units in the same cluster must share the same value or realisation of the random effects .
+
+The effect of a covariate on the response can also differ between clusters which can be modelled by including this cluster specific "random coefficients".
+
+\subsubsection{Generating flexible distributions}
+
+ Latent variables are useful in generating distributions with the desired variance function and shape, or multivariate distributions with a particular dependence structure.
+ 
+ For example, if there are an excess of zero counts, zero inflated Poisson (ZIP) models can be used which are a mixture of a Poisson model and a mass at zero. See, for example, Lambert 1992.
+ 
+\subsubsection{Chapter 2}
+ 
+2.2 Generalised linear models
+ 
+In generalised linear models (for example Nelder and Wedderburn, 1972) the explanatory variables affect the response only through the linear predictor $\nu_i$ for unit $i$
+\begin{align*}
+	\nu_i = x_i ^T \beta
+\end{align*}
+
+The response process is fully described by specifying the conditional probability 
+(density) of $y-i$ given the linear predictor.
+
+e.g. Poisson model
+
+\begin{align*}
+	\mu_i = \exp{\nu_i}\text{ or }\ln{\mu_i} = \nu_i
+\end{align*}
+
+and Poisson distribution
+
+\begin{align*}
+	P(y_i|\mu_i) = \frac{\exp{-\mu_i}\mu_i^{y_i}}{y_i !}
+\end{align*}
+
+Counts have a Poisson distribution if the events being counter for a unit occur at a
+constant rate in continuous time and are mutually independent.
+
+\subsubsection{6.4 Maximising the likelihood}
+
+6.4.1 EM algorithm
+
+The motivating idea behind the EM algorithm is as follows: rather than perform one complex estimation, the observed data is augmented with latent data that permits estimation to proceed in a sequence of simple estimation steps.
+ 
+The complete data $C=\{y, X, \zeta\}$ consists of two parts,  incomplete data Y and X 
+that are observable and the unobservable or latent data $\zeta$. The complete data log 
+likelihood, imagining the latent data were observed, is denoted $l(\eta|C)$. In general, 
+the complete data log likelihood itself is involved at each iteration of the EM 
+algorithm, which takes the following form at the $(k+1)th$ step:
+
+\emph{E-step} Evaluate the posterior expectation
+\begin{align*}
+	Q(\eta|\eta^k) = E_\zeta [l_h(\eta|C)|y, X, \eta^k]
+\end{align*}
+
+The conditional expectation of the complete data log likelihood with respect to the latent variables, given the incomplete data and the estimates $\eta^k$ from the previous iteration, i.e. an expectation of the posterior density of $\zeta$.
+
+% Question: Maximise how? Literally find the maximum value of the log likelihood given
+% the observed data and the current guess for the latent variable \eta^k
+
+\emph{M-step} Maximise $Q(\eta|\eta^k)$ with respect to $\eta$ to produce an updated
+estimate $\eta^{k+1}$
+
+This can sometimes be published analytically, but usually requires iterative algorithms 
+such as gradient methods.
+
+\section{Information theory}
+Taken from 2.8 in Machine Learning: A Probabilistic Perspective
+% We didn't learn this in undergrad, but it turns out to be an important way of thinking.
+\subsection{2.8.1 Entropy}
+The \emph{entropy} of a random variable X with distribution p, denoted by H(X) or
+sometimes H(p), is a measure of its uncertainty. In particular, for a discrete variable
+with K states, it is defined by
+\begin{align*}
+	H(X) \triangleq - \sum_{k=1}^K P(X=k) \log_2{P(X=k)}
+\end{align*}
+
+\subsection{2.8.2 KL divergence}
+One way to measure the dissimilarity of two probability distributions, p and q, is
+known as the \emph{Kullback-Leibler divergence (KL divergence)} or \emph{relative 
+entropy}. This is defined as
+\begin{align*}
+	KL(p||q) \triangleq \sum_{k=1}^K p_k \log{\frac{p_k}{q_k}}
+\end{align*}
+
+We can rewrite this as
+\begin{align*}
+	KL(p||q) = \sum_k p_k \log p_k - \sum_k p_k \log q_k = -H(p) + H(p, q)
+\end{align*}
+
+where $H(p, q)$ is called the \emph{cross entropy},
+\begin{align*}
+	H(p, q) \triangleq -\sum_k p_k \log{q_k}
+\end{align*}
+
+One can show (Cover and Thomas 2006) that the cross entropy is the average number of
+bits needed to encode data coming from a source with distribution p when we use model
+q to define our codebook. Hence the ``regular'' entropy $H(p) = H(p, p)$, defined in
+the previous section, is the expected number of bits if we use the true model, so the KL 
+divergence is the difference between these. In other words, the KL divergence is the
+average number of \emph{extra} bits needed to encode the data, due to the fact that we
+used distribution q to encode the data instead of the true distribution p.
+
+The ``extra number of bits'' interpretation should make it clear that $KL(p||q) \geq 0$,
+and that KL is only equal to zero iff q=p. We now prove this important result:
+
+Theorem 2.8.1. (Information inequality) $KL(p||q) \geq 0$ with equality iff p=q.
+Proof
+
+We make use of Jensen's inequality
+
+\begin{align*}
+	f(\sum_{i=1}^n \lambda_i x_i) \leq \sum_{i=1}^n \lambda_i f(x_i)
+\end{align*}
+
+where $\lambda_i \geq 0$ and $\sum_{i=1}^n \lambda_i =1$.
+
+Let $A = \{ x : p(x) > 0 \}$ be the support of $p(x)$. Then
+
+\begin{align*}
+	-KL(p||q) &= -\sum_{x \in A} p(x) \log{\frac{p(x)}{q(x)}} = \sum_{x \in A} p(x) \log{\frac{q(x)}{p(x)}} \\
+	&\leq \log{\sum_{x \in A} p(x) \frac{q(x)}{p(x)}} = \log{\sum_{x \in A} q(x)} \\
+	&\leq \log{sum_{x \in A} q(x)} = \log{1} = 0
+\end{align*}
+
+\subsection{2.8.3 Mutual information}
+
+Consider two random variables, X and Y. Suppose we want to know how much knowing one
+variable tells us about the other. A more general approach than correlation is to
+determine how similar the joint distribution $p(X, Y)$ is to the factor distribution
+$p(X) p(Y)$. This is called \emph{mutual information (MI)}, and is defined as follows:
+
+\begin{align*}
+	I(X, Y) \triangleq KL(p(X, Y) || p(X)p(Y))= \sum_x p(x, y) \log{\frac{p(x, y)}{p(x)p(y)}}
+\end{align*}
+
+We have $I(X, Y) \geq 0$ with equality if $p(X, Y) = p(X)p(Y)$. That is, the MI is
+zero off the variables are independent.
+
+To gain insight into the meaning of MI, it helps to re-express it in terms of joint
+and conditional entropies. One can show tha
+\begin{align*}
+	I(X, Y) = H(X) - H(X|Y) = H(Y) - H(Y|X)
+\end{align*}
+
+where $H(Y|X)$ is the \emph{conditional entropy}, defined as
+$H(Y|X)=\sum_x p(x) H(Y|X=x)$. Thus we can interpret the MI between X and Y as the
+reduction in uncertainty about X after observing Y, or, by symmetry, the reduction in
+uncertainty about Y after observing X.
+
+A quantity which is closely related to the MI is the \emph{point wise mutual information}
+or PMI. For two events x and y, this is defined as
+
+\begin{align*}
+	PMI(x, y) \triangleq \log{\frac{p(x|y)}{p(x)}} = \log{\frac{p(y|x)}{p(y)}}
+\end{align*}
+
+This measures the discrepancy between these events occurring together compared to what
+would be expected by chance. Clearly the MI of X and Y is ust the expected value
+of the PMI. Interestingly, we can rewrite the PMI as follows:
+
+\begin{align*}
+	PMI(x, y) = \log{\frac{p(x|y)}{p(x)}} = \log{\frac{p(y|x)}{p(y)}}
+\end{align*}
+
+This is the amount we learn from updating the prior into posterior $p(x|y)$, or
+equivalently, updating the prior $p(y)$ into the posterior $p(y|x)$.
+
+\subsection{Fitting latent variable models with the EM algorithm}
+\begin{itemize}
+\item Complete data likelihood is made up of observed variable and latent variable parts
+\item The algorithm works by sub-dividing the complex optimisation of the complete data
+likelihood into easier E and M steps where the observed variable likelihood parameters 
+and latent variable likelihood parameters are repeatedly optimised relative to each 
+other
+\item The algorithm is guaranteed to increase or at least keep constant the log-
+likelihood with each iteration
+\end{itemize}
+
+\section{Variational approximations}
+Variational approximations to Bayesian models are an extension of the EM algorithm,
+where each parameter in the model is treated as latent and unobserved in turn, and is
+estimated conditional on all of the other parameters.
+
+
+
+\end{document}

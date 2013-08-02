@@ -1,0 +1,90 @@
+\documentclass{amsart}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\begin{document}
+\emph{First paper} ``Fancy'' count data models
+Poisson: $\log p(y|\eta) = y^T \eta - 1^T \exp{\eta} - 1^T \log{y!}$
+Laplace and GVA
+
+Negative binomial:
+\begin{align*}
+	y|a &\sim \text{Poisson}(a)\\
+	a &\sim \text{Gamma}(f(\eta), g(\eta))
+\end{align*}
+
+Variational Bayes
+GVA/Laplace
+
+Structured VB
+
+or
+
+$y|\eta, k \sim \text{Negative Binomial}(\eta, k)$
+
+Zero-inflated Poisson: 
+
+\begin{align*}
+	p(y|\eta, \pi)&= \pi p_{\text{Poisson}}(y|\eta, y>0) + (1-\pi)\delta_0 \\
+	\pi & \sim \text{Bernoulli}(p)
+\end{align*}
+
+Mixtures: $p(y|\eta, w) = \sum_{k=1}^K w_k p_{\text{Poisson}} (y|\eta_k)$
+
+Problem with mixtures is not labelling/label switching, it's the choice of loss
+function
+
+Zucchini, p 103
+
+Start with smoothing problems
+
+For each,
+
+\begin{align*}
+	\eta = X\beta + Zu\\
+	u \sim N(0, \sigma_u^2 \Omega) \\
+	\beta \sim N(0, \sigma_\beta^2 I) \\
+	\sigma_\beta^2 = 10^8 \\
+	\sigma_u^2 \sim IG(A, b) \\
+	A = B = 0.001 \\
+	X = [1, x]
+	Z = [\text{O'Sullivan splines}]
+\end{align*}
+
+\section{O'Sullivan splines}
+$y_i = f(x_i) + \epsilon_i, 1 \leq i \leq n$
+
+We seek to minimise:
+
+\begin{equation*}
+	m_{f \in C^2} \|y - f(x)\|^2 + \lambda \int_{-\infty}^{\infty} (f''(x))^2 dx
+\end{equation*}
+
+The solution to this problem is called a smoothing spline. $f(x) = \sum_{j=1}^k B_j^3(x_i)\nu_j$
+
+B-splines with ``knots''
+
+$K_1=x_1, \ldots, K_n=x_n$
+
+Picture goes here
+
+highly localised, piecewise quadratic
+
+Note that the intercept and slope are not penalised by $\lambda f''(x)$, as these 
+functions have zero second derivative.
+
+John used Simpson's rule to exactly evaluate something. What was it?
+
+B Spline basis transformed into O'Sullivan spline basis.
+
+Cholesky factorisation retains sparsity
+
+$\Omega = R^T R$
+Upper and lower diag.
+
+If $\Omega$ is sparse, R will also ve sparse.
+
+$\log{|\Omega|} = 21^T \log{\text{diag}(R)}$
+
+Finite mixture approximations $\leftarrow$ VB
+
+\end{document}
