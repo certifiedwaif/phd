@@ -3,6 +3,9 @@
 \usepackage{amsfonts}
 \usepackage{amssymb}
 \title{Summary of Bayesian Data Analysis}
+
+\newcommand{\Poisson}[1] {\text{Poisson} ( #1 )}
+
 \begin{document}
 \maketitle
 \section{Chapter 1}
@@ -58,4 +61,143 @@ $\mathcal{P}$ is \emph{conjugate} for $\mathcal{F}$ if
 p(\theta|y) \in \mathcal{P}\text{ for all }p(.|\theta)\text{ and }p(.)\in \mathcal{P}
 \]
 
+\subsection{Conjugate prior distributions, exponential families and sufficient statistics}
+
+$\mathcal{F}$ is an exponential family if
+\[
+	p(y_i|\theta) = f(y_i) g(\theta) e^{\phi(\theta)^T u(y_i)}
+\]
+
+The factors $\phi(\theta)$ and $u(y_i)$ are in general, vectors of equal
+dimension to that of $\theta$. The vector $\phi(\theta)$ is called the
+`natural parameter' of the family $\mathcal{F}$. The likelihood of the
+corresponding sequence $y=(y_1, y_2, \ldots, y_n)$ of i.i.d. observations is
+\[
+p(y|\theta) = \Pi_{i=1}^n f(y_i) g(\theta)^n \exp{\left(\phi(\theta)^T \sum_{i=1}^n u(y_i)\right)}
+\]
+
+For all $n$ and $y$, this has a fixed form (as a function of $\theta$):
+\[
+p(y|\theta) \propto g(\theta)^n e^{\phi(\theta)^T t(y)}
+\]
+where $t(y) = \sum_{i=1}^n u(y_i)$.
+
+The quantity $t(y)$ is said to be a \emph{sufficient statistic} for $\theta$,
+because the likelihood for $\theta$ depends on the data $y$ only through
+the value of $t(y)$. If the prior density is specified as
+\[
+p(\theta) \propto g(\theta)^\eta e^{\phi(\theta)^T \nu}
+\]
+then the posterior density is
+\[
+p(\theta|y) \propto g(\theta)^{\eta + n} e^{\phi(\theta)^T(\nu + t(y))}
+\]
+
+\subsection{p50, Normal distribution with known mean but unknown variance}
+For $p(y|\theta, \sigma^2) = N(y|\theta, \sigma^2)$, with $\theta$ known and
+$\sigma^2$ unknown, the likelihood for a vector $y$ of $n$ i.i.d observations is
+
+\begin{align*}
+	p(y|\sigma^2) & x \propto \sigma^{-n} \exp{\left(-\frac{1}{2\sigma^2} \sum_{i=1}^n (y_i - \theta)^2\right)} \\
+	&= (\sigma^2)^{-n/2} \exp{\left(-\frac{n}{2\sigma^2}\nu \right)}
+\end{align*}
+
+The sufficient statistic is
+\[
+\nu = \frac{1}{n} \sum_{i=1}^n (y_i - \theta)^2
+\]
+
+The corresponding conjugate prior density is the inverse-gamma,
+\[
+p(\sigma^2) \propto {\sigma^2}^{-(\alpha+1)} e^{\beta/\sigma^2}
+\]
+
+\subsection{Poisson model}
+The Poisson distribution arises naturally in the study of data taking the form
+of counts.
+
+If a data point y follows a Poisson distribution with rate $\theta$, then the
+probability distribution of a single observation $y$ is
+\[
+p(y|\theta) = \frac{\theta^y e^{-\theta}}{y!}\text{, for y=0, 1, 2, \ldots}
+\]
+
+and for a vector $y=(y_1, y_2, \ldots, y_n)$ of i.i.d. observations, the
+likelihood is
+\begin{align*}
+p(y|\theta) &= \Pi_{i=1}^n \frac{1}{y_i!} \theta^{y_i} e^{-\theta} \\
+& \propto \theta^{t(y)} e^{-n\theta}
+\end{align*}
+where $t(y) = \sum_{i=1}^n y_i$ is the sufficient statistic. We can rewrite
+the likelihood in exponential form as
+\[
+p(y|\theta) \propto e^{-n\theta} e^{t(y) \log{\theta}}
+\]
+revealing that the natural parameter is $\phi(\theta) = \log{\theta}$, and
+the natural conjugate prior distribution is
+\[
+	p(\theta) \propto (e^{-\theta})^\eta e^{\nu \log{\theta}}
+\]
+This is a $\text{Gamma}(\nu+ 1, \frac{1}{\eta})$ distribution. With this
+conjugate distribution \ldots the posterior distribution is
+\[
+\theta|y \sim \text{Gamma}(\alpha + n\bar{y}, \beta+n).
+\]
+
+There's more about negative binomial and Poisson w/rate of exposure/log
+offsets etc.
+
+\section{Chapter 14 - Introduction to regression models}
+
+The simplest and most widely used version of this model is the
+\emph{normal linear model}, in which the distribution of y given X is a normal
+whose mean is a linear function of X:
+\[
+	E(y_i|\beta, X) = \beta_1 x_{i1} + \ldots + \beta_k x_{ik}
+\]
+
+for $i = 1, \ldots, n$. For an intercept term, fix $x_{i1} = 1$.
+
+\subsection{Notation and basic model}
+
+\[
+	y|\beta, \sigma^2, X \sim N(X^\beta, \sigma^2 I)
+\]
+
+\subsection{The standard noninformative prior distribution}
+A convenient noninformtaive prior distribution is uniform on $\beta, 
+\log{\sigma}$, or equivalently,
+
+\[
+	p(\beta, \sigma^2|X) \propto \sigma^{-2}
+\]
+
+\subsection{The posterior distribution}
+
+The conditional posterior distribution of the (vector) parameter $\beta$,
+given $\sigma^2$, is the exponential of a quadratic form in $\beta$ and hence
+is normal. We use the notation
+\[
+	\beta|\sigma^2, y \sim N(\hat{\beta}, V_{\beta}\sigma^2)
+\]
+where, using the now familiar technique of completing the square, one finds,
+\begin{align*}
+	\hat{\beta} &= (X^T X)^{-1} X^T y\\
+	V_{\beta} &= (X^T X)^{-1}
+\end{align*}
+
+\section{Chapter 16 - Generalised linear models}
+\subsection{Poisson}
+\[
+	p(y|\beta) = \sum_{i=1}^n \frac{1}{y_i !} e^{- \exp{(\eta_i)}} (\exp{(\eta_i)})^{y_i}
+\]
+where $\eta_i = (X\beta)_i$ is the linear predictor in the i-th case.
+\subsection{Example: Hierarchical Poisson regression for police stops}
+This is not too dissimiliar from what we want to do.
+
+\begin{align*}
+y_{sp} & \sim \Poisson{n_{sp} e^{\alpha_e + \beta_p + \epsilon_{sp}}} \\
+\beta_p & \sim N(0, \sigma_\beta^2) \\
+\epsilon_{sp} & \sim N(0, \sigma_\epsilon^2)
+\end{align*}
 \end{document}
