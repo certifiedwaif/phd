@@ -71,15 +71,19 @@ $H_1: \mu > \mu_0$. Use everyone's favorite test statistic
 t = \frac{\mu - \mu_0}{S/\sqrt{n}}
 \]
 
-Under $H_0$, $t \sim t_{n-1}$. Now, assumed that the true value of $\mu_0$ is not $\mu_0$, but in fact
-$\mu_0 + \epsilon$. As $n \to \infty$, the numerator goes to $\epsilon \sqrt{n} \to \infty$, while the
-denominator $S \to 0$. So $t \to \infty$, and the pvalue goes to $0$ as the sample size increases.
+Under $H_0$, $t \sim t_{n-1}$. Now, consider the case where the true value of 
+$\mu_0$ is not $\mu_0$, but in fact $\mu_0 + \epsilon$ for some fixed $\epsilon$. 
+As $n \to \infty$, the numerator goes to $\epsilon \sqrt{n} \to \infty$, while the
+denominator $S \to 0$. So $t \to \infty$, and the pvalue goes to $0$ as the sample 
+size increases.
 
-This has profound and disturbing implications -- you can prove any hypothesis you like is
-statistically significant simply by making your sample size sufficiently large. This casts
-doubt on, for example, most of the public health literature, where sample sizes are typically
-in the tens or hundreds of thousands, and borderline pvalues are used as a matter of routine.
+This has profound and disturbing implications -- you can prove any hypothesis you 
+like is statistically significant simply by making your sample size sufficiently 
+large. This casts doubt on, for example, most of the public health literature, 
+where sample sizes are typically in the tens or hundreds of thousands, and 
+borderline pvalues are used as a matter of routine.
 
-This also highlights the fact that pvalue fishing is at its worst a form of scientific fraud.
+This also highlights the fact that pvalue fishing is at its worst a form of 
+scientific fraud.
 
 \end{document}
