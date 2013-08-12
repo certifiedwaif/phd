@@ -1,13 +1,14 @@
 # variational_approximation_to_univariate_gaussian.R
 # Author: Mark Greenaway
 
-# This is the very first model I've ever tried to fit using variational approximations
+# This is the very first model I've ever tried to fit using variational approximations.
+# This code is based entirely on the example from Section 21.5.1 on page 742 of
+# Machine Learning: A Probabilistic Perspective
 
 # Generate samples from true distribution x ~ N(2, 1^2)
 true_mu = 2
 true_sigma2 = 1^2
 N = 100
-EPSILON = 1e-100
 x = rnorm(N, true_mu, true_sigma2)
 
 mu_0 = 3
