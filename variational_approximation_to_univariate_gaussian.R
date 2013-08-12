@@ -5,7 +5,7 @@
 # This code is based entirely on the example from Section 21.5.1 on page 742 of
 # Machine Learning: A Probabilistic Perspective
 
-# Generate samples from true distribution x ~ N(2, 1^2)
+# Generate samples from true distribution x ~ N(2, 1^2) ----
 true_mu = 2
 true_sigma2 = 1^2
 N = 100
@@ -17,7 +17,7 @@ a_0 = 1
 b_0 = 1
 xbar = mean(x)
 
-# These parameters are fixed
+# These parameters are fixed ----
 mu_N = (K_0 * mu_0 + N * xbar)/(K_0 + N)
 a_N = a_0 + (N+1)/2
 
@@ -31,28 +31,26 @@ E_mu2 = function(mu_N, K_N)
   return(1/K_N + mu_N^2)
 }
 
-# Initialise
+# Initialise ----
 K_N = K_0
 b_N = b_0
-# Iteratively update until convergence
+# Iteratively update until convergence ----
 i = 1
+likelihood = rep(NA, 6)
 while (TRUE) {
   K_N_last = K_N
   b_N_last = b_N
   
   K_N = (K_0 + N) * a_N/b_N
   b_N = b_0 + K_0*(E_mu2(mu_N, K_N) + mu_0^2 - 2*E_mu(mu_N) * mu_0) + 1/2*(sum(x^2 + E_mu2(mu_N, K_N) - 2*E_mu(mu_N)*x))
+  likelihood[i] = 1/2*log(1/K_N) + log(gamma(a_N)) - a_N*log(b_N)
   
-  if (isTRUE(all.equal(K_N, K_N_last)))
+  print(paste("Iteration", i, ":", "K_N", K_N, "b_N", b_N, "lik", likelihood[i]))
+  if (isTRUE(all.equal(K_N, K_N_last)) && isTRUE(all.equal(b_N, b_N_last)))
     break
-  
-  if (isTRUE(all.equal(b_N, b_N_last)))
-    break
-  
-  print(paste("Iteration", i, ":", "K_N", K_N, "b_N", b_N))
   i = i + 1
 }
-# Compare the true distribution with the distribution that we fit
+# Compare the true distribution with the distribution that we fit graphically ----
 par(mfrow=c(2,2))
 curve(dnorm(x, true_mu, true_sigma2), from=2-3, to=2+3)
 lambda = rep(NA, N)
