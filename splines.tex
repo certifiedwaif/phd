@@ -36,11 +36,10 @@ to fit $\hat{f_{\theta}}$ to our function f in closed form.
 Ormerod and Wand did this using O'Sullivan splines in their 2008 paper. This
 form of spline apparently has numerical advantages. The co-efficient matrix
 $B$ where $\{B\}_{ik} = B_{k}(x_i)$ is
-almost banded, as splines have highly localised support and hence could be
-considered ``almost orthogonal''.
+almost banded, as splines have highly localised support.
 $\Omega = \int_{-\infty}^{\infty} B''_{k}(x) B''_{k'}(x) dx$
 
-Things I don't understand:
+\section{Things I don't understand}
 \begin{enumerate}
 	\item How did Wand and Ormerod change the basis from B Splines to O'Sullivan
 	splines?
