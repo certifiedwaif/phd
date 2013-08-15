@@ -54,6 +54,9 @@ while (TRUE) {
   if (i > 99) 
     break
 }
+# FIXME: The likelihood does not monotonically increase! The theory guarantees that it must,
+# so something must be wrong - either in the maths or the code.
+
 # Compare the true distribution with the distribution that we fit graphically ----
 par(mfrow=c(2,2))
 curve(dnorm(x, true_mu, true_sigma2), from=2-3, to=2+3)
@@ -68,3 +71,24 @@ for(i in 1:N) {
 hist(lambda)
 hist(samples, xlim=c(-1, 5))
 hist(mu)
+
+# Try John Ormerod's variant ----
+# This code actually works correctly.
+# Let X ~ N(mu, sigma2)
+# mu ~ N(mu_mu, sigma_mu^2)
+# sigma2 ~ IG(A,B)
+# Initialise ----
+mu_mu = 0
+sigma2_mu = 10^8
+A = 1/100
+B = 1/100
+n = 20
+x = rnorm(n, 100, 15)
+xbar = mean(x)
+B_q_sigma2 = 1
+# Iterate ----
+sigma2_q_mu = (n*(A + n/2)/B_q_sigma2 + 1/sigma2_mu)^{-1}
+mu_q_mu = (n*xbar*(A+n/2)/B_q_sigma2+mu_mu/sigma2_mu)*sigma2_q_mu
+B_q_sigma2 = B + 1/2*(sum((x - mu_q_mu)^2)+n*sigma2_q_mu)
+log_likelihood = 1/2-n/2*log(2*pi)+1/2*log(sigma2_q_mu/sigma2_mu) - ((mu_q_mu - mu_mu)^2 + sigma2_q_mu)/(2*sigma2_mu)
+log_likelihood
