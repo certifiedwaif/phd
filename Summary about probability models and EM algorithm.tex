@@ -309,4 +309,224 @@ estimated conditional on all of the other parameters.
 
 
 
+% TODO: Let's put some detail in here today. Then break this document up into sub-documents,
+% and form a plan of attack for how to proceed.
+
+This summary glosses over all of the important technical details, which I will now
+proceed to attempt to fill in.
+
+\section{\S 7.6 Bayesian linear regression}
+
+We sometimes want to compute the full posterior over $\vec{w}$ and $\sigma^2$. For
+simplicity, we will initially assume the noise variance $\sigma^2$ is known, so we
+focus on computing $p(\vec{w}|\mathcal{D}, \sigma^2)$. Then in section 7.6.3 we
+consider the general case, where we compute $p(\vec{w}, \sigma^2|\mathcal{D})$. We assume
+a Gaussian likelihood model throughout.
+
+\subsection{\S 7.6.1 Computing the posterior}
+In linear regression, the likelihood is given by
+\begin{align*}
+	p(\vec{y}|X, \vec{w}, \mu, \sigma^2) &= N(\vec{y}|\mu+ X \vec{w}, \sigma^2 I_N) \\
+	&\propto \exp{\left(- \frac{1}{2 \sigma^2} (\vec{y} - \mu 1_N - X \vec{w})^T (\vec{y} - \mu 1_N - X \vec{w})\right)}
+\end{align*}
+
+where $\vec{\mu}$ is an offset term. If the inputs are centre, so $\sum_i x_{ij} = 0$ for
+each $j$, the mean of the output is equally likely to be positive or negative. So let us
+put an improper prior on $\mu$ of the form $p(\mu) \propto 1$, and then integrate it out
+to get
+\[
+	p(\vec{y}|\vec{X}, \vec{w}, \sigma^2) \propto \exp{(-\frac{1}{2 \sigma^2}) 
+		\|\vec{y} - \bar{y} 1_N - X \vec{w}\|^2_2} 
+\]
+
+where $\bar{y} = \frac{1}{n} \sum_{i=1}^N y_i$ is the emperical mean of the output. For
+notational simplicity, we shall assume the output has been centred, and write $\vec{y}$ for
+$\vec{y} - \bar{y} 1_N$.
+
+The conjugate prior to the above Gaussian likelihood is also a Gaussian, which we will
+denote by $p(\vec{w}) = N(\vec{w} | \vec{w}_0, \vec{V}_0)$. Using Bayes Rule for Gaussians,
+Eq 4.125, the posterior distribution is given by
+\begin{align*}
+p(\vec{w}|\vec{X}, \vec{y}, \sigma^2) &\propto N(\vec{w}|\vec{w}_0, \vec{V}_0) N(\vec{y}|X \vec{w}, \sigma^2 I_N) = N(\vec{w}|\vec{W}_N, V_N) \\
+\text{where}\\
+w_N &= V_N V_0^{-1} w_0 + \frac{1}{\sigma^2} V_N X^T \vec{y} \\
+V_N^{-1} &= V_0^{-1} + \frac{1}{\sigma^2} X^T X \\
+V_N &= \sigma^2 (\sigma^2 V_0^{-1} + X^T X)^{-1} \\
+\end{align*}
+
+If $w_0 = 0$ and $V_0 = \tau^2 I$, then the posterior mean reduces to the ridge estimate
+if we define $\lambda = \frac{sigma^2}{\tau^2}$. This is because the mean and mode of a 
+Gaussian are the same.
+
+To gain insgith into the posterior distribution (and not just its mode), let us consider a
+1D example:
+\[
+y(x, \vec{w}) = w_0 + w_1 x + \epsilon
+\]
+
+where the ``true'' parameters are $w_0 = -0.3$ and $w_1 = 0.5$. In Figure 7.11 we plot the
+prior, likelihood and the posterior, and some samples from the posterior predictive
+distribution. In particular, the right hand column plots the function $y(x, \vec{w}^{(s)})$
+where $x$ ranges over $[-1, 1]$, and $\vec{w}^{(s)} \sim N(\vec{w} | \vec{w}_N, V_N)$ is a
+sample from the parameter posterior. Initially, when we sample from the prior (first row)
+our predictions are ``all over the place'', since our prior is unifrom. After we see one
+data point (second row), our posterior becomes constrained by the corresponding likelihood
+and our predictions pass close to the observed data. However, we see that the posterior has
+a ridge-like shape, reflecting the fact that there are many possible solutions with
+different slopes/intercepts. This makes sense, since we cannot uniquely infer two parameters
+from one observation. After we see two data points (third row), the posterior becomes
+much narrower, and our predictions all have similiar slopes and intercepts. After we observe
+twenty data points (last row), the posterior is essentially a delta function centred on
+the true value, indicated by a white cross. (The estimate converges to the truth since the data was generated from the model, and because is a consistent estimator; see \S 6.4.1
+for discussion of this point).
+
+\section{\S 9 Generalised linear models and the exponential family}
+Note: The chapter starts off by saying that ``the exponentnial family is at the core
+of variation inference, as discussed in \S 21.2''.
+
+% TODO: Move this to the splines.tex summary file
+Splines are in \S 15.4.6.2, which is a chapter on Gaussian processes.
+
+All of \S 15.4.6 is a gold mine.
+
+\section{\S 15.4.6 Smoothing splines compared to GPs}
+\emph{Smoothing splines} are a widely used non-parametric method for smoothly interpolating
+data (see Green and Silverman 1994). They are a special case of Gaussian processes, as we
+will see. They are used when the input is 1 or 2 dimensional.
+
+\subsection{\S 15.4.6.1 Univariate splines}
+The basic idea is to fit a function f by minimising the discrepancy to the data plus a
+smoothing term that penalizes functions that are ``too wiggly''. If we penalise the
+m'th derivative of the function, the objective function becomes
+\[
+J(f) = \sum_{i=1}^N (f(x_i) - y_i)^2 + \lambda \int \left(\frac{d^m}{dx^m} f(x)\right)^2 dx
+\]
+
+One can show (Green and Silverman 1994) that the solution is a \emph{piecewise polynomial}
+where the polynomials have order $2m - 1$ in the interior lines $[x_{i-1}, x_i]$ (denoted I),
+and order $m - 1$ in the two outermost intervals $(-\infty, x_1]$ and $[x_N, \infty)$:
+\[
+f(x) = \sum_{j=0}^{m-1} \beta_j x^j + I(x \in I)\left( \sum_{i=1}^N \alpha_i (x - x_i)^{2m - 1}_{+}\right) + I(x \notin I)\left(\sum_{i=1}^N \alpha_i (x - x_i)^{m-1}_{+}\right)
+\]
+
+For example, if $m=2$, we get the (natural) \emph{cubic spline}
+\[
+f(x) = \beta_0 + \beta_1 x + \mathcal{I}(x \in I)\left(\sum_{i=1}^N \alpha_i (x - x_i)^3_+ \right) +
+\mathcal{I}(x \notin I) \left( \sum_{i=1}^N \alpha_i (x - x_i)_+ \right)
+\]
+
+which is a series of truncated cubic polynomials, where left hand sides are located at
+each of the N training points. (The fact that the model is linear on the edges prevents it
+from extrapolating too wildly beyond the range of the data, if we drop the requirement,
+we get an ``unrestricted'' spline.)
+
+We can clearly fit this model using the ridge regression:
+$\hat{w} = (\Phi^T \Phi + \lambda I_N)^{-1} \Phi^T \vec{y}$, where the columns of $\Phi$ are
+1, $x_i$ and $(x - x_i)^3_+$ for $i=2:N-1$ and $(x - x_i)_+$ for $i=1$ or $i=N$. However, we
+can also derive an O(N) time method (Green and Silverman 1994, \S 2.3.3).
+
+\subsection{\S 15.4.6.2 Regression splines}
+
+In general, we can place the polynomials at a fixed set of K locations known as \emph{knots},
+denoted $\xi_k$. The result is called a \emph{regression spline}. This is a parametric model,
+which uses basis function expansion of the following form (where we drop the interior/
+exterior distinction for simplicity):
+\[
+f(x) = \beta_0 + \beta_1 x + \sum_{i=1}^K \alpha_j (x - \xi_k)^3_+
+\]
+
+Choosing the number and locations of the knots is just like choosing the number and values 
+of the support vectors in \S 14.3.2. If we imposse an $l_2$ regulariser on the regression
+co-efficients $\alpha_j$, the method is known as \emph{penalized splines}. See
+\S 9.6.1 for a practical example of penalised splines.
+
+\section{\S 21 Variational inference}
+
+From Machine Learning: A Probabilistic Perspective,
+
+For some simple two node graphical models, of the form $x \to \mathcal{D}$, we can compute
+the exact posterior $p\vec{x}|\mathcal{D})$ in closed form, provided the prior $p(\vec{x})$ 
+is conjugate to the likelihood, $p(\mathcal{D}|\vec{x})$ (which means the likelihood must
+be in the exponential family). See Chapter 5 for some examples of this.
+
+In more general settings, we must use approixmate inference methods. In \S 8.4.1, we
+discussed the Gaussian approximation, which is useful for inference in two node models of
+the form $\vec{x} \to \mathcal{D}$, where the prior is not conjugate. (For example, 
+\S 8.4.3 applied to the method of logistic regression).
+
+The Gaussian approximation is simple. However, some posteriors are not naturally modelled as
+Gaussians. For example, when inferring multinomial parameters, a Dirichlet
+distribution is a better choice, and when inferring states in a discrete graphical model,
+a categorical distribution is a better choice.
+
+In this chapter, we will study a more general class of deterministic approximate inference
+algorithms based on \emph{variational inference} (Jordan et al. 1998; Jaakda and Jordan 
+2000; Jaakkola 2001; Wainwright and Jordan 2008). The basic idea is to pick an approximation
+as close as possible to the true posterior,
+$p^{*}(\vec{x}) \text{def} = p(\vec{x}|\mathcal{D})$. This reduces inference to an 
+optimisation problem. By relaxing the constraints and/or approximating the objective, we can
+trade accuracy for speed. The bottom line is that variational inference often gives us the
+speed benefirts of MAP estimation but the statistical benefits of the Bayesian approach.
+
+\subsection{\S 21.2 Variational inference}
+
+Suppose $p^{8}(\vec{x})$ is our true but intractable distribution, and $q(\vec{x})$ is some 
+approximation, chosen from some tractable family, such as a multivariate Gaussian or a
+factored distributuion. We assume $q$ has some free parameters which we want to optimise,
+so as to make q ``similiar to'' p.
+
+An obvious cost function to try is the KL divergence:
+\[
+	KL(p^{*}||q) = \sum_x p^{*}(x) \log{\frac{p^{*}(x)}{q(x)}}
+\]
+
+However, this is hard to compute, since taking expectations with respect to $p^{*}$ is
+presumed to be intractable. A natural alternative is the reverse KL divergence:
+\[
+	KL(q||p^{*}) = \sum_x p^{*}(x) \log{\frac{q(x)}{p^{*}(x)}}
+\]
+
+The main advantage of this objective is that computing expectations wrt $p^{*}$ is assumed
+to be intractable. We discuss the statistical differences between these two objects in
+\S 21.2.2. % which I should summarise
+
+Unfortunately, Equation 21.2 is still no tractable as written, since even evaluating
+$p^{*}(\vec{x}) = p(\vec{x} | \mathcal{D})$ pointwise is hard, since it requires evaluating
+the intractable normalisation constant $Z=p(\mathcal{D})$. However, usually the unnormalised
+distribution $\tilde{p}(\vec{x}) def = p(\vec{x}, \mathcal{D}) = p^{*}(\vec{x} Z$ is
+tracable to compule. We thereore define our new objective function as follows:
+\[
+J(q) def = KL(q||\tilde{p})
+\]
+
+where we are slightly abusing notation, since $\tilde{p}$ is not a normalised distribution.
+Plugging in the definition of KL, we get
+\begin{align*}
+J(q) &= \sum_x q(x) \log{\frac{q(x)}{\tilde{p}(x)}} \\
+&= \sum_x q(x) \log{\frac{q(x)}{Z p^{*}(x)}} \\
+&= \sum_x q(x) \log{\frac{q(x)}{p^{*}(x)}} - \log{Z} \\
+&= KL(q || p^{*}) - \log{Z}
+\end{align*}
+
+Since $Z$ is a constant, by minimising $J(q)$, we will force $q$ to become close to
+$p^{*}$.
+
+Since KL divergence is always non-negative, we see that $J(q)$ is an upper bound on the
+negative log likelihood:
+\[
+J(q) = KL(q||p^{*}) - \log{Z} \geq -\log{Z} = -\log{p(\mathcal{D})}
+\]
+
+Alternately, we can try to \emph{maximise} the following quantity (in Koller and Friedman
+2009, this is referred to as the \emph{energy functional}), which is the lower bound on
+the log likelihood of the data:
+\[
+L(q) def = -J(q) = -KL(q||p^{*}) + \log{Z} \leq \log{Z} = \log{p(\mathcal{D})}
+\]
+
+Since this bound is tight (what does this mean?!? - Mark) when $q=p^{*}$, we see that the
+variational inference is closely related to EM (see \S 11.4.7).
+
+\subsection{\S 21.3 The mean field method}
+
 \end{document}
