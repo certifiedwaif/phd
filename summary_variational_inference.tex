@@ -1,0 +1,94 @@
+\documentclass{amsart}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\begin{document}
+\section{\S 21 Variational inference}
+
+From Machine Learning: A Probabilistic Perspective,
+
+For some simple two node graphical models, of the form $x \to \mathcal{D}$, we can compute
+the exact posterior $p\vec{x}|\mathcal{D})$ in closed form, provided the prior $p(\vec{x})$ 
+is conjugate to the likelihood, $p(\mathcal{D}|\vec{x})$ (which means the likelihood must
+be in the exponential family). See Chapter 5 for some examples of this.
+
+In more general settings, we must use approixmate inference methods. In \S 8.4.1, we
+discussed the Gaussian approximation, which is useful for inference in two node models of
+the form $\vec{x} \to \mathcal{D}$, where the prior is not conjugate. (For example, 
+\S 8.4.3 applied to the method of logistic regression).
+
+The Gaussian approximation is simple. However, some posteriors are not naturally modelled as
+Gaussians. For example, when inferring multinomial parameters, a Dirichlet
+distribution is a better choice, and when inferring states in a discrete graphical model,
+a categorical distribution is a better choice.
+
+In this chapter, we will study a more general class of deterministic approximate inference
+algorithms based on \emph{variational inference} (Jordan et al. 1998; Jaakda and Jordan 
+2000; Jaakkola 2001; Wainwright and Jordan 2008). The basic idea is to pick an approximation
+as close as possible to the true posterior,
+$p^{*}(\vec{x}) \text{def} = p(\vec{x}|\mathcal{D})$. This reduces inference to an 
+optimisation problem. By relaxing the constraints and/or approximating the objective, we can
+trade accuracy for speed. The bottom line is that variational inference often gives us the
+speed benefirts of MAP estimation but the statistical benefits of the Bayesian approach.
+
+\subsection{\S 21.2 Variational inference}
+
+Suppose $p^{8}(\vec{x})$ is our true but intractable distribution, and $q(\vec{x})$ is some 
+approximation, chosen from some tractable family, such as a multivariate Gaussian or a
+factored distributuion. We assume $q$ has some free parameters which we want to optimise,
+so as to make q ``similiar to'' p.
+
+An obvious cost function to try is the KL divergence:
+\[
+	KL(p^{*}||q) = \sum_x p^{*}(x) \log{\frac{p^{*}(x)}{q(x)}}
+\]
+
+However, this is hard to compute, since taking expectations with respect to $p^{*}$ is
+presumed to be intractable. A natural alternative is the reverse KL divergence:
+\[
+	KL(q||p^{*}) = \sum_x p^{*}(x) \log{\frac{q(x)}{p^{*}(x)}}
+\]
+
+The main advantage of this objective is that computing expectations wrt $p^{*}$ is assumed
+to be intractable. We discuss the statistical differences between these two objects in
+\S 21.2.2. % which I should summarise
+
+Unfortunately, Equation 21.2 is still no tractable as written, since even evaluating
+$p^{*}(\vec{x}) = p(\vec{x} | \mathcal{D})$ pointwise is hard, since it requires evaluating
+the intractable normalisation constant $Z=p(\mathcal{D})$. However, usually the unnormalised
+distribution $\tilde{p}(\vec{x}) def = p(\vec{x}, \mathcal{D}) = p^{*}(\vec{x} Z$ is
+tracable to compule. We thereore define our new objective function as follows:
+\[
+J(q) def = KL(q||\tilde{p})
+\]
+
+where we are slightly abusing notation, since $\tilde{p}$ is not a normalised distribution.
+Plugging in the definition of KL, we get
+\begin{align*}
+J(q) &= \sum_x q(x) \log{\frac{q(x)}{\tilde{p}(x)}} \\
+&= \sum_x q(x) \log{\frac{q(x)}{Z p^{*}(x)}} \\
+&= \sum_x q(x) \log{\frac{q(x)}{p^{*}(x)}} - \log{Z} \\
+&= KL(q || p^{*}) - \log{Z}
+\end{align*}
+
+Since $Z$ is a constant, by minimising $J(q)$, we will force $q$ to become close to
+$p^{*}$.
+
+Since KL divergence is always non-negative, we see that $J(q)$ is an upper bound on the
+negative log likelihood:
+\[
+J(q) = KL(q||p^{*}) - \log{Z} \geq -\log{Z} = -\log{p(\mathcal{D})}
+\]
+
+Alternately, we can try to \emph{maximise} the following quantity (in Koller and Friedman
+2009, this is referred to as the \emph{energy functional}), which is the lower bound on
+the log likelihood of the data:
+\[
+L(q) def = -J(q) = -KL(q||p^{*}) + \log{Z} \leq \log{Z} = \log{p(\mathcal{D})}
+\]
+
+Since this bound is tight (what does this mean?!? - Mark) when $q=p^{*}$, we see that the
+variational inference is closely related to EM (see \S 11.4.7).
+
+\subsection{\S 21.3 The mean field method}
+
+\end{document}
