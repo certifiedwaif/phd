@@ -165,12 +165,14 @@ for $i = 1, \ldots, n$. For an intercept term, fix $x_{i1} = 1$.
 \]
 
 \subsection{The standard noninformative prior distribution}
-A convenient noninformtaive prior distribution is uniform on $\beta, 
+A convenient noninformative prior distribution is uniform on $\beta, 
 \log{\sigma}$, or equivalently,
 
 \[
 	p(\beta, \sigma^2|X) \propto \sigma^{-2}
 \]
+
+% Why the log of sigma?
 
 \subsection{The posterior distribution}
 
@@ -185,6 +187,23 @@ where, using the now familiar technique of completing the square, one finds,
 	\hat{\beta} &= (X^T X)^{-1} X^T y\\
 	V_{\beta} &= (X^T X)^{-1}
 \end{align*}
+
+% Exercise 14.3 goes through this process of completing the square.
+Mark fills the detail in:
+\[
+p(y) &= (2\pi)^{-\frac{p}{2}} \sigma^{-1/2} \exp{(-1/2 (y - X^T\beta)^T \sigma^{-2} (y - X^T \beta))}
+\]
+
+Expanding the binomial argument to the exponential we obtain
+\[
+	y^T y -  2 y^T X^T \beta + X^T X \beta
+\]
+
+Consider this to be a quadratic in $\beta$. Then to complete the square in this quadratic
+we add the constant term $(X^T X)^{-1} X^T y$ and allow the $y^T y$ term to be absorbed off
+into a proportionality constant somewhere else. Here $X^T X$ takes the role of $a$ in the
+quadratic $a x^2 + b x + c$ and $X^T y$ takes the role of $b$. So the constant that we need
+is $c = \frac{-b}{2a}$.
 
 \section{Chapter 16 - Generalised linear models}
 \subsection{Poisson}
