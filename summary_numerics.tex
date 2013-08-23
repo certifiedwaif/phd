@@ -1,0 +1,66 @@
+\documentclass{amsart}
+\begin{document}
+\section{Numerics}
+This is obviously going to be a big part of this project. Numerics is the
+difference between what you can theoretically do with mathematics and what
+you can actually do with available floating point hardware.
+
+\section{Floating point}
+Computers have finite memory and thus must store their results with limited
+precision. But we want to represent and do arithmetic on any real numbers
+we wish. Hardware designers solved this problem by developing floating point
+representation (after they finished fighting over whether floating point or
+fixed point was the best way to represent real numbers).
+
+Floating point numbers are represented as
+Sign bit
+Mantissa
+Exponent
+
+This allows arithmetic operations to be performed in digital hardware very
+quickly. It also has a lot of important consequences. Take the following
+example:
+
+Suppose you have two floating point numbers, a and b. a has exponent 0 and
+b has exponent 1. Both have full length mantissas. Let's say you want to
+calculate c=a+b. In order to do this meaningfully, you have to make the exponent
+of each number the same. So you must increase the exponent of a. But in order
+to do this and still be representing a similiar number, you also have to right
+shift the mantissa of a. So you can perform the addition, but you've lost
+a bit of precision in the mantissa of a. The floating point sum of a and b
+isn't quite a+b, it's a+b+\epsilon_M, where \epsilon_M is the machine accuracy.
+This is an unavoidable consequence of the way floating point arithmetic works,
+and the price we pay for being able to use small amounts of memory and
+perform arithmetic in a single clock cycle (or even less if you're using
+vector instructions/GPUs).
+
+This means that treasured notions about arithmetic from pure mathematics or
+even high school no longer hold. Addition is not commutative, or associative.
+The order in which you perform addition can and does change the final result.
+``Equivalent'' ways of calculating something may lead to quite different
+answers.
+
+\section{Roundoff error}
+\section{Truncation error}
+
+\section{Linear algebra}
+Inverting matrices is computationally very expensive O(n^3) and computationally
+infeasible for moderately large data sets. A much better idea is to factor
+the matrix of interest A into an upper and lower triangular matrix A=LU.
+
+Cholesky factorisation
+LU factorisation where U is the transpose of L.
+
+Triangular matrices
+Can be solved in O(n). Can be solved in parallel by forming new triangular
+submatrices and solving these. This subdivision can be repeated as often as
+necessary to break the task into as many pieces as desired.
+
+Banded matrices
+Banded matrices can be solved in O(n).
+
+\section{Interpolation}
+Polynomials and the Horner rule.
+Numerical differentiation and integration.
+
+\end{document}
