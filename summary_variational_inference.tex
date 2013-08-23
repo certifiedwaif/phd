@@ -2,6 +2,11 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \begin{document}
+\section{Variational approximations}
+Variational approximations to Bayesian models are an extension of the EM algorithm,
+where each parameter in the model is treated as latent and unobserved in turn, and is
+estimated conditional on all of the other parameters.
+
 \section{\S 21 Variational inference}
 
 From Machine Learning: A Probabilistic Perspective,
@@ -90,5 +95,8 @@ Since this bound is tight (what does this mean?!? - Mark) when $q=p^{*}$, we see
 variational inference is closely related to EM (see \S 11.4.7).
 
 \subsection{\S 21.3 The mean field method}
+
+\subsection{Univariate Gaussian}
+\subsection{Linear mixed model}
 
 \end{document}
