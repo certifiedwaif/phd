@@ -54,4 +54,61 @@ Penalised splines
 Fit using Least squares
 Numerical advantages to O'Sullivan splines, using in Wand/Ormerod 2008.
 
+From Machine Learning: A Probabilistic Perspective
+% TODO: Move this to the splines.tex summary file
+Splines are in \S 15.4.6.2, which is a chapter on Gaussian processes.
+
+All of \S 15.4.6 is a gold mine.
+
+\section{\S 15.4.6 Smoothing splines compared to GPs}
+\emph{Smoothing splines} are a widely used non-parametric method for smoothly interpolating
+data (see Green and Silverman 1994). They are a special case of Gaussian processes, as we
+will see. They are used when the input is 1 or 2 dimensional.
+
+\subsection{\S 15.4.6.1 Univariate splines}
+The basic idea is to fit a function f by minimising the discrepancy to the data plus a
+smoothing term that penalizes functions that are ``too wiggly''. If we penalise the
+m'th derivative of the function, the objective function becomes
+\[
+J(f) = \sum_{i=1}^N (f(x_i) - y_i)^2 + \lambda \int \left(\frac{d^m}{dx^m} f(x)\right)^2 dx
+\]
+
+One can show (Green and Silverman 1994) that the solution is a \emph{piecewise polynomial}
+where the polynomials have order $2m - 1$ in the interior lines $[x_{i-1}, x_i]$ (denoted I),
+and order $m - 1$ in the two outermost intervals $(-\infty, x_1]$ and $[x_N, \infty)$:
+\[
+f(x) = \sum_{j=0}^{m-1} \beta_j x^j + I(x \in I)\left( \sum_{i=1}^N \alpha_i (x - x_i)^{2m - 1}_{+}\right) + I(x \notin I)\left(\sum_{i=1}^N \alpha_i (x - x_i)^{m-1}_{+}\right)
+\]
+
+For example, if $m=2$, we get the (natural) \emph{cubic spline}
+\[
+f(x) = \beta_0 + \beta_1 x + \mathcal{I}(x \in I)\left(\sum_{i=1}^N \alpha_i (x - x_i)^3_+ \right) +
+\mathcal{I}(x \notin I) \left( \sum_{i=1}^N \alpha_i (x - x_i)_+ \right)
+\]
+
+which is a series of truncated cubic polynomials, where left hand sides are located at
+each of the N training points. (The fact that the model is linear on the edges prevents it
+from extrapolating too wildly beyond the range of the data, if we drop the requirement,
+we get an ``unrestricted'' spline.)
+
+We can clearly fit this model using the ridge regression:
+$\hat{w} = (\Phi^T \Phi + \lambda I_N)^{-1} \Phi^T \vec{y}$, where the columns of $\Phi$ are
+1, $x_i$ and $(x - x_i)^3_+$ for $i=2:N-1$ and $(x - x_i)_+$ for $i=1$ or $i=N$. However, we
+can also derive an O(N) time method (Green and Silverman 1994, \S 2.3.3).
+
+\subsection{\S 15.4.6.2 Regression splines}
+
+In general, we can place the polynomials at a fixed set of K locations known as \emph{knots},
+denoted $\xi_k$. The result is called a \emph{regression spline}. This is a parametric model,
+which uses basis function expansion of the following form (where we drop the interior/
+exterior distinction for simplicity):
+\[
+f(x) = \beta_0 + \beta_1 x + \sum_{i=1}^K \alpha_j (x - \xi_k)^3_+
+\]
+
+Choosing the number and locations of the knots is just like choosing the number and values 
+of the support vectors in \S 14.3.2. If we imposse an $l_2$ regulariser on the regression
+co-efficients $\alpha_j$, the method is known as \emph{penalized splines}. See
+\S 9.6.1 for a practical example of penalised splines.
+
 \end{document}
