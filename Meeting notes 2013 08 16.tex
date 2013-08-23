@@ -1,0 +1,36 @@
+\documentclass{amsart}
+\begin{document}
+\section{Meeting Notes - 16/8/2013}
+John was going to Queensland to give a talk, so he proposed that we meet on Friday instead of Monday.
+
+\[
+\frac{b_n}{a_n} \to \frac{2B+ \|x - \bar{x} 1\|^2}{@A + n-1}
+\]
+as $\sigma_\beta \to \infty$.
+
+If $A$, $B$ are close to zero, then this goes to $\hat{\sigma}^2$.
+
+This is ``better'' in that it is less biased than the MLE. I didn't quite understand this
+comment.
+
+\subsection{Do you know C?}
+Let's say that you have an approximation problem where the joint likelihood is known up to
+proportionality, but the normalising constant is not.
+
+Then let $\log{p(y, \theta)} = f_i$. We approximate this with, say, $q=N(\mu, sigma^2)$.
+This will work well if $p$ is symmetric, but if it is skewed it will work very poorly. Many
+people try to counter this problem by using multiple multivariate normals. We will instead
+attempt to approximate such distributions using a flexible skew normal distribution, which is
+a slight modification of a multivariate normal. This has the advantage that we will end up
+fitting less parameters - each multi variate normal has $p + p^2$ parameters for the
+mean vector and covariance matrices. If we use a more appropriate distribution, we should
+be able to fit less parameters.
+
+We will attempt to solve the problem
+\[
+	\min_{c, \mu, \sigma^2} \frac{1}{N} \sum_{i=1}^N (f_i - \log{c N(\mu, sigma^2)})
+\]
+
+This problem is computationally tractable. ``Like'' numerical interpolation.
+
+\end{document}
