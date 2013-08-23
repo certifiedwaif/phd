@@ -93,10 +93,11 @@ last_log_likelihood = -1e8
 while (TRUE) {
   sigma2_q_mu = (n*(A + n/2)/B_q_sigma2 + 1/sigma2_mu)^{-1}
   mu_q_mu = (n*xbar*(A+n/2)/B_q_sigma2+mu_mu/sigma2_mu)*sigma2_q_mu
-  B_q_sigma2 = B + 1/2*(sum((x - mu_q_mu)^2)+n*sigma2_q_mu)
-  log_likelihood = 1/2-n/2*log(2*pi)+1/2*log(sigma2_q_mu/sigma2_mu) - ((mu_q_mu - mu_mu)^2 + sigma2_q_mu)/(2*sigma2_mu)
+  B_q_sigma2 = B + 0.5*(sum((x - mu_q_mu)^2)+n*sigma2_q_mu)
+  log_likelihood = 0.5-0.5*n*log(2*pi)+0.5*log(sigma2_q_mu/sigma2_mu) - ((mu_q_mu - mu_mu)^2 + sigma2_q_mu)*0.5/sigma2_mu
   print(c(sigma2_q_mu, mu_q_mu, B_q_sigma2, log_likelihood))
   if (log_likelihood <= last_log_likelihood)
     break
   last_log_likelihood = log_likelihood
 }
+
