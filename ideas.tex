@@ -1,0 +1,15 @@
+\documentclass{amsart}
+\begin{document}
+\section{Ideas}
+\begin{itemize}
+\item Use the fact that if a prior is conjugate then a mixture of priors will be a mixture of conjugates to build
+a mixture model
+\item Dirichlet prior on weights
+\item Find lower bounds by working with $\log p(y)$, terms not involving $q_i$ for current i simply get subtracted out so
+we only optimise $q_i$ by taking expectations over all $q_j$ for $j \ne i$
+\item $\text{MVN}(0, \sigma^2)$ for $\beta$ even if we're using basis splines?
+\item Start coding in C if it's not too arduous - SDL for visualisation, GSL for maths. Integrates easily with R/Rcpp.
+Develop in Eclipse or something standard.
+\item Learn about flexible skew normals.
+\end{itemize}
+\end{document}
