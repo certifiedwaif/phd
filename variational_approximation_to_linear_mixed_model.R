@@ -29,5 +29,15 @@ n = 4
 source("fit_linear_mixed_model.R")
 fit_linear_mixed_model(Y, X, Z, A_epsilon, B_epsilon, A_u, B_u, K, sigma2_beta, p, n)
 
+require(nlme)
+data(Orthodont)
+Y = Orthodont$distance
+X = model.matrix(distance~age+factor(Sex)-1, Orthodont)
+Z = model.matrix(distance~factor(Subject)-1, Orthodont)
+n = 108
+p = 3
+dim(X)
+dim(Z)
+fit_linear_mixed_model(Y, X, Z, A_epsilon, B_epsilon, A_u, B_u, K, sigma2_beta, p, n)
 # Compare against MCMC result?
 # Or frequentist fit.
