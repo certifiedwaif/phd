@@ -1,0 +1,60 @@
+\documentclass{amsart}
+\begin{document}
+\section{Meeting notes}
+\subsection{Bipolar study}
+John Ormerod talked about the bipolar study. Some data has come in, which is survey 
+data, categorical and discretised. He wanted to know whether we can add value to
+the study.
+
+\subsection{Linear mixed models}
+John looked over the code that I wrote to fit linear mixed models with variational
+approximations. He said my crossover model with two intercepts and four random
+observations was ``dinky'' and that I should fit it to a more substantial example.
+
+He asked me to do some things:
+\begin{itemize}
+\item Re-organise the code so that the fitting code is in a function in a seperate
+source file.
+\item Use the code to fit the Orthodont model.
+\end{itemize}
+
+The first of these is easy, I just quickly edit the source files and re-organise
+them.
+
+The second may be substantially more difficult, depending on the structure of the
+Orthodont data.
+
+\subsection{Logistic model}
+John took me through how the augmented variables introduced make this model
+tractable.
+
+Consider a model $y|\beta \sim \text{}(\phi(X\beta)))$, which is preferred by
+Bayesians because of its augmented representation.
+
+The y's are observed, but the $\beta$'s are not.
+
+\[
+p(y|\beta) = \Pi_{i=1}^n \Phi(x_i ^T \beta)^{y_i} (1 - \Phi(x_i ^T \beta))^{1 - y_i}
+\]
+
+Let each of the i multiplicands be denoted $p(y_i|\beta)$.
+Then we can rewrite each multiplicand as
+\[
+	p(y_i|\beta) = \int I(a_i > 0)^y_i I(a_i < 0) ^{1-y_i} \phi(a_i - x_i^T \beta) d a_i
+\]
+
+Proof:
+\begin{align*}
+p(y_i = 1) &= \int_{-\infty}^{\infty} I(a_i \geq 0) \phi(a_i - x_i^T \beta) \\
+&= \int_{0}^{\infty} I(a_i - x_i^T \beta) d a_i
+\end{align*}
+
+Make the substitution $z_i = a_i - x_i^T \beta$. Then the integral above becomes
+\begin{align*}
+\int_{-x_i^T \beta}^{\infty} \phi(z_i) d z_i
+&= 1 - \int_{-\infty}^{-x_i^T \beta} \phi(z_i) d z_i \\
+&= 1 - \Phi(-x_i^T \beta) \\
+&= \Phi(x_i^T \beta)
+\end{align*}
+
+\end{document}
