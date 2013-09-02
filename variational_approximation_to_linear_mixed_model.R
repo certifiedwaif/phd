@@ -38,12 +38,10 @@ Z = matrix(c(1, 0,
              1, 0,
              0, 1,
              0, 1), 4, 2, byrow=TRUE)
-fit = lm(Y~X-1)
-summary(fit)
 Y = matrix(c(9, 8, 9, 8), 4, 1)
 C = cbind(X, Z)
 A_epsilon = 1/100
-A_u = 1/100 # Quite sensitive, depends on data being standardised
+A_u = 1/100
 B_epsilon = 1/100
 B_u = 1/100
 K = 2

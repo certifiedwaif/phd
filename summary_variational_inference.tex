@@ -94,9 +94,33 @@ L(q) def = -J(q) = -KL(q||p^{*}) + \log{Z} \leq \log{Z} = \log{p(\mathcal{D})}
 Since this bound is tight (what does this mean?!? - Mark) when $q=p^{*}$, we see that the
 variational inference is closely related to EM (see \S 11.4.7).
 
+% This seems so obvious now. If you take the expectation of a variable in the factored
+% approximation with respect to every other variable, the only terms involved in that
+% expectation will be the ones involving the variable you're currently maximising.
+
+% But it's important that you work through the details of this.
 \subsection{\S 21.3 The mean field method}
 
 \subsection{Univariate Gaussian}
+% Approximate as y~N(\mu, \lambda \sigma^2|\lambda), \lambda~Gamma(\alpha, \beta)
+% Factorise q(\mu, \sigma) = q(\mu)q(sigma), with \lambda as a prior
+% Write out the full likelihood, then figure out how to maximise q(\mu) and q(\sigma) seperately
+% For q(\mu), completing the square will give you the correct form with the expectation of
+% \sigma as a term.
+% For q(\sigma), I think from memory you can get the term easily enough as Gamma is a conjugate
+% prior for a normal distribution. Again, the expectation of \mu is involved.
+% These calculations turn out to be very like calculating full conditionals for Gibbs sampling,
+% but with expectations used in place of the current value of the paramteres. But this is the
+% sense in which the structure of each algorithm is the same.
+
+\subsubsection{Lower bound}
+% I still haven't really figured out a good technique for calculating these.
+
 \subsection{Linear mixed model}
+% The structure is a little more complicated, but the thinking is not.
+% Factorise the approximation q(\mu, \Sigma) into q(\mu, Sigma) q(u_1, u_2, \ldots, u_n)
+% The process we follow from here is much like that for the Univariate Gaussian case.
+
+\subsubsection{Lower bound}
 
 \end{document}
