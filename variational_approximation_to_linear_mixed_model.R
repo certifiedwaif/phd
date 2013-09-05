@@ -36,6 +36,7 @@ X = model.matrix(distance~age+factor(Sex)-1, Orthodont)
 Z = model.matrix(distance~factor(Subject)-1, Orthodont)
 n = 108
 p = 3
+K = 27
 dim(X)
 dim(Z)
 fit_linear_mixed_model(Y, X, Z, A_epsilon, B_epsilon, A_u, B_u, K, sigma2_beta, p, n)
