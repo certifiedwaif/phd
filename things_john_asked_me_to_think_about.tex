@@ -1,0 +1,61 @@
+\documentclass{amsart}
+\title{Things John asked me to think about}
+\author{Mark Greenaway}
+\begin{document}
+\maketitle
+\section{Multi-threading}
+The multicore package is very easy to use. It supplies an mclapply function which
+runs the function passed to apply on multiple cores, and returns the results of each
+function in a list.
+
+We could also link R to a multi-threaded version of BLAS. In fact, we should do this
+as a matter of course.
+
+\section{Distribution computing}
+The two most popular approaches seem to be MPI and Hadoop. Both are supported by R
+packages. Both of these can also be used to run programs across multiple cores on
+a single machine. The advantage of these approaches is that they can also be used to
+run programs across an entire cluster of machines.
+
+Both of these solutions require programs to be written to distribute work across
+the cluster.
+
+\subsection{MPI}
+MPI is based on a message-passing metaphor. It is mostly used by people who do
+scientific computing, and is the standard for distributed scientific computing.
+MPI is written in C.
+
+There is an excellent tutorial for the Rmpi package here.
+http://math.acadiau.ca/ACMMaC/Rmpi/index.html
+
+\subsection{Hadoop}
+Hadoop is an implementation of Google's MapReduce idea. This is what most of the 
+``Big Data'' people are using. To run a Hadoop job, you break your program up into
+a Map phase, which is run on every computer in the cluster, and a Reduce phase,
+which is run on the Master and combines all of the results from the Map phase
+run across the entire cluster into the final result.
+
+Apache Hadoop is written in Java.
+
+\section{Distributed file system}
+The bioinformatics researchers are dealing with very large data sets, and the data
+sets that they will be dealing with in the future will be even larger. A single very
+fast, very large hard disk may not be able to store all the data, and furthermore may
+not be able to read it fast enough.
+
+A solution to this is to use multiple hard disks, with multiple controllers, possibly
+spread across multiple machines. To ensure that data passes between the machines as
+fast as possible, it is recommended that high speed interconnections are used e.g.
+InfiniBand or 10 gigabit Ethernet.
+
+All of the alternatives below have commercial support:
+
+\subsection{Lustre}
+Very mature, developed in 1999. Very high performance. Figures as high as
+peak read performance of one terabyte a second are quoted.
+\subsection{Ceph}
+Relatively new, but made it into the Linux kernel recently.
+\subsection{HDFS}
+Hadoop file system. Can be mounted as a standard file system using FUSE.
+
+\end{document}
