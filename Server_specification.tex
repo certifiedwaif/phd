@@ -1,0 +1,18 @@
+\documentclass{amsart}
+\begin{document}
+\section{Specifications for server}
+Budget: $15k-$25k
+Main use cases
+The server will be used principally by the statistics research group, and in particular the bioinformatics researchers. The main
+computationally demanding tasks that they perform are
+\begin{enumerate}
+\item{Mapping} This uses large quantities of RAM, gigabytes of it. We should not
+consider getting a server configured with any less than 128 gigabytes of RAM.
+\item{Processing large data sets} The researchers regularly process data in the
+terabyte range. To process these volumes of data quickly we will use a solution like
+RAID striping across multiple hard disks. To ensure that these disks performance well
+in this configuration, we need a controller that will support this many hard disks at
+full speed, in this configuration. We could use software RAID, or possibly consider a
+solution involving hardware RAID at the controller level.
+\end{enumerate}
+\end{document}
