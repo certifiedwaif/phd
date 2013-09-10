@@ -1,18 +1,55 @@
 \documentclass{amsart}
+\author{Mark Greenaway}
+\title{Server specifications}
 \begin{document}
-\section{Specifications for server}
-Budget: $15k-$25k
-Main use cases
-The server will be used principally by the statistics research group, and in particular the bioinformatics researchers. The main
-computationally demanding tasks that they perform are
+\section{Budget}
+The range \$15k-\$25k was mentioned
+
+\subsection{Main use cases}
+The server will be used principally by the statistics research group, and in particular the bioinformatics researchers. I spoke to Sheila and Dario, in addition to talking to
+John and Jean. The following computational issues were raised:
+
 \begin{enumerate}
-\item{Mapping} This uses large quantities of RAM, gigabytes of it. We should not
+\item{CPUs of our own} -- One of the main issues at present is that our jobs have to
+compete with whoever else is using the school's servers. This often results in our
+jobs getting ``niced'' (there's nothing nice about it) down to the point where they
+take an incredibly long time to complete. The more CPUs the better, but for our
+purposes, RAM and especially fast storage are much more important than CPUs.
+
+\item{Mapping} -- This uses large quantities of RAM, gigabytes of it. We should not
 consider getting a server configured with any less than 128 gigabytes of RAM.
-\item{Processing large data sets} The researchers regularly process data in the
+
+\item{Processing large data sets} -- The researchers regularly process data in the
 terabyte range. To process these volumes of data quickly we will use a solution like
-RAID striping across multiple hard disks. To ensure that these disks performance well
-in this configuration, we need a controller that will support this many hard disks at
-full speed, in this configuration. We could use software RAID, or possibly consider a
-solution involving hardware RAID at the controller level.
+RAID striping across multiple hard disks. The basic idea is much like multicore processing,
+if one disk is too slow, use several in parallel. This isn't very hard to set up, and
+also has the advantage that the multiple disks are combined together into one very large
+file system, so we will no longer have to juggle files between disks that are almost full.
+We can simply combine all of our disks together, and let the operating system take care
+of the details for us.
+
+To ensure that these disks performance well in this configuration, we need a controller that 
+will support this many hard disks at full speed, in this configuration. We could use 
+software RAID, or possibly consider a solution involving hardware RAID at the controller 
+level. The current state of the art seems to be SATA-3 controllers, but I'm happy to go with 
+Paul's guidance on that.
+
+Of all the things we need from a new server, I think we need fast storage the most, so this
+should be prioritised.
 \end{enumerate}
+
+\subsection{Future proofing}
+As you wisely asked me to make sure that whatever we buy continues to be useful in the
+future, I would also suggest we get a 10 gigabit Ethernet network adapter. These are
+expensive, but well worth it. In the future, if we want to expand, we can simply
+buy more machines and link them with 10 gigabit Ethernet. That way, we can build
+a computing cluster with fast interconnections between the nodes.
+
+Of course, 10 gigabit Ethernet adapters aren't much use without the appropriate 10 gigabit
+switch and other machines equipped with 10 gigabit Ethernet adapters to talk to them, but
+we can get those things piece by piece if we need to.
+
+We should also choose a server allows us to install more hard disks if need be, in case the
+volume of data grows even more than it already has done.
+
 \end{document}
