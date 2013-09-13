@@ -1,4 +1,5 @@
 \documentclass{amsart}
+\newcommand{\Bernoulli}[1]{\text{Bernoulli} \left( #1 \right)}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \begin{document}
@@ -123,4 +124,55 @@ variational inference is closely related to EM (see \S 11.4.7).
 
 \subsubsection{Lower bound}
 
+\subsection{Probit regression}
+% This was the first model where I tried to do some of the calculations for the
+% likelihood, mean field updates and lower bound myself. I didn't get them all
+% right, but I got close.
+Let $Y_i|\beta_0, \beta_1, \ldots, \beta_k \sim \Bernoulli{\Psi(\beta_0 + \beta_1 x_{1i} + \ldots + \beta_k x_{ki})}$, and $\beta \sim N(\mu_\beta, \Sigma_\beta)$.
+
+Letting $X = [1 x_{1i} \ldots x_{ki}]$, the likelihood can be written compactly as
+\[
+p(\vec{y}|\vec{\beta}) = \Psi(X \beta)^{\vec{y}} \Psi(1 - \Psi(X \beta))^{\vec{1} - \vec{y}}
+\]]
+
+Question: Why don't we just optimise $\beta$ directly in this case?
+
+Introduce a vector of auxillary variables, $\vec{a} = (a_1, \ldots, a_n)$, where
+\[
+a_i | \vec{\beta} \sim N((X\beta)_i, 1)
+\]
+
+Then we can write
+\[
+p(y_i|a_i) = I(a_i \geq 0)^y_i I(a_i < 0)^{1-y_i}
+\]
+
+$\beta -> y$
+
+$\beta -> a -> y$
+
+So then we can write the likelihood for each individual datum as
+\begin{align*}
+	p(y_i, \sigma) &= p(y_i|a_i) p(a_i|\vec{\beta}) p(\vec{\beta}) \\
+	&= \Psi(a_i \geq 0)^{y_i} \Psi(a_i < 0)^{1 - y_i} \frac{1}{\sqrt{2 \pi}} \exp{- \frac{(a_i - X \beta)^2}{2}} \left( 2 \pi \right)^{-\frac{k}{2}} |\Sigma|^{-\frac{1}{2}} \exp{-\frac{1}{2} (\beta - \mu_\beta)^T \Sigma^{-1} (\beta - \mu_\beta)}
+\end{align*}
+
+To maximise this function, we need only maximise the terms of the log likelihood
+involving $a_i$ or $\beta$. That is, we maximise
+
+\begin{align*}
+\log{p(y_i, a_i, \vec{\beta})} =& y_i \log{(\Psi(a_i \geq X \beta))} + (1 - y_i) \log{(\Psi(a_i < X \beta))} + \\
+&- \frac{(a_i - X \beta)^2}{2} - \frac{(\beta - \mu_\beta)^T \Sigma^{-1} (\beta - \mu_\beta)}{2}
+\end{align*}
+
+Adopting the factored approximation
+\[
+q(\theta) = q_a(\vec{a}) q_{\vec{\beta}}(\vec{\beta})
+\]
+
+we calculate the mean field update equations.
+
+\[
+q_a^*(a) \propto \exp{E_\beta \log{p(y, a, \beta)}}
+\]
 \end{document}
