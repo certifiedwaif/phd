@@ -1,21 +1,9 @@
 # variational_approximation_to_probit_regression.R
-Ind0 = function(expr) {
-  if (expr) {
-    return(1)
-  } else {
-    return(0)
-  }
-}
-
-Ind = function(expr_list) {
-  sapply(expr_list, Ind0)
-}
 
 logLik = function(y, mu_q_a, mu_q_beta, X, Sigma_beta, p) {
-  browser()
-  liks = y * log(Ind(mu_q_a >= 0)) + (1 - y)*log(Ind(mu_q_a < 0)) - .5*log(2*pi)
-  liks= liks - .5*(mu_q_a - X %*% mu_q_beta)^2
-  liks = liks + log(2*pi)^(p/2) * 1/sqrt(det(Sigma_beta)) - .5*t(mu_q_beta - mu_beta) %*% solve(Sigma_beta) %*% (mu_q_beta - mu_beta)
+  liks = y * log(pnorm(X %*% mu_q_beta)) + (1 - y)*log(1 - pnorm(X %*% mu_q_beta))
+  lik= sum(liks) - .5*log(det(Sigma_beta %*% t(X) %*% X + diag(rep(1, p))))
+  lik = lik -.5*t(mu_q_beta - mu_beta) %*% solve(Sigma_beta) %*% (mu_q_beta - mu_beta)
   return(sum(liks))
 }
 
