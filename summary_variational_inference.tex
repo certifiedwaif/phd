@@ -183,4 +183,52 @@ We then calculate the mean field update equations.
 q_a^*(a) \propto \exp{E_\beta \log{p(y, a, \beta)}}
 \]
 
+TODO: Truncated normal distribution for $a_i$
+
+TODO: Normal distribution for $q_\beta$
+
+Meeting with John - 16/09/2013
+
+John stressed that we must always identify the distributions first
+
+The trick for finding the distribution for $q_a^*(a)$ is to consider the cases where
+$y_i=1$ and $y_i=0$ seperately.
+
+\begin{align*}
+p(y_i=1, a_i, \beta) &\propto \exp{E_{-a_i} \left[\frac{-(a_i - X \beta)^2}{2}\right]} \\
+&\propto \exp{E_{-a_i}\left[\frac{-(a_i^2 - a_i x_i^T \beta)^2}{2}\right]}, a_i \geq 0 \\
+&= TN_+(\mu_{q(a_i)}, 1)
+\end{align*}
+
+When $y_i=0$, $p(y_i=0|a_i, \beta)$, $q(a_i) = TN_{-} (\mu_{q(a_i)}, 1)$.
+
+\[
+q(\beta) \propto \exp{\left( \frac{-\beta^T[X^T X + \Sigma_{\beta}^{-1}]\beta}{2} + (X^T \mu_{q(a)} + \Sigma_{\beta}^{-1} \mu_{\beta} )^T \beta \right)}
+\]
+
+If $q(\beta) \propto \exp{\frac{1}{2}\beta^T A \beta + \beta^T \beta}$ then $q(\beta) = N(A^{-1}b, A^{-1})$
+
+So the above equals $N([X^T + \Sigma_{\beta}^{-1}]^{-1} [X^T \mu_{q(a)} + \Sigma_{\beta}^{-1}]^{-1})$
+
+Expectation of a truncated normal distribution.
+
+\begin{align*}
+q(a_i) &= TN_{+}(x_i^T \mu_{q(\beta)}, 1), \text{ when } y_i=1 \\
+&=TN_{-}(x_i^T \mu_{q(\beta)}, 1), \text{ when } y_i=0 
+\end{align*}
+
+More zeta functions
+\[
+\zeta_k(x) = \frac{\partial^k \log{\Psi(x)}}{\partial x^k}
+\]
+
+so
+
+\[
+\zeta_1 = \frac{\psi(x)}{\Psi(x)}
+\]
+
+The $sn$ library calculates this in a numerically stable manner, using continued fractions.
+John has better code, which is written in C and calculates the function to a numerical
+threshold.
 \end{document}
