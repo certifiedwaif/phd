@@ -170,9 +170,13 @@ Adopting the factored approximation
 q(\theta) = q_a(\vec{a}) q_{\vec{\beta}}(\vec{\beta})
 \]
 
-we calculate the mean field update equations.
+we find the distribution of $q_a$ and $q_\beta$.
 
-\[
-q_a^*(a) \propto \exp{E_\beta \log{p(y, a, \beta)}}
-\]
+\begin{align*}
+q_a^*(a) \propto& \exp{E_\beta \log{p(y, a, \beta)}} \\
+=& \exp{\sum_{i=1}^n E_\beta \left( y_i \log{\Psi{a_i \geq 0}} + (1 - y_i) \log{\Psi{a_i < 0}} \right) - \frac{1}{2}(a_i - X \mu_{q(\beta)})^2 + \\ &\frac{1}{2}(\mu_{q(\beta)} - \mu_{\beta})^T \Sigma^{-1} (\mu_{q(\beta)} - \mu_\beta)  }
+\end{align*}
+
+We then calculate the mean field update equations.
+
 \end{document}
