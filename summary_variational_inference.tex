@@ -172,10 +172,10 @@ q(\theta) = q_a(\vec{a}) q_{\vec{\beta}}(\vec{\beta})
 
 we find the distribution of $q_a$ and $q_\beta$.
 
-\begin{align*}
-q_a^*(a) \propto& \exp{E_\beta \log{p(y, a, \beta)}} \\
-=& \exp{\sum_{i=1}^n E_\beta \left( y_i \log{\Psi{a_i \geq 0}} + (1 - y_i) \log{\Psi{a_i < 0}} \right) - \frac{1}{2}(a_i - X \mu_{q(\beta)})^2 + \\ &\frac{1}{2}(\mu_{q(\beta)} - \mu_{\beta})^T \Sigma^{-1} (\mu_{q(\beta)} - \mu_\beta)  }
-\end{align*}
+%\begin{align*}
+%q_a^*(a) \propto& \exp{E_\beta \log{p(y, a, \beta)}} \\
+%=& \exp{\sum_{i=1}^n E_\beta \left( y_i \log{\Psi{a_i \geq 0}} + (1 - y_i) \log{\Psi{a_i < %0}} \right) - \frac{1}{2}(a_i - X \mu_{q(\beta)})^2 + \\ &\frac{1}{2}(\mu_{q(\beta)} - %\mu_{\beta})^T \Sigma^{-1} (\mu_{q(\beta)} - \mu_\beta)  }
+%\end{align*}
 
 We then calculate the mean field update equations.
 
@@ -231,4 +231,17 @@ so
 The $sn$ library calculates this in a numerically stable manner, using continued fractions.
 John has better code, which is written in C and calculates the function to a numerical
 threshold.
+
+\section{Finite normal mixture model}
+Let $X_1, X_2, \ldots, X_n$ be a univariate samplethat is modelled as a random sample from a
+mixture of K normal density functions with parameters $(\mu_k, \sigma_k^2)$,
+$1 \leq k \leq K$. The joint density function of the sample is
+\[
+p(x_1, \ldots, x_n) = \Pi_{i=1}^n \left [ \sum_{k=1}^K w_k \frac{1}{\sqrt{2 \pi}} \exp{ \left( -\frac{1}{2}(x_i - \mu_k)^2/\sigma_k^2 \right)} \right ]
+\]
+where the weights $w_k$, $1 \leq k \leq K$, are nonnegative and sum to unity. Let 
+$(w_1, \ldots, w_k) \sim \text{Dirichlet($\alpha, \ldots, \alpha$)}$, $\alpha > 0$.
+
+% TODO: Start working through the details.
+
 \end{document}
