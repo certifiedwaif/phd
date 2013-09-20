@@ -233,12 +233,12 @@ John has better code, which is written in C and calculates the function to a num
 threshold.
 
 \section{Finite normal mixture model}
-Let $X_1, X_2, \ldots, X_n$ be a univariate samplethat is modelled as a random sample from a
+Let $X_1, X_2, \ldots, X_n$ be a univariate sample that is modelled as a random sample from a
 mixture of K normal density functions with parameters $(\mu_k, \sigma_k^2)$,
 $1 \leq k \leq K$. The joint density function of the sample is
-\[
+\begin{equation}\label{eq:gaussian_mixture}
 p(x_1, \ldots, x_n) = \Pi_{i=1}^n \left [ \sum_{k=1}^K w_k \frac{1}{\sqrt{2 \pi}} \exp{ \left( -\frac{1}{2}(x_i - \mu_k)^2/\sigma_k^2 \right)} \right ]
-\]
+\end{equation}
 where the weights $w_k$, $1 \leq k \leq K$, are nonnegative and sum to unity. Let 
 $(w_1, \ldots, w_k) \sim \text{Dirichlet($\alpha, \ldots, \alpha$)}$, $\alpha > 0$.
 
@@ -246,6 +246,8 @@ $(w_1, \ldots, w_k) \sim \text{Dirichlet($\alpha, \ldots, \alpha$)}$, $\alpha > 
 
 As before, we introduce an auxillary node
 $a_1, \ldots, a_n|w_1, \ldots, w_k \sim \text{Multinomial}(1, \vec{\alpha})$. Then
-$p(y_i|a_i) = \Pi_{i=1}^n \Pi_{k=1}^K f_Z(\mu_k, \sigma_{k}^2)^{a_i}$.
+$p(x_i|a_{i1}, \ldots, a_{ik}) = \Pi_{k=1}^K (2\pi \sigma_k^2)^{-\frac{1}{2}}\exp{(\mu_k- \sigma_{k})^2})^{a_{ik}}$, then the joint distribution is easily shown to be as in
+\eqref{eq:gaussian_mixture}. % So show it then.
+
 
 \end{document}
