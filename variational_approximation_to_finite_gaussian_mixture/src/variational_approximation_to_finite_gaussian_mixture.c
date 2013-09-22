@@ -14,7 +14,7 @@
 #include <gsl/gsl_sf.h>
 #include <gsl/gsl_statistics.h>
 
-struct {
+struct faithful_datum {
 	int number;
 	double eruptions;
 	int waiting;
@@ -311,9 +311,9 @@ int main(void) {
 	// Priors
 	const double mu_mu[K] = {0.0, 1.0};
 	const double sigma2_mu[K] = {1.0e7, 1.0e7};
-	const double prior_alpha = .001;
-	const double prior_A[K] = {.001, .001};
-	const double prior_B[K] = {.001, .001};
+	const double prior_alpha = .1;
+	const double prior_A[K] = {.1, .1};
+	const double prior_B[K] = {.1, .1};
 	// Parameters
 	double mu[K];
 	double alpha[K];
@@ -338,42 +338,52 @@ int main(void) {
 	}
 
 	// Cycle until convergence
-	for (i = 0; i<n; i++) {
-		for (k=0; k < K; k++) {
-			v[i][k] = digamma(alpha[k]) + .5*digamma(A[k]) + .5*log(B[k]) - .5*A[k]*square(x[i] - mu[k])/B[k];
+	for (int z=0; z<10; z++) {
+		for (i = 0; i<n; i++) {
+			for (k=0; k < K; k++) {
+				v[i][k] = digamma(alpha[k]) + .5*digamma(A[k]) + .5*log(B[k]) - .5*A[k]*square(x[i] - mu[k])/B[k];
+			}
 		}
-	}
 
-	for (i = 0; i<n; i++) {
-		for (k=0; k < K; k++) {
-			double sum_wk = 0.0;
-			for (i=0; i < n; i++) {
-				sum_wk += exp(v[i][k]);
+		for (i = 0; i<n; i++) {
+			for (k=0; k < K; k++) {
+				double sum_wk = 0.0;
+				for (i=0; i < n; i++) {
+					sum_wk += exp(v[i][k]);
+				}
+
+				w[i][k] = exp(v[i][k])/sum_wk;
+			}
+		}
+
+		for (k=0;k<K;k++) {
+			double sum_wi = 0.0;
+			for (i = 0; i < n; i++) {
+				sum_wi = w[i][k];
 			}
 
-			w[i][k] = exp(v[i][k])/sum_wk;
-		}
-	}
+			for (i = 0; i < n; i++) {
+				sigma2[k] = 1.0/(1.0/sigma2_mu[k] + A[k]*sum_wi/B[k]);
 
-	for (k=0;k<K;k++) {
-		double sum_wi = 0.0;
-		for (i = 0; i < n; i++) {
-			sum_wi = w[i][k];
-			sigma2[k] = 1.0/(1.0/sigma2_mu[k] + A[k]*sum_wi/B[k]);
-			double sum_wx = 0.0;
-			for (int i2 = 0; i2 < n; i2++) {
-				sum_wx += w[i][k] * x[i];
-			}
-			mu[k] = sigma2[k] * (mu_mu[k]/sigma2_mu[k] + A[k]*sum_wx/B[k]);
-			alpha[k] = prior_alpha + sum_wi;
-			A[k] = prior_A[k] + .5*sum_wi;
-			double sum_wx2 = 0.0;
-			for (int i3 = 0; i3 < n; i3++) {
-				sum_wx2 += w[i][k]*(square(x[i]-mu[k]) + sigma2[k]);
-			}
-			B[k] = prior_B[k] + .5*sum_wx2;
-		}
-	}
+				double sum_wx = 0.0;
+				for (int i2 = 0; i2 < n; i2++) {
+					sum_wx += w[i][k] * x[i];
+				}
 
+				mu[k] = sigma2[k] * (mu_mu[k]/sigma2_mu[k] + A[k]*sum_wx/B[k]);
+				alpha[k] = prior_alpha + sum_wi;
+				A[k] = prior_A[k] + .5*sum_wi;
+
+				double sum_wx2 = 0.0;
+				for (int i3 = 0; i3 < n; i3++) {
+					sum_wx2 += w[i][k]*(square(x[i]-mu[k]) + sigma2[k]);
+				}
+
+				B[k] = prior_B[k] + .5*sum_wx2;
+			}
+		}
+
+		printf("mu_1 %g, mu_2 %g\n", mu[0], mu[1]);
+	}
 	return EXIT_SUCCESS;
 }
