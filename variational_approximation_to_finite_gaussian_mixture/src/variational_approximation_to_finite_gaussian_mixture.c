@@ -341,7 +341,7 @@ int main(void) {
 	for (int z=0; z<10; z++) {
 		for (i = 0; i<n; i++) {
 			for (k=0; k < K; k++) {
-				v[i][k] = digamma(alpha[k]) + .5*digamma(A[k]) + .5*log(B[k]) - .5*A[k]*square(x[i] - mu[k])/B[k];
+				v[i][k] = digamma(alpha[k]) + .5*digamma(A[k]) - .5*log(B[k]) - .5*A[k]*(square(x[i] - mu[k]) + sigma2[k])/B[k];
 			}
 		}
 
