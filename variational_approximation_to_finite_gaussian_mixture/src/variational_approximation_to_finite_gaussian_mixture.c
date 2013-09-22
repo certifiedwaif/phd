@@ -310,7 +310,7 @@ int main(void) {
 	puts("Variational approximation to finite Gaussian mixture"); /* prints !!!Hello World!!! */
 	// Priors
 	const double mu_mu[K] = {0.0, 1.0};
-	const double sigma2_mu[K] = {1.0e7, 1.0e7};
+	const double sigma2_mu[K] = {1e7, 1e7};
 	const double prior_alpha = .1;
 	const double prior_A[K] = {.1, .1};
 	const double prior_B[K] = {.1, .1};
@@ -348,8 +348,8 @@ int main(void) {
 		for (i = 0; i<n; i++) {
 			for (k=0; k < K; k++) {
 				double sum_wk = 0.0;
-				for (i=0; i < n; i++) {
-					sum_wk += exp(v[i][k]);
+				for (int i4=0; i4 < n; i4++) {
+					sum_wk += exp(v[i4][k]);
 				}
 
 				w[i][k] = exp(v[i][k])/sum_wk;
