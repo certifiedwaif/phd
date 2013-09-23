@@ -306,14 +306,16 @@ double square(const double x)
 #define n 272
 #define K 2
 
-int main(void) {
+int main(void)
+{
 	puts("Variational approximation to finite Gaussian mixture"); /* prints !!!Hello World!!! */
 	// Priors
-	const double mu_mu[K] = {0.0, 1.0};
-	const double sigma2_mu[K] = {1e7, 1e7};
-	const double prior_alpha = .1;
-	const double prior_A[K] = {.1, .1};
-	const double prior_B[K] = {.1, .1};
+	double mu_mu[K] = {0.0, 1.0};
+	double sigma2_mu[K] = {10000, 10000};
+	double prior_alpha = .1;
+	double prior_A[K] = {.1, .1};
+	double prior_B[K] = {.1, .1};
+
 	// Parameters
 	double mu[K];
 	double alpha[K];
@@ -324,17 +326,19 @@ int main(void) {
 	double x[n];
 	int i, k;
 
-	// Initialise
+	// Initialise x from faithful
+	// TODO: Standardise data
 	for (i=0;i<n;i++) {
 		x[i] = faithful[i].eruptions;
 	}
 
+	// Initialise
 	for (k=0; k<K; k++) {
 		mu[k] = gsl_stats_mean(x, 1, n) + k;
 		sigma2[k] = gsl_stats_variance(x, 1, n);
-		alpha[k] = .001;
-		A[k] = .001;
-		B[k] = .001;
+		alpha[k] = .1;
+		A[k] = .1;
+		B[k] = .1;
 	}
 
 	// Cycle until convergence
@@ -347,6 +351,8 @@ int main(void) {
 
 		for (i = 0; i<n; i++) {
 			for (k=0; k < K; k++) {
+				// TODO: There's the potential for overflow here
+				// Remove the maximum using the trick that John showed you.
 				double sum_wk = 0.0;
 				for (int i4=0; i4 < n; i4++) {
 					sum_wk += exp(v[i4][k]);
@@ -362,25 +368,23 @@ int main(void) {
 				sum_wi = w[i][k];
 			}
 
-			for (i = 0; i < n; i++) {
-				sigma2[k] = 1.0/(1.0/sigma2_mu[k] + A[k]*sum_wi/B[k]);
+			sigma2[k] = 1.0/(1.0/sigma2_mu[k] + A[k]*sum_wi/B[k]);
 
-				double sum_wx = 0.0;
-				for (int i2 = 0; i2 < n; i2++) {
-					sum_wx += w[i][k] * x[i];
-				}
-
-				mu[k] = sigma2[k] * (mu_mu[k]/sigma2_mu[k] + A[k]*sum_wx/B[k]);
-				alpha[k] = prior_alpha + sum_wi;
-				A[k] = prior_A[k] + .5*sum_wi;
-
-				double sum_wx2 = 0.0;
-				for (int i3 = 0; i3 < n; i3++) {
-					sum_wx2 += w[i][k]*(square(x[i]-mu[k]) + sigma2[k]);
-				}
-
-				B[k] = prior_B[k] + .5*sum_wx2;
+			double sum_wx = 0.0;
+			for (int i2 = 0; i2 < n; i2++) {
+				sum_wx += w[i2][k] * x[i2];
 			}
+
+			mu[k] = sigma2[k] * (mu_mu[k]/sigma2_mu[k] + A[k]*sum_wx/B[k]);
+			alpha[k] = prior_alpha + sum_wi;
+			A[k] = prior_A[k] + .5*sum_wi;
+
+			double sum_wx2 = 0.0;
+			for (int i3 = 0; i3 < n; i3++) {
+				sum_wx2 += w[i3][k]*(square(x[i3]-mu[k]) + sigma2[k]);
+			}
+
+			B[k] = prior_B[k] + .5*sum_wx2;
 		}
 
 		printf("mu_1 %g, mu_2 %g\n", mu[0], mu[1]);
