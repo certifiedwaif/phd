@@ -37,6 +37,7 @@ fit_linear_mixed_model = function(Y, X, Z, A_epsilon, B_epsilon, A_u, B_u, K, si
   {
     lastLogLik = logLik
     Sigma_q_beta_u_inv = (A_epsilon + 0.5*n)/(B_q_sigma2_epsilon) * t(C) %*% C
+    #browser()
     Sigma_q_beta_u_inv = Sigma_q_beta_u_inv + bdiag(eye(p) / sigma2_beta, (A_u + 0.5 * K)/(B_q_sigma2_u) * eye(K))
     Sigma_q_beta_u = solve(Sigma_q_beta_u_inv)
     mu_q_beta_u = (A_epsilon + 0.5 * n)/(B_q_sigma2_epsilon) * Sigma_q_beta_u %*% t(C) %*% Y
@@ -44,9 +45,9 @@ fit_linear_mixed_model = function(Y, X, Z, A_epsilon, B_epsilon, A_u, B_u, K, si
     # Number of columns in the Z matrix
     p_x = dim(X)[2]
     p_z = dim(Z)[2]
-    print(p)
+    #print(p)
     random_int_idx = (p_x+1):(p_x+p_z)
-    print(random_int_idx)
+    #print(random_int_idx)
     B_q_sigma2_u = B_u + 0.5 * (sum(mu_q_beta_u[random_int_idx]^2) + trace(Sigma_q_beta_u[random_int_idx, random_int_idx]))
     logLik = calcLogLik()
     
