@@ -1,6 +1,7 @@
 \documentclass{amsart}
 \newcommand{\Bernoulli}[1]{\text{Bernoulli} \left( #1 \right)}
-\newcommand{\half}{\frac{1}{2}}
+\newcommand{\mydigamma}[1]{\psi \left( #1 \right)}
+\def \half {\frac{1}{2}}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \begin{document}
@@ -278,17 +279,45 @@ where
 \end{align*}
 
 \begin{align*}
-\log{p(\vec{w})} = \log{\left( \frac{\Gamma(\sum_{k=1}^K \alpha)}{\Pi_{k=1}^K \Gamma(\alpha)} \Pi_{k=1}^K w_k^{\alpha-1} \right)}
+\log{p(\vec{w})} &= \log{\left( \frac{\Gamma(\sum_{k=1}^K \alpha)}{\Pi_{k=1}^K \Gamma(\alpha)} \Pi_{k=1}^K w_k^{\alpha-1} \right)} \\
+&= \log \Gamma(K \alpha) - K \Gamma(\alpha) + (\alpha - 1) \sum_{k=1}^K \log{w_k}
 \end{align*}
 
 \begin{align*}
-\log{p(\mu_k)} &= \log{ \frac{1}{\sqrt{2 \pi \sigma_{\mu_k}^2}} \exp{\left( -\frac{(\mu_k - \mu_{\mu_k})^2}{2 \sigma_{\mu_{\mu_k}^2}} \right)}} \\
-&= \half \log{2 \pi} - \half \frac{(\mu_k - \mu_{\mu_k})^2}{2 \sigma_{\mu_{\mu_k}^2}}
+\log{p(\mu_k)} &= \log{ \frac{1}{\sqrt{2 \pi \sigma_{\mu_k}^2}} \exp{\left( -\frac{(\mu_k - \mu_{\mu_k})^2}{\sigma_{\mu_{\mu_k}^2}} \right)}} \\
+&= \half \log{2 \pi} - \half \frac{(\mu_k - \mu_{\mu_k})^2}{\sigma_{\mu_{\mu_k}^2}}
 \end{align*}
 
 and
 
 \begin{align*}
-\log{p(\sigma_k^2)} &= \log{\left [ \frac{B_k^{A_k}}{\Gamma(A_k)} \sigma_k^{2 (-(A_k - 1))} \exp{-\frac{B_k}{\sigma_k^2}} \right ]}
+\log{p(\sigma_k^2)} &= \log{\left [ \frac{B_k^{A_k}}{\Gamma(A_k)} \sigma_k^{2 (-(A_k - 1))} \exp{-\frac{B_k}{\sigma_k^2}} \right ]} \\
+&= A_k \log{B_k} + \log{\Gamma(A_k)} - (A_k - 1) \log{\sigma_k^2} - B_k \frac{1}{\sigma_k^2}
 \end{align*}
+
+\subsection{Mean field update equations}
+\begin{align*}
+\log{E_{-a_{ik}} \left[ p(x_{ik}, \theta) \right] } \propto&E_{-a_{ik}} \left [  - \half  \log{2 \pi} - \half \log{\sigma_k^2} \\
+&+a_{ik} \log{w_k} + \\
+&\log \Gamma(\alpha) - \log{\Gamma(\alpha)} + (\alpha - 1) \log{w_k}\\
+& - \half a_{ik} \frac{(x_i - \mu_k)^2}{\sigma_k^2}\\
+& - \half \frac{(\mu_k - \mu_{\mu_k})^2}{\sigma_{\mu_{\mu_k}^2}} \\
+&+ A_k \log{B_k} + \log{\Gamma(A_k)} - (A_k - 1) \log{\sigma_k^2} - B_k \frac{1}{\sigma_k^2} \right ] \\
+
+\propto&E_{-a_{ik}} \left [  - \half \log{\sigma_k^2} \right ]\\
+&+ E_{-a_{ik}}\left[ a_{ik} \log{w_k} \right]\\
+&+ E_{-a_{ik}}\left[ \log \Gamma(\alpha) - \log{\Gamma(\alpha)} + (\alpha - 1) \log{w_k} \right]\\
+& + E_{-a_{ik}}\left[- \half a_{ik} \frac{(x_i - \mu_k)^2}{\sigma_k^2} \right]\\
+& + E_{-a_{ik}}\left[- \half \frac{(\mu_k - \mu_{\mu_k})^2}{\sigma_{\mu_{\mu_k}^2}} \right] \\
+&+ E_{-a_{ik}}\left[A_k \log{B_k} + \log{\Gamma(A_k)} - (A_k - 1) \log{\sigma_k^2} - B_k \frac{1}{\sigma_k^2} \right ] \\
+
+\propto&- \half \frac{A_k}{B_k} \\
+&+ \psi{\alpha_{q_{w_{ik}}} }\\
+&+ (\alpha - 1) \psi{\alpha_{q_{w_{ik}}} \right]\\
+& - \frac{(x_i - \mu_k)^2}{\frac{A_k}{B_k}} \right]\\
+&+ A_k \log{B_k} + \Psi{A_k} - (A_k - 1) \log{\sigma_k^2} - B_k \frac{1}{\sigma_k^2} \right ]
+\end{align*}
+
+\subsection{Lower bound}
+
 \end{document}
