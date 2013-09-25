@@ -4,3 +4,5 @@
 *.aux
 *.log
 *.pdf
+*.o
+*.d
