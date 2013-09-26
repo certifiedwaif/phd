@@ -260,7 +260,7 @@ The joint likelihood can be specified as the product of conditional likelihoods
 p(x;q) = \Pi_{i=1}^n \Pi_{k=1}^K p(x_i|a_{i1}, \ldots, a_{iK}) p(a_{i1}, \ldots, a_{iK} | w_1, \ldots, w_K) p(w_1, \ldots, w_K) p(\mu_k) p(\sigma_k^2)
 \]
 
-It follows that the joint likelihood is
+It follows that the log of the joint likelihood is
 
 \[
 \sum_{i=1}^n \sum_{k=1}^K \log{p(x_i|\vec{a_i})} + \log{p(\vec{a_i}|\vec{w})} + \log{p(\vec{w})} + \log{p(\mu_k)} + \log{p(\sigma_k^2)}
@@ -285,39 +285,57 @@ where
 
 \begin{align*}
 \log{p(\mu_k)} &= \log{ \frac{1}{\sqrt{2 \pi \sigma_{\mu_k}^2}} \exp{\left( -\frac{(\mu_k - \mu_{\mu_k})^2}{\sigma_{\mu_{\mu_k}^2}} \right)}} \\
-&= \half \log{2 \pi} - \half \frac{(\mu_k - \mu_{\mu_k})^2}{\sigma_{\mu_{\mu_k}^2}}
+&= -\half \log{2 \pi} - \half \log{\sigma_{\mu_k}^2} - \half \frac{(\mu_k - \mu_{\mu_k})^2}{\sigma_{\mu_{\mu_k}^2}}
 \end{align*}
 
 and
 
 \begin{align*}
 \log{p(\sigma_k^2)} &= \log{\left [ \frac{B_k^{A_k}}{\Gamma(A_k)} \sigma_k^{2 (-(A_k - 1))} \exp{-\frac{B_k}{\sigma_k^2}} \right ]} \\
-&= A_k \log{B_k} + \log{\Gamma(A_k)} - (A_k - 1) \log{\sigma_k^2} - B_k \frac{1}{\sigma_k^2}
+&= A_k \log{B_k} - \log{\Gamma(A_k)} - (A_k - 1) \log{\sigma_k^2} - B_k \frac{1}{\sigma_k^2}
 \end{align*}
 
 \subsection{Mean field update equations}
+
+We start with the mean field update for the indicator variables
+
 \begin{align*}
-\log{E_{-a_{ik}} \left[ p(x_{ik}, \theta) \right] } \propto&E_{-a_{ik}} \left [  - \half  \log{2 \pi} - \half \log{\sigma_k^2} \\
+\log{E_{-a_{ik}} \left[ p(x_{ik}, \theta) \right] } \propto & E_{-a_{ik}} \left [  - \half  \log{2 \pi} - \half \log{\sigma_k^2} \\
 &+a_{ik} \log{w_k} + \\
 &\log \Gamma(\alpha) - \log{\Gamma(\alpha)} + (\alpha - 1) \log{w_k}\\
 & - \half a_{ik} \frac{(x_i - \mu_k)^2}{\sigma_k^2}\\
 & - \half \frac{(\mu_k - \mu_{\mu_k})^2}{\sigma_{\mu_{\mu_k}^2}} \\
 &+ A_k \log{B_k} + \log{\Gamma(A_k)} - (A_k - 1) \log{\sigma_k^2} - B_k \frac{1}{\sigma_k^2} \right ] \\
-
 \propto&E_{-a_{ik}} \left [  - \half \log{\sigma_k^2} \right ]\\
 &+ E_{-a_{ik}}\left[ a_{ik} \log{w_k} \right]\\
 &+ E_{-a_{ik}}\left[ \log \Gamma(\alpha) - \log{\Gamma(\alpha)} + (\alpha - 1) \log{w_k} \right]\\
 & + E_{-a_{ik}}\left[- \half a_{ik} \frac{(x_i - \mu_k)^2}{\sigma_k^2} \right]\\
 & + E_{-a_{ik}}\left[- \half \frac{(\mu_k - \mu_{\mu_k})^2}{\sigma_{\mu_{\mu_k}^2}} \right] \\
 &+ E_{-a_{ik}}\left[A_k \log{B_k} + \log{\Gamma(A_k)} - (A_k - 1) \log{\sigma_k^2} - B_k \frac{1}{\sigma_k^2} \right ] \\
-
-\propto&- \half \frac{A_k}{B_k} \\
-&+ \psi{\alpha_{q_{w_{ik}}} }\\
-&+ (\alpha - 1) \psi{\alpha_{q_{w_{ik}}} \right]\\
-& - \frac{(x_i - \mu_k)^2}{\frac{A_k}{B_k}} \right]\\
-&+ A_k \log{B_k} + \Psi{A_k} - (A_k - 1) \log{\sigma_k^2} - B_k \frac{1}{\sigma_k^2} \right ]
+\propto&- \half \psi{A_k} - \half \log{B_k} \\
+&+ \psi{(\alpha_{q_{w_{ik}}})}\\
+& - \half \frac{A_k}{B_k} ((x_i - \mu_k)^2 + \sigma^2) \right\\
+%&+ (A_k - 1) \log{\sigma_k^2} - B_k \frac{1}{\sigma_k^2} \right ]
 \end{align*}
 
-\subsection{Lower bound}
+A couple of terms at the end, to do with $\sigma_k^2$, are wrong, and I'm not sure quite why.
+Update: This is because the $sigma_k^2$ parameter is the reciprocal of the standard deviation
+for the candidate distribution.
 
+Next, we exponentiate and appropriately weight these indicators to make sure that they
+sum to 1
+\[
+w_{ik} \leftarrow \frac{\exp{a_{ik}}}{\sum_{i=1}^k \exp{a_{ik}}}
+\]
+
+We then derive the mean field update equations for $\sigma_k^2$.
+
+We derive the mean field update equations for $\mu_k$.
+%Comment: No, you can't do this until you have the mean field update equation for 
+%$\sigma^2_{q(\mu_k)}$. And that's the combination of the weighted variance for each $\mu_k$
+%and the variance from the prior for $\sigma^2_k$, which you've seen before in previous
+%Gaussian cases. They are using \sigma^2_{q(\mu_k)} as a parameter defined to suit 
+%themselves. It's not the $sigma^2_k$ that you're used to!
+
+\subsection{Lower bound}
 \end{document}
