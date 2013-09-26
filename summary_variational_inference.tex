@@ -337,5 +337,27 @@ We derive the mean field update equations for $\mu_k$.
 %Gaussian cases. They are using \sigma^2_{q(\mu_k)} as a parameter defined to suit 
 %themselves. It's not the $sigma^2_k$ that you're used to!
 
+\subsubsection{Completing the square}
+If $ax^2 + bx + c = 0$, and you wish to rewrite this in the form $(x - h)^2 + k = 0$ then
+\begin{align*}
+h &= \frac{-b}{2a} \\
+k &= c - \frac{b^2}{4a}
+\end{align*}
+
+This trick is particularly useful when dealing with joint likelihoods involving multiple
+Gaussians up to proportionality. For example, if you have
+\[
+-\half \left [ \frac{(x_i - \mu_k)^2}{\sigma_k^2} + \frac{(\mu_k - \mu_{\mu_k})^2}{\sigma_{\mu_k}^2} \right ]
+\]
+
+in your log likelihood, then you a quadratic in $\mu_k$. Expanding the binomials, we
+see that $a = \half (\frac{1}{\sigma_k^2} + \frac{1}{\sigma_{\mu_k}^2})$ and
+$b = -\left( \frac{x_i}{\sigma_k^2} + \frac{\mu_{\mu_k}}{\sigma_{\mu_k}^2} \right)$. So we
+can rewrite the above terms in the log likelihood as
+\[
+-\half \frac{(\mu_k - \mu_{q_{\mu_k}(\mu)})^2}{q_{\mu_k}(\sigma^2)} + k
+\]
+
+where $\mu_{q_{\mu_k}(\mu) = -b$ and $q_{\mu_k}(\sigma^2) = \frac{1}{2a}$
 \subsection{Lower bound}
 \end{document}
