@@ -90,12 +90,19 @@ double dsnorm(double x, double mu, double sigma, int ISLOG)
 {
     double z;
     double dmu;
+    double tmp;
     dmu = x - mu;
     z = dmu/sigma;
-    if(ISLOG) {
-        return( -0.2257914 - log(sigma) - 0.5*z*z  );
+    //if(ISLOG) {
+    //    return( -0.2257914 - log(sigma) - 0.5*z*z  );
+    //} else {
+    //    return( exp(-0.2257914 - log(sigma) - 0.5*z*z) );
+    //}
+     tmp = 1/(sqrt(2*M_PI)*sigma)*exp(-z*z/2);
+    if (ISLOG) {
+    	return(log(tmp));
     } else {
-        return( exp(-0.2257914 - log(sigma) - 0.5*z*z) ); 
+    	return(tmp);
     }
 }
 
