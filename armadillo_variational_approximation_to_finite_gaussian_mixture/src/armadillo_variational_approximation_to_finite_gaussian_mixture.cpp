@@ -1,9 +1,10 @@
 //============================================================================
-// Name        : armadillo_demo.cpp
+// Name        : armadillo_variational_approximation_to_finite_gaussian_mixture.cpp
 // Author      : Mark Greenaway
 // Version     :
 // Copyright   : Your copyright notice
-// Description : Hello World in C++, Ansi-style
+// Description : Implement finite Gaussian mixture model in C++ using the Armadillo
+//               library.
 //============================================================================
 
 #include <iostream>
@@ -12,6 +13,9 @@
 #include <gsl/gsl_sf.h>
 #include <gsl/gsl_statistics.h>
 #include "faithful.hpp"
+
+using namespace std;
+using namespace arma;
 
 double digamma(const double x)
 {
@@ -23,11 +27,19 @@ double square(const double x)
 	return x*x;
 }
 
+vec lgamma(vec x)
+{
+	vec result(x.n_elem);
+
+	for (unsigned int i = 0; i < x.n_elem; i++) {
+		result(i) = lgamma(x(i));
+	}
+
+	return result;
+}
+
 #define n 272
 #define K 2
-
-using namespace std;
-using namespace arma;
 
 struct FiniteGaussianMixture {
 	vec mu_mu, sigma2_mu, prior_A, prior_B;
@@ -83,6 +95,15 @@ struct FiniteGaussianMixture {
 			A(k) = .1;
 			B(k) = .1;
 		}
+
+		// Start with equal weighting of all components. We do this because otherwise the initialise
+		// evaluation of the log-likelihood produces NaNs.
+		// This seems to break things even worse!
+		for (i = 0; i < n; i++) {
+			for (k = 0; k < K; k++) {
+				w(i, k) = 1.0/K;
+			}
+		}
 	}
 
 	void cycle()
@@ -94,7 +115,6 @@ struct FiniteGaussianMixture {
 				v(i, k) = digamma(alpha(k)) + .5*digamma(A(k)) - .5*log(B(k)) - .5*A(k)*(square(x(i) - mu(k)) + sigma2(k))/B(k);
 			}
 		}
-		cout << v << endl;
 
 		for (i = 0; i<n; i++) {
 			for (k=0; k < K; k++) {
@@ -103,7 +123,6 @@ struct FiniteGaussianMixture {
 				w(i, k) = exp(v(i,k)) / sum(exp(v.row(i)));
 			}
 		}
-		cout << w << endl;
 
 		for (k=0;k<K;k++) {
 			sigma2(k) = 1.0/(1.0/sigma2_mu(k) + A(k)*sum(w.col(k))/B(k));
@@ -112,13 +131,27 @@ struct FiniteGaussianMixture {
 			A(k) = prior_A(k) + .5*sum(w.col(k));
 
 			B(k) = prior_B(k) + .5*sum(w.col(k).t()*square(x - mu(k)) + sigma2(k));
-
-			cout << mu(k) << " " << sigma2(k) << " " << alpha(k) << " " << A(k) << " " << B(k) << endl;
 		}
 	}
 
 	const double log_likelihood(void) {
-		return 0.0;
+		double log_lik;
+
+		log_lik = .5*K*(1 - n*log(2* M_PI)) + lgamma(K*prior_alpha);
+		log_lik += -K * lgamma(prior_alpha) - lgamma(n + K * prior_alpha);
+
+		vec log_lik_v(K);
+
+		for (int k = 0; k < K; k++) {
+			log_lik_v(k) = prior_A(k) * log(prior_B(k)) - A(k) * log(B(k));
+			log_lik_v(k) += lgamma(alpha(k)) + .5 * log(sigma2(k)/sigma2_mu(k));
+			log_lik_v(k) += -.5*(square(mu(k) - mu_mu(k)) + sigma2(k))/sigma2_mu(k);
+			log_lik_v(k) += - sum(w.col(k).t() * log(w.col(k)));
+		}
+
+		log_lik += sum(log_lik_v);
+
+		return log_lik;
 	}
 
 };
@@ -130,9 +163,14 @@ int main(int argc, char **argv) {
 	m.initialise();
 
 	// Cycle until convergence
-	for (int z=0; z<100; z++) {
-		cout << "Iteration: " << z << endl;
+	int iter = 1;
+	double log_likelihood = m.log_likelihood(), last_log_likelihood = -INFINITY;
+	while (log_likelihood > last_log_likelihood) {
+		last_log_likelihood = log_likelihood;
+		cout << "Iteration: " << iter << " , log. lik. " << log_likelihood << endl;
 		m.cycle();
+		log_likelihood = m.log_likelihood();
+		iter++;
 	}
 
 	return 0;
