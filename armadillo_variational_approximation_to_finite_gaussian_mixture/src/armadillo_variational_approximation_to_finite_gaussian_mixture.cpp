@@ -29,46 +29,65 @@ double square(const double x)
 using namespace std;
 using namespace arma;
 
-int main(int argc, char **argv) {
-	cout << "Variational approximation to finite Gaussian mixture" << endl;
-	// Priors
-	vec mu_mu(K);
-	mu_mu << 0.0 << 1.0 << endr;
+struct FiniteGaussianMixture {
+	vec mu_mu, sigma2_mu, prior_A, prior_B;
+	const double prior_alpha;
+	vec mu, alpha, sigma2, A, B, x;
+	mat v, w;
 
-	vec sigma2_mu(K);
-	sigma2_mu << 10000 << 10000 << endr;
-
-	const double prior_alpha = .1;
-
-	vec prior_A(K);
-	prior_A.fill(1.0);
-
-	vec prior_B(K);
-	prior_B = prior_A;
-
-	// Parameters
-	vec mu(K), alpha(K), sigma2(K), A(K), B(K), x(n);
-	mat v(n, K), w(n, K);
-	int i, k;
-
-	// Initialise x from faithful, then standardise.
-	for (i=0;i<n;i++) {
-		x(i) = faithful[i].eruptions;
-	}
-	x = (x - mean(x))/stddev(x);
-
-	// Initialise
-	for (k=0; k<K; k++) {
-		mu(k) = mean(x) + k;
-		sigma2(k) = var(x);
-		alpha(k) = .1;
-		A(k) = .1;
-		B(k) = .1;
+	FiniteGaussianMixture(): mu_mu(K), sigma2_mu(K), prior_A(K), prior_B(K), prior_alpha(.1),
+			mu(K), alpha(K), sigma2(K),
+			A(K), B(K), x(n), v(n, K), w(n, K)
+	{
 	}
 
-	// Cycle until convergence
-	for (int z=0; z<100; z++) {
-		cout << "Iteration: " << z << endl;
+	void initialise()
+	{
+		initialise_priors();
+		initialise_data();
+		initialise_parameters();
+	}
+
+	void initialise_priors()
+	{
+		// Initialise priors
+		mu_mu << 0.0 << 1.0 << endr;
+		sigma2_mu << 10000 << 10000 << endr;
+		prior_A.fill(1.0);
+		prior_B = prior_A;
+	}
+
+	void initialise_data()
+	{
+		// Initialise x from faithful, then standardise.
+		for (int i=0;i<n;i++) {
+			x(i) = faithful[i].eruptions;
+		}
+		x = (x - mean(x))/stddev(x);
+	}
+
+	void initialise_parameters()
+	{
+		int i, k;
+		// Initialise x from faithful, then standardise.
+		for (i=0;i<n;i++) {
+			x(i) = faithful[i].eruptions;
+		}
+		x = (x - mean(x))/stddev(x);
+
+		// Initialise parameters
+		for (k=0; k<K; k++) {
+			mu(k) = mean(x) + k;
+			sigma2(k) = var(x);
+			alpha(k) = .1;
+			A(k) = .1;
+			B(k) = .1;
+		}
+	}
+
+	void cycle()
+	{
+		int i, k;
 
 		for (i = 0; i<n; i++) {
 			for (k=0; k < K; k++) {
@@ -90,12 +109,30 @@ int main(int argc, char **argv) {
 			sigma2(k) = 1.0/(1.0/sigma2_mu(k) + A(k)*sum(w.col(k))/B(k));
 			mu(k) = sigma2(k) * (mu_mu(k)/sigma2_mu(k) + A(k)*sum(w.col(k).t() * x)/B(k));
 			alpha(k) = prior_alpha + sum(w.col(k));
-			A(k) = prior_A[k] + .5*sum(w.col(k));
+			A(k) = prior_A(k) + .5*sum(w.col(k));
 
-			B(k) = prior_B[k] + .5*sum(w.col(k).t()*square(x - mu[k]) + sigma2[k]);
+			B(k) = prior_B(k) + .5*sum(w.col(k).t()*square(x - mu(k)) + sigma2(k));
 
 			cout << mu(k) << " " << sigma2(k) << " " << alpha(k) << " " << A(k) << " " << B(k) << endl;
 		}
+	}
+
+	const double log_likelihood(void) {
+		return 0.0;
+	}
+
+};
+
+int main(int argc, char **argv) {
+	FiniteGaussianMixture m;
+
+	cout << "Variational approximation to finite Gaussian mixture" << endl;
+	m.initialise();
+
+	// Cycle until convergence
+	for (int z=0; z<100; z++) {
+		cout << "Iteration: " << z << endl;
+		m.cycle();
 	}
 
 	return 0;
