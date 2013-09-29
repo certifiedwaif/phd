@@ -96,14 +96,10 @@ struct FiniteGaussianMixture {
 			B(k) = .1;
 		}
 
-		// Start with equal weighting of all components. We do this because otherwise the initialise
-		// evaluation of the log-likelihood produces NaNs.
-		// This seems to break things even worse!
-		for (i = 0; i < n; i++) {
-			for (k = 0; k < K; k++) {
-				w(i, k) = 1.0/K;
-			}
-		}
+		// Start with equal weighting of all components. We do this because otherwise the initial
+		// evaluation of the log-likelihood before we have run the mean field update equations for the
+		// first time produces NaNs.
+		w.fill(1.0/K);
 	}
 
 	void cycle()
