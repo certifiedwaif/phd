@@ -1,7 +1,13 @@
 \documentclass{amsart}
 \newcommand{\Bernoulli}[1]{\text{Bernoulli} \left( #1 \right)}
 \newcommand{\mydigamma}[1]{\psi \left( #1 \right)}
+\newcommand{\Poisson}[1]{\text{Poisson} \left( #1 \right)}
 \def \half {\frac{1}{2}}
+\def \R {\mathbb{R}}
+\def \vbeta {\vec{\beta}}
+\def \vy {\vec{y}}
+\def \vmu {\vec{mu}}
+\def \mX {\vec{X}}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \begin{document}
@@ -31,12 +37,12 @@ a categorical distribution is a better choice.
 
 In this chapter, we will study a more general class of deterministic approximate inference
 algorithms based on \emph{variational inference} (Jordan et al. 1998; Jaakda and Jordan 
-2000; Jaakkola 2001; Wainwright and Jordan 2008). The basic idea is to pick an approximation
+2000; Jaakkola 2001; Wainwright and Jordan 2008). The basic idea is to select an approximation
 as close as possible to the true posterior,
 $p^{*}(\vec{x}) \text{def} = p(\vec{x}|\mathcal{D})$. This reduces inference to an 
 optimisation problem. By relaxing the constraints and/or approximating the objective, we can
 trade accuracy for speed. The bottom line is that variational inference often gives us the
-speed benefirts of MAP estimation but the statistical benefits of the Bayesian approach.
+speed benefits of MAP estimation but the statistical benefits of the Bayesian approach.
 
 \subsection{\S 21.2 Variational inference}
 
@@ -269,8 +275,8 @@ It follows that the log of the joint likelihood is
 where
 
 \begin{align*}
-\sum_{i=1}^n \sum_{k=1}^K \log{p(x_i|\vec{a_i})} &= \sum_{i=1}^n \sum_{k=1}^K - \half \log{2 \pi} - \half \log{\sigma_k^2} - \half a_{ik} \frac{(x_i - \mu_k)^2}{\sigma_k^2} \\
-&= - \half Kn \log{2 \pi} - \half \sum_{k=1}^K n \log{\sigma_k^2} - \half \sum_{i=1}^n \sum_{k=1}^K a_{ik} \frac{(x_i - \mu_k)^2}{\sigma_k^2}
+\sum_{i=1}^n \sum_{k=1}^K \log{p(x_i|\vec{a_i})} &= \sum_{i=1}^n \sum_{k=1}^K - \half a_{ik} \log{2 \pi} - \half a_{ik} \log{\sigma_k^2} - \half a_{ik} \frac{(x_i - \mu_k)^2}{\sigma_k^2} \\
+&= - \half a_{ik} Kn \log{2 \pi} - \half a_{ik} \sum_{k=1}^K n \log{\sigma_k^2} - \half \sum_{i=1}^n \sum_{k=1}^K a_{ik} \frac{(x_i - \mu_k)^2}{\sigma_k^2}
 \end{align*}
 
 \begin{align*}
@@ -364,4 +370,55 @@ can rewrite the above terms in the log likelihood as
 
 where $\mu_{q_{\mu_k}(\mu) = -b$ and $q_{\mu_k}(\sigma^2) = \frac{1}{2a}$
 \subsection{Lower bound}
+
+\section{Poisson Regression with Gaussian Transform}
+\subsection{Parametric Density Transforms}
+Instead of assuming that $q(\theta)$ has a product density structure, we may instead assume
+that it belongs to a particular parametric family and hope that this results in a more
+tractable approximation to the posterior density $p(\vec{\theta}|\vec{y})$.
+
+The first example of this given in Ormerod 2010
+% TODO: Proper references
+is the Poisson Regression model with Gaussian Transform.
+
+Consider the Bayesian Poisson regression model
+\[
+Y_i | \beta_0, \ldots, \beta_k \overset{\text{ind.}}{\sim}  \Poisson{\exp{\vbeta_0 + \vbeta_1 x_{1i} + \ldots + \vbeta_k x_{ki}}}, 1 \leq i \leq n
+\]
+
+% Question: How would you pick which one?
+where the prior distribution on the coefficient vector $\vbeta$ takes the form
+$\vbeta \sim N(\vec{\mu}_{\vbeta}, \vec{\Sigma}_{\vbeta})$. Then the
+likelihood is
+\[
+p(\vec{y}|\vec{\vbeta}) = \exp{\left [ \vy^T \mX \vbeta - \vec{1_n}^T \exp{\mX \vbeta} - \vec{1_n}^T \log{(\vy!)} \right ]}
+\]
+
+and the marginal likelihood is
+\begin{align*}
+p(\vec{y}) =& (2 \pi)^{-(k+1)/2} | \Sigma_{\vbeta}|^{-\half} \times 
+	\int_{\R^{k+1}} \exp{\{ y^T X\vbeta - 1_n^T \exp{(X \vbeta)} - 1_n ^T \log{(y!)} \\
+		&- \half (\vbeta - \mu_{\vbeta})^T \Sigma_\vbeta^{-1} (\vbeta - \mu_{\vbeta})\}} d \vbeta
+\end{align*}
+
+Note that this integral is clearly intractable, and thus it follows that $p(\vbeta|y)$ is
+also intractable.
+
+Take $q$ to be the $N(\mu_{q(\vbeta)}, \Sigma_{q(\vbeta)})$ density:
+
+\[
+q(\vbeta; \mu_{q(\vbeta)}, \Sigma_{q(\vbeta)}) = (2 \pi)^{-p/2} | \Sigma_{q(\vbeta)} |^{-\half}
+	\exp{\{ -\half (\vbeta - \mu_{q(\vbeta)})^T \Sigma_{q(\vbeta)}^{-1} (\vbeta - \mu_{q(\vbeta)}) \}}
+\]
+
+Then the lower bound admits the explicit expression
+% FIXME: This LaTeX needs to be corrected so that it displays
+\begin{align*}
+\log{p(\vy;\vmu_{q(\vbeta)}, \Sigma_{q(\vbeta)})} &= \vy^T X \mu_{q(\vbeta)} -
+	1_n^T \exp{\mX \vmu_{q(\vbeta)} + \half \diag{\mX \Sigma_{q(\vbeta)} X^T}} \\
+&-half (\mu_{q(\vbeta)} - \vmu_{\vbeta})^T \Sigma_{q(\vbeta)}^{-1} (\mu_{q(\vbeta)} - \vmu_{\vbeta}) -\half \tr{\Sigma_{\beta}^{-1} \Sigma_{q(\vbeta)}}\\
+& + \half \log{|\Sigma_{q(\vbeta)}}|} - \half \log{|\Sigma_{\vbeta}|} + \frac{k + 1}{2}\\
+& -1_n^T \log{y!}
+\end{align*}
+
 \end{document}
