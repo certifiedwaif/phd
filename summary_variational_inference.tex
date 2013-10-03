@@ -1,15 +1,9 @@
 \documentclass{amsart}
-\newcommand{\Bernoulli}[1]{\text{Bernoulli} \left( #1 \right)}
-\newcommand{\mydigamma}[1]{\psi \left( #1 \right)}
-\newcommand{\Poisson}[1]{\text{Poisson} \left( #1 \right)}
-\def \half {\frac{1}{2}}
-\def \R {\mathbb{R}}
-\def \vbeta {\vec{\beta}}
-\def \vy {\vec{y}}
-\def \vmu {\vec{mu}}
-\def \mX {\vec{X}}
 \usepackage{amsmath}
 \usepackage{amssymb}
+
+\input{include.tex}
+
 \begin{document}
 \section{Variational approximations}
 Variational approximations to Bayesian models are an extension of the EM algorithm,
@@ -227,13 +221,13 @@ q(a_i) &= TN_{+}(x_i^T \mu_{q(\beta)}, 1), \text{ when } y_i=1 \\
 
 More zeta functions
 \[
-\zeta_k(x) = \frac{\partial^k \log{\Psi(x)}}{\partial x^k}
+\zeta_k(x) = \frac{\partial^k \log{\Phi(x)}}{\partial x^k}
 \]
 
 so
 
 \[
-\zeta_1 = \frac{\psi(x)}{\Psi(x)}
+\zeta_1 = \frac{\phi(x)}{\Phi(x)}
 \]
 
 The $sn$ library calculates this in a numerically stable manner, using continued fractions.
@@ -324,8 +318,8 @@ We start with the mean field update for the indicator variables
 &+ E_{-a_{ik}}\left[A_k \log{B_k} + \log{\Gamma(A_k)} - (A_k - 1) \log{\sigma_k^2} - B_k \frac{1}{\sigma_k^2} \right ] \\
 \propto&- \half \psi{A_k} - \half \log{B_k} \\
 &+ \psi{(\alpha_{q_{w_{ik}}})}\\
-& - \half \frac{A_k}{B_k} ((x_i - \mu_k)^2 + \sigma^2) \right\\
-%&+ (A_k - 1) \log{\sigma_k^2} - B_k \frac{1}{\sigma_k^2} \right ]
+& - \half \frac{A_k}{B_k} ((x_i - \mu_k)^2 + \sigma^2)\\
+&+ (A_k - 1) \log{\sigma_k^2} - B_k \frac{1}{\sigma_k^2}
 \end{align*}
 
 A couple of terms at the end, to do with $\sigma_k^2$, are wrong, and I'm not sure quite why.
@@ -368,7 +362,7 @@ can rewrite the above terms in the log likelihood as
 -\half \frac{(\mu_k - \mu_{q_{\mu_k}(\mu)})^2}{q_{\mu_k}(\sigma^2)} + k
 \]
 
-where $\mu_{q_{\mu_k}(\mu) = -b$ and $q_{\mu_k}(\sigma^2) = \frac{1}{2a}$
+where $\mu_{q_{\mu_k}}(\mu) = -b$ and $q_{\mu_k}(\sigma^2) = \frac{1}{2a}$
 \subsection{Lower bound}
 
 \section{Poisson Regression with Gaussian Transform}
@@ -397,28 +391,47 @@ p(\vec{y}|\vec{\vbeta}) = \exp{\left [ \vy^T \mX \vbeta - \vec{1_n}^T \exp{\mX \
 and the marginal likelihood is
 \begin{align*}
 p(\vec{y}) =& (2 \pi)^{-(k+1)/2} | \Sigma_{\vbeta}|^{-\half} \times 
-	\int_{\R^{k+1}} \exp{\{ y^T X\vbeta - 1_n^T \exp{(X \vbeta)} - 1_n ^T \log{(y!)} \\
-		&- \half (\vbeta - \mu_{\vbeta})^T \Sigma_\vbeta^{-1} (\vbeta - \mu_{\vbeta})\}} d \vbeta
+	\int_{\R^{k+1}} \exp{\{ y^T X\vbeta - 1_n^T \exp{(X \vbeta)} - 1_n ^T \log{(y!)}} \\
+		&- \half (\vbeta - \mu_{\vbeta})^T \Sigma_{\vbeta}^{-1} (\vbeta - \mu_{\vbeta}) d \vbeta
 \end{align*}
 
 Note that this integral is clearly intractable, and thus it follows that $p(\vbeta|y)$ is
 also intractable.
 
-Take $q$ to be the $N(\mu_{q(\vbeta)}, \Sigma_{q(\vbeta)})$ density:
+Take $q$ to be the $N(\mu_{q(\vbeta)}, \sigmaqbeta)$ density:
 
 \[
-q(\vbeta; \mu_{q(\vbeta)}, \Sigma_{q(\vbeta)}) = (2 \pi)^{-p/2} | \Sigma_{q(\vbeta)} |^{-\half}
-	\exp{\{ -\half (\vbeta - \mu_{q(\vbeta)})^T \Sigma_{q(\vbeta)}^{-1} (\vbeta - \mu_{q(\vbeta)}) \}}
+q(\vbeta; \mu_{q(\vbeta)}, \sigmaqbeta) = (2 \pi)^{-p/2} | \sigmaqbeta |^{-\half}
+	\exp{\{ -\half (\vbeta - \mu_{q(\vbeta)})^T \sigmaqbeta^{-1} (\vbeta - \mu_{q(\vbeta)}) \}}
 \]
 
 Then the lower bound admits the explicit expression
+
 % FIXME: This LaTeX needs to be corrected so that it displays
 \begin{align*}
-\log{p(\vy;\vmu_{q(\vbeta)}, \Sigma_{q(\vbeta)})} &= \vy^T X \mu_{q(\vbeta)} -
-	1_n^T \exp{\mX \vmu_{q(\vbeta)} + \half \diag{\mX \Sigma_{q(\vbeta)} X^T}} \\
-&-half (\mu_{q(\vbeta)} - \vmu_{\vbeta})^T \Sigma_{q(\vbeta)}^{-1} (\mu_{q(\vbeta)} - \vmu_{\vbeta}) -\half \tr{\Sigma_{\beta}^{-1} \Sigma_{q(\vbeta)}}\\
-& + \half \log{|\Sigma_{q(\vbeta)}}|} - \half \log{|\Sigma_{\vbeta}|} + \frac{k + 1}{2}\\
+\log{p(\vy;\vmu_{q(\vbeta)}, \sigmaqbeta)} &= \vy^T X \mu_{q(\vbeta)} -
+	1_n^T \exp{\mX \vmu_{q(\vbeta)} + \half \diag{\mX \sigmaqbeta X^T}} \\
+&-half (\mu_{q(\vbeta)} - \vmu_{\vbeta})^T \sigmaqbeta^{-1} (\mu_{q(\vbeta)} - \vmu_{\vbeta}) -\half \tr{\Sigma_{\beta}^{-1} \sigmaqbeta}\\
+& + \half \log{|\sigmaqbeta|} - \half \log{|\Sigma_{\vbeta}|} + \frac{k + 1}{2}\\
 & -1_n^T \log{y!}
 \end{align*}
+
+The $\mu_{q(\beta)}$ and $\Sigma_{q(\beta)}$ lower bound can be optimised using
+Newton-Raphson of the form:
+
+$\vmu_{q(\vbeta_{n+1})} = \vmu_{q(\vbeta_{n})} + $
+
+where
+
+\begin{align*}
+\frac{\partial \log{p(\vy; \vmuqbeta, \sigmaqbeta)}}{\partial \vmuqbeta} &= y^T X - 1_n^T \exp{\left { X \vmuqbeta + \half \diag{frogs} \right }}
+\end{align*}
+
+Partially differentiating with respect to the parameters we obtain
+
+\ldots
+
+and inverting the derivatives allows us to perform Newtown-Raphson updates on the parameters
+using the current value of the q-log likelihood.
 
 \end{document}
