@@ -398,21 +398,21 @@ p(\vec{y}) =& (2 \pi)^{-(k+1)/2} | \Sigma_{\vbeta}|^{-\half} \times
 Note that this integral is clearly intractable, and thus it follows that $p(\vbeta|y)$ is
 also intractable.
 
-Take $q$ to be the $N(\mu_{q(\vbeta)}, \sigmaqbeta)$ density:
+Take $q$ to be the $N(\vmuqbeta, \Sigmaqbeta)$ density:
 
 \[
-q(\vbeta; \mu_{q(\vbeta)}, \sigmaqbeta) = (2 \pi)^{-p/2} | \sigmaqbeta |^{-\half}
-	\exp{\{ -\half (\vbeta - \mu_{q(\vbeta)})^T \sigmaqbeta^{-1} (\vbeta - \mu_{q(\vbeta)}) \}}
+q(\vbeta; \vmuqbeta, \Sigmaqbeta) = (2 \pi)^{-p/2} | \Sigmaqbeta |^{-\half}
+	\exp{ -\half (\vbeta - \vmuqbeta)^T \Sigmaqbeta^{-1} (\vbeta - \vmuqbeta) }
 \]
 
 Then the lower bound admits the explicit expression
 
 % FIXME: This LaTeX needs to be corrected so that it displays
 \begin{align*}
-\log{p(\vy;\vmu_{q(\vbeta)}, \sigmaqbeta)} &= \vy^T X \mu_{q(\vbeta)} -
-	1_n^T \exp{\mX \vmu_{q(\vbeta)} + \half \diag{\mX \sigmaqbeta X^T}} \\
-&-half (\mu_{q(\vbeta)} - \vmu_{\vbeta})^T \sigmaqbeta^{-1} (\mu_{q(\vbeta)} - \vmu_{\vbeta}) -\half \tr{\Sigma_{\beta}^{-1} \sigmaqbeta}\\
-& + \half \log{|\sigmaqbeta|} - \half \log{|\Sigma_{\vbeta}|} + \frac{k + 1}{2}\\
+\log{p(\vy;\vmuqbeta}, \Sigmaqbeta)} &= \vy^T X \vmuqbeta} -
+	1_n^T \exp{\mX \vmuqbeta} + \half \diag{\mX \Sigmaqbeta X^T}} \\
+&-half (\vmuqbeta - \vmubeta)^T \Sigmaqbeta^{-1} (\mu_{q(\vbeta)} - \vmubeta) -\half \tr{\Sigmabeta^{-1} \Sigmaqbeta}\\
+& + \half \log{|\Sigmaqbeta|} - \half \log{|\Sigmabeta|} + \frac{k + 1}{2}\\
 & -1_n^T \log{y!}
 \end{align*}
 
@@ -420,18 +420,18 @@ The $\mu_{q(\beta)}$ and $\Sigma_{q(\beta)}$ lower bound can be optimised using
 Newton-Raphson of the form:
 
 $\vmu_{q(\vbeta_{n+1})} = \vmu_{q(\vbeta_{n})} + $
+$\theta_{n+1} = \theta_n - \frac{f'(\theta)}{f''(\theta)}$
 
 where
 
 \begin{align*}
-\frac{\partial \log{p(\vy; \vmuqbeta, \sigmaqbeta)}}{\partial \vmuqbeta} &= y^T X - 1_n^T \exp{\left { X \vmuqbeta + \half \diag{frogs} \right }}
+\frac{\partial \log{p(\vy; \vmuqbeta, \Sigmaqbeta)}}{\partial \vmuqbeta} &= y^T X - 1_n^T \exp{\left { X \vmuqbeta + \half \diag{\text{X \Sigmaqbeta X^T}} \right }} - (\vmuqbeta - \vmubeta)^T \Sigmabeta^{-1}
 \end{align*}
 
-Partially differentiating with respect to the parameters we obtain
+The function we wish to optimise is $\log p(y) - \log q(y; \theta) = 0$. As $p$ does not 
+depend on the parameters of $q$ as all, and $y$ is constant, we may consider the function to 
+be $k - \log q(y; \theta) = 0$. This function is maximised when the derivative of the
+log of the q-likelihood is 0, so we may use Newton-Raphson updates of the form
 
-\ldots
-
-and inverting the derivatives allows us to perform Newtown-Raphson updates on the parameters
-using the current value of the q-log likelihood.
 
 \end{document}
