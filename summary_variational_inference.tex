@@ -12,7 +12,7 @@ estimated conditional on all of the other parameters.
 
 \section{\S 21 Variational inference}
 
-From Machine Learning: A Probabilistic Perspective,
+>From Machine Learning: A Probabilistic Perspective,
 
 For some simple two node graphical models, of the form $x \to \mathcal{D}$, we can compute
 the exact posterior $p\vec{x}|\mathcal{D})$ in closed form, provided the prior $p(\vec{x})$ 
@@ -135,7 +135,7 @@ Let $Y_i|\beta_0, \beta_1, \ldots, \beta_k \sim \Bernoulli{\Psi(\beta_0 + \beta_
 Letting $X = [1 x_{1i} \ldots x_{ki}]$, the likelihood can be written compactly as
 \[
 p(\vec{y}|\vec{\beta}) = \Psi(X \beta)^{\vec{y}} \Psi(1 - \Psi(X \beta))^{\vec{1} - \vec{y}}
-\]]
+\]
 
 Question: Why don't we just optimise $\beta$ directly in this case?
 
@@ -304,22 +304,47 @@ approximation for in turn.
 We start with the mean field update for the indicator variables
 
 \begin{align*}
-\log{E_{-a_{ik}} \left[ p(x_{ik}, \theta) \right] } \propto & E_{-a_{ik}} \left [  - \half  \log{2 \pi} - \half \log{\sigma_k^2} \\
-&+a_{ik} \log{w_k} + \\
-&\log \Gamma(\alpha) - \log{\Gamma(\alpha)} + (\alpha - 1) \log{w_k}\\
-& - \half a_{ik} \frac{(x_i - \mu_k)^2}{\sigma_k^2}\\
-& - \half \frac{(\mu_k - \mu_{\mu_k})^2}{\sigma_{\mu_{\mu_k}^2}} \\
-&+ A_k \log{B_k} + \log{\Gamma(A_k)} - (A_k - 1) \log{\sigma_k^2} - B_k \frac{1}{\sigma_k^2} \right ] \\
-\propto&E_{-a_{ik}} \left [  - \half \log{\sigma_k^2} \right ]\\
-&+ E_{-a_{ik}}\left[ a_{ik} \log{w_k} \right]\\
-&+ E_{-a_{ik}}\left[ \log \Gamma(\alpha) - \log{\Gamma(\alpha)} + (\alpha - 1) \log{w_k} \right]\\
-& + E_{-a_{ik}}\left[- \half a_{ik} \frac{(x_i - \mu_k)^2}{\sigma_k^2} \right]\\
-& + E_{-a_{ik}}\left[- \half \frac{(\mu_k - \mu_{\mu_k})^2}{\sigma_{\mu_{\mu_k}^2}} \right] \\
-&+ E_{-a_{ik}}\left[A_k \log{B_k} + \log{\Gamma(A_k)} - (A_k - 1) \log{\sigma_k^2} - B_k \frac{1}{\sigma_k^2} \right ] \\
-\propto&- \half \psi{A_k} - \half \log{B_k} \\
-&+ \psi{(\alpha_{q_{w_{ik}}})}\\
-& - \half \frac{A_k}{B_k} ((x_i - \mu_k)^2 + \sigma^2)\\
-&+ (A_k - 1) \log{\sigma_k^2} - B_k \frac{1}{\sigma_k^2}
+\log{E_{-a_{ik}} \left[ p(x_{ik}, \theta) \right] } 
+    \propto 
+& E_{-a_{ik}} 
+\Big[  
+- \half \log{2 \pi} 
+- \half \log{\sigma_k^2} 
+\\
+& + a_{ik} \log{w_k} 
+& + \log \Gamma(\alpha) 
+  - \log{\Gamma(\alpha)} 
+  + (\alpha - 1)\log{w_k}\\
+& - \half a_{ik}\frac{(x_i - \mu_k)^2}{\sigma_k^2}\\
+& - \half \frac{(\mu_k - \mu_{\mu_k})^2}{\sigma_{\mu_{\mu_k}^2}} 
+\\
+& 
++ A_k \log{B_k} 
++ \log{\Gamma(A_k)} 
+- (A_k - 1) \log{\sigma_k^2} 
+- B_k \frac{1}{\sigma_k^2} \Big] 
+\\
+\propto&E_{-a_{ik}} \left[  
+- \half \log{\sigma_k^2} 
+\right] 
+\\
+& + E_{-a_{ik}}\left[ a_{ik} \log{w_k} \right]
+\\
+& + E_{-a_{ik}}\left[ \log \Gamma(\alpha) - \log{\Gamma(\alpha)} + (\alpha - 1) \log{w_k} \right]
+\\
+& + E_{-a_{ik}}\left[- \half a_{ik} \frac{(x_i - \mu_k)^2}{\sigma_k^2} \right]
+\\
+& + E_{-a_{ik}}\left[- \half \frac{(\mu_k - \mu_{\mu_k})^2}{\sigma_{\mu_{\mu_k}^2}} \right] 
+\\
+&+ E_{-a_{ik}}\left[A_k \log{B_k} + \log{\Gamma(A_k)} - (A_k - 1) \log{\sigma_k^2} - B_k \frac{1}{\sigma_k^2} \right] \\
+\propto
+& - \half \psi{A_k} - \half \log{B_k} 
+\\
+& + \psi{(\alpha_{q_{w_{ik}}})}
+\\
+& - \half \frac{A_k}{B_k} ((x_i - \mu_k)^2 + \sigma^2)
+\\
+& + (A_k - 1) \log{\sigma_k^2} - B_k \frac{1}{\sigma_k^2}
 \end{align*}
 
 A couple of terms at the end, to do with $\sigma_k^2$, are wrong, and I'm not sure quite why.
@@ -409,8 +434,8 @@ Then the lower bound admits the explicit expression
 
 % FIXME: This LaTeX needs to be corrected so that it displays
 \begin{align*}
-\log{p(\vy;\vmuqbeta}, \Sigmaqbeta)} &= \vy^T X \vmuqbeta} -
-	1_n^T \exp{\mX \vmuqbeta} + \half \diag{\mX \Sigmaqbeta X^T}} \\
+\log{p(\vy;\vmuqbeta, \Sigmaqbeta)} &= \vy^T X \vmuqbeta -
+	1_n^T \exp{\mX \vmuqbeta} + \half \diag{\mX \Sigmaqbeta X^T} \\
 &-half (\vmuqbeta - \vmubeta)^T \Sigmaqbeta^{-1} (\mu_{q(\vbeta)} - \vmubeta) -\half \tr{\Sigmabeta^{-1} \Sigmaqbeta}\\
 & + \half \log{|\Sigmaqbeta|} - \half \log{|\Sigmabeta|} + \frac{k + 1}{2}\\
 & -1_n^T \log{y!}
@@ -423,10 +448,16 @@ $\vmu_{q(\vbeta_{n+1})} = \vmu_{q(\vbeta_{n})} + $
 $\theta_{n+1} = \theta_n - \frac{f'(\theta)}{f''(\theta)}$
 
 where
+$$
+\begin{array}{rl}
+\ds \frac{\partial \log{p(\vy; \vmuqbeta, \Sigmaqbeta)}}{\partial \vmuqbeta} 
+    & \ds = y^T X 
+- 1_n^T \exp{\left\{ X \vmuqbeta + \half \diag( X \Sigmaqbeta X^T) \right\}} 
+- (\vmuqbeta - \vmubeta)^T \Sigmabeta^{-1}
+\end{array}
+$$
 
-\begin{align*}
-\frac{\partial \log{p(\vy; \vmuqbeta, \Sigmaqbeta)}}{\partial \vmuqbeta} &= y^T X - 1_n^T \exp{\left { X \vmuqbeta + \half \diag{\text{X \Sigmaqbeta X^T}} \right }} - (\vmuqbeta - \vmubeta)^T \Sigmabeta^{-1}
-\end{align*}
+ 
 
 The function we wish to optimise is $\log p(y) - \log q(y; \theta) = 0$. As $p$ does not 
 depend on the parameters of $q$ as all, and $y$ is constant, we may consider the function to 
