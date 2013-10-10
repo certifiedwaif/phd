@@ -1,9 +1,9 @@
 \documentclass{amsart}
-\newcommand{\Bernoulli}[1]{\text{Bernoulli} \left( #1 \right)}
-\newcommand{\mydigamma}[1]{\psi \left( #1 \right)}
-\def \half {\frac{1}{2}}
 \usepackage{amsmath}
 \usepackage{amssymb}
+
+\input{include.tex}
+
 \begin{document}
 \section{Variational approximations}
 Variational approximations to Bayesian models are an extension of the EM algorithm,
@@ -12,7 +12,7 @@ estimated conditional on all of the other parameters.
 
 \section{\S 21 Variational inference}
 
-From Machine Learning: A Probabilistic Perspective,
+>From Machine Learning: A Probabilistic Perspective,
 
 For some simple two node graphical models, of the form $x \to \mathcal{D}$, we can compute
 the exact posterior $p\vec{x}|\mathcal{D})$ in closed form, provided the prior $p(\vec{x})$ 
@@ -31,12 +31,12 @@ a categorical distribution is a better choice.
 
 In this chapter, we will study a more general class of deterministic approximate inference
 algorithms based on \emph{variational inference} (Jordan et al. 1998; Jaakda and Jordan 
-2000; Jaakkola 2001; Wainwright and Jordan 2008). The basic idea is to pick an approximation
+2000; Jaakkola 2001; Wainwright and Jordan 2008). The basic idea is to select an approximation
 as close as possible to the true posterior,
 $p^{*}(\vec{x}) \text{def} = p(\vec{x}|\mathcal{D})$. This reduces inference to an 
 optimisation problem. By relaxing the constraints and/or approximating the objective, we can
 trade accuracy for speed. The bottom line is that variational inference often gives us the
-speed benefirts of MAP estimation but the statistical benefits of the Bayesian approach.
+speed benefits of MAP estimation but the statistical benefits of the Bayesian approach.
 
 \subsection{\S 21.2 Variational inference}
 
@@ -135,7 +135,7 @@ Let $Y_i|\beta_0, \beta_1, \ldots, \beta_k \sim \Bernoulli{\Psi(\beta_0 + \beta_
 Letting $X = [1 x_{1i} \ldots x_{ki}]$, the likelihood can be written compactly as
 \[
 p(\vec{y}|\vec{\beta}) = \Psi(X \beta)^{\vec{y}} \Psi(1 - \Psi(X \beta))^{\vec{1} - \vec{y}}
-\]]
+\]
 
 Question: Why don't we just optimise $\beta$ directly in this case?
 
@@ -221,13 +221,13 @@ q(a_i) &= TN_{+}(x_i^T \mu_{q(\beta)}, 1), \text{ when } y_i=1 \\
 
 More zeta functions
 \[
-\zeta_k(x) = \frac{\partial^k \log{\Psi(x)}}{\partial x^k}
+\zeta_k(x) = \frac{\partial^k \log{\Phi(x)}}{\partial x^k}
 \]
 
 so
 
 \[
-\zeta_1 = \frac{\psi(x)}{\Psi(x)}
+\zeta_1 = \frac{\phi(x)}{\Phi(x)}
 \]
 
 The $sn$ library calculates this in a numerically stable manner, using continued fractions.
@@ -269,8 +269,8 @@ It follows that the log of the joint likelihood is
 where
 
 \begin{align*}
-\sum_{i=1}^n \sum_{k=1}^K \log{p(x_i|\vec{a_i})} &= \sum_{i=1}^n \sum_{k=1}^K - \half \log{2 \pi} - \half \log{\sigma_k^2} - \half a_{ik} \frac{(x_i - \mu_k)^2}{\sigma_k^2} \\
-&= - \half Kn \log{2 \pi} - \half \sum_{k=1}^K n \log{\sigma_k^2} - \half \sum_{i=1}^n \sum_{k=1}^K a_{ik} \frac{(x_i - \mu_k)^2}{\sigma_k^2}
+\sum_{i=1}^n \sum_{k=1}^K \log{p(x_i|\vec{a_i})} &= \sum_{i=1}^n \sum_{k=1}^K - \half a_{ik} \log{2 \pi} - \half a_{ik} \log{\sigma_k^2} - \half a_{ik} \frac{(x_i - \mu_k)^2}{\sigma_k^2} \\
+&= - \half a_{ik} Kn \log{2 \pi} - \half a_{ik} \sum_{k=1}^K n \log{\sigma_k^2} - \half \sum_{i=1}^n \sum_{k=1}^K a_{ik} \frac{(x_i - \mu_k)^2}{\sigma_k^2}
 \end{align*}
 
 \begin{align*}
@@ -304,22 +304,47 @@ approximation for in turn.
 We start with the mean field update for the indicator variables
 
 \begin{align*}
-\log{E_{-a_{ik}} \left[ p(x_{ik}, \theta) \right] } \propto & E_{-a_{ik}} \left [  - \half  \log{2 \pi} - \half \log{\sigma_k^2} \\
-&+a_{ik} \log{w_k} + \\
-&\log \Gamma(\alpha) - \log{\Gamma(\alpha)} + (\alpha - 1) \log{w_k}\\
-& - \half a_{ik} \frac{(x_i - \mu_k)^2}{\sigma_k^2}\\
-& - \half \frac{(\mu_k - \mu_{\mu_k})^2}{\sigma_{\mu_{\mu_k}^2}} \\
-&+ A_k \log{B_k} + \log{\Gamma(A_k)} - (A_k - 1) \log{\sigma_k^2} - B_k \frac{1}{\sigma_k^2} \right ] \\
-\propto&E_{-a_{ik}} \left [  - \half \log{\sigma_k^2} \right ]\\
-&+ E_{-a_{ik}}\left[ a_{ik} \log{w_k} \right]\\
-&+ E_{-a_{ik}}\left[ \log \Gamma(\alpha) - \log{\Gamma(\alpha)} + (\alpha - 1) \log{w_k} \right]\\
-& + E_{-a_{ik}}\left[- \half a_{ik} \frac{(x_i - \mu_k)^2}{\sigma_k^2} \right]\\
-& + E_{-a_{ik}}\left[- \half \frac{(\mu_k - \mu_{\mu_k})^2}{\sigma_{\mu_{\mu_k}^2}} \right] \\
-&+ E_{-a_{ik}}\left[A_k \log{B_k} + \log{\Gamma(A_k)} - (A_k - 1) \log{\sigma_k^2} - B_k \frac{1}{\sigma_k^2} \right ] \\
-\propto&- \half \psi{A_k} - \half \log{B_k} \\
-&+ \psi{(\alpha_{q_{w_{ik}}})}\\
-& - \half \frac{A_k}{B_k} ((x_i - \mu_k)^2 + \sigma^2) \right\\
-%&+ (A_k - 1) \log{\sigma_k^2} - B_k \frac{1}{\sigma_k^2} \right ]
+\log{E_{-a_{ik}} \left[ p(x_{ik}, \theta) \right] } 
+    \propto 
+& E_{-a_{ik}} 
+\Big[  
+- \half \log{2 \pi} 
+- \half \log{\sigma_k^2} 
+\\
+& + a_{ik} \log{w_k} 
+& + \log \Gamma(\alpha) 
+  - \log{\Gamma(\alpha)} 
+  + (\alpha - 1)\log{w_k}\\
+& - \half a_{ik}\frac{(x_i - \mu_k)^2}{\sigma_k^2}\\
+& - \half \frac{(\mu_k - \mu_{\mu_k})^2}{\sigma_{\mu_{\mu_k}^2}} 
+\\
+& 
++ A_k \log{B_k} 
++ \log{\Gamma(A_k)} 
+- (A_k - 1) \log{\sigma_k^2} 
+- B_k \frac{1}{\sigma_k^2} \Big] 
+\\
+\propto&E_{-a_{ik}} \left[  
+- \half \log{\sigma_k^2} 
+\right] 
+\\
+& + E_{-a_{ik}}\left[ a_{ik} \log{w_k} \right]
+\\
+& + E_{-a_{ik}}\left[ \log \Gamma(\alpha) - \log{\Gamma(\alpha)} + (\alpha - 1) \log{w_k} \right]
+\\
+& + E_{-a_{ik}}\left[- \half a_{ik} \frac{(x_i - \mu_k)^2}{\sigma_k^2} \right]
+\\
+& + E_{-a_{ik}}\left[- \half \frac{(\mu_k - \mu_{\mu_k})^2}{\sigma_{\mu_{\mu_k}^2}} \right] 
+\\
+&+ E_{-a_{ik}}\left[A_k \log{B_k} + \log{\Gamma(A_k)} - (A_k - 1) \log{\sigma_k^2} - B_k \frac{1}{\sigma_k^2} \right] \\
+\propto
+& - \half \psi{A_k} - \half \log{B_k} 
+\\
+& + \psi{(\alpha_{q_{w_{ik}}})}
+\\
+& - \half \frac{A_k}{B_k} ((x_i - \mu_k)^2 + \sigma^2)
+\\
+& + (A_k - 1) \log{\sigma_k^2} - B_k \frac{1}{\sigma_k^2}
 \end{align*}
 
 A couple of terms at the end, to do with $\sigma_k^2$, are wrong, and I'm not sure quite why.
@@ -362,6 +387,82 @@ can rewrite the above terms in the log likelihood as
 -\half \frac{(\mu_k - \mu_{q_{\mu_k}(\mu)})^2}{q_{\mu_k}(\sigma^2)} + k
 \]
 
-where $\mu_{q_{\mu_k}(\mu) = -b$ and $q_{\mu_k}(\sigma^2) = \frac{1}{2a}$
+where $\mu_{q_{\mu_k}}(\mu) = -b$ and $q_{\mu_k}(\sigma^2) = \frac{1}{2a}$
 \subsection{Lower bound}
+
+\section{Poisson Regression with Gaussian Transform}
+\subsection{Parametric Density Transforms}
+Instead of assuming that $q(\theta)$ has a product density structure, we may instead assume
+that it belongs to a particular parametric family and hope that this results in a more
+tractable approximation to the posterior density $p(\vec{\theta}|\vec{y})$.
+
+The first example of this given in Ormerod 2010
+% TODO: Proper references
+is the Poisson Regression model with Gaussian Transform.
+
+Consider the Bayesian Poisson regression model
+\[
+Y_i | \beta_0, \ldots, \beta_k \overset{\text{ind.}}{\sim}  \Poisson{\exp{\vbeta_0 + \vbeta_1 x_{1i} + \ldots + \vbeta_k x_{ki}}}, 1 \leq i \leq n
+\]
+
+% Question: How would you pick which one?
+where the prior distribution on the coefficient vector $\vbeta$ takes the form
+$\vbeta \sim N(\vec{\mu}_{\vbeta}, \vec{\Sigma}_{\vbeta})$. Then the
+likelihood is
+\[
+p(\vec{y}|\vec{\vbeta}) = \exp{\left [ \vy^T \mX \vbeta - \vec{1_n}^T \exp{\mX \vbeta} - \vec{1_n}^T \log{(\vy!)} \right ]}
+\]
+
+and the marginal likelihood is
+\begin{align*}
+p(\vec{y}) =& (2 \pi)^{-(k+1)/2} | \Sigma_{\vbeta}|^{-\half} \times 
+	\int_{\R^{k+1}} \exp{\{ y^T X\vbeta - 1_n^T \exp{(X \vbeta)} - 1_n ^T \log{(y!)}} \\
+		&- \half (\vbeta - \mu_{\vbeta})^T \Sigma_{\vbeta}^{-1} (\vbeta - \mu_{\vbeta}) d \vbeta
+\end{align*}
+
+Note that this integral is clearly intractable, and thus it follows that $p(\vbeta|y)$ is
+also intractable.
+
+Take $q$ to be the $N(\vmuqbeta, \Sigmaqbeta)$ density:
+
+\[
+q(\vbeta; \vmuqbeta, \Sigmaqbeta) = (2 \pi)^{-p/2} | \Sigmaqbeta |^{-\half}
+	\exp{ -\half (\vbeta - \vmuqbeta)^T \Sigmaqbeta^{-1} (\vbeta - \vmuqbeta) }
+\]
+
+Then the lower bound admits the explicit expression
+
+% FIXME: This LaTeX needs to be corrected so that it displays
+\begin{align*}
+\log{p(\vy;\vmuqbeta, \Sigmaqbeta)} &= \vy^T X \vmuqbeta -
+	1_n^T \exp{\mX \vmuqbeta} + \half \diag{\mX \Sigmaqbeta X^T} \\
+&-half (\vmuqbeta - \vmubeta)^T \Sigmaqbeta^{-1} (\mu_{q(\vbeta)} - \vmubeta) -\half \tr{\Sigmabeta^{-1} \Sigmaqbeta}\\
+& + \half \log{|\Sigmaqbeta|} - \half \log{|\Sigmabeta|} + \frac{k + 1}{2}\\
+& -1_n^T \log{y!}
+\end{align*}
+
+The $\mu_{q(\beta)}$ and $\Sigma_{q(\beta)}$ lower bound can be optimised using
+Newton-Raphson of the form:
+
+$\vmu_{q(\vbeta_{n+1})} = \vmu_{q(\vbeta_{n})} + $
+$\theta_{n+1} = \theta_n - \frac{f'(\theta)}{f''(\theta)}$
+
+where
+$$
+\begin{array}{rl}
+\ds \frac{\partial \log{p(\vy; \vmuqbeta, \Sigmaqbeta)}}{\partial \vmuqbeta} 
+    & \ds = y^T X 
+- 1_n^T \exp{\left\{ X \vmuqbeta + \half \diag( X \Sigmaqbeta X^T) \right\}} 
+- (\vmuqbeta - \vmubeta)^T \Sigmabeta^{-1}
+\end{array}
+$$
+
+ 
+
+The function we wish to optimise is $\log p(y) - \log q(y; \theta) = 0$. As $p$ does not 
+depend on the parameters of $q$ as all, and $y$ is constant, we may consider the function to 
+be $k - \log q(y; \theta) = 0$. This function is maximised when the derivative of the
+log of the q-likelihood is 0, so we may use Newton-Raphson updates of the form
+
+
 \end{document}
