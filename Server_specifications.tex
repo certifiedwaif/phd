@@ -1,0 +1,48 @@
+\documentclass{amsart}
+\author{Mark Greenaway}
+\title{Server specifications}
+\begin{document}
+\section{Budget}
+\$15k to \$25k.
+
+\section{CPU}
+We can save some money here - four cores should be fine. There
+are many other machines within the department which have fast
+CPUs. If we need more processing power, we can use those.
+
+\section{Memory}
+A minimum of 128 GB of RAM, of the fastest type that we can buy.
+256 GB of RAM would be better, but it's not essential.
+
+\section{Hard disks}
+At least $12 \times 3$ terabyte hard disks, for a total of 36 terabytes of storage.
+There is a trade-off between rotational speed and storage capacity. From my
+research, I think the best current trade-off for us is 10,000 RPM hard disks.
+
+This is the most important thing, due to the large volumes of data that we
+routinely process. We should focus the majority of our budget on
+getting the fastest, best hard disks that we can. The entire point of
+purchasing this server is to increase our storage capacity, and the
+speed with which we can process the data on that storage.
+
+\section{RAID}
+We have at least two options here:
+
+\begin{enumerate}
+\item A hardware RAID controller that allows us to do striping so that
+we can get good I/O performance.
+\item Software RAID, which the Linux kernel supports.
+\end{enumerate}
+
+\section{Network adapter}
+1 gigabit Ethernet is standard now.
+
+10 gigabit Ethernet would be better, but at present we would have no
+other 10 gigabit Ethernet devices (switches, other servers etc.) to
+connect it to. This should probably be a future upgrade.
+
+\section{Actually, scratch all of that \ldots}
+I met with Ellis, Kashuala and Dario. They liked the idea of Directly Attached
+Storage. Cheaper, simpler and it solves current our problem.
+
+\end{document}
