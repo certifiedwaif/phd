@@ -1,35 +1,44 @@
 \documentclass{amsart}
 \author{Mark Greenaway}
-\title{Server specifications}
+\title{Bioinformatics research group new server specification}
 \begin{document}
+\maketitle
+
 \section{Budget}
-\$15k to \$25k. I think we can get what we need for well under this, probably less than \$10k.
+\$15k to \$25k.
 
-\section{What to buy?}
-Initially I was thinking we should get a new server. But after exploring the options, I
-realised that our current server is fine. We aren't running out of CPU or memory. And if we
-run out of those resources, we can get them later.
+\section{CPU}
+At least 16 or 32 cores in a server seems standard now. Intel processors. The supplier
+can probably help us optimise how to get the best price to performance ratio, but we
+shouldn't go below 2.4 GHz per core.
 
-We just need more disks and faster I/O. I think we should buy Directly Attached Storage, and 
-connect it to our server with a fast SAS (SCSI Across Serial) adapter.
+\section{Memory}
+At least 128 GB of RAM. 256 GB would be better. 1333 MHz or 1600 MHz server RAM.
 
-\subsection{Hard disks}
+\section{Hard disks}
 At least $12 \times 3$ terabyte hard disks, for a total of 36 terabytes of storage.
-There is a trade-off between rotational speed and storage capacity. From my
-research, I think the best current trade-off for us is 10,000 RPM hard disks.
+There is a trade-off between rotational speed and storage capacity. We can probably talk to 
+the supplier about which mix of disks gives us the best performance/price ratio. But we 
+should be getting at least this much storage.
 
-We can probably talk to the supplier about which mix of disks gives us the best 
-performance/price ratio. But we should be getting at least this much storage.
+As long as we can meet our storage requirements, the next thing to optimise for is the
+fastest disks that we can get. This is probably the most important thing in the
+specification, as our code currently spends a lot of time waiting for I/O.
 
-\subsection{RAID}
-We should buy DAS which supports RAID and allows us to configure it flexibly. We should use
-RAID-0 (striping data across all disks). A single hard disk doesn't have a very high transfer
-rate relative to the amounts of data that we have to process, but using RAID-0 or something
-similiar we can be using all of our hard disks in parallel. This will speed things up 
-considerably.
+\section{Disk controller}
+We should also make sure that whatever disk controller is part of the server, it is able
+to keep up with all of the drives that we buy.
 
-\subsection{SAS adapter}
-We will connect the DAS to our existing server using a SAS adapter. As this is a potential
-bottleneck, we should get the fastest one that we can find.
+\section{RAID}
+We need either hardware RAID, or to set RAID up in software. The Linux kernel supports
+RAID in software.  We should use RAID-0 (striping data across all disks). A single hard disk 
+doesn't have a very  high transfer rate relative to the amounts of data that we have to 
+process, but using RAID-0 or something similiar we can be using all of our hard disks in 
+parallel. This will speed I/O up considerably.
+
+\section{Network interface}
+1 gigabit Ethernet is now the entry level standard. 10 gigabit Ethernet would be good to
+future proof us, but we don't currently have any other 10 gigabit Ethernet switches or 
+machines to talk to, so this would be wasted at present.
 
 \end{document}
