@@ -19,7 +19,7 @@ the exact posterior $p\vec{x}|\mathcal{D})$ in closed form, provided the prior $
 is conjugate to the likelihood, $p(\mathcal{D}|\vec{x})$ (which means the likelihood must
 be in the exponential family). See Chapter 5 for some examples of this.
 
-In more general settings, we must use approixmate inference methods. In \S 8.4.1, we
+In more general settings, we must use approximate inference methods. In \S 8.4.1, we
 discussed the Gaussian approximation, which is useful for inference in two node models of
 the form $\vec{x} \to \mathcal{D}$, where the prior is not conjugate. (For example, 
 \S 8.4.3 applied to the method of logistic regression).
@@ -441,28 +441,95 @@ Then the lower bound admits the explicit expression
 & -1_n^T \log{y!}
 \end{align*}
 
-The $\mu_{q(\beta)}$ and $\Sigma_{q(\beta)}$ lower bound can be optimised using
-Newton-Raphson of the form:
-
-$\vmu_{q(\vbeta_{n+1})} = \vmu_{q(\vbeta_{n})} + $
-$\theta_{n+1} = \theta_n - \frac{f'(\theta)}{f''(\theta)}$
-
-where
 $$
-\begin{array}{rl}
-\ds \frac{\partial \log{p(\vy; \vmuqbeta, \Sigmaqbeta)}}{\partial \vmuqbeta} 
-    & \ds = y^T X 
-- 1_n^T \exp{\left\{ X \vmuqbeta + \half \diag( X \Sigmaqbeta X^T) \right\}} 
-- (\vmuqbeta - \vmubeta)^T \Sigmabeta^{-1}
-\end{array}
+\frac{\partial \log{ p(y; \vmuqbeta, \Sigmaqbeta)}}{\partial \vmuqbeta} = y^T X - 1_n^T X \exp{X \vmuqbeta + \half \diag{X \Sigmaqbeta X^T}} - (\vmuqbeta -\vmubeta)^T \Sigmabeta^{-1}
 $$
 
- 
+$$
+\frac{\partial^2 \log{ p(y; \vmuqbeta, \Sigmaqbeta)}}{\partial \vmuqbeta \partial \vmuqbeta^T} = - X^T X \exp{X \vmuqbeta + \half \diag{X \Sigmaqbeta X^T}} - \Sigmabeta^{-1}
+$$
 
-The function we wish to optimise is $\log p(y) - \log q(y; \theta) = 0$. As $p$ does not 
-depend on the parameters of $q$ as all, and $y$ is constant, we may consider the function to 
-be $k - \log q(y; \theta) = 0$. This function is maximised when the derivative of the
-log of the q-likelihood is 0, so we may use Newton-Raphson updates of the form
+The variational update equation for $\vmuqbeta$ is
+\begin{align*}
+\mu &\leftarrow \mu - [-E_q \left [  \left (\frac{\partial^2 \log{ p(y, \theta)}}{\partial \theta \partial \theta^T} \right ) \right ]^{-1}\frac{\partial \log{ p(y; \vmuqbeta, \Sigmaqbeta)}}{\partial \vmuqbeta}\\
+&= \mu + \Sigma \frac{\partial \log{ p(y; \vmuqbeta, \Sigmaqbeta)}}{\partial \vmuqbeta}
+\end{align*}
+
+To calculate the variational update of the covariance matrix,
+we make use of the Fisher information of the likelihood:
+$$
+\Sigma \approx -E_q \left [  \left (\frac{\partial^2 \log{ p(y, \theta)}}{\partial \theta \partial \theta^T} \right ) \right ]
+$$
+
+\section{Logistic regression}
+\subsection{Generalised Linear Models}
+Let $\vy$ be a vector of responses and $\mX$ be a corresponding design matrix. The one-parameter
+exponential family model, with canonical link, is characterized by the joint density
+
+$$
+f(\vy, \vbeta) = \exp{(\vy^T (X\vbeta) -1^T b(X\vbeta) + 1^T c(\vy) )}
+$$
+
+where $\vbeta$ is the vector of coefficients. Choosing $b(x) = \log{(1 + e^x)}$, the logit link, 
+corresponds to binary regression with the canonical link.
+
+\subsection{Logistic regression}
+Formulating our logistic regression model as
+$$
+P(S = 1} X, \vbeta) = g(X \vbeta)
+$$
+where $g(x) = (1 + e^{-x})^{-1}$ is the logistic function, S the binary response variable and $X$
+the design matrix of explanatory covariates. We represent the uncertainty over the parameter values
+$\beta$ via the prior distribution $p(\vbeta)$ which we assume to be Gaussian with a possible
+full covariance structure. Our predictive posterior distribution is therefore
+$$
+P(S|X) = \int p(S|X, \vbeta) p(\vbeta) d \vbeta
+$$
+
+\subsection{Variational approximation}
+The variational approximation to logistic regression relies on a tangent approximation to
+the function $-\log{(1 + e^{-x})}$. We first begin by symmetrising the log logistic function
+
+$$
+\log{g(x)} = - \log{(1 + e^{-x})} = \frac{x}{2} - \log{(e^{x/2} + e^{-x/2})}
+$$
+
+and note that this is a convex function in $x^2$.
+
+Convexity of the function guarantees that any tangent line to the function will always lie below the
+function itself, and thus the function is an upper bound for the collection of all such tangent lines.
+
+Let $L(z;z_0)$ be the tangent line at $z = z_0$. Then
+$$
+L(z;z_0) = f(z_0) + \frac{\partial}{\partial z} f(z)_{z=z_0} (z - z_0)
+$$
+and it follows that $f(z) \geq L(z; z_0)$ for all $z, z_0$ and $f(z_0) = L(z_0; z_0)$. $L(z;z_0)$ is a
+variational lower bound of $f(z)$ where the parameter $z_0$ is known as the \emph{variational parameter}.
+% TODO: Reference Jaakola Jordan 2000 paper.
+Since the lower bound $L(z; z_0)$ is a simple linear function, it is much easier to optimise than the
+non-linear function $f(z)$.
+
+Thus we can bound $f(x)$ above by
+\begin{align*}
+f(x) &\geq f(\xi) + \frac{\partial f(\xi)}{\partial(\xi^2)} (x^2 - \xi^2) \\
+&= -\xi/2 + \log{g(\xi)} + \frac{1}{4 \xi} \tanh{(\xi/2)}(x^2 - \xi^2)
+\end{align*}
+
+Note that this lower bound is exact when $\xi^2 = x^2$. Combining this result with our definition for
+$\log{g(x)}$ above and exponentiating yields the desired variational transformation of the logistic
+function:
+
+% So you have a lower bound that we can maximise.
+\begin{align*}
+P(S|X, \vbeta) &= g(H_S) \\
+&\geq g(\xi) \exp{\left( (H_S - \xi)/2 - \lambda(\xi)(H_S^2 - \xi^2) \right)}
+\end{align*}
+
+where $H_S = (2S - 1)\vbeta^T X$ and $\lambda(\xi) = \tanh{(\xi/2)}/(4 \xi)$.
+
+% Mean field update equations
+
+% EM on \lambda(\xi)
 
 
 \end{document}
