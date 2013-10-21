@@ -47,4 +47,62 @@ table(depb_28)
 # Which variable did they use for Medication 12 mo? There are several
 # variables that look relevant, but I'm not sure which one to use.
 
+# Table 2 Summary of social support by mood disorder ----
+# Mean number of friends and relatives
+summary(as.numeric(ssmb_01))
+# Summary of types of social support
+# Tangible social support
+table(ssmb_21a)
+# Affective support
+table(ssmb_22a)
+# Positive social interactive support
+table(ssmb_23a)
+# Emotional/informational support
+table(ssmb_24a)
+
+# Table 3 Prevalence of specific support by mood disorders ----
+# Tangible social support
+# Has someone to give help if confined to bed
+table(ssmb_02)
+# Has someone to take to doctor
+table(ssmb_05)
+# Has someone to prepare meals
+table(ssmb_12)
+# Has someone to help with daily chores if sick
+table(ssmb_15)
+
+# Emotional or informational support
+# Has someone to listen
+table(ssmb_03)
+# Has someone to give advice about a crisis
+table(ssmb_04)
+# Has someone who gives information to understand a situation
+table(ssmb_08)
+# Has someone to confide in
+table(ssmb_09)
+# Has someone to share most private worries and fears with
+table(ssmb_16)
+# Has someone to turn to for suggestions for personal problems
+table(ssmb_17)
+# Has someone who understands problems
+table(ssmb_19)
+
+# Positive social interaction
+# Has someone to have a good time with
+table(ssmb_07)
+# Has someone to get together with for relaxation
+table(ssmb_11)
+# Has someone to get mind off things
+table(ssmb_14)
+# Has someone to do something enjoyable with
+table(ssmb_18)
+
+# Affective support
+# Has someone who shows love and affection
+table(ssmb_06)
+# Has somsone who gives hugs
+table(ssmb_10)
+# Has someone who loves and makes feel wanted
+table(ssmb_20)
+
 detach()
