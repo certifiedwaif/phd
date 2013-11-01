@@ -1,0 +1,36 @@
+\documentclass{amsart}
+\begin{document}
+\section{Question 3}
+\begin{align*}
+\frac{f(x)}{g(x)} &= \frac{\exp{(-\frac{x^2}{2})}}{\frac{1}{1+x^2}} \\
+&= (1+x^2) \exp{(-\frac{x^2}{2})}
+\end{align*}
+
+Is this bounded? Yes, plot the curves to see this.
+For what value is the bound attained? To find this, we differentiate $f(x)/g(x)$.
+
+\begin{align*}
+\frac{d}{dx} \frac{f(x)}{g(x)} &= (1+x^2)(-x) \exp{(-\frac{x^2}{2})} + 2x \exp{(-\frac{x^2}{2})} \\
+&= (-x -x^3 + 2x)  \exp{(-\frac{x^2}{2})} \\
+&= (x - x^3) \exp{(-\frac{x^2}{2})}
+\end{align*}
+
+Setting this to 0, we see that as the exponential function is positive for any real argument,
+x(1-x^2) must be 0. Hence, $x=0$ or $\pm 1$.
+
+At $x = \pm 1$,
+\begin{align*}
+\frac{f(1)}{g(1)} &= 2 \exp{-\frac{1}{2}} \\
+&= \frac{2}{\sqrt{e}}
+\end{align*}
+
+By appropriately normalising f(x) and g(x), \ldots
+% Normal by sqrt of 2pi, Cauchy by pi
+
+\begin{align*}
+m &= \frac{\sqrt{pi}}{\sqrt{2 \pi}} \frac{2}{\sqrt{e}}\\
+&= \frac{\sqrt{2\pi}}{\sqrt{e}}
+\end{align*}
+
+Remember that in importance sampling, $f(x) \leq m g(x)$.
+\end{document}
