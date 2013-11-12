@@ -527,6 +527,10 @@ P(S|X, \vbeta) &= g(H_S) \\
 
 where $H_S = (2S - 1)\vbeta^T X$ and $\lambda(\xi) = \tanh{(\xi/2)}/(4 \xi)$.
 
+$\lambda(\xi)$ itself depends on $\xi$, so the optimal value of $\xi$ must be found using a modified
+EM algorithm.
+
+
 % Mean field update equations
 
 % EM on \lambda(\xi)
