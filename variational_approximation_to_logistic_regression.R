@@ -28,6 +28,7 @@ xi = rep(.1, n)
 # Mean field update
 stop = FALSE
 ll = -Inf
+iteration = 1
 while (!stop) {
   Sigma_qbeta = solve(solve(Sigma_beta) - 2 * t(X) %*% diag(lambda(xi)) %*% X)
   mu_qbeta = Sigma_qbeta %*% (solve(Sigma_beta) %*% mu_beta + t(X) %*% (y - .5 * ones))
@@ -42,6 +43,7 @@ while (!stop) {
     stop = TRUE
   }
   ll = log_likelihood()
-  print(ll)
+  print(paste(iteration, " ", ll))
+  iteration = iteration + 1
 }
 print(mu_qbeta)
