@@ -527,9 +527,62 @@ P(S|X, \vbeta) &= g(H_S) \\
 
 where $H_S = (2S - 1)\vbeta^T X$ and $\lambda(\xi) = \tanh{(\xi/2)}/(4 \xi)$.
 
-% Mean field update equations
+% Not sure exactly where we're picking up the thread here, but here goes ...
+We make use of this bound and rewrite our equations in vector form to obtain
+$$
+-\half (\vbeta - \vmubeta)^T \Sigmavbeta^{-1} (\vbeta - \vmubeta) + \sum_{i=1}^n x_i^T\vbeta (\vy - \half 1_n) - \lambda(\xi_i) \vbeta^T X X^T \vbeta + \text{const.}
+$$
 
+This is a quadratic in $\vbeta$, and hence the log likelihood of a Gaussian. So the Gaussian
+variational posterior is
+$$
+	q(\vbeta) = N(\vbeta | \mu_{q(\vbeta)}, \Sigma_{q(\vbeta)})
+$$
+
+where $\mu_{q(\beta)} = \Sigma_{q(\vbeta)}(\Sigma_{\vbeta}^{-1} + X^T (\vy - \half 1_n))$
+and $\Sigma_{q(\vbeta)} = \Sigmavbeta^{-1} + 2 \lambda(\xi_i) X X^T$
+
+% Mean field update equations
+To optimise $\lambda(\xi_i)$, we use the EM algorithm.
+
+$$
+\log{p(\vy)} = \int \logp{y|\vbeta} p(\vbeta) d \vbeta \geq \log{\int h(\beta, \xi) p(\vbeta) d \vbeta} = L(\xi)
+$$
+
+Note that $h(\vbeta, \xi) p(\vbeta)$ is the product of two Gaussians, and so is again a
+Gaussian.
+
+% This is the E step.
+\begin{align*}
+Q(\xi, \xi^{\text{old}}) &= E[\log{\{ h(\vbeta, \xi) p(\vbeta) \}}] \\
+&= \sum_{i=1}^n \log{\sigma(\xi_i)} - \xi_i - \lambda(\xi_i)(x_i^T E[\vbeta \vbeta^T] x_i - \xi_i^2) + \text{const.}
+\end{align*}
+
+Note that $E \vbeta \vbeta^T = \Sigma_{q(\vbeta)} + \vmu_{q(\vbeta)} \vmu_{q(\vbeta)}^T
+
+% This is the M-step
+To maximise this, we differentiate with respect to $\xi$ and set to 0.
+
+$$
+\sum_{i=1}^n \frac{\sigma'(\xi_i)}{\sigma(\xi_i)} - 1 + 2 \lambda(\xi_i)(x_i^T E [\vbeta \vbeta^T] x_i - \xi_i^2) = 0
+$$
+
+As $\sigma'(\xi_i) = \frac{d}{d \xi_i} (1 + e^{-\xi_i}) = \left( \frac{e^{-\xi_i}}{1 + e^{-\xi_i}} \right)^{-2}$.
+
+So the above simplifies to
+$$
+\lambda'(\xi_i)(x_i^T E[\vbeta \vbeta^T] x_i - \xi_i^2) = 0
+$$
+
+As $\lambda'(\xi_i) \geq 0$, our equation becomes
+\begin{align}
+(\xi_i^{\text{new}})^2 &= x_i^T E[\vbeta \vbeta^T] x_i \\
+&=x_i^T (\Sigma_{q(\vbeta)} + \vmu_{\vbeta} \vmu_{\vbeta}^T) x_i
+\end{align}
+
+Taking positive square roots on both sides, we obtain our update equation for $\xi_i^{\text{new}}$.
 % EM on \lambda(\xi)
 
+% Where to next? Mixtures of count models.
 
 \end{document}
