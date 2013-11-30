@@ -1,0 +1,73 @@
+\documentclass{amsart}
+\input{include.tex}
+\begin{document}
+% First, simplest zero-inflated count model to consider.
+Consider $X_1, X_2, \ldots, X_n$ where $X_i = R_i Y_i$, $Y_i \sim \Poisson{\lambda}$ independent of
+$R_i \text{indep.} \sim \Bernoulli{\rho}$.
+
+Let $\rho \sim \Unif{0, 1}$, $\lambda \sim \Gamma(a, b)$ and $r_i | \rho \sim \Bernoulli{\rho}$, $1 \leq i \leq n$.
+
+Then the joint likelihood is:
+
+$$
+p(\vx, \vr, \lambda, \rho) = \frac{b^a \lambda^{a - 1} \exp{(-b \lambda)}}{\Gamma{a}} \Pi_{i=1}^n \frac{\exp{(-\lambda r_i)} (\lambda r_i)^{x_i}}{x_i !} \rho^{r_i} (1 - \rho)^{1 - r_i}
+$$
+
+We seek the full conditionals for $\lambda$ and $\rho$.
+
+First, we calculate the full conditional for $\lambda$.
+
+\begin{align*}
+p(\lambda|\vx, \vr, \rho) &= \frac{\Pi_{i=1}^n p(x_i | \lambda, r_i) p(\lambda) p(r_i|\rho) p(\rho)}{\int \Pi_{i=1}^n p(x_i | \lambda, r_i) p(\lambda) p(r_i|\rho) p(\rho)) d \lambda} \\
+\end{align*}
+
+Concentrating for now on the denominator in this expression, we re-arrange and collect
+like terms to obtain
+$$
+\Pi_{i=1}^n \rho^r_i (1 - \rho)^{1 - r_i} \frac{r_i^{x_i}}{x_i !}
+	\int \frac{b^a \lambda^{a - 1} \exp{(-b \lambda)} \lambda^{x_i} \exp{(-\lambda r_i)}}{\Gamma{(a)}} d \lambda
+$$
+
+The integral in this expression is
+\begin{align*}
+& \int \frac{b^a \lambda^{(a + x_i) - 1} \exp{(-\lambda(b + r_i))}}{\Gamma{(a + x_i)}} d \lambda \frac{\Gamma{(a+ x_i)}}{\Gamma{(a)} b^{-x_i}} \\
+=& \frac{\Gamma{(a+ x_i)}}{\Gamma{(a)} b^{-x_i}}
+\end{align*}
+
+Collecting the multiplicands in the integral over $\lambda$ together, we obtain
+$$
+\Pi_{i=1}^n \rho^{r_i} (1 - \rho)^{1 - r_i} \frac{r_i^{x_i}}{x_i!}
+	\int \frac{b^{na + \sum_{i=1}^n x_i} \lambda^{(na + \sum_{i=1}^n x_i) - 1} \exp{(-\lambda(nb + \sum_{i=1}^n r_i))}}{\Gamma{(na + \sum_{i=1}^n x_i)}} d \lambda
+	\frac{\Gamma{(na + \sum_{i=1}^n x_i)}}{\Gamma{(na)} b^{-\sum_{i=1}^n x_i}}
+$$
+
+By cancelling like terms in the numerator and denominator of the full likelihood we arrive 
+at the functional form of the full conditional, which is proportional to
+
+$$
+b^{a+\sum_{i=1}^n x_i} \lambda^{(a + \sum_{i=1}^n x_i) - 1} \exp{(-(b + \sum_{i=1}^n r_i) \lambda)}
+$$
+
+which is clearly seen to be a Gamma distribution. Thus
+$\lambda | \vx, \vr, \rho \sim \Gamma{(a + \sum_{i=1}^n x_i), b + \sum_{i=1}^n r_i)}$
+
+We now turn our attention to the full conditional distribution for $\rho$. Following the same
+technique as above, we first concentrate on the denominator in the full conditional:
+\begin{align*}
+p(\vx, \vr, \lambda) &= \int \frac{b^a \lambda^{a - 1} \exp{(-b \lambda)}}{\Gamma{a}} \Pi_{i=1}^n \frac{\exp{(-\lambda r_i)} (\lambda r_i)^{x_i}}{x_i !} \rho^{r_i} (1 - \rho)^{1 - r_i} d \rho \\
+&= \left(\frac{b^a \lambda^{a - 1} \exp{(-b \lambda)}}{\Gamma{a}} \Pi_{i=1}^n \frac{\exp{(-\lambda r_i)} (\lambda r_i)^{x_i}}{x_i !} \right) \int \rho^{\sum_{i=1}^n r_i} (1 - \rho)^{n - \sum_{i=1}^n r_i} d \rho
+\end{align*}
+
+This integral on the right hand side is a Beta integral with the parameters
+$a = \sum_{i=1}^n r_i + 1$ and $b = (n - \sum_{i=1}^n r_i) + 1$. All of the terms in the numerator and 
+denominator of the full conditional cancel except for
+$$
+\frac{\rho^{\sum_{i=1}^n r_i} (1 - \rho)^{n - \sum_{i=1}^n r_i}}{\Beta{(\sum_{i=1}^n r_i + 1, n - \sum_{i=1}^n r_i + 1)}}
+$$
+
+and thus we see that
+
+$\rho | \vx, \vr, \lambda \sim \Beta{\sum_{i=1}^n r_i + 1, (n - \sum_{i=1}^n r_i) + 1}$.
+
+
+\end{document}
