@@ -1,0 +1,45 @@
+\documentclass{beamer}
+\usepackage{soul}
+\begin{document}
+
+\begin{frame}
+\frametitle{Hard disk apocalypse}
+What have I been doing? Buying and installing new hard disks. Deleting all of Shila's data.
+
+Why? \st{I'm a terrible person. }It was an accident.
+
+How did it happen? We installed and powered up two 4 TB Seagate drives. Then we formatted and made file systems on two 4 TB Seagate drives. Unfortunately, these were not the same two 4 TB Seagate drives that we had just installed.
+\end{frame}
+
+\begin{frame}
+\frametitle{Lessons learned}
+\begin{enumerate}
+\item Know your hardware. Especially know your servers.
+\item Always ensure that when you add new hard disks to a server, it's detected by the BIOS.
+\item If there's a file system already on a hard disk, check what's on it before blowing it away.
+\item Shila has impressive coping skills.
+\item Data recovery tools actually work pretty well, when given a fighting chance.
+\item The University of Sydney has an impressive Internet connection.
+\item Backups? This is like doing a trapeze act with no safety net.
+\end{enumerate}
+\end{frame}
+
+\begin{frame}
+\frametitle{What else have I been doing?}
+The melanoma data has been downloaded again, and is currently being converted from SRA to
+gzipped FASTQ. If not for the gzipping, we would again run out of disk space.
+
+No seg faults yet - touch wood. It should all finish in a couple of days. Then we'll begin 
+mapping.
+
+The bottleneck is the external Seagate disks, which are currently connected with USB 2.0. 
+They can write at about 20 meg./second each.
+
+The disks support USB 3.0, but the server currently doesn't. If we installed a USB 3.0 PCI 
+adapter, they could read and write at more like 150 meg./second each. These cost around 
+\$40, so I think we should get one.
+
+Happy to install it myself. What could possibly go wrong?
+\end{frame}
+
+\end{document}
