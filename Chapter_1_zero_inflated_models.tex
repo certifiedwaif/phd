@@ -69,5 +69,55 @@ and thus we see that
 
 $\rho | \vx, \vr, \lambda \sim \Beta{\sum_{i=1}^n r_i + 1, (n - \sum_{i=1}^n r_i) + 1}$.
 
+% Step Two: Assume q(r_i) = Bernoulli(\rho_i), 1 \leq i \leq n for some known \rho_i. Find the
+% variational Bayes updates of the q-densities q(\lambda) and q(\rho) corresponding to the
+% factorisation
+% q(\vr, \lambda, \rho) = q(\lambda) q(\rho) \sum_{i=1}^n q(r_i)
+
+\subsection{Mean field update equations}
+Assuming that $q^*(r_i) \sim \Bernoulli(p_i)$,
+
+\begin{align*}
+q^*(\lambda) &\propto \lambda^{a+\sum_{i=1}^n x_i - 1} \exp{\{ E_{-q(\lambda)} [-(b + \sum_{i=1}^n r_i) \lambda] \}} \\
+&\propto \lambda^{a+\sum_{i=1}^n x_i - 1} \exp{-(b + \sum_{i=1}^n p_i)\lambda} \\
+&= \myGamma{a+\sum_{i=1}^n x_i, b + \sum_{i=1}^n p_i}
+\end{align*}
+
+and
+
+\begin{align*}
+q^*(\rho) &\propto \exp{\{ E_{-q(\rho)} \sum_{i=1}^n r_i \log{(\rho)} + \sum_{i=1}^n (1- r_i) \log{(1 - \rho)} \}} \\
+&\propto \exp{\{ \sum_{i=1}^n p_i \log{\rho} + \sum_{i=1}^n (1 - p_i) \log{(1 - \rho)} \}} \\
+&\propto \Beta{1+ \sum_{i=1} p_i, n - \sum_{i=1}^n p_i + 1}
+\end{align*}
+
+Turning our attention now to $r_i$, we first note that the relevant terms of the
+log-likelihood are
+
+$$
+-\lambda r_i + x_i \log{r_i} + r_i \log{\frac{\rho}{1 - \rho}}
+$$
+
+Taking expectations with respect to $\lambda$ and $\rho$ we have
+
+$$
+-r_i \frac{\alpha_\lambda^*}{\beta_\lambda^*} + x_i \log{r_i} + r_i (\Psi(\alpha_\rho^*) - \Psi(\beta_\rho^*))
+$$
+
+This log likelihood will be $-\infty$ in the case where $x_i = 0$. Dr John Ormerod hit
+upon the idea of side-stepping this problem by writing the q-likelihood as
+
+$$
+q_{r_i}^*(r_i) \propto r_i^{x_i} \exp{(r_i \eta_i)}
+$$
+
+where $\eta_i = - \frac{\alpha_\lambda^*}{\beta_\lambda^*} + \Psi(\alpha_\rho^*) - \Psi(\beta_\rho^*)$.
+
+Now, either $x_i = 0$ or $x_i \ne 0$.
+
+\begin{align*}
+p_i &= \frac{exp{\eta_i}}{\exp{\eta_i} + I(x_i = 0)} \\
+&= \text{expit}(\eta_i)
+\end{align*}
 
 \end{document}
