@@ -120,4 +120,19 @@ p_i &= \frac{exp{\eta_i}}{\exp{\eta_i} + I(x_i = 0)} \\
 &= \text{expit}(\eta_i)
 \end{align*}
 
+\subsection{Full conditional for $r_i$}
+\begin{align*}
+p(r_i | \text{rest}) \propto \frac{(\lambda r_i)^{x_i} \exp{(-\lambda r_i)}}{x_i !} \rho^{r_i} (1 - \rho)^{1 - r_i} \\
+\propto r_i^{x_i} (e^{-\lambda})^{r_i} \rho^{r_i} (1 - \rho)^{1 - r_i}
+\end{align*}
+
+Once again, we rely upon the fact that if $x_i = 0$, $r_i = 0$, and if $x_i \ne 0$,
+$r_i = 1$. So $x_i^{r_i} = I(x \ne 0)$ and hence the likelihood can be re-written as
+
+\begin{align*}
+p(r_i | \text{rest}) &= \frac{(e^{-\lambda} \rho)^{r_i}}{I(x_i = 0) + (e^{-\lambda} \rho)^{r_i}} \\
+&= \Bernoulli{(\text{expit}(\eta_i))}
+\end{align*}
+where $\eta_i = e^{-\lambda} \rho$.
+
 \end{document}
