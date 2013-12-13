@@ -21,6 +21,7 @@ lambda = mean(x)
 rho = sum(x == 0)/length(x)
 eta = rep(NA, n)
 r = rep(NA, n)
+# Iterate ----
 iterations = 10000
 for (j in 1:iterations) {
   # TODO: You could vectorise the loop below.
@@ -36,6 +37,20 @@ for (j in 1:iterations) {
 }
 
 # Variational approximation ----
+# Initialise ----
+p = rep(.5, n)
+# Iterate ----
+for (i in 1:iterations) {
+  a_lambda = a + sum(x)
+  b_lambda = b + sum(p)
+  a_rho = 1 + sum(p)
+  b_rho = n - sum(p) + 1
+  # TODO: You could vectorise the loop below.
+  for (i in 1:n) {
+    p[i] = - a_lambda/b_lambda + digamma(a_rho) - digamma(b_rho)
+  }
+# TODO: Lower bound? ----
+}
 # Calculate accuracy ----
 # Approximate the L1 norm between the variational approximation and
 # the MCMC approximation
