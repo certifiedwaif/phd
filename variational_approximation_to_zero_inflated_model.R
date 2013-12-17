@@ -22,14 +22,19 @@ rho = sum(x == 0)/length(x)
 eta = rep(NA, n)
 r = rep(NA, n)
 # Iterate ----
+logit = function(p) log(p/(1-p))
 iterations = 10000
 for (j in 1:iterations) {
   # TODO: You could vectorise the loop below.
   for (i in 1:n) {
     zero_ind = as.numeric(x[i]==0)
     nonzero_ind = as.numeric(x[i]!=0)
-    eta[i] = ((exp(-lambda) * rho))/(zero_ind + ((exp(-lambda) * rho)))
-    r[i] = rbinom(1, 1, eta[i])
+    arg = exp(-lambda + logit(rho))
+    eta[i] = arg/(zero_ind + arg)
+    if (x[i] == 0)
+      r[i] = rbinom(1, 1, eta[i])
+    else
+      r[i] = 1
   }
   # head(cbind(x, eta, r), 100)
   lambda = rgamma(1, a + sum(x), b + sum(r))
