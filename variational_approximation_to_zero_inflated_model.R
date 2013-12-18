@@ -1,4 +1,6 @@
 # variational_approximation_to_zero_inflated_model.R
+require(parallel)
+
 # I really have to come up with a better way of naming these ----
 
 # Simulate the data ----
@@ -27,31 +29,38 @@ zero_infl_mcmc = function(iterations)
   rho[1] = sum(x == 0)/length(x)
   eta = rep(NA, n)
   r = rep(NA, n)
+  # Build up a list of the zero observations. We'll only generate
+  # r[i]'s for those. The non-zero observations will always have r[i] = 1.
+  r[x != 0] = 1
+  zero_observation_idx = which(x == 0)
   # Iterate ----
   for (i in 1:iterations) {
-    # TODO: You could vectorise the loop below.
     arg = exp(-lambda[i] + logit(rho[i]))
-    for (j in 1:n) {
-      zero_ind = as.numeric(x[j]==0)
-      if (x[j] == 0) {
-        eta = arg/(zero_ind + arg)
-        r[j] = rbinom(1, 1, eta)
-      }
-      else
-        r[j] = 1
-    }
-    # head(cbind(x, eta, r), 100)
+    eta = arg/(1 + arg)
+    
+    #for (j in 1:length(zero_observation_idx)) {
+    #  r[zero_observation_idx[j]] = rbinom(1, 1, eta)
+    #}
+    r[zero_observation_idx] = rbinom(length(zero_observation_idx), 1, eta) 
     lambda[i+1] = rgamma(1, a + sum(x), b + sum(r))
     rho[i+1] = rbeta(1, sum(r) + 1, n - sum(r) + 1)
   }
   return(list(lambda=lambda, rho=rho))
 }
 
+iterations = 1e6
+burnin = 1e3
+
 start = Sys.time()
-result_mcmc = zero_infl_mcmc(1e3)
+result_mcmc = zero_infl_mcmc(iterations+burnin)
 Sys.time() - start
-# 1000 iterations in 5.440476 seconds. So 200 iterations/second.
-# 1 million iterations would take just under one and a half hours.
+# Throw away burn-in samples.
+# Brackets turn out to be incredibly important here!!!
+result_mcmc$rho = result_mcmc$rho[(burnin+1):(burnin+iterations+1)]
+result_mcmc$lambda = result_mcmc$lambda[(burnin+1):(burnin+iterations+1)]
+
+# FIXME: Why are there NAs?
+# 1000 iterations in 0.07461715 seconds.
 
 # Variational approximation ----
 # Initialise ----
@@ -91,3 +100,18 @@ result_var$a_rho / (result_var$a_rho + result_var$b_lambda)
 # Calculate accuracy ----
 # Approximate the L1 norm between the variational approximation and
 # the MCMC approximation
+density_mcmc_rho = density(result_mcmc$rho)
+integrand = function(x)
+{
+  fn = splinefun(density_mcmc_rho$x, density_mcmc_rho$y)
+  return(abs(fn(x) - dbeta(x, result_var$a_rho, result_var$b_rho)))
+}
+integrate(integrand, min(density_mcmc_rho$x), max(density_mcmc_rho$x), subdivisions = length(density_mcmc_rho$x))
+
+density_mcmc_lambda = density(result_mcmc$lambda)
+integrand = function(x)
+{
+  fn = splinefun(density_mcmc_lambda$x, density_mcmc_lambda$y)
+  return(abs(fn(x) - dgamma(x, result_var$a_lambda, result_var$b_lambda)))
+}
+integrate(integrand, min(density_mcmc_lambda$x), max(density_mcmc_lambda$x), subdivisions = length(density_mcmc_lambda$x))
