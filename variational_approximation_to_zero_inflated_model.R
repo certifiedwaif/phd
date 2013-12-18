@@ -1,4 +1,6 @@
 # variational_approximation_to_zero_inflated_model.R
+require(parallel)
+
 # I really have to come up with a better way of naming these ----
 
 # Simulate the data ----
@@ -27,20 +29,19 @@ zero_infl_mcmc = function(iterations)
   rho[1] = sum(x == 0)/length(x)
   eta = rep(NA, n)
   r = rep(NA, n)
+  # Build up a list of the zero observations. We'll only generate
+  # r[i]'s for those. The non-zero observations will always have r[i] = 1.
+  r[x != 0] = 1
+  zero_observation_idx = which(x == 0)
   # Iterate ----
   for (i in 1:iterations) {
-    # TODO: You could vectorise the loop below.
     arg = exp(-lambda[i] + logit(rho[i]))
-    for (j in 1:n) {
-      zero_ind = as.numeric(x[j]==0)
-      if (x[j] == 0) {
-        eta = arg/(zero_ind + arg)
-        r[j] = rbinom(1, 1, eta)
-      }
-      else
-        r[j] = 1
-    }
-    # head(cbind(x, eta, r), 100)
+    eta = arg/(1 + arg)
+    
+    #for (j in 1:length(zero_observation_idx)) {
+    #  r[zero_observation_idx[j]] = rbinom(1, 1, eta)
+    #}
+    r[zero_observation_idx] = rbinom(length(zero_observation_idx), 1, eta) 
     lambda[i+1] = rgamma(1, a + sum(x), b + sum(r))
     rho[i+1] = rbeta(1, sum(r) + 1, n - sum(r) + 1)
   }
@@ -50,8 +51,7 @@ zero_infl_mcmc = function(iterations)
 start = Sys.time()
 result_mcmc = zero_infl_mcmc(1e3)
 Sys.time() - start
-# 1000 iterations in 5.440476 seconds. So 200 iterations/second.
-# 1 million iterations would take just under one and a half hours.
+# 1000 iterations in 0.07461715 seconds.
 
 # Variational approximation ----
 # Initialise ----
