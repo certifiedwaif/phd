@@ -38,10 +38,11 @@ zero_infl_mcmc = function(iterations)
     arg = exp(-lambda[i] + logit(rho[i]))
     eta = arg/(1 + arg)
     
-    #for (j in 1:length(zero_observation_idx)) {
-    #  r[zero_observation_idx[j]] = rbinom(1, 1, eta)
-    #}
-    r[zero_observation_idx] = rbinom(length(zero_observation_idx), 1, eta) 
+    # Idea: The bottleneck is here. If you could parallelise this section
+    # of code, the speed-ups would be large.
+    # Write the relevant section of code in C with OpenMP?
+    r[zero_observation_idx] = rbinom(length(zero_observation_idx), 1, eta)
+    
     lambda[i+1] = rgamma(1, a + sum(x), b + sum(r))
     rho[i+1] = rbeta(1, sum(r) + 1, n - sum(r) + 1)
   }
@@ -49,7 +50,7 @@ zero_infl_mcmc = function(iterations)
 }
 
 start = Sys.time()
-result_mcmc = zero_infl_mcmc(1e3)
+result_mcmc = zero_infl_mcmc(1e6)
 Sys.time() - start
 # 1000 iterations in 0.07461715 seconds.
 
@@ -91,3 +92,8 @@ result_var$a_rho / (result_var$a_rho + result_var$b_lambda)
 # Calculate accuracy ----
 # Approximate the L1 norm between the variational approximation and
 # the MCMC approximation
+
+rho_mcmc_density = density(result_mcmc$rho)
+rho_var_density = dbeta(a_rho, b_rho)
+
+lambda_mcmc_density = density(result_mcmc$lambda)
