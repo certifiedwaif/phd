@@ -48,9 +48,18 @@ zero_infl_mcmc = function(iterations)
   return(list(lambda=lambda, rho=rho))
 }
 
+iterations = 1e6
+burnin = 1e3
+
 start = Sys.time()
-result_mcmc = zero_infl_mcmc(1e3)
+result_mcmc = zero_infl_mcmc(iterations+burnin)
 Sys.time() - start
+# Throw away burn-in samples.
+# Brackets turn out to be incredibly important here!!!
+result_mcmc$rho = result_mcmc$rho[(burnin+1):(burnin+iterations+1)]
+result_mcmc$lambda = result_mcmc$lambda[(burnin+1):(burnin+iterations+1)]
+
+# FIXME: Why are there NAs?
 # 1000 iterations in 0.07461715 seconds.
 
 # Variational approximation ----
@@ -91,3 +100,18 @@ result_var$a_rho / (result_var$a_rho + result_var$b_lambda)
 # Calculate accuracy ----
 # Approximate the L1 norm between the variational approximation and
 # the MCMC approximation
+density_mcmc_rho = density(result_mcmc$rho)
+integrand = function(x)
+{
+  fn = splinefun(density_mcmc_rho$x, density_mcmc_rho$y)
+  return(abs(fn(x) - dbeta(x, result_var$a_rho, result_var$b_rho)))
+}
+integrate(integrand, min(density_mcmc_rho$x), max(density_mcmc_rho$x), subdivisions = length(density_mcmc_rho$x))
+
+density_mcmc_lambda = density(result_mcmc$lambda)
+integrand = function(x)
+{
+  fn = splinefun(density_mcmc_lambda$x, density_mcmc_lambda$y)
+  return(abs(fn(x) - dgamma(x, result_var$a_lambda, result_var$b_lambda)))
+}
+integrate(integrand, min(density_mcmc_lambda$x), max(density_mcmc_lambda$x), subdivisions = length(density_mcmc_lambda$x))
