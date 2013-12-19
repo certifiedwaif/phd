@@ -17,17 +17,17 @@
 using namespace std;
 using namespace arma;
 
-double digamma(const double x)
+const double digamma(const double x)
 {
 	return gsl_sf_psi(x);
 }
 
-double square(const double x)
+const double square(const double x)
 {
 	return x*x;
 }
 
-vec lgamma(vec x)
+const vec lgamma(const vec x)
 {
 	vec result(x.n_elem);
 
@@ -41,19 +41,16 @@ vec lgamma(vec x)
 #define n 272
 #define K 2
 
-struct FiniteGaussianMixture {
+class FiniteGaussianMixture {
 	vec mu_mu, sigma2_mu, prior_A, prior_B;
 	const double prior_alpha;
 	vec mu, alpha, sigma2, A, B, x;
 	mat v, w;
 
+public:
 	FiniteGaussianMixture(): mu_mu(K), sigma2_mu(K), prior_A(K), prior_B(K), prior_alpha(.1),
 			mu(K), alpha(K), sigma2(K),
 			A(K), B(K), x(n), v(n, K), w(n, K)
-	{
-	}
-
-	void initialise()
 	{
 		initialise_priors();
 		initialise_data();
@@ -130,7 +127,7 @@ struct FiniteGaussianMixture {
 		}
 	}
 
-	const double log_likelihood(void) {
+	const double log_likelihood(void) const {
 		double log_lik;
 
 		log_lik = .5*K*(1 - n*log(2* M_PI)) + lgamma(K*prior_alpha);
@@ -153,21 +150,26 @@ struct FiniteGaussianMixture {
 };
 
 int main(int argc, char **argv) {
-	FiniteGaussianMixture m;
-
 	cout << "Variational approximation to finite Gaussian mixture" << endl;
-	m.initialise();
+
+	// Initialise
+	FiniteGaussianMixture m;
 
 	// Cycle until convergence
 	int iter = 1;
 	double log_likelihood = m.log_likelihood(), last_log_likelihood = -INFINITY;
+
 	while (log_likelihood > last_log_likelihood) {
 		last_log_likelihood = log_likelihood;
-		cout << "Iteration: " << iter << " , log. lik. " << log_likelihood << endl;
+		cout << "Iteration " << iter << ", log. lik. " << log_likelihood << endl;
 		m.cycle();
 		log_likelihood = m.log_likelihood();
 		iter++;
 	}
 
-	return 0;
+	mat::fixed<K, 1> beta;
+	mat::fixed<K, K> beta2;
+	beta2 = beta;
+
+	return EXIT_SUCCESS;
 }
