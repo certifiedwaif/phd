@@ -130,9 +130,41 @@ Once again, we rely upon the fact that if $x_i = 0$, $r_i = 0$, and if $x_i \ne 
 $r_i = 1$. So $x_i^{r_i} = I(x \ne 0)$ and hence the likelihood can be re-written as
 
 \begin{align*}
-p(r_i | \text{rest}) &= \frac{(e^{-\lambda} \rho)^{r_i}}{I(x_i = 0) + (e^{-\lambda} \rho)^{r_i}} \\
+p(r_i | \text{rest}) &= \frac{(e^{-\lambda + \expit{\rho}})^{r_i}}{I(x_i = 0) + (e^{-\lambda + \expit{\rho}})^{r_i}} \\
 &= \Bernoulli{(\text{expit}(\eta_i))}
 \end{align*}
 where $\eta_i = e^{-\lambda} \rho$.
+
+\subsection{Lower bound}
+% The approach that I'm taking is to make use of the trick that John suggested, which is to recognise that
+% the lower bound of the variational approximation is the KL divergence between the full likelihood p and
+% the factor approximation q.
+$$
+KL(q_{r_i}^* || p_{r_I}) = p_i \log{\frac{p_i}{\rho_*}} + (1 - p_i) \log{\frac{1 - p_i}{1 - \rho_*}}
+$$
+
+where $\rho_*$ is the current variational approximation of the parameter $\rho$ for the q-likelihood of
+$\rho$.
+
+$$
+KL(q_{\rho}^* || p_{\rho}) = \log{\frac{B(a, b)}{B(a_*, b_*)}} + (a - a_*) \Psi(a) + (b - b_*) \Psi(b) + (a_* - a + b_* - b) \Psi(a + b)
+$$
+% TODO: Substitute current values of a_{q(\rho)} and b_{q(\rho)} for a_* and b_*
+
+$$
+KL(q_{\lambda}^* || p(\lambda)) = (a_* - a) \Psi(a_*) - \log{\Gamma(a_*)} + \log{\Gamma(a)} + a(\log{b_*} - \log{b}) + \frac{a_*(b_* - b)}{b_*} 
+$$
+% TODO: Substitute current values of a_{q(\lambda)} and b_{q(\lambda)} for a_* and b_*
+
+% Now we come to what I think will be the sticking point: p(x_i | r_i, \lambda, \rho)
+% I think that this is intractable, or will have to be approximated. But we'll see what John says.
+$$
+E_q \log{p(x_i | r_i, \lambda, \rho)} = - \{ \lambda_* (1 - \log{\lambda_*}) + e^{-\lambda_*} \sum_{k=0}^\infty \frac{\lambda_*^k \log{(k!)}}{k!} \}
+$$
+
+For large $\lambda_*$, the expression within the brackets is approximately
+$$
+\half \log{(2 \pi e \lambda_*)} - \frac{1}{12 \lambda_*} - \frac{1}{24 \lambda_*^2} - \frac{19}{360 \lambgda_*^3} + O(\frac{1}{\lambda_*^4})
+$$
 
 \end{document}
