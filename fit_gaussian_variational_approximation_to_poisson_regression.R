@@ -21,6 +21,7 @@ fit_poisson_regression = function(y=y, X=X, df=df, mubeta=mubeta, Sigmabeta=Sigm
     
     muqbeta <- muqbeta + Sigmaqbeta %*% dmuqbeta
     loglik = loglikelihood(y=y, X=X, muqbeta=muqbeta, Sigmaqbeta=Sigmaqbeta, mubeta=mubeta, Sigmabeta=Sigmabeta, prior_sigma2=prior_sigma2)
+    print(last_loglik - loglik)
   }
 }
 
