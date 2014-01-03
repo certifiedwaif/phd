@@ -570,9 +570,9 @@ $$
 As $\sigma'(\xi_i) = \frac{d}{d \xi_i} (1 + e^{-\xi_i}) = \left( \frac{e^{-\xi_i}}{1 + e^{-\xi_i}} \right)^{-2}$.
 
 So the above simplifies to
-$$
+\begin{align*}
 \lambda'(\xi_i)(x_i^T E[\vbeta \vbeta^T] x_i - \xi_i^2) = 0
-$$
+\end{align*}
 
 As $\lambda'(\xi_i) \geq 0$, our equation becomes
 \begin{align}
@@ -582,6 +582,25 @@ As $\lambda'(\xi_i) \geq 0$, our equation becomes
 
 Taking positive square roots on both sides, we obtain our update equation for $\xi_i^{\text{new}}$.
 % EM on \lambda(\xi)
+
+% Lower bound
+\subsection{Lower bound}
+We make use of the EM approximation to bound the likelihood from below.
+
+Recalling from the definition of variational Bayes that the lower bound is
+$$
+E_q [\log p(y, \theta) - \log q(\theta)]
+$$
+we use $Q(\xi, \xi^{old}) = E [\log h(\vbeta, \xi) p(\vbeta)]$ to arrive at
+% To be honest, I'm not totally sure how this works, in that we seem to have
+% just append the EM terms to the end of the log q-likelihood
+% Oh, right. We're saying that \xi has a distribution too, and it's part of the
+% q-likelihood. Got it.
+\begin{align*}
++ \half \log |\Sigma_{q(\vbeta)}| + \half \mu_{q(\vbeta)} ^T \Sigma_{q(\vbeta)} \mu_{q(\vbeta)} \\
+- \half \log |\Sigma_{\vbeta}| - \half \mu_{\vbeta}^T \Sigma_{\vbeta}^{-1} \mu_{\vbeta} \\
++ \sum_{i=1}^{n} \{ \log \sigma(\xi_i) - \half \xi_{i} - \lambda(\xi_{i}) \xi_{i}^2 \}
+\end{align*}
 
 % Where to next? Mixtures of count models.
 
