@@ -1,0 +1,17 @@
+\documentclass{amsart}
+\begin{document}
+Exercise 4:
+\begin{align*}
+\hat{\sigma}^2_{p_1} &= \frac{RSS_{p_1}}{n - p_1} \\
+&= \frac{y^T (I-H_1}y}{n - p_1} \\
+\end{align*}
+
+\begin{align*}
+y = X\beta = X_1 \beta_1 + X_2 \beta_2 + \epsilon \\
+E y = E X_1 \beta_1 + X_2 \beta_2 + \epsilon = X_1 \beta_1 + X_2 \beta_2 \\
+E y^T (I - H_1) y = \frac{E \epsilon^T(I - H_1)\epsilon}{n - p_1} + \frac{E \beta_1 ^T X_1^T (I - H_1) X_1 \beta_1}{n - p_1} + \frac{E \beta_2 ^T X_2^T (I - H_1) X_2 \beta_2}{n - p_1} \\
+&= \sigma^2 + 0 + \frac{\beta^T X^T(I - H_1) X \beta}{n - p_1} \\
+\end{align*}
+
+as required.
+\end{document}
