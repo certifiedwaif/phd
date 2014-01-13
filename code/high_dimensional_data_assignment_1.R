@@ -4,7 +4,7 @@
 require(leaps)
 
 # Generate the test data
-generate_test_data = function(variables=1:5, n=16)
+generate_test_data = function(variables=1:5, n=16, sigma=1)
 {
   # True model:
   beta = c(0.1, 5, 9, 7, 12)
@@ -14,23 +14,11 @@ generate_test_data = function(variables=1:5, n=16)
   }
   
   if (length(variables) == 1) {
-    y = X[,variables] * beta[variables] + rnorm(n, 0, 10)    
+    y = X[,variables] * beta[variables] + rnorm(n, 0, sigma)    
   } else {
-    y = X[,variables] %*% beta[variables] + rnorm(n, 0, 10)
+    y = X[,variables] %*% beta[variables] + rnorm(n, 0, sigma)
   }
   return(list(X=X, y=y))
-}
-
-sigma = function(RSS, n, a)
-{
-  sqrt(RSS/(n-a))
-}
-
-l_n = function(y, X, beta, sigma)
-{
-  #print(beta)
-  k = length(beta)
-  - .5*k * log(2*pi) - k * log(sigma) - .5 * sum((y - X %*% beta)^2)
 }
 
 # Slide 12, lecture 6
@@ -98,90 +86,21 @@ lm.df = function(A,y,X) {
   return(RES)
 }
 
-
 #y = dat2$Bodyfat
 #X = cbind(1L,dat2[,-1])
 #Loss = -2*lm.loglik(A,y,X)
 #Size = apply(A,1,sum)
 
-pick_best_model = function(X, y, vars=4, true_model)
-{
-  # leaps will find the best subset using an exhaustive search
-  # Use the regsubsets function
-  subsets = regsubsets(x=X, y=y, nvmax=vars, nbest=choose(5, vars), method="exhaustive")
-  names(subsets)
-  summ_subsets = summary(subsets)
-  summ_subsets$which
-  dimnames(summ_subsets$which)
-  # TODO: Return true model
-  # true_model = some subset, which one?
-  
-  # Extract the models of interest.
-  models = summ_subsets$which[dimnames(summ_subsets$which)[[1]] == as.character(vars),]
-  models = models[,-1] # Drop the intercept, which is always in
-  # Calculate the measures.
-  aic_v = NULL
-  bic_v = NULL
-  aic_c_v = NULL
-  aic_cstar_v = NULL
-  for (i in 1:dim(models)[1]) {
-    # We don't care about models that don't include the intercept
-    if (models[i,1] == FALSE)
-      next
-    X_subset = cbind(1, X[,models[i,]])
-    fit = lm(y~., data=as.data.frame(X_subset))
-    #beta_ML = coef(fit)[models[i,]]
-    beta_ML = coef(fit)#[models[i,]]
-    print(beta_ML)
-    beta_ML = beta_ML[!is.na(beta_ML)]
-    print(beta_ML)
-    print(models[i,])
-    RSS = sum(residuals(fit)^2)
-    #loglik = logLik(fit)
-    # TODO: Calculate the scale estimator
-    # TODO: Calculate the log likelihood
-    n = length(y)
-    k = vars
-  
-    # AIC: -2 * loglik + 2 * k
-    # BIC: -2 * loglik + log(n) * k
-    # AIC_c: -2 l_n(beta_ML, sigma_0) + 2(p_alpha + 1) (n)/(n - p_alpha - 2)
-    # AIC_c*: -2 l_n(beta_ML, sigma_{p_alpha + 2}) + 2 (p_alpha + 1)
-    #print(beta_ML)
-    print(RSS)
-    aic_v[i] = -2 * l_n(y, X_subset, beta_ML, sigma(RSS, n, k+1)) + 2 * k
-    bic_v[i] = -2 * l_n(y, X_subset, beta_ML, sigma(RSS, n, k+1)) + log(n) * k
-    aic_c_v[i] = -2 * l_n(y, X_subset, beta_ML, sigma(RSS, n, 0)) + (2*(k + 1) * n)/(n - k - 2)
-    aic_cstar_v[i] = -2 * l_n(y, X_subset, beta_ML, sigma(RSS, n, k + 2)) + 2 * (k + 1)
-  }
-  print(aic_v)
-  print(bic_v)
-  print(aic_c_v)
-  print(aic_cstar_v)
-  # Pick the best one according to our measure.
-  best_aic_model = which.min(aic_v)
-  best_bic_model = which.min(bic_v)
-  best_aic_c_model = which.min(aic_c_v)
-  best_aic_cstar_model = which.min(aic_cstar_v)
-  
-  # Did you pick the best one?
-  # In my test case, we always picked the same one. Is something wrong?
-  
-  # TODO: What should I return here?
-  return(list(best_aic_model=best_aic_model,
-              best_bic_model=best_bic_model,
-              best_aic_c_model=best_aic_model,
-              best_aic_cstar_model=best_aic_cstar_model))
-}
-
 pick_best_model2 = function(X, y, k=4, true_model)
 {
   n = length(y)
   A = ASM(5)
+  X = cbind(1, X)
   rss = lm.rss(A, y, X)
   sigma = function(a) sqrt(rss/(n - a))
   df = lm.df(A, y, X)
-  models_we_want = apply(A, 1, sum) %in% 1 + c(1, 3, 4)
+  models_we_want = apply(A, 1, sum) %in% (1 + c(1, 3, 4))
+  print(A[models_we_want])
   rss = rss[models_we_want]
   df = df[models_we_want]
   print(l_n)
@@ -240,7 +159,7 @@ run = function(n=16, vars=4)
   aic_cstar_models = NULL
   for (B in 1:100) {
     # Resample
-    test_data = generate_test_data(variables=true_model, n=16)
+    test_data = generate_test_data(variables=true_model, n=n, sigma=10)
     X = test_data$X
     y = test_data$y
     results = pick_best_model2(X, y, vars, true_model)
@@ -249,13 +168,18 @@ run = function(n=16, vars=4)
     aic_c_models[B] = results$best_aic_c_model
     aic_cstar_models[B] = results$best_aic_cstar_model
   }
-  print(true_model)
+  
+  true_model_row = c(1, 0, 0, 0, 0, 0)
+  true_model_row[true_model+1] = 1
+  print("true_model_row")
+  print(true_model_row)
+  
   return(list(aic_models=aic_models,
               bic_models=bic_models,
               aic_c_models=aic_c_models,
               aic_cstar_models=aic_cstar_models))
 }
-run(n=16, vars=1)
+result = run(n=16, vars=1)
 run(n=64, vars=1)
 run(n=16, vars=3)
 run(n=64, vars=3)
