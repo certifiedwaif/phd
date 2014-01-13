@@ -1,6 +1,7 @@
 # High dimensional data Assignment 1 Problem 2.R
 # Simulate data from a linear regression model with p_alpha_f = 5 and
 # n = 16 and n = 64.
+require(leaps)
 
 # Generate the test data
 generate_test_data = function(variables=1:5, n=16)
@@ -15,57 +16,78 @@ generate_test_data = function(variables=1:5, n=16)
   return(list(X=X, y=y))
 }
 
-sigma_a = function(y, yhat, a)
+sigma = function(RSS, n, a)
 {
-  n = length(y)
-  rss = sum((y - yhat)^2)
-  return(sqrt(rss/(n - a)))
+  sqrt(RSS/(n-a))
 }
 
-# Probably a better idea to use the log likelihood functions built into
-# R.
-log_lik = function(X, y, beta, sigma)
+l_n = function(y, X, beta, sigma)
 {
-  residuals = y - X %*% beta
-  return(sum(log(pnorm(residuals, 0, sigma^2))))
+  k = length(beta)
+  - .5*k * log(2*pi) - k * log(sigma) - .5 * sum((y - X %*% beta)^2)
 }
 
-l_n = function(y, X, theta_a)
-# theta_a is implicit in the X matrix which is passed.  
+pick_best_model = function(X, y, vars=4, true_model)
 {
-  # Fit a linear model to y using the model in theta_a. Return the
-  # log likelihood of the model.
-  data_tmp = as.data.frame(cbind(1, X))
-  fit = lm(y~., data=data_tmp)
-  return(logLik(fit))
-}
-
-# leaps will find the best subset using an exhaustive search
-# Use the regsubsets function
-
-# AIC
-aic = function(loglik, n, k)
-{
-  -2 * loglik + 2 * k
-}
-
-# BIC
-bic = function(loglik, n, k)
-{
-  -2 * loglik + log(n) * k  
-}
-
-# AIC_c
-aic_c = function(loglik, n, k)
-{
-  # AIC with a finite sample correction
-  aic(loglik, n, k) + (2*k*(k+1))/(n - k - 1)
-}
-
-# AIC_c^*
-aic_cstar = function(loglik, n, k)
-{
-  # ???
+  # leaps will find the best subset using an exhaustive search
+  # Use the regsubsets function
+  subsets = regsubsets(x=X, y=y, nvmax=vars, nbest=2^vars, method="exhaustive")
+  names(subsets)
+  summ_subsets = summary(subsets)
+  summ_subsets$which
+  dimnames(summ_subsets$which)
+  # TODO: Return true model
+  # true_model = some subset, which one?
+  
+  # Extract the models of interest.
+  models = summ_subsets$which[dimnames(summ_subsets$which)[[1]] == as.character(vars),]
+  models = models[,-1] # Drop the intercept, which is always in
+  # Calculate the measures.
+  aic_v = NULL
+  bic_v = NULL
+  aic_c_v = NULL
+  aic_cstar_v = NULL
+  for (i in 1:dim(models)[1]) {
+    if (models[i,1] == FALSE)
+      next
+    fit = lm(y~X[,models[i,]])
+    theta = coef(fit)
+    data_tmp = as.data.frame(cbind(1, X[,models[i,]]))
+    fit = lm(y~., data=data_tmp)
+    beta_ML = coef(fit)[models[i,]]
+    #print(models[i,])
+    #print(beta_ML)
+    RSS = sum(residuals(fit)^2)
+    #loglik = logLik(fit)
+    # TODO: Calculate the scale estimator
+    # TODO: Calculate the log likelihood
+    n = length(y)
+    k = vars
+  
+    # AIC: -2 * loglik + 2 * k
+    # BIC: -2 * loglik + log(n) * k
+    # AIC_c: -2 l_n(beta_ML, sigma_0) + 2(p_alpha + 1) (n)/(n - p_alpha - 2)
+    # AIC_c*: -2 l_n(beta_ML, sigma_{p_alpha + 2}) + 2 (p_alpha + 1)
+    
+    aic_v[i] = -2 * l_n(y, X, beta_ML, sigma(RSS, n, 0)) + 2 * k
+    bic_v[i] = -2 * l_n(y, X, beta_ML, sigma(RSS, n, 0)) + log(n) * k
+    aic_c_v[i] = -2 * l_n(y, X, beta_ML, sigma(RSS, n, 0)) + (2*(k + 1) * n)/(n - k - 2)
+    aic_cstar_v[i] = -2 * l_n(y, X, beta_ML, sigma(RSS, n, k + 2)) + 2 * (k + 1)
+  }
+  # Pick the best one according to our measure.
+  best_aic_model = which.min(aic_v)
+  best_bic_model = which.min(bic_v)
+  best_aic_c_model = which.min(aic_c_v)
+  best_aic_cstar_model = which.min(aic_cstar_v)
+  
+  # Did you pick the best one?
+  # In my test case, we always picked the same one. Is something wrong?
+  
+  # TODO: What should I return here?
+  return(list(best_aic_model=best_aic_model,
+              best_bic_model=best_bic_model,
+              best_aic_c_model=best_aic_model,
+              best_aic_cstar_model=best_aic_cstar_model))
 }
 
 # Consider data generating models with one, three and four non-zero parameters.
@@ -73,39 +95,21 @@ aic_cstar = function(loglik, n, k)
 # Pick a subset of the five variables. Generate test data using that subset.
 # Then enumerate all possible sub-models and generate them. See which
 # is selected by the AIC etc.
-variables = sort(sample(1:5, 4))
-test_data = generate_test_data(variables=variables, n=16)
-
-# Calculate these model selection measures and use them to rank models
-# Pick the best one
-X = test_data$X
-y = test_data$y
-subsets = regsubsets(x=X, y=y, nvmax=4, nbest=2^4, method="exhaustive")
-names(subsets)
-summ_subsets = summary(subsets)
-summ_subsets$which
-dimnames(summ_subsets$which)
-# Extract the models of interest.
-models = summ_subsets$which[dimnames(summ_subsets$which)[[1]] == "4",]
-models = models[,-1] # Drop the intercept, which is always in
-# Calculate the measures.
-aic_v = NULL
-bic_v = NULL
-aic_c_v = NULL
-for (i in 1:dim(models)[1]) {
-  fit = lm(y~X[,models[i,]])
-  theta = coef(fit)
-  data_tmp = as.data.frame(cbind(1, X[,models[i,]]))
-  fit = lm(y~., data=data_tmp)
-  loglik = logLik(fit)
-  n = length(y)
-  k = 4
-
-  aic_v[i] = aic(loglik, n, k)
-  bic_v[i] = bic(loglik, n, k)
-  aic_c_v[i] = aic_c(loglik, n, k)
-}
-# Pick the best one according to our measure.
 
 # Idea: Use regsubsets to calculate many of the models. Then calculate the
 # AIC/BIC etc. for all of them, and select the best one yourself.
+
+# Calculate these model selection measures and use them to rank models
+# Pick the best one
+
+# TODO: One, three and four non-zero regression parameters.
+# Bootstrap of 1000 runs.
+true_model = sort(sample(1:5, 4))
+result = NULL
+for (B in 1:10) {
+  # Resample
+  test_data = generate_test_data(variables=true_model, n=16)
+  X = test_data$X
+  y = test_data$y
+  result = pick_best_model(X, y, 4, true_model)
+}
