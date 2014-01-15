@@ -100,13 +100,13 @@ pick_best_model2 = function(X, y, k=4, true_model)
   sigma = function(a) sqrt(rss/(n - a))
   df = lm.df(A, y, X)
   models_we_want = apply(A, 1, sum) %in% (1 + c(1, 3, 4))
-  print(A[models_we_want])
+  #print(A[models_we_want])
   rss = rss[models_we_want]
   df = df[models_we_want]
-  print(l_n)
-  print(rss)
-  print(df)
-  print(A[models_we_want,])
+  #print(l_n)
+  #print(rss)
+  #print(df)
+  #print(A[models_we_want,])
   
   # Calculate the measures.
   p = df - 1
@@ -115,10 +115,10 @@ pick_best_model2 = function(X, y, k=4, true_model)
   aic_c_v = 2 * n * log(sigma(0)) + .5 * n + (2*(p + 1) * n)/(n - p - 2)
   aic_cstar_v = 2 * n * log(sigma(p + 2)) + .5 * (n - (p + 2)) + 2 * (p + 1)
   
-  print(aic_v)
-  print(bic_v)
-  print(aic_c_v)
-  print(aic_cstar_v)
+  #print(aic_v)
+  #print(bic_v)
+  #print(aic_c_v)
+  #print(aic_cstar_v)
 
   # Pick the best one according to our measure.
   best_aic_model = which.min(aic_v)
@@ -133,7 +133,8 @@ pick_best_model2 = function(X, y, k=4, true_model)
   return(list(best_aic_model=best_aic_model,
               best_bic_model=best_bic_model,
               best_aic_c_model=best_aic_model,
-              best_aic_cstar_model=best_aic_cstar_model))
+              best_aic_cstar_model=best_aic_cstar_model,
+              A=A[models_we_want,]))
 }
 
 # Consider data generating models with one, three and four non-zero parameters.
@@ -150,16 +151,16 @@ pick_best_model2 = function(X, y, k=4, true_model)
 
 # TODO: One, three and four non-zero regression parameters.
 # Bootstrap of 1000 runs.
-run = function(n=16, vars=4)
+run = function(MAX_B=1000, n=16, vars=4, sigma=1)
 {
   true_model = sort(sample(1:5, vars))
   aic_models = NULL
   bic_models = NULL
   aic_c_models = NULL
   aic_cstar_models = NULL
-  for (B in 1:100) {
+  for (B in 1:MAX_B) {
     # Resample
-    test_data = generate_test_data(variables=true_model, n=n, sigma=10)
+    test_data = generate_test_data(variables=true_model, n=n, sigma=sigma)
     X = test_data$X
     y = test_data$y
     results = pick_best_model2(X, y, vars, true_model)
@@ -167,21 +168,57 @@ run = function(n=16, vars=4)
     bic_models[B] = results$best_bic_model
     aic_c_models[B] = results$best_aic_c_model
     aic_cstar_models[B] = results$best_aic_cstar_model
+    A = results$A
   }
   
   true_model_row = c(1, 0, 0, 0, 0, 0)
   true_model_row[true_model+1] = 1
   print("true_model_row")
   print(true_model_row)
+  true_model_number = NA
+  for (row in 1:dim(A)[1]) {
+    if (all(A[row,] == true_model_row))
+      true_model_number = row
+  }
   
+  prop_true_model_aic = sum(as.numeric(aic_models==true_model_number))/MAX_B
+  prop_true_model_bic = sum(as.numeric(bic_models==true_model_number))/MAX_B
+  prop_true_model_aic_c = sum(as.numeric(aic_c_models==true_model_number))/MAX_B
+  prop_true_model_aic_cstar = sum(as.numeric(aic_cstar_models==true_model_number))/MAX_B
+    
   return(list(aic_models=aic_models,
               bic_models=bic_models,
               aic_c_models=aic_c_models,
-              aic_cstar_models=aic_cstar_models))
+              aic_cstar_models=aic_cstar_models,
+              A=A,
+              true_model_row=true_model_row,
+              true_model_number=true_model_number,
+              prop_true_model_aic=prop_true_model_aic,
+              prop_true_model_bic=prop_true_model_bic,
+              prop_true_model_aic_c=prop_true_model_aic_c,
+              prop_true_model_aic_cstar=prop_true_model_aic_cstar))
 }
-result = run(n=16, vars=1)
-run(n=64, vars=1)
-run(n=16, vars=3)
-run(n=64, vars=3)
-run(n=16, vars=4)
-run(n=64, vars=4)
+
+display = function(result, pdf_filename)
+{
+  pdf(pdf_filename)
+  par(mfrow=c(2, 2))
+  hist(result$aic_models, main="AIC models selected")
+  hist(result$bic_models, main="BIC models selected")
+  hist(result$aic_c_models, main="AIC C models selected")
+  hist(result$aic_cstar_models, main="AIC C* models selected")
+  dev.off()
+}
+
+result = run(n=16, vars=1, sigma=1.5)
+display(result, "sixteen_samples_one_var_hist.pdf")
+result = run(n=64, vars=1, sigma=1.5)
+display(result, "sixty_four_samples_one_var_hist.pdf")
+result = run(n=16, vars=3, sigma=1.5)
+display(result, "sixteen_samples_three_vars_hist.pdf")
+result = run(n=64, vars=3, sigma=1.5)
+display(result, "sixty_four_samples_three_vars_hist.pdf")
+result = run(n=16, vars=4, sigma=1.5)
+display(result, "sixteen_samples_four_vars_hist.pdf")
+result = run(n=64, vars=4, sigma=1.5)
+display(result, "sixty_four_samples_four_vars_hist.pdf")
