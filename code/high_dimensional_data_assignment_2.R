@@ -43,60 +43,128 @@ ASM = function(k.s,intcpt = TRUE)
   return(A[order(apply(A,1,sum)),])
 } # end ASM function
 
-find_best_model = function(A, y, X, method="lm")
+fit_model = function(y, X, regression_method="lm")
 {
-  n = length(y)
-  M = NULL
-  #print(X)
-  #print(A)
-  for (model_num in 1:dim(A)[1]) {
-    print("model_num")
-    print(model_num)
-    #print(A[model_num,])
-    print(A[model_num,]*1:3)
-    columns = A[model_num,]*1:3
-    columns = columns[columns != 0]
-    X_alpha = X[,columns]
-    #print(X_alpha)
-    #print(dim(X_alpha))
-    #print(X_alpha)
-    if (method == "lm") {
-      fit = lm(y~X_alpha)
-    }
-    if (method == "MM") {
-      fit = rlm(X_alpha, y, method="MM")
-    }
-    resid = residuals(fit)
-    print(sum(resid^2))
-    sigma = MAD(resid)
-    p = sum(A[model_num,]) - 1
-    M[model_num] = sum(rho(resid))/sigma + log(n) * p
+  if (regression_method == "lm") {
+    fit = lm(y~X)
   }
-  print(M)
-  return(which.min(M))
+  if (regression_method == "MM") {
+    fit = rlm(X, y, method="MM")
+  }
+  resid = residuals(fit)
+  return(list(resid=resid, sigma=MAD(resid), coef=coef(fit)))
 }
 
-main = function(method="lm")
+M_1 = function(result)
 {
-  dat = data_set()
-  y = dat[,1]
-  X = cbind(1, dat[,2:3])
-  
-  A = ASM(2)
-  A = A[2:4,] # Exclude the intercept model
-  model_selected = NULL
+  resid = result$resid
+  sigma = result$sigma
+  n = result$n
+  p = result$p
+  (sum(rho(resid))/sigma + log(n) * p)/n
+}
+
+M_2 = function(y, X, m=16, regression_method="lm")
+{
+  n = length(y)
+  M_2 = NULL
+  # Bootstrap for M_2
   for (B in 1:100) {
-    bootstrap_rows = sample(1:64, 64, replace=TRUE)
+    bootstrap_rows = sample(1:64, m, replace=TRUE)
     bootstrap_y = y[bootstrap_rows]
     bootstrap_X = X[bootstrap_rows,]
     
-    model_selected[B] = find_best_model(A, bootstrap_y, as.matrix(bootstrap_X),
-                                        method=method)
+    model_result = fit_model(bootstrap_y, as.matrix(bootstrap_X),
+                                        regression_method=regression_method)
+
+    beta_star_vec = model_result$coef
+    beta_star_vec = beta_star_vec[!is.na(beta_star_vec)]
+    beta_star = matrix(beta_star_vec, nrow=length(beta_star_vec), ncol=1)
+
+    #resid = model_result$resid
+    #sigma = model_result$sigma
+    print(dim(y))
+    print(dim(X))
+    print(dim(beta_star))
+    print(beta_star)
+    #browser()
+    
+    resid = y - X %*% beta_star
+    sigma = MAD(resid)
+    M_2[B] = sum(rho(resid/sigma)) # Bootstrapped version
   }
-  return(model_selected)
+  return(sum(M_2)/(n*B)) # Should you be dividing by m here?
+  #return(sum(M_2)/(m*B))
+  # Not quite. Get the coefficient. Then apply that to the entire data set.
 }
-model_selected_lm = main(method="lm")
-model_selected_MM = main(method="MM")
-par(mfrow=c(2, 1))
-hist(model_selected_lm)
-hist(model_selected_MM)
+
+main = function()
+{
+  m = c(16, 24, 32, 64)
+  dat = data_set()
+  y = dat[,1]
+  X = cbind(1, dat[,2:3])
+
+  A = ASM(2)
+  A = A[2:4,] # Exclude the intercept model
+  
+  M_1_lm = NULL
+  M_1_MM = NULL
+  M_2_lm_16 = NULL
+  M_2_MM_16 = NULL
+  M_2_lm_24 = NULL
+  M_2_MM_24 = NULL
+  M_2_lm_32 = NULL
+  M_2_MM_32 = NULL
+  M_2_lm_64 = NULL
+  M_2_MM_64 = NULL
+  M_lm = NULL
+  M_MM = NULL
+  
+  for (model_num in 1:dim(A)[1]) {
+    #print("model_num")
+    #print(model_num)
+    #print(A[model_num,])
+    columns = A[model_num,]*1:3
+    columns = sort(columns[columns != 0])
+    #print(columns)
+    X_alpha = as.matrix(X[,columns])
+    n = length(y)
+    p = sum(A[model_num,])    
+    
+    lm_result = fit_model(y, X_alpha, regression_method="lm")
+    lm_result = c(lm_result, n=n, p=p)
+    M_1_lm[model_num] = M_1(lm_result)
+    
+    MM_result = fit_model(y, X_alpha, regression_method="MM")
+    MM_result = c(MM_result, n=n, p=p)
+    M_1_MM[model_num] = M_1(MM_result)
+
+    # For M_2 we need to bootstrap
+    M_2_lm_16[model_num] = M_2(y, X_alpha, m=16, regression_method="lm")
+    M_2_MM_16[model_num] = M_2(y, X_alpha, m=16, regression_method="MM")
+    M_2_lm_24[model_num] = M_2(y, X_alpha, m=24, regression_method="lm")
+    M_2_MM_24[model_num] = M_2(y, X_alpha, m=24, regression_method="MM")
+    M_2_lm_32[model_num] = M_2(y, X_alpha, m=32, regression_method="lm")
+    M_2_MM_32[model_num] = M_2(y, X_alpha, m=32, regression_method="MM")
+    M_2_lm_64[model_num] = M_2(y, X_alpha, m=64, regression_method="lm")
+    M_2_MM_64[model_num] = M_2(y, X_alpha, m=64, regression_method="MM")    
+    # As the bootstrap sample size increases, M2 goes down. Why?
+    
+    M_lm[model_num] = MAD(M_1_lm[model_num] + M_2_lm_16[model_num])    
+    M_MM[model_num] = MAD(M_1_MM[model_num] + M_2_MM_16[model_num])    
+  }
+  return(list(M_1_lm=M_1_lm,
+              M_1_MM=M_1_MM,
+              M_2_lm_16=M_2_lm_16,
+              M_2_MM_16=M_2_MM_16,
+              M_2_lm_24=M_2_lm_24,
+              M_2_MM_24=M_2_MM_24,
+              M_2_lm_32=M_2_lm_32,
+              M_2_MM_32=M_2_MM_32,
+              M_2_lm_64=M_2_lm_64,
+              M_2_MM_64=M_2_MM_64,
+              M_lm=M_lm,
+              M_MM=M_MM))
+}
+main()
