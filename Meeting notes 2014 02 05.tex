@@ -1,0 +1,52 @@
+\documentclass{amsart}
+\begin{document}
+I had just returned from a month at the AMSI Summer School, so there had been no progress since this time.
+
+\section{Shila's project}
+Ask Shila where she is with her project, and if she still needs help from you.
+
+\section{Nancy's bipolar data}
+John did a lot of work on this while he was on ``holiday''. He broke the data set into two subsets,
+those with Bipolar12, and those with Depression. He then analysed the Alchohol interference
+at 12 months in these two subsets. The Alcohol interference field contains
+1 Yes
+0 No, not applicable
+NA Not stated
+
+John analysed the data using logistic regression and classification trees.
+He included the sociodemographic variables age, gender, employment and education.
+The important variables that he identified were:
+drinking to cope - 3, sometimes or often
+smoking
+drinking $\times$ emotional support
+There are positive main effects for emotional support and drinking, but a negative
+interaction between emotional support and drinking, which is counterintuitive.
+
+There is also an interesting interaction between age and tangible support,
+where if age was low and tangible support was available, alchohol interference
+was more likely.
+
+Exercise and sleep were also important.
+
+\subsection{To Do}
+Check over what John has done, and think about how to continue it. Think about how to incorporate survey weighting.
+
+\section{Approximate inference}
+Collapsed Variational Bayes 2010 applied to Hidden Markov Models, Latent Dictionary Analysis. John would like to apply this
+technique to Gaussian mixture models, and see if there's any advantage to the factored variational approximation to
+Gaussian mixture models.
+
+Marginal Variational Bayes 2012
+
+Stochastic Variational Bayes $q(\theta; \xi)$. This leads to stochastic approximation - control variate,
+gradient descent, BFGS approaches. BFGS approaches use the gradient to approximate the inverse of the
+Hessian. The standard method of calculating an inverse takes $O(p^3)$, whereas this takes $O(p^2)$.
+
+This method allows you to produce a sequence which solves
+$$
+\text{min}_{\xi} E_{\theta} f(\theta; \xi)
+$$
+
+without having to evaluate the underlying integral.
+
+\end{document}
