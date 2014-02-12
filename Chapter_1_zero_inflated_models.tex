@@ -153,35 +153,60 @@ p_i &= \frac{exp{\eta_i}}{\exp{\eta_i} + I(x_i = 0)} \\
 \end{align*}
 
 \subsection{Lower bound}
-% The approach that I'm taking is to make use of the trick that John suggested, which is to recognise that
-% the lower bound of the variational approximation is the KL divergence between the full likelihood p and
-% the factor approximation q.
+The lower bound $\log{p(x;q)}$ is
 $$
-KL(q_{r_i}^* || p_{r_I}) = p_i \log{\frac{p_i}{\rho_*}} + (1 - p_i) \log{\frac{1 - p_i}{1 - \rho_*}}
+	E_q[\log{p(\theta)} - \log{q(\theta)}]
 $$
 
-where $\rho_*$ is the current variational approximation of the parameter $\rho$ for the q-likelihood of
-$\rho$.
+In this case, $q(\lambda) \sim \text{Gamma}{a_q, b_q}$,
+$q(\rho) \sim \text{Beta}(\alpha_q, \beta_q)$ and
+$q(r_i) = 1$ if $x_i \ne 0$, and $p_i$ if $x_i = 0$, where $p_i$ is
+calculated for each iteration as specified above.
+
+In this case, the lower bound is simple enough to calculate directly.
+\begin{align*}
+E_q \log{p(x, r, \lambda, \rho)} - E_q \log{q(r, \lambda, \rho)} &= a \log{b} + (a-1) E[\log{\lambda}] - b E[\lambda] - \log{\Gamma{(a)}} \\
+& + \sum_{i=1}^n \(-E [ \lambda \] E(r_i) + E [x_i \log{\lambda r_i}] - \log{x_i!} + E [r_i] E[\log(\rho)] + E [(1-r_i)] E[\log{1 - \rho}] \) \\
+& - \log{q(r)} - \log{q(\lambda)} - \log{q(\rho)}
+\end{align*}
+
+where
 
 $$
-KL(q_{\rho}^* || p_{\rho}) = \log{\frac{B(a, b)}{B(a_*, b_*)}} + (a - a_*) \Psi(a) + (b - b_*) \Psi(b) + (a_* - a + b_* - b) \Psi(a + b)
+E [\log{\lambda}] = -\{ a_q - \log{b_q} + \log{\gamma(a_q)} + (1 - a_q) \Psi{a_q} \}
 $$
-% TODO: Substitute current values of a_{q(\rho)} and b_{q(\rho)} for a_* and b_*
+$$
+E [\lambda] = \frac{a_q}{b_q}
+$$
+$$
+\[
+E[r_i] = 
+	\begin{cases}
+	1 & \text{if } x_i \ne 0 \\
+	p_i & \text{if } x_i = 0 \\
+	\end{cases}
+\]
+$$
+$$
+E[\log{\rho}] = - \{ \log{B(a_q, b_q)} - (\alpha_q - 1) \psi{a_q} - (\beta_q - 1)\Psi{\beta_q} + (\alpha_q + \beta_q - 2)\Psi{\alpha_q + \beta_q} \}
+$$
+
+By symmetry, we see that $(1 - \rho)$ has the same entropy as $\rho$.
 
 $$
-KL(q_{\lambda}^* || p(\lambda)) = (a_* - a) \Psi(a_*) - \log{\Gamma(a_*)} + \log{\Gamma(a)} + a(\log{b_*} - \log{b}) + \frac{a_*(b_* - b)}{b_*} 
+-E_q \log{q(r)} = \sum_{i=1}^n \[
+\begin{cases}
+0&\text{if } x_i \ne 0\\
+\log{p_i}&\text{if } x_i = 0\\
+\end{cases}
+\]
 $$
-% TODO: Substitute current values of a_{q(\lambda)} and b_{q(\lambda)} for a_* and b_*
+$$
+-E_q \log{q(\lambda)} = q_q^* - \log{b_q^*} + \log{\Gamma{a_q^*}} + (1 - a_q^*) \Psi{(a_q^*)}
+$$
 
-% Now we come to what I think will be the sticking point: p(x_i | r_i, \lambda, \rho)
-% I think that this is intractable, or will have to be approximated. But we'll see what John says.
 $$
-E_q \log{p(x_i | r_i, \lambda, \rho)} = - \{ \lambda_* (1 - \log{\lambda_*}) + e^{-\lambda_*} \sum_{k=0}^\infty \frac{\lambda_*^k \log{(k!)}}{k!} \}
-$$
-
-For large $\lambda_*$, the expression within the brackets is approximately
-$$
-\half \log{(2 \pi e \lambda_*)} - \frac{1}{12 \lambda_*} - \frac{1}{24 \lambda_*^2} - \frac{19}{360 \lambda_*^3} + O(\frac{1}{\lambda_*^4})
+E[\log{q(\rho)}] = - \{ \log{B(a_q^*, b_q^*)} - (\alpha_q^* - 1) \psi{a_q^*} - (\beta_q^* - 1)\Psi{\beta_q^*} + (\alpha_q^* + \beta_q^* - 2)\Psi{\alpha_q^* + \beta_q^*} \}
 $$
 
 \end{document}

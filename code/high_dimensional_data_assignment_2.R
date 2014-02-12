@@ -18,7 +18,7 @@ data_set = function()
 
 MAD = function(x)
 {
-  sum(abs(x - median(x)))/length(x)
+  1.483 * median(abs(x - median(x)))
 }
 
 rho = function(x)
@@ -61,7 +61,7 @@ M_1 = function(result)
   sigma = result$sigma
   n = result$n
   p = result$p
-  (sum(rho(resid))/sigma + log(n) * p)/n
+  (sum(rho(resid^2/sigma)) + log(n) * p)/n
 }
 
 M_2 = function(y, X, m=16, regression_method="lm")
@@ -83,18 +83,17 @@ M_2 = function(y, X, m=16, regression_method="lm")
 
     #resid = model_result$resid
     #sigma = model_result$sigma
-    print(dim(y))
-    print(dim(X))
-    print(dim(beta_star))
-    print(beta_star)
+    #print(dim(y))
+    #print(dim(X))
+    #print(dim(beta_star))
+    #print(beta_star)
     #browser()
     
     resid = y - X %*% beta_star
     sigma = MAD(resid)
-    M_2[B] = sum(rho(resid/sigma)) # Bootstrapped version
+    M_2[B] = sum(rho(resid^2/sigma)) # Bootstrapped version
   }
-  return(sum(M_2)/(n*B)) # Should you be dividing by m here?
-  #return(sum(M_2)/(m*B))
+  return(sum(M_2)/(n*B))
   # Not quite. Get the coefficient. Then apply that to the entire data set.
 }
 
@@ -110,16 +109,10 @@ main = function()
   
   M_1_lm = NULL
   M_1_MM = NULL
-  M_2_lm_16 = NULL
-  M_2_MM_16 = NULL
-  M_2_lm_24 = NULL
-  M_2_MM_24 = NULL
-  M_2_lm_32 = NULL
-  M_2_MM_32 = NULL
-  M_2_lm_64 = NULL
-  M_2_MM_64 = NULL
-  M_lm = NULL
-  M_MM = NULL
+  M_2_lm = matrix(NA, 3, 4)
+  M_2_MM = matrix(NA, 3, 4)  
+  M_lm = matrix(NA, 3, 1)
+  M_MM = matrix(NA, 3, 1)
   
   for (model_num in 1:dim(A)[1]) {
     #print("model_num")
@@ -141,30 +134,54 @@ main = function()
     M_1_MM[model_num] = M_1(MM_result)
 
     # For M_2 we need to bootstrap
-    M_2_lm_16[model_num] = M_2(y, X_alpha, m=16, regression_method="lm")
-    M_2_MM_16[model_num] = M_2(y, X_alpha, m=16, regression_method="MM")
-    M_2_lm_24[model_num] = M_2(y, X_alpha, m=24, regression_method="lm")
-    M_2_MM_24[model_num] = M_2(y, X_alpha, m=24, regression_method="MM")
-    M_2_lm_32[model_num] = M_2(y, X_alpha, m=32, regression_method="lm")
-    M_2_MM_32[model_num] = M_2(y, X_alpha, m=32, regression_method="MM")
-    M_2_lm_64[model_num] = M_2(y, X_alpha, m=64, regression_method="lm")
-    M_2_MM_64[model_num] = M_2(y, X_alpha, m=64, regression_method="MM")    
+    for (i in 1:4) {
+      M_2_lm[model_num, i] = M_2(y, X_alpha, m=m[i], regression_method="lm")
+      M_2_MM[model_num, i] = M_2(y, X_alpha, m=m[i], regression_method="MM")
+    }
     # As the bootstrap sample size increases, M2 goes down. Why?
     
-    M_lm[model_num] = MAD(M_1_lm[model_num] + M_2_lm_16[model_num])    
-    M_MM[model_num] = MAD(M_1_MM[model_num] + M_2_MM_16[model_num])    
+    #for (i in 1:4) {
+      M_lm[model_num, 1] = MAD(M_1_lm[model_num] + M_2_lm[model_num,])    
+      M_MM[model_num, 1] = MAD(M_1_MM[model_num] + M_2_MM[model_num,])    
+    #}
   }
   return(list(M_1_lm=M_1_lm,
               M_1_MM=M_1_MM,
-              M_2_lm_16=M_2_lm_16,
-              M_2_MM_16=M_2_MM_16,
-              M_2_lm_24=M_2_lm_24,
-              M_2_MM_24=M_2_MM_24,
-              M_2_lm_32=M_2_lm_32,
-              M_2_MM_32=M_2_MM_32,
-              M_2_lm_64=M_2_lm_64,
-              M_2_MM_64=M_2_MM_64,
+              M_2_lm_16=M_2_lm[,1],
+              M_2_MM_16=M_2_MM[,1],
+              M_2_lm_24=M_2_lm[,2],
+              M_2_MM_24=M_2_MM[,2],
+              M_2_lm_32=M_2_lm[,3],
+              M_2_MM_32=M_2_MM[,3],
+              M_2_lm_64=M_2_lm[,4],
+              M_2_MM_64=M_2_MM[,4],
               M_lm=M_lm,
               M_MM=M_MM))
 }
 main()
+
+# Theory: The reason that the RSS is so much bigger for the full data set
+# is that the whole regression line fits the whole data set very badly, whereas
+# fitting to a subsample is much less egregious.
+
+# Basic checks ----
+ds = data_set()
+y = ds[,1]
+x = ds[,2]
+plot(x, y)
+lm_fit = lm(y~x)
+summary(lm_fit)
+# Large, spurious x coefficient
+plot(lm_fit)
+# Outlying responses exert very high leverage
+mm_fit = rlm(y~x, method="MM")
+summary(mm_fit)
+
+x = ds[,3]
+plot(x, y)
+lm_fit = lm(y~x)
+summary(lm_fit)
+# Overestimate of the true co-efficients.
+mm_fit = rlm(y~x, method="MM")
+summary(mm_fit)
+# Much closer to the true co-efficient values.
