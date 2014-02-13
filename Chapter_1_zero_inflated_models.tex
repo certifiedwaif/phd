@@ -1,6 +1,7 @@
 \documentclass{amsart}
 \input{include.tex}
 \begin{document}
+\section{A factorised variational approximation to the univariate zero-inflated Poisson model}
 % First, simplest zero-inflated count model to consider.
 Consider $X_1, X_2, \ldots, X_n$ where $X_i = R_i Y_i$, $Y_i \sim \Poisson{\lambda}$ independent of
 $R_i \text{indep.} \sim \Bernoulli{\rho}$.
@@ -15,6 +16,7 @@ $$
 
 We seek the full conditionals for $\lambda$ and $\rho$.
 
+\subsection{Full conditional for \lambda}
 First, we calculate the full conditional for $\lambda$.
 
 \begin{align*}
@@ -51,6 +53,7 @@ $$
 which is clearly seen to be a Gamma distribution. Thus
 $\lambda | \vx, \vr, \rho \sim \Gamma{(a + \sum_{i=1}^n x_i), b + \sum_{i=1}^n r_i)}$
 
+\subsection{Full conditional for $\rho}
 We now turn our attention to the full conditional distribution for $\rho$. Following the same
 technique as above, we first concentrate on the denominator in the full conditional:
 \begin{align*}
@@ -69,12 +72,41 @@ and thus we see that
 
 $\rho | \vx, \vr, \lambda \sim \Beta{\sum_{i=1}^n r_i + 1, (n - \sum_{i=1}^n r_i) + 1}$.
 
+\subsection{Full conditional for $r_i$}
+\begin{align*}
+p(r_i | \text{rest}) \propto \frac{(\lambda r_i)^{x_i} \exp{(-\lambda r_i)}}{x_i !} \rho^{r_i} (1 - \rho)^{1 - r_i} \\
+\propto r_i^{x_i} (e^{-\lambda})^{r_i} \rho^{r_i} (1 - \rho)^{1 - r_i}
+\end{align*}
+
+Once again, we rely upon the fact that if $x_i = 0$, $r_i = 0$, and if $x_i \ne 0$,
+$r_i = 1$. So $x_i^{r_i} = I(x \ne 0)$ and hence the likelihood can be re-written as
+
+\begin{align*}
+p(r_i | \text{rest}) &= \frac{(e^{-\lambda + \expit{\rho}})^{r_i}}{I(x_i = 0) + (e^{-\lambda + \expit{\rho}})^{r_i}} \\
+&= \Bernoulli{(\text{expit}(\eta_i))}
+\end{align*}
+where $\eta_i = e^{-\lambda} \rho$.
+
 % Step Two: Assume q(r_i) = Bernoulli(\rho_i), 1 \leq i \leq n for some known \rho_i. Find the
 % variational Bayes updates of the q-densities q(\lambda) and q(\rho) corresponding to the
 % factorisation
 % q(\vr, \lambda, \rho) = q(\lambda) q(\rho) \sum_{i=1}^n q(r_i)
 
+We assume a factorised approximation of the form
+
+$$
+q(\theta) = q(\lambda) q(\rho) \Pi_{i=1}^n q(p_i)
+$$
+
+where $q(\lambda)$ is a Gamma distribution, $q(\rho) is a Beta distribution and
+$q(p_i)$ are Bernoulli distributions.
+
+By taking the expectation of each full conditional with respect to 
+
 \subsection{Mean field update equations}
+We are now in a position to calculate the mean field update equations for the factorised
+variational approximation.
+
 Assuming that $q^*(r_i) \sim \Bernoulli(p_i)$,
 
 \begin{align*}
@@ -120,51 +152,61 @@ p_i &= \frac{exp{\eta_i}}{\exp{\eta_i} + I(x_i = 0)} \\
 &= \text{expit}(\eta_i)
 \end{align*}
 
-\subsection{Full conditional for $r_i$}
-\begin{align*}
-p(r_i | \text{rest}) \propto \frac{(\lambda r_i)^{x_i} \exp{(-\lambda r_i)}}{x_i !} \rho^{r_i} (1 - \rho)^{1 - r_i} \\
-\propto r_i^{x_i} (e^{-\lambda})^{r_i} \rho^{r_i} (1 - \rho)^{1 - r_i}
-\end{align*}
-
-Once again, we rely upon the fact that if $x_i = 0$, $r_i = 0$, and if $x_i \ne 0$,
-$r_i = 1$. So $x_i^{r_i} = I(x \ne 0)$ and hence the likelihood can be re-written as
-
-\begin{align*}
-p(r_i | \text{rest}) &= \frac{(e^{-\lambda + \expit{\rho}})^{r_i}}{I(x_i = 0) + (e^{-\lambda + \expit{\rho}})^{r_i}} \\
-&= \Bernoulli{(\text{expit}(\eta_i))}
-\end{align*}
-where $\eta_i = e^{-\lambda} \rho$.
-
 \subsection{Lower bound}
-% The approach that I'm taking is to make use of the trick that John suggested, which is to recognise that
-% the lower bound of the variational approximation is the KL divergence between the full likelihood p and
-% the factor approximation q.
+The lower bound $\log{p(x;q)}$ is
 $$
-KL(q_{r_i}^* || p_{r_I}) = p_i \log{\frac{p_i}{\rho_*}} + (1 - p_i) \log{\frac{1 - p_i}{1 - \rho_*}}
+	E_q[\log{p(\theta)} - \log{q(\theta)}]
 $$
 
-where $\rho_*$ is the current variational approximation of the parameter $\rho$ for the q-likelihood of
-$\rho$.
+In this case, $q(\lambda) \sim \text{Gamma}{a_q, b_q}$,
+$q(\rho) \sim \text{Beta}(\alpha_q, \beta_q)$ and
+$q(r_i) = 1$ if $x_i \ne 0$, and $p_i$ if $x_i = 0$, where $p_i$ is
+calculated for each iteration as specified above.
+
+In this case, the lower bound is simple enough to calculate directly.
+\begin{align*}
+E_q \log{p(x, r, \lambda, \rho)} - E_q \log{q(r, \lambda, \rho)} &= a \log{b} + (a-1) E[\log{\lambda}] - b E[\lambda] - \log{\Gamma{(a)}} \\
+& + \sum_{i=1}^n \(-E [ \lambda \] E(r_i) + E [x_i \log{\lambda r_i}] - \log{x_i!} + E [r_i] E[\log(\rho)] + E [(1-r_i)] E[\log{1 - \rho}] \) \\
+& - \log{q(r)} - \log{q(\lambda)} - \log{q(\rho)}
+\end{align*}
+
+where
 
 $$
-KL(q_{\rho}^* || p_{\rho}) = \log{\frac{B(a, b)}{B(a_*, b_*)}} + (a - a_*) \Psi(a) + (b - b_*) \Psi(b) + (a_* - a + b_* - b) \Psi(a + b)
+E [\log{\lambda}] = -\{ a_q - \log{b_q} + \log{\gamma(a_q)} + (1 - a_q) \Psi{a_q} \}
 $$
-% TODO: Substitute current values of a_{q(\rho)} and b_{q(\rho)} for a_* and b_*
+$$
+E [\lambda] = \frac{a_q}{b_q}
+$$
+$$
+\[
+E[r_i] = 
+	\begin{cases}
+	1 & \text{if } x_i \ne 0 \\
+	p_i & \text{if } x_i = 0 \\
+	\end{cases}
+\]
+$$
+$$
+E[\log{\rho}] = - \{ \log{B(a_q, b_q)} - (\alpha_q - 1) \psi{a_q} - (\beta_q - 1)\Psi{\beta_q} + (\alpha_q + \beta_q - 2)\Psi{\alpha_q + \beta_q} \}
+$$
+
+By symmetry, we see that $(1 - \rho)$ has the same entropy as $\rho$.
 
 $$
-KL(q_{\lambda}^* || p(\lambda)) = (a_* - a) \Psi(a_*) - \log{\Gamma(a_*)} + \log{\Gamma(a)} + a(\log{b_*} - \log{b}) + \frac{a_*(b_* - b)}{b_*} 
+-E_q \log{q(r)} = \sum_{i=1}^n \[
+\begin{cases}
+0&\text{if } x_i \ne 0\\
+\log{p_i}&\text{if } x_i = 0\\
+\end{cases}
+\]
 $$
-% TODO: Substitute current values of a_{q(\lambda)} and b_{q(\lambda)} for a_* and b_*
+$$
+-E_q \log{q(\lambda)} = q_q^* - \log{b_q^*} + \log{\Gamma{a_q^*}} + (1 - a_q^*) \Psi{(a_q^*)}
+$$
 
-% Now we come to what I think will be the sticking point: p(x_i | r_i, \lambda, \rho)
-% I think that this is intractable, or will have to be approximated. But we'll see what John says.
 $$
-E_q \log{p(x_i | r_i, \lambda, \rho)} = - \{ \lambda_* (1 - \log{\lambda_*}) + e^{-\lambda_*} \sum_{k=0}^\infty \frac{\lambda_*^k \log{(k!)}}{k!} \}
-$$
-
-For large $\lambda_*$, the expression within the brackets is approximately
-$$
-\half \log{(2 \pi e \lambda_*)} - \frac{1}{12 \lambda_*} - \frac{1}{24 \lambda_*^2} - \frac{19}{360 \lambda_*^3} + O(\frac{1}{\lambda_*^4})
+E[\log{q(\rho)}] = - \{ \log{B(a_q^*, b_q^*)} - (\alpha_q^* - 1) \psi{a_q^*} - (\beta_q^* - 1)\Psi{\beta_q^*} + (\alpha_q^* + \beta_q^* - 2)\Psi{\alpha_q^* + \beta_q^*} \}
 $$
 
 \end{document}

@@ -15,6 +15,7 @@ generate_test_data = function (n, rho, lambda)
 
 logit = function(p) log(p/(1-p))
 expit = function(eta) 1/(1+exp(-eta))
+
 zero_infl_mcmc = function(iterations, x, a, b)
 {
   # Initialise
@@ -47,6 +48,41 @@ zero_infl_mcmc = function(iterations, x, a, b)
   return(list(lambda=lambda, rho=rho))
 }
 
+lower_bound = function(x, p, a, b, a_lambda, b_lambda, a_rho, b_rho)
+{
+  gamma_entropy = function(a, b)
+  {
+    a - log(b) + lgamma(a) + (1-a) * digamma(a)
+  }
+
+  E_log_lambda = -gamma_entropy(a, b)
+  E_lambda = a/b
+  E_r = ifelse(x == 0, p, 1)
+  E_xi_log_lambda_r = ifelse(x == 0, E_log_lambda, 0)
+
+  beta_entropy = function(a, b)
+  {
+    lbeta(a, b) - (a-1)*digamma(a) - (b-1)*digamma(b)+ (a+b-2)*digamma(a+b)
+  }
+
+  E_log_rho = 0 # rho is Unif([0, 1]), so the answer is digamma(1) - digamma(1) = 0
+  E_log_one_minus_rho = E_log_rho
+  
+  log_q_r = ifelse(x == 0, log(p), 0)
+  log_q_lambda = -gamma_entropy(a_lambda, b_lambda)
+  log_q_rho = -beta_entropy(a_rho, b_rho)
+  
+  # FIXME: Sign error?
+  result = a * log(b) + (a-1) * E_log_lambda - b * E_lambda - lgamma(a)
+  result = result + - E_lambda * sum(E_r)
+  result = result + sum(E_xi_log_lambda_r) - sum(log(factorial(x)))
+  result = result + sum(E_r) * E_log_rho + sum((1 - E_r)) * E_log_one_minus_rho
+  result = result - sum(log_q_r) - log_q_lambda - log_q_rho
+  
+  browser()
+  return(result)
+}
+
 zero_infl_var = function(iterations, x, a, b)
 {
   n = length(x)
@@ -68,6 +104,8 @@ zero_infl_var = function(iterations, x, a, b)
       }
     }
     # TODO: Lower bound? ----
+    lower_bd = lower_bound(x, p, a, b, a_lambda, b_lambda, a_rho, b_rho)
+    print(lower_bd)
     params = list(a_lambda=a_lambda, b_lambda=b_lambda, a_rho=a_rho, b_rho=b_rho)
     #print(params)
   }
@@ -132,7 +170,7 @@ check_accuracy = function(n, rho, lambda)
 }
 
 # Check accuracy of the approximation for a range of parameter values ----
-main = function()
+main_check_accuracy = function()
 {
   n = 1000
   rho = .5
@@ -142,4 +180,37 @@ main = function()
     for (lambda in seq(5, 100, 5))
       print(check_accuracy(n, rho, lambda))
 }
-main()
+#main_check_accuracy()
+
+# Test variational approximation. Unit tests? ----
+# Simulate data
+# Variational approximation
+# Check that lower bounds are monotonically increasing
+# Compare accuracy against MCMC
+
+x = generate_test_data(n, rho, lambda)
+
+a = 10
+b = 10
+
+# MCMC ----
+iterations = 1e6
+burnin = 1e3
+
+start = Sys.time()
+result_mcmc = zero_infl_mcmc(iterations+burnin, x, a, b)
+mcmc_runtime = Sys.time() - start
+# Throw away burn-in samples.
+# Brackets turn out to be incredibly important here!!!
+result_mcmc$rho = result_mcmc$rho[(burnin+1):(burnin+iterations+1)]
+result_mcmc$lambda = result_mcmc$lambda[(burnin+1):(burnin+iterations+1)]
+# 1000 iterations in 0.07461715 seconds.
+
+# Variational approximation ----
+start = Sys.time()
+result_var = zero_infl_var(10, x, a, b)
+var_runtime = Sys.time() - start
+# Variational approximation takes .05 seconds to run 10 iterations. So 5ms per iteration,
+# or 200 iterations a second.
+var_lambda = result_var$a_lambda / result_var$b_lambda
+var_rho = result_var$a_rho / (result_var$a_rho + result_var$b_lambda)
