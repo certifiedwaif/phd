@@ -50,6 +50,8 @@ zero_infl_mcmc = function(iterations, x, a, b)
 
 lower_bound = function(x, p, a, b, a_lambda, b_lambda, a_rho, b_rho)
 {
+  browser()
+
   gamma_entropy = function(a, b)
   {
     a - log(b) + lgamma(a) + (1-a) * digamma(a)
@@ -65,7 +67,7 @@ lower_bound = function(x, p, a, b, a_lambda, b_lambda, a_rho, b_rho)
     lbeta(a, b) - (a-1)*digamma(a) - (b-1)*digamma(b)+ (a+b-2)*digamma(a+b)
   }
 
-  E_log_rho = 0 # rho is Unif([0, 1]), so the answer is digamma(1) - digamma(1) = 0
+  E_log_rho = -beta_entropy(1, 1) # rho is Unif([0, 1]), so a = b = 1
   E_log_one_minus_rho = E_log_rho
   
   log_q_r = ifelse(x == 0, log(p), 0)
@@ -79,7 +81,6 @@ lower_bound = function(x, p, a, b, a_lambda, b_lambda, a_rho, b_rho)
   result = result + sum(E_r) * E_log_rho + sum((1 - E_r)) * E_log_one_minus_rho
   result = result - sum(log_q_r) - log_q_lambda - log_q_rho
   
-  browser()
   return(result)
 }
 
@@ -187,11 +188,23 @@ main_check_accuracy = function()
 # Variational approximation
 # Check that lower bounds are monotonically increasing
 # Compare accuracy against MCMC
+n = 100
+rho = .5
+lambda = 100
 
 x = generate_test_data(n, rho, lambda)
 
 a = 10
 b = 10
+
+# Variational approximation ----
+start = Sys.time()
+result_var = zero_infl_var(10, x, a, b)
+var_runtime = Sys.time() - start
+# Variational approximation takes .05 seconds to run 10 iterations. So 5ms per iteration,
+# or 200 iterations a second.
+var_lambda = result_var$a_lambda / result_var$b_lambda
+var_rho = result_var$a_rho / (result_var$a_rho + result_var$b_lambda)
 
 # MCMC ----
 iterations = 1e6
@@ -206,11 +219,3 @@ result_mcmc$rho = result_mcmc$rho[(burnin+1):(burnin+iterations+1)]
 result_mcmc$lambda = result_mcmc$lambda[(burnin+1):(burnin+iterations+1)]
 # 1000 iterations in 0.07461715 seconds.
 
-# Variational approximation ----
-start = Sys.time()
-result_var = zero_infl_var(10, x, a, b)
-var_runtime = Sys.time() - start
-# Variational approximation takes .05 seconds to run 10 iterations. So 5ms per iteration,
-# or 200 iterations a second.
-var_lambda = result_var$a_lambda / result_var$b_lambda
-var_rho = result_var$a_rho / (result_var$a_rho + result_var$b_lambda)
