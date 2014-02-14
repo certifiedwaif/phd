@@ -2,6 +2,44 @@
 \usepackage{graphicx}
 \begin{document}
 \section{Question 1}
+\subsection{i}
+We are required to prove that $KL(g||f) \geq 0$.
+
+\begin{align*}
+KL(g||f) &= \int g(x) \log{\frac{g(x)}{f(x)}} dx
+&= E_g \log{g(x)} - E_g \log{f(x)}
+\end{align*}
+
+We make use of Jensen's Inequality, and the convexity of the log function.
+\begin{align*}
+E_g \log{g(x)} & \geq \log{E_g g(x)} \\
+&= \log{1}
+&= 0
+\end{align*}
+
+and
+
+\begin{align*}
+E_g \log{f(x)} \geq \log{E_g f(x)} \\
+&= \log{1} \\
+&= 0
+\end{align*}
+
+Now,
+\begin{align*}
+E_g f(x) &= \int f(x) g(x) dx \\
+&\leq \int f(x) dx \int g(x) dx
+&= 1
+\end{align*}
+
+and this maximum is achieved only iff f=g.
+So it follows that $E_g \log{g(x)} \geq E_g \log{f(x)}$.
+
+Combining these facts, we see that $KL(g||f) \ geq 0$.
+
+\subsection{ii}
+
+\subsection{iii}
 
 \section{Question 2}
 % How did you generate the data?
@@ -30,8 +68,8 @@ kept as the set of possible models to select, while all other rows were discarde
 \begin{table}
 \label{tab:results}
 \caption{Proportion of times that the correct model was selected}
-\begin{tabular}
-\end{tabular}
+%\begin{tabular}
+%\end{tabular}
 \end{table}
 
 For the run with the true model containing one non-zero regression parameter and 
