@@ -50,16 +50,27 @@ zero_infl_mcmc = function(iterations, x, a, b)
 
 lower_bound = function(x, p, a, b, a_lambda, b_lambda, a_rho, b_rho)
 {
-  E_log_lambda = digamma(a) - log(b)
+  gamma_entropy = function(a, b)
+  {
+    a - log(b) + lgamma(a) + (1-a) * digamma(a)
+  }
+
+  E_log_lambda = -gamma_entropy(a, b)
   E_lambda = a/b
   E_r = ifelse(x == 0, p, 1)
   E_xi_log_lambda_r = ifelse(x == 0, E_log_lambda, 0)
-  E_log_rho = digamma(1) - digamma(1 + 1) # rho is Unif([0, 1]), so a = b = 1
+
+  beta_entropy = function(a, b)
+  {
+    lbeta(a, b) - (a-1)*digamma(a) - (b-1)*digamma(b)+ (a+b-2)*digamma(a+b)
+  }
+
+  E_log_rho = 0 # rho is Unif([0, 1]), so the answer is digamma(1) - digamma(1) = 0
   E_log_one_minus_rho = E_log_rho
   
   log_q_r = ifelse(x == 0, log(p), 0)
-  log_q_lambda = digamma(a_lambda) - log(b_lambda)
-  log_q_rho = digamma(a_rho) - digamma(a_rho + b_rho)
+  log_q_lambda = -gamma_entropy(a_lambda, b_lambda)
+  log_q_rho = -beta_entropy(a_rho, b_rho)
   
   # FIXME: Sign error?
   result = a * log(b) + (a-1) * E_log_lambda - b * E_lambda - lgamma(a)
