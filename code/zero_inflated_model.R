@@ -70,16 +70,15 @@ calculate_lower_bound = function(x, p, a, b, a_lambda, b_lambda, a_rho, b_rho)
   E_log_rho = -beta_entropy(1, 1) # rho is Unif([0, 1]), so a = b = 1
   E_log_one_minus_rho = E_log_rho
   
-  log_q_r = ifelse(x == 0, log(p), 0)
-  log_q_lambda = -gamma_entropy(a_lambda, b_lambda)
-  log_q_rho = -beta_entropy(a_rho, b_rho)
+  E_log_q_r = ifelse(x == 0, log(p), 0)
+  E_log_q_lambda = -gamma_entropy(a_lambda, b_lambda)
+  E_log_q_rho = -beta_entropy(a_rho, b_rho) # FIXME: Why is this entropy positive?
   
-  # FIXME: Sign error?
   result = a * log(b) + (a-1) * E_log_lambda - b * E_lambda - lgamma(a)
   result = result + - E_lambda * sum(E_r)
   result = result + sum(E_xi_log_lambda_r) - sum(log(factorial(x)))
   result = result + sum(E_r) * E_log_rho + sum((1 - E_r)) * E_log_one_minus_rho
-  result = result - sum(log_q_r) - log_q_lambda - log_q_rho
+  result = result - sum(E_log_q_r) - E_log_q_lambda - E_log_q_rho
   
   return(result)
 }
@@ -93,13 +92,12 @@ zero_infl_var = function(x, a, b)
   eta = rep(NA, n)
   a_lambda = a + sum(x)
   
-  first_iteration = TRUE
   lower_bound = -Inf
   last_lower_bound = -Inf
+  iteration = 1
   # Iterate ----
-  while (first_iteration || lower_bound > last_lower_bound) {
+  while (iteration == 1 || lower_bound > last_lower_bound) {
     last_lower_bound = lower_bound
-    first_iteration = FALSE
     
     b_lambda = b + sum(p)
     a_rho = 1 + sum(p)
@@ -116,9 +114,13 @@ zero_infl_var = function(x, a, b)
     }
     # TODO: Lower bound? ----
     lower_bound = calculate_lower_bound(x, p, a, b, a_lambda, b_lambda, a_rho, b_rho)
-    print(lower_bound)
+    #print(lower_bound)
     params = list(a_lambda=a_lambda, b_lambda=b_lambda, a_rho=a_rho, b_rho=b_rho)
-    print(params)
+    #print(params)
+    cat("Iteration ", iteration, ": lower bound ", lower_bound, " difference ",
+        last_lower_bound - lower_bound, " parameters ", "a_lambda", a_lambda,
+        "b_lambda", b_lambda, "a_rho", a_rho, "b_rho", b_rho, "\n")
+    iteration = iteration + 1
   }
   return(params)
 }
