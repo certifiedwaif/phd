@@ -1,91 +1,93 @@
 \documentclass{amsart}
 \input{include.tex}
 \begin{document}
-\section{A factorised variational approximation to the univariate zero-inflated Poisson model}
 % First, simplest zero-inflated count model to consider.
-Consider $X_1, X_2, \ldots, X_n$ where $X_i = R_i Y_i$, $Y_i \sim \Poisson{\lambda}$ independent of
-$R_i \text{indep.} \sim \Bernoulli{\rho}$.
+Count data with a large number of zero counts arises in many areas of
+application, such as data arising from physical activity studies, 
+insurance claims, hospital visits or defects in manufacturing processes.
 
-Let $\rho \sim \Unif{0, 1}$, $\lambda \sim \Gamma(a, b)$ and $r_i | \rho \sim \Bernoulli{\rho}$, $1 \leq i \leq n$.
+\section{A factorised variational approximation to the univariate zero-inflated Poisson model}
 
-Then the joint likelihood is:
+\noindent Consider $X_1, X_2, \ldots, X_n$ where $X_i = R_i Y_i$, $Y_i \sim \Poisson{\lambda}$ independent of
+$R_i \text{indep.} \sim \Bernoulli{\rho}$. Let $\rho \sim \Unif{0, 1}$, 
+$\lambda \sim \Gamma(a, b)$ and $r_i | \rho \sim \Bernoulli{\rho}$, $1 
+\leq i \leq n$. Then the joint likelihood is:
 
 $$
-p(\vx, \vr, \lambda, \rho) = \frac{b^a \lambda^{a - 1} \exp{(-b \lambda)}}{\Gamma{a}} \Pi_{i=1}^n \frac{\exp{(-\lambda r_i)} (\lambda r_i)^{x_i}}{x_i !} \rho^{r_i} (1 - \rho)^{1 - r_i}
+p(\vx, \vr, \lambda, \rho) = \frac{b^a \lambda^{a - 1} \exp{(-b \lambda)}}{\Gamma{(a)}} \prod_{i=1}^n \frac{\exp{(-\lambda r_i)} (\lambda r_i)^{x_i}}{x_i !} \rho^{r_i} (1 - \rho)^{1 - r_i}.
 $$
 
-We seek the full conditionals for $\lambda$ and $\rho$.
+\noindent We calculate the full conditionals for $\lambda$, $\rho$ and $\vr$.
 
-\subsection{Full conditional for \lambda}
+\subsection{Full conditional for $\lambda$}
 First, we calculate the full conditional for $\lambda$.
 
 \begin{align*}
-p(\lambda|\vx, \vr, \rho) &= \frac{\Pi_{i=1}^n p(x_i | \lambda, r_i) p(\lambda) p(r_i|\rho) p(\rho)}{\int \Pi_{i=1}^n p(x_i | \lambda, r_i) p(\lambda) p(r_i|\rho) p(\rho)) d \lambda} \\
+p(\lambda|\vx, \vr, \rho) &= \frac{\prod_{i=1}^n p(x_i | \lambda, r_i) p(\lambda) p(r_i|\rho) p(\rho)}{\int \prod_{i=1}^n p(x_i | \lambda, r_i) p(\lambda) p(r_i|\rho) p(\rho)) d \lambda}.
 \end{align*}
 
 Concentrating for now on the denominator in this expression, we re-arrange and collect
 like terms to obtain
 $$
-\Pi_{i=1}^n \rho^r_i (1 - \rho)^{1 - r_i} \frac{r_i^{x_i}}{x_i !}
+\prod_{i=1}^n \rho^r_i (1 - \rho)^{1 - r_i} \frac{r_i^{x_i}}{x_i !}
 	\int \frac{b^a \lambda^{a - 1} \exp{(-b \lambda)} \lambda^{x_i} \exp{(-\lambda r_i)}}{\Gamma{(a)}} d \lambda
 $$
 
 The integral in this expression is
 \begin{align*}
 & \int \frac{b^a \lambda^{(a + x_i) - 1} \exp{(-\lambda(b + r_i))}}{\Gamma{(a + x_i)}} d \lambda \frac{\Gamma{(a+ x_i)}}{\Gamma{(a)} b^{-x_i}} \\
-=& \frac{\Gamma{(a+ x_i)}}{\Gamma{(a)} b^{-x_i}}
+=& \frac{\Gamma{(a+ x_i)}}{\Gamma{(a)} b^{-x_i}}.
 \end{align*}
 
 Collecting the multiplicands in the integral over $\lambda$ together, we obtain
 $$
-\Pi_{i=1}^n \rho^{r_i} (1 - \rho)^{1 - r_i} \frac{r_i^{x_i}}{x_i!}
+\prod_{i=1}^n \rho^{r_i} (1 - \rho)^{1 - r_i} \frac{r_i^{x_i}}{x_i!}
 	\int \frac{b^{na + \sum_{i=1}^n x_i} \lambda^{(na + \sum_{i=1}^n x_i) - 1} \exp{(-\lambda(nb + \sum_{i=1}^n r_i))}}{\Gamma{(na + \sum_{i=1}^n x_i)}} d \lambda
-	\frac{\Gamma{(na + \sum_{i=1}^n x_i)}}{\Gamma{(na)} b^{-\sum_{i=1}^n x_i}}
+	\frac{\Gamma{(na + \sum_{i=1}^n x_i)}}{\Gamma{(na)} b^{-\sum_{i=1}^n x_i}}.
 $$
 
 By cancelling like terms in the numerator and denominator of the full likelihood we arrive 
 at the functional form of the full conditional, which is proportional to
 
 $$
-b^{a+\sum_{i=1}^n x_i} \lambda^{(a + \sum_{i=1}^n x_i) - 1} \exp{(-(b + \sum_{i=1}^n r_i) \lambda)}
+b^{a+\sum_{i=1}^n x_i} \lambda^{(a + \sum_{i=1}^n x_i) - 1} \exp{\left(-(b + \sum_{i=1}^n r_i) \lambda \right)}
 $$
 
-which is clearly seen to be a Gamma distribution. Thus
-$\lambda | \vx, \vr, \rho \sim \Gamma{(a + \sum_{i=1}^n x_i), b + \sum_{i=1}^n r_i)}$
+\noindent which is clearly seen to be a Gamma distribution. Thus
+$$
+\lambda | \vx, \vr, \rho \sim \myGamma{a + \sum_{i=1}^n x_i, b + \sum_{i=1}^n r_i}.
+$$
 
-\subsection{Full conditional for $\rho}
+\subsection{Full conditional for $\rho$}
 We now turn our attention to the full conditional distribution for $\rho$. Following the same
 technique as above, we first concentrate on the denominator in the full conditional:
 \begin{align*}
-p(\vx, \vr, \lambda) &= \int \frac{b^a \lambda^{a - 1} \exp{(-b \lambda)}}{\Gamma{a}} \Pi_{i=1}^n \frac{\exp{(-\lambda r_i)} (\lambda r_i)^{x_i}}{x_i !} \rho^{r_i} (1 - \rho)^{1 - r_i} d \rho \\
-&= \left(\frac{b^a \lambda^{a - 1} \exp{(-b \lambda)}}{\Gamma{a}} \Pi_{i=1}^n \frac{\exp{(-\lambda r_i)} (\lambda r_i)^{x_i}}{x_i !} \right) \int \rho^{\sum_{i=1}^n r_i} (1 - \rho)^{n - \sum_{i=1}^n r_i} d \rho
+p(\vx, \vr, \lambda) &= \int \frac{b^a \lambda^{a - 1} \exp{(-b \lambda)}}{\Gamma{(a)}} \prod_{i=1}^n \frac{\exp{(-\lambda r_i)} (\lambda r_i)^{x_i}}{x_i !} \rho^{r_i} (1 - \rho)^{1 - r_i} d \rho \\
+&= \left(\frac{b^a \lambda^{a - 1} \exp{(-b \lambda)}}{\Gamma{(a)}} \prod_{i=1}^n \frac{\exp{(-\lambda r_i)} (\lambda r_i)^{x_i}}{x_i !} \right) \int \rho^{\sum_{i=1}^n r_i} (1 - \rho)^{n - \sum_{i=1}^n r_i} d \rho
 \end{align*}
 
 This integral on the right hand side is a Beta integral with the parameters
 $a = \sum_{i=1}^n r_i + 1$ and $b = (n - \sum_{i=1}^n r_i) + 1$. All of the terms in the numerator and 
 denominator of the full conditional cancel except for
 $$
-\frac{\rho^{\sum_{i=1}^n r_i} (1 - \rho)^{n - \sum_{i=1}^n r_i}}{\Beta{(\sum_{i=1}^n r_i + 1, n - \sum_{i=1}^n r_i + 1)}}
+\frac{\rho^{\sum_{i=1}^n r_i} (1 - \rho)^{n - \sum_{i=1}^n r_i}}{\Beta{\sum_{i=1}^n r_i + 1, n - \sum_{i=1}^n r_i + 1}}
 $$
 
-and thus we see that
-
-$\rho | \vx, \vr, \lambda \sim \Beta{\sum_{i=1}^n r_i + 1, (n - \sum_{i=1}^n r_i) + 1}$.
+and thus we see that $\rho | \vx, \vr, \lambda \sim \Beta{\sum_{i=1}^n r_i + 1, (n - \sum_{i=1}^n r_i) + 1}$.
 
 \subsection{Full conditional for $r_i$}
 \begin{align*}
 p(r_i | \text{rest}) \propto \frac{(\lambda r_i)^{x_i} \exp{(-\lambda r_i)}}{x_i !} \rho^{r_i} (1 - \rho)^{1 - r_i} \\
 \propto r_i^{x_i} (e^{-\lambda})^{r_i} \rho^{r_i} (1 - \rho)^{1 - r_i}
-\end{align*}
+\end{align*}.
 
 Once again, we rely upon the fact that if $x_i = 0$, $r_i = 0$, and if $x_i \ne 0$,
 $r_i = 1$. So $x_i^{r_i} = I(x \ne 0)$ and hence the likelihood can be re-written as
 
 \begin{align*}
-p(r_i | \text{rest}) &= \frac{(e^{-\lambda + \expit{\rho}})^{r_i}}{I(x_i = 0) + (e^{-\lambda + \expit{\rho}})^{r_i}} \\
-&= \Bernoulli{(\text{expit}(\eta_i))}
-\end{align*}
-where $\eta_i = e^{-\lambda} \rho$.
+p(r_i | \text{rest}) &= \frac{(e^{-\lambda + \logit{\rho}})^{r_i}}{I(x_i = 0) + (e^{-\lambda + \logit{\rho}})^{r_i}} \\
+&= \Bernoulli{\text{expit}(\eta_i)}
+\end{align*}.
 
 % Step Two: Assume q(r_i) = Bernoulli(\rho_i), 1 \leq i \leq n for some known \rho_i. Find the
 % variational Bayes updates of the q-densities q(\lambda) and q(\rho) corresponding to the
@@ -95,10 +97,10 @@ where $\eta_i = e^{-\lambda} \rho$.
 We assume a factorised approximation of the form
 
 $$
-q(\theta) = q(\lambda) q(\rho) \Pi_{i=1}^n q(p_i)
+q(\theta) = q(\lambda) q(\rho) \prod_{i=1}^n q(p_i)
 $$
 
-where $q(\lambda)$ is a Gamma distribution, $q(\rho) is a Beta distribution and
+where $q(\lambda)$ is a Gamma distribution, $q(\rho)$ is a Beta distribution and
 $q(p_i)$ are Bernoulli distributions.
 
 By taking the expectation of each full conditional with respect to 
@@ -107,36 +109,37 @@ By taking the expectation of each full conditional with respect to
 We are now in a position to calculate the mean field update equations for the factorised
 variational approximation.
 
-Assuming that $q^*(r_i) \sim \Bernoulli(p_i)$,
+Assuming that $q^*(r_i) \sim \Bernoulli{p_i}$,
 
 \begin{align*}
-q^*(\lambda) &\propto \lambda^{a+\sum_{i=1}^n x_i - 1} \exp{\{ E_{-q(\lambda)} [-(b + \sum_{i=1}^n r_i) \lambda] \}} \\
-&\propto \lambda^{a+\sum_{i=1}^n x_i - 1} \exp{-(b + \sum_{i=1}^n p_i)\lambda} \\
+q^*(\lambda) &\propto \lambda^{a+\sum_{i=1}^n x_i - 1} \exp{\left[ E_{-q(\lambda)} \{-(b + \sum_{i=1}^n r_i) \lambda \} \right]} \\
+&\propto \lambda^{a+\sum_{i=1}^n x_i - 1} \exp{\{-(b + \sum_{i=1}^n p_i)\lambda \} } \\
 &= \myGamma{a+\sum_{i=1}^n x_i, b + \sum_{i=1}^n p_i}
 \end{align*}
 
 and
 
 \begin{align*}
-q^*(\rho) &\propto \exp{\{ E_{-q(\rho)} \sum_{i=1}^n r_i \log{(\rho)} + \sum_{i=1}^n (1- r_i) \log{(1 - \rho)} \}} \\
-&\propto \exp{\{ \sum_{i=1}^n p_i \log{\rho} + \sum_{i=1}^n (1 - p_i) \log{(1 - \rho)} \}} \\
-&\propto \Beta{1+ \sum_{i=1} p_i, n - \sum_{i=1}^n p_i + 1}
+q^*(\rho) &\propto \exp{\{ E_{-q(\rho)} \left[ \sum_{i=1}^n r_i \log{(\rho)} + \sum_{i=1}^n (1- r_i) \log{(1 - \rho)} \right] } \\
+&\propto \exp{ \left( \sum_{i=1}^n p_i \log{\rho} + \sum_{i=1}^n (1 - p_i) \log{(1 - \rho)} \right) } \\
+&= \Beta{1+ \sum_{i=1} p_i, n - \sum_{i=1}^n p_i + 1}
 \end{align*}
 
 Turning our attention now to $r_i$, we first note that the relevant terms of the
 log-likelihood are
 
 $$
--\lambda r_i + x_i \log{r_i} + r_i \log{\frac{\rho}{1 - \rho}}
+-\lambda r_i + x_i \log{r_i} + r_i \log{\left(\frac{\rho}{1 - \rho}\right)}
 $$
 
 Taking expectations with respect to $\lambda$ and $\rho$ we have
 
 $$
--r_i \frac{\alpha_\lambda^*}{\beta_\lambda^*} + x_i \log{r_i} + r_i (\Psi(\alpha_\rho^*) - \Psi(\beta_\rho^*))
+-r_i \frac{\alpha_\lambda^*}{\beta_\lambda^*} + x_i \log{(r_i)} + r_i (\Psi(\alpha_\rho^*) - \Psi(\beta_\rho^*))
 $$
 
-This log likelihood will be $-\infty$ in the case where $x_i = 0$. Dr John Ormerod hit
+Note that if $x_i = 0$ then
+$x_i \log{(r_i)} = \log{(x_i^{r_i})} = \log{(0^0)} = \log{(1)} = 0$. Dr John Ormerod hit
 upon the idea of side-stepping this problem by writing the q-likelihood as
 
 $$
@@ -148,65 +151,63 @@ where $\eta_i = - \frac{\alpha_\lambda^*}{\beta_\lambda^*} + \Psi(\alpha_\rho^*)
 Now, either $x_i = 0$ or $x_i \ne 0$.
 
 \begin{align*}
-p_i &= \frac{exp{\eta_i}}{\exp{\eta_i} + I(x_i = 0)} \\
+p_i &= \frac{\exp{(\eta_i)}}{I(x_i = 0) + \exp{(\eta_i)}} \\
 &= \text{expit}(\eta_i)
 \end{align*}
 
 \subsection{Lower bound}
-The lower bound $\log{p(x;q)}$ is
+The lower bound $\log{p(x)}$ is
 $$
-	E_q[\log{p(\theta)} - \log{q(\theta)}]
+	E_q[\log{p(x, \theta)} - \log{q(\theta)}]
 $$
 
-In this case, $q(\lambda) \sim \text{Gamma}{a_q, b_q}$,
-$q(\rho) \sim \text{Beta}(\alpha_q, \beta_q)$ and
+where $q(\theta) = q(\lambda) q(\rho) \prod_{i=1}^n q(r_i)$,
+$q(\lambda) \sim \text{Gamma}{(a_\lambda^*, b\lambda^*)}$,
+$q(\rho) \sim \text{Beta}(a_\rho^*, b_\rho^*)$ and
 $q(r_i) = 1$ if $x_i \ne 0$, and $p_i$ if $x_i = 0$, where $p_i$ is
 calculated for each iteration as specified above.
 
-In this case, the lower bound is simple enough to calculate directly.
+In this case, the lower bound can be calculated directly to be
+
 \begin{align*}
-E_q \log{p(x, r, \lambda, \rho)} - E_q \log{q(r, \lambda, \rho)} &= a \log{b} + (a-1) E[\log{\lambda}] - b E[\lambda] - \log{\Gamma{(a)}} \\
-& + \sum_{i=1}^n \(-E [ \lambda \] E(r_i) + E [x_i \log{\lambda r_i}] - \log{x_i!} + E [r_i] E[\log(\rho)] + E [(1-r_i)] E[\log{1 - \rho}] \) \\
+E_q \log{p(x, r, \lambda, \rho)} - E_q \log{q(r, \lambda, \rho)} &= a \log{b} + (a-1) E\left[\log{\lambda}\right] - b E\left[\lambda\right] - \log{\Gamma{(a)}} \\
+& + \sum_{i=1}^n \left(-E \left[ \lambda \right] E(r_i) + E \left[x_i \log{\lambda r_i}\right] - \log{x_i!} + E \left[r_i\right] E\left[\log(\rho)\right] + E \left[(1-r_i)\right] E\left[\log{1 - \rho}\right] \right) \\
 & - \log{q(r)} - \log{q(\lambda)} - \log{q(\rho)}
 \end{align*}
 
 where
+$$
+E [\log{\lambda}] = -\{ a_\lambda^* - \log{b_\lambda^*} + \log{\gamma(a_\lambda^*)} + (1 - a_\lambda^*) \Psi{a_\lambda^*} \} \\
+$$
+$$
+E [\lambda] = \frac{a_\lambda^*}{b_\lambda^*} \\
+$$
+$$
+E[\log{\rho}] = - \{ \log{B(a_\rho^*, b_\rho^*)} - (a_\rho^* - 1) \psi{a_\rho^*} - (b_\rho^* - 1)\Psi{b_\rho^*} + (a_\rho^* + b_\rho^* - 2)\Psi{a_\rho^* + b_\rho^*} \} \\
+$$
 
+By symmetry, we see that $(1 - \rho)$ has the same entropy as $\rho$,
+and so $E [\log{(\rho)}] = E [\log{(1 - \rho)}]$.
 $$
-E [\log{\lambda}] = -\{ a_q - \log{b_q} + \log{\gamma(a_q)} + (1 - a_q) \Psi{a_q} \}
-$$
-$$
-E [\lambda] = \frac{a_q}{b_q}
-$$
-$$
-\[
 E[r_i] = 
 	\begin{cases}
 	1 & \text{if } x_i \ne 0 \\
 	p_i & \text{if } x_i = 0 \\
 	\end{cases}
-\]
-$$
-$$
-E[\log{\rho}] = - \{ \log{B(a_q, b_q)} - (\alpha_q - 1) \psi{a_q} - (\beta_q - 1)\Psi{\beta_q} + (\alpha_q + \beta_q - 2)\Psi{\alpha_q + \beta_q} \}
-$$
-
-By symmetry, we see that $(1 - \rho)$ has the same entropy as $\rho$.
-
-$$
--E_q \log{q(r)} = \sum_{i=1}^n \[
-\begin{cases}
-0&\text{if } x_i \ne 0\\
-\log{p_i}&\text{if } x_i = 0\\
-\end{cases}
-\]
-$$
-$$
--E_q \log{q(\lambda)} = q_q^* - \log{b_q^*} + \log{\Gamma{a_q^*}} + (1 - a_q^*) \Psi{(a_q^*)}
 $$
 
 $$
-E[\log{q(\rho)}] = - \{ \log{B(a_q^*, b_q^*)} - (\alpha_q^* - 1) \psi{a_q^*} - (\beta_q^* - 1)\Psi{\beta_q^*} + (\alpha_q^* + \beta_q^* - 2)\Psi{\alpha_q^* + \beta_q^*} \}
+-E_q \log{q(r)} = \sum_{i=1}^n I(x_i = 0) \log{(p_i)}
 $$
+
+$$
+-E_q \log{q(\lambda)} = q_q^* - \log{(b_q^*)} + \log{\Gamma{(a_q^*)}} + (1 - a_q^*) \Psi{(a_q^*)}
+$$
+
+$$
+E[\log{q(\rho)}] = - \{ \log{(B(a_q^*, b_q^*)} - (\alpha_q^* - 1) \psi{(a_q^*)} - (\beta_q^* - 1)\Psi{(\beta_q^*)} + (\alpha_q^* + \beta_q^* - 2)\Psi{(\alpha_q^* + \beta_q^*)} \}
+$$
+
+
 
 \end{document}

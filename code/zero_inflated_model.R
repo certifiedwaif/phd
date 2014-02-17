@@ -48,53 +48,61 @@ zero_infl_mcmc = function(iterations, x, a, b)
   return(list(lambda=lambda, rho=rho))
 }
 
-lower_bound = function(x, p, a, b, a_lambda, b_lambda, a_rho, b_rho)
+calculate_lower_bound = function(x, p, a, b, a_lambda, b_lambda, a_rho, b_rho)
 {
-  browser()
+  #browser()
 
-  gamma_entropy = function(a, b)
+  gamma_entropy = function(alpha, beta)
   {
-    a - log(b) + lgamma(a) + (1-a) * digamma(a)
+    alpha - log(beta) + lgamma(a) - (a-1) * digamma(a)
   }
 
   E_log_lambda = -gamma_entropy(a, b)
   E_lambda = a/b
   E_r = ifelse(x == 0, p, 1)
-  E_xi_log_lambda_r = ifelse(x == 0, E_log_lambda, 0)
+  E_xi_log_lambda_r = ifelse(x == 0, 0, x*E_log_lambda)
 
-  beta_entropy = function(a, b)
+  beta_entropy = function(alpha, beta)
   {
-    lbeta(a, b) - (a-1)*digamma(a) - (b-1)*digamma(b)+ (a+b-2)*digamma(a+b)
+    lbeta(alpha, beta) - (alpha-1)*digamma(alpha) - (beta-1)*digamma(beta) + (alpha+beta-2)*digamma(alpha+beta)
   }
 
   E_log_rho = -beta_entropy(1, 1) # rho is Unif([0, 1]), so a = b = 1
   E_log_one_minus_rho = E_log_rho
   
-  log_q_r = ifelse(x == 0, log(p), 0)
-  log_q_lambda = -gamma_entropy(a_lambda, b_lambda)
-  log_q_rho = -beta_entropy(a_rho, b_rho)
+  E_log_q_r = ifelse(x == 0, log(p), 0)
+  E_log_q_lambda = -gamma_entropy(a_lambda, b_lambda)
+  E_log_q_rho = -beta_entropy(a_rho, b_rho) # FIXME: Why is this entropy positive?
   
-  # FIXME: Sign error?
   result = a * log(b) + (a-1) * E_log_lambda - b * E_lambda - lgamma(a)
   result = result + - E_lambda * sum(E_r)
   result = result + sum(E_xi_log_lambda_r) - sum(log(factorial(x)))
   result = result + sum(E_r) * E_log_rho + sum((1 - E_r)) * E_log_one_minus_rho
-  result = result - sum(log_q_r) - log_q_lambda - log_q_rho
+  result = result - sum(E_log_q_r) - E_log_q_lambda - E_log_q_rho
   
   return(result)
 }
 
-zero_infl_var = function(iterations, x, a, b)
+zero_infl_var = function(x, a, b)
 {
+  #browser()
   n = length(x)
-  p = rep(sum(x == 0)/length(x), n)
+  #p = rep(sum(x == 0)/length(x), n)
+  p = rep(1, n)
   eta = rep(NA, n)
   a_lambda = a + sum(x)
+  
+  lower_bound = -Inf
+  last_lower_bound = -Inf
+  iteration = 1
   # Iterate ----
-  for (i in 1:iterations) {
+  while (iteration == 1 || lower_bound > last_lower_bound) {
+    last_lower_bound = lower_bound
+    
     b_lambda = b + sum(p)
     a_rho = 1 + sum(p)
     b_rho = n - sum(p) + 1
+    
     # TODO: You could vectorise the loop below.
     for (i in 1:n) {
       if (x[i] != 0)
@@ -105,10 +113,14 @@ zero_infl_var = function(iterations, x, a, b)
       }
     }
     # TODO: Lower bound? ----
-    lower_bd = lower_bound(x, p, a, b, a_lambda, b_lambda, a_rho, b_rho)
-    print(lower_bd)
+    lower_bound = calculate_lower_bound(x, p, a, b, a_lambda, b_lambda, a_rho, b_rho)
+    #print(lower_bound)
     params = list(a_lambda=a_lambda, b_lambda=b_lambda, a_rho=a_rho, b_rho=b_rho)
     #print(params)
+    cat("Iteration ", iteration, ": lower bound ", lower_bound, " difference ",
+        last_lower_bound - lower_bound, " parameters ", "a_lambda", a_lambda,
+        "b_lambda", b_lambda, "a_rho", a_rho, "b_rho", b_rho, "\n")
+    iteration = iteration + 1
   }
   return(params)
 }
@@ -183,39 +195,17 @@ main_check_accuracy = function()
 }
 #main_check_accuracy()
 
-# Test variational approximation. Unit tests? ----
-# Simulate data
-# Variational approximation
-# Check that lower bounds are monotonically increasing
-# Compare accuracy against MCMC
-n = 100
-rho = .5
-lambda = 100
-
-x = generate_test_data(n, rho, lambda)
-
-a = 10
-b = 10
-
-# Variational approximation ----
-start = Sys.time()
-result_var = zero_infl_var(10, x, a, b)
-var_runtime = Sys.time() - start
-# Variational approximation takes .05 seconds to run 10 iterations. So 5ms per iteration,
-# or 200 iterations a second.
-var_lambda = result_var$a_lambda / result_var$b_lambda
-var_rho = result_var$a_rho / (result_var$a_rho + result_var$b_lambda)
 
 # MCMC ----
-iterations = 1e6
-burnin = 1e3
+#iterations = 1e6
+#burnin = 1e3
 
-start = Sys.time()
-result_mcmc = zero_infl_mcmc(iterations+burnin, x, a, b)
-mcmc_runtime = Sys.time() - start
+#start = Sys.time()
+#result_mcmc = zero_infl_mcmc(iterations+burnin, x, a, b)
+#mcmc_runtime = Sys.time() - start
 # Throw away burn-in samples.
 # Brackets turn out to be incredibly important here!!!
-result_mcmc$rho = result_mcmc$rho[(burnin+1):(burnin+iterations+1)]
-result_mcmc$lambda = result_mcmc$lambda[(burnin+1):(burnin+iterations+1)]
+#result_mcmc$rho = result_mcmc$rho[(burnin+1):(burnin+iterations+1)]
+#result_mcmc$lambda = result_mcmc$lambda[(burnin+1):(burnin+iterations+1)]
 # 1000 iterations in 0.07461715 seconds.
 
