@@ -208,6 +208,34 @@ $$
 E[\log{q(\rho)}] = - \{ \log{(B(a_q^*, b_q^*)} - (\alpha_q^* - 1) \psi{(a_q^*)} - (\beta_q^* - 1)\Psi{(\beta_q^*)} + (\alpha_q^* + \beta_q^* - 2)\Psi{(\alpha_q^* + \beta_q^*)} \}
 $$
 
+\section{Extending the zero-inflated Poisson model to a regression model}
+The above univariate model demonstrates that variational approximations are well-suited
+to accelerating the fit of Bayesian zero-inflated models to data. We now extend the above
+model to a regression model by replacing the single parameter $\lambda$ with a set of
+regression coefficients $\beta$. We replace the Gamma prior on $\lambda$ with a multivariate
+normal prior $p(\vbeta) \sim N(\mu_\beta, \Sigma_\beta)$.
 
+Using the formulation of GLMs from \ref{Wand02}
+
+$$
+p(y|X, \vbeta) = \exp{\left[ \vy^T(\log{\vr} + X\vbeta) - \vr \exp{(X\vbeta)} - \log{(\vy!)} \right]}
+$$
+
+\subsection{Mean field updates}
+As the prior for $\vbeta$ is not conjugate with the Poisson distribution, $\vbeta$ must be
+updated by Newton-Raphson updates on the lower bound.
+
+The likelihood for $r_i$ is proportional to
+$$
+-\vr \exp{\left(X\vbeta\right)} + \vr \log{(\rho)} + (1 - \vr) \log{(1 - \rho)}
+$$
+
+Taking the expectation with respect to $\vbeta$
+
+$$
+\mathbb{E_{\vbeta}}\left[ e^{X \vbeta} \right] = % FIXME: What's the best we to evaluate this?
+$$
+
+\subsection{Lower bound}
 
 \end{document}
