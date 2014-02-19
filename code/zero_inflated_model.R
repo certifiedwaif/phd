@@ -56,28 +56,33 @@ calculate_lower_bound = function(x, p, a, b, a_lambda, b_lambda, a_rho, b_rho)
   {
     alpha - log(beta) + lgamma(a) - (a-1) * digamma(a)
   }
-
-  E_log_lambda = -gamma_entropy(a, b)
-  E_lambda = a/b
-  E_r = ifelse(x == 0, p, 1)
-  E_xi_log_lambda_r = ifelse(x == 0, 0, x*E_log_lambda)
-
+  
   beta_entropy = function(alpha, beta)
   {
     lbeta(alpha, beta) - (alpha-1)*digamma(alpha) - (beta-1)*digamma(beta) + (alpha+beta-2)*digamma(alpha+beta)
-  }
-
-  E_log_rho = -beta_entropy(1, 1) # rho is Unif([0, 1]), so a = b = 1
-  E_log_one_minus_rho = E_log_rho
+  }  
   
-  E_log_q_r = ifelse(x == 0, log(p), 0)
+  zero.set <- which(x==0)
+  
+  E_lambda = a_lambda/b_lambda
+  E_log_lambda = digamma(a_lambda) - log(b_lambda)  
+
+  E_r = ifelse(x == 0, p, 1)
+  E_xi_log_lambda_r = ifelse(x == 0, 0, x*E_log_lambda)
+  
+
+  
+  E_log_rho = digamma(a_rho) - digamma(a_rho + b_rho)
+  E_log_one_minus_rho = digamma(b_rho) - digamma(a_rho + b_rho)
+
+  E_log_q_r = (p[zero.set]*log(p[zero.set]) + (1-p[zero.set])*log(1-p[zero.set]))
   E_log_q_lambda = -gamma_entropy(a_lambda, b_lambda)
   E_log_q_rho = -beta_entropy(a_rho, b_rho) # FIXME: Why is this entropy positive?
   
   result = a * log(b) + (a-1) * E_log_lambda - b * E_lambda - lgamma(a)
-  result = result + - E_lambda * sum(E_r)
-  result = result + sum(E_xi_log_lambda_r) - sum(log(factorial(x)))
-  result = result + sum(E_r) * E_log_rho + sum((1 - E_r)) * E_log_one_minus_rho
+  result = result - E_lambda * sum(E_r)
+  result = result + sum(E_xi_log_lambda_r) - sum(lgamma(x+1))
+  result = result + sum(E_r) * E_log_rho + sum(1 - E_r) * E_log_one_minus_rho
   result = result - sum(E_log_q_r) - E_log_q_lambda - E_log_q_rho
   
   return(result)
@@ -91,6 +96,8 @@ zero_infl_var = function(x, a, b)
   p = rep(1, n)
   eta = rep(NA, n)
   a_lambda = a + sum(x)
+  
+  lower_bound_vector<- c()
   
   lower_bound = -Inf
   last_lower_bound = -Inf
@@ -114,6 +121,15 @@ zero_infl_var = function(x, a, b)
     }
     # TODO: Lower bound? ----
     lower_bound = calculate_lower_bound(x, p, a, b, a_lambda, b_lambda, a_rho, b_rho)
+    
+    lower_bound_vector[iteration] <- lower_bound
+    
+    if (iteration>2) {
+    	plot(lower_bound_vector,type="l")
+    }
+    ans <- readline()
+    
+    
     #print(lower_bound)
     params = list(a_lambda=a_lambda, b_lambda=b_lambda, a_rho=a_rho, b_rho=b_rho)
     #print(params)
