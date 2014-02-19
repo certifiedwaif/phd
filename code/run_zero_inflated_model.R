@@ -4,14 +4,14 @@
 # Check that lower bounds are monotonically increasing
 # Compare accuracy against MCMC
 source("zero_inflated_model.R")
-n = 100
+n = 1000
 rho = .5
-lambda = 100
+lambda = 1
 
 x = generate_test_data(n, rho, lambda)
 
-a = 1000
-b = 10
+a = 0.01
+b = 0.01
 
 # Variational approximation ----
 start = Sys.time()
