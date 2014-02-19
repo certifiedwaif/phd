@@ -171,19 +171,20 @@ In this case, the lower bound can be calculated directly to be
 
 \begin{align*}
 E_q \log{p(x, r, \lambda, \rho)} - E_q \log{q(r, \lambda, \rho)} &= a \log{b} + (a-1) E\left[\log{\lambda}\right] - b E\left[\lambda\right] - \log{\Gamma{(a)}} \\
-& + \sum_{i=1}^n \left(-E \left[ \lambda \right] E(r_i) + E \left[x_i \log{\lambda r_i}\right] - \log{x_i!} + E \left[r_i\right] E\left[\log(\rho)\right] + E \left[(1-r_i)\right] E\left[\log{1 - \rho}\right] \right) \\
+& + \sum_{i=1}^n \left(-E \left[ \lambda \right] E(r_i) + E \left[x_i \log{\lambda r_i}\right] - \log{(x_i!)} \\
+& + E \left[r_i\right] E\left[\log(\rho)\right] + E \left[(1-r_i)\right] E\left[\log{1 - \rho}\right] \right) \\
 & - \log{q(r)} - \log{q(\lambda)} - \log{q(\rho)}
 \end{align*}
 
 where
 $$
-E [\log{\lambda}] = -\{ a_\lambda^* - \log{b_\lambda^*} + \log{\gamma(a_\lambda^*)} + (1 - a_\lambda^*) \Psi{a_\lambda^*} \} \\
+E [\log{\lambda}] = -\{ a_\lambda^* - \log{(b_\lambda^*)} + \log{\Gamma(a_\lambda^*)} + (1 - a_\lambda^*) \psi{(a_\lambda^*)} \} \\
 $$
 $$
 E [\lambda] = \frac{a_\lambda^*}{b_\lambda^*} \\
 $$
 $$
-E[\log{\rho}] = - \{ \log{B(a_\rho^*, b_\rho^*)} - (a_\rho^* - 1) \psi{a_\rho^*} - (b_\rho^* - 1)\Psi{b_\rho^*} + (a_\rho^* + b_\rho^* - 2)\Psi{a_\rho^* + b_\rho^*} \} \\
+E[\log{\rho}] = - \{ \log{B(a_\rho^*, b_\rho^*)} - (a_\rho^* - 1) \psi{(a_\rho^*)} - (b_\rho^* - 1)\psi{(b_\rho^*)} + (a_\rho^* + b_\rho^* - 2)\psi{(a_\rho^* + b_\rho^*)} \} \\
 $$
 
 By symmetry, we see that $(1 - \rho)$ has the same entropy as $\rho$,
@@ -208,6 +209,34 @@ $$
 E[\log{q(\rho)}] = - \{ \log{(B(a_q^*, b_q^*)} - (\alpha_q^* - 1) \psi{(a_q^*)} - (\beta_q^* - 1)\Psi{(\beta_q^*)} + (\alpha_q^* + \beta_q^* - 2)\Psi{(\alpha_q^* + \beta_q^*)} \}
 $$
 
+\section{Extending the zero-inflated Poisson model to a regression model}
+The above univariate model demonstrates that variational approximations are well-suited
+to accelerating the fit of Bayesian zero-inflated models to data. We now extend the above
+model to a regression model by replacing the single parameter $\lambda$ with a set of
+regression coefficients $\beta$. We replace the Gamma prior on $\lambda$ with a multivariate
+normal prior $p(\vbeta) \sim N(\mu_\beta, \Sigma_\beta)$.
 
+Using the formulation of GLMs from \ref{Wand02}
+
+$$
+p(y|X, \vbeta) = \exp{\left[ \vy^T(\log{\vr} + X\vbeta) - \vr \exp{(X\vbeta)} - \log{(\vy!)} \right]}
+$$
+
+\subsection{Mean field updates}
+As the prior for $\vbeta$ is not conjugate with the Poisson distribution, $\vbeta$ must be
+updated by Newton-Raphson updates on the lower bound.
+
+The likelihood for $r_i$ is proportional to
+$$
+-\vr \exp{\left(X\vbeta\right)} + \vr \log{(\rho)} + (1 - \vr) \log{(1 - \rho)}
+$$
+
+Taking the expectation with respect to $\vbeta$
+
+$$
+\mathbb{E_{\vbeta}}\left[ e^{X \vbeta} \right] = % FIXME: What's the best we to evaluate this?
+$$
+
+\subsection{Lower bound}
 
 \end{document}
