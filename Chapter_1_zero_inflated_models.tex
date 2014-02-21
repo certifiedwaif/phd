@@ -216,7 +216,7 @@ model to a regression model by replacing the single parameter $\lambda$ with a s
 regression coefficients $\beta$. We replace the Gamma prior on $\lambda$ with a multivariate
 normal prior $p(\vbeta) \sim N(\mu_\beta, \Sigma_\beta)$.
 
-Using the formulation of GLMs from \ref{Wand02}
+Using the formulation of GLMs from \cite{wand02}
 
 $$
 p(y|X, \vbeta) = \exp{\left[ \vy^T(\log{\vr} + X\vbeta) - \vr \exp{(X\vbeta)} - \log{(\vy!)} \right]}
@@ -238,5 +238,8 @@ $$
 $$
 
 \subsection{Lower bound}
+
+\bibliographystyle{plain}
+\bibliography{references}
 
 \end{document}
