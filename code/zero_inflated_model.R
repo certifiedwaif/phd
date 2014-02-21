@@ -48,13 +48,13 @@ zero_infl_mcmc = function(iterations, x, a, b)
   return(list(lambda=lambda, rho=rho))
 }
 
-calculate_lower_bound = function(x, p, a, b, a_lambda, b_lambda, a_rho, b_rho)
+calculate_lower_bound = function(x, p, a_lambda, b_lambda, a_rho, b_rho)
 {
   #browser()
 
   gamma_entropy = function(alpha, beta)
   {
-    alpha - log(beta) + lgamma(a) - (a-1) * digamma(a)
+    alpha - log(beta) + lgamma(alpha) - (alpha-1) * digamma(alpha)
   }
   
   beta_entropy = function(alpha, beta)
@@ -120,7 +120,7 @@ zero_infl_var = function(x, a, b)
       }
     }
     # TODO: Lower bound? ----
-    lower_bound = calculate_lower_bound(x, p, a, b, a_lambda, b_lambda, a_rho, b_rho)
+    lower_bound = calculate_lower_bound(x, p, a_lambda, b_lambda, a_rho, b_rho)
     
     lower_bound_vector[iteration] <- lower_bound
     
@@ -134,7 +134,7 @@ zero_infl_var = function(x, a, b)
     params = list(a_lambda=a_lambda, b_lambda=b_lambda, a_rho=a_rho, b_rho=b_rho)
     #print(params)
     cat("Iteration ", iteration, ": lower bound ", lower_bound, " difference ",
-        last_lower_bound - lower_bound, " parameters ", "a_lambda", a_lambda,
+        lower_bound - last_lower_bound, " parameters ", "a_lambda", a_lambda,
         "b_lambda", b_lambda, "a_rho", a_rho, "b_rho", b_rho, "\n")
     iteration = iteration + 1
   }
