@@ -7,6 +7,7 @@ application, such as data arising from physical activity studies,
 insurance claims, hospital visits or defects in manufacturing processes.
 
 \section{A factorised variational approximation to the univariate zero-inflated Poisson model}
+We use a factorised approximation to the full likelihood, as detailed in \cite{ormerod10}.
 
 \noindent Consider $X_1, X_2, \ldots, X_n$ where $X_i = R_i Y_i$, $Y_i \sim \Poisson{\lambda}$ independent of
 $R_i \text{indep.} \sim \Bernoulli{\rho}$. Let $\rho \sim \Unif{0, 1}$, 
@@ -22,32 +23,33 @@ $$
 \subsection{Full conditional for $\lambda$}
 First, we calculate the full conditional for $\lambda$.
 
-\begin{align*}
-p(\lambda|\vx, \vr, \rho) &= \frac{\prod_{i=1}^n p(x_i | \lambda, r_i) p(\lambda) p(r_i|\rho) p(\rho)}{\int \prod_{i=1}^n p(x_i | \lambda, r_i) p(\lambda) p(r_i|\rho) p(\rho)) d \lambda}.
-\end{align*}
+%\begin{align*}
+%p(\lambda|\vx, \vr, \rho) &= \frac{\prod_{i=1}^n p(x_i | \lambda, r_i) p(\lambda) p(r_i|\rho) p(\rho)}{\int \prod_{i=1}^n p(x_i | \lambda, r_i) p(\lambda) p(r_i|\rho) p(\rho)) d \lambda}.
+%\end{align*}
+%
+%Concentrating for now on the denominator in this expression, we re-arrange and collect
+%like terms to obtain
+%$$
+%\prod_{i=1}^n \rho^r_i (1 - \rho)^{1 - r_i} \frac{r_i^{x_i}}{x_i !}
+%	\int \frac{b^a \lambda^{a - 1} \exp{(-b \lambda)} \lambda^{x_i} \exp{(-\lambda r_i)}}{\Gamma{(a)}} d \lambda
+%$$
+%
+%The integral in this expression is
+%\begin{align*}
+%& \int \frac{b^a \lambda^{(a + x_i) - 1} \exp{(-\lambda(b + r_i))}}{\Gamma{(a + x_i)}} d \lambda \frac{\Gamma{(a+ x_i)}}{\Gamma{(a)} b^{-x_i}} \\
+%=& \frac{\Gamma{(a+ x_i)}}{\Gamma{(a)} b^{-x_i}}.
+%\end{align*}
+%
+%Collecting the multiplicands in the integral over $\lambda$ together, we obtain
+%$$
+%\prod_{i=1}^n \rho^{r_i} (1 - \rho)^{1 - r_i} \frac{r_i^{x_i}}{x_i!}
+%	\int \frac{b^{na + \sum_{i=1}^n x_i} \lambda^{(na + \sum_{i=1}^n x_i) - 1} \exp{(-\lambda(nb + \sum_{i=1}^n r_i))}}{\Gamma{(na + \sum_{i=1}^n x_i)}} d \lambda
+%	\frac{\Gamma{(na + \sum_{i=1}^n x_i)}}{\Gamma{(na)} b^{-\sum_{i=1}^n x_i}}.
+%$$
 
-Concentrating for now on the denominator in this expression, we re-arrange and collect
-like terms to obtain
-$$
-\prod_{i=1}^n \rho^r_i (1 - \rho)^{1 - r_i} \frac{r_i^{x_i}}{x_i !}
-	\int \frac{b^a \lambda^{a - 1} \exp{(-b \lambda)} \lambda^{x_i} \exp{(-\lambda r_i)}}{\Gamma{(a)}} d \lambda
-$$
-
-The integral in this expression is
-\begin{align*}
-& \int \frac{b^a \lambda^{(a + x_i) - 1} \exp{(-\lambda(b + r_i))}}{\Gamma{(a + x_i)}} d \lambda \frac{\Gamma{(a+ x_i)}}{\Gamma{(a)} b^{-x_i}} \\
-=& \frac{\Gamma{(a+ x_i)}}{\Gamma{(a)} b^{-x_i}}.
-\end{align*}
-
-Collecting the multiplicands in the integral over $\lambda$ together, we obtain
-$$
-\prod_{i=1}^n \rho^{r_i} (1 - \rho)^{1 - r_i} \frac{r_i^{x_i}}{x_i!}
-	\int \frac{b^{na + \sum_{i=1}^n x_i} \lambda^{(na + \sum_{i=1}^n x_i) - 1} \exp{(-\lambda(nb + \sum_{i=1}^n r_i))}}{\Gamma{(na + \sum_{i=1}^n x_i)}} d \lambda
-	\frac{\Gamma{(na + \sum_{i=1}^n x_i)}}{\Gamma{(na)} b^{-\sum_{i=1}^n x_i}}.
-$$
-
-By cancelling like terms in the numerator and denominator of the full likelihood we arrive 
-at the functional form of the full conditional, which is proportional to
+%By cancelling like terms in the numerator and denominator of the full likelihood we arrive 
+%at
+The functional form of the full conditional is proportional to
 
 $$
 b^{a+\sum_{i=1}^n x_i} \lambda^{(a + \sum_{i=1}^n x_i) - 1} \exp{\left(-(b + \sum_{i=1}^n r_i) \lambda \right)}
@@ -59,16 +61,10 @@ $$
 $$
 
 \subsection{Full conditional for $\rho$}
-We now turn our attention to the full conditional distribution for $\rho$. Following the same
-technique as above, we first concentrate on the denominator in the full conditional:
-\begin{align*}
-p(\vx, \vr, \lambda) &= \int \frac{b^a \lambda^{a - 1} \exp{(-b \lambda)}}{\Gamma{(a)}} \prod_{i=1}^n \frac{\exp{(-\lambda r_i)} (\lambda r_i)^{x_i}}{x_i !} \rho^{r_i} (1 - \rho)^{1 - r_i} d \rho \\
-&= \left(\frac{b^a \lambda^{a - 1} \exp{(-b \lambda)}}{\Gamma{(a)}} \prod_{i=1}^n \frac{\exp{(-\lambda r_i)} (\lambda r_i)^{x_i}}{x_i !} \right) \int \rho^{\sum_{i=1}^n r_i} (1 - \rho)^{n - \sum_{i=1}^n r_i} d \rho
-\end{align*}
-
-This integral on the right hand side is a Beta integral with the parameters
-$a = \sum_{i=1}^n r_i + 1$ and $b = (n - \sum_{i=1}^n r_i) + 1$. All of the terms in the numerator and 
-denominator of the full conditional cancel except for
+The terms of the log-likelihood involving $\rho$ are
+%This integral on the right hand side is a Beta integral with the parameters
+%$a = \sum_{i=1}^n r_i + 1$ and $b = (n - \sum_{i=1}^n r_i) + 1$. All of the terms in the %numerator and 
+%denominator of the full conditional cancel except for
 $$
 \frac{\rho^{\sum_{i=1}^n r_i} (1 - \rho)^{n - \sum_{i=1}^n r_i}}{\Beta{\sum_{i=1}^n r_i + 1, n - \sum_{i=1}^n r_i + 1}}
 $$
@@ -81,7 +77,7 @@ p(r_i | \text{rest}) \propto \frac{(\lambda r_i)^{x_i} \exp{(-\lambda r_i)}}{x_i
 \propto r_i^{x_i} (e^{-\lambda})^{r_i} \rho^{r_i} (1 - \rho)^{1 - r_i}
 \end{align*}.
 
-Once again, we rely upon the fact that if $x_i = 0$, $r_i = 0$, and if $x_i \ne 0$,
+We make use of the fact that if $x_i = 0$, $r_i = 0$, and if $x_i \ne 0$,
 $r_i = 1$. So $x_i^{r_i} = I(x \ne 0)$ and hence the likelihood can be re-written as
 
 \begin{align*}
@@ -103,7 +99,7 @@ $$
 where $q(\lambda)$ is a Gamma distribution, $q(\rho)$ is a Beta distribution and
 $q(p_i)$ are Bernoulli distributions.
 
-By taking the expectation of each full conditional with respect to 
+%By taking the expectation of each full conditional with respect to 
 
 \subsection{Mean field update equations}
 We are now in a position to calculate the mean field update equations for the factorised
@@ -179,19 +175,19 @@ a \log{(b)} + (a - 1) \bbE[\log{(\lambda)}] - b \bbE [\lambda] - \log{(\Gamma(a)
 
 where
 $$
-E [\log{\lambda}] = -\{ a_\lambda^* - \log{(b_\lambda^*)} + \log{\Gamma(a_\lambda^*)} + (1 - a_\lambda^*) \psi{(a_\lambda^*)} \} \\
+\bbE [\log{\lambda}] = -\{ a_\lambda^* - \log{(b_\lambda^*)} + \log{\Gamma(a_\lambda^*)} + (1 - a_\lambda^*) \psi{(a_\lambda^*)} \} \\
 $$
 $$
-E [\lambda] = \frac{a_\lambda^*}{b_\lambda^*} \\
+\bbE [\lambda] = \frac{a_\lambda^*}{b_\lambda^*} \\
 $$
 $$
-E[\log{\rho}] = - \{ \log{B(a_\rho^*, b_\rho^*)} - (a_\rho^* - 1) \psi{(a_\rho^*)} - (b_\rho^* - 1)\psi{(b_\rho^*)} + (a_\rho^* + b_\rho^* - 2)\psi{(a_\rho^* + b_\rho^*)} \} \\
+\bbE[\log{\rho}] = - \{ \log{B(a_\rho^*, b_\rho^*)} - (a_\rho^* - 1) \psi{(a_\rho^*)} - (b_\rho^* - 1)\psi{(b_\rho^*)} + (a_\rho^* + b_\rho^* - 2)\psi{(a_\rho^* + b_\rho^*)} \} \\
 $$
 
 By symmetry, we see that $(1 - \rho)$ has the same entropy as $\rho$,
-and so $E [\log{(\rho)}] = E [\log{(1 - \rho)}]$.
+and so $\bbE [\log{(\rho)}] = \bbE [\log{(1 - \rho)}]$.
 $$
-E[r_i] = 
+\bbE[r_i] = 
 	\begin{cases}
 	1 & \text{if } x_i \ne 0 \\
 	p_i & \text{if } x_i = 0 \\
@@ -199,15 +195,15 @@ E[r_i] =
 $$
 
 $$
--E_q \log{q(r)} = \sum_{i=1}^n I(x_i = 0) \log{(p_i)}
+-\bbE_q \log{q(r)} = \sum_{i=1}^n I(x_i = 0) \log{(p_i)}
 $$
 
 $$
--E_q \log{q(\lambda)} = q_q^* - \log{(b_q^*)} + \log{\Gamma{(a_q^*)}} + (1 - a_q^*) \Psi{(a_q^*)}
+-\bbE_q \log{q(\lambda)} = q_q^* - \log{(b_q^*)} + \log{\Gamma{(a_q^*)}} + (1 - a_q^*) \Psi{(a_q^*)}
 $$
 
 $$
-E[\log{q(\rho)}] = - \{ \log{(B(a_q^*, b_q^*)} - (\alpha_q^* - 1) \psi{(a_q^*)} - (\beta_q^* - 1)\Psi{(\beta_q^*)} + (\alpha_q^* + \beta_q^* - 2)\Psi{(\alpha_q^* + \beta_q^*)} \}
+\bbE[\log{q(\rho)}] = - \{ \log{(B(a_q^*, b_q^*)} - (\alpha_q^* - 1) \psi{(a_q^*)} - (\beta_q^* - 1)\Psi{(\beta_q^*)} + (\alpha_q^* + \beta_q^* - 2)\Psi{(\alpha_q^* + \beta_q^*)} \}
 $$
 
 \section{Extending the zero-inflated Poisson model to a regression model}
