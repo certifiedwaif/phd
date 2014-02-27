@@ -170,11 +170,11 @@ calculated for each iteration as specified above.
 In this case, the lower bound can be calculated directly to be
 
 \begin{align*}
-E_q \log{p(x, r, \lambda, \rho)} - E_q \log{q(r, \lambda, \rho)} &= a \log{b} + (a-1) E\left[\log{\lambda}\right] - b E\left[\lambda\right] - \log{\Gamma{(a)}} \\
-% FIXME: This line breaks everything!
-%& + \sum_{i=1}^n \left(-E \left[ \lambda \right] E(r_i) + E \left[x_i \log{\lambda r_i}\right] - \log{(x_i!)} \\
-%& + E \left[r_i\right] E\left[\log(\rho)\right] + E \left[(1-r_i)\right] E\left[\log{1 - \rho}\right] \right) \\
-%& - \log{q(r)} - \log{q(\lambda)} - \log{q(\rho)}
+\bbE_q \left\{ \log{p(\vx, \vr, \lambda, \rho)} - \log{q(\vr, \lambda, \rho)} \right\} &= 
+a \log{(b)} + (a - 1) \bbE[\log{(\lambda)}] - b \bbE [\lambda] - \log{(\Gamma(a))} \\
+&+ \sum_{i=1}^n \left\{ -\bbE [\lambda] \bbE [r_i] + \bbE[x_i \log{(\lambda r_i)}] - \log{(x_i!)} \\
+&+ \bbE[r_i] \bbE[\log{(\rho)}] + \bbE[(1 - r_i)] \bbE[\log{(1 - \rho)}] \right\} \\
+& - \bbE \log{q(r)} - \bbE \log{q(\lambda)} - \bbE \log{q(\rho)}
 \end{align*}
 
 where
