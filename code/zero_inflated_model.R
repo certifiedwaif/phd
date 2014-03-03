@@ -225,3 +225,20 @@ main_check_accuracy = function()
 #result_mcmc$lambda = result_mcmc$lambda[(burnin+1):(burnin+iterations+1)]
 # 1000 iterations in 0.07461715 seconds.
 
+# Extension to multivariate case ----
+multivariate = function(y, X, Z)
+{
+  SigmaInv = solve(Sigma)
+  D_b = sum(t(y - B(1, beta, mu, Lambda)) %*% X)
+  D_Sigma = 0.5 * sum(t(vec(SigmaInv %*% (m[i] %*% t(mu[i]) + Lambda[i]) %*% SigmaInv)) %*% D)
+  D_mu[i] = t(y - B(1, mu[i], Lambda[i])) %*% Z[i] - t(mu[i]) %*% SigmaInv
+  D_Lambda[i] = .5 t(vec(Lambda[i]Inv - SigmaInv - t(Z[i]) %*% diag(B(2, beta, mu[i], Lambda[i])) %*% Z[i])) %*% D
+
+  H_b_u[i] = -t(X[i]) %*% diag(B(2, beta, mu[i], Lambda[i])) %*% Z[i]
+  H_b_Lambda[i] = - .5 * t(X[i]) %*% diag(B(3, beta, mu[i], Lambda[i])) %*% O(Z[i]) %*% D
+  H_Sigma_mu[i] = t(D) %*% kron(SigmaInv %*% mu[i], SigmaInv)
+  H_mu[i]_mu[i] = -t(Z[i]) %*% diag(B(2, beta, mu[i], Lambda[i])) %*% Z[i] - SigmaInv
+  H_mu[i]_Lambda[i] = - .5 * t(Z[i] %*% diag(B(3, beta, mu[i], Lambda[i]))) %*% O(Z[i]) %*% D
+  Lambda[i]Inv = solve(Lambda[i])
+  H_Lambda[i]_Lambda[i] = -.25 * t(D) %*% (t(O(Z[i])) %*% diag(4, beta, mu[i], Lambda[i])) + 2(kron(Lambda[i]Inv, Lambda[i]Inv)) %*% D
+}
