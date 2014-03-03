@@ -168,8 +168,8 @@ In this case, the lower bound can be calculated directly to be
 \begin{align*}
 \bbE_q \left\{ \log{p(\vx, \vr, \lambda, \rho)} - \log{q(\vr, \lambda, \rho)} \right\} &= 
 a \log{(b)} + (a - 1) \bbE[\log{(\lambda)}] - b \bbE [\lambda] - \log{(\Gamma(a))} \\
-&+ \sum_{i=1}^n \left\{ -\bbE [\lambda] \bbE [r_i] + \bbE[x_i \log{(\lambda r_i)}] - \log{(x_i!)} \\
-&+ \bbE[r_i] \bbE[\log{(\rho)}] + \bbE[(1 - r_i)] \bbE[\log{(1 - \rho)}] \right\} \\
+&+ \sum_{i=1}^n  ( -\bbE [\lambda] \bbE [r_i] + \bbE[x_i \log{(\lambda r_i)}] - \log{(x_i!)} \\
+&+ \bbE[r_i] \bbE[\log{(\rho)}] + \bbE[(1 - r_i)] \bbE[\log{(1 - \rho)}] ) \\
 & - \bbE \log{q(r)} - \bbE \log{q(\lambda)} - \bbE \log{q(\rho)}
 \end{align*}
 
