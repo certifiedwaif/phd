@@ -1,13 +1,22 @@
 \documentclass{amsart}
+\usepackage{graphicx}
+\title{Variational approximations to zero-inflated Bayesian models}
+\author{Mark Greenaway}
 \input{include.tex}
 \begin{document}
+\maketitle
 % First, simplest zero-inflated count model to consider.
 Count data with a large number of zero counts arises in many areas of
 application, such as data arising from physical activity studies, 
 insurance claims, hospital visits or defects in manufacturing processes.
 
 \section{A factorised variational approximation to the univariate zero-inflated Poisson model}
+
+% TODO: Add graphical model
+
 We use a factorised approximation to the full likelihood, as detailed in \cite{ormerod10}.
+The use of conjugate priors in the full model yields easier mean field updates in the
+variational approximation.
 
 \noindent Consider $X_1, X_2, \ldots, X_n$ where $X_i = R_i Y_i$, $Y_i \sim \Poisson{\lambda}$ independent of
 $R_i \text{indep.} \sim \Bernoulli{\rho}$. Let $\rho \sim \Unif{0, 1}$, 
@@ -206,35 +215,28 @@ $$
 \bbE[\log{q(\rho)}] = - \{ \log{(B(a_q^*, b_q^*)} - (\alpha_q^* - 1) \psi{(a_q^*)} - (\beta_q^* - 1)\Psi{(\beta_q^*)} + (\alpha_q^* + \beta_q^* - 2)\Psi{(\alpha_q^* + \beta_q^*)} \}
 $$
 
+\subsection{Results}
+\includegraphics[width=100mm,height=100mm]{code/lower_bound_convergence.pdf}
+
 \section{Extending the zero-inflated Poisson model to a regression model}
 The above univariate model demonstrates that variational approximations are well-suited
-to accelerating the fit of Bayesian zero-inflated models to data. We now extend the above
-model to a regression model by replacing the single parameter $\lambda$ with a set of
-regression coefficients $\beta$. We replace the Gamma prior on $\lambda$ with a multivariate
-normal prior $p(\vbeta) \sim N(\mu_\beta, \Sigma_\beta)$.
-
-Using the formulation of GLMs from \cite{wand02}
-
-$$
-p(y|X, \vbeta) = \exp{\left[ \vy^T(\log{\vr} + X\vbeta) - \vr \exp{(X\vbeta)} - \log{(\vy!)} \right]}
-$$
-
-\subsection{Mean field updates}
-As the prior for $\vbeta$ is not conjugate with the Poisson distribution, $\vbeta$ must be
-updated by Newton-Raphson updates on the lower bound.
-
-The likelihood for $r_i$ is proportional to
-$$
--\vr \exp{\left(X\vbeta\right)} + \vr \log{(\rho)} + (1 - \vr) \log{(1 - \rho)}
-$$
-
-Taking the expectation with respect to $\vbeta$
+to accelerating the fit of Bayesian zero-inflated models to data. Typically zero-inflated
+models arise in applications where we wish to build multivariate models. To be able to
+construct multivariate models with as much generality as possible, we specify the full
+model as a General Design Bayesian Generalized Linear Mixed Model, as in \cite{zhao06}.
+This allows us to incorporate within-subject correlation, measurement error, missing data
+and smoothing splines in our models. We replace the $\lambda$ component of the model
+in the previous section with
 
 $$
-\mathbb{E_{\vbeta}}\left[ e^{X \vbeta} \right] = % FIXME: What's the best we to evaluate this?
+y_i|u_i \sim \exp{z_i^T(X_i \beta+ Z_i u_i) - r_i^T \exp{X_i\beta + Z_i u_i} + 1_i^T\Gamma(y_i + 1)}, u_i \sim N(0, \Sigma)
 $$
 
-\subsection{Lower bound}
+where $z_i = I(y_i = 0)y_i$. The prior on $\vbeta$ is $N(0, \Sigmabeta)$.
+
+The use of non-conjugate multivariate normal priors for $\vbeta$ make this model less
+amenable to mean field updates. Instead, we use the Gaussian Variational Approximation
+approach outlined in \cite{ormerod09}.
 
 \bibliographystyle{plain}
 \bibliography{Chapter_1_zero_inflated_models}
