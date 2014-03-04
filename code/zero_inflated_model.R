@@ -124,10 +124,10 @@ zero_infl_var = function(x, a, b)
     
     lower_bound_vector[iteration] <- lower_bound
     
-    if (iteration>2) {
-    	plot(lower_bound_vector,type="l")
-    }
-    ans <- readline()
+    #if (iteration>2) {
+    #	plot(lower_bound_vector,type="l")
+    #}
+    #ans <- readline()
     
     
     #print(lower_bound)
@@ -138,6 +138,7 @@ zero_infl_var = function(x, a, b)
         "b_lambda", b_lambda, "a_rho", a_rho, "b_rho", b_rho, "\n")
     iteration = iteration + 1
   }
+  plot(lower_bound_vector,type="l")
   return(params)
 }
 
