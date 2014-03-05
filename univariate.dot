@@ -1,0 +1,9 @@
+digraph G {
+	lambda [label="&lambda;"];
+	rho [label="&rho;"];
+
+	x_i -> r_i;
+	r_i -> rho;
+	x_i -> y_i;
+	y_i -> lambda;
+}
