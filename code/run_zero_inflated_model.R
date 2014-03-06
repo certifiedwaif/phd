@@ -4,7 +4,7 @@
 # Check that lower bounds are monotonically increasing
 # Compare accuracy against MCMC
 source("zero_inflated_model.R")
-n = 10000
+n = 1000
 rho = .5
 lambda = 1
 
@@ -21,3 +21,5 @@ var_runtime = Sys.time() - start
 # or 200 iterations a second.
 var_lambda = result_var$a_lambda / result_var$b_lambda
 var_rho = result_var$a_rho / (result_var$a_rho + result_var$b_rho)
+
+main_check_accuracy()
