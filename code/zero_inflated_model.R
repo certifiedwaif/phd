@@ -79,7 +79,7 @@ calculate_lower_bound = function(x, p, a_lambda, b_lambda, a_rho, b_rho)
   E_log_q_lambda = -gamma_entropy(a_lambda, b_lambda)
   E_log_q_rho = -beta_entropy(a_rho, b_rho) # FIXME: Why is this entropy positive?
   
-  result = a * log(b) + (a-1) * E_log_lambda - b * E_lambda - lgamma(a)
+  result = a_lambda * log(b_lambda) + (a_lambda-1) * E_log_lambda - b_lambda * E_lambda - lgamma(a_lambda)
   result = result - E_lambda * sum(E_r)
   result = result + sum(E_xi_log_lambda_r) - sum(lgamma(x+1))
   result = result + sum(E_r) * E_log_rho + sum(1 - E_r) * E_log_one_minus_rho
@@ -122,13 +122,7 @@ zero_infl_var = function(x, a, b)
     # TODO: Lower bound? ----
     lower_bound = calculate_lower_bound(x, p, a_lambda, b_lambda, a_rho, b_rho)
     
-    lower_bound_vector[iteration] <- lower_bound
-    
-    if (iteration>2) {
-    	plot(lower_bound_vector,type="l")
-    }
-    ans <- readline()
-    
+    lower_bound_vector[iteration] <- lower_bound    
     
     #print(lower_bound)
     params = list(a_lambda=a_lambda, b_lambda=b_lambda, a_rho=a_rho, b_rho=b_rho)
@@ -138,6 +132,7 @@ zero_infl_var = function(x, a, b)
         "b_lambda", b_lambda, "a_rho", a_rho, "b_rho", b_rho, "\n")
     iteration = iteration + 1
   }
+  plot(lower_bound_vector,type="l")
   return(params)
 }
 
@@ -187,7 +182,7 @@ check_accuracy = function(n, rho, lambda)
   
   # Variational approximation ----
   start = Sys.time()
-  result_var = zero_infl_var(10, x, a, b)
+  result_var = zero_infl_var(x, a, b)
   var_runtime = Sys.time() - start
   # Variational approximation takes .05 seconds to run 10 iterations. So 5ms per iteration,
   # or 200 iterations a second.
@@ -206,11 +201,9 @@ main_check_accuracy = function()
   lambda = 100
   
   for (rho in .1*1:9)
-    for (lambda in seq(5, 100, 5))
+    for (lambda in seq(5, 10, 0.05))
       print(check_accuracy(n, rho, lambda))
 }
-#main_check_accuracy()
-
 
 # MCMC ----
 #iterations = 1e6
@@ -228,17 +221,20 @@ main_check_accuracy = function()
 # Extension to multivariate case ----
 multivariate = function(y, X, Z)
 {
-  SigmaInv = solve(Sigma)
-  D_b = sum(t(y - B(1, beta, mu, Lambda)) %*% X)
-  D_Sigma = 0.5 * sum(t(vec(SigmaInv %*% (m[i] %*% t(mu[i]) + Lambda[i]) %*% SigmaInv)) %*% D)
-  D_mu[i] = t(y - B(1, mu[i], Lambda[i])) %*% Z[i] - t(mu[i]) %*% SigmaInv
-  D_Lambda[i] = .5 t(vec(Lambda[i]Inv - SigmaInv - t(Z[i]) %*% diag(B(2, beta, mu[i], Lambda[i])) %*% Z[i])) %*% D
-
-  H_b_u[i] = -t(X[i]) %*% diag(B(2, beta, mu[i], Lambda[i])) %*% Z[i]
-  H_b_Lambda[i] = - .5 * t(X[i]) %*% diag(B(3, beta, mu[i], Lambda[i])) %*% O(Z[i]) %*% D
-  H_Sigma_mu[i] = t(D) %*% kron(SigmaInv %*% mu[i], SigmaInv)
-  H_mu[i]_mu[i] = -t(Z[i]) %*% diag(B(2, beta, mu[i], Lambda[i])) %*% Z[i] - SigmaInv
-  H_mu[i]_Lambda[i] = - .5 * t(Z[i] %*% diag(B(3, beta, mu[i], Lambda[i]))) %*% O(Z[i]) %*% D
-  Lambda[i]Inv = solve(Lambda[i])
-  H_Lambda[i]_Lambda[i] = -.25 * t(D) %*% (t(O(Z[i])) %*% diag(4, beta, mu[i], Lambda[i])) + 2(kron(Lambda[i]Inv, Lambda[i]Inv)) %*% D
+  # Initialise variables
+  # You're probably just re-writing software that already exists
+  
+#   SigmaInv = solve(Sigma)
+#   D_b = sum(t(y - B(1, beta, mu, Lambda)) %*% X)
+#   D_Sigma = .5 * sum(t(vec(SigmaInv %*% (m[i] %*% t(mu[i]) + Lambda[i]) %*% SigmaInv)) %*% D)
+#   D_mu[i] = t(y - B(1, mu[i], Lambda[i])) %*% Z[i] - t(mu[i]) %*% SigmaInv
+#   D_Lambda[i] = .5 * t(vec(Lambda[i]Inv - SigmaInv - t(Z[i]) %*% diag(B(2, beta, mu[i], Lambda[i])) %*% Z[i])) %*% D
+# 
+#   H_b_u[i] = -t(X[i]) %*% diag(B(2, beta, mu[i], Lambda[i])) %*% Z[i]
+#   H_b_Lambda[i] = - .5 * t(X[i]) %*% diag(B(3, beta, mu[i], Lambda[i])) %*% O(Z[i]) %*% D
+#   H_Sigma_mu[i] = t(D) %*% kron(SigmaInv %*% mu[i], SigmaInv)
+#   H_mu_mu[i, i] = -t(Z[i]) %*% diag(B(2, beta, mu[i], Lambda[i])) %*% Z[i] - SigmaInv
+#   H_mu_Lambda[i, i] = - .5 * t(Z[i] %*% diag(B(3, beta, mu[i], Lambda[i]))) %*% O(Z[i]) %*% D
+#   LambdaInv[i] = solve(Lambda[i])
+#   H_Lambda_Lambda[i, i] = -.25 * t(D) %*% (t(O(Z[i])) %*% diag(4, beta, mu[i], Lambda[i])) + 2(kron(LambdaInv[i], LambdaInv[i])) %*% D
 }
