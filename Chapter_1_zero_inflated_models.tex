@@ -216,7 +216,7 @@ $$
 $$
 
 \subsection{Results}
-\includegraphics[width=100mm,height=100mm]{code/lower_bound_convergence.pdf}
+%\includegraphics[width=100mm,height=100mm]{code/lower_bound_convergence.pdf}
 
 \section{Extending the zero-inflated Poisson model to a regression model}
 The above univariate model demonstrates that variational approximations are well-suited
@@ -229,14 +229,28 @@ and smoothing splines in our models. We replace the $\lambda$ component of the m
 in the previous section with
 
 $$
-y_i|u_i \sim \exp{z_i^T(X_i \beta+ Z_i u_i) - r_i^T \exp{X_i\beta + Z_i u_i} + 1_i^T\Gamma(y_i + 1)}, u_i \sim N(0, \Sigma)
+y_i|u_i \sim \exp{\left\{z_i^T(X_i \beta+ Z_i u_i) - r_i^T \exp{X_i\beta + Z_i u_i} + 1_i^T\Gamma(y_i + 1)\right\}}, u_i \sim N(0, \Sigma)
 $$
 
 where $z_i = I(y_i = 0)y_i$. The prior on $\vbeta$ is $N(0, \Sigmabeta)$.
 
 The use of non-conjugate multivariate normal priors for $\vbeta$ make this model less
 amenable to mean field updates. Instead, we use the Gaussian Variational Approximation
-approach outlined in \cite{ormerod09}.
+approach outlined in \cite{ormerod09}. As we are using the Poisson regression model, the
+integral over the random effects $u_i$ simplifies to
+\begin{align*}
+\int_{-\infty}^\infty \exp{\left( \sigma x + \mu \right)} \phi(x) dx &= \exp{\left( \mu + \half \sigma^2\right)}
+\end{align*}
+
+and so $B^{(r)} = \sigma^r \exp{\left( \mu + \half \sigma^2\right)}$.
+% What to write down first?
+
+% TODO: Lower bound graph
+% TODO: Accuracy of approximations
+% TODO: Application, physical activity data
+% Random intercept, longitudinal data
+% Graph demonstrating additional zeroes
+
 
 \bibliographystyle{plain}
 \bibliography{Chapter_1_zero_inflated_models}
