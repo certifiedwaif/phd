@@ -24,9 +24,16 @@ vg.lap <- function(vbeta,vu,vy,mX,mZ,mSigmaBeta.inv,mSigma.inv)
 
 mH.lap <- function(vbeta,vu,vy,mX,mZ,mSigmaBeta.inv,mSigma.inv) 
 {
+  diagMat <- function(x, y)
+  {
+    result = matrix(0, nrow(x) + nrow(y), ncol(x) + ncol(y))
+    result[1:nrow(x), 1:ncol(x)] = x
+    result[(nrow(x)+1):(nrow(x)+nrow(y)), (ncol(x)+1):(ncol(x)+ncol(y))]
+    return(result)
+  }
 	veta = mX%*%vbeta + mZ%*%vu
     vw <- exp(veta); dim(vw) <- NULL
-    mH <- -t(cbind(mX,mZ)*vw)%*%cbind(mX,mZ) - rbind(mSigmaBeta.inv%*%vbeta, mSigma.inv%*%vu)
+    mH <- -t(cbind(mX,mZ)*vw)%*%cbind(mX,mZ) - diagMat(mSigmaBeta.inv, mSigma.inv)
     return(mH)
 }
 
@@ -35,6 +42,7 @@ mH.lap <- function(vbeta,vu,vy,mX,mZ,mSigmaBeta.inv,mSigma.inv)
 fit.Lap <- function(vbeta,vu,vy,mX,mZ,mSigmaBeta.inv,mSigma.inv) 
 {
     MAXITER <- 100
+    vmu = c(vbeta, vu)
     
     for (ITER in 1:MAXITER) {
         f  <- f.lap(vbeta,vu,vy,mX,mZ,mSigmaBeta.inv,mSigma.inv) 
