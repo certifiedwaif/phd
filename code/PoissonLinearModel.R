@@ -6,8 +6,13 @@ source("CalculateB.R")
 
 f.lap <- function(vbeta,vu,vy,mX,mZ,mSigmaBeta.inv,mSigma.inv) 
 {       
-    veta <- mX%*%vbeta + mZ%*%vu
-    f <- sum(vy*veta - exp(veta)) - 0.5*t(vbeta)%*%mSigmaBeta.inv%*%vbeta - 0.5*t(vu)%*%mSigma.inv%*%vu 
+    #veta <- mX%*%vbeta + mZ%*%vu
+    #f <- sum(vy*veta - exp(veta)) - 0.5*t(vbeta)%*%mSigmaBeta.inv%*%vbeta - 0.5*t(vu)%*%mSigma.inv%*%vu 
+    #return(f)
+    vtheta <- c(vbeta, vu)
+    d <- length(vtheta)
+    veta <- cbind(mX, mZ)%*%vtheta
+    f <- sum(vy*veta - exp(veta)) - 0.5*t(vtheta)%*%mSigma.inv%*%vtheta 
     return(f)
 }
 
@@ -15,26 +20,33 @@ f.lap <- function(vbeta,vu,vy,mX,mZ,mSigmaBeta.inv,mSigma.inv)
 
 vg.lap <- function(vbeta,vu,vy,mX,mZ,mSigmaBeta.inv,mSigma.inv) 
 {       
-    veta <- mX%*%vbeta + mZ%*%vu
-    vg <- t(cbind(mX,mZ))%*%(vy - exp(veta)) - rbind(mSigmaBeta.inv%*%vbeta, mSigma.inv%*%vu)
-    return(vg)
+  vtheta <- c(vbeta, vu)
+  vg <- t(cbind(mX, mZ))%*%(vy - exp(cbind(mX, mZ)%*%vtheta)) - mSigma.inv%*%vtheta
+  return(vg)
+    #veta <- mX%*%vbeta + mZ%*%vu
+    #vg <- t(cbind(mX,mZ))%*%(vy - exp(veta)) - rbind(mSigmaBeta.inv%*%vbeta, mSigma.inv%*%vu)
+    #return(vg)
 }
 
 ###############################################################################
 
 mH.lap <- function(vbeta,vu,vy,mX,mZ,mSigmaBeta.inv,mSigma.inv) 
 {
-  diagMat <- function(x, y)
-  {
-    result = matrix(0, nrow(x) + nrow(y), ncol(x) + ncol(y))
-    result[1:nrow(x), 1:ncol(x)] = x
-    result[(nrow(x)+1):(nrow(x)+nrow(y)), (ncol(x)+1):(ncol(x)+ncol(y))]
-    return(result)
-  }
-	veta = mX%*%vbeta + mZ%*%vu
-    vw <- exp(veta); dim(vw) <- NULL
-    mH <- -t(cbind(mX,mZ)*vw)%*%cbind(mX,mZ) - diagMat(mSigmaBeta.inv, mSigma.inv)
-    return(mH)
+  vtheta <- c(vbeta, vu)
+  vw <- exp(cbind(mX, mZ)%*%vtheta); dim(vw) <- NULL
+  mH <- -t(cbind(mX, mZ)*vw)%*%cbind(mX, mZ) - mSigma.inv
+  return(mH)
+  #diagMat <- function(x, y)
+  #{
+  #  result = matrix(0, nrow(x) + nrow(y), ncol(x) + ncol(y))
+  #  result[1:nrow(x), 1:ncol(x)] = x
+  #  result[(nrow(x)+1):(nrow(x)+nrow(y)), (ncol(x)+1):(ncol(x)+ncol(y))]
+  #  return(result)
+  #}
+	#veta = mX%*%vbeta + mZ%*%vu
+  #  vw <- exp(veta); dim(vw) <- NULL
+  #  mH <- -t(cbind(mX,mZ)*vw)%*%cbind(mX,mZ) - diagMat(mSigmaBeta.inv, mSigma.inv)
+  #  return(mH)
 }
 
 ###############################################################################
@@ -50,6 +62,8 @@ fit.Lap <- function(vbeta,vu,vy,mX,mZ,mSigmaBeta.inv,mSigma.inv)
         mH <- mH.lap(vbeta,vu,vy,mX,mZ,mSigmaBeta.inv,mSigma.inv)
         mLambda <- solve(-mH,tol=1.0E-99)
         vmu <- vmu + mLambda%*%vg
+        vbeta <- vmu[1:2]
+        vu <- vmu[3:4]
         #print(c(ITER,f,max(abs(vg))))
         if (max(abs(vg))<1.0E-8) {
             break;
@@ -64,8 +78,7 @@ fit.Lap <- function(vbeta,vu,vy,mX,mZ,mSigmaBeta.inv,mSigma.inv)
         
     #vu <- res$par
     #mLambda <- solve(-mH.lap(vu,vy,mZ,mSigma.inv),tol=1.0E-99)
-    
-    f <- f.lap(vmu,vy,mZ,mSigma.inv) + 0.5*log(det(mLambda%*%mSigma.inv))
+    f <- f.lap(vbeta,vu,vy,mX,mZ,mSigmaBeta.inv,mSigma.inv) + 0.5*log(det(mLambda%*%mSigma.inv))
     print(f)
     return(list(vmu=vmu,mLambda=mLambda,f=f))
 }
