@@ -85,7 +85,7 @@ fit.Lap <- function(vbeta,vu,vy,mX,mZ,mSigmaBeta.inv,mSigma.inv, debug=FALSE)
         
     #vu <- res$par
     #mLambda <- solve(-mH.lap(vu,vy,mZ,mSigma.inv),tol=1.0E-99)
-    f <- f.lap(vbeta,vu,vy,mX,mZ,mSigmaBeta.inv,mSigma.inv) + 0.5*log(det(mLambda%*%mSigma.inv))
+    f <- f.lap(vbeta,vu,vy,mX,mZ,mSigmaBeta.inv,mSigma.inv) + 0.5*log(det(mLambda%*%bdiag(mSigmaBeta.inv, mSigma.inv)))
     print(f)
     return(list(vmu=vmu,mLambda=mLambda,f=f))
 }
