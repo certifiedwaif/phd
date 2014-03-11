@@ -1,6 +1,7 @@
 ###############################################################################
 
 source("CalculateB.R")
+require(Matrix)
 
 ###############################################################################
 
@@ -12,7 +13,7 @@ f.lap <- function(vbeta,vu,vy,mX,mZ,mSigmaBeta.inv,mSigma.inv)
     vtheta <- c(vbeta, vu)
     d <- length(vtheta)
     veta <- cbind(mX, mZ)%*%vtheta
-    f <- sum(vy*veta - exp(veta)) - 0.5*t(vtheta)%*%mSigma.inv%*%vtheta 
+    f <- sum(vy*veta - exp(veta)) - 0.5*(t(vbeta)%*%mSigmaBeta.inv%*%vbeta + t(vu)%*%mSigma.inv%*%vu)
     return(f)
 }
 
@@ -21,7 +22,7 @@ f.lap <- function(vbeta,vu,vy,mX,mZ,mSigmaBeta.inv,mSigma.inv)
 vg.lap <- function(vbeta,vu,vy,mX,mZ,mSigmaBeta.inv,mSigma.inv) 
 {       
   vtheta <- c(vbeta, vu)
-  vg <- t(cbind(mX, mZ))%*%(vy - exp(cbind(mX, mZ)%*%vtheta)) - mSigma.inv%*%vtheta
+  vg <- t(cbind(mX, mZ))%*%(vy - exp(cbind(mX, mZ)%*%vtheta)) - rbind(mSigmaBeta.inv%*%vbeta, mSigma.inv%*%vu)
   return(vg)
     #veta <- mX%*%vbeta + mZ%*%vu
     #vg <- t(cbind(mX,mZ))%*%(vy - exp(veta)) - rbind(mSigmaBeta.inv%*%vbeta, mSigma.inv%*%vu)
@@ -32,9 +33,14 @@ vg.lap <- function(vbeta,vu,vy,mX,mZ,mSigmaBeta.inv,mSigma.inv)
 
 mH.lap <- function(vbeta,vu,vy,mX,mZ,mSigmaBeta.inv,mSigma.inv) 
 {
-  vtheta <- c(vbeta, vu)
-  vw <- exp(cbind(mX, mZ)%*%vtheta); dim(vw) <- NULL
-  mH <- -t(cbind(mX, mZ)*vw)%*%cbind(mX, mZ) - mSigma.inv
+  #vtheta <- c(vbeta, vu)
+  #vw <- exp(cbind(mX, mZ)%*%vtheta); dim(vw) <- NULL
+  #mH <- -t(cbind(mX, mZ)*vw)%*%cbind(mX, mZ) - bdiag(mSigmaBeta.inv, mSigma.inv)
+  mW <- diag(as.vector(exp(mX%*%vbeta + mZ%*%vu)))
+  #mH <- bdiag(-t(mX) %*% mW %*% mX - mSigmaBeta.inv,
+  #            -t(mZ) %*% mW %*% mZ - mSigma.inv)
+  mH <- rbind(cbind(-t(mX)%*%mW%*%mX - mSigmaBeta.inv, -t(mX)%*%mW%*%mZ),
+              cbind(-t(mZ)%*%mW%*%mX, -t(mZ)%*%mW%*%mZ - mSigma.inv))
   return(mH)
   #diagMat <- function(x, y)
   #{
@@ -51,7 +57,7 @@ mH.lap <- function(vbeta,vu,vy,mX,mZ,mSigmaBeta.inv,mSigma.inv)
 
 ###############################################################################
 
-fit.Lap <- function(vbeta,vu,vy,mX,mZ,mSigmaBeta.inv,mSigma.inv) 
+fit.Lap <- function(vbeta,vu,vy,mX,mZ,mSigmaBeta.inv,mSigma.inv, debug=FALSE) 
 {
     MAXITER <- 100
     vmu = c(vbeta, vu)
@@ -64,7 +70,8 @@ fit.Lap <- function(vbeta,vu,vy,mX,mZ,mSigmaBeta.inv,mSigma.inv)
         vmu <- vmu + mLambda%*%vg
         vbeta <- vmu[1:2]
         vu <- vmu[3:4]
-        #print(c(ITER,f,max(abs(vg))))
+        if (debug)
+            print(c(ITER,f,max(abs(vg))))
         if (max(abs(vg))<1.0E-8) {
             break;
         }

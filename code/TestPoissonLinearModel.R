@@ -17,14 +17,15 @@ test_new <- function()
 	
 	mSigmaBeta.inv = matrix(0, 2, 2)
   diag(mSigmaBeta.inv) = rep(1.0, 2)
-	mSigma = matrix(0, 4, 4)
-	diag(mSigma) = rep(1.0, 4)
+	mSigma = matrix(0, 2, 2)
+	diag(mSigma) = rep(1.0, 2)
 	rho = .2
-	mSigma[4, 3] = rho
-	mSigma[3, 4] = rho
+	mSigma[2, 1] = rho
+	mSigma[1, 2] = rho
 	mSigma.inv = solve(mSigma)
-	fit = fit.Lap(vbeta, vu, vy, mX, mZ, mSigmaBeta.inv, mSigma.inv)
+	fit = fit.Lap(vbeta, vu, vy, mX, mZ, mSigmaBeta.inv, mSigma.inv, debug=TRUE)
 	print(str(fit))
+  # vg should equal (6, 35, 1, 5)
 	expect_equal(fit$vmu, matrix(c(-0.05263632,
 								  0.19422878,
 								 -0.16430321,
