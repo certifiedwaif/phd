@@ -218,13 +218,13 @@ vg.GVA <- function(vu,vy,mZ,mSigma.inv,gh,mR,Rinds,Dinds)
 
 ###############################################################################
 
-fit.GVA <- function(vmu,mLambda,vy,mZ,mSigma.inv,method,reltol=1.0e-8)
+fit.GVA <- function(vbeta,vu,mLambda,vy,mX,mZ,mSigmaBeta.inv,mSigma.inv,method,reltol=1.0e-8)
 {
 		#library(statmod)
 		#N <- 15
 		#gh  <- gauss.quad(N,kind="hermite")
 		gh2 <- NULL #list(x=gh$nodes,w=gh$weights,w.til=gh$weights*exp(gh$nodes^2))    
-		
+		vmu <- c(vbeta, vu)
     d <- length(vmu)
     # Calculate the diagonal indices
     Dinds <- d*((1:d)-1)+(1:d) 		

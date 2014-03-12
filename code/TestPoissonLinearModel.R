@@ -52,7 +52,9 @@ test_gaussian_approximation <- function()
   mSigma[3, 4] = rho
   mSigma.inv = solve(mSigma)
   fit_lap = fit.Lap.old(vmu, vy, mat, mSigma.inv)
-  fit_gaussian = fit.GVA(fit_lap$vmu, fit_lap$mLambda, vy, mat, mSigma.inv, "Nelder-Mead")  
+  vbeta = fit_lap$vmu[1:2]
+  vu = fit_lap$vmu[3:4]
+  fit_gaussian = fit.GVA(vbeta, vu, fit_lap$mLambda, vy, mX, mZ, mSigmaBeta.inv, mSigma.inv, "Nelder-Mead")  
   expect_equal(fit_gaussian$vmu, matrix(c(0.122079962,
                                           0.090590365,
                                           -0.008619054,
