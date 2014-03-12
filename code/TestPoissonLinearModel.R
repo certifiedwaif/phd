@@ -3,7 +3,7 @@ source("PoissonLinearModel.R")
 source("PoissonLinearModel_old.R")
 require(testthat)
 
-test_new <- function()
+test_laplace_approximation <- function()
 {
 	vbeta = c(0.0, 0.0)
 	vu = c(0.0, 0.0) 
@@ -30,40 +30,39 @@ test_new <- function()
 								  0.19422878,
 								 -0.16430321,
 								  0.10113962), 4, 1), tolerance=1e-6)
-	
-	test_data = data.frame(y=vy, x=mX[,2], Id=c(1, 1, 2, 2))
-	print(test_data)
-	lme4_fit = glmer(y~x+(1|Id), data=test_data, family=poisson)
-	print(lme4_fit)
 }
 
-test_old <- function()
+test_gaussian_approximation <- function()
 {
-	vu = c(0.0, 0.0, 0.0, 0.0) 
-	vy = c(1, 2, 3, 4)
-	mZ = matrix(c(1, 3, 1, 0,
-					1, 4, 1, 0,
-					1, 5, 0, 1,
-					1, 7, 0, 1), 4, 4, byrow=TRUE)
-	
-	mSigma = matrix(0, 4, 4)
-	diag(mSigma) = rep(1.0, 4)
-	rho = .2
-	mSigma[4, 3] = rho
-	mSigma[3, 4] = rho
-	mSigma.inv = solve(mSigma)
-	fit = fit.Lap.old(vu, vy, mZ, mSigma.inv)
-	print(str(fit))
-	expect_equal(fit$vmu, matrix(c(-0.05263632,
-								  0.19422878,
-								 -0.16430321,
-								  0.10113962), 4, 1), tolerance=1e-6)
+  vbeta = c(0.0, 0.0)
+  vu = c(0.0, 0.0) 
+  vmu = c(vbeta, vu)
+  vy = c(1, 2, 3, 4)
+  mat = matrix(c(1, 3, 1, 0,
+                 1, 4, 1, 0,
+                 1, 5, 0, 1,
+                 1, 7, 0, 1), 4, 4, byrow=TRUE)
+  mX = mat[,1:2]
+  mZ = mat[,3:4]
+  
+  mSigma = matrix(0, 4, 4)
+  diag(mSigma) = rep(1.0, 4)
+  rho = .2
+  mSigma[4, 3] = rho
+  mSigma[3, 4] = rho
+  mSigma.inv = solve(mSigma)
+  fit_lap = fit.Lap.old(vmu, vy, mat, mSigma.inv)
+  fit_gaussian = fit.GVA(fit_lap$vmu, fit_lap$mLambda, vy, mat, mSigma.inv, "Nelder-Mead")  
+  expect_equal(fit_gaussian$vmu, matrix(c(0.122079962,
+                                          0.090590365,
+                                          -0.008619054,
+                                          0.420113211), 4, 1), tolerance=1e-6)
 }
 
 main <- function()
 {
-	test_old()
-	test_new()
+	test_laplace_approximation()
+	test_gaussian_approximation()
 }
 
 main()
