@@ -226,9 +226,11 @@ fit.GVA <- function(vmu,mLambda,vy,mZ,mSigma.inv,method,reltol=1.0e-8)
 		gh2 <- NULL #list(x=gh$nodes,w=gh$weights,w.til=gh$weights*exp(gh$nodes^2))    
 		
     d <- length(vmu)
+    # Calculate the diagonal indices
     Dinds <- d*((1:d)-1)+(1:d) 		
           
     mR <- t(chol(mLambda + diag(1.0E-8,d)))
+    # Question: Why do we only take the log of the diagonal entries?
     mR[Dinds] <- log(mR[Dinds]) 
     Rinds <- which(lower.tri(mR,diag=TRUE))
     vu <- c(vmu,mR[Rinds])
