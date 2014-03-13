@@ -73,39 +73,44 @@ fit.Lap <- function(vbeta,vu,vy,mX,mZ,mSigmaBeta.inv,mSigma.inv, debug=FALSE)
 
 ###############################################################################
 
-f.G <- function(vmu,mLambda,vy,mZ,mSigma.inv,gh) 
+f.G <- function(vmu,mLambda,vy,mX,mZ,mSigmaBeta.inv,mSigma.inv,gh) 
 # Calculate the main part of the lower bound.
 {
-    d <- length(vmu)
+    d1 <- ncol(mX)
+	d2 <- ncol(mZ)
+	vbeta <- vmu[1:d1]
+	vu <- vmu[(d1+1):(d1+d2)]
     
-    vmu.til     <- mZ%*%vmu
-    vsigma2.til <- diag(mZ%*%mLambda%*%t(mZ))
+    vmu.til     <- mX%*%vbeta+mZ%*%vu
+    vsigma2.til <- diag(cbind(mX,mZ)%*%mLambda%*%t(cbind(mX,mZ)))
     vB0 <- B0.fun("POISSON",vmu.til,vsigma2.til,gh) 
     
-    f <- sum(vy*vmu.til - vB0) - 0.5*t(vmu)%*%mSigma.inv%*%vmu 
-    f <- f - 0.5*d*log(2*pi) + 0.5*log(det(mSigma.inv)) 
+    f <- sum(vy*vmu.til - vB0) - 0.5*(t(vbeta)%*%mSigmaBeta.inv%*%vbeta + t(vu)%*%mSigma.inv%*%vu)
+    f <- f - 0.5*(d1+d2)*log(2*pi) + 0.5*(log(det(mSigmaBeta.inv)) + log(det(mSigma.inv)) )
     return(f)
 }
 
 ###############################################################################
 
-f.GVA <- function(vu,vy,mZ,mSigma.inv,gh,mR,Rinds,Dinds)
+f.GVA <- function(vmu,vy,mX,mZ,mSigmaBeta.inv,mSigma.inv,gh,mR,Rinds,Dinds)
 # Calculate lower bound.
 {
-	# Unpack vmu and mR from vu
-   d <- ncol(mZ)  
-   vmu <- vu[1:d]
-   mR[Rinds] <- vu[(1+d):length(vu)]
+	# Unpack vbeta, vu and mR from vu
+	d1 <- ncol(mX)
+   d2 <- ncol(mZ)  
+	vbeta = vmu[1:d1]
+   vu <- vmu[(d1+1):d2]
+   mR[Rinds] <- vmu[(1+d1+d2):length(vmu)]
    mR[Dinds] <- exp(mR[Dinds]) 
-	# Threshold entries in mR at 10,000
+	# Threshold entries in the diagonal of mR at 10,000
     for (i in 1:length(Dinds)) {
         mR[Dinds[i]] <- min(c(1.0E5,mR[Dinds[i]]))
     }   
    mLambda <- mR%*%t(mR)   
    
 	# Calculate f
-   f <- sum(log(diag(mR))) + f.G(vmu,mLambda,vy,mZ,mSigma.inv,gh) 
-   f <- f + 0.5*d*log(2*pi) + 0.5*d
+   f <- sum(log(diag(mR))) + f.G(vmu,mLambda,vy,mX,mZ,mSigmaBeta.inv,mSigma.inv,gh) 
+   f <- f + 0.5*(d1+d2)*log(2*pi) + 0.5*(d1+d2)
    
    if (!is.finite(f)) {
        f <- -1.0E16
@@ -115,9 +120,9 @@ f.GVA <- function(vu,vy,mZ,mSigma.inv,gh,mR,Rinds,Dinds)
 
 ###############################################################################
 
-vg.G <- function(vmu,mLambda,vy,mZ,mSigma.inv,vB1) 
+vg.G <- function(vmu,mLambda,vy,mX,mZ,mSigmaBeta.inv,mSigma.inv,vB1) 
 {
-    vg <- t(mZ)%*%(vy - vB1) - mSigma.inv%*%vmu     
+    vg <- t(cbind(mX,mZ))%*%(vy - vB1) - mSigmaBeta.inv%*%vbeta - mSigma.inv%*%vu     
     return(vg)
 }
 
@@ -126,27 +131,27 @@ vg.G <- function(vmu,mLambda,vy,mZ,mSigma.inv,vB1)
 mH.G <- function(vmu,mLambda,vy,mZ,mSigma.inv,vB2) 
 {
     vw <-  vB2; dim(vw) <- NULL
-    mH <- -t(mZ*vw)%*%mZ - mSigma.inv
+    mH <- -t(cbind(mX,mZ)*vw)%*%cbind(mX, mZ) - rbind(mSigmaBeta.inv, mSigma.inv)
     return(mH)    
 }
 
 ###############################################################################
 
-vg.GVA.approx <- function(vu,vy,mZ,mSigma.inv,gh,mR,Rinds,Dinds)
+vg.GVA.approx <- function(vmu,vy,mX,mZ,mSigmaBeta.inv,mSigma.inv,gh,mR,Rinds,Dinds)
 {
     n <- length(vy); P <- length(vu); d <- ncol(mZ)
 		# Question: Why do we do this epsilon averaging trick?
 		eps <- 1.0E-6
-		f <- f.GVA(vu,vy,mZ,mSigma.inv,gh,mR,Rinds,Dinds)
+		f <- f.GVA(vmu,vy,mX,mZ,mSigmaBeta.inv,mSigma.inv,gh,mR,Rinds,Dinds)
 		vg.approx <- matrix(0,P,1)
 		for (i in 1:P) {
 		   vup <- vu 
 		   vup[i] <- vu[i] + eps
-		   fp <- f.GVA(vup,vy,mZ,mSigma.inv,gh,mR,Rinds,Dinds)
+		   fp <- f.GVA(vup,vy,mX,mZ,mSigmaBeta.inv,mSigma.inv,gh,mR,Rinds,Dinds)
 		   
 		   vum <- vu 
 		   vum[i] <- vu[i] - eps
-		   fm <- f.GVA(vum,vy,mZ,mSigma.inv,gh,mR,Rinds,Dinds)
+		   fm <- f.GVA(vum,vy,mX,mZ,mSigmaBeta.inv,mSigma.inv,gh,mR,Rinds,Dinds)
 		   
 		   vg.approx[i] <- (fp - fm)/(2*eps)
 		   
@@ -165,13 +170,15 @@ vg.GVA.approx <- function(vu,vy,mZ,mSigma.inv,gh,mR,Rinds,Dinds)
 
 ###############################################################################
 
-vg.GVA <- function(vu,vy,mZ,mSigma.inv,gh,mR,Rinds,Dinds)
+vg.GVA <- function(vmu,vy,mX,mZ,mSigmaBeta.inv,mSigma.inv,gh,mR,Rinds,Dinds)
 {
-	# FIXME: Bug? vmu is not in scope
-	# d <- ncol(mZ)
-    d <- length(vmu)
-    vmu <- vu[1:d]
-    mR[Rinds] <- vu[(1+d):length(vu)]
+	# Unpack vbeta, vu and mR from vmu
+	d1 <- ncol(mX)
+    d2 <- ncol(mZ)
+	vbeta <- vmu[1:d1]
+    vu <- vmu[(d1+1):(d1+d2)]
+    mR[Rinds] <- vmu[(1+d1+d2):length(vmu)]
+
     mR[Dinds] <- exp(mR[Dinds]) 
 	# Threshold entries of mR at 1,000
     for (i in 1:length(Dinds)) {
@@ -187,10 +194,10 @@ vg.GVA <- function(vu,vy,mZ,mSigma.inv,gh,mR,Rinds,Dinds)
     
 	# Set the derivative of vmu in the first d entries of vg
     vg <- 0*vu
-    vg[1:d] <- vg.G(vmu,mLambda,vy,mZ,mSigma.inv,vB1) 
+    vg[1:(d1+d2)] <- vg.G(vmu,mLambda,vy,mX,mZ,mSigmaBeta.inv,mSigma.inv,vB1) 
 
     mLambda.inv <- solve(mLambda,tol=1.0E-99)
-    mH <- mH.G(vmu,mLambda,vy,mZ,mSigma.inv,vB2)
+    mH <- mH.G(vmu,mLambda,vy,mX,mZ,mSigmaBeta.inv,mSigma.inv,vB2)
     dmLambda <- (mLambda.inv + mH)%*%mR
 
     #count <- d+1
@@ -207,7 +214,7 @@ vg.GVA <- function(vu,vy,mZ,mSigma.inv,gh,mR,Rinds,Dinds)
     
 	# Set the derivative of mR in the last entries of vg
     dmLambda[Dinds] <- dmLambda[Dinds]*mR[Dinds]
-    vg[(1+d):length(vu)] <- dmLambda[Rinds]    
+    vg[(1+d1+d2):length(vu)] <- dmLambda[Rinds]    
    
     #vg.approx <- vg.GVA.approx(vu,vy,mZ,mSigma.inv,gh,mR,Rinds,Dinds)
     #print(cbind(vg,vg.approx,abs(vg - vg.approx),abs(vg - vg.approx)/abs(vg),vg/vg.approx))
@@ -220,11 +227,11 @@ vg.GVA <- function(vu,vy,mZ,mSigma.inv,gh,mR,Rinds,Dinds)
 
 fit.GVA <- function(vbeta,vu,mLambda,vy,mX,mZ,mSigmaBeta.inv,mSigma.inv,method,reltol=1.0e-8)
 {
-		#library(statmod)
-		#N <- 15
-		#gh  <- gauss.quad(N,kind="hermite")
-		gh2 <- NULL #list(x=gh$nodes,w=gh$weights,w.til=gh$weights*exp(gh$nodes^2))    
-		vmu <- c(vbeta, vu)
+	#library(statmod)
+	#N <- 15
+	#gh  <- gauss.quad(N,kind="hermite")
+	gh2 <- NULL #list(x=gh$nodes,w=gh$weights,w.til=gh$weights*exp(gh$nodes^2))    
+	vmu <- c(vbeta, vu)
     d <- length(vmu)
     # Calculate the diagonal indices
     Dinds <- d*((1:d)-1)+(1:d) 		
@@ -245,7 +252,8 @@ fit.GVA <- function(vbeta,vu,mLambda,vy,mX,mZ,mSigmaBeta.inv,mSigma.inv,method,r
     }
     res <- optim(par=vu, fn=f.GVA, gr=vg.GVA,
         method=method,lower=-Inf, upper=Inf, control=controls,
-        vy=vy,mZ=mZ,mSigma.inv=mSigma.inv,gh=gh2,mR=mR*0,Rinds=Rinds,Dinds=Dinds)        
+        vy=vy,mX=mX,mZ=mZ,mSigmaBeta.inv=mSigmaBeta.inv,mSigma.inv=mSigma.inv,gh=gh2,mR=mR*0,
+		Rinds=Rinds,Dinds=Dinds)        
         
     vu <- res$par 
     
