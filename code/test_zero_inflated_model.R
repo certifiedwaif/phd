@@ -8,7 +8,7 @@ require(testthat)
 
 test_univariate_zip <- function()
 {
-	n = 1000
+	n = 10000
 	expected_rho = .5
 	expected_lambda = 1
 
