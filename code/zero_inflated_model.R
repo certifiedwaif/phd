@@ -93,15 +93,13 @@ zero_infl_var = function(vx, a, b, verbose=FALSE, plot_lower_bound=FALSE)
   a_lambda = a + sum(vx)
 	zero.set = which(vx == 0)
 	nonzero.set = which(vx != 0)
-
   vlower_bound <- c()
   
-  lower_bound = -Inf
-  last_lower_bound = -Inf
-  i = 1
+  i = 0
   # Iterate ----
-  while (i == 1 || vlower_bound[iteration] > vlower_bound[iteration-1]) {
-	# Update paramerer for q_lambda
+  while (i <= 2 || vlower_bound[i] > vlower_bound[i-1]) {
+    i = i+1
+	# Update parameter for q_lambda
     b_lambda = b + sum(vp)
 
 	# Update parameters for q_rho
@@ -116,10 +114,9 @@ zero_infl_var = function(vx, a, b, verbose=FALSE, plot_lower_bound=FALSE)
     
     params = list(a_lambda=a_lambda, b_lambda=b_lambda, a_rho=a_rho, b_rho=b_rho)
 	if (verbose && i > 1)
-		cat("Iteration ", iteration, ": lower bound ", vlower_bound, " difference ",
+		cat("Iteration ", i, ": lower bound ", vlower_bound[i], " difference ",
 			vlower_bound[i] - vlower_bound[i-1], " parameters ", "a_lambda", a_lambda,
 			"b_lambda", b_lambda, "a_rho", a_rho, "b_rho", b_rho, "\n")
-    i = i + 1
   }
   if (plot_lower_bound)
   	plot(lower_bound_vector,type="l")
