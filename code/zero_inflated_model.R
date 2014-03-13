@@ -2,38 +2,38 @@
 
 generate_test_data = function (n, rho, lambda)
 {
-  x = rep(NA, n)
+  vx = rep(NA, n)
   for (i in 1:n) {
     if (runif(1) >= rho) {
-      x[i] = rpois(1, lambda)
+      vx[i] = rpois(1, lambda)
     } else {
-      x[i] = 0
+      vx[i] = 0
     }
   }
-  return(x)
+  return(vx)
 }
 
 logit = function(p) log(p/(1-p))
 expit = function(eta) 1/(1+exp(-eta))
 
-zero_infl_mcmc = function(iterations, x, a, b)
+zero_infl_mcmc = function(iterations, vx, a, b)
 {
   # Initialise
-  n = length(x)
-  lambda = rep(NA, iterations+1)
-  rho = rep(NA, iterations+1)
-  lambda[1] = mean(x)
-  rho[1] = sum(x == 0)/length(x)
-  eta = rep(NA, n)
-  r = rep(NA, n)
+  n = length(vx)
+  vlambda = rep(NA, iterations+1)
+  vrho = rep(NA, iterations+1)
+  vlambda[1] = mean(vx)
+  vrho[1] = sum(vx == 0)/length(vx)
+  veta = rep(NA, n)
+  vr = rep(NA, n)
   # Build up a list of the zero observations. We'll only generate
   # r[i]'s for those. The non-zero observations will always have r[i] = 1.
-  r[x != 0] = 1
-  zero_observation_idx = which(x == 0)
+  vr[x != 0] = 1
+  zero_observation_idx = which(vx == 0)
   # Iterate ----
   for (i in 1:iterations) {
-    arg = exp(-lambda[i] + logit(rho[i]))
-    eta = arg/(1 + arg)
+    varg = exp(-vlambda[i] + logit(vrho[i]))
+    veta = varg/(1 + varg)
     
     # The following code is correct, but 100 times slower as R is interpreted.
     # So we use the vectorised code instead.
@@ -41,17 +41,15 @@ zero_infl_mcmc = function(iterations, x, a, b)
     #  r[zero_observation_idx[j]] = rbinom(1, 1, eta)
     #}
     
-    r[zero_observation_idx] = rbinom(length(zero_observation_idx), 1, eta) 
-    lambda[i+1] = rgamma(1, a + sum(x), b + sum(r))
-    rho[i+1] = rbeta(1, sum(r) + 1, n - sum(r) + 1)
+    vr[zero_observation_idx] = rbinom(length(zero_observation_idx), 1, veta) 
+    vlambda[i+1] = rgamma(1, a + sum(vx), b + sum(vr))
+    vrho[i+1] = rbeta(1, sum(vr) + 1, n - sum(vr) + 1)
   }
-  return(list(lambda=lambda, rho=rho))
+  return(list(vlambda=vlambda, vrho=vrho))
 }
 
-calculate_lower_bound = function(x, p, a_lambda, b_lambda, a_rho, b_rho)
+calculate_lower_bound = function(vx, vp, a_lambda, b_lambda, a_rho, b_rho)
 {
-  #browser()
-
   gamma_entropy = function(alpha, beta)
   {
     alpha - log(beta) + lgamma(alpha) - (alpha-1) * digamma(alpha)
@@ -62,80 +60,69 @@ calculate_lower_bound = function(x, p, a_lambda, b_lambda, a_rho, b_rho)
     lbeta(alpha, beta) - (alpha-1)*digamma(alpha) - (beta-1)*digamma(beta) + (alpha+beta-2)*digamma(alpha+beta)
   }  
   
-  zero.set <- which(x==0)
+  zero.set <- which(vx==0)
   
   E_lambda = a_lambda/b_lambda
   E_log_lambda = digamma(a_lambda) - log(b_lambda)  
 
-  E_r = ifelse(x == 0, p, 1)
-  E_xi_log_lambda_r = ifelse(x == 0, 0, x*E_log_lambda)
-  
-
+  E_r = ifelse(vx == 0, vp, 1)
+  E_xi_log_lambda_r = ifelse(vx == 0, 0, vx*E_log_lambda)
   
   E_log_rho = digamma(a_rho) - digamma(a_rho + b_rho)
   E_log_one_minus_rho = digamma(b_rho) - digamma(a_rho + b_rho)
 
-  E_log_q_r = (p[zero.set]*log(p[zero.set]) + (1-p[zero.set])*log(1-p[zero.set]))
+  E_log_q_r = (vp[zero.set]*log(vp[zero.set]) + (1-vp[zero.set])*log(1-vp[zero.set]))
   E_log_q_lambda = -gamma_entropy(a_lambda, b_lambda)
   E_log_q_rho = -beta_entropy(a_rho, b_rho) # FIXME: Why is this entropy positive?
   
   result = a_lambda * log(b_lambda) + (a_lambda-1) * E_log_lambda - b_lambda * E_lambda - lgamma(a_lambda)
   result = result - E_lambda * sum(E_r)
-  result = result + sum(E_xi_log_lambda_r) - sum(lgamma(x+1))
+  result = result + sum(E_xi_log_lambda_r) - sum(lgamma(vx+1))
   result = result + sum(E_r) * E_log_rho + sum(1 - E_r) * E_log_one_minus_rho
   result = result - sum(E_log_q_r) - E_log_q_lambda - E_log_q_rho
   
   return(result)
 }
 
-zero_infl_var = function(x, a, b)
+zero_infl_var = function(vx, a, b, verbose=FALSE, plot_lower_bound=FALSE)
 {
-  #browser()
-  n = length(x)
-  #p = rep(sum(x == 0)/length(x), n)
-  p = rep(1, n)
-  eta = rep(NA, n)
-  a_lambda = a + sum(x)
-  
-  lower_bound_vector<- c()
+	# Initialise
+  n = length(vx)
+  vp = rep(1, n)
+  veta = rep(NA, n)
+  a_lambda = a + sum(vx)
+	zero.set = which(vx == 0)
+	nonzero.set = which(vx != 0)
+
+  vlower_bound <- c()
   
   lower_bound = -Inf
   last_lower_bound = -Inf
-  iteration = 1
+  i = 1
   # Iterate ----
-  while (iteration == 1 || lower_bound > last_lower_bound) {
-    last_lower_bound = lower_bound
+  while (i == 1 || vlower_bound[iteration] > vlower_bound[iteration-1]) {
+	# Update paramerer for q_lambda
+    b_lambda = b + sum(vp)
+
+	# Update parameters for q_rho
+    a_rho = 1 + sum(vp)
+    b_rho = n - sum(vp) + 1
     
-    b_lambda = b + sum(p)
-    a_rho = 1 + sum(p)
-    b_rho = n - sum(p) + 1
+	# Update parameters for q_vr
+    vp[nonzero.set] = 1.0
+    vp[zero.set] = expit(-a_lambda/b_lambda + digamma(a_rho) - digamma(b_rho))
     
-    # TODO: You could vectorise the loop below.
-    #for (i in 1:n) {
-    #  if (x[i] != 0)
-    #    p[i] = 1.0
-    #  else {
-    #    eta[i] = - a_lambda/b_lambda + digamma(a_rho) - digamma(b_rho)
-    #    p[i] = expit(eta[i])
-    #  }
-    #}
-    p[x != 0] = 1.0
-    p[x == 0] = expit(- a_lambda/b_lambda + digamma(a_rho) - digamma(b_rho))
+    vlower_bound[i] <- calculate_lower_bound(vx, vp, a_lambda, b_lambda, a_rho, b_rho)
     
-    # TODO: Lower bound? ----
-    lower_bound = calculate_lower_bound(x, p, a_lambda, b_lambda, a_rho, b_rho)
-    
-    lower_bound_vector[iteration] <- lower_bound    
-    
-    #print(lower_bound)
     params = list(a_lambda=a_lambda, b_lambda=b_lambda, a_rho=a_rho, b_rho=b_rho)
-    #print(params)
-    cat("Iteration ", iteration, ": lower bound ", lower_bound, " difference ",
-        lower_bound - last_lower_bound, " parameters ", "a_lambda", a_lambda,
-        "b_lambda", b_lambda, "a_rho", a_rho, "b_rho", b_rho, "\n")
-    iteration = iteration + 1
+	if (verbose && i > 1)
+		cat("Iteration ", iteration, ": lower bound ", vlower_bound, " difference ",
+			vlower_bound[i] - vlower_bound[i-1], " parameters ", "a_lambda", a_lambda,
+			"b_lambda", b_lambda, "a_rho", a_rho, "b_rho", b_rho, "\n")
+    i = i + 1
   }
-  plot(lower_bound_vector,type="l")
+  if (plot_lower_bound)
+  	plot(lower_bound_vector,type="l")
   return(params)
 }
 
