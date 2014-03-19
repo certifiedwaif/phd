@@ -225,14 +225,16 @@ models arise in applications where we wish to build multivariate models. To be a
 construct multivariate models with as much generality as possible, we specify the full
 model as a General Design Bayesian Generalized Linear Mixed Model, as in \cite{zhao06}.
 This allows us to incorporate within-subject correlation, measurement error, missing data
-and smoothing splines in our models. We replace the $\lambda$ component of the model
-in the previous section with
+and smoothing splines in our models.
+
+If we let $Z_i=R_i Y_i, Y_i \sim \Poisson{\exp{\vX_i\beta + \vZ_i \vu}}, R_i \sim \Bernoulli{\rho}$,
+the log-likelihood becomes
 
 $$
-y_i|u_i \sim \exp{\left\{z_i^T(X_i \beta+ Z_i u_i) - r_i^T \exp{X_i\beta + Z_i u_i} + 1_i^T\Gamma(y_i + 1)\right\}}, u_i \sim N(0, \Sigma)
+\sum_{i=1}^m \{r_i y_i^TX_i \beta + 1_i^T \log{\Gamma{y_i + 1}}\} - \frac{m}{2} \log{|\Sigma|} - \frac{mK}{2} \log{2 \pi} \\
++ \sum_{i=1}^m \log{\int_{\mathbb{R}^K} \exp{\{r_i y_i^T Z_i \vu - r_i^T b(X_i \vbeta + Z_i \vu) - \half \vu^T \Sigma^{-1} \vu\}} d \vu} \\
++ r_i \log{\rho} + (1 - r_i) \log{(1 - \rho)}
 $$
-
-where $z_i = I(y_i = 0)y_i$. The prior on $\vbeta$ is $N(0, \Sigmabeta)$.
 
 The use of non-conjugate multivariate normal priors for $\vbeta$ make this model less
 amenable to mean field updates. Instead, we use the Gaussian Variational Approximation
