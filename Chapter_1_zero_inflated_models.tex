@@ -280,8 +280,11 @@ Taking expectations and collecting like terms, we obtain
 
 % FIXME: Is this correct? Don't you need to take expectations wrt \rho as well?
 $$
-r_i \left [ (y_i^T X_i \bbE_{q(\vbeta} [\vbeta]) + (\frac{p}{2}(1 + \log{2 \pi}) + \half \log{|\Sigma_{q(\vbeta)}|})\exp{\{ Z_i \mu_i + \half \diag{Z_i \Lambda_i Z_i^T} \}} + \log{\left( \frac{\rho}{1 - \rho} \right)} \right ]
+r_i \left [ (y_i^T X_i \bbE_{q(\vbeta} [\vbeta]) + (\frac{p}{2}(1 + \log{2 \pi}) + \half \log{|\Sigma_{q(\vbeta)}|})\exp{\{ Z_i \mu_i + \half \diag{Z_i \Lambda_i Z_i^T} \}} + \bbE_{q(\rho)}\{ \log{\left( \frac{\rho}{1 - \rho} \right)} \} \right ]
 $$
+
+Thus $r_i \sim \frac{\exp{(p_i)}}{I(y_i = 0) + \exp{(p_i)}}$ where
+$p_i = \exp{\{(y_i^T X_i \bbE_{q(\vbeta} [\vbeta]) + (\frac{p}{2}(1 + \log{2 \pi}) + \half \log{|\Sigma_{q(\vbeta)}|})\exp{\{ Z_i \mu_i + \half \diag{Z_i \Lambda_i Z_i^T} \}} + \bbE_{q(\rho)}\{ \log{\left( \frac{\rho}{1 - \rho} \right)} \} \}}$
 
 % TODO: Lower bound graph
 % TODO: Accuracy of approximations
