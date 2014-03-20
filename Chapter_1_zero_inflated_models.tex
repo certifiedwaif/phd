@@ -237,21 +237,66 @@ $$
 $$
 
 The use of non-conjugate multivariate normal priors for $\vbeta$ make this model less
-amenable to mean field updates. Instead, we use the Gaussian Variational Approximation
-approach outlined in \cite{ormerod09}. As we are using the Poisson regression model, the
-integral over the random effects $u_i$ simplifies to
+amenable to mean field updates. Instead, we adopt a hybrid algorithm where the q
+distribution is of the form
+
+$$
+q(\vtheta) = q(\vbeta, \Sigma) q(\rho) \Product_{i=1}^n q(r_i)
+$$
+
+We continue to use a mean field update approach, but update $\vbeta$ and $\Sigma$ together, using
+the Gaussian Variational Approximation approach outlined in \cite{ormerod09} to maximise the
+lower bound of the likelihood relative to $\rho$ and $r$, and then perform mean field updates on
+$\rho$ and $r$ once $\vbeta$ and $\Sigma$ have been maximised.
+
+% What to write down first?
+% Details of the GVA
+
+Let $Z_i = R_i Y_i$, $Y_i \sim \Poisson{\exp{\left( X\vbeta + Z \vu \right)}}$ and
+$R_i \sim \Bernoulli{\rho}$ with $Y_i$ and $R_i$ assumed independent.
+
+The log-likelihood of this model is
+$$
+l(\vbeta, \Sigma) = \sum_{i=1}^m \{r_i y_i^TX_i \vbeta - 1_i^T \log{\Gamma{y_i + 1}}\} - \frac{m}{2} \log{|\Sigma|} - \frac{mK}{2} \log{2 \pi} \\
++ \sum_{i=1}^m \log{\int_{\mathbb{R}^K} \exp{\{r_i y_i^TZ_i \vu - r_i^T\exp{(X_i \vbeta + Z_i \vu + \half \text{diagonal}(Z_i \Lambda_i Z_i^T))}\}} + \half \{\log{|\Lambda_i|} - \mu_i^T \Sigma^{-1} \mu_i - \text{tr}(\Sigma^{-1} \Lambda_i)\}} \\
++ \sum_{i=1}^m r_i \log{\rho} + (1 - r_i) \log{(1 - \rho)} - \half \log{|2\pi\Sigma_\vbeta|} - \half \vbeta^T \Sigma^{-1}_\vbeta \vbeta
+$$
+
+using the simplification from \cite{ormerod09}.
+
+As we are using the Poisson regression model, the integral over the random effects $u_i$ simplifies to
 \begin{align*}
 \int_{-\infty}^\infty \exp{\left( \sigma x + \mu \right)} \phi(x) dx &= \exp{\left( \mu + \half \sigma^2\right)}
 \end{align*}
 
 and so $B^{(r)} = \sigma^r \exp{\left( \mu + \half \sigma^2\right)}$.
-% What to write down first?
+
+The terms in the likelihood involving $r_i$ are
+$$
+r_i y_i^T(X_i \vbeta + Z_i \mu_i) - r_i^T \exp{(X_i \vbeta + Z_i \mu_i + \half \diag{Z_i \Lambda_i Z_i^T})} + r_i \log{\frac{\rho}{1 - \rho}}
+$$
+
+Taking expectations
 
 % TODO: Lower bound graph
 % TODO: Accuracy of approximations
 % TODO: Application, physical activity data
 % Random intercept, longitudinal data
 % Graph demonstrating additional zeroes
+
+% Idea: We can use an approximation of the from q(\beta, \u, \Sigma) q(\rho) \Product q(r_i)
+% and use GVA on q(\beta, \u, \Sigma) and mean field updates on \rho and r_i
+
+\section{Theory of variational approximation of zero-inflated Poisson models}
+Let $Z_i = R_i Y_i$.
+
+Then the probability that $Z_i = 0$ is
+\begin{align*}
+P(Z_i = 0) &= P(R_i = 0)P(Y_i = y) + P(R_i = 1) P(Y_i = 0) - P(R_i = 0) P(Y_i = 0) \\
+&= (1 - \rho) + \rho e^{-\lambda} - (1 - \rho) e^{-\lambda} \\
+&= (1 - \rho) + e^{-\lambda}(2 \rho - 1)
+\end{align*}
+
 
 
 \bibliographystyle{plain}
