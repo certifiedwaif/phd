@@ -276,7 +276,12 @@ $$
 r_i y_i^T(X_i \vbeta + Z_i \mu_i) - r_i^T \exp{(X_i \vbeta + Z_i \mu_i + \half \diag{Z_i \Lambda_i Z_i^T})} + r_i \log{\frac{\rho}{1 - \rho}}
 $$
 
-Taking expectations
+Taking expectations and collecting like terms, we obtain
+
+% FIXME: Is this correct? Don't you need to take expectations wrt \rho as well?
+$$
+r_i \left [ (y_i^T X_i \bbE_{q(\vbeta} [\vbeta]) + (\frac{p}{2}(1 + \log{2 \pi}) + \half \log{|\Sigma_{q(\vbeta)}|})\exp{\{ Z_i \mu_i + \half \diag{Z_i \Lambda_i Z_i^T} \}} + \log{\left( \frac{\rho}{1 - \rho} \right)} \right ]
+$$
 
 % TODO: Lower bound graph
 % TODO: Accuracy of approximations
