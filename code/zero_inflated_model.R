@@ -49,8 +49,16 @@ zero_infl_mcmc = function(iterations, vx, a, b)
 	return(list(vlambda=vlambda, vrho=vrho))
 }
 
-calculate_lower_bound = function(vx, vp, a_lambda, b_lambda, a_rho, b_rho)
+calculate_lower_bound.univariate = function(univariate)
+#calculate_lower_bound = function(vx, vp, a_lambda, b_lambda, a_rho, b_rho)
 {
+	vx = univariate$vx
+	vp = univariate$vp
+	a_lambda = univariate$a_lambda
+	b_lambda = univariate$b_lambda
+	a_rho = univariate$a_rho
+	b_rho = univariate$b_rho
+
 	gamma_entropy = function(alpha, beta)
 	{
 		alpha - log(beta) + lgamma(alpha) - (alpha-1) * digamma(alpha)
@@ -85,16 +93,43 @@ calculate_lower_bound = function(vx, vp, a_lambda, b_lambda, a_rho, b_rho)
 	return(result)
 }
 
+calculate_lower_bound = function(object)
+{
+	UseMethod("calculate_lower_bound", object)
+}
+
+# TODO: How do I generalise this code?
+expected_lambda.univariate = function(univariate)
+{
+	univariate$a_lambda/univariate$b_lambda  
+}
+
+expected_lambda.multivariate = function(multivariate)
+{
+	# Find using Gaussian approximation
+
+	# To extend to multivariate, would need something like
+	# fit = fit_gaussian_approximation(vy, mX, mZ, mSigmaBeta.inv, mSigma.inv)
+	# expected_lambda = exp(fit$vmu)
+}
+
+expected_lambda <- function(object)
+{
+	UseMethod("expected_lambda", object)
+}
+
+
 zero_infl_var = function(vx, a, b, trace=FALSE, plot_lower_bound=FALSE)
 {
 	# Initialise
 	n = length(vx)
 	vp = rep(1, n)
-	veta = rep(NA, n)
 	a_lambda = a + sum(vx)
 	zero.set = which(vx == 0)
 	nonzero.set = which(vx != 0)
 	vlower_bound <- c()
+	univariate = list(vx=vx, vp=vp, a_lambda=a_lambda)
+	class(univariate) = "univariate"
 	
 	i = 0
 	# Iterate ----
@@ -102,35 +137,28 @@ zero_infl_var = function(vx, a, b, trace=FALSE, plot_lower_bound=FALSE)
 		i = i+1
 
 		# Update parameter for q_lambda
-		b_lambda = b + sum(vp)
+		univariate$b_lambda = b + sum(univariate$vp)
 		
 		# Update parameters for q_rho
-		a_rho = 1 + sum(vp)
-		b_rho = n - sum(vp) + 1
+		univariate$a_rho = 1 + sum(univariate$vp)
+		univariate$b_rho = n - sum(univariate$vp) + 1
 		
 		# Update parameters for q_vr
-		# TODO: How do I generalise this code?
-		univariate_expected_lambda = function(a_lambda, b_lambda)
-		{
-			a_lambda/b_lambda  
-		}
-		expected_lambda = univariate_expected_lambda(a_lambda, b_lambda)
-		# To extend to multivariate, would need something like
-		# fit_gaussian_approximation(vy, mX, mZ, mSigmaBeta.inv, mSigma.inv)
-		# expected_lambda = exp(fit_gaussian_approximation$vmu)
-		vp[zero.set] = expit(-expected_lambda + digamma(a_rho) - digamma(b_rho))
-		vlower_bound[i] <- calculate_lower_bound(vx, vp, a_lambda, b_lambda, a_rho, b_rho)
+		univariate$vp[zero.set] = expit(-expected_lambda(univariate) + digamma(univariate$a_rho) - digamma(univariate$b_rho))
+
+		#vlower_bound[i] <- calculate_lower_bound(vx, vp, a_lambda, b_lambda, a_rho, b_rho)
+		vlower_bound[i] <- calculate_lower_bound(univariate)
 		
 		if (trace && i > 1)
 			cat("Iteration ", i, ": lower bound ", vlower_bound[i], " difference ",
-					vlower_bound[i] - vlower_bound[i-1], " parameters ", "a_lambda", a_lambda,
-					"b_lambda", b_lambda, "a_rho", a_rho, "b_rho", b_rho, "\n")
+					vlower_bound[i] - vlower_bound[i-1], " parameters ", "a_lambda", univariate$a_lambda,
+					"b_lambda", univariate$b_lambda, "a_rho", univariate$a_rho, "b_rho", univariate$b_rho, "\n")
 	}
 
 	if (plot_lower_bound)
 		plot(lower_bound_vector,type="l")
 
-	params = list(a_lambda=a_lambda, b_lambda=b_lambda, a_rho=a_rho, b_rho=b_rho)
+	params = list(a_lambda=univariate$a_lambda, b_lambda=univariate$b_lambda, a_rho=univariate$a_rho, b_rho=univariate$b_rho)
 	return(params)
 }
 
