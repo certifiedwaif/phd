@@ -1,4 +1,5 @@
 # variational_approximation_to_zero_inflated_model.R
+source("zero_inflated_poisson_linear_model.R")
 
 generate_test_data = function (n, rho, lambda)
 {
@@ -93,6 +94,12 @@ calculate_lower_bound.univariate = function(univariate)
 	return(result)
 }
 
+calculate_lower_bound.multivariate = function(multivariate)
+{
+	# Re-use what you can from the univariate lower bound.
+	# Take the lower bound returned by multivariate fit and combine it
+}
+
 calculate_lower_bound = function(object)
 {
 	UseMethod("calculate_lower_bound", object)
@@ -106,11 +113,15 @@ expected_lambda.univariate = function(univariate)
 
 expected_lambda.multivariate = function(multivariate)
 {
+	vr = multivariate$vr
+	vy = multivariate$vy
+	mX = multivariate$mX
+	mZ = multivariate$mZ
+	
 	# Find using Gaussian approximation
-
-	# To extend to multivariate, would need something like
-	# fit = fit_gaussian_approximation(vy, mX, mZ, mSigmaBeta.inv, mSigma.inv)
-	# expected_lambda = exp(fit$vmu)
+	fit = fit_gaussian_approximation.zero(vr, vy, mX, mZ, mSigmaBeta.inv, mSigma.inv)
+	expected_lambda = exp(fit$vmu)
+	return(expected_lambda)
 }
 
 expected_lambda <- function(object)
@@ -118,18 +129,27 @@ expected_lambda <- function(object)
 	UseMethod("expected_lambda", object)
 }
 
-
-zero_infl_var = function(vx, a, b, trace=FALSE, plot_lower_bound=FALSE)
+create_univariate = function(vx, a, b)
 {
 	# Initialise
 	n = length(vx)
 	vp = rep(1, n)
 	a_lambda = a + sum(vx)
-	zero.set = which(vx == 0)
-	nonzero.set = which(vx != 0)
-	vlower_bound <- c()
-	univariate = list(vx=vx, vp=vp, a_lambda=a_lambda)
+	b_lambda = b
+	univariate = list(vx=vx, vp=vp, a_lambda=a_lambda, b_lambda=b_lambda)
 	class(univariate) = "univariate"
+	return(univariate)
+}
+
+zero_infl_var.univariate = function(univariate, trace=FALSE, plot_lower_bound=FALSE)
+{
+	vx = univariate$vx
+	a = univariate$a_lambda
+	b = univariate$b_lambda
+	n = length(univariate$vx)
+	zero.set = which(univariate$vx == 0)
+	nonzero.set = which(univariate$vx != 0)
+	vlower_bound <- c()
 	
 	i = 0
 	# Iterate ----
@@ -160,6 +180,62 @@ zero_infl_var = function(vx, a, b, trace=FALSE, plot_lower_bound=FALSE)
 
 	params = list(a_lambda=univariate$a_lambda, b_lambda=univariate$b_lambda, a_rho=univariate$a_rho, b_rho=univariate$b_rho)
 	return(params)
+}
+
+zero_infl_var.multivariate = function(multivariate, vx, vmu_beta, mSigma_beta, trace=FALSE, plot_lower_bound=FALSE)
+{
+	# Initialise
+	n = length(vx)
+	vp = rep(1, n)
+	a_lambda = a + sum(vx)
+	zero.set = which(vx == 0)
+	nonzero.set = which(vx != 0)
+	vlower_bound <- c()
+	univariate = list(vx=vx, vp=vp, a_lambda=a_lambda)
+	class(univariate) = "univariate"
+	
+	i = 0
+	# Iterate ----
+	while (i <= 2 || vlower_bound[i] > vlower_bound[i-1]) {
+		i = i+1
+
+		# FIXME: We don't update, we maximise the log-likelihood using z_i = r_i y_i
+		# and r_i
+		multivariate$vbeta = ???
+		multivariate$vmu = ???
+		multivariate$mLambda = ???
+
+		# Update parameter for q_lambda
+		univariate$b_lambda = b + sum(univariate$vp)
+		
+		# Update parameters for q_rho
+		# This could be re-used
+		multivariate$a_rho = 1 + sum(univariate$vp)
+		multivariate$b_rho = n - sum(univariate$vp) + 1
+		
+		# Update parameters for q_vr
+		# This could also be re-used
+		multivariate$vp[zero.set] = expit(-expected_lambda(univariate) + digamma(univariate$a_rho) - digamma(univariate$b_rho))
+
+		#vlower_bound[i] <- calculate_lower_bound(vx, vp, a_lambda, b_lambda, a_rho, b_rho)
+		vlower_bound[i] <- calculate_lower_bound(univariate)
+		
+		if (trace && i > 1)
+			cat("Iteration ", i, ": lower bound ", vlower_bound[i], " difference ",
+					vlower_bound[i] - vlower_bound[i-1], " parameters ", "a_lambda", univariate$a_lambda,
+					"b_lambda", univariate$b_lambda, "a_rho", univariate$a_rho, "b_rho", univariate$b_rho, "\n")
+	}
+
+	if (plot_lower_bound)
+		plot(lower_bound_vector,type="l")
+
+	params = list(a_lambda=univariate$a_lambda, b_lambda=univariate$b_lambda, a_rho=univariate$a_rho, b_rho=univariate$b_rho)
+	return(params)
+}
+
+zero_infl_var <- function(object)
+{
+	UseMethod("zero_infl_var", object)
 }
 
 # Calculate accuracy ----

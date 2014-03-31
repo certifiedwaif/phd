@@ -17,7 +17,8 @@ test_univariate_zip <- function()
 	a_lambda = 0.01
 	b_lambda = 0.01
 
-	result_var = zero_infl_var(vx, a_lambda, b_lambda)
+	univariate = create_univariate(vx, a_lambda, b_lambda)
+	result_var = zero_infl_var(univariate)
 
 	expect_equal(result_var$a_lambda / result_var$b_lambda, expected_lambda, tolerance=1e-1)
 	expect_equal(result_var$a_rho / (result_var$a_rho + result_var$b_rho), expected_rho, tolerance=1e-1)
