@@ -321,21 +321,26 @@ Let $r_0 = \{ r_i : y_i = 0 \}$.
 \begin{align*}
 q(r_0, \vnu, \sigma_{\vu}^2, \rho) &= q(\vnu) q(\sigma_{\vu}^2) q(\rho) q(r_0) \\
 q(\vnu) &= N(\vmu, \mLambda) \\
-q(\sigma_{\vu}^2) &= IG(A + \frac{m}{2}, B + \frac{\|\mu_u\|^2}{2} + \frac{tr(\Sigma_{uu})}{2}) \\
-q(r_i) \propto \exp{\{\bbE_{-r_i} [-r_i \exp{(c_i^T\vnu)}]\} + r_i [\digamma(\alpha_\rho) - \digamma(\beta_rho)]} \\
+q(\sigma_{\vu}^2) &= IG\left(A + \frac{m}{2}, B + \frac{\|\mu_u\|^2}{2} + \frac{tr(\Sigma_{uu})}{2}\right) \\
+q(r_i) &\propto \exp{\{\bbE_{-r_i} [-r_i \exp{(c_i^T\vnu)}]\} + r_i [\digamma(\alpha_\rho) - \digamma(\beta_\rho)]} \\
 \end{align*}
+
+Hence $q(r_i) = \Bernoulli{p_i}$ where
+$$
+p_i = \expit{[\digamma(\alpha_q) - \digamma(\beta_q) - \exp{\{c_i^T\vnu + \half c_i^T \mLambda c_i\}}]}
+$$
 
 The optimal approximation for $\vr$ is
 \begin{align*}
-q(r) &\propto \exp{\{\bbE_{-q(\vr)}y^TR(C\vnu) - r^T\exp{(C\vnu)}-\half \vnu^T D(\sigma_{\vu}^2)^{-1} \vnu\}}$
+q(r) &\propto \exp{\{\bbE_{-q(\vr)}y^TR(C\vnu) - r^T\exp{(C\vnu)}-\half \vnu^T D(\sigma_{\vu}^2)^{-1} \vnu\}}
 \end{align*}
 
 \begin{align*}
-&\bbE_{-q(\vr)} [y^TR(C\vnu) - r^T\exp{(C\vnu)}-\half \vnu^T D(\sigma_{\vu}^2)^{-1} \vnu]
-i=&y^TRC \vnu - p^T \exp{\{C \mu + \text{dg}(C \mLambda C^T)\}} - \half \mu^T \hat{D} \mu - \half \text{tr}(\mLambda \hat{D})
+&\bbE_{-q(\vr)} [y^TR(C\vnu) - r^T\exp{(C\vnu)}-\half \vnu^T D(\sigma_{\vu}^2)^{-1} \vnu]\\
+=&y^TRC \vnu - p^T \exp{\{C \mu + \text{dg}(C \mLambda C^T)\}} - \half \mu^T \hat{D} \mu - \half \text{tr}(\mLambda \hat{D})
 \end{align*}
 
-where $\hat{D} = D(A_{q(\sigma_{\vu}^2)}, B_{q(\sigma_{\vu}^2)})$. This can be seen to be very close to a Poisson
+where $\hat{D} = D(A_{q(\sigma_{\vu}^2)} / B_{q(\sigma_{\vu}^2)})$. This can be seen to be very close to a Poisson
 regression model.
 
 \section{Theory of variational approximation of zero-inflated Poisson models}
