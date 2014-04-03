@@ -1,23 +1,10 @@
 # variational_approximation_to_zero_inflated_model.R
 source("zero_inflated_poisson_linear_model.R")
 
-generate_test_data = function (n, rho, lambda)
-{
-	vx = rep(NA, n)
-	for (i in 1:n) {
-		if (runif(1) >= rho) {
-			vx[i] = rpois(1, lambda)
-		} else {
-			vx[i] = 0
-		}
-	}
-	return(vx)
-}
+logit <- function(p) log(p/(1-p))
+expit <- function(eta) 1/(1+exp(-eta))
 
-logit = function(p) log(p/(1-p))
-expit = function(eta) 1/(1+exp(-eta))
-
-zero_infl_mcmc = function(iterations, vx, a, b)
+zero_infl_mcmc <- function(iterations, vx, a, b)
 {
 	# Initialise
 	n = length(vx)
@@ -50,8 +37,8 @@ zero_infl_mcmc = function(iterations, vx, a, b)
 	return(list(vlambda=vlambda, vrho=vrho))
 }
 
-calculate_lower_bound.univariate = function(univariate)
-#calculate_lower_bound = function(vx, vp, a_lambda, b_lambda, a_rho, b_rho)
+calculate_lower_bound.univariate <- function(univariate)
+#calculate_lower_bound <- function(vx, vp, a_lambda, b_lambda, a_rho, b_rho)
 {
 	vx = univariate$vx
 	vp = univariate$vp
@@ -60,12 +47,12 @@ calculate_lower_bound.univariate = function(univariate)
 	a_rho = univariate$a_rho
 	b_rho = univariate$b_rho
 
-	gamma_entropy = function(alpha, beta)
+	gamma_entropy <- function(alpha, beta)
 	{
 		alpha - log(beta) + lgamma(alpha) - (alpha-1) * digamma(alpha)
 	}
 	
-	beta_entropy = function(alpha, beta)
+	beta_entropy <- function(alpha, beta)
 	{
 		lbeta(alpha, beta) - (alpha-1)*digamma(alpha) - (beta-1)*digamma(beta) + (alpha+beta-2)*digamma(alpha+beta)
 	}	
@@ -94,24 +81,24 @@ calculate_lower_bound.univariate = function(univariate)
 	return(result)
 }
 
-calculate_lower_bound.multivariate = function(multivariate)
+calculate_lower_bound.multivariate <- function(multivariate)
 {
 	# Re-use what you can from the univariate lower bound.
 	# Take the lower bound returned by multivariate fit and combine it
 }
 
-calculate_lower_bound = function(object)
+calculate_lower_bound <- function(object)
 {
 	UseMethod("calculate_lower_bound", object)
 }
 
 # TODO: How do I generalise this code?
-expected_lambda.univariate = function(univariate)
+expected_lambda.univariate <- function(univariate)
 {
 	univariate$a_lambda/univariate$b_lambda  
 }
 
-expected_lambda.multivariate = function(multivariate)
+expected_lambda.multivariate <- function(multivariate)
 {
 	vr = multivariate$vr
 	vy = multivariate$vy
@@ -129,7 +116,7 @@ expected_lambda <- function(object)
 	UseMethod("expected_lambda", object)
 }
 
-create_univariate = function(vx, a, b)
+create_univariate <- function(vx, a, b)
 {
 	# Initialise
 	n = length(vx)
@@ -141,7 +128,7 @@ create_univariate = function(vx, a, b)
 	return(univariate)
 }
 
-zero_infl_var.univariate = function(univariate, trace=FALSE, plot_lower_bound=FALSE)
+zero_infl_var.univariate <- function(univariate, trace=FALSE, plot_lower_bound=FALSE)
 {
 	vx = univariate$vx
 	a = univariate$a_lambda
@@ -182,7 +169,7 @@ zero_infl_var.univariate = function(univariate, trace=FALSE, plot_lower_bound=FA
 	return(params)
 }
 
-zero_infl_var.multivariate = function(multivariate, vx, vmu_beta, mSigma_beta, trace=FALSE, plot_lower_bound=FALSE)
+zero_infl_var.multivariate <- function(multivariate, vx, vmu_beta, mSigma_beta, trace=FALSE, plot_lower_bound=FALSE)
 {
 	# Initialise
 	n = length(vx)
@@ -241,10 +228,10 @@ zero_infl_var <- function(object)
 # Calculate accuracy ----
 # Approximate the L1 norm between the variational approximation and
 # the MCMC approximation
-calculate_accuracy = function(result_mcmc, result_var)
+calculate_accuracy <- function(result_mcmc, result_var)
 {
 	density_mcmc_rho = density(result_mcmc$rho)
-	integrand = function(x)
+	integrand <- function(x)
 	{
 		fn = splinefun(density_mcmc_rho$x, density_mcmc_rho$y)
 		return(abs(fn(x) - dbeta(x, result_var$a_rho, result_var$b_rho)))
@@ -252,7 +239,7 @@ calculate_accuracy = function(result_mcmc, result_var)
 	integrate(integrand, min(density_mcmc_rho$x), max(density_mcmc_rho$x), subdivisions = length(density_mcmc_rho$x))
 	
 	density_mcmc_lambda = density(result_mcmc$lambda)
-	integrand = function(x)
+	integrand <- function(x)
 	{
 		fn = splinefun(density_mcmc_lambda$x, density_mcmc_lambda$y)
 		return(abs(fn(x) - dgamma(x, result_var$a_lambda, result_var$b_lambda)))
@@ -262,7 +249,7 @@ calculate_accuracy = function(result_mcmc, result_var)
 	return(accuracy)
 }
 
-check_accuracy = function(n, rho, lambda)
+check_accuracy <- function(n, rho, lambda)
 {
 	x = generate_test_data(n, rho, lambda)
 	
@@ -296,7 +283,7 @@ check_accuracy = function(n, rho, lambda)
 }
 
 # Check accuracy of the approximation for a range of parameter values ----
-main_check_accuracy = function()
+main_check_accuracy <- function()
 {
 	n = 1000
 	rho = .5
@@ -321,7 +308,7 @@ main_check_accuracy = function()
 # 1000 iterations in 0.07461715 seconds.
 
 # Extension to multivariate case ----
-# multivariate = function(y, X, Z)
+# multivariate <- function(y, X, Z)
 # {
 #	 SigmaInv = solve(Sigma)
 #	 D_b = sum(t(y - B(1, beta, mu, Lambda)) %*% X)
