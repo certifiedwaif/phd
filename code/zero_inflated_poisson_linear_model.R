@@ -10,7 +10,7 @@ f.lap <- function(vtheta,vy,vr,mX,mSigma.inv,mLambda)
 {       
     d <- length(vtheta)
     veta <- mX%*%vtheta
-    f <- sum(vy*veta - vr*exp(veta+.5*diag(mX%*%mLambda*t(mX))) - 0.5*t(vtheta)%*%mSigma.inv%*%vtheta - 0.5*tr(mLambda%*%Dhat)
+    f <- sum(vy*veta - vr*exp(veta+.5*diag(mX%*%mLambda%*%t(mX)))) - 0.5*t(vtheta)%*%mSigma.inv%*%vtheta - 0.5*tr(mLambda%*%Dhat)
     return(f)
 }
 
