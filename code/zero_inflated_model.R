@@ -100,14 +100,7 @@ expected_lambda.univariate <- function(univariate)
 
 expected_lambda.multivariate <- function(multivariate)
 {
-	vr = multivariate$vr
-	vy = multivariate$vy
-	mX = multivariate$mX
-	mZ = multivariate$mZ
-	
-	# Find using Gaussian approximation
-	fit = fit_gaussian_approximation.zero(vr, vy, mX, mZ, mSigmaBeta.inv, mSigma.inv)
-	expected_lambda = exp(fit$vmu)
+	expected_lambda = exp(multivariate$vmu%*%multivariate$mX)
 	return(expected_lambda)
 }
 
@@ -169,54 +162,65 @@ zero_infl_var.univariate <- function(univariate, trace=FALSE, plot_lower_bound=F
 	return(params)
 }
 
-zero_infl_var.multivariate <- function(multivariate, vx, vmu_beta, mSigma_beta, trace=FALSE, plot_lower_bound=FALSE)
+create_multivariate <- function(vy, mX, a_sigma, b_sigma)
 {
 	# Initialise
-	n = length(vx)
+	n = length(vy)
 	vp = rep(1, n)
-	a_lambda = a + sum(vx)
-	zero.set = which(vx == 0)
-	nonzero.set = which(vx != 0)
+	print(ncol(mX))
+	print(dim(mX))
+	vbeta = rep(0, ncol(mX))
+	D = diag(rep(a_sigma/b_sigma, ncol(mX)))
+	multivariate = list(vy=vy, mX=mX, vp=vp, vbeta=vbeta, a_sigma=a_sigma, b_sigma=b_sigma, D=D)
+	class(multivariate) = "multivariate"
+	return(multivariate)
+}
+
+zero_infl_var.multivariate <- function(m, trace=FALSE, plot_lower_bound=FALSE)
+{
+	# Initialise
+	vy = m$vy
+	vbeta = m$vbeta
+	mX = m$mX
+	n = length(vy)
+	vp = m$vp
+	zero.set = which(vy == 0)
+	nonzero.set = which(vy != 0)
 	vlower_bound <- c()
-	univariate = list(vx=vx, vp=vp, a_lambda=a_lambda)
-	class(univariate) = "univariate"
 	
 	i = 0
 	# Iterate ----
 	while (i <= 2 || vlower_bound[i] > vlower_bound[i-1]) {
 		i = i+1
 
+		# Update parameter for q_lambda
 		# FIXME: We don't update, we maximise the log-likelihood using z_i = r_i y_i
 		# and r_i
-		multivariate$vbeta = ???
-		multivariate$vmu = ???
-		multivariate$mLambda = ???
+		# Find these things using Poisson mixed model code
+		fit = fit.Lap(m$vbeta, m$vy, m$vp, m$mX, m$mSigma.inv, m$mLambda)
+		m$vbeta = fit$vmu
+		m$mLambda = fit$mLambda
 
-		# Update parameter for q_lambda
-		univariate$b_lambda = b + sum(univariate$vp)
-		
 		# Update parameters for q_rho
-		# This could be re-used
-		multivariate$a_rho = 1 + sum(univariate$vp)
-		multivariate$b_rho = n - sum(univariate$vp) + 1
+		m$a_rho = 1 + sum(m$vp)
+		m$b_rho = n - sum(m$vp) + 1
 		
 		# Update parameters for q_vr
-		# This could also be re-used
-		multivariate$vp[zero.set] = expit(-expected_lambda(univariate) + digamma(univariate$a_rho) - digamma(univariate$b_rho))
+		m$vp[zero.set] = expit(-exp(t(m$mX)%*%m$vbeta) + digamma(m$a_rho) - digamma(m$b_rho))
 
 		#vlower_bound[i] <- calculate_lower_bound(vx, vp, a_lambda, b_lambda, a_rho, b_rho)
-		vlower_bound[i] <- calculate_lower_bound(univariate)
+		vlower_bound[i] <- calculate_lower_bound(m)
 		
 		if (trace && i > 1)
 			cat("Iteration ", i, ": lower bound ", vlower_bound[i], " difference ",
-					vlower_bound[i] - vlower_bound[i-1], " parameters ", "a_lambda", univariate$a_lambda,
-					"b_lambda", univariate$b_lambda, "a_rho", univariate$a_rho, "b_rho", univariate$b_rho, "\n")
+					vlower_bound[i] - vlower_bound[i-1], " parameters ", "a_lambda", m$a_lambda,
+					"b_lambda", m$b_lambda, "a_rho", m$a_rho, "b_rho", m$b_rho, "\n")
 	}
 
 	if (plot_lower_bound)
 		plot(lower_bound_vector,type="l")
 
-	params = list(a_lambda=univariate$a_lambda, b_lambda=univariate$b_lambda, a_rho=univariate$a_rho, b_rho=univariate$b_rho)
+	params = list(a_lambda=m$a_lambda, b_lambda=m$b_lambda, a_rho=m$a_rho, b_rho=m$b_rho)
 	return(params)
 }
 

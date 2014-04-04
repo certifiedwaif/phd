@@ -19,15 +19,15 @@ generate_univariate_test_data <- function (n, rho, lambda)
 	return(vx)
 }
 
-generate_multivariate_test_data <- function (mX, rho, vbeta)
+generate_multivariate_test_data <- function (mX, mZ, rho, vbeta, sigma2_u)
 {
 	n = nrow(mX)
 	vy = rep(NA, n)
 	for (i in 1:n) {
 		if (runif(1) >= rho) {
-			vx[i] = rpois(1, exp(mX[i,] %*% vbeta))
+			vy[i] = rpois(1, exp(mX[i,] %*% vbeta + mZ[i,]%*%rep(1, ncol(mZ)) + rnorm(1, 0, sigma2_u)))
 		} else {
-			vx[i] = 0
+			vy[i] = 0
 		}
 	}
 	return(vy)
@@ -58,15 +58,14 @@ test_multivariate_zip <- function()
 	# Simulate data
 	# Could we load test data from somewhere? I don't know that hardcoding the
 	# test data into the source files is really the best idea.
-	mX = matrix(c(1, 0,
-					1, 1), 2, 2)
+	n = 10000
+	mX = matrix(as.vector(cbind(rep(1, n), rnorm(n))), n, 2)
 	expected_rho = .5
 	expected_beta = c(1, 2)
 	vy = generate_multivariate_test_data(mX, expected_rho, expected_beta)
-	print(vy)
 
 	# Test model fitting
-	multivariate = create_multivariate(vy, a_lambda, b_lambda)
+	multivariate = create_multivariate(vy, mX, a_lambda, b_lambda)
 	result_var = zero_infl_var(multivariate)
 
 	expect_equal(result$vbeta, expected_beta)
