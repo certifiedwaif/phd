@@ -219,81 +219,13 @@ $$
 \includegraphics[width=100mm,height=100mm]{code/lower_bound_convergence.pdf}
 
 \section{Extending the zero-inflated Poisson model to a regression model}
-% Mark's attempt
 The above univariate model demonstrates that variational approximations are well-suited
 to accelerating the fit of Bayesian zero-inflated models to data. Typically zero-inflated
-models arise in applications where we wish to build multivariate models. To be able to
+models arise in applications where we wish to build multivariate regression models. To be able to
 construct multivariate models with as much generality as possible, we specify the full
 model as a General Design Bayesian Generalized Linear Mixed Model, as in \cite{zhao06}.
 This allows us to incorporate within-subject correlation, measurement error, missing data
 and smoothing splines in our models.
-
-If we let $Z_i=R_i Y_i, Y_i \sim \Poisson{\exp{\mX_i\beta + \mZ_i \vu}}, R_i \sim \Bernoulli{\rho}$,
-the log-likelihood becomes
-
-\begin{align*}
-\sum_{i=1}^m \{r_i y_i^TX_i \beta + 1_i^T \log{\Gamma{y_i + 1}}\} - \frac{m}{2} \log{|\Sigma|} - \frac{mK}{2} \log{2 \pi} \\
-+ \sum_{i=1}^m \log{\int_{\mathbb{R}^K} \exp{\{r_i y_i^T Z_i \vu - r_i^T b(X_i \vbeta + Z_i \vu) - \half \vu^T \Sigma^{-1} \vu\}} d \vu} \\
-+ r_i \log{\rho} + (1 - r_i) \log{(1 - \rho)}
-\end{align*}
-
-The use of non-conjugate multivariate normal priors for $\vbeta$ make this model less
-amenable to mean field updates. Instead, we adopt a hybrid algorithm where the q
-distribution is of the form
-
-$$
-q(\vtheta) = q(\vbeta, \Sigma) q(\rho) \prod_{i=1}^n q(r_i)
-$$
-
-We continue to use a mean field update approach, but update $\vbeta$ and $\Sigma$ together, using
-the Gaussian Variational Approximation approach outlined in \cite{ormerod09} to maximise the
-lower bound of the likelihood relative to $\rho$ and $r$, and then perform mean field updates on
-$\rho$ and $r$ once $\vbeta$ and $\Sigma$ have been determined.
-
-% What to write down first?
-% Details of the GVA
-
-Let $Z_i = R_i Y_i$, $Y_i \sim \Poisson{\exp{\left( X\vbeta + Z \vu \right)}}$ and
-$R_i \sim \Bernoulli{\rho}$ with $Y_i$ and $R_i$ assumed independent.
-
-The variational lower bound of the log-likelihood of this model is
-
-\begin{align*}
-l(\vbeta, \Sigma) &= \sum_{i=1}^m \{r_i y_i^TX_i \vbeta - 1_i^T \log{\Gamma{(y_i + 1)}}\} - \frac{m}{2} \log{|\Sigma|} - \frac{mK}{2} \log{2 \pi} \\
-&+ \sum_{i=1}^m \log{\int_{\mathbb{R}^K} \exp{\{r_i y_i^TZ_i \vu - r_i^T\exp{(X_i \vbeta + Z_i \vu + \half \text{diagonal}(Z_i \Lambda_i Z_i^T))}\}} + \\
-&\half \{\log{|\Lambda_i|} - \mu_i^T \Sigma^{-1} \mu_i - \text{tr}(\Sigma^{-1} \Lambda_i)\}} \\
-&+ \sum_{i=1}^m r_i \log{\rho} + (1 - r_i) \log{(1 - \rho)} - \half \log{|2\pi\Sigma_{\vbeta}|} - \half \vbeta^T \Sigma^{-1}_{\vbeta} \vbeta
-\end{align*}
-
-using the simplification from \cite{ormerod09}.
-
-%As we are using the Poisson regression model, the integral over the random effects $u_i$ simplifies to
-%\begin{align*}
-%\int_{-\infty}^\infty \exp{\left( \sigma x + \mu \right)} \phi(x) dx &= \exp{\left( \mu + \half \sigma^2\right)}
-%\end{align*}
-
-%and so $B^{(r)} = \sigma^r \exp{\left( \mu + \half \sigma^2\right)}$.
-
-The terms in the likelihood involving $r_i$ are
-$$
-r_i y_i^T(X_i \vbeta + Z_i \mu_i) - r_i^T \exp{(X_i \vbeta + Z_i \mu_i + \half \diag{Z_i \Lambda_i Z_i^T})} + r_i \log{\left(\frac{\rho}{1 - \rho}\right)}
-$$
-
-Taking expectations and collecting like terms, we obtain
-
-% FIXME: Is this correct? Don't you need to take expectations wrt \rho as well?
-$$
-r_i \left [ (y_i^T X_i \bbE_{q(\vbeta)} [\vbeta]) + (\frac{p}{2}(1 + \log{2 \pi}) + \half \log{|\Sigma_{q(\vbeta)}|})\exp{\{ Z_i \mu_i + \half \diag{(Z_i \Lambda_i Z_i^T)} \}} + \bbE_{q(\rho)}\{ \log{\left( \frac{\rho}{1 - \rho} \right)} \} \right ]
-$$
-
-Thus $r_i \sim \frac{\exp{(p_i)}}{I(y_i = 0) + \exp{(p_i)}}$ where
-\begin{align*}
-p_i &= \exp{\{(y_i^T X_i \bbE_{q(\vbeta} [\vbeta]) + (\frac{p}{2}(1 + \log{2 \pi}) + \\
-&\half \log{|\Sigma_{q(\vbeta)}|})\exp{\{ Z_i \mu_i + \half \diag{Z_i \Lambda_i Z_i^T} \}} + \\
-&\bbE_{q(\rho)}\{ \log{\left( \frac{\rho}{1 - \rho} \right)} \} \}}
-\end{align*}
-
-The mean field update for $\rho$ is as for the univariate zero-inflated Poisson model above.
 
 % TODO: Lower bound graph
 % TODO: Accuracy of approximations
@@ -304,22 +236,27 @@ The mean field update for $\rho$ is as for the univariate zero-inflated Poisson 
 % Idea: We can use an approximation of the from q(\beta, \u, \Sigma) q(\rho) \Product q(r_i)
 % and use GVA on q(\beta, \u, \Sigma) and mean field updates on \rho and r_i
 
-% John's attempt
-Model
+\subsection{Model}
 Let $\mR = \diag{\vr}$. Let $C = [X Z], \vnu = [\vbeta^T \vu^T]^T$.
 
 \begin{align*}
-\log{p(y|\vr, \vbeta, \vu)} &= y^T R (C\vnu) - \vr^T \exp{(C\vnu)} - 1^T \log{\Gamma{(y + 1)}} \\
+\log{p(y|\vr, \vbeta, \vu)} &= \vy^T R (C\vnu) - \vr^T \exp{(C\vnu)} - 1^T \log{\Gamma{(y + 1)}} \\
 \log{p(\vnu|\sigma_{u}^2)} &= - \half \log{|2\pi D(\sigma_{\vu}^2)|} - \half \vnu^T D(sigma_{\vu}^2)^{-1} \vnu \\
 \log{p(\vr)} &= \vr^T \log{\rho 1} + (1 - \vr)^T\log{(1 - 1 \rho)} \\
 p(\rho) &\propto 1 \\
 \log{p(\sigma^2)} &= A \log{B} - \log{\Gamma{(A)} - (A + 1) \log{(\sigma_{\vu}^2)} - \frac{B}{\sigma_{\vu}^2}
 \end{align*}
 
-Approximation
+\subsection{Approximation}
 Let $r_0 = \{ r_i : y_i = 0 \}$.
-\begin{align*}
+We assume an approximation of the form
+$$
 q(r_0, \vnu, \sigma_{\vu}^2, \rho) &= q(\vnu) q(\sigma_{\vu}^2) q(\rho) q(r_0) \\
+$$
+
+where
+
+\begin{align*}
 q(\vnu) &= N(\vmu, \mLambda) \\
 q(\sigma_{\vu}^2) &= IG\left(A + \frac{m}{2}, B + \frac{\|\mu_u\|^2}{2} + \frac{tr(\Sigma_{uu})}{2}\right) \\
 q(r_i) &\propto \exp{\{\bbE_{-r_i} [-r_i \exp{(c_i^T\vnu)}]\} + r_i [\digamma(\alpha_\rho) - \digamma(\beta_\rho)]} \\
@@ -342,6 +279,9 @@ q(r) &\propto \exp{\{\bbE_{-q(\vr)}y^TR(C\vnu) - r^T\exp{(C\vnu)}-\half \vnu^T D
 
 where $\hat{D} = D(A_{q(\sigma_{\vu}^2)} / B_{q(\sigma_{\vu}^2)})$. This can be seen to be very close to a Poisson
 regression model.
+
+\subsection{Results}
+
 
 \section{Theory of variational approximation of zero-inflated Poisson models}
 Let $Z_i = R_i Y_i$.
