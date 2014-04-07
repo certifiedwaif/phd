@@ -13,7 +13,10 @@ f.lap <- function(vtheta,vy,vr,mX,mSigma.inv,mLambda)
 	# FIXME: This is awful, we shouldn't need to invert the whole matrix. There's
 	# a lot of room for improvement here.
 	mSigma <- solve(mSigma.inv)
-    f <- sum(vy*veta - vr*exp(veta+0.5*diag(mX%*%mLambda%*%t(mX)))) - 0.5*t(vtheta)%*%mSigma.inv%*%vtheta - 0.5*sum(diag(mLambda%*%mSigma))
+	# diag(mX mLambda mX^T)_i i = mX[i, ] . mLambda[, i] . mX[, i] 
+    #f <- sum(vy*veta - vr*exp(veta+0.5*diag(mX%*%mLambda%*%t(mX)))) - 0.5*t(vtheta)%*%mSigma.inv%*%vtheta - 0.5*sum(diag(mLambda%*%mSigma))
+	mDiag <- sapply(1:ncol(mX), function(i) sum(mX[i,] * mLambda[, i] * mX[, i]))
+	f <- sum(vy*veta - vr*exp(veta+0.5*mDiag)) - 0.5*t(vtheta)%*%mSigma.inv%*%vtheta - 0.5*sum(diag(mLambda%*%mSigma))
     return(f)
 }
 
@@ -29,7 +32,8 @@ vg.lap <- function(vtheta,vy,vr,mX,mSigma.inv,mLambda)
 
 mH.lap <- function(vtheta,vy,vr,mX,mSigma.inv,mLambda) 
 {
-    vw <- exp(mX%*%vtheta+.5*mX%*%mLambda%*%t(mX)); dim(vw) <- NULL
+    mDiag <- sapply(1:ncol(mX), function(i) sum(mX[i,] * mLambda[, i] * mX[, i]))
+    vw <- exp(mX%*%vtheta+.5*mDiag); dim(vw) <- NULL
     mH <- -t(mX*vw)%*%mX - mSigma.inv
     return(mH)
 }
