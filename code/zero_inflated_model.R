@@ -4,7 +4,7 @@ source("zero_inflated_poisson_linear_model.R")
 logit <- function(p) log(p/(1-p))
 expit <- function(eta) 1/(1+exp(-eta))
 
-zero_infl_mcmc <- function(iterations, vx, a, b)
+zero_infl_mcmc.univariate <- function(iterations, vx, a, b)
 {
 	# Initialise
 	n = length(vx)
@@ -35,6 +35,16 @@ zero_infl_mcmc <- function(iterations, vx, a, b)
 		vrho[i+1] = rbeta(1, sum(vr) + 1, n - sum(vr) + 1)
 	}
 	return(list(vlambda=vlambda, vrho=vrho))
+}
+
+zero_infl_mcmc.multivariate <- function(multivariate)
+{
+	stop("Not implemented yet")
+}
+
+zero_infl_mcmc <- function(object)
+{
+	UseMethod("zero_infl_mcmc", object)
 }
 
 calculate_lower_bound.univariate <- function(univariate)
@@ -85,6 +95,7 @@ calculate_lower_bound.multivariate <- function(multivariate)
 {
 	# Re-use what you can from the univariate lower bound.
 	# Take the lower bound returned by multivariate fit and combine it
+	stop("Not implemented yet")
 }
 
 calculate_lower_bound <- function(object)
@@ -170,8 +181,24 @@ create_multivariate <- function(vy, mX, a_sigma, b_sigma)
 	print(ncol(mX))
 	print(dim(mX))
 	vbeta = rep(0, ncol(mX))
-	D = diag(rep(a_sigma/b_sigma, ncol(mX)))
-	multivariate = list(vy=vy, mX=mX, vp=vp, vbeta=vbeta, a_sigma=a_sigma, b_sigma=b_sigma, D=D)
+
+	# There are too many covariance matrices floating around. You don't really understand what
+	# they all do, or what they're supposed to contain. You have to straighten this out first
+	# before you can proceed. I suspect that at least one of these covariance matrices is redundant.
+	# We have:
+	# mLambda - variational parameter, covariance matrix of \nu
+	# mD - variational parameter, covariance matrice of \vu
+	# mSigma.inv - a parameter to the fitting routines. I'm not sure where this fits into the scheme
+	# of things.
+	# I think that Dhat is mSigma
+
+	# TODO: What should mLambda be initialised to?
+	mLambda = diag(rep(1, ncol(mX)))
+	mD = diag(rep(a_sigma/b_sigma, ncol(mX)))
+	# TODO: What should mSigma.inv be initialised to?
+	mSigma.inv = diag(rep(b_sigma/a_sigma, ncol(mX)))
+	multivariate = list(vy=vy, mX=mX, vp=vp, vbeta=vbeta, a_sigma=a_sigma, b_sigma=b_sigma, mLambda=mLambda, mD=mD,
+						mSigma.inv=mSigma.inv)
 	class(multivariate) = "multivariate"
 	return(multivariate)
 }
@@ -179,13 +206,9 @@ create_multivariate <- function(vy, mX, a_sigma, b_sigma)
 zero_infl_var.multivariate <- function(m, trace=FALSE, plot_lower_bound=FALSE)
 {
 	# Initialise
-	vy = m$vy
-	vbeta = m$vbeta
-	mX = m$mX
-	n = length(vy)
-	vp = m$vp
-	zero.set = which(vy == 0)
-	nonzero.set = which(vy != 0)
+	n = length(m$vy)
+	zero.set = which(m$vy == 0)
+	nonzero.set = which(m$vy != 0)
 	vlower_bound <- c()
 	
 	i = 0
@@ -197,9 +220,12 @@ zero_infl_var.multivariate <- function(m, trace=FALSE, plot_lower_bound=FALSE)
 		# FIXME: We don't update, we maximise the log-likelihood using z_i = r_i y_i
 		# and r_i
 		# Find these things using Poisson mixed model code
-		fit = fit.Lap(m$vbeta, m$vy, m$vp, m$mX, m$mSigma.inv, m$mLambda)
-		m$vbeta = fit$vmu
-		m$mLambda = fit$mLambda
+    # FIXME: This first call is _incredibly_ time-consuming, and the answer
+    # that it gives back is well off what the result should be.
+		fit1 = fit.Lap(m$vbeta, m$vy, m$vp, m$mX, m$mSigma.inv, m$mLambda)
+		fit2 = fit.GVA(fit1$vmu, m$vy, m$vp, m$mX, fit1$mSigma.inv, "L-BFGS-B")
+		m$vbeta = fit2$vmu
+		m$mLambda = fit2$mLambda
 
 		# Update parameters for q_rho
 		m$a_rho = 1 + sum(m$vp)

@@ -62,10 +62,12 @@ test_multivariate_zip <- function()
 	mX = matrix(as.vector(cbind(rep(1, n), rnorm(n))), n, 2)
 	expected_rho = .5
 	expected_beta = c(1, 2)
+  a_sigma = 1e5
+  b_sigma = 1e5
 	vy = generate_multivariate_test_data(mX, expected_rho, expected_beta)
 
 	# Test model fitting
-	multivariate = create_multivariate(vy, mX, a_lambda, b_lambda)
+	multivariate = create_multivariate(vy, mX, a_sigma, b_sigma)
 	result_var = zero_infl_var(multivariate)
 
 	expect_equal(result$vbeta, expected_beta)
