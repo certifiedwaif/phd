@@ -221,7 +221,7 @@ fit.GVA <- function(vmu,mLambda,vy,vr,mX,mSigma.inv,method,reltol=1.0e-8)
     }
     res <- optim(par=vtheta, fn=f.GVA, gr=vg.GVA,
         method=method,lower=-Inf, upper=Inf, control=controls,
-        vy=vy,mX=mX,mSigma.inv=mSigma.inv,gh=gh2,mR=mR*0,Rinds=Rinds,Dinds=Dinds)        
+        vy=vy,vr=vr,mX=mX,mSigma.inv=mSigma.inv,gh=gh2,mR=mR*0,Rinds=Rinds,Dinds=Dinds)        
         
     vtheta <- res$par 
     
