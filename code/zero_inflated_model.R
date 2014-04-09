@@ -223,7 +223,8 @@ zero_infl_var.multivariate <- function(m, trace=FALSE, plot_lower_bound=FALSE)
     # FIXME: This first call is _incredibly_ time-consuming, and the answer
     # that it gives back is well off what the result should be.
 		fit1 = fit.Lap(m$vbeta, m$vy, m$vp, m$mX, m$mSigma.inv, m$mLambda)
-		fit2 = fit.GVA(fit1$vmu, m$vy, m$vp, m$mX, fit1$mSigma.inv, "L-BFGS-B")
+		print(str(fit1))
+		fit2 = fit.GVA(fit1$vmu, fit1$mLambda, m$vy, m$vp, m$mX, fit1$mSigma.inv, "L-BFGS-B")
 		m$vbeta = fit2$vmu
 		m$mLambda = fit2$mLambda
 

@@ -15,7 +15,11 @@ f.lap <- function(vtheta,vy,vr,mX,mSigma.inv,mLambda)
 	mSigma <- solve(mSigma.inv)
 	# diag(mX mLambda mX^T)_i i = mX[i, ] . mLambda[, i] . mX[, i] 
     #f <- sum(vy*veta - vr*exp(veta+0.5*diag(mX%*%mLambda%*%t(mX)))) - 0.5*t(vtheta)%*%mSigma.inv%*%vtheta - 0.5*sum(diag(mLambda%*%mSigma))
+	# Are these really equivalent?
 	mDiag <- sapply(1:ncol(mX), function(i) sum(mX[i,] * mLambda[, i] * mX[, i]))
+	#mDiag2 <-  diag(mX%*%mLambda%*%t(mX))
+	#print(mDiag)
+	#print(mDiag2)
 	f <- sum(vy*veta - vr*exp(veta+0.5*mDiag)) - 0.5*t(vtheta)%*%mSigma.inv%*%vtheta - 0.5*sum(diag(mLambda%*%mSigma))
     return(f)
 }
@@ -24,7 +28,9 @@ f.lap <- function(vtheta,vy,vr,mX,mSigma.inv,mLambda)
 
 vg.lap <- function(vtheta,vy,vr,mX,mSigma.inv,mLambda) 
 {       
-    vg <- t(mX)%*%(vy - vr*exp(mX%*%vtheta+0.5*diag(mX%*%mLambda%*%t(mX)))) - mSigma.inv%*%vtheta
+	mDiag <- sapply(1:ncol(mX), function(i) sum(mX[i,] * mLambda[, i] * mX[, i]))
+	#mDiag2 <-  diag(mX%*%mLambda%*%t(mX))
+    vg <- t(mX)%*%(vy - vr*exp(mX%*%vtheta+0.5*mDiag)) - mSigma.inv%*%vtheta
     return(vg)
 }
 
