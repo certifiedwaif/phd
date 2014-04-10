@@ -47,6 +47,16 @@ zero_infl_mcmc <- function(object)
 	UseMethod("zero_infl_mcmc", object)
 }
 
+gamma_entropy <- function(alpha, beta)
+{
+	alpha - log(beta) + lgamma(alpha) - (alpha-1) * digamma(alpha)
+}
+	
+beta_entropy <- function(alpha, beta)
+{
+	lbeta(alpha, beta) - (alpha-1)*digamma(alpha) - (beta-1)*digamma(beta) + (alpha+beta-2)*digamma(alpha+beta)
+}	
+	
 calculate_lower_bound.univariate <- function(univariate)
 #calculate_lower_bound <- function(vx, vp, a_lambda, b_lambda, a_rho, b_rho)
 {
@@ -57,16 +67,6 @@ calculate_lower_bound.univariate <- function(univariate)
 	a_rho = univariate$a_rho
 	b_rho = univariate$b_rho
 
-	gamma_entropy <- function(alpha, beta)
-	{
-		alpha - log(beta) + lgamma(alpha) - (alpha-1) * digamma(alpha)
-	}
-	
-	beta_entropy <- function(alpha, beta)
-	{
-		lbeta(alpha, beta) - (alpha-1)*digamma(alpha) - (beta-1)*digamma(beta) + (alpha+beta-2)*digamma(alpha+beta)
-	}	
-	
 	zero.set <- which(vx==0)
 	
 	E_lambda = a_lambda/b_lambda
@@ -94,8 +94,39 @@ calculate_lower_bound.univariate <- function(univariate)
 calculate_lower_bound.multivariate <- function(multivariate)
 {
 	# Re-use what you can from the univariate lower bound.
-	# Take the lower bound returned by multivariate fit and combine it
-	stop("Not implemented yet")
+	# Take the lower bound returned by Poisson fit and combine it
+	vy = multivariate$vy
+	vp = multivariate$vp
+	#a_lambda = multivariate$a_lambda
+	#b_lambda = multivariate$b_lambda
+	a_rho = multivariate$a_rho
+	b_rho = multivariate$b_rho
+
+	zero.set <- which(vy==0)
+	
+	#E_lambda = a_lambda/b_lambda
+	#E_log_lambda = digamma(a_lambda) - log(b_lambda)	
+	
+	E_r = ifelse(vy == 0, vp, 1)
+	#E_xi_log_lambda_r = ifelse(vy == 0, 0, vy*E_log_lambda)
+	
+	E_log_rho = digamma(a_rho) - digamma(a_rho + b_rho)
+	E_log_one_minus_rho = digamma(b_rho) - digamma(a_rho + b_rho)
+	
+	E_log_q_r = (vp[zero.set]*log(vp[zero.set]) + (1-vp[zero.set])*log(1-vp[zero.set]))
+	#E_log_q_lambda = -gamma_entropy(a_lambda, b_lambda)
+	E_log_q_rho = -beta_entropy(a_rho, b_rho) # FIXME: Why is this entropy positive?
+	
+	result = 0
+	#result = a_lambda * log(b_lambda) + (a_lambda-1) * E_log_lambda - b_lambda * E_lambda - lgamma(a_lambda)
+	#result = result - E_lambda * sum(E_r)
+	#result = result + sum(E_xi_log_lambda_r) - sum(lgamma(vx+1))
+	result = result + sum(E_r) * E_log_rho + sum(1 - E_r) * E_log_one_minus_rho
+	result = result - sum(E_log_q_r) #- E_log_q_lambda
+	result = result - E_log_q_rho
+	result = result + multivariate$f
+	
+	return(result)
 }
 
 calculate_lower_bound <- function(object)
@@ -224,30 +255,33 @@ zero_infl_var.multivariate <- function(m, trace=FALSE, plot_lower_bound=FALSE)
     # that it gives back is well off what the result should be.
 		fit1 = fit.Lap(m$vbeta, m$vy, m$vp, m$mX, m$mSigma.inv, m$mLambda)
 		print(str(fit1))
-		fit2 = fit.GVA(fit1$vmu, fit1$mLambda, m$vy, m$vp, m$mX, fit1$mSigma.inv, "L-BFGS-B")
-		m$vbeta = fit2$vmu
-		m$mLambda = fit2$mLambda
+		#fit2 = fit.GVA(fit1$vmu, fit1$mLambda, m$vy, m$vp, m$mX, fit1$mSigma.inv, "L-BFGS-B")
+		m$vbeta = fit1$vmu
+		m$mLambda = fit1$mLambda
+		m$f = fit1$f
 
 		# Update parameters for q_rho
 		m$a_rho = 1 + sum(m$vp)
 		m$b_rho = n - sum(m$vp) + 1
 		
 		# Update parameters for q_vr
-		m$vp[zero.set] = expit(-exp(t(m$mX)%*%m$vbeta) + digamma(m$a_rho) - digamma(m$b_rho))
+		print(dim(m$mX))
+		print(dim(m$vbeta))
+		m$vp[zero.set] = expit(-exp(m$mX[zero.set,]%*%m$vbeta) + digamma(m$a_rho) - digamma(m$b_rho))
 
 		#vlower_bound[i] <- calculate_lower_bound(vx, vp, a_lambda, b_lambda, a_rho, b_rho)
 		vlower_bound[i] <- calculate_lower_bound(m)
 		
 		if (trace && i > 1)
 			cat("Iteration ", i, ": lower bound ", vlower_bound[i], " difference ",
-					vlower_bound[i] - vlower_bound[i-1], " parameters ", "a_lambda", m$a_lambda,
-					"b_lambda", m$b_lambda, "a_rho", m$a_rho, "b_rho", m$b_rho, "\n")
+					vlower_bound[i] - vlower_bound[i-1], " parameters ", "vbeta", m$vbeta,
+					"a_rho", m$a_rho, "b_rho", m$b_rho, "\n")
 	}
 
 	if (plot_lower_bound)
 		plot(lower_bound_vector,type="l")
 
-	params = list(a_lambda=m$a_lambda, b_lambda=m$b_lambda, a_rho=m$a_rho, b_rho=m$b_rho)
+	params = list(vbeta=m$vbeta, a_rho=m$a_rho, b_rho=m$b_rho)
 	return(params)
 }
 

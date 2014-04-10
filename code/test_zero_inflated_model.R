@@ -53,7 +53,7 @@ test_univariate_zip <- function()
 	expect_equal(result_var$a_rho / (result_var$a_rho + result_var$b_rho), expected_rho, tolerance=1e-1)
 }
 
-test_multivariate_zip <- function()
+test_multivariate_zip_no_zeros <- function()
 {
 	# Simulate data
 	# Could we load test data from somewhere? I don't know that hardcoding the
@@ -61,7 +61,6 @@ test_multivariate_zip <- function()
 	n = 10
 	mX = matrix(as.vector(cbind(rep(1, n), rnorm(n))), n, 2)
 	expected_rho = 0
-	#expected_rho = .1
 	expected_beta = c(1, 2)
 	expected_sigma2_u = 0
 	a_sigma = 1e5
@@ -72,14 +71,37 @@ test_multivariate_zip <- function()
 	multivariate = create_multivariate(vy, mX, a_sigma, b_sigma)
 	result_var = zero_infl_var(multivariate)
 
-	expect_equal(result$vbeta, expected_beta)
-	expect_equal(result$rho, expected_rho)
+	expect_equal(as.vector(result_var$vbeta), expected_beta)
+	expect_equal(result_var$rho, expected_rho)
+}
+
+test_multivariate_zip_half_zeros <- function()
+{
+	# Simulate data
+	# Could we load test data from somewhere? I don't know that hardcoding the
+	# test data into the source files is really the best idea.
+	n = 10
+	mX = matrix(as.vector(cbind(rep(1, n), rnorm(n))), n, 2)
+	expected_rho = .5
+	expected_beta = c(1, 2)
+	expected_sigma2_u = 0
+	a_sigma = 1e5
+	b_sigma = 1e5
+	vy = generate_multivariate_test_data(mX, expected_rho, expected_beta, expected_sigma2_u)
+
+	# Test model fitting
+	multivariate = create_multivariate(vy, mX, a_sigma, b_sigma)
+	result_var = zero_infl_var(multivariate, trace=TRUE)
+
+	expect_equal(as.vector(result_var$vbeta), expected_beta)
+	expect_equal(result_var$rho, expected_rho)
 }
 
 #main_check_accuracy()
 main <- function()
 {
 	test_univariate_zip()
-	test_multivariate_zip()
+	test_multivariate_zip_no_zeros()
+  test_multivariate_zip_half_zeros()
 }
 main()
