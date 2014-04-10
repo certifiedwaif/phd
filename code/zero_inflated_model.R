@@ -254,7 +254,7 @@ zero_infl_var.multivariate <- function(m, trace=FALSE, plot_lower_bound=FALSE)
     # FIXME: This first call is _incredibly_ time-consuming, and the answer
     # that it gives back is well off what the result should be.
 		fit1 = fit.Lap(m$vbeta, m$vy, m$vp, m$mX, m$mSigma.inv, m$mLambda)
-		print(str(fit1))
+		#print(str(fit1))
 		#fit2 = fit.GVA(fit1$vmu, fit1$mLambda, m$vy, m$vp, m$mX, fit1$mSigma.inv, "L-BFGS-B")
 		m$vbeta = fit1$vmu
 		m$mLambda = fit1$mLambda
@@ -265,8 +265,8 @@ zero_infl_var.multivariate <- function(m, trace=FALSE, plot_lower_bound=FALSE)
 		m$b_rho = n - sum(m$vp) + 1
 		
 		# Update parameters for q_vr
-		print(dim(m$mX))
-		print(dim(m$vbeta))
+		#print(dim(m$mX))
+		#print(dim(m$vbeta))
 		m$vp[zero.set] = expit(-exp(m$mX[zero.set,]%*%m$vbeta) + digamma(m$a_rho) - digamma(m$b_rho))
 
 		#vlower_bound[i] <- calculate_lower_bound(vx, vp, a_lambda, b_lambda, a_rho, b_rho)
@@ -358,34 +358,3 @@ main_check_accuracy <- function()
 		for (lambda in seq(5, 10, 0.05))
 			print(check_accuracy(n, rho, lambda))
 }
-
-# MCMC ----
-#iterations = 1e6
-#burnin = 1e3
-
-#start = Sys.time()
-#result_mcmc = zero_infl_mcmc(iterations+burnin, x, a, b)
-#mcmc_runtime = Sys.time() - start
-# Throw away burn-in samples.
-# Brackets turn out to be incredibly important here!!!
-#result_mcmc$rho = result_mcmc$rho[(burnin+1):(burnin+iterations+1)]
-#result_mcmc$lambda = result_mcmc$lambda[(burnin+1):(burnin+iterations+1)]
-# 1000 iterations in 0.07461715 seconds.
-
-# Extension to multivariate case ----
-# multivariate <- function(y, X, Z)
-# {
-#	 SigmaInv = solve(Sigma)
-#	 D_b = sum(t(y - B(1, beta, mu, Lambda)) %*% X)
-#	 D_Sigma = 0.5 * sum(t(vec(SigmaInv %*% (m[i] %*% t(mu[i]) + Lambda[i]) %*% SigmaInv)) %*% D)
-#	 D_mu[i] = t(y - B(1, mu[i], Lambda[i])) %*% Z[i] - t(mu[i]) %*% SigmaInv
-#	 D_Lambda[i] = .5 t(vec(Lambda[i]Inv - SigmaInv - t(Z[i]) %*% diag(B(2, beta, mu[i], Lambda[i])) %*% Z[i])) %*% D
-# 
-#	 H_b_u[i] = -t(X[i]) %*% diag(B(2, beta, mu[i], Lambda[i])) %*% Z[i]
-#	 H_b_Lambda[i] = - .5 * t(X[i]) %*% diag(B(3, beta, mu[i], Lambda[i])) %*% O(Z[i]) %*% D
-#	 H_Sigma_mu[i] = t(D) %*% kron(SigmaInv %*% mu[i], SigmaInv)
-#	 H_mu_mu[i, i] = -t(Z[i]) %*% diag(B(2, beta, mu[i], Lambda[i])) %*% Z[i] - SigmaInv
-#	 H_mu_Lambda[i, i] = - .5 * t(Z[i] %*% diag(B(3, beta, mu[i], Lambda[i]))) %*% O(Z[i]) %*% D
-#	 LambdaInv[i] = solve(Lambda[i])
-#	 H_Lambda_Lambda[i, i] = -.25 * t(D) %*% (t(O(Z[i])) %*% diag(4, beta, mu[i], Lambda[i])) + 2(kron(LambdaInv[i], LambdaInv[i])) %*% D
-#}
