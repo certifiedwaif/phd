@@ -271,6 +271,11 @@ zero_infl_var.multivariate <- function(m, trace=FALSE, plot_lower_bound=FALSE)
 
 		#vlower_bound[i] <- calculate_lower_bound(vx, vp, a_lambda, b_lambda, a_rho, b_rho)
 		vlower_bound[i] <- calculate_lower_bound(m)
+		print(m$vbeta)
+		print(m$vp)
+		print(m$a_rho)
+		print(m$b_rho)
+		cat("End of iteration", i, "\n")
 		
 		if (trace && i > 1)
 			cat("Iteration ", i, ": lower bound ", vlower_bound[i], " difference ",
