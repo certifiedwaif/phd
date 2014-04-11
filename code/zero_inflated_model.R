@@ -93,7 +93,8 @@ calculate_lower_bound.univariate <- function(univariate)
 
 calculate_lower_bound.multivariate <- function(multivariate)
 {
-	# Re-use what you can from the univariate lower bound.
+	# TODO: Re-use what you can from the univariate lower bound, rather than
+  # duplicating code.
 	# Take the lower bound returned by Poisson fit and combine it
 	vy = multivariate$vy
 	vp = multivariate$vp
@@ -268,7 +269,9 @@ zero_infl_var.multivariate <- function(m, trace=FALSE, plot_lower_bound=FALSE)
 		#print(dim(m$mX))
 		#print(dim(m$vbeta))
 		m$vp[zero.set] = expit(-exp(m$mX[zero.set,]%*%m$vbeta) + digamma(m$a_rho) - digamma(m$b_rho))
-
+    # FIXME: We get zeros in here sometimes, which plays havoc with the lower bound
+    # calculation.
+    
 		#vlower_bound[i] <- calculate_lower_bound(vx, vp, a_lambda, b_lambda, a_rho, b_rho)
 		vlower_bound[i] <- calculate_lower_bound(m)
 		print(m$vbeta)
@@ -290,7 +293,7 @@ zero_infl_var.multivariate <- function(m, trace=FALSE, plot_lower_bound=FALSE)
 	return(params)
 }
 
-zero_infl_var <- function(object)
+zero_infl_var <- function(object, trace=FALSE, plot_lower_bound=FALSE)
 {
 	UseMethod("zero_infl_var", object)
 }

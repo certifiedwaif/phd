@@ -104,7 +104,7 @@ main <- function()
 	# TODO: Add some sort of test for the accuracy of the approximation?
 
 	test_multivariate_zip_no_zeros()
-	#test_multivariate_zip_half_zeros()
+	test_multivariate_zip_half_zeros()
 	# TODO: Add a test for the random intercepts?
 }
 main()
