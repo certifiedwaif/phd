@@ -98,6 +98,16 @@ test_multivariate_zip_half_zeros <- function()
 	expect_equal(result_var$a_rho / (result_var$a_rho + result_var$b_rho), expected_rho, tolerance=1e-1)
 }
 
+test_multivariate_zip_no_zeros_random_intercept <- function()
+{
+	stop("Not implemented yet")
+}
+
+test_multivariate_zip_half_zeros_random_intercept <- function()
+{
+	stop("Not implemented yet")
+}
+
 #main_check_accuracy()
 main <- function()
 {
@@ -105,7 +115,10 @@ main <- function()
 	# TODO: Add some sort of test for the accuracy of the approximation?
 
 	test_multivariate_zip_no_zeros()
-	#test_multivariate_zip_half_zeros()
+	test_multivariate_zip_half_zeros()
+
+	test_multivariate_zip_no_zeros_random_intercept()
+	test_multivariate_zip_half_zeros_random_intercept()
 	# TODO: Add a test for the random intercepts?
 }
 main()
