@@ -80,6 +80,8 @@ fit.Lap <- function(vmu,vy,vr,mX,mSigma.inv,mLambda)
 
 f.G <- function(vmu,mLambda,vy,vr,mX,mSigma.inv,gh) 
 {
+	print(vmu)
+	print(mSigma.inv)
     d <- length(vmu)
     
     vmu.til     <- mX%*%vmu
@@ -135,31 +137,31 @@ mH.G <- function(vmu,mLambda,vy,vr,mX,mSigma.inv,vB2)
 vg.GVA.approx <- function(vtheta,vy,vr,mX,mSigma.inv,gh,mR,Rinds,Dinds)
 {
     n <- length(vy); P <- length(vtheta); d <- ncol(mX)
-		eps <- 1.0E-6
-		f <- f.GVA(vtheta,vy,vr,mX,mSigma.inv,gh,mR,Rinds,Dinds)
-		vg.approx <- matrix(0,P,1)
-		for (i in 1:P) {
-		   vthetap <- vtheta 
-		   vthetap[i] <- vtheta[i] + eps
-		   fp <- f.GVA(vthetap,vy,vr,mX,mSigma.inv,gh,mR,Rinds,Dinds)
-		   
-		   vthetam <- vtheta 
-		   vthetam[i] <- vtheta[i] - eps
-		   fm <- f.GVA(vthetam,vy,vr,mX,mSigma.inv,gh,mR,Rinds,Dinds)
-		   
-		   vg.approx[i] <- (fp - fm)/(2*eps)
-		   
-		   #vthetapp <- vtheta 
-		   #vthetapp[i] <- vtheta[i] + 2*eps
-		   #fpp <- f.GVA(vthetapp,vy,mX,mSigma.inv,gh,mR,Rinds,Dinds)
-		   
-		   #vthetamm <- vtheta 
-		   #vthetamm[i] <- vtheta[i] - 2*eps
-		   #fmm <- f.GVA(vthetamm,vy,mX,mSigma.inv,gh,mR,Rinds,Dinds)  
-		   
-		   #vg.approx[i] <- (-fpp + 8*fp - 8*fm + fmm)/(12*eps)
-		}
-		return(vg.approx)
+	eps <- 1.0E-6
+	f <- f.GVA(vtheta,vy,vr,mX,mSigma.inv,gh,mR,Rinds,Dinds)
+	vg.approx <- matrix(0,P,1)
+	for (i in 1:P) {
+	   vthetap <- vtheta 
+	   vthetap[i] <- vtheta[i] + eps
+	   fp <- f.GVA(vthetap,vy,vr,mX,mSigma.inv,gh,mR,Rinds,Dinds)
+	   
+	   vthetam <- vtheta 
+	   vthetam[i] <- vtheta[i] - eps
+	   fm <- f.GVA(vthetam,vy,vr,mX,mSigma.inv,gh,mR,Rinds,Dinds)
+	   
+	   vg.approx[i] <- (fp - fm)/(2*eps)
+	   
+	   #vthetapp <- vtheta 
+	   #vthetapp[i] <- vtheta[i] + 2*eps
+	   #fpp <- f.GVA(vthetapp,vy,mX,mSigma.inv,gh,mR,Rinds,Dinds)
+	   
+	   #vthetamm <- vtheta 
+	   #vthetamm[i] <- vtheta[i] - 2*eps
+	   #fmm <- f.GVA(vthetamm,vy,mX,mSigma.inv,gh,mR,Rinds,Dinds)  
+	   
+	   #vg.approx[i] <- (-fpp + 8*fp - 8*fm + fmm)/(12*eps)
+	}
+	return(vg.approx)
 }
 
 ###############################################################################

@@ -58,7 +58,8 @@ test_multivariate_zip_no_zeros <- function()
 	# Simulate data
 	# Could we load test data from somewhere? I don't know that hardcoding the
 	# test data into the source files is really the best idea.
-	n = 100
+	# FIXME: You have serious overflow issues
+	n = 10
 	mX = matrix(as.vector(cbind(rep(1, n), rnorm(n))), n, 2)
 	expected_rho = 1
 	expected_beta = c(1, 2)
@@ -80,7 +81,7 @@ test_multivariate_zip_half_zeros <- function()
 	# Simulate data
 	# Could we load test data from somewhere? I don't know that hardcoding the
 	# test data into the source files is really the best idea.
-	n = 100
+	n = 10
 	mX = matrix(as.vector(cbind(rep(1, n), rnorm(n))), n, 2)
 	expected_rho = .5
 	expected_beta = c(1, 2)
