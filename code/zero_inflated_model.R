@@ -143,7 +143,7 @@ expected_lambda.univariate <- function(univariate)
 
 expected_lambda.multivariate <- function(multivariate)
 {
-	expected_lambda = exp(multivariate$vmu%*%multivariate$mX)
+	expected_lambda = exp(multivariate$vmu%*%multivariate$mC)
 	return(expected_lambda)
 }
 
@@ -205,31 +205,20 @@ zero_infl_var.univariate <- function(univariate, trace=FALSE, plot_lower_bound=F
 	return(params)
 }
 
-create_multivariate <- function(vy, mX, a_sigma, b_sigma)
+create_multivariate <- function(vy, mC, a_sigma, b_sigma)
 {
 	# Initialise
 	n = length(vy)
 	vp = rep(1, n)
-	print(ncol(mX))
-	print(dim(mX))
-	vbeta = rep(0, ncol(mX))
+	print(ncol(mC))
+	print(dim(mC))
+	vnu = rep(0, ncol(mC))
 
-	# There are too many covariance matrices floating around. You don't really understand what
-	# they all do, or what they're supposed to contain. You have to straighten this out first
-	# before you can proceed. I suspect that at least one of these covariance matrices is redundant.
-	# We have:
-	# mLambda - variational parameter, covariance matrix of \nu
-	# mD - variational parameter, covariance matrice of \vu
-	# mSigma.inv - a parameter to the fitting routines. I'm not sure where this fits into the scheme
-	# of things.
-	# I think that Dhat is mSigma
-
-	# TODO: What should mLambda be initialised to?
-	mLambda = diag(rep(1, ncol(mX)))
-	mD = diag(rep(a_sigma/b_sigma, ncol(mX)))
-	# TODO: What should mSigma.inv be initialised to?
-	mSigma.inv = diag(rep(b_sigma/a_sigma, ncol(mX)))
-	multivariate = list(vy=vy, mX=mX, vp=vp, vbeta=vbeta, a_sigma=a_sigma, b_sigma=b_sigma, mLambda=mLambda, mD=mD,
+	mLambda = diag(rep(1, ncol(mC)))
+	mSigma.inv = diag(rep(b_sigma/a_sigma, ncol(mC)))
+	multivariate = list(vy=vy, mC=mC, vp=vp, vnu=vnu,
+						a_sigma=a_sigma, b_sigma=b_sigma,
+						mLambda=mLambda,
 						mSigma.inv=mSigma.inv)
 	class(multivariate) = "multivariate"
 	return(multivariate)
@@ -254,11 +243,11 @@ zero_infl_var.multivariate <- function(m, trace=FALSE, plot_lower_bound=FALSE)
 		# Find these things using Poisson mixed model code
 		# FIXME: This first call is _incredibly_ time-consuming, and the answer
 		# that it gives back is well off what the result should be.
-		fit1 = fit.Lap(m$vbeta, m$vy, m$vp, m$mX, m$mSigma.inv, m$mLambda)
+		fit1 = fit.Lap(m$vnu, m$vy, m$vp, m$mC, m$mSigma.inv, m$mLambda)
 		print(str(fit1))
 		# TODO: What should be in mSigma.inv?
-		fit2 = fit.GVA(fit1$vmu, fit1$mLambda, m$vy, m$vp, m$mX, fit1$mSigma.inv, "L-BFGS-B")
-		m$vbeta = fit2$vmu
+		fit2 = fit.GVA(fit1$vnu, fit1$mLambda, m$vy, m$vp, m$mC, m$mSigma.inv, "L-BFGS-B")
+		m$vnu = fit2$vnu
 		m$mLambda = fit2$mLambda
 		m$f = fit2$f
 
@@ -267,15 +256,15 @@ zero_infl_var.multivariate <- function(m, trace=FALSE, plot_lower_bound=FALSE)
 		m$b_rho = n - sum(m$vp) + 1
 		
 		# Update parameters for q_vr
-		#print(dim(m$mX))
-		#print(dim(m$vbeta))
-		m$vp[zero.set] = expit(-exp(m$mX[zero.set,]%*%m$vbeta) + digamma(m$a_rho) - digamma(m$b_rho))
+		#print(dim(m$mC))
+		#print(dim(m$vnu))
+		m$vp[zero.set] = expit(-exp(m$mC[zero.set,]%*%m$vnu) + digamma(m$a_rho) - digamma(m$b_rho))
     # FIXME: We get zeros in here sometimes, which plays havoc with the lower bound
     # calculation.
     
 		#vlower_bound[i] <- calculate_lower_bound(vx, vp, a_lambda, b_lambda, a_rho, b_rho)
 		vlower_bound[i] <- calculate_lower_bound(m)
-		print(m$vbeta)
+		print(m$vnu)
 		print(m$vp)
 		print(m$a_rho)
 		print(m$b_rho)
@@ -283,14 +272,14 @@ zero_infl_var.multivariate <- function(m, trace=FALSE, plot_lower_bound=FALSE)
 		
 		if (trace && i > 1)
 			cat("Iteration ", i, ": lower bound ", vlower_bound[i], " difference ",
-					vlower_bound[i] - vlower_bound[i-1], " parameters ", "vbeta", m$vbeta,
+					vlower_bound[i] - vlower_bound[i-1], " parameters ", "vnu", m$vnu,
 					"a_rho", m$a_rho, "b_rho", m$b_rho, "\n")
 	}
 
 	if (plot_lower_bound)
 		plot(lower_bound_vector,type="l")
 
-	params = list(vbeta=m$vbeta, a_rho=m$a_rho, b_rho=m$b_rho)
+	params = list(vnu=m$vnu, a_rho=m$a_rho, b_rho=m$b_rho)
 	return(params)
 }
 

@@ -19,15 +19,24 @@ generate_univariate_test_data <- function (n, rho, lambda)
 	return(vx)
 }
 
-generate_multivariate_test_data <- function (mX, rho, vbeta, sigma2_u)
+generate_multivariate_test_data <- function (mC, m, n, rho, vnu, sigma2_u)
 {
-	n = nrow(mX)
-	vy = rep(NA, n)
-	for (i in 1:n) {
-		if (runif(1) <= rho) {
-			vy[i] = rpois(1, exp(mX[i,] %*% vbeta) + rnorm(1, 0, sigma2_u))
-		} else {
-			vy[i] = 0
+	vy = rep(NA, sum(n))
+	for (i in 1:m) {
+		intercept = rnorm(1, 0, sigma2_u)
+		for (j in 1:n[i]) {
+			if (i == 1) {
+				ind = j
+			} else {
+				ind = j + sum(n[1:(i-1)])
+			}
+			cat("ind", ind, "\n")
+
+			if (runif(1) <= rho) {
+				vy[ind] = rpois(1, exp(mC[ind,] %*% vnu) + intercept)
+			} else {
+				vy[ind] = 0
+			}
 		}
 	}
 	return(vy)
@@ -36,11 +45,11 @@ generate_multivariate_test_data <- function (mX, rho, vbeta, sigma2_u)
 test_univariate_zip <- function()
 {
 	# Simulate data
-	n = 10000
+	m = 10000
 	expected_rho = .5
 	expected_lambda = 1
 
-	vx = generate_univariate_test_data(n, expected_rho, expected_lambda)
+	vx = generate_univariate_test_data(m, expected_rho, expected_lambda)
 
 	a_lambda = 0.01
 	b_lambda = 0.01
@@ -59,20 +68,22 @@ test_multivariate_zip_no_zeros <- function()
 	# Could we load test data from somewhere? I don't know that hardcoding the
 	# test data into the source files is really the best idea.
 	# FIXME: You have serious overflow issues
-	n = 10
-	mX = matrix(as.vector(cbind(rep(1, n), rnorm(n))), n, 2)
+	m = 10
+	n = rep(1, m)
+	mC = matrix(as.vector(cbind(rep(1, m), runif(m, -1, 1))), m, 2)
+	cat("mC", mC, "\n")
 	expected_rho = 1
-	expected_beta = c(1, 2)
+	expected_nu = c(1, 2)
 	expected_sigma2_u = 0
 	a_sigma = 1e5
 	b_sigma = 1e5
-	vy = generate_multivariate_test_data(mX, expected_rho, expected_beta, expected_sigma2_u)
+	vy = generate_multivariate_test_data(mC, m, n, expected_rho, expected_nu, expected_sigma2_u)
 
 	# Test model fitting
-	multivariate = create_multivariate(vy, mX, a_sigma, b_sigma)
+	multivariate = create_multivariate(vy, mC, a_sigma, b_sigma)
 	result_var = zero_infl_var(multivariate)
 
-	expect_equal(as.vector(result_var$vbeta), expected_beta, tolerance=1e-1)
+	expect_equal(as.vector(result_var$vnu), expected_nu, tolerance=1e-1)
 	expect_equal(result_var$a_rho / (result_var$a_rho + result_var$b_rho), expected_rho, tolerance=1e-1)
 }
 
@@ -82,19 +93,19 @@ test_multivariate_zip_half_zeros <- function()
 	# Could we load test data from somewhere? I don't know that hardcoding the
 	# test data into the source files is really the best idea.
 	n = 10
-	mX = matrix(as.vector(cbind(rep(1, n), rnorm(n))), n, 2)
+	mC = matrix(as.vector(cbind(rep(1, n), rnorm(n))), n, 2)
 	expected_rho = .5
-	expected_beta = c(1, 2)
+	expected_nu = c(1, 2)
 	expected_sigma2_u = 0
 	a_sigma = 1e5
 	b_sigma = 1e5
-	vy = generate_multivariate_test_data(mX, expected_rho, expected_beta, expected_sigma2_u)
+	vy = generate_multivariate_test_data(mC, expected_rho, expected_nu, expected_sigma2_u)
 
 	# Test model fitting
-	multivariate = create_multivariate(vy, mX, a_sigma, b_sigma)
+	multivariate = create_multivariate(vy, mC, a_sigma, b_sigma)
 	result_var = zero_infl_var(multivariate, trace=TRUE)
 
-	expect_equal(as.vector(result_var$vbeta), expected_beta, tolerance=1e-1)
+	expect_equal(as.vector(result_var$vnu), expected_nu, tolerance=1e-1)
 	expect_equal(result_var$a_rho / (result_var$a_rho + result_var$b_rho), expected_rho, tolerance=1e-1)
 }
 
@@ -117,8 +128,8 @@ main <- function()
 	test_multivariate_zip_no_zeros()
 	test_multivariate_zip_half_zeros()
 
+	# TODO: Add a test for the random intercepts?
 	test_multivariate_zip_no_zeros_random_intercept()
 	test_multivariate_zip_half_zeros_random_intercept()
-	# TODO: Add a test for the random intercepts?
 }
 main()
