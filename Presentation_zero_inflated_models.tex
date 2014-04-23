@@ -2,27 +2,58 @@
 
 \begin{document}
 \begin{frame}
-Introduction
-Zero inflated data, where it arises
+\frametitle{Introduction}
+Zero inflated data arises in many areas of application, such as physical activity data,
+number of hospital visits and number of insurance claims per year.
 \end{frame}
 
 \begin{frame}
-Univariate
-Model formulation
-Mean field updates
+\frametitle{Univariate model formulation}
+$$
+X_i = R_i Y_i
+R_i \sim \text{Bernoulli}(\rho)
+Y_i \sim \text{Poisson}(\lambda)
+\rho \sim \text{Beta}(a_\rho, b_\rho)
+\lambda \sim \text{Gamma}(a_\lambda, b_\lambda)
+$$
+\end{frame}
+
+\begin{frame}
+\frametitle{Mean field updates}
+Choose a factored approximation of the form
+$$
+q(\theta) = q(\lambda) q(\rho) \prod_{i=1}^n q(r_i)
+$$
+Most of the mean field updates are straightforward, as the priors are conjugate.
+$$
+r_i \sim \text{Bernoulli}(\text{expit}(\eta_i))
+$$
+where
+$$
+\eta_i = - \frac{\alpha_\lambda^*}{\beta_\lambda^*} + \Psi(\alpha_\rho^*) - \Psi(\beta_\rho^*)
+$$
+\end{frame}
+
+\begin{frame}
 Results/Accuracy - excellent accuracy
+% Graph of lower bound
+%\includegraphics{univariate_lower_bound_convergence.pdf}
 \end{frame}
 
 \begin{frame}
-Multivariate
+\frametitle{Extension to multivariate/regression models}
 Extension from univariate, model formulation
-Mixed models -- one mode to rule them all
+$$
+q(\theta) = q(\beta) q(\rho) \prod_{i=1}^n q(r_i)
+$$
+Mixed models -- one model to rule them all
 The need for better approaches - MCMC with existing software can take minutes to
 converge, if they converge at all. That might not sound so bad to you, but how do you
 do model selection?
 Lack of conjugacy means mean field updates won't be analytically tractable. Try
 Gaussian Variational Approximations instead
 Computation - a work in progress
+Initial signs are that this approach will work
 \end{frame}
 
 \begin{frame}
