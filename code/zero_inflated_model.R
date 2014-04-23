@@ -58,7 +58,6 @@ beta_entropy <- function(alpha, beta)
 }	
 	
 calculate_lower_bound.univariate <- function(univariate)
-#calculate_lower_bound <- function(vx, vp, a_lambda, b_lambda, a_rho, b_rho)
 {
 	vx = univariate$vx
 	vp = univariate$vp
@@ -247,9 +246,11 @@ zero_infl_var.multivariate <- function(m, trace=FALSE, plot_lower_bound=FALSE)
 		print(str(fit1))
 		# TODO: What should be in mSigma.inv?
 		fit2 = fit.GVA(fit1$vnu, fit1$mLambda, m$vy, m$vp, m$mC, m$mSigma.inv, "L-BFGS-B")
+		print(fit2)
 		m$vnu = fit2$vnu
 		m$mLambda = fit2$mLambda
-		m$f = fit2$f
+		m$f = fit2$res$value
+		cat("m$f", m$f, "\n")
 
 		# Update parameters for q_rho
 		m$a_rho = 1 + sum(m$vp)

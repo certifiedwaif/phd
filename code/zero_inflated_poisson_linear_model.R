@@ -95,11 +95,11 @@ f.G <- function(vnu,mLambda,vy,vr,mC,mSigma.inv,gh)
 
 ###############################################################################
 
-f.GVA <- function(vnu,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
+f.GVA <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
 {
    d <- ncol(mC)  
-   vnu <- vnu[1:d]
-   mR[Rinds] <- vnu[(1+d):length(vnu)]
+   vnu <- vtheta[1:d]
+   mR[Rinds] <- vtheta[(1+d):length(vtheta)]
    mR[Dinds] <- exp(mR[Dinds]) 
     for (i in 1:length(Dinds)) {
         mR[Dinds[i]] <- min(c(1.0E5,mR[Dinds[i]]))
@@ -166,11 +166,13 @@ vg.GVA.approx <- function(vnu,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
 
 ###############################################################################
 
-vg.GVA <- function(vnu,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
+vg.GVA <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
 {
+	cat("vtheta", vtheta, "\n")
+	cat("ncol(mC)", ncol(mC), "\n")
     d <- ncol(mC)
-    vnu <- vnu[1:d]
-    mR[Rinds] <- vnu[(1+d):length(vnu)]
+    vnu <- vtheta[1:d]
+    mR[Rinds] <- vtheta[(1+d):length(vtheta)]
     mR[Dinds] <- exp(mR[Dinds]) 
     for (i in 1:length(Dinds)) {
         mR[Dinds[i]] <- min(c(1.0E3,mR[Dinds[i]]))
@@ -192,8 +194,9 @@ vg.GVA <- function(vnu,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
 
     dmLambda[Dinds] <- dmLambda[Dinds]*mR[Dinds]
     # FIXME: Something broken in this function
-    vg[(1+d):length(vnu)] <- dmLambda[Rinds]    
+    vg[(1+d):length(vtheta)] <- dmLambda[Rinds]    
    
+	cat("vg", vg, "\n")
     return(vg)
 }
 
@@ -228,12 +231,12 @@ fit.GVA <- function(vnu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-8)
         method=method,lower=-Inf, upper=Inf, control=controls,
         vy=vy,vr=vr,mC=mC,mSigma.inv=mSigma.inv,gh=gh2,mR=mR*0,Rinds=Rinds,Dinds=Dinds)        
         
-    vnu <- res$par 
+    vtheta <- res$par 
     
     #f <- f.GVA(vnu,vy,mC,CTC,CTy,p,K,mR,Rinds,Dinds)
     
-    vnu <- vnu[1:d]
-    mR[Rinds] <- vnu[(1+d):P]
+    vnu <- vtheta[1:d]
+    mR[Rinds] <- vtheta[(1+d):P]
     mR[Dinds] <- exp(mR[Dinds])  
     mLambda <- mR%*%t(mR)
        
