@@ -1,5 +1,30 @@
 \documentclass{beamer}
 
+% 1. Front slide
+% 2. Intro
+% 3. Univariate model
+% 4. \rho = 1/10, \lambda = 5
+% Example data 0 0 0 5 10
+% 5. How to fit, and advantages and disadvantages of each approach
+% - Maximum likelihood
+% - MCMC
+% - VB
+% 6. Overview of Variational Bayes
+% 7a. Variational Bayes solution to ZIP
+% - q-densities
+% - Algorithm
+% 8. Results
+% - Lower bound convergence
+% - Accuracies
+% 7b. Define accuracy
+% 9. Extension to linear model
+% 10. Overview GVA
+% 11. Algorithm
+% 12. Results?
+% 13. What next
+% 14. Conclusion
+% 15. References
+
 \begin{document}
 \begin{frame}
 \frametitle{Introduction}
@@ -9,13 +34,15 @@ number of hospital visits and number of insurance claims per year.
 
 \begin{frame}
 \frametitle{Univariate model formulation}
-$$
-X_i = R_i Y_i
-R_i \sim \text{Bernoulli}(\rho)
-Y_i \sim \text{Poisson}(\lambda)
-\rho \sim \text{Beta}(a_\rho, b_\rho)
-\lambda \sim \text{Gamma}(a_\lambda, b_\lambda)
-$$
+We start by building a relatively simple model to see if our approach is
+likely to work well.
+\begin{align*}
+X_i &= R_i Y_i \\
+R_i &\sim \text{Bernoulli}(\rho) \\
+Y_i &\sim \text{Poisson}(\lambda) \\
+\rho &\sim \text{Beta}(a_\rho, b_\rho) \\
+\lambda &\sim \text{Gamma}(a_\lambda, b_\lambda) \\
+\end{align*}
 \end{frame}
 
 \begin{frame}
@@ -35,7 +62,8 @@ $$
 \end{frame}
 
 \begin{frame}
-Results/Accuracy - excellent accuracy
+\frametitle{Results/Accuracy}
+Excellent accuracy, over 99\% in all of the cases that I looked at.
 % Graph of lower bound
 %\includegraphics{univariate_lower_bound_convergence.pdf}
 \end{frame}
@@ -46,18 +74,25 @@ Extension from univariate, model formulation
 $$
 q(\theta) = q(\beta) q(\rho) \prod_{i=1}^n q(r_i)
 $$
-Mixed models -- one model to rule them all
-The need for better approaches - MCMC with existing software can take minutes to
+\begin{itemize}
+\item Mixed models -- one model to rule them all
+\item The need for better approaches - MCMC with existing software can take minutes to
 converge, if they converge at all. That might not sound so bad to you, but how do you
 do model selection?
-Lack of conjugacy means mean field updates won't be analytically tractable. Try
-Gaussian Variational Approximations instead
-Computation - a work in progress
-Initial signs are that this approach will work
+\item Lack of conjugacy means mean field updates won't be analytically tractable. Try
+\item Gaussian Variational Approximations instead
+\item Computation - a work in progress
+\item Initial signs are that this approach will work
+\end{itemize}
 \end{frame}
 
 \begin{frame}
-References
+\frametitle{References}
+\begin{itemize}
+\item Explaining variational approximations
+\item Gaussian variational approximations
+\item General Design Mixed Models
+\end{itemize}
 \end{frame}
 
 \end{document}
