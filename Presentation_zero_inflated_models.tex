@@ -1,41 +1,28 @@
 \documentclass{beamer}
 
-% 1. Front slide
-% 2. Intro
-% 3. Univariate model
-% 4. \rho = 1/10, \lambda = 5
-% Example data 0 0 0 5 10
-% 5. How to fit, and advantages and disadvantages of each approach
-% - Maximum likelihood
-% - MCMC
-% - VB
-% 6. Overview of Variational Bayes
-% 7a. Variational Bayes solution to ZIP
-% - q-densities
-% - Algorithm
-% 8. Results
-% - Lower bound convergence
-% - Accuracies
-% 7b. Define accuracy
-% 9. Extension to linear model
-% 10. Overview GVA
-% 11. Algorithm
-% 12. Results?
-% 13. What next
-% 14. Conclusion
-% 15. References
 
 \begin{document}
+% 1. Front slide
 \begin{frame}
-\frametitle{Introduction}
-Zero inflated data arises in many areas of application, such as physical activity data,
-number of hospital visits and number of insurance claims per year.
+\frametitle{Zero-inflated models}
+Mark Greenaway
+% Details about myself here?
 \end{frame}
 
+% 2. Intro
+\begin{frame}
+\frametitle{Introduction}
+Zero inflated data arises in many areas of application, such as physical
+activity data, number of hospital visits and number of insurance claims per
+year.
+
+We will work with zero-inflated count data.
+\end{frame}
+
+% 3. Univariate model
 \begin{frame}
 \frametitle{Univariate model formulation}
-We start by building a relatively simple model to see if our approach is
-likely to work well.
+We start by building a relatively simple zero-inflated count model.
 \begin{align*}
 X_i &= R_i Y_i \\
 R_i &\sim \text{Bernoulli}(\rho) \\
@@ -45,12 +32,90 @@ Y_i &\sim \text{Poisson}(\lambda) \\
 \end{align*}
 \end{frame}
 
+% 4. \rho = 9/10, \lambda = 5
+% Example data 0 0 0 5 10
 \begin{frame}
-\frametitle{Mean field updates}
+\frametitle{Example data}
+Take, for example, $\rho = \frac{1}{2}$, $\lambda = 5$.
+\begin{verbatim}
+0 7 3 4 5 3 2 6 5 0 0 1
+0 0 5 0 2 3 6 4 0 5 4 0
+7 0 0 0 7 0 6 6 0 3 0 5
+0 4 0 0 0 2 3 0 3 4 5 0
+8 0
+\end{verbatim}
+% Histogram
+\includegraphics{code/univariate_data_histogram.pdf}
+% Density
+\end{frame}
+
+% 5. How to fit, and advantages and disadvantages of each approach
+% - Maximum likelihood
+% - MCMC
+% - VB
+\begin{frame}
+\frametitle{Comparison of techniques}
+Maximum likelihood
+Pro
+Frequentist
+Standard optimisation techniques can be used
+Con
+Biased for mixed models
+
+MCMC
+Pro
+Very accurate
+Con
+Slow
+May not converge at all
+
+VB
+Pro
+Fast
+Still quite accurate
+Con
+May lose accuracy, variance
+Solution may be intractable
+\end{frame}
+
+% 6. Overview of Variational Bayes
+\begin{frame}
+\frametitle{An overview of Variational Bayes}
+\begin{itemize}
+\item Approximate the full posterior p(\theta) with an approximation q(\theta)
+\item Minimise the KL divergence between p(\theta) and q(\theta)
+\item Theory guarantees that p(\theta) < q(\theta) and that q(\theta) will
+increase with each VB step
+\end{itemize}
+\end{frame}
+
+% 7a. Variational Bayes solution to ZIP
+% - q-densities
+\begin{frame}
 Choose a factored approximation of the form
 $$
 q(\theta) = q(\lambda) q(\rho) \prod_{i=1}^n q(r_i)
 $$
+where
+$$
+q(\lambda) = \text{Gamma}(a_\lambda_*, b_\lambda_*)
+q(\rho) = \text{Beta}(a_\rho_*, b_\rho_*)
+q(r_i) = Bernoulli(\rho)
+$$
+
+% - Algorithm
+We iteratively update the parameters of each approximate distribution
+in turn until the lower bound of the approximation converges.
+
+This could be thought of as a generalisation of Expectation Maximisation.
+\end{frame}
+
+% 8. Results
+% - Lower bound convergence
+% - Accuracies
+% 7b. Define accuracy
+\begin{frame}
+\frametitle{Mean field updates}
 Most of the mean field updates are straightforward, as the priors are conjugate.
 $$
 r_i \sim \text{Bernoulli}(\text{expit}(\eta_i))
@@ -68,17 +133,32 @@ Excellent accuracy, over 99\% in all of the cases that I looked at.
 %\includegraphics{univariate_lower_bound_convergence.pdf}
 \end{frame}
 
+% 9. Extension to linear model
+% 10. Overview GVA
+% 11. Algorithm
+% 12. Results?
+% 13. What next
+% 14. Conclusion
+% 15. References
 \begin{frame}
 \frametitle{Extension to multivariate/regression models}
 Extension from univariate, model formulation
 $$
 q(\theta) = q(\beta) q(\rho) \prod_{i=1}^n q(r_i)
 $$
+where
+$q(\beta) \sim N(\mu, \Sigma)$
+
 \begin{itemize}
 \item Mixed models -- one model to rule them all
 \item The need for better approaches - MCMC with existing software can take minutes to
 converge, if they converge at all. That might not sound so bad to you, but how do you
 do model selection?
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\begin{itemize}
 \item Lack of conjugacy means mean field updates won't be analytically tractable. Try
 \item Gaussian Variational Approximations instead
 \item Computation - a work in progress
