@@ -134,7 +134,6 @@ calculate_lower_bound <- function(object)
 	UseMethod("calculate_lower_bound", object)
 }
 
-# TODO: How do I generalise this code?
 expected_lambda.univariate <- function(univariate)
 {
 	univariate$a_lambda/univariate$b_lambda  
@@ -204,20 +203,21 @@ zero_infl_var.univariate <- function(univariate, trace=FALSE, plot_lower_bound=F
 	return(params)
 }
 
-create_multivariate <- function(vy, mC, a_sigma, b_sigma)
+create_multivariate <- function(vy, mX, mZ, a_sigma, b_sigma)
 {
 	# Initialise
 	n = length(vy)
 	vp = rep(1, n)
-	print(ncol(mC))
-	print(dim(mC))
+	mC = cbind(mX, mZ)
 	vnu = rep(0, ncol(mC))
 
 	mLambda = diag(rep(1, ncol(mC)))
 	mSigma.inv = diag(rep(b_sigma/a_sigma, ncol(mC)))
-	multivariate = list(vy=vy, mC=mC, vp=vp, vnu=vnu,
+	prior = list(a_sigma=a_sigma, b_sigma=b_sigma)
+	multivariate = list(vy=vy, mX=mX, mZ=mZ, mC=mC, vp=vp, vnu=vnu,
 						a_sigma=a_sigma, b_sigma=b_sigma,
 						mLambda=mLambda,
+						prior=prior,
 						mSigma.inv=mSigma.inv)
 	class(multivariate) = "multivariate"
 	return(multivariate)
@@ -239,18 +239,21 @@ zero_infl_var.multivariate <- function(m, trace=FALSE, plot_lower_bound=FALSE)
 		# Update parameter for q_lambda
 		# FIXME: We don't update, we maximise the log-likelihood using z_i = r_i y_i
 		# and r_i
-		# Find these things using Poisson mixed model code
-		# FIXME: This first call is _incredibly_ time-consuming, and the answer
-		# that it gives back is well off what the result should be.
+		# Maximise the Gaussian Variational Approximation using
+		# Dr Ormerod's Poisson mixed model code
 		fit1 = fit.Lap(m$vnu, m$vy, m$vp, m$mC, m$mSigma.inv, m$mLambda)
-		print(str(fit1))
-		# TODO: What should be in mSigma.inv?
 		fit2 = fit.GVA(fit1$vnu, fit1$mLambda, m$vy, m$vp, m$mC, m$mSigma.inv, "L-BFGS-B")
-		print(fit2)
 		m$vnu = fit2$vnu
 		m$mLambda = fit2$mLambda
 		m$f = fit2$res$value
-		cat("m$f", m$f, "\n")
+
+		# Update parameters for q_sigma_u^2
+		# a_sigma is fixed
+		m$a_sigma = m$a_sigma + n/2
+		vu = m$vnu[(ncol(m$mX)+1):ncol(m$mC)]
+		# We know that mSigma = sigma_u^2 I. We should exploit this knowledge
+		tr_mSigma = ncol(m$mZ) * m$prior$a_sigma/m$prior$b_sigma
+		m$b_sigma = m$prior$b_sigma + sum(vu^2)/2 + (tr_mSigma)/2
 
 		# Update parameters for q_rho
 		m$a_rho = 1 + sum(m$vp)
@@ -260,16 +263,16 @@ zero_infl_var.multivariate <- function(m, trace=FALSE, plot_lower_bound=FALSE)
 		#print(dim(m$mC))
 		#print(dim(m$vnu))
 		m$vp[zero.set] = expit(-exp(m$mC[zero.set,]%*%m$vnu) + digamma(m$a_rho) - digamma(m$b_rho))
-    # FIXME: We get zeros in here sometimes, which plays havoc with the lower bound
-    # calculation.
+		# FIXME: We get zeros in here sometimes, which plays havoc with the
+		# lower bound calculation.
     
 		#vlower_bound[i] <- calculate_lower_bound(vx, vp, a_lambda, b_lambda, a_rho, b_rho)
 		vlower_bound[i] <- calculate_lower_bound(m)
-		print(m$vnu)
-		print(m$vp)
-		print(m$a_rho)
-		print(m$b_rho)
-		cat("End of iteration", i, "\n")
+		#print(m$vnu)
+		#print(m$vp)
+		#print(m$a_rho)
+		#print(m$b_rho)
+		#cat("End of iteration", i, "\n")
 		
 		if (trace && i > 1)
 			cat("Iteration ", i, ": lower bound ", vlower_bound[i], " difference ",
