@@ -70,17 +70,18 @@ test_multivariate_zip_no_zeros <- function()
 	# FIXME: You have serious overflow issues
 	m = 50
 	n = rep(1, m)
-	mC = matrix(as.vector(cbind(rep(1, m), runif(m, -1, 1))), m, 2)
-	cat("mC", mC, "\n")
+	mX = matrix(as.vector(cbind(rep(1, m), runif(m, -1, 1))), m, 2)
+	cat("mX", mX, "\n")
+	mZ = NULL
 	expected_rho = 1
 	expected_nu = c(1, 2)
 	expected_sigma2_u = 0
 	a_sigma = 1e5
 	b_sigma = 1e5
-	vy = generate_multivariate_test_data(mC, m, n, expected_rho, expected_nu, expected_sigma2_u)
+	vy = generate_multivariate_test_data(mX, m, n, expected_rho, expected_nu, expected_sigma2_u)
 
 	# Test model fitting
-	multivariate = create_multivariate(vy, mC, a_sigma, b_sigma)
+	multivariate = create_multivariate(vy, mX, mZ, a_sigma, b_sigma)
 	result_var = zero_infl_var(multivariate)
 
 	expect_equal(as.vector(result_var$vnu), expected_nu, tolerance=1e-1)
@@ -94,16 +95,17 @@ test_multivariate_zip_half_zeros <- function()
 	# test data into the source files is really the best idea.
 	m = 100
 	n = rep(1, m)
-	mC = matrix(as.vector(cbind(rep(1, m), runif(m, -1, 1))), m, 2)
+	mX = matrix(as.vector(cbind(rep(1, m), runif(m, -1, 1))), m, 2)
+	mZ = NULL
 	expected_rho = .5
 	expected_nu = c(1, 2)
 	expected_sigma2_u = 0
 	a_sigma = 1e5
 	b_sigma = 1e5
-	vy = generate_multivariate_test_data(mC, m, n, expected_rho, expected_nu, expected_sigma2_u)
+	vy = generate_multivariate_test_data(mX, m, n, expected_rho, expected_nu, expected_sigma2_u)
 
 	# Test model fitting
-	multivariate = create_multivariate(vy, mC, a_sigma, b_sigma)
+	multivariate = create_multivariate(vy, mX, mZ, a_sigma, b_sigma)
 	result_var = zero_infl_var(multivariate, trace=TRUE)
 
 	expect_equal(as.vector(result_var$vnu), expected_nu, tolerance=1e-1)
@@ -112,7 +114,30 @@ test_multivariate_zip_half_zeros <- function()
 
 test_multivariate_zip_no_zeros_random_intercept <- function()
 {
-	stop("Not implemented yet")
+	# Simulate data
+	# Could we load test data from somewhere? I don't know that hardcoding the
+	# test data into the source files is really the best idea.
+	# FIXME: You have serious overflow issues
+	m = 2
+	n = c(25, 25)
+	mX = matrix(as.vector(cbind(rep(1, m), runif(m, -1, 1))), n, 2)
+	cat("mX", mX, "\n")
+	mZ = matrix(c(1, 0, 0, 1), c(n, n, n, n), 50, 2, byrow=FALSE)
+	cat("mZ", mZ, "\n")
+	expected_rho = 1
+	expected_nu = c(1, 2)
+	expected_sigma2_u = 10.0
+	a_sigma = 1e5
+	b_sigma = 1e5
+	vy = generate_multivariate_test_data(mX, m, n, expected_rho, expected_nu, expected_sigma2_u)
+
+	# Test model fitting
+	multivariate = create_multivariate(vy, mX, mZ, a_sigma, b_sigma)
+	result_var = zero_infl_var(multivariate)
+
+	expect_equal(as.vector(result_var$vnu), expected_nu, tolerance=1e-1)
+	expect_equal(result_var$a_rho / (result_var$a_rho + result_var$b_rho), expected_rho, tolerance=1e-1)
+	expect_equal(result_var$a_sigma / result_var$b_sigma, expected_sigma2_u, tolerance=1e-1)
 }
 
 test_multivariate_zip_half_zeros_random_intercept <- function()
