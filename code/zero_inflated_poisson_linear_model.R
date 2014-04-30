@@ -56,7 +56,7 @@ fit.Lap <- function(vnu,vy,vr,mC,mSigma.inv,mLambda)
         mH <- mH.lap(vnu,vy,vr,mC,mSigma.inv,mLambda)
         mLambda <- solve(-mH,tol=1.0E-99)
         vnu <- vnu + mLambda%*%vg
-        #print(c(ITER,f,max(abs(vg))))
+        print(c(ITER,f,max(abs(vg))))
         if (max(abs(vg))<1.0E-8) {
             break;
         }
@@ -80,8 +80,8 @@ fit.Lap <- function(vnu,vy,vr,mC,mSigma.inv,mLambda)
 
 f.G <- function(vnu,mLambda,vy,vr,mC,mSigma.inv,gh) 
 {
-	print(vnu)
-	print(mSigma.inv)
+	#print(vnu)
+	#print(mSigma.inv)
     d <- length(vnu)
     
     vnu.til     <- mC%*%vnu
@@ -168,8 +168,8 @@ vg.GVA.approx <- function(vnu,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
 
 vg.GVA <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
 {
-	cat("vtheta", vtheta, "\n")
-	cat("ncol(mC)", ncol(mC), "\n")
+	#cat("vtheta", vtheta, "\n")
+	#cat("ncol(mC)", ncol(mC), "\n")
     d <- ncol(mC)
     vnu <- vtheta[1:d]
     mR[Rinds] <- vtheta[(1+d):length(vtheta)]
@@ -196,7 +196,7 @@ vg.GVA <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
     # FIXME: Something broken in this function
     vg[(1+d):length(vtheta)] <- dmLambda[Rinds]    
    
-	cat("vg", vg, "\n")
+	#cat("vg", vg, "\n")
     return(vg)
 }
 

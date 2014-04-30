@@ -249,9 +249,10 @@ zero_infl_var.multivariate <- function(m, trace=FALSE, plot_lower_bound=FALSE)
 
 		# Update parameters for q_sigma_u^2
 		# a_sigma is fixed
-		m$a_sigma = m$a_sigma + n/2
+		m$a_sigma = m$prior$a_sigma + n/2
 		vu = m$vnu[(ncol(m$mX)+1):ncol(m$mC)]
 		# We know that mSigma = sigma_u^2 I. We should exploit this knowledge
+		# Q: Nothing from mLambda? Why not?
 		tr_mSigma = ncol(m$mZ) * m$prior$a_sigma/m$prior$b_sigma
 		m$b_sigma = m$prior$b_sigma + sum(vu^2)/2 + (tr_mSigma)/2
 
@@ -283,7 +284,8 @@ zero_infl_var.multivariate <- function(m, trace=FALSE, plot_lower_bound=FALSE)
 	if (plot_lower_bound)
 		plot(lower_bound_vector,type="l")
 
-	params = list(vnu=m$vnu, a_rho=m$a_rho, b_rho=m$b_rho)
+	params = list(vnu=m$vnu, a_rho=m$a_rho, b_rho=m$b_rho,
+					a_sigma=m$a_sigma, b_sigma=m$b_sigma)
 	return(params)
 }
 
