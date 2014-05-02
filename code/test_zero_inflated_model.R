@@ -19,27 +19,47 @@ generate_univariate_test_data <- function (n, rho, lambda)
 	return(vx)
 }
 
-generate_multivariate_test_data <- function (mX, mZ, m, n, rho, vnu, sigma2_u)
+generate_multivariate_test_data <- function (mX, mZ, m, n, rho, vnu, sigma2_u, verbose=FALSE)
 {
-	mC = cbind(mX, mZ)
+	if (verbose)
+		cat("mZ", mZ, "\n")
+
+	if (is.null(mZ)) {
+		mC = mX
+	} else {
+		mC = cbind(mX, mZ)
+	}
 	vy = rep(NA, sum(n))
-	for (i in 1:m) {
-		intercept = rnorm(1, 0, sigma2_u)
+	if (verbose)
+		cat("vy", vy, "\n")
+	idx = 0
+	for (i in 1:length(n)) {
+		if (sigma2_u == 0)
+			intercept = 0
+		else
+			intercept = rnorm(1, 0, sigma2_u)
+
 		for (j in 1:n[i]) {
-			if (i == 1) {
-				ind = j
-			} else {
-				ind = j + sum(n[1:(i-1)])
-			}
-			#cat("ind", ind, "\n")
+			idx = idx + 1
+			if (verbose)
+				cat("idx", idx, "\n")
 
 			if (runif(1) <= rho) {
-				vy[ind] = rpois(1, exp(mC[ind,] %*% vnu) + intercept)
+				veta = mC[idx,] %*% vnu + intercept
+				if (verbose)
+					cat("veta", veta, "\n")
+				vy[idx] = rpois(1, exp(veta))
+				if (verbose)
+					cat("Generated vy[idx]", vy[idx], "\n")
 			} else {
-				vy[ind] = 0
+				vy[idx] = 0
 			}
 		}
 	}
+	if (verbose)
+		cat("vy", vy, "\n")
+	if(NA %in% vy)
+		stop("NAs in vy")
 	return(vy)
 }
 
@@ -79,14 +99,14 @@ test_multivariate_zip_no_zeros <- function()
 	expected_sigma2_u = 0
 	a_sigma = 1e5
 	b_sigma = 1e5
-	vy = generate_multivariate_test_data(mX, m, n, expected_rho, expected_nu, expected_sigma2_u)
+	vy = generate_multivariate_test_data(mX, NULL, m, n, expected_rho, expected_nu, expected_sigma2_u)
 
 	# Test model fitting
 	multivariate = create_multivariate(vy, mX, mZ, a_sigma, b_sigma)
 	result_var = zero_infl_var(multivariate)
 
-	expect_equal(as.vector(result_var$vnu), expected_nu, tolerance=1e-1)
-	expect_equal(result_var$a_rho / (result_var$a_rho + result_var$b_rho), expected_rho, tolerance=1e-1)
+	expect_equal(as.vector(result_var$vnu), expected_nu, tolerance=2e-1)
+	expect_equal(result_var$a_rho / (result_var$a_rho + result_var$b_rho), expected_rho, tolerance=2e-1)
 }
 
 test_multivariate_zip_half_zeros <- function()
@@ -103,14 +123,14 @@ test_multivariate_zip_half_zeros <- function()
 	expected_sigma2_u = 0
 	a_sigma = 1e5
 	b_sigma = 1e5
-	vy = generate_multivariate_test_data(mX, m, n, expected_rho, expected_nu, expected_sigma2_u)
+	vy = generate_multivariate_test_data(mX, NULL, m, n, expected_rho, expected_nu, expected_sigma2_u)
 
 	# Test model fitting
 	multivariate = create_multivariate(vy, mX, mZ, a_sigma, b_sigma)
 	result_var = zero_infl_var(multivariate, trace=TRUE)
 
-	expect_equal(as.vector(result_var$vnu), expected_nu, tolerance=1e-1)
-	expect_equal(result_var$a_rho / (result_var$a_rho + result_var$b_rho), expected_rho, tolerance=1e-1)
+	expect_equal(as.vector(result_var$vnu), expected_nu, tolerance=2e-1)
+	expect_equal(result_var$a_rho / (result_var$a_rho + result_var$b_rho), expected_rho, tolerance=2e-1)
 }
 
 test_multivariate_zip_no_zeros_random_intercept <- function()
@@ -123,25 +143,26 @@ test_multivariate_zip_no_zeros_random_intercept <- function()
 	n = c(25, 25)
 	mX = matrix(as.vector(cbind(rep(1, sum(n)), runif(sum(n), -1, 1))), sum(n), 2)
 	cat("mX", mX, "\n")
-	# Indicator variables for groups
 	v = c(rep(1, 25), rep(0, 25))
+	# Indicator variables for groups
 	mZ = matrix(cbind(v, 1-v), sum(n), 2)
 	cat("mZ", mZ, "\n")
 	expected_rho = 1
-	expected_nu = c(1, 2, 1, 2)
-	expected_sigma2_u = 10.0
+	expected_nu = c(2, 1, -1, 1)
+	expected_sigma2_u = 1.0
 	a_sigma = 1e5
 	b_sigma = 1e5
-	vy = generate_multivariate_test_data(mX, mZ, m, n, expected_rho, expected_nu, expected_sigma2_u)
+	vy = generate_multivariate_test_data(mX, mZ, m, n, expected_rho, expected_nu, expected_sigma2_u, verbose=TRUE)
 
 	# Test model fitting
 	multivariate = create_multivariate(vy, mX, mZ, a_sigma, b_sigma)
 	result_var = zero_infl_var(multivariate)
+	print(str(result_var))
 
-	expect_equal(as.vector(result_var$vnu), expected_nu, tolerance=5e-1)
+	expect_equal(as.vector(result_var$vnu), expected_nu, tolerance=2e-1)
 	expect_equal(result_var$a_rho / (result_var$a_rho + result_var$b_rho), expected_rho, tolerance=2e-1)
 	print(str(result_var))
-	expect_equal(result_var$b_sigma^2 / result_var$a_sigma, expected_sigma2_u, tolerance=1e-1)
+	expect_equal(result_var$b_sigma^2 / result_var$a_sigma, expected_sigma2_u, tolerance=2e-1)
 }
 
 test_multivariate_zip_half_zeros_random_intercept <- function()
@@ -155,8 +176,8 @@ main <- function()
 	#test_univariate_zip()
 	# TODO: Add some sort of test for the accuracy of the approximation?
 
-	#test_multivariate_zip_no_zeros()
-	#test_multivariate_zip_half_zeros()
+	test_multivariate_zip_no_zeros()
+	test_multivariate_zip_half_zeros()
 
 	# TODO: Add a test for the random intercepts?
 	test_multivariate_zip_no_zeros_random_intercept()

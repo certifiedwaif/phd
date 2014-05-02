@@ -28,9 +28,14 @@ f.lap <- function(vnu,vy,vr,mC,mSigma.inv,mLambda)
 
 vg.lap <- function(vnu,vy,vr,mC,mSigma.inv,mLambda) 
 {       
+	cat("vg.lap vnu", vnu, "\n")
+	cat("vg.lap vy", head(vy), "\n")
+	cat("vg.lap vr", head(vr), "\n")
+	cat("vg.lap mC", head(mC), "\n")
 	mDiag <- sapply(1:ncol(mC), function(i) sum(mC[i,] * mLambda[, i] * mC[, i]))
 	#mDiag2 <-  diag(mC%*%mLambda%*%t(mC))
     vg <- t(mC)%*%(vy - vr*exp(mC%*%vnu+0.5*mDiag)) - mSigma.inv%*%vnu
+	cat("vg.lap vg", vg, "\n")
     return(vg)
 }
 
@@ -120,6 +125,7 @@ f.GVA <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
 vg.G <- function(vnu,mLambda,vy,vr,mC,mSigma.inv,vB1) 
 {
     vg <- t(mC)%*%(vr*(vy - vB1)) - mSigma.inv%*%vnu     
+	cat("vg.G", vg, "\n")
     return(vg)
 }
 

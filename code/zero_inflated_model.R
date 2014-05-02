@@ -255,6 +255,7 @@ zero_infl_var.multivariate <- function(m, trace=FALSE, plot_lower_bound=FALSE)
 		# Q: Nothing from mLambda? Why not?
 		tr_mSigma = ncol(m$mZ) * m$prior$a_sigma/m$prior$b_sigma
 		m$b_sigma = m$prior$b_sigma + sum(vu^2)/2 + (tr_mSigma)/2
+		#m$b_sigma = m$prior$b_sigma + sum(vu^2)/2 + (sum(diag(m$mLambda)))/2
 
 		# Update parameters for q_rho
 		m$a_rho = 1 + sum(m$vp)
