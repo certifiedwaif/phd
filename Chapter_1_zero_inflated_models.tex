@@ -216,7 +216,7 @@ $$
 $$
 
 \subsection{Results}
-\includegraphics[width=100mm,height=100mm]{code/lower_bound_convergence.pdf}
+%\includegraphics[width=100mm,height=100mm]{code/lower_bound_convergence.pdf}
 
 \section{Extending the zero-inflated Poisson model to a regression model}
 The above univariate model demonstrates that variational approximations are well-suited
@@ -244,23 +244,27 @@ Let $\mR = \diag{\vr}$. Let $C = [X Z], \vnu = [\vbeta^T \vu^T]^T$.
 \log{p(\vnu|\sigma_{u}^2)} &= - \half \log{|2\pi D(\sigma_{\vu}^2)|} - \half \vnu^T D(sigma_{\vu}^2)^{-1} \vnu \\
 \log{p(\vr)} &= \vr^T \log{\rho 1} + (1 - \vr)^T\log{(1 - 1 \rho)} \\
 p(\rho) &\propto 1 \\
-\log{p(\sigma^2)} &= A \log{B} - \log{\Gamma{(A)} - (A + 1) \log{(\sigma_{\vu}^2)} - \frac{B}{\sigma_{\vu}^2}
+\log{p(\sigma^2)} &= A \log{B} - \log{\Gamma{(A)}} - (A + 1) \log{(\sigma_{\vu}^2)} - \frac{B}{\sigma_{\vu}^2}\\
 \end{align*}
 
 \subsection{Approximation}
 Let $r_0 = \{ r_i : y_i = 0 \}$.
 We assume an approximation of the form
 $$
-q(r_0, \vnu, \sigma_{\vu}^2, \rho) &= q(\vnu) q(\sigma_{\vu}^2) q(\rho) q(r_0) \\
+q(r_0, \vnu, \sigma_{\vu}^2, \rho) = q(\vnu) q(\sigma_{\vu}^2) q(\rho) q(r_0) \\
 $$
 
 where
 
-\begin{align*}
+%\begin{align*}
+$$
+\begin{array}{rl}
 q(\vnu) &= N(\vmu, \mLambda) \\
-q(\sigma_{\vu}^2) &= IG\left(A + \frac{m}{2}, B + \frac{\|\mu_u\|^2}{2} + \frac{tr(\Sigma_{uu})}{2}\right) \\
+q(\sigma_{\vu}^2) &= IG\left(A + \frac{m}{2}, B + \frac{\|\mu_u\|^2}{2} + \frac{tr(\Lambda_{uu})}{2}\right) \\
 q(r_i) &\propto \exp{\{\bbE_{-r_i} [-r_i \exp{(c_i^T\vnu)}]\} + r_i [\digamma(\alpha_\rho) - \digamma(\beta_\rho)]} \\
-\end{align*}
+\end{array}
+$$
+%\end{align*}
 
 Hence $q(r_i) = \Bernoulli{p_i}$ where
 $$

@@ -249,13 +249,13 @@ zero_infl_var.multivariate <- function(m, trace=FALSE, plot_lower_bound=FALSE)
 
 		# Update parameters for q_sigma_u^2
 		# a_sigma is fixed
-		m$a_sigma = m$prior$a_sigma + n/2
+		m$a_sigma = m$prior$a_sigma + ncol(m$mZ)/2
 		vu = m$vnu[(ncol(m$mX)+1):ncol(m$mC)]
 		# We know that mSigma = sigma_u^2 I. We should exploit this knowledge
 		# Q: Nothing from mLambda? Why not?
 		tr_mSigma = ncol(m$mZ) * m$prior$a_sigma/m$prior$b_sigma
-		m$b_sigma = m$prior$b_sigma + sum(vu^2)/2 + (tr_mSigma)/2
-		#m$b_sigma = m$prior$b_sigma + sum(vu^2)/2 + (sum(diag(m$mLambda)))/2
+		#m$b_sigma = m$prior$b_sigma + sum(vu^2)/2 + (tr_mSigma)/2
+		m$b_sigma = m$prior$b_sigma + sum(vu^2)/2 + (sum(diag(m$mLambda)))/2    # Extract right elements of mLambda
 
 		# Update parameters for q_rho
 		m$a_rho = 1 + sum(m$vp)
@@ -264,7 +264,7 @@ zero_infl_var.multivariate <- function(m, trace=FALSE, plot_lower_bound=FALSE)
 		# Update parameters for q_vr
 		#print(dim(m$mC))
 		#print(dim(m$vnu))
-		m$vp[zero.set] = expit(-exp(m$mC[zero.set,]%*%m$vnu) + digamma(m$a_rho) - digamma(m$b_rho))
+		m$vp[zero.set] = expit(-exp(m$mC[zero.set,]%*%m$vnu  \pm 0.5*diagof(mC%*%mLambda%*%t(mC)) + digamma(m$a_rho) - digamma(m$b_rho))   # to fix
 		# FIXME: We get zeros in here sometimes, which plays havoc with the
 		# lower bound calculation.
     
