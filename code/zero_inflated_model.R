@@ -223,12 +223,13 @@ create_multivariate <- function(vy, mX, mZ, a_sigma, b_sigma)
 	return(multivariate)
 }
 
-zero_infl_var.multivariate <- function(m, trace=FALSE, plot_lower_bound=FALSE)
+zero_infl_var.multivariate <- function(mult, trace=FALSE, plot_lower_bound=FALSE)
 {
 	# Initialise
-	n = length(m$vy)
-	zero.set = which(m$vy == 0)
-	nonzero.set = which(m$vy != 0)
+	n = length(mult$vy)
+	m = ncol(mult$mZ)
+	zero.set = which(mult$vy == 0)
+	nonzero.set = which(mult$vy != 0)
 	vlower_bound <- c()
 	
 	i = 0
@@ -241,52 +242,56 @@ zero_infl_var.multivariate <- function(m, trace=FALSE, plot_lower_bound=FALSE)
 		# and r_i
 		# Maximise the Gaussian Variational Approximation using
 		# Dr Ormerod's Poisson mixed model code
-		fit1 = fit.Lap(m$vnu, m$vy, m$vp, m$mC, m$mSigma.inv, m$mLambda)
-		fit2 = fit.GVA(fit1$vnu, fit1$mLambda, m$vy, m$vp, m$mC, m$mSigma.inv, "L-BFGS-B")
-		m$vnu = fit2$vnu
-		m$mLambda = fit2$mLambda
-		m$f = fit2$res$value
+		fit1 = fit.Lap(mult$vnu, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, mult$mLambda)
+		fit2 = fit.GVA(fit1$vnu, fit1$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B")
+		mult$vnu = fit2$vnu
+		mult$mLambda = fit2$mLambda
+		mult$f = fit2$res$value
 
-		# Update parameters for q_sigma_u^2
-		# a_sigma is fixed
-		m$a_sigma = m$prior$a_sigma + ncol(m$mZ)/2
-		vu = m$vnu[(ncol(m$mX)+1):ncol(m$mC)]
-		# We know that mSigma = sigma_u^2 I. We should exploit this knowledge
-		# Q: Nothing from mLambda? Why not?
-		tr_mSigma = ncol(m$mZ) * m$prior$a_sigma/m$prior$b_sigma
-		#m$b_sigma = m$prior$b_sigma + sum(vu^2)/2 + (tr_mSigma)/2
-		m$b_sigma = m$prior$b_sigma + sum(vu^2)/2 + (sum(diag(m$mLambda)))/2    # Extract right elements of mLambda
+		# Update parameters for q_sigma_u^2 if we need to
+		tr <- function(mX) sum(diag(mX))
+		if (!is.null(mult$mZ)) {
+			# a_sigma is fixed
+			mult$a_sigma = mult$prior$a_sigma + ncol(mult$mZ)/2
+			u_idx = (ncol(mult$mX)+1):ncol(mult$mC)
+			vu = mult$vnu[u_idx]
+			# We know that mSigma = sigma_u^2 I. We should exploit this knowledge
+			# Q: Nothing from mLambda? Why not?
+			#tr_mSigma = ncol(mult$mZ) * mult$prior$a_sigma/mult$prior$b_sigma
+			#mult$b_sigma = mult$prior$b_sigma + sum(vu^2)/2 + (tr_mSigma)/2
+			mult$b_sigma = mult$prior$b_sigma + sum(vu^2)/2 + tr(mult$mLambda[u_idx, u_idx])/2    # Extract right elements of mLambda
+		}
 
 		# Update parameters for q_rho
-		m$a_rho = 1 + sum(m$vp)
-		m$b_rho = n - sum(m$vp) + 1
+		mult$a_rho = 1 + sum(mult$vp)
+		mult$b_rho = n - sum(mult$vp) + 1
 		
 		# Update parameters for q_vr
-		#print(dim(m$mC))
-		#print(dim(m$vnu))
-		m$vp[zero.set] = expit(-exp(m$mC[zero.set,]%*%m$vnu  \pm 0.5*diagof(mC%*%mLambda%*%t(mC)) + digamma(m$a_rho) - digamma(m$b_rho))   # to fix
+		#print(dim(mult$mC))
+		#print(dim(mult$vnu))
+		mult$vp[zero.set] = expit(-exp(mult$mC[zero.set,]%*%mult$vnu + 0.5*diag(mult$mC%*%mult$mLambda%*%t(mult$mC))) + digamma(mult$a_rho) - digamma(mult$b_rho))   # to fix
 		# FIXME: We get zeros in here sometimes, which plays havoc with the
 		# lower bound calculation.
     
 		#vlower_bound[i] <- calculate_lower_bound(vx, vp, a_lambda, b_lambda, a_rho, b_rho)
-		vlower_bound[i] <- calculate_lower_bound(m)
-		#print(m$vnu)
-		#print(m$vp)
-		#print(m$a_rho)
-		#print(m$b_rho)
+		vlower_bound[i] <- calculate_lower_bound(mult)
+		#print(mult$vnu)
+		#print(mult$vp)
+		#print(mult$a_rho)
+		#print(mult$b_rho)
 		#cat("End of iteration", i, "\n")
 		
 		if (trace && i > 1)
 			cat("Iteration ", i, ": lower bound ", vlower_bound[i], " difference ",
-					vlower_bound[i] - vlower_bound[i-1], " parameters ", "vnu", m$vnu,
-					"a_rho", m$a_rho, "b_rho", m$b_rho, "\n")
+					vlower_bound[i] - vlower_bound[i-1], " parameters ", "vnu", mult$vnu,
+					"a_rho", mult$a_rho, "b_rho", mult$b_rho, "\n")
 	}
 
 	if (plot_lower_bound)
 		plot(lower_bound_vector,type="l")
 
-	params = list(vnu=m$vnu, a_rho=m$a_rho, b_rho=m$b_rho,
-					a_sigma=m$a_sigma, b_sigma=m$b_sigma)
+	params = list(vnu=mult$vnu, a_rho=mult$a_rho, b_rho=mult$b_rho,
+					a_sigma=mult$a_sigma, b_sigma=mult$b_sigma)
 	return(params)
 }
 

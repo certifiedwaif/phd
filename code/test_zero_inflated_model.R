@@ -150,8 +150,8 @@ test_multivariate_zip_no_zeros_random_intercept <- function()
 	expected_rho = 1
 	expected_nu = c(2, 1, -1, 1)
 	expected_sigma2_u = 1.0
-	a_sigma = 1e5
-	b_sigma = 1e5
+	a_sigma = 1e-3
+	b_sigma = 1e-3
 	vy = generate_multivariate_test_data(mX, mZ, m, n, expected_rho, expected_nu, expected_sigma2_u, verbose=TRUE)
 
 	# Test model fitting
@@ -173,7 +173,7 @@ test_multivariate_zip_half_zeros_random_intercept <- function()
 #main_check_accuracy()
 main <- function()
 {
-	#test_univariate_zip()
+	test_univariate_zip()
 	# TODO: Add some sort of test for the accuracy of the approximation?
 
 	test_multivariate_zip_no_zeros()
