@@ -162,7 +162,7 @@ create_univariate <- function(vx, a, b)
 	return(univariate)
 }
 
-zero_infl_var.univariate <- function(univariate, trace=FALSE, plot_lower_bound=FALSE)
+zero_infl_var.univariate <- function(univariate, verbose=FALSE, plot_lower_bound=FALSE)
 {
 	vx = univariate$vx
 	a = univariate$a_lambda
@@ -190,7 +190,7 @@ zero_infl_var.univariate <- function(univariate, trace=FALSE, plot_lower_bound=F
 		#vlower_bound[i] <- calculate_lower_bound(vx, vp, a_lambda, b_lambda, a_rho, b_rho)
 		vlower_bound[i] <- calculate_lower_bound(univariate)
 		
-		if (trace && i > 1)
+		if (verbose && i > 1)
 			cat("Iteration ", i, ": lower bound ", vlower_bound[i], " difference ",
 					vlower_bound[i] - vlower_bound[i-1], " parameters ", "a_lambda", univariate$a_lambda,
 					"b_lambda", univariate$b_lambda, "a_rho", univariate$a_rho, "b_rho", univariate$b_rho, "\n")
@@ -208,7 +208,11 @@ create_multivariate <- function(vy, mX, mZ, a_sigma, b_sigma)
 	# Initialise
 	n = length(vy)
 	vp = rep(1, n)
-	mC = cbind(mX, mZ)
+	if (is.null(mZ)) {
+		mC = mX
+	} else {
+		mC = cbind(mX, mZ)
+	}
 	vnu = rep(0, ncol(mC))
 
 	mLambda = diag(rep(1, ncol(mC)))
@@ -223,11 +227,15 @@ create_multivariate <- function(vy, mX, mZ, a_sigma, b_sigma)
 	return(multivariate)
 }
 
-zero_infl_var.multivariate <- function(mult, trace=FALSE, plot_lower_bound=FALSE)
+zero_infl_var.multivariate <- function(mult, verbose=FALSE, plot_lower_bound=FALSE)
 {
 	# Initialise
 	n = length(mult$vy)
-	m = ncol(mult$mZ)
+	if (verbose) cat("n", n, "\n")
+	if (!is.null(mult$mZ)) {
+		m = ncol(mult$mZ) 
+		if (verbose) cat("m", m, "\n")
+	}
 	zero.set = which(mult$vy == 0)
 	nonzero.set = which(mult$vy != 0)
 	vlower_bound <- c()
@@ -238,10 +246,9 @@ zero_infl_var.multivariate <- function(mult, trace=FALSE, plot_lower_bound=FALSE
 		i = i+1
 
 		# Update parameter for q_lambda
-		# FIXME: We don't update, we maximise the log-likelihood using z_i = r_i y_i
-		# and r_i
 		# Maximise the Gaussian Variational Approximation using
 		# Dr Ormerod's Poisson mixed model code
+		# TODO: Add parameter to choose between the various optimisation options.
 		fit1 = fit.Lap(mult$vnu, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, mult$mLambda)
 		fit2 = fit.GVA(fit1$vnu, fit1$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B")
 		mult$vnu = fit2$vnu
@@ -267,11 +274,14 @@ zero_infl_var.multivariate <- function(mult, trace=FALSE, plot_lower_bound=FALSE
 		mult$b_rho = n - sum(mult$vp) + 1
 		
 		# Update parameters for q_vr
-		#print(dim(mult$mC))
-		#print(dim(mult$vnu))
-		mult$vp[zero.set] = expit(-exp(mult$mC[zero.set,]%*%mult$vnu + 0.5*diag(mult$mC%*%mult$mLambda%*%t(mult$mC))) + digamma(mult$a_rho) - digamma(mult$b_rho))   # to fix
-		# FIXME: We get zeros in here sometimes, which plays havoc with the
-		# lower bound calculation.
+		#if (verbose) {
+		#	print(dim(mult$mC))
+		#	print(dim(mult$vnu))
+		#	print(mult$vnu)
+		#	print(mult$mLambda)
+		#	print(diag(mult$mC%*%mult$mLambda%*%t(mult$mC)))
+		#}
+		mult$vp[zero.set] = expit(-exp(mult$mC[zero.set,]%*%mult$vnu + 0.5*diag(mult$mC[zero.set,]%*%mult$mLambda%*%t(mult$mC[zero.set,]))) + digamma(mult$a_rho) - digamma(mult$b_rho))
     
 		#vlower_bound[i] <- calculate_lower_bound(vx, vp, a_lambda, b_lambda, a_rho, b_rho)
 		vlower_bound[i] <- calculate_lower_bound(mult)
@@ -281,7 +291,7 @@ zero_infl_var.multivariate <- function(mult, trace=FALSE, plot_lower_bound=FALSE
 		#print(mult$b_rho)
 		#cat("End of iteration", i, "\n")
 		
-		if (trace && i > 1)
+		if (verbose && i > 1)
 			cat("Iteration ", i, ": lower bound ", vlower_bound[i], " difference ",
 					vlower_bound[i] - vlower_bound[i-1], " parameters ", "vnu", mult$vnu,
 					"a_rho", mult$a_rho, "b_rho", mult$b_rho, "\n")
@@ -295,7 +305,7 @@ zero_infl_var.multivariate <- function(mult, trace=FALSE, plot_lower_bound=FALSE
 	return(params)
 }
 
-zero_infl_var <- function(object, trace=FALSE, plot_lower_bound=FALSE)
+zero_infl_var <- function(object, verbose=FALSE, plot_lower_bound=FALSE)
 {
 	UseMethod("zero_infl_var", object)
 }

@@ -125,7 +125,7 @@ f.GVA <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
 vg.G <- function(vnu,mLambda,vy,vr,mC,mSigma.inv,vB1) 
 {
     vg <- t(mC)%*%(vr*(vy - vB1)) - mSigma.inv%*%vnu     
-	cat("vg.G", vg, "\n")
+	#cat("vg.G", vg, "\n")
     return(vg)
 }
 
@@ -202,7 +202,7 @@ vg.GVA <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
     # FIXME: Something broken in this function
     vg[(1+d):length(vtheta)] <- dmLambda[Rinds]    
    
-	#cat("vg", vg, "\n")
+	cat("vg", vg, "\n")
     return(vg)
 }
 
@@ -216,8 +216,8 @@ fit.GVA <- function(vnu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-8)
 	gh2 <- NULL #list(x=gh$nodes,w=gh$weights,w.til=gh$weights*exp(gh$nodes^2))
 		
     d <- length(vnu)
-	cat("vnu", vnu, "\n")
-	cat("d", d, "\n")
+	#cat("vnu", vnu, "\n")
+	#cat("d", d, "\n")
     Dinds <- d*((1:d)-1)+(1:d)
           
     mR <- t(chol(mLambda + diag(1.0E-8,d)))

@@ -105,6 +105,7 @@ test_multivariate_zip_no_zeros <- function()
 	multivariate = create_multivariate(vy, mX, mZ, a_sigma, b_sigma)
 	result_var = zero_infl_var(multivariate)
 
+	print(result_var$vnu)
 	expect_equal(as.vector(result_var$vnu), expected_nu, tolerance=2e-1)
 	expect_equal(result_var$a_rho / (result_var$a_rho + result_var$b_rho), expected_rho, tolerance=2e-1)
 }
@@ -156,7 +157,7 @@ test_multivariate_zip_no_zeros_random_intercept <- function()
 
 	# Test model fitting
 	multivariate = create_multivariate(vy, mX, mZ, a_sigma, b_sigma)
-	result_var = zero_infl_var(multivariate)
+	result_var = zero_infl_var(multivariate, verbose=TRUE)
 	print(str(result_var))
 
 	expect_equal(as.vector(result_var$vnu), expected_nu, tolerance=2e-1)
@@ -173,11 +174,11 @@ test_multivariate_zip_half_zeros_random_intercept <- function()
 #main_check_accuracy()
 main <- function()
 {
-	test_univariate_zip()
+	#test_univariate_zip()
 	# TODO: Add some sort of test for the accuracy of the approximation?
 
 	test_multivariate_zip_no_zeros()
-	test_multivariate_zip_half_zeros()
+	#test_multivariate_zip_half_zeros()
 
 	# TODO: Add a test for the random intercepts?
 	test_multivariate_zip_no_zeros_random_intercept()
