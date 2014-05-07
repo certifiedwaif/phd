@@ -21,9 +21,6 @@ generate_univariate_test_data <- function (n, rho, lambda)
 
 generate_multivariate_test_data <- function (mX, mZ, m, n, rho, vnu, sigma2_u, verbose=FALSE)
 {
-	if (verbose)
-		cat("mZ", mZ, "\n")
-
 	if (is.null(mZ)) {
 		mC = mX
 	} else {
@@ -141,19 +138,23 @@ test_multivariate_zip_no_zeros_random_intercept <- function()
 	# test data into the source files is really the best idea.
 	# FIXME: You have serious overflow issues
 	m = 2
-	n = c(25, 25)
+	g = 45
+	n = c(g, g)
 	mX = matrix(as.vector(cbind(rep(1, sum(n)), runif(sum(n), -1, 1))), sum(n), 2)
 	cat("mX", mX, "\n")
-	v = c(rep(1, 25), rep(0, 25))
+	cat("dim(mX)", dim(mX), "\n")
+	v = c(rep(1, g), rep(0, g))
 	# Indicator variables for groups
 	mZ = matrix(cbind(v, 1-v), sum(n), 2)
 	cat("mZ", mZ, "\n")
+	cat("dim(mZ)", dim(mZ), "\n")
 	expected_rho = 1
 	expected_nu = c(2, 1, -1, 1)
-	expected_sigma2_u = 1.0
+	expected_sigma2_u = .5^2
 	a_sigma = 1e-3
 	b_sigma = 1e-3
 	vy = generate_multivariate_test_data(mX, mZ, m, n, expected_rho, expected_nu, expected_sigma2_u, verbose=TRUE)
+	print(table(vy))
 
 	# Test model fitting
 	multivariate = create_multivariate(vy, mX, mZ, a_sigma, b_sigma)
@@ -177,7 +178,7 @@ main <- function()
 	#test_univariate_zip()
 	# TODO: Add some sort of test for the accuracy of the approximation?
 
-	test_multivariate_zip_no_zeros()
+	#test_multivariate_zip_no_zeros()
 	#test_multivariate_zip_half_zeros()
 
 	# TODO: Add a test for the random intercepts?

@@ -26,16 +26,20 @@ f.lap <- function(vnu,vy,vr,mC,mSigma.inv,mLambda)
 
 ###############################################################################
 
+norm <- function(v) sqrt(sum(v^2))
+
+###############################################################################
+
 vg.lap <- function(vnu,vy,vr,mC,mSigma.inv,mLambda) 
 {       
 	cat("vg.lap vnu", vnu, "\n")
-	cat("vg.lap vy", head(vy), "\n")
-	cat("vg.lap vr", head(vr), "\n")
-	cat("vg.lap mC", head(mC), "\n")
+	#cat("vg.lap vy", head(vy), "\n")
+	#cat("vg.lap vr", head(vr), "\n")
+	#cat("vg.lap mC", head(mC), "\n")
 	mDiag <- sapply(1:ncol(mC), function(i) sum(mC[i,] * mLambda[, i] * mC[, i]))
 	#mDiag2 <-  diag(mC%*%mLambda%*%t(mC))
     vg <- t(mC)%*%(vy - vr*exp(mC%*%vnu+0.5*mDiag)) - mSigma.inv%*%vnu
-	cat("vg.lap vg", vg, "\n")
+	cat("vg.lap vg", vg, "norm", norm(vg), "\n")
     return(vg)
 }
 
@@ -76,6 +80,7 @@ fit.Lap <- function(vnu,vy,vr,mC,mSigma.inv,mLambda)
     #vnu <- res$par
     #mLambda <- solve(-mH.lap(vnu,vy,mC,mSigma.inv),tol=1.0E-99)
     
+	# FIXME: Should the mLambda on the next line be something else?
     f <- f.lap(vnu,vy,vr,mC,mSigma.inv,mLambda) + 0.5*log(det(mLambda%*%mSigma.inv))
     #print(f)
     return(list(vnu=vnu,mLambda=mLambda,f=f))
@@ -204,7 +209,8 @@ vg.GVA <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
     # FIXME: Something broken in this function
     vg[(1+d):length(vtheta)] <- dmLambda[Rinds]    
    
-	cat("vg", vg, "\n")
+	cat("vtheta.GVA vtheta", vtheta, "norm", norm(vtheta), "\n")
+	cat("vg.GVA vg", vg, "norm", norm(vg), "\n")
     return(vg)
 }
 

@@ -250,6 +250,7 @@ zero_infl_var.multivariate <- function(mult, verbose=FALSE, plot_lower_bound=FAL
 		# Dr Ormerod's Poisson mixed model code
 		# TODO: Add parameter to choose between the various optimisation options.
 		fit1 = fit.Lap(mult$vnu, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, mult$mLambda)
+		#fit2 = fit.GVA(fit1$vnu, fit1$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B")
 		fit2 = fit.GVA(fit1$vnu, fit1$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B")
 		mult$vnu = fit2$vnu
 		mult$mLambda = fit2$mLambda
