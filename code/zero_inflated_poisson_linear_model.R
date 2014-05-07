@@ -172,6 +172,8 @@ vg.GVA.approx <- function(vnu,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
 
 ###############################################################################
 
+# FIXME: I think there's an error in this routine. The derivatives become
+# very large indeed.
 vg.GVA <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
 {
 	#cat("vtheta", vtheta, "\n")
