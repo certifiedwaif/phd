@@ -27,14 +27,15 @@ generate_multivariate_test_data <- function (mX, mZ, m, n, rho, vbeta, sigma2_u,
 		mC = cbind(mX, mZ)
 	}
 	vy = rep(NA, sum(n))
+	vu = rep(NA, length(n))
 	if (verbose)
 		cat("vy", vy, "\n")
 	idx = 0
 	for (i in 1:length(n)) {
 		if (sigma2_u == 0)
-			intercept = 0
+			vu[i] = 0
 		else
-			intercept = rnorm(1, 0, sqrt(sigma2_u))
+			vu[i] = rnorm(1, 0, sqrt(sigma2_u))
 
 		for (j in 1:n[i]) {
 			idx = idx + 1
@@ -42,7 +43,7 @@ generate_multivariate_test_data <- function (mX, mZ, m, n, rho, vbeta, sigma2_u,
 				cat("idx", idx, "\n")
 
 			if (runif(1) <= rho) {
-				veta = mX[idx,] %*% vbeta + intercept
+				veta = mX[idx,] %*% vbeta + vu[i]
 				if (verbose)
 					cat("veta", veta, "\n")
 				vy[idx] = rpois(1, exp(veta))
@@ -57,7 +58,8 @@ generate_multivariate_test_data <- function (mX, mZ, m, n, rho, vbeta, sigma2_u,
 		cat("vy", vy, "\n")
 	if(NA %in% vy)
 		stop("NAs in vy")
-	return(vy)
+	result = list(vy=vy, vu=vu)
+	return(result)
 }
 
 test_univariate_zip <- function()
@@ -141,9 +143,9 @@ test_multivariate_zip_no_zeros_random_intercept <- function()
 	ni = 20
 	n = rep(ni,m)
 	mX = matrix(as.vector(cbind(rep(1, sum(n)), runif(sum(n), -1, 1))), sum(n), 2)
-	print("mX=")
-	print(mX)
-	cat("dim(mX)", dim(mX), "\n")
+	#print("mX=")
+	#print(mX)
+	#cat("dim(mX)", dim(mX), "\n")
 	
 	#v = c(rep(1, g), rep(0, g))
 	# Indicator variables for groups
@@ -158,9 +160,9 @@ test_multivariate_zip_no_zeros_random_intercept <- function()
 	
 	mZ <- kronecker(diag(1,m),rep(1,ni))
 	
-	print("mZ=")
-	print(mZ)
-	cat("dim(mZ)", dim(mZ), "\n")
+	#print("mZ=")
+	#print(mZ)
+	#cat("dim(mZ)", dim(mZ), "\n")
 	
 	expected_rho = 1
 	expected_beta = c(2, 1)
@@ -171,7 +173,8 @@ test_multivariate_zip_no_zeros_random_intercept <- function()
 	sigma2.beta <- 1.0E8
 	
 	
-	vy = generate_multivariate_test_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u, verbose=TRUE)
+	generated = generate_multivariate_test_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u, verbose=TRUE)
+	vy = generated$vy
 	
 	
 	print(table(vy))
@@ -183,13 +186,11 @@ test_multivariate_zip_no_zeros_random_intercept <- function()
 	result_var = zero_infl_var(multivariate, verbose=TRUE)
 	print(str(result_var))
 
-	#expect_equal(as.vector(result_var$vnu), expected_nu, tolerance=2e-1)
+	expect_equal(as.vector(result_var$vnu[1:2]), expected_beta, tolerance=1e-1)
 	#expect_equal(result_var$a_rho / (result_var$a_rho + result_var$b_rho), expected_rho, tolerance=2e-1)
 	#print(str(result_var))
-	#expect_equal(result_var$b_sigma^2 / result_var$a_sigma, expected_sigma2_u, tolerance=2e-1)
-	
-	
-	return(result_var)
+	result_sigma2_u = (result_var$b_sigma / result_var$a_sigma)
+	expect_equal(result_sigma2_u, expected_sigma2_u, tolerance=3e-1)
 }
 
 test_multivariate_zip_half_zeros_random_intercept <- function()
@@ -207,7 +208,7 @@ main <- function()
 	#test_multivariate_zip_half_zeros()
 
 	# TODO: Add a test for the random intercepts?
-	return(test_multivariate_zip_no_zeros_random_intercept())
+	test_multivariate_zip_no_zeros_random_intercept()
 	#test_multivariate_zip_half_zeros_random_intercept()
 }
 
