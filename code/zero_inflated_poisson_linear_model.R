@@ -32,14 +32,14 @@ norm <- function(v) sqrt(sum(v^2))
 
 vg.lap <- function(vnu,vy,vr,mC,mSigma.inv,mLambda) 
 {       
-	cat("vg.lap vnu", vnu, "\n")
+	#cat("vg.lap vnu", vnu, "\n")
 	#cat("vg.lap vy", head(vy), "\n")
 	#cat("vg.lap vr", head(vr), "\n")
 	#cat("vg.lap mC", head(mC), "\n")
-	mDiag <- sapply(1:ncol(mC), function(i) sum(mC[i,] * mLambda[, i] * mC[, i]))
+	#mDiag <- sapply(1:ncol(mC), function(i) sum(mC[i,] * mLambda[, i] * mC[, i]))
 	#mDiag2 <-  diag(mC%*%mLambda%*%t(mC))
-    vg <- t(mC)%*%(vy - vr*exp(mC%*%vnu+0.5*mDiag)) - mSigma.inv%*%vnu
-	cat("vg.lap vg", vg, "norm", norm(vg), "\n")
+    vg <- t(mC)%*%(vy - vr*exp(mC%*%vnu)) - mSigma.inv%*%vnu
+	#cat("vg.lap vg", vg, "norm", norm(vg), "\n")
     return(vg)
 }
 
@@ -47,8 +47,8 @@ vg.lap <- function(vnu,vy,vr,mC,mSigma.inv,mLambda)
 
 mH.lap <- function(vnu,vy,vr,mC,mSigma.inv,mLambda) 
 {
-    mDiag <- sapply(1:ncol(mC), function(i) sum(mC[i,] * mLambda[, i] * mC[, i]))
-    vw <- exp(mC%*%vnu+.5*mDiag); dim(vw) <- NULL
+    #mDiag <- sapply(1:ncol(mC), function(i) sum(mC[i,] * mLambda[, i] * mC[, i]))
+    vw <- exp(mC%*%vnu); dim(vw) <- NULL
     mH <- -t(mC*vw)%*%mC - mSigma.inv
     return(mH)
 }

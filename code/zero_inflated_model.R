@@ -203,7 +203,7 @@ zero_infl_var.univariate <- function(univariate, verbose=FALSE, plot_lower_bound
 	return(params)
 }
 
-create_multivariate <- function(vy, mX, mZ, a_sigma, b_sigma)
+create_multivariate <- function(vy, mX, mZ, sigma2.beta,a_sigma, b_sigma)
 {
 	# Initialise
 	n = length(vy)
@@ -216,22 +216,32 @@ create_multivariate <- function(vy, mX, mZ, a_sigma, b_sigma)
 	vnu = rep(0, ncol(mC))
 
 	mLambda = diag(rep(1, ncol(mC)))
-	mSigma.inv = diag(rep(b_sigma/a_sigma, ncol(mC)))
+	mSigma.beta.inv = diag(1/sigma2.beta, ncol(mX))
+	mSigma.u.inv = diag(a_sigma/b_sigma, ncol(mZ))	
 	prior = list(a_sigma=a_sigma, b_sigma=b_sigma)
 	multivariate = list(vy=vy, mX=mX, mZ=mZ, mC=mC, vp=vp, vnu=vnu,
 						a_sigma=a_sigma, b_sigma=b_sigma,
 						mLambda=mLambda,
 						prior=prior,
-						mSigma.inv=mSigma.inv)
+						mSigma.beta.inv=mSigma.beta.inv,
+						mSigma.u.inv=mSigma.u.inv)
 	class(multivariate) = "multivariate"
 	return(multivariate)
 }
 
+library(limma)
+
 zero_infl_var.multivariate <- function(mult, verbose=FALSE, plot_lower_bound=FALSE)
 {
+	MAXITER <- 10
+
 	# Initialise
-	n = length(mult$vy)
-	if (verbose) cat("n", n, "\n")
+	N = length(mult$vy)
+	if (verbose) cat("N", N, "\n")
+	if (!is.null(mult$mX)) {
+		p = ncol(mult$mX) 
+		if (verbose) cat("p", p, "\n")
+	}	
 	if (!is.null(mult$mZ)) {
 		m = ncol(mult$mZ) 
 		if (verbose) cat("m", m, "\n")
@@ -242,37 +252,59 @@ zero_infl_var.multivariate <- function(mult, verbose=FALSE, plot_lower_bound=FAL
 	
 	i = 0
 	# Iterate ----
-	while (i <= 2 || vlower_bound[i] > vlower_bound[i-1]) {
+	while ( (i <= MAXITER) || (vlower_bound[i] > vlower_bound[i-1])  ) {
 		i = i+1
-
+		
+		
+		mult$mSigma.inv <- blockDiag(mult$mSigma.beta.inv,mult$mSigma.u.inv)
+		
 		# Update parameter for q_lambda
 		# Maximise the Gaussian Variational Approximation using
 		# Dr Ormerod's Poisson mixed model code
 		# TODO: Add parameter to choose between the various optimisation options.
 		fit1 = fit.Lap(mult$vnu, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, mult$mLambda)
+		
+		
+				
 		#fit2 = fit.GVA(fit1$vnu, fit1$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B")
-		fit2 = fit.GVA(fit1$vnu, fit1$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B")
-		mult$vnu = fit2$vnu
-		mult$mLambda = fit2$mLambda
-		mult$f = fit2$res$value
+		#fit2 = fit.GVA(fit1$vnu, fit1$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B")
+		
+		mult$vnu = fit1$vnu
+		mult$mLambda = fit1$mLambda
+		mult$f = fit1$res$value
+		
+		#print("vnu=")
+		#print(mult$vnu)
+		#print("mLambda=")
+		#print(mult$mLambda)
+		#print("f=")
+		#print(mult$f)
+		
+		#ans <- readline()
+				
 
 		# Update parameters for q_sigma_u^2 if we need to
 		tr <- function(mX) sum(diag(mX))
 		if (!is.null(mult$mZ)) {
 			# a_sigma is fixed
-			mult$a_sigma = mult$prior$a_sigma + ncol(mult$mZ)/2
-			u_idx = (ncol(mult$mX)+1):ncol(mult$mC)
+			mult$a_sigma = mult$prior$a_sigma + m/2
+			u_idx = p + (1:m)  # (ncol(mult$mX)+1):ncol(mult$mC)
 			vu = mult$vnu[u_idx]
 			# We know that mSigma = sigma_u^2 I. We should exploit this knowledge
 			# Q: Nothing from mLambda? Why not?
 			#tr_mSigma = ncol(mult$mZ) * mult$prior$a_sigma/mult$prior$b_sigma
 			#mult$b_sigma = mult$prior$b_sigma + sum(vu^2)/2 + (tr_mSigma)/2
 			mult$b_sigma = mult$prior$b_sigma + sum(vu^2)/2 + tr(mult$mLambda[u_idx, u_idx])/2    # Extract right elements of mLambda
+			
+			
+			mult$mSigma.u.inv = diag(mult$a_sigma/mult$b_sigma, m)	
 		}
+		
+		
 
 		# Update parameters for q_rho
-		mult$a_rho = 1 + sum(mult$vp)
-		mult$b_rho = n - sum(mult$vp) + 1
+		#mult$a_rho = 1 + sum(mult$vp)
+		#mult$b_rho = n - sum(mult$vp) + 1
 		
 		# Update parameters for q_vr
 		#if (verbose) {
@@ -282,10 +314,11 @@ zero_infl_var.multivariate <- function(mult, verbose=FALSE, plot_lower_bound=FAL
 		#	print(mult$mLambda)
 		#	print(diag(mult$mC%*%mult$mLambda%*%t(mult$mC)))
 		#}
-		mult$vp[zero.set] = expit(-exp(mult$mC[zero.set,]%*%mult$vnu + 0.5*diag(mult$mC[zero.set,]%*%mult$mLambda%*%t(mult$mC[zero.set,]))) + digamma(mult$a_rho) - digamma(mult$b_rho))
+		
+		#mult$vp[zero.set] = expit(-exp(mult$mC[zero.set,]%*%mult$vnu + 0.5*diag(mult$mC[zero.set,]%*%mult$mLambda%*%t(mult$mC[zero.set,]))) + digamma(mult$a_rho) - digamma(mult$b_rho))
     
 		#vlower_bound[i] <- calculate_lower_bound(vx, vp, a_lambda, b_lambda, a_rho, b_rho)
-		vlower_bound[i] <- calculate_lower_bound(mult)
+		vlower_bound[i] <- 0 # calculate_lower_bound(mult)
 		#print(mult$vnu)
 		#print(mult$vp)
 		#print(mult$a_rho)
@@ -301,7 +334,7 @@ zero_infl_var.multivariate <- function(mult, verbose=FALSE, plot_lower_bound=FAL
 	if (plot_lower_bound)
 		plot(lower_bound_vector,type="l")
 
-	params = list(vnu=mult$vnu, a_rho=mult$a_rho, b_rho=mult$b_rho,
+	params = list(vnu=mult$vnu, mLambda=mult$mLambda, a_rho=mult$a_rho, b_rho=mult$b_rho,
 					a_sigma=mult$a_sigma, b_sigma=mult$b_sigma)
 	return(params)
 }

@@ -19,7 +19,7 @@ generate_univariate_test_data <- function (n, rho, lambda)
 	return(vx)
 }
 
-generate_multivariate_test_data <- function (mX, mZ, m, n, rho, vnu, sigma2_u, verbose=FALSE)
+generate_multivariate_test_data <- function (mX, mZ, m, n, rho, vbeta, sigma2_u, verbose=FALSE)
 {
 	if (is.null(mZ)) {
 		mC = mX
@@ -34,7 +34,7 @@ generate_multivariate_test_data <- function (mX, mZ, m, n, rho, vnu, sigma2_u, v
 		if (sigma2_u == 0)
 			intercept = 0
 		else
-			intercept = rnorm(1, 0, sigma2_u)
+			intercept = rnorm(1, 0, sqrt(sigma2_u))
 
 		for (j in 1:n[i]) {
 			idx = idx + 1
@@ -42,7 +42,7 @@ generate_multivariate_test_data <- function (mX, mZ, m, n, rho, vnu, sigma2_u, v
 				cat("idx", idx, "\n")
 
 			if (runif(1) <= rho) {
-				veta = mC[idx,] %*% vnu + intercept
+				veta = mX[idx,] %*% vbeta + intercept
 				if (verbose)
 					cat("veta", veta, "\n")
 				vy[idx] = rpois(1, exp(veta))
@@ -137,34 +137,59 @@ test_multivariate_zip_no_zeros_random_intercept <- function()
 	# Could we load test data from somewhere? I don't know that hardcoding the
 	# test data into the source files is really the best idea.
 	# FIXME: You have serious overflow issues
-	m = 2
-	g = 45
-	n = c(g, g)
+	m = 100
+	ni = 20
+	n = rep(ni,m)
 	mX = matrix(as.vector(cbind(rep(1, sum(n)), runif(sum(n), -1, 1))), sum(n), 2)
-	cat("mX", mX, "\n")
+	print("mX=")
+	print(mX)
 	cat("dim(mX)", dim(mX), "\n")
-	v = c(rep(1, g), rep(0, g))
+	
+	#v = c(rep(1, g), rep(0, g))
 	# Indicator variables for groups
-	mZ = matrix(cbind(v, 1-v), sum(n), 2)
-	cat("mZ", mZ, "\n")
+	
+	#mZ = matrix(cbind(v, 1-v), sum(n), 2)
+	#mZ <- matrix(0,sum(n),m)
+	#count <- 0
+	#for (i in 1:m) {
+	#	mZ[count + (1:n[i]),i] <- 1
+	#	count <- count + n[i]
+	#}
+	
+	mZ <- kronecker(diag(1,m),rep(1,ni))
+	
+	print("mZ=")
+	print(mZ)
 	cat("dim(mZ)", dim(mZ), "\n")
+	
 	expected_rho = 1
-	expected_nu = c(2, 1, -1, 1)
+	expected_beta = c(2, 1)
 	expected_sigma2_u = .5^2
-	a_sigma = 1e-3
-	b_sigma = 1e-3
-	vy = generate_multivariate_test_data(mX, mZ, m, n, expected_rho, expected_nu, expected_sigma2_u, verbose=TRUE)
+	a_sigma = 1e-2
+	b_sigma = 1e-2
+	
+	sigma2.beta <- 1.0E8
+	
+	
+	vy = generate_multivariate_test_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u, verbose=TRUE)
+	
+	
 	print(table(vy))
+	
+	ans <- readline()
 
 	# Test model fitting
-	multivariate = create_multivariate(vy, mX, mZ, a_sigma, b_sigma)
+	multivariate = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma)
 	result_var = zero_infl_var(multivariate, verbose=TRUE)
 	print(str(result_var))
 
-	expect_equal(as.vector(result_var$vnu), expected_nu, tolerance=2e-1)
-	expect_equal(result_var$a_rho / (result_var$a_rho + result_var$b_rho), expected_rho, tolerance=2e-1)
-	print(str(result_var))
-	expect_equal(result_var$b_sigma^2 / result_var$a_sigma, expected_sigma2_u, tolerance=2e-1)
+	#expect_equal(as.vector(result_var$vnu), expected_nu, tolerance=2e-1)
+	#expect_equal(result_var$a_rho / (result_var$a_rho + result_var$b_rho), expected_rho, tolerance=2e-1)
+	#print(str(result_var))
+	#expect_equal(result_var$b_sigma^2 / result_var$a_sigma, expected_sigma2_u, tolerance=2e-1)
+	
+	
+	return(result_var)
 }
 
 test_multivariate_zip_half_zeros_random_intercept <- function()
@@ -182,7 +207,8 @@ main <- function()
 	#test_multivariate_zip_half_zeros()
 
 	# TODO: Add a test for the random intercepts?
-	test_multivariate_zip_no_zeros_random_intercept()
+	return(test_multivariate_zip_no_zeros_random_intercept())
 	#test_multivariate_zip_half_zeros_random_intercept()
 }
-main()
+
+res <- main()
