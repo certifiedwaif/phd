@@ -209,8 +209,8 @@ vg.GVA <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
     # FIXME: Something broken in this function
     vg[(1+d):length(vtheta)] <- dmLambda[Rinds]    
    
-	cat("vtheta.GVA vtheta", vtheta, "norm", norm(vtheta), "\n")
-	cat("vg.GVA vg", vg, "norm", norm(vg), "\n")
+	#cat("vtheta.GVA vtheta", vtheta, "norm", norm(vtheta), "\n")
+	#cat("vg.GVA vg", vg, "norm", norm(vg), "\n")
     return(vg)
 }
 
