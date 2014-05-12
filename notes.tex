@@ -1,0 +1,17 @@
+\documentclass{amsart}
+\begin{document}
+Laplacian approximations
+Most important facts about Multivariate Gaussians that keep coming up
+Cov(X) = E(X - E X)(X - E X)^T = E(X X^T) - (E X)^2
+Therefore, E(X X^T) = Cov(X) + (E X)^2
+
+\section{Notes from 8/5/2013 meeting}
+I met up with John to see why my mixed model code wasn't fitting correctly.
+It turned out that there were several problems. I should have been generating
+test data with more groups. Also, I misunderstood Laplace approximations -
+you're just maximising the log likelihood, not the Gaussian approximation to
+the log likelihood.
+
+The code now seems to work quite well for the one test case that we tried,
+but less well when you change any of the settings.
+\end{document}
