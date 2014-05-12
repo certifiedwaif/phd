@@ -231,9 +231,9 @@ create_multivariate <- function(vy, mX, mZ, sigma2.beta,a_sigma, b_sigma)
 
 library(limma)
 
-zero_infl_var.multivariate <- function(mult, verbose=FALSE, plot_lower_bound=FALSE)
+zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE)
 {
-	MAXITER <- 10
+	MAXITER <- 15
 
 	# Initialise
 	N = length(mult$vy)
@@ -262,11 +262,13 @@ zero_infl_var.multivariate <- function(mult, verbose=FALSE, plot_lower_bound=FAL
 		# Maximise the Gaussian Variational Approximation using
 		# Dr Ormerod's Poisson mixed model code
 		# TODO: Add parameter to choose between the various optimisation options.
-		fit1 = fit.Lap(mult$vnu, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, mult$mLambda)
-		
-		
-				
-		#fit2 = fit.GVA(fit1$vnu, fit1$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B")
+		if (method == "laplacian") {
+			fit1 = fit.Lap(mult$vnu, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, mult$mLambda)
+		} else if (method == "gva") {	
+			fit1 = fit.GVA(mult$vnu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B")
+		} else {
+			stop("method must be either laplacian or gva")
+		}
 		#fit2 = fit.GVA(fit1$vnu, fit1$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B")
 		
 		mult$vnu = fit1$vnu
@@ -303,8 +305,8 @@ zero_infl_var.multivariate <- function(mult, verbose=FALSE, plot_lower_bound=FAL
 		
 
 		# Update parameters for q_rho
-		#mult$a_rho = 1 + sum(mult$vp)
-		#mult$b_rho = n - sum(mult$vp) + 1
+		mult$a_rho = 1 + sum(mult$vp)
+		mult$b_rho = N - sum(mult$vp) + 1
 		
 		# Update parameters for q_vr
 		#if (verbose) {
@@ -315,7 +317,7 @@ zero_infl_var.multivariate <- function(mult, verbose=FALSE, plot_lower_bound=FAL
 		#	print(diag(mult$mC%*%mult$mLambda%*%t(mult$mC)))
 		#}
 		
-		#mult$vp[zero.set] = expit(-exp(mult$mC[zero.set,]%*%mult$vnu + 0.5*diag(mult$mC[zero.set,]%*%mult$mLambda%*%t(mult$mC[zero.set,]))) + digamma(mult$a_rho) - digamma(mult$b_rho))
+		mult$vp[zero.set] = expit(-exp(mult$mC[zero.set,]%*%mult$vnu + 0.5*diag(mult$mC[zero.set,]%*%mult$mLambda%*%t(mult$mC[zero.set,]))) + digamma(mult$a_rho) - digamma(mult$b_rho))
     
 		#vlower_bound[i] <- calculate_lower_bound(vx, vp, a_lambda, b_lambda, a_rho, b_rho)
 		vlower_bound[i] <- 0 # calculate_lower_bound(mult)
@@ -339,7 +341,7 @@ zero_infl_var.multivariate <- function(mult, verbose=FALSE, plot_lower_bound=FAL
 	return(params)
 }
 
-zero_infl_var <- function(object, verbose=FALSE, plot_lower_bound=FALSE)
+zero_infl_var <- function(object, method="laplacian", verbose=FALSE, plot_lower_bound=FALSE)
 {
 	UseMethod("zero_infl_var", object)
 }
