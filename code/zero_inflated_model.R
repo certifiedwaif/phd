@@ -101,9 +101,11 @@ calculate_lower_bound.multivariate <- function(multivariate)
 	#b_lambda = multivariate$b_lambda
 	a_rho = multivariate$a_rho
 	b_rho = multivariate$b_rho
-	mX = multivariate$mX
+	mC = multivariate$mC
 	vnu = multivariate$vnu
 	mLambda = multivariate$mLambda
+	a_sigma2_u = multivariate$a_sigma2_u
+	b_sigma2_u = multivariate$b_sigma2_u
 
 	zero.set <- which(vy==0)
 	
@@ -132,8 +134,8 @@ calculate_lower_bound.multivariate <- function(multivariate)
 
 	# Terms for (beta, u)
 	# TODO: Add term for priors for beta and u
-	result = result + (vy*vr) %*% mX %*% vnu
-	result = result - vp * exp(mC %*% vnu + 0.5 %*% vnu %*% mLambda %*% t(vnu)) - sum(lgamma(vy + 1))
+	result = result + (vy*vp) %*% mC %*% vnu
+	result = result - vp * exp(mC %*% vnu + 0.5 * vnu %*% mLambda %*% t(vnu)) - sum(lgamma(vy + 1))
 	result = result + 0.5 * (det(2*pi*mLambda) + t(vnu) %*% solve(mLambda) %*% vnu)
 	# TODO: Add a term for sigma2_u
 	E_log_sigma2_u = -gamma_entropy(a_sigma2_u, b_sigma2_u)
@@ -266,7 +268,7 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
 	
 	i = 0
 	# Iterate ----
-	while ( (i <= MAXITER) || (vlower_bound[i] > vlower_bound[i-1])  ) {
+	while ( (i <= 1) || (vlower_bound[i] > vlower_bound[i-1])  ) {
 		i = i+1
 		
 		
@@ -335,6 +337,7 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
     
 		#vlower_bound[i] <- calculate_lower_bound(vx, vp, a_lambda, b_lambda, a_rho, b_rho)
 		vlower_bound[i] <- 0 # calculate_lower_bound(mult)
+		vlower_bound[i] <- calculate_lower_bound(mult)
 		#print(mult$vnu)
 		#print(mult$vp)
 		#print(mult$a_rho)
