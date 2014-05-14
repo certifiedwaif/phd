@@ -101,6 +101,9 @@ calculate_lower_bound.multivariate <- function(multivariate)
 	#b_lambda = multivariate$b_lambda
 	a_rho = multivariate$a_rho
 	b_rho = multivariate$b_rho
+	mX = multivariate$mX
+	vnu = multivariate$vnu
+	mLambda = multivariate$mLambda
 
 	zero.set <- which(vy==0)
 	
@@ -124,7 +127,18 @@ calculate_lower_bound.multivariate <- function(multivariate)
 	result = result + sum(E_r) * E_log_rho + sum(1 - E_r) * E_log_one_minus_rho
 	result = result - sum(E_log_q_r) #- E_log_q_lambda
 	result = result - E_log_q_rho
-	result = result + multivariate$f
+	# TODO: This is incorrect.
+	#result = result + multivariate$f
+
+	# Terms for (beta, u)
+	# TODO: Add term for priors for beta and u
+	result = result + (vy*vr) %*% mX %*% vnu
+	result = result - vp * exp(mC %*% vnu + 0.5 %*% vnu %*% mLambda %*% t(vnu)) - sum(lgamma(vy + 1))
+	result = result + 0.5 * (det(2*pi*mLambda) + t(vnu) %*% solve(mLambda) %*% vnu)
+	# TODO: Add a term for sigma2_u
+	E_log_sigma2_u = -gamma_entropy(a_sigma2_u, b_sigma2_u)
+	E_sigma2_u = a_sigma2_u/b_sigma2_u
+	result = result + 0.5 * m * E_log_sigma2_u - 0.5*(sum(vu^2) + tr(mLambda[u_idx, u_idx])) * E_sigma2_u - lgamma(a_sigma2_u) + lgamma(a_sigma2_u + 0.5 * m - 1)
 	
 	return(result)
 }
