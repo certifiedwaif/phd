@@ -135,8 +135,9 @@ calculate_lower_bound.multivariate <- function(multivariate)
 	# Terms for (beta, u)
 	# TODO: Add term for priors for beta and u
 	result = result + (vy*vp) %*% mC %*% vnu
-	result = result - vp * exp(mC %*% vnu + 0.5 * vnu %*% mLambda %*% t(vnu)) - sum(lgamma(vy + 1))
+	result = result - vp %*% exp(mC %*% vnu + matrix(0.5 * (t(vnu) %*% mLambda %*% vnu), nrow = nrow(mC), ncol = 1)) - sum(lgamma(vy + 1))
 	result = result + 0.5 * (det(2*pi*mLambda) + t(vnu) %*% solve(mLambda) %*% vnu)
+
 	# TODO: Add a term for sigma2_u
 	E_log_sigma2_u = -gamma_entropy(a_sigma2_u, b_sigma2_u)
 	E_sigma2_u = a_sigma2_u/b_sigma2_u
