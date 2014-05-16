@@ -1,8 +1,6 @@
 # variational_approximation_to_zero_inflated_model.R
+source("common.R")
 source("zero_inflated_poisson_linear_model.R")
-
-logit <- function(p) log(p/(1-p))
-expit <- function(eta) 1/(1+exp(-eta))
 
 zero_infl_mcmc.univariate <- function(iterations, vx, a, b)
 {
@@ -93,8 +91,11 @@ calculate_lower_bound.univariate <- function(univariate)
 calculate_lower_bound.multivariate <- function(multivariate)
 {
 	# TODO: Re-use what you can from the univariate lower bound, rather than
-  # duplicating code.
+  	# duplicating code.
+
 	# Take the lower bound returned by Poisson fit and combine it
+
+	# Extract variables that we will need
 	vy = multivariate$vy
 	vp = multivariate$vp
 	#a_lambda = multivariate$a_lambda
@@ -104,8 +105,12 @@ calculate_lower_bound.multivariate <- function(multivariate)
 	mC = multivariate$mC
 	vnu = multivariate$vnu
 	mLambda = multivariate$mLambda
-	a_sigma2_u = multivariate$a_sigma2_u
-	b_sigma2_u = multivariate$b_sigma2_u
+	a_sigma2_u = multivariate$a_sigma
+	b_sigma2_u = multivariate$b_sigma
+	p = ncol(multivariate$mX) 
+	m = ncol(multivariate$mZ) 
+	u_idx = p + (1:m)  # (ncol(mult$mX)+1):ncol(mult$mC)
+	vu = vnu[u_idx]
 
 	zero.set <- which(vy==0)
 	
@@ -139,6 +144,8 @@ calculate_lower_bound.multivariate <- function(multivariate)
 	result = result + 0.5 * (det(2*pi*mLambda) + t(vnu) %*% solve(mLambda) %*% vnu)
 
 	# TODO: Add a term for sigma2_u
+	cat("a_sigma2_u", a_sigma2_u, "\n")
+	cat("b_sigma2_u", b_sigma2_u, "\n")
 	E_log_sigma2_u = -gamma_entropy(a_sigma2_u, b_sigma2_u)
 	E_sigma2_u = a_sigma2_u/b_sigma2_u
 	result = result + 0.5 * m * E_log_sigma2_u - 0.5*(sum(vu^2) + tr(mLambda[u_idx, u_idx])) * E_sigma2_u - lgamma(a_sigma2_u) + lgamma(a_sigma2_u + 0.5 * m - 1)
@@ -303,7 +310,6 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
 				
 
 		# Update parameters for q_sigma_u^2 if we need to
-		tr <- function(mX) sum(diag(mX))
 		if (!is.null(mult$mZ)) {
 			# a_sigma is fixed
 			mult$a_sigma = mult$prior$a_sigma + m/2
