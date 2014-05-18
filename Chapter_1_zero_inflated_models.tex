@@ -284,8 +284,30 @@ q(r) &\propto \exp{\{\bbE_{-q(\vr)}y^TR(C\vnu) - r^T\exp{(C\vnu)}-\half \vnu^T D
 where $\hat{D} = D(A_{q(\sigma_{\vu}^2)} / B_{q(\sigma_{\vu}^2)})$. This can be seen to be very close to a Poisson
 regression model.
 
-\subsection{Results}
+\subsection{Lower bound}
+% Explain how most of the lower bound for the univariate model can simply be re-used, but \lambda is replaced
+% with \vbeta
+$$
+E_q [\log{p(y, \theta)} - \log{q(\theta)}] = \vy \vp^T X\vnu - \vp \exp{(X\vnu + \half \vnu^T \Lambda \vnu)} - log{(vy + 1)}
++ \half (|2\pi \Lambda| + \vnu^T \Lambda^{-1} \vnu)
+$$
 
+For $\sigma^2_u$,
+$$
+E_q [\log{p(\sigma_u^2)} - \log{q(\sigma_u^2)}] = \frac{m}{2} E_q [\log{\sigma_u^{-2}}] - (\half \|\mu_u\|^2 + \tr(\Lambda_{uu})) E_q [\sigma_u^{-2}] - \log{\Gamma(\alpha_{\sigma_u^2})} + \log{\Gamma(\alpha_{\sigma_u^2} + \frac{m}{2} - 1)}
+$$
+
+where
+$$
+E_q[\log{(\sigma_u^2)}] = - \{\alpha_{\sigma_u^2}^2 - \log{\beta_{\sigma_u^2}^*} + \log{\Gamma(\alpha_{\sigma_u^2}^*)} + (1-\alpha_{\sigma_u^2}^*)\digamma{(\alpha_{\sigma_u^2}^*)}\}
+$$
+
+and
+$$
+E_q[\sigma_u^{-2}] = \frac{\alpha_{\sigma_u^2}^*}{\beta_{\sigma_u^2}^*}
+$$
+
+\subsection{Results}
 
 \section{Theory of variational approximation of zero-inflated Poisson models}
 Let $Z_i = R_i Y_i$.
