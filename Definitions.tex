@@ -1,0 +1,283 @@
+
+\usepackage{latexsym,amssymb,amsmath,amsfonts}
+%\usepackage{tabularx}
+\usepackage{theorem}
+\usepackage{verbatim,array,multicol,palatino}
+\usepackage{graphicx}
+\usepackage{graphics}
+\usepackage{fancyhdr}
+\usepackage{algorithm,algorithmic}
+\usepackage{url}
+%\usepackage[all]{xy}
+
+
+
+\def\approxdist{\stackrel{{\tiny \mbox{approx.}}}{\sim}}
+\def\smhalf{\textstyle{\frac{1}{2}}}
+\def\vxnew{\vx_{\mbox{{\tiny new}}}}
+\def\bib{\vskip12pt\par\noindent\hangindent=1 true cm\hangafter=1}
+\def\jump{\vskip3mm\noindent}
+\def\etal{{\em et al.}}
+\def\etahat{{\widehat\eta}}
+\def\thick#1{\hbox{\rlap{$#1$}\kern0.25pt\rlap{$#1$}\kern0.25pt$#1$}}
+\def\smbbeta{{\thick{\scriptstyle{\beta}}}}
+\def\smbtheta{{\thick{\scriptstyle{\theta}}}}
+\def\smbu{{\thick{\scriptstyle{\rm u}}}}
+\def\smbzero{{\thick{\scriptstyle{0}}}}
+\def\boxit#1{\begin{center}\fbox{#1}\end{center}}
+\def\lboxit#1{\vbox{\hrule\hbox{\vrule\kern6pt
+      \vbox{\kern6pt#1\kern6pt}\kern6pt\vrule}\hrule}}
+\def\thickboxit#1{\vbox{{\hrule height 1mm}\hbox{{\vrule width 1mm}\kern6pt
+          \vbox{\kern6pt#1\kern6pt}\kern6pt{\vrule width 1mm}}
+               {\hrule height 1mm}}}
+
+
+%\sloppy
+%\usepackage{geometry}
+%\geometry{verbose,a4paper,tmargin=20mm,bmargin=20mm,lmargin=40mm,rmargin=20mm}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Some convenience definitions
+%
+% \bf      -> vector
+% \sf      -> matrix
+% \mathcal -> sets or statistical
+% \mathbb  -> fields or statistical
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Sets or statistical values
+\def\sI{{\mathcal I}}                            % Current Index set
+\def\sJ{{\mathcal J}}                            % Select Index set
+\def\sL{{\mathcal L}}                            % Likelihood
+\def\sl{{\ell}}                                  % Log-likelihood
+\def\sN{{\mathcal N}}                            
+\def\sS{{\mathcal S}}                            
+\def\sP{{\mathcal P}}                            
+\def\sQ{{\mathcal Q}}                            
+\def\sB{{\mathcal B}}                            
+\def\sD{{\mathcal D}}                            
+\def\sT{{\mathcal T}}
+\def\sE{{\mathcal E}}                            
+\def\sF{{\mathcal F}}                            
+\def\sC{{\mathcal C}}                            
+\def\sO{{\mathcal O}}                            
+\def\sH{{\mathcal H}} 
+\def\sR{{\mathcal R}}                            
+\def\sJ{{\mathcal J}}                            
+\def\sCP{{\mathcal CP}}                            
+\def\sX{{\mathcal X}}                            
+\def\sA{{\mathcal A}} 
+\def\sZ{{\mathcal Z}}                            
+\def\sM{{\mathcal M}}                            
+\def\sK{{\mathcal K}}     
+\def\sG{{\mathcal G}}                         
+\def\sY{{\mathcal Y}}                         
+\def\sU{{\mathcal U}}  
+
+
+\def\sIG{{\mathcal IG}}                            
+
+
+\def\cD{{\sf D}}
+\def\cH{{\sf H}}
+\def\cI{{\sf I}}
+
+% Vectors
+\def\vectorfontone{\bf}
+\def\vectorfonttwo{\boldsymbol}
+\def\va{{\vectorfontone a}}                      %
+\def\vb{{\vectorfontone b}}                      %
+\def\vc{{\vectorfontone c}}                      %
+\def\vd{{\vectorfontone d}}                      %
+\def\ve{{\vectorfontone e}}                      %
+\def\vf{{\vectorfontone f}}                      %
+\def\vg{{\vectorfontone g}}                      %
+\def\vh{{\vectorfontone h}}                      %
+\def\vi{{\vectorfontone i}}                      %
+\def\vj{{\vectorfontone j}}                      %
+\def\vk{{\vectorfontone k}}                      %
+\def\vl{{\vectorfontone l}}                      %
+\def\vm{{\vectorfontone m}}                      % number of basis functions
+\def\vn{{\vectorfontone n}}                      % number of training samples
+\def\vo{{\vectorfontone o}}                      %
+\def\vp{{\vectorfontone p}}                      % number of unpenalized coefficients
+\def\vq{{\vectorfontone q}}                      % number of penalized coefficients
+\def\vr{{\vectorfontone r}}                      %
+\def\vs{{\vectorfontone s}}                      %
+\def\vt{{\vectorfontone t}}                      %
+\def\vu{{\vectorfontone u}}                      % Penalized coefficients
+\def\vv{{\vectorfontone v}}                      %
+\def\vw{{\vectorfontone w}}                      %
+\def\vx{{\vectorfontone x}}                      % Covariates/Predictors
+\def\vy{{\vectorfontone y}}                      % Targets/Labels
+\def\vz{{\vectorfontone z}}                      %
+
+\def\vone{{\vectorfontone 1}}
+\def\vzero{{\vectorfontone 0}}
+
+\def\valpha{{\vectorfonttwo \alpha}}             %
+\def\vbeta{{\vectorfonttwo \beta}}               % Unpenalized coefficients
+\def\vgamma{{\vectorfonttwo \gamma}}             %
+\def\vdelta{{\vectorfonttwo \delta}}             %
+\def\vepsilon{{\vectorfonttwo \epsilon}}         %
+\def\vvarepsilon{{\vectorfonttwo \varepsilon}}   % Vector of errors
+\def\vzeta{{\vectorfonttwo \zeta}}               %
+\def\veta{{\vectorfonttwo \eta}}                 % Vector of natural parameters
+\def\vtheta{{\vectorfonttwo \theta}}             % Vector of combined coefficients
+\def\vvartheta{{\vectorfonttwo \vartheta}}       %
+\def\viota{{\vectorfonttwo \iota}}               %
+\def\vkappa{{\vectorfonttwo \kappa}}             %
+\def\vlambda{{\vectorfonttwo \lambda}}           % Vector of smoothing parameters
+\def\vmu{{\vectorfonttwo \mu}}                   % Vector of means
+\def\vnu{{\vectorfonttwo \nu}}                   %
+\def\vxi{{\vectorfonttwo \xi}}                   %
+\def\vpi{{\vectorfonttwo \pi}}                   %
+\def\vvarpi{{\vectorfonttwo \varpi}}             %
+\def\vrho{{\vectorfonttwo \rho}}                 %
+\def\vvarrho{{\vectorfonttwo \varrho}}           %
+\def\vsigma{{\vectorfonttwo \sigma}}             %
+\def\vvarsigma{{\vectorfonttwo \varsigma}}       %
+\def\vtau{{\vectorfonttwo \tau}}                 %
+\def\vupsilon{{\vectorfonttwo \upsilon}}         %
+\def\vphi{{\vectorfonttwo \phi}}                 %
+\def\vvarphi{{\vectorfonttwo \varphi}}           %
+\def\vchi{{\vectorfonttwo \chi}}                 %
+\def\vpsi{{\vectorfonttwo \psi}}                 %
+\def\vomega{{\vectorfonttwo \omega}}             %
+
+
+% Matrices
+%\def\matrixfontone{\sf}
+%\def\matrixfonttwo{\sf}
+\def\matrixfontone{\bf}
+\def\matrixfonttwo{\boldsymbol}
+\def\mA{{\matrixfontone A}}                      %
+\def\mB{{\matrixfontone B}}                      %
+\def\mC{{\matrixfontone C}}                      % Combined Design Matrix
+\def\mD{{\matrixfontone D}}                      % Penalty Matrix for \vu_J
+\def\mE{{\matrixfontone E}}                      %
+\def\mF{{\matrixfontone F}}                      %
+\def\mG{{\matrixfontone G}}                      % Penalty Matrix for \vu
+\def\mH{{\matrixfontone H}}                      %
+\def\mI{{\matrixfontone I}}                      % Identity Matrix
+\def\mJ{{\matrixfontone J}}                      %
+\def\mK{{\matrixfontone K}}                      %
+\def\mL{{\matrixfontone L}}                      % Lower bound
+\def\mM{{\matrixfontone M}}                      %
+\def\mN{{\matrixfontone N}}                      %
+\def\mO{{\matrixfontone O}}                      %
+\def\mP{{\matrixfontone P}}                      %
+\def\mQ{{\matrixfontone Q}}                      %
+\def\mR{{\matrixfontone R}}                      %
+\def\mS{{\matrixfontone S}}                      %
+\def\mT{{\matrixfontone T}}                      %
+\def\mU{{\matrixfontone U}}                      % Upper bound
+\def\mV{{\matrixfontone V}}                      %
+\def\mW{{\matrixfontone W}}                      % Variance Matrix i.e. diag(b'')
+\def\mX{{\matrixfontone X}}                      % Unpenalized Design Matrix/Nullspace Matrix
+\def\mY{{\matrixfontone Y}}                      %
+\def\mZ{{\matrixfontone Z}}                      % Penalized Design Matrix/Kernel Space Matrix
+
+\def\mGamma{{\matrixfonttwo \Gamma}}             %
+\def\mDelta{{\matrixfonttwo \Delta}}             %
+\def\mTheta{{\matrixfonttwo \Theta}}             %
+\def\mLambda{{\matrixfonttwo \Lambda}}           % Penalty Matrix for \vnu
+\def\mXi{{\matrixfonttwo \Xi}}                   %
+\def\mPi{{\matrixfonttwo \Pi}}                   %
+\def\mSigma{{\matrixfonttwo \Sigma}}             %
+\def\mUpsilon{{\matrixfonttwo \Upsilon}}         %
+\def\mPhi{{\matrixfonttwo \Phi}}                 %
+\def\mOmega{{\matrixfonttwo \Omega}}             %
+\def\mPsi{{\matrixfonttwo \Psi}}                 %
+
+\def\mone{{\matrixfontone 1}}
+\def\mzero{{\matrixfontone 0}}
+
+% Fields or Statistical
+\def\bE{{\mathbb E}}                             % Expectation
+\def\bP{{\mathbb P}}                             % Probability
+\def\bR{{\mathbb R}}                             % Reals
+\def\bI{{\mathbb I}}                             % Reals
+\def\bV{{\mathbb V}}                             % Reals
+
+\def\vX{{\vectorfontone X}}                      % Targets/Labels
+\def\vY{{\vectorfontone Y}}                      % Targets/Labels
+\def\vZ{{\vectorfontone Z}}                      %
+
+% Other
+\def\etal{{\em et al.}}
+\def\ds{\displaystyle}
+\def\d{\partial}
+\def\diag{\text{diag}}
+\def\span{\text{span}}
+\def\blockdiag{\text{blockdiag}}
+\def\tr{\text{tr}}
+\def\RSS{\text{RSS}}
+\def\df{\text{df}}
+\def\GCV{\text{GCV}}
+\def\AIC{\text{AIC}}
+\def\MLC{\text{MLC}}
+\def\mAIC{\text{mAIC}}
+\def\cAIC{\text{cAIC}}
+\def\rank{\text{rank}}
+\def\MASE{\text{MASE}}
+\def\SMSE{\text{SASE}}
+\def\sign{\text{sign}}
+\def\card{\text{card}}
+\def\notexp{\text{notexp}}
+\def\ASE{\text{ASE}}
+\def\ML{\text{ML}}
+\def\nullity{\text{nullity}}
+
+\def\logexpit{\text{logexpit}}
+\def\logit{\mbox{logit}}
+\def\dg{\mbox{dg}}
+
+\def\Bern{\mbox{Bernoulli}}
+\def\sBernoulli{\mbox{Bernoulli}}
+\def\sGamma{\mbox{Gamma}}
+\def\sInvN{\mbox{Inv}\sN}
+\def\sNegBin{\sN\sB}
+
+\def\dGamma{\mbox{Gamma}}
+\def\dInvGam{\mbox{Inv}\Gamma}
+
+\def\Cov{\mbox{Cov}}
+\def\Mgf{\mbox{Mgf}}
+
+\def\mis{{mis}} 
+\def\obs{{obs}}
+
+\def\argmax{\operatornamewithlimits{\text{argmax}}}
+\def\argmin{\operatornamewithlimits{\text{argmin}}}
+\def\argsup{\operatornamewithlimits{\text{argsup}}}
+\def\arginf{\operatornamewithlimits{\text{arginf}}}
+
+
+\def\minimize{\operatornamewithlimits{\text{minimize}}}
+\def\maximize{\operatornamewithlimits{\text{maximize}}}
+\def\suchthat{\text{such that}}
+
+
+\def\relstack#1#2{\mathop{#1}\limits_{#2}}
+\def\sfrac#1#2{{\textstyle{\frac{#1}{#2}}}}
+
+
+\def\comment#1{
+\vspace{0.5cm}
+\noindent \begin{tabular}{|p{14cm}|}  
+\hline #1 \\ 
+\hline 
+\end{tabular}
+\vspace{0.5cm}
+}
+
+
+\def\mytext#1{\begin{tabular}{p{13cm}}#1\end{tabular}}
+\def\mytextB#1{\begin{tabular}{p{7.5cm}}#1\end{tabular}}
+\def\mytextC#1{\begin{tabular}{p{12cm}}#1\end{tabular}}
+
+\def\jump{\vskip3mm\noindent}

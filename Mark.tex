@@ -1,0 +1,169 @@
+
+\documentclass[a4paper,11pt]{article}
+\usepackage[pdftex]{graphicx,epsfig,pict2e}
+\usepackage{amsmath,amsfonts,amssymb}
+\usepackage[usenames]{color}
+\usepackage{cite}
+
+\usepackage[margin=1.35in]{geometry}
+\usepackage{amscd}
+\usepackage{amsthm}
+\usepackage{ifthen}
+\usepackage[utf8]{inputenc}
+\usepackage{float}
+\usepackage{natbib}
+\bibpunct{(}{)}{;}{a}{}{,}
+
+\newtheorem{result}{Result}
+\newtheorem{lemma}{Lemma}
+\DeclareMathOperator*{\argmax}{arg\,max}
+\newcounter{qcounter} 
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+
+
+\input{Definitions.tex}
+ 
+
+
+\begin{document}
+
+\section{Lower Bound}
+
+$$
+\begin{array}{rl}
+\ds \log \underline{p}(\vy,\vtheta)
+    & \ds = 
+\bE_q\Big[ 
+\log p(\vy|\vr,\vbeta,\vu)
++ \log p(\vr|\rho)
++ \log p(\rho)
++ \log p(\vbeta)
++ \log p(\vu|\sigma_u^2)
++ \log p(\sigma_u^2) \\
+    & \ds 
+\qquad - \log q(\vbeta,\vu)
+- \log q(\vr)
+- \log q(\sigma_u^2)
+- \log q(\rho)
+\Big] \\
+    & \ds = T_1 + T_2 + T_3 + T_4
+
+\end{array}
+$$
+
+\noindent where
+$$
+\begin{array}{rl}
+\ds T_1  
+    & \ds = \bE_q\Big[ 
+    \log p(\vy|\vr,\vbeta,\vu) \Big] 
+\\
+\ds T_2  
+    & \ds = \bE_q\Big[ 
+    \log p(\vbeta,\vu,\sigma_u^2) - q(\sigma_u^2) \Big]
+\\
+\ds T_3 
+    & \ds = \bE_q \left[ \log p(\vr|\rho) + \log p(\rho) - \log q(\vr) - \log q(\rho)
+    \right]
+\\
+\ds T_4
+    & \ds = - \bE_q \log q(\vbeta,\vu).
+\end{array}
+$$
+
+\noindent  First,
+$$
+\begin{array}{rl}
+\ds T_1 
+    & \ds = \bE_q\Big[ 
+\vy^T\mR(\mX\vbeta + \mZ \vu) - \vr^T\exp\left\{\mX\vbeta + \mZ\vu \right\}
+-\vone^T\log \Gamma(\vy + \vone) \Big]
+\\
+    & \ds =  \vy^T\widetilde{\mR}\mC\vmu_{q(\vbeta,\vu)}  - \widetilde{\vr}^T\exp\left\{\mC\vmu_{q(\vbeta,\vu)}
+    + \tfrac{1}{2}\mbox{dg}(\mC\mLambda_{q(\vbeta,\vu)}\mC^T) \right\}
+    -\vone^T\log \Gamma(\vy + \vone) 
+\end{array}
+$$
+
+\noindent where $\widetilde{\mR} = \mbox{diag}(\widetilde{\vr})$,
+$\widetilde{\vr} = \vmu_{q(\vr)}$,
+$\mC = [\mX,\mZ]$
+and
+$\mbox{dg}(\mA)$ is the vector
+consisting of the diagonal elements of $\mA$.
+
+Next,
+$$
+\begin{array}{rl}
+T_2
+    & \ds = \bE_q\Big[ 
+    -\tfrac{p}{2}\log(2\pi\sigma_\beta^2) - \tfrac{1}{2\sigma_\beta^2}\|\vbeta\|^2 \\
+    & \ds \quad -\tfrac{m}{2}\log(2\pi\sigma_u^2) - \tfrac{1}{2\sigma_u^2}\|\vu\|^2  \\
+    & \ds \quad    + A\log(B) - \log\Gamma(A) -  (A + 1)\log(\sigma_u^2) - B/\sigma_u^2 \\
+    & \ds \quad    - (A + m/2)\log(B_{q(\sigma_u^2)}) + \log\Gamma(A + m/2) +  (A + m/2 + 1)\log(\sigma_u^2) + B_{q(\sigma_u^2)}/\sigma_u^2 \Big]
+    \\
+     & \ds =   
+     -\tfrac{p}{2}\log(2\pi\sigma_\beta^2) - \tfrac{1}{2\sigma_\beta^2}\left[ \|\vmu_{q(\vbeta)}\|^2 + \mbox{tr}(\mLambda_{q(\vbeta)})\right]\\
+     & \ds \quad -\tfrac{m}{2}\log(2\pi) 
+     -\tfrac{m}{2}\bE_q[\log(\sigma_u^2)]
+     - \tfrac{1}{2}\bE_q[\sigma_u^{-2}]\left[ \|\vmu_{q(\vu)}\|^2 + \mbox{tr}(\mLambda_{q(\vu)})\right]  \\
+     & \ds \quad    + A\log(B) - \log\Gamma(A) -  (A + 1)\bE_q[\log(\sigma_u^2)] - B\bE_q[\sigma_u^{-2}] \\
+     & \ds \quad    - (A + m/2)\log(B_{q(\sigma_u^2)}) + \log\Gamma(A + m/2) +  (A + m/2 + 1)\bE_q[\log(\sigma_u^2)] + B_{q(\sigma_u^2)}\bE_q[\sigma_u^{-2}].
+    
+    
+\end{array}
+$$
+
+\noindent After some cancelling
+$$
+\begin{array}{rl}
+T_2
+     & \ds =   
+     -\tfrac{p}{2}\log(2\pi\sigma_\beta^2) - \tfrac{1}{2\sigma_\beta^2}\left[ \|\vmu_{q(\vbeta)}\|^2 + \mbox{tr}(\mLambda_{q(\vbeta)})\right] -\tfrac{m}{2}\log(2\pi) \\
+     & \ds \quad + A\log(B) - \log\Gamma(A) - (A + m/2)\log(B_{q(\sigma_u^2)}) + \log\Gamma(A + m/2) \\
+     & \ds \quad \bE_q[\sigma_u^{-2}]  
+     \left[ 
+     B_{q(\sigma_u^2)}    - B - \tfrac{1}{2}\left[ \|\vmu_{q(\vu)}\|^2 + \mbox{tr}(\mLambda_{q(\vu)})\right]    
+     \right].
+\end{array}
+$$
+
+\noindent If the update for $B_{q(\sigma_u^2)}$ is performed last then
+$$
+B_{q(\sigma_u^2)} = B + \tfrac{1}{2}\left[ \|\vmu_{q(\vu)}\|^2 + \mbox{tr}(\mLambda_{q(\vu)})\right]
+$$
+
+\noindent holds and $T_2$ simplifies to
+$$
+\begin{array}{rl}
+T_2
+     & \ds =   
+     -\tfrac{p}{2}\log(2\pi\sigma_\beta^2) - \tfrac{1}{2\sigma_\beta^2}\left[ \|\vmu_{q(\vbeta)}\|^2 + \mbox{tr}(\mLambda_{q(\vbeta)})\right] -\tfrac{m}{2}\log(2\pi) \\
+     & \ds \quad + A\log(B) - \log\Gamma(A) - (A + m/2)\log(B_{q(\sigma_u^2)}) + \log\Gamma(A + m/2). \\
+\end{array}
+$$
+
+
+\noindent Next, $T_3$ is given by
+$$
+\ds T_3
+    & \ds = 
+$$
+
+\noindent Lastly, the expression for $T_4$ is obtain using the (Shannon's) Entropy expression
+for the multivariate Gaussian 
+distribution given by 
+$$
+T_4 = - \bE_q\left[ \log q(\vbeta,\vu) \right]
+ = \tfrac{1}{2}\log|2e\pi\mLambda_{q(\vbeta,\vu)} |.
+$$
+
+
+
+
+
+
+
+\end{document}
