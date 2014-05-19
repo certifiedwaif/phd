@@ -177,8 +177,6 @@ test_multivariate_zip_no_zeros_random_intercept <- function()
 	
 	print(table(vy))
 	
-	ans <- readline()
-
 	# Test model fitting
 	multivariate = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma)
 	result_var = zero_infl_var(multivariate, method="laplacian", verbose=TRUE)
@@ -252,6 +250,7 @@ test_multivariate_zip_half_zeros_random_intercept <- function()
 #main_check_accuracy()
 main <- function()
 {
+	set.seed(123)
 	#test_univariate_zip()
 	# TODO: Add some sort of test for the accuracy of the approximation?
 
@@ -264,4 +263,4 @@ main <- function()
 	#test_multivariate_zip_half_zeros_random_intercept()
 }
 
-res <- main()
+main()
