@@ -149,7 +149,16 @@ $$
 \noindent Next, $T_3$ is given by
 $$
 \ds T_3
-    & \ds = 
+    & \ds = \bE_q \left[ \log p(\vr|\rho) + \log p(\rho) - \log q(\vr) - \log q(\rho)
+	\right]
+    & \ds = \bE_q \left[ 
+	I(y \ne 0)^T \vone \log{\rho} + (1 - I(y \ne 0))^T \vone \log{1 - \rho}
+	+ (alpha_\rho - 1) \log{\rho} + (\beta_\rho - 1) \log{1 - \rho}
+	- \vr^T \vone \log{\vp} - (\vone - \vr)^T \vone \log{\vone - \vp}
+	- (alpha_\rho + \vr^T \vone - 1) \log{\rho} - (\beta_\rho + (1 - \vr)^T \vone - 1) \log{\rho}
+	\right]
+	& \ds = \bE_q \left[
+	\right]
 $$
 
 \noindent Lastly, the expression for $T_4$ is obtain using the (Shannon's) Entropy expression
