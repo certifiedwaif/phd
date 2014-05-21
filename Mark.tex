@@ -152,13 +152,28 @@ $$
     & \ds = \bE_q \left[ \log p(\vr|\rho) + \log p(\rho) - \log q(\vr) - \log q(\rho)
 	\right]
     & \ds = \bE_q \left[ 
-	I(y \ne 0)^T \vone \log{\rho} + (1 - I(y \ne 0))^T \vone \log{1 - \rho}
+	I(y \ne 0)^T \vone \log{\rho} + (\vone - I(y \ne 0))^T \vone \log{1 - \rho}
 	+ (alpha_\rho - 1) \log{\rho} + (\beta_\rho - 1) \log{1 - \rho}
+	- \log{\Beta(\alpha_\rho, \beta_\rho)}
 	- \vr^T \vone \log{\vp} - (\vone - \vr)^T \vone \log{\vone - \vp}
-	- (alpha_\rho + \vr^T \vone - 1) \log{\rho} - (\beta_\rho + (1 - \vr)^T \vone - 1) \log{\rho}
+	- (alpha_\rho + \vr^T \vone - 1) \log{\rho} - (\beta_\rho + (1 - \vr)^T \vone - 1) \log{1 - \rho}
+	+ \log{\Beta(\alpha_\rho + \vone^T\vp, \beta_\rho +(\vone - \vp)^T\vone)}
 	\right]
 	& \ds = \bE_q \left[
+	I(y \ne 0)^T \vone \log{\rho} + (alpha_\rho - 1) \log{\rho} - (alpha_\rho + \vr^T \vone - 1) \log{\rho}
+	+ (\vone - I(y \ne 0))^T \vone \log{1 - \rho} + (\beta_\rho - 1) \log{1 - \rho} - (\beta_\rho + (1 - \vr)^T \vone - 1) \log{1 - \rho}
+	- \vr^T \vone \log{\vp} - (\vone - \vr)^T \vone \log{\vone - \vp}
+	- \log{\Beta(\alpha_\rho, \beta_\rho)} + \log{\Beta(\alpha_\rho + \vone^T\vp, \beta_\rho +(\vone - \vp)^T\vone)}
 	\right]
+	& \ds = \bE_q \left[
+	(I(y \ne 0) - \vr)^T \vone \log{\rho} + (\vone - (I(y \ne 0) - \vr))^T \vone \log{1 - \rho} +
+	- \vr^T \vone \log{\vp} - (\vone - \vr)^T \vone \log{\vone - \vp}
+	- \log{\Beta(\alpha_\rho, \beta_\rho)} + \log{\Beta(\alpha_\rho + \vone^T\vp, \beta_\rho +(\vone - \vp)^T\vone)}
+	\right]
+	& \ds = 
+	(I(y \ne 0) - \vp)^T \vone E_q \left[ \log{\rho} \right] + (\vone - (I(y \ne 0) - \vr))^T \vone \bE_q \left[ \log{1 - \rho} \right] +
+	- \vr^T \vone \log{\vp} - (\vone - \vr)^T \vone \log{\vone - \vp}
+	- \log{\Beta(\alpha_\rho, \beta_\rho)} + \log{\Beta(\alpha_\rho + \vone^T\vp, \beta_\rho +(\vone - \vp)^T\vone)}
 $$
 
 \noindent Lastly, the expression for $T_4$ is obtain using the (Shannon's) Entropy expression
