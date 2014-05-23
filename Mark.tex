@@ -24,8 +24,6 @@
 
 
 \input{Definitions.tex}
- 
-
 
 \begin{document}
 
@@ -148,33 +146,41 @@ $$
 
 \noindent Next, $T_3$ is given by
 $$
+\begin{array}{rl}
 \ds T_3
     & \ds = \bE_q \left[ \log p(\vr|\rho) + \log p(\rho) - \log q(\vr) - \log q(\rho)
 	\right]
+	\\
     & \ds = \bE_q \left[ 
 	I(y \ne 0)^T \vone \log{\rho} + (\vone - I(y \ne 0))^T \vone \log{1 - \rho}
 	+ (alpha_\rho - 1) \log{\rho} + (\beta_\rho - 1) \log{1 - \rho}
-	- \log{\Beta(\alpha_\rho, \beta_\rho)}
+	- \log{\beta(\alpha_\rho, \beta_\rho)}
 	- \vr^T \vone \log{\vp} - (\vone - \vr)^T \vone \log{\vone - \vp}
 	- (alpha_\rho + \vr^T \vone - 1) \log{\rho} - (\beta_\rho + (1 - \vr)^T \vone - 1) \log{1 - \rho}
-	+ \log{\Beta(\alpha_\rho + \vone^T\vp, \beta_\rho +(\vone - \vp)^T\vone)}
+	+ \log{\beta(\alpha_\rho + \vone^T\vp, \beta_\rho +(\vone - \vp)^T\vone)}
 	\right]
+	\\
 	& \ds = \bE_q \left[
 	I(y \ne 0)^T \vone \log{\rho} + (alpha_\rho - 1) \log{\rho} - (alpha_\rho + \vr^T \vone - 1) \log{\rho}
 	+ (\vone - I(y \ne 0))^T \vone \log{1 - \rho} + (\beta_\rho - 1) \log{1 - \rho} - (\beta_\rho + (1 - \vr)^T \vone - 1) \log{1 - \rho}
 	- \vr^T \vone \log{\vp} - (\vone - \vr)^T \vone \log{\vone - \vp}
-	- \log{\Beta(\alpha_\rho, \beta_\rho)} + \log{\Beta(\alpha_\rho + \vone^T\vp, \beta_\rho +(\vone - \vp)^T\vone)}
+	- \log{\beta(\alpha_\rho, \beta_\rho)} + \log{\beta(\alpha_\rho + \vone^T\vp, \beta_\rho +(\vone - \vp)^T\vone)}
 	\right]
+	\\
 	& \ds = \bE_q \left[
 	(I(y \ne 0) - \vr)^T \vone \log{\rho} + (\vone - (I(y \ne 0) - \vr))^T \vone \log{1 - \rho} +
 	- \vr^T \vone \log{\vp} - (\vone - \vr)^T \vone \log{\vone - \vp}
-	- \log{\Beta(\alpha_\rho, \beta_\rho)} + \log{\Beta(\alpha_\rho + \vone^T\vp, \beta_\rho +(\vone - \vp)^T\vone)}
+	- \log{\beta(\alpha_\rho, \beta_\rho)} + \log{\beta(\alpha_\rho + \vone^T\vp, \beta_\rho +(\vone - \vp)^T\vone)}
 	\right]
+	\\
 	& \ds = 
 	(I(y \ne 0) - \vp)^T \vone E_q \left[ \log{\rho} \right] + (\vone - (I(y \ne 0) - \vr))^T \vone \bE_q \left[ \log{1 - \rho} \right] +
 	- \vr^T \vone \log{\vp} - (\vone - \vr)^T \vone \log{\vone - \vp}
-	- \log{\Beta(\alpha_\rho, \beta_\rho)} + \log{\Beta(\alpha_\rho + \vone^T\vp, \beta_\rho +(\vone - \vp)^T\vone)}
+	- \log{\beta(\alpha_\rho, \beta_\rho)} + \log{\beta(\alpha_\rho + \vone^T\vp, \beta_\rho +(\vone - \vp)^T\vone)}
+\end{array}
 $$
+where $\bE_q \left[ \log{\rho} \right]  = \log{\text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)})} - (\alpha_{q(\rho)} - 1)\digamma{(\alpha_{q(\rho)})} - (\beta_{q(\rho)} - 1)\digamma{(\beta_{q(\rho)})} + (\alpha_{q(\rho)} + \beta_{q(\rho)}) - 2)\digamma{(\alpha_{q(\rho)} + \beta_{q(\rho)})}$
+and by symmetry $\bE_q \left[ 1 - \rho \right] = \bE_q \left[ \rho \right]$.
 
 \noindent Lastly, the expression for $T_4$ is obtain using the (Shannon's) Entropy expression
 for the multivariate Gaussian 
