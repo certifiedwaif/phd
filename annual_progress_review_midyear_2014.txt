@@ -1,0 +1,54 @@
+Thesis title: Variational approximations to zero-inflated count models
+
+Abstract: 
+
+1.1 Are you an active participant in your research community?
+
+Not as yet.
+
+1.2 What have been the main accomplishments of your project over the past
+year?
+
+Reviewing the literature
+Learning how to write non-trivial R programs, and learning about numerical programming
+Univariate approximation of zero inflated model
+Considerable progress towards approximation of zero inflated model
+Begin working on draft of first paper
+First presentation
+
+1.3 What key milestones do you plan to meet during the next year?
+
+Finish and submit first paper
+Draft first chapter
+
+1.4 By what date do you plan to submit your thesis?
+
+June 2016 - December 2016
+
+1.5 The research process generally has its challenges, and we would like to
+hear about yours. What are the biggest challenges you have faced during the
+past year in terms of progressing your research?
+
+Having been away from Uni so long, I've had to work hard to get my algebraic
+manipulation and theoretical statistical skills back up to scratch. I'm still
+working on this. I've been particularly working on my linear algebra skills.
+
+Substantial time has been spent learning to implement numerical algorithms
+in R, and get them to produce the correct results.
+
+Balancing full time research and part-time work has been very difficult, and
+this has slowed my progress somewhat. I will be concentrating solely on my
+research in this next year.
+
+1.6 Describe your working relationship with your supervisory team
+
+Dr John Ormerod and I meet for supervisory meetings at least once a week.
+During especially busy periods, we meet twice a week. We also email each other
+if something urgent comes up. I find this arrangement satisfactory.
+
+1.7 Are there any issues you would like to discuss with the panel during
+your interview? This is an opportunity for you to let us know of any concerns
+you may have about your project, research community, progres and supervisory
+team.
+
+Not at this time.
