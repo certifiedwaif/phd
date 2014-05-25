@@ -56,26 +56,26 @@ Take, for example, $\rho = \frac{1}{2}$, $\lambda = 5$.
 \begin{frame}
 \frametitle{Comparison of techniques}
 Maximum likelihood
-Pro
 Frequentist
-Standard optimisation techniques can be used
-Con
-Biased for mixed models
+\begin{array}{ll}
+Pro & Con \\
+Standard optimisation techniques can be used & Biased for mixed models 
+\end{array}
 
 MCMC
-Pro
-Very accurate
-Con
-Slow
-May not converge at all
+\begin{array}
+Pro & Con \\
+Very accurate & Slow \\
+& May not converge at all
+\end{array}
 
-VB
-Pro
-Fast
-Still quite accurate
-Con
-May lose accuracy, variance
-Solution may be intractable
+Variational Bayes
+\begin{array}{ll}
+Pro & Con \\
+Fast & May lose accuracy, variance \\
+Still quite accurate & Solution may be intractable
+\end{array}
+
 \end{frame}
 
 % 6. Overview of Variational Bayes
@@ -116,9 +116,14 @@ This could be thought of as a generalisation of Expectation Maximisation.
 % 7b. Define accuracy
 \begin{frame}
 \frametitle{Mean field updates}
+% Are they going to be happy with that?
 Most of the mean field updates are straightforward, as the priors are conjugate.
 $$
-r_i \sim \text{Bernoulli}(\text{expit}(\eta_i))
+q(\lambda) = \text{Gamma}(\alpha_\lambda + \vone^T \vx, \beta_\lambda + \vone^T\vp)
+q(\rho) = \text{Beta}(\alpha_\rho + \vone^T\vr, \beta_\rho + \vone^T(\vone - \vr))
+$$
+$$
+q(r_i) = \text{Bernoulli}(\text{expit}(\eta_i))
 $$
 where
 $$
@@ -128,7 +133,11 @@ $$
 
 \begin{frame}
 \frametitle{Results/Accuracy}
-Excellent accuracy, over 99\% in all of the cases that I looked at.
+% Definition of accuracy
+Accuracy is defined as the difference in $L_1$ norm between the true posterior distribution and
+the approximate posterior distribution of the variational approximation.
+
+Excellent accuracy for the univariate approximation, over 99\% in all of the cases that I looked at.
 % Graph of lower bound
 %\includegraphics{univariate_lower_bound_convergence.pdf}
 \end{frame}
@@ -147,7 +156,8 @@ $$
 q(\theta) = q(\beta) q(\rho) \prod_{i=1}^n q(r_i)
 $$
 where
-$q(\beta) \sim N(\mu, \Sigma)$
+$q(\beta) \sim N(\mu, \Sigma)$ and
+$q(\sigma_u^2) \sim IG(\alpha_{\sigma_u^2}, \beta_{\sigma_u^2})$
 
 \begin{itemize}
 \item Mixed models -- one model to rule them all
@@ -159,8 +169,9 @@ do model selection?
 
 \begin{frame}
 \begin{itemize}
-\item Lack of conjugacy means mean field updates won't be analytically tractable. Try
-\item Gaussian Variational Approximations instead
+\item Lack of conjugacy means mean field updates won't be analytically tractable.
+\item We try Gaussian Variational Approximations instead, assume that $\beta, \vu \sim N(\vmu, \Sigma)$
+and approximate as closely as we can
 \item Computation - a work in progress
 \item Initial signs are that this approach will work
 \end{itemize}
