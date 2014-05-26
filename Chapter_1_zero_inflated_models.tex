@@ -3,6 +3,7 @@
 \title{Variational approximations to zero-inflated Bayesian models}
 \author{Mark Greenaway}
 \input{include.tex}
+\input{Definitions.tex}
 \begin{document}
 \maketitle
 % First, simplest zero-inflated count model to consider.
@@ -61,12 +62,12 @@ First, we calculate the full conditional for $\lambda$.
 The functional form of the full conditional is proportional to
 
 $$
-b^{a+\sum_{i=1}^n x_i} \lambda^{(a + \sum_{i=1}^n x_i) - 1} \exp{\left(-(b + \sum_{i=1}^n r_i) \lambda \right)}
+\beta_{\lambda}^{\alpha_\lambda+\vone^T\vx} \lambda^{(\alpha_\lambda + \vone^T\vx) - 1} \exp{\left(-(\beta_\lambda + \vone^T\vr) \lambda \right)}
 $$
 
 \noindent which is clearly seen to be a Gamma distribution. Thus
 $$
-\lambda | \vx, \vr, \rho \sim \myGamma{a + \sum_{i=1}^n x_i, b + \sum_{i=1}^n r_i}.
+\lambda | \vx, \vr, \rho \sim \myGamma{\alpha_\lambda + \vone^T\vx, \beta_\lambda + \vone^T\vr}.
 $$
 
 \subsection{Full conditional for $\rho$}
@@ -75,10 +76,10 @@ The terms of the log-likelihood involving $\rho$ are
 %$a = \sum_{i=1}^n r_i + 1$ and $b = (n - \sum_{i=1}^n r_i) + 1$. All of the terms in the %numerator and 
 %denominator of the full conditional cancel except for
 $$
-\frac{\rho^{\sum_{i=1}^n r_i} (1 - \rho)^{n - \sum_{i=1}^n r_i}}{\Beta{\sum_{i=1}^n r_i + 1, n - \sum_{i=1}^n r_i + 1}}
+\frac{\rho^{\vone^T\vr} (1 - \rho)^{\vone^T(\vone - \vr)}}{\Beta{\alpha_\rho + \vone^T \vr, \beta_\rho + \vone^T(\vone - \vr)}}
 $$
 
-and thus we see that $\rho | \vx, \vr, \lambda \sim \Beta{\sum_{i=1}^n r_i + 1, (n - \sum_{i=1}^n r_i) + 1}$.
+and thus we see that $\rho | \vx, \vr, \lambda \sim \Beta{\alpha_\rho + \vone^T \vr, \beta_\rho + \vone^T(\vone - \vr)}$.
 
 \subsection{Full conditional for $r_i$}
 \begin{align*}
@@ -114,33 +115,35 @@ $q(p_i)$ are Bernoulli distributions.
 We are now in a position to calculate the mean field update equations for the factorised
 variational approximation.
 
-Assuming that $q^*(r_i) \sim \Bernoulli{p_i}$,
+Assuming that $q(r_i) \sim \Bernoulli{p_i}$,
 
+% Mean field update for q(\lambda)
 \begin{align*}
-q^*(\lambda) &\propto \lambda^{a+\sum_{i=1}^n x_i - 1} \exp{\left[ E_{-q(\lambda)} \{-(b + \sum_{i=1}^n r_i) \lambda \} \right]} \\
-&\propto \lambda^{a+\sum_{i=1}^n x_i - 1} \exp{\{-(b + \sum_{i=1}^n p_i)\lambda \} } \\
-&= \myGamma{a+\sum_{i=1}^n x_i, b + \sum_{i=1}^n p_i}
+q^*(\lambda) &\propto \lambda^{\alpha_\lambda+\vone^T\vx - 1} \exp{\left[ E_{-q(\lambda)} \{-(\beta_\lambda + \vone^T\vr) \lambda \} \right]} \\
+&\propto \lambda^{\alpha_\lambda+\vone^T\vx - 1} \exp{\{-(\beta_\lambda + \vone^T\vp)\lambda \} } \\
+&= \myGamma{\alpha_\lambda+\vone^T\vx, \beta_\lambda+\vone^T\vp}
 \end{align*}
 
 and
 
+% Mean field update for q(\rho)
 \begin{align*}
-q^*(\rho) &\propto \exp{\{ E_{-q(\rho)} \left[ \sum_{i=1}^n r_i \log{(\rho)} + \sum_{i=1}^n (1- r_i) \log{(1 - \rho)} \right] } \\
-&\propto \exp{ \left( \sum_{i=1}^n p_i \log{\rho} + \sum_{i=1}^n (1 - p_i) \log{(1 - \rho)} \right) } \\
-&= \Beta{1+ \sum_{i=1} p_i, n - \sum_{i=1}^n p_i + 1}
+q^*(\rho) &\propto \exp{\{ E_{-q(\rho)} \left[ \vone^T\vr \log{(\rho)} + \vone^T(\vone - \vr) \log{(1 - \rho)} \right] } \\
+&\propto \exp{ \left( \vone^T\vp \log{(\rho)} + \vone^T(\vone - \vp) \log{(1 - \rho)} \right) } \\
+&= \Beta{\alpha_\rho + \vone^T\vp, \beta_\rho + \vone^T(\vone - \vp)}
 \end{align*}
 
 Turning our attention now to $r_i$, we first note that the relevant terms of the
 log-likelihood are
 
 $$
--\lambda r_i + x_i \log{r_i} + r_i \log{\left(\frac{\rho}{1 - \rho}\right)}
+-\lambda r_i + x_i \log{(r_i)} + r_i \log{\left(\frac{\rho}{1 - \rho}\right)}
 $$
 
 Taking expectations with respect to $\lambda$ and $\rho$ we have
 
 $$
--r_i \frac{\alpha_\lambda^*}{\beta_\lambda^*} + x_i \log{(r_i)} + r_i (\Psi(\alpha_\rho^*) - \Psi(\beta_\rho^*))
+-r_i \frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} + x_i \log{(r_i)} + r_i (\Psi(\alpha_{q(\rho)}) - \Psi(\beta_{q(\rho)}))
 $$
 
 Note that if $x_i = 0$ then
@@ -151,7 +154,7 @@ $$
 q_{r_i}^*(r_i) \propto r_i^{x_i} \exp{(r_i \eta_i)}
 $$
 
-where $\eta_i = - \frac{\alpha_\lambda^*}{\beta_\lambda^*} + \Psi(\alpha_\rho^*) - \Psi(\beta_\rho^*)$.
+where $\eta_i = - \frac{\alpha_\lambda_{q(\lambda)}}{\beta_{q(\lambda)} + \Psi(\alpha_{q(\rho)}) - \Psi(\alpha_{q(\rho)})$.
 
 Now, either $x_i = 0$ or $x_i \ne 0$.
 
@@ -175,28 +178,28 @@ calculated for each iteration as specified above.
 In this case, the lower bound can be calculated directly to be
 
 \begin{align*}
-\bbE_q \left\{ \log{p(\vx, \vr, \lambda, \rho)} - \log{q(\vr, \lambda, \rho)} \right\} &= 
-a \log{(b)} + (a - 1) \bbE[\log{(\lambda)}] - b \bbE [\lambda] - \log{(\Gamma(a))} \\
-&+ \sum_{i=1}^n  ( -\bbE [\lambda] \bbE [r_i] + \bbE[x_i \log{(\lambda r_i)}] - \log{(x_i!)} \\
-&+ \bbE[r_i] \bbE[\log{(\rho)}] + \bbE[(1 - r_i)] \bbE[\log{(1 - \rho)}] ) \\
-& - \bbE \log{q(r)} - \bbE \log{q(\lambda)} - \bbE \log{q(\rho)}
+\bE_q \left\{ \log{p(\vx, \vr, \lambda, \rho)} - \log{q(\vr, \lambda, \rho)} \right\} &= 
+a \log{(b)} + (a - 1) \bE[\log{(\lambda)}] - b \bE [\lambda] - \log{(\Gamma(a))} \\
+&+ \sum_{i=1}^n  ( -\bE [\lambda] \bE [r_i] + \bE[x_i \log{(\lambda r_i)}] - \log{(x_i!)} \\
+&+ \bE[r_i] \bE[\log{(\rho)}] + \bE[(1 - r_i)] \bE[\log{(1 - \rho)}] ) \\
+& - \bE \log{q(r)} - \bE \log{q(\lambda)} - \bE \log{q(\rho)}
 \end{align*}
 
 where
 $$
-\bbE [\log{\lambda}] = -\{ a_\lambda^* - \log{(b_\lambda^*)} + \log{\Gamma(a_\lambda^*)} + (1 - a_\lambda^*) \psi{(a_\lambda^*)} \} \\
+\bE [\log{\lambda}] = -\{ a_{q(\lambda)} - \log{(b_{q(\lambda)})} + \log{\Gamma(a_{q(\lambda)})} + (1 - a_{q(\lambda)}) \psi{(a_{q(\lambda)})} \} \\
 $$
 $$
-\bbE [\lambda] = \frac{a_\lambda^*}{b_\lambda^*} \\
+\bE [\lambda] = \frac{a_{q(\lambda)}}{b_{q(\lambda)}} \\
 $$
 $$
-\bbE[\log{\rho}] = - \{ \log{B(a_\rho^*, b_\rho^*)} - (a_\rho^* - 1) \psi{(a_\rho^*)} - (b_\rho^* - 1)\psi{(b_\rho^*)} + (a_\rho^* + b_\rho^* - 2)\psi{(a_\rho^* + b_\rho^*)} \} \\
+\bE[\log{\rho}] = - \{ \log{B(a_{q(\rho)}, b_{q(\rho)})} - (a_{q(\rho)} - 1) \psi{(a_{q(\rho)})} - (b_{q(\rho)} - 1)\psi{(b_{q(\rho)})} + (a_{q(\rho)} + b_{q(\rho)} - 2)\psi{(a_{q(\rho)} + b_{q(\rho)})} \} \\
 $$
 
 By symmetry, we see that $(1 - \rho)$ has the same entropy as $\rho$,
-and so $\bbE [\log{(\rho)}] = \bbE [\log{(1 - \rho)}]$.
+and so $\bE [\log{(\rho)}] = \bE [\log{(1 - \rho)}]$.
 $$
-\bbE[r_i] = 
+\bE[r_i] = 
 	\begin{cases}
 	1 & \text{if } x_i \ne 0 \\
 	p_i & \text{if } x_i = 0 \\
@@ -204,15 +207,15 @@ $$
 $$
 
 $$
--\bbE_q \log{q(r)} = \sum_{i=1}^n I(x_i = 0) \log{(p_i)}
+-\bE_q \log{q(r)} = \sum_{i=1}^n I(x_i = 0) \log{(p_i)}
 $$
 
 $$
--\bbE_q \log{q(\lambda)} = q_q^* - \log{(b_q^*)} + \log{\Gamma{(a_q^*)}} + (1 - a_q^*) \Psi{(a_q^*)}
+-\bE_q \log{q(\lambda)} = q_q^* - \log{(b_q^*)} + \log{\Gamma{(a_q^*)}} + (1 - a_q^*) \Psi{(a_q^*)}
 $$
 
 $$
-\bbE[\log{q(\rho)}] = - \{ \log{(B(a_q^*, b_q^*)} - (\alpha_q^* - 1) \psi{(a_q^*)} - (\beta_q^* - 1)\Psi{(\beta_q^*)} + (\alpha_q^* + \beta_q^* - 2)\Psi{(\alpha_q^* + \beta_q^*)} \}
+\bE[\log{q(\rho)}] = - \{ \log{(\text{Beta}(a_q^*, b_q^*)} - (\alpha_q^* - 1) \Psi{(a_q^*)} - (\beta_q^* - 1)\Psi{(\beta_q^*)} + (\alpha_q^* + \beta_q^* - 2)\Psi{(\alpha_q^* + \beta_q^*)} \}
 $$
 
 \subsection{Results}
@@ -261,7 +264,7 @@ $$
 \begin{array}{rl}
 q(\vnu) &= N(\vmu, \mLambda) \\
 q(\sigma_{\vu}^2) &= IG\left(A + \frac{m}{2}, B + \frac{\|\mu_u\|^2}{2} + \frac{tr(\Lambda_{uu})}{2}\right) \\
-q(r_i) &\propto \exp{\{\bbE_{-r_i} [-r_i \exp{(c_i^T\vnu)}]\} + r_i [\digamma(\alpha_\rho) - \digamma(\beta_\rho)]} \\
+q(r_i) &\propto \exp{\{\bE_{-r_i} [-r_i \exp{(c_i^T\vnu)}]\} + r_i [\digamma(\alpha_\rho) - \digamma(\beta_\rho)]} \\
 \end{array}
 $$
 %\end{align*}
@@ -273,11 +276,11 @@ $$
 
 The optimal approximation for $\vr$ is
 \begin{align*}
-q(r) &\propto \exp{\{\bbE_{-q(\vr)}y^TR(C\vnu) - r^T\exp{(C\vnu)}-\half \vnu^T D(\sigma_{\vu}^2)^{-1} \vnu\}}
+q(r) &\propto \exp{\{\bE_{-q(\vr)}y^TR(C\vnu) - r^T\exp{(C\vnu)}-\half \vnu^T D(\sigma_{\vu}^2)^{-1} \vnu\}}
 \end{align*}
 
 \begin{align*}
-&\bbE_{-q(\vr)} [y^TR(C\vnu) - r^T\exp{(C\vnu)}-\half \vnu^T D(\sigma_{\vu}^2)^{-1} \vnu]\\
+&\bE_{-q(\vr)} [y^TR(C\vnu) - r^T\exp{(C\vnu)}-\half \vnu^T D(\sigma_{\vu}^2)^{-1} \vnu]\\
 =&y^TRC \vnu - p^T \exp{\{C \mu + \text{dg}(C \mLambda C^T)\}} - \half \mu^T \hat{D} \mu - \half \text{tr}(\mLambda \hat{D})
 \end{align*}
 
