@@ -1,11 +1,18 @@
 \documentclass{beamer}
 
+\usepackage{graphicx}
+\input{include.tex}
+
+\title{Zero-inflated models}
+\author{Mark Greenaway}
+
+\mode<presentation>
+{ \usetheme{boxes} }
 
 \begin{document}
 % 1. Front slide
 \begin{frame}
-\frametitle{Zero-inflated models}
-Mark Greenaway
+\titlepage
 % Details about myself here?
 \end{frame}
 
@@ -18,25 +25,27 @@ year.
 
 We will work with zero-inflated count data.
 \end{frame}
-
 % 3. Univariate model
 \begin{frame}
 \frametitle{Univariate model formulation}
 We start by building a relatively simple zero-inflated count model.
-\begin{align*}
+
+\begin{align*}{ll}
 X_i &= R_i Y_i \\
 R_i &\sim \text{Bernoulli}(\rho) \\
 Y_i &\sim \text{Poisson}(\lambda) \\
 \rho &\sim \text{Beta}(a_\rho, b_\rho) \\
-\lambda &\sim \text{Gamma}(a_\lambda, b_\lambda) \\
+\lambda &\sim \text{Gamma}(a_\lambda, b_\lambda)
 \end{align*}
+
 \end{frame}
 
 % 4. \rho = 9/10, \lambda = 5
 % Example data 0 0 0 5 10
-\begin{frame}
+\begin{frame}[fragile]
 \frametitle{Example data}
-Take, for example, $\rho = \frac{1}{2}$, $\lambda = 5$.
+Take, for example, $\rho = \frac{1}{2}, \lambda = 5$.
+
 \begin{verbatim}
 0 7 3 4 5 3 2 6 5 0 0 1
 0 0 5 0 2 3 6 4 0 5 4 0
@@ -44,8 +53,9 @@ Take, for example, $\rho = \frac{1}{2}$, $\lambda = 5$.
 0 4 0 0 0 2 3 0 3 4 5 0
 8 0
 \end{verbatim}
+
 % Histogram
-\includegraphics{code/univariate_data_histogram.pdf}
+\includegraphics[width=100mm, height=100mm]{code/univariate_data_histogram.pdf}
 % Density
 \end{frame}
 
@@ -53,28 +63,29 @@ Take, for example, $\rho = \frac{1}{2}$, $\lambda = 5$.
 % - Maximum likelihood
 % - MCMC
 % - VB
+\
 \begin{frame}
-\frametitle{Comparison of techniques}
+\frametitle{Comparison of fitting techniques}
 Maximum likelihood
 Frequentist
-\begin{array}{ll}
+\begin{tabular}{ll}
 Pro & Con \\
-Standard optimisation techniques can be used & Biased for mixed models 
-\end{array}
+Standard optimisation techniques can be used & Biased for mixed models
+\end{tabular}
 
 MCMC
-\begin{array}
+\begin{tabular}{ll}
 Pro & Con \\
 Very accurate & Slow \\
 & May not converge at all
-\end{array}
+\end{tabular}
 
 Variational Bayes
-\begin{array}{ll}
+\begin{tabular}{ll}
 Pro & Con \\
 Fast & May lose accuracy, variance \\
 Still quite accurate & Solution may be intractable
-\end{array}
+\end{tabular}
 
 \end{frame}
 
@@ -82,9 +93,9 @@ Still quite accurate & Solution may be intractable
 \begin{frame}
 \frametitle{An overview of Variational Bayes}
 \begin{itemize}
-\item Approximate the full posterior p(\theta) with an approximation q(\theta)
-\item Minimise the KL divergence between p(\theta) and q(\theta)
-\item Theory guarantees that p(\theta) < q(\theta) and that q(\theta) will
+\item Approximate the full posterior $p(\theta)$ with an approximation $q(\theta)$
+\item Minimise the KL divergence between $p(\theta)$ and $q(\theta)$
+\item Theory guarantees that $p(\theta) < q(\theta)$ and that $q(\theta)$ will
 increase with each VB step
 \end{itemize}
 \end{frame}
@@ -98,9 +109,9 @@ q(\theta) = q(\lambda) q(\rho) \prod_{i=1}^n q(r_i)
 $$
 where
 $$
-q(\lambda) = \text{Gamma}(a_\lambda_*, b_\lambda_*)
-q(\rho) = \text{Beta}(a_\rho_*, b_\rho_*)
-q(r_i) = Bernoulli(\rho)
+q(\lambda) = \text{Gamma}(a_{q(\lambda)}, b_{q(\lambda)})
+q(\rho) = \text{Beta}(a_{q(\rho)}, b_{q(\rho)})
+q(r_i) = \text{Bernoulli}(p_i)
 $$
 
 % - Algorithm
@@ -109,6 +120,7 @@ in turn until the lower bound of the approximation converges.
 
 This could be thought of as a generalisation of Expectation Maximisation.
 \end{frame}
+
 
 % 8. Results
 % - Lower bound convergence
