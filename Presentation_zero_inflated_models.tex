@@ -99,15 +99,18 @@ $$
 where
 $$
 q(\lambda) = \text{Gamma}(a_\lambda_*, b_\lambda_*)
-q(\rho) = \text{Beta}(a_\rho_*, b_\rho_*)
-q(r_i) = Bernoulli(\rho)
+q(\rho) = \text{Beta}(a_{q(\rho)}, b_{q(\rho))
+q(r_i) = Bernoulli(p_i)
 $$
 
 % - Algorithm
 We iteratively update the parameters of each approximate distribution
 in turn until the lower bound of the approximation converges.
 
-This could be thought of as a generalisation of Expectation Maximisation.
+This could be thought of as a generalisation of Expectation Maximisation,
+where each parameter is thought of as the unobserved parameter and maximised
+relative to the other parameters in turn..
+% FIXME - Check this.
 \end{frame}
 
 % 8. Results
@@ -135,7 +138,9 @@ $$
 \frametitle{Results/Accuracy}
 % Definition of accuracy
 Accuracy is defined as the difference in $L_1$ norm between the true posterior distribution and
-the approximate posterior distribution of the variational approximation.
+the approximate posterior distribution of the variational approximation. This was calculated
+using the kernel density estimate of the posterior distribution from MCMC minus the approximate
+distribution for each parameter of interest.
 
 Excellent accuracy for the univariate approximation, over 99\% in all of the cases that I looked at.
 % Graph of lower bound
@@ -173,7 +178,15 @@ do model selection?
 \item We try Gaussian Variational Approximations instead, assume that $\beta, \vu \sim N(\vmu, \Sigma)$
 and approximate as closely as we can
 \item Computation - a work in progress
-\item Initial signs are that this approach will work
+\item Initial signs are that this approach will work. Parameters are correctly estimated for simulated data.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Further work}
+\begin{itemize}
+\item Continue working on the multivariate approximation
+\item Check accuracy against random walk Metropolis-Hastings
 \end{itemize}
 \end{frame}
 
