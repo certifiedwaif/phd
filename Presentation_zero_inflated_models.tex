@@ -4,7 +4,7 @@
 \usepackage{graphicx}
 \input{include.tex}
 
-\title{Zero-inflated models}
+\title{Variational approximations to zero-inflated count models}
 \author{Mark Greenaway}
 
 \mode<presentation>
@@ -89,11 +89,20 @@ Variational Bayes & Bayesian & May lose accuracy, or underestimate variance \\
 \begin{frame}
 \frametitle{An overview of Variational Bayes}
 \begin{itemize}
-\item Approximate the full posterior $p(\theta)$ with an approximation $q(\theta)$
-\item Minimise the KL divergence between $p(\theta)$ and $q(\theta)$
+\item \emph{Idea:} Approximate the full posterior $p(\vx, \theta)$ with a simpler approximation $q(\theta)$
+\item Fit $q(\theta)$ to the data by minimising the KL divergence between $p(\vx, \theta)$ and $q(\theta)$
 \item Theory guarantees that $q(\theta) < p(\vx, \theta)$ and that $q(\theta)$ will
-increase with each VB step
+increase with each iteration
+\item If you use conjugate priors, a factored approximation can be used, and mean field updates can be used on
+each parameter in turn until convergence is reached
 \end{itemize}
+% - Algorithm
+We iteratively update the parameters of each approximate distribution
+in turn until the lower bound of the approximation converges.
+
+% Check this.
+This could be thought of as a generalisation of Expectation Maximisation, where each parameter is thought of as a latent
+variable and estimated according to the expectations of the other parameters.
 \end{frame}
 
 % 7a. Variational Bayes solution to ZIP
@@ -110,11 +119,6 @@ q(\rho) &= \text{Beta}(a_{q(\rho)}, b_{q(\rho)}) \\
 q(r_i) &= \text{Bernoulli}(p_i)
 \end{align*}
 
-% - Algorithm
-We iteratively update the parameters of each approximate distribution
-in turn until the lower bound of the approximation converges.
-
-This could be thought of as a generalisation of Expectation Maximisation.
 \end{frame}
 
 
@@ -157,22 +161,41 @@ Excellent accuracy for the univariate approximation, over 99\% in all of the cas
 % 15. References
 \begin{frame}
 \frametitle{Extension to multivariate/regression models}
-Extension from univariate, model formulation
-$$
-q(\theta) = q(\beta) q(\rho) \prod_{i=1}^n q(r_i)
-$$
-where
-$q(\beta) \sim N(\mu, \Sigma)$ and
-$q(\sigma_u^2) \sim IG(\alpha_{\sigma_u^2}, \beta_{\sigma_u^2})$
-
 \begin{itemize}
-\item Mixed models -- Applied statisticians love these.
+\item Univariate models are a nice proof of concept.
+\item Most applied statisticians want to build regression models
+\item Applied statisticians love mixed models.
 \item There is a need for better approaches to fitting zero-inflated mixed models.
 \item For example, MCMC with existing software can take minutes to
 converge, or not converge at all.
 \item That might not sound so bad to you, but how do you
-do model selection? Applied statisticians and biostatisticians rarely know the true model
+do model selection? Applied statisticians and biostatisticians rarely know the true model.
 \end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Model formulation}
+We use a zero-inflated Poisson regression model
+\begin{align*}{ll}
+p(y_i|\vbeta, \vu, \vr, \mX, \mZ) &= \exp{(y_i^T\mR(\mX_i \vbeta + \mZ_i \vu) - \vr^Te^{\mX_i \vbeta + \mZ_i \vu} - \log{(y_i !)})} \\
+\vbeta &\sim N(\vmu_\vbeta, \Sigma_\vbeta) \\
+\vu|\sigma_u^2 &\sim N(\vzero, \sigma_u^2 I) \\
+\sigma_u^2 &\sim IG(\alpha_{\sigma_u^2}, \beta_{\sigma_u^2}) \\
+\end{align*}
+\end{frame}
+\end{document}
+
+\begin{frame}
+\frametitle{Form of the multivariate approximation}
+Form of approximation
+$$
+q(\theta) = q(\beta, \vu) q(\sigma_u^2) q(\rho) \prod_{i=1}^n q(r_i)
+$$
+where
+\begin{align*}{ll}
+q(\beta) &\sim N(\mu, \Sigma) \\
+q(\sigma_u^2) &\sim IG(\alpha_{\sigma_u^2}, \beta_{\sigma_u^2}) \\
+\end{align*}
 \end{frame}
 
 \begin{frame}
