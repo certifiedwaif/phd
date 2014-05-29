@@ -17,7 +17,6 @@
 % Details about myself here?
 \end{frame}
 
-
 % 2. Intro
 \begin{frame}
 \frametitle{Introduction}
@@ -36,8 +35,6 @@ analysing the data arising from the Get Healthy project.
 % Example data 0 0 0 5 10
 \begin{frame}[fragile]
 \frametitle{Example data}
-%Take, for example, $\rho = \frac{1}{2}, \lambda = 5$.
-
 \begin{verbatim}
 0 7 3 4 5 3 2 6 5 0 0 1
 0 0 5 0 2 3 6 4 0 5 4 0
@@ -45,8 +42,9 @@ analysing the data arising from the Get Healthy project.
 0 4 0 0 0 2 3 0 3 4 5 0
 8 0
 \end{verbatim}
+%Take, for example, $\rho = \frac{1}{2}, \lambda = 5$.
 
-\noindent Note that $n=50$ 
+\noindent Note that $n=50$, 
 $n\times P(Z = 0) \approx 3.8$ for $Z\sim\mbox{Poisson}(\overline{X})$
 and we have observed 21 zeros. Hence,
 a Poisson model is not suitable.
@@ -81,12 +79,7 @@ Being Bayesians we use the priors:
 \lambda &\sim \text{Gamma}(a_\lambda, b_\lambda).
 \end{align*}
 
-
 \end{frame}
-
-
-
-
 
 % 5. How to fit, and advantages and disadvantages of each approach
 % - Maximum likelihood
@@ -95,14 +88,14 @@ Being Bayesians we use the priors:
 
 \begin{frame}
 \frametitle{Comparison of fitting techniques}
-\begin{tabular}{p{2cm}p{3.75cm}p{3.75cm}}
+\begin{tabular}{p{2cm}p{3.5cm}p{4.5cm}}
 Technique & Pro & Con \\
 \hline
-MLE & Standard optimisation techniques can be used & Biased for mixed models \\
+MLE & EM could be used to fit these models, with $R_i$ as latent data & Not flexible to complications. \\
 & & \\ %Frequentist \\
 \hline
 MCMC & Bayesian & Slow \\
-	& Very accurate &  May not converge at all \\
+	& Very accurate &  \\
 \hline
 Variational Bayes & Bayesian & May lose accuracy, or underestimate variance \\
 & Fast  & Solution may be intractable \\ 
@@ -111,9 +104,6 @@ Variational Bayes & Bayesian & May lose accuracy, or underestimate variance \\
 \end{tabular}
 
 \end{frame}
-
-
-
 
 % 6. Overview of Variational Bayes
 \begin{frame}
@@ -124,7 +114,7 @@ Variational Bayes & Bayesian & May lose accuracy, or underestimate variance \\
 \item Fit $q(\theta)$ to the data by minimising the KL divergence between $p(\theta|\vx)$ and $q(\theta)$.
 
 \item Theory guarantees that $\log p(x)\ge 
-\log \underline{p}(x;q)$ and that $q(\theta)$ will
+\log \underline{p}(x;q)$ and that $\log \underline{p}(x;q)$ will
 increase with each iteration.
 
 \item If you use conjugate priors, a factored approximation can be used, and mean field updates can be used on
@@ -161,7 +151,7 @@ q(r_i) &= \text{Bernoulli}(p_i)
 \begin{align*}
 q(\lambda) = \text{Gamma}(a_{\lambda_*}, b_{\lambda_*}) \\
 q(\rho) = \text{Beta}(a_{q(\rho)}, b_{q(\rho)}) \\
-q(r_i) = Bernoulli(p_i)
+q(r_i) = \text{Bernoulli}(p_i)
 \end{align*}
 
 % - Algorithm
@@ -181,17 +171,17 @@ relative to the other parameters in turn..
 % 7b. Define accuracy
 \begin{frame}
 \frametitle{Mean field updates}
-% Are they going to be happy with that?
 As we are using conjugate priors in our model, the mean field updates can be derived.
 \begin{align*}
-q(\lambda) &= \text{Gamma}(\alpha_\lambda + \vone^T \vx, \beta_\lambda + \vone^T\vp) \\
-q(\rho) &= \text{Beta}(\alpha_\rho + \vone^T\vr, \beta_\rho + \vone^T(\vone - \vr)) \\
-q(r_i) &= \text{Bernoulli}(\text{expit}(\eta_i))
+q(\lambda) &= \text{Gamma}(\alpha_{q(\lambda)} = \alpha_\lambda + \vone^T \vx, \beta_{q(\lambda)} = \beta_\lambda + \vone^T\vp) \\
+q(\rho) &= \text{Beta}(\alpha_{q(\rho)} = \alpha_\rho + \vone^T\vr, \beta_{q(\rho)} = \beta_\rho + \vone^T(\vone - \vr)) \\
+q(r_i) &= \text{Bernoulli}(p_i = \text{expit}(\eta_i))
 \end{align*}
 where
 $$
 \eta_i = - \frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} + \Psi(\alpha_{q(\rho)}) - \Psi(\beta_{q(\rho)})
 $$
+
 \end{frame}
 
 \begin{frame}
@@ -229,8 +219,38 @@ do model selection? Applied statisticians and biostatisticians rarely know the t
 \end{frame}
 
 \begin{frame}
+\frametitle{Linear mixed model set-up}
+Consider a linear random intercept model with
+$$
+\begin{array}{ll}
+\vy|\vu &\sim N(\mX \vbeta + \mZ \vu, \sigma_\vbeta^2 I) \\
+\vbeta &\sim N(\vmu_\vbeta, \sigma_\vbeta) \\
+\vu &\sim N(\vzero, \sigma_u^2 I)
+\end{array}
+$$
+\noindent where
+$$
+\begin{array}{ll}
+\vy & =
+\begin{pmatrix}
+y_1 \\
+\vdots \\
+y_n
+\end{pmatrix} \\
+\mX &= [\vone_n \vx_1 \hdots \vx_p] \\
+\mZ &=
+\begin{bmatrix}
+\vone_{n_1} &  & \\
+& \ddots & \\
+& & \vone_{n_m}
+\end{bmatrix}
+\end{array}
+$$
+\end{frame}
+
+\begin{frame}
 \frametitle{Model formulation}
-We use a zero-inflated Poisson regression model
+We use a zero-inflated Poisson random effects model
 \begin{align*}
 p(\vy|\vbeta, \vu, \vr, \mX, \mZ) &= \exp{(\vy^T\mR(\mX \vbeta + \mZ \vu) - \vr^Te^{\mX \vbeta + \mZ \vu} - \vone^T\log{(\vy !)})} \\
 \vbeta &\sim N(\vmu_\vbeta, \Sigma_\vbeta) \\
@@ -247,7 +267,7 @@ $$
 q(\theta) = q(\beta, \vu) q(\sigma_u^2) q(\rho) \prod_{i=1}^n q(r_i)
 $$
 where
-\begin{align*}{ll}
+\begin{align*}
 q(\beta) &\sim N(\mu, \Sigma) \\
 q(\sigma_u^2) &\sim IG(\alpha_{\sigma_u^2}, \beta_{\sigma_u^2}) \\
 \end{align*}
