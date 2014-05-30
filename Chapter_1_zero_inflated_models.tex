@@ -82,18 +82,22 @@ $$
 and thus we see that $\rho | \vx, \vr, \lambda \sim \Beta{\alpha_\rho + \vone^T \vr, \beta_\rho + \vone^T(\vone - \vr)}$.
 
 \subsection{Full conditional for $r_i$}
-\begin{align*}
-p(r_i | \text{rest}) \propto \frac{(\lambda r_i)^{x_i} \exp{(-\lambda r_i)}}{x_i !} \rho^{r_i} (1 - \rho)^{1 - r_i} \\
-\propto r_i^{x_i} (e^{-\lambda})^{r_i} \rho^{r_i} (1 - \rho)^{1 - r_i}
-\end{align*}.
+$$
+\begin{array}{ll}
+p(r_i | \text{rest}) &\propto \frac{(\lambda r_i)^{x_i} \exp{(-\lambda r_i)}}{x_i !} \rho^{r_i} (1 - \rho)^{1 - r_i} \\
+&\propto r_i^{x_i} (e^{-\lambda})^{r_i} \rho^{r_i} (1 - \rho)^{1 - r_i}
+\end{array}
+$$
 
 We make use of the fact that if $x_i = 0$, $r_i = 0$, and if $x_i \ne 0$,
 $r_i = 1$. So $x_i^{r_i} = I(x \ne 0)$ and hence the likelihood can be re-written as
 
-\begin{align*}
+$$
+\begin{array}{ll}
 p(r_i | \text{rest}) &= \frac{(e^{-\lambda + \logit{\rho}})^{r_i}}{I(x_i = 0) + (e^{-\lambda + \logit{\rho}})^{r_i}} \\
 &= \Bernoulli{\text{expit}(\eta_i)}
-\end{align*}.
+\end{array}
+$$
 
 % Step Two: Assume q(r_i) = Bernoulli(\rho_i), 1 \leq i \leq n for some known \rho_i. Find the
 % variational Bayes updates of the q-densities q(\lambda) and q(\rho) corresponding to the
@@ -118,20 +122,24 @@ variational approximation.
 Assuming that $q(r_i) \sim \Bernoulli{p_i}$,
 
 % Mean field update for q(\lambda)
-\begin{align*}
+$$
+\begin{array}{ll}
 q^*(\lambda) &\propto \lambda^{\alpha_\lambda+\vone^T\vx - 1} \exp{\left[ E_{-q(\lambda)} \{-(\beta_\lambda + \vone^T\vr) \lambda \} \right]} \\
 &\propto \lambda^{\alpha_\lambda+\vone^T\vx - 1} \exp{\{-(\beta_\lambda + \vone^T\vp)\lambda \} } \\
 &= \myGamma{\alpha_\lambda+\vone^T\vx, \beta_\lambda+\vone^T\vp}
-\end{align*}
+\end{array}
+$$
 
 and
 
 % Mean field update for q(\rho)
-\begin{align*}
+$$
+\begin{array}{ll}
 q^*(\rho) &\propto \exp{\{ E_{-q(\rho)} \left[ \vone^T\vr \log{(\rho)} + \vone^T(\vone - \vr) \log{(1 - \rho)} \right] } \\
 &\propto \exp{ \left( \vone^T\vp \log{(\rho)} + \vone^T(\vone - \vp) \log{(1 - \rho)} \right) } \\
 &= \Beta{\alpha_\rho + \vone^T\vp, \beta_\rho + \vone^T(\vone - \vp)}
-\end{align*}
+\end{array}
+$$
 
 Turning our attention now to $r_i$, we first note that the relevant terms of the
 log-likelihood are
@@ -154,14 +162,16 @@ $$
 q_{r_i}^*(r_i) \propto r_i^{x_i} \exp{(r_i \eta_i)}
 $$
 
-where $\eta_i = - \frac{\alpha_\lambda_{q(\lambda)}}{\beta_{q(\lambda)} + \Psi(\alpha_{q(\rho)}) - \Psi(\alpha_{q(\rho)})$.
+where $\eta_i = - \frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} + \Psi(\alpha_{q(\rho)}) - \Psi(\alpha_{q(\rho)})$.
 
 Now, either $x_i = 0$ or $x_i \ne 0$.
 
-\begin{align*}
+$$
+\begin{array}{ll}
 p_i &= \frac{\exp{(\eta_i)}}{I(x_i = 0) + \exp{(\eta_i)}} \\
 &= \text{expit}(\eta_i)
-\end{align*}
+\end{array}
+$$
 
 \subsection{Lower bound}
 The lower bound $\log{p(x)}$ is
@@ -177,13 +187,15 @@ calculated for each iteration as specified above.
 
 In this case, the lower bound can be calculated directly to be
 
-\begin{align*}
+$$
+\begin{array}{ll}
 \bE_q \left\{ \log{p(\vx, \vr, \lambda, \rho)} - \log{q(\vr, \lambda, \rho)} \right\} &= 
 a \log{(b)} + (a - 1) \bE[\log{(\lambda)}] - b \bE [\lambda] - \log{(\Gamma(a))} \\
 &+ \sum_{i=1}^n  ( -\bE [\lambda] \bE [r_i] + \bE[x_i \log{(\lambda r_i)}] - \log{(x_i!)} \\
 &+ \bE[r_i] \bE[\log{(\rho)}] + \bE[(1 - r_i)] \bE[\log{(1 - \rho)}] ) \\
 & - \bE \log{q(r)} - \bE \log{q(\lambda)} - \bE \log{q(\rho)}
-\end{align*}
+\end{array}
+$$
 
 where
 $$
@@ -242,13 +254,15 @@ and smoothing splines in our models.
 \subsection{Model}
 Let $\mR = \diag{\vr}$. Let $C = [X Z], \vnu = [\vbeta^T \vu^T]^T$.
 
-\begin{align*}
+$$
+\begin{array}{ll}
 \log{p(y|\vr, \vbeta, \vu)} &= \vy^T R (C\vnu) - \vr^T \exp{(C\vnu)} - 1^T \log{\Gamma{(y + 1)}} \\
 \log{p(\vnu|\sigma_{u}^2)} &= - \half \log{|2\pi D(\sigma_{\vu}^2)|} - \half \vnu^T(\sigma_{\vu}^2 I)^{-1} \vnu \\
 \log{p(\vr)} &= \vr^T \log{\rho 1} + (1 - \vr)^T\log{(1 - 1 \rho)} \\
 p(\rho) &\propto 1 \\
 \log{p(\sigma^2)} &= A \log{B} - \log{\Gamma{(A)}} - (A + 1) \log{(\sigma_{\vu}^2)} - \frac{B}{\sigma_{\vu}^2}\\
-\end{align*}
+\end{array}
+$$
 
 \subsection{Approximation}
 Let $r_0 = \{ r_i : y_i = 0 \}$.
@@ -263,28 +277,32 @@ where
 $$
 \begin{array}{rl}
 q(\vnu) &= N(\vmu, \mLambda) \\
-q(\sigma_{\vu}^2) &= IG\left(A + \frac{m}{2}, B + \frac{\|\mu_u\|^2}{2} + \frac{tr(\Lambda_{uu})}{2}\right) \\
-q(r_i) &\propto \exp{\{\bE_{-r_i} [-r_i \exp{(c_i^T\vnu)}]\} + r_i [\digamma(\alpha_\rho) - \digamma(\beta_\rho)]} \\
+q(\sigma_{\vu}^2) &= IG\left(\alpha_{\sigma_u^2} + \frac{m}{2}, \beta_{\sigma_u^2} + \frac{\|\mu_u\|^2}{2} + \frac{\tr(\Lambda_{uu})}{2}\right) \\
+q(r_i) &\propto \exp{\{\bE_{-r_i} [-r_i \exp{(c_i^T\vnu)}]\} + r_i [\Psi(\alpha_\rho) - \Psi(\beta_\rho)]} \\
 \end{array}
 $$
 %\end{align*}
 
 Hence $q(r_i) = \Bernoulli{p_i}$ where
 $$
-p_i = \expit{[\digamma{\alpha_q} - \digamma{\beta_q} - \exp{\{c_i^T\vnu + \half c_i^T \mLambda c_i\}}]}
+p_i = \expit{\Psi{(\alpha_{q(\rho)})} - \Psi{(\beta_{q(\rho)})} - \exp{\{c_i^T\vnu + \half c_i^T \mLambda c_i\}}}
 $$
 
 The optimal approximation for $\vr$ is
-\begin{align*}
+$$
+\begin{array}{ll}
 q(r) &\propto \exp{\{\bE_{-q(\vr)}y^TR(C\vnu) - r^T\exp{(C\vnu)}-\half \vnu^T D(\sigma_{\vu}^2)^{-1} \vnu\}}
-\end{align*}
+\end{array}
+$$
 
-\begin{align*}
+$$
+\begin{array}{ll}
 &\bE_{-q(\vr)} [y^TR(C\vnu) - r^T\exp{(C\vnu)}-\half \vnu^T D(\sigma_{\vu}^2)^{-1} \vnu]\\
-=&y^TRC \vnu - p^T \exp{\{C \mu + \text{dg}(C \mLambda C^T)\}} - \half \mu^T \hat{D} \mu - \half \text{tr}(\mLambda \hat{D})
-\end{align*}
+=&y^TRC \vnu - p^T \exp{\{C \mu + \text{diag}(C \mLambda C^T)\}} - \half \mu^T \hat{D} \mu - \half \text{tr}(\mLambda \hat{D})
+\end{array}
+$$
 
-where $\hat{D} = D(A_{q(\sigma_{\vu}^2)} / B_{q(\sigma_{\vu}^2)})$. This can be seen to be very close to a Poisson
+where $\hat{D} = D(A_{q(\sigma_{\vu}^2)} / B_{q(\sigma_{\vu}^2)}) I$. This can be seen to be very close to a Poisson
 regression model.
 
 \subsection{Lower bound}
@@ -316,11 +334,13 @@ $$
 Let $Z_i = R_i Y_i$.
 
 Then the probability that $Z_i = 0$ is
-\begin{align*}
+$$
+\begin{array}{ll}
 P(Z_i = 0) &= P(R_i = 0)P(Y_i = y) + P(R_i = 1) P(Y_i = 0) - P(R_i = 0) P(Y_i = 0) \\
 &= (1 - \rho) + \rho e^{-\lambda} - (1 - \rho) e^{-\lambda} \\
 &= (1 - \rho) + e^{-\lambda}(2 \rho - 1)
-\end{align*}
+\end{array}
+$$
 
 \bibliographystyle{plain}
 \bibliography{Chapter_1_zero_inflated_models}
