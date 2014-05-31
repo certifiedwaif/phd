@@ -286,7 +286,7 @@ $$
 The optimal approximation for $\vr$ is
 $$
 \begin{array}{ll}
-q(\vr) &\propto \exp{\{\bE_{-q(\vr)}y^T\mR(\mC\vmu) - \vr^T\exp{(C\vnu)}-\half \vnu^T D(\sigma_{\vu}^2)^{-1} \vnu\}}
+q(\vr) &\propto \exp{\{\bE_{-q(\vr)}y^T\mR(\mC\vmu) - \vr^T\exp{(C\vnu)}-\half \vnu^T \text{diag}(\sigma_{\vu}^2)^{-1} \vnu\}}
 \end{array}
 $$
 
