@@ -272,7 +272,7 @@ where
 $$
 \begin{array}{rl}
 q(\vnu) &= N(\vmu, \mLambda) \\
-q(\sigma_{\vu}^2) &= IG\left(\alpha_{\sigma_u^2} + \frac{m}{2}, \beta_{\sigma_u^2} + \frac{\|\mu_u\|^2}{2} + \frac{\tr(\Lambda_{uu})}{2}\right) \\
+q(\sigma_{\vu}^2) &= IG\left(\alpha_{\sigma_u^2} + \frac{m}{2}, \beta_{\sigma_u^2} + \frac{\|\vmu_\vu\|^2}{2} + \frac{\tr(\mLambda_{\vu\vu})}{2}\right) \\
 q(r_i) &\propto \exp{\{\bE_{-r_i} [-r_i \exp{(c_i^T\vnu)}]\} + r_i [\Psi(\alpha_\rho) - \Psi(\beta_\rho)]} \\
 \end{array}
 $$
@@ -286,14 +286,14 @@ $$
 The optimal approximation for $\vr$ is
 $$
 \begin{array}{ll}
-q(r) &\propto \exp{\{\bE_{-q(\vr)}y^T\mR(C\vmu) - r^T\exp{(C\vnu)}-\half \vnu^T D(\sigma_{\vu}^2)^{-1} \vnu\}}
+q(\vr) &\propto \exp{\{\bE_{-q(\vr)}y^T\mR(\mC\vmu) - \vr^T\exp{(C\vnu)}-\half \vnu^T D(\sigma_{\vu}^2)^{-1} \vnu\}}
 \end{array}
 $$
 
 $$
 \begin{array}{ll}
-&\bE_{-q(\vr)} [y^TR(C\vnu) - r^T\exp{(C\vnu)}-\half \vnu^T D(\sigma_{\vu}^2)^{-1} \vnu]\\
-=&y^TRC \vmu - p^T \exp{\{C \mu + \half \text{diag}(C \mLambda C^T)\}} - \half \mu^T \hat{D} \mu - \half \text{tr}(\mLambda \hat{D})
+&\bE_{-q(\vr)} [\vy^T\mR(C\vnu) - \vr^T\exp{(\mC\vnu)}-\half \vnu^T D(\sigma_{\vu}^2)^{-1} \vnu]\\
+=&\vy^T\mR\mC \vmu - \vp^T \exp{\{\mC \vmu + \half \text{diag}(\mC \mLambda \mC^T)\}} - \half \vmu^T \hat{D} \vmu - \half \text{tr}(\mLambda \hat{D})
 \end{array}
 $$
 
