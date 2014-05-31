@@ -94,7 +94,7 @@ $r_i = 1$. So $x_i^{r_i} = I(x \ne 0)$ and hence the likelihood can be re-writte
 
 $$
 \begin{array}{ll}
-p(r_i | \text{rest}) &= \frac{(e^{-\lambda + \logit{\rho}})^{r_i}}{I(x_i = 0) + (e^{-\lambda + \logit{\rho}})^{r_i}} \\
+p(r_i | \text{rest}) &= \frac{(e^{-\lambda + \logit{(\rho)}})^{r_i}}{I(x_i = 0) + (e^{-\lambda + \logit{(\rho)}})^{r_i}} \\
 &= \Bernoulli{\text{expit}(\eta_i)}
 \end{array}
 $$
@@ -135,7 +135,7 @@ and
 % Mean field update for q(\rho)
 $$
 \begin{array}{ll}
-q^*(\rho) &\propto \exp{\{ E_{-q(\rho)} \left[ \vone^T\vr \log{(\rho)} + \vone^T(\vone - \vr) \log{(1 - \rho)} \right] } \\
+q^*(\rho) &\propto \exp{\{ \bE_{-q(\rho)} \left[ \vone^T\vr \log{(\rho)} + \vone^T(\vone - \vr) \log{(1 - \rho)} \right] } \\
 &\propto \exp{ \left( \vone^T\vp \log{(\rho)} + \vone^T(\vone - \vp) \log{(1 - \rho)} \right) } \\
 &= \Beta{\alpha_\rho + \vone^T\vp, \beta_\rho + \vone^T(\vone - \vp)}
 \end{array}
@@ -176,12 +176,12 @@ $$
 \subsection{Lower bound}
 The lower bound $\log{p(x)}$ is
 $$
-	E_q[\log{p(x, \theta)} - \log{q(\theta)}]
+	\bE_q[\log{p(x, \theta)} - \log{q(\theta)}]
 $$
 
 where $q(\theta) = q(\lambda) q(\rho) \prod_{i=1}^n q(r_i)$,
-$q(\lambda) \sim \text{Gamma}{(a_\lambda^*, b\lambda^*)}$,
-$q(\rho) \sim \text{Beta}(a_\rho^*, b_\rho^*)$ and
+$q(\lambda) \sim \text{Gamma}{(\alpha_{q(\lambda)}, \beta_{q(\lambda)})}$,
+$q(\rho) \sim \text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)})$ and
 $q(r_i) = 1$ if $x_i \ne 0$, and $p_i$ if $x_i = 0$, where $p_i$ is
 calculated for each iteration as specified above.
 
@@ -189,23 +189,21 @@ In this case, the lower bound can be calculated directly to be
 
 $$
 \begin{array}{ll}
-\bE_q \left\{ \log{p(\vx, \vr, \lambda, \rho)} - \log{q(\vr, \lambda, \rho)} \right\} &= 
-a \log{(b)} + (a - 1) \bE[\log{(\lambda)}] - b \bE [\lambda] - \log{(\Gamma(a))} \\
-&+ \sum_{i=1}^n  ( -\bE [\lambda] \bE [r_i] + \bE[x_i \log{(\lambda r_i)}] - \log{(x_i!)} \\
-&+ \bE[r_i] \bE[\log{(\rho)}] + \bE[(1 - r_i)] \bE[\log{(1 - \rho)}] ) \\
-& - \bE \log{q(r)} - \bE \log{q(\lambda)} - \bE \log{q(\rho)}
+\bE_q \left\{ \log{p(\vx, \vr, \lambda, \rho)} - \log{q(\vr, \lambda, \rho)} \right\} =& 
+\alpha_\lambda \log{(\beta_\lambda)} + (\alpha_\lambda - 1) \bE_q[\log{(\lambda)}] - \beta_\lambda \bE_q [\lambda] - \log{(\Gamma(\alpha_\lambda))} \\
+&+ \sum_{i=1}^n ( -\bE_q [\lambda] \bE_q [r_i] + \bE_q[x_i \log{(\lambda r_i)}] - \log{(x_i!)} \\
+&+ \bE_q[r_i] \bE_q[\log{(\rho)}] + \bE_q[(1 - r_i)] \bE_q[\log{(1 - \rho)}] ) \\
+& - \bE_q \log{q(r)} - \bE_q \log{q(\lambda)} - \bE_q \log{q(\rho)}
 \end{array}
 $$
 
 where
 $$
-\bE [\log{\lambda}] = -\{ a_{q(\lambda)} - \log{(b_{q(\lambda)})} + \log{\Gamma(a_{q(\lambda)})} + (1 - a_{q(\lambda)}) \psi{(a_{q(\lambda)})} \} \\
-$$
-$$
-\bE [\lambda] = \frac{a_{q(\lambda)}}{b_{q(\lambda)}} \\
-$$
-$$
-\bE[\log{\rho}] = - \{ \log{B(a_{q(\rho)}, b_{q(\rho)})} - (a_{q(\rho)} - 1) \psi{(a_{q(\rho)})} - (b_{q(\rho)} - 1)\psi{(b_{q(\rho)})} + (a_{q(\rho)} + b_{q(\rho)} - 2)\psi{(a_{q(\rho)} + b_{q(\rho)})} \} \\
+\begin{array}{ll}
+\bE [\log{\lambda}] &= -\{ \alpha_{q(\lambda)} - \log{(\beta_{q(\lambda)})} + \log{\Gamma(\alpha_{q(\lambda)})} + (1 - \alpha_{q(\lambda)}) \psi{(\alpha_{q(\lambda)})} \} \\
+\bE [\lambda] &= \frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} \\
+\bE[\log{\rho}] &= - \{ \log{\text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)})} - (\alpha_{q(\rho)} - 1) \psi{(\alpha_{q(\rho)})} - (\beta_{q(\rho)} - 1)\psi{(\beta_{q(\rho)})} + (\alpha_{q(\rho)} + \beta_{q(\rho)} - 2)\psi{(\alpha_{q(\rho)} + \beta_{q(\rho)})} \} \\
+\end{array}
 $$
 
 By symmetry, we see that $(1 - \rho)$ has the same entropy as $\rho$,
@@ -219,15 +217,12 @@ $$
 $$
 
 $$
--\bE_q \log{q(r)} = \sum_{i=1}^n I(x_i = 0) \log{(p_i)}
-$$
-
-$$
--\bE_q \log{q(\lambda)} = q_q^* - \log{(b_q^*)} + \log{\Gamma{(a_q^*)}} + (1 - a_q^*) \Psi{(a_q^*)}
-$$
-
-$$
-\bE[\log{q(\rho)}] = - \{ \log{(\text{Beta}(a_q^*, b_q^*)} - (\alpha_q^* - 1) \Psi{(a_q^*)} - (\beta_q^* - 1)\Psi{(\beta_q^*)} + (\alpha_q^* + \beta_q^* - 2)\Psi{(\alpha_q^* + \beta_q^*)} \}
+\begin{array}{ll}
+-\bE_q \log{q(r)} &= \sum_{i=1}^n I(x_i = 0) \log{(p_i)} \\
+-\bE_q \log{q(\lambda)} &= \alpha_{q(\lambda)} - \log{(\beta_{q(\lambda)})} + \log{\Gamma{(\alpha_{q(\lambda)})}} + (1 - \alpha_{q(\lambda)}) \Psi{(\alpha_{q(\lambda)})} \\
+\bE_q[\log{q(\rho)}] &= - \{ \log{(\text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)})} - (\alpha_{q(\rho)} - 1) \Psi{(\alpha_{q(\rho)})} - (\beta_{q(\rho)} - 1)\Psi{(\beta_{q(\rho)})} \\
++ (\alpha_{q(\rho)} + \beta_{q(\rho)} - 2)\Psi{(\alpha_{q(\rho)} + \beta_{q(\rho)})} \} \\
+\end{array}
 $$
 
 \subsection{Results}
