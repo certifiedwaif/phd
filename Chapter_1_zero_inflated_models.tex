@@ -247,15 +247,15 @@ and smoothing splines in our models.
 % and use GVA on q(\beta, \u, \Sigma) and mean field updates on \rho and r_i
 
 \subsection{Model}
-Let $\mR = \diag{\vr}$. Let $C = [X Z], \vnu = [\vbeta^T \vu^T]^T$.
+Let $\mR = \diag{(\vr)}$. Let $\mC = [X Z], \vnu = [\vbeta^T \vu^T]^T$.
 
 $$
 \begin{array}{ll}
-\log{p(y|\vr, \vbeta, \vu)} &= \vy^T R (C\vnu) - \vr^T \exp{(C\vnu)} - 1^T \log{\Gamma{(y + 1)}} \\
-\log{p(\vnu|\sigma_{u}^2)} &= - \half \log{|2\pi D(\sigma_{\vu}^2)|} - \half \vnu^T(\sigma_{\vu}^2 I)^{-1} \vnu \\
-\log{p(\vr)} &= \vr^T \log{\rho 1} + (1 - \vr)^T\log{(1 - 1 \rho)} \\
+\log{p(y|\vr, \vbeta, \vu)} &= \vy^T \mR (C\vnu) - \vr^T \exp{(C\vnu)} - \vone^T \log{\Gamma{(\vy + \vone)}} \\
+\log{p(\vnu|\sigma_{u}^2)} &= - \half \log{|2\pi \sigma_{\vu}^2 \mI|} - \half \vnu^T(\sigma_{\vu}^2 I)^{-1} \vnu \\
+\log{p(\vr)} &= \vr^T \log{(\rho \vone)} + (\vone - \vr)^T\log{(\vone - \vone \rho)} \\
 p(\rho) &\propto 1 \\
-\log{p(\sigma^2)} &= A \log{B} - \log{\Gamma{(A)}} - (A + 1) \log{(\sigma_{\vu}^2)} - \frac{B}{\sigma_{\vu}^2}\\
+\log{p(\sigma^2)} &= \alpha_{\sigma_\vu^2} \log{\beta_{\sigma_\vu^2}} - \log{\Gamma{(\alpha_{\sigma_\vu^2})}} - (\alpha_{\sigma_\vu^2} + 1) \log{(\sigma_{\vu}^2)} - \frac{\beta_{\sigma_\vu^2}}{\sigma_{\vu}^2}\\
 \end{array}
 $$
 
@@ -286,41 +286,41 @@ $$
 The optimal approximation for $\vr$ is
 $$
 \begin{array}{ll}
-q(r) &\propto \exp{\{\bE_{-q(\vr)}y^TR(C\vnu) - r^T\exp{(C\vnu)}-\half \vnu^T D(\sigma_{\vu}^2)^{-1} \vnu\}}
+q(r) &\propto \exp{\{\bE_{-q(\vr)}y^T\mR(C\vmu) - r^T\exp{(C\vnu)}-\half \vnu^T D(\sigma_{\vu}^2)^{-1} \vnu\}}
 \end{array}
 $$
 
 $$
 \begin{array}{ll}
 &\bE_{-q(\vr)} [y^TR(C\vnu) - r^T\exp{(C\vnu)}-\half \vnu^T D(\sigma_{\vu}^2)^{-1} \vnu]\\
-=&y^TRC \vnu - p^T \exp{\{C \mu + \text{diag}(C \mLambda C^T)\}} - \half \mu^T \hat{D} \mu - \half \text{tr}(\mLambda \hat{D})
+=&y^TRC \vmu - p^T \exp{\{C \mu + \half \text{diag}(C \mLambda C^T)\}} - \half \mu^T \hat{D} \mu - \half \text{tr}(\mLambda \hat{D})
 \end{array}
 $$
 
-where $\hat{D} = D(A_{q(\sigma_{\vu}^2)} / B_{q(\sigma_{\vu}^2)}) I$. This can be seen to be very close to a Poisson
+where $\hat{D} = \frac{\alpha_{q(\sigma_{\vu}^2)}}{\beta_{q(\sigma_{\vu}^2)}} \mI$. This can be seen to be very close to a Poisson
 regression model.
 
 \subsection{Lower bound}
 % Explain how most of the lower bound for the univariate model can simply be re-used, but \lambda is replaced
 % with \vbeta
 $$
-E_q [\log{p(y, \theta)} - \log{q(\theta)}] = \vy \vp^T X\vnu - \vp \exp{(X\vnu + \half \vnu^T \Lambda \vnu)} - \log{(vy + 1)}
-+ \half (|2\pi \Lambda| + \vnu^T \Lambda^{-1} \vnu)
+\bE_q [\log{p(y, \theta)} - \log{q(\theta)}] = \vy \vp^T \mX\vmu - \vp \exp{(\mX\vmu + \half \vmu^T \Lambda \vmu)} - \log{(\vy + \vone)}
++ \half (|2\pi \Lambda| + \vnu^T \Lambda^{-1} \vmu)
 $$
 
 For $\sigma^2_u$,
 $$
-E_q [\log{p(\sigma_u^2)} - \log{q(\sigma_u^2)}] = \frac{m}{2} E_q [\log{\sigma_u^{-2}}] - (\half \|\mu_u\|^2 + \tr(\Lambda_{uu})) E_q [\sigma_u^{-2}] - \log{\Gamma(\alpha_{\sigma_u^2})} + \log{\Gamma(\alpha_{\sigma_u^2} + \frac{m}{2} - 1)}
+\bE_q [\log{p(\sigma_u^2)} - \log{q(\sigma_u^2)}] = \frac{m}{2} \bE_q [\log{\sigma_u^{-2}}] - (\half \|\mu_u\|^2 + \tr(\Lambda_{uu})) \bE_q [\sigma_u^{-2}] - \log{\Gamma(\alpha_{\sigma_u^2})} + \log{\Gamma(\alpha_{\sigma_u^2} + \frac{m}{2} - 1)}
 $$
 
 where
 $$
-E_q[\log{(\sigma_u^2)}] = - \{\alpha_{\sigma_u^2}^2 - \log{\beta_{\sigma_u^2}^*} + \log{\Gamma(\alpha_{\sigma_u^2}^*)} + (1-\alpha_{\sigma_u^2}^*)\digamma{(\alpha_{\sigma_u^2}^*)}\}
+\bE_q[\log{(\sigma_u^2)}] = - \{\alpha_{\sigma_u^2}^2 - \log{\beta_{q(\sigma_u^2)}} + \log{\Gamma(\alpha_{q(\sigma_u^2)})} + (1-\alpha_{q(\sigma_u^2)})\Psi{(\alpha_{q(\sigma_u^2)})}\}
 $$
 
 and
 $$
-E_q[\sigma_u^{-2}] = \frac{\alpha_{\sigma_u^2}^*}{\beta_{\sigma_u^2}^*}
+\bE_q[\sigma_u^{-2}] = \frac{\alpha_{q(\sigma_u^2)}}{\beta_{q(\sigma_u^2)}}
 $$
 
 \subsection{Results}
