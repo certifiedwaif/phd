@@ -52,8 +52,6 @@ a Poisson model is not suitable.
 % Density
 \end{frame}
 
-
-
 % 3. Univariate model
 \begin{frame}
 \frametitle{Univariate model formulation}
@@ -140,8 +138,8 @@ q(\theta) = q(\lambda) q(\rho) \prod_{i=1}^n q(r_i)
 $$
 where
 \begin{align*}
-q(\lambda) &= \text{Gamma}(a_{q(\lambda)}, b_{q(\lambda)}) \\
-q(\rho) &= \text{Beta}(a_{q(\rho)}, b_{q(\rho)}) \\
+q(\lambda) &= \text{Gamma}(\alpha_{q(\lambda)}, \beta_{q(\lambda)}) \\
+q(\rho) &= \text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)}) \\
 q(r_i) &= \text{Bernoulli}(p_i)
 \end{align*}
 
@@ -250,33 +248,48 @@ y_n
 \vone_{n_1} &  & \\
 & \ddots & \\
 & & \vone_{n_m}
-\end{bmatrix}
+\end{bmatrix} \\
+\mC &= [\mX \mZ]
 \end{array}
 $$
 \end{frame}
 
 \begin{frame}
-\frametitle{Model formulation}
-We use a zero-inflated Poisson random effects model
+\frametitle{Multivariate model formulation}
+We use a zero-inflated Poisson random effects model.
+
+\medskip
+
+Suppose that we observe a vector of responses $\vy$ of length n, and matrices
+of covariates $\mX$ and $\mZ$ of dimensions $n \times p$ and $n \times m$,
+respectively.
+
 \begin{align*}
 p(\vy|\vbeta, \vu, \vr, \mX, \mZ) &= \exp{(\vy^T\mR(\mX \vbeta + \mZ \vu) - \vr^Te^{\mX \vbeta + \mZ \vu} - \vone^T\log{(\vy !)})} \\
+\vr &\sim \vone^T\text{Bernoulli}(\rho) \\
+\end{align*}
+We use the priors:
+\begin{align*}
 \vbeta &\sim N(\vmu_\vbeta, \Sigma_\vbeta) \\
 \vu|\sigma_u^2 &\sim N({\bf 0}, \sigma_u^2 I) \\
 \sigma_u^2 &\sim IG(\alpha_{\sigma_u^2}, \beta_{\sigma_u^2}) \\
+\rho &\sim \text{Beta}(a_\rho, b_\rho) \\
 \end{align*}
 \end{frame}
 
 
 \begin{frame}
 \frametitle{Form of the multivariate approximation}
-Form of approximation
+We choose an approximation of the form
 $$
 q(\theta) = q(\beta, \vu) q(\sigma_u^2) q(\rho) \prod_{i=1}^n q(r_i)
 $$
 where
 \begin{align*}
-q(\beta) &\sim N(\mu, \Sigma) \\
+q(\beta, \vu) &\sim N(\mu, \Sigma) \\
 q(\sigma_u^2) &\sim IG(\alpha_{\sigma_u^2}, \beta_{\sigma_u^2}) \\
+q(\rho) &= \text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)}) \\
+q(r_i) &= \text{Bernoulli}(p_i), 1 \leq i \leq n
 \end{align*}
 \end{frame}
 
@@ -304,6 +317,20 @@ $$
 $$
 and then perform mean field updates on the other parameters.
 \end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Mean field updates}
+\begin{align*}
+q(\vbeta, \vu) &= N(\vmu, \mLambda) \\
+q(\sigma_{\vu}^2) &= IG\left(\alpha_{q(\sigma_{\vu}^2)} = \alpha_{\sigma_u^2} + \frac{m}{2}, \beta_{q(\sigma_{\vu}^2)} = \beta_{\sigma_u^2} + \frac{\|\vmu_\vu\|^2}{2} + \frac{\text{tr}(\mLambda_{\vu\vu})}{2}\right) \\
+q(\rho) &= \text{Beta}(\alpha_{q(\rho)} = \alpha_\rho + \vone^T\vp, \beta_{q(\rho)} = \beta_\rho + \vone^T(\vone - \vp)) \\
+q(r_i) & \sim \text{Bernoulli}{(p_i)}, 1 \leq i \leq n
+\end{align*}
+where
+$$
+p_i = \expit{\Psi{(\alpha_{q(\rho)})} - \Psi{(\beta_{q(\rho)})} - \exp{\{c_i^T\vmu + \half c_i^T \mLambda c_i\}}}
+$$
 \end{frame}
 
 \begin{frame}
