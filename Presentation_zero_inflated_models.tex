@@ -17,6 +17,7 @@
 % Details about myself here?
 \end{frame}
 
+
 % 2. Intro
 \begin{frame}
 \frametitle{Introduction}
@@ -24,29 +25,18 @@ Zero inflated data arises in many areas of application, such as physical
 activity data, number of hospital visits and number of insurance claims per
 year.
 
+\bigskip 
 We will work with zero-inflated count data. I encountered this sort of data while
 analysing the data arising from the Get Healthy project.
 \end{frame}
-% 3. Univariate model
-\begin{frame}
-\frametitle{Univariate model formulation}
-We start by building a relatively simple zero-inflated count model.
 
-\begin{align*}{ll}
-X_i &= R_i Y_i \\
-R_i &\sim \text{Bernoulli}(\rho) \\
-Y_i &\sim \text{Poisson}(\lambda) \\
-\rho &\sim \text{Beta}(a_\rho, b_\rho) \\
-\lambda &\sim \text{Gamma}(a_\lambda, b_\lambda)
-\end{align*}
 
-\end{frame}
 
 % 4. \rho = 9/10, \lambda = 5
 % Example data 0 0 0 5 10
 \begin{frame}[fragile]
 \frametitle{Example data}
-Take, for example, $\rho = \frac{1}{2}, \lambda = 5$.
+%Take, for example, $\rho = \frac{1}{2}, \lambda = 5$.
 
 \begin{verbatim}
 0 7 3 4 5 3 2 6 5 0 0 1
@@ -56,16 +46,53 @@ Take, for example, $\rho = \frac{1}{2}, \lambda = 5$.
 8 0
 \end{verbatim}
 
+\noindent Note that $n=50$ 
+$n\times P(Z = 0) \approx 3.8$ for $Z\sim\mbox{Poisson}(\overline{X})$
+and we have observed 21 zeros. Hence,
+a Poisson model is not suitable.
+
 % Histogram
 \includegraphics[width=50mm, height=50mm]{code/univariate_data_histogram.pdf}
 % Density
 \end{frame}
 
+
+
+% 3. Univariate model
+\begin{frame}
+\frametitle{Univariate model formulation}
+
+We start by building a relatively simple zero-inflated count model. Suppose that we observe
+$$
+X_i = R_i Y_i, \quad 1\le i\le n,
+$$
+
+\noindent where for $1\le i\le n$,
+\begin{align*} 
+R_i &\sim \text{Bernoulli}(\rho) \\
+Y_i &\sim \text{Poisson}(\lambda)
+\end{align*}
+
+\noindent for parameters $\rho$ and $\lambda$,
+but we do not observe $R_i$ or $Y_i$ themselves.
+Being Bayesians we use the priors:
+\begin{align*} 
+\rho &\sim \text{Beta}(a_\rho, b_\rho) \\
+\lambda &\sim \text{Gamma}(a_\lambda, b_\lambda).
+\end{align*}
+
+
+\end{frame}
+
+
+
+
+
 % 5. How to fit, and advantages and disadvantages of each approach
 % - Maximum likelihood
 % - MCMC
 % - VB
-\
+
 \begin{frame}
 \frametitle{Comparison of fitting techniques}
 \begin{tabular}{p{2cm}p{3.75cm}p{3.75cm}}
@@ -85,17 +112,25 @@ Variational Bayes & Bayesian & May lose accuracy, or underestimate variance \\
 
 \end{frame}
 
+
+
+
 % 6. Overview of Variational Bayes
 \begin{frame}
 \frametitle{An overview of Variational Bayes}
 \begin{itemize}
-\item \emph{Idea:} Approximate the full posterior $p(\vx, \theta)$ with a simpler approximation $q(\theta)$
-\item Fit $q(\theta)$ to the data by minimising the KL divergence between $p(\vx, \theta)$ and $q(\theta)$
-\item Theory guarantees that $q(\theta) < p(\vx, \theta)$ and that $q(\theta)$ will
-increase with each iteration
+\item \emph{Idea:} Approximate the full posterior $p(\theta|\vx)$ with a simpler approximation $q(\theta)$.
+
+\item Fit $q(\theta)$ to the data by minimising the KL divergence between $p(\theta|\vx)$ and $q(\theta)$.
+
+\item Theory guarantees that $\log p(x)\ge 
+\log \underline{p}(x;q)$ and that $q(\theta)$ will
+increase with each iteration.
+
 \item If you use conjugate priors, a factored approximation can be used, and mean field updates can be used on
-each parameter in turn until convergence is reached
+each parameter in turn until convergence is reached.
 \end{itemize}
+
 % - Algorithm
 We iteratively update the parameters of each approximate distribution
 in turn until the lower bound of the approximation converges.
@@ -105,6 +140,9 @@ This could be thought of as a generalisation of Expectation Maximisation, where 
 variable and estimated according to the expectations of the other parameters.
 \end{frame}
 
+
+
+
 % 7a. Variational Bayes solution to ZIP
 % - q-densities
 \begin{frame}
@@ -113,19 +151,18 @@ $$
 q(\theta) = q(\lambda) q(\rho) \prod_{i=1}^n q(r_i)
 $$
 where
-<<<<<<< HEAD
-\begin{align*}{ll}
+
+\begin{align*}
 q(\lambda) &= \text{Gamma}(a_{q(\lambda)}, b_{q(\lambda)}) \\
 q(\rho) &= \text{Beta}(a_{q(\rho)}, b_{q(\rho)}) \\
 q(r_i) &= \text{Bernoulli}(p_i)
 \end{align*}
 
-=======
-$$
-q(\lambda) = \text{Gamma}(a_\lambda_*, b_\lambda_*)
-q(\rho) = \text{Beta}(a_{q(\rho)}, b_{q(\rho))
+\begin{align*}
+q(\lambda) = \text{Gamma}(a_{\lambda_*}, b_{\lambda_*}) \\
+q(\rho) = \text{Beta}(a_{q(\rho)}, b_{q(\rho)}) \\
 q(r_i) = Bernoulli(p_i)
-$$
+\end{align*}
 
 % - Algorithm
 We iteratively update the parameters of each approximate distribution
@@ -135,9 +172,8 @@ This could be thought of as a generalisation of Expectation Maximisation,
 where each parameter is thought of as the unobserved parameter and maximised
 relative to the other parameters in turn..
 % FIXME - Check this.
->>>>>>> 7f0afd0b3cb08f3f0f262113abe12ccacdc6fc05
 \end{frame}
-
+ 
 
 % 8. Results
 % - Lower bound convergence
@@ -147,7 +183,7 @@ relative to the other parameters in turn..
 \frametitle{Mean field updates}
 % Are they going to be happy with that?
 As we are using conjugate priors in our model, the mean field updates can be derived.
-\begin{align*}{ll}
+\begin{align*}
 q(\lambda) &= \text{Gamma}(\alpha_\lambda + \vone^T \vx, \beta_\lambda + \vone^T\vp) \\
 q(\rho) &= \text{Beta}(\alpha_\rho + \vone^T\vr, \beta_\rho + \vone^T(\vone - \vr)) \\
 q(r_i) &= \text{Bernoulli}(\text{expit}(\eta_i))
@@ -195,14 +231,14 @@ do model selection? Applied statisticians and biostatisticians rarely know the t
 \begin{frame}
 \frametitle{Model formulation}
 We use a zero-inflated Poisson regression model
-\begin{align*}{ll}
-p(y_i|\vbeta, \vu, \vr, \mX, \mZ) &= \exp{(y_i^T\mR(\mX_i \vbeta + \mZ_i \vu) - \vr^Te^{\mX_i \vbeta + \mZ_i \vu} - \log{(y_i !)})} \\
+\begin{align*}
+p(\vy|\vbeta, \vu, \vr, \mX, \mZ) &= \exp{(\vy^T\mR(\mX \vbeta + \mZ \vu) - \vr^Te^{\mX \vbeta + \mZ \vu} - \vone^T\log{(\vy !)})} \\
 \vbeta &\sim N(\vmu_\vbeta, \Sigma_\vbeta) \\
-\vu|\sigma_u^2 &\sim N(\vzero, \sigma_u^2 I) \\
+\vu|\sigma_u^2 &\sim N({\bf 0}, \sigma_u^2 I) \\
 \sigma_u^2 &\sim IG(\alpha_{\sigma_u^2}, \beta_{\sigma_u^2}) \\
 \end{align*}
 \end{frame}
-\end{document}
+
 
 \begin{frame}
 \frametitle{Form of the multivariate approximation}
@@ -216,6 +252,8 @@ q(\beta) &\sim N(\mu, \Sigma) \\
 q(\sigma_u^2) &\sim IG(\alpha_{\sigma_u^2}, \beta_{\sigma_u^2}) \\
 \end{align*}
 \end{frame}
+
+
 
 \begin{frame}
 \frametitle{Gaussian and Laplacian Variational Approximations}
@@ -245,6 +283,8 @@ that we have tried.
 \end{itemize}
 \end{frame}
 
+
+
 \begin{frame}
 \frametitle{What next?}
 \begin{itemize}
@@ -265,5 +305,6 @@ framework
 \item General Design Mixed Models, J. T. Ormerod, M. P. Wand, 2006
 \end{itemize}
 \end{frame}
+
 
 \end{document}
