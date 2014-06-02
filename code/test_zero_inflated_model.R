@@ -96,12 +96,14 @@ test_multivariate_zip_no_zeros <- function()
 	expected_rho = 1
 	expected_nu = c(1, 2)
 	expected_sigma2_u = 0
+  sigma2.beta = 1e5
 	a_sigma = 1e5
 	b_sigma = 1e5
-	vy = generate_multivariate_test_data(mX, NULL, m, n, expected_rho, expected_nu, expected_sigma2_u)
+  test_data = generate_multivariate_test_data(mX, NULL, m, n, expected_rho, expected_nu, expected_sigma2_u)
+	vy = test_data$vy
 
 	# Test model fitting
-	multivariate = create_multivariate(vy, mX, mZ, a_sigma, b_sigma)
+	multivariate = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma)
 	result_var = zero_infl_var(multivariate)
 
 	print(result_var$vnu)
@@ -121,13 +123,15 @@ test_multivariate_zip_half_zeros <- function()
 	expected_rho = .5
 	expected_nu = c(1, 2)
 	expected_sigma2_u = 0
+	sigma2.beta = 1e5  
 	a_sigma = 1e5
 	b_sigma = 1e5
-	vy = generate_multivariate_test_data(mX, NULL, m, n, expected_rho, expected_nu, expected_sigma2_u)
+	test_data = generate_multivariate_test_data(mX, NULL, m, n, expected_rho, expected_nu, expected_sigma2_u)
+	vy = test_data$vy
 
 	# Test model fitting
-	multivariate = create_multivariate(vy, mX, mZ, a_sigma, b_sigma)
-	result_var = zero_infl_var(multivariate, trace=TRUE)
+	multivariate = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma)
+	result_var = zero_infl_var(multivariate)
 
 	expect_equal(as.vector(result_var$vnu), expected_nu, tolerance=2e-1)
 	expect_equal(result_var$a_rho / (result_var$a_rho + result_var$b_rho), expected_rho, tolerance=2e-1)
@@ -172,8 +176,8 @@ test_multivariate_zip_no_zeros_random_intercept <- function()
 	
 	sigma2.beta <- 1.0E8
 	
-	generated = generate_multivariate_test_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u, verbose=TRUE)
-	vy = generated$vy
+	test_data = generate_multivariate_test_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u, verbose=TRUE)
+	vy = test_data$vy
 	
 	print(table(vy))
 	
@@ -226,9 +230,8 @@ test_multivariate_zip_half_zeros_random_intercept <- function()
 	
 	sigma2.beta <- 1.0E8
 	
-	generated = generate_multivariate_test_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u, verbose=TRUE)
-	vy = generated$vy
-	
+	test_data = generate_multivariate_test_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u, verbose=TRUE)
+	vy = test_data$vy
 	
 	#print(table(vy))
 	#ans <- readline()
@@ -251,12 +254,13 @@ test_multivariate_zip_half_zeros_random_intercept <- function()
 main <- function()
 {
 	set.seed(123)
-	#test_univariate_zip()
+	options(recover = dump.frames)
+	test_univariate_zip()
 	# TODO: Add some sort of test for the accuracy of the approximation?
 
 	# Tests with multivariate fixed effects
-	#test_multivariate_zip_no_zeros()
-	#test_multivariate_zip_half_zeros()
+	test_multivariate_zip_no_zeros()
+	test_multivariate_zip_half_zeros()
 
 	# Tests with multivariate fixed effects and random intercepts
 	test_multivariate_zip_no_zeros_random_intercept()

@@ -108,9 +108,11 @@ calculate_lower_bound.multivariate <- function(multivariate)
 	a_sigma2_u = multivariate$a_sigma
 	b_sigma2_u = multivariate$b_sigma
 	p = ncol(multivariate$mX) 
-	m = ncol(multivariate$mZ) 
-	u_idx = p + (1:m)  # (ncol(mult$mX)+1):ncol(mult$mC)
-	vu = vnu[u_idx]
+  if (!is.null(multivariate$mZ)) {
+    m = ncol(multivariate$mZ) 
+    u_idx = p + (1:m)  # (ncol(mult$mX)+1):ncol(mult$mC)
+  	vu = vnu[u_idx]
+  }
 
 	zero.set <- which(vy==0)
 	
@@ -143,12 +145,13 @@ calculate_lower_bound.multivariate <- function(multivariate)
 	result = result + 0.5 * (det(2*pi*mLambda) + t(vnu) %*% solve(mLambda) %*% vnu)
 
 	# Terms for sigma2_u
-	cat("a_sigma2_u", a_sigma2_u, "\n")
-	cat("b_sigma2_u", b_sigma2_u, "\n")
-	E_log_sigma2_u = -gamma_entropy(a_sigma2_u, b_sigma2_u)
-	E_sigma2_u = a_sigma2_u/b_sigma2_u
-	result = result + 0.5 * m * E_log_sigma2_u - 0.5*(sum(vu^2) + tr(mLambda[u_idx, u_idx])) * E_sigma2_u - lgamma(a_sigma2_u) + lgamma(a_sigma2_u + 0.5 * m - 1)
-	
+  if (!is.null(multivariate$mZ)) {
+  	cat("a_sigma2_u", a_sigma2_u, "\n")
+  	cat("b_sigma2_u", b_sigma2_u, "\n")
+  	E_log_sigma2_u = -gamma_entropy(a_sigma2_u, b_sigma2_u)
+  	E_sigma2_u = a_sigma2_u/b_sigma2_u
+  	result = result + 0.5 * m * E_log_sigma2_u - 0.5*(sum(vu^2) + tr(mLambda[u_idx, u_idx])) * E_sigma2_u - lgamma(a_sigma2_u) + lgamma(a_sigma2_u + 0.5 * m - 1)
+  }
 	return(result)
 }
 
@@ -226,7 +229,7 @@ zero_infl_var.univariate <- function(univariate, verbose=FALSE, plot_lower_bound
 	return(params)
 }
 
-create_multivariate <- function(vy, mX, mZ, sigma2.beta,a_sigma, b_sigma)
+create_multivariate <- function(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma)
 {
 	# Initialise
 	n = length(vy)
@@ -240,7 +243,11 @@ create_multivariate <- function(vy, mX, mZ, sigma2.beta,a_sigma, b_sigma)
 
 	mLambda = diag(rep(1, ncol(mC)))
 	mSigma.beta.inv = diag(1/sigma2.beta, ncol(mX))
-	mSigma.u.inv = diag(a_sigma/b_sigma, ncol(mZ))	
+  if (!is.null(ncol(mZ))) {
+	  mSigma.u.inv = diag(a_sigma/b_sigma, ncol(mZ))	
+  } else {
+    mSigma.u.inv = NULL
+  }
 	prior = list(a_sigma=a_sigma, b_sigma=b_sigma)
 	multivariate = list(vy=vy, mX=mX, mZ=mZ, mC=mC, vp=vp, vnu=vnu,
 						a_sigma=a_sigma, b_sigma=b_sigma,
@@ -278,8 +285,11 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
 	while ( (i <= 1) || (vlower_bound[i] > vlower_bound[i-1])  ) {
 		i = i+1
 		
-		
-		mult$mSigma.inv <- blockDiag(mult$mSigma.beta.inv,mult$mSigma.u.inv)
+		if (!is.null(mult$mSigma.u.inv)) {
+		  mult$mSigma.inv <- blockDiag(mult$mSigma.beta.inv,mult$mSigma.u.inv)
+		} else {
+      mult$mSigma.inv <- mult$mSigma.beta.inv
+		}
 		
 		# Update parameter for q_lambda
 		# Maximise the Gaussian Variational Approximation using
