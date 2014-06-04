@@ -151,7 +151,7 @@ $$
 Taking expectations with respect to $\lambda$ and $\rho$ we have
 
 $$
--r_i \frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} + x_i \log{(r_i)} + r_i (\Psi(\alpha_{q(\rho)}) - \Psi(\beta_{q(\rho)}))
+q^*(\lambda) = -r_i \frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} + x_i \log{(r_i)} + r_i (\Psi(\alpha_{q(\rho)}) - \Psi(\beta_{q(\rho)}))
 $$
 
 Note that if $x_i = 0$ then
@@ -159,7 +159,7 @@ $x_i \log{(r_i)} = \log{(x_i^{r_i})} = \log{(0^0)} = \log{(1)} = 0$. Dr John Orm
 upon the idea of side-stepping this problem by writing the q-likelihood as
 
 $$
-q_{r_i}^*(r_i) \propto r_i^{x_i} \exp{(r_i \eta_i)}
+q^*(r_i) \propto r_i^{x_i} \exp{(r_i \eta_i)}
 $$
 
 where $\eta_i = - \frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} + \Psi(\alpha_{q(\rho)}) - \Psi(\alpha_{q(\rho)})$.
@@ -255,7 +255,7 @@ $$
 \log{p(\vnu|\sigma_{u}^2)} &= - \half \log{|2\pi \sigma_{\vu}^2 \mI|} - \half \vnu^T(\sigma_{\vu}^2 I)^{-1} \vnu \\
 \log{p(\vr)} &= \vr^T \log{(\rho \vone)} + (\vone - \vr)^T\log{(\vone - \vone \rho)} \\
 p(\rho) &\propto 1 \\
-\log{p(\sigma^2)} &= \alpha_{\sigma_\vu^2} \log{\beta_{\sigma_\vu^2}} - \log{\Gamma{(\alpha_{\sigma_\vu^2})}} - (\alpha_{\sigma_\vu^2} + 1) \log{(\sigma_{\vu}^2)} - \frac{\beta_{\sigma_\vu^2}}{\sigma_{\vu}^2}\\
+\log{p(\sigma^2)} &= \alpha_{\sigma_\vu^2} \log{(\beta_{\sigma_\vu^2})} - \log{\Gamma{(\alpha_{\sigma_\vu^2})}} - (\alpha_{\sigma_\vu^2} + 1) \log{(\sigma_{\vu}^2)} - \frac{\beta_{\sigma_\vu^2}}{\sigma_{\vu}^2}\\
 \end{array}
 $$
 
@@ -305,7 +305,7 @@ regression model.
 % with \vbeta
 $$
 \bE_q [\log{p(y, \theta)} - \log{q(\theta)}] = \vy \vp^T \mX\vmu - \vp \exp{(\mX\vmu + \half \vmu^T \Lambda \vmu)} - \log{(\vy + \vone)}
-+ \half (|2\pi \Lambda| + \vnu^T \Lambda^{-1} \vmu)
++ \half (|2\pi \Lambda| + \vmu^T \Lambda^{-1} \vmu)
 $$
 
 For $\sigma^2_u$,
