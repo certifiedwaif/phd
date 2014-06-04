@@ -39,7 +39,11 @@ vg.lap <- function(vnu,vy,vr,mC,mSigma.inv,mLambda)
 	#mDiag <- sapply(1:ncol(mC), function(i) sum(mC[i,] * mLambda[, i] * mC[, i]))
 	#mDiag2 <-  diag(mC%*%mLambda%*%t(mC))
     vg <- t(mC)%*%(vy - vr*exp(mC%*%vnu)) - mSigma.inv%*%vnu
-	#cat("vg.lap vg", vg, "norm", norm(vg), "\n")
+    
+    print(mC%*%vnu)
+    
+    
+	cat("vg.lap vg", vg, "norm", norm(vg), "\n")
     return(vg)
 }
 
@@ -63,7 +67,9 @@ fit.Lap <- function(vnu,vy,vr,mC,mSigma.inv,mLambda)
         f  <- f.lap(vnu,vy,vr,mC,mSigma.inv,mLambda)
         vg <- vg.lap(vnu,vy,vr,mC,mSigma.inv,mLambda)
         mH <- mH.lap(vnu,vy,vr,mC,mSigma.inv,mLambda)
+        print("A")
         mLambda <- solve(-mH,tol=1.0E-99)
+        print("B")        
         vnu <- vnu + mLambda%*%vg
         print(c(ITER,f,max(abs(vg))))
         if (max(abs(vg))<1.0E-8) {

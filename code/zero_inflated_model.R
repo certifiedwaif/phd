@@ -229,7 +229,7 @@ zero_infl_var.univariate <- function(univariate, verbose=FALSE, plot_lower_bound
 	return(params)
 }
 
-create_multivariate <- function(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma)
+create_multivariate <- function(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau)
 {
 	# Initialise
 	n = length(vy)
@@ -244,7 +244,7 @@ create_multivariate <- function(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma)
 	mLambda = diag(rep(1, ncol(mC)))
 	mSigma.beta.inv = diag(1/sigma2.beta, ncol(mX))
   if (!is.null(ncol(mZ))) {
-	  mSigma.u.inv = diag(a_sigma/b_sigma, ncol(mZ))	
+	  mSigma.u.inv = diag(tau, ncol(mZ))	
   } else {
     mSigma.u.inv = NULL
   }
@@ -282,13 +282,14 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
 	
 	i = 0
 	# Iterate ----
-	while ( (i <= 1) || (vlower_bound[i] > vlower_bound[i-1])  ) {
+	#while ( (i <= 1) || (vlower_bound[i] > vlower_bound[i-1])  ) {
+	while ( (i <= MAXITER)  ) {	
 		i = i+1
 		
 		if (!is.null(mult$mSigma.u.inv)) {
-		  mult$mSigma.inv <- blockDiag(mult$mSigma.beta.inv,mult$mSigma.u.inv)
+			mult$mSigma.inv <- blockDiag(mult$mSigma.beta.inv,mult$mSigma.u.inv)
 		} else {
-      mult$mSigma.inv <- mult$mSigma.beta.inv
+      		mult$mSigma.inv <- mult$mSigma.beta.inv
 		}
 		
 		# Update parameter for q_lambda
@@ -308,14 +309,14 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
 		mult$mLambda = fit1$mLambda
 		mult$f = fit1$res$value
 		
-		#print("vnu=")
-		#print(mult$vnu)
-		#print("mLambda=")
-		#print(mult$mLambda)
-		#print("f=")
-		#print(mult$f)
+		print("vnu=")
+		print(mult$vnu)
+		print("mLambda=")
+		print(mult$mLambda)
+		print("f=")
+		print(mult$f)
 		
-		#ans <- readline()
+	#	ans <- readline()
 				
 
 		# Update parameters for q_sigma_u^2 if we need to
@@ -330,8 +331,12 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
 			#mult$b_sigma = mult$prior$b_sigma + sum(vu^2)/2 + (tr_mSigma)/2
 			mult$b_sigma = mult$prior$b_sigma + sum(vu^2)/2 + tr(mult$mLambda[u_idx, u_idx])/2    # Extract right elements of mLambda
 			
+			tau_sigma = mult$a_sigma/mult$b_sigma
+			if (tau_sigma<0.1) {
+			#	tau_sigma = 0.01
+			}
 			
-			mult$mSigma.u.inv = diag(mult$a_sigma/mult$b_sigma, m)	
+			mult$mSigma.u.inv = diag(tau_sigma, m)	
 		}
 		
 		

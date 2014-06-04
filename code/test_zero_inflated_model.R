@@ -143,8 +143,8 @@ test_multivariate_zip_no_zeros_random_intercept <- function()
 	# Could we load test data from somewhere? I don't know that hardcoding the
 	# test data into the source files is really the best idea.
 	# FIXME: You have serious overflow issues
-	m = 100
-	ni = 20
+	m = 20
+	ni = 5
 	n = rep(ni,m)
 	mX = matrix(as.vector(cbind(rep(1, sum(n)), runif(sum(n), -1, 1))), sum(n), 2)
 	#print("mX=")
@@ -176,13 +176,15 @@ test_multivariate_zip_no_zeros_random_intercept <- function()
 	
 	sigma2.beta <- 1.0E8
 	
+	tau = 1.0E2
+	
 	test_data = generate_multivariate_test_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u, verbose=TRUE)
 	vy = test_data$vy
 	
 	print(table(vy))
 	
 	# Test model fitting
-	multivariate = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma)
+	multivariate = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau)
 	result_var = zero_infl_var(multivariate, method="laplacian", verbose=TRUE)
 	expect_equal(as.vector(result_var$vnu[1:2]), expected_beta, tolerance=1e-1)
 	#expect_equal(result_var$a_rho / (result_var$a_rho + result_var$b_rho), expected_rho, tolerance=2e-1)
@@ -197,8 +199,8 @@ test_multivariate_zip_no_zeros_random_intercept <- function()
 
 test_multivariate_zip_half_zeros_random_intercept <- function()
 {
-	m = 100
-	ni = 20
+	m = 20
+	ni = 5
 	n = rep(ni,m)
 	mX = matrix(as.vector(cbind(rep(1, sum(n)), runif(sum(n), -1, 1))), sum(n), 2)
 	#print("mX=")
@@ -228,6 +230,8 @@ test_multivariate_zip_half_zeros_random_intercept <- function()
 	a_sigma = 1e-2
 	b_sigma = 1e-2
 	
+	tau = 1.0E-2
+	
 	sigma2.beta <- 1.0E8
 	
 	test_data = generate_multivariate_test_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u, verbose=TRUE)
@@ -237,7 +241,7 @@ test_multivariate_zip_half_zeros_random_intercept <- function()
 	#ans <- readline()
 
 	# Test model fitting
-	multivariate = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma)
+	multivariate = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau)
 	result_var = zero_infl_var(multivariate, method="laplacian", verbose=TRUE)
 	expect_equal(as.vector(result_var$vnu[1:2]), expected_beta, tolerance=1e-1)
 	expect_equal(result_var$a_rho / (result_var$a_rho + result_var$b_rho), expected_rho, tolerance=2e-1)
@@ -253,14 +257,14 @@ test_multivariate_zip_half_zeros_random_intercept <- function()
 #main_check_accuracy()
 main <- function()
 {
-	set.seed(123)
+	set.seed(5)
 	options(recover = dump.frames)
-	test_univariate_zip()
+	#test_univariate_zip()
 	# TODO: Add some sort of test for the accuracy of the approximation?
 
 	# Tests with multivariate fixed effects
-	test_multivariate_zip_no_zeros()
-	test_multivariate_zip_half_zeros()
+	#test_multivariate_zip_no_zeros()
+	#test_multivariate_zip_half_zeros()
 
 	# Tests with multivariate fixed effects and random intercepts
 	test_multivariate_zip_no_zeros_random_intercept()
