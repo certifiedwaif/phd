@@ -103,7 +103,7 @@ calculate_lower_bound.multivariate <- function(multivariate)
 	a_rho = multivariate$a_rho
 	b_rho = multivariate$b_rho
 	mC = multivariate$mC
-	vnu = multivariate$vnu
+	vmu = multivariate$vmu
 	mLambda = multivariate$mLambda
 	a_sigma2_u = multivariate$a_sigma
 	b_sigma2_u = multivariate$b_sigma
@@ -111,7 +111,7 @@ calculate_lower_bound.multivariate <- function(multivariate)
   if (!is.null(multivariate$mZ)) {
     m = ncol(multivariate$mZ) 
     u_idx = p + (1:m)  # (ncol(mult$mX)+1):ncol(mult$mC)
-  	vu = vnu[u_idx]
+  	vu = vmu[u_idx]
   }
 
 	zero.set <- which(vy==0)
@@ -140,9 +140,9 @@ calculate_lower_bound.multivariate <- function(multivariate)
 	#result = result + multivariate$f
 
 	# Terms for (beta, u)
-	result = result + (vy*vp) %*% mC %*% vnu
-	result = result - vp %*% exp(mC %*% vnu + matrix(0.5 * (t(vnu) %*% mLambda %*% vnu), nrow = nrow(mC), ncol = 1)) - sum(lgamma(vy + 1))
-	result = result + 0.5 * (det(2*pi*mLambda) + t(vnu) %*% solve(mLambda) %*% vnu)
+	result = result + (vy*vp) %*% mC %*% vmu
+	result = result - vp %*% exp(mC %*% vmu + matrix(0.5 * (t(vmu) %*% mLambda %*% vmu), nrow = nrow(mC), ncol = 1)) - sum(lgamma(vy + 1))
+	result = result + 0.5 * (det(2*pi*mLambda) + t(vmu) %*% solve(mLambda) %*% vmu)
 
 	# Terms for sigma2_u
   if (!is.null(multivariate$mZ)) {
@@ -239,7 +239,7 @@ create_multivariate <- function(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau)
 	} else {
 		mC = cbind(mX, mZ)
 	}
-	vnu = rep(0, ncol(mC))
+	vmu = rep(0, ncol(mC))
 
 	mLambda = diag(rep(1, ncol(mC)))
 	mSigma.beta.inv = diag(1/sigma2.beta, ncol(mX))
@@ -249,7 +249,7 @@ create_multivariate <- function(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau)
     mSigma.u.inv = NULL
   }
 	prior = list(a_sigma=a_sigma, b_sigma=b_sigma)
-	multivariate = list(vy=vy, mX=mX, mZ=mZ, mC=mC, vp=vp, vnu=vnu,
+	multivariate = list(vy=vy, mX=mX, mZ=mZ, mC=mC, vp=vp, vmu=vmu,
 						a_sigma=a_sigma, b_sigma=b_sigma,
 						mLambda=mLambda,
 						prior=prior,
@@ -297,20 +297,20 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
 		# Dr Ormerod's Poisson mixed model code
 		# TODO: Add parameter to choose between the various optimisation options.
 		if (method == "laplacian") {
-			fit1 = fit.Lap(mult$vnu, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, mult$mLambda)
+			fit1 = fit.Lap(mult$vmu, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, mult$mLambda)
 		} else if (method == "gva") {	
-			fit1 = fit.GVA(mult$vnu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B")
+			fit1 = fit.GVA(mult$vmu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B")
 		} else {
 			stop("method must be either laplacian or gva")
 		}
-		#fit2 = fit.GVA(fit1$vnu, fit1$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B")
+		#fit2 = fit.GVA(fit1$vmu, fit1$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B")
 		
-		mult$vnu = fit1$vnu
+		mult$vmu = fit1$vmu
 		mult$mLambda = fit1$mLambda
 		mult$f = fit1$res$value
 		
-		print("vnu=")
-		print(mult$vnu)
+		print("vmu=")
+		print(mult$vmu)
 		print("mLambda=")
 		print(mult$mLambda)
 		print("f=")
@@ -324,7 +324,7 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
 			# a_sigma is fixed
 			mult$a_sigma = mult$prior$a_sigma + m/2
 			u_idx = p + (1:m)  # (ncol(mult$mX)+1):ncol(mult$mC)
-			vu = mult$vnu[u_idx]
+			vu = mult$vmu[u_idx]
 			# We know that mSigma = sigma_u^2 I. We should exploit this knowledge
 			# Q: Nothing from mLambda? Why not?
 			#tr_mSigma = ncol(mult$mZ) * mult$prior$a_sigma/mult$prior$b_sigma
@@ -348,18 +348,18 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
 		# Update parameters for q_vr
 		#if (verbose) {
 		#	print(dim(mult$mC))
-		#	print(dim(mult$vnu))
-		#	print(mult$vnu)
+		#	print(dim(mult$vmu))
+		#	print(mult$vmu)
 		#	print(mult$mLambda)
 		#	print(diag(mult$mC%*%mult$mLambda%*%t(mult$mC)))
 		#}
 		
-		mult$vp[zero.set] = expit(-exp(mult$mC[zero.set,]%*%mult$vnu + 0.5*diag(mult$mC[zero.set,]%*%mult$mLambda%*%t(mult$mC[zero.set,]))) + digamma(mult$a_rho) - digamma(mult$b_rho))
+		mult$vp[zero.set] = expit(-exp(mult$mC[zero.set,]%*%mult$vmu + 0.5*diag(mult$mC[zero.set,]%*%mult$mLambda%*%t(mult$mC[zero.set,]))) + digamma(mult$a_rho) - digamma(mult$b_rho))
     
 		#vlower_bound[i] <- calculate_lower_bound(vx, vp, a_lambda, b_lambda, a_rho, b_rho)
 		vlower_bound[i] <- 0 # calculate_lower_bound(mult)
 		vlower_bound[i] <- calculate_lower_bound(mult)
-		#print(mult$vnu)
+		#print(mult$vmu)
 		#print(mult$vp)
 		#print(mult$a_rho)
 		#print(mult$b_rho)
@@ -367,14 +367,14 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
 		
 		if (verbose && i > 1)
 			cat("Iteration ", i, ": lower bound ", vlower_bound[i], " difference ",
-					vlower_bound[i] - vlower_bound[i-1], " parameters ", "vnu", mult$vnu,
+					vlower_bound[i] - vlower_bound[i-1], " parameters ", "vmu", mult$vmu,
 					"a_rho", mult$a_rho, "b_rho", mult$b_rho, "\n")
 	}
 
 	if (plot_lower_bound)
 		plot(lower_bound_vector,type="l")
 
-	params = list(vnu=mult$vnu, mLambda=mult$mLambda, a_rho=mult$a_rho, b_rho=mult$b_rho,
+	params = list(vmu=mult$vmu, mLambda=mult$mLambda, a_rho=mult$a_rho, b_rho=mult$b_rho,
 					a_sigma=mult$a_sigma, b_sigma=mult$b_sigma)
 	return(params)
 }

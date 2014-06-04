@@ -94,7 +94,7 @@ test_multivariate_zip_no_zeros <- function()
 	cat("mX", mX, "\n")
 	mZ = NULL
 	expected_rho = 1
-	expected_nu = c(1, 2)
+	expected_mu = c(1, 2)
 	expected_sigma2_u = 0
   sigma2.beta = 1e5
 	a_sigma = 1e5
@@ -106,8 +106,8 @@ test_multivariate_zip_no_zeros <- function()
 	multivariate = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma)
 	result_var = zero_infl_var(multivariate)
 
-	print(result_var$vnu)
-	expect_equal(as.vector(result_var$vnu), expected_nu, tolerance=2e-1)
+	print(result_var$vmu)
+	expect_equal(as.vector(result_var$vmu), expected_mu, tolerance=2e-1)
 	expect_equal(result_var$a_rho / (result_var$a_rho + result_var$b_rho), expected_rho, tolerance=2e-1)
 }
 
@@ -121,7 +121,7 @@ test_multivariate_zip_half_zeros <- function()
 	mX = matrix(as.vector(cbind(rep(1, m), runif(m, -1, 1))), m, 2)
 	mZ = NULL
 	expected_rho = .5
-	expected_nu = c(1, 2)
+	expected_mu = c(1, 2)
 	expected_sigma2_u = 0
 	sigma2.beta = 1e5  
 	a_sigma = 1e5
@@ -133,7 +133,7 @@ test_multivariate_zip_half_zeros <- function()
 	multivariate = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma)
 	result_var = zero_infl_var(multivariate)
 
-	expect_equal(as.vector(result_var$vnu), expected_nu, tolerance=2e-1)
+	expect_equal(as.vector(result_var$vmu), expected_mu, tolerance=2e-1)
 	expect_equal(result_var$a_rho / (result_var$a_rho + result_var$b_rho), expected_rho, tolerance=2e-1)
 }
 
@@ -186,14 +186,14 @@ test_multivariate_zip_no_zeros_random_intercept <- function()
 	# Test model fitting
 	multivariate = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau)
 	result_var = zero_infl_var(multivariate, method="laplacian", verbose=TRUE)
-	expect_equal(as.vector(result_var$vnu[1:2]), expected_beta, tolerance=1e-1)
+	expect_equal(as.vector(result_var$vmu[1:2]), expected_beta, tolerance=1e-1)
 	#expect_equal(result_var$a_rho / (result_var$a_rho + result_var$b_rho), expected_rho, tolerance=2e-1)
 	#print(str(result_var))
 	result_sigma2_u = (result_var$b_sigma / result_var$a_sigma)
 	expect_equal(result_sigma2_u, expected_sigma2_u, tolerance=3e-1)
 
 	result_var = zero_infl_var(multivariate, method="gva", verbose=TRUE)
-	expect_equal(as.vector(result_var$vnu[1:2]), expected_beta, tolerance=1e-1)
+	expect_equal(as.vector(result_var$vmu[1:2]), expected_beta, tolerance=1e-1)
 	expect_equal(result_sigma2_u, expected_sigma2_u, tolerance=3e-1)
 }
 
@@ -243,13 +243,13 @@ test_multivariate_zip_half_zeros_random_intercept <- function()
 	# Test model fitting
 	multivariate = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau)
 	result_var = zero_infl_var(multivariate, method="laplacian", verbose=TRUE)
-	expect_equal(as.vector(result_var$vnu[1:2]), expected_beta, tolerance=1e-1)
+	expect_equal(as.vector(result_var$vmu[1:2]), expected_beta, tolerance=1e-1)
 	expect_equal(result_var$a_rho / (result_var$a_rho + result_var$b_rho), expected_rho, tolerance=2e-1)
 	result_sigma2_u = (result_var$b_sigma / result_var$a_sigma)
 	expect_equal(result_sigma2_u, expected_sigma2_u, tolerance=3e-1)
 
 	result_var = zero_infl_var(multivariate, method="gva", verbose=TRUE)
-	expect_equal(as.vector(result_var$vnu[1:2]), expected_beta, tolerance=1e-1)
+	expect_equal(as.vector(result_var$vmu[1:2]), expected_beta, tolerance=1e-1)
 	expect_equal(result_var$a_rho / (result_var$a_rho + result_var$b_rho), expected_rho, tolerance=2e-1)
 	expect_equal(result_sigma2_u, expected_sigma2_u, tolerance=3e-1)
 }
