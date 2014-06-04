@@ -146,8 +146,7 @@ calculate_lower_bound.multivariate <- function(multivariate)
 
 	# Terms for sigma2_u
   if (!is.null(multivariate$mZ)) {
-  	cat("a_sigma2_u", a_sigma2_u, "\n")
-  	cat("b_sigma2_u", b_sigma2_u, "\n")
+  	cat("a_sigma2_u", a_sigma2_u, "b_sigma2_u", b_sigma2_u, "\n")
   	E_log_sigma2_u = -gamma_entropy(a_sigma2_u, b_sigma2_u)
   	E_sigma2_u = a_sigma2_u/b_sigma2_u
   	result = result + 0.5 * m * E_log_sigma2_u - 0.5*(sum(vu^2) + tr(mLambda[u_idx, u_idx])) * E_sigma2_u - lgamma(a_sigma2_u) + lgamma(a_sigma2_u + 0.5 * m - 1)
@@ -267,15 +266,16 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
 
 	# Initialise
 	N = length(mult$vy)
-	if (verbose) cat("N", N, "\n")
+	if (verbose) cat("N", N)
 	if (!is.null(mult$mX)) {
 		p = ncol(mult$mX) 
-		if (verbose) cat("p", p, "\n")
+		if (verbose) cat("p", p)
 	}	
 	if (!is.null(mult$mZ)) {
 		m = ncol(mult$mZ) 
-		if (verbose) cat("m", m, "\n")
+		if (verbose) cat("m", m)
 	}
+	cat("\n")
 	zero.set = which(mult$vy == 0)
 	nonzero.set = which(mult$vy != 0)
 	vlower_bound <- c()

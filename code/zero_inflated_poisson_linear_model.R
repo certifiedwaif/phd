@@ -66,6 +66,7 @@ fit.Lap <- function(vnu,vy,vr,mC,mSigma.inv,mLambda)
         mLambda <- solve(-mH,tol=1.0E-99)
         vnu <- vnu + mLambda%*%vg
         print(c(ITER,f,max(abs(vg))))
+        cat("iterations", ITER, "f", f, "max(abs(vg))", max(abs(vg)))
         if (max(abs(vg))<1.0E-8) {
             break;
         }

@@ -253,7 +253,7 @@ test_multivariate_zip_half_zeros_random_intercept <- function()
 #main_check_accuracy()
 main <- function()
 {
-	set.seed(123)
+	set.seed(12345)
 	options(recover = dump.frames)
 	test_univariate_zip()
 	# TODO: Add some sort of test for the accuracy of the approximation?
