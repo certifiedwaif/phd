@@ -1,28 +1,28 @@
 ###############################################################################
 
 rawdata <- matrix(c(1, 53,
-1, 57,
-1, 58,
-1, 63,
-0, 66,
-0, 67,
-0, 67,
-0, 67,
-0, 68,
-0, 69,
-0, 70,
-0, 70,
-1, 70,
-1, 70,
-0, 72,
-0, 73,
-0, 75,
-1, 75,
-0, 76,
-0, 76,
-0, 78,
-0, 79,
-0, 81),23,2,byrow=T)
+                    1, 57,
+                    1, 58,
+                    1, 63,
+                    0, 66,
+                    0, 67,
+                    0, 67,
+                    0, 67,
+                    0, 68,
+                    0, 69,
+                    0, 70,
+                    0, 70,
+                    1, 70,
+                    1, 70,
+                    0, 72,
+                    0, 73,
+                    0, 75,
+                    1, 75,
+                    0, 76,
+                    0, 76,
+                    0, 78,
+                    0, 79,
+                    0, 81),23,2,byrow=T)
 
 w <- rawdata[,1]
 s <- rawdata[,2]
@@ -35,34 +35,35 @@ mSigma     <- diag(1.0E4,d)
 mSigma.inv <- diag(1.0E-4,d)
 
 res.glm <- glm(vy~-1+mX,family=binomial(link=probit))
+summary(res.glm)
 
 ###############################################################################
 
 trapint2D <- function(xgrid, ygrid, fgrid) 
 {
-    ng1   <- length(xgrid)
-    ng2   <- length(ygrid)
-    area <- 0   
-    for (i in 2:ng1) {
-		    for (j in 2:ng2) {
-		        area <- area + (xgrid[i] - xgrid[i-1])*(ygrid[j] - ygrid[j-1])*(fgrid[i,j] + fgrid[i-1,j] + fgrid[i,j-1] + fgrid[i-1,j-1])/4
-		    }
+  ng1   <- length(xgrid)
+  ng2   <- length(ygrid)
+  area <- 0   
+  for (i in 2:ng1) {
+    for (j in 2:ng2) {
+      area <- area + (xgrid[i] - xgrid[i-1])*(ygrid[j] - ygrid[j-1])*(fgrid[i,j] + fgrid[i-1,j] + fgrid[i,j-1] + fgrid[i-1,j-1])/4
     }
-    return(area)
+  }
+  return(area)
 }
 
 djointLMM <- function(u,v,vy,mX,mSigma.inv) {
-		log.f <- matrix(0,length(u),length(v))
-		for (i in 1:length(u)) {
-		    for (j in 1:length(v)) {
-		        vtheta <- matrix(c(u[i],v[j]))
-		        veta <- mX%*%vtheta
-		        log.f[i,j] <- sum(vy*veta - log(pnorm(veta))) - 0.5*t(vtheta)%*%mSigma.inv%*%vtheta
-		    }
-		}
-		f <- exp(log.f - max(log.f))
-		area <- trapint2D(u,v,f) 
-		return(f/area)
+  log.f <- matrix(0,length(u),length(v))
+  for (i in 1:length(u)) {
+    for (j in 1:length(v)) {
+      vtheta <- matrix(c(u[i],v[j]))
+      veta <- mX%*%vtheta
+      log.f[i,j] <- sum(vy*pnorm(veta, log.p=TRUE) + (1-vy)*pnorm(veta, lower.tail=FALSE, log.p=TRUE)) - 0.5*t(vtheta)%*%mSigma.inv%*%vtheta
+    }
+  }
+  f <- exp(log.f - max(log.f))
+  area <- trapint2D(u,v,f) 
+  return(f/area)
 }
 
 u <- seq(-3,0.5,,100)
@@ -81,81 +82,81 @@ library(mvtnorm)
 
 fast.f <- function(mTheta,vy,mX,mSigma) 
 {
-    N <- nrow(mTheta)
-    n <- length(vy)
-    mY <- matrix(vy,n,N)
-    mEta <- mX%*%t(mTheta)
-
-    log.vp <- matrix(1,1,n)%*%(mY*mEta - pnorm(mEta)) + dmvnorm(mTheta,sigma=mSigma,log=TRUE)
-    return(log.vp)
+  N <- nrow(mTheta)
+  n <- length(vy)
+  mY <- matrix(vy,n,N)
+  mEta <- mX%*%t(mTheta)
+  
+  #vy*pnorm(veta, log.p=TRUE) + (1-vy)*pnorm(veta, lower.tail=FALSE, log.p=TRUE)
+  log.vp <- matrix(1,1,n)%*%(vy*pnorm(veta, log.p=TRUE) + (1-vy)*pnorm(veta, lower.tail=FALSE, log.p=TRUE)) + dmvnorm(mTheta,sigma=mSigma,log=TRUE)
+  return(log.vp)
 } 
 
 ###############################################################################
 
 ImportanceSampling <- function(N,vmu,mLambda,nu,vy,mX,mSigma,EPS) 
 {
-  browser()
-    MAXITER <- 10000000
-    log.vq <- rep(NA, MAXITER)
-    log.vp <- rep(NA, MAXITER)
-    for (ITER in 1:MAXITER) 
-    {
-				mZ <- rmvt(N, delta=as.vector(vmu), sigma=mLambda, df = nu, type = "shifted")
-				log.vq.new <- dmvt(mZ, delta=as.vector(vmu), sigma=mLambda, df = nu, log=TRUE, type = "shifted")
-				log.vp.new <- as.vector(fast.f(mZ,vy,mX,mSigma)) 
-		    log.vq[ITER] <- log.vq.new
-		    log.vp[ITER] <- log.vp.new
-				vw <- exp(log.vp - log.vq)
-				N <- length(vw)
-				I.hat <- mean(vw)
-				se <- sqrt(var(vw)/length(vw))
-				print(c(ITER,N,I.hat,se))
-				if (se<EPS) {
-				    break;
-				}
+  MAXITER <- 10000000
+  log.vq <- c()
+  log.vp <- c()
+  for (ITER in 1:MAXITER) 
+  {
+    mZ <- rmvt(N, delta=as.vector(vmu), sigma=mLambda, df = nu, type = "shifted")
+    log.vq.new <- dmvt(mZ, delta=as.vector(vmu), sigma=mLambda, df = nu, log=TRUE, type = "shifted")
+    log.vp.new <- as.vector(fast.f(mZ,vy,mX,mSigma)) 
+    log.vq <- c(log.vq,log.vq.new)
+    log.vp <- c(log.vp,log.vp.new)				
+    vw <- exp(log.vp - log.vq)
+    N <- length(vw)
+    I.hat <- mean(vw)
+    se <- sqrt(var(vw)/length(vw))
+    print(c(ITER,N,I.hat,se))
+    if (se<EPS) {
+      break;
     }
-    return(list(I.hat=I.hat,se=se,vw=vw))
+  }
+  return(list(I.hat=I.hat,se=se,vw=vw))
 }
 
 ###############################################################################
 
 NormalisedImportanceSampling <- function(N,vmu,mLambda,nu,vy,mX,mSigma) 
 {
-    log.vq <- c()
-    log.vp <- c()
-    
-    mZ <- rmvt(N, delta=as.vector(vmu), sigma=mLambda, df = nu, type = "shifted")
-	  log.vq <- dmvt(mZ, delta=as.vector(vmu), sigma=mLambda, df = nu, log=TRUE, type = "shifted")
-		log.vp <- as.vector(fast.f(mZ,vy,mX,mSigma)) 
-
-		vw <- exp(log.vp - log.vq)
-		vw <- vw/sum(vw)
-		
-		EXPECTED.VAL <- apply(t(mZ)*vw,1,sum)
-
-    return(list(EXPECTED.VAL=EXPECTED.VAL))
+  log.vq <- c()
+  log.vp <- c()
+  
+  mZ <- rmvt(N, delta=as.vector(vmu), sigma=mLambda, df = nu, type = "shifted")
+  log.vq <- dmvt(mZ, delta=as.vector(vmu), sigma=mLambda, df = nu, log=TRUE, type = "shifted")
+  log.vp <- as.vector(fast.f(mZ,vy,mX,mSigma)) 
+  
+  vw <- exp(log.vp - log.vq)
+  vw <- vw/sum(vw)
+  
+  EXPECTED.VAL <- apply(t(mZ)*vw,1,sum)
+  
+  return(list(EXPECTED.VAL=EXPECTED.VAL))
 }
 
 ###############################################################################
 
 LaplaceApproxPosterior <- function(vy,mX,mSigma.inv) 
 {
-    n <- length(vy)
-    d <- ncol(mX)
-    vtheta <- matrix(0,d,1)
-    for (ITER in 1:1000) 
-    {
-       vmu <- pnorm(mX%*%vtheta)
-       vg <- t(mX)%*%(vy - vmu) - mSigma.inv%*%vtheta
-       mH <- - t(mX*as.vector(vmu*(1 - vmu)))%*%mX - mSigma.inv
-       vtheta <- vtheta - solve(mH)%*%vg
-       err <- max(abs(vg))
-       if (err<1.0E-6) {
-           break;
-       }
-       print(c(ITER,err))
+  n <- length(vy)
+  d <- ncol(mX)
+  vtheta <- matrix(0,d,1)
+  for (ITER in 1:1000) 
+  {
+    vmu <- 1/(1+exp(-mX%*%vtheta))
+    vg <- t(mX)%*%(vy - vmu) - mSigma.inv%*%vtheta
+    mH <- - t(mX*as.vector(vmu*(1 - vmu)))%*%mX - mSigma.inv
+    vtheta <- vtheta - solve(mH)%*%vg
+    err <- max(abs(vg))
+    if (err<1.0E-6) {
+      break;
     }
-    return(list(vtheta=vtheta,mLambda=solve(-mH)))
+    print(c(ITER,err))
+  }
+  return(list(vtheta=vtheta,mLambda=solve(-mH)))
 }
 
 
