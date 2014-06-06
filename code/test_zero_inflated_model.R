@@ -99,7 +99,7 @@ test_multivariate_zip_no_zeros <- function()
   sigma2.beta = 1e5
 	a_sigma = 1e5
 	b_sigma = 1e5
-  test_data = generate_multivariate_test_data(mX, NULL, m, n, expected_rho, expected_nu, expected_sigma2_u)
+  test_data = generate_multivariate_test_data(mX, NULL, m, n, expected_rho, expected_mu, expected_sigma2_u)
 	vy = test_data$vy
 
 	# Test model fitting
@@ -126,7 +126,7 @@ test_multivariate_zip_half_zeros <- function()
 	sigma2.beta = 1e5  
 	a_sigma = 1e5
 	b_sigma = 1e5
-	test_data = generate_multivariate_test_data(mX, NULL, m, n, expected_rho, expected_nu, expected_sigma2_u)
+	test_data = generate_multivariate_test_data(mX, NULL, m, n, expected_rho, expected_mu, expected_sigma2_u)
 	vy = test_data$vy
 
 	# Test model fitting
@@ -259,16 +259,16 @@ main <- function()
 {
 	set.seed(5)
 	options(recover = dump.frames)
-	#test_univariate_zip()
+	test_univariate_zip()
 	# TODO: Add some sort of test for the accuracy of the approximation?
 
 	# Tests with multivariate fixed effects
-	#test_multivariate_zip_no_zeros()
-	#test_multivariate_zip_half_zeros()
+	test_multivariate_zip_no_zeros()
+	test_multivariate_zip_half_zeros()
 
 	# Tests with multivariate fixed effects and random intercepts
 	test_multivariate_zip_no_zeros_random_intercept()
-	#test_multivariate_zip_half_zeros_random_intercept()
+	test_multivariate_zip_half_zeros_random_intercept()
 }
 
 main()
