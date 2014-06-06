@@ -118,6 +118,28 @@ ImportanceSampling <- function(N,vmu,mLambda,nu,vy,mX,mSigma,EPS)
   return(list(I.hat=I.hat,se=se,vw=vw))
 }
 
+fast.f2 <- function(mult, mTheta,vy,vr,mX,mSigma) 
+{
+  N <- nrow(mTheta)
+  n <- length(vy)
+  mY <- matrix(vy,n,N)
+  vEta <- mX%*%t(mTheta)
+  
+  #vy*pnorm(veta, log.p=TRUE) + (1-vy)*pnorm(veta, lower.tail=FALSE, log.p=TRUE)
+  #log.vp <- matrix(1,1,n)%*%(vy*pnorm(vEta, log.p=TRUE) + (1-vy)*pnorm(vEta, lower.tail=FALSE, log.p=TRUE)) + dmvnorm(mTheta,sigma=mSigma,log=TRUE)
+
+  # Log-likelihood pertaining to vbeta and vu
+  veta = mC%*%vtheta  
+  log.vp <- t(vy*vr)%*%veta - t(vr)%*%exp(veta) - sum(lgamma(vy+1))
+  
+  # Prior
+  mSigma.vbeta = solve(mult$mSigma.beta.inv)
+  mSigma.vu = solve(mult$mSigma.u.inv)
+  log.vp <- log.vp + dmvnorm(vtheta, blockDiag(mSigma.vbeta, mSigma.vu), log=TRUE)
+  
+  return(log.vp)
+} 
+
 ###############################################################################
 
 NormalisedImportanceSampling <- function(N,vmu,mLambda,nu,vy,mX,mSigma) 
