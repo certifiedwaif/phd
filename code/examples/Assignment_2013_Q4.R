@@ -85,10 +85,10 @@ fast.f <- function(mTheta,vy,mX,mSigma)
   N <- nrow(mTheta)
   n <- length(vy)
   mY <- matrix(vy,n,N)
-  mEta <- mX%*%t(mTheta)
+  vEta <- mX%*%t(mTheta)
   
   #vy*pnorm(veta, log.p=TRUE) + (1-vy)*pnorm(veta, lower.tail=FALSE, log.p=TRUE)
-  log.vp <- matrix(1,1,n)%*%(vy*pnorm(veta, log.p=TRUE) + (1-vy)*pnorm(veta, lower.tail=FALSE, log.p=TRUE)) + dmvnorm(mTheta,sigma=mSigma,log=TRUE)
+  log.vp <- matrix(1,1,n)%*%(vy*pnorm(vEta, log.p=TRUE) + (1-vy)*pnorm(vEta, lower.tail=FALSE, log.p=TRUE)) + dmvnorm(mTheta,sigma=mSigma,log=TRUE)
   return(log.vp)
 } 
 
@@ -146,7 +146,8 @@ LaplaceApproxPosterior <- function(vy,mX,mSigma.inv)
   vtheta <- matrix(0,d,1)
   for (ITER in 1:1000) 
   {
-    vmu <- 1/(1+exp(-mX%*%vtheta))
+    #vmu <- 1/(1+exp(-mX%*%vtheta))
+    vmu <- pnorm(mX%*%vtheta)
     vg <- t(mX)%*%(vy - vmu) - mSigma.inv%*%vtheta
     mH <- - t(mX*as.vector(vmu*(1 - vmu)))%*%mX - mSigma.inv
     vtheta <- vtheta - solve(mH)%*%vg
