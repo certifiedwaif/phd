@@ -129,8 +129,8 @@ fast.f2 <- function(mult, mTheta,vy,vr,mX,mSigma)
   #log.vp <- matrix(1,1,n)%*%(vy*pnorm(vEta, log.p=TRUE) + (1-vy)*pnorm(vEta, lower.tail=FALSE, log.p=TRUE)) + dmvnorm(mTheta,sigma=mSigma,log=TRUE)
 
   # Log-likelihood pertaining to vbeta and vu
-  veta = mC%*%vtheta  
-  log.vp <- t(vy*vr)%*%veta - t(vr)%*%exp(veta) - sum(lgamma(vy+1))
+  veta = mC%*%mTheta  
+  log.vp <- t(vy*vr)%*%veta - t(vr)%*%exp(veta) - sum(lgamma(vy+1)) + dmvnorm(mTheta,sigma=mSigma,log=TRUE)
   
   # Prior
   mSigma.vbeta = solve(mult$mSigma.beta.inv)
