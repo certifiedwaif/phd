@@ -53,18 +53,19 @@ ImportanceSample <- function(mult)
     nu <- ncol(mX) + ncol(mZ)
     N <- nrow(mX)
 		mZ <- rmvt(N, delta=as.vector(vmu), sigma=mLambda, df = nu, type = "shifted")
-		log.vq.new <- dmvt(mZ, delta=as.vector(vmu), sigma=mLambda, df = nu, log=TRUE, type = "shifted")
-		log.vp.new <- as.vector(fast.f.zip(mult)) 
-		log.vq <- c(log.vq,log.vq.new)
-		log.vp <- c(log.vp,log.vp.new)				
-		vw <- exp(log.vp - log.vq)
+		log.vq <- dmvt(mZ, delta=as.vector(vmu), sigma=mLambda, df = nu, log=TRUE, type = "shifted")
+		log.vp <- as.vector(fast.f.zip(mult)) 
+		#log.vq <- c(log.vq,log.vq.new)
+		#log.vp <- c(log.vp,log.vp.new)				
+		vw <- exp(log.vp.new - log.vq.new)
 		N <- length(vw)
 		I.hat <- mean(vw)
 		se <- sqrt(var(vw)/length(vw))
-		print(c(ITER,N,I.hat,se))
-		if (se<EPS) {
-		  break;
-		}
+		#print(c(ITER,N,I.hat,se))
+		#if (se<EPS) {
+		#  break;
+		#}
+    list(I.hat=I.hat, se=se)
 	})
 }
 
@@ -107,7 +108,7 @@ fast.f.zip <- function(mult)
     #log.vp <- matrix(1,1,n)%*%(vy*pnorm(vEta, log.p=TRUE) + (1-vy)*pnorm(vEta, lower.tail=FALSE, log.p=TRUE)) + dmvnorm(mTheta,sigma=mSigma,log=TRUE)
   
     # Log-likelihood pertaining to vbeta and vu
-    veta = mC%*%vmu
+    veta = mC%*%as.vector(vmu)
     log.vp <- t(vy*vp)%*%veta - t(vp)%*%exp(veta) - sum(lgamma(vy+1))
     
     # Prior
@@ -117,7 +118,7 @@ fast.f.zip <- function(mult)
     mSigma.vbeta = solve(mult$mSigma.beta.inv)
     mSigma.vu = solve(mult$mSigma.u.inv)
     print(dim(blockDiag(mSigma.vbeta, mSigma.vu)))
-    log.vp <- log.vp + dmvnorm(vmu, blockDiag(mSigma.vbeta, mSigma.vu), log=TRUE)
+    log.vp <- log.vp + dmvnorm(vmu, mean=rep(0, length(vmu)), sigma=blockDiag(mSigma.vbeta, mSigma.vu), log=TRUE)
     
     log.vp
   })
@@ -136,15 +137,37 @@ mcmc <- function(mult)
   })
 	with(mult,
 	{
-		# FIXME: What will you do about vbeta and vu?
 		# Rather than do it RWMH in a loop, do one iteration? I don't see any reason why this
 		# shouldn't eventually converge.
-		vnu <- ImportanceSample(mult)
-		rho <- rbeta(alpha_rho + sum(vr), beta_rho + n - sum(vr))
-		veta <- -exp(mX%*%vbeta + mZ%*%vu) + logit(rho)
-		vr <- rbinom(expit(veta))
-		sigma2_u <- 1/rgamma(alpha_sigma2_u + m/2, beta_sigma2_u + 0.5*sum(vu^2) + 0.5*tr(mLambda[u_idx, u_idx]))
+		#vnu <- ImportanceSample(mult)
+    # FIXME: Where is vy?
+    n = length(vy)
+    m = ncol(mZ)
+    vnu <- RandomWalkMetropolisHastings(mult)
+		rho <- rbeta(1, a_rho + sum(vp), b_rho + n - sum(vp))
+		veta <- -exp(mC%*%as.vector(vnu)) + logit(rho)
+		vr <- rbinom(1, 1, expit(veta))
+    u_idx = (ncol(mX)+1):ncol(mC)
+		sigma2_u <- 1/rgamma(1, a_sigma + m/2, b_sigma + 0.5*sum(vnu[u_idx]^2) + 0.5*tr(mLambda[u_idx, u_idx]))
 	})
+}
+
+###############################################################################
+
+RandomWalkMetropolisHastings <- function(mult)
+{
+  with(mult, {
+    mSigma.beta = solve(mSigma.beta.inv)
+    mSigma.u = solve(mSigma.u.inv)
+    mult.new = mult
+    mult.new$vmu = rmvnorm(1, mean=vmu, sigma=blockDiag(mSigma.beta, mSigma.u))
+    ratio = min(1, fast.f.zip(mult.new)/fast.f.zip(mult))
+    if (runif(1) < ratio) {
+      mult.new$vmu
+    } else {
+      vmu
+    }
+  })
 }
 
 ###############################################################################
