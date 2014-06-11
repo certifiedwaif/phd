@@ -140,6 +140,15 @@ fast.f2 <- function(mult, mTheta,vy,vr,mX,mSigma)
   return(log.vp)
 } 
 
+mcmc.multivariate <- function(mult)
+{
+  m = ncol(mult$mZ)
+  rho = rbeta(mult$alpha_rho + sum(vr), mult$beta_rho + n - sum(vr))
+  veta = -exp(mult$mX%*%vbeta + mult$mZ%*%vu) + logit(rho)
+  vr = rbinom(expit(veta))
+  sigma2_u = 1/rgamma(mult$alpha_sigma2_u + m/2, mult$beta_sigma2_u + 0.5*sum(vu)^2 + 0.5*tr(mLambda[u_idx, u_idx]))
+}
+
 ###############################################################################
 
 NormalisedImportanceSampling <- function(N,vmu,mLambda,nu,vy,mX,mSigma) 
