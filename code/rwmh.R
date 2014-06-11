@@ -1,44 +1,5 @@
 ###############################################################################
 
-rawdata <- matrix(c(1, 53,
-                    1, 57,
-                    1, 58,
-                    1, 63,
-                    0, 66,
-                    0, 67,
-                    0, 67,
-                    0, 67,
-                    0, 68,
-                    0, 69,
-                    0, 70,
-                    0, 70,
-                    1, 70,
-                    1, 70,
-                    0, 72,
-                    0, 73,
-                    0, 75,
-                    1, 75,
-                    0, 76,
-                    0, 76,
-                    0, 78,
-                    0, 79,
-                    0, 81),23,2,byrow=T)
-
-w <- rawdata[,1]
-s <- rawdata[,2]
-
-vy <- w
-n  <- length(vy)
-mX <- cbind(rep(1,n),s-mean(s))
-d  <- ncol(mX)
-mSigma     <- diag(1.0E4,d)
-mSigma.inv <- diag(1.0E-4,d)
-
-res.glm <- glm(vy~-1+mX,family=binomial(link=probit))
-summary(res.glm)
-
-###############################################################################
-
 trapint2D <- function(xgrid, ygrid, fgrid) 
 {
   ng1   <- length(xgrid)
@@ -66,15 +27,6 @@ djointLMM <- function(u,v,vy,mX,mSigma.inv) {
   return(f/area)
 }
 
-u <- seq(-3,0.5,,100)
-v <- seq(-0.7,0.1,,100)
-
-f <- djointLMM(u,v,vy,mX,mSigma.inv)
-levels <- pretty(range(f),12)
-
-contour(u,v,f,levels=levels,lwd=2,main="Exact Posterior Density",cex.main=3)
-
-ans <- readline()
 
 ###############################################################################
 
@@ -91,6 +43,30 @@ fast.f <- function(mTheta,vy,mX,mSigma)
   log.vp <- matrix(1,1,n)%*%(vy*pnorm(vEta, log.p=TRUE) + (1-vy)*pnorm(vEta, lower.tail=FALSE, log.p=TRUE)) + dmvnorm(mTheta,sigma=mSigma,log=TRUE)
   return(log.vp)
 } 
+
+###############################################################################
+
+ImportanceSample <- function(mult)
+{
+	with(mult, {
+    # FIXME: WTF should nu be?
+    nu <- ncol(mX) + ncol(mZ)
+    N <- nrow(mX)
+		mZ <- rmvt(N, delta=as.vector(vmu), sigma=mLambda, df = nu, type = "shifted")
+		log.vq.new <- dmvt(mZ, delta=as.vector(vmu), sigma=mLambda, df = nu, log=TRUE, type = "shifted")
+		log.vp.new <- as.vector(fast.f.zip(mult)) 
+		log.vq <- c(log.vq,log.vq.new)
+		log.vp <- c(log.vp,log.vp.new)				
+		vw <- exp(log.vp - log.vq)
+		N <- length(vw)
+		I.hat <- mean(vw)
+		se <- sqrt(var(vw)/length(vw))
+		print(c(ITER,N,I.hat,se))
+		if (se<EPS) {
+		  break;
+		}
+	})
+}
 
 ###############################################################################
 
@@ -118,24 +94,33 @@ ImportanceSampling <- function(N,vmu,mLambda,nu,vy,mX,mSigma,EPS)
   return(list(I.hat=I.hat,se=se,vw=vw))
 }
 
-fast.f2 <- function(mult, mTheta,vy,vr,mX,mSigma) 
+fast.f.zip <- function(mult) 
 {
-  N <- nrow(mTheta)
-  n <- length(vy)
-  mY <- matrix(vy,n,N)
-  vEta <- mX%*%t(mTheta)
+  print(str(mult))
+  log.vp <- with(mult,{
+    
+    #N <- nrow(mTheta)
+    n <- length(vy)
+    #mY <- matrix(vy,n,N)
+    
+    #vy*pnorm(veta, log.p=TRUE) + (1-vy)*pnorm(veta, lower.tail=FALSE, log.p=TRUE)
+    #log.vp <- matrix(1,1,n)%*%(vy*pnorm(vEta, log.p=TRUE) + (1-vy)*pnorm(vEta, lower.tail=FALSE, log.p=TRUE)) + dmvnorm(mTheta,sigma=mSigma,log=TRUE)
   
-  #vy*pnorm(veta, log.p=TRUE) + (1-vy)*pnorm(veta, lower.tail=FALSE, log.p=TRUE)
-  #log.vp <- matrix(1,1,n)%*%(vy*pnorm(vEta, log.p=TRUE) + (1-vy)*pnorm(vEta, lower.tail=FALSE, log.p=TRUE)) + dmvnorm(mTheta,sigma=mSigma,log=TRUE)
-
-  # Log-likelihood pertaining to vbeta and vu
-  veta = mC%*%mTheta  
-  log.vp <- t(vy*vr)%*%veta - t(vr)%*%exp(veta) - sum(lgamma(vy+1)) + dmvnorm(mTheta,sigma=mSigma,log=TRUE)
-  
-  # Prior
-  mSigma.vbeta = solve(mult$mSigma.beta.inv)
-  mSigma.vu = solve(mult$mSigma.u.inv)
-  log.vp <- log.vp + dmvnorm(vtheta, blockDiag(mSigma.vbeta, mSigma.vu), log=TRUE)
+    # Log-likelihood pertaining to vbeta and vu
+    veta = mC%*%vmu
+    log.vp <- t(vy*vp)%*%veta - t(vp)%*%exp(veta) - sum(lgamma(vy+1))
+    
+    # Prior
+    print(length(vmu))
+    print(dim(mSigma.beta.inv))
+    print(dim(mSigma.u.inv))
+    mSigma.vbeta = solve(mult$mSigma.beta.inv)
+    mSigma.vu = solve(mult$mSigma.u.inv)
+    print(dim(blockDiag(mSigma.vbeta, mSigma.vu)))
+    log.vp <- log.vp + dmvnorm(vmu, blockDiag(mSigma.vbeta, mSigma.vu), log=TRUE)
+    
+    log.vp
+  })
   
   return(log.vp)
 } 
@@ -143,11 +128,18 @@ fast.f2 <- function(mult, mTheta,vy,vr,mX,mSigma)
 ###############################################################################
 mcmc <- function(mult)
 {
+	# Initialise with Laplacian approximation
+  print(str(mult))
+	lap_approx = with(mult, {
+    mSigma.inv = blockDiag(mSigma.beta.inv, mSigma.u.inv)
+    fit.Lap(vmu, vy, vp, mC, mSigma.inv, mLambda)
+  })
 	with(mult,
 	{
 		# FIXME: What will you do about vbeta and vu?
 		# Rather than do it RWMH in a loop, do one iteration? I don't see any reason why this
 		# shouldn't eventually converge.
+		vnu <- ImportanceSample(mult)
 		rho <- rbeta(alpha_rho + sum(vr), beta_rho + n - sum(vr))
 		veta <- -exp(mX%*%vbeta + mZ%*%vu) + logit(rho)
 		vr <- rbinom(expit(veta))
@@ -184,7 +176,7 @@ LaplaceApproxPosterior <- function(vy,mX,mSigma.inv)
   for (ITER in 1:1000) 
   {
     #vmu <- 1/(1+exp(-mX%*%vtheta))
-    #vmu <- pnorm(mX%*%vtheta)
+    vmu <- pnorm(mX%*%vtheta)
     vg <- t(mX)%*%(vy - vmu) - mSigma.inv%*%vtheta
     mH <- - t(mX*as.vector(vmu*(1 - vmu)))%*%mX - mSigma.inv
     vtheta <- vtheta - solve(mH)%*%vg
@@ -200,17 +192,29 @@ LaplaceApproxPosterior <- function(vy,mX,mSigma.inv)
 
 ###############################################################################
 
-res.lap <- LaplaceApproxPosterior(vy,mX,mSigma.inv) 
-
-vmu     <- res.lap$vtheta
-mLambda <- res.lap$mLambda
-nu      <- 8
-EPS     <- 1.0E-12
-N       <- 1000
-
-res.is <- ImportanceSampling(N,vmu,mLambda,nu,vy,mX,mSigma,EPS) 
-
-plot(density(res.is$vw))
-
-
-res.nis <- NormalisedImportanceSampling(100*length(res.is$vw),vmu,mLambda,nu,vy,mX,mSigma) 
+rwmh_main <- function()
+{
+  u <- seq(-3,0.5,,100)
+  v <- seq(-0.7,0.1,,100)
+  
+  f <- djointLMM(u,v,vy,mX,mSigma.inv)
+  levels <- pretty(range(f),12)
+  
+  contour(u,v,f,levels=levels,lwd=2,main="Exact Posterior Density",cex.main=3)
+  
+  ans <- readline()
+  
+  res.lap <- LaplaceApproxPosterior(vy,mX,mSigma.inv) 
+  
+  vmu     <- res.lap$vtheta
+  mLambda <- res.lap$mLambda
+  nu      <- 8
+  EPS     <- 1.0E-12
+  N       <- 1000
+  
+  res.is <- ImportanceSampling(N,vmu,mLambda,nu,vy,mX,mSigma,EPS) 
+  
+  plot(density(res.is$vw))
+  
+  res.nis <- NormalisedImportanceSampling(100*length(res.is$vw),vmu,mLambda,nu,vy,mX,mSigma) 
+}
