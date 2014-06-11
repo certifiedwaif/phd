@@ -10,16 +10,11 @@ f.lap <- function(vmu,vy,vr,mC,mSigma.inv,mLambda)
 {       
     d <- length(vmu)
     veta <- mC%*%vmu
-	# FIXME: This is awful, we shouldn't need to invert the whole matrix. There's
-	# a lot of room for improvement here.
 	mSigma <- solve(mSigma.inv)
 	# diag(mC mLambda mC^T)_i i = mC[i, ] . mLambda[, i] . mC[, i] 
     #f <- sum(vy*veta - vr*exp(veta+0.5*diag(mC%*%mLambda%*%t(mC)))) - 0.5*t(vmu)%*%mSigma.inv%*%vmu - 0.5*sum(diag(mLambda%*%mSigma))
-	# Are these really equivalent?
 	mDiag <- sapply(1:ncol(mC), function(i) sum(mC[i,] * mLambda[, i] * mC[, i]))
 	#mDiag2 <-  diag(mC%*%mLambda%*%t(mC))
-	#print(mDiag)
-	#print(mDiag2)
 	f <- sum(vy*veta - vr*exp(veta+0.5*mDiag)) - 0.5*t(vmu)%*%mSigma.inv%*%vmu - 0.5*sum(diag(mLambda%*%mSigma))
     return(f)
 }
@@ -67,9 +62,7 @@ fit.Lap <- function(vmu,vy,vr,mC,mSigma.inv,mLambda)
         f  <- f.lap(vmu,vy,vr,mC,mSigma.inv,mLambda)
         vg <- vg.lap(vmu,vy,vr,mC,mSigma.inv,mLambda)
         mH <- mH.lap(vmu,vy,vr,mC,mSigma.inv,mLambda)
-        print("A")
         mLambda <- solve(-mH,tol=1.0E-99)
-        print("B")        
         vmu <- vmu + mLambda%*%vg
         print(c(ITER,f,max(abs(vg))))
         cat("iterations", ITER, "f", f, "max(abs(vg))", max(abs(vg)))
@@ -87,7 +80,6 @@ fit.Lap <- function(vmu,vy,vr,mC,mSigma.inv,mLambda)
     #vmu <- res$par
     #mLambda <- solve(-mH.lap(vmu,vy,mC,mSigma.inv),tol=1.0E-99)
     
-	# FIXME: Should the mLambda on the next line be something else?
     f <- f.lap(vmu,vy,vr,mC,mSigma.inv,mLambda) + 0.5*log(det(mLambda%*%mSigma.inv))
     #print(f)
     return(list(vmu=vmu,mLambda=mLambda,f=f))

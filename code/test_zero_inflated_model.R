@@ -4,6 +4,7 @@
 # Check that lower bounds are monotonically increasing
 # Compare accuracy against MCMC
 source("zero_inflated_model.R")
+source("rwmh.R")
 require(testthat)
 
 generate_univariate_test_data <- function (n, rho, lambda)
@@ -254,21 +255,69 @@ test_multivariate_zip_half_zeros_random_intercept <- function()
 	expect_equal(result_sigma2_u, expected_sigma2_u, tolerance=3e-1)
 }
 
+test_multivariate_accuracy <- function()
+{
+	m = 20
+	ni = 5
+	n = rep(ni,m)
+	mX = matrix(as.vector(cbind(rep(1, sum(n)), runif(sum(n), -1, 1))), sum(n), 2)
+	#print("mX=")
+	#print(mX)
+	#cat("dim(mX)", dim(mX), "\n")
+	
+	#v = c(rep(1, g), rep(0, g))
+	# Indicator variables for groups
+	
+	#mZ = matrix(cbind(v, 1-v), sum(n), 2)
+	#mZ <- matrix(0,sum(n),m)
+	#count <- 0
+	#for (i in 1:m) {
+	#	mZ[count + (1:n[i]),i] <- 1
+	#	count <- count + n[i]
+	#}
+	
+	mZ <- kronecker(diag(1,m),rep(1,ni))
+	
+	#print("mZ=")
+	#print(mZ)
+	#cat("dim(mZ)", dim(mZ), "\n")
+	
+	expected_rho = 0.5
+	expected_beta = c(2, 1)
+	expected_sigma2_u = .5^2
+	a_sigma = 1e-2
+	b_sigma = 1e-2
+	
+	tau = 1.0E-2
+	
+	sigma2.beta <- 1.0E8
+	
+	test_data = generate_multivariate_test_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u)
+	vy = test_data$vy
+	
+	# Test accuracy
+	mult = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau)
+	mcmc_result = mcmc(mult)
+}
+
 #main_check_accuracy()
 main <- function()
 {
 	set.seed(5)
-	options(recover = dump.frames)
-	test_univariate_zip()
+	options(recover = traceback)
+	#test_univariate_zip()
 	# TODO: Add some sort of test for the accuracy of the approximation?
 
 	# Tests with multivariate fixed effects
-	test_multivariate_zip_no_zeros()
-	test_multivariate_zip_half_zeros()
+	#test_multivariate_zip_no_zeros()
+	#test_multivariate_zip_half_zeros()
 
 	# Tests with multivariate fixed effects and random intercepts
-	test_multivariate_zip_no_zeros_random_intercept()
-	test_multivariate_zip_half_zeros_random_intercept()
+	#test_multivariate_zip_no_zeros_random_intercept()
+	#test_multivariate_zip_half_zeros_random_intercept()
+
+	# Test multivariate approximation's accuracy
+	test_multivariate_accuracy()
 }
 
 main()

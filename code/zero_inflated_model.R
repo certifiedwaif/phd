@@ -247,9 +247,13 @@ create_multivariate <- function(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau)
   } else {
     mSigma.u.inv = NULL
   }
+	a_rho = 1 + sum(vp)
+	b_rho = n - sum(vp) + 1
+	
 	prior = list(a_sigma=a_sigma, b_sigma=b_sigma)
 	multivariate = list(vy=vy, mX=mX, mZ=mZ, mC=mC, vp=vp, vmu=vmu,
 						a_sigma=a_sigma, b_sigma=b_sigma,
+            a_rho=a_rho, b_rho=b_rho,
 						mLambda=mLambda,
 						prior=prior,
 						mSigma.beta.inv=mSigma.beta.inv,
