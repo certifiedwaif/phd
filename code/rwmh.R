@@ -145,8 +145,10 @@ mcmc <- function(mult)
     m = ncol(mZ)
     vnu <- RandomWalkMetropolisHastings(mult)
 		rho <- rbeta(1, a_rho + sum(vp), b_rho + n - sum(vp))
-		veta <- -exp(mC%*%as.vector(vnu)) + logit(rho)
-		vr <- rbinom(1, 1, expit(veta))
+    # FIXME: This is only needed on the zero set vy == 0
+    zero.set = vy == 0
+		veta <- -exp(mC[zero.set]%*%as.vector(vnu)) + logit(rho)
+		vr[zero.set] <- rbinom(1, 1, expit(veta))
     u_idx = (ncol(mX)+1):ncol(mC)
 		sigma2_u <- 1/rgamma(1, a_sigma + m/2, b_sigma + 0.5*sum(vnu[u_idx]^2) + 0.5*tr(mLambda[u_idx, u_idx]))
 	})
