@@ -298,6 +298,83 @@ test_multivariate_accuracy <- function()
 	# Test accuracy
 	mult = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau)
 	mcmc_result = mcmc(mult)
+  par(mfrow=c(2, 1))
+  hist(mcmc_result$vnu[1,])
+	hist(mcmc_result$vnu[2,])
+	par(mfrow=c(1, 1))
+	print(summary(mcmc_result$vnu[1,]))
+	print(summary(mcmc_result$vnu[2,]))
+	# Kernel density estimates of MCMC-estimated posteriors
+  # Use L_1 distance to compare against variational approximations of posteriors
+}
+
+# Calculate accuracy ----
+# Approximate the L1 norm between the variational approximation and
+# the MCMC approximation
+calculate_accuracy <- function(result_mcmc, result_var)
+{
+  density_mcmc_rho = density(result_mcmc$rho)
+  integrand <- function(x)
+  {
+    fn = splinefun(density_mcmc_rho$x, density_mcmc_rho$y)
+    return(abs(fn(x) - dbeta(x, result_var$a_rho, result_var$b_rho)))
+  }
+  integrate(integrand, min(density_mcmc_rho$x), max(density_mcmc_rho$x), subdivisions = length(density_mcmc_rho$x))
+  
+  density_mcmc_lambda = density(result_mcmc$lambda)
+  integrand <- function(x)
+  {
+    fn = splinefun(density_mcmc_lambda$x, density_mcmc_lambda$y)
+    return(abs(fn(x) - dgamma(x, result_var$a_lambda, result_var$b_lambda)))
+  }
+  result = integrate(integrand, min(density_mcmc_lambda$x), max(density_mcmc_lambda$x), subdivisions = length(density_mcmc_lambda$x))
+  accuracy = 1 - .5 * result$value
+  return(accuracy)
+}
+
+check_accuracy <- function(n, rho, lambda)
+{
+  x = generate_test_data(n, rho, lambda)
+  
+  a = 10
+  b = 10
+  
+  # MCMC ----
+  iterations = 1e6
+  burnin = 1e3
+  
+  start = Sys.time()
+  result_mcmc = zero_infl_mcmc(iterations+burnin, x, a, b)
+  mcmc_runtime = Sys.time() - start
+  # Throw away burn-in samples.
+  # Brackets turn out to be incredibly important here!!!
+  result_mcmc$rho = result_mcmc$rho[(burnin+1):(burnin+iterations+1)]
+  result_mcmc$lambda = result_mcmc$lambda[(burnin+1):(burnin+iterations+1)]
+  # 1000 iterations in 0.07461715 seconds.
+  
+  # Variational approximation ----
+  start = Sys.time()
+  result_var = zero_infl_var(x, a, b)
+  var_runtime = Sys.time() - start
+  # Variational approximation takes .05 seconds to run 10 iterations. So 5ms per iteration,
+  # or 200 iterations a second.
+  var_lambda = result_var$a_lambda / result_var$b_lambda
+  var_rho = result_var$a_rho / (result_var$a_rho + result_var$b_lambda)
+  
+  accuracy = calculate_accuracy(result_mcmc, result_var)
+  return(list(n=n, rho=rho, lambda=lambda, accuracy=accuracy))
+}
+
+# Check accuracy of the approximation for a range of parameter values ----
+main_check_accuracy <- function()
+{
+  n = 1000
+  rho = .5
+  lambda = 100
+  
+  for (rho in .1*1:9)
+    for (lambda in seq(5, 10, 0.05))
+      print(check_accuracy(n, rho, lambda))
 }
 
 #main_check_accuracy()

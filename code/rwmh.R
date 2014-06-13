@@ -97,7 +97,7 @@ ImportanceSampling <- function(N,vmu,mLambda,nu,vy,mX,mSigma,EPS)
 
 fast.f.zip <- function(mult, vtheta) 
 {
-  print(str(mult))
+  cat("fast.f.zip", vtheta, "\n")
   log.vp <- with(mult,{
     
     #N <- nrow(mTheta)
@@ -132,35 +132,50 @@ fast.f.zip <- function(mult, vtheta)
 mcmc <- function(mult)
 {
 	# Initialise with Laplacian approximation
-  print(str(mult))
+  #print(str(mult))
 	lap_approx = with(mult, {
     mSigma.inv = blockDiag(mSigma.beta.inv, mSigma.u.inv)
     fit.Lap(vmu, vy, vp, mC, mSigma.inv, mLambda)
   })
   print(str(lap_approx))
   mult$vmu = lap_approx$vmu
-  mult$vnu = rep(0, length(lap_approx$vmu))
   mult$mLambda = lap_approx$mLambda
-  with(mult,
+  result = with(mult,
 	{
 		# Rather than do it RWMH in a loop, do one iteration? I don't see any reason why this
 		# shouldn't eventually converge.
 		#vnu <- ImportanceSample(mult)
     # FIXME: Where is vy?
-    n = length(vy)
-    m = ncol(mZ)
-    vnu <- RandomWalkMetropolisHastings(mult, vnu)
-		rho <- rbeta(1, a_rho + sum(vp), b_rho + n - sum(vp))
-    # FIXME: This is only needed on the zero set vy == 0
-    zero.set = vy == 0
-		veta <- -exp(mC[zero.set,]%*%as.vector(vnu)) + logit(rho)
-    vr = rep(1, length(vy))
-		vr[zero.set] <- rbinom(1, 1, expit(veta))
+
+    # Initialise and set constants
+	  ITERATIONS = 1e4
+	  n = length(vy)
+	  m = ncol(mZ)
+	  zero.set = vy == 0
+    vr = matrix(NA, nrow = length(vy), ncol = ITERATIONS)
+    vr[,1] = rep(1, length(vy))
     u_idx = (ncol(mX)+1):ncol(mC)
-		sigma2_u <- 1/rgamma(1, a_sigma + m/2, b_sigma + 0.5*sum(vnu[u_idx]^2) + 0.5*tr(mLambda[u_idx, u_idx]))
+    vnu = matrix(NA, nrow = length(vmu), ncol = ITERATIONS)
+    vnu[,1] = rep(0, length(lap_approx$vmu))
+    veta = matrix(NA, nrow = length(vy), ncol = ITERATIONS)
+    rho = rep(NA, ITERATIONS)
+    sigma2_u = rep(NA, ITERATIONS)
+    
+    # Iterate
+    # TODO: To reduce memory consumption, implement thinning
+    for (i in 2:ITERATIONS) {
+      vnu[,i] <- RandomWalkMetropolisHastings(mult, vnu[,i-1])
+  		rho[i] <- rbeta(1, a_rho + sum(vr), b_rho + n - sum(vr))
+      # FIXME: This is only needed on the zero set vy == 0
+  		veta[zero.set,i] <- -exp(mC[zero.set,]%*%as.vector(vnu[,i])) + logit(rho[i])
+  		vr[zero.set,i] <- rbinom(1, 1, expit(veta[zero.set,i]))
+  		sigma2_u[i] <- 1/rgamma(1, a_sigma + m/2, b_sigma + 0.5*sum(vnu[u_idx, i]^2) + 0.5*tr(mLambda[u_idx, u_idx]))
+    }
     result = list(vnu=vnu, rho=rho, vr=vr, sigma2_u=sigma2_u)
-    print(result)
+
+    result
 	})
+  print(result)  
 }
 
 ###############################################################################
