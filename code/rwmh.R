@@ -95,7 +95,7 @@ ImportanceSampling <- function(N,vmu,mLambda,nu,vy,mX,mSigma,EPS)
   return(list(I.hat=I.hat,se=se,vw=vw))
 }
 
-fast.f.zip <- function(mult) 
+fast.f.zip <- function(mult, vtheta) 
 {
   print(str(mult))
   log.vp <- with(mult,{
@@ -108,21 +108,23 @@ fast.f.zip <- function(mult)
     #log.vp <- matrix(1,1,n)%*%(vy*pnorm(vEta, log.p=TRUE) + (1-vy)*pnorm(vEta, lower.tail=FALSE, log.p=TRUE)) + dmvnorm(mTheta,sigma=mSigma,log=TRUE)
   
     # Log-likelihood pertaining to vbeta and vu
-    veta = mC%*%as.vector(vmu)
+    veta = mC%*%as.vector(vtheta)
     log.vp <- t(vy*vp)%*%veta - t(vp)%*%exp(veta) - sum(lgamma(vy+1))
-    
+    cat("fast.f.zip: log.vp", log.vp, "\n")
     # Prior
-    print(length(vmu))
-    print(dim(mSigma.beta.inv))
-    print(dim(mSigma.u.inv))
-    mSigma.vbeta = solve(mult$mSigma.beta.inv)
-    mSigma.vu = solve(mult$mSigma.u.inv)
+    vtheta = as.vector(vtheta)
+    #print(length(vmu))
+    #print(dim(mSigma.beta.inv))
+    #print(dim(mSigma.u.inv))
+    mSigma.vbeta = solve(mSigma.beta.inv)
+    mSigma.vu = solve(mSigma.u.inv)
     print(dim(blockDiag(mSigma.vbeta, mSigma.vu)))
-    log.vp <- log.vp + dmvnorm(vmu, mean=rep(0, length(vmu)), sigma=blockDiag(mSigma.vbeta, mSigma.vu), log=TRUE)
+    log.vp <- log.vp + dmvnorm(vtheta, mean=rep(0, length(vmu)), sigma=blockDiag(mSigma.vbeta, mSigma.vu), log=TRUE)
+    cat("fast.f.zip: log.vp 2 ", log.vp, "\n")
     
     log.vp
   })
-  
+  cat("fast.f.zip: Returning", log.vp, "\n")
   return(log.vp)
 } 
 
@@ -135,7 +137,11 @@ mcmc <- function(mult)
     mSigma.inv = blockDiag(mSigma.beta.inv, mSigma.u.inv)
     fit.Lap(vmu, vy, vp, mC, mSigma.inv, mLambda)
   })
-	with(mult,
+  print(str(lap_approx))
+  mult$vmu = lap_approx$vmu
+  mult$vnu = rep(0, length(lap_approx$vmu))
+  mult$mLambda = lap_approx$mLambda
+  with(mult,
 	{
 		# Rather than do it RWMH in a loop, do one iteration? I don't see any reason why this
 		# shouldn't eventually converge.
@@ -143,31 +149,40 @@ mcmc <- function(mult)
     # FIXME: Where is vy?
     n = length(vy)
     m = ncol(mZ)
-    vnu <- RandomWalkMetropolisHastings(mult)
+    vnu <- RandomWalkMetropolisHastings(mult, vnu)
 		rho <- rbeta(1, a_rho + sum(vp), b_rho + n - sum(vp))
     # FIXME: This is only needed on the zero set vy == 0
     zero.set = vy == 0
-		veta <- -exp(mC[zero.set]%*%as.vector(vnu)) + logit(rho)
+		veta <- -exp(mC[zero.set,]%*%as.vector(vnu)) + logit(rho)
+    vr = rep(1, length(vy))
 		vr[zero.set] <- rbinom(1, 1, expit(veta))
     u_idx = (ncol(mX)+1):ncol(mC)
 		sigma2_u <- 1/rgamma(1, a_sigma + m/2, b_sigma + 0.5*sum(vnu[u_idx]^2) + 0.5*tr(mLambda[u_idx, u_idx]))
+    result = list(vnu=vnu, rho=rho, vr=vr, sigma2_u=sigma2_u)
+    print(result)
 	})
 }
 
 ###############################################################################
 
-RandomWalkMetropolisHastings <- function(mult)
+RandomWalkMetropolisHastings <- function(mult, vtheta)
 {
   with(mult, {
     mSigma.beta = solve(mSigma.beta.inv)
     mSigma.u = solve(mSigma.u.inv)
-    mult.new = mult
-    mult.new$vmu = rmvnorm(1, mean=vmu, sigma=blockDiag(mSigma.beta, mSigma.u))
-    ratio = min(1, fast.f.zip(mult.new)/fast.f.zip(mult))
+    #mult.new = mult
+    vnu_new = rmvnorm(1, mean=vmu, sigma=mLambda)
+    cat("RandomWalkMetropolisHastings: vnu_new", vnu_new, "\n")
+    ratio = min(1, exp(fast.f.zip(mult, vnu_new)-fast.f.zip(mult, vtheta)))
+    cat("RandomWalkMetropolisHastings: fast.f.zip(mult, vtheta)", fast.f.zip(mult, vtheta), "\n")
+    cat("RandomWalkMetropolisHastings: fast.f.zip(mult, vnu_new)", fast.f.zip(mult, vnu_new), "\n")
+    cat("RandomWalkMetropolisHastings: vtheta", vtheta, "\n")
+    cat("RandomWalkMetropolisHastings: vnu_new", vnu_new, "\n")
+    cat("RandomWalkMetropolisHastings: ratio", ratio)
     if (runif(1) < ratio) {
-      mult.new$vmu
+      vnu_new
     } else {
-      vmu
+      vtheta
     }
   })
 }
