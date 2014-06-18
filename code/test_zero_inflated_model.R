@@ -297,13 +297,14 @@ test_multivariate_accuracy <- function()
 	
 	# Test accuracy
 	mult = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau)
-	mcmc_result = mcmc(mult)
+	mcmc_result = mcmc(mult, 1e6)
   par(mfrow=c(2, 1))
   hist(mcmc_result$vnu[1,])
 	hist(mcmc_result$vnu[2,])
 	par(mfrow=c(1, 1))
 	print(summary(mcmc_result$vnu[1,]))
 	print(summary(mcmc_result$vnu[2,]))
+  browser()
 	# Kernel density estimates of MCMC-estimated posteriors
   # Use L_1 distance to compare against variational approximations of posteriors
 }

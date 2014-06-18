@@ -129,7 +129,7 @@ fast.f.zip <- function(mult, vtheta)
 } 
 
 ###############################################################################
-mcmc <- function(mult)
+mcmc <- function(mult, iterations=1e3)
 {
 	# Initialise with Laplacian approximation
   #print(str(mult))
@@ -148,7 +148,7 @@ mcmc <- function(mult)
     # FIXME: Where is vy?
 
     # Initialise and set constants
-	  ITERATIONS = 1e4
+	  ITERATIONS = iterations
 	  n = length(vy)
 	  m = ncol(mZ)
 	  zero.set = vy == 0
