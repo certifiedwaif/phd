@@ -95,9 +95,12 @@ ImportanceSampling <- function(N,vmu,mLambda,nu,vy,mX,mSigma,EPS)
   return(list(I.hat=I.hat,se=se,vw=vw))
 }
 
-fast.f.zip <- function(mult, vtheta) 
+fast.f.zip <- function(mult, vtheta,vr) 
 {
   cat("fast.f.zip", vtheta, "\n")
+  
+  #mult$vr <- vr
+  
   log.vp <- with(mult,{
     
     #N <- nrow(mTheta)
@@ -109,7 +112,7 @@ fast.f.zip <- function(mult, vtheta)
   
     # Log-likelihood pertaining to vbeta and vu
     veta = mC%*%as.vector(vtheta)
-    log.vp <- t(vy*vp)%*%veta - t(vp)%*%exp(veta) - sum(lgamma(vy+1))
+    log.vp <- t(vy*vr)%*%veta - t(vr)%*%exp(veta) - sum(lgamma(vy+1))
     cat("fast.f.zip: log.vp", log.vp, "\n")
     # Prior
     vtheta = as.vector(vtheta)
@@ -118,7 +121,7 @@ fast.f.zip <- function(mult, vtheta)
     #print(dim(mSigma.u.inv))
     mSigma.vbeta = solve(mSigma.beta.inv)
     mSigma.vu = solve(mSigma.u.inv)
-    print(dim(blockDiag(mSigma.vbeta, mSigma.vu)))
+    #print(dim(blockDiag(mSigma.vbeta, mSigma.vu)))
     log.vp <- log.vp + dmvnorm(vtheta, mean=rep(0, length(vmu)), sigma=blockDiag(mSigma.vbeta, mSigma.vu), log=TRUE)
     cat("fast.f.zip: log.vp 2 ", log.vp, "\n")
     
@@ -129,6 +132,19 @@ fast.f.zip <- function(mult, vtheta)
 } 
 
 ###############################################################################
+
+
+my.diag <- function(mA) {
+    k <- ncol(mA) 
+    Dinds <- k*((1:k)-1) + (1:k)
+    val <- mA[Dinds]
+    return(val)
+}
+
+my.tr <- function(mA) {
+	return( sum(my.diag(mA)) ) 
+}
+
 mcmc <- function(mult, iterations=1e3)
 {
 	# Initialise with Laplacian approximation
@@ -146,8 +162,11 @@ mcmc <- function(mult, iterations=1e3)
 	  ITERATIONS = iterations
 	  n = length(vy)
 	  m = ncol(mZ)
-	  zero.set = vy == 0
-    vr = matrix(NA, nrow = length(vy), ncol = ITERATIONS)
+	  zero.set = which(vy == 0)
+	  nnz <- length(zero.set)
+    vr = matrix(1, nrow = length(vy), ncol = ITERATIONS)
+    vr[!zero.set,] <- 1
+    vr[zero.set,]  <- rbinom(nnz,1,0.5) 
     vr[,1] = rep(1, length(vy))
     u_idx = (ncol(mX)+1):ncol(mC)
     vnu = matrix(NA, nrow = length(vmu), ncol = ITERATIONS)
@@ -156,16 +175,38 @@ mcmc <- function(mult, iterations=1e3)
     rho = rep(NA, ITERATIONS)
     sigma2_u = rep(NA, ITERATIONS)
     
+    d <- length(mult$vmu)
+    mR <- chol(((2.38^2)/d)*mult$mLambda)
+    
     # Iterate
     # TODO: To reduce memory consumption, implement thinning
     for (i in 2:ITERATIONS) {
-      vnu[,i] <- RandomWalkMetropolisHastings(mult, vnu[,i-1])
+      vnu[,i] <- RandomWalkMetropolisHastings(mult, vnu[,i-1],mR,vr[,i])
   		rho[i] <- rbeta(1, a_rho + sum(vr[,i]), b_rho + n - sum(vr[,i]))
       # FIXME: This is only needed on the zero set vy == 0
   		veta[zero.set,i] <- -exp(mC[zero.set,]%*%as.vector(vnu[,i])) + logit(rho[i])
-  		vr[zero.set,i] <- rbinom(1, 1, expit(veta[zero.set,i]))
-  		#sigma2_u[i] <- 1/rgamma(1, a_sigma + 0.5*m, b_sigma + 0.5*sum(vnu[u_idx, i]^2) + 0.5*tr(mLambda[u_idx, u_idx]))
-  		sigma2_u[i] <- 1/rgamma(1, a_sigma + 0.5*m, b_sigma + 0.5*(n-1)*var(vnu[u_idx, i]) + 0.5*tr(mLambda[u_idx, u_idx]))
+  		
+  		print(nnz)
+  		print(length(zero.set))
+  		
+  		val <- c()
+  		for (j in 1:nnz) {
+  			val[j] <- rbinom(1, 1, expit(veta[zero.set[j],i]))
+  		}
+  		
+  		print(val)
+  		print(vr[zero.set,i] )
+  		
+  		print(n)
+  		
+  		vr[zero.set,i] <- val
+  		sigma2_u[i] <- 1/rgamma(1, a_sigma + 0.5*m, b_sigma + 0.5*sum(vnu[u_idx, i]^2))
+  		#sigma2_u[i] <- 1/rgamma(1, a_sigma + 0.5*m, b_sigma + 0.5*(n-1)*var(vnu[u_idx, i]) + 0.5*tr(mLambda[u_idx, u_idx]))
+  		
+  		cat("\n")
+		cat("i=",i,"\n")
+		cat("\n")
+  		
     }
     result = list(vnu=vnu, rho=rho, vr=vr, sigma2_u=sigma2_u)
 
@@ -176,20 +217,23 @@ mcmc <- function(mult, iterations=1e3)
 
 ###############################################################################
 
-RandomWalkMetropolisHastings <- function(mult, vtheta)
+RandomWalkMetropolisHastings <- function(mult, vtheta,mR,vr)
 {
   with(mult, {
     mSigma.beta = solve(mSigma.beta.inv)
     mSigma.u = solve(mSigma.u.inv)
     #mult.new = mult
-    vnu_new = rmvnorm(1, mean=vmu, sigma=mLambda)
+    
+    d <- length(vtheta)
+    #vnu_new = vtheta + rmvnorm(1, mean=0*vtheta, sigma=((2.38^2)/d)*mLambda)
+    vnu_new = vtheta + t(mR)%*%matrix(rnorm(d))
     cat("RandomWalkMetropolisHastings: vnu_new", vnu_new, "\n")
-    ratio = min(1, exp(fast.f.zip(mult, vnu_new)-fast.f.zip(mult, vtheta)))
-    cat("RandomWalkMetropolisHastings: fast.f.zip(mult, vtheta)", fast.f.zip(mult, vtheta), "\n")
-    cat("RandomWalkMetropolisHastings: fast.f.zip(mult, vnu_new)", fast.f.zip(mult, vnu_new), "\n")
+    ratio = min(1, exp(fast.f.zip(mult, vnu_new,vr)-fast.f.zip(mult, vtheta,vr)))
+    cat("RandomWalkMetropolisHastings: fast.f.zip(mult, vtheta,vr)", fast.f.zip(mult, vtheta,vr), "\n")
+    cat("RandomWalkMetropolisHastings: fast.f.zip(mult, vnu_new,vr)", fast.f.zip(mult, vnu_new,vr), "\n")
     cat("RandomWalkMetropolisHastings: vtheta", vtheta, "\n")
     cat("RandomWalkMetropolisHastings: vnu_new", vnu_new, "\n")
-    cat("RandomWalkMetropolisHastings: ratio", ratio)
+    cat("RandomWalkMetropolisHastings: ratio", ratio, "\n")
     if (runif(1) < ratio) {
       vnu_new
     } else {
