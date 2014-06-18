@@ -142,13 +142,8 @@ mcmc <- function(mult)
   mult$mLambda = lap_approx$mLambda
   result = with(mult,
 	{
-		# Rather than do it RWMH in a loop, do one iteration? I don't see any reason why this
-		# shouldn't eventually converge.
-		#vnu <- ImportanceSample(mult)
-    # FIXME: Where is vy?
-
     # Initialise and set constants
-	  ITERATIONS = 1e4
+	  ITERATIONS = 3e3
 	  n = length(vy)
 	  m = ncol(mZ)
 	  zero.set = vy == 0
@@ -169,7 +164,8 @@ mcmc <- function(mult)
       # FIXME: This is only needed on the zero set vy == 0
   		veta[zero.set,i] <- -exp(mC[zero.set,]%*%as.vector(vnu[,i])) + logit(rho[i])
   		vr[zero.set,i] <- rbinom(1, 1, expit(veta[zero.set,i]))
-  		sigma2_u[i] <- 1/rgamma(1, a_sigma + m/2, b_sigma + 0.5*sum(vnu[u_idx, i]^2) + 0.5*tr(mLambda[u_idx, u_idx]))
+  		#sigma2_u[i] <- 1/rgamma(1, a_sigma + 0.5*m, b_sigma + 0.5*sum(vnu[u_idx, i]^2) + 0.5*tr(mLambda[u_idx, u_idx]))
+  		sigma2_u[i] <- 1/rgamma(1, a_sigma + 0.5*m, b_sigma + 0.5*(n-1)*var(vnu[u_idx, i]) + 0.5*tr(mLambda[u_idx, u_idx]))
     }
     result = list(vnu=vnu, rho=rho, vr=vr, sigma2_u=sigma2_u)
 
