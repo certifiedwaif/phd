@@ -165,7 +165,7 @@ mcmc <- function(mult)
     # TODO: To reduce memory consumption, implement thinning
     for (i in 2:ITERATIONS) {
       vnu[,i] <- RandomWalkMetropolisHastings(mult, vnu[,i-1])
-  		rho[i] <- rbeta(1, a_rho + sum(vr), b_rho + n - sum(vr))
+  		rho[i] <- rbeta(1, a_rho + sum(vr[,i]), b_rho + n - sum(vr[,i]))
       # FIXME: This is only needed on the zero set vy == 0
   		veta[zero.set,i] <- -exp(mC[zero.set,]%*%as.vector(vnu[,i])) + logit(rho[i])
   		vr[zero.set,i] <- rbinom(1, 1, expit(veta[zero.set,i]))
