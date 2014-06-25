@@ -302,7 +302,9 @@ regression model.
 
 \subsection{Lower bound}
 % Explain how most of the lower bound for the univariate model can simply be re-used, but \lambda is replaced
-% with \vbeta
+% with \vbeta, \vu
+% You can build the lower bound out of re-usable terms like T_1, T_2, T_3, ...
+% We're just introducing a replacement T_1
 $$
 \bE_q [\log{p(y, \theta)} - \log{q(\theta)}] = 
 \vy \mP^T C \vmu - \vp^T\exp{(C\vmu + \half \vmu^T \mLambda \vmu)} - \vone^T\log{(\vy + \vone)} +

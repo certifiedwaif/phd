@@ -208,7 +208,7 @@ mcmc <- function(mult, iterations=1e3)
 		cat("\n")
   		
     }
-    result = list(vnu=vnu, rho=rho, vr=vr, sigma2_u=sigma2_u)
+    result = list(vnu=vnu, rho=rho, vr=vr, sigma2_u=sigma2_u, vy=vy)
 
     result
 	})

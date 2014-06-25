@@ -304,6 +304,23 @@ test_multivariate_accuracy <- function()
 	par(mfrow=c(1, 1))
 	print(summary(mcmc_result$vnu[1,]))
 	print(summary(mcmc_result$vnu[2,]))
+  # TODO: Compare MCMC distribution with variational approximation for each parameter
+  # vnu[i] ~ Normal, dnorm
+  # sigma2_u ~ IG, dgamma(1/x)
+  # rho ~ Beta, dbeta
+  # vr[i] ~ Bernoulli, dbinom
+	result_var = zero_infl_var(multivariate, method="gva", verbose=TRUE)
+  # For each parameter of interest,
+  # * estimate density of MCMC
+  # * compare with q distribution using L_1 norm
+	density_mcmc_vnu[1] = density(mcmc_result$vnu[1])
+	integrand <- function(x)
+	{
+	  fn = splinefun(density_mcmc_vnu[1]$x, density_mcmc_vnu$y)
+	  return(abs(fn(x) - dnorm(x, result_var$vmu[1], result_var$mLambda[1,1])))
+	}
+	result = integrate(integrand, min(density_mcmc_vnu[1]$x), max(density_mcmc_vnu[1]$x), subdivisions = length(density_mcmc_lambda$x))
+	accuracy = 1 - .5 * result$value
   browser()
 	# Kernel density estimates of MCMC-estimated posteriors
   # Use L_1 distance to compare against variational approximations of posteriors
