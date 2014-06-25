@@ -304,8 +304,9 @@ regression model.
 % Explain how most of the lower bound for the univariate model can simply be re-used, but \lambda is replaced
 % with \vbeta
 $$
-\bE_q [\log{p(y, \theta)} - \log{q(\theta)}] = \vy \vp^T \mX\vmu - \vp \exp{(\mX\vmu + \half \vmu^T \Lambda \vmu)} - \log{(\vy + \vone)}
-+ \half (|2\pi \Lambda| + \vmu^T \Lambda^{-1} \vmu)
+\bE_q [\log{p(y, \theta)} - \log{q(\theta)}] = 
+\vy \mP^T C \vmu - \vp^T\exp{(C\vmu + \half \vmu^T \mLambda \vmu)} - \vone^T\log{(\vy + \vone)} +
+\half \log{|\mLambda|} + \frac{p + m}{2} (1 + \log{(2 \pi)})
 $$
 
 For $\sigma^2_u$,
@@ -314,16 +315,34 @@ $$
 $$
 
 where
+
 $$
 \bE_q[\log{(\sigma_u^2)}] = - \{\alpha_{\sigma_u^2}^2 - \log{\beta_{q(\sigma_u^2)}} + \log{\Gamma(\alpha_{q(\sigma_u^2)})} + (1-\alpha_{q(\sigma_u^2)})\Psi{(\alpha_{q(\sigma_u^2)})}\}
 $$
 
 and
+
 $$
 \bE_q[\sigma_u^{-2}] = \frac{\alpha_{q(\sigma_u^2)}}{\beta_{q(\sigma_u^2)}}
 $$
 
-\subsection{Results}
+Second try ...
+
+For $\sigma^2_u$,
+$$
+\bE_q[\log{p(\sigma^2_u)} - \log{q(\sigma^2_u)}] =
+\alpha_{\sigma^2_u} \log{\beta_{\sigma^2_u}} - \log{\Gamma{(\alpha_{\sigma^2_u})}} +
+(\alpha_{\sigma^2_u} - 1) \bE_q	\log{\sigma^2_u} - \beta_{\sigma^2_u} \bE_q [\sigma^2_u] +
+\log{\Gamma(\alpha^*_{\sigma^2_u})} - (\alpha^*_{\sigma^2_u} - 1) \Psi{(\alpha^*_{\sigma^2_u})} - \log{(\beta^*_{\sigma^2_u})} - \log{(\alpha^*_{\sigma^2_u} + \beta^*_{\sigma^2_u})}\\
+=\alpha_{\sigma^2_u} \log{\beta_{\sigma^2_u}} - \log{\Gamma{(\alpha_{\sigma^2_u})}} +
+(\alpha_{\sigma^2_u} - 1) \Psi{\alpha^*_{\sigma^2_u}} - \log{(\beta^*_{\sigma^2_u})} - \beta_{\sigma^2_u} \frac{\alpha^*_{\sigma^2_u}}{\beta^*_{\sigma^2_u}} + \\
+\log{\Gamma(\alpha^*_{\sigma^2_u})} - (\alpha^*_{\sigma^2_u} - 1) \Psi{(\alpha^*_{\sigma^2_u})} - \log{(\beta^*_{\sigma^2_u})} - \log{(\alpha^*_{\sigma^2_u} + \beta^*_{\sigma^2_u})}
+$$
+
+where
+
+$\alpha^*_{\sigma^2_u} = \alpha_{\sigma^2_u} + \frac{m}{2}$,
+$\beta^*_{\sigma^2_u} = \beta_{\sigma^2_u} + \frac{\|\vmu_\vu\|^2}{2} + \frac{\tr{(\mLambda_{\vu \vu})}}{2}$ \subsection{Results}
 
 \section{Theory of variational approximation of zero-inflated Poisson models}
 Let $Z_i = R_i Y_i$.
