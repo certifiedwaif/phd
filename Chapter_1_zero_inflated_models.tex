@@ -337,18 +337,22 @@ $$
 \alpha_{\sigma^2_u} \log{\beta_{\sigma^2_u}} - \log{\Gamma{(\alpha_{\sigma^2_u})}} +
 (\alpha_{\sigma^2_u} - 1) \bE_q	\log{\sigma^2_u}\\
 &- \beta_{\sigma^2_u} \bE_q [\sigma^2_u] +
-\log{\Gamma(\alpha^*_{\sigma^2_u})} - (\alpha^*_{\sigma^2_u} - 1) \Psi{(\alpha^*_{\sigma^2_u})} - \log{(\beta^*_{\sigma^2_u})} - \log{(\alpha^*_{\sigma^2_u} + \beta^*_{\sigma^2_u})}\\
+\log{\Gamma(\alpha_{q(\sigma^2_u)})} - (\alpha_{q(\sigma^2_u)} - 1) \Psi{(\alpha_{q(\sigma^2_u)})} - \log{(\beta_{q(\sigma^2_u)})}\\
+&- \log{(\alpha_{q(\sigma^2_u)} + \beta_{q(\sigma^2_u)})}\\
 &=\alpha_{\sigma^2_u} \log{\beta_{\sigma^2_u}} - \log{\Gamma{(\alpha_{\sigma^2_u})}} +
-(\alpha_{\sigma^2_u} - 1) \Psi{\alpha^*_{\sigma^2_u}} - \log{(\beta^*_{\sigma^2_u})} \\
-&- \beta_{\sigma^2_u} \frac{\alpha^*_{\sigma^2_u}}{\beta^*_{\sigma^2_u}} + 
-\log{\Gamma(\alpha^*_{\sigma^2_u})} - (\alpha^*_{\sigma^2_u} - 1) \Psi{(\alpha^*_{\sigma^2_u})} - \log{(\beta^*_{\sigma^2_u})} - \log{(\alpha^*_{\sigma^2_u} + \beta^*_{\sigma^2_u})}
+(\alpha_{\sigma^2_u} - 1) \Psi{\alpha_{q(\sigma^2_u)}} - \log{(\beta_{q(\sigma^2_u)})} \\
+&- \beta_{\sigma^2_u} \frac{\alpha_{q(\sigma^2_u)}}{\beta_{q(\sigma^2_u)}} + 
+\log{\Gamma(\alpha_{q(\sigma^2_u)})} - (\alpha_{q(\sigma^2_u)} - 1) \Psi{(\alpha_{q(\sigma^2_u)})} - \log{(\beta_{q(\sigma^2_u)})}\\
+&- \log{(\alpha_{q(\sigma^2_u)} + \beta_{q(\sigma^2_u)})}
 \end{array}
 $$
 
 where
 
-$\alpha^*_{\sigma^2_u} = \alpha_{\sigma^2_u} + \frac{m}{2}$,
-$\beta^*_{\sigma^2_u} = \beta_{\sigma^2_u} + \frac{\|\vmu_\vu\|^2}{2} + \frac{\tr{(\mLambda_{\vu \vu})}}{2}$ \subsection{Results}
+$\alpha_{q(\sigma^2_u)} = \alpha_{\sigma^2_u} + \frac{m}{2}$,
+$\beta_{q(\sigma^2_u)} = \beta_{\sigma^2_u} + \frac{\|\vmu_\vu\|^2}{2} + \frac{\tr{(\mLambda_{\vu \vu})}}{2}$
+
+\subsection{Results}
 
 \section{Theory of variational approximation of zero-inflated Poisson models}
 Let $Z_i = R_i Y_i$.
