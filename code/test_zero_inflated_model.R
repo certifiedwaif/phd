@@ -297,7 +297,8 @@ test_multivariate_accuracy <- function()
 	
 	# Test accuracy
 	mult = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau)
-	mcmc_result = mcmc(mult, 1e5)
+	mcmc_result = mcmc(mult, 1e4)
+  # TODO: Drop off burn-in samples
   par(mfrow=c(2, 1))
   hist(mcmc_result$vnu[1,])
 	hist(mcmc_result$vnu[2,])
@@ -309,17 +310,17 @@ test_multivariate_accuracy <- function()
   # sigma2_u ~ IG, dgamma(1/x)
   # rho ~ Beta, dbeta
   # vr[i] ~ Bernoulli, dbinom
-	result_var = zero_infl_var(multivariate, method="gva", verbose=TRUE)
+	result_var = zero_infl_var(mult, method="laplacian", verbose=TRUE)
   # For each parameter of interest,
   # * estimate density of MCMC
   # * compare with q distribution using L_1 norm
-	density_mcmc_vnu[1] = density(mcmc_result$vnu[1])
+	density_mcmc_vnu = density(mcmc_result$vnu[1,])
 	integrand <- function(x)
 	{
-	  fn = splinefun(density_mcmc_vnu[1]$x, density_mcmc_vnu$y)
+	  fn = splinefun(density_mcmc_vnu$x, density_mcmc_vnu$y)
 	  return(abs(fn(x) - dnorm(x, result_var$vmu[1], result_var$mLambda[1,1])))
 	}
-	result = integrate(integrand, min(density_mcmc_vnu[1]$x), max(density_mcmc_vnu[1]$x), subdivisions = length(density_mcmc_lambda$x))
+	result = integrate(integrand, min(density_mcmc_vnu$x), max(density_mcmc_vnu$x), subdivisions = length(density_mcmc_vnu$x))
 	accuracy = 1 - .5 * result$value
   browser()
 	# Kernel density estimates of MCMC-estimated posteriors
