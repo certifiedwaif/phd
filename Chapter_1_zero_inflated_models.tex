@@ -311,34 +311,38 @@ $$
 \half \log{|\mLambda|} + \frac{p + m}{2} (1 + \log{(2 \pi)})
 $$
 
-For $\sigma^2_u$,
-$$
-\bE_q [\log{p(\sigma_u^2)} - \log{q(\sigma_u^2)}] = \frac{m}{2} \bE_q [\log{\sigma_u^{-2}}] - (\half \|\mu_u\|^2 + \tr(\Lambda_{uu})) \bE_q [\sigma_u^{-2}] - \log{\Gamma(\alpha_{\sigma_u^2})} + \log{\Gamma(\alpha_{\sigma_u^2} + \frac{m}{2} - 1)}
-$$
-
-where
-
-$$
-\bE_q[\log{(\sigma_u^2)}] = - \{\alpha_{\sigma_u^2}^2 - \log{\beta_{q(\sigma_u^2)}} + \log{\Gamma(\alpha_{q(\sigma_u^2)})} + (1-\alpha_{q(\sigma_u^2)})\Psi{(\alpha_{q(\sigma_u^2)})}\}
-$$
-
-and
-
-$$
-\bE_q[\sigma_u^{-2}] = \frac{\alpha_{q(\sigma_u^2)}}{\beta_{q(\sigma_u^2)}}
-$$
+%For $\sigma^2_u$,
+%$$
+%\bE_q [\log{p(\sigma_u^2)} - \log{q(\sigma_u^2)}] = \frac{m}{2} \bE_q [\log{\sigma_u^{-2}}] - (\half \|\mu_u\|^2 + \tr(\Lambda_{uu})) \bE_q [\sigma_u^{-2}] - \log{\Gamma(\alpha_{\sigma_u^2})} + \log{\Gamma(\alpha_{\sigma_u^2} + \frac{m}{2} - 1)}
+%$$
+%
+%where
+%
+%$$
+%\bE_q[\log{(\sigma_u^2)}] = - \{\alpha_{\sigma_u^2}^2 - \log{\beta_{q(\sigma_u^2)}} + \log{\Gamma(\alpha_{q(\sigma_u^2)})} + (1-\alpha_{q(\sigma_u^2)})\Psi{(\alpha_{q(\sigma_u^2)})}\}
+%$$
+%
+%and
+%
+%$$
+%\bE_q[\sigma_u^{-2}] = \frac{\alpha_{q(\sigma_u^2)}}{\beta_{q(\sigma_u^2)}}
+%$$
 
 Second try ...
 
 For $\sigma^2_u$,
 $$
-\bE_q[\log{p(\sigma^2_u)} - \log{q(\sigma^2_u)}] =
+\begin{array}{ll}
+\bE_q[\log{p(\sigma^2_u)} - \log{q(\sigma^2_u)}] &=
 \alpha_{\sigma^2_u} \log{\beta_{\sigma^2_u}} - \log{\Gamma{(\alpha_{\sigma^2_u})}} +
-(\alpha_{\sigma^2_u} - 1) \bE_q	\log{\sigma^2_u} - \beta_{\sigma^2_u} \bE_q [\sigma^2_u] +
+(\alpha_{\sigma^2_u} - 1) \bE_q	\log{\sigma^2_u}\\
+&- \beta_{\sigma^2_u} \bE_q [\sigma^2_u] +
 \log{\Gamma(\alpha^*_{\sigma^2_u})} - (\alpha^*_{\sigma^2_u} - 1) \Psi{(\alpha^*_{\sigma^2_u})} - \log{(\beta^*_{\sigma^2_u})} - \log{(\alpha^*_{\sigma^2_u} + \beta^*_{\sigma^2_u})}\\
-=\alpha_{\sigma^2_u} \log{\beta_{\sigma^2_u}} - \log{\Gamma{(\alpha_{\sigma^2_u})}} +
-(\alpha_{\sigma^2_u} - 1) \Psi{\alpha^*_{\sigma^2_u}} - \log{(\beta^*_{\sigma^2_u})} - \beta_{\sigma^2_u} \frac{\alpha^*_{\sigma^2_u}}{\beta^*_{\sigma^2_u}} + \\
+&=\alpha_{\sigma^2_u} \log{\beta_{\sigma^2_u}} - \log{\Gamma{(\alpha_{\sigma^2_u})}} +
+(\alpha_{\sigma^2_u} - 1) \Psi{\alpha^*_{\sigma^2_u}} - \log{(\beta^*_{\sigma^2_u})} \\
+&- \beta_{\sigma^2_u} \frac{\alpha^*_{\sigma^2_u}}{\beta^*_{\sigma^2_u}} + 
 \log{\Gamma(\alpha^*_{\sigma^2_u})} - (\alpha^*_{\sigma^2_u} - 1) \Psi{(\alpha^*_{\sigma^2_u})} - \log{(\beta^*_{\sigma^2_u})} - \log{(\alpha^*_{\sigma^2_u} + \beta^*_{\sigma^2_u})}
+\end{array}
 $$
 
 where
