@@ -182,7 +182,7 @@ mcmc <- function(mult, iterations=1e3)
     for (i in 2:ITERATIONS) {
       #browser()
       vnu[,i] <- RandomWalkMetropolisHastings(mult, vnu[,i-1],mR,vr[,i-1])
-  		rho[i] <- rbeta(1, a_rho + sum(vr[,i-1]), b_rho + n - sum(vr[,i-1]))
+  		rho[i] <- rbeta(1, prior$a_rho + sum(vr[,i-1]), prior$b_rho + n - sum(vr[,i-1]))
       # FIXME: This is only needed on the zero set vy == 0
   		veta[zero.set,i] <- -exp(mC[zero.set,]%*%as.vector(vnu[,i])) + logit(rho[i])
   		
