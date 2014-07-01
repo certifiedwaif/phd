@@ -145,8 +145,8 @@ calculate_lower_bound.multivariate <- function(multivariate)
 	result = result + 0.5 * (det(2*pi*mLambda) + t(vmu) %*% solve(mLambda) %*% vmu)
 
   # Second try ...
-  result = result + t(vy*vp) %*% mC %*% vmu - t(vp) %*% exp(mC %*% vmu + .5 * t(vmu)%*%mLambda%*%vmu)
-  result = result  - sum(lgamma(vy + 1)) + .5*log(det(mLambda)) + .5*(p+m)(1 + log(2*pi))
+  #result = result + t(vy*vp) %*% mC %*% vmu - t(vp) %*% exp(mC %*% vmu + .5 * t(vmu)%*%mLambda%*%vmu)
+  #result = result  - sum(lgamma(vy + 1)) + .5*log(det(mLambda)) + .5*(p+m)(1 + log(2*pi))
   
 	# Terms for sigma2_u
   if (!is.null(multivariate$mZ)) {
@@ -158,8 +158,8 @@ calculate_lower_bound.multivariate <- function(multivariate)
   
   # Second try ...
   # How do you distinguish between the variational parameters and the priors?
-  result = result + a_sigma2_u * log(b_sigma2_u) - lgamma(a_sigma2_u) + (a_sigma2_u - 1)*psi(E_sigma2_u)
-  result = result - b_sigma2_u * E_sigma2_u + lgamma(a_sigma2_) # Same problem.
+  #result = result + a_sigma2_u * log(b_sigma2_u) - lgamma(a_sigma2_u) + (a_sigma2_u - 1)*psi(E_sigma2_u)
+  #result = result - b_sigma2_u * E_sigma2_u + lgamma(a_sigma2_) # Same problem.
   
 	return(result)
 }
