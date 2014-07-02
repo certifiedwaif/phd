@@ -95,9 +95,9 @@ ImportanceSampling <- function(N,vmu,mLambda,nu,vy,mX,mSigma,EPS)
   return(list(I.hat=I.hat,se=se,vw=vw))
 }
 
-fast.f.zip <- function(mult, vtheta,vr) 
+fast.f.zip <- function(mult, vtheta, vr) 
 {
-  cat("fast.f.zip", vtheta, "\n")
+  #cat("fast.f.zip", vtheta, "\n")
   
   #mult$vr <- vr
   
@@ -113,7 +113,7 @@ fast.f.zip <- function(mult, vtheta,vr)
     # Log-likelihood pertaining to vbeta and vu
     veta = mC%*%as.vector(vtheta)
     log.vp <- t(vy*vr)%*%veta - t(vr)%*%exp(veta) - sum(lgamma(vy+1))
-    cat("fast.f.zip: log.vp", log.vp, "\n")
+    #cat("fast.f.zip: log.vp", log.vp, "\n")
     # Prior
     vtheta = as.vector(vtheta)
     #print(length(vmu))
@@ -123,11 +123,11 @@ fast.f.zip <- function(mult, vtheta,vr)
     mSigma.vu = solve(mSigma.u.inv)
     #print(dim(blockDiag(mSigma.vbeta, mSigma.vu)))
     log.vp <- log.vp + dmvnorm(vtheta, mean=rep(0, length(vmu)), sigma=blockDiag(mSigma.vbeta, mSigma.vu), log=TRUE)
-    cat("fast.f.zip: log.vp 2 ", log.vp, "\n")
+    #cat("fast.f.zip: log.vp 2 ", log.vp, "\n")
     
     log.vp
   })
-  cat("fast.f.zip: Returning", log.vp, "\n")
+  #cat("fast.f.zip: Returning", log.vp, "\n")
   return(log.vp)
 } 
 
@@ -164,10 +164,9 @@ mcmc <- function(mult, iterations=1e3)
 	  m = ncol(mZ)
 	  zero.set = which(vy == 0)
 	  nnz <- length(zero.set)
-    vr = matrix(1, nrow = length(vy), ncol = ITERATIONS)
-    vr[!zero.set,] <- 1
-    vr[zero.set,]  <- rbinom(nnz,1,0.5) 
-    vr[,1] = rep(1, length(vy))
+    vr = matrix(NA, nrow = length(vy), ncol = ITERATIONS)
+	  vr[,1] = rep(1, length(vy))
+    vr[zero.set,1]  <- rbinom(nnz,1,0.5) 
     u_idx = (ncol(mX)+1):ncol(mC)
     vnu = matrix(NA, nrow = length(vmu), ncol = ITERATIONS)
     vnu[,1] = rep(0, length(lap_approx$vmu))
@@ -181,31 +180,33 @@ mcmc <- function(mult, iterations=1e3)
     # Iterate
     # TODO: To reduce memory consumption, implement thinning
     for (i in 2:ITERATIONS) {
-      vnu[,i] <- RandomWalkMetropolisHastings(mult, vnu[,i-1],mR,vr[,i])
-  		rho[i] <- rbeta(1, a_rho + sum(vr[,i]), b_rho + n - sum(vr[,i]))
+      #browser()
+      vnu[,i] <- RandomWalkMetropolisHastings(mult, vnu[,i-1],mR,vr[,i-1])
+  		rho[i] <- rbeta(1, prior$a_rho + sum(vr[,i-1]), prior$b_rho + n - sum(vr[,i-1]))
       # FIXME: This is only needed on the zero set vy == 0
   		veta[zero.set,i] <- -exp(mC[zero.set,]%*%as.vector(vnu[,i])) + logit(rho[i])
   		
-  		print(nnz)
-  		print(length(zero.set))
+  		#print(nnz)
+  		#print(length(zero.set))
   		
   		val <- c()
   		for (j in 1:nnz) {
   			val[j] <- rbinom(1, 1, expit(veta[zero.set[j],i]))
   		}
   		
-  		print(val)
-  		print(vr[zero.set,i] )
+  		#print(val)
+  		#print(vr[zero.set,i] )
   		
-  		print(n)
-  		
+  		#print(n)
+  		vr[,i] <- 1
   		vr[zero.set,i] <- val
   		sigma2_u[i] <- 1/rgamma(1, a_sigma + 0.5*m, b_sigma + 0.5*sum(vnu[u_idx, i]^2))
   		#sigma2_u[i] <- 1/rgamma(1, a_sigma + 0.5*m, b_sigma + 0.5*(n-1)*var(vnu[u_idx, i]) + 0.5*tr(mLambda[u_idx, u_idx]))
   		
-  		cat("\n")
-		cat("i=",i,"\n")
-		cat("\n")
+  		#cat("\n")
+		if ((i %% 1000) == 0)
+      cat("i=",i,"\n")
+		#cat("\n")
   		
     }
     result = list(vnu=vnu, rho=rho, vr=vr, sigma2_u=sigma2_u, vy=vy)
@@ -226,14 +227,14 @@ RandomWalkMetropolisHastings <- function(mult, vtheta, mR, vr)
     
     d <- length(vtheta)
     #vnu_new = vtheta + rmvnorm(1, mean=0*vtheta, sigma=((2.38^2)/d)*mLambda)
-    vnu_new = vtheta + t(mR)%*%matrix(rnorm(d))
-    cat("RandomWalkMetropolisHastings: vnu_new", vnu_new, "\n")
+    vnu_new = vtheta + t(mR)%*%matrix(((2.38^2)/d)*rnorm(d))
+    #cat("RandomWalkMetropolisHastings: vnu_new", vnu_new, "\n")
     ratio = min(1, exp(fast.f.zip(mult, vnu_new,vr)-fast.f.zip(mult, vtheta,vr)))
-    cat("RandomWalkMetropolisHastings: fast.f.zip(mult, vtheta,vr)", fast.f.zip(mult, vtheta,vr), "\n")
-    cat("RandomWalkMetropolisHastings: fast.f.zip(mult, vnu_new,vr)", fast.f.zip(mult, vnu_new,vr), "\n")
-    cat("RandomWalkMetropolisHastings: vtheta", vtheta, "\n")
-    cat("RandomWalkMetropolisHastings: vnu_new", vnu_new, "\n")
-    cat("RandomWalkMetropolisHastings: ratio", ratio, "\n")
+    #cat("RandomWalkMetropolisHastings: fast.f.zip(mult, vtheta,vr)", fast.f.zip(mult, vtheta,vr), "\n")
+    #cat("RandomWalkMetropolisHastings: fast.f.zip(mult, vnu_new,vr)", fast.f.zip(mult, vnu_new,vr), "\n")
+    #cat("RandomWalkMetropolisHastings: vtheta", vtheta, "\n")
+    #cat("RandomWalkMetropolisHastings: vnu_new", vnu_new, "\n")
+    #cat("RandomWalkMetropolisHastings: ratio", ratio, "\n")
     if (runif(1) < ratio) {
       vnu_new
     } else {
