@@ -217,7 +217,7 @@ mcmc <- function(mult, iterations=1e3)
 
 ###############################################################################
 
-RandomWalkMetropolisHastings <- function(mult, vtheta,mR,vr)
+RandomWalkMetropolisHastings <- function(mult, vtheta, mR, vr)
 {
   with(mult, {
     mSigma.beta = solve(mSigma.beta.inv)
