@@ -33,7 +33,12 @@ fast.f.zip <- function(mult, vtheta, vr)
     mSigma.vbeta = solve(mSigma.beta.inv)
     #mSigma.vu = solve(mSigma.u.inv)
     #print(dim(blockDiag(mSigma.vbeta, mSigma.vu)))
-    log.vp <- log.vp + dmvnorm(vtheta, mean=rep(0, length(vmu)), sigma=blockDiag(mSigma.vbeta, mSigma.vu), log=TRUE)
+    # Break into fixed effects part and random effects part
+    #log.vp <- log.vp + dmvnorm(vtheta, mean=rep(0, length(vmu)), sigma=blockDiag(mSigma.vbeta, mSigma.vu), log=TRUE)
+    fixed_idx = 1:ncol(mX)
+    u_idx = (ncol(mX) + 1):ncol(mC)
+    log.vp <- log.vp + dmvnorm(vtheta[fixed_idx], mean=rep(0, ncol(mX)), sigma=mSigma.vbeta, log=TRUE)
+    log.vp <- log.vp + dmvnorm(vtheta[u_idx], mean=rep(0, ncol(mZ)), sigma=mSigma.vu, log=TRUE)
     #cat("fast.f.zip: log.vp 2 ", log.vp, "\n")
     
     log.vp
