@@ -291,47 +291,124 @@ test_multivariate_accuracy <- function()
 	
 	tau = 1.0E2
 	
-	sigma2.beta <- 1.0E8
+	sigma2.beta <- 1.0E3
 	
 	test_data = generate_multivariate_test_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u)
 	vy = test_data$vy
 	
 	# Test accuracy
 	mult = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau)
-	mcmc_result = mcmc(mult, iterations=1e6+2000, burnin=2000)
-  # TODO: Drop off burn-in samples
+	mcmc_result = mcmc(mult, iterations=1e5+2000, burnin=2000, thinning=1)
+
   par(mfrow=c(2, 1))
   hist(mcmc_result$vnu[1,])
 	hist(mcmc_result$vnu[2,])
 	par(mfrow=c(1, 1))
 	print(summary(mcmc_result$vnu[1,]))
 	print(summary(mcmc_result$vnu[2,]))
-  # TODO: Compare MCMC distribution with variational approximation for each parameter
+	var_result = zero_infl_var(mult, method="gva", verbose=TRUE)
+	
+  # Compare MCMC distribution with variational approximation for each parameter
   # vnu[i] ~ Normal, dnorm
   # sigma2_u ~ IG, dgamma(1/x)
   # rho ~ Beta, dbeta
   # vr[i] ~ Bernoulli, dbinom
-	result_var = zero_infl_var(mult, method="laplacian", verbose=TRUE)
   # For each parameter of interest,
   # * estimate density of MCMC
   # * compare with q distribution using L_1 norm
-	t = 2
-	density_mcmc_vnu = density(mcmc_result$vnu[t,])
-	integrand <- function(x)
-	{
-	  fn = splinefun(density_mcmc_vnu$x, density_mcmc_vnu$y)
-	  return(abs(fn(x) - dnorm(x, result_var$vmu[t], sqrt(result_var$mLambda[t,t]))))
-	}
-	result = integrate(integrand, min(density_mcmc_vnu$x), max(density_mcmc_vnu$x), subdivisions = length(density_mcmc_vnu$x))
-	accuracy = 1 - .5 * result$value
-	t = 2
-	plot(density(mcmc_result$vnu[t,]))
-	curve(dnorm(x, result_var$vmu[t], sqrt(result_var$mLambda[t,t])),
-        from=min(density(mcmc_result$vnu[t,])$x), to=max(density(mcmc_result$vnu[t,])$x),
-        add=TRUE, lty=2, col="blue")
-  browser()
+  
 	# Kernel density estimates of MCMC-estimated posteriors
-  # Use L_1 distance to compare against variational approximations of posteriors
+	# Use L_1 distance to compare against variational approximations of posteriors
+	par(mfrow=c(2,1))
+  # Pseudocode:
+  # Estimate density
+  # Define integrand, using distribution and parameters.
+  # Calculate accuracy integral
+  # Plots
+  calculate_accuracy = function(mcmc_samples, dist_fn, param1, param2)
+  {
+    #cat("dist_fn", deparse(substitute(dist_fn)), "\n")
+    #cat("param1", param1, "\n")
+    #cat("param2", param2, "\n")
+    mcmc_density = density(mcmc_samples)
+  	mcmc_fn = splinefun(mcmc_density$x, mcmc_density$y)
+  	
+  	integrand <- function(x)
+  	{
+  	  return(abs(mcmc_fn(x) - dist_fn(x, param1, param2)))
+  	}
+    #cat("min(mcmc_density$x)", min(mcmc_density$x), "\n")
+    #cat("max(mcmc_density$x)", max(mcmc_density$x), "\n")
+    result = integrate(integrand, min(mcmc_density$x), max(mcmc_density$x),
+                       subdivisions = length(mcmc_density$x))
+  	accuracy = 1 - .5 * result$value
+    return(accuracy)
+  }
+  # vnu accuracy
+	for (t in 1:nrow(mcmc_result$vnu)) {
+	  accuracy = calculate_accuracy(mcmc_result$vnu[t,], dnorm,
+	                                var_result$vmu[t], sqrt(var_result$mLambda[t,t]))
+    cat("vnu[", t, "] accuracy: ", accuracy, "\n")
+	}
+  # sigma2_u accuracy
+	accuracy = calculate_accuracy(1/mcmc_result$sigma2_u, dgamma,
+	                              var_result$a_sigma, var_result$b_sigma)
+	cat("sigma2_u accuracy: ", accuracy, "\n")
+  
+  # rho accuracy
+	accuracy = calculate_accuracy(mcmc_result$rho, dbeta,
+	                              var_result$a_rho, var_result$b_rho)
+	cat("rho accuracy: ", accuracy, "\n")
+	
+	accuracy_plot = function(mcmc_samples, dist_fn, param1, param2)
+	{
+    mcmc_density = density(mcmc_samples)
+    plot(mcmc_density)
+    curve(dist_fn(x, param1, param2),
+          from=min(mcmc_density$x), to=max(mcmc_density$x),
+          add=TRUE, lty=2, col="blue")
+	}
+	par(mfrow=c(2,1))
+	accuracy_plot(mcmc_result$vnu[t,], dnorm, 
+                var_result$vmu[t], sqrt(var_result$mLambda[t,t]))
+  plot(mcmc_result$vnu[t,], type="l")
+  par(mfrow=c(1,1))
+	browser()
+  t = 6
+  plot(mcmc_result$vnu[t,1:(1e4-1)], mcmc_result$vnu[t,2:1e4])
+  acf(mcmc_result$vnu[t,])
+	pacf(mcmc_result$vnu[t,])
+	
+	par(mfrow=c(2,1))
+	accuracy_plot(1/mcmc_result$sigma2_u, dgamma,
+	                              var_result$a_sigma, var_result$b_sigma)
+	plot(1/mcmc_result$sigma2_u, type="l")
+	par(mfrow=c(1,1))
+	plot(mcmc_result$sigma2_u[1:(1e4-1)], mcmc_result$sigma2_u[2:1e4])
+	
+	par(mfrow=c(2,1))
+	accuracy_plot(mcmc_result$rho, dbeta,
+	              var_result$a_rho, var_result$b_rho)
+	plot(mcmc_result$rho, type="l")
+	plot(mcmc_result$rho[1:(1e4-1)], mcmc_result$rho[2:1e4])
+	par(mfrow=c(1,1))
+	
+	par(mfrow=c(2,1))
+	density_mcmc_sigma2_u_inv = density(1/mcmc_result$sigma2_u)
+	plot(density_mcmc_sigma2_u_inv)
+	curve(dgamma(x, result_var$a_sigma, result_var$b_sigma),
+	      from=min(density_mcmc_sigma2_u_inv$x), to=max(density_mcmc_sigma2_u_inv$x),
+	      add=TRUE, lty=2, col="blue")
+	par(mfrow=c(1,1))
+	
+	par(mfrow=c(2,1))
+	density_mcmc_rho = density(mcmc_result$rho)
+	plot(density_mcmc_rho)
+	curve(dbeta(x, result_var$a_rho, result_var$b_rho),
+	      from=min(density_mcmc_rho$x), to=max(density_mcmc_rho$x),
+	      add=TRUE, lty=2, col="blue")
+	par(mfrow=c(1,1))
+	
 }
 
 # Calculate accuracy ----
@@ -421,6 +498,8 @@ main <- function()
 
 	# Test multivariate approximation's accuracy
 	test_multivariate_accuracy()
+  # The fixed intercept is too high, and the fixed slope parameter is too low. This is
+  # unlikely to be a coincidence.
 }
 
 main()

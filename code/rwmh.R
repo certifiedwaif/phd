@@ -33,7 +33,12 @@ fast.f.zip <- function(mult, vtheta, vr)
     mSigma.vbeta = solve(mSigma.beta.inv)
     #mSigma.vu = solve(mSigma.u.inv)
     #print(dim(blockDiag(mSigma.vbeta, mSigma.vu)))
-    log.vp <- log.vp + dmvnorm(vtheta, mean=rep(0, length(vmu)), sigma=blockDiag(mSigma.vbeta, mSigma.vu), log=TRUE)
+    # Break into fixed effects part and random effects part
+    #log.vp <- log.vp + dmvnorm(vtheta, mean=rep(0, length(vmu)), sigma=blockDiag(mSigma.vbeta, mSigma.vu), log=TRUE)
+    fixed_idx = 1:ncol(mX)
+    u_idx = (ncol(mX) + 1):ncol(mC)
+    log.vp <- log.vp + dmvnorm(vtheta[fixed_idx], mean=rep(0, ncol(mX)), sigma=mSigma.vbeta, log=TRUE)
+    log.vp <- log.vp + dmvnorm(vtheta[u_idx], mean=rep(0, ncol(mZ)), sigma=mSigma.vu, log=TRUE)
     #cat("fast.f.zip: log.vp 2 ", log.vp, "\n")
     
     log.vp
@@ -44,7 +49,7 @@ fast.f.zip <- function(mult, vtheta, vr)
 
 ###############################################################################
 
-mcmc <- function(mult, iterations=1e3, burnin=round(iterations/10))
+mcmc <- function(mult, iterations=1e3, burnin=round(iterations/10), thinning=10)
 {
 	# Initialise with Laplacian approximation
   #print(str(mult))
@@ -75,7 +80,7 @@ mcmc <- function(mult, iterations=1e3, burnin=round(iterations/10))
     sigma2_u = rep(NA, ITERATIONS)
     
     d <- length(mult$vmu)
-    mR <- chol(((2.38^2)/d)*mult$mLambda)
+    mR <- chol(mult$mLambda)
     
     # Iterate
     # TODO: To reduce memory consumption, implement thinning
@@ -113,6 +118,7 @@ mcmc <- function(mult, iterations=1e3, burnin=round(iterations/10))
   		
     }
     idx = burnin:iterations
+    idx = idx[idx %% thinning == 0]
     result = list(vnu=vnu[,idx], accept=accept[idx], rho=rho[idx], vr=vr[idx],
                   sigma2_u=sigma2_u[idx], vy=vy)
 
@@ -135,7 +141,7 @@ RandomWalkMetropolisHastings <- function(mult, vtheta, mR, vr)
     
     d <- length(vtheta)
     #vnu_new = vtheta + rmvnorm(1, mean=0*vtheta, sigma=((2.38^2)/d)*mLambda)
-    vnu_new = vtheta + t(mR)%*%matrix(((2.38^2)/d)*rnorm(d))
+    vnu_new = vtheta + (mR)%*%matrix(sqrt((2.38^2)/d)*rnorm(d))
     #cat("RandomWalkMetropolisHastings: vnu_new", vnu_new, "\n")
     ratio = min(1, exp(fast.f.zip(mult, vnu_new,vr)-fast.f.zip(mult, vtheta,vr)))
     #cat("RandomWalkMetropolisHastings: fast.f.zip(mult, vtheta,vr)", fast.f.zip(mult, vtheta,vr), "\n")
