@@ -49,7 +49,7 @@ fast.f.zip <- function(mult, vtheta, vr)
 
 ###############################################################################
 
-mcmc <- function(mult, iterations=1e3, burnin=round(iterations/10))
+mcmc <- function(mult, iterations=1e3, burnin=round(iterations/10), thinning=10)
 {
 	# Initialise with Laplacian approximation
   #print(str(mult))
@@ -118,6 +118,7 @@ mcmc <- function(mult, iterations=1e3, burnin=round(iterations/10))
   		
     }
     idx = burnin:iterations
+    idx = idx[idx %% thinning == 0]
     result = list(vnu=vnu[,idx], accept=accept[idx], rho=rho[idx], vr=vr[idx],
                   sigma2_u=sigma2_u[idx], vy=vy)
 
