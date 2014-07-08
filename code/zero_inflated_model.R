@@ -267,7 +267,9 @@ create_multivariate <- function(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau)
 						mLambda=mLambda,
 						prior=prior,
 						mSigma.beta.inv=mSigma.beta.inv,
-						mSigma.u.inv=mSigma.u.inv)
+						mSigma.u.inv=mSigma.u.inv,
+            mSigma.beta=solve(mSigma.beta.inv),
+            mSigma.vu=solve(mSigma.u.inv))
 	class(multivariate) = "multivariate"
 	return(multivariate)
 }
