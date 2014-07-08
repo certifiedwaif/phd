@@ -80,7 +80,7 @@ mcmc <- function(mult, iterations=1e3, burnin=round(iterations/10), thinning=10)
     sigma2_u = rep(NA, ITERATIONS)
     
     d <- length(mult$vmu)
-    mR <- chol(((2.38^2)/d)*mult$mLambda)
+    mR <- chol(mult$mLambda)
     
     # Iterate
     # TODO: To reduce memory consumption, implement thinning
@@ -141,7 +141,7 @@ RandomWalkMetropolisHastings <- function(mult, vtheta, mR, vr)
     
     d <- length(vtheta)
     #vnu_new = vtheta + rmvnorm(1, mean=0*vtheta, sigma=((2.38^2)/d)*mLambda)
-    vnu_new = vtheta + t(mR)%*%matrix(((2.38^2)/d)*rnorm(d))
+    vnu_new = vtheta + (mR)%*%matrix(sqrt((2.38^2)/d)*rnorm(d))
     #cat("RandomWalkMetropolisHastings: vnu_new", vnu_new, "\n")
     ratio = min(1, exp(fast.f.zip(mult, vnu_new,vr)-fast.f.zip(mult, vtheta,vr)))
     #cat("RandomWalkMetropolisHastings: fast.f.zip(mult, vtheta,vr)", fast.f.zip(mult, vtheta,vr), "\n")

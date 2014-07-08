@@ -297,7 +297,7 @@ test_multivariate_accuracy <- function()
 	
 	# Test accuracy
 	mult = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau)
-	mcmc_result = mcmc(mult, iterations=1e4+2000, burnin=2000)
+	mcmc_result = mcmc(mult, iterations=1e5+2000, burnin=2000, thinning=1)
 
   par(mfrow=c(2, 1))
   hist(mcmc_result$vnu[1,])
