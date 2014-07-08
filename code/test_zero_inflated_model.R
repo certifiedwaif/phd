@@ -297,7 +297,7 @@ test_multivariate_accuracy <- function()
 	
 	# Test accuracy
 	mult = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau)
-	mcmc_result = mcmc(mult, iterations=1e6+2000, burnin=2000)
+	mcmc_result = mcmc(mult, iterations=1e4+2000, burnin=2000)
 
   par(mfrow=c(2, 1))
   hist(mcmc_result$vnu[1,])
@@ -359,14 +359,38 @@ test_multivariate_accuracy <- function()
 	                              var_result$a_rho, var_result$b_rho)
 	cat("rho accuracy: ", accuracy, "\n")
 	
-	plot(density(mcmc_result$vnu[t,]))
-	curve(dnorm(x, result_var$vmu[t], sqrt(result_var$mLambda[t,t])),
-        from=min(density_mcmc_vnu$x), to=max(density_mcmc_vnu$x),
-        add=TRUE, lty=2, col="blue")
-  print(accuracy)
+	accuracy_plot = function(mcmc_samples, dist_fn, param1, param2)
+	{
+    mcmc_density = density(mcmc_samples)
+    plot(mcmc_density)
+    curve(dist_fn(x, param1, param2),
+          from=min(mcmc_density$x), to=max(mcmc_density$x),
+          add=TRUE, lty=2, col="blue")
+	}
+	par(mfrow=c(2,1))
+	accuracy_plot(mcmc_result$vnu[t,], dnorm, 
+                var_result$vmu[t], sqrt(var_result$mLambda[t,t]))
   plot(mcmc_result$vnu[t,], type="l")
   par(mfrow=c(1,1))
 	browser()
+  t = 6
+  plot(mcmc_result$vnu[t,1:(1e4-1)], mcmc_result$vnu[t,2:1e4])
+  acf(mcmc_result$vnu[t,])
+	pacf(mcmc_result$vnu[t,])
+	
+	par(mfrow=c(2,1))
+	accuracy_plot(1/mcmc_result$sigma2_u, dgamma,
+	                              var_result$a_sigma, var_result$b_sigma)
+	plot(1/mcmc_result$sigma2_u, type="l")
+	par(mfrow=c(1,1))
+	plot(mcmc_result$sigma2_u[1:(1e4-1)], mcmc_result$sigma2_u[2:1e4])
+	
+	par(mfrow=c(2,1))
+	accuracy_plot(mcmc_result$rho, dbeta,
+	              var_result$a_rho, var_result$b_rho)
+	plot(mcmc_result$rho, type="l")
+	plot(mcmc_result$rho[1:(1e4-1)], mcmc_result$rho[2:1e4])
+	par(mfrow=c(1,1))
 	
 	par(mfrow=c(2,1))
 	density_mcmc_sigma2_u_inv = density(1/mcmc_result$sigma2_u)
