@@ -6,6 +6,7 @@
 source("zero_inflated_model.R")
 source("rwmh.R")
 require(testthat)
+require(Matrix)
 
 generate_univariate_test_data <- function (n, rho, lambda)
 {
@@ -297,7 +298,7 @@ test_multivariate_accuracy <- function()
 	
 	# Test accuracy
 	mult = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau)
-	mcmc_result = mcmc(mult, 1e5)
+	mcmc_result = mcmc(mult, iterations=1e6+2000, burnin=2000)
   # TODO: Drop off burn-in samples
   par(mfrow=c(2, 1))
   hist(mcmc_result$vnu[1,])
