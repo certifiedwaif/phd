@@ -1,3 +1,4 @@
+# univariate_stan.R
 require(rstan)
 
 zip_code <- '
