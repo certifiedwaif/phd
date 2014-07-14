@@ -452,7 +452,7 @@ test_multivariate_accuracy_stan <- function()
   vy = test_data$vy
   
   # Test accuracy
-  #mult = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau)
+  mult = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau)
   #mcmc_result = mcmc(mult, iterations=1e5+2000, burnin=2000, thinning=1)
   # Use Stan to create MCMC samples, because Stan deals much better with highly
   # correlated posteriors.
@@ -460,16 +460,7 @@ test_multivariate_accuracy_stan <- function()
   zip_dat <- list(N=sum(n), P=2, M=m, y=vy, X=mX, Z=mZ)
   print(str(zip_dat))
   fit <- stan(model_code = zip_code, data = zip_dat, 
-              iter = 1e5, chains = 4)  
-  plot(fit)
-  browser()
-  
-  par(mfrow=c(2, 1))
-  hist(mcmc_result$vnu[1,])
-  hist(mcmc_result$vnu[2,])
-  par(mfrow=c(1, 1))
-  print(summary(mcmc_result$vnu[1,]))
-  print(summary(mcmc_result$vnu[2,]))
+              iter = 2e5, chains = 1)  
   var_result = zero_infl_var(mult, method="gva", verbose=TRUE)
   
   # Compare MCMC distribution with variational approximation for each parameter
@@ -509,18 +500,20 @@ test_multivariate_accuracy_stan <- function()
     return(accuracy)
   }
   # vnu accuracy
-  for (t in 1:nrow(mcmc_result$vnu)) {
-    accuracy = calculate_accuracy(mcmc_result$vnu[t,], dnorm,
-                                  var_result$vmu[t], sqrt(var_result$mLambda[t,t]))
-    cat("vnu[", t, "] accuracy: ", accuracy, "\n")
+  for (i in 1:2) {
+    param_name = sprintf("vbeta[%d]", i)
+    accuracy = calculate_accuracy(fit@sim$samples[[1]][[param_name]], dnorm,
+                                  var_result$vmu[i], sqrt(var_result$mLambda[i,i]))
+    cat("vnu[", i, "] accuracy: ", accuracy, "\n")
   }
+  
   # sigma2_u accuracy
-  accuracy = calculate_accuracy(1/mcmc_result$sigma2_u, dgamma,
+  accuracy = calculate_accuracy(1/fit@sim$samples[[1]][["sigma_u"]]^2, dgamma,
                                 var_result$a_sigma, var_result$b_sigma)
   cat("sigma2_u accuracy: ", accuracy, "\n")
   
   # rho accuracy
-  accuracy = calculate_accuracy(mcmc_result$rho, dbeta,
+  accuracy = calculate_accuracy(fit@sim$samples[[1]][["rho"]], dbeta,
                                 var_result$a_rho, var_result$b_rho)
   cat("rho accuracy: ", accuracy, "\n")
   
@@ -533,9 +526,24 @@ test_multivariate_accuracy_stan <- function()
           add=TRUE, lty=2, col="blue")
   }
   par(mfrow=c(2,1))
-  accuracy_plot(mcmc_result$vnu[t,], dnorm, 
-                var_result$vmu[t], sqrt(var_result$mLambda[t,t]))
-  plot(mcmc_result$vnu[t,], type="l")
+  param_name = sprintf("vbeta[%d]", 1)  
+  accuracy_plot(fit@sim$samples[[1]][[param_name]], dnorm,
+                var_result$vmu[1], sqrt(var_result$mLambda[1,1]))
+  plot(fit@sim$samples[[1]][[param_name]], type="l")
+
+  param_name = sprintf("vbeta[%d]", 2)  
+  accuracy_plot(fit@sim$samples[[1]][[param_name]], dnorm,
+                var_result$vmu[2], sqrt(var_result$mLambda[2,2]))
+  plot(fit@sim$samples[[1]][[param_name]], type="l")
+
+  accuracy_plot(1/fit@sim$samples[[1]][["sigma_u"]]^2, dgamma,
+                var_result$a_sigma, var_result$b_sigma)
+  plot(fit@sim$samples[[1]][["sigma_u"]], type="l")
+
+  accuracy_plot(fit@sim$samples[[1]][["rho"]], dbeta,
+                var_result$a_rho, var_result$b_rho)
+  plot(fit@sim$samples[[1]][["rho"]], type="l")
+  
   par(mfrow=c(1,1))
   browser()
   t = 6
