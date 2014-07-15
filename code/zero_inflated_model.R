@@ -2,7 +2,7 @@
 source("common.R")
 source("zero_inflated_poisson_linear_model.R")
 
-zero_infl_mcmc.univariate <- function(iterations, vx, a, b)
+mcmc.univariate <- function(iterations, vx, a, b)
 {
 	# Initialise
 	n = length(vx)
@@ -35,12 +35,7 @@ zero_infl_mcmc.univariate <- function(iterations, vx, a, b)
 	return(list(vlambda=vlambda, vrho=vrho))
 }
 
-zero_infl_mcmc.multivariate <- function(multivariate)
-{
-	stop("Not implemented yet")
-}
-
-zero_infl_mcmc <- function(object)
+mcmc <- function(object)
 {
 	UseMethod("zero_infl_mcmc", object)
 }
