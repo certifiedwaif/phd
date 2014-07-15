@@ -31,4 +31,4 @@ schools_dat <- list(J = 8,
 
 fit <- stan(model_code = schools_code, data = schools_dat, 
             iter = 1000, chains = 4)
-#plot(fit)
+plot(fit)
