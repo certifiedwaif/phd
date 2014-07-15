@@ -35,10 +35,10 @@ vg.lap <- function(vmu,vy,vr,mC,mSigma.inv,mLambda)
 	#mDiag2 <-  diag(mC%*%mLambda%*%t(mC))
     vg <- t(mC)%*%(vy - vr*exp(mC%*%vmu)) - mSigma.inv%*%vmu
     
-    print(mC%*%vmu)
+    #print(mC%*%vmu)
     
     
-	cat("vg.lap vg", vg, "norm", norm(vg), "\n")
+	#cat("vg.lap vg", vg, "norm", norm(vg), "\n")
     return(vg)
 }
 
@@ -64,8 +64,8 @@ fit.Lap <- function(vmu,vy,vr,mC,mSigma.inv,mLambda)
         mH <- mH.lap(vmu,vy,vr,mC,mSigma.inv,mLambda)
         mLambda <- solve(-mH,tol=1.0E-99)
         vmu <- vmu + mLambda%*%vg
-        print(c(ITER,f,max(abs(vg))))
-        cat("iterations", ITER, "f", f, "max(abs(vg))", max(abs(vg)))
+        #print(c(ITER,f,max(abs(vg))))
+        #cat("iterations", ITER, "f", f, "max(abs(vg))", max(abs(vg)))
         if (max(abs(vg))<1.0E-8) {
             break;
         }
@@ -205,7 +205,6 @@ vg.GVA <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
     dmLambda <- (mLambda.inv + mH)%*%mR
 
     dmLambda[Dinds] <- dmLambda[Dinds]*mR[Dinds]
-    # FIXME: Something broken in this function
     vg[(1+d):length(vtheta)] <- dmLambda[Rinds]    
    
 	#cat("vtheta.GVA vtheta", vtheta, "norm", norm(vtheta), "\n")

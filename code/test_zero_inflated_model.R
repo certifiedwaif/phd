@@ -460,7 +460,7 @@ test_multivariate_accuracy_stan <- function()
   zip_dat <- list(N=sum(n), P=2, M=m, y=vy, X=mX, Z=mZ)
   print(str(zip_dat))
   fit <- stan(model_code = zip_code, data = zip_dat, 
-              iter = 2e5, chains = 1)  
+              iter = 1e5, chains = 4)  
   var_result = zero_infl_var(mult, method="gva", verbose=TRUE)
   
   # Compare MCMC distribution with variational approximation for each parameter
@@ -502,7 +502,7 @@ test_multivariate_accuracy_stan <- function()
   # vnu accuracy
   for (i in 1:2) {
     param_name = sprintf("vbeta[%d]", i)
-    accuracy = calculate_accuracy(fit@sim$samples[[1]][[param_name]], dnorm,
+    accuracy = calculate_accuracy(fit@sim$samples[[2]][[param_name]], dnorm,
                                   var_result$vmu[i], sqrt(var_result$mLambda[i,i]))
     cat("vnu[", i, "] accuracy: ", accuracy, "\n")
   }
@@ -532,7 +532,7 @@ test_multivariate_accuracy_stan <- function()
   plot(fit@sim$samples[[1]][[param_name]], type="l")
 
   param_name = sprintf("vbeta[%d]", 2)  
-  accuracy_plot(fit@sim$samples[[1]][[param_name]], dnorm,
+  accuracy_plot(fit@sim$samples[[2]][[param_name]], dnorm,
                 var_result$vmu[2], sqrt(var_result$mLambda[2,2]))
   plot(fit@sim$samples[[1]][[param_name]], type="l")
 
@@ -619,7 +619,7 @@ check_accuracy <- function(n, rho, lambda)
   burnin = 1e3
   
   start = Sys.time()
-  result_mcmc = zero_infl_mcmc(iterations+burnin, x, a, b)
+  result_mcmc = mcmc(iterations+burnin, x, a, b)
   mcmc_runtime = Sys.time() - start
   # Throw away burn-in samples.
   # Brackets turn out to be incredibly important here!!!
