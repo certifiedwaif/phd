@@ -453,6 +453,8 @@ test_multivariate_accuracy_stan <- function()
   
   # Test accuracy
   mult = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau)
+  var_result = zero_infl_var(mult, method="gva", verbose=TRUE)
+
   #mcmc_result = mcmc(mult, iterations=1e5+2000, burnin=2000, thinning=1)
   # Use Stan to create MCMC samples, because Stan deals much better with highly
   # correlated posteriors.
@@ -464,14 +466,13 @@ test_multivariate_accuracy_stan <- function()
   rng_seed <- 1234;
   foo <- stan("multivariate_zip.stan", data=zip_data, chains = 0)
   sflist <- 
-    mclapply(1:4, mc.cores = 4, 
+    mclapply(1:4, mc.cores = 2, 
              function(i) stan(fit=foo, data=zip_data, seed = rng_seed, 
                               chains = 1, chain_id = i, refresh = -1,
-                              iter=1e4))
+                              iter=1e3))
   fit <- sflist2stanfit(sflist)
   #fit <- stan(model_code = zip_code, data = zip_dat, 
   #            iter = 1e5, chains = 4)  
-  var_result = zero_infl_var(mult, method="gva", verbose=FALSE)
   
   # Compare MCMC distribution with variational approximation for each parameter
   # vnu[i] ~ Normal, dnorm
@@ -564,6 +565,7 @@ test_multivariate_accuracy_stan <- function()
                 var_result$a_rho, var_result$b_rho)
   plot(mcmc_samples$rho, type="l")
   par(mfrow=c(1,1))
+  browser()
 }
 
 # Calculate accuracy ----
