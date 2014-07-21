@@ -128,6 +128,8 @@ calculate_lower_bound.multivariate <- function(multivariate)
     result = result - t(vp) %*% exp(mC %*% vmu + rep(1, p+m) * .5 * t(vmu)%*%mLambda%*%vmu)
     result = result - sum(lgamma(vy + 1)) + .5*log(det(mLambda))
     result = result + .5*(p+m)*(1 + log(2*pi))
+    # FIXME: There are terms missing. Must include entropy for \beta and \vu.
+    # Probably the easiest thing to do is to re-code all of this.
     
   	# Terms for sigma2_u
     #if (!is.null(multivariate$mZ)) {
