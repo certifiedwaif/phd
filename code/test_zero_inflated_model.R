@@ -414,7 +414,7 @@ test_multivariate_accuracy <- function()
 test_multivariate_accuracy_stan <- function()
 {
   m = 20
-  ni = 10
+  ni = 20
   n = rep(ni,m)
   mX = matrix(as.vector(cbind(rep(1, sum(n)), runif(sum(n), -1, 1))), sum(n), 2)
   #print("mX=")
@@ -464,7 +464,7 @@ test_multivariate_accuracy_stan <- function()
   rng_seed <- 1234;
   foo <- stan("multivariate_zip.stan", data=zip_data, chains = 0)
   sflist <- 
-    mclapply(1:4, mc.cores = 4, 
+    mclapply(1:4, mc.cores = 1, 
              function(i) stan(fit=foo, data=zip_data, seed = rng_seed, 
                               chains = 1, chain_id = i, refresh = -1,
                               iter=1e4))
@@ -564,6 +564,8 @@ test_multivariate_accuracy_stan <- function()
                 var_result$a_rho, var_result$b_rho)
   plot(mcmc_samples$rho, type="l")
   par(mfrow=c(1,1))
+  
+  browser()
 }
 
 # Calculate accuracy ----
