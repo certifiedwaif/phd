@@ -103,17 +103,19 @@ calculate_lower_bound.multivariate <- function(multivariate)
   	
   	E_log_rho = digamma(a_rho) - digamma(a_rho + b_rho)
   	E_log_one_minus_rho = digamma(b_rho) - digamma(a_rho + b_rho)
-  	
+    cat("calculate_lower_bound: E_log_rho", E_log_rho, "E_log_1-rho", E_log_one_minus_rho, "\n")
+    
   	E_log_q_r = (vp[zero.set]*log(vp[zero.set]) + (1-vp[zero.set])*log(1-vp[zero.set]))
-  	#E_log_q_lambda = -gamma_entropy(a_lambda, b_lambda)
-  	E_log_q_rho = -beta_entropy(a_rho, b_rho) # FIXME: Why is this entropy positive?
+  	cat("calculate_lower_bound: sum(E_log_q_r)", sum(E_log_q_r), "\n")
+  	
+    #E_log_q_lambda = -gamma_entropy(a_lambda, b_lambda)
   	
   	#result = a_lambda * log(b_lambda) + (a_lambda-1) * E_log_lambda - b_lambda * E_lambda - lgamma(a_lambda)
   	#result = result - E_lambda * sum(E_r)
   	#result = result + sum(E_xi_log_lambda_r) - sum(lgamma(vx+1))
   	T1 = sum(E_r) * E_log_rho + sum(1 - E_r) * E_log_one_minus_rho
   	T1 = T1 - sum(E_log_q_r) #- E_log_q_lambda
-  	T1 = T1 - E_log_q_rho
+  	T1 = T1 + beta_entropy(a_rho, b_rho)
     
   	# Terms for (beta, u)
   	#result = result + (vy*vp) %*% mC %*% vmu
@@ -352,10 +354,9 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
 		}
 		
 		
-
 		# Update parameters for q_rho
-		mult$a_rho = 1 + sum(mult$vp)
-		mult$b_rho = N - sum(mult$vp) + 1
+		mult$a_rho = mult$prior$a_rho + sum(mult$vp)
+		mult$b_rho = mult$prior$b_rho + N - sum(mult$vp)
 		
 		# Update parameters for q_vr
 		#if (verbose) {
@@ -366,8 +367,8 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
 		#	print(diag(mult$mC%*%mult$mLambda%*%t(mult$mC)))
 		#}
 		
-		mult$vp[zero.set] = expit(-exp(mult$mC[zero.set,]%*%mult$vmu + 0.5*diag(mult$mC[zero.set,]%*%mult$mLambda%*%t(mult$mC[zero.set,]))) + digamma(mult$a_rho) - digamma(mult$b_rho))
-    
+	  mult$vp[zero.set] = expit((mult$vy[zero.set]*mult$mC[zero.set,])%*%mult$vmu-exp(mult$mC[zero.set,]%*%mult$vmu + 0.5*diag(mult$mC[zero.set,]%*%mult$mLambda%*%t(mult$mC[zero.set,]))) + digamma(mult$a_rho) - digamma(mult$b_rho))
+	
 		#vlower_bound[i] <- calculate_lower_bound(vx, vp, a_lambda, b_lambda, a_rho, b_rho)
 		vlower_bound[i] <- 0 # calculate_lower_bound(mult)
 		vlower_bound[i] <- calculate_lower_bound(mult)
