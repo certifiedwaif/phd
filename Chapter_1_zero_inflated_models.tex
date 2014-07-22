@@ -74,7 +74,7 @@ Assuming that $q(r_i) \sim \Bernoulli{p_i}$,
 % Mean field update for q(\lambda)
 $$
 \begin{array}{ll}
-q^*(\lambda) &\propto \lambda^{\alpha_\lambda+\vone^T\vx - 1} \exp{\left[ E_{-q(\lambda)} \{-(\beta_\lambda + \vone^T\vr) \lambda \} \right]} \\
+q^*(\lambda) &\propto \lambda^{\alpha_\lambda+\vone^T\vx - 1} \exp{\left[ \bE_{-q(\lambda)} \{-(\beta_\lambda + \vone^T\vr) \lambda \} \right]} \\
 &\propto \lambda^{\alpha_\lambda+\vone^T\vx - 1} \exp{\{-(\beta_\lambda + \vone^T\vp)\lambda \} } \\
 &= \myGamma{\alpha_\lambda+\vone^T\vx, \beta_\lambda+\vone^T\vp}
 \end{array}
@@ -91,17 +91,10 @@ q^*(\rho) &\propto \exp{\{ \bE_{-q(\rho)} \left[ \vone^T\vr \log{(\rho)} + \vone
 \end{array}
 $$
 
-Turning our attention now to $r_i$, we first note that the relevant terms of the
-log-likelihood are
-
 $$
--\lambda r_i + x_i \log{(r_i)} + r_i \log{\left(\frac{\rho}{1 - \rho}\right)}
-$$
-
-Taking expectations with respect to $\lambda$ and $\rho$ we have
-
-$$
-q^*(\lambda) = -r_i \frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} + x_i \log{(r_i)} + r_i (\Psi(\alpha_{q(\rho)}) - \Psi(\beta_{q(\rho)}))
+\begin{array}{ll}
+q^*(\lambda) &\propto -\bE_{q(\lambda)} [\lambda ] r_i + x_i \log{(r_i)} + r_i \bE_{q(\rho)} [\log{\left(\frac{\rho}{1 - \rho}\right)}]\\
+&= -r_i \frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} + x_i \log{(r_i)} + r_i (\Psi(\alpha_{q(\rho)}) - \Psi(\beta_{q(\rho)}))
 $$
 
 Note that if $x_i = 0$ then
@@ -112,7 +105,7 @@ $$
 q^*(r_i) \propto r_i^{x_i} \exp{(r_i \eta_i)}
 $$
 
-where $\eta_i = - \frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} + \Psi(\alpha_{q(\rho)}) - \Psi(\alpha_{q(\rho)})$.
+where $\eta_i = - \frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} + \Psi(\alpha_{q(\rho)}) - \Psi(\beta_{q(\rho)})$.
 
 Now, either $x_i = 0$ or $x_i \ne 0$.
 
