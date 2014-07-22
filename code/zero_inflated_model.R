@@ -108,13 +108,12 @@ calculate_lower_bound.multivariate <- function(multivariate)
   	#E_log_q_lambda = -gamma_entropy(a_lambda, b_lambda)
   	E_log_q_rho = -beta_entropy(a_rho, b_rho) # FIXME: Why is this entropy positive?
   	
-  	result = 0
   	#result = a_lambda * log(b_lambda) + (a_lambda-1) * E_log_lambda - b_lambda * E_lambda - lgamma(a_lambda)
   	#result = result - E_lambda * sum(E_r)
   	#result = result + sum(E_xi_log_lambda_r) - sum(lgamma(vx+1))
-  	result = result + sum(E_r) * E_log_rho + sum(1 - E_r) * E_log_one_minus_rho
-  	result = result - sum(E_log_q_r) #- E_log_q_lambda
-  	result = result - E_log_q_rho
+  	T1 = sum(E_r) * E_log_rho + sum(1 - E_r) * E_log_one_minus_rho
+  	T1 = T1 - sum(E_log_q_r) #- E_log_q_lambda
+  	T1 = T1 - E_log_q_rho
     
   	# Terms for (beta, u)
   	#result = result + (vy*vp) %*% mC %*% vmu
@@ -124,12 +123,12 @@ calculate_lower_bound.multivariate <- function(multivariate)
   
     # Terms for (beta, u)
     # Second try ...
-    result = result + t(vy*vp) %*% mC %*% vmu
-    result = result - t(vp) %*% exp(mC %*% vmu + rep(1, p+m) * .5 * t(vmu)%*%mLambda%*%vmu)
-    result = result - sum(lgamma(vy + 1)) + .5*log(det(mLambda))
-    result = result + .5*(p+m)*(1 + log(2*pi))
-    # FIXME: There are terms missing. Must include entropy for \beta and \vu.
-    # Probably the easiest thing to do is to re-code all of this.
+    T2 = t(vy*vp) %*% mC %*% vmu
+    T2 = T2 - t(vp) %*% exp(mC %*% vmu + rep(1, p+m) * .5 * t(vmu)%*%mLambda%*%vmu)
+    T2 = T2 - sum(lgamma(vy + 1)) + .5*log(det(mLambda))
+    T2 = T2 + .5*(p+m)*(1 + log(2*pi))
+    T2 = T2 - .5*(log(2*pi) + log(m) + digamma(a_sigma) - log(b_sigma))
+    T2 = T2 - .5*a_sigma/b_sigma*(sum(vmu[u_idx]^2) + tr(mLambda[u_idx, u_idx]))
     
   	# Terms for sigma2_u
     #if (!is.null(multivariate$mZ)) {
@@ -143,13 +142,18 @@ calculate_lower_bound.multivariate <- function(multivariate)
     # Second try ...
     # Need to be careful to distinguish the prior from the variational parameter
     if (!is.null(mZ)) {
+      # FIXME: Something is screwed here.
       E_log_sigma2_u = -gamma_entropy(a_sigma, b_sigma)
       E_sigma2_u = a_sigma/b_sigma
-      result = result + prior$a_sigma * log(prior$b_sigma) - lgamma(prior$a_sigma) + (prior$a_sigma - 1)*digamma(E_sigma2_u)
-      result = result - prior$b_sigma * E_sigma2_u + lgamma(a_sigma)
-      result = result - (a_sigma - 1)*digamma(a_sigma) - log(b_sigma)
-      result = result - log(a_sigma + b_sigma)
+      T3 = prior$a_sigma * log(prior$b_sigma) - lgamma(prior$a_sigma) - (prior$a_sigma - 1)*digamma(E_sigma2_u)
+      T3 = T3 - prior$b_sigma * E_sigma2_u + lgamma(a_sigma)
+      T3 = T3 - (a_sigma - 1)*digamma(a_sigma) - log(b_sigma)
+      T3 = T3 - log(a_sigma + b_sigma)
+    } else {
+      T3 = 0
     }
+    cat("calculate_lower_bound: T1", T1, "T2", T2, "T3", T3, "\n")
+    result = T1 + T2 + T3
     result
   })
   
@@ -376,7 +380,11 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
 		if (verbose && i > 1)
 			cat("Iteration ", i, ": lower bound ", vlower_bound[i], " difference ",
 					vlower_bound[i] - vlower_bound[i-1], " parameters ", "vmu", mult$vmu,
-					"a_rho", mult$a_rho, "b_rho", mult$b_rho, "\n")
+					"a_rho", mult$a_rho, "b_rho", mult$b_rho)
+      if (!is.null(mult$mZ)) {
+        cat(" a_sigma", mult$a_sigma, "b_sigma", mult$b_sigma)
+      }
+      cat("\n")
 	}
 
 	if (plot_lower_bound)
