@@ -33,8 +33,8 @@ full conditionals for $\lambda, \rho$ and $\vr$ are:
 
 $$
 \begin{array}{ll}
-\lambda | \text{rest} &\sim \myGamma{\alpha_\lambda + \vone^T\vx, \beta_\lambda + \vone^T\vr}, \\
-\rho | \text{rest} &\sim \Beta{\alpha_\rho + \vone^T \vr, \beta_\rho + \vone^T(\vone - \vr)}, \\
+\lambda | \textbf{rest} &\sim \myGamma{\alpha_\lambda + \vone^T\vx, \beta_\lambda + \vone^T\vr}, \\
+\rho | \textbf{rest} &\sim \Beta{\alpha_\rho + \vone^T \vr, \beta_\rho + \vone^T(\vone - \vr)}, \\
 r_i | \textbf{rest} &\sim \Bernoulli{\text{expit}(\eta_i)}, 1 \leq i \leq n
 \end{array}
 $$
@@ -55,13 +55,13 @@ $q(p_i)$ are Bernoulli distributions.
 
 \noindent This leads to the following functional forms of the optimal q-densities
 
-\begin{array}{l}
-$q^*(\lambda)$ is the $\myGamma{\alpha_{q(\lambda)}, \beta_{q(\lambda)}}$ density function, \\
-$q^*(\rho)$ is the $\text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)})$ density function, and \\
-$q^*(r_i)$  is the $\text{Bernoulli}(p_{q(r_i)})$ density function, $1 \leq i \leq n$,
-\end{array}
+%\begin{array}{l}
+%$q^*(\lambda)$ is the $\myGamma{\alpha_{q(\lambda)}, \beta_{q(\lambda)}}$ density function, \\
+%$q^*(\rho)$ is the $\text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)})$ density function, and \\
+%$q^*(r_i)$  is the $\text{Bernoulli}(p_{q(r_i)})$ density function, $1 \leq i \leq n$,
+%\end{array}
 
-\noindent where the parameters are updated according to ...
+\noindent where the parameters are updated according to \ldots
 
 %By taking the expectation of each full conditional with respect to 
 
@@ -74,7 +74,7 @@ Assuming that $q(r_i) \sim \Bernoulli{p_i}$,
 % Mean field update for q(\lambda)
 $$
 \begin{array}{ll}
-q^*(\lambda) &\propto \lambda^{\alpha_\lambda+\vone^T\vx - 1} \exp{\left[ E_{-q(\lambda)} \{-(\beta_\lambda + \vone^T\vr) \lambda \} \right]} \\
+q^*(\lambda) &\propto \lambda^{\alpha_\lambda+\vone^T\vx - 1} \exp{\left[ \bE_{-q(\lambda)} \{-(\beta_\lambda + \vone^T\vr) \lambda \} \right]} \\
 &\propto \lambda^{\alpha_\lambda+\vone^T\vx - 1} \exp{\{-(\beta_\lambda + \vone^T\vp)\lambda \} } \\
 &= \myGamma{\alpha_\lambda+\vone^T\vx, \beta_\lambda+\vone^T\vp}
 \end{array}
@@ -85,36 +85,21 @@ and
 % Mean field update for q(\rho)
 $$
 \begin{array}{ll}
-q^*(\rho) &\propto \exp{\{ \bE_{-q(\rho)} \left[ \vone^T\vr \log{(\rho)} + \vone^T(\vone - \vr) \log{(1 - \rho)} \right] } \\
+\log{q^*(\rho)} &\propto \{ \bE_{-q(\rho)} \left[ \vone^T\vr \log{(\rho)} + \vone^T(\vone - \vr) \log{(1 - \rho)} \right] \} \\
 &\propto \exp{ \left( \vone^T\vp \log{(\rho)} + \vone^T(\vone - \vp) \log{(1 - \rho)} \right) } \\
 &= \Beta{\alpha_\rho + \vone^T\vp, \beta_\rho + \vone^T(\vone - \vp)}
 \end{array}
 $$
 
-Turning our attention now to $r_i$, we first note that the relevant terms of the
-log-likelihood are
-
 $$
--\lambda r_i + x_i \log{(r_i)} + r_i \log{\left(\frac{\rho}{1 - \rho}\right)}
-$$
-
-Taking expectations with respect to $\lambda$ and $\rho$ we have
-
-$$
-q^*(\lambda) = -r_i \frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} + x_i \log{(r_i)} + r_i (\Psi(\alpha_{q(\rho)}) - \Psi(\beta_{q(\rho)}))
+\begin{array}{ll}
+\log{q^*(r_i)} &\propto -\bE_{q(\lambda)} [\lambda ] r_i + x_i \log{(r_i)} + r_i \bE_{q(\rho)} [\log{\left(\frac{\rho}{1 - \rho}\right)}]\\
+&= -r_i \frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} + x_i \log{(r_i)} + r_i (\Psi(\alpha_{q(\rho)}) - \Psi(\beta_{q(\rho)}))\\
+&= \text{Bernoulli}(p_i)
+\end{array}
 $$
 
-Note that if $x_i = 0$ then
-$x_i \log{(r_i)} = \log{(x_i^{r_i})} = \log{(0^0)} = \log{(1)} = 0$. Dr John Ormerod hit
-upon the idea of side-stepping this problem by writing the q-likelihood as
-
-$$
-q^*(r_i) \propto r_i^{x_i} \exp{(r_i \eta_i)}
-$$
-
-where $\eta_i = - \frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} + \Psi(\alpha_{q(\rho)}) - \Psi(\alpha_{q(\rho)})$.
-
-Now, either $x_i = 0$ or $x_i \ne 0$.
+where
 
 $$
 \begin{array}{ll}
@@ -123,8 +108,43 @@ p_i &= \frac{\exp{(\eta_i)}}{I(x_i = 0) + \exp{(\eta_i)}} \\
 \end{array}
 $$
 
+and $\eta_i = -\frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} + \Psi(\alpha_{q(\rho)}) - \Psi(\beta_{q(\rho)})$.
+
+%Note that if $x_i = 0$ then
+%$x_i \log{(r_i)} = \log{(x_i^{r_i})} = \log{(0^0)} = \log{(1)} = 0$. Dr John %Ormerod hit
+%upon the idea of side-stepping this problem by writing the q-likelihood as
+
+%$$
+%q^*(r_i) \propto r_i^{x_i} \exp{(r_i \eta_i)}
+%$$
+
+
+%Now, either $x_i = 0$ or $x_i \ne 0$.
+
+%So
+
+%$$
+%q^*(r_i) = \text{Bernoulli}(p_i)
+%$$
+
+So the mean field update equations are \ldots
+
+$$
+\begin{array}{cl}
+\alpha_{q(\rho)} &\leftarrow \alpha_\rho + \vone^T\vp \\
+\beta_{q(\rho)} &\leftarrow \beta_\rho + \vone^T(\vone - \vp) \\
+\eta &\leftarrow -\frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} + \Psi(\alpha_{q(\rho)}) - \Psi(\beta_{q(\rho)}) \\
+\vp_{q(\vr_0)} &\leftarrow \expit{\eta} \\
+\alpha_{q(\lambda)} &\leftarrow \alpha_\lambda+ \vone^T\vx \\
+\beta_{q(\lambda)} &\leftarrow \beta_\lambda+ \vone^T\vp
+\end{array}
+$$
+
+% The formatting of this entire section is horrible.
+% It should be organised into subterms, as you will for the multivariate
+% model.
 \subsection{Lower bound}
-The lower bound $\log{p(x)}$ is
+The lower bound $\log{\stackrel{\sim}{p}(\theta)}$ is
 $$
 	\bE_q[\log{p(x, \theta)} - \log{q(\theta)}]
 $$
@@ -139,20 +159,42 @@ In this case, the lower bound can be calculated directly to be
 
 $$
 \begin{array}{ll}
-\bE_q \left\{ \log{p(\vx, \vr, \lambda, \rho)} - \log{q(\vr, \lambda, \rho)} \right\} =& 
+\bE_q \left\{ \log{p(\vx, \vr, \lambda, \rho)} - \log{q(\vr, \lambda, \rho)} \right\} &= T_1 + T_2 \\
+\end{array}
+$$
+
+$$
+\begin{array}{ll}
+T_1 &=
 \alpha_\lambda \log{(\beta_\lambda)} + (\alpha_\lambda - 1) \bE_q[\log{(\lambda)}] - \beta_\lambda \bE_q [\lambda] - \log{(\Gamma(\alpha_\lambda))} \\
-&+ \sum_{i=1}^n ( -\bE_q [\lambda] \bE_q [r_i] + \bE_q[x_i \log{(\lambda r_i)}] - \log{(x_i!)} \\
-&+ \bE_q[r_i] \bE_q[\log{(\rho)}] + \bE_q[(1 - r_i)] \bE_q[\log{(1 - \rho)}] ) \\
-& - \bE_q \log{q(r)} - \bE_q \log{q(\lambda)} - \bE_q \log{q(\rho)}
+&\quad + \sum_{i=1}^n ( -\bE_q [\lambda] \bE_q [r_i] + \bE_q[x_i \log{(\lambda r_i)}] - \log{(x_i!)}
 \end{array}
 $$
 
 where
+
+% T_1 terms
 $$
 \begin{array}{ll}
 \bE [\log{\lambda}] &= -\{ \alpha_{q(\lambda)} - \log{(\beta_{q(\lambda)})} + \log{\Gamma(\alpha_{q(\lambda)})} + (1 - \alpha_{q(\lambda)}) \psi{(\alpha_{q(\lambda)})} \} \\
 \bE [\lambda] &= \frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} \\
-\bE[\log{\rho}] &= - \{ \log{\text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)})} - (\alpha_{q(\rho)} - 1) \psi{(\alpha_{q(\rho)})} - (\beta_{q(\rho)} - 1)\psi{(\beta_{q(\rho)})} + (\alpha_{q(\rho)} + \beta_{q(\rho)} - 2)\psi{(\alpha_{q(\rho)} + \beta_{q(\rho)})} \} \\
+\end{array}
+$$
+
+$$
+\begin{array}{ll}
+T_2 &=\bE_q[r_i] \bE_q[\log{(\rho)}] + \bE_q[(1 - r_i)] \bE_q[\log{(1 - \rho)}] ) \\
+& \quad - \bE_q \log{q(r)} - \bE_q \log{q(\lambda)} - \bE_q \log{q(\rho)}
+\end{array}
+$$
+
+where
+
+% T_2 terms
+$$
+\begin{array}{ll}
+\bE[\log{\rho}] &= -\{ \log{(\text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)}))} - (\alpha_{q(\rho)} - 1) \psi{(\alpha_{q(\rho)})} - (\beta_{q(\rho)} - 1)\psi{(\beta_{q(\rho)})} \\
+&\quad + (\alpha_{q(\rho)} + \beta_{q(\rho)} - 2)\psi{(\alpha_{q(\rho)} + \beta_{q(\rho)})} \} 
 \end{array}
 $$
 
@@ -171,7 +213,7 @@ $$
 -\bE_q \log{q(r)} &= \sum_{i=1}^n I(x_i = 0) \log{(p_i)} \\
 -\bE_q \log{q(\lambda)} &= \alpha_{q(\lambda)} - \log{(\beta_{q(\lambda)})} + \log{\Gamma{(\alpha_{q(\lambda)})}} + (1 - \alpha_{q(\lambda)}) \Psi{(\alpha_{q(\lambda)})} \\
 \bE_q[\log{q(\rho)}] &= - \{ \log{(\text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)})} - (\alpha_{q(\rho)} - 1) \Psi{(\alpha_{q(\rho)})} - (\beta_{q(\rho)} - 1)\Psi{(\beta_{q(\rho)})} \\
-+ (\alpha_{q(\rho)} + \beta_{q(\rho)} - 2)\Psi{(\alpha_{q(\rho)} + \beta_{q(\rho)})} \} \\
+&\quad + (\alpha_{q(\rho)} + \beta_{q(\rho)} - 2)\Psi{(\alpha_{q(\rho)} + \beta_{q(\rho)})} \} \\
 \end{array}
 $$
 
@@ -256,9 +298,11 @@ regression model.
 % You can build the lower bound out of re-usable terms like T_1, T_2, T_3, ...
 % We're just introducing a replacement T_1
 $$
-\bE_q [\log{p(y, \theta)} - \log{q(\theta)}] = 
-\vy \mP^T C \vmu - \vp^T\exp{(C\vmu + \half \vmu^T \mLambda \vmu)} - \vone^T\log{(\vy + \vone)} +
-\half \log{|\mLambda|} + \frac{p + m}{2} (1 + \log{(2 \pi)})
+\begin{array}{ll}
+\bE_q [\log{p(y, \theta)} - \log{q(\theta)}] &= 
+\vy \mP^T C \vmu - \vp^T\exp{(C\vmu + \half \vmu^T \mLambda \vmu)} - \vone^T\log{(\vy + \vone)} + \\
+&\quad \half \log{|\mLambda|} + \frac{p + m}{2} (1 + \log{(2 \pi)})
+\end{array}
 $$
 
 %For $\sigma^2_u$,
@@ -278,26 +322,38 @@ $$
 %\bE_q[\sigma_u^{-2}] = \frac{\alpha_{q(\sigma_u^2)}}{\beta_{q(\sigma_u^2)}}
 %$$
 
+For $\vnu$,
+
+% Where are the priors for \vbeta and \vu
+
+$$
+\begin{array}{ll}
+\bE_q[\log{p(\vnu)} - \log{q(\vnu)}] &= \vy^T \mP \mC \vmu - \vp^T \exp{(\mC \vmu + \half \vmu^T \mLambda \vmu)} - \vone^T\log \Gamma{(\vy + \vone)} + \\
+& \quad \frac{p + m}{2} (1 + \log{\2 \pi}) + \half \log{|\mLambda|}
+\end{array}
+$$
+
+% This should be denoted as T_3
 For $\sigma^2_u$,
 $$
 \begin{array}{ll}
 \bE_q[\log{p(\sigma^2_u)} - \log{q(\sigma^2_u)}] &=
 \alpha_{\sigma^2_u} \log{\beta_{\sigma^2_u}} - \log{\Gamma{(\alpha_{\sigma^2_u})}} +
 (\alpha_{\sigma^2_u} - 1) \bE_q	\log{\sigma^2_u}\\
-&- \beta_{\sigma^2_u} \bE_q [\sigma^2_u] +
+&\quad - \beta_{\sigma^2_u} \bE_q [\sigma^2_u] +
 \log{\Gamma(\alpha_{q(\sigma^2_u)})} - (\alpha_{q(\sigma^2_u)} - 1) \Psi{(\alpha_{q(\sigma^2_u)})} - \log{(\beta_{q(\sigma^2_u)})}\\
-&- \log{(\alpha_{q(\sigma^2_u)} + \beta_{q(\sigma^2_u)})}\\
+&\quad - \log{(\alpha_{q(\sigma^2_u)} + \beta_{q(\sigma^2_u)})}\\
 &=\alpha_{\sigma^2_u} \log{\beta_{\sigma^2_u}} - \log{\Gamma{(\alpha_{\sigma^2_u})}} +
 (\alpha_{\sigma^2_u} - 1) \Psi{\alpha_{q(\sigma^2_u)}} - \log{(\beta_{q(\sigma^2_u)})} \\
-&- \beta_{\sigma^2_u} \frac{\alpha_{q(\sigma^2_u)}}{\beta_{q(\sigma^2_u)}} + 
+&\quad - \beta_{\sigma^2_u} \frac{\alpha_{q(\sigma^2_u)}}{\beta_{q(\sigma^2_u)}} + 
 \log{\Gamma(\alpha_{q(\sigma^2_u)})} - (\alpha_{q(\sigma^2_u)} - 1) \Psi{(\alpha_{q(\sigma^2_u)})} - \log{(\beta_{q(\sigma^2_u)})}\\
-&- \log{(\alpha_{q(\sigma^2_u)} + \beta_{q(\sigma^2_u)})}
+&\quad - \log{(\alpha_{q(\sigma^2_u)} + \beta_{q(\sigma^2_u)})}
 \end{array}
 $$
 
 where
 
-$\alpha_{q(\sigma^2_u)} = \alpha_{\sigma^2_u} + \frac{m}{2}$,
+$\alpha_{q(\sigma^2_u)} = \alpha_{\sigma^2_u} + \frac{m}{2}$ and
 $\beta_{q(\sigma^2_u)} = \beta_{\sigma^2_u} + \frac{\|\vmu_\vu\|^2}{2} + \frac{\tr{(\mLambda_{\vu \vu})}}{2}$
 
 \subsection{Results}

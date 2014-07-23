@@ -95,25 +95,15 @@ calculate_lower_bound.multivariate <- function(multivariate)
   
   	zero.set <- which(vy==0)
   	
-  	#E_lambda = a_lambda/b_lambda
-  	#E_log_lambda = digamma(a_lambda) - log(b_lambda)	
-  	
-  	E_r = ifelse(vy == 0, vp, 1)
   	#E_xi_log_lambda_r = ifelse(vy == 0, 0, vy*E_log_lambda)
   	
   	E_log_rho = digamma(a_rho) - digamma(a_rho + b_rho)
   	E_log_one_minus_rho = digamma(b_rho) - digamma(a_rho + b_rho)
-  	
-  	E_log_q_r = (vp[zero.set]*log(vp[zero.set]) + (1-vp[zero.set])*log(1-vp[zero.set]))
-  	#E_log_q_lambda = -gamma_entropy(a_lambda, b_lambda)
-  	E_log_q_rho = -beta_entropy(a_rho, b_rho) # FIXME: Why is this entropy positive?
-  	
-  	#result = a_lambda * log(b_lambda) + (a_lambda-1) * E_log_lambda - b_lambda * E_lambda - lgamma(a_lambda)
-  	#result = result - E_lambda * sum(E_r)
-  	#result = result + sum(E_xi_log_lambda_r) - sum(lgamma(vx+1))
-  	T1 = sum(E_r) * E_log_rho + sum(1 - E_r) * E_log_one_minus_rho
-  	T1 = T1 - sum(E_log_q_r) #- E_log_q_lambda
-  	T1 = T1 - E_log_q_rho
+    cat("calculate_lower_bound: E_log_rho", E_log_rho, "E_log_1-rho", E_log_one_minus_rho, "\n")
+    
+    T1 = sum(vp) * E_log_rho + sum(1 - vp) * E_log_one_minus_rho
+  	T1 = T1 - sum((vp[zero.set]*log(vp[zero.set]) + (1-vp[zero.set])*log(1-vp[zero.set])))
+  	T1 = T1 + beta_entropy(a_rho, b_rho)
     
   	# Terms for (beta, u)
   	#result = result + (vy*vp) %*% mC %*% vmu
@@ -124,12 +114,13 @@ calculate_lower_bound.multivariate <- function(multivariate)
     # Terms for (beta, u)
     # Second try ...
     T2 = t(vy*vp) %*% mC %*% vmu
-    T2 = T2 - t(vp) %*% exp(mC %*% vmu + rep(1, p+m) * .5 * t(vmu)%*%mLambda%*%vmu)
-    T2 = T2 - sum(lgamma(vy + 1)) + .5*log(det(mLambda))
-    T2 = T2 + .5*(p+m)*(1 + log(2*pi))
-    T2 = T2 - .5*(log(2*pi) + log(m) + digamma(a_sigma) - log(b_sigma))
+    T2 = T2 - t(vp) %*% exp(mC %*% vmu + .5 * diag(mC%*%mLambda%*%t(mC)))
+    T2 = T2 - sum(lgamma(vy + 1))
     T2 = T2 - .5*a_sigma/b_sigma*(sum(vmu[u_idx]^2) + tr(mLambda[u_idx, u_idx]))
-    
+  	T2 = T2 + .5*(p+m)*(1 + log(2*pi)) + .5*log(det(mLambda))
+  	#T2 = T2 - .5*(log(2*pi) + log(m) + digamma(a_sigma) - log(b_sigma)) # WTF is this?
+    # Entropy? No, I don't know what it is.
+  	
   	# Terms for sigma2_u
     #if (!is.null(multivariate$mZ)) {
     #	cat("a_sigma2_u", a_sigma2_u, "b_sigma2_u", b_sigma2_u, "\n")
@@ -282,10 +273,14 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
 	if (!is.null(mult$mX)) {
 		p = ncol(mult$mX) 
 		if (verbose) cat("p", p)
-	}	
+	}	else {
+    p = 0
+	}
 	if (!is.null(mult$mZ)) {
 		m = ncol(mult$mZ) 
 		if (verbose) cat("m", m)
+	} else {
+    m = 0
 	}
 	cat("\n")
 	zero.set = which(mult$vy == 0)
@@ -352,10 +347,9 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
 		}
 		
 		
-
 		# Update parameters for q_rho
-		mult$a_rho = 1 + sum(mult$vp)
-		mult$b_rho = N - sum(mult$vp) + 1
+		mult$a_rho = mult$prior$a_rho + sum(mult$vp)
+		mult$b_rho = mult$prior$b_rho + N - sum(mult$vp)
 		
 		# Update parameters for q_vr
 		#if (verbose) {
@@ -366,11 +360,12 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
 		#	print(diag(mult$mC%*%mult$mLambda%*%t(mult$mC)))
 		#}
 		
-		mult$vp[zero.set] = expit(-exp(mult$mC[zero.set,]%*%mult$vmu + 0.5*diag(mult$mC[zero.set,]%*%mult$mLambda%*%t(mult$mC[zero.set,]))) + digamma(mult$a_rho) - digamma(mult$b_rho))
-    
+	  mult$vp[zero.set] = expit((mult$vy[zero.set]*mult$mC[zero.set,])%*%mult$vmu-exp(mult$mC[zero.set,]%*%mult$vmu + 0.5*diag(mult$mC[zero.set,]%*%mult$mLambda%*%t(mult$mC[zero.set,])) + digamma(mult$a_rho) - digamma(mult$b_rho)))
+	
 		#vlower_bound[i] <- calculate_lower_bound(vx, vp, a_lambda, b_lambda, a_rho, b_rho)
 		vlower_bound[i] <- 0 # calculate_lower_bound(mult)
 		vlower_bound[i] <- calculate_lower_bound(mult)
+    # Debugging idea: Save mult objects for later comparison
 		#print(mult$vmu)
 		#print(mult$vp)
 		#print(mult$a_rho)
