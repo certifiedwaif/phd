@@ -1,5 +1,18 @@
-\documentclass{amsart}
+\documentclass{amsart}[12pt]
+
 \usepackage{graphicx}
+
+\addtolength{\oddsidemargin}{-.75in}%
+\addtolength{\evensidemargin}{-.75in}%
+\addtolength{\textwidth}{1.5in}%
+\addtolength{\textheight}{1.3in}%
+\addtolength{\topmargin}{-.8in}%
+\addtolength{\marginparpush}{-.75in}%
+%\setlength\parindent{0pt}
+%\setlength{\bibsep}{0pt plus 0.3ex}
+
+
+
 \title{Variational approximations to zero-inflated Bayesian models}
 \author{Mark Greenaway}
 \input{include.tex}
@@ -55,11 +68,13 @@ $q(p_i)$ are Bernoulli distributions.
 
 \noindent This leads to the following functional forms of the optimal q-densities
 
+$$
 \begin{array}{l}
-$q^*(\lambda)$ is the $\myGamma{\alpha_{q(\lambda)}, \beta_{q(\lambda)}}$ density function, \\
-$q^*(\rho)$ is the $\text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)})$ density function, and \\
-$q^*(r_i)$  is the $\text{Bernoulli}(p_{q(r_i)})$ density function, $1 \leq i \leq n$,
+\mbox{$q^*(\lambda)$ is the $\myGamma{\alpha_{q(\lambda)}, \beta_{q(\lambda)}}$ density function,} \\
+\mbox{$q^*(\rho)$ is the $\text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)})$ density function, and} \\
+\mbox{$q^*(r_i)$  is the $\text{Bernoulli}(p_{q(r_i)})$ density function, $1 \leq i \leq n$,}
 \end{array}
+$$
 
 \noindent where the parameters are updated according to ...
 
@@ -118,7 +133,7 @@ Now, either $x_i = 0$ or $x_i \ne 0$.
 
 $$
 \begin{array}{ll}
-p_i &= \frac{\exp{(\eta_i)}}{I(x_i = 0) + \exp{(\eta_i)}} \\
+p_i &= \ds \frac{\exp{(\eta_i)}}{I(x_i = 0) + \exp{(\eta_i)}} \\
 &= \text{expit}(\eta_i)
 \end{array}
 $$
@@ -140,9 +155,9 @@ In this case, the lower bound can be calculated directly to be
 $$
 \begin{array}{ll}
 \bE_q \left\{ \log{p(\vx, \vr, \lambda, \rho)} - \log{q(\vr, \lambda, \rho)} \right\} =& 
-\alpha_\lambda \log{(\beta_\lambda)} + (\alpha_\lambda - 1) \bE_q[\log{(\lambda)}] - \beta_\lambda \bE_q [\lambda] - \log{(\Gamma(\alpha_\lambda))} \\
-&+ \sum_{i=1}^n ( -\bE_q [\lambda] \bE_q [r_i] + \bE_q[x_i \log{(\lambda r_i)}] - \log{(x_i!)} \\
-&+ \bE_q[r_i] \bE_q[\log{(\rho)}] + \bE_q[(1 - r_i)] \bE_q[\log{(1 - \rho)}] ) \\
+\alpha_\lambda \log{(\beta_\lambda)} + (\alpha_\lambda - 1) \bE_q[\log{(\lambda)}] - \beta_\lambda \bE_q [\lambda] - \log{(\Gamma(\alpha_\lambda))} \\ [1ex]
+&+ \sum_{i=1}^n ( -\bE_q [\lambda] \bE_q [r_i] + \bE_q[x_i \log{(\lambda r_i)}] - \log{(x_i!)} \\ [1ex]
+&+ \bE_q[r_i] \bE_q[\log{(\rho)}] + \bE_q[(1 - r_i)] \bE_q[\log{(1 - \rho)}] ) \\ [1ex]
 & - \bE_q \log{q(r)} - \bE_q \log{q(\lambda)} - \bE_q \log{q(\rho)}
 \end{array}
 $$
@@ -151,8 +166,9 @@ where
 $$
 \begin{array}{ll}
 \bE [\log{\lambda}] &= -\{ \alpha_{q(\lambda)} - \log{(\beta_{q(\lambda)})} + \log{\Gamma(\alpha_{q(\lambda)})} + (1 - \alpha_{q(\lambda)}) \psi{(\alpha_{q(\lambda)})} \} \\
-\bE [\lambda] &= \frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} \\
-\bE[\log{\rho}] &= - \{ \log{\text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)})} - (\alpha_{q(\rho)} - 1) \psi{(\alpha_{q(\rho)})} - (\beta_{q(\rho)} - 1)\psi{(\beta_{q(\rho)})} + (\alpha_{q(\rho)} + \beta_{q(\rho)} - 2)\psi{(\alpha_{q(\rho)} + \beta_{q(\rho)})} \} \\
+\bE [\lambda] & \ds = \frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} \\
+\bE[\log{\rho}] &= - \{ \log{\text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)})} - (\alpha_{q(\rho)} - 1) \psi{(\alpha_{q(\rho)})} - (\beta_{q(\rho)} - 1)\psi{(\beta_{q(\rho)})} \\
+    & \ds \qquad + (\alpha_{q(\rho)} + \beta_{q(\rho)} - 2)\psi{(\alpha_{q(\rho)} + \beta_{q(\rho)})} \} \\
 \end{array}
 $$
 
@@ -168,10 +184,10 @@ $$
 
 $$
 \begin{array}{ll}
--\bE_q \log{q(r)} &= \sum_{i=1}^n I(x_i = 0) \log{(p_i)} \\
--\bE_q \log{q(\lambda)} &= \alpha_{q(\lambda)} - \log{(\beta_{q(\lambda)})} + \log{\Gamma{(\alpha_{q(\lambda)})}} + (1 - \alpha_{q(\lambda)}) \Psi{(\alpha_{q(\lambda)})} \\
-\bE_q[\log{q(\rho)}] &= - \{ \log{(\text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)})} - (\alpha_{q(\rho)} - 1) \Psi{(\alpha_{q(\rho)})} - (\beta_{q(\rho)} - 1)\Psi{(\beta_{q(\rho)})} \\
-+ (\alpha_{q(\rho)} + \beta_{q(\rho)} - 2)\Psi{(\alpha_{q(\rho)} + \beta_{q(\rho)})} \} \\
+-\bE_q \log{q(r)} &= \sum_{i=1}^n I(x_i = 0) \log{(p_i)} \\ [1ex]
+-\bE_q \log{q(\lambda)} &= \alpha_{q(\lambda)} - \log{(\beta_{q(\lambda)})} + \log{\Gamma{(\alpha_{q(\lambda)})}} + (1 - \alpha_{q(\lambda)}) \Psi{(\alpha_{q(\lambda)})} \\ [1ex]
+\bE_q[\log{q(\rho)}] &= - \{ \log{(\text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)})} - (\alpha_{q(\rho)} - 1) \Psi{(\alpha_{q(\rho)})} - (\beta_{q(\rho)} - 1)\Psi{(\beta_{q(\rho)})} \\ [1ex]
+    & \ds \quad + (\alpha_{q(\rho)} + \beta_{q(\rho)} - 2)\Psi{(\alpha_{q(\rho)} + \beta_{q(\rho)})} \} \\
 \end{array}
 $$
 
@@ -284,14 +300,14 @@ $$
 \bE_q[\log{p(\sigma^2_u)} - \log{q(\sigma^2_u)}] &=
 \alpha_{\sigma^2_u} \log{\beta_{\sigma^2_u}} - \log{\Gamma{(\alpha_{\sigma^2_u})}} +
 (\alpha_{\sigma^2_u} - 1) \bE_q	\log{\sigma^2_u}\\
-&- \beta_{\sigma^2_u} \bE_q [\sigma^2_u] +
+& \quad - \beta_{\sigma^2_u} \bE_q [\sigma^2_u] +
 \log{\Gamma(\alpha_{q(\sigma^2_u)})} - (\alpha_{q(\sigma^2_u)} - 1) \Psi{(\alpha_{q(\sigma^2_u)})} - \log{(\beta_{q(\sigma^2_u)})}\\
-&- \log{(\alpha_{q(\sigma^2_u)} + \beta_{q(\sigma^2_u)})}\\
+& \quad - \log{(\alpha_{q(\sigma^2_u)} + \beta_{q(\sigma^2_u)})}\\ [2ex]
 &=\alpha_{\sigma^2_u} \log{\beta_{\sigma^2_u}} - \log{\Gamma{(\alpha_{\sigma^2_u})}} +
 (\alpha_{\sigma^2_u} - 1) \Psi{\alpha_{q(\sigma^2_u)}} - \log{(\beta_{q(\sigma^2_u)})} \\
-&- \beta_{\sigma^2_u} \frac{\alpha_{q(\sigma^2_u)}}{\beta_{q(\sigma^2_u)}} + 
+& \quad - \beta_{\sigma^2_u} \frac{\alpha_{q(\sigma^2_u)}}{\beta_{q(\sigma^2_u)}} + 
 \log{\Gamma(\alpha_{q(\sigma^2_u)})} - (\alpha_{q(\sigma^2_u)} - 1) \Psi{(\alpha_{q(\sigma^2_u)})} - \log{(\beta_{q(\sigma^2_u)})}\\
-&- \log{(\alpha_{q(\sigma^2_u)} + \beta_{q(\sigma^2_u)})}
+& \quad- \log{(\alpha_{q(\sigma^2_u)} + \beta_{q(\sigma^2_u)})}
 \end{array}
 $$
 
@@ -359,8 +375,8 @@ $$
 
 $$
 \begin{array}{ll}
-p(r_i | \text{rest}) &\propto \frac{(\lambda r_i)^{x_i} \exp{(-\lambda r_i)}}{x_i !} \rho^{r_i} (1 - \rho)^{1 - r_i} \\
-&\propto r_i^{x_i} (e^{-\lambda})^{r_i} \rho^{r_i} (1 - \rho)^{1 - r_i}
+p(r_i | \text{rest}) & \ds \propto \frac{(\lambda r_i)^{x_i} \exp{(-\lambda r_i)}}{x_i !} \rho^{r_i} (1 - \rho)^{1 - r_i} \\
+& \ds \propto r_i^{x_i} (e^{-\lambda})^{r_i} \rho^{r_i} (1 - \rho)^{1 - r_i}
 \end{array}
 $$
 
@@ -369,7 +385,7 @@ $r_i = 1$. So $x_i^{r_i} = I(x \ne 0)$ and hence the likelihood can be re-writte
 
 $$
 \begin{array}{ll}
-p(r_i | \text{rest}) &= \frac{(e^{-\lambda + \logit{(\rho)}})^{r_i}}{I(x_i = 0) + (e^{-\lambda + \logit{(\rho)}})^{r_i}}
+p(r_i | \text{rest}) & \ds = \frac{(e^{-\lambda + \logit{(\rho)}})^{r_i}}{I(x_i = 0) + (e^{-\lambda + \logit{(\rho)}})^{r_i}}
 \end{array}
 $$
 \bibliographystyle{plain}
