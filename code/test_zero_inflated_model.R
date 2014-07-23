@@ -464,13 +464,14 @@ test_multivariate_accuracy_stan <- function()
   zip_data <- list(N=sum(n), P=2, M=m, y=vy, X=mX, Z=mZ)
   #print(str(zip_data))
   rng_seed <- 1234;
-  foo <- stan("multivariate_zip.stan", data=zip_data, chains = 0)
-  sflist <- 
-    mclapply(1:4, mc.cores = 2, 
-             function(i) stan(fit=foo, data=zip_data, seed = rng_seed, 
-                              chains = 1, chain_id = i, refresh = -1,
-                              iter=1e3))
-  fit <- sflist2stanfit(sflist)
+  fit <- stan("multivariate_zip.stan", data=zip_data, chains = 1)
+  #foo <- stan("multivariate_zip.stan", data=zip_data, chains = 0)
+  #sflist <- 
+  #  mclapply(1:4, mc.cores = 2, 
+  #           function(i) stan(fit=foo, data=zip_data, seed = rng_seed, 
+  #                            chains = 1, chain_id = i, refresh = -1,
+  #                            iter=1e3))
+  #fit <- sflist2stanfit(sflist)
   #fit <- stan(model_code = zip_code, data = zip_dat, 
   #            iter = 1e5, chains = 4)  
   
