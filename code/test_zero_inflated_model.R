@@ -414,7 +414,7 @@ test_multivariate_accuracy <- function()
 test_multivariate_accuracy_stan <- function()
 {
   m = 20
-  ni = 20
+  ni = 10
   n = rep(ni,m)
   mX = matrix(as.vector(cbind(rep(1, sum(n)), runif(sum(n), -1, 1))), sum(n), 2)
   #print("mX=")
