@@ -65,6 +65,8 @@ $q(p_i)$ are Bernoulli distributions.
 \noindent where the parameters are updated according to
 
 \begin{algorithm}
+\label{algorithm1}
+\caption[Algorithm 1]{The univariate model fitting algorithm}
 \begin{algorithmic}
 \REQUIRE{$\alpha_{q(\rho)} \leftarrow \alpha_\rho + \vone^T\vp, 
 \alpha_{q(\lambda)} \leftarrow \alpha_\lambda + \vone^T\vx$}
@@ -87,18 +89,18 @@ Assuming that $q(r_i) \sim \Bernoulli{p_i}$ then,
 
 % Mean field update for q(\lambda)
 $$
-\begin{array}{ll}
-q^*(\lambda) &\propto \lambda^{\alpha_\lambda+\vone^T\vx - 1} \exp{\left[ \bE_{-q(\lambda)} \{-(\beta_\lambda + \vone^T\vr) \lambda \} \right]} \\
-&\propto \lambda^{\alpha_\lambda+\vone^T\vx - 1} \exp{\{-(\beta_\lambda + \vone^T\vp)\lambda \} } \\
+\begin{array}{rl}
+q^*(\lambda) &\propto \lambda^{\alpha_\lambda+\vone^T\vx - 1} \exp{\left[ \bE_{-q(\lambda)} \left \{-(\beta_\lambda + \vone^T\vr) \lambda \right \} \right]} \\
+&\propto \lambda^{\alpha_\lambda+\vone^T\vx - 1} \exp{\left \{-(\beta_\lambda + \vone^T\vp)\lambda \right \} } \\
 &= \myGamma{\alpha_\lambda+\vone^T\vx, \beta_\lambda+\vone^T\vp},
 \end{array}
 $$
 
 % Mean field update for q(\rho)
 $$
-\begin{array}{ll}
-\log{q^*(\rho)} &\propto \{ \bE_{-q(\rho)} \left[ \vone^T\vr \log{(\rho)} + (n - \vone^T\vr) \log{(1 - \rho)} \right] \} \\
-&\propto \exp{ \left( \vone^T\vp \log{(\rho)} + (n - \vone^T\vp) \log{(1 - \rho)} \right) } \\
+\begin{array}{rl}
+\log{q^*(\rho)} &\propto \left \{ \bE_{-q(\rho)} \left[ \vone^T\vr \log{(\rho)} + (n - \vone^T\vr) \log{(1 - \rho)} \right] + \alpha_\rho \log{(\rho)} + \beta_\rho \log{(1 - \rho)} \right \} \\
+&\propto \exp{ \left( (\vone^T\vp + \alpha_\rho) \log{(\rho)} + (n - \vone^T\vp + \beta_\rho) \log{(1 - \rho)} \right) } \\
 &= \Beta{\alpha_\rho + \vone^T\vp, \beta_\rho + n - \vone^T\vp},
 \end{array}
 $$
@@ -106,7 +108,7 @@ $$
 and
 
 $$
-\begin{array}{ll}
+\begin{array}{rl}
 \log{q^*(r_i)} &\propto -\bE_{q(\lambda)} [\lambda ] r_i + x_i \log{(r_i)} + r_i \bE_{q(\rho)} \left[\log{\left(\frac{\rho}{1 - \rho}\right)}\right]\\
 &= -r_i \frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} + x_i \log{(r_i)} + r_i \left(\psi(\alpha_{q(\rho)}) - \psi(\beta_{q(\rho)})\right)\\
 &= \text{Bernoulli}(p_i)
@@ -116,9 +118,9 @@ $$
 where
 
 $$
-\begin{array}{ll}
+\begin{array}{rl}
 p_i &= \frac{\exp{(\eta_i)}}{I(x_i = 0) + \exp{(\eta_i)}} \\
-&= \text{expit}(\eta_i), \quad \forall i \mbox{ such that } x_i = 0
+&= \text{expit}(\eta_i), \mbox{ when } x_i = 0
 \end{array}
 $$
 
@@ -141,10 +143,11 @@ and $\eta_i = -\frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} + \psi(\alpha_{q(\
 %q^*(r_i) = \text{Bernoulli}(p_i)
 %$$
 
+% Why do you care about these when you have the algorithm?
 So the mean field update equations are \ldots
 
 $$
-\begin{array}{cl}
+\begin{array}{rl}
 \alpha_{q(\rho)} &\leftarrow \alpha_\rho + \vone^T\vp \\
 \beta_{q(\rho)} &\leftarrow \beta_\rho + \vone^T(\vone - \vp) \\
 \eta &\leftarrow -\frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} + \psi(\alpha_{q(\rho)}) - \psi(\beta_{q(\rho)}) \\
@@ -160,25 +163,25 @@ $$
 \subsection{Lower bound}
 The lower bound $\log{\underline{p}(\vtheta)}$ is
 $$
-	\bE_q[\log{p(x, \theta)} - \log{q(\theta)}]
+	\bE_q[\log{p(\vx, \vtheta)} - \log{q(\vtheta)}]
 $$
 
-where $q(\theta) = q(\lambda) q(\rho) \prod_{i=1}^n q(r_i)$,
+where $q(\vtheta) = q(\lambda) q(\rho) \prod_{i=1}^n q(r_i)$,
 $q(\lambda) \sim \text{Gamma}{(\alpha_{q(\lambda)}, \beta_{q(\lambda)})}$,
 $q(\rho) \sim \text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)})$ and
 $q(r_i) = 1$ if $x_i \ne 0$, and $p_i$ if $x_i = 0$, where $p_i$ is
-calculated for each iteration as specified above.
+calculated for each iteration as specified above \ref{algorithm1}.
 
 In this case, the lower bound can be calculated directly to be
 
 $$
-\begin{array}{ll}
+\begin{array}{rl}
 \bE_q \left\{ \log{p(\vx, \vr, \lambda, \rho)} - \log{q(\vr, \lambda, \rho)} \right\} &= T_1 + T_2 \\
 \end{array}
 $$
 
 $$
-\begin{array}{ll}
+\begin{array}{rl}
 T_1 &=
 \alpha_\lambda \log{(\beta_\lambda)} + (\alpha_\lambda - 1) \bE_q[\log{(\lambda)}] - \beta_\lambda \bE_q [\lambda] - \log{(\Gamma(\alpha_\lambda))} \\
 &\quad + \sum_{i=1}^n ( -\bE_q [\lambda] \bE_q [r_i] + \bE_q[x_i \log{(\lambda r_i)}] - \log{(x_i!)}
@@ -189,14 +192,14 @@ where
 
 % T_1 terms
 $$
-\begin{array}{ll}
+\begin{array}{rl}
 \bE [\log{\lambda}] &= -\{ \alpha_{q(\lambda)} - \log{(\beta_{q(\lambda)})} + \log{\Gamma(\alpha_{q(\lambda)})} + (1 - \alpha_{q(\lambda)}) \psi{(\alpha_{q(\lambda)})} \} \\
 \bE [\lambda] &= \frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} \\
 \end{array}
 $$
 
 $$
-\begin{array}{ll}
+\begin{array}{rl}
 T_2 &=\bE_q[r_i] \bE_q[\log{(\rho)}] + \bE_q[(1 - r_i)] \bE_q[\log{(1 - \rho)}] ) \\
 & \quad - \bE_q \log{q(r)} - \bE_q \log{q(\lambda)} - \bE_q \log{q(\rho)}
 \end{array}
@@ -206,14 +209,12 @@ where
 
 % T_2 terms
 $$
-\begin{array}{ll}
+\begin{array}{rl}
 \bE[\log{\rho}] &= -\{ \log{(\text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)}))} - (\alpha_{q(\rho)} - 1) \psi{(\alpha_{q(\rho)})} - (\beta_{q(\rho)} - 1)\psi{(\beta_{q(\rho)})} \\
 &\quad + (\alpha_{q(\rho)} + \beta_{q(\rho)} - 2)\psi{(\alpha_{q(\rho)} + \beta_{q(\rho)})} \} 
 \end{array}
 $$
 
-By symmetry, we see that $(1 - \rho)$ has the same entropy as $\rho$,
-and so $\bE [\log{(\rho)}] = \bE [\log{(1 - \rho)}]$.
 $$
 \bE[r_i] = 
 	\begin{cases}
@@ -222,15 +223,18 @@ $$
 	\end{cases}
 $$
 
+where
+
 $$
-\begin{array}{ll}
+\begin{array}{rl}
 -\bE_q \log{q(r)} &= \sum_{i=1}^n I(x_i = 0) \log{(p_i)} \\
 -\bE_q \log{q(\lambda)} &= \alpha_{q(\lambda)} - \log{(\beta_{q(\lambda)})} + \log{\Gamma{(\alpha_{q(\lambda)})}} + (1 - \alpha_{q(\lambda)}) \psi{(\alpha_{q(\lambda)})} \\
-\bE_q[\log{q(\rho)}] &= - \{ \log{(\text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)})} - (\alpha_{q(\rho)} - 1) \psi{(\alpha_{q(\rho)})} - (\beta_{q(\rho)} - 1)\psi{(\beta_{q(\rho)})} \\
+\quad \bE_q[\log{q(\rho)}] &= - \{ \log{(\text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)})} - (\alpha_{q(\rho)} - 1) \psi{(\alpha_{q(\rho)})} - (\beta_{q(\rho)} - 1)\psi{(\beta_{q(\rho)})} \\
 &\quad + (\alpha_{q(\rho)} + \beta_{q(\rho)} - 2)\psi{(\alpha_{q(\rho)} + \beta_{q(\rho)})} \} \\
 \end{array}
 $$
 
+\newpage
 \subsection{Results}
 %\includegraphics[width=100mm,height=100mm]{code/lower_bound_convergence.pdf}
 
@@ -292,13 +296,13 @@ where $i \in \{i : \vy_i = 0 \}$.
 
 The optimal approximation for $\vr$ is
 $$
-\begin{array}{ll}
+\begin{array}{rl}
 q(\vr) &\propto \exp{\{\bE_{-q(\vr)}y^T\mR(\mC\vmu) - \vr^T\exp{(\mC\vnu)}-\half \vnu^T \text{diag}(\sigma_{\vu}^2)^{-1} \vnu\}}
 \end{array}
 $$
 
 $$
-\begin{array}{ll}
+\begin{array}{rl}
 &\bE_{-q(\vr)} [\vy^T\mR(C\vnu) - \vr^T\exp{(\mC\vnu)}-\half \vnu^T D(\sigma_{\vu}^2)^{-1} \vnu]\\
 =&\vy^T\mR\mC \vmu - \vp^T \exp{\{\mC \vmu + \half \text{diag}(\mC \mLambda \mC^T)\}} - \half \vmu^T \hat{D} \vmu - \half \text{tr}(\mLambda \hat{D})
 \end{array}
@@ -313,7 +317,7 @@ regression model.
 % You can build the lower bound out of re-usable terms like T_1, T_2, T_3, ...
 % We're just introducing a replacement T_1
 $$
-\begin{array}{ll}
+\begin{array}{rl}
 \bE_q [\log{p(y, \theta)} - \log{q(\theta)}] &= 
 \vy \mP^T \mC \vmu - \vp^T\exp{(\mC\vmu + \half \vmu^T \mLambda \vmu)} - \vone^T\log{(\vy + \vone)}\\
 &\quad + \half \log{|\mLambda|} + \frac{p + m}{2} (1 + \log{(2 \pi)})
@@ -444,7 +448,7 @@ p(r_i | \text{rest}) &= \frac{(e^{-\lambda + \logit{(\rho)}})^{r_i}}{I(x_i = 0) 
 \end{array}
 $$
 
-\bibliographystyle{plain}
+\bibliographystyle{elsarticle-harv}
 \bibliography{Chapter_1_zero_inflated_models}
 
 \end{document}
