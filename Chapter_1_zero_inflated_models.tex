@@ -1,4 +1,5 @@
 \documentclass{amsart}
+\usepackage[authoryear]{natbib}
 \usepackage{graphicx}
 \usepackage{algorithm,algorithmic}
 \title{Variational approximations to zero-inflated Bayesian models}
@@ -16,7 +17,7 @@ insurance claims, hospital visits or defects in manufacturing processes.
 
 % TODO: Add graphical model
 
-\noindent We use a factorised approximation to the full likelihood, as detailed in \cite{ormerod10}.
+\noindent We use a factorised approximation to the full likelihood, as detailed in \citep{ormerod10}.
 The use of conjugate priors in the full model yields easier mean field updates in the
 variational approximation.
 
@@ -149,9 +150,9 @@ So the mean field update equations are \ldots
 $$
 \begin{array}{rl}
 \alpha_{q(\rho)} &\leftarrow \alpha_\rho + \vone^T\vp \\
-\beta_{q(\rho)} &\leftarrow \beta_\rho + \vone^T(\vone - \vp) \\
+\beta_{q(\rho)} &\leftarrow \beta_\rho + n - \vone^T\vp \\
 \eta &\leftarrow -\frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} + \psi(\alpha_{q(\rho)}) - \psi(\beta_{q(\rho)}) \\
-\vp_{q(\vr_0)} &\leftarrow \expit{\eta} \\
+\vp_{q(\vr_0)} &\leftarrow \expit{(\eta)} \\
 \alpha_{q(\lambda)} &\leftarrow \alpha_\lambda+ \vone^T\vx \\
 \beta_{q(\lambda)} &\leftarrow \beta_\lambda+ \vone^T\vp
 \end{array}
@@ -170,7 +171,7 @@ where $q(\vtheta) = q(\lambda) q(\rho) \prod_{i=1}^n q(r_i)$,
 $q(\lambda) \sim \text{Gamma}{(\alpha_{q(\lambda)}, \beta_{q(\lambda)})}$,
 $q(\rho) \sim \text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)})$ and
 $q(r_i) = 1$ if $x_i \ne 0$, and $p_i$ if $x_i = 0$, where $p_i$ is
-calculated for each iteration as specified above \ref{algorithm1}.
+calculated for each iteration as specified in Algorithm \ref{algorithm1}.
 
 In this case, the lower bound can be calculated directly to be
 
@@ -180,6 +181,8 @@ $$
 \end{array}
 $$
 
+where
+
 $$
 \begin{array}{rl}
 T_1 &=
@@ -188,7 +191,7 @@ T_1 &=
 \end{array}
 $$
 
-where
+with
 
 % T_1 terms
 $$
@@ -198,20 +201,22 @@ $$
 \end{array}
 $$
 
+and
+
 $$
 \begin{array}{rl}
-T_2 &=\bE_q[r_i] \bE_q[\log{(\rho)}] + \bE_q[(1 - r_i)] \bE_q[\log{(1 - \rho)}] ) \\
+T_2 &=\bE_q[r_i] \bE_q[\log{(\rho)}] + \bE_q[(1 - r_i)] \bE_q[\log{(1 - \rho)}] \\
 & \quad - \bE_q \log{q(r)} - \bE_q \log{q(\lambda)} - \bE_q \log{q(\rho)}
 \end{array}
 $$
 
-where
+with
 
 % T_2 terms
 $$
 \begin{array}{rl}
 \bE[\log{\rho}] &= -\{ \log{(\text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)}))} - (\alpha_{q(\rho)} - 1) \psi{(\alpha_{q(\rho)})} - (\beta_{q(\rho)} - 1)\psi{(\beta_{q(\rho)})} \\
-&\quad + (\alpha_{q(\rho)} + \beta_{q(\rho)} - 2)\psi{(\alpha_{q(\rho)} + \beta_{q(\rho)})} \} 
+&\quad + (\alpha_{q(\rho)} + \beta_{q(\rho)} - 2)\psi{(\alpha_{q(\rho)} + \beta_{q(\rho)})} \} .
 \end{array}
 $$
 
@@ -243,7 +248,7 @@ The above univariate model demonstrates that variational approximations are well
 to accelerating the fit of Bayesian zero-inflated models to data. Typically zero-inflated
 models arise in applications where we wish to build multivariate regression models. To be able to
 construct multivariate models with as much generality as possible, we specify the full
-model as a General Design Bayesian Generalized Linear Mixed Model, as in \cite{zhao06}.
+model as a General Design Bayesian Generalized Linear Mixed Model, as in \citep{zhao06}.
 This allows us to incorporate within-subject correlation, measurement error, missing data
 and smoothing splines in our models.
 
@@ -257,11 +262,11 @@ and smoothing splines in our models.
 % and use GVA on q(\beta, \u, \Sigma) and mean field updates on \rho and r_i
 
 \subsection{Model}
-Let $\mR = \diag{(\vr)}$. Let $\mC = [X Z], \vnu = [\vbeta^T \vu^T]^T$.
+Let $\mR = \diag{(\vr)}$. Let $\mC = [\mX \mZ], \vnu = [\vbeta^T \vu^T]^T$.
 
 $$
 \begin{array}{rl}
-\log{p(y|\vr, \vbeta, \vu)} &= \vy^T \mR (C\vnu) - \vr^T \exp{(C\vnu)} - \vone^T \log{\Gamma{(\vy + \vone)}}, \\
+\log{p(y|\vr, \vbeta, \vu)} &= \vy^T \mR (\mC\vnu) - \vr^T \exp{(\mC\vnu)} - \vone^T \log{\Gamma{(\vy + \vone)}}, \\
 \log{p(\vnu|\sigma_{u}^2)} &= - \half \log{|2\pi \sigma_{\vu}^2 \mI|} - \half \vnu^T(\sigma_{\vu}^2 I)^{-1} \vnu, \\
 \log{p(\vr)} &= \vr^T \log{(\rho \vone)} + (\vone - \vr)^T\log{(\vone - \vone \rho)}, \\
 p(\rho) &\propto 1, \\
@@ -283,16 +288,16 @@ $$
 \begin{array}{rl}
 q(\vnu) &= N(\vmu, \mLambda), \\
 q(\sigma_{\vu}^2) &= IG\left(\alpha_{\sigma_u^2} + \frac{m}{2}, \beta_{\sigma_u^2} + \frac{\|\vmu_\vu\|^2}{2} + \frac{\tr(\mLambda_{\vu\vu})}{2}\right), \\
-\mbox{and } q(r_i) &\propto \exp{\{\bE_{-r_i} [-r_i \exp{(c_i^T\vnu)}]\} + r_i [\psi(\alpha_\rho) - \psi(\beta_\rho)]}.\\
+\mbox{and } q(r_i) &\propto \exp{\left \{-r_i \bE_{-r_i} [\exp{(c_i^T\vnu)}] \right \} + r_i [\psi(\alpha_\rho) - \psi(\beta_\rho)]}.\\
 \end{array}
 $$
 %\end{align*}
 
-Hence $q(r_i) = \Bernoulli{(p_i)}$ where
+Hence $q(r_i) = \Bernoulli{p_i}$ where
 $$
-p_i = \expit{\psi{(\alpha_{q(\rho)})} - \psi{(\beta_{q(\rho)})} - \exp{\{c_i^T\vnu + \half c_i^T \mLambda c_i\}}},
+p_i = \expit{\left \{ \psi{(\alpha_{q(\rho)})} - \psi{(\beta_{q(\rho)})} - \exp{(c_i^T\vmu + \half c_i^T \mLambda c_i)} \right \} },
 $$
-where $i \in \{i : \vy_i = 0 \}$.
+when $\vy_i = 0$.
 
 The optimal approximation for $\vr$ is
 $$
@@ -303,8 +308,8 @@ $$
 
 $$
 \begin{array}{rl}
-&\bE_{-q(\vr)} [\vy^T\mR(C\vnu) - \vr^T\exp{(\mC\vnu)}-\half \vnu^T D(\sigma_{\vu}^2)^{-1} \vnu]\\
-=&\vy^T\mR\mC \vmu - \vp^T \exp{\{\mC \vmu + \half \text{diag}(\mC \mLambda \mC^T)\}} - \half \vmu^T \hat{D} \vmu - \half \text{tr}(\mLambda \hat{D})
+&\bE_{-q(\vr)} [\vy^T\mR(C\vnu) - \vr^T\exp{(\mC\vnu)}-\half \vnu^T \mD(\sigma_{\vu}^2)^{-1} \vnu]\\
+=&\vy^T\mR\mC \vmu - \vp^T \exp{\{\mC \vmu + \half \text{diag}(\mC \mLambda \mC^T)\}} - \half \vmu^T \hat{\mD} \vmu - \half \text{tr}(\mLambda \hat{\mD})
 \end{array}
 $$
 
@@ -318,8 +323,8 @@ regression model.
 % We're just introducing a replacement T_1
 $$
 \begin{array}{rl}
-\bE_q [\log{p(y, \theta)} - \log{q(\theta)}] &= 
-\vy \mP^T \mC \vmu - \vp^T\exp{(\mC\vmu + \half \vmu^T \mLambda \vmu)} - \vone^T\log{(\vy + \vone)}\\
+\bE_q [\log{p(\vy, \vtheta)} - \log{q(\vtheta)}] &= 
+\vy \mP^T \mC \vmu - \vp^T\exp{\{\mC\vmu + \half \text{diag} (\mC^T \mLambda \mC) \} } - \vone^T\log{(\vy + \vone)}\\
 &\quad + \half \log{|\mLambda|} + \frac{p + m}{2} (1 + \log{(2 \pi)})
 \end{array}
 $$
@@ -341,21 +346,27 @@ $$
 %\bE_q[\sigma_u^{-2}] = \frac{\alpha_{q(\sigma_u^2)}}{\beta_{q(\sigma_u^2)}}
 %$$
 
-For $\vnu$,
+\noindent The lower bound is equal to $\bE_q[\log{p(\vnu)} - \log{q(\vnu)}] = T_1 + T_2 + T_3$.
+The $T_1$ term is the same as in the univariate model.
+
+\noindent The other two terms are:
 
 % Where are the priors for \vbeta and \vu
 
+% This is the new T_2
 $$
-\begin{array}{ll}
-\bE_q[\log{p(\vnu)} - \log{q(\vnu)}] &= \vy^T \mP \mC \vmu - \vp^T \exp{(\mC \vmu + \half \vmu^T \mLambda \vmu)} - \vone^T\log \Gamma{(\vy + \vone)}\\
-& \quad + \frac{p + m}{2} (1 + \log{2 \pi}) + \half \log{|\mLambda|}.
+\begin{array}{rl}
+T_2 &= \bE_q[\log{p(\vnu)} - \log{q(\vnu)}] \\
+&= \vy^T \mP \mC \vmu - \vp^T \exp{\{\mC \vmu + \half (\mC^T \mLambda \mC)\}} - \vone^T\log \Gamma{(\vy + \vone)}\\
+& \quad + \frac{p + m}{2} (1 + \log{2 \pi}) + \half \log{|\mLambda|},
 \end{array}
 $$
 
 % This should be denoted as T_3
-For $\sigma^2_u$,
+\noindent and
+
 $$
-\begin{array}{ll}
+\begin{array}{rl}
 \bE_q[\log{p(\sigma^2_u)} - \log{q(\sigma^2_u)}] &=
 \alpha_{\sigma^2_u} \log{\beta_{\sigma^2_u}} - \log{\Gamma{(\alpha_{\sigma^2_u})}} +
 (\alpha_{\sigma^2_u} - 1) \bE_q	\log{\sigma^2_u}\\
