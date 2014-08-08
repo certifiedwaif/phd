@@ -106,13 +106,14 @@ $q(r_i)$ are Bernoulli distributions.
 
 \noindent This leads to the following functional forms of the optimal q-densities
 
-$$
-q^*(\lambda) \sim \myGamma{(\alpha_{q(\lambda)}, \beta_{q(\lambda)})},
-q^*(\rho) \sim \text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)}),
-\mbox{ and } q^*(r_i) \sim \text{Bernoulli}(p_{q(r_i)}), \mbox{1 \leq i \leq n},
-$$
 
-where the parameters are updated according to Algorithm \ref{algorithm1}.
+\begin{array}{c}
+$q^*(\lambda) \sim \myGamma{(\alpha_{q(\lambda)}, \beta_{q(\lambda)})},
+q^*(\rho) \sim \text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)}),
+\mbox{ and } q^*(r_i) \sim \text{Bernoulli}(p_{q(r_i)}), \mbox{1 \leq i \leq n},$
+\end{array}
+
+\noindent where the parameters are updated according to Algorithm \ref{algorithm1}.
 
 \begin{algorithm}\label{alg:algorithm_one}
 \label{algorithm1}
@@ -136,14 +137,14 @@ optimal densities $q^*(\lambda)$ and $q^*(\rho)$}
 We are now in a position to calculate the mean field update equations for the factorised
 variational approximation.
 
-\noindent Assuming that $q(r_i) \sim \Bernoulli{p_i}$ then,
+\noindent Assuming that $q(r_i) \sim \Bernoulli{(p_i)}$ then,
 
 % Mean field update for q(\lambda)
 $$
 \begin{array}{rl}
-q^*(\lambda) &\propto \lambda^{\alpha_\lambda+\vone^T\vx - 1} \exp{\left[ \bE_{-q(\lambda)} \left \{-(\beta_\lambda + \vone^T\vr) \lambda \right \} \right]} \\
+q^*(\lambda) &\propto \lambda^{\alpha_\lambda+\vone^T\vx - 1} \exp{\left \{ \bE_{-q(\lambda)} \left \[-(\beta_\lambda + \vone^T\vr) \lambda \right \] \right \}} \\
 &\propto \lambda^{\alpha_\lambda+\vone^T\vx - 1} \exp{\left \{-(\beta_\lambda + \vone^T\vp)\lambda \right \} } \\
-&= \myGamma{\alpha_\lambda+\vone^T\vx, \beta_\lambda+\vone^T\vp},
+&= \myGamma{(\alpha_\lambda+\vone^T\vx, \beta_\lambda+\vone^T\vp)},
 \end{array}
 $$
 
