@@ -295,7 +295,7 @@ $$
 %\includegraphics[width=100mm,height=100mm]{code/lower_bound_convergence.pdf}
 
 \section{Extending the zero-inflated Poisson model to a regression model}
-The above univariate model demonstrates that variational approximations are well-suited
+\noindent The above univariate model demonstrates that variational approximations are well-suited
 to accelerating the fit of Bayesian zero-inflated models to data. Typically zero-inflated
 models arise in applications where we wish to build multivariate regression models. To be able to
 construct multivariate models with as much generality as possible, we specify the full
@@ -339,16 +339,22 @@ $$
 \begin{array}{rl}
 q(\vnu) &= N(\vmu, \mLambda), \\
 q(\sigma_{\vu}^2) &= \mbox{IG}\left(\alpha_{\sigma_u^2} + \frac{m}{2}, \beta_{\sigma_u^2} + \frac{\|\vmu_\vu\|^2}{2} + \frac{\tr(\mLambda_{\vu\vu})}{2}\right), \\
-\mbox{and } q(r_i) &\propto \exp{\left \{-r_i \bE_{-r_i} [\exp{(c_i^T\vnu)}] + r_i [\psi(\alpha_\rho) - \psi(\beta_\rho)] \right \} }.\\
+\mbox{and } q(r_i) &= \Bernoulli{(p_i)}
 \end{array}
 $$
 %\end{align*}
 
-\noindent Hence $q(r_i) = \Bernoulli{p_i}$ where
+\noindent where
 $$
-p_i = \expit{\left \{ \psi{(\alpha_{q(\rho)})} - \psi{(\beta_{q(\rho)})} - \exp{(c_i^T\vmu + \half c_i^T \mLambda c_i)} \right \} },
+p_i = \expit{\left \[ \psi{(\alpha_{q(\rho)})} - \psi{(\beta_{q(\rho)})} - \exp{(c_i^T\vmu + \half c_i^T \mLambda c_i)} \right \]}
 $$
-when $\vy_i = 0$.
+
+\noindent \text{when} $\vy_i = 0$.
+
+% What on Earth is this section doing here? This is very random.
+$\propto \exp{\left \{-r_i \bE_{-r_i} [\exp{(c_i^T\vnu)}] + r_i [\psi(\alpha_\rho) - \psi(\beta_\rho)] \right \} }.\\$
+
+% Include derivations for mean field updates at the end?
 
 \noindent The optimal approximation for $\vr$ is
 $$
@@ -360,16 +366,40 @@ $$
 $$
 \begin{array}{rl}
 &\bE_{-q(\vr)} [\vy^T\mR(C\vnu) - \vr^T\exp{(\mC\vnu)}-\half \vnu^T \text{diag}(\sigma_{\vu}^2)^{-1} \vnu]\\
-=&\vy^T\mR\mC \vmu - \vp^T \exp{\{\mC \vmu + \half \text{diag}(\mC \mLambda \mC^T)\}} - \half \vmu^T \text{diag}\left (\frac{\alpha_{q(\sigma_{\vu}^2)}}{\beta_{q(\sigma_{\vu}^2)}} \right ) \vmu - \half \text{tr}(\mLambda \text{diag}\left (\frac{\alpha_{q(\sigma_{\vu}^2)}}{\beta_{q(\sigma_{\vu}^2)}} \right ))
+=&\vy^T\mR\mC \vmu - \vp^T \exp{\{\mC \vmu + \half \text{diag}(\mC \mLambda \mC^T)\}} - \half \vmu^T \hat{\mD} \vmu - \half \text{tr}(\mLambda \hat{\mD} ))
 \end{array}
 $$
 
-%where $\hat{\mD} = \frac{\alpha_{q(\sigma_{\vu}^2)}}{\beta_{q(\sigma_{\vu}^2)}} \mI$. 
-\noindent This can be seen to be very close to a Poisson regression model.
-This is close in form to a Poisson regression model. Poisson regression models
+\noindent where $\hat{\mD} = \text{diag}\left (\alpha_{q(\sigma_{\vu}^2)}/\beta_{q(\sigma_{\vu}^2)} \right )$. 
+
+\noindent This is close in form to a Poisson regression model. Poisson regression models
 with normal priors have no closed form for their mean field updates due to
 non-conjugacy, but can be fit using Gaussian variational approximation
-\citep{ormerod09}.
+\citep{ormerod09}. The model can be fit using Algorithm \ref{alg:algorithm_two} below.
+
+\begin{algorithm}\label{alg:algorithm_two}
+\label{algorithm1}
+\caption[Algorithm 2]{Iterative scheme for obtaining the parameters in the
+optimal densities $q^*(\vmu, \mLambda)$, $q^*(\sigma_u^2)$ and $q^*(\rho)$}
+\begin{algorithmic}
+% Fit \vmu, \mLambda using Laplace approximation
+\REQUIRE{$\alpha_{q(\rho)} \leftarrow \alpha_\rho + \vone^T\vp, 
+\alpha_{q(\lambda)} \leftarrow \alpha_\lambda + \vone^T\vx$}
+\WHILE{the increase in $\log{\underline{p}}(\vx;q)$ is significant}
+% \vmu, \mLambda
+\STATE Optimise $\vmu$ and $\mLambda$ using $\vy, \mX, \mZ, \rho, \vp$ and
+$\alpha_{q(\sigma_u^2)}$, $\beta_{q(\sigma_u^2)}$
+\STATE $\beta_{q(\lambda)} \leftarrow \beta_\lambda + \vone^T\vp$
+% \vp
+% \rho is a prior? Not directly observed, except through \vr_i
+\STATE $\beta_{q(\rho)} \leftarrow \beta_\rho + n - \vone^T\vp$
+\STATE $\eta \leftarrow -\alpha_{q(\lambda)}/\beta_{q(\lambda)} + \psi{(a_{q{(\rho)}})} - \psi{(b_{q{(\rho)}})}$
+\STATE $\vp_{q(\vr_0)} \leftarrow \expit{(\eta)}$
+% sigma_u^2
+\ENDWHILE
+\end{algorithmic}
+\end{algorithm}
+
 
 \subsection{Lower bound}
 % Explain how most of the lower bound for the univariate model can simply be re-used, but \lambda is replaced
