@@ -1,4 +1,4 @@
-\documentclass{amsart}[12pt]
+\documentclass{article}[12pt]
 
 \addtolength{\oddsidemargin}{-.75in}%
 \addtolength{\evensidemargin}{-.75in}%
@@ -56,7 +56,6 @@ density with mean $\vmu$ and covariance $\mSigma$. If $x$ has an inverse gamma
 distribution, denoted $x \sim \mbox{IG}(\alpha, \beta)$, then it has density
 $p(x) = \beta^\alpha \Gamma(\alpha)^{-1}x^{-\alpha-1} \exp{(-\beta/x)}, x, \alpha,
 \beta > 0$.
-
 If $\vx$ is a vector of length $d$ then $\mbox{diag}(\vx)$ is the $d \times d$
 diagonal matrix whose diagonal elements are $\vx$.
 
@@ -67,7 +66,11 @@ for count data with extra zeroes. After introducing Bayesian zero-inflated model
 and VB methodology we derive the VB factorised approximation to the full Bayesian
 model.
 
-\subsection{Zero-inflated count models}
+ 
+
+\subsection{Variational Bayesian inference}
+
+\subsection{Variational Bayes for zero-inflated count models}
 
 \noindent We start with the simplest example of a zero-inflated Poisson model. Let
 
@@ -78,26 +81,21 @@ $$
 \noindent where $x_i \sim \Poisson{(\lambda)}$ independent of $r_i \stackrel{\text{ind.}}{\sim} \Bernoulli{(\rho)}, 1 \leq i \leq n$. We use vague priors
 $\rho \sim \Unif{(0, 1)}$ and $\lambda \sim \myGamma{(0.01, 0.01)}$. 
 
-\subsection{Variational Bayesian inference}
-
-\subsection{Variational Bayesian zero-inflated count models}
-
-\section{A factorised variational approximation to the univariate zero-inflated Poisson model}
-
+ 
 % TODO: Add graphical model
 
-\noindent We use a factorised approximation to the full likelihood, as detailed in \citep{ormerod10}.
+  We use a factorised approximation to the full likelihood, as detailed in \citep{ormerod10}.
 The use of conjugate priors in the full model yields easier mean field updates in the
 variational approximation.
 
-\noindent It can be shown via standard algebraic manipulations that the
+  It can be shown via standard algebraic manipulations that the
 full conditionals for $\lambda, \rho$ and $\vr$ are:
 
 $$
 \begin{array}{rl}
-\lambda | \textbf{rest} &\sim \myGamma{(\alpha_\lambda + \vone^T\vx, \beta_\lambda + \vone^T\vr)}, \\
-\rho | \textbf{rest} &\sim \Beta{(\alpha_\rho + \vone^T \vr, \beta_\rho + n - \vone^T\vr)}, \\
-\mbox{ and } r_i | \textbf{rest} &\sim \Bernoulli{(\text{expit}(\eta_i))}, \quad 1 \leq i \leq n.
+\lambda | \textbf{rest} &\sim \myGamma{(\alpha_\lambda + \vone^T\vx, \beta_\lambda + \vone^T\vr)}, \\ [0.5ex]
+\rho | \textbf{rest} &\sim \Beta{(\alpha_\rho + \vone^T \vr, \beta_\rho + n - \vone^T\vr)} \\ [0.5ex]
+\mbox{ and } \quad r_i | \textbf{rest} &\sim \Bernoulli{(\text{expit}(\eta_i))}, \quad 1 \leq i \leq n.
 \end{array}
 $$
 
@@ -109,7 +107,7 @@ $$
 \noindent We assume a factorised approximation of the form
 
 $$
-q(\lambda, \rho, \vp) = q(\lambda) q(\rho) \left [ \prod_{i=1}^n q(r_i) \right ], \quad 1 \leq i \leq n
+q(\lambda, \rho, \vp) = q(\lambda) q(\rho) \left [ \prod_{i=1}^n q(r_i) \right ]
 $$
 
 \noindent where $q(\lambda)$ is a Gamma distribution, $q(\rho)$ is a Beta distribution and
@@ -119,22 +117,26 @@ $q(r_i)$ are Bernoulli distributions.
 
 $$
 \begin{array}{l}
-\mbox{$q^*(\lambda)$ is the $\myGamma{\alpha_{q(\lambda)}, \beta_{q(\lambda)}}$ density function,} \\
-\mbox{$q^*(\rho)$ is the $\text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)})$ density function, and} \\
+\mbox{$q^*(\lambda)$ is the $\myGamma{\alpha_{q(\lambda)}, \beta_{q(\lambda)}}$ density function,} \\ [0.5ex]
+\mbox{$q^*(\rho)$ is the $\text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)})$ density function, and} \\ [0.5ex]
 \mbox{$q^*(r_i)$  is the $\text{Bernoulli}(p_{q(r_i)})$ density function, $1 \leq i \leq n$,}
 \end{array}
 $$
 
-\begin{array}{c}
-$q^*(\lambda) \sim \myGamma{(\alpha_{q(\lambda)}, \beta_{q(\lambda)})},
-q^*(\rho) \sim \text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)}),
-\mbox{ and } q^*(r_i) \sim \text{Bernoulli}(p_{q(r_i)}), \mbox{1 \leq i \leq n},$
-\end{array}
+%$$
+%\begin{array}{c}
+%q^*(\lambda) \sim \myGamma(\alpha_{q(\lambda)}, %\beta_{q(\lambda)}),
+%q^*(\rho) \sim \text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)}),
+%\quad \mbox{ and } \quad  
+%q^*(r_i) \sim \text{Bernoulli}(p_{q(r_i)}), \ \ 1 \leq i \leq n,
+%\end{array}
+%$$
 
-\noindent where the parameters are updated according to Algorithm \ref{algorithm1}.
+\noindent where the parameters are updated according to Algorithm \ref{algorithm1}. The lower bound can be written as..
 
-\begin{algorithm}\label{alg:algorithm_one}
-\label{algorithm1}
+
+
+\begin{algorithm} 
 \caption[Algorithm 1]{Iterative scheme for obtaining the parameters in the
 optimal densities $q^*(\lambda)$ and $q^*(\rho)$}
 \begin{algorithmic}
@@ -147,175 +149,12 @@ optimal densities $q^*(\lambda)$ and $q^*(\rho)$}
 \STATE $\beta_{q(\lambda)} \leftarrow \beta_\lambda + \vone^T\vp$
 \ENDWHILE
 \end{algorithmic}
+\label{algorithm1}
 \end{algorithm}
 
 %By taking the expectation of each full conditional with respect to 
 
-\subsection{Mean field update equations}
-We are now in a position to calculate the mean field update equations for the factorised
-variational approximation.
-
-\noindent Assuming that $q(r_i) \sim \Bernoulli{(p_i)}$ then,
-
-% Mean field update for q(\lambda)
-$$
-\begin{array}{rl}
-q^*(\lambda) &\propto \lambda^{\alpha_\lambda+\vone^T\vx - 1} \exp{\left \{ \bE_{-q(\lambda)} \left \[-(\beta_\lambda + \vone^T\vr) \lambda \right \] \right \}} \\
-&\propto \lambda^{\alpha_\lambda+\vone^T\vx - 1} \exp{\left \{-(\beta_\lambda + \vone^T\vp)\lambda \right \} } \\
-&= \myGamma{(\alpha_\lambda+\vone^T\vx, \beta_\lambda+\vone^T\vp)},
-\end{array}
-$$
-
-% Mean field update for q(\rho)
-$$
-\begin{array}{rl}
-\log{q^*(\rho)} &\propto \left \{ \bE_{-q(\rho)} \left[ \vone^T\vr \log{(\rho)} + (n - \vone^T\vr) \log{(1 - \rho)} \right] + \alpha_\rho \log{(\rho)} + \beta_\rho \log{(1 - \rho)} \right \} \\
-&\propto \exp{ \left( (\vone^T\vp + \alpha_\rho) \log{(\rho)} + (n - \vone^T\vp + \beta_\rho) \log{(1 - \rho)} \right) } \\
-&= \Beta{\alpha_\rho + \vone^T\vp, \beta_\rho + n - \vone^T\vp},
-\end{array}
-$$
-
-\noindent and
-
-$$
-\begin{array}{rl}
-\log{q^*(r_i)} &\propto -\bE_{q(\lambda)} [\lambda ] r_i + x_i \log{(r_i)} + r_i \bE_{q(\rho)} \left[\log{\left(\frac{\rho}{1 - \rho}\right)}\right]\\
-&= -r_i \frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} + x_i \log{(r_i)} + r_i \left(\psi(\alpha_{q(\rho)}) - \psi(\beta_{q(\rho)})\right)\\
-&= \text{Bernoulli}(p_i)
-\end{array}
-$$
-
-\noindent where
-
-$$
-\begin{array}{rl}
-p_i &= \frac{\exp{(\eta_i)}}{I(x_i = 0) + \exp{(\eta_i)}} \\
-&= \text{expit}(\eta_i), \mbox{ when } x_i = 0
-\end{array}
-$$
-
-\noindent and $\eta_i = -\frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} + \psi(\alpha_{q(\rho)}) - \psi(\beta_{q(\rho)})$.
-
-%Note that if $x_i = 0$ then
-%$x_i \log{(r_i)} = \log{(x_i^{r_i})} = \log{(0^0)} = \log{(1)} = 0$. Dr John %Ormerod hit
-%upon the idea of side-stepping this problem by writing the q-likelihood as
-
-%$$
-%q^*(r_i) \propto r_i^{x_i} \exp{(r_i \eta_i)}
-%$$
-
-
-%Now, either $x_i = 0$ or $x_i \ne 0$.
-
-%So
-
-%$$
-%q^*(r_i) = \text{Bernoulli}(p_i)
-%$$
-
-% Why do you care about these when you have the algorithm?
-\noindent So the mean field update equations are \ldots
-
-$$
-\begin{array}{ll}
-p_i &= \ds \frac{\exp{(\eta_i)}}{I(x_i = 0) + \exp{(\eta_i)}} \\
-&= \text{expit}(\eta_i)
-\end{array}
-\begin{array}{cl}
-\alpha_{q(\rho)} &\leftarrow \alpha_\rho + \vone^T\vp \\
-\beta_{q(\rho)} &\leftarrow \beta_\rho + n - \vone^T\vp \\
-\eta &\leftarrow -\frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} + \psi(\alpha_{q(\rho)}) - \psi(\beta_{q(\rho)}) \\
-\vp_{q(\vr_0)} &\leftarrow \expit{(\eta)} \\
-\alpha_{q(\lambda)} &\leftarrow \alpha_\lambda+ \vone^T\vx \\
-\beta_{q(\lambda)} &\leftarrow \beta_\lambda+ \vone^T\vp
-\end{array}
-$$
-
-% The formatting of this entire section is horrible.
-% It should be organised into subterms, as you will for the multivariate
-% model.
-\subsection{Lower bound}
-The lower bound $\log{\underline{p}(\vtheta)}$ is
-$$
-	\bE_q[\log{p(\vx, \vtheta)} - \log{q(\vtheta)}]
-$$
-
-\noindent where $q(\vtheta) = q(\lambda) q(\rho) \prod_{i=1}^n q(r_i)$,
-$q(\lambda) \sim \text{Gamma}{(\alpha_{q(\lambda)}, \beta_{q(\lambda)})}$,
-$q(\rho) \sim \text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)})$ and
-$q(r_i) = 1$ if $x_i \ne 0$, and $p_i$ if $x_i = 0$, where $p_i$ is
-calculated for each iteration as specified in Algorithm \ref{algorithm1}.
-
-\noindent The lower bound can be calculated directly to be
-
-$$
-\begin{array}{rl}
-\bE_q \left\{ \log{p(\vx, \vr, \lambda, \rho)} - \log{q(\vr, \lambda, \rho)} \right\} &= T_1 + T_2 \\
-\end{array}
-$$
-
-\noindent where
-
-$$
-\begin{array}{rl}
-T_1 &=
-\alpha_\lambda \log{(\beta_\lambda)} + (\alpha_\lambda - 1) \bE_q[\log{(\lambda)}] - \beta_\lambda \bE_q [\lambda] - \log{(\Gamma(\alpha_\lambda))} \\
-&\quad + \sum_{i=1}^n ( -\bE_q [\lambda] \bE_q [r_i] + \bE_q[x_i \log{(\lambda r_i)}] - \log{(x_i!)}
-\end{array}
-$$
-
-\noindent with
-
-% T_1 terms
-$$
-\begin{array}{rl}
-\bE [\log{\lambda}] &= -\{ \alpha_{q(\lambda)} - \log{(\beta_{q(\lambda)})} + \log{\Gamma(\alpha_{q(\lambda)})} + (1 - \alpha_{q(\lambda)}) \psi{(\alpha_{q(\lambda)})} \} \\
-\bE [\lambda] & \ds = \frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} \\
-\bE[\log{\rho}] &= - \{ \log{\text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)})} - (\alpha_{q(\rho)} - 1) \psi{(\alpha_{q(\rho)})} - (\beta_{q(\rho)} - 1)\psi{(\beta_{q(\rho)})} \\
-    & \ds \qquad + (\alpha_{q(\rho)} + \beta_{q(\rho)} - 2)\psi{(\alpha_{q(\rho)} + \beta_{q(\rho)})} \} \\
-\bE [\lambda] &= \frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} \\
-\end{array}
-$$
-
-\noindent and
-
-$$
-\begin{array}{rl}
-T_2 &=\bE_q[r_i] \bE_q[\log{(\rho)}] + \bE_q[(1 - r_i)] \bE_q[\log{(1 - \rho)}] \\
-& \quad - \bE_q \log{q(r)} - \bE_q \log{q(\lambda)} - \bE_q \log{q(\rho)}
-\end{array}
-$$
-
-\noindent with
-
-% T_2 terms
-$$
-\begin{array}{rl}
-\bE[\log{\rho}] &= -\{ \log{(\text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)}))} - (\alpha_{q(\rho)} - 1) \psi{(\alpha_{q(\rho)})} - (\beta_{q(\rho)} - 1)\psi{(\beta_{q(\rho)})} \\
-&\quad + (\alpha_{q(\rho)} + \beta_{q(\rho)} - 2)\psi{(\alpha_{q(\rho)} + \beta_{q(\rho)})} \} .
-\end{array}
-$$
-
-$$
-\bE[r_i] = 
-	\begin{cases}
-	1 & \text{if } x_i \ne 0 \\
-	p_i & \text{if } x_i = 0 \\
-	\end{cases}
-$$
-
-\noindent where
-
-$$
-\begin{array}{rl}
--\bE_q \log{q(r)} &= \sum_{i=1}^n I(x_i = 0) \log{(p_i)} \\
--\bE_q \log{q(\lambda)} &= \alpha_{q(\lambda)} - \log{(\beta_{q(\lambda)})} + \log{\Gamma{(\alpha_{q(\lambda)})}} + (1 - \alpha_{q(\lambda)}) \psi{(\alpha_{q(\lambda)})} \\
-\quad \bE_q[\log{q(\rho)}] &= - \{ \log{(\text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)})} - (\alpha_{q(\rho)} - 1) \psi{(\alpha_{q(\rho)})} - (\beta_{q(\rho)} - 1)\psi{(\beta_{q(\rho)})} \\
-&\quad + (\alpha_{q(\rho)} + \beta_{q(\rho)} - 2)\psi{(\alpha_{q(\rho)} + \beta_{q(\rho)})} \} \\
-\end{array}
-$$
-
-\newpage
+ 
 \subsection{Results}
 %\includegraphics[width=100mm,height=100mm]{code/lower_bound_convergence.pdf}
 
@@ -371,7 +210,7 @@ $$
 
 \noindent where
 $$
-p_i = \expit{\left \[ \psi{(\alpha_{q(\rho)})} - \psi{(\beta_{q(\rho)})} - \exp{(c_i^T\vmu + \half c_i^T \mLambda c_i)} \right \]}
+p_i = \expit\left[ \psi{(\alpha_{q(\rho)})} - \psi{(\beta_{q(\rho)})} - \exp{(c_i^T\vmu + \half c_i^T \mLambda c_i)} \right]
 $$
 
 \noindent \text{when} $\vy_i = 0$.
@@ -403,7 +242,7 @@ non-conjugacy, but can be fit using Gaussian variational approximation
 \citep{ormerod09}. The model can be fit using Algorithm \ref{alg:algorithm_two} below.
 
 \begin{algorithm}\label{alg:algorithm_two}
-\label{algorithm1}
+\label{algorithm2}
 \caption[Algorithm 2]{Iterative scheme for obtaining the parameters in the
 optimal densities $q^*(\vmu, \mLambda)$, $q^*(\sigma_u^2)$ and $q^*(\rho)$}
 \begin{algorithmic}
@@ -465,7 +304,7 @@ $$
 % This is the new T_2
 $$
 \begin{array}{rl}
-T_2 &= \bE_q[\log{p(\vnu)} - \log{q(\vnu)}] \\
+T_1 &= \bE_q[\log{p(\vnu)} - \log{q(\vnu)}] \\
 &= \vy^T \mP \mC \vmu - \vp^T \exp{\{\mC \vmu + \half \text{diag} (\mC^T \mLambda \mC)\}} - \vone^T\log \Gamma{(\vy + \vone)}\\
 & \quad + \frac{p + m}{2} (1 + \log{2 \pi}) + \half \log{|\mLambda|},
 \end{array}
@@ -509,6 +348,177 @@ $$
 P(Z_i = 0) &= P(R_i = 0)P(Y_i = y) + P(R_i = 1) P(Y_i = 0) - P(R_i = 0) P(Y_i = 0) \\
 &= (1 - \rho) + \rho e^{-\lambda} - (1 - \rho) e^{-\lambda} \\
 &= (1 - \rho) + e^{-\lambda}(2 \rho - 1)
+\end{array}
+$$
+
+\section{} 
+
+
+\subsection{Mean field update equations}
+We are now in a position to calculate the mean field update equations for the factorised
+variational approximation.
+Assuming that $q(r_i) \sim \Bernoulli{(p_i)}$ then,
+
+% Mean field update for q(\lambda)
+$$
+\begin{array}{rl}
+q^*(\lambda)
+    & \propto 
+    \lambda^{\alpha_\lambda+\vone^T\vx - 1} 
+    \exp\left\{ 
+    \bE_{-q(\lambda)} \left[
+    -(\beta_\lambda + \vone^T\vr) \lambda 
+    \right] 
+    \right\} 
+    \\ [0.5ex]
+    &
+    \propto \lambda^{\alpha_\lambda+\vone^T\vx - 1} \exp{\left \{-(\beta_\lambda + \vone^T\vp)\lambda \right \} } 
+\\
+    & = \myGamma{(\alpha_\lambda+\vone^T\vx, \beta_\lambda+\vone^T\vp)},
+\end{array}
+$$
+
+% Mean field update for q(\rho)
+$$
+\begin{array}{rl}
+\log{q^*(\rho)} 
+    &
+    \propto \left\{ 
+    \bE_{-q(\rho)}\left[ 
+    \vone^T\vr \log{(\rho)} 
+    + (n - \vone^T\vr) \log{(1 - \rho)} 
+    \right] 
+    + \alpha_\rho \log{(\rho)} 
+    + \beta_\rho \log{(1 - \rho)} 
+    \right\} 
+    \\ [0.5ex]
+    &
+    \propto \exp \left( 
+    (\vone^T\vp + \alpha_\rho) \log{(\rho)} 
+    + (n - \vone^T\vp + \beta_\rho) \log{(1 - \rho)} 
+    \right) 
+    \\ [0.5ex]
+    &= \Beta(\alpha_\rho + \vone^T\vp, \beta_\rho + n - \vone^T\vp),
+\end{array}
+$$
+
+\noindent and
+
+$$
+\begin{array}{rl}
+\ds \log{q^*(r_i)} &\propto -\bE_{q(\lambda)} [\lambda ] r_i + x_i \log{(r_i)} + r_i \bE_{q(\rho)} \left[\log{\left(\frac{\rho}{1 - \rho}\right)}\right]\\[0.5ex]
+& \ds = -r_i \frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} + x_i \log{(r_i)} + r_i \left(\psi(\alpha_{q(\rho)}) - \psi(\beta_{q(\rho)})\right)\\ [0.5ex]%
+& \ds = \text{Bernoulli}(p_i)
+\end{array}
+$$
+
+\noindent where
+
+$$
+\begin{array}{rl}
+\ds p_i 
+     = \frac{\exp{(\eta_i)}}{I(x_i = 0) + \exp{(\eta_i)}}  
+     = \text{expit}(\eta_i), \quad \mbox{(when $x_i = 0$)} 
+\end{array}
+$$
+
+\noindent and $\eta_i = - \alpha_{q(\lambda)}/\beta_{q(\lambda)} + \psi(\alpha_{q(\rho)}) - \psi(\beta_{q(\rho)})$.
+%
+%Note that if $x_i = 0$ then
+%$x_i \log{(r_i)} = \log{(x_i^{r_i})} = \log{(0^0)} = \log{(1)} = 0$. Dr John %Ormerod hit
+%upon the idea of side-stepping this problem by writing the q-likelihood as
+%
+%$$
+%q^*(r_i) \propto r_i^{x_i} \exp{(r_i \eta_i)}
+%$$
+%
+%
+%Now, either $x_i = 0$ or $x_i \ne 0$.
+%
+%So
+%
+%$$
+%q^*(r_i) = \text{Bernoulli}(p_i)
+%$$
+%
+% Why do you care about these when you have the algorithm?
+%\noindent So the mean field update equations are \ldots
+%
+%$$
+%\begin{array}{ll}
+%p_i &= \ds \frac{\exp{(\eta_i)}}{I(x_i = 0) + \exp{(\eta_i)}} %\\
+%&= \text{expit}(\eta_i)
+%\end{array}
+%\begin{array}{cl}
+%\alpha_{q(\rho)} &\leftarrow \alpha_\rho + \vone^T\vp \\
+%\beta_{q(\rho)} &\leftarrow \beta_\rho + n - \vone^T\vp \\
+%\eta &\leftarrow -\frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} + \psi(\alpha_{q(\rho)}) - \psi(\beta_{q(\rho)}) \\
+%\vp_{q(\vr_0)} &\leftarrow \expit{(\eta)} \\
+%\alpha_{q(\lambda)} &\leftarrow \alpha_\lambda+ \vone^T\vx \\
+%\beta_{q(\lambda)} &\leftarrow \beta_\lambda+ \vone^T\vp
+%\end{array}
+%$$
+%
+% The formatting of this entire section is horrible.
+% It should be organised into subterms, as you will for the multivariate
+% model.
+
+\subsection{Lower bound}
+The lower bound $\log{\underline{p}(\vtheta)}$ is
+$$
+	\bE_q[\log{p(\vx, \vtheta)} - \log{q(\vtheta)}]
+$$
+
+\noindent where $q(\vtheta) = q(\lambda) q(\rho) \prod_{i=1}^n q(r_i)$,
+$q(\lambda) \sim \text{Gamma}{(\alpha_{q(\lambda)}, \beta_{q(\lambda)})}$,
+$q(\rho) \sim \text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)})$ and
+$q(r_i) = 1$ if $x_i \ne 0$, and $p_i$ if $x_i = 0$, where $p_i$ is
+calculated for each iteration as specified in Algorithm \ref{algorithm1}.
+
+The lower bound can be calculated directly to be
+$$
+\begin{array}{rl}
+\bE_q \left\{ \log{p(\vx, \vr, \lambda, \rho)} - \log{q(\vr, \lambda, \rho)} \right\} &= T_1 + T_2 \\
+\end{array}
+$$
+
+\noindent where
+$$
+\begin{array}{rl}
+T_1 & \ds =
+\alpha_\lambda \log{(\beta_\lambda)} + (\alpha_\lambda - 1) \bE_q[\log{(\lambda)}] - \beta_\lambda \bE_q [\lambda] - \log\Gamma(\alpha_\lambda) \\
+& \ds \quad + \sum_{i=1}^n ( -\bE_q [\lambda] \bE_q [r_i] + \bE_q[x_i \log{(\lambda r_i)}] - \log\Gamma(x_i+1)) \quad \mbox{and}
+\\ [1ex]
+T_2 &=\bE_q[r_i] \bE_q[\log{(\rho)}] + \bE_q[(1 - r_i)] \bE_q[\log{(1 - \rho)}] 
+- \bE_q[\log{q(r)}] 
+- \bE_q[\log{q(\lambda)}] 
+- \bE_q[ \log{q(\rho)}]
+\end{array}
+$$
+
+\noindent with 
+$\bE[\lambda] = \alpha_{q(\lambda)}/\beta_{q(\lambda)}$,
+$\bE [\lambda] = \alpha_{q(\lambda)}/\beta_{q(\lambda)}$,
+% T_1 terms
+$$
+\begin{array}{rl}
+\bE [\log{\lambda}] & \ds = -\{ \alpha_{q(\lambda)} - \log{(\beta_{q(\lambda)})} + \log{\Gamma(\alpha_{q(\lambda)})} + (1 - \alpha_{q(\lambda)}) \psi{(\alpha_{q(\lambda)})} \}, \\
+ \\
+\bE[\log{\rho}] & \ds = - \{ \log{\text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)})} - (\alpha_{q(\rho)} - 1) \psi{(\alpha_{q(\rho)})} - (\beta_{q(\rho)} - 1)\psi{(\beta_{q(\rho)})} \\
+    & \ds \qquad + (\alpha_{q(\rho)} + \beta_{q(\rho)} - 2)\psi{(\alpha_{q(\rho)} + \beta_{q(\rho)})} \},
+\\
+\bE[r_i] & \ds = 
+	\begin{cases}
+	1 & \text{if } x_i \ne 0 \\
+	p_i & \text{if } x_i = 0, \\
+	\end{cases}
+\\
+-\bE_q[\log{q(r)}] & \ds = \sum_{i=1}^n I(x_i = 0) \log{(p_i)} \\ [0.5ex]
+-\bE_q[\log{q(\lambda)}] 
+    & \ds = \alpha_{q(\lambda)} - \log{(\beta_{q(\lambda)})} + \log{\Gamma{(\alpha_{q(\lambda)})}} + (1 - \alpha_{q(\lambda)}) \psi{(\alpha_{q(\lambda)})}, \\ [0.5ex]
+ \mbox{and}\quad \bE_q[\log{q(\rho)}] 
+    & \ds = - \{ \log{(\text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)})} - (\alpha_{q(\rho)} - 1) \psi{(\alpha_{q(\rho)})} - (\beta_{q(\rho)} - 1)\psi{(\beta_{q(\rho)})}  \\ [0.5ex]
+& \ds \quad + (\alpha_{q(\rho)} + \beta_{q(\rho)} - 2)\psi{(\alpha_{q(\rho)} + \beta_{q(\rho)})} \}. \\ [0.5ex]
 \end{array}
 $$
 
