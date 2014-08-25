@@ -106,7 +106,7 @@ test_multivariate_zip_no_zeros <- function()
 
 	# Test model fitting
 	multivariate = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma)
-	result_var = zero_infl_var(multivariate)
+	result_var = zero_infl_var(multivariate, verbose=TRUE)
 
 	print(result_var$vmu)
 	expect_equal(as.vector(result_var$vmu), expected_mu, tolerance=2e-1)
@@ -580,7 +580,8 @@ calculate_accuracy <- function(result_mcmc, result_var)
     fn = splinefun(density_mcmc_rho$x, density_mcmc_rho$y)
     return(abs(fn(x) - dbeta(x, result_var$a_rho, result_var$b_rho)))
   }
-  integrate(integrand, min(density_mcmc_rho$x), max(density_mcmc_rho$x), subdivisions = length(density_mcmc_rho$x))
+  result = integrate(integrand, min(density_mcmc_rho$x), max(density_mcmc_rho$x), subdivisions = length(density_mcmc_rho$x))
+  rho_accuracy = 1 - .5 * result$value
   
   density_mcmc_lambda = density(result_mcmc$vlambda)
   integrand <- function(x)
@@ -589,8 +590,8 @@ calculate_accuracy <- function(result_mcmc, result_var)
     return(abs(fn(x) - dgamma(x, result_var$a_lambda, result_var$b_lambda)))
   }
   result = integrate(integrand, min(density_mcmc_lambda$x), max(density_mcmc_lambda$x), subdivisions = length(density_mcmc_lambda$x))
-  accuracy = 1 - .5 * result$value
-  return(accuracy)
+  lambda_accuracy = 1 - .5 * result$value
+  return(list(rho_accuracy=rho_accuracy, lambda_accuracy=lambda_accuracy))
 }
 
 check_accuracy <- function(n, rho, lambda)
@@ -635,7 +636,7 @@ main_check_accuracy <- function()
   lambda = 100
   
   sink("~/phd/code/univariate_accuracy_results.txt")
-  for (rho in .1*1:9)
+  for (rho in seq(.1,.9, 0.05))
     for (lambda in seq(0.1, 10, 0.05))
       print(check_accuracy(n, rho, lambda))
   sink()
@@ -646,9 +647,11 @@ main <- function()
 {
 	set.seed(5)
 	options(recover = traceback)
+  
 	#test_univariate_zip()
 	# TODO: Add some sort of test for the accuracy of the approximation?
-
+	main_check_accuracy()
+  
 	# Tests with multivariate fixed effects
 	#test_multivariate_zip_no_zeros()
 	#test_multivariate_zip_half_zeros()
@@ -658,7 +661,7 @@ main <- function()
 	#test_multivariate_zip_half_zeros_random_intercept()
 
 	# Test multivariate approximation's accuracy
-	test_multivariate_accuracy_stan()
+	#test_multivariate_accuracy_stan()
   # The fixed intercept is too high, and the fixed slope parameter is too low. This is
   # unlikely to be a coincidence.
 }
