@@ -86,11 +86,14 @@ calculate_lower_bound.univariate <- function(univariate)
 calculate_lower_bound.multivariate <- function(multivariate)
 {
   result = with(multivariate, {
-  	p = ncol(mX) 
+  	p = ncol(mX)
+    beta_idx = 1:p
     if (!is.null(mZ)) {
       m = ncol(mZ) 
       u_idx = p + (1:m)  # (ncol(mult$mX)+1):ncol(mult$mC)
     	vu = vmu[u_idx]
+    } else {
+      m = 0
     }
   
   	zero.set <- which(vy==0)
@@ -100,10 +103,14 @@ calculate_lower_bound.multivariate <- function(multivariate)
   	E_log_rho = digamma(a_rho) - digamma(a_rho + b_rho)
   	E_log_one_minus_rho = digamma(b_rho) - digamma(a_rho + b_rho)
     cat("calculate_lower_bound: E_log_rho", E_log_rho, "E_log_1-rho", E_log_one_minus_rho, "\n")
-    
-    T1 = sum(vp) * E_log_rho + sum(1 - vp) * E_log_one_minus_rho
-  	T1 = T1 - sum((vp[zero.set]*log(vp[zero.set]) + (1-vp[zero.set])*log(1-vp[zero.set])))
-  	T1 = T1 + beta_entropy(a_rho, b_rho)
+
+    # Something is wrong in T2. It sometimes goes backwards as we're optimised.
+    # This should be unchanged from the univariate lower bound
+    T2 = sum(vp) * E_log_rho + sum(1 - vp) * E_log_one_minus_rho
+  	T2 = T2 + sum((vp[zero.set]*log(vp[zero.set]) + (1-vp[zero.set])*log(1-vp[zero.set])))
+  	#T2 = T2 + sum((vp*log(vp) + (1-vp)*log(1-vp)))
+  	T2 = T2 + beta_entropy(a_rho, b_rho)
+    #cat("calculate_lower_bound: beta_entropy ", beta_entropy(a_rho, b_rho), "\n")
     
   	# Terms for (beta, u)
   	#result = result + (vy*vp) %*% mC %*% vmu
@@ -113,11 +120,14 @@ calculate_lower_bound.multivariate <- function(multivariate)
   
     # Terms for (beta, u)
     # Second try ...
-    T2 = t(vy*vp) %*% mC %*% vmu
-    T2 = T2 - t(vp) %*% exp(mC %*% vmu + .5 * diag(mC%*%mLambda%*%t(mC)))
-    T2 = T2 - sum(lgamma(vy + 1))
-    T2 = T2 - .5*a_sigma/b_sigma*(sum(vmu[u_idx]^2) + tr(mLambda[u_idx, u_idx]))
-  	T2 = T2 + .5*(p+m)*(1 + log(2*pi)) + .5*log(det(mLambda))
+    T1 = t(vy*vp) %*% mC %*% vmu
+    T1 = T1 - t(vp) %*% exp(mC %*% vmu + .5 * diag(mC%*%mLambda%*%t(mC)))
+    T1 = T1 - sum(lgamma(vy + 1))
+    T1 = T1 - .5*p*log(prior$sigma2.beta) - .5*tr(mLambda[beta_idx, beta_idx])/prior$sigma2.beta
+    if (m > 0) {
+      T1 = T1 - .5*m*(digamma(a_sigma) - log(b_sigma)) - .5*a_sigma/b_sigma*tr(mLambda[u_idx, u_idx])
+    }
+  	T1 = T1 + .5*(p+m)*(1 + log(2*pi)) + .5*log(det(mLambda))
   	#T2 = T2 - .5*(log(2*pi) + log(m) + digamma(a_sigma) - log(b_sigma)) # WTF is this?
     # Entropy? No, I don't know what it is.
   	
@@ -247,7 +257,7 @@ create_multivariate <- function(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau)
 	a_rho = 1 + sum(vp)
 	b_rho = n - sum(vp) + 1
 	
-	prior = list(a_sigma=a_sigma, b_sigma=b_sigma, a_rho=1, b_rho=1)
+	prior = list(a_sigma=a_sigma, b_sigma=b_sigma, a_rho=1, b_rho=1, sigma2.beta=sigma2.beta)
 	multivariate = list(vy=vy, mX=mX, mZ=mZ, mC=mC, vp=vp, vmu=vmu,
 						a_sigma=a_sigma, b_sigma=b_sigma,
             a_rho=a_rho, b_rho=b_rho,
@@ -256,7 +266,7 @@ create_multivariate <- function(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau)
 						mSigma.beta.inv=mSigma.beta.inv,
 						mSigma.u.inv=mSigma.u.inv,
             mSigma.beta=solve(mSigma.beta.inv),
-            mSigma.vu=solve(mSigma.u.inv))
+            mSigma.vu=mSigma.u.inv)
 	class(multivariate) = "multivariate"
 	return(multivariate)
 }
