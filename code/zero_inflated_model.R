@@ -124,7 +124,7 @@ calculate_lower_bound.multivariate <- function(multivariate)
     T1 = T1 - t(vp) %*% exp(mC %*% vmu + .5 * diag(mC%*%mLambda%*%t(mC)))
     T1 = T1 - sum(lgamma(vy + 1))
     T1 = T1 - .5*p*log(prior$sigma2.beta) - .5*tr(mLambda[beta_idx, beta_idx])/prior$sigma2.beta
-    if (m > 0) {
+    if (!is.null(mZ)) {
       T1 = T1 - .5*m*(digamma(a_sigma) - log(b_sigma)) - .5*a_sigma/b_sigma*tr(mLambda[u_idx, u_idx])
     }
   	T1 = T1 + .5*(p+m)*(1 + log(2*pi)) + .5*log(det(mLambda))
@@ -144,7 +144,7 @@ calculate_lower_bound.multivariate <- function(multivariate)
     # Need to be careful to distinguish the prior from the variational parameter
     if (!is.null(mZ)) {
       # FIXME: Something is screwed here.
-      E_log_sigma2_u = -gamma_entropy(a_sigma, b_sigma)
+      E_log_sigma2_u = -gamma_entropy(a_sigma, b_sigma) # I think this line is wrong. But it's not used.
       E_sigma2_u = a_sigma/b_sigma
       T3 = prior$a_sigma * log(prior$b_sigma) - lgamma(prior$a_sigma) - (prior$a_sigma - 1)*digamma(E_sigma2_u)
       T3 = T3 - prior$b_sigma * E_sigma2_u + lgamma(a_sigma)
@@ -299,8 +299,8 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
 	
 	i = 0
 	# Iterate ----
-	#while ( (i <= 1) || (vlower_bound[i] > vlower_bound[i-1])  ) {
-	while ( (i <= MAXITER)  ) {	
+	while ( (i <= 1) || is.nan(vlower_bound[i] - vlower_bound[i - 1]) || (vlower_bound[i] > vlower_bound[i-1])  ) {
+	#while ( (i <= MAXITER)  ) {	
 		i = i+1
 		
 		if (!is.null(mult$mSigma.u.inv)) {
