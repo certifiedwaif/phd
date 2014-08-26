@@ -232,22 +232,6 @@ $$
 % What on Earth is this section doing here? This is very random.
 %$\propto \exp{\left \{-r_i \bE_{-r_i} [\exp{(c_i^T\vnu)}] + r_i [\psi(\alpha_\rho) - \psi(\beta_\rho)] \right \} }.\\$
 
-% Include derivations for mean field updates at the end?
-
-\noindent The optimal approximation for $\vr$ is
-$$
-\begin{array}{rl}
-q(\vr) &\propto \exp{\{\bE_{-q(\vr)}y^T\mR(\mC\vmu) - \vr^T\exp{(\mC\vnu)}-\half \vnu^T \text{diag}(\sigma_{\vu}^2)^{-1} \vnu\}}
-\end{array}
-$$
-
-$$
-\begin{array}{rl}
-&\bE_{-q(\vr)} [\vy^T\mR(C\vnu) - \vr^T\exp{(\mC\vnu)}-\half \vnu^T \text{diag}(\sigma_{\vu}^2)^{-1} \vnu]\\
-=&\vy^T\mR\mC \vmu - \vp^T \exp{\{\mC \vmu + \half \text{diag}(\mC \mLambda \mC^T)\}} - \half \vmu^T \hat{\mD} \vmu - \half \text{tr}(\mLambda \hat{\mD} ))
-\end{array}
-$$
-
 \noindent where $\hat{\mD} = \text{diag}\left (\alpha_{q(\sigma_{\vu}^2)}/\beta_{q(\sigma_{\vu}^2)} \right )$. 
 
 \noindent This is close in form to a Poisson regression model. Poisson regression models
@@ -345,9 +329,7 @@ $T$_3 &= \bE_q[\log{p(\vy, \sigma^2_u)} - \log{q(\sigma^2_u)}] \\
 \end{array}
 $$
 
-where
-
-$\alpha_{q(\sigma^2_u)} = \alpha_{\sigma^2_u} + m/2$ and
+where $\alpha_{q(\sigma^2_u)} = \alpha_{\sigma^2_u} + m/2$ and
 $\beta_{q(\sigma^2_u)} = \beta_{\sigma^2_u} + \|\vmu_\vu\|^2/2 +  \tr{(\mLambda_{\vu \vu})}/2$.
 
 \subsection{Results}
@@ -475,6 +457,22 @@ $$
 % It should be organised into subterms, as you will for the multivariate
 % model.
 
+% Include derivations for mean field updates at the end?
+
+\noindent The optimal approximation for $\vr$ is
+$$
+\begin{array}{rl}
+q(\vr) &\propto \exp{\{\bE_{-q(\vr)}y^T\mR(\mC\vmu) - \vr^T\exp{(\mC\vnu)}-\half \vnu^T \text{diag}(\sigma_{\vu}^2)^{-1} \vnu\}}
+\end{array}
+$$
+
+$$
+\begin{array}{rl}
+&\bE_{-q(\vr)} [\vy^T\mR(C\vnu) - \vr^T\exp{(\mC\vnu)}-\half \vnu^T \text{diag}(\sigma_{\vu}^2)^{-1} \vnu]\\
+=&\vy^T\mR\mC \vmu - \vp^T \exp{\{\mC \vmu + \half \text{diag}(\mC \mLambda \mC^T)\}} - \half \vmu^T \hat{\mD} \vmu - \half \text{tr}(\mLambda \hat{\mD} ))
+\end{array}
+$$
+
 \subsection{Lower bound}
 The lower bound $\log{\underline{p}(\vtheta)}$ is
 $$
@@ -592,6 +590,7 @@ $$
 p(r_i | \text{rest}) & \ds = \frac{(e^{-\lambda + \logit{(\rho)}})^{r_i}}{I(x_i = 0) + (e^{-\lambda + \logit{(\rho)}})^{r_i}}
 \end{array}
 $$
+
 
 \bibliographystyle{elsarticle-harv}
 \bibliography{Chapter_1_zero_inflated_models}
