@@ -497,18 +497,24 @@ $$
 \begin{array}{rl}
 T_1 & \ds =
 \alpha_\lambda \log{(\beta_\lambda)} + (\alpha_\lambda - 1) \bE_q[\log{(\lambda)}] - \beta_\lambda \bE_q [\lambda] - \log\Gamma(\alpha_\lambda) \\
-& \ds \quad + \sum_{i=1}^n ( -\bE_q [\lambda] \bE_q [r_i] + \bE_q[x_i \log{(\lambda r_i)}] - \log\Gamma(x_i+1)) \quad \mbox{and}
+& \ds \quad + \sum_{i=1}^n ( -\bE_q [\lambda] \bE_q [r_i] + \bE_q[x_i \log{(\lambda r_i)}] - \log\Gamma(x_i+1)) \\
+& \ds =
+\alpha_\lambda \log{(\beta_\lambda)} + (\alpha_\lambda - 1) [\psi(\alpha_{q(\lambda)}) - \log{(\beta_{q(\lambda)})}] - \beta_\lambda \frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} - \log\Gamma(\alpha_\lambda) \\
+& \ds \quad -\vp^T\frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} + \bE_q[\vx^T \log{(\lambda \vr)}] - \log\Gamma(\vx+1)) \quad \mbox{and} 
 \\ [1ex]
 T_2 &=\bE_q[r_i] \bE_q[\log{(\rho)}] + \bE_q[(1 - r_i)] \bE_q[\log{(1 - \rho)}] 
 - \bE_q[\log{q(r)}] 
 - \bE_q[\log{q(\lambda)}] 
-- \bE_q[ \log{q(\rho)}]
+- \bE_q[ \log{q(\rho)}] \\
+&= \quad \vp^T[\psi{(\alpha_{q(\lambda)})} - \psi{(\alpha_{q(\lambda)} + \beta_{q(\lambda)})}] + (\vone - \vp)^T[\psi(\beta_{q(\lambda)}) - \psi{(\alpha_{q(\lambda)} + \beta_{q(\lambda)})}] \\
+& \quad - \vp^T \log{\vp} - (\vone - \vp)^T \log{(\vone - \vp)} \\
+& \quad + \alpha_{q(\lambda)} - \log{\beta_{q(\lambda)}} + \log \Gamma{(\alpha_{q(\lambda)})} + (1 - \alpha_{q(\lambda)}) \psi{(\alpha_{q(\lambda)})} \\
+& \quad + \log{\text{Beta}}(\alpha_{q(\lambda)}, \beta_{q(\lambda)}) - (\alpha_{q(\lambda)} - 1) \psi{(\alpha_{q(\lambda)})} - (\beta_{q(\lambda)} - 1) \psi{(\beta_{q(\lambda)})} + (\alpha_{q(\lambda)} + \beta_{q(\lambda)} - 2) \psi{(\alpha_{q(\lambda)} + \beta_{q(\lambda)})}
 \end{array}
 $$
 
 \noindent with 
 $\bE[\lambda] = \alpha_{q(\lambda)}/\beta_{q(\lambda)}$,
-$\bE [\lambda] = \alpha_{q(\lambda)}/\beta_{q(\lambda)}$,
 % T_1 terms
 $$
 \begin{array}{rl}
@@ -523,6 +529,12 @@ $$
 	p_i & \text{if } x_i = 0, \\
 	\end{cases}
 \\
+\bE [x_i \log{(\lambda r_i)}] & =
+	\begin{cases}
+	0 & \textbf{if } x_i = 0 \\
+	\bE_q [\log \lambda] = \psi(\alpha_{q(\lambda)}) - \log{(\beta_{q(\lambda)})} & \textbf{if } x_i \ne 0 \\
+	\end{cases}
+\\
 -\bE_q[\log{q(r)}] & \ds = \sum_{i=1}^n I(x_i = 0) \log{(p_i)} \\ [0.5ex]
 -\bE_q[\log{q(\lambda)}] 
     & \ds = \alpha_{q(\lambda)} - \log{(\beta_{q(\lambda)})} + \log{\Gamma{(\alpha_{q(\lambda)})}} + (1 - \alpha_{q(\lambda)}) \psi{(\alpha_{q(\lambda)})}, \\ [0.5ex]
@@ -531,6 +543,7 @@ $$
 & \ds \quad + (\alpha_{q(\rho)} + \beta_{q(\rho)} - 2)\psi{(\alpha_{q(\rho)} + \beta_{q(\rho)})} \}. \\ [0.5ex]
 \end{array}
 $$
+
 
 \section{Appendix - Algebraic derivations of conditional likelihoods}
 
