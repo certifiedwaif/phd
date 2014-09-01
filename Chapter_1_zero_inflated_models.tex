@@ -242,22 +242,22 @@ non-conjugacy, but can be fit using Gaussian variational approximation
 \begin{algorithm}\label{alg:algorithm_two}
 \label{algorithm2}
 \caption[Algorithm 2]{Iterative scheme for obtaining the parameters in the
-optimal densities $q^*(\vmu, \mLambda)$, $q^*(\sigma_u^2)$ and $q^*(\rho)$}
+optimal densities $q^*(\vmu, \mLambda)$, $q^*(\sigma_u^2)$, $q^*(\vr)$ and $q^*(\rho)$}
 \begin{algorithmic}
 % Fit \vmu, \mLambda using Laplace approximation
-\REQUIRE{$\alpha_{q(\rho)} \leftarrow \alpha_\rho + \vone^T\vp, 
-\alpha_{q(\lambda)} \leftarrow \alpha_\lambda + \vone^T\vx$}
-\WHILE{the increase in $\log{\underline{p}}(\vx;q)$ is significant}
+\REQUIRE{$A_q \leftarrow A + m/2$}
+\WHILE{the increase in $\log{\underline{p}}(\vy;q)$ is significant}
 % \vmu, \mLambda
 \STATE Optimise $\vmu$ and $\mLambda$ using $\vy, \mX, \mZ, \rho, \vp$ and
-$\alpha_{q(\sigma_u^2)}$, $\beta_{q(\sigma_u^2)}$
-\STATE $\beta_{q(\lambda)} \leftarrow \beta_\lambda + \vone^T\vp$
+$A_q$, $B_q$
 % \vp
 % \rho is a prior? Not directly observed, except through \vr_i
+\STATE $\alpha_{q(\rho)} \leftarrow \alpha_\rho + \vone^T\vp$
 \STATE $\beta_{q(\rho)} \leftarrow \beta_\rho + n - \vone^T\vp$
 \STATE $\eta \leftarrow -\exp [\mC \vmu + \half \diag{(\mC\mLambda\mC^T)}] + \psi{(a_{q{(\rho)}})} - \psi{(b_{q{(\rho)}})}$
 \STATE $\vp_{q(\vr_0)} \leftarrow \expit{(\eta)}$
 % sigma_u^2
+\STATE $B_q \leftarrow B + \half \|\vu\| + \half \tr(\mLambda_{\vu \vu})$
 \ENDWHILE
 \end{algorithmic}
 \end{algorithm}
@@ -304,9 +304,9 @@ $$
 \begin{array}{rl}
 $T$_1 &= \bE_q[\log{p(\vy, \vnu)} - \log{q(\vnu)}] \\
 &= \vy^T \mP \mC \vmu - \vp^T \exp{\{\mC \vmu + \half \text{diag} (\mC \mLambda \mC^T)\}} - \vone^T\log \Gamma{(\vy + \vone)}\\
-& \quad - \frac{p+m}{2} \log{(2\pi)} - \frac{p}{2} \log{\sigma_\vbeta^2} - \frac{m}{2}[\psi{(\alpha_{q(\sigma_\vu^2)})} - \log{\beta_{q(\sigma_\vu^2)}}]\\
-& \quad - \half[\sigma_\beta^{-2} \tr (\mLambda_{\vbeta\vbeta}) + \frac{\alpha_{q(\sigma_\vu^2)}}{\beta_{q(\sigma_\vu^2)}} \tr (\mLambda_{\vu\vu})] \\
-& \quad + \frac{p + m}{2} (1 + \log{2 \pi}) + \half \log{|\mLambda|}
+& \quad - \frac{p}{2} \log{(\sigma_\vbeta^2)} - \frac{\|\vmu_\vbeta\|^2 + \tr{(\mLambda_{\vbeta \vbeta}})}{2 \sigma_{\vbeta}^2} + A \log{(B)} - \log{\Gamma(A)} \\
+&\quad - A_q \log{(B_q)} + \log{\Gamma(A_q)}
++ \frac{p+m}{2} + \half \log{|\mLambda|}
 \end{array}
 $$
 
@@ -322,15 +322,13 @@ $T$_3 &= \bE_q[\log{p(\vy, \sigma^2_u)} - \log{q(\sigma^2_u)}] \\
 %&\quad - \beta_{\sigma^2_u} \bE_q [\sigma^2_u] +
 %\log{\Gamma(\alpha_{q(\sigma^2_u)})} - (\alpha_{q(\sigma^2_u)} - 1) %\psi{(\alpha_{q(\sigma^2_u)})} - \log{(\beta_{q(\sigma^2_u)})}\\
 %&\quad - \log{(\alpha_{q(\sigma^2_u)} + \beta_{q(\sigma^2_u)})}\\
-&=\alpha_{\sigma^2_u} \log{\beta_{\sigma^2_u}} - (\alpha_{q(\sigma^2_u)} - 1) [\psi{(\alpha_{q(\sigma^2_u)})} - \log{(\beta_{q(\sigma^2_u)})}]
-- \beta_{\sigma^2_u} \frac{\alpha_{q(\sigma^2_u)}}{\beta_{q(\sigma^2_u)}}
-- \log{\Gamma{(\alpha_{\sigma^2_u})}} \\
-& \quad + [\alpha_{q(\sigma^2_u)} - \log{\beta_{q(\sigma^2_u)}} + \log{\Gamma{(\alpha_{q(\sigma^2_u)})}} + (1 - \alpha_{q(\sigma^2_u)})\psi(\alpha_{q(\sigma^2_u)})].
+&=A \log{B} - \log{\Gamma(A)} \\
+&\quad - A_q \log{(B_q)} + \log{\Gamma(A_q)} \\
+&\quad - (A - A_q) [\psi(A_q) - \log{(B_q)}] - (B - B_q) \frac{A_q}{B_q}
 \end{array}
 $$
 
-where $\alpha_{q(\sigma^2_u)} = \alpha_{\sigma^2_u} + m/2$ and
-$\beta_{q(\sigma^2_u)} = \beta_{\sigma^2_u} + \|\vmu_\vu\|^2/2 +  \tr{(\mLambda_{\vu \vu})}/2$.
+where $A_q = A + m/2$ and $B_q = B + \|\vmu_\vu\|^2/2 +  \tr{(\mLambda_{\vu \vu})}/2$.
 
 \subsection{Results}
 
