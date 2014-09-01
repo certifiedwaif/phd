@@ -199,7 +199,7 @@ $$
 \log{p(\vnu|\sigma_{u}^2)} &= - \half \log{|2\pi \sigma_{\vu}^2 \mI|} - \half \vnu^T(\sigma_{\vu}^2 I)^{-1} \vnu, \\
 \log{p(\vr)} &= \vr^T \log{(\rho \vone)} + (\vone - \vr)^T\log{(\vone - \vone \rho)}, \\
 p(\rho) &\propto 1, \\
-\mbox{and } \log{p(\sigma^2)} &= \alpha_{\sigma_\vu^2} \log{(\beta_{\sigma_\vu^2})} - \log{\Gamma{(\alpha_{\sigma_\vu^2})}} - (\alpha_{\sigma_\vu^2} + 1) \log{(\sigma_{\vu}^2)} - \frac{\beta_{\sigma_\vu^2}}{\sigma_{\vu}^2}\\
+\mbox{and } \log{p(\sigma^2)} &= A \log{(B)} - \log{\Gamma{(A)}} - (A + 1) \log{(\sigma_{\vu}^2)} - \frac{B}{\sigma_{\vu}^2}\\
 \end{array}
 $$
 
@@ -216,7 +216,7 @@ $$
 $$
 \begin{array}{rl}
 q(\vnu) &= \mbox{N}(\vmu, \mLambda), \\
-q(\sigma_{\vu}^2) &= \mbox{IG}\left(\alpha_{\sigma_u^2} + \frac{m}{2}, \beta_{\sigma_u^2} + \frac{\|\vmu_\vu\|^2}{2} + \frac{\tr(\mLambda_{\vu\vu})}{2}\right), \\
+q(\sigma_{\vu}^2) &= \mbox{IG}\left(A + \frac{m}{2}, B + \frac{\|\vmu_\vu\|^2}{2} + \frac{\tr(\mLambda_{\vu\vu})}{2}\right), \\
 \mbox{and } q(r_i) &= \Bernoulli{(p_i)}
 \end{array}
 $$
@@ -224,15 +224,16 @@ $$
 
 \noindent where
 $$
-p_i = \expit\left[ \psi{(\alpha_{q(\rho)})} - \psi{(\beta_{q(\rho)})} - \exp{(c_i^T\vmu + \half c_i^T \mLambda c_i)} \right]
+p_i = \expit\left[ \psi{(\alpha_q)} - \psi{(\beta_q)} - \exp{(c_i^T\vmu + \half c_i^T \mLambda c_i)} \right]
 $$
 
-\noindent \text{when} $\vy_i = 0$.
+\noindent where $\hat{\mD} = \text{diag}\left ( A_q/B_q \right )$,
+and $\alpha_q = \alpha_\rho + \vone^T\vp$ and 
+$\alpha_q = \beta_\rho + \vone^T(\vone - \vp)$ \text{when} $\vy_i = 0$.
 
 % What on Earth is this section doing here? This is very random.
 %$\propto \exp{\left \{-r_i \bE_{-r_i} [\exp{(c_i^T\vnu)}] + r_i [\psi(\alpha_\rho) - \psi(\beta_\rho)] \right \} }.\\$
 
-\noindent where $\hat{\mD} = \text{diag}\left (\alpha_{q(\sigma_{\vu}^2)}/\beta_{q(\sigma_{\vu}^2)} \right )$. 
 
 \noindent This is close in form to a Poisson regression model. Poisson regression models
 with normal priors have no closed form for their mean field updates due to
@@ -250,11 +251,11 @@ optimal densities $q^*(\vmu, \mLambda)$, $q^*(\sigma_u^2)$, $q^*(\vr)$ and $q^*(
 % \vmu, \mLambda
 \STATE Optimise $\vmu$ and $\mLambda$ using $\vy, \mX, \mZ, \rho, \vp$ and
 $A_q$, $B_q$
+% \rho is not directly observed, except through \vr_i
+\STATE $\alpha_q \leftarrow \alpha_\rho + \vone^T\vp$
+\STATE $\beta_q \leftarrow \beta_\rho + n - \vone^T\vp$
 % \vp
-% \rho is a prior? Not directly observed, except through \vr_i
-\STATE $\alpha_{q(\rho)} \leftarrow \alpha_\rho + \vone^T\vp$
-\STATE $\beta_{q(\rho)} \leftarrow \beta_\rho + n - \vone^T\vp$
-\STATE $\eta \leftarrow -\exp [\mC \vmu + \half \diag{(\mC\mLambda\mC^T)}] + \psi{(a_{q{(\rho)}})} - \psi{(b_{q{(\rho)}})}$
+\STATE $\eta \leftarrow -\exp [\mC \vmu + \half \diag{(\mC\mLambda\mC^T)}] + \psi{(\alpha_q)} - \psi{(\beta_q)}$
 \STATE $\vp_{q(\vr_0)} \leftarrow \expit{(\eta)}$
 % sigma_u^2
 \STATE $B_q \leftarrow B + \half \|\vu\| + \half \tr(\mLambda_{\vu \vu})$
