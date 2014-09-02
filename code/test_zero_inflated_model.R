@@ -133,7 +133,7 @@ test_multivariate_zip_half_zeros <- function()
 
 	# Test model fitting
 	multivariate = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma)
-	result_var = zero_infl_var(multivariate)
+	result_var = zero_infl_var(multivariate, verbose=TRUE)
 
 	expect_equal(as.vector(result_var$vmu), expected_mu, tolerance=2e-1)
 	expect_equal(result_var$a_rho / (result_var$a_rho + result_var$b_rho), expected_rho, tolerance=2e-1)
@@ -653,15 +653,15 @@ main <- function()
 	main_check_accuracy()
   
 	# Tests with multivariate fixed effects
-	#test_multivariate_zip_no_zeros()
-	#test_multivariate_zip_half_zeros()
+	test_multivariate_zip_no_zeros()
+	test_multivariate_zip_half_zeros()
 
 	# Tests with multivariate fixed effects and random intercepts
-	#test_multivariate_zip_no_zeros_random_intercept()
-	#test_multivariate_zip_half_zeros_random_intercept()
+	test_multivariate_zip_no_zeros_random_intercept()
+	test_multivariate_zip_half_zeros_random_intercept()
 
 	# Test multivariate approximation's accuracy
-	#test_multivariate_accuracy_stan()
+	test_multivariate_accuracy_stan()
   # The fixed intercept is too high, and the fixed slope parameter is too low. This is
   # unlikely to be a coincidence.
 }
