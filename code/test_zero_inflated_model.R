@@ -106,7 +106,7 @@ test_multivariate_zip_no_zeros <- function()
 
 	# Test model fitting
 	multivariate = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma)
-	result_var = zero_infl_var(multivariate)
+	result_var = zero_infl_var(multivariate, verbose=TRUE)
 
 	print(result_var$vmu)
 	expect_equal(as.vector(result_var$vmu), expected_mu, tolerance=2e-1)
@@ -133,7 +133,7 @@ test_multivariate_zip_half_zeros <- function()
 
 	# Test model fitting
 	multivariate = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma)
-	result_var = zero_infl_var(multivariate)
+	result_var = zero_infl_var(multivariate, verbose=TRUE)
 
 	expect_equal(as.vector(result_var$vmu), expected_mu, tolerance=2e-1)
 	expect_equal(result_var$a_rho / (result_var$a_rho + result_var$b_rho), expected_rho, tolerance=2e-1)
@@ -453,6 +453,8 @@ test_multivariate_accuracy_stan <- function()
   
   # Test accuracy
   mult = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau)
+  var_result = zero_infl_var(mult, method="gva", verbose=TRUE)
+
   #mcmc_result = mcmc(mult, iterations=1e5+2000, burnin=2000, thinning=1)
   # Use Stan to create MCMC samples, because Stan deals much better with highly
   # correlated posteriors.
@@ -464,14 +466,14 @@ test_multivariate_accuracy_stan <- function()
   rng_seed <- 1234;
   foo <- stan("multivariate_zip.stan", data=zip_data, chains = 0)
   sflist <- 
-    mclapply(1:4, mc.cores = 4, 
+    mclapply(1:4, mc.cores = 1, 
              function(i) stan(fit=foo, data=zip_data, seed = rng_seed, 
                               chains = 1, chain_id = i, refresh = -1,
-                              iter=1e4))
+                              iter=1e3))
   fit <- sflist2stanfit(sflist)
+
   #fit <- stan(model_code = zip_code, data = zip_dat, 
   #            iter = 1e5, chains = 4)  
-  var_result = zero_infl_var(mult, method="gva", verbose=FALSE)
   
   # Compare MCMC distribution with variational approximation for each parameter
   # vnu[i] ~ Normal, dnorm
@@ -574,28 +576,29 @@ test_multivariate_accuracy_stan <- function()
 # the MCMC approximation
 calculate_accuracy <- function(result_mcmc, result_var)
 {
-  density_mcmc_rho = density(result_mcmc$rho)
+  density_mcmc_rho = density(result_mcmc$vrho)
   integrand <- function(x)
   {
     fn = splinefun(density_mcmc_rho$x, density_mcmc_rho$y)
     return(abs(fn(x) - dbeta(x, result_var$a_rho, result_var$b_rho)))
   }
-  integrate(integrand, min(density_mcmc_rho$x), max(density_mcmc_rho$x), subdivisions = length(density_mcmc_rho$x))
+  result = integrate(integrand, min(density_mcmc_rho$x), max(density_mcmc_rho$x), subdivisions = length(density_mcmc_rho$x))
+  rho_accuracy = 1 - .5 * result$value
   
-  density_mcmc_lambda = density(result_mcmc$lambda)
+  density_mcmc_lambda = density(result_mcmc$vlambda)
   integrand <- function(x)
   {
     fn = splinefun(density_mcmc_lambda$x, density_mcmc_lambda$y)
     return(abs(fn(x) - dgamma(x, result_var$a_lambda, result_var$b_lambda)))
   }
   result = integrate(integrand, min(density_mcmc_lambda$x), max(density_mcmc_lambda$x), subdivisions = length(density_mcmc_lambda$x))
-  accuracy = 1 - .5 * result$value
-  return(accuracy)
+  lambda_accuracy = 1 - .5 * result$value
+  return(list(rho_accuracy=rho_accuracy, lambda_accuracy=lambda_accuracy))
 }
 
 check_accuracy <- function(n, rho, lambda)
 {
-  x = generate_test_data(n, rho, lambda)
+  x = generate_univariate_test_data(n, rho, lambda)
   
   a = 10
   b = 10
@@ -605,7 +608,7 @@ check_accuracy <- function(n, rho, lambda)
   burnin = 1e3
   
   start = Sys.time()
-  result_mcmc = mcmc(iterations+burnin, x, a, b)
+  result_mcmc = mcmc.univariate(iterations+burnin, x, a, b)
   mcmc_runtime = Sys.time() - start
   # Throw away burn-in samples.
   # Brackets turn out to be incredibly important here!!!
@@ -615,7 +618,8 @@ check_accuracy <- function(n, rho, lambda)
   
   # Variational approximation ----
   start = Sys.time()
-  result_var = zero_infl_var(x, a, b)
+  univariate = create_univariate(x, a, b)
+  result_var = zero_infl_var(univariate)
   var_runtime = Sys.time() - start
   # Variational approximation takes .05 seconds to run 10 iterations. So 5ms per iteration,
   # or 200 iterations a second.
@@ -633,9 +637,11 @@ main_check_accuracy <- function()
   rho = .5
   lambda = 100
   
-  for (rho in .1*1:9)
-    for (lambda in seq(5, 10, 0.05))
+  sink("~/phd/code/univariate_accuracy_results.txt")
+  for (rho in seq(.1,.9, 0.05))
+    for (lambda in seq(0.1, 10, 0.05))
       print(check_accuracy(n, rho, lambda))
+  sink()
 }
 
 #main_check_accuracy()
@@ -643,16 +649,18 @@ main <- function()
 {
 	set.seed(5)
 	options(recover = traceback)
+  
 	#test_univariate_zip()
 	# TODO: Add some sort of test for the accuracy of the approximation?
-
+	main_check_accuracy()
+  
 	# Tests with multivariate fixed effects
-	#test_multivariate_zip_no_zeros()
-	#test_multivariate_zip_half_zeros()
+	test_multivariate_zip_no_zeros()
+	test_multivariate_zip_half_zeros()
 
 	# Tests with multivariate fixed effects and random intercepts
-	#test_multivariate_zip_no_zeros_random_intercept()
-	#test_multivariate_zip_half_zeros_random_intercept()
+	test_multivariate_zip_no_zeros_random_intercept()
+	test_multivariate_zip_half_zeros_random_intercept()
 
 	# Test multivariate approximation's accuracy
 	test_multivariate_accuracy_stan()

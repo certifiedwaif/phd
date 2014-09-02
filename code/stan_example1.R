@@ -1,4 +1,8 @@
-require(rstan)
+library(rstan) 
+# Example 1: Eight Schools
+#
+# This is an example in Section 5.5 of Gelman et al (2003), which studied coaching effects from eight schools. For simplicity, we call this example "eight schools."
+
 schools_code <- '
   data {
     int<lower=0> J; // number of schools 
