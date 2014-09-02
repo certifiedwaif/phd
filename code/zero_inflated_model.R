@@ -329,7 +329,7 @@ library(limma)
 
 zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE)
 {
-	MAXITER <- 15
+	MAXITER <- 30
 
 	# Initialise
 	N = length(mult$vy)
@@ -353,20 +353,18 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
 	
 	i = 0
 	# Iterate ----
-	while ( (i <= 1) || is.nan(vlower_bound[i] - vlower_bound[i - 1]) || (vlower_bound[i] > vlower_bound[i-1])  ) {
-	#while ( (i <= MAXITER)  ) {	
+	#while ( (i <= 1) || is.nan(vlower_bound[i] - vlower_bound[i - 1]) || (vlower_bound[i] > vlower_bound[i-1])  ) {
+	while ( (i <= MAXITER)  ) {	
 		i = i+1
 		
 		if (!is.null(mult$mSigma.u.inv)) {
 			mult$mSigma.inv <- blockDiag(mult$mSigma.beta.inv,mult$mSigma.u.inv)
 		} else {
-      		mult$mSigma.inv <- mult$mSigma.beta.inv
+      mult$mSigma.inv <- mult$mSigma.beta.inv
 		}
 		
-		# Update parameter for q_lambda
-		# Maximise the Gaussian Variational Approximation using
-		# Dr Ormerod's Poisson mixed model code
-		# TODO: Add parameter to choose between the various optimisation options.
+		# Update parameter for q_vnu
+		# Maximise the Gaussian Variational Approximation using Dr Ormerod's Poisson mixed model code
 		if (method == "laplacian") {
 			fit1 = fit.Lap(mult$vmu, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, mult$mLambda)
 		} else if (method == "gva") {	
@@ -387,13 +385,15 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
 		#print("f=")
 		#print(mult$f)
 		
-	#	ans <- readline()
-				
+	  #	ans <- readline()
+		
+  	# Update parameters for q_vr
+  	mult$vp[zero.set] = expit((mult$vy[zero.set]*mult$mC[zero.set,])%*%mult$vmu-exp(mult$mC[zero.set,]%*%mult$vmu + 0.5*diag(mult$mC[zero.set,]%*%mult$mLambda%*%t(mult$mC[zero.set,])) + digamma(mult$a_rho) - digamma(mult$b_rho)))
+  
 		# Update parameters for q_rho
 		mult$a_rho = mult$prior$a_rho + sum(mult$vp)
 		mult$b_rho = mult$prior$b_rho + N - sum(mult$vp)
 		
-		# Update parameters for q_vr
 		#if (verbose) {
 		#	print(dim(mult$mC))
 		#	print(dim(mult$vmu))
@@ -402,7 +402,6 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
 		#	print(diag(mult$mC%*%mult$mLambda%*%t(mult$mC)))
 		#}
 		
-	  mult$vp[zero.set] = expit((mult$vy[zero.set]*mult$mC[zero.set,])%*%mult$vmu-exp(mult$mC[zero.set,]%*%mult$vmu + 0.5*diag(mult$mC[zero.set,]%*%mult$mLambda%*%t(mult$mC[zero.set,])) + digamma(mult$a_rho) - digamma(mult$b_rho)))
 
   	# Update parameters for q_sigma_u^2 if we need to
   	if (!is.null(mult$mZ)) {
