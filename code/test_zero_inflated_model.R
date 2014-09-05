@@ -96,7 +96,7 @@ test_multivariate_zip_no_zeros <- function()
 	cat("mX", mX, "\n")
 	mZ = NULL
 	expected_rho = 1
-	expected_mu = c(1, 2)
+	expected_mu = c(2, 1)
 	expected_sigma2_u = 0
   sigma2.beta = 1e5
 	a_sigma = 1e5
@@ -123,7 +123,7 @@ test_multivariate_zip_half_zeros <- function()
 	mX = matrix(as.vector(cbind(rep(1, m), runif(m, -1, 1))), m, 2)
 	mZ = NULL
 	expected_rho = .5
-	expected_mu = c(1, 2)
+	expected_mu = c(2, 1)
 	expected_sigma2_u = 0
 	sigma2.beta = 1e5  
 	a_sigma = 1e5
@@ -373,7 +373,6 @@ test_multivariate_accuracy <- function()
                 var_result$vmu[t], sqrt(var_result$mLambda[t,t]))
   plot(mcmc_result$vnu[t,], type="l")
   par(mfrow=c(1,1))
-	browser()
   t = 6
   plot(mcmc_result$vnu[t,1:(1e4-1)], mcmc_result$vnu[t,2:1e4])
   acf(mcmc_result$vnu[t,])
@@ -566,7 +565,6 @@ test_multivariate_accuracy_stan <- function()
                 var_result$a_rho, var_result$b_rho)
   plot(mcmc_samples$rho, type="l")
   par(mfrow=c(1,1))
-  browser()
 }
 
 # Calculate accuracy ----

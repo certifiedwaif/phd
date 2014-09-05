@@ -119,34 +119,15 @@ calculate_lower_bound.multivariate <- function(multivariate)
       T1 = T1 + prior$a_sigma * log (prior$b_sigma) - lgamma(prior$a_sigma)
       T1 = T1 - a_sigma * log(b_sigma) + lgamma(a_sigma)
     }
-  	T1 = T1 + .5*(p+m) + .5*log(det(mLambda))
+  	T1 = T1 + .5*(p+m) + .5*sum(log(eigen(mLambda)$values))
   	
   	# Something is wrong in T2. It sometimes goes backwards as we're optimised.
   	# This should be unchanged from the univariate lower bound
-  	T2 = sum(vp[zero.set]*log(vp[zero.set]) + (1-vp[zero.set])*log(1-vp[zero.set]))
+  	T2 = sum(-vp[zero.set]*log(vp[zero.set]) - (1-vp[zero.set])*log(1-vp[zero.set]))
     T2 = T2 - lbeta(prior$a_rho, prior$b_rho) + lbeta(a_rho, b_rho)
     
-    # Terms for sigma2_u
-    # Second try ...
-    # Need to be careful to distinguish the prior from the variational parameter
-    if (!is.null(mZ)) {
-        # Old
-        #E_log_sigma2_u = -gamma_entropy(a_sigma, b_sigma) # I think this line is wrong. But it's not used.
-        #E_sigma2_u = a_sigma/b_sigma
-        #T3 = prior$a_sigma * log(prior$b_sigma) - lgamma(prior$a_sigma) - (prior$a_sigma - 1)*digamma(E_sigma2_u)
-        #T3 = T3 - prior$b_sigma * E_sigma2_u + lgamma(a_sigma)
-        #T3 = T3 - (a_sigma - 1)*digamma(a_sigma) - log(b_sigma)
-        #T3 = T3 - log(a_sigma + b_sigma)
-        
-        # New
-        T3 = prior$a_sigma*log(prior$b_sigma) - lgamma(prior$a_sigma)
-        T3 = T3 - a_sigma*log(b_sigma) + lgamma(a_sigma)
-        T3 = T3 - .5*m*(digamma(a_sigma) - log(b_sigma)) - .5*(sum(vmu[u_idx]^2) + tr(mLambda[u_idx, u_idx]))*a_sigma/b_sigma
-    } else {
-      T3 = 0
-    }
-    cat("calculate_lower_bound: T1", T1, "T2", T2, "T3", T3, "\n")
-    result = T1 + T2 + T3
+    cat("calculate_lower_bound: T1", T1, "T2", T2, "\n")
+    result = T1 + T2
     result
   })
   
@@ -329,7 +310,7 @@ library(limma)
 
 zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE)
 {
-	MAXITER <- 30
+	MAXITER <- 100
 
 	# Initialise
 	N = length(mult$vy)
@@ -353,9 +334,14 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
 	
 	i = 0
 	# Iterate ----
-	#while ( (i <= 1) || is.nan(vlower_bound[i] - vlower_bound[i - 1]) || (vlower_bound[i] > vlower_bound[i-1])  ) {
-	while ( (i <= MAXITER)  ) {	
-		i = i+1
+	while ( (i <= 1) || is.nan(vlower_bound[i] - vlower_bound[i - 1]) || (vlower_bound[i] > vlower_bound[i-1])  ) {
+	#while ( (i <= MAXITER)  ) {	
+    if (i >= MAXITER) {
+      cat("Iteration limit reached, breaking ...")
+      break
+    }
+      
+    i = i+1
 		
 		if (!is.null(mult$mSigma.u.inv)) {
 			mult$mSigma.inv <- blockDiag(mult$mSigma.beta.inv,mult$mSigma.u.inv)
