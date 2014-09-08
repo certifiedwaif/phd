@@ -1,0 +1,60 @@
+\documentclass{article}[12pt]
+\usepackage{amsmath}
+\input{include.tex}
+\input{Definitions.tex}
+\begin{document}
+\section{Idea of new parameterisation $\mLambda = (\mR^T \mR)^{-1}$}
+\begin{equation*}
+\frac{\partial \log p(y;\vmu, \mLambda)}{\partial \mLambda_{ij}} = \half \tr ((\mLambda^{-1} - C^T W C - B)\frac{\partial \mLambda}{\partial \mLambda_{ij}})
+\end{equation*}
+
+$$
+\mC = [\mX, \mZ]
+\mW = \diag(f(\vmu, \mLambda))
+\mLambda = \begin{bmatrix}
+\mLambda_{11} & \mLambda_{12} &  &\\
+\mLambda_{21} & \mLambda_{22} &  &\\
+& & \ddots & \\
+& & & \mLambda_{p \times p}
+\end{bmatrix}
+$$
+
+\section{NR update}
+$$
+\mLambda \leftarrow (C^T W C + B)^{-1}
+\vmu \leftarrow \vmu + \mLambda C^T (\vy - B^{(1)}(\mC\vmu, \diag \mC \mLambda \mC^T)) - \mB \vmu
+$$
+
+$$
+\frac{\partial \log p (\vy;\vmu, \mLambda)}{\partial r_{ij}} = \half \tr \left ((\mLambda^{-1} - C^T W C - B) \frac{\partial \mLambda}{\partial r_{ij}} \right )
+$$
+
+$$
+\mLambda = R^T R, 
+R = \begin{bmatrix}
+e^{r_{11}} & r_{12} & r_{13} & \dots & r_{1p} \\
+& e^{r_{22}} & & & & \\
+&  & \ddots & & & \\
+&  & & & & e^{r_{pp}}\\
+\end{bmatrix}
+$$
+
+Recall that
+$$E_{ij} =
+\begin{cases}
+0 & i \ne j \\
+1 & i = j
+\end{cases}
+$$
+
+\begin{align*}
+\frac{\partial \log p(\vy; \vmu, \mLambda)}{\partial r_{ij}} &= - \half \tr \left( (\mLambda^{-1} - \mC^T \mW \mC - \mB) \times \mLambda \frac{\partial R^T R}{\partial r_{ij}} \mLambda \right) \\
+&= - \half \tr \left( \mLambda(\mLambda^{-1} - \mC^T\mW\mC - B)\mLambda \times [(E_{ij} e^{I(i=j)r_{ij}})^T \mR + \mR^T E_{ij} e^{I(i=j) r_{ij}}] \right) \\
+&= - \tr (\mR \mLambda (\mLambda^{-1} - C^T W C - B) \mLambda E_{ij})e^{I(i=j) r_{ij}} \\
+&= - (\mR \mLambda (\mLambda^{-1} - C^T W C - B) \mLambda)_{ij} e^{I(i=j) r_{ij}} () \\
+&= - (\mR^{-T} (\mLambda^{-1} - \mC^T \mW \mC - B) \mLambda)_{ij} e^{I(i=j) r_{ij}}
+\end{align*}
+
+as $\mLambda = (\mR^T \mR)^{-1} = \mR^{-1} \mR^{-T}$.
+
+\end{document}
