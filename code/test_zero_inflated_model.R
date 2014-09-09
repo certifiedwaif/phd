@@ -96,7 +96,7 @@ test_multivariate_zip_no_zeros <- function()
 	cat("mX", mX, "\n")
 	mZ = NULL
 	expected_rho = 1
-	expected_mu = c(1, 2)
+	expected_mu = c(2, 1)
 	expected_sigma2_u = 0
   sigma2.beta = 1e5
 	a_sigma = 1e5
@@ -123,7 +123,7 @@ test_multivariate_zip_half_zeros <- function()
 	mX = matrix(as.vector(cbind(rep(1, m), runif(m, -1, 1))), m, 2)
 	mZ = NULL
 	expected_rho = .5
-	expected_mu = c(1, 2)
+	expected_mu = c(2, 1)
 	expected_sigma2_u = 0
 	sigma2.beta = 1e5  
 	a_sigma = 1e5
@@ -197,6 +197,9 @@ test_multivariate_zip_no_zeros_random_intercept <- function()
 	result_var = zero_infl_var(multivariate, method="gva", verbose=TRUE)
 	expect_equal(as.vector(result_var$vmu[1:2]), expected_beta, tolerance=1e-1)
 	expect_equal(result_sigma2_u, expected_sigma2_u, tolerance=3e-1)
+	pdf("mult_no_zeroes_lower_bound.pdf")
+	plot(result_var$vlower_bound, type="l", xlab="Iterations", ylab="Lower bound")
+  dev.off()
 }
 
 test_multivariate_zip_half_zeros_random_intercept <- function()
@@ -254,6 +257,9 @@ test_multivariate_zip_half_zeros_random_intercept <- function()
 	expect_equal(as.vector(result_var$vmu[1:2]), expected_beta, tolerance=1e-1)
 	expect_equal(result_var$a_rho / (result_var$a_rho + result_var$b_rho), expected_rho, tolerance=2e-1)
 	expect_equal(result_sigma2_u, expected_sigma2_u, tolerance=3e-1)
+  pdf("mult_half_zeroes_lower_bound.pdf")
+	plot(result_var$vlower_bound, type="l", xlab="Iterations", ylab="Lower bound")
+  dev.off()
 }
 
 test_multivariate_accuracy <- function()
@@ -373,7 +379,6 @@ test_multivariate_accuracy <- function()
                 var_result$vmu[t], sqrt(var_result$mLambda[t,t]))
   plot(mcmc_result$vnu[t,], type="l")
   par(mfrow=c(1,1))
-	browser()
   t = 6
   plot(mcmc_result$vnu[t,1:(1e4-1)], mcmc_result$vnu[t,2:1e4])
   acf(mcmc_result$vnu[t,])
@@ -463,13 +468,13 @@ test_multivariate_accuracy_stan <- function()
   #source("multivariate_stan.R")
   zip_data <- list(N=sum(n), P=2, M=m, y=vy, X=mX, Z=mZ)
   #print(str(zip_data))
-  rng_seed <- 1234;
+  rng_seed <- 5;
   foo <- stan("multivariate_zip.stan", data=zip_data, chains = 0)
   sflist <- 
     mclapply(1:4, mc.cores = 1, 
              function(i) stan(fit=foo, data=zip_data, seed = rng_seed, 
                               chains = 1, chain_id = i, refresh = -1,
-                              iter=1e3))
+                              iter=1e6))
   fit <- sflist2stanfit(sflist)
 
   #fit <- stan(model_code = zip_code, data = zip_dat, 
@@ -486,7 +491,7 @@ test_multivariate_accuracy_stan <- function()
   
   # Kernel density estimates of MCMC-estimated posteriors
   # Use L_1 distance to compare against variational approximations of posteriors
-  par(mfrow=c(2,1))
+  par(mfrow=c(1,1))
   # Pseudocode:
   # Estimate density
   # Define integrand, using distribution and parameters.
@@ -529,11 +534,13 @@ test_multivariate_accuracy_stan <- function()
                                   var_result$vmu[i], sqrt(var_result$mLambda[i,i]))
     cat("vbeta[", i, "] accuracy: ", accuracy, "\n")
 
-    par(mfrow=c(2,1))
-    param_name = sprintf("vbeta[%d]", 1)  
+    par(mfrow=c(1,1))
+    param_name = sprintf("vbeta[%d]", 1)
+    pdf(sprintf("~/phd/code/vbeta_accuracy_%s.pdf", i))
     accuracy_plot(mcmc_samples$vbeta[,i], dnorm,
                   var_result$vmu[i], sqrt(var_result$mLambda[i,i]))
-    plot(mcmc_samples$vbeta[,i], type="l")
+    dev.off()
+    #plot(mcmc_samples$vbeta[,i], type="l")
     par(mfrow=c(1,1))
   }
   
@@ -542,10 +549,12 @@ test_multivariate_accuracy_stan <- function()
     accuracy = calculate_accuracy(mcmc_samples$u[,i], dnorm,
                                   var_result$vmu[i+2], sqrt(var_result$mLambda[i+2,i+2]))
     cat("vu[", i, "] accuracy: ", accuracy, "\n")
-    par(mfrow=c(2,1))
+    par(mfrow=c(1,1))
+    pdf(sprintf("~/phd/code/vu_accuracy_%s.pdf", i))
     accuracy_plot(mcmc_samples$u[,i], dnorm,
                   var_result$vmu[i+2], sqrt(var_result$mLambda[i+2,i+2]))
-    plot(mcmc_samples$u[,i], type="l")
+    dev.off()
+    #plot(mcmc_samples$u[,i], type="l")
     par(mfrow=c(1,1))
   }
   
@@ -553,22 +562,25 @@ test_multivariate_accuracy_stan <- function()
   accuracy = calculate_accuracy(1/mcmc_samples$sigma_u^2, dgamma,
                                 var_result$a_sigma, var_result$b_sigma)
   cat("sigma2_u accuracy: ", accuracy, "\n")
-  par(mfrow=c(2,1))
+  par(mfrow=c(1,1))
+  pdf("~/phd/code/sigma2_u_accuracy.pdf")
   accuracy_plot(1/mcmc_samples$sigma_u^2, dgamma,
                 var_result$a_sigma, var_result$b_sigma)
-  plot(mcmc_samples$sigma_u, type="l")
+  dev.off()
+  #plot(mcmc_samples$sigma_u, type="l")
   par(mfrow=c(1,1))
   
   # rho accuracy
   accuracy = calculate_accuracy(mcmc_samples$rho, dbeta,
                                 var_result$a_rho, var_result$b_rho)
   cat("rho accuracy: ", accuracy, "\n")
-  par(mfrow=c(2,1))
+  par(mfrow=c(1,1))
+  pdf("~/phd/code/rho_accuracy.pdf")
   accuracy_plot(mcmc_samples$rho, dbeta,
                 var_result$a_rho, var_result$b_rho)
-  plot(mcmc_samples$rho, type="l")
-  par(mfrow=c(1,1))
   dev.off()
+  #plot(mcmc_samples$rho, type="l")
+  par(mfrow=c(1,1))
 }
 
 # Calculate accuracy ----
