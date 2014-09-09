@@ -20,24 +20,24 @@ $$
 $$
 
 \section{NR update}
-$$
-\mLambda \leftarrow (C^T W C + B)^{-1}
-\vmu \leftarrow \vmu + \mLambda C^T (\vy - B^{(1)}(\mC\vmu, \diag \mC \mLambda \mC^T)) - \mB \vmu
-$$
+\begin{align*}
+\mLambda &\leftarrow (\mC^T \mW \mC + \mB)^{-1} \\
+\vmu &\leftarrow \vmu + \mLambda \mC^T (\vy - \mB^{(1)}(\mC\vmu, \diag (\mC \mLambda \mC^T))) - \mB \vmu
+\end{align*}
 
 $$
-\frac{\partial \log p (\vy;\vmu, \mLambda)}{\partial r_{ij}} = \half \tr \left ((\mLambda^{-1} - C^T W C - B) \frac{\partial \mLambda}{\partial r_{ij}} \right )
+\frac{\partial \log p (\vy;\vmu, \mLambda)}{\partial r_{ij}} = \half \tr \left ((\mLambda^{-1} - \mC^T \mW \mC - \mB) \frac{\partial \mLambda}{\partial r_{ij}} \right )
 $$
 
-$$
-\mLambda = R^T R, 
-R = \begin{bmatrix}
+\begin{align*}
+\mLambda &= \mR^T \mR, \\
+\mR &= \begin{bmatrix}
 e^{r_{11}} & r_{12} & r_{13} & \dots & r_{1p} \\
 & e^{r_{22}} & & & & \\
 &  & \ddots & & & \\
 &  & & & & e^{r_{pp}}\\
 \end{bmatrix}
-$$
+\end{align*}
 
 Recall that
 $$E_{ij} =
@@ -47,14 +47,28 @@ $$E_{ij} =
 \end{cases}
 $$
 
+Consider the proposal that instead of $\mLambda = \mR^T \mR$, we choose
+$\mLambda = (\mR^T \mR)^{-1}$. Then
+
 \begin{align*}
 \frac{\partial \log p(\vy; \vmu, \mLambda)}{\partial r_{ij}} &= - \half \tr \left( (\mLambda^{-1} - \mC^T \mW \mC - \mB) \times \mLambda \frac{\partial R^T R}{\partial r_{ij}} \mLambda \right) \\
 &= - \half \tr \left( \mLambda(\mLambda^{-1} - \mC^T\mW\mC - B)\mLambda \times [(E_{ij} e^{I(i=j)r_{ij}})^T \mR + \mR^T E_{ij} e^{I(i=j) r_{ij}}] \right) \\
-&= - \tr (\mR \mLambda (\mLambda^{-1} - C^T W C - B) \mLambda E_{ij})e^{I(i=j) r_{ij}} \\
-&= - (\mR \mLambda (\mLambda^{-1} - C^T W C - B) \mLambda)_{ij} e^{I(i=j) r_{ij}} () \\
-&= - (\mR^{-T} (\mLambda^{-1} - \mC^T \mW \mC - B) \mLambda)_{ij} e^{I(i=j) r_{ij}}
+&= - \tr (\mR \mLambda (\mLambda^{-1} - \mC^T \mW \mC - \mB) \mLambda E_{ij})e^{I(i=j) r_{ij}} \\
+&= - (\mR \mLambda (\mLambda^{-1} - \mC^T \mW \mC - \mB) \mLambda)_{ij} e^{I(i=j) r_{ij}} () \\
+&= - (\mR^{-T} (\mLambda^{-1} - \mC^T \mW \mC - \mB) \mLambda)_{ij} e^{I(i=j) r_{ij}}
 \end{align*}
 
 as $\mLambda = (\mR^T \mR)^{-1} = \mR^{-1} \mR^{-T}$.
 
+Here, I think $\mW = B^{(1)}(\vmu, \mLambda)$ and $\mB = \mSigma^{-1}$.
+
+\section{Implementation}
+Change the dmLambda line.
+
+\section{Runtime efficiency}
+$O(P^2 N - P^4)$ where $N=nm$, $P=p+m$.
+
+$O(m + p + (m+p)^2) \to O((m + p + \frac{p(p-1)}{2} + p \times m))$
+
+We will need to try the Newtown-Raphson approach as well.
 \end{document}
