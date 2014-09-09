@@ -13,8 +13,8 @@ f.lap <- function(vmu,vy,vr,mC,mSigma.inv,mLambda)
 	mSigma <- solve(mSigma.inv)
 	# diag(mC mLambda mC^T)_i i = mC[i, ] . mLambda[, i] . mC[, i] 
     #f <- sum(vy*veta - vr*exp(veta+0.5*diag(mC%*%mLambda%*%t(mC)))) - 0.5*t(vmu)%*%mSigma.inv%*%vmu - 0.5*sum(diag(mLambda%*%mSigma))
-	mDiag <- sapply(1:ncol(mC), function(i) sum(mC[i,] * mLambda[, i] * mC[, i]))
-	#mDiag2 <-  diag(mC%*%mLambda%*%t(mC))
+	#mDiag <- sapply(1:ncol(mC), function(i) sum(mC[i,] * mLambda[, i] * mC[, i]))
+	mDiag <-  diag(mC%*%mLambda%*%t(mC)) # sapply(1:3, function(i) {mC[i,]%*%mLambda%*%mC[i,]})
 	f <- sum(vy*vr*veta - vr*exp(veta+0.5*mDiag)) - 0.5*t(vmu)%*%mSigma.inv%*%vmu - 0.5*sum(diag(mLambda%*%mSigma))
     return(f)
 }
@@ -94,7 +94,7 @@ f.G <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,gh)
   d <- length(vmu)
   
   vmu.til     <- mC%*%vmu
-  vsigma2.til <- diag(mC%*%mLambda%*%t(mC))
+  vsigma2.til <- diag(mC%*%mLambda%*%t(mC)) # sapply(1:3, function(i) {mC[i,]%*%mLambda%*%mC[i,]})
   vB0 <- B0.fun("POISSON",vmu.til,vsigma2.til,gh) 
   
   f <- sum(vr*(vy*vmu.til - vB0)) - 0.5*t(vmu)%*%mSigma.inv%*%vmu 
@@ -190,7 +190,7 @@ vg.GVA <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   mLambda <- mR%*%t(mR)   
 
   vmu.til     <- mC%*%vmu
-  vsigma2.til <- diag(mC%*%mLambda%*%t(mC))
+  vsigma2.til <- diag(mC%*%mLambda%*%t(mC)) # sapply(1:3, function(i) {mC[i,]%*%mLambda%*%mC[i,]})
   res.B12 <- B12.fun("POISSON",vmu.til,vsigma2.til,gh)
   vB1 <- res.B12$vB1
   vB2 <- res.B12$vB2
@@ -202,8 +202,11 @@ vg.GVA <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   mH <- mH.G(vmu,mLambda,vy,vr,mC,mSigma.inv,vB2)
   dmLambda <- (mLambda.inv + mH)%*%mR
   # Possible new dmLambda in new parameterisation
+  # This will have to be rewritten to be efficient
   # mR.inv <- solve(mR)
+  # mLambda <- solve(t(mR)%*%mR)
   # dmLambda <- -(t(mR.inv)%*%(mLambda.inv + mH)%*%mLambda)
+  # diag(dmLambda) <- diag(dmLambda)*exp(diag(mR))
 
   dmLambda[Dinds] <- dmLambda[Dinds]*mR[Dinds]
   vg[(1+d):length(vtheta)] <- dmLambda[Rinds]    

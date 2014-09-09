@@ -429,7 +429,7 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
 	}
 
 	if (plot_lower_bound)
-		plot(lower_bound_vector,type="l")
+		plot(vlower_bound,type="l")
 
 	params = list(vmu=mult$vmu, mLambda=mult$mLambda, a_rho=mult$a_rho, b_rho=mult$b_rho,
 					a_sigma=mult$a_sigma, b_sigma=mult$b_sigma, vlower_bound=vlower_bound)
