@@ -374,7 +374,12 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
 	  #	ans <- readline()
 		
   	# Update parameters for q_vr
-  	mult$vp[zero.set] = expit((mult$vy[zero.set]*mult$mC[zero.set,])%*%mult$vmu-exp(mult$mC[zero.set,]%*%mult$vmu + 0.5*diag(mult$mC[zero.set,]%*%mult$mLambda%*%t(mult$mC[zero.set,])) + digamma(mult$a_rho) - digamma(mult$b_rho)))
+    #cat("length(zero.set)", length(zero.set), "\n")
+    #cat("zero.set", zero.set, "\n")
+    #cat("length(mult$vy[zero.set])", length(mult$vy[zero.set]), "\n")
+    #cat("length(mult$mC[zero.set,])", length(mult$mC[zero.set,]), "\n")
+		#cat("dim(mult$mLambda)", dim(mult$mLambda), "\n")
+		mult$vp[zero.set] = expit((mult$vy[zero.set]*mult$mC[zero.set,])%*%mult$vmu-exp(mult$mC[zero.set,]%*%mult$vmu + 0.5*diag(mult$mC[zero.set,]%*%mult$mLambda%*%t(mult$mC[zero.set,])) + digamma(mult$a_rho) - digamma(mult$b_rho)))
   
 		# Update parameters for q_rho
 		mult$a_rho = mult$prior$a_rho + sum(mult$vp)
@@ -388,7 +393,6 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
 		#	print(diag(mult$mC%*%mult$mLambda%*%t(mult$mC)))
 		#}
 		
-
   	# Update parameters for q_sigma_u^2 if we need to
   	if (!is.null(mult$mZ)) {
   	  # a_sigma is fixed
