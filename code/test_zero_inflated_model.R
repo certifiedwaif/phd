@@ -526,6 +526,8 @@ test_multivariate_accuracy_stan <- function()
           add=TRUE, lty=2, col="blue")
   }
   mcmc_samples = extract(fit)
+
+  pdf("accuracy_plots.pdf")
   # vbeta accuracy
   for (i in 1:ncol(mX)) {
     accuracy = calculate_accuracy(mcmc_samples$vbeta[,i], dnorm,
