@@ -5,19 +5,19 @@
 \begin{document}
 \section{Idea of new parameterisation $\mLambda = (\mR^T \mR)^{-1}$}
 \begin{equation*}
-\frac{\partial \log p(y;\vmu, \mLambda)}{\partial \mLambda_{ij}} = \half \tr ((\mLambda^{-1} - C^T W C - B)\frac{\partial \mLambda}{\partial \mLambda_{ij}})
+\frac{\partial \log p(y;\vmu, \mLambda)}{\partial \mLambda_{ij}} = \half \tr ((\mLambda^{-1} - \mC^T \mW \mC - \mB)\frac{\partial \mLambda}{\partial \mLambda_{ij}})
 \end{equation*}
 
-$$
-\mC = [\mX, \mZ]
-\mW = \diag(f(\vmu, \mLambda))
-\mLambda = \begin{bmatrix}
+\begin{align*}
+\mC &= [\mX, \mZ] \\
+\mW &= \diag(f(\vmu, \mLambda)) \\
+\mLambda &= \begin{bmatrix}
 \mLambda_{11} & \mLambda_{12} &  &\\
 \mLambda_{21} & \mLambda_{22} &  &\\
 & & \ddots & \\
 & & & \mLambda_{p \times p}
 \end{bmatrix}
-$$
+\end{align*}
 
 \section{NR update}
 \begin{align*}
@@ -54,7 +54,7 @@ $\mLambda = (\mR^T \mR)^{-1}$. Then
 \frac{\partial \log p(\vy; \vmu, \mLambda)}{\partial r_{ij}} &= - \half \tr \left( (\mLambda^{-1} - \mC^T \mW \mC - \mB) \times \mLambda \frac{\partial R^T R}{\partial r_{ij}} \mLambda \right) \\
 &= - \half \tr \left( \mLambda(\mLambda^{-1} - \mC^T\mW\mC - B)\mLambda \times [(E_{ij} e^{I(i=j)r_{ij}})^T \mR + \mR^T E_{ij} e^{I(i=j) r_{ij}}] \right) \\
 &= - \tr (\mR \mLambda (\mLambda^{-1} - \mC^T \mW \mC - \mB) \mLambda E_{ij})e^{I(i=j) r_{ij}} \\
-&= - (\mR \mLambda (\mLambda^{-1} - \mC^T \mW \mC - \mB) \mLambda)_{ij} e^{I(i=j) r_{ij}} () \\
+&= - (\mR \mLambda (\mLambda^{-1} - \mC^T \mW \mC - \mB) \mLambda)_{ij} e^{I(i=j) r_{ij}} \\
 &= - (\mR^{-T} (\mLambda^{-1} - \mC^T \mW \mC - \mB) \mLambda)_{ij} e^{I(i=j) r_{ij}}
 \end{align*}
 
@@ -63,12 +63,38 @@ as $\mLambda = (\mR^T \mR)^{-1} = \mR^{-1} \mR^{-T}$.
 Here, I think $\mW = B^{(1)}(\vmu, \mLambda)$ and $\mB = \mSigma^{-1}$.
 
 \section{Implementation}
-Change the dmLambda line.
+Change the dmLambda line. I think the mLambda line also needs to be
+changed.
+
+\section{Issues}
+I tried to implement this, and it failed spectacularly. I'm not really
+sure why yet, but I've been thinking about it this afternoon.
+
+The parameterisation suggested above is $\mLambda = (\mR^T\mR)^{-1}$,
+which would assume $\mR$ is upper triangular. But the current GVA
+code uses $\mLambda = \mR \mR^T$ and the Cholesky factors are lower
+triangular. You can, of course, do it either way. But the above
+derivation is for the wrong case.
+
+I think should just be able to change the concluding line from
+
+$$
+- (\mR^{-T} (\mLambda^{-1} - \mC^T \mW \mC - \mB) \mLambda)_{ij} e^{I(i=j) r_{ij}}
+$$
+
+\noindent to
+
+$$
+- (\mR^{-1} (\mLambda^{-1} - \mC^T \mW \mC - \mB) \mLambda)_{ij} e^{I(i=j) r_{ij}}
+$$
+
+\noindent and everything should work as expected. Of course, I have to actually try it.
+Which means it might not work.
 
 \section{Runtime efficiency}
 $O(P^2 N - P^4)$ where $N=nm$, $P=p+m$.
 
-$O(m + p + (m+p)^2) \to O((m + p + \frac{p(p-1)}{2} + p \times m))$
+\noindent $O(m + p + (m+p)^2) \to O((m + p + \frac{p(p-1)}{2} + p \times m))$
 
-We will need to try the Newtown-Raphson approach as well.
+\noindent We will need to try the Newtown-Raphson approach as well.
 \end{document}
