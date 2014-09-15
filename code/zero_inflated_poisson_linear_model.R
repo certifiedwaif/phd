@@ -13,8 +13,8 @@ f.lap <- function(vmu,vy,vr,mC,mSigma.inv,mLambda)
 	mSigma <- solve(mSigma.inv)
 	# diag(mC mLambda mC^T)_i i = mC[i, ] . mLambda[, i] . mC[, i] 
     #f <- sum(vy*veta - vr*exp(veta+0.5*diag(mC%*%mLambda%*%t(mC)))) - 0.5*t(vmu)%*%mSigma.inv%*%vmu - 0.5*sum(diag(mLambda%*%mSigma))
-	mDiag <-  diag(mC%*%mLambda%*%t(mC))
-	#mDiag <- sapply(1:nrow(mC), function(i) mC[i,] %*% mLambda %*% mC[i,])
+	#mDiag <-  diag(mC%*%mLambda%*%t(mC))
+  	mDiag <- sapply(1:nrow(mC), function(i) {mC[i,]%*%mLambda%*%mC[i,]})
 	f <- sum(vy*vr*veta - vr*exp(veta+0.5*mDiag)) - 0.5*t(vmu)%*%mSigma.inv%*%vmu - 0.5*sum(diag(mLambda%*%mSigma))
     return(f)
 }
@@ -94,7 +94,8 @@ f.G <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,gh)
   d <- length(vmu)
   
   vmu.til     <- mC%*%vmu
-  vsigma2.til <- diag(mC%*%mLambda%*%t(mC))
+  #vsigma2.til <- diag(mC%*%mLambda%*%t(mC))
+  vsigma2.til <- sapply(1:nrow(mC), function(i) {mC[i,]%*%mLambda%*%mC[i,]})
   vB0 <- B0.fun("POISSON",vmu.til,vsigma2.til,gh) 
   
   f <- sum(vr*(vy*vmu.til - vB0)) - 0.5*t(vmu)%*%mSigma.inv%*%vmu 
@@ -113,7 +114,10 @@ f.GVA <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
     for (i in 1:length(Dinds)) {
         mR[Dinds[i]] <- min(c(1.0E5,mR[Dinds[i]]))
     }   
-   mLambda <- mR%*%t(mR)   
+	# Old parameterisation
+   #mLambda <- mR%*%t(mR)   
+	# New parameterisation
+   mLambda <- solve(mR%*%t(mR))
    
    f <- sum(log(diag(mR))) + f.G(vmu,mLambda,vy,vr,mC,mSigma.inv,gh) 
    f <- f + 0.5*d*log(2*pi) + 0.5*d
@@ -183,15 +187,19 @@ vg.GVA <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   d <- ncol(mC)
   vmu <- vtheta[1:d]
   mR[Rinds] <- vtheta[(1+d):length(vtheta)]
+  mR <- abs(mR)
   mR[Dinds] <- exp(mR[Dinds]) 
   for (i in 1:length(Dinds)) {
     mR[Dinds[i]] <- min(c(1.0E3,mR[Dinds[i]]))
   }    
-  mLambda <- mR%*%t(mR)   
+  # Old parameterisation
+  #mLambda <- mR%*%t(mR)   
+  # New parameterisation
+  mLambda <- solve(mR%*%t(mR),tol=1.0E-99)
 
   vmu.til     <- mC%*%vmu
-  #vsigma2.til <- sapply(1:nrow(mC), function(i) mC[i,] %*% mLambda %*% mC[i,])
-  vsigma2.til <- diag(mC%*%mLambda%*%t(mC))
+  #vsigma2.til <- diag(mC%*%mLambda%*%t(mC))
+  vsigma2.til <- sapply(1:nrow(mC), function(i) {mC[i,]%*%mLambda%*%mC[i,]})
   res.B12 <- B12.fun("POISSON",vmu.til,vsigma2.til,gh)
   vB1 <- res.B12$vB1
   vB2 <- res.B12$vB2
@@ -199,13 +207,16 @@ vg.GVA <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   vg <- 0*vmu
   vg[1:d] <- vg.G(vmu,mLambda,vy,vr,mC,mSigma.inv,vB1) 
 
-  mLambda.inv <- solve(mLambda,tol=1.0E-99)
+  # Old parameterisation
+  #mLambda.inv <- solve(mR%*%t(mR))
+  # New parameterisation
+  mLambda.inv <- mR%*%t(mR)
   mH <- mH.G(vmu,mLambda,vy,vr,mC,mSigma.inv,vB2)
-  dmLambda <- (mLambda.inv + mH)%*%mR
-  # Possible new dmLambda in new parameterisation
-  # mR.inv <- solve(mR)
-  # dmLambda <- -(t(mR.inv)%*%(mLambda.inv + mH)%*%mLambda)
-
+  # Old parameterisation
+  #dmLambda <- (mLambda.inv + mH)%*%mR
+  # New parameterisation
+  dmLambda <- -solve(mR)%*%(mLambda.inv + mH)%*%mLambda
+  
   dmLambda[Dinds] <- dmLambda[Dinds]*mR[Dinds]
   vg[(1+d):length(vtheta)] <- dmLambda[Rinds]    
  
@@ -252,9 +263,10 @@ fit.GVA <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12)
   vmu <- vtheta[1:d]
   mR[Rinds] <- vtheta[(1+d):P]
   mR[Dinds] <- exp(mR[Dinds])  
-  mLambda <- mR%*%t(mR)
+  # Old parameterisation
+  #mLambda <- mR%*%t(mR)
+  # New parameterisation
+  mLambda <- solve(mR%*%t(mR))
      
   return(list(res=res,vmu=vmu,mLambda=mLambda))
 }
-
-###############################################################################

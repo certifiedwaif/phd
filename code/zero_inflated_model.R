@@ -123,6 +123,7 @@ calculate_lower_bound.multivariate <- function(multivariate)
   	
   	# Something is wrong in T2. It sometimes goes backwards as we're optimised.
   	# This should be unchanged from the univariate lower bound
+    cat("calculate_lower_bound: ", vp[zero.set], "\n")
   	T2 = sum(-vp[zero.set]*log(vp[zero.set]) - (1-vp[zero.set])*log(1-vp[zero.set]))
     T2 = T2 - lbeta(prior$a_rho, prior$b_rho) + lbeta(a_rho, b_rho)
     
@@ -132,84 +133,6 @@ calculate_lower_bound.multivariate <- function(multivariate)
   })
   
 	return(result)
-}
-
-calculate_lower_bound_old.multivariate <- function(multivariate)
-{
-  result = with(multivariate, {
-    p = ncol(mX)
-    beta_idx = 1:p
-    if (!is.null(mZ)) {
-      m = ncol(mZ) 
-      u_idx = p + (1:m)  # (ncol(mult$mX)+1):ncol(mult$mC)
-      vu = vmu[u_idx]
-    } else {
-      m = 0
-    }
-    
-    zero.set <- which(vy==0)
-    
-    #E_xi_log_lambda_r = ifelse(vy == 0, 0, vy*E_log_lambda)
-    
-    E_log_rho = digamma(a_rho) - digamma(a_rho + b_rho)
-    E_log_one_minus_rho = digamma(b_rho) - digamma(a_rho + b_rho)
-    cat("calculate_lower_bound: E_log_rho", E_log_rho, "E_log_1-rho", E_log_one_minus_rho, "\n")
-    
-    # Something is wrong in T2. It sometimes goes backwards as we're optimised.
-    # This should be unchanged from the univariate lower bound
-    T2 = sum(vp) * E_log_rho + sum(1 - vp) * E_log_one_minus_rho
-    T2 = T2 + sum((vp[zero.set]*log(vp[zero.set]) + (1-vp[zero.set])*log(1-vp[zero.set])))
-    #T2 = T2 + sum((vp*log(vp) + (1-vp)*log(1-vp)))
-    T2 = T2 + beta_entropy(a_rho, b_rho)
-    #cat("calculate_lower_bound: beta_entropy ", beta_entropy(a_rho, b_rho), "\n")
-    
-    # Terms for (beta, u)
-    #result = result + (vy*vp) %*% mC %*% vmu
-    #mat <- matrix(0.5 * (t(vmu) %*% mLambda %*% vmu), nrow = nrow(mC), ncol = 1)
-    #result = result - vp %*% exp(mC %*% vmu + mat) - sum(lgamma(vy + 1))
-    #result = result + 0.5 * (det(2*pi*mLambda) + t(vmu) %*% solve(mLambda) %*% vmu)
-    
-    # Terms for (beta, u)
-    # Second try ...
-    T1 = t(vy*vp) %*% mC %*% vmu
-    T1 = T1 - t(vp) %*% exp(mC %*% vmu + .5 * diag(mC%*%mLambda%*%t(mC)))
-    T1 = T1 - sum(lgamma(vy + 1))
-    T1 = T1 - .5*p*log(prior$sigma2.beta) - .5*tr(mLambda[beta_idx, beta_idx])/prior$sigma2.beta
-    if (!is.null(mZ)) {
-      T1 = T1 - .5*m*(digamma(a_sigma) - log(b_sigma)) - .5*a_sigma/b_sigma*tr(mLambda[u_idx, u_idx])
-    }
-    T1 = T1 + .5*(p+m)*(1 + log(2*pi)) + .5*log(det(mLambda))
-    #T2 = T2 - .5*(log(2*pi) + log(m) + digamma(a_sigma) - log(b_sigma)) # WTF is this?
-    # Entropy? No, I don't know what it is.
-    
-    # Terms for sigma2_u
-    #if (!is.null(multivariate$mZ)) {
-    #	cat("a_sigma2_u", a_sigma2_u, "b_sigma2_u", b_sigma2_u, "\n")
-    # E_log_sigma2_u = -gamma_entropy(a_sigma2_u, b_sigma2_u)
-    # E_sigma2_u = a_sigma2_u/b_sigma2_u
-    #	result = result + 0.5 * m * E_log_sigma2_u - 0.5*(sum(vu^2) + tr(mLambda[u_idx, u_idx])) * E_sigma2_u - lgamma(a_sigma2_u) + lgamma(a_sigma2_u + 0.5 * m - 1)
-    #}
-    
-    # Terms for sigma2_u
-    # Second try ...
-    # Need to be careful to distinguish the prior from the variational parameter
-    if (!is.null(mZ)) {
-      # FIXME: Something is screwed here.
-      E_log_sigma2_u = -gamma_entropy(a_sigma, b_sigma) # I think this line is wrong. But it's not used.
-      E_sigma2_u = a_sigma/b_sigma
-      T3 = prior$a_sigma * log(prior$b_sigma) - lgamma(prior$a_sigma) - (prior$a_sigma - 1)*digamma(E_sigma2_u)
-      T3 = T3 - prior$b_sigma * E_sigma2_u + lgamma(a_sigma)
-      T3 = T3 - (a_sigma - 1)*digamma(a_sigma) - log(b_sigma)
-      T3 = T3 - log(a_sigma + b_sigma)
-    } else {
-      T3 = 0
-    }
-    cat("calculate_lower_bound: T1", T1, "T2", T2, "T3", T3, "\n")
-    result = T1 + T2 + T3
-    result
-  })
-  
-  return(result)
 }
 
 calculate_lower_bound <- function(object)
@@ -310,7 +233,7 @@ library(limma)
 
 zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE)
 {
-	MAXITER <- 100
+	MAXITER <- 200
 
 	# Initialise
 	N = length(mult$vy)
@@ -374,8 +297,15 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
 	  #	ans <- readline()
 		
   	# Update parameters for q_vr
-  	mult$vp[zero.set] = expit((mult$vy[zero.set]*mult$mC[zero.set,])%*%mult$vmu-exp(mult$mC[zero.set,]%*%mult$vmu + 0.5*diag(mult$mC[zero.set,]%*%mult$mLambda%*%t(mult$mC[zero.set,])) + digamma(mult$a_rho) - digamma(mult$b_rho)))
-  
+    #cat("length(zero.set)", length(zero.set), "\n")
+    #cat("zero.set", zero.set, "\n")
+    #cat("length(mult$vy[zero.set])", length(mult$vy[zero.set]), "\n")
+    #cat("length(mult$mC[zero.set,])", length(mult$mC[zero.set,]), "\n")
+		#cat("dim(mult$mLambda)", dim(mult$mLambda), "\n")
+    cat("diag(mLambda)", diag(mult$mLambda), "\n")
+		mult$vp[zero.set] = expit((mult$vy[zero.set]*mult$mC[zero.set,])%*%mult$vmu-exp(mult$mC[zero.set,]%*%mult$vmu + 0.5*diag(mult$mC[zero.set,]%*%mult$mLambda%*%t(mult$mC[zero.set,])) + digamma(mult$a_rho) - digamma(mult$b_rho)))
+    cat("vp[zero.set] ", mult$vp[zero.set], "\n")
+    
 		# Update parameters for q_rho
 		mult$a_rho = mult$prior$a_rho + sum(mult$vp)
 		mult$b_rho = mult$prior$b_rho + N - sum(mult$vp)
@@ -388,7 +318,6 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
 		#	print(diag(mult$mC%*%mult$mLambda%*%t(mult$mC)))
 		#}
 		
-
   	# Update parameters for q_sigma_u^2 if we need to
   	if (!is.null(mult$mZ)) {
   	  # a_sigma is fixed
@@ -429,7 +358,7 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
 	}
 
 	if (plot_lower_bound)
-		plot(lower_bound_vector,type="l")
+		plot(vlower_bound,type="l")
 
 	params = list(vmu=mult$vmu, mLambda=mult$mLambda, a_rho=mult$a_rho, b_rho=mult$b_rho,
 					a_sigma=mult$a_sigma, b_sigma=mult$b_sigma, vlower_bound=vlower_bound)
