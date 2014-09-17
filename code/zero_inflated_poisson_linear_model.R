@@ -230,8 +230,8 @@ vg.GVA <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   #dmLambda[Dinds] <- log(dmLambda[Dinds])
   vg[(1+d):length(vtheta)] <- dmLambda[Rinds]    
  
-  cat("vtheta.GVA vtheta", vtheta, "norm", norm(vtheta), "\n")
-  cat("vg.GVA vg[mR]", vg, "norm", norm(vg), "\n")
+  #cat("vtheta.GVA vtheta", vtheta, "norm", norm(vtheta), "\n")
+  #cat("vg.GVA vg[mR]", vg, "norm", norm(vg), "\n")
   return(vg)
 }
 
@@ -264,7 +264,7 @@ fit.GVA <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12)
   cat("lower_constraint", lower_constraint, "\n")
   
   if (method=="L-BFGS-B") {
-    controls <- list(maxit=1000,trace=1,fnscale=-1,REPORT=1,factr=1.0E-5,lmm=10)
+    controls <- list(maxit=1000,trace=0,fnscale=-1,REPORT=1,factr=1.0E-5,lmm=10)
   } else if (method=="Nelder-Mead") {
     controls <- list(maxit=100000000,trace=0,fnscale=-1,REPORT=1000,reltol=reltol) 
   } else {
@@ -435,8 +435,8 @@ vg.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   #dmLambda[Dinds] <- log(dmLambda[Dinds])
   vg[(1+d):length(vtheta)] <- dmLambda[Rinds]    
   
-  cat("vtheta.GVA vtheta", vtheta, "norm", norm(vtheta), "\n")
-  cat("vg.GVA vg[mR]", vg, "norm", norm(vg), "\n")
+  #cat("vtheta.GVA vtheta", vtheta, "norm", norm(vtheta), "\n")
+  #cat("vg.GVA vg[mR]", vg, "norm", norm(vg), "\n")
   return(vg)
 }
 
@@ -464,12 +464,12 @@ fit.GVA_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12)
   vmu <- c(vmu,mR[Rinds])
   cat("vmu", vmu, "\n")
   P <- length(vmu)
-  lower_constraint <- rep(-Inf, length(vmu))
+  #lower_constraint <- rep(-Inf, length(vmu))
   #lower_constraint[d+Dinds] <- 0
-  cat("lower_constraint", lower_constraint, "\n")
+  #cat("lower_constraint", lower_constraint, "\n")
   
   if (method=="L-BFGS-B") {
-    controls <- list(maxit=1000,trace=1,fnscale=-1,REPORT=1,factr=1.0E-5,lmm=10)
+    controls <- list(maxit=1000,trace=0,fnscale=-1,REPORT=1,factr=1.0E-5,lmm=10)
   } else if (method=="Nelder-Mead") {
     controls <- list(maxit=100000000,trace=0,fnscale=-1,REPORT=1000,reltol=reltol) 
   } else {
