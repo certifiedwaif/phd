@@ -6,7 +6,7 @@
 source("zero_inflated_model.R")
 source("rwmh.R")
 require(testthat)
-require(Matrix)
+#require(Matrix)
 
 generate_univariate_test_data <- function (n, rho, lambda)
 {
@@ -146,7 +146,7 @@ test_multivariate_zip_no_zeros_random_intercept <- function()
 	# test data into the source files is really the best idea.
 	# FIXME: You have serious overflow issues
 	m = 20
-	ni = 5
+	ni = 10
 	n = rep(ni,m)
 	mX = matrix(as.vector(cbind(rep(1, sum(n)), runif(sum(n), -1, 1))), sum(n), 2)
 	#print("mX=")
@@ -176,7 +176,8 @@ test_multivariate_zip_no_zeros_random_intercept <- function()
 	a_sigma = 1e-2
 	b_sigma = 1e-2
 	
-	sigma2.beta <- 1.0E8
+	#sigma2.beta <- 1.0E8
+	sigma2.beta <- 1.0E3
 	
 	tau = 1.0E2
 	
@@ -196,6 +197,7 @@ test_multivariate_zip_no_zeros_random_intercept <- function()
 
 	result_var = zero_infl_var(multivariate, method="gva", verbose=TRUE)
 	expect_equal(as.vector(result_var$vmu[1:2]), expected_beta, tolerance=1e-1)
+	result_sigma2_u = (result_var$b_sigma / result_var$a_sigma)
 	expect_equal(result_sigma2_u, expected_sigma2_u, tolerance=3e-1)
 	#pdf("mult_no_zeroes_lower_bound.pdf")
 	#plot(result_var$vlower_bound, type="l", xlab="Iterations", ylab="Lower bound")
