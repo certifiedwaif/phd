@@ -120,10 +120,14 @@ calculate_lower_bound.multivariate <- function(multivariate)
       T1 = T1 - a_sigma * log(b_sigma) + lgamma(a_sigma)
     }
   	T1 = T1 + .5*(p+m) + .5*sum(log(eigen(mLambda)$values))
+    cat("calculate_lower_bound: eigen(mLambda) ", eigen(mLambda)$values, "\n")
   	
   	# Something is wrong in T2. It sometimes goes backwards as we're optimised.
   	# This should be unchanged from the univariate lower bound
-    cat("calculate_lower_bound: ", vp[zero.set], "\n")
+    #cat("calculate_lower_bound: ", vp[zero.set], "\n")
+    # 0 log 0 returns NaN. We sidestep this by adding epsilon to vp[zero.set]
+    eps = 1e-10
+    vp[zero.set] = vp[zero.set] + eps
   	T2 = sum(-vp[zero.set]*log(vp[zero.set]) - (1-vp[zero.set])*log(1-vp[zero.set]))
     T2 = T2 - lbeta(prior$a_rho, prior$b_rho) + lbeta(a_rho, b_rho)
     
@@ -205,13 +209,15 @@ create_multivariate <- function(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau)
 	}
 	vmu = rep(0, ncol(mC))
 
-	mLambda = diag(rep(1, ncol(mC)))
 	mSigma.beta.inv = diag(1/sigma2.beta, ncol(mX))
   if (!is.null(ncol(mZ))) {
 	  mSigma.u.inv = diag(tau, ncol(mZ))	
+	  mLambda = diag(c(rep(sigma2.beta, ncol(mX)), rep(1/tau, ncol(mZ))))
   } else {
     mSigma.u.inv = NULL
+    mLambda = diag(rep(sigma2.beta, ncol(mX)))
   }
+	#mLambda = diag(rep(1, ncol(mC)))
 	a_rho = 1 + sum(vp)
 	b_rho = n - sum(vp) + 1
 	
@@ -233,7 +239,7 @@ library(limma)
 
 zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE)
 {
-	MAXITER <- 200
+	MAXITER <- 30
 
 	# Initialise
 	N = length(mult$vy)
@@ -297,14 +303,17 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
 	  #	ans <- readline()
 		
   	# Update parameters for q_vr
-    #cat("length(zero.set)", length(zero.set), "\n")
-    #cat("zero.set", zero.set, "\n")
-    #cat("length(mult$vy[zero.set])", length(mult$vy[zero.set]), "\n")
-    #cat("length(mult$mC[zero.set,])", length(mult$mC[zero.set,]), "\n")
-		#cat("dim(mult$mLambda)", dim(mult$mLambda), "\n")
+    cat("length(zero.set)", length(zero.set), "\n")
+    cat("zero.set", zero.set, "\n")
+    cat("length(mult$vy[zero.set])", length(mult$vy[zero.set]), "\n")
+    cat("length(mult$mC[zero.set,])", length(mult$mC[zero.set,]), "\n")
+		cat("dim(matrix(mult$mC[zero.set,]))", dim(matrix(mult$mC[zero.set,], N, p+m)), "\n")
+		cat("dim(mult$mLambda)", dim(mult$mLambda), "\n")
     cat("diag(mLambda)", diag(mult$mLambda), "\n")
-		mult$vp[zero.set] = expit((mult$vy[zero.set]*mult$mC[zero.set,])%*%mult$vmu-exp(mult$mC[zero.set,]%*%mult$vmu + 0.5*diag(mult$mC[zero.set,]%*%mult$mLambda%*%t(mult$mC[zero.set,])) + digamma(mult$a_rho) - digamma(mult$b_rho)))
-    cat("vp[zero.set] ", mult$vp[zero.set], "\n")
+    if (length(zero.set) != 0) {
+		  mult$vp[zero.set] = expit((mult$vy[zero.set]*mult$mC[zero.set,])%*%mult$vmu-exp(mult$mC[zero.set,]%*%mult$vmu + 0.5*diag((matrix(mult$mC[zero.set,], length(zero.set), p+m))%*%mult$mLambda%*%t(matrix(mult$mC[zero.set,], length(zero.set), p+m))) + digamma(mult$a_rho) - digamma(mult$b_rho)))
+      cat("vp[zero.set] ", mult$vp[zero.set], "\n")
+    }
     
 		# Update parameters for q_rho
 		mult$a_rho = mult$prior$a_rho + sum(mult$vp)
