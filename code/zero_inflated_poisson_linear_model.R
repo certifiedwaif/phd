@@ -151,7 +151,7 @@ mH.G <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,vB2)
 
 vg.GVA.approx <- function(vmu,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
 {
-    n <- length(vy); P <- length(vmu); d <- ncol(mC)
+  n <- length(vy); P <- length(vmu); d <- ncol(mC)
 	eps <- 1.0E-6
 	f <- f.GVA(vmu,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
 	vg.approx <- matrix(0,P,1)
@@ -188,12 +188,14 @@ vg.GVA <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   d <- ncol(mC)
   vmu <- vtheta[1:d]
   mR[Rinds] <- vtheta[(1+d):length(vtheta)]
+
   #diag(mR) <- abs(diag(mR))
   #cat("mR", mR, "\n")
   #diag(mR) <- abs(diag(mR)) # FIXME: This may be the wrong way to solve this. Get outside the
                             # allowable solution space on every second iteration, diagonal entries
                             # of mR become negative.
   #cat("mR after diag. abs", mR, "\n")
+
   mR[Dinds] <- exp(mR[Dinds]) 
   for (i in 1:length(Dinds)) {
     mR[Dinds[i]] <- min(c(1.0E3,mR[Dinds[i]]))
@@ -230,8 +232,9 @@ vg.GVA <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   #dmLambda[Dinds] <- log(dmLambda[Dinds])
   vg[(1+d):length(vtheta)] <- dmLambda[Rinds]    
  
-  #cat("vtheta.GVA vtheta", vtheta, "norm", norm(vtheta), "\n")
-  #cat("vg.GVA vg[mR]", vg, "norm", norm(vg), "\n")
+  cat("vtheta.GVA vtheta", round(vtheta[(1+d):length(vtheta)], 2), "norm", norm(vtheta[(1+d):length(vtheta)]), "\n")
+  cat("vg.GVA vg", round(vg[(1+d):length(vtheta)], 2), "norm", norm(vg[(1+d):length(vtheta)]), "\n")
+
   return(vg)
 }
 
@@ -264,7 +267,7 @@ fit.GVA <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12)
   cat("lower_constraint", lower_constraint, "\n")
   
   if (method=="L-BFGS-B") {
-    controls <- list(maxit=1000,trace=0,fnscale=-1,REPORT=1,factr=1.0E-5,lmm=10)
+    controls <- list(maxit=1000,trace=1,fnscale=-1,REPORT=1,factr=1.0E-5,lmm=10)
   } else if (method=="Nelder-Mead") {
     controls <- list(maxit=100000000,trace=0,fnscale=-1,REPORT=1000,reltol=reltol) 
   } else {
