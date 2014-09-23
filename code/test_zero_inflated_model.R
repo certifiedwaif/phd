@@ -196,6 +196,7 @@ test_multivariate_zip_no_zeros_random_intercept <- function()
 
 	result_var = zero_infl_var(multivariate, method="gva", verbose=TRUE)
 	expect_equal(as.vector(result_var$vmu[1:2]), expected_beta, tolerance=1e-1)
+	result_sigma2_u = (result_var$b_sigma / result_var$a_sigma)
 	expect_equal(result_sigma2_u, expected_sigma2_u, tolerance=3e-1)
 	#pdf("mult_no_zeroes_lower_bound.pdf")
 	#plot(result_var$vlower_bound, type="l", xlab="Iterations", ylab="Lower bound")
