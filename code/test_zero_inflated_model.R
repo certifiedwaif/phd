@@ -176,8 +176,8 @@ test_multivariate_zip_no_zeros_random_intercept <- function()
 	a_sigma = 1e-2
 	b_sigma = 1e-2
 	
-	#sigma2.beta <- 1.0E8
-	sigma2.beta <- 1.0E3
+	sigma2.beta <- 1.0E8
+	#sigma2.beta <- 1.0E3
 	
 	tau = 1.0E2
 	
@@ -416,7 +416,6 @@ test_multivariate_accuracy <- function()
 	      from=min(density_mcmc_rho$x), to=max(density_mcmc_rho$x),
 	      add=TRUE, lty=2, col="blue")
 	par(mfrow=c(1,1))
-	
 }
 
 test_multivariate_accuracy_stan <- function()
