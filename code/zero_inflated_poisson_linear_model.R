@@ -467,7 +467,7 @@ fit.GVA_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12)
   vmu <- c(vmu,mR[Rinds])
   cat("vmu", vmu, "\n")
   P <- length(vmu)
-  #lower_constraint <- rep(-Inf, length(vmu))
+  lower_constraint <- rep(-Inf, length(vmu))
   #lower_constraint[d+Dinds] <- 0
   #cat("lower_constraint", lower_constraint, "\n")
   
