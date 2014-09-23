@@ -205,13 +205,15 @@ create_multivariate <- function(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau)
 
 	mSigma.beta.inv = diag(1/sigma2.beta, ncol(mX))
   if (!is.null(ncol(mZ))) {
-	  mSigma.u.inv = diag(tau, ncol(mZ))	
-	  mLambda = diag(c(rep(sigma2.beta, ncol(mX)), rep(1/tau, ncol(mZ))))
+	  mSigma.u.inv = diag(tau, ncol(mZ))
+    # This is a really bad idea - the optimisation will diverge.
+	  #mLambda = diag(c(rep(sigma2.beta, ncol(mX)), rep(1/tau, ncol(mZ))))
   } else {
     mSigma.u.inv = NULL
-    mLambda = diag(rep(sigma2.beta, ncol(mX)))
+    # This is a really bad idea - the optimisation will diverge.
+    #mLambda = diag(rep(sigma2.beta, ncol(mX)))
   }
-	#mLambda = diag(rep(1, ncol(mC)))
+	mLambda = diag(rep(1, ncol(mC)))
 	a_rho = 1 + sum(vp)
 	b_rho = n - sum(vp) + 1
 	
