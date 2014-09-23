@@ -98,12 +98,6 @@ calculate_lower_bound.multivariate <- function(multivariate)
   
   	zero.set <- which(vy==0)
   	
-  	#E_xi_log_lambda_r = ifelse(vy == 0, 0, vy*E_log_lambda)
-  	
-  	E_log_rho = digamma(a_rho) - digamma(a_rho + b_rho)
-  	E_log_one_minus_rho = digamma(b_rho) - digamma(a_rho + b_rho)
-    #cat("calculate_lower_bound: E_log_rho", E_log_rho, "E_log_1-rho", E_log_one_minus_rho, "\n")
-
   	# Terms for (beta, u)
   	#result = result + (vy*vp) %*% mC %*% vmu
   	#mat <- matrix(0.5 * (t(vmu) %*% mLambda %*% vmu), nrow = nrow(mC), ncol = 1)
@@ -239,7 +233,7 @@ library(limma)
 
 zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE)
 {
-	MAXITER <- 30
+	MAXITER <- 20
 
 	# Initialise
 	N = length(mult$vy)
@@ -283,7 +277,8 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
 		if (method == "laplacian") {
 			fit1 = fit.Lap(mult$vmu, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, mult$mLambda)
 		} else if (method == "gva") {	
-			fit1 = fit.GVA(mult$vmu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B")
+			#fit1 = fit.GVA(mult$vmu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B")
+			fit1 = fit.GVA_new(mult$vmu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B")
 		} else {
 			stop("method must be either laplacian or gva")
 		}
