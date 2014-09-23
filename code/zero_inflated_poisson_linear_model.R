@@ -187,7 +187,6 @@ vg.GVA <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   d <- ncol(mC)
   vmu <- vtheta[1:d]
   mR[Rinds] <- vtheta[(1+d):length(vtheta)]
-  mR <- abs(mR)
   mR[Dinds] <- exp(mR[Dinds]) 
   for (i in 1:length(Dinds)) {
     mR[Dinds[i]] <- min(c(1.0E3,mR[Dinds[i]]))
@@ -220,8 +219,8 @@ vg.GVA <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   dmLambda[Dinds] <- dmLambda[Dinds]*mR[Dinds]
   vg[(1+d):length(vtheta)] <- dmLambda[Rinds]    
  
-  #cat("vtheta.GVA vtheta", vtheta, "norm", norm(vtheta), "\n")
-  #cat("vg.GVA vg", vg, "norm", norm(vg), "\n")
+  cat("vtheta.GVA vtheta", round(vtheta[(1+d):length(vtheta)], 2), "norm", norm(vtheta[(1+d):length(vtheta)]), "\n")
+  cat("vg.GVA vg", round(vg[(1+d):length(vtheta)], 2), "norm", norm(vg[(1+d):length(vtheta)]), "\n")
   return(vg)
 }
 
@@ -246,7 +245,7 @@ fit.GVA <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12)
   P <- length(vmu)
   
   if (method=="L-BFGS-B") {
-    controls <- list(maxit=1000,trace=0,fnscale=-1,REPORT=1,factr=1.0E-5,lmm=10)
+    controls <- list(maxit=1000,trace=1,fnscale=-1,REPORT=1,factr=1.0E-5,lmm=10)
   } else if (method=="Nelder-Mead") {
     controls <- list(maxit=100000000,trace=0,fnscale=-1,REPORT=1000,reltol=reltol) 
   } else {
