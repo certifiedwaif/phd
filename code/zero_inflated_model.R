@@ -235,7 +235,7 @@ library(limma)
 
 zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE)
 {
-	MAXITER <- 20
+	MAXITER <- 50
 
 	# Initialise
 	N = length(mult$vy)
@@ -279,10 +279,14 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
 		if (method == "laplacian") {
 			fit1 = fit.Lap(mult$vmu, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, mult$mLambda)
 		} else if (method == "gva") {	
-			#fit1 = fit.GVA(mult$vmu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B")
-			fit1 = fit.GVA_new(mult$vmu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B")
+			fit1 = fit.GVA(mult$vmu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B")
+    } else if (method == "gva2")
+    {
+      fit1 = fit.GVA_new(mult$vmu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B")
+    } else if (method == "gva_nr") {
+      fit1 = fit.GVA_nr(mult$vmu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B")
 		} else {
-			stop("method must be either laplacian or gva")
+			stop("method must be either laplacian, gva, gva2 or gva_nr")
 		}
 		#fit2 = fit.GVA(fit1$vmu, fit1$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B")
 		
@@ -304,7 +308,7 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
     cat("zero.set", zero.set, "\n")
     cat("length(mult$vy[zero.set])", length(mult$vy[zero.set]), "\n")
     cat("length(mult$mC[zero.set,])", length(mult$mC[zero.set,]), "\n")
-		cat("dim(matrix(mult$mC[zero.set,]))", dim(matrix(mult$mC[zero.set,], N, p+m)), "\n")
+		cat("dim(matrix(mult$mC[zero.set,]))", dim(matrix(mult$mC[zero.set,], length(zero.set), p+m)), "\n")
 		cat("dim(mult$mLambda)", dim(mult$mLambda), "\n")
     cat("diag(mLambda)", diag(mult$mLambda), "\n")
     if (length(zero.set) != 0) {

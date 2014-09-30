@@ -430,6 +430,7 @@ vg.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   #dmLambda <- (mLambda.inv + mH)%*%mR
   # New parameterisation
   dmLambda <- -solve(mR)%*%(mLambda.inv + mH)%*%mLambda
+  #dmLambda <- -mLambda%*%(mLambda.inv + mH)%*%mLambda%*%mR
   #browser()
   #dmLambda <- -solve(t(mR))%*%(mLambda.inv + mH)%*%mLambda
   
@@ -493,6 +494,137 @@ fit.GVA_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12)
   #mLambda <- mR%*%t(mR)
   # New parameterisation
   mLambda <- solve(mR%*%t(mR))
+  #mLambda <- solve(t(mR)%*%mR)
+  
+  return(list(res=res,vmu=vmu,mLambda=mLambda))
+}
+
+# NR scratch
+# Re-use one of the existing f's
+# Implement new vg
+# Is there any point to using the Cholesky factor rather than just storing the
+# upper or lower triangular matrix?
+###############################################################################
+
+vg.G_nr <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,vB1) 
+{
+  vg <- mLambda %*% t(mC)%*%(vr*(vy - vB1)) - mSigma.inv%*%vmu     
+  #cat("vg.G", vg, "\n")
+  return(vg)
+}
+
+###############################################################################
+
+vg.GVA_nr <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
+{
+  #cat("vtheta", vtheta, "\n")
+  #cat("ncol(mC)", ncol(mC), "\n")
+  d <- ncol(mC)
+  vmu <- vtheta[1:d]
+  mR[Rinds] <- vtheta[(1+d):length(vtheta)]
+  
+  #diag(mR) <- abs(diag(mR))
+  #cat("mR", mR, "\n")
+  #diag(mR) <- abs(diag(mR)) # FIXME: This may be the wrong way to solve this. Get outside the
+  # allowable solution space on every second iteration, diagonal entries
+  # of mR become negative.
+  #cat("mR after diag. abs", mR, "\n")
+  
+  mR[Dinds] <- exp(mR[Dinds]) 
+  for (i in 1:length(Dinds)) {
+    mR[Dinds[i]] <- min(c(1.0E3,mR[Dinds[i]]))
+  }    
+  # Old parameterisation
+  mLambda <- mR%*%t(mR)   
+  # New parameterisation
+  #mLambda <- solve(mR%*%t(mR),tol=1.0E-99)
+  #mLambda <- solve(t(mR)%*%mR)
+  
+  vmu.til     <- mC%*%vmu
+  #vsigma2.til <- diag(mC%*%mLambda%*%t(mC))
+  vsigma2.til <- sapply(1:nrow(mC), function(i) {mC[i,]%*%mLambda%*%mC[i,]})
+  res.B12 <- B12.fun("POISSON",vmu.til,vsigma2.til,gh)
+  vB1 <- res.B12$vB1
+  vB2 <- res.B12$vB2
+  
+  vg <- 0*vmu
+  vg[1:d] <- vg.G(vmu,mLambda,vy,vr,mC,mSigma.inv,vB1) 
+  
+  # Old parameterisation
+  mLambda.inv <- solve(mR%*%t(mR))
+  # New parameterisation
+  #mLambda.inv <- t(mR)%*%mR
+  # Old parameterisation
+  #dmLambda <- (mLambda.inv + mH)%*%mR
+  cat("dim(mC)", dim(mC), "\n")
+  cat("dim(t(mC))", dim(t(mC)), "\n")
+  cat("vB2", vB2, "\n")
+  cat("class(vB2)", class(vB2), "\n")
+  cat("dim(vB2)", dim(vB2))
+  cat("dim(diag(vB2))", dim(diag(as.vector(vB2), nrow = length(vB2))), "\n")
+  cat("length(vB2)", length(vB2), "\n")
+  dmLambda <- solve(t(mC)%*%diag(as.vector(vB2), nrow = length(vB2))%*%mC + mSigma.inv) - mLambda
+  
+  dmLambda[Dinds] <- dmLambda[Dinds]*mR[Dinds]
+  # Worth a try ...
+  #dmLambda[Dinds] <- log(dmLambda[Dinds])
+  vg[(1+d):length(vtheta)] <- dmLambda[Rinds]    
+  
+  cat("vtheta.GVA vtheta", round(vtheta[(1+d):length(vtheta)], 2), "norm", norm(vtheta[(1+d):length(vtheta)]), "\n")
+  cat("vg.GVA vg", round(vg[(1+d):length(vtheta)], 2), "norm", norm(vg[(1+d):length(vtheta)]), "\n")
+  
+  return(vg)
+}
+
+###############################################################################
+
+fit.GVA_nr <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12)
+{
+  #library(statmod)
+  #N <- 15
+  #gh  <- gauss.quad(N,kind="hermite")
+  gh2 <- NULL #list(x=gh$nodes,w=gh$weights,w.til=gh$weights*exp(gh$nodes^2))
+  
+  d <- length(vmu)
+  #cat("vmu", vmu, "\n")
+  #cat("d", d, "\n")
+  Dinds <- d*((1:d)-1)+(1:d)
+  
+  mR <- t(chol(mLambda + diag(1.0E-8,d)))
+  cat("mR", mR, "\n")
+  mR[Dinds] <- log(mR[Dinds])
+  Rinds <- which(lower.tri(mR,diag=TRUE))
+  #Rinds <- which(upper.tri(mR,diag=TRUE))
+  cat("Rinds", Rinds, "\n")
+  cat("mR", mR, "\n")
+  vmu <- c(vmu,mR[Rinds])
+  cat("vmu", vmu, "\n")
+  P <- length(vmu)
+  lower_constraint <- rep(-Inf, length(vmu))
+  #lower_constraint[d+Dinds] <- 0
+  cat("lower_constraint", lower_constraint, "\n")
+  
+  if (method=="L-BFGS-B") {
+    controls <- list(maxit=1000,trace=1,fnscale=-1,REPORT=1,factr=1.0E-5,lmm=10)
+  } else if (method=="Nelder-Mead") {
+    controls <- list(maxit=100000000,trace=0,fnscale=-1,REPORT=1000,reltol=reltol) 
+  } else {
+    controls <- list(maxit=1000,trace=0,fnscale=-1,REPORT=1,reltol=reltol) 
+  }
+  res <- optim(par=vmu, fn=f.GVA, gr=vg.GVA_nr,
+               method=method,lower=lower_constraint, upper=Inf, control=controls,
+               vy=vy,vr=vr,mC=mC,mSigma.inv=mSigma.inv,gh=gh2,mR=mR*0,Rinds=Rinds,Dinds=Dinds)        
+  
+  vtheta <- res$par 
+  
+  #f <- f.GVA(vmu,vy,mC,CTC,CTy,p,K,mR,Rinds,Dinds)
+  
+  vmu <- vtheta[1:d]
+  mR[Rinds] <- vtheta[(1+d):P]
+  mR[Dinds] <- exp(mR[Dinds])  
+  # Old parameterisation
+  mLambda <- mR%*%t(mR)
+  # New parameterisation
   #mLambda <- solve(t(mR)%*%mR)
   
   return(list(res=res,vmu=vmu,mLambda=mLambda))
