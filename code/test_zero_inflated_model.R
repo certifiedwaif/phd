@@ -84,7 +84,7 @@ test_univariate_zip <- function()
 	expect_equal(result_var$a_rho / (result_var$a_rho + result_var$b_rho), expected_rho, tolerance=1e-1)
 }
 
-test_multivariate_zip_no_zeros <- function()
+test_multivariate_zip_no_zeros <- function(approximation="gva")
 {
 	# Simulate data
 	# Could we load test data from somewhere? I don't know that hardcoding the
@@ -106,14 +106,14 @@ test_multivariate_zip_no_zeros <- function()
 
 	# Test model fitting
 	multivariate = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma)
-	result_var = zero_infl_var(multivariate, verbose=TRUE)
+	result_var = zero_infl_var(multivariate, verbose=TRUE, method=approximation)
 
 	print(result_var$vmu)
 	expect_equal(as.vector(result_var$vmu), expected_mu, tolerance=2e-1)
 	expect_equal(result_var$a_rho / (result_var$a_rho + result_var$b_rho), expected_rho, tolerance=2e-1)
 }
 
-test_multivariate_zip_half_zeros <- function()
+test_multivariate_zip_half_zeros <- function(approximation="gva")
 {
 	# Simulate data
 	# Could we load test data from somewhere? I don't know that hardcoding the
@@ -133,13 +133,13 @@ test_multivariate_zip_half_zeros <- function()
 
 	# Test model fitting
 	multivariate = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma)
-	result_var = zero_infl_var(multivariate, verbose=TRUE)
+	result_var = zero_infl_var(multivariate, verbose=TRUE, method=approximation)
 
 	expect_equal(as.vector(result_var$vmu), expected_mu, tolerance=2e-1)
 	expect_equal(result_var$a_rho / (result_var$a_rho + result_var$b_rho), expected_rho, tolerance=2e-1)
 }
 
-test_multivariate_zip_no_zeros_random_intercept <- function()
+test_multivariate_zip_no_zeros_random_intercept <- function(approximation="gva")
 {
 	# Simulate data
 	# Could we load test data from somewhere? I don't know that hardcoding the
@@ -194,7 +194,7 @@ test_multivariate_zip_no_zeros_random_intercept <- function()
 	#result_sigma2_u = (result_var$b_sigma / result_var$a_sigma)
 	#expect_equal(result_sigma2_u, expected_sigma2_u, tolerance=3e-1)
 
-	result_var = zero_infl_var(multivariate, method="gva", verbose=TRUE)
+	result_var = zero_infl_var(multivariate, method=approximation, verbose=TRUE)
 	expect_equal(as.vector(result_var$vmu[1:2]), expected_beta, tolerance=1e-1)
 	result_sigma2_u = (result_var$b_sigma / result_var$a_sigma)
 	expect_equal(result_sigma2_u, expected_sigma2_u, tolerance=3e-1)
@@ -203,7 +203,7 @@ test_multivariate_zip_no_zeros_random_intercept <- function()
   #dev.off()
 }
 
-test_multivariate_zip_half_zeros_random_intercept <- function()
+test_multivariate_zip_half_zeros_random_intercept <- function(approximation="gva")
 {
 	m = 20
 	ni = 10
@@ -254,7 +254,7 @@ test_multivariate_zip_half_zeros_random_intercept <- function()
 	#result_sigma2_u = (result_var$b_sigma / result_var$a_sigma)
 	#expect_equal(result_sigma2_u, expected_sigma2_u, tolerance=3e-1)
 
-	result_var = zero_infl_var(multivariate, method="gva", verbose=TRUE)
+	result_var = zero_infl_var(multivariate, method=approximation, verbose=TRUE)
 	expect_equal(as.vector(result_var$vmu[1:2]), expected_beta, tolerance=1e-1)
 	expect_equal(result_var$a_rho / (result_var$a_rho + result_var$b_rho), expected_rho, tolerance=2e-1)
   result_sigma2_u = (result_var$b_sigma / result_var$a_sigma)
@@ -274,12 +274,16 @@ main <- function()
 	test_univariate_zip()
   
 	# Tests with multivariate fixed effects
-	test_multivariate_zip_no_zeros()
-	test_multivariate_zip_half_zeros()
-
+	test_multivariate_zip_no_zeros("gva")
+	test_multivariate_zip_no_zeros("gva2")
+	test_multivariate_zip_half_zeros("gva")
+	test_multivariate_zip_half_zeros("gva2")
+	
 	# Tests with multivariate fixed effects and random intercepts
-	test_multivariate_zip_no_zeros_random_intercept()
-	test_multivariate_zip_half_zeros_random_intercept()
+	test_multivariate_zip_no_zeros_random_intercept("gva")
+	test_multivariate_zip_no_zeros_random_intercept("gva2")
+	test_multivariate_zip_half_zeros_random_intercept("gva")
+	test_multivariate_zip_half_zeros_random_intercept("gva2")
 }
 
 #main()
