@@ -326,7 +326,8 @@ f.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   mLambda <- solve(mR%*%t(mR))
   #mLambda <- solve(t(mR)%*%mR)
   
-  f <- sum(log(diag(mR))) + f.G_new(vmu,mLambda,vy,vr,mC,mSigma.inv,gh) 
+  f <- -sum(log(diag(mR))) + f.G_new(vmu,mLambda,vy,vr,mC,mSigma.inv,gh) 
+  #f <- 0.5*sum(log(det(mLambda))) + f.G_new(vmu,mLambda,vy,vr,mC,mSigma.inv,gh) 
   f <- f + 0.5*d*log(2*pi) + 0.5*d
   
   if (!is.finite(f)) {
@@ -408,7 +409,6 @@ vg.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   #mLambda <- mR%*%t(mR)   
   # New parameterisation
   mLambda <- solve(mR%*%t(mR),tol=1.0E-99)
-  #mLambda <- solve(t(mR)%*%mR)
   
   vmu.til     <- mC%*%vmu
   #vsigma2.til <- diag(mC%*%mLambda%*%t(mC))
@@ -429,6 +429,8 @@ vg.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   # Old parameterisation
   #dmLambda <- (mLambda.inv + mH)%*%mR
   # New parameterisation
+  #dmLambda <- -solve(mR)%*%(mLambda.inv + mH)%*%mLambda
+  # FIXME: I think this derivative must be wrong. Check again.
   dmLambda <- -solve(mR)%*%(mLambda.inv + mH)%*%mLambda
   #dmLambda <- -mLambda%*%(mLambda.inv + mH)%*%mLambda%*%mR
   #browser()
