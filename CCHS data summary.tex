@@ -1,0 +1,72 @@
+\documentclass{article}
+\begin{document}
+\section{Data source}
+The primary data source is the Canadian Community Health Survey Cycle 1.2, focusing on Mental Health and Well-being. The survey was conducted between
+2002-05-01 to 2002-12-31. The data set, questionnaire and sampling
+metholodology is extensively documented in documents available from the 
+Statistics Canada web site 
+\begin{verbatim}
+http://www23.statcan.gc.ca/imdb/p2SV.pl?Function=getSurvey&SurvId=1632&InstaId=5285&SDDS=5015
+\end{verbatim}
+ and in the data dictionary PDFs in the cchs2002/Documentation 
+ subdirectory.
+
+The CCHS uses a complex survey design to perform their surveys, which
+is detailed in the documentation. The weighting variable they calculate
+is stored in the variable WTSB\_M.
+
+This was merged with a secondary data source, where additional questions
+relevant to bipolar disorder were asked. We have both of these individual
+data sets, and the resulting merged data set.
+
+\section{File location}
+The files are all stored in the directories cchs and cchs2002 under the
+directory /dskh/nobackup/markg on verona.
+
+\section{Data Files}
+\begin{tabular}{lp{6cm}]}
+Filename & Description \\
+\hline
+Cchs1-2.sav coping Aug 25 2013.sav
+& The Coping data set with the additional variables, in SPSS format.
+\\
+HS.txt
+& The raw CCHS data file
+\\
+CCHS\_SAS/data.sas7bdat
+& The SAS data file for the data set formed by joining the CCHS data to the Coping data
+\\
+CCHS\_SAS/formats.sas7bcat
+& The SAS data file for the data set formed by joining the CCHS data to the Coping data \\
+\hline
+\end{tabular}
+
+\section{Code}
+\begin{tabular}{lp{6cm}]}
+Filename & Description \\
+\hline
+cchs02.sas
+& SAS code which sets up library names
+\\
+2010-03-25 LOW MOOD ANALYSES.sas
+& SAS code which does data cleaning and actually produces the tables used in the draft research paper.
+This code takes account of the weighting of the data given in the WTSB\_M variable.
+\\
+\hline
+\end{tabular}
+
+\section{Results}
+The file cchs\_tables.rtf contains the tables of results that were 
+generated when the 2010-03-25 LOW MOOD ANALYSES.sas code was run in SAS.
+
+\section{Analysis}
+Analysis was begun in R, but quickly abandoned as I realised that there
+were many steps of data cleaning and calculating new variables that had
+already been done in the SAS code we were sent which were hard to match.
+
+Analysis was performed in SAS, using the SAS code provided by Dr Nancy 
+Low and the data provided to us. The tables produced matched the tables 
+in the draft research paper that Dr Nancy Low and her group have written,
+indicating that their analysis was performed correctly.
+
+\end{document}
