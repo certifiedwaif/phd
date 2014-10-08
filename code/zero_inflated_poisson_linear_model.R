@@ -257,14 +257,14 @@ fit.GVA <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12)
   mR[Dinds] <- log(mR[Dinds])
   Rinds <- which(lower.tri(mR,diag=TRUE))
 	#Rinds <- which(upper.tri(mR,diag=TRUE))
-  cat("Rinds", Rinds, "\n")
-	cat("mR", mR, "\n")
+  #cat("Rinds", Rinds, "\n")
+	#cat("mR", mR, "\n")
 	vmu <- c(vmu,mR[Rinds])
-  cat("vmu", vmu, "\n")
+  #cat("vmu", vmu, "\n")
   P <- length(vmu)
   lower_constraint <- rep(-Inf, length(vmu))
   #lower_constraint[d+Dinds] <- 0
-  cat("lower_constraint", lower_constraint, "\n")
+  #cat("lower_constraint", lower_constraint, "\n")
   
   if (method=="L-BFGS-B") {
     controls <- list(maxit=1000,trace=1,fnscale=-1,REPORT=1,factr=1.0E-5,lmm=10)
@@ -323,7 +323,7 @@ f.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   # Old parameterisation
   #mLambda <- mR%*%t(mR)   
   # New parameterisation
-  mLambda <- solve(mR%*%t(mR))
+  mLambda <- solve(mR%*%t(mR), tol=1.0E-99)
   #mLambda <- solve(t(mR)%*%mR)
   
   f <- -sum(log(diag(mR))) + f.G_new(vmu,mLambda,vy,vr,mC,mSigma.inv,gh) 
@@ -408,7 +408,7 @@ vg.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   # Old parameterisation
   #mLambda <- mR%*%t(mR)   
   # New parameterisation
-  mLambda <- solve(mR%*%t(mR),tol=1.0E-99)
+  mLambda <- solve(mR%*%t(mR), tol=1.0E-99)
   
   vmu.til     <- mC%*%vmu
   #vsigma2.til <- diag(mC%*%mLambda%*%t(mC))
@@ -431,7 +431,7 @@ vg.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   # New parameterisation
   #dmLambda <- -solve(mR)%*%(mLambda.inv + mH)%*%mLambda
   # FIXME: I think this derivative must be wrong. Check again.
-  dmLambda <- -solve(mR)%*%(mLambda.inv + mH)%*%mLambda
+  dmLambda <- -solve(mR, tol=1.0E-99)%*%(mLambda.inv + mH)%*%mLambda
   #dmLambda <- -mLambda%*%(mLambda.inv + mH)%*%mLambda%*%mR
   #browser()
   #dmLambda <- -solve(t(mR))%*%(mLambda.inv + mH)%*%mLambda
@@ -460,7 +460,7 @@ fit.GVA_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12)
   #cat("d", d, "\n")
   Dinds <- d*((1:d)-1)+(1:d)
   
-  mR <- t(chol(solve(mLambda) + diag(1.0E-8,d)))
+  mR <- t(chol(solve(mLambda, tol=1.0E-99) + diag(1.0E-8,d)))
   cat("mR", mR, "\n")
   mR[Dinds] <- log(mR[Dinds])
   Rinds <- which(lower.tri(mR,diag=TRUE))
@@ -495,7 +495,7 @@ fit.GVA_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12)
   # Old parameterisation
   #mLambda <- mR%*%t(mR)
   # New parameterisation
-  mLambda <- solve(mR%*%t(mR))
+  mLambda <- solve(mR%*%t(mR), tol=1.0E-99)
   #mLambda <- solve(t(mR)%*%mR)
   
   return(list(res=res,vmu=vmu,mLambda=mLambda))
