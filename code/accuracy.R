@@ -242,9 +242,6 @@ test_accuracy = function(mult, mcmc_samples, approximation)
   # vbeta accuracy
   calculate_accuracy3 = function(mcmc_samples, dist_fn, param1, param2)
   {
-    #cat("dist_fn", deparse(substitute(dist_fn)), "\n")
-    #cat("param1", param1, "\n")
-    #cat("param2", param2, "\n")
     mcmc_density = density(mcmc_samples)
     mcmc_fn = splinefun(mcmc_density$x, mcmc_density$y)
     
@@ -339,6 +336,7 @@ test_accuracy = function(mult, mcmc_samples, approximation)
   dev.off()
   #plot(mcmc_samples$rho, type="l")
   par(mfrow=c(1,1))
+  return(var_result)
 }
 
 # Calculate accuracy ----
@@ -419,9 +417,14 @@ main_check_accuracy <- function()
 # Need to be able to compare the solution paths of each approximation
 
 # Generate data
-mult = generate_test_data(10, 100)
-# Monte Carlo Markov Chains approximation
-mcmc_samples = mcmc_approximation(mult, iterations=1e4)
+for (i in 1:100) {
+  set.seed(i)
+  mult = generate_test_data(10, 100)
+  # Monte Carlo Markov Chains approximation
+  mcmc_samples = mcmc_approximation(mult, iterations=1e3)
+  # Save the results, because this takes such a long time to run.
+}
+save(mult, mcmc_samples, file="accuracy.RData")
 # Test all other approximations against it
 
 # Test multivariate approximation's accuracy
@@ -429,6 +432,3 @@ test_accuracy(mult, mcmc_samples, "laplacian")
 test_accuracy(mult, mcmc_samples, "gva")
 test_accuracy(mult, mcmc_samples, "gva2")
 test_accuracy(mult, mcmc_samples, "gva_nr")
-
-# The fixed intercept is too high, and the fixed slope parameter is too low. This is
-# unlikely to be a coincidence.
