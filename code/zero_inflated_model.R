@@ -113,9 +113,7 @@ calculate_lower_bound.multivariate <- function(multivariate)
       T1 = T1 + prior$a_sigma * log (prior$b_sigma) - lgamma(prior$a_sigma)
       T1 = T1 - a_sigma * log(b_sigma) + lgamma(a_sigma)
     }
-  	#T1 = T1 + .5*(p+m) + .5*sum(log(eigen(mLambda)$values))
   	T1 = T1 + .5*(p+m) + .5*log(det(mLambda))
-  	cat("calculate_lower_bound: eigen(mLambda) ", eigen(mLambda)$values, "\n")
   	
   	# Something is wrong in T2. It sometimes goes backwards as we're optimised.
   	# This should be unchanged from the univariate lower bound
@@ -176,7 +174,6 @@ zero_infl_var.univariate <- function(univariate, verbose=FALSE, plot_lower_bound
 		# Update parameters for q_vr
 		univariate$vp[zero.set] = expit(-expected_lambda(univariate) + digamma(univariate$a_rho) - digamma(univariate$b_rho))
 
-		#vlower_bound[i] <- calculate_lower_bound(vx, vp, a_lambda, b_lambda, a_rho, b_rho)
 		vlower_bound[i] <- calculate_lower_bound(univariate)
 		
 		if (verbose && i > 1)
@@ -207,12 +204,8 @@ create_multivariate <- function(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau)
 	mSigma.beta.inv = diag(1/sigma2.beta, ncol(mX))
   if (!is.null(ncol(mZ))) {
 	  mSigma.u.inv = diag(tau, ncol(mZ))
-    # This is a really bad idea - the optimisation will diverge.
-	  #mLambda = diag(c(rep(sigma2.beta, ncol(mX)), rep(1/tau, ncol(mZ))))
   } else {
     mSigma.u.inv = NULL
-    # This is a really bad idea - the optimisation will diverge.
-    #mLambda = diag(rep(sigma2.beta, ncol(mX)))
   }
 	mLambda = diag(rep(1, ncol(mC)))
 	a_rho = 1 + sum(vp)
