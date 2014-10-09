@@ -1,5 +1,5 @@
 # accuracy.R
-
+setwd("~/phd/code")
 source("zero_inflated_model.R")
 source("test_zero_inflated_model.R")
 source("rwmh.R")
@@ -207,7 +207,7 @@ test_multivariate_accuracy <- function()
   par(mfrow=c(1,1))
 }
 
-mcmc_approximation <- function(mult)
+mcmc_approximation <- function(mult, iterations=1e3)
 {
   #mcmc_result = mcmc(mult, iterations=1e5+2000, burnin=2000, thinning=1)
   # Use Stan to create MCMC samples, because Stan deals much better with highly
@@ -224,7 +224,7 @@ mcmc_approximation <- function(mult)
     mclapply(1:4, mc.cores = 1, 
              function(i) stan(fit=foo, data=zip_data, seed = rng_seed, 
                               chains = 1, chain_id = i, refresh = -1,
-                              iter=1e4))
+                              iter=iterations))
   fit <- sflist2stanfit(sflist)
   
   #fit <- stan(model_code = zip_code, data = zip_dat, 
@@ -416,14 +416,12 @@ main_check_accuracy <- function()
 
 #main_check_accuracy()
 
-# TODO: Restructure this.
-# There's no need to recompute the MCMC for every approximation
 # Need to be able to compare the solution paths of each approximation
 
 # Generate data
 mult = generate_test_data(10, 100)
 # Monte Carlo Markov Chains approximation
-mcmc_samples = mcmc_approximation(mult)
+mcmc_samples = mcmc_approximation(mult, iterations=1e4)
 # Test all other approximations against it
 
 # Test multivariate approximation's accuracy
