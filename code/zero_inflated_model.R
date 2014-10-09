@@ -1,6 +1,6 @@
 # variational_approximation_to_zero_inflated_model.R
 source("common.R")
-source("zero_inflated_poisson_linear_model.R")
+source("zero_inflated_poisson_model.R")
 
 mcmc.univariate <- function(iterations, vx, a, b)
 {
@@ -282,74 +282,36 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
 		} else {
 			stop("method must be either laplacian, gva, gva2 or gva_nr")
 		}
-		#fit2 = fit.GVA(fit1$vmu, fit1$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B")
 		
 		mult$vmu = fit1$vmu
 		mult$mLambda = fit1$mLambda
 		mult$f = fit1$res$value
 		
-		#print("vmu=")
-		#print(mult$vmu)
-		#print("mLambda=")
-		#print(mult$mLambda)
-		#print("f=")
-		#print(mult$f)
-		
-	  #	ans <- readline()
-		
   	# Update parameters for q_vr
-    #cat("length(zero.set)", length(zero.set), "\n")
-    #cat("zero.set", zero.set, "\n")
-    #cat("length(mult$vy[zero.set])", length(mult$vy[zero.set]), "\n")
-    #cat("length(mult$mC[zero.set,])", length(mult$mC[zero.set,]), "\n")
-		#cat("dim(matrix(mult$mC[zero.set,]))", dim(matrix(mult$mC[zero.set,], length(zero.set), p+m)), "\n")
-		#cat("dim(mult$mLambda)", dim(mult$mLambda), "\n")
-    #cat("diag(mLambda)", diag(mult$mLambda), "\n")
     if (length(zero.set) != 0) {
 		  mult$vp[zero.set] = expit((mult$vy[zero.set]*mult$mC[zero.set,])%*%mult$vmu-exp(mult$mC[zero.set,]%*%mult$vmu + 0.5*diag((matrix(mult$mC[zero.set,], length(zero.set), p+m))%*%mult$mLambda%*%t(matrix(mult$mC[zero.set,], length(zero.set), p+m))) + digamma(mult$a_rho) - digamma(mult$b_rho)))
-      cat("vp[zero.set] ", mult$vp[zero.set], "\n")
     }
     
 		# Update parameters for q_rho
 		mult$a_rho = mult$prior$a_rho + sum(mult$vp)
 		mult$b_rho = mult$prior$b_rho + N - sum(mult$vp)
 		
-		#if (verbose) {
-		#	print(dim(mult$mC))
-		#	print(dim(mult$vmu))
-		#	print(mult$vmu)
-		#	print(mult$mLambda)
-		#	print(diag(mult$mC%*%mult$mLambda%*%t(mult$mC)))
-		#}
-		
   	# Update parameters for q_sigma_u^2 if we need to
   	if (!is.null(mult$mZ)) {
   	  # a_sigma is fixed
   	  mult$a_sigma = mult$prior$a_sigma + m/2
   	  u_idx = p + (1:m)  # (ncol(mult$mX)+1):ncol(mult$mC)
-  	  # We know that mSigma = sigma_u^2 I. We should exploit this knowledge
-  	  # Q: Nothing from mLambda? Why not?
   	  #tr_mSigma = ncol(mult$mZ) * mult$prior$a_sigma/mult$prior$b_sigma
   	  #mult$b_sigma = mult$prior$b_sigma + sum(vu^2)/2 + (tr_mSigma)/2
   	  mult$b_sigma = mult$prior$b_sigma + sum(mult$vmu[u_idx]^2)/2 + tr(mult$mLambda[u_idx, u_idx])/2    # Extract right elements of mLambda
   	  
   	  tau_sigma = mult$a_sigma/mult$b_sigma
-  	  if (tau_sigma<0.1) {
-  	    #	tau_sigma = 0.01
-  	  }
   	  
   	  mult$mSigma.u.inv = diag(tau_sigma, m)	
   	}
 	
-		#vlower_bound[i] <- calculate_lower_bound(vx, vp, a_lambda, b_lambda, a_rho, b_rho)
 		vlower_bound[i] <- 0 # calculate_lower_bound(mult)
 		vlower_bound[i] <- calculate_lower_bound(mult)
-    # Debugging idea: Save mult objects for later comparison
-		#print(mult$vmu)
-		#print(mult$vp)
-		#print(mult$a_rho)
-		#print(mult$b_rho)
-		#cat("End of iteration", i, "\n")
 		
 		if (verbose && i > 1)
 			cat("Iteration ", i, ": lower bound ", vlower_bound[i], " difference ",
