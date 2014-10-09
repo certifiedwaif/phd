@@ -79,9 +79,7 @@ test_univariate_zip <- function()
 	# Test model fitting
 	univariate = create_univariate(vx, a_lambda, b_lambda)
 	result_var = zero_infl_var(univariate)
-
-	expect_equal(result_var$a_lambda / result_var$b_lambda, expected_lambda, tolerance=1e-1)
-	expect_equal(result_var$a_rho / (result_var$a_rho + result_var$b_rho), expected_rho, tolerance=1e-1)
+  return(result_var)
 }
 
 test_multivariate_zip_no_zeros <- function(approximation="gva")
@@ -107,10 +105,7 @@ test_multivariate_zip_no_zeros <- function(approximation="gva")
 	# Test model fitting
 	multivariate = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma)
 	result_var = zero_infl_var(multivariate, verbose=TRUE, method=approximation)
-
-	print(result_var$vmu)
-	expect_equal(as.vector(result_var$vmu), expected_mu, tolerance=2e-1)
-	expect_equal(result_var$a_rho / (result_var$a_rho + result_var$b_rho), expected_rho, tolerance=2e-1)
+  return(result_var)
 }
 
 test_multivariate_zip_half_zeros <- function(approximation="gva")
@@ -134,41 +129,18 @@ test_multivariate_zip_half_zeros <- function(approximation="gva")
 	# Test model fitting
 	multivariate = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma)
 	result_var = zero_infl_var(multivariate, verbose=TRUE, method=approximation)
-
-	expect_equal(as.vector(result_var$vmu), expected_mu, tolerance=2e-1)
-	expect_equal(result_var$a_rho / (result_var$a_rho + result_var$b_rho), expected_rho, tolerance=2e-1)
+  return(result_var)
 }
 
 test_multivariate_zip_no_zeros_random_intercept <- function(approximation="gva")
 {
 	# Simulate data
-	# Could we load test data from somewhere? I don't know that hardcoding the
-	# test data into the source files is really the best idea.
-	# FIXME: You have serious overflow issues
 	m = 20
 	ni = 10
 	n = rep(ni,m)
 	mX = matrix(as.vector(cbind(rep(1, sum(n)), runif(sum(n), -1, 1))), sum(n), 2)
-	#print("mX=")
-	#print(mX)
-	#cat("dim(mX)", dim(mX), "\n")
-	
-	#v = c(rep(1, g), rep(0, g))
-	# Indicator variables for groups
-	
-	#mZ = matrix(cbind(v, 1-v), sum(n), 2)
-	#mZ <- matrix(0,sum(n),m)
-	#count <- 0
-	#for (i in 1:m) {
-	#	mZ[count + (1:n[i]),i] <- 1
-	#}
-	#	count <- count + n[i]
 	
 	mZ <- kronecker(diag(1,m),rep(1,ni))
-	
-	#print("mZ=")
-	#print(mZ)
-	#cat("dim(mZ)", dim(mZ), "\n")
 	
 	expected_rho = 1
 	expected_beta = c(2, 1)
@@ -183,24 +155,10 @@ test_multivariate_zip_no_zeros_random_intercept <- function(approximation="gva")
 	test_data = generate_multivariate_test_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u, verbose=TRUE)
 	vy = test_data$vy
 	
-	print(table(vy))
-	
 	# Test model fitting
 	multivariate = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau)
-	#result_var = zero_infl_var(multivariate, method="laplacian", verbose=TRUE)
-	#expect_equal(as.vector(result_var$vmu[1:2]), expected_beta, tolerance=1e-1)
-	#expect_equal(result_var$a_rho / (result_var$a_rho + result_var$b_rho), expected_rho, tolerance=2e-1)
-	#print(str(result_var))
-	#result_sigma2_u = (result_var$b_sigma / result_var$a_sigma)
-	#expect_equal(result_sigma2_u, expected_sigma2_u, tolerance=3e-1)
-
 	result_var = zero_infl_var(multivariate, method=approximation, verbose=TRUE)
-	expect_equal(as.vector(result_var$vmu[1:2]), expected_beta, tolerance=1e-1)
-	result_sigma2_u = (result_var$b_sigma / result_var$a_sigma)
-	expect_equal(result_sigma2_u, expected_sigma2_u, tolerance=3e-1)
-	#pdf("mult_no_zeroes_lower_bound.pdf")
-	#plot(result_var$vlower_bound, type="l", xlab="Iterations", ylab="Lower bound")
-  #dev.off()
+  return(result_var)
 }
 
 test_multivariate_zip_half_zeros_random_intercept <- function(approximation="gva")
@@ -209,26 +167,7 @@ test_multivariate_zip_half_zeros_random_intercept <- function(approximation="gva
 	ni = 10
 	n = rep(ni,m)
 	mX = matrix(as.vector(cbind(rep(1, sum(n)), runif(sum(n), -1, 1))), sum(n), 2)
-	#print("mX=")
-	#print(mX)
-	#cat("dim(mX)", dim(mX), "\n")
-	
-	#v = c(rep(1, g), rep(0, g))
-	# Indicator variables for groups
-	
-	#mZ = matrix(cbind(v, 1-v), sum(n), 2)
-	#mZ <- matrix(0,sum(n),m)
-	#count <- 0
-	#for (i in 1:m) {
-	#	mZ[count + (1:n[i]),i] <- 1
-	#	count <- count + n[i]
-	#}
-	
 	mZ <- kronecker(diag(1,m),rep(1,ni))
-	
-	#print("mZ=")
-	#print(mZ)
-	#cat("dim(mZ)", dim(mZ), "\n")
 	
 	expected_rho = 0.5
 	expected_beta = c(2, 1)
@@ -243,25 +182,9 @@ test_multivariate_zip_half_zeros_random_intercept <- function(approximation="gva
 	test_data = generate_multivariate_test_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u, verbose=TRUE)
 	vy = test_data$vy
 	
-	#print(table(vy))
-	#ans <- readline()
-
 	# Test model fitting
 	multivariate = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau)
-	#result_var = zero_infl_var(multivariate, method="laplacian", verbose=TRUE)
-	#expect_equal(as.vector(result_var$vmu[1:2]), expected_beta, tolerance=1e-1)
-	#expect_equal(result_var$a_rho / (result_var$a_rho + result_var$b_rho), expected_rho, tolerance=2e-1)
-	#result_sigma2_u = (result_var$b_sigma / result_var$a_sigma)
-	#expect_equal(result_sigma2_u, expected_sigma2_u, tolerance=3e-1)
-
 	result_var = zero_infl_var(multivariate, method=approximation, verbose=TRUE)
-	#expect_equal(as.vector(result_var$vmu[1:2]), expected_beta, tolerance=1e-1)
-	#expect_equal(result_var$a_rho / (result_var$a_rho + result_var$b_rho), expected_rho, tolerance=2e-1)
-  #result_sigma2_u = (result_var$b_sigma / result_var$a_sigma)
-  #expect_equal(result_sigma2_u, expected_sigma2_u, tolerance=3e-1)
-  pdf("mult_half_zeroes_lower_bound.pdf")
-	plot(result_var$vlower_bound, type="l", xlab="Iterations", ylab="Lower bound")
-  dev.off()
   return(result_var)
 }
 
