@@ -1,6 +1,6 @@
 # variational_approximation_to_zero_inflated_model.R
 source("common.R")
-source("zero_inflated_poisson_linear_model.R")
+source("zero_inflated_poisson_model.R")
 
 mcmc.univariate <- function(iterations, vx, a, b)
 {
@@ -113,11 +113,14 @@ calculate_lower_bound.multivariate <- function(multivariate)
       T1 = T1 + prior$a_sigma * log (prior$b_sigma) - lgamma(prior$a_sigma)
       T1 = T1 - a_sigma * log(b_sigma) + lgamma(a_sigma)
     }
-  	T1 = T1 + .5*(p+m) + .5*sum(log(eigen(mLambda)$values))
+  	T1 = T1 + .5*(p+m) + .5*log(det(mLambda))
   	
   	# Something is wrong in T2. It sometimes goes backwards as we're optimised.
   	# This should be unchanged from the univariate lower bound
-    cat("calculate_lower_bound: ", vp[zero.set], "\n")
+    #cat("calculate_lower_bound: ", vp[zero.set], "\n")
+    # 0 log 0 returns NaN. We sidestep this by adding epsilon to vp[zero.set]
+    eps = 1e-10
+    vp[zero.set] = vp[zero.set] + eps
   	T2 = sum(-vp[zero.set]*log(vp[zero.set]) - (1-vp[zero.set])*log(1-vp[zero.set]))
     T2 = T2 - lbeta(prior$a_rho, prior$b_rho) + lbeta(a_rho, b_rho)
     
@@ -171,7 +174,6 @@ zero_infl_var.univariate <- function(univariate, verbose=FALSE, plot_lower_bound
 		# Update parameters for q_vr
 		univariate$vp[zero.set] = expit(-expected_lambda(univariate) + digamma(univariate$a_rho) - digamma(univariate$b_rho))
 
-		#vlower_bound[i] <- calculate_lower_bound(vx, vp, a_lambda, b_lambda, a_rho, b_rho)
 		vlower_bound[i] <- calculate_lower_bound(univariate)
 		
 		if (verbose && i > 1)
@@ -199,13 +201,13 @@ create_multivariate <- function(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau)
 	}
 	vmu = rep(0, ncol(mC))
 
-	mLambda = diag(rep(1, ncol(mC)))
 	mSigma.beta.inv = diag(1/sigma2.beta, ncol(mX))
   if (!is.null(ncol(mZ))) {
-	  mSigma.u.inv = diag(tau, ncol(mZ))	
+	  mSigma.u.inv = diag(tau, ncol(mZ))
   } else {
     mSigma.u.inv = NULL
   }
+	mLambda = diag(rep(1, ncol(mC)))
 	a_rho = 1 + sum(vp)
 	b_rho = n - sum(vp) + 1
 	
@@ -271,76 +273,45 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
 		if (method == "laplacian") {
 			fit1 = fit.Lap(mult$vmu, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, mult$mLambda)
 		} else if (method == "gva") {	
-			#fit1 = fit.GVA(mult$vmu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B")
-			fit1 = fit.GVA_new(mult$vmu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B")
+			fit1 = fit.GVA(mult$vmu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B")
+    } else if (method == "gva2")
+    {
+      fit1 = fit.GVA_new(mult$vmu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B")
+    } else if (method == "gva_nr") {
+      fit1 = fit.GVA_nr(mult$vmu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B")
 		} else {
-			stop("method must be either laplacian or gva")
+			stop("method must be either laplacian, gva, gva2 or gva_nr")
 		}
-		#fit2 = fit.GVA(fit1$vmu, fit1$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B")
 		
 		mult$vmu = fit1$vmu
 		mult$mLambda = fit1$mLambda
 		mult$f = fit1$res$value
 		
-		#print("vmu=")
-		#print(mult$vmu)
-		#print("mLambda=")
-		#print(mult$mLambda)
-		#print("f=")
-		#print(mult$f)
-		
-	  #	ans <- readline()
-		
   	# Update parameters for q_vr
-    #cat("length(zero.set)", length(zero.set), "\n")
-    #cat("zero.set", zero.set, "\n")
-    #cat("length(mult$vy[zero.set])", length(mult$vy[zero.set]), "\n")
-    #cat("length(mult$mC[zero.set,])", length(mult$mC[zero.set,]), "\n")
-		#cat("dim(mult$mLambda)", dim(mult$mLambda), "\n")
-    cat("diag(mLambda)", diag(mult$mLambda), "\n")
-		mult$vp[zero.set] = expit((mult$vy[zero.set]*mult$mC[zero.set,])%*%mult$vmu-exp(mult$mC[zero.set,]%*%mult$vmu + 0.5*diag(mult$mC[zero.set,]%*%mult$mLambda%*%t(mult$mC[zero.set,])) + digamma(mult$a_rho) - digamma(mult$b_rho)))
-    cat("vp[zero.set] ", mult$vp[zero.set], "\n")
+    if (length(zero.set) != 0) {
+		  mult$vp[zero.set] = expit((mult$vy[zero.set]*mult$mC[zero.set,])%*%mult$vmu-exp(mult$mC[zero.set,]%*%mult$vmu + 0.5*diag((matrix(mult$mC[zero.set,], length(zero.set), p+m))%*%mult$mLambda%*%t(matrix(mult$mC[zero.set,], length(zero.set), p+m))) + digamma(mult$a_rho) - digamma(mult$b_rho)))
+    }
     
 		# Update parameters for q_rho
 		mult$a_rho = mult$prior$a_rho + sum(mult$vp)
 		mult$b_rho = mult$prior$b_rho + N - sum(mult$vp)
-		
-		#if (verbose) {
-		#	print(dim(mult$mC))
-		#	print(dim(mult$vmu))
-		#	print(mult$vmu)
-		#	print(mult$mLambda)
-		#	print(diag(mult$mC%*%mult$mLambda%*%t(mult$mC)))
-		#}
 		
   	# Update parameters for q_sigma_u^2 if we need to
   	if (!is.null(mult$mZ)) {
   	  # a_sigma is fixed
   	  mult$a_sigma = mult$prior$a_sigma + m/2
   	  u_idx = p + (1:m)  # (ncol(mult$mX)+1):ncol(mult$mC)
-  	  # We know that mSigma = sigma_u^2 I. We should exploit this knowledge
-  	  # Q: Nothing from mLambda? Why not?
   	  #tr_mSigma = ncol(mult$mZ) * mult$prior$a_sigma/mult$prior$b_sigma
   	  #mult$b_sigma = mult$prior$b_sigma + sum(vu^2)/2 + (tr_mSigma)/2
   	  mult$b_sigma = mult$prior$b_sigma + sum(mult$vmu[u_idx]^2)/2 + tr(mult$mLambda[u_idx, u_idx])/2    # Extract right elements of mLambda
   	  
   	  tau_sigma = mult$a_sigma/mult$b_sigma
-  	  if (tau_sigma<0.1) {
-  	    #	tau_sigma = 0.01
-  	  }
   	  
   	  mult$mSigma.u.inv = diag(tau_sigma, m)	
   	}
 	
-		#vlower_bound[i] <- calculate_lower_bound(vx, vp, a_lambda, b_lambda, a_rho, b_rho)
 		vlower_bound[i] <- 0 # calculate_lower_bound(mult)
 		vlower_bound[i] <- calculate_lower_bound(mult)
-    # Debugging idea: Save mult objects for later comparison
-		#print(mult$vmu)
-		#print(mult$vp)
-		#print(mult$a_rho)
-		#print(mult$b_rho)
-		#cat("End of iteration", i, "\n")
 		
 		if (verbose && i > 1)
 			cat("Iteration ", i, ": lower bound ", vlower_bound[i], " difference ",
