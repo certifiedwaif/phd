@@ -113,7 +113,8 @@ vg.G <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,vB1)
 mH.G <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,vB2) 
 {
     vw <-  vB2; dim(vw) <- NULL
-    mH <- -t(mC*vw)%*%mC - mSigma.inv
+    #mH <- -t(mC*vw)%*%mC - mSigma.inv
+    mH <- -t(mC*vr*vw)%*%(mC*vr) - mSigma.inv
     return(mH)    
 }
 
@@ -183,7 +184,8 @@ fit.GVA <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12)
   Dinds <- d*((1:d)-1)+(1:d)
           
   mR <- t(chol(mLambda + diag(1.0E-8,d)))
-  mR[Dinds] <- log(mR[Dinds])
+	cat("mR", mR, "\n")
+	mR[Dinds] <- log(mR[Dinds])
   Rinds <- which(lower.tri(mR,diag=TRUE))
 	vmu <- c(vmu,mR[Rinds])
   P <- length(vmu)
@@ -236,7 +238,8 @@ f.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   for (i in 1:length(Dinds)) {
     mR[Dinds[i]] <- min(c(1.0E5,mR[Dinds[i]]))
   }   
-  mLambda <- solve(mR%*%t(mR), tol=1.0E-99)
+  mLambda.inv = mR%*%t(mR)
+  mLambda <- solve(mLambda.inv, tol=1.0E-99)
   
   f <- -sum(log(diag(mR))) + f.G_new(vmu,mLambda,vy,vr,mC,mSigma.inv,gh) 
   f <- f + 0.5*d*log(2*pi) + 0.5*d
@@ -261,7 +264,9 @@ vg.G_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,vB1)
 mH.G_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,vB2) 
 {
   vw <-  vB2; dim(vw) <- NULL
-  mH <- -t(mC*vw)%*%mC - mSigma.inv
+  #mH <- -t(mC*vw)%*%mC - mSigma.inv
+  #mH <- -t(mC*vr*vw)%*%(mC*vr) - mSigma.inv
+  mH <- -t(mC*vr*vw)%*%(mC*vr) - mSigma.inv
   return(mH)    
 }
 
@@ -315,7 +320,47 @@ vg.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   dmLambda <- -solve(mR, tol=1.0E-99)%*%(mLambda.inv + mH)%*%mLambda
   
   dmLambda[Dinds] <- dmLambda[Dinds]*mR[Dinds]
+  # Check with numeric derivative
+  h = 1e-8
+  dmLambda2 = matrix(0, nrow(mLambda), ncol(mLambda))
+  for (i in 1:length(Rinds)) {
+    mR_high = mR
+    mR_high[Rinds[i]] = mR_high[Rinds[i]] + h
+    mR_low = mR
+    mR_low[Rinds[i]] = mR_low[Rinds[i]] - h
+    #mLambda_high = solve(mR_high%*%t(mR_high), tol=1e-99)
+    #mLambda_low = solve(mR_low%*%t(mR_low), tol=1e-99)
+    #dmLambda2[Rinds[i]] = (-0.5*log(det(mLambda_high)) + f.G_new(vmu,mLambda_high,vy,vr,mC,mSigma.inv,gh)  + 0.5*log(det(mLambda_low)) - f.G_new(vmu,mLambda_low,vy,vr,mC,mSigma.inv,gh))/(2*h)
+    #vtheta_high = c(vmu, mR_high[Rinds])
+    #vtheta_low = c(vmu, mR_low[Rinds])
+    #dmLambda2[Rinds[i]] = (f.GVA_new(vtheta_high,vy,vr,mC,mSigma.inv,gh,mR_high,Rinds,Dinds) - f.GVA_new(vtheta_low,vy,vr,mC,mSigma.inv,gh,mR_low,Rinds,Dinds))/(2*h)
+    mLambda_high = solve(mR_high%*%t(mR_high), tol=1e-99)
+    mLambda_low = solve(mR_low%*%t(mR_low), tol=1e-99)
+    dmLambda2[Rinds[i]] = (f.G_new(vmu,mLambda_high,vy,vr,mC,mSigma.inv,gh) - f.G_new(vmu,mLambda_low,vy,vr,mC,mSigma.inv,gh))/(2*h)
+  }  
+  
+  #cat("dmLambda", dmLambda, "\n")
+  #cat("dmLambda2", dmLambda2, "\n")
+  #cat("dmLambda diff", dmLambda - dmLambda2, "\n")
+  for (i in 1:ncol(dmLambda))
+    for (j in 1:nrow(dmLambda))
+      cat(j, i, dmLambda[i, j], dmLambda2[i, j], dmLambda[i, j] - dmLambda2[i, j], "\n")
+  cat("\n")
+  
+  printMatrix = function(mat) {
+    for (i in 1:nrow(mat)) {
+      for (j in 1:ncol(mat)) {
+        cat(mat[i, j], " ")
+      }
+      cat("\n")
+    }
+  }
+  printMatrix(dmLambda)
+  printMatrix(dmLambda2)
+  printMatrix(dmLambda-dmLambda2)
+  
   vg[(1+d):length(vtheta)] <- dmLambda[Rinds]    
+  #vg[(1+d):length(vtheta)] <- dmLambda2[Rinds]    
   
   return(vg)
 }
@@ -334,6 +379,7 @@ fit.GVA_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12)
   
   mR <- t(chol(solve(mLambda, tol=1.0E-99) + diag(1.0E-8,d)))
   cat("mR", mR, "\n")
+  cat("mSigma.inv", mSigma.inv, "\n")
   mR[Dinds] <- log(mR[Dinds])
   Rinds <- which(lower.tri(mR,diag=TRUE))
   vmu <- c(vmu,mR[Rinds])
