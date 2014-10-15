@@ -237,7 +237,7 @@ mcmc_approximation <- function(mult, iterations=1e3)
 test_accuracy = function(mult, mcmc_samples, approximation)
 {
   pdf(paste0("accuracy_plots_", approximation, ".pdf"))
-  var_result = zero_infl_var(mult, method=approximation)
+  var_result = zero_infl_var(mult, method=approximation, verbose=TRUE)
   # vbeta accuracy
   calculate_accuracy3 = function(mcmc_samples, dist_fn, param1, param2)
   {
@@ -391,9 +391,9 @@ main_check_accuracy <- function()
 # Generate data
 for (i in 1:100) {
   set.seed(i)
-  mult = generate_test_data(10, 100)
+  mult = generate_test_data(20, 100)
   # Monte Carlo Markov Chains approximation
-  mcmc_samples = mcmc_approximation(mult, iterations=1e3)
+  mcmc_samples = mcmc_approximation(mult, iterations=1e6)
   # Save the results, because this takes such a long time to run.
 }
 save(mult, mcmc_samples, file="accuracy.RData")
