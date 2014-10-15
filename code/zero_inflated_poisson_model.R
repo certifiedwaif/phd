@@ -73,7 +73,7 @@ f.G <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,gh)
   vsigma2.til <- sapply(1:nrow(mC), function(i) {mC[i,]%*%mLambda%*%mC[i,]})
   vB0 <- B0.fun("POISSON",vmu.til,vsigma2.til,gh) 
   
-  f <- sum(vr*(vy*vmu.til - vB0)) - 0.5*t(vmu)%*%mSigma.inv%*%vmu 
+  f <- sum(vr*(vy*vmu.til - vB0)) - 0.5*t(vmu)%*%mSigma.inv%*%vmu - 0.5*tr(mSigma.inv%*%mLambda)
   f <- f - 0.5*d*log(2*pi) + 0.5*log(det(mSigma.inv)) 
   return(f)
 }
@@ -222,7 +222,7 @@ f.G_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,gh)
   vsigma2.til <- sapply(1:nrow(mC), function(i) {mC[i,]%*%mLambda%*%mC[i,]})
   vB0 <- B0.fun("POISSON",vmu.til,vsigma2.til,gh) 
   
-  f <- sum(vr*(vy*vmu.til - vB0)) - 0.5*t(vmu)%*%mSigma.inv%*%vmu 
+  f <- sum(vr*(vy*vmu.til - vB0)) - 0.5*t(vmu)%*%mSigma.inv%*%vmu - 0.5*tr(mSigma.inv%*%mLambda)
   f <- f - 0.5*d*log(2*pi) + 0.5*log(det(mSigma.inv)) 
   return(f)
 }
@@ -247,6 +247,7 @@ f.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   if (!is.finite(f)) {
     f <- -1.0E16
   }
+
   return(f)
 }
 
@@ -266,26 +267,27 @@ mH.G_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,vB2)
   vw <-  vB2; dim(vw) <- NULL
   #mH <- -t(mC*vw)%*%mC - mSigma.inv
   #mH <- -t(mC*vr*vw)%*%(mC*vr) - mSigma.inv
-  mH <- -t(mC*vr*vw)%*%(mC*vr) - mSigma.inv
+  mH <- -t(mC*(vr*vw))%*%(mC)    - mSigma.inv
   return(mH)    
 }
 
 ###############################################################################
 
-vg.GVA.approx_new <- function(vmu,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
+vg.GVA.approx_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
 {
-  n <- length(vy); P <- length(vmu); d <- ncol(mC)
+  n <- length(vy); P <- length(vtheta); d <- ncol(mC)
   eps <- 1.0E-6
-  f <- f.GVA_new(vmu,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
+  f <- f.GVA_new(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   vg.approx <- matrix(0,P,1)
   for (i in 1:P) {
-    vmup <- vmu 
-    vmup[i] <- vmu[i] + eps
-    fp <- f.GVA_new(vmup,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
+    vthetap <- vtheta
+    vthetap[i] <- vtheta[i] + eps
+    fp <- f.GVA_new(vthetap,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
     
-    vmum <- vmu 
-    vmum[i] <- vmu[i] - eps
-    fm <- f.GVA_new(vmum,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
+    vthetam <- vtheta
+    vthetam[i] <- vtheta[i] - eps
+    fm <- f.GVA_new(vthetam,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
+
     
     vg.approx[i] <- (fp - fm)/(2*eps)
   }
@@ -317,35 +319,68 @@ vg.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   
   mLambda.inv <- mR%*%t(mR)
   mH <- mH.G_new(vmu,mLambda,vy,vr,mC,mSigma.inv,vB2)
-  dmLambda <- -solve(mR, tol=1.0E-99)%*%(mLambda.inv + mH)%*%mLambda
-  
+  dmLambda <- -solve(mR, tol=1.0E-99)%*%(mLambda.inv + mH)%*%mLambda  
   dmLambda[Dinds] <- dmLambda[Dinds]*mR[Dinds]
+
+  res <- vg.GVA.approx_new(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
+ 
+  #print("john test")
+
+  #print("mLambda.inv")
+  #print(mLambda.inv)
+  
+  #print("mH")
+  #print(mH)
+  
+  #print("mLambda")
+  #print(mLambda)
+
+  #print("mSigma.inv")
+  #print(mSigma.inv)
+
+  #print("diff")
+  #print(mLambda - solve(mLambda.inv,tol=1.0E-99))
+
+
+  #print("mR")
+  #print(mR)
+
+
+  #print(res)
+  #bit <- res[(1+d):length(vtheta)]
+  
+  #print(cbind(bit,dmLambda[Rinds],bit-dmLambda[Rinds]))    
+
+  #ans <- readline()
+
+
+
   # Check with numeric derivative
   h = 1e-8
-  dmLambda2 = matrix(0, nrow(mLambda), ncol(mLambda))
-  for (i in 1:length(Rinds)) {
-    mR_high = mR
-    mR_high[Rinds[i]] = mR_high[Rinds[i]] + h
-    mR_low = mR
-    mR_low[Rinds[i]] = mR_low[Rinds[i]] - h
+  #dmLambda2 = matrix(0, nrow(mLambda), ncol(mLambda))
+  #for (i in 1:length(Rinds)) {
+  #  mR_high = mR
+  #  mR_high[Rinds[i]] = mR_high[Rinds[i]] + h
+  #  mR_low = mR
+  #  mR_low[Rinds[i]] = mR_low[Rinds[i]] - h
     #mLambda_high = solve(mR_high%*%t(mR_high), tol=1e-99)
     #mLambda_low = solve(mR_low%*%t(mR_low), tol=1e-99)
     #dmLambda2[Rinds[i]] = (-0.5*log(det(mLambda_high)) + f.G_new(vmu,mLambda_high,vy,vr,mC,mSigma.inv,gh)  + 0.5*log(det(mLambda_low)) - f.G_new(vmu,mLambda_low,vy,vr,mC,mSigma.inv,gh))/(2*h)
     #vtheta_high = c(vmu, mR_high[Rinds])
     #vtheta_low = c(vmu, mR_low[Rinds])
     #dmLambda2[Rinds[i]] = (f.GVA_new(vtheta_high,vy,vr,mC,mSigma.inv,gh,mR_high,Rinds,Dinds) - f.GVA_new(vtheta_low,vy,vr,mC,mSigma.inv,gh,mR_low,Rinds,Dinds))/(2*h)
-    mLambda_high = solve(mR_high%*%t(mR_high), tol=1e-99)
-    mLambda_low = solve(mR_low%*%t(mR_low), tol=1e-99)
-    dmLambda2[Rinds[i]] = (f.G_new(vmu,mLambda_high,vy,vr,mC,mSigma.inv,gh) - f.G_new(vmu,mLambda_low,vy,vr,mC,mSigma.inv,gh))/(2*h)
-  }  
+  #  mLambda_high = solve(mR_high%*%t(mR_high), tol=1e-99)
+  #  mLambda_low = solve(mR_low%*%t(mR_low), tol=1e-99)
+  #  dmLambda2[Rinds[i]] = (f.G_new(vmu,mLambda_high,vy,vr,mC,mSigma.inv,gh) - f.G_new(vmu,mLambda_low,vy,vr,mC,mSigma.inv,gh))/(2*h)
+  #}  
   
   #cat("dmLambda", dmLambda, "\n")
   #cat("dmLambda2", dmLambda2, "\n")
   #cat("dmLambda diff", dmLambda - dmLambda2, "\n")
-  for (i in 1:ncol(dmLambda))
-    for (j in 1:nrow(dmLambda))
-      cat(j, i, dmLambda[i, j], dmLambda2[i, j], dmLambda[i, j] - dmLambda2[i, j], "\n")
-  cat("\n")
+  #for (i in 1:ncol(dmLambda))
+  #  for (j in 1:nrow(dmLambda))
+  #    cat(j, i, dmLambda[i, j], dmLambda2[i, j], dmLambda[i, j] - dmLambda2[i, j], "\n")
+  #cat("\n")
   
   printMatrix = function(mat) {
     for (i in 1:nrow(mat)) {
@@ -355,9 +390,9 @@ vg.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
       cat("\n")
     }
   }
-  printMatrix(dmLambda)
-  printMatrix(dmLambda2)
-  printMatrix(dmLambda-dmLambda2)
+  #printMatrix(dmLambda)
+  #printMatrix(dmLambda2)
+  #printMatrix(dmLambda-dmLambda2)
   
   vg[(1+d):length(vtheta)] <- dmLambda[Rinds]    
   #vg[(1+d):length(vtheta)] <- dmLambda2[Rinds]    
