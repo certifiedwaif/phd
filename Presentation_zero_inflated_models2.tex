@@ -1,0 +1,83 @@
+\documentclass{beamer}
+
+\usetheme{Warsaw}
+\usepackage{graphicx}
+\input{include.tex}
+
+\usefonttheme{serif}
+
+\title{Variational approximations to zero-inflated count models 2: the optimiser strikes back}
+\author{Mark Greenaway\\PhD candidate\\markg@maths.usyd.edu.au}
+
+\mode<presentation>
+{ \usetheme{boxes} }
+
+\begin{document}
+% 1. Front slide
+\begin{frame}
+\titlepage
+% Details about myself here?
+\end{frame}
+
+% Details from last time: Gaussian variational approximation
+
+% Detail what progress has been made, and what results have been obtained
+% Algorithms:
+% i) Optimise with L-BFGS, mLambda = R R^T
+% ii) Optimise with L-BFGS, mLambda = (R R^T)^-1
+% iii) Newton-Raphson optimisation on the variational lower bound
+% iv) Newton-Raphson optimisation on the variational lower bound, using block inverses
+
+% Motivations behind the algorithms
+% ii) The Cholesky factor of a block matrix of the form
+% diag for random effects, block for cross effects
+% block for cross effects, diag for fixed effects
+% is mostly diagonal
+% Less parameters to optimise and store
+
+% Work to date
+% 2000 lines of R code
+% 93 functions
+% Debugging. So much debugging ...
+
+% Accuracy results
+% Accuracy verified using 1 million MCMC iterations from Stan
+% Stan converts your model specification into C++ code
+% A one million iteration run ``only'' takes ten CPU hours per chain
+% Can be parallelised across multiple cores
+% The need for approximate methods is obvious
+
+\begin{frame}
+\begin{tabular}{lllll}
+\hline
+	& Laplacian & GVA & GVA2 & GVA_nr \\
+\hline
+beta&0.95&0.95&0.95&0.95 \\
+beta&0.81&0.90&0.85&0.90 \\
+u&0.95&0.96&0.95&0.96 \\
+u&0.94&0.96&0.94&0.96 \\
+u&0.95&0.96&0.95&0.96 \\
+u&0.95&0.96&0.95&0.96 \\
+u&0.95&0.96&0.95&0.96 \\
+u&0.95&0.96&0.95&0.96 \\
+u&0.94&0.95&0.95&0.95 \\
+u&0.95&0.96&0.95&0.96 \\
+u&0.92&0.94&0.93&0.94 \\
+u&0.95&0.97&0.95&0.97 \\
+sigma2_u&0.96&0.95&0.96&0.95 \\
+rho&0.90&0.90&0.90&0.90 \\
+\hline
+\end{tabular}
+\end{frame}
+
+% Further work
+% All algorithms should arrive at exactly the same result, up to numerical error ~10^-8
+% Algorithms i and iii work well
+% Algorithm ii does not get exactly the right result
+% Algorithm ii works on some data sets, but this isn't good enough
+% That is, I have concerns about its stability
+% Algorithm iv is yet to be implemented
+% Splines should be ``easy'' to implement, but I've heard that before
+% Shut up and write
+
+\end{document}
