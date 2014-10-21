@@ -91,6 +91,23 @@ R_{31} R_{11} & R_{31}R_{21} + R_{32}L_{22} & R_{31}^2 + R_{32} ^2 + R_{33}^2
 % block for cross effects, diag for fixed effects
 % is mostly diagonal
 % Less parameters to optimise and store
+If we re-arrange the covariance matrix to have random effects before
+fixed effects, our posterior covariance matrix is of the form
+\begin{align*} \mLambda =
+\begin{pmatrix}
+\sigma_\vu^2 & & & \sigma_{\vbeta \vu} & \sigma_{\vbeta \vu} \\
+& \ddots & & \vdots & \vdots \\
+& & \sigma_\vu^2 & \sigma_{\vbeta \vu} & \sigma_{\vbeta \vu} \\
+\sigma_{\vbeta \vu} & \ldots & \sigma_{\vbeta \vu} & \sigma_\vbeta^2 \\
+\sigma_{\vbeta \vu} & \ldots &\sigma_{\vbeta \vu}  & & \sigma_\vbeta^2
+\end{pmatrix}
+\end{align*}
+
+As the $\sigma_\vu^2$ block is diagonal, the Cholesky factor is 
+sparse, with only $m + \frac{p(p-1)}{2}$ non-zero elements. If $p$ is small
+and $m$ is large, as will typically be the case, then this algorithm will
+be much faster.
+
 \end{frame}
 
 \begin{frame}
@@ -120,7 +137,7 @@ practical for many types of applied work
 
 \begin{frame}
 \frametitle{Accuracy results}
-\begin{tabular}{rcccc}
+\begin{tabular}{ccccc}
 \hline
 	& Laplacian & GVA & GVA2 & GVA\_nr \\
 \hline
@@ -150,14 +167,15 @@ $\rho$&0.90&0.90&0.90&0.90 \\
 \begin{frame}
 \frametitle{Further work}
 \begin{itemize}
-\item All algorithms should arrive at exactly the same result, up to numerical error i.e. around $10^{-8}$. But they don't
+\item All algorithms should arrive at exactly the same result, up to numerical error i.e. around $10^{-8}$. But they currently don't
+\item More checking. These algorithms should produce the same results on
+a wide range of randomly generated data sets
 \item Algorithms i and iii work well
-\item Algorithm ii does not get exactly the right result
-\item Algorithm ii works on some data sets, but this isn't good enough
-\item That is, I have concerns about its stability
-\item Algorithm iv should be straightforward, but is yet to be implemented
-\item Splines should be ``easy'' to implement, but I've heard that before
-\item Finish writing this all up into a paper
+\item Algorithm ii is accurate on some data sets, but this isn't good enough
+\item I have concerns about its stability
+\item Algorithm iv is yet to be implemented, but should be straightforward
+\item Splines should be ``easy'' to implement. Doesn't require any major changes to the existing code
+\item Finish writing this all up into a paper, and release an R package
 \end{itemize}
 \end{frame}
 
