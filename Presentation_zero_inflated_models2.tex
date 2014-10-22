@@ -1,0 +1,182 @@
+\documentclass{beamer}
+
+\usetheme{Warsaw}
+\usepackage{graphicx}
+\input{include.tex}
+\input{Definitions.tex}
+
+\usefonttheme{serif}
+
+\title{Variational approximations to ZIP models 2: the optimiser strikes back}
+\author{Mark Greenaway\\PhD candidate\\markg@maths.usyd.edu.au}
+
+\mode<presentation>
+{ \usetheme{boxes} }
+
+\begin{document}
+% 1. Front slide
+\begin{frame}
+\titlepage
+% Details about myself here?
+\end{frame}
+
+\begin{frame}
+\frametitle{Gaussian variational approximation}
+% Details from last time: Gaussian variational approximation
+For generalised linear models, there is no tractable factored 
+approximation which works well, so we attempt to approximate
+the GLM with a multivariate Gaussian (reference relevant
+Ormerod paper).
+\end{frame}
+
+\begin{frame}
+\begin{align*}
+\log p(\vbeta, \vu, \mLambda) &= \vy^T \mR \mC \vnu + \vone^T c(\vy) + \frac{m}{2} \log |\mLambda| - \frac{mK}{2} \log{(2 \pi)}\\
+&\quad \log  \int_{\mathbb{R}^{m}} \exp \big[ \vy^T (\mR \mZ \vu - \vone^T b(\mR( \mX \vbeta + \mZ \vu))) \\
+ &\quad \quad \quad \quad \quad \quad \quad - \half {\vu^T \mLambda^{-1} \vu } \big] d \vu \\
+\log \overline{p}(\vmu, \mLambda) &= \vy^T \mR \mC \vmu - \vp^T \exp{\left(\mC \vmu + \half \diag{(\mC \mLambda \mC^T)}\right)} \\
+& \quad - \vmu^T \mSigma^{-1} \vmu - \half \tr{(\mLambda \mSigma^{-1})} + \half \log{|\mSigma^{-1}\mLambda|} + \text{const.} \\
+&= \mR\mC^T(\vy - B^{(1)}(\vmu, \sigma^2_u)) \\
+& \quad - \vmu^T \mSigma^{-1} \vmu - \half \tr{(\mLambda \mSigma^{-1})} + \half \log{|\mSigma^{-1}\mLambda|} + \text{const.} \\
+\end{align*}
+%\end{align*}
+\end{frame}
+
+\begin{frame}
+\frametitle{Algorithms to fit model}
+% Detail what progress has been made, and what results have been obtained
+There are several alternative algorithms we've implemented or will implement
+to fit this model:
+\begin{enumerate}
+\item Optimise variational lower bound with L-BFGS, $\mLambda = \mR \mR^T$
+\item Optimise variational lower bound with L-BFGS, $\mLambda = (\mR \mR^T)^{-1}$
+\item Newton-Raphson optimisation on the variational lower bound
+\item Newton-Raphson optimisation on the variational lower bound, using block inverses
+\end{enumerate}
+
+These algorithms should all fit the same model to the same data
+within numerical tolerances.
+\end{frame}
+
+\begin{frame}
+\frametitle{Cholesky factors}
+Any symmetric matrix can be written $\mSigma = \mR \mR^T$
+where $\mR$ is lower triangular.
+
+\begin{align*}
+&\begin{pmatrix}
+R_{11} \\
+R_{21} & R_{22} \\
+R_{31} & R_{32} & R_{33}
+\end{pmatrix}
+\begin{pmatrix}
+R_{11} & R_{21} & R_{31} \\
+& R_{22} & R_{32} \\
+& & R_{33}
+\end{pmatrix}
+\\
+=& \begin{pmatrix}
+R_{11}^2 & & \text{symmetric}\\
+R_{21}L_{11} & R_{21}^2 + R_{22}^2 \\
+R_{31} R_{11} & R_{31}R_{21} + R_{32}L_{22} & R_{31}^2 + R_{32} ^2 + R_{33}^2
+\end{pmatrix}
+\end{align*}
+\end{frame}
+
+\begin{frame}
+% Motivations behind the algorithms
+\frametitle{Motivations behind the algorithms}
+% ii) The Cholesky factor of a block matrix of the form
+% diag for random effects, block for cross effects
+% block for cross effects, diag for fixed effects
+% is mostly diagonal
+% Less parameters to optimise and store
+If we re-arrange the covariance matrix to have random effects before
+fixed effects, our posterior covariance matrix is of the form
+\begin{align*} \mLambda =
+\begin{pmatrix}
+\sigma_\vu^2 & & & \sigma_{\vbeta \vu} & \sigma_{\vbeta \vu} \\
+& \ddots & & \vdots & \vdots \\
+& & \sigma_\vu^2 & \sigma_{\vbeta \vu} & \sigma_{\vbeta \vu} \\
+\sigma_{\vbeta \vu} & \ldots & \sigma_{\vbeta \vu} & \sigma_\vbeta^2 \\
+\sigma_{\vbeta \vu} & \ldots &\sigma_{\vbeta \vu}  & & \sigma_\vbeta^2
+\end{pmatrix}
+\end{align*}
+
+As the $\sigma_\vu^2$ block is diagonal, the Cholesky factor is 
+sparse, with only $m + \frac{p(p-1)}{2}$ non-zero elements. If $p$ is small
+and $m$ is large, as will typically be the case, then this algorithm will
+be much faster.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Implementation}
+% Work to date
+\begin{itemize}
+\item 2000 lines of R code, about enough for an R package
+\item 93 functions
+\item Debugging. So much debugging ...
+\item I've had to learn some numerics/computational statistics along the
+way
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Accuracy results using MCMC}
+\begin{itemize}
+\item Accuracy verified using 1 million MCMC iterations from Stan
+\item Stan converts your model specification into C++ code
+\item A one million iteration run ``only'' takes ten CPU hours per chain
+\item Can be parallelised across multiple cores
+\item Pro tip: Checkpoint every few thousand iterations
+\item The need for approximate methods is obvious, this is simply not
+practical for many types of applied work
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Accuracy results}
+\begin{tabular}{ccccc}
+\hline
+	& Laplacian & GVA & GVA2 & GVA\_nr \\
+\hline
+$\vbeta_1$&0.95&0.95&0.95&0.95 \\
+$\vbeta_2$&0.81&0.90&0.85&0.90 \\
+$\vu_1$&0.95&0.96&0.95&0.96 \\
+$\vu_2$&0.94&0.96&0.94&0.96 \\
+$\vu_3$&0.95&0.96&0.95&0.96 \\
+$\vu_4$&0.95&0.96&0.95&0.96 \\
+$\vu_5$&0.95&0.96&0.95&0.96 \\
+$\vu_6$&0.95&0.96&0.95&0.96 \\
+$\vu_7$&0.94&0.95&0.95&0.95 \\
+$\vu_8$&0.95&0.96&0.95&0.96 \\
+$\vu_9$&0.92&0.94&0.93&0.94 \\
+$\vu_{10}$&0.95&0.97&0.95&0.97 \\
+$\sigma_\vu^2$&0.96&0.95&0.96&0.95 \\
+$\rho$&0.90&0.90&0.90&0.90 \\
+\hline
+\end{tabular}
+\end{frame}
+
+% Pretty pictures
+\begin{frame}
+\frametitle{Plot the MCMC-estimated and approximating densities}
+\end{frame}
+
+\begin{frame}
+\frametitle{Further work}
+\begin{itemize}
+\item All algorithms should arrive at exactly the same result, up to numerical error i.e. around $10^{-8}$. But they currently don't
+\item More checking. These algorithms should produce the same results on
+a wide range of randomly generated data sets
+\item Algorithms i and iii work well
+\item Algorithm ii is accurate on some data sets, but this isn't good enough
+\item I have concerns about its stability
+\item Algorithm iv is yet to be implemented, but should be straightforward
+\item Splines should be ``easy'' to implement. Doesn't require any major changes to the existing code
+\item Finish writing this all up into a paper, and release an R package
+\end{itemize}
+\end{frame}
+
+\end{document}

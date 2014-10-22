@@ -236,9 +236,8 @@ mcmc_approximation <- function(mult, iterations=1e3)
 
 test_accuracy = function(mult, mcmc_samples, approximation)
 {
-  cat("approximation", approximation, "\n")
-  pdf("accuracy_plots.pdf")
-  var_result = zero_infl_var(mult, method=approximation)
+  pdf(paste0("accuracy_plots_", approximation, ".pdf"))
+  var_result = zero_infl_var(mult, method=approximation, verbose=TRUE)
   # vbeta accuracy
   calculate_accuracy3 = function(mcmc_samples, dist_fn, param1, param2)
   {
@@ -249,8 +248,6 @@ test_accuracy = function(mult, mcmc_samples, approximation)
     {
       return(abs(mcmc_fn(x) - dist_fn(x, param1, param2)))
     }
-    #cat("min(mcmc_density$x)", min(mcmc_density$x), "\n")
-    #cat("max(mcmc_density$x)", max(mcmc_density$x), "\n")
     result = integrate(integrand, min(mcmc_density$x), max(mcmc_density$x),
                        subdivisions = length(mcmc_density$x))
     accuracy = 1 - .5 * result$value
@@ -268,12 +265,6 @@ test_accuracy = function(mult, mcmc_samples, approximation)
   
   # Kernel density estimates of MCMC-estimated posteriors
   # Use L_1 distance to compare against variational approximations of posteriors
-  par(mfrow=c(1,1))
-  # Pseudocode:
-  # Estimate density
-  # Define integrand, using distribution and parameters.
-  # Calculate accuracy integral
-  # Plots
   
   accuracy_plot = function(mcmc_samples, dist_fn, param1, param2)
   {
@@ -289,14 +280,9 @@ test_accuracy = function(mult, mcmc_samples, approximation)
                                   var_result$vmu[i], sqrt(var_result$mLambda[i,i]))
     cat("vbeta[", i, "]", approximation, "accuracy:", accuracy, "\n")
     
-    par(mfrow=c(1,1))
     param_name = sprintf("vbeta[%d]", 1)
-    pdf(sprintf("~/phd/code/vbeta_accuracy_%s.pdf", i))
     accuracy_plot(mcmc_samples$vbeta[,i], dnorm,
                   var_result$vmu[i], sqrt(var_result$mLambda[i,i]))
-    dev.off()
-    #plot(mcmc_samples$vbeta[,i], type="l")
-    par(mfrow=c(1,1))
   }
   
   # vu accuracy
@@ -304,38 +290,24 @@ test_accuracy = function(mult, mcmc_samples, approximation)
     accuracy = calculate_accuracy3(mcmc_samples$u[,i], dnorm,
                                   var_result$vmu[i+2], sqrt(var_result$mLambda[i+2,i+2]))
     cat("vu[", i, "]", approximation, "accuracy:", accuracy, "\n")
-    par(mfrow=c(1,1))
-    pdf(sprintf("~/phd/code/vu_accuracy_%s.pdf", i))
     accuracy_plot(mcmc_samples$u[,i], dnorm,
                   var_result$vmu[i+2], sqrt(var_result$mLambda[i+2,i+2]))
-    dev.off()
-    #plot(mcmc_samples$u[,i], type="l")
-    par(mfrow=c(1,1))
   }
   
   # sigma2_u accuracy
   accuracy = calculate_accuracy3(1/mcmc_samples$sigma_u^2, dgamma,
                                  var_result$a_sigma, var_result$b_sigma)
   cat("sigma2_u", approximation, "accuracy:", accuracy, "\n")
-  par(mfrow=c(1,1))
-  pdf("~/phd/code/sigma2_u_accuracy.pdf")
   accuracy_plot(1/mcmc_samples$sigma_u^2, dgamma,
                 var_result$a_sigma, var_result$b_sigma)
-  dev.off()
-  #plot(mcmc_samples$sigma_u, type="l")
-  par(mfrow=c(1,1))
   
   # rho accuracy
   accuracy = calculate_accuracy3(mcmc_samples$rho, dbeta,
                                  var_result$a_rho, var_result$b_rho)
   cat("rho", approximation, "accuracy: ", accuracy, "\n")
-  par(mfrow=c(1,1))
-  pdf("~/phd/code/rho_accuracy.pdf")
   accuracy_plot(mcmc_samples$rho, dbeta,
                 var_result$a_rho, var_result$b_rho)
   dev.off()
-  #plot(mcmc_samples$rho, type="l")
-  par(mfrow=c(1,1))
   return(var_result)
 }
 
@@ -419,12 +391,13 @@ main_check_accuracy <- function()
 # Generate data
 for (i in 1:100) {
   set.seed(i)
-  mult = generate_test_data(10, 100)
+  mult = generate_test_data(20, 100)
   # Monte Carlo Markov Chains approximation
-  mcmc_samples = mcmc_approximation(mult, iterations=1e3)
+  mcmc_samples = mcmc_approximation(mult, iterations=1e6)
   # Save the results, because this takes such a long time to run.
 }
 save(mult, mcmc_samples, file="accuracy.RData")
+load(file="accuracy.RData")
 # Test all other approximations against it
 
 # Test multivariate approximation's accuracy
