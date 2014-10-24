@@ -396,12 +396,18 @@ for (i in 1:100) {
   mcmc_samples = mcmc_approximation(mult, iterations=1e6)
   # Save the results, because this takes such a long time to run.
 }
-save(mult, mcmc_samples, file="accuracy.RData")
+save(mult, mcmc_samples, file="accuracy_good.RData")
+set.seed(1)
+mult = generate_test_data(20, 100)
+# Monte Carlo Markov Chains approximation
+mcmc_samples = mcmc_approximation(mult, iterations=1e6)
+# Save the results, because this takes such a long time to run.
+#save(mult, mcmc_samples, file="accuracy.RData")
 load(file="accuracy.RData")
 # Test all other approximations against it
 
 # Test multivariate approximation's accuracy
-test_accuracy(mult, mcmc_samples, "laplacian")
-test_accuracy(mult, mcmc_samples, "gva")
-test_accuracy(mult, mcmc_samples, "gva2")
-test_accuracy(mult, mcmc_samples, "gva_nr")
+var1 = test_accuracy(mult, mcmc_samples, "laplacian")
+var2 = test_accuracy(mult, mcmc_samples, "gva")
+var3 = test_accuracy(mult, mcmc_samples, "gva2")
+var4 = test_accuracy(mult, mcmc_samples, "gva_nr")
