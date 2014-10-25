@@ -310,7 +310,7 @@ q(r_i) &= \text{Bernoulli}(p_i), \ \ 1 \leq i \leq n
 \frametitle{Gaussian and Laplacian Variational Approximations}
 \begin{itemize}
 \item Lack of conjugacy means mean field updates won't be analytically tractable for the regression parameters.
-\item We try Gaussian Variational Approximations instead, assuming that
+\item We try Laplacian and Gaussian Variational Approximations instead, assuming that
 $$
 \begin{pmatrix}
 \vbeta \\
@@ -339,7 +339,7 @@ q(r_i) & \sim \text{Bernoulli}{(p_i)}, \ \ \ 1 \leq i \leq n
 \end{align*}
 where
 $$
-p_i = \expit{\Psi{(\alpha_{q(\rho)})} - \Psi{(\beta_{q(\rho)})} - \exp{\{c_i^T\vmu + \half c_i^T \mLambda c_i\}}}.
+p_i = \expit{\left [\Psi{(\alpha_{q(\rho)})} - \Psi{(\beta_{q(\rho)})} - \exp{\left(c_i^T\vmu + \half c_i^T \mLambda c_i\right)} \right ]}.
 $$
 \end{frame}
 
@@ -382,6 +382,29 @@ $$
 %\end{frame}
 
 \begin{frame}
+\frametitle{Laplacian approximation}
+We Taylor expand the log likelihood $\log{p(\vtheta)}$ around the mode
+$\vtheta_*$:
+\begin{align*}
+\log{p(\vtheta)} &\approx \log{p(\vtheta_*)} + \log{p'(\vtheta_*)}(\vtheta - \vtheta^*) + \half \log{p''(\vtheta_*)}(\vtheta - \vtheta^*)^2 \\
+&= \log{p(\vtheta_*)} + \log{p''(\vtheta_*)}(\vtheta - \vtheta^*)^2
+\end{align*}
+
+as $\log{p^{'}(\vtheta_*)}(\vtheta - \vtheta^*) = 0$ at the mode. This has
+the same form as a Gaussian density
+\begin{align*}
+\log{N(\vtheta|\vmu, \eta^{-1})} &= \half \log{\eta} - \frac{p}{2} \log{2 \pi} - \frac{\eta}{2} (\theta-\mu)^2 \\
+&= \half \log{\frac{\eta}{2\pi}} + \half (-\eta)(\theta - \mu)^2
+\end{align*}
+
+and so we have an approximate posterior $q(\vtheta) = N(\theta|\mu, \eta^{-1})$ with
+\begin{align*}
+\mu &= \theta_* & \text{mode of the log-posterior}\\
+\eta &= -\log{p''(\vtheta_*)} & \text{negative curvature at the mode} \\
+\end{align*}
+\end{frame}
+
+\begin{frame}
 \frametitle{Optimising the Gaussian Variational Approximation}
 The true likelihood $\log p(\vbeta, \vu, \mLambda)$ is hard to optimise due 
 to the high dimensional integral involved, but the variational lower bound $\log \overline{p}(\vmu, \mLambda)$ can be optimised.
@@ -420,7 +443,7 @@ within numerical tolerances.
 
 \begin{frame}
 \frametitle{Cholesky factors}
-Any symmetric matrix can be written $\mSigma = \mR \mR^T$
+Any symmetric matrix $\mSigma$ can be written $\mSigma = \mR \mR^T$
 where $\mR$ is lower triangular.
 
 \begin{align*}
@@ -491,9 +514,15 @@ way
 \begin{itemize}
 \item Accuracy verified using 1 million MCMC iterations from Stan
 \item Stan converts your model specification into C++ code
-\item A one million iteration run ``only'' takes ten CPU hours per chain
+\item A one million iteration run for this model took over 32 CPU days
 \item Can be parallelised across multiple cores
-\item Pro tip: Checkpoint every few thousand iterations
+\item Pro tips:
+\begin{itemize}
+\item Check your computer has enough RAM
+\item Run longrunning tasks with R -f script.R and nohup
+\item Run them on the biggest, fastest server you can find. verona's pretty good
+\item Checkpoint every few thousand iterations
+\end{itemize}
 \item The need for approximate methods is obvious, this is simply not
 practical for many types of applied work
 \end{itemize}
@@ -546,9 +575,9 @@ a wide range of randomly generated data sets
 \begin{frame}
 \frametitle{References}
 \begin{itemize}
-\item Explaining variational approximations, J.T. Ormerod, M.P. Wand, American Statistician, 2010
-\item Gaussian variational approximations, J.T. Ormerod, M.P. Wand, 2012
-\item General design mixed models, M.P. Wand and others, 2006
+\item Explaining Variational Approximations, J.T. Ormerod, M.P. Wand, American Statistician, 2010
+\item Gaussian Variational Approximations, J.T. Ormerod, M.P. Wand, 2012
+\item General Design Mixed Models, M.P. Wand and others, 2006
 \end{itemize}
 \end{frame}
 
