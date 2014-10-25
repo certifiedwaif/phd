@@ -291,9 +291,6 @@ We use the priors:
 \end{align*}
 \end{frame}
 
-
-
-
 \begin{frame}
 \frametitle{Form of the multivariate approximation}
 We choose an approximation of the form
@@ -346,44 +343,34 @@ p_i = \expit{\Psi{(\alpha_{q(\rho)})} - \Psi{(\beta_{q(\rho)})} - \exp{\{c_i^T\v
 $$
 \end{frame}
 
-\begin{frame}
-\frametitle{Progress so far}
-\begin{itemize}
-\item Computation - a work in progress. The multivariate model is
-implemented by combining my univariate VB code with John's GVA code.
-\item Initial signs are that this approach will work.
-\item The correct parameters are estimated for simulated test cases
-that we have tried.
-\item I've calculated the lower bound, but have not yet checked that it
-always increases for my test cases.
-\item Accuracy will be assessed against the random walk Metropolis-Hastings approximation of the true posterior.
-\end{itemize}
-\end{frame}
+%\begin{frame}
+%\frametitle{Progress so far}
+%\begin{itemize}
+%\item Computation - a work in progress. The multivariate model is
+%implemented by combining my univariate VB code with John's GVA code.
+%\item Initial signs are that this approach will work.
+%\item The correct parameters are estimated for simulated test cases
+%that we have tried.
+%\item I've calculated the lower bound, but have not yet checked that it
+%always increases for my test cases.
+%\item Accuracy will be assessed against the random walk Metropolis-Hastings approximation of the true posterior.
+%\end{itemize}
+%\end{frame}
 
+%\begin{frame}
+%\frametitle{What next?}
+%\begin{itemize}
+%\item Continue working on the multivariate approximation.
+%\item Extensions - random slopes, splines, and measurement error can all be 
+%accomodated within a mixed model framework.
+%\item Check accuracy against random walk Metropolis-Hastings approximation
+%of the true posterior.
+%\item Apply the mixed model fitting code to my physical activity data.
+%\item Write this all up into a paper.
+%\item Release an R package.
+%\end{itemize}
+%\end{frame}
 
-
-\begin{frame}
-\frametitle{What next?}
-\begin{itemize}
-\item Continue working on the multivariate approximation.
-\item Extensions - random slopes, splines, and measurement error can all be 
-accomodated within a mixed model framework.
-\item Check accuracy against random walk Metropolis-Hastings approximation
-of the true posterior.
-\item Apply the mixed model fitting code to my physical activity data.
-\item Write this all up into a paper.
-\item Release an R package.
-\end{itemize}
-\end{frame}
-
-\begin{frame}
-\frametitle{References}
-\begin{itemize}
-\item Explaining variational approximations, J.T. Ormerod, M.P. Wand, American Statistician, 2010
-\item Gaussian variational approximations, J.T. Ormerod, M.P. Wand, 2012
-\item General design mixed models, M.P. Wand and others, 2006
-\end{itemize}
-\end{frame}
 
 %\begin{frame}
 %\frametitle{Gaussian variational approximation}
@@ -417,10 +404,14 @@ There are several alternative algorithms we've implemented or will implement
 to fit this model:
 % Point out the advantages of each
 \begin{enumerate}
-\item Optimise variational lower bound with L-BFGS, $\mLambda = \mR \mR^T$
-\item Optimise variational lower bound with L-BFGS, $\mLambda = (\mR \mR^T)^{-1}$
-\item Newton-Raphson optimisation on the variational lower bound
-\item Newton-Raphson optimisation on the variational lower bound, using block inverses
+\item Optimise variational lower bound with L-BFGS, $\mLambda = \mR \mR^T$\\
+\quad Accurate
+\item Optimise variational lower bound with L-BFGS, $\mLambda = (\mR \mR^T)^{-1}$ \\
+\quad Accurate, and very fast
+\item Newton-Raphson optimisation on the variational lower bound \\
+\quad Straightforward to implement
+\item Newton-Raphson optimisation on the variational lower bound, using block inverses \\
+\quad Straightforward to implement, and can be made fast
 \end{enumerate}
 
 These algorithms should all fit the same model to the same data
@@ -549,6 +540,15 @@ a wide range of randomly generated data sets
 \item Algorithm iv is yet to be implemented, but should be straightforward
 \item Splines should be ``easy'' to implement. Doesn't require any major changes to the existing code
 \item Finish writing this all up into a paper, and release an R package
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{References}
+\begin{itemize}
+\item Explaining variational approximations, J.T. Ormerod, M.P. Wand, American Statistician, 2010
+\item Gaussian variational approximations, J.T. Ormerod, M.P. Wand, 2012
+\item General design mixed models, M.P. Wand and others, 2006
 \end{itemize}
 \end{frame}
 
