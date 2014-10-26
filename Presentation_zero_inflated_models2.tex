@@ -399,8 +399,8 @@ the same form as a Gaussian density
 
 and so we have an approximate posterior $q(\vtheta) = N(\theta|\mu, \eta^{-1})$ with
 \begin{align*}
-\mu &= \theta_* & \text{mode of the log-posterior}\\
-\eta &= -\log{p''(\vtheta_*)} & \text{negative curvature at the mode} \\
+\mu &= \theta_* & \text{mode of the log-posterior, and}\\
+\eta &= -\log{p''(\vtheta_*)} & \text{negative curvature at the mode.} \\
 \end{align*}
 \end{frame}
 
@@ -427,14 +427,14 @@ There are several alternative algorithms we've implemented or will implement
 to fit this model:
 % Point out the advantages of each
 \begin{enumerate}
-\item Optimise variational lower bound with L-BFGS, $\mLambda = \mR \mR^T$\\
-\quad Accurate
-\item Optimise variational lower bound with L-BFGS, $\mLambda = (\mR \mR^T)^{-1}$ \\
-\quad Accurate, and very fast
-\item Newton-Raphson optimisation on the variational lower bound \\
-\quad Straightforward to implement
-\item Newton-Raphson optimisation on the variational lower bound, using block inverses \\
-\quad Straightforward to implement, and can be made fast
+\item Optimise variational lower bound with L-BFGS, $\mLambda = \mR \mR^T$.\\
+\quad Advantage: Accurate.
+\item Optimise variational lower bound with L-BFGS, $\mLambda = (\mR \mR^T)^{-1}$. \\
+\quad Advantage: Accurate, and very fast.
+\item Newton-Raphson optimisation on the variational lower bound. \\
+\quad Advantage: Straightforward to implement.
+\item Newton-Raphson optimisation on the variational lower bound, using block inverses. \\
+\quad Advantage: Straightforward to implement, and can be made fast.
 \end{enumerate}
 
 These algorithms should all fit the same model to the same data
@@ -444,18 +444,18 @@ within numerical tolerances.
 \begin{frame}
 \frametitle{Cholesky factors}
 Any symmetric matrix $\mSigma$ can be written $\mSigma = \mR \mR^T$
-where $\mR$ is lower triangular.
+where $\mR$ is lower triangular. $\mR$ is unique if $\mR_{ii} \geq 0$.
 
 \begin{align*}
 &\begin{pmatrix}
-\mR_{11} \\
-\mR_{21} & \mR_{22} \\
+\mR_{11} & 0 & 0 \\
+\mR_{21} & \mR_{22} & 0 \\
 \mR_{31} & \mR_{32} & \mR_{33}
 \end{pmatrix}
 \begin{pmatrix}
 \mR_{11} & \mR_{21} & \mR_{31} \\
-& \mR_{22} & \mR_{32} \\
-& & \mR_{33}
+0 & \mR_{22} & \mR_{32} \\
+0 & 0 & \mR_{33}
 \end{pmatrix}
 \\
 =& \begin{pmatrix}
@@ -482,11 +482,12 @@ If we re-arrange the covariance matrix to have random effects before
 fixed effects, our posterior covariance matrix is of the form
 \begin{align*} \mLambda =
 \begin{pmatrix}
-\sigma_\vu^2 & & & \sigma_{\vbeta \vu} & \sigma_{\vbeta \vu} \\
-& \ddots & & \vdots & \vdots \\
-& & \sigma_\vu^2 & \sigma_{\vbeta \vu} & \sigma_{\vbeta \vu} \\
-\sigma_{\vbeta \vu} & \ldots & \sigma_{\vbeta \vu} & \sigma_\vbeta^2 \\
-\sigma_{\vbeta \vu} & \ldots &\sigma_{\vbeta \vu}  & & \sigma_\vbeta^2
+\sigma_\vu^2 & 0 & \ldots & 0 & \sigma_{\vbeta \vu} & \sigma_{\vbeta \vu} \\
+0 & \sigma_{\vu}^2 & 0 & 0 & \vdots & \vdots \\
+\vdots & 0 & \ddots & 0 & \vdots & \vdots \\
+0 & 0 & \ldots & \sigma_\vu^2 & \sigma_{\vbeta \vu} & \sigma_{\vbeta \vu} \\
+\sigma_{\vbeta \vu} & \ldots & \ldots & \sigma_{\vbeta \vu} & \sigma_\vbeta^2 & 0 \\
+\sigma_{\vbeta \vu} & \ldots & \ldots &\sigma_{\vbeta \vu}  & 0 & \sigma_\vbeta^2
 \end{pmatrix}
 \end{align*}
 
@@ -501,31 +502,31 @@ be much faster.
 \frametitle{Implementation}
 % Work to date
 \begin{itemize}
-\item 2000 lines of R code, about enough for an R package
-\item 93 functions
-\item Debugging. So much debugging ...
+\item We've written 2,000 lines of R code, about enough for an R package.
+\item There are 93 functions so far.
+\item I spend my life debugging this code.
 \item I've had to learn some numerics/computational statistics along the
-way
-\item Plenty still to do \ldots
+way.
+\item There's still plenty to do \ldots
 \end{itemize}
 \end{frame}
 
 \begin{frame}
 \frametitle{Accuracy results using MCMC}
 \begin{itemize}
-\item Accuracy verified using 1 million MCMC iterations from Stan
-\item Stan converts your model specification into C++ code
-\item A one million iteration run for this model took over 32 CPU days
-\item Can be parallelised across multiple cores
+\item Accuracy verified using 1 million MCMC iterations from Stan.
+\item Stan converts your model specification into C++ code.
+\item A one million iteration run for this model took over 32 CPU days.
+\item Stan can be parallelised across multiple cores.
 \item Pro tips:
 \begin{itemize}
-\item Check your computer has enough RAM
-\item Run longrunning tasks with R -f script.R and nohup
-\item Run them on the biggest, fastest server you can find. verona's pretty good
-\item Checkpoint every few thousand iterations
+\item Check your computer has enough RAM.
+\item Run longrunning tasks with R -f script.R and nohup.
+\item Run them on the biggest, fastest server you can find. verona's pretty good.
+\item Checkpoint every few thousand iterations.
 \end{itemize}
 \item The need for approximate methods is obvious, this is simply not
-practical for many types of applied work
+practical for many types of applied work.
 \end{itemize}
 \end{frame}
 
@@ -555,21 +556,21 @@ $\rho$&0.90&0.90&0.90&0.90 \\
 
 % Pretty pictures
 \begin{frame}
-\frametitle{Plot the MCMC-estimated and approximating densities}
+\frametitle{Plots of the MCMC-estimated and approximating densities}
 \end{frame}
 
 \begin{frame}
 \frametitle{Further work}
 \begin{itemize}
-\item All algorithms should arrive at exactly the same result, up to numerical error i.e. around $10^{-4}$. But they currently don't
+\item All algorithms should arrive at exactly the same result, up to numerical error i.e. around $10^{-4}$. But they currently don't.
 \item More checking. These algorithms should produce the same results on
-a wide range of randomly generated data sets
-\item Algorithms i and iii work well
-\item Algorithm ii is accurate on some data sets, but this isn't good enough
-\item I have concerns about its stability
-\item Algorithm iv is yet to be implemented, but should be straightforward
-\item Splines should be ``easy'' to implement. Doesn't require any major changes to the existing code
-\item Finish writing this all up into a paper, and release an R package
+a wide range of randomly generated data sets.
+\item Algorithms i and iii work well.
+\item Algorithm ii is accurate on some data sets, but this isn't good enough.
+\item I have concerns about its stability.
+\item Algorithm iv is yet to be implemented, but should be straightforward.
+\item Splines should be ``easy'' to implement. Doesn't require any major changes to the existing code.
+\item Finish writing this all up into a paper, and release an R package.
 \end{itemize}
 \end{frame}
 
