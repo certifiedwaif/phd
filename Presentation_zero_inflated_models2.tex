@@ -421,7 +421,7 @@ to the high dimensional integral involved, but the variational lower bound $\log
 \end{frame}
 
 \begin{frame}
-\frametitle{Algorithms to fit model}
+\frametitle{Algorithms to fit model using GVA}
 % Detail what progress has been made, and what results have been obtained
 There are several alternative algorithms we've implemented or will implement
 to fit this model:
@@ -506,6 +506,7 @@ be much faster.
 \item Debugging. So much debugging ...
 \item I've had to learn some numerics/computational statistics along the
 way
+\item Plenty still to do \ldots
 \end{itemize}
 \end{frame}
 
@@ -532,7 +533,7 @@ practical for many types of applied work
 \frametitle{Accuracy results}
 \begin{tabular}{ccccc}
 \hline
-	& Laplacian & GVA & GVA2 & GVA\_nr \\
+	& Laplacian & GVA $(\mLambda=\mR \mR^T)$ & GVA $\mLambda=(\mR \mR)^{-1}$ & GVA NR \\
 \hline
 $\vbeta_1$&0.95&0.95&0.95&0.95 \\
 $\vbeta_2$&0.81&0.90&0.85&0.90 \\
