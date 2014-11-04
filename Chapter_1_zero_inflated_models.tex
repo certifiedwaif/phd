@@ -324,8 +324,89 @@ $$
 
 where $A_q = A + m/2$ and $B_q = B + \|\vmu_\vu\|^2/2 +  \tr{(\mLambda_{\vu \vu})}/2$.
 
+\subsection{Fitting algorithms}
+% Detail techniques used for fitting models.
+
+Laplace's method
+% NR
+% Detail the function and its derivatives
+Function
+\begin{align*}
+\vp^T\vy^T\mC\vmu - \vp^T\exp{(\mC \vmu + \half \mC \mLambda \mC^T)} - \half \vmu^T \mSigma^{-1} \vmu - \half \tr{(\mLambda \mSigma^{-1})}
+\end{align*}
+
+Derivative
+\begin{align*}
+% Should there be a \vp in front of \vy? There is in the above function
+vg &= \mC(\vy - \vp^T \exp{(\mC \vmu)}) - \mSigma^{-1} \vmu \\
+mH &= -\mC^T \text{diag}(\exp{(\mC \vmu)}) \mC - \mSigma^{-1}
+\end{align*}
+
+GVA
+% L-BFGS
+% Detail the function and its derivatives
+Function
+\begin{align*}
+\vp^T\vy^T\mC \vmu - \vp^T B(\mC \vmu, \text{diag}(\mC \mLambda \mC^T)) - \half \vmu \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} \\
+- \frac{d}{2} \log{(2 \pi)} + \half \log{|\mSigma^{-1}|} \\
++ \frac{d}{2} \log{(2 \pi)} + \frac{d}{2} \\
++ \log{|\mR|}
+\end{align*}
+
+vg
+\begin{align*}
+\mC^T \vp^T(\vy - B^{(1)}(\mC \vmu, \mC \mLambda \mC^T)) - \mSigma^{-1}
+\end{align*}
+
+dmLambda =
+\begin{align*}
+[\mLambda&^{-1} - \vp^T \mC^T \text{diag}(B^{(2)}(\mC \vmu, \mC \mLambda \mC^T)) \mC \vp) - \mSigma^{-1}] \mR
+\end{align*} 
+ 
+GVA2
+% L-BFGS
+% Detail the function and its derivatives under this parameterisation
+% Difficulties re: multimodal likelihood, tricks to get that to work
+Function
+\begin{align*}
+\vp^T\vy^T\mC \vmu - \vp^T B(\mC \vmu, \text{diag}(\mC \mLambda \mC^T)) - \half \vmu \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} \\
+- \frac{d}{2} \log{(2 \pi)} + \half \log{|\mSigma^{-1}|} \\
++ \frac{d}{2} \log{(2 \pi)} + \frac{d}{2} \\
+- \log{|\mR|}
+\end{align*}
+
+dmLambda =
+\begin{align*}
+-\mR^{-1}[\mLambda&^{-1} - \vp^T \mC^T \text{diag}(B^{(2)}(\mC \vmu, \mC \mLambda \mC^T)) \mC \vp) - \mSigma^{-1}]\mLambda
+\end{align*} 
+
+% GVA NR
+% NR
+% Detail the function and its derivatives
+vg
+\begin{align*}
+\mC^T\vp[\vy - B^{1}(\mC \vmu, \text{diag}(\mC \mLambda \mC^T))] - \mSigma^{-1} \vmu
+\end{align*}
+
+mH
+\begin{align*}
+-\mC^T \text{diag}(\vp \odot B^{(2)}(\mC \vmu, \text{diag}(\mC \mLambda \mC^T))) - \mSigma^{-1}
+\end{align*}
+
+Algorithm
+\begin{align*}
+\mLambda \leftarrow (\mC^T\vp^T B^{(2)}(\mC \vmu, \text{diag}(\mC \mLambda \mC^T)) \mC)^{-1} \\
+\vmu \leftarrow \vmu + \mLambda vg
+\end{align*}
+
+% Splines
+
 \subsection{Results}
 
+% Table of accuracy results
+% Graphs
+
+% This section is not very interesting.
 \section{Theory of variational approximation of zero-inflated Poisson models}
 Let $Z_i = R_i Y_i$.
 
