@@ -324,8 +324,161 @@ $$
 
 where $A_q = A + m/2$ and $B_q = B + \|\vmu_\vu\|^2/2 +  \tr{(\mLambda_{\vu \vu})}/2$.
 
-\subsection{Results}
+\subsection{Optimising the GVA lower bound}
+% Detail techniques used for fitting models.
+The Gaussian variational lower bound in Algorithm 2 can be optimised using a 
+variety of algorithms. Each of these algorithms is a trade-off between accuracy, 
+stability and speed.
 
+\subsubsection{Laplace's method}
+Laplace's method of approximation relies on a second order Taylor expansion of the
+log likelihood around the mode. This can then be optimised with Newton-Raphson
+iterations. The algorithm is very quick to execute, but the resulting approximate
+posterior distributions are not as accurate as those produced by the other algorithms
+considered in this article.
+
+% NR
+% Detail the function and its derivatives
+Function
+\begin{align*}
+\vp^T\vy^T\mC\vmu - \vp^T\exp{(\mC \vmu + \half \mC \mLambda \mC^T)} - \half \vmu^T \mSigma^{-1} \vmu - \half \tr{(\mLambda \mSigma^{-1})}
+\end{align*}
+
+Derivative
+\begin{align*}
+% Should there be a \vp in front of \vy? There is in the above function
+vg &= \mC(\vy - \vp^T \exp{(\mC \vmu)}) - \mSigma^{-1} \vmu \\
+mH &= -\mC^T \text{diag}(\exp{(\mC \vmu)}) \mC - \mSigma^{-1}
+\end{align*}
+
+% Algorithm?
+
+\subsubsection{GVA}
+% More complicated functions and derivatives, but more accurate
+The first variant of the Gaussian Variational Approximation algorithm
+optimises the Gaussian variational lower bound of the log likelihood with respect
+to $\vmu$ and the Cholesky decomposition $\mR$ of $\mLambda$, that is,
+$\mLambda = \mR \mR^T$. This algorithm trades the computational complexity of 
+numerically evaluating the integral in Equation \ref{eq:gva} for greatly increased 
+accuracy in the approximating posterior distribution.
+
+L-BFGS
+% Detail the function and its derivatives
+Function
+\begin{align}\label{eq:gva}
+\vp^T\vy^T\mC \vmu - \vp^T B(\mC \vmu, \text{diag}(\mC \mLambda \mC^T)) - \half \vmu \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} \\
+- \frac{d}{2} \log{(2 \pi)} + \half \log{|\mSigma^{-1}|} \\
++ \frac{d}{2} \log{(2 \pi)} + \frac{d}{2} \\
++ \log{|\mR|}
+\end{align}
+
+vg
+\begin{align*}
+\mC^T \vp^T(\vy - B^{(1)}(\mC \vmu, \mC \mLambda \mC^T)) - \mSigma^{-1}
+\end{align*}
+
+dmLambda =
+\begin{align*}
+[\mLambda&^{-1} - \vp^T \mC^T \text{diag}(B^{(2)}(\mC \vmu, \mC \mLambda \mC^T)) \mC \vp) - \mSigma^{-1}] \mR
+\end{align*} 
+ 
+\subsubsection{GVA2}
+The second variant of the Gaussian Variational Approximation algorithm is similiar to
+the first, but instead of optimising $\vmu$ and $\mR$ where $\mLambda=\mR \mR^T$,
+instead we optimise $\mR$ where $\mLambda = (\mR \mR^T)^{-1}$.
+% The function and derivatives change
+This has the advantage that if we re-order the columns of $\mLambda$ such that
+the random effects are placed before the fixed effects then due to the assumed 
+independence between the random effects, the off-diagonals of the Cholesky decomposition
+will 0s and so the Cholesky factor $\mR$ will be sparse. This mitigates the increased
+computational complexity of this algorithm versus Laplace's method to some degree.
+
+% More complicated functions and derivatives, but more accurate
+% Can be quite fast because of the special form of $\mR$.
+
+L-BFGS
+% Detail the function and its derivatives under this parameterisation
+% Difficulties re: multimodal likelihood, tricks to get that to work
+The variational lower bound is not necessarily unimodal, leading to potential
+difficulty in optimising to the global maximum. This problem was sidestepped by
+optimising the parameter estimates using Laplace's method first to get a rough
+estimate, then using the GVA2 algorithm to further refine that estimate. This led
+to an extremely accurate approximation of the true posterior at the expense of some
+additional computational effort.
+% Re-order the covariance matrix so that Chevron form is ``reversed''. This makes
+% the Cholesky factorisation very simple, and reduces the number of parameters that
+% you need to optimise and store.
+Function
+\begin{align*}
+\vp^T\vy^T\mC \vmu - \vp^T B(\mC \vmu, \text{diag}(\mC \mLambda \mC^T)) - \half \vmu \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} \\
+- \frac{d}{2} \log{(2 \pi)} + \half \log{|\mSigma^{-1}|} \\
++ \frac{d}{2} \log{(2 \pi)} + \frac{d}{2} \\
+- \log{|\mR|}
+\end{align*}
+
+dmLambda =
+\begin{align*}
+-\mR^{-1}[\mLambda&^{-1} - \vp^T \mC^T \text{diag}(B^{(2)}(\mC \vmu, \mC \mLambda \mC^T)) \mC \vp) - \mSigma^{-1}]\mLambda
+\end{align*} 
+
+\subsubsection{GVA NR}
+This variant of the algorithm uses Newton-Raphson optimisation on the Gaussian
+variational lower bound. This algorithm is fast, but potentially unstable.
+% Essentially a very straightforward optimisation approach, but potentially unstable.
+% Detail the function and its derivatives
+\begin{align*}
+\nabla l(\vmu, \mLambda; \vy) &= \mC^T\vp[\vy - B^{1}(\mC \vmu, \text{diag}(\mC \mLambda \mC^T))] - \mSigma^{-1} \vmu
+\end{align*}
+
+\begin{align*}
+\nabla^2 l(\vmu, \mLambda; \vy) &= -\mC^T \text{diag}(\vp \odot B^{(2)}(\mC \vmu, \text{diag}(\mC \mLambda \mC^T))) - \mSigma^{-1}
+\end{align*}
+
+Algorithm
+\begin{align*}
+\mLambda \leftarrow (\mC^T\vp^T B^{(2)}(\mC \vmu, \text{diag}(\mC \mLambda \mC^T)) \mC)^{-1} \\
+\vmu \leftarrow \vmu + \mLambda vg
+\end{align*}
+
+\begin{algorithm}\label{alg:algorithm_nr}
+\label{algorithm_nr}
+\caption[Algorithm GVA NR]{Iterative scheme for obtaining optimal $\vmu$ and $\mLambda$
+given $\vy$, $\mC$ and $\vp$}
+\begin{algorithmic}
+% Fit \vmu, \mLambda using Laplace approximation
+\REQUIRE{}
+\WHILE{the increase in $\log{\underline{p}}(\vmu, \mLambda; \vy)$ is significant}
+% \vmu, \mLambda
+\STATE $\mLambda \leftarrow (\mC^T\vp^T B^{(2)}(\mC \vmu, \text{diag}(\mC \mLambda \mC^T)) \mC)^{-1}$
+\STATE $\vmu \leftarrow \vmu + \mLambda \nabla l(\vmu, \mLambda; \vy)$
+\ENDWHILE
+\end{algorithmic}
+\end{algorithm}
+
+% Splines
+
+\subsection{Results/Numerical experiments}
+
+% Comparison with MCMC
+Our approximation algorithms were compared with the posterior distribution estimated
+by kernel density estimate from a 1 million MCMC sample produced using Stan.
+% It works
+% Stability was confirmed over 100 randomly generated data sets.
+
+The stability of the algorithms was confirmed by running them on 100 different
+data sets that were randomly generated after having initialised the random number
+generator with different seeds.
+
+% Table of accuracy results
+% Graphs - exactly what sort of graphs do we need?
+% Increase in lower bound
+% MCMC posterior, with approximating posterior for at least one or two of the
+% key parameters, such as, say, vbeta[2]
+
+
+\section{Application}
+
+% This section can probably be dropped.
 \section{Theory of variational approximation of zero-inflated Poisson models}
 Let $Z_i = R_i Y_i$.
 
