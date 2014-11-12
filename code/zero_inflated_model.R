@@ -278,7 +278,7 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
     {
       fit1 = fit.GVA_new(mult$vmu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B")
     } else if (method == "gva_nr") {
-      fit1 = fit.GVA_nr(mult$vmu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B")
+      fit1 = fit.GVA_nr(mult$vmu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B", p=p, m=m)
     } else {
       stop("method must be either laplacian, gva, gva2 or gva_nr")
     }
