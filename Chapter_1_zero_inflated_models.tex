@@ -434,11 +434,11 @@ variational lower bound. This algorithm is fast, but potentially unstable.
 \nabla^2 l(\vmu, \mLambda; \vy) &= -\mC^T \text{diag}(\vp \odot B^{(2)}(\mC \vmu, \text{diag}(\mC \mLambda \mC^T))) - \mSigma^{-1}
 \end{align*}
 
-Algorithm
-\begin{align*}
-\mLambda \leftarrow (\mC^T\vp^T B^{(2)}(\mC \vmu, \text{diag}(\mC \mLambda \mC^T)) \mC)^{-1} \\
-\vmu \leftarrow \vmu + \mLambda vg
-\end{align*}
+%Algorithm
+%\begin{align*}
+%\mLambda \leftarrow (\mC^T\vp^T B^{(2)}(\mC \vmu, \text{diag}(\mC \mLambda \mC^T)) \mC)^{-1} \\
+%\vmu \leftarrow \vmu + \mLambda vg
+%\end{align*}
 
 \begin{algorithm}\label{alg:algorithm_nr}
 \label{algorithm_nr}
