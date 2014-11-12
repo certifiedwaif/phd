@@ -238,6 +238,7 @@ test_accuracy = function(mult, mcmc_samples, approximation)
 {
   pdf(paste0("accuracy_plots_", approximation, ".pdf"))
   var_result = zero_infl_var(mult, method=approximation, verbose=TRUE)
+  #return(var_result)
   # vbeta accuracy
   calculate_accuracy3 = function(mcmc_samples, dist_fn, param1, param2)
   {
@@ -389,21 +390,21 @@ main_check_accuracy <- function()
 # Need to be able to compare the solution paths of each approximation
 
 # Generate data
-for (i in 1:100) {
-  set.seed(i)
-  mult = generate_test_data(20, 100)
-  # Monte Carlo Markov Chains approximation
-  mcmc_samples = mcmc_approximation(mult, iterations=1e6)
-  # Save the results, because this takes such a long time to run.
-}
-save(mult, mcmc_samples, file="accuracy_good.RData")
-set.seed(1)
-mult = generate_test_data(20, 100)
-# Monte Carlo Markov Chains approximation
-mcmc_samples = mcmc_approximation(mult, iterations=1e6)
+# for (i in 1:100) {
+#   set.seed(i)
+#   mult = generate_test_data(20, 100)
+#   # Monte Carlo Markov Chains approximation
+#   mcmc_samples = mcmc_approximation(mult, iterations=1e6)
+#   # Save the results, because this takes such a long time to run.
+# }
+# save(mult, mcmc_samples, file="accuracy_good.RData")
+# set.seed(1)
+# mult = generate_test_data(20, 100)
+# # Monte Carlo Markov Chains approximation
+# mcmc_samples = mcmc_approximation(mult, iterations=1e4)
 # Save the results, because this takes such a long time to run.
 #save(mult, mcmc_samples, file="accuracy.RData")
-load(file="accuracy.RData")
+#load(file="accuracy.RData")
 # Test all other approximations against it
 
 # Test multivariate approximation's accuracy
@@ -411,3 +412,14 @@ var1 = test_accuracy(mult, mcmc_samples, "laplacian")
 var2 = test_accuracy(mult, mcmc_samples, "gva")
 var3 = test_accuracy(mult, mcmc_samples, "gva2")
 var4 = test_accuracy(mult, mcmc_samples, "gva_nr")
+
+for (i in 1:100) {
+  set.seed(i)
+  mult = generate_test_data(20, 100)
+  mcmc_samples = mcmc_approximation(mult, iterations=1e4)
+  
+  var1 = test_accuracy(mult, mcmc_samples, "laplacian")
+  var2 = test_accuracy(mult, mcmc_samples, "gva")
+  var3 = test_accuracy(mult, mcmc_samples, "gva2")
+  var4 = test_accuracy(mult, mcmc_samples, "gva_nr")
+}
