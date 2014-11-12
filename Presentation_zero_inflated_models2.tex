@@ -67,7 +67,7 @@ $$
 
 \noindent where for $1\le i\le n$,
 \begin{align*} 
-R_i &\sim \text{Bernoulli}(\rho) \\
+R_i &\sim \text{Bernoulli}(\rho) \text{ and}\\
 Y_i &\sim \text{Poisson}(\lambda)
 \end{align*}
 
@@ -98,7 +98,7 @@ MCMC & Bayesian & Slow \\
 	& Very accurate &  \\
 \hline
 Variational Bayes & Bayesian & May lose accuracy, or underestimate variance \\
-& Fast  & Solution may be intractable \\ 
+& Fast  & \\ %Solution may be intractable \\ 
 & Still quite accurate & \\
 \hline
 \end{tabular}
@@ -109,14 +109,14 @@ Variational Bayes & Bayesian & May lose accuracy, or underestimate variance \\
 \begin{frame}
 \frametitle{An overview of Variational Bayes}
 \begin{itemize}
-\item \emph{Idea:} Approximate the full posterior $p(\theta|\vx)$ with a simpler approximation $q(\theta)$.
+\item \emph{Idea:} Approximate the full posterior $p(\theta|\vy)$ with a simpler approximation $q(\vtheta)$.
 
-\item Fit $q(\theta)$ to the data by minimising the KL divergence between $p(\theta|\vx)$ and $q(\theta)$.
+\item Fit $q(\vtheta)$ to the data by minimising the KL divergence between $p(\vtheta|\vy)$ and $q(\vtheta)$.
 
-\item Theory guarantees that $\log p(x)\ge 
-\log \underline{p}(x;q)$ and that 
+\item Theory guarantees that $\log p(\vy)\ge 
+\log \underline{p}(\vy;q)$ and that 
 $$
-\log \underline{p}(x;q) = \int q(\vtheta) \left\{ \frac{p(\vy,\vtheta)}{q(\vtheta)} \right\}
+\log \underline{p}(x;q) = \int q(\vtheta) \left\{ \frac{p(\vy,\vtheta)}{q(\vtheta)} \right\} d \vtheta
 $$ 
 
 \noindent will
@@ -150,9 +150,9 @@ q(\theta) = q(\lambda) q(\rho) \prod_{i=1}^n q(r_i)
 $$
 where
 \begin{align*}
-q(\lambda) &= \text{Gamma}(\alpha_{q(\lambda)}, \beta_{q(\lambda)}) \\
-q(\rho) &= \text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)}) \\
-q(r_i) &= \text{Bernoulli}(p_i)
+q(\lambda) &= \text{Gamma}(\alpha_{q(\lambda)}, \beta_{q(\lambda)}), \\
+q(\rho) &= \text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)}) \text{ and} \\
+q(r_i) &= \text{Bernoulli}(p_i).
 \end{align*}
 
 % \begin{align*}
@@ -176,26 +176,27 @@ in turn until the lower bound of the approximation converges.
 \frametitle{Mean field updates}
 As we are using conjugate priors in our model, the mean field updates can be derived.
 \begin{align*}
-q(\lambda) &= \text{Gamma}(\alpha_{q(\lambda)} = \alpha_\lambda + \vone^T \vx, \beta_{q(\lambda)} = \beta_\lambda + \vone^T\vp) \\
-q(\rho) &= \text{Beta}(\alpha_{q(\rho)} = \alpha_\rho + \vone^T\vr, \beta_{q(\rho)} = \beta_\rho + \vone^T(\vone - \vr)) \\
-q(r_i) &= \text{Bernoulli}(p_i = \text{expit}(\eta_i))
+q(\lambda) &= \text{Gamma}(\alpha_{q(\lambda)} = \alpha_\lambda + \vone^T \vx, \beta_{q(\lambda)} = \beta_\lambda + \vone^T\vp), \\
+q(\rho) &= \text{Beta}(\alpha_{q(\rho)} = \alpha_\rho + \vone^T\vr, \beta_{q(\rho)} = \beta_\rho + \vone^T(\vone - \vr)) \text{ and} \\
+q(r_i) &= \text{Bernoulli}(p_i = \text{expit}(\eta_i)).
 \end{align*}
 where
-$$
-\eta_i = - \frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} + \Psi(\alpha_{q(\rho)}) - \Psi(\beta_{q(\rho)})
-$$
+\begin{align*}
+\eta_i &= - \frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} + \Psi(\alpha_{q(\rho)}) - \Psi(\beta_{q(\rho)}) \text{ and} \\
+\text{expit}(x) &= \text{logit}^{-1}(x)
+\end{align*}
 
 \end{frame}
 
 \begin{frame}
 \frametitle{Results/Accuracy}
 % Definition of accuracy
-Accuracy is defined as 1 minus half the difference in $L_1$ norm between the
+One measure of accuracy is defined as 1 minus half the difference in $L_1$ norm between the
 true posterior distribution and the approximate posterior distribution of the
 variational approximation.
 
 $$
-\text{Accuracy} = 1 - \half \|p(\vtheta|\vx) - q(\vtheta)\|_1
+\text{Accuracy} = 1 - \half \int \left |p(\vtheta|\vy) - q(\vtheta) \right | d \vtheta
 $$
 
 This was calculated using the kernel density estimate of the posterior
@@ -239,28 +240,28 @@ length n.
 Consider a linear random intercept model with
 $$
 \begin{array}{ll}
-\vy|\vbeta,\vu,\sigma_y^2 &\sim N(\mX \vbeta + \mZ \vu, \sigma_y^2 \mI) \\
-\vbeta &\sim N(\vzero, \sigma_\vbeta^2 \mI) \\
-\vu|\sigma_u^2 &\sim N(\vzero, \sigma_u^2 \mI)
+\vy|\vbeta,\vu,\sigma_y^2 &\sim N(\mX \vbeta + \mZ \vu, \sigma_y^2 \mI) \\[2ex]
+\vbeta &\sim N(\vzero, \sigma_\vbeta^2 \mI) \text{ and} \\[2ex]
+\vu|\sigma_u^2 &\sim N(\vzero, \sigma_u^2 \mI).
 \end{array}
 $$
 \noindent where
 $$
-\begin{array}{ll}
-\vy & =
+\begin{array}{rll}
+& \vy & =
 \begin{pmatrix}
 y_1 \\
 \vdots \\
 y_n
-\end{pmatrix} \\
-\mX &= [\vone_n, \vx_1, \cdots, \vx_p] \\
-\mZ &=
+\end{pmatrix}, \\[2ex]
+& \mX &= [\vone_n, \vx_1, \cdots, \vx_p] \\
+& \mZ &=
 \begin{bmatrix}
 \vone_{n_1} &  & \\
 & \ddots & \\
 & & \vone_{n_m}
 \end{bmatrix} \\
-\mC &= [\mX, \mZ]
+ \text{and}& \mC &= [\mX, \mZ].
 \end{array}
 $$
 \end{frame}
@@ -278,16 +279,16 @@ of covariates $\mX$ and $\mZ$ of dimensions $n \times p$ and $n \times m$,
 respectively.
 
 \begin{align*}
-p(\vy|\vbeta, \vu, \vr) &= \exp{(\vy^T\mR(\mX \vbeta + \mZ \vu) - \vr^Te^{\mX \vbeta + \mZ \vu} - \vone^T\log{(\vy !)})} \\
-r_i|\rho & \stackrel{\mbox{\tiny iid}}{\sim} \text{Bernoulli}(\rho), \ \{i \colon y_i=0\} \\
-\vu|\sigma_u^2 &\sim N({\bf 0}, \sigma_u^2 \mI) \\
+p(\vy|\vbeta, \vu, \vr) &= \exp{(\vy^T\mR(\mX \vbeta + \mZ \vu) - \vr^Te^{\mX \vbeta + \mZ \vu} - \vone^T\log{(\vy !)})}, \\
+r_i|\rho & \stackrel{\mbox{\tiny iid}}{\sim} \text{Bernoulli}(\rho), \ \{i \colon y_i=0\}, \\
+\text{and }\vu|\sigma_u^2 &\sim N({\bf 0}, \sigma_u^2 \mI) \\
 \end{align*}
 \noindent where $\mR =\mbox{diag}(\vr)$.
 We use the priors:
 \begin{align*}
-\vbeta &\sim N({\bf 0}, \sigma_\vbeta^2\mI) \\
-\sigma_u^2 &\sim IG(\alpha_{\sigma_u^2}, \beta_{\sigma_u^2}) \\
-\rho &\sim \text{Beta}(a_\rho, b_\rho) \\
+\vbeta &\sim \text{N}({\bf 0}, \sigma_\vbeta^2\mI), \\
+\sigma_\vu^2 &\sim \text{IG}(\alpha_{\sigma_\vu^2}, \beta_{\sigma_\vu^2}), \\
+\text{and }\rho &\sim \text{Beta}(a_\rho, b_\rho) \\
 \end{align*}
 \end{frame}
 
@@ -299,10 +300,10 @@ q(\theta) = q(\vbeta, \vu) q(\sigma_u^2) q(\rho) \prod_{i=1}^n q(r_i)
 $$
 where
 \begin{align*}
-q(\vbeta, \vu) &\sim N(\vmu, \mLambda) \\
-q(\sigma_u^2) &\sim IG(\alpha_{\sigma_u^2}, \beta_{\sigma_u^2}) \\
-q(\rho) &= \text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)}) \\
-q(r_i) &= \text{Bernoulli}(p_i), \ \ 1 \leq i \leq n
+q(\vbeta, \vu) &\sim \text{N}(\vmu, \mLambda), \\
+q(\sigma_u^2) &\sim \text{IG}(\alpha_{\sigma_u^2}, \beta_{\sigma_u^2}), \\
+q(\rho) &= \text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)}) \text{ and} \\
+q(r_i) &= \text{Bernoulli}(p_i), \ \ 1 \leq i \leq n.
 \end{align*}
 \end{frame}
 
@@ -310,7 +311,7 @@ q(r_i) &= \text{Bernoulli}(p_i), \ \ 1 \leq i \leq n
 \frametitle{Gaussian and Laplacian Variational Approximations}
 \begin{itemize}
 \item Lack of conjugacy means mean field updates won't be analytically tractable for the regression parameters.
-\item We try Laplacian and Gaussian Variational Approximations instead, assuming that
+\item We try Laplace's method and Gaussian Variational Approximations (GVA) instead, assuming that
 $$
 \begin{pmatrix}
 \vbeta \\
@@ -332,9 +333,9 @@ and then perform mean field updates on the other parameters.
 \begin{frame}
 \frametitle{Mean field updates}
 \begin{align*}
-q(\vbeta, \vu) &= N(\vmu, \mLambda) \\
-q(\sigma_{\vu}^2) &= IG\left(\alpha_{q(\sigma_{\vu}^2)} = \alpha_{\sigma_u^2} + \frac{m}{2}, \beta_{q(\sigma_{\vu}^2)} = \beta_{\sigma_u^2} + \frac{\|\vmu_\vu\|^2}{2} + \frac{\text{tr}(\mLambda_{\vu\vu})}{2}\right) \\
-q(\rho) &= \text{Beta}(\alpha_{q(\rho)} = \alpha_\rho + \vone^T\vp, \beta_{q(\rho)} = \beta_\rho + \vone^T(\vone - \vp)) \\
+q(\vbeta, \vu) &= \text{N}(\vmu, \mLambda), \\
+q(\sigma_{\vu}^2) &= \text{IG}\left(\alpha_{q(\sigma_{\vu}^2)} = \alpha_{\sigma_u^2} + \frac{m}{2}, \beta_{q(\sigma_{\vu}^2)} = \beta_{\sigma_u^2} + \frac{\|\vmu_\vu\|^2}{2} + \frac{\text{tr}(\mLambda_{\vu\vu})}{2}\right), \\
+q(\rho) &= \text{Beta}(\alpha_{q(\rho)} = \alpha_\rho + \vone^T\vp, \beta_{q(\rho)} = \beta_\rho + \vone^T(\vone - \vp))\text{ and} \\
 q(r_i) & \sim \text{Bernoulli}{(p_i)}, \ \ \ 1 \leq i \leq n
 \end{align*}
 where
@@ -382,7 +383,7 @@ $$
 %\end{frame}
 
 \begin{frame}
-\frametitle{Laplacian approximation}
+\frametitle{Laplace's method approximation}
 We Taylor expand the log likelihood $\log{p(\vtheta)}$ around the mode
 $\vtheta_*$:
 \begin{align*}
@@ -407,12 +408,12 @@ and so we have an approximate posterior $q(\vtheta) = N(\theta|\mu, \eta^{-1})$ 
 \begin{frame}
 \frametitle{Optimising the Gaussian Variational Approximation}
 The true likelihood $\log p(\vbeta, \vu, \mLambda)$ is hard to optimise due 
-to the high dimensional integral involved, but the variational lower bound $\log \overline{p}(\vmu, \mLambda)$ can be optimised.
+to the high dimensional integral involved, but the variational lower bound $\log \underline{p}(\vmu, \mLambda)$ can be optimised.
 \begin{align*}
 \log p(\vbeta, \vu, \mLambda) &= \vy^T \mR \mC \vnu + \vone^T c(\vy) + \frac{m}{2} \log |\mLambda| - \frac{mK}{2} \log{(2 \pi)}\\
 &\quad + \log  \int_{\mathbb{R}^{m}} \exp \big[ \vy^T (\mR \mZ \vu - \mR^T b( \mX \vbeta + \mZ \vu)) \\
  &\quad \quad \quad \quad \quad \quad \quad - \half {\vu^T \mLambda^{-1} \vu } \big] d \vu + \text{const.}\\
-\log \overline{p}(\vmu, \mLambda) &= \vy^T \mR \mC \vmu - \vp^T \exp{\left(\mC \vmu + \half \diag{(\mC \mLambda \mC^T)}\right)} \\
+\log \underline{p}(\vmu, \mLambda) &= \vy^T \mR \mC \vmu - \vp^T \exp{\left(\mC \vmu + \half \diag{(\mC \mLambda \mC^T)}\right)} \\
 & \quad - \vmu^T \mSigma^{-1} \vmu - \half \tr{(\mLambda \mSigma^{-1})} + \half \log{|\mSigma^{-1}\mLambda|} + \text{const.} \\
 %&= \mR\mC^T(\vy - B^{(1)}(\vmu, \sigma^2_u)) \\
 %& \quad - \vmu^T \mSigma^{-1} \vmu - \half \tr{(\mLambda \mSigma^{-1})} + \half \log{|\mSigma^{-1}\mLambda|} + \text{const.} \\
@@ -431,10 +432,9 @@ to fit this model:
 \quad Advantage: Accurate.
 \item Optimise variational lower bound with L-BFGS, $\mLambda = (\mR \mR^T)^{-1}$. \\
 \quad Advantage: Accurate, and very fast.
-\item Newton-Raphson optimisation on the variational lower bound. \\
-\quad Advantage: Straightforward to implement.
 \item Newton-Raphson optimisation on the variational lower bound, using block inverses. \\
-\quad Advantage: Straightforward to implement, and can be made fast.
+\quad Advantage: Straightforward to implement, and very fast. \\
+\quad Disadvantage: Unstable.
 \end{enumerate}
 
 These algorithms should all fit the same model to the same data
@@ -462,7 +462,7 @@ where $\mR$ is lower triangular. $\mR$ is unique if $\mR_{ii} \geq 0$.
 \mR_{11}^2 & & \text{symmetric}\\
 \mR_{21}\mR_{11} & \mR_{21}^2 + \mR_{22}^2 \\
 \mR_{31} \mR_{11} & \mR_{31}\mR_{21} + \mR_{32}L_{22} & \mR_{31}^2 + \mR_{32} ^2 + \mR_{33}^2
-\end{pmatrix}
+\end{pmatrix}.
 \end{align*}
 
 So we only have $\frac{p(p-1)}{2}$ numbers to deal with instead of
@@ -482,20 +482,19 @@ If we re-arrange the covariance matrix to have random effects before
 fixed effects, our posterior covariance matrix is of the form
 \begin{align*} \mLambda =
 \begin{pmatrix}
-\sigma_\vu^2 & 0 & \ldots & 0 & \sigma_{\vbeta \vu} & \sigma_{\vbeta \vu} \\
-0 & \sigma_{\vu}^2 & 0 & 0 & \vdots & \vdots \\
+\mLambda_\vu^2 & 0 & \ldots & 0 & \mLambda_{\vbeta \vu} & \mLambda_{\vbeta \vu} \\
+0 & \mLambda_{\vu}^2 & 0 & 0 & \vdots & \vdots \\
 \vdots & 0 & \ddots & 0 & \vdots & \vdots \\
-0 & 0 & \ldots & \sigma_\vu^2 & \sigma_{\vbeta \vu} & \sigma_{\vbeta \vu} \\
-\sigma_{\vbeta \vu} & \ldots & \ldots & \sigma_{\vbeta \vu} & \sigma_\vbeta^2 & 0 \\
-\sigma_{\vbeta \vu} & \ldots & \ldots &\sigma_{\vbeta \vu}  & 0 & \sigma_\vbeta^2
+0 & 0 & \ldots & \mLambda_\vu^2 & \mLambda_{\vbeta \vu} & \mLambda_{\vbeta \vu} \\
+\mLambda_{\vbeta \vu} & \ldots & \ldots & \mLambda_{\vbeta \vu} & \mLambda_\vbeta_1^2 & \mLambda_{\vbeta_1 \vbeta_2} \\
+\mLambda_{\vbeta \vu} & \ldots & \ldots &\mLambda_{\vbeta \vu}  & \mLambda_{\vbeta_1 \vbeta_2} & \mLambda_\vbeta_2^2
 \end{pmatrix}
 \end{align*}
 
 As the $\sigma_\vu^2$ block is diagonal, the Cholesky factor is 
-sparse, with only $m + \frac{p(p-1)}{2}$ non-zero elements. If $p$ is small
+sparse, with $\half m(m-1)$ zero elements. If $p$ is small
 and $m$ is large, as will typically be the case, then this algorithm will
 be much faster.
-
 \end{frame}
 
 \begin{frame}
@@ -569,7 +568,7 @@ a wide range of randomly generated data sets.
 \item Algorithm ii is accurate on some data sets, but this isn't good enough.
 \item I have concerns about its stability.
 \item Algorithm iv is yet to be implemented, but should be straightforward.
-\item Splines should be ``easy'' to implement. Doesn't require any major changes to the existing code.
+\item Splines, random slopes and additive models should be ``easy'' to implement. Doesn't require any major changes to the existing code.
 \item Finish writing this all up into a paper, and release an R package.
 \end{itemize}
 \end{frame}

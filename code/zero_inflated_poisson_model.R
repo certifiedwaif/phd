@@ -24,7 +24,7 @@ norm <- function(v) sqrt(sum(v^2))
 
 vg.lap <- function(vmu,vy,vr,mC,mSigma.inv,mLambda) 
 {       
-    vg <- t(mC)%*%(vy - vr*exp(mC%*%vmu)) - mSigma.inv%*%vmu
+    vg <- t(mC)%*%(vr*vy - vr*exp(mC%*%vmu)) - mSigma.inv%*%vmu
     
     return(vg)
 }

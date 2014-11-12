@@ -40,7 +40,6 @@ using a deterministic algorithm which converges much more quickly.
 
 % Cite prior publications in this area
 
-
 In this paper, we follow the earlier work of \ldots
 
 In Section \ref{sec:methodology} we provide the framework for our approach. In
@@ -64,9 +63,7 @@ diagonal matrix whose diagonal elements are $\vx$.
 In this section we present a VB approach to a Bayesian zero-inflated Poisson model
 for count data with extra zeroes. After introducing Bayesian zero-inflated models
 and VB methodology we derive the VB factorised approximation to the full Bayesian
-model.
-
- 
+model. 
 
 \subsection{Variational Bayesian inference}
 
@@ -264,14 +261,8 @@ $$
 \noindent The optimal approximation for $\vr$ is
 $$
 \begin{array}{rl}
-q(\vr) &\propto \exp{\{\bE_{-q(\vr)}y^T\mR(\mC\vmu) - \vr^T\exp{(\mC\vnu)}-\half \vnu^T \text{diag}(\sigma_{\vu}^2)^{-1} \vnu\}}
-\end{array}
-$$
-
-$$
-\begin{array}{rl}
-&\bE_{-q(\vr)} [\vy^T\mR(C\vnu) - \vr^T\exp{(\mC\vnu)}-\half \vnu^T \text{diag}(\sigma_{\vu}^2)^{-1} \vnu]\\
-=&\vy^T\mR\mC \vmu - \vp^T \exp{\{\mC \vmu + \half \text{diag}(\mC \mLambda \mC^T)\}} - \half \vmu^T \hat{\mD} \vmu - \half \text{tr}(\mLambda \hat{\mD} ))
+q(\vr) &\propto \exp{\{\bE_{-q(\vr)}y^T\mR(\mC\vmu) - \vr^T\exp{(\mC\vnu)}-\half \vnu^T \text{diag}(\sigma_{\vu}^2)^{-1} \vnu\}} \\
+&= \exp{[\vy^T\mR\mC \vmu - \vp^T \exp{\{\mC \vmu + \half \text{diag}(\mC \mLambda \mC^T)\}} - \half \vmu^T \hat{\mD} \vmu - \half \text{tr}(\mLambda \hat{\mD} ))]}
 \end{array}
 $$
 
@@ -280,7 +271,7 @@ $$
 \noindent This is close in form to a Poisson regression model. Poisson regression models
 with normal priors have no closed form for their mean field updates due to
 non-conjugacy, but can be fit using Gaussian variational approximation
-\citep{ormerod09}. The model can be fit using Algorithm \ref{alg:algorithm_two} below.
+\citep{ormerod09}. The model can be fit using Algorithm 2 below.
 
 \begin{algorithm}\label{alg:algorithm_two}
 \label{algorithm2}
@@ -339,19 +330,29 @@ considered in this article.
 
 % NR
 % Detail the function and its derivatives
-Function
+Taylor expanding the variational lower bound once around the mode yields the following function
 \begin{align*}
-\vp^T\vy^T\mC\vmu - \vp^T\exp{(\mC \vmu + \half \mC \mLambda \mC^T)} - \half \vmu^T \mSigma^{-1} \vmu - \half \tr{(\mLambda \mSigma^{-1})}
+\log \underline{p}(\vmu, \mLambda; \vy) = \vp^T\vy^T\mC\vmu - \vp^T\exp{(\mC \vmu + \half \mC \mLambda \mC^T)} - \half \vmu^T \mSigma^{-1} \vmu - \half \tr{(\mLambda \mSigma^{-1})}
 \end{align*}
 
-Derivative
+This can be optimised using a Newton-Raphson style algorithm where
+
 \begin{align*}
-% Should there be a \vp in front of \vy? There is in the above function
-vg &= \mC(\vy - \vp^T \exp{(\mC \vmu)}) - \mSigma^{-1} \vmu \\
-mH &= -\mC^T \text{diag}(\exp{(\mC \vmu)}) \mC - \mSigma^{-1}
+\nabla \log \underline{p}(\vmu, \mLambda; \vy) &= \vp^T\mC(\vy - \exp{(\mC \vmu)}) - \mSigma^{-1} \vmu \\
+\nabla^2 \log \underline{p}(\vmu, \mLambda; \vy) &= -\mC^T \text{diag}(\exp{(\mC \vmu)}) \mC - \mSigma^{-1}
 \end{align*}
 
-% Algorithm?
+\begin{algorithm}\label{alg:algorithm_three}
+\caption[Algorithm 3]{Newton-Raphson scheme for optimising $\log \underline{p}(\vmu, \mLambda; \vy)$}
+\begin{algorithmic}
+% Fit \vmu, \mLambda using Laplace approximation
+\WHILE{the increase in $\log \underline{p}(\vmu, \mLambda; \vy)$ is significant}
+% \vmu, \mLambda
+\STATE $\mLambda \leftarrow [\mC^T \text{diag}(\exp{(\mC \vmu)}) \mC + \mSigma^{-1}]^{-1}$
+\STATE $\vmu \leftarrow \vmu + \mLambda \nabla \log \underline{p}(\vmu, \mLambda; \vy)$
+\ENDWHILE
+\end{algorithmic}
+\end{algorithm}
 
 \subsubsection{GVA}
 % More complicated functions and derivatives, but more accurate
@@ -362,24 +363,20 @@ $\mLambda = \mR \mR^T$. This algorithm trades the computational complexity of
 numerically evaluating the integral in Equation \ref{eq:gva} for greatly increased 
 accuracy in the approximating posterior distribution.
 
-L-BFGS
-% Detail the function and its derivatives
-Function
-\begin{align}\label{eq:gva}
-\vp^T\vy^T\mC \vmu - \vp^T B(\mC \vmu, \text{diag}(\mC \mLambda \mC^T)) - \half \vmu \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} \\
-- \frac{d}{2} \log{(2 \pi)} + \half \log{|\mSigma^{-1}|} \\
-+ \frac{d}{2} \log{(2 \pi)} + \frac{d}{2} \\
-+ \log{|\mR|}
-\end{align}
+The resulting function is below and can be optimised with L-BFGS:
 
-vg
-\begin{align*}
-\mC^T \vp^T(\vy - B^{(1)}(\mC \vmu, \mC \mLambda \mC^T)) - \mSigma^{-1}
+% Detail the function and its derivatives
+\begin{align*}\label{eq:gva}
+\log \underline{p}(\vmu, \mLambda; \vy) &= \vp^T\vy^T\mC \vmu - \vp^T B(\mC \vmu, \text{diag}(\mC \mLambda \mC^T)) - \half \vmu \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} \\
+&\quad - \frac{d}{2} \log{(2 \pi)} + \half \log{|\mSigma^{-1}|} + \frac{d}{2} \log{(2 \pi)} + \frac{d}{2} + \log{|\mR|}
 \end{align*}
 
-dmLambda =
 \begin{align*}
-[\mLambda&^{-1} - \vp^T \mC^T \text{diag}(B^{(2)}(\mC \vmu, \mC \mLambda \mC^T)) \mC \vp) - \mSigma^{-1}] \mR
+\nabla \log \underline{p}(\vmu, \mLambda; \vy) &= \mC^T \vp^T(\vy - B^{(1)}(\mC \vmu, \mC \mLambda \mC^T)) - \mSigma^{-1}
+\end{align*}
+
+\begin{align*}
+\nabla^2 \log \underline{p}(\vmu, \mLambda; \vy) &= [\mLambda^{-1} - \vp^T \mC^T \text{diag}(B^{(2)}(\mC \vmu, \mC \mLambda \mC^T)) \mC \vp) - \mSigma^{-1}] \mR
 \end{align*} 
  
 \subsubsection{GVA2}
@@ -396,7 +393,6 @@ computational complexity of this algorithm versus Laplace's method to some degre
 % More complicated functions and derivatives, but more accurate
 % Can be quite fast because of the special form of $\mR$.
 
-L-BFGS
 % Detail the function and its derivatives under this parameterisation
 % Difficulties re: multimodal likelihood, tricks to get that to work
 The variational lower bound is not necessarily unimodal, leading to potential
@@ -408,17 +404,17 @@ additional computational effort.
 % Re-order the covariance matrix so that Chevron form is ``reversed''. This makes
 % the Cholesky factorisation very simple, and reduces the number of parameters that
 % you need to optimise and store.
-Function
+
 \begin{align*}
-\vp^T\vy^T\mC \vmu - \vp^T B(\mC \vmu, \text{diag}(\mC \mLambda \mC^T)) - \half \vmu \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} \\
-- \frac{d}{2} \log{(2 \pi)} + \half \log{|\mSigma^{-1}|} \\
-+ \frac{d}{2} \log{(2 \pi)} + \frac{d}{2} \\
-- \log{|\mR|}
+\log \underline{p}(\vmu, \mLambda; \vy) &= \vp^T\vy^T\mC \vmu - \vp^T B(\mC \vmu, \text{diag}(\mC \mLambda \mC^T)) - \half \vmu \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} \\
+&\quad- \frac{d}{2} \log{(2 \pi)} + \half \log{|\mSigma^{-1}|} + \frac{d}{2} \log{(2 \pi)} + \frac{d}{2} - \log{|\mR|}
 \end{align*}
 
-dmLambda =
+The first derivative is the same as that in the GVA algorithm, but as the parameterisation of
+$\mLambda$ has changed, the second derivative is now
+
 \begin{align*}
--\mR^{-1}[\mLambda&^{-1} - \vp^T \mC^T \text{diag}(B^{(2)}(\mC \vmu, \mC \mLambda \mC^T)) \mC \vp) - \mSigma^{-1}]\mLambda
+\nabla^2 \log \underline{p}(\vmu, \mLambda; \vy) &= -\mR^{-1}[\mLambda^{-1} - \vp^T \mC^T \text{diag}(B^{(2)}(\mC \vmu, \mC \mLambda \mC^T)) \mC \vp) - \mSigma^{-1}]\mLambda
 \end{align*} 
 
 \subsubsection{GVA NR}
@@ -433,12 +429,6 @@ variational lower bound. This algorithm is fast, but potentially unstable.
 \begin{align*}
 \nabla^2 l(\vmu, \mLambda; \vy) &= -\mC^T \text{diag}(\vp \odot B^{(2)}(\mC \vmu, \text{diag}(\mC \mLambda \mC^T))) - \mSigma^{-1}
 \end{align*}
-
-%Algorithm
-%\begin{align*}
-%\mLambda \leftarrow (\mC^T\vp^T B^{(2)}(\mC \vmu, \text{diag}(\mC \mLambda \mC^T)) \mC)^{-1} \\
-%\vmu \leftarrow \vmu + \mLambda vg
-%\end{align*}
 
 \begin{algorithm}\label{alg:algorithm_nr}
 \label{algorithm_nr}
