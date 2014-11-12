@@ -24,7 +24,7 @@ norm <- function(v) sqrt(sum(v^2))
 
 vg.lap <- function(vmu,vy,vr,mC,mSigma.inv,mLambda) 
 {       
-    vg <- t(mC)%*%(vy - vr*exp(mC%*%vmu)) - mSigma.inv%*%vmu
+    vg <- t(mC)%*%vr*(vy - exp(mC%*%vmu)) - mSigma.inv%*%vmu
     
     return(vg)
 }
@@ -424,7 +424,7 @@ fit.GVA_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12)
   lower_constraint <- rep(-Inf, length(vmu))
   
   if (method=="L-BFGS-B") {
-    controls <- list(maxit=1000,trace=1,fnscale=-1,REPORT=1,factr=1.0E-5,lmm=10)
+    controls <- list(maxit=1000,trace=0,fnscale=-1,REPORT=1,factr=1.0E-5,lmm=10)
   } else if (method=="Nelder-Mead") {
     controls <- list(maxit=100000000,trace=0,fnscale=-1,REPORT=1000,reltol=reltol) 
   } else {
