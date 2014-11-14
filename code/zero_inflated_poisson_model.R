@@ -404,7 +404,7 @@ vg.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
 
 ###############################################################################
 
-fit.GVA_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12)
+fit.GVA_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, p=NA, m=NA)
 {
   #library(statmod)
   #N <- 15
@@ -413,6 +413,21 @@ fit.GVA_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12)
   
   d <- length(vmu)
   Dinds <- d*((1:d)-1)+(1:d)
+  
+  # Swap fixed and random effects so that inverse of mR is quick to calculate
+  # due to sparsity
+  # FIXME: If you do this, you have to re-order mSigma.inv as well.
+  # And vmu!
+  # And mC!
+  # Something is still wrong.
+  mLambda_new = blockDiag(mLambda[(p+1):(p+m), (p+1):(p+m)], mLambda[1:p, 1:p])
+  mLambda_new[1:m, (m+1):(m+p)] = t(mLambda[1:p, (p+1):(p+m)])
+  mLambda_new[(m+1):(m+p), 1:m] = t(mLambda_new[1:m, (m+1):(m+p)])
+  #browser()
+  mLambda = mLambda_new
+  mSigma.inv = blockDiag(mSigma.inv[(p+1):(p+m), (p+1):(p+m)], mSigma.inv[1:p, 1:p])
+  vmu = c(vmu[(p+1):(p+m)], vmu[1:p])
+  mC = mC[,c((p+1):(p+m), 1:p)]
   
   mR <- t(chol(solve(mLambda, tol=1.0E-99) + diag(1.0E-8,d)))
   cat("mR", mR, "\n")
@@ -440,6 +455,16 @@ fit.GVA_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12)
   mR[Rinds] <- vtheta[(1+d):P]
   mR[Dinds] <- exp(mR[Dinds])  
   mLambda <- solve(mR%*%t(mR), tol=1.0E-99)
+
+  # Swap back
+  mLambda_new = blockDiag(mLambda[(m+1):(m+p), (m+1):(m+p)], mLambda[1:m, 1:m])
+  mLambda_new[1:p, (p+1):(m+p)] = t(mLambda[(m+1):(m+p), 1:m])
+  mLambda_new[(p+1):(m+p), 1:p] = t(mLambda_new[1:p, (p+1):(m+p)])
+  #browser()
+  mLambda = mLambda_new
+  mSigma.inv = blockDiag(mSigma.inv[(m+1):(m+p), (m+1):(m+p)], mSigma.inv[1:m, 1:m])
+  vmu = c(vmu[(m+1):(m+p)], vmu[1:m])
+  mC = mC[,c((m+1):(m+p), 1:m)]
   
   return(list(res=res,vmu=vmu,mLambda=mLambda))
 }
@@ -487,13 +512,13 @@ fit.GVA_nr <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, m=
       #mLambda <- solve(-mH,tol=1.0E-99)
       # New version
       # Use block inverse formula to speed computation
-      # Let mLambda = [A B]
-      #               [B D]
+      # Let -mH = [A B]
+      #           [B D]
       A = -mH[1:p, 1:p]
       B = -mH[1:p, (p+1):(p+m)]
       D = -mH[(p+1):(p+m), (p+1):(p+m)]
-      # Then mLambda^{-1} = [(A - B D^-1 B^T)^-1, -(A-B D^-1 B^T)^-1 B D^-1]
-      #                     [-D^-1 B^T (A - B D^-1 B^T)^-1, D^-1 + D^-1 B^T (A - B D^-1 B^T)^-1 B D^-1]
+      # Then -mH^{-1} = [(A - B D^-1 B^T)^-1, -(A-B D^-1 B^T)^-1 B D^-1]
+      #                 [-D^-1 B^T (A - B D^-1 B^T)^-1, D^-1 + D^-1 B^T (A - B D^-1 B^T)^-1 B D^-1]
       # D^-1 and (A - B D^-1 B^T)^-1 appear repeatedly, so we precalculate them
       D.inv = solve(D)
       A_BDB.inv = solve(A - B %*% D.inv %*% t(B))
