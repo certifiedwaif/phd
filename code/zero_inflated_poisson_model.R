@@ -184,7 +184,7 @@ fit.GVA <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12)
   Dinds <- d*((1:d)-1)+(1:d)
           
   mR <- t(chol(mLambda + diag(1.0E-8,d)))
-	cat("mR", mR, "\n")
+	#cat("mR", mR, "\n")
 	mR[Dinds] <- log(mR[Dinds])
   Rinds <- which(lower.tri(mR,diag=TRUE))
 	vmu <- c(vmu,mR[Rinds])
@@ -426,8 +426,8 @@ fit.GVA_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, p
   mC = mC[,c((p+1):(p+m), 1:p)]
   
   mR <- t(chol(solve(mLambda, tol=1.0E-99) + diag(1.0E-8,d)))
-  cat("mR", mR, "\n")
-  cat("mSigma.inv", mSigma.inv, "\n")
+  #cat("mR", mR, "\n")
+  #cat("mSigma.inv", mSigma.inv, "\n")
   mR[Dinds] <- log(mR[Dinds])
   Rinds <- which(lower.tri(mR,diag=TRUE))
   vmu <- c(vmu,mR[Rinds])
