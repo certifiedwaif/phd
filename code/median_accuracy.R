@@ -28,13 +28,21 @@ var_fn = function(vbeta)
   multivariate = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau)
   approximation = "gva"
   result_var = zero_infl_var(multivariate, method=approximation, verbose=FALSE)
-  return(result_var)
+  mcmc_samples = mcmc_approximation(multivariate, iterations=1e3)
+  return(list(result_var=result_var, mcmc_samples=mcmc_samples))
 }
-var_fn(c(1, 0))
-var_fn(c(1, 1))
-var_fn(c(1, 2))
-var_fn(c(1, 3))
-var_fn(c(1, 4))
+var_fn2 = function(vbeta)
+{
+  result = var_fn(vbeta)
+  var_approx = var(result$mcmc_samples$vbeta[,1])
+  mcmc_approx = result$result_var$mLambda[1,1]
+  return(list(var_approx=var_approx, mcmc_approx=mcmc_approx))
+}
+var_fn2(c(1, 0))
+var_fn2(c(1, 1))
+var_fn2(c(1, 2))
+var_fn2(c(1, 3))
+var_fn2(c(1, 4))
 
 # Graph of E_q(theta) against E(theta|y)
 
