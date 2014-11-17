@@ -108,8 +108,8 @@ $$
 q(\lambda, \rho, \vp) = q(\lambda) q(\rho) \left [ \prod_{i=1}^n q(r_i) \right ]
 $$
 
-\noindent where $q(\lambda)$ is a Gamma distribution, $q(\rho)$ is a Beta distribution and
-$q(r_i)$ are Bernoulli distributions.
+\noindent where $q(\lambda)$ is a Gamma distribution, $q(\rho)$ is a Beta distribution 
+and $q(r_i)$ are Bernoulli distributions.
 
 \noindent This leads to the following functional forms of the optimal q-densities
 
@@ -388,7 +388,7 @@ instead we optimise $\mR$ where $\mLambda = (\mR \mR^T)^{-1}$.
 This has the advantage that if we re-order the columns of $\mLambda$ such that
 the random effects are placed before the fixed effects then due to the assumed 
 independence between the random effects, the off-diagonals of the Cholesky decomposition
-will 0s and so the Cholesky factor $\mR$ will be sparse. This mitigates the increased
+will be 0 and so the Cholesky factor $\mR$ will be sparse. This mitigates the increased
 computational complexity of this algorithm versus Laplace's method to some degree.
 
 % More complicated functions and derivatives, but more accurate
@@ -411,8 +411,8 @@ additional computational effort.
 &\quad- \frac{d}{2} \log{(2 \pi)} + \half \log{|\mSigma^{-1}|} + \frac{d}{2} \log{(2 \pi)} + \frac{d}{2} - \log{|\mR|}
 \end{align*}
 
-The first derivative is the same as that in the GVA algorithm, but as the parameterisation of
-$\mLambda$ has changed, the second derivative is now
+The first derivative is the same as that in the GVA algorithm, but as the 
+parameterisation of $\mLambda$ has changed, the second derivative is now
 
 \begin{align*}
 \nabla^2 \log \underline{p}(\vmu, \mLambda; \vy) &= -\mR^{-1}\left [\mLambda^{-1} - \vp^T \mC^T \text{diag}(\B^{(2)}(\mC \vmu, \mC \mLambda \mC^T)) \mC \vp - \mSigma^{-1} \right ]\mLambda
