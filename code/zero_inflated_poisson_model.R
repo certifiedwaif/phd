@@ -414,16 +414,12 @@ fit.GVA_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, p
   d <- length(vmu)
   Dinds <- d*((1:d)-1)+(1:d)
   
-  # Swap fixed and random effects so that inverse of mR is quick to calculate
-  # due to sparsity
-  # FIXME: If you do this, you have to re-order mSigma.inv as well.
-  # And vmu!
-  # And mC!
-  # Something is still wrong.
+  # Swap fixed and random effects in mLambda so that inverse of mR is quick to
+  # calculate due to sparsity.If you do this, you have to re-order mSigma.inv,
+  # vmu and mC as well.
   mLambda_new = blockDiag(mLambda[(p+1):(p+m), (p+1):(p+m)], mLambda[1:p, 1:p])
   mLambda_new[1:m, (m+1):(m+p)] = t(mLambda[1:p, (p+1):(p+m)])
   mLambda_new[(m+1):(m+p), 1:m] = t(mLambda_new[1:m, (m+1):(m+p)])
-  #browser()
   mLambda = mLambda_new
   mSigma.inv = blockDiag(mSigma.inv[(p+1):(p+m), (p+1):(p+m)], mSigma.inv[1:p, 1:p])
   vmu = c(vmu[(p+1):(p+m)], vmu[1:p])
@@ -456,11 +452,10 @@ fit.GVA_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, p
   mR[Dinds] <- exp(mR[Dinds])  
   mLambda <- solve(mR%*%t(mR), tol=1.0E-99)
 
-  # Swap back
+  # Swap everything back
   mLambda_new = blockDiag(mLambda[(m+1):(m+p), (m+1):(m+p)], mLambda[1:m, 1:m])
   mLambda_new[1:p, (p+1):(m+p)] = t(mLambda[(m+1):(m+p), 1:m])
   mLambda_new[(p+1):(m+p), 1:p] = t(mLambda_new[1:p, (p+1):(m+p)])
-  #browser()
   mLambda = mLambda_new
   mSigma.inv = blockDiag(mSigma.inv[(m+1):(m+p), (m+1):(m+p)], mSigma.inv[1:m, 1:m])
   vmu = c(vmu[(m+1):(m+p)], vmu[1:m])
