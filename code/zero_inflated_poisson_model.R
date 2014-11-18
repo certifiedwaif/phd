@@ -184,7 +184,7 @@ fit.GVA <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12)
   Dinds <- d*((1:d)-1)+(1:d)
           
   mR <- t(chol(mLambda + diag(1.0E-8,d)))
-	cat("mR", mR, "\n")
+	#cat("mR", mR, "\n")
 	mR[Dinds] <- log(mR[Dinds])
   Rinds <- which(lower.tri(mR,diag=TRUE))
 	vmu <- c(vmu,mR[Rinds])
@@ -229,7 +229,7 @@ f.G_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,gh)
 
 ###############################################################################
 
-f.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
+f.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m)
 {
   d <- ncol(mC)  
   vmu <- vtheta[1:d]
@@ -295,8 +295,18 @@ vg.GVA.approx_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
 }
 
 ###############################################################################
+printMatrix = function(mat) {
+  for (i in 1:nrow(mat)) {
+    for (j in 1:ncol(mat)) {
+      cat(mat[i, j], " ")
+    }
+    cat("\n")
+  }
+}
 
-vg.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
+###############################################################################
+
+vg.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m)
 {
   d <- ncol(mC)
   vmu <- vtheta[1:d]
@@ -321,7 +331,22 @@ vg.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   mH <- mH.G_new(vmu,mLambda,vy,vr,mC,mSigma.inv,vB2)
   # mR is lower triangular. Can you rewrite this using forward solves and
   # backsolves?
-  dmLambda <- -solve(mR, tol=1.0E-99)%*%(mLambda.inv + mH)%*%mLambda  
+  # Old
+  #mR.inv = solve(mR, tol=1.0E-99)
+  # New
+  # First m lines of inverse can be calculated by taking reciprocal of diagonal
+  mR.inv.mZ = matrix(0, nrow=m, ncol=m)
+  diag(mR.inv.mZ) = 1/diag(mR[1:m, 1:m])
+  # Last p lines can be solved using this
+  mR.inv.mX = solve(mR[(m+1):(m+p), (m+1):(m+p)], tol=1e-99)
+  # Construct inverse of mR.
+  mR.inv = blockDiag(mR.inv.mZ, mR.inv.mX)
+  # Because of special form of mR.inv.mZ, this could probably be optimised
+  # further.
+  mR.inv[(m+1):(m+p), 1:m] = -mR.inv.mX %*% mR[(m+1):(m+p), 1:m] %*% mR.inv.mZ
+  
+  dmLambda <- -mR.inv%*%(mLambda.inv + mH)%*%mLambda  
+  
   dmLambda[Dinds] <- dmLambda[Dinds]*mR[Dinds]
 
   #res <- vg.GVA.approx_new(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
@@ -384,14 +409,6 @@ vg.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   #    cat(j, i, dmLambda[i, j], dmLambda2[i, j], dmLambda[i, j] - dmLambda2[i, j], "\n")
   #cat("\n")
   
-  printMatrix = function(mat) {
-    for (i in 1:nrow(mat)) {
-      for (j in 1:ncol(mat)) {
-        cat(mat[i, j], " ")
-      }
-      cat("\n")
-    }
-  }
   #printMatrix(dmLambda)
   #printMatrix(dmLambda2)
   #printMatrix(dmLambda-dmLambda2)
@@ -414,24 +431,21 @@ fit.GVA_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, p
   d <- length(vmu)
   Dinds <- d*((1:d)-1)+(1:d)
   
-  # Swap fixed and random effects so that inverse of mR is quick to calculate
-  # due to sparsity
-  # FIXME: If you do this, you have to re-order mSigma.inv as well.
-  # And vmu!
-  # And mC!
-  # Something is still wrong.
+  # Swap fixed and random effects in mLambda so that inverse of mR is quick to
+  # calculate due to sparsity.If you do this, you have to re-order mSigma.inv,
+  # vmu and mC as well.
   mLambda_new = blockDiag(mLambda[(p+1):(p+m), (p+1):(p+m)], mLambda[1:p, 1:p])
   mLambda_new[1:m, (m+1):(m+p)] = t(mLambda[1:p, (p+1):(p+m)])
   mLambda_new[(m+1):(m+p), 1:m] = t(mLambda_new[1:m, (m+1):(m+p)])
-  #browser()
   mLambda = mLambda_new
   mSigma.inv = blockDiag(mSigma.inv[(p+1):(p+m), (p+1):(p+m)], mSigma.inv[1:p, 1:p])
   vmu = c(vmu[(p+1):(p+m)], vmu[1:p])
   mC = mC[,c((p+1):(p+m), 1:p)]
   
   mR <- t(chol(solve(mLambda, tol=1.0E-99) + diag(1.0E-8,d)))
-  cat("mR", mR, "\n")
-  cat("mSigma.inv", mSigma.inv, "\n")
+  #cat("mR", round(mR, 3), "\n")
+  #printMatrix(round(mR, 3))
+  #cat("mSigma.inv", mSigma.inv, "\n")
   mR[Dinds] <- log(mR[Dinds])
   Rinds <- which(lower.tri(mR,diag=TRUE))
   vmu <- c(vmu,mR[Rinds])
@@ -447,7 +461,7 @@ fit.GVA_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, p
   }
   res <- optim(par=vmu, fn=f.GVA_new, gr=vg.GVA_new,
                method=method,lower=lower_constraint, upper=Inf, control=controls,
-               vy=vy,vr=vr,mC=mC,mSigma.inv=mSigma.inv,gh=gh2,mR=mR*0,Rinds=Rinds,Dinds=Dinds)        
+               vy=vy,vr=vr,mC=mC,mSigma.inv=mSigma.inv,gh=gh2,mR=mR*0,Rinds=Rinds,Dinds=Dinds, p=p, m=m)        
   
   vtheta <- res$par 
   
@@ -456,11 +470,10 @@ fit.GVA_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, p
   mR[Dinds] <- exp(mR[Dinds])  
   mLambda <- solve(mR%*%t(mR), tol=1.0E-99)
 
-  # Swap back
+  # Swap everything back
   mLambda_new = blockDiag(mLambda[(m+1):(m+p), (m+1):(m+p)], mLambda[1:m, 1:m])
   mLambda_new[1:p, (p+1):(m+p)] = t(mLambda[(m+1):(m+p), 1:m])
   mLambda_new[(p+1):(m+p), 1:p] = t(mLambda_new[1:p, (p+1):(m+p)])
-  #browser()
   mLambda = mLambda_new
   mSigma.inv = blockDiag(mSigma.inv[(m+1):(m+p), (m+1):(m+p)], mSigma.inv[1:m, 1:m])
   vmu = c(vmu[(m+1):(m+p)], vmu[1:m])
