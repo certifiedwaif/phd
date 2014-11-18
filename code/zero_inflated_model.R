@@ -83,7 +83,7 @@ calculate_lower_bound.univariate <- function(univariate)
   return(result)
 }
 
-calculate_lower_bound.multivariate <- function(multivariate)
+calculate_lower_bound.multivariate <- function(multivariate, verbose=FALSE)
 {
   result = with(multivariate, {
     p = ncol(mX)
@@ -124,7 +124,9 @@ calculate_lower_bound.multivariate <- function(multivariate)
     T2 = sum(-vp[zero.set]*log(vp[zero.set]) - (1-vp[zero.set])*log(1-vp[zero.set]))
     T2 = T2 - lbeta(prior$a_rho, prior$b_rho) + lbeta(a_rho, b_rho)
     
-    cat("calculate_lower_bound: T1", T1, "T2", T2, "\n")
+	if (verbose)
+    	cat("calculate_lower_bound: T1", T1, "T2", T2, "\n")
+
     result = T1 + T2
     result
   })
@@ -229,10 +231,11 @@ library(limma)
 
 zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE)
 {
-  MAXITER <- 20
+  MAXITER <- 30
   
   # Initialise
   N = length(mult$vy)
+
   if (verbose) cat("N", N)
   if (!is.null(mult$mX)) {
     p = ncol(mult$mX) 
@@ -246,7 +249,8 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
   } else {
     m = 0
   }
-  cat("\n")
+  if (verbose) cat("\n")
+
   zero.set = which(mult$vy == 0)
   nonzero.set = which(mult$vy != 0)
   vlower_bound <- c()
@@ -318,10 +322,10 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
       cat("Iteration ", i, ": lower bound ", vlower_bound[i], " difference ",
           vlower_bound[i] - vlower_bound[i-1], " parameters ", "vmu", mult$vmu,
           "a_rho", mult$a_rho, "b_rho", mult$b_rho)
-    if (!is.null(mult$mZ)) {
+    if (verbose && !is.null(mult$mZ)) {
       cat(" a_sigma", mult$a_sigma, "b_sigma", mult$b_sigma)
     }
-    cat("\n")
+    if (verbose) cat("\n")
   }
   
   if (plot_lower_bound)
