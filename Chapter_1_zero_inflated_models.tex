@@ -214,7 +214,7 @@ r_i &\sim \text{Bernoulli}(\rho) \\
 \end{array}
 $$
 
-with priors
+\noindent with priors
 
 $$ 
 \begin{array}{rl}
@@ -248,7 +248,7 @@ $$
 \noindent The optimal approximation for $\vr$ is
 $$
 \begin{array}{rl}
-q(\vr) &\propto \exp \left [ \bE_{-q(\vr)}y^T\mR(\mC\vmu) - \vr^T\exp{(\mC\vnu)}-\half \vnu^T \text{diag}(\sigma_{\vu}^2)^{-1} \vnu \right ] \\
+q(\vr) &\propto \exp \left [ \bE_{-q(\vr)}y^T\mR(\mC\vmu) - \vr^T\exp{(\mC\vnu)}-\half \vnu^T \sigma_{\vu}^{-2} \mI \vnu \right ] \\
 &= \exp{\left [\vy^T\mR\mC \vmu - \vp^T \exp{\{\mC \vmu + \half \text{diag}(\mC \mLambda \mC^T)\}} - \half \vmu^T \mD \vmu - \half \text{tr}(\mLambda \mD )) \right ]}
 \end{array}
 $$
@@ -311,7 +311,7 @@ considered in this article.
 
 % NR
 % Detail the function and its derivatives
-Taylor expanding the variational lower bound once around the mode yields the following function
+\noindent Taylor expanding the variational lower bound once around the mode yields the following function
 \begin{align*}
 \log \underline{p}(\vmu, \mLambda; \vy) = \vp^T\vy^T\mC\vmu - \vp^T\exp \left (\mC \vmu + \half \mC \mLambda \mC^T \right ) - \half \vmu^T \mSigma^{-1} \vmu - \half \tr{(\mLambda \mSigma^{-1})}
 \end{align*}
