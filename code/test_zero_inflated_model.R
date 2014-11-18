@@ -64,7 +64,7 @@ generate_multivariate_test_data <- function (mX, mZ, m, n, rho, vbeta, sigma2_u,
 	return(result)
 }
 
-mcmc_approximation <- function(mult, iterations=1e3)
+mcmc_approximation <- function(mult, iterations=1e3, mc.cores = 1)
 {
   #mcmc_result = mcmc(mult, iterations=1e5+2000, burnin=2000, thinning=1)
   # Use Stan to create MCMC samples, because Stan deals much better with highly
@@ -73,12 +73,12 @@ mcmc_approximation <- function(mult, iterations=1e3)
   require(parallel)
   #source("multivariate_stan.R")
   
-  zip_data <- with(mult, list(N=sum(n), P=2, M=m, y=vy, X=mX, Z=mZ))
+  zip_data <- with(mult, list(N=length(vy), P=2, M=ncol(mZ), y=vy, X=mX, Z=mZ))
   #print(str(zip_data))
   rng_seed <- 5;
   foo <- stan("multivariate_zip.stan", data=zip_data, chains = 0)
   sflist <- 
-    mclapply(1:4, mc.cores = 1, 
+    mclapply(1:4, mc.cores = mc.cores, 
              function(i) stan(fit=foo, data=zip_data, seed = rng_seed, 
                               chains = 1, chain_id = i, refresh = -1,
                               iter=iterations))
