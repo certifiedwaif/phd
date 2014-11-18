@@ -4,7 +4,7 @@ source("test_zero_inflated_model.R")
 # Graph of Var_q(theta) against Var(theta|y)
 # How to get this?
 # Run fits for a range of theta values?
-var_fn = function(vbeta)
+compare_approximations = function(vbeta)
 {
   m = 20
   ni = 10
@@ -28,21 +28,27 @@ var_fn = function(vbeta)
   multivariate = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau)
   approximation = "gva"
   result_var = zero_infl_var(multivariate, method=approximation, verbose=FALSE)
-  mcmc_samples = mcmc_approximation(multivariate, iterations=1e3)
+  mcmc_samples = mcmc_approximation(multivariate, iterations=1e4, mc.cores = 32)
   return(list(result_var=result_var, mcmc_samples=mcmc_samples))
 }
-var_fn2 = function(vbeta)
+
+mean_var = function(vbeta)
 {
-  result = var_fn(vbeta)
-  var_approx = var(result$mcmc_samples$vbeta[,1])
-  mcmc_approx = result$result_var$mLambda[1,1]
-  return(list(var_approx=var_approx, mcmc_approx=mcmc_approx))
+  result = compare_approximations(vbeta)
+  return(with(result, {
+  var_approx_mean = result_var$vmu[2]
+  mcmc_approx_mean = mean(mcmc_samples$vbeta[,2])
+  var_approx_var = result_var$mLambda[2,2]
+  mcmc_approx_var = var(mcmc_samples$vbeta[,2])
+  list(var_approx_mean=var_approx_mean,
+		mcmc_approx_mean=mcmc_approx_mean,
+  		var_approx_var=var_approx_var,
+		mcmc_approx_var=mcmc_approx_var)
+  }))
 }
-var_fn2(c(1, 0))
-var_fn2(c(1, 1))
-var_fn2(c(1, 2))
-var_fn2(c(1, 3))
-var_fn2(c(1, 4))
+
+for (theta in seq(1, 2, by=.1))
+	print(mean_var(c(1, theta)))
 
 # Graph of E_q(theta) against E(theta|y)
 
