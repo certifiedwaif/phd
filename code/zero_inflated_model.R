@@ -114,12 +114,12 @@ calculate_lower_bound.multivariate <- function(multivariate, verbose=FALSE)
       T1 = T1 - a_sigma * log(b_sigma) + lgamma(a_sigma)
     }
     T1 = T1 + .5*(p+m) + .5*log(det(mLambda))
+    eps = 1e-10
     
     # Something is wrong in T2. It sometimes goes backwards as we're optimised.
     # This should be unchanged from the univariate lower bound
-    #cat("calculate_lower_bound: ", vp[zero.set], "\n")
+    #if (verbose) cat("calculate_lower_bound: ", vp[zero.set], "\n")
     # 0 log 0 returns NaN. We sidestep this by adding epsilon to vp[zero.set]
-    eps = 1e-10
     vp[zero.set] = vp[zero.set] + eps
     T2 = sum(-vp[zero.set]*log(vp[zero.set]) - (1-vp[zero.set])*log(1-vp[zero.set]))
     T2 = T2 - lbeta(prior$a_rho, prior$b_rho) + lbeta(a_rho, b_rho)
@@ -134,7 +134,7 @@ calculate_lower_bound.multivariate <- function(multivariate, verbose=FALSE)
   return(result)
 }
 
-calculate_lower_bound <- function(object)
+calculate_lower_bound <- function(object, verbose=verbose)
 {
   UseMethod("calculate_lower_bound", object)
 }
@@ -231,7 +231,7 @@ library(limma)
 
 zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE)
 {
-  MAXITER <- 30
+  MAXITER <- 20
   
   # Initialise
   N = length(mult$vy)
@@ -278,8 +278,7 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
       fit1 = fit.Lap(mult$vmu, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, mult$mLambda)
     } else if (method == "gva") {	
       fit1 = fit.GVA(mult$vmu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B")
-    } else if (method == "gva2")
-    {
+    } else if (method == "gva2") {
       fit2 = fit.Lap(mult$vmu, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, mult$mLambda)
       fit1 = fit.GVA_new(fit2$vmu, fit2$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B", p=p, m=m)
     } else if (method == "gva_nr") {
@@ -316,7 +315,7 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
     }
     
     vlower_bound[i] <- 0 # calculate_lower_bound(mult)
-    vlower_bound[i] <- calculate_lower_bound(mult)
+    vlower_bound[i] <- calculate_lower_bound(mult, verbose=verbose)
     
     if (verbose && i > 1)
       cat("Iteration ", i, ": lower bound ", vlower_bound[i], " difference ",
