@@ -332,7 +332,6 @@ vg.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m)
   # mR is lower triangular. Can you rewrite this using forward solves and
   # backsolves?
   # Old
-  #mR.inv = solve(mR, tol=1.0E-99)
   # New
   # First m lines of inverse can be calculated by taking reciprocal of diagonal
   mR.inv.mZ = matrix(0, nrow=m, ncol=m)
@@ -343,7 +342,11 @@ vg.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m)
   mR.inv = blockDiag(mR.inv.mZ, mR.inv.mX)
   # Because of special form of mR.inv.mZ, this could probably be optimised
   # further.
-  mR.inv[(m+1):(m+p), 1:m] = -mR.inv.mX %*% mR[(m+1):(m+p), 1:m] %*% mR.inv.mZ
+  mR.inv[1:m, (m+1):(m+p)] = -mR.inv.mX %*% mR[(m+1):(m+p), 1:m] %*% mR.inv.mZ
+  mR.inv2 = solve(mR, tol=1.0E-99)
+  printMatrix(round(mR.inv2 - mR.inv, 3))
+  ans <- readline()
+  mR.inv = mR.inv2
   
   dmLambda <- -mR.inv%*%(mLambda.inv + mH)%*%mLambda  
   
