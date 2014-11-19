@@ -218,8 +218,8 @@ f.G_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,gh)
   d <- length(vmu)
   
   vmu.til     <- mC%*%vmu
-  #vsigma2.til <- diag(mC%*%mLambda%*%t(mC))
-  vsigma2.til <- sapply(1:nrow(mC), function(i) {mC[i,]%*%mLambda%*%mC[i,]})
+  vsigma2.til <- diag(mC%*%mLambda%*%t(mC))
+  #vsigma2.til <- sapply(1:nrow(mC), function(i) {mC[i,]%*%mLambda%*%mC[i,]})
   vB0 <- B0.fun("POISSON",vmu.til,vsigma2.til,gh) 
   
   f <- sum(vr*(vy*vmu.til - vB0)) - 0.5*t(vmu)%*%mSigma.inv%*%vmu - 0.5*tr(mSigma.inv%*%mLambda)
@@ -239,7 +239,9 @@ f.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m)
     mR[Dinds[i]] <- min(c(1.0E5,mR[Dinds[i]]))
   }   
   mLambda.inv = mR%*%t(mR)
-  mLambda <- solve(mLambda.inv, tol=1.0E-99)
+  #mLambda <- solve(mLambda.inv, tol=1.0E-99)
+  mR.inv = fastinv(mR, p=p, m=m)
+  mLambda <- t(mR.inv) %*% mR.inv
   
   f <- -sum(log(diag(mR))) + f.G_new(vmu,mLambda,vy,vr,mC,mSigma.inv,gh) 
   f <- f + 0.5*d*log(2*pi) + 0.5*d
@@ -305,7 +307,22 @@ printMatrix = function(mat) {
 }
 
 ###############################################################################
+fastinv = function(mR, p=NA, m=NA)
+{
+  # First m lines of inverse can be calculated by taking reciprocal of diagonal
+  mR.inv.mZ = matrix(0, nrow=m, ncol=m)
+  diag(mR.inv.mZ) = 1/diag(mR[1:m, 1:m])
+  # Last p lines can be solved as normal
+  mR.inv.mX = solve(mR[(m+1):(m+p), (m+1):(m+p)], tol=1e-99)
+  # Construct inverse of mR.
+  mR.inv = blockDiag(mR.inv.mZ, mR.inv.mX)
+  # Because of diagonal form of mR.inv.mZ, this could probably be optimised
+  # further.
+  mR.inv[(m+1):(m+p), 1:m] = -mR.inv.mX %*% mR[(m+1):(m+p), 1:m] %*% mR.inv.mZ
+  return(mR.inv)
+}
 
+###############################################################################
 vg.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m)
 {
   d <- ncol(mC)
@@ -315,39 +332,36 @@ vg.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m)
   for (i in 1:length(Dinds)) {
     mR[Dinds[i]] <- min(c(1.0E3,mR[Dinds[i]]))
   }    
-  mLambda <- solve(mR%*%t(mR), tol=1.0E-99)
   
+  # mR is lower triangular. Can you rewrite this using forward solves and
+  # backsolves?
+  # New
+  mR.inv = fastinv(mR, p=p, m=m)
+  # Old
+  #mR.inv = solve(mR, tol=1.0E-99)
+  #cat("mR.inv2\n")
+  #printMatrix(round(mR.inv2, 3))
+  #cat("mR.inv\n")
+  #printMatrix(round(mR.inv, 3))
+  #cat("diff\n")
+  #printMatrix(round(mR.inv2 - mR.inv, 3))
+  #ans <- readline()
+  
+  # Old
+  #mLambda <- solve(mR%*%t(mR), tol=1.0E-99)
+  # New
+  mLambda <- t(mR.inv) %*% mR.inv
+  mLambda.inv <- mR%*%t(mR)
+
   vmu.til     <- mC%*%vmu
-  #vsigma2.til <- diag(mC%*%mLambda%*%t(mC))
-  vsigma2.til <- sapply(1:nrow(mC), function(i) {mC[i,]%*%mLambda%*%mC[i,]})
+  vsigma2.til <- diag(mC%*%mLambda%*%t(mC))
+  #vsigma2.til <- sapply(1:nrow(mC), function(i) {mC[i,]%*%mLambda%*%mC[i,]})
   res.B12 <- B12.fun("POISSON",vmu.til,vsigma2.til,gh)
   vB1 <- res.B12$vB1
   vB2 <- res.B12$vB2
-  
   vg <- 0*vmu
   vg[1:d] <- vg.G_new(vmu,mLambda,vy,vr,mC,mSigma.inv,vB1) 
-  
-  mLambda.inv <- mR%*%t(mR)
   mH <- mH.G_new(vmu,mLambda,vy,vr,mC,mSigma.inv,vB2)
-  # mR is lower triangular. Can you rewrite this using forward solves and
-  # backsolves?
-  # Old
-  # New
-  # First m lines of inverse can be calculated by taking reciprocal of diagonal
-  mR.inv.mZ = matrix(0, nrow=m, ncol=m)
-  diag(mR.inv.mZ) = 1/diag(mR[1:m, 1:m])
-  # Last p lines can be solved using this
-  mR.inv.mX = solve(mR[(m+1):(m+p), (m+1):(m+p)], tol=1e-99)
-  # Construct inverse of mR.
-  mR.inv = blockDiag(mR.inv.mZ, mR.inv.mX)
-  # Because of special form of mR.inv.mZ, this could probably be optimised
-  # further.
-  mR.inv[1:m, (m+1):(m+p)] = -mR.inv.mX %*% mR[(m+1):(m+p), 1:m] %*% mR.inv.mZ
-  mR.inv2 = solve(mR, tol=1.0E-99)
-  printMatrix(round(mR.inv2 - mR.inv, 3))
-  ans <- readline()
-  mR.inv = mR.inv2
-  
   dmLambda <- -mR.inv%*%(mLambda.inv + mH)%*%mLambda  
   
   dmLambda[Dinds] <- dmLambda[Dinds]*mR[Dinds]
@@ -435,10 +449,10 @@ fit.GVA_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, p
   Dinds <- d*((1:d)-1)+(1:d)
   
   # Swap fixed and random effects in mLambda so that inverse of mR is quick to
-  # calculate due to sparsity.If you do this, you have to re-order mSigma.inv,
+  # calculate due to sparsity. If you do this, you have to re-order mSigma.inv,
   # vmu and mC as well.
   mLambda_new = blockDiag(mLambda[(p+1):(p+m), (p+1):(p+m)], mLambda[1:p, 1:p])
-  mLambda_new[1:m, (m+1):(m+p)] = t(mLambda[1:p, (p+1):(p+m)])
+  mLambda_new[1:m, (m+1):(m+p)] = mLambda[(p+1):(p+m), 1:p]
   mLambda_new[(m+1):(m+p), 1:m] = t(mLambda_new[1:m, (m+1):(m+p)])
   mLambda = mLambda_new
   mSigma.inv = blockDiag(mSigma.inv[(p+1):(p+m), (p+1):(p+m)], mSigma.inv[1:p, 1:p])
@@ -446,11 +460,17 @@ fit.GVA_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, p
   mC = mC[,c((p+1):(p+m), 1:p)]
   
   mR <- t(chol(solve(mLambda, tol=1.0E-99) + diag(1.0E-8,d)))
+
   #cat("mR", round(mR, 3), "\n")
   #printMatrix(round(mR, 3))
   #cat("mSigma.inv", mSigma.inv, "\n")
   mR[Dinds] <- log(mR[Dinds])
-  Rinds <- which(lower.tri(mR,diag=TRUE))
+  # Idea: If Rinds included only the diagonal for the mZ part, and the
+  # lower triangular mX part, we could optimise over a space of lower dimension.
+  low.tri <- lower.tri(mR,diag=TRUE)
+  low.tri[1:m,] <- FALSE
+  diag(low.tri) <- TRUE
+  Rinds <- which(low.tri)
   vmu <- c(vmu,mR[Rinds])
   P <- length(vmu)
   lower_constraint <- rep(-Inf, length(vmu))
@@ -475,13 +495,12 @@ fit.GVA_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, p
 
   # Swap everything back
   mLambda_new = blockDiag(mLambda[(m+1):(m+p), (m+1):(m+p)], mLambda[1:m, 1:m])
-  mLambda_new[1:p, (p+1):(m+p)] = t(mLambda[(m+1):(m+p), 1:m])
-  mLambda_new[(p+1):(m+p), 1:p] = t(mLambda_new[1:p, (p+1):(m+p)])
+  mLambda_new[1:p, (p+1):(m+p)] = mLambda[(m+1):(m+p), 1:m]
+  mLambda_new[(p+1):(m+p), 1:p] = t(mLambda[(m+1):(m+p), 1:m])
   mLambda = mLambda_new
   mSigma.inv = blockDiag(mSigma.inv[(m+1):(m+p), (m+1):(m+p)], mSigma.inv[1:m, 1:m])
   vmu = c(vmu[(m+1):(m+p)], vmu[1:m])
   mC = mC[,c((m+1):(m+p), 1:m)]
-  
   return(list(res=res,vmu=vmu,mLambda=mLambda))
 }
 
