@@ -1,7 +1,7 @@
 # John Ormerod's Poisson regression code, slightly modified to be used by my
 # zero-inflated model code.
 ###############################################################################
-
+require(limma)
 source("CalculateB.R")
 
 ###############################################################################
@@ -169,6 +169,15 @@ vg.GVA <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   dmLambda <- (mLambda.inv + mH)%*%mR
   
   dmLambda[Dinds] <- dmLambda[Dinds]*mR[Dinds]
+  #require(gridExtra)
+  #require(lattice)
+  #plot1 <- image(Matrix(mR))
+  #plot2 <- image(Matrix(dmLambda))
+  #grob <- grid.arrange(plot1, plot2, ncol=2)
+  #ans <- readline()
+  #if (ans == "Q") stop("Time to go!")
+  print(sum(eigen(dmLambda)$values^2))
+  print("\n")
   vg[(1+d):length(vtheta)] <- dmLambda[Rinds]    
  
   return(vg)
@@ -192,7 +201,7 @@ fit.GVA <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12)
   lower_constraint <- rep(-Inf, length(vmu))
   
   if (method=="L-BFGS-B") {
-    controls <- list(maxit=1000,trace=0,fnscale=-1,REPORT=1,factr=1.0E-5,lmm=10)
+    controls <- list(maxit=1000,trace=1,fnscale=-1,REPORT=1,factr=1.0E-5,lmm=10)
   } else if (method=="Nelder-Mead") {
     controls <- list(maxit=100000000,trace=0,fnscale=-1,REPORT=1000,reltol=reltol) 
   } else {
@@ -218,8 +227,13 @@ f.G_new2 <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,gh)
   d <- length(vmu)
   
   vmu.til     <- mC%*%vmu
-  vsigma2.til <- diag(mC%*%mLambda%*%t(mC))
+  #vsigma2.til <- diag(mC%*%mLambda%*%t(mC))
   #vsigma2.til <- sapply(1:nrow(mC), function(i) {mC[i,]%*%mLambda%*%mC[i,]})
+  vsigma2.til <- apply(mC, 1, function(row) {row%*%mLambda%*%row})
+  #vsigma2.til <- apply(mC, 1, function(row) {
+  #  x <- row%*%t(mR.inv)
+  #  return(t(x)%*%x)
+  #)
   vB0 <- B0.fun("POISSON",vmu.til,vsigma2.til,gh) 
   
   f <- sum(vr*(vy*vmu.til - vB0)) - 0.5*t(vmu)%*%mSigma.inv%*%vmu - 0.5*tr(mSigma.inv%*%mLambda)
@@ -243,7 +257,8 @@ f.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m)
   mR.inv = fastinv(mR, p=p, m=m)
   mLambda <- t(mR.inv) %*% mR.inv
   
-  f <- -sum(log(diag(mR))) + f.G_new(vmu,mLambda,vy,vr,mC,mSigma.inv,gh) 
+  #f <- -sum(log(diag(mR))) + f.G_new(vmu,mLambda,vy,vr,mC,mSigma.inv,gh) 
+  f <- sum(log(diag(mR.inv))) + f.G_new2(vmu,mLambda,vy,vr,mC,mSigma.inv,gh) 
   f <- f + 0.5*d*log(2*pi) + 0.5*d
   
   if (!is.finite(f)) {
@@ -317,7 +332,7 @@ fastinv = function(mR, p=NA, m=NA)
   # Last p lines can be solved as normal
   mR.inv.mX = solve(mR[(m+1):(m+p), (m+1):(m+p)], tol=1e-99)
   # Construct inverse of mR.
-  mR.inv = bdiag(mR.inv.mZ, mR.inv.mX)
+  mR.inv = blockDiag(mR.inv.mZ, mR.inv.mX)
   # Because of diagonal form of mR.inv.mZ, this could probably be optimised
   # further.
   mR.inv[(m+1):(m+p), 1:m] = -mR.inv.mX %*% mR[(m+1):(m+p), 1:m] %*% mR.inv.mZ
@@ -340,6 +355,8 @@ vg.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m)
   # backsolves?
   # New
   mR.inv = fastinv(mR, p=p, m=m)
+  #ans <- readline()
+  #if (ans == "Q") stop("Hammer time!")
   # Old
   #mR.inv = solve(mR, tol=1.0E-99)
   #cat("mR.inv2\n")
@@ -357,12 +374,13 @@ vg.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m)
   mLambda <- t(mR.inv) %*% mR.inv
   
   vmu.til     <- mC%*%vmu
-  vsigma2.til <- diag(mC %*% mLambda %*%t(mC))
+  #vsigma2.til <- diag(mC %*% mLambda %*%t(mC))
+  #vsigma2.til <- sapply(1:nrow(mC), function(i) {mC[i,]%*%mLambda%*%mC[i,]})
+  vsigma2.til <- apply(mC, 1, function(row) {row%*%mLambda%*%row})
   #vsigma2.til = rep(0, nrow(mC))
   #for (i in 1:nrow(mC))
   #  vsigma2.til[i] = as.numeric(mC[i,] %*% mLambda %*% mC[i,])
   #vsigma2.til <- mC%*%Diagonal(x = diag(mLambda))%*%t(mC)
-  #vsigma2.til <- sapply(1:nrow(mC), function(i) {mC[i,]%*%mLambda%*%mC[i,]})
   res.B12 <- B12.fun("POISSON",vmu.til,vsigma2.til,gh)
   vB1 <- res.B12$vB1
   vB2 <- res.B12$vB2
@@ -372,7 +390,17 @@ vg.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m)
   dmLambda <- -mR.inv%*%(mLambda.inv + mH)%*%mLambda  
   
   dmLambda[Dinds] <- dmLambda[Dinds]*mR[Dinds]
-
+  #require(gridExtra)
+  #require(lattice)
+  #plot1 <- image(Matrix(mR))
+  #plot2 <- image(Matrix(mR.inv))
+  #plot3 <- image(Matrix(dmLambda))
+  #grob <- grid.arrange(plot1, plot2, plot3, ncol=3)
+  #ans <- readline()
+  #if (ans == "Q") stop("Time to go!")
+  print(sum(eigen(dmLambda)$values^2))
+  print("\n")
+  
   #res <- vg.GVA.approx_new(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
  
   #print("john test")
@@ -438,6 +466,7 @@ vg.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m)
   #printMatrix(dmLambda-dmLambda2)
   
   vg[(1+d):length(vtheta)] <- dmLambda[Rinds]    
+  #vg[(1+d):length(vtheta)] <- t(chol(dmLambda))[Rinds]    
   #vg[(1+d):length(vtheta)] <- dmLambda2[Rinds]    
   
   return(vg)
@@ -622,6 +651,7 @@ vg.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   # backsolves?
   dmLambda <- -solve(mR, tol=1.0E-99)%*%(mLambda.inv + mH)%*%mLambda  
   dmLambda[Dinds] <- dmLambda[Dinds]*mR[Dinds]
+  print(sum(eigen(dmLambda)$values^2))
   
   #res <- vg.GVA.approx_new(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   
@@ -723,7 +753,7 @@ fit.GVA_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, p
   lower_constraint <- rep(-Inf, length(vmu))
   
   if (method=="L-BFGS-B") {
-    controls <- list(maxit=1000,trace=0,fnscale=-1,REPORT=1,factr=1.0E-5,lmm=10)
+    controls <- list(maxit=1000,trace=1,fnscale=-1,REPORT=1,factr=1.0E-5,lmm=10)
   } else if (method=="Nelder-Mead") {
     controls <- list(maxit=100000000,trace=0,fnscale=-1,REPORT=1000,reltol=reltol) 
   } else {

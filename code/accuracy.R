@@ -209,8 +209,8 @@ test_multivariate_accuracy <- function()
 
 test_accuracy = function(mult, mcmc_samples, approximation)
 {
-  pdf(paste0("accuracy_plots_", approximation, ".pdf"))
   var_result = zero_infl_var(mult, method=approximation, verbose=TRUE)
+  pdf(paste0("accuracy_plots_", approximation, ".pdf"))
   #return(var_result)
   # vbeta accuracy
   calculate_accuracy3 = function(mcmc_samples, dist_fn, param1, param2)
@@ -381,18 +381,41 @@ main_check_accuracy <- function()
 # Test all other approximations against it
 
 # Test multivariate approximation's accuracy
-var1 = test_accuracy(mult, mcmc_samples, "laplacian")
-var2 = test_accuracy(mult, mcmc_samples, "gva")
-var3 = test_accuracy(mult, mcmc_samples, "gva2")
-var4 = test_accuracy(mult, mcmc_samples, "gva_nr")
+#now = Sys.time()
+#var1 = test_accuracy(mult, mcmc_samples, "laplacian")
+#Sys.time() - now
+#print(image(Matrix(var1$mLambda)))
 
-for (i in 1:100) {
-  set.seed(i)
-  mult = generate_test_data(20, 100)
-  mcmc_samples = mcmc_approximation(mult, iterations=1e4)
-  
-  var1 = test_accuracy(mult, mcmc_samples, "laplacian")
-  var2 = test_accuracy(mult, mcmc_samples, "gva")
-  var3 = test_accuracy(mult, mcmc_samples, "gva2")
-  var4 = test_accuracy(mult, mcmc_samples, "gva_nr")
-}
+#now = Sys.time()
+#var2 = test_accuracy(mult, mcmc_samples, "gva")
+#Sys.time() - now
+#print(image(Matrix(var2$mLambda)))
+
+#now = Sys.time()
+#var3 = test_accuracy(mult, mcmc_samples, "gva2")
+#Sys.time() - now
+#print(image(Matrix(var3$mLambda)))
+
+#Rprof()
+now = Sys.time()
+var3_new = test_accuracy(mult, mcmc_samples, "gva2")
+print(Sys.time() - now)
+#Rprof(NULL)
+#summaryRprof()
+#print(image(Matrix(var3_new$mLambda)))
+
+#now = Sys.time()
+#var4 = test_accuracy(mult, mcmc_samples, "gva_nr")
+#Sys.time() - now
+#print(image(Matrix(var4$mLambda)))
+
+#for (i in 1:100) {
+#  set.seed(i)
+#  mult = generate_test_data(20, 100)
+#  mcmc_samples = mcmc_approximation(mult, iterations=1e4)
+#  
+#  var1 = test_accuracy(mult, mcmc_samples, "laplacian")
+#  var2 = test_accuracy(mult, mcmc_samples, "gva")
+#  var3 = test_accuracy(mult, mcmc_samples, "gva2")
+#  var4 = test_accuracy(mult, mcmc_samples, "gva_nr")
+#}
