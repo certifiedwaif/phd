@@ -176,8 +176,8 @@ vg.GVA <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   #grob <- grid.arrange(plot1, plot2, ncol=2)
   #ans <- readline()
   #if (ans == "Q") stop("Time to go!")
-  print(sum(eigen(dmLambda)$values^2))
-  print("\n")
+  #print(sum(eigen(dmLambda)$values^2))
+
   vg[(1+d):length(vtheta)] <- dmLambda[Rinds]    
  
   return(vg)
@@ -222,20 +222,36 @@ fit.GVA <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12)
 }
 ###############################################################################
 
-f.G_new2 <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,gh) 
+f.G_new2 <- function(vmu,mLambda,mR,vy,vr,mC,mSigma.inv,gh) 
 {
   d <- length(vmu)
   
   vmu.til     <- mC%*%vmu
   #vsigma2.til <- diag(mC%*%mLambda%*%t(mC))
+  #vsigma2.til = rep(0, nrow(mC))
+  #for (i in 1:length(nrow(mC))) {
+  #  vsigma2.til[i] = as.double(mC[i,]%*%mLambda%*%mC[i,])
+  #}
   #vsigma2.til <- sapply(1:nrow(mC), function(i) {mC[i,]%*%mLambda%*%mC[i,]})
-  vsigma2.til <- apply(mC, 1, function(row) {row%*%mLambda%*%row})
+  #vsigma2.til <- apply(mC, 1, function(row) {row%*%mLambda%*%row})
+  #vsigma2.til <- apply(mC, 1, function(row) {crossprod(crossprod(mLambda, row), row)})
+  #vsigma2.til <- diag(mC %*% (mLambda %*%t(mC)))
+  #vsigma2.til <- apply(mC, 1, function(row) {
+  #  a <- forwardsolve(mR, row)
+  #  sum(a^2)
+  #})
+  #browser()
+  #mR <- Matrix(mR, sparse=TRUE)
+  a <- forwardsolve(mR, t(mC))
+  #browser()
+  vsigma2.til <- crossprod(a^2, rep(1, ncol(mC)))
+                           
+  
   #vsigma2.til <- apply(mC, 1, function(row) {
   #  x <- row%*%t(mR.inv)
   #  return(t(x)%*%x)
   #)
   vB0 <- B0.fun("POISSON",vmu.til,vsigma2.til,gh) 
-  
   f <- sum(vr*(vy*vmu.til - vB0)) - 0.5*t(vmu)%*%mSigma.inv%*%vmu - 0.5*tr(mSigma.inv%*%mLambda)
   f <- f - 0.5*d*log(2*pi) + 0.5*log(det(mSigma.inv)) 
   return(f)
@@ -255,10 +271,11 @@ f.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m)
   #mLambda.inv = mR%*%t(mR)
   #mLambda <- solve(mLambda.inv, tol=1.0E-99)
   mR.inv = fastinv(mR, p=p, m=m)
-  mLambda <- t(mR.inv) %*% mR.inv
+  #mLambda <- t(mR.inv) %*% mR.inv
+  mLambda <- crossprod(mR.inv)
   
   #f <- -sum(log(diag(mR))) + f.G_new(vmu,mLambda,vy,vr,mC,mSigma.inv,gh) 
-  f <- sum(log(diag(mR.inv))) + f.G_new2(vmu,mLambda,vy,vr,mC,mSigma.inv,gh) 
+  f <- sum(log(diag(mR.inv))) + f.G_new2(vmu,mLambda,mR, vy,vr,mC,mSigma.inv,gh) 
   f <- f + 0.5*d*log(2*pi) + 0.5*d
   
   if (!is.finite(f)) {
@@ -283,8 +300,8 @@ mH.G_new2 <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,vB2)
 {
   vw <-  vB2; dim(vw) <- NULL
   #mH <- -t(mC*vw)%*%mC - mSigma.inv
-  mH <- -t(mC*vr*vw)%*%(mC*vr) - mSigma.inv
-  #mH <- -t(mC*(vr*vw))%*%(mC)    - mSigma.inv
+  #mH <- -t(mC*vr*vw)%*%(mC*vr) - mSigma.inv
+  mH <- -t(mC*(vr*vw))%*%(mC)    - mSigma.inv
   return(mH)    
 }
 
@@ -368,15 +385,29 @@ vg.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m)
   #ans <- readline()
   
   # Old
-  mLambda.inv <- mR%*%t(mR)
+  #mLambda.inv <- mR%*%t(mR)
   #mLambda <- solve(mLambda.inv, tol=1.0E-99)
   # New
-  mLambda <- t(mR.inv) %*% mR.inv
-  
+  #mLambda <- t(mR.inv) %*% mR.inv
+  mLambda <- crossprod(mR.inv)
   vmu.til     <- mC%*%vmu
-  #vsigma2.til <- diag(mC %*% mLambda %*%t(mC))
+  #vsigma2.til <- diag(mC %*% (mLambda %*%t(mC)))
   #vsigma2.til <- sapply(1:nrow(mC), function(i) {mC[i,]%*%mLambda%*%mC[i,]})
-  vsigma2.til <- apply(mC, 1, function(row) {row%*%mLambda%*%row})
+  #vsigma2.til <- apply(mC, 1, function(row) {row%*%(mLambda%*%row)})
+  #mR <- Matrix(mR, sparse=TRUE)
+  a <- forwardsolve(mR, t(mC))
+  #browser()
+  vsigma2.til <- crossprod(a^2, rep(1, ncol(mC)))
+  #vsigma2.til <- apply(mC, 1, function(row) {crossprod(crossprod(mLambda, row), row)})
+  #vsigma2.til <- apply(mC, 1, function(row) {
+  #  #a <- forwardsolve(mR, row)
+  #  a <- solve(mR, row)
+  #  sum(a^2)
+  #})
+  #vsigma2.til = rep(0, nrow(mC))
+  #for (i in 1:length(nrow(mC))) {
+  #  vsigma2.til[i] = as.double(mC[i,]%*%mLambda%*%mC[i,])
+  #}
   #vsigma2.til = rep(0, nrow(mC))
   #for (i in 1:nrow(mC))
   #  vsigma2.til[i] = as.numeric(mC[i,] %*% mLambda %*% mC[i,])
@@ -385,9 +416,12 @@ vg.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m)
   vB1 <- res.B12$vB1
   vB2 <- res.B12$vB2
   vg <- 0*vmu
-  vg[1:d] <- vg.G_new2(vmu,mLambda,vy,vr,mC,mSigma.inv,vB1) 
+  vg[1:d] <- as.double(vg.G_new2(vmu,mLambda,vy,vr,mC,mSigma.inv,vB1) )
   mH <- mH.G_new2(vmu,mLambda,vy,vr,mC,mSigma.inv,vB2)
-  dmLambda <- -mR.inv%*%(mLambda.inv + mH)%*%mLambda  
+  #dmLambda <- -mR.inv%*%(mLambda.inv + mH)%*%mLambda
+  #browser()
+  #dmLambda <- -mR.inv%*%(diag(1, ncol(mC)) + mH %*% mLambda)
+  dmLambda <- forwardsolve(-mR, diag(1, ncol(mC)) + mH %*% mLambda)
   
   dmLambda[Dinds] <- dmLambda[Dinds]*mR[Dinds]
   #require(gridExtra)
@@ -398,8 +432,9 @@ vg.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m)
   #grob <- grid.arrange(plot1, plot2, plot3, ncol=3)
   #ans <- readline()
   #if (ans == "Q") stop("Time to go!")
-  print(sum(eigen(dmLambda)$values^2))
-  print("\n")
+  #print(sum(eigen(dmLambda)$values^2))
+  #print("\n")
+  #print(det(dmLambda))
   
   #res <- vg.GVA.approx_new(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
  
@@ -494,6 +529,7 @@ fit.GVA_new2 <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, 
   mSigma.inv = blockDiag(mSigma.inv[(p+1):(p+m), (p+1):(p+m)], mSigma.inv[1:p, 1:p])
   vmu = c(vmu[(p+1):(p+m)], vmu[1:p])
   mC = mC[,c((p+1):(p+m), 1:p)]
+  #mC = Matrix(mC, sparse=TRUE)
   
   mR <- t(chol(solve(mLambda, tol=1.0E-99) + diag(1.0E-8,d)))
 
@@ -650,8 +686,9 @@ vg.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   # mR is lower triangular. Can you rewrite this using forward solves and
   # backsolves?
   dmLambda <- -solve(mR, tol=1.0E-99)%*%(mLambda.inv + mH)%*%mLambda  
+  #dmLambda <- -solve(mR, tol=1.0E-99)%*%(diag(rep(1, ncol(mC))) + mH%*%mLambda)
   dmLambda[Dinds] <- dmLambda[Dinds]*mR[Dinds]
-  print(sum(eigen(dmLambda)$values^2))
+  #print(sum(eigen(dmLambda)$values^2))
   
   #res <- vg.GVA.approx_new(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   
@@ -744,8 +781,8 @@ fit.GVA_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, p
   Dinds <- d*((1:d)-1)+(1:d)
   
   mR <- t(chol(solve(mLambda, tol=1.0E-99) + diag(1.0E-8,d)))
-  cat("mR", mR, "\n")
-  cat("mSigma.inv", mSigma.inv, "\n")
+  #cat("mR", mR, "\n")
+  #cat("mSigma.inv", mSigma.inv, "\n")
   mR[Dinds] <- log(mR[Dinds])
   Rinds <- which(lower.tri(mR,diag=TRUE))
   vmu <- c(vmu,mR[Rinds])
