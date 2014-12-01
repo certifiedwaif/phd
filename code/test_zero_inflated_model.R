@@ -188,14 +188,31 @@ test_multivariate_zip_no_zeros_random_intercept <- function(approximation="gva")
   return(result_var)
 }
 
+# Create mZ matrix for random slopes
+# There's probably a better way to do this
+makeZ <- function(mX, m, ni, p=1)
+{
+  n = rep(ni,m)
+  mX = matrix(as.vector(cbind(rep(1, sum(n)), runif(sum(n), -1, 1))), sum(n), 2)
+  mZ <- kronecker(diag(1,m),rep(1,ni))
+  # Create mZ matrix for random slopes
+  # There's probably a better way to do this
+  mZ2 = matrix(0, nrow=m*ni, ncol=2*m)
+  for (i in 1:m) {
+    row_idx = ni*(i-1)+1:ni
+    mZ2[row_idx,((i-1)*p+1):(i*p)] = mX[row_idx,]
+  }
+  mZ2
+}
+
 test_multivariate_zip_half_zeros_random_intercept <- function(approximation="gva")
 {
 	m = 20
 	ni = 10
 	n = rep(ni,m)
 	mX = matrix(as.vector(cbind(rep(1, sum(n)), runif(sum(n), -1, 1))), sum(n), 2)
-	mZ <- kronecker(diag(1,m),rep(1,ni))
-	
+  mZ = makeZ(mX, m, ni, p=2)
+  
 	expected_rho = 0.5
 	expected_beta = c(2, 1)
 	expected_sigma2_u = .5^2
@@ -210,7 +227,7 @@ test_multivariate_zip_half_zeros_random_intercept <- function(approximation="gva
 	vy = test_data$vy
 	
 	# Test model fitting
-	multivariate = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau)
+	multivariate = create_multivariate(vy, mX, mZ, blocksize=2, sigma2.beta, a_sigma, b_sigma, tau)
 	result_var = zero_infl_var(multivariate, method=approximation, verbose=TRUE)
   return(result_var)
 }
