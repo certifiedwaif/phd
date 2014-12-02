@@ -26,7 +26,7 @@ compare_approximations = function(vbeta)
   vy = test_data$vy
   
   multivariate = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau)
-  approximation = "gva"
+  approximation = "gva2new"
   result_var = zero_infl_var(multivariate, method=approximation, verbose=FALSE)
   mcmc_samples = mcmc_approximation(multivariate, iterations=1e4, mc.cores = 32)
   return(list(result_var=result_var, mcmc_samples=mcmc_samples))
@@ -47,6 +47,7 @@ mean_var = function(vbeta)
   }))
 }
 
+# This is most definitely a verona job
 for (theta in seq(1, 2, by=.1))
 	print(mean_var(c(1, theta)))
 
