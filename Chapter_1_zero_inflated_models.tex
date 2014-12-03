@@ -320,7 +320,7 @@ This can be optimised using a Newton-Raphson style algorithm where
 
 \begin{align*}
 \frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \vmu} &\approx \vp^T\mC(\vy - \exp{(\mC \vmu)}) - \mSigma^{-1} \vmu \\
-\frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \mLambda} &\approx -\mC^T \text{diag}(\exp{(\mC \vmu)}) \mC - \mSigma^{-1}
+\frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \mLambda} &\approx -\vp^T \mC^T \text{diag}(\exp{(\mC \vmu)}) \mC - \mSigma^{-1}
 \end{align*}
 
 \begin{algorithm}\label{alg:algorithm_three}
@@ -329,8 +329,8 @@ This can be optimised using a Newton-Raphson style algorithm where
 % Fit \vmu, \mLambda using Laplace approximation
 \WHILE{the increase in $\log \underline{p}(\vmu, \mLambda; \vy)$ is significant}
 % \vmu, \mLambda
-\STATE $\mLambda \leftarrow \left [\mC^T \text{diag}(\exp{(\mC \vmu)}) \mC + \mSigma^{-1} \right ]^{-1}$
-\STATE $\vmu \leftarrow \vmu + \mLambda \nabla \log \underline{p}(\vmu, \mLambda; \vy)$
+\STATE $\mLambda \leftarrow \left [\vp^T \mC^T \text{diag}(\exp{(\mC \vmu)}) \mC + \mSigma^{-1} \right ]^{-1}$
+\STATE $\vmu \leftarrow \vmu + \mLambda \frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \mLambda}$
 \ENDWHILE
 \end{algorithmic}
 \end{algorithm}
@@ -366,42 +366,52 @@ can be optimised with L-BFGS:
 \end{align*} 
  
 \subsubsection{GVA2}
-The second variant of the Gaussian Variational Approximation algorithm is similiar to
-the first, but instead of optimising $\vmu$ and $\mR$ where $\mLambda=\mR \mR^T$,
+The second variant of the Gaussian Variational Approximation algorithm is similiar 
+to the first, but instead of optimising $\vmu$ and $\mR$ where $\mLambda=\mR \mR^T$,
 instead we optimise $\mR$ where $\mLambda = (\mR \mR^T)^{-1}$.
 % The function and derivatives change
-This has the advantage that if we re-order the columns of $\mLambda$ such that
-the random effects are placed before the fixed effects then due to the assumed 
-independence between the random effects, the off-diagonals of the Cholesky decomposition
-will be 0 and so the Cholesky factor $\mR$ will be sparse. This mitigates the increased
-computational complexity of this algorithm versus Laplace's method to some degree.
+
+\noindent By re-ordering the columns and rows of $\mR$ so that random effects
+precede fixed effects, the assumption of independence between the components of
+$\vu$ ensures sparsity of $\mR$. This allows optimisation of the Gaussian 
+variational lower bound to be done over fewer parameters, and for inverses of $\mR$ 
+to be calculated more quickly - a reduction from $O((m + p)^3)$ to
+$O(m + (pm)^2 + p^3)$, which is a substantial reduction in computation if $m$ is 
+substantially greater than $p$, as is typical in applications.
 
 % More complicated functions and derivatives, but more accurate
 % Can be quite fast because of the special form of $\mR$.
 
 % Detail the function and its derivatives under this parameterisation
 % Difficulties re: multimodal likelihood, tricks to get that to work
-\noindent The variational lower bound is not necessarily unimodal, leading to potential
-difficulty in optimising to the global maximum. This problem was sidestepped by
-optimising the parameter estimates using Laplace's method first to get a rough
-estimate, then using the GVA2 algorithm to further refine that estimate. This led
-to an extremely accurate approximation of the true posterior at the expense of some
-additional computational effort.
+\noindent The variational lower bound is not necessarily unimodal, leading to 
+potential difficulty in optimising to the global maximum. This problem was 
+sidestepped by optimising the parameter estimates using Laplace's method first to 
+get a rough estimate, then using the GVA2 algorithm to further refine that estimate. 
+This led to an extremely accurate approximation of the true posterior at the expense 
+of some additional computational effort.
 % Re-order the covariance matrix so that Chevron form is ``reversed''. This makes
 % the Cholesky factorisation very simple, and reduces the number of parameters that
 % you need to optimise and store.
+
+\noindent The Gaussian variational lower bound is
 
 \begin{align*}
 \log \underline{p}(\vmu, \mLambda; \vy) &= \vp^T\vy^T\mC \vmu - \vp^T \B(\mC \vmu, \text{diag}(\mC \mLambda \mC^T)) - \half \vmu \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} \\
 &\quad- \frac{d}{2} \log{(2 \pi)} + \half \log{|\mSigma^{-1}|} + \frac{d}{2} \log{(2 \pi)} + \frac{d}{2} - \log{|\mR|}
 \end{align*}
 
-\noindent The first derivative is the same as that in the GVA algorithm, but as the 
-parameterisation of $\mLambda$ has changed, the second derivative is now
+\noindent The derivative with respect to $\vmu$ is the same as that in the GVA 
+algorithm, but as the parameterisation of $\mLambda$ has changed, the  
+derivative with respect to $\mLambda$ is now
 
 \begin{align*}
-\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda} &= -\mR^{-1}\left [\mLambda^{-1} - \vp^T \mC^T \text{diag}(\B^{(2)}(\mC \vmu, \mC \mLambda \mC^T)) \mC \vp - \mSigma^{-1} \right ]\mLambda
+\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda} &= -\mR^{-1}\left [\mLambda^{-1} - \mH \right ]\mLambda \\
+&= -\mR^{-1} (\mI + \mH \mLambda)
 \end{align*} 
+
+\noindent where $\mH = \vp^T \mC^T \text{diag}(\B^{(2)}(\mC \vmu, \mC \mLambda \mC^T)) \mC \vp - \mSigma^{-1}$.
+
 
 \subsubsection{GVA NR}
 % Fixed point update of \mLambda
