@@ -191,7 +191,7 @@ zero_infl_var.univariate <- function(univariate, verbose=FALSE, plot_lower_bound
   return(params)
 }
 
-create_multivariate <- function(vy, mX, mZ, blocksize=1, sigma2.beta, a_sigma, b_sigma, tau)
+create_multivariate <- function(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, blocksize=1)
 {
   # Initialise
   n = length(vy)
