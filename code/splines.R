@@ -71,12 +71,12 @@ fit_spline = function(x, y)
   Bg <- bs(xg,knots=intKnots,degree=3,
            Boundary.knots=c(a,b),intercept=TRUE)
   fhatg <- Bg%*%nuHat
-  par(mfrow=c(1,2))
-  plot(x,y,xlim=range(xg),bty="l",type="n",xlab="radiation",
-       ylab="cuberoot of ozone",main="(a) direct fit; user 
-       choice of smooth. par.")
-  lines(xg,fhatg,lwd=2)   
-  points(x,y,lwd=2)
+  #par(mfrow=c(1,2))
+  #plot(x,y,xlim=range(xg),bty="l",type="n",xlab="radiation",
+  #     ylab="cuberoot of ozone",main="(a) direct fit; user 
+  #     choice of smooth. par.")
+  #lines(xg,fhatg,lwd=2)   
+  #points(x,y,lwd=2)
   
   # Mixed model scatterplot smoothing with REML choice of smoothing parameter
   # -------------------------------------------------------------------------
@@ -105,7 +105,6 @@ fit_spline = function(x, y)
   X <- cbind(rep(1,length(x)),x)
   Z <- B%*%LZ
   
-  return(list(X=X, Z=Z))
   # Fit using lme() with REML choice of smoothing parameter:
   
   library(nlme)
@@ -124,20 +123,7 @@ fit_spline = function(x, y)
        REML choice of smooth. par.")
   lines(xg,fhatgREML,lwd=2)   
   points(x,y,lwd=2)
+  
+  return(list(X=X, Z=Z))
 }
 
-m = 50
-n = rep(1, m)
-mX = matrix(as.vector(cbind(rep(1, m), runif(m, -1, 1))), m, 2)
-mZ = NULL
-expected_rho = 1
-expected_mu = c(2, 1)
-expected_sigma2_u = 0
-sigma2.beta = 1e5
-a_sigma = 1e5
-b_sigma = 1e5
-test_data = generate_multivariate_test_data(mX, NULL, m, n, expected_rho, expected_mu, expected_sigma2_u)
-vy = test_data$vy
-vy = vy ^ 3
-
-result = fit_spline(mX[,2], vy)

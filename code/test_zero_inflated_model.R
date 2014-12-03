@@ -234,6 +234,32 @@ test_multivariate_zip_half_zeros_random_intercept <- function(approximation="gva
 
 # Idea: Run each of the tests for convergence repeatedly.
 
+test_spline = function(approximation="gva")
+{
+  m = 50
+  n = rep(1, m)
+  mX = matrix(as.vector(cbind(rep(1, m), runif(m, -1, 1))), m, 2)
+  mZ = NULL
+  expected_rho = 1
+  expected_mu = c(2, 1)
+  expected_sigma2_u = 0
+  sigma2.beta = 1e5
+  a_sigma = 1e5
+  b_sigma = 1e5
+  tau = 1.0E2
+  
+  test_data = generate_multivariate_test_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u, verbose=TRUE)
+  vy = test_data$vy
+  vy = 2+mX[,2]^3+rnorm(m)*.1
+  mult = create_multivariate(vy, mX, mZ, blocksize=2, sigma2.beta, a_sigma, b_sigma, tau)
+  
+  result = fit_spline(mX[,2], vy)
+  mult$mZ = result$Z
+  mult$vy = vy
+  
+  result_var = zero_infl_var(mult, method=approximation, verbose=TRUE)
+}
+
 main <- function()
 {
 	set.seed(5)
@@ -253,6 +279,7 @@ main <- function()
 	test_multivariate_zip_half_zeros_random_intercept("gva")
 	test_multivariate_zip_half_zeros_random_intercept("gva2")
 	test_multivariate_zip_half_zeros_random_intercept("gva_nr")
+  test_spline("gva")
 }
 
 #main()
