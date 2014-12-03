@@ -244,8 +244,7 @@ f.G_new2 <- function(vmu,mLambda,mR,vy,vr,mC,mSigma.inv,gh)
   #mR <- Matrix(mR, sparse=TRUE)
   a <- forwardsolve(mR, t(mC))
   #browser()
-  vsigma2.til <- crossprod(a^2, rep(1, ncol(mC)))
-                           
+  vsigma2.til <- crossprod(a^2, rep(1, ncol(mC)))                           
   
   #vsigma2.til <- apply(mC, 1, function(row) {
   #  x <- row%*%t(mR.inv)

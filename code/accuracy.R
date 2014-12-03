@@ -53,10 +53,9 @@ generate_test_data = function(m, ni)
   return(mult)
 }
 
-test_accuracy = function(mult, mcmc_samples, approximation)
+calculate_accuracy = function(mcmc_samples, var_result, print_flag=FALSE, plot_flag=FALSE)
 {
-  var_result = zero_infl_var(mult, method=approximation, verbose=TRUE)
-  pdf(paste0("accuracy_plots_", approximation, ".pdf"))
+  if (plot_flag) pdf(paste0("accuracy_plots_", approximation, ".pdf"))
   #return(var_result)
   # vbeta accuracy
   calculate_accuracy3 = function(mcmc_samples, dist_fn, param1, param2)
@@ -95,42 +94,54 @@ test_accuracy = function(mult, mcmc_samples, approximation)
           add=TRUE, lty=2, col="blue")
   }
   
+  vbeta_accuracy = rep(NA, ncol(mult$mX))
   for (i in 1:ncol(mult$mX)) {
-    accuracy = calculate_accuracy3(mcmc_samples$vbeta[,i], dnorm,
-                                  var_result$vmu[i], sqrt(var_result$mLambda[i,i]))
-    cat("vbeta[", i, "]", approximation, "accuracy:", accuracy, "\n")
+    vbeta_accuracy[i] = calculate_accuracy3(mcmc_samples$vbeta[,i], dnorm,
+                                            var_result$vmu[i], sqrt(var_result$mLambda[i,i]))
+    if (print_flag) cat("vbeta[", i, "]", approximation, "accuracy:", vbeta_accuracy[i], "\n")
     
     param_name = sprintf("vbeta[%d]", 1)
-    accuracy_plot(mcmc_samples$vbeta[,i], dnorm,
-                  var_result$vmu[i], sqrt(var_result$mLambda[i,i]))
+    if (plot_flag) accuracy_plot(mcmc_samples$vbeta[,i], dnorm,
+                            var_result$vmu[i], sqrt(var_result$mLambda[i,i]))
   }
   
   # vu accuracy
   # FIXME: To check for random slopes accuracy, this section will have
   # to get more complex.
+  vu_accuracy = rep(NA, ncol(mult$mZ))
   for (i in 1:ncol(mult$mZ)) {
-    accuracy = calculate_accuracy3(mcmc_samples$u[,i], dnorm,
-                                  var_result$vmu[i+2], sqrt(var_result$mLambda[i+2,i+2]))
-    cat("vu[", i, "]", approximation, "accuracy:", accuracy, "\n")
-    accuracy_plot(mcmc_samples$u[,i], dnorm,
-                  var_result$vmu[i+2], sqrt(var_result$mLambda[i+2,i+2]))
+    vu_accuracy[i] = calculate_accuracy3(mcmc_samples$u[,i], dnorm,
+                                         var_result$vmu[i+2], sqrt(var_result$mLambda[i+2,i+2]))
+    if (print_flag) cat("vu[", i, "]", approximation, "accuracy:", vu_accuracy[i], "\n")
+    if (plot_flag) accuracy_plot(mcmc_samples$u[,i], dnorm,
+                            var_result$vmu[i+2], sqrt(var_result$mLambda[i+2,i+2]))
   }
   
   # sigma2_u accuracy
-  accuracy = calculate_accuracy3(1/mcmc_samples$sigma_u^2, dgamma,
-                                 var_result$a_sigma, var_result$b_sigma)
-  cat("sigma2_u", approximation, "accuracy:", accuracy, "\n")
-  accuracy_plot(1/mcmc_samples$sigma_u^2, dgamma,
-                var_result$a_sigma, var_result$b_sigma)
+  sigma2_u_accuracy = calculate_accuracy3(1/mcmc_samples$sigma_u^2, dgamma,
+                                          var_result$a_sigma, var_result$b_sigma)
+  if (print_flag) cat("sigma2_u", approximation, "accuracy:", sigma2_u_accuracy, "\n")
+  if (plot_flag) accuracy_plot(1/mcmc_samples$sigma_u^2, dgamma,
+                          var_result$a_sigma, var_result$b_sigma)
   
   # rho accuracy
-  accuracy = calculate_accuracy3(mcmc_samples$rho, dbeta,
-                                 var_result$a_rho, var_result$b_rho)
-  cat("rho", approximation, "accuracy: ", accuracy, "\n")
-  accuracy_plot(mcmc_samples$rho, dbeta,
-                var_result$a_rho, var_result$b_rho)
-  dev.off()
-  return(var_result)
+  rho_accuracy = calculate_accuracy3(mcmc_samples$rho, dbeta,
+                                     var_result$a_rho, var_result$b_rho)
+  if (print_flag) cat("rho", approximation, "accuracy: ", rho_accuracy, "\n")
+  if (plot_flag) accuracy_plot(mcmc_samples$rho, dbeta,
+                          var_result$a_rho, var_result$b_rho)
+  if (plot_flag) dev.off()
+  return(list(var_result=var_result,
+              vbeta_accuracy=vbeta_accuracy,
+              vu_accuracy=vu_accuracy,
+              sigma2_u_accuracy=sigma2_u_accuracy,
+              rho_accuracy=rho_accuracy))
+}
+
+test_accuracy = function(mult, mcmc_samples, approximation, plot=FALSE)
+{
+  var_result = zero_infl_var(mult, method=approximation, verbose=TRUE)
+  return(calculate_accuracy(mcmc_samples, var_result))
 }
 
 # Calculate accuracy ----
@@ -158,62 +169,65 @@ calculate_accuracy2 <- function(result_mcmc, result_var)
   return(list(rho_accuracy=rho_accuracy, lambda_accuracy=lambda_accuracy))
 }
 
-# Need to be able to compare the solution paths of each approximation
-
-# Generate data
-# for (i in 1:100) {
-#   set.seed(i)
-#   mult = generate_test_data(20, 100)
-#   # Monte Carlo Markov Chains approximation
-#   mcmc_samples = mcmc_approximation(mult, iterations=1e6)
-#   # Save the results, because this takes such a long time to run.
-# }
-# save(mult, mcmc_samples, file="accuracy_good.RData")
-# set.seed(1)
-# mult = generate_test_data(20, 100)
-# # Monte Carlo Markov Chains approximation
-# mcmc_samples = mcmc_approximation(mult, iterations=1e4)
-# Save the results, because this takes such a long time to run.
-#save(mult, mcmc_samples, file="accuracy.RData")
-#load(file="accuracy.RData")
-# Test all other approximations against it
-
-# Test multivariate approximation's accuracy
-#now = Sys.time()
-#var1 = test_accuracy(mult, mcmc_samples, "laplacian")
-#Sys.time() - now
-#print(image(Matrix(var1$mLambda)))
-
-#now = Sys.time()
-#var2 = test_accuracy(mult, mcmc_samples, "gva")
-#Sys.time() - now
-#print(image(Matrix(var2$mLambda)))
-
-#now = Sys.time()
-#var3 = test_accuracy(mult, mcmc_samples, "gva2")
-#Sys.time() - now
-#print(image(Matrix(var3$mLambda)))
-
-#Rprof()
-now = Sys.time()
-var3_new = test_accuracy(mult, mcmc_samples, "gva2")
-print(Sys.time() - now)
-#Rprof(NULL)
-#summaryRprof()
-#print(image(Matrix(var3_new$mLambda)))
-
-#now = Sys.time()
-#var4 = test_accuracy(mult, mcmc_samples, "gva_nr")
-#Sys.time() - now
-#print(image(Matrix(var4$mLambda)))
-
-#for (i in 1:100) {
-#  set.seed(i)
-#  mult = generate_test_data(20, 100)
-#  mcmc_samples = mcmc_approximation(mult, iterations=1e4)
-#  
-#  var1 = test_accuracy(mult, mcmc_samples, "laplacian")
-#  var2 = test_accuracy(mult, mcmc_samples, "gva")
-#  var3 = test_accuracy(mult, mcmc_samples, "gva2")
-#  var4 = test_accuracy(mult, mcmc_samples, "gva_nr")
-#}
+test_accuracies = function()
+{
+  # Need to be able to compare the solution paths of each approximation
+  
+  # Generate data
+  # for (i in 1:100) {
+  #   set.seed(i)
+  #   mult = generate_test_data(20, 100)
+  #   # Monte Carlo Markov Chains approximation
+  #   mcmc_samples = mcmc_approximation(mult, iterations=1e6)
+  #   # Save the results, because this takes such a long time to run.
+  # }
+  # save(mult, mcmc_samples, file="accuracy_good.RData")
+  # set.seed(1)
+  # mult = generate_test_data(20, 100)
+  # # Monte Carlo Markov Chains approximation
+  # mcmc_samples = mcmc_approximation(mult, iterations=1e4)
+  # Save the results, because this takes such a long time to run.
+  #save(mult, mcmc_samples, file="accuracy.RData")
+  #load(file="accuracy.RData")
+  # Test all other approximations against it
+  
+  # Test multivariate approximation's accuracy
+  #now = Sys.time()
+  #var1 = test_accuracy(mult, mcmc_samples, "laplacian")
+  #Sys.time() - now
+  #print(image(Matrix(var1$mLambda)))
+  
+  #now = Sys.time()
+  #var2 = test_accuracy(mult, mcmc_samples, "gva")
+  #Sys.time() - now
+  #print(image(Matrix(var2$mLambda)))
+  
+  #now = Sys.time()
+  #var3 = test_accuracy(mult, mcmc_samples, "gva2")
+  #Sys.time() - now
+  #print(image(Matrix(var3$mLambda)))
+  
+  #Rprof()
+  now = Sys.time()
+  var3_new = test_accuracy(mult, mcmc_samples, "gva2")
+  print(Sys.time() - now)
+  #Rprof(NULL)
+  #summaryRprof()
+  #print(image(Matrix(var3_new$mLambda)))
+  
+  #now = Sys.time()
+  #var4 = test_accuracy(mult, mcmc_samples, "gva_nr")
+  #Sys.time() - now
+  #print(image(Matrix(var4$mLambda)))
+  
+  #for (i in 1:100) {
+  #  set.seed(i)
+  #  mult = generate_test_data(20, 100)
+  #  mcmc_samples = mcmc_approximation(mult, iterations=1e4)
+  #  
+  #  var1 = test_accuracy(mult, mcmc_samples, "laplacian")
+  #  var2 = test_accuracy(mult, mcmc_samples, "gva")
+  #  var3 = test_accuracy(mult, mcmc_samples, "gva2")
+  #  var4 = test_accuracy(mult, mcmc_samples, "gva_nr")
+  #}
+}

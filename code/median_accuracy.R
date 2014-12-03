@@ -1,5 +1,22 @@
 # median_accuracy.R
 source("test_zero_inflated_model.R")
+source("accuracy.R")
+
+# Repeatedly run trials and compare accuracy. Plot boxplots.
+median_accuracy = function()
+{
+  ITER = 100
+
+  set.seed(1234)
+  accuracy = list()
+  for (i in 1:ITER) {
+    # Run code
+    result = compare_approximations(c(1, 2))
+    accuracy[[i]] = with(result, calculate_accuracy(mcmc_samples, var_result))
+  }
+  # For name in names(accuracy)
+  boxplot(accuracy)
+}
 
 # Graph of Var_q(theta) against Var(theta|y)
 # How to get this?
@@ -29,7 +46,7 @@ compare_approximations = function(vbeta)
   approximation = "gva2new"
   result_var = zero_infl_var(multivariate, method=approximation, verbose=FALSE)
   mcmc_samples = mcmc_approximation(multivariate, iterations=1e4, mc.cores = 32)
-  return(list(result_var=result_var, mcmc_samples=mcmc_samples))
+  return(list(multivariate=multivariate, result_var=result_var, mcmc_samples=mcmc_samples))
 }
 
 mean_var = function(vbeta)
@@ -48,9 +65,34 @@ mean_var = function(vbeta)
 }
 
 # This is most definitely a verona job
-for (theta in seq(1, 2, by=.1))
+for (theta in seq(1, 2, by=.01))
 	print(mean_var(c(1, theta)))
 
 # Graph of E_q(theta) against E(theta|y)
 
 # For most important parameters: beta_1, beta_2
+
+plot_graphs = function()
+{
+  # Read files, plot graphs
+  require(stringr)
+  fn = function(fname)
+  {
+    lines = readLines(fname)
+    num_str = str_match(lines, "[0-9]*\\.[0-9]*")
+    return(na.omit(as.numeric(num_str)))
+  }
+  
+  var_mean = fn("var_approx_mean.txt")
+  var_var = fn("var_approx_var.txt")
+  mcmc_mean = fn("mcmc_approx_mean.txt")
+  mcmc_var = fn("mcmc_approx_var.txt")
+  
+  plot(mcmc_mean)
+  points(var_mean, col=2)
+  plot(mcmc_mean, var_mean)
+  
+  plot(mcmc_var)
+  points(var_var, col=2)
+  plot(mcmc_var, var_var)
+}
