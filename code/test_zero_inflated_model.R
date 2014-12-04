@@ -248,6 +248,7 @@ test_spline = function(approximation="gva")
   b_sigma = 1e5
   tau = 1.0E2
   
+  expected_beta = c(2, 1)
   test_data = generate_multivariate_test_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u, verbose=TRUE)
   vy = test_data$vy
   vy = 2+mX[,2]^3+rnorm(m)*.1

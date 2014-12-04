@@ -313,6 +313,7 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
       # a_sigma is fixed
       mult$a_sigma = mult$prior$a_sigma + m/2
       u_idx = p + 1:(m*blocksize)  # (ncol(mult$mX)+1):ncol(mult$mC)
+      # u_idx = p + 1:(m*blocksize) + spline_degree
       #tr_mSigma = ncol(mult$mZ) * mult$prior$a_sigma/mult$prior$b_sigma
       #mult$b_sigma = mult$prior$b_sigma + sum(vu^2)/2 + (tr_mSigma)/2
       mult$b_sigma = mult$prior$b_sigma + sum(mult$vmu[u_idx]^2)/2 + tr(mult$mLambda[u_idx, u_idx])/2    # Extract right elements of mLambda
