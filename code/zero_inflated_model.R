@@ -251,6 +251,7 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
     if (verbose) {
       cat("m", m, "\n")
       cat("blocksize", blocksize, "\n")
+      cat("spline_degree", spline_degree, "\n")
     }
   } else {
     m = 0
@@ -303,7 +304,7 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
     
     # Update parameters for q_vr
     if (length(zero.set) != 0) {
-      mult$vp[zero.set] = expit((mult$vy[zero.set]*mult$mC[zero.set,])%*%mult$vmu-exp(mult$mC[zero.set,]%*%mult$vmu + 0.5*diag((matrix(mult$mC[zero.set,], length(zero.set), p+m*blocksize))%*%mult$mLambda%*%t(matrix(mult$mC[zero.set,], length(zero.set), p+m*blocksize))) + digamma(mult$a_rho) - digamma(mult$b_rho)))
+      mult$vp[zero.set] = expit((mult$vy[zero.set]*mult$mC[zero.set,])%*%mult$vmu-exp(mult$mC[zero.set,]%*%mult$vmu + 0.5*diag((matrix(mult$mC[zero.set,], length(zero.set), p+m*blocksize+spline_degree))%*%mult$mLambda%*%t(matrix(mult$mC[zero.set,], length(zero.set), p+m*blocksize+spline_degree))) + digamma(mult$a_rho) - digamma(mult$b_rho)))
     }
     
     # Update parameters for q_rho
@@ -312,7 +313,6 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
     
     # Update parameters for q_sigma_u^2 if we need to
     if (!is.null(mult$mZ)) {
-      browser()
       # a_sigma is fixed
       u_dim = m*blocksize+spline_degree
       mult$a_sigma = mult$prior$a_sigma + u_dim/2

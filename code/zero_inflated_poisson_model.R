@@ -95,7 +95,6 @@ f.GVA <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
    f <- f + 0.5*d*log(2*pi) + 0.5*d
    
    if (!is.finite(f)) {
-     browser()
      f <- -1.0E16
    }
    return(f)
@@ -165,7 +164,7 @@ vg.GVA <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   vg <- 0*vmu
   vg[1:d] <- vg.G(vmu,mLambda,vy,vr,mC,mSigma.inv,vB1) 
 
-  mLambda.inv <- solve(mR%*%t(mR))
+  mLambda.inv <- solve(mR%*%t(mR),tol=1.0E-99)
   mH <- mH.G(vmu,mLambda,vy,vr,mC,mSigma.inv,vB2)
   dmLambda <- (mLambda.inv + mH)%*%mR
   
