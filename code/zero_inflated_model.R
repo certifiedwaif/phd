@@ -191,7 +191,7 @@ zero_infl_var.univariate <- function(univariate, verbose=FALSE, plot_lower_bound
   return(params)
 }
 
-create_multivariate <- function(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, blocksize=1)
+create_multivariate <- function(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, m=ncol(mZ), blocksize=1, spline_degree=NA)
 {
   # Initialise
   n = length(vy)
@@ -214,15 +214,16 @@ create_multivariate <- function(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, 
   b_rho = n - sum(vp) + 1
   
   prior = list(a_sigma=a_sigma, b_sigma=b_sigma, a_rho=1, b_rho=1, sigma2.beta=sigma2.beta)
-  multivariate = list(vy=vy, mX=mX, mZ=mZ, blocksize=blocksize, mC=mC, vp=vp, vmu=vmu,
+  multivariate = list(vy=vy, vp=vp, vmu=vmu,
+                      mX=mX, mZ=mZ, mC=mC,
+                      m=m, blocksize=blocksize, spline_degree=spline_degree,
                       a_sigma=a_sigma, b_sigma=b_sigma,
                       a_rho=a_rho, b_rho=b_rho,
                       mLambda=mLambda,
                       prior=prior,
                       mSigma.beta.inv=mSigma.beta.inv,
                       mSigma.u.inv=mSigma.u.inv,
-                      mSigma.beta=solve(mSigma.beta.inv),
-                      mSigma.vu=mSigma.u.inv)
+                      mSigma.beta=solve(mSigma.beta.inv))
   class(multivariate) = "multivariate"
   return(multivariate)
 }
@@ -244,8 +245,9 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
     p = 0
   }
   if (!is.null(mult$mZ)) {
-    m = ncol(mult$mZ)/mult$blocksize 
+    m = mult$m
     blocksize = mult$blocksize
+    spline_degree = mult$spline_degree
     if (verbose) {
       cat("m", m, "\n")
       cat("blocksize", blocksize, "\n")
@@ -310,9 +312,11 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
     
     # Update parameters for q_sigma_u^2 if we need to
     if (!is.null(mult$mZ)) {
+      browser()
       # a_sigma is fixed
-      mult$a_sigma = mult$prior$a_sigma + m/2
-      u_idx = p + 1:(m*blocksize)  # (ncol(mult$mX)+1):ncol(mult$mC)
+      u_dim = m*blocksize+spline_degree
+      mult$a_sigma = mult$prior$a_sigma + u_dim/2
+      u_idx = p + 1:u_dim  # (ncol(mult$mX)+1):ncol(mult$mC)
       # u_idx = p + 1:(m*blocksize) + spline_degree
       #tr_mSigma = ncol(mult$mZ) * mult$prior$a_sigma/mult$prior$b_sigma
       #mult$b_sigma = mult$prior$b_sigma + sum(vu^2)/2 + (tr_mSigma)/2
@@ -320,7 +324,7 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
       
       tau_sigma = mult$a_sigma/mult$b_sigma
       
-      mult$mSigma.u.inv = diag(tau_sigma, m*blocksize)
+      mult$mSigma.u.inv = diag(tau_sigma, u_dim)
     }
     
     vlower_bound[i] <- 0 # calculate_lower_bound(mult)

@@ -69,8 +69,8 @@ f.G <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,gh)
   d <- length(vmu)
   
   vmu.til     <- mC%*%vmu
-  #vsigma2.til <- diag(mC%*%mLambda%*%t(mC))
-  vsigma2.til <- sapply(1:nrow(mC), function(i) {mC[i,]%*%mLambda%*%mC[i,]})
+  cat("diag(mLambda)", diag(mLambda), "\n")
+  vsigma2.til <- diag(mC%*%mLambda%*%t(mC))
   vB0 <- B0.fun("POISSON",vmu.til,vsigma2.til,gh) 
   
   f <- sum(vr*(vy*vmu.til - vB0)) - 0.5*t(vmu)%*%mSigma.inv%*%vmu - 0.5*tr(mSigma.inv%*%mLambda)
@@ -95,7 +95,8 @@ f.GVA <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
    f <- f + 0.5*d*log(2*pi) + 0.5*d
    
    if (!is.finite(f)) {
-       f <- -1.0E16
+     browser()
+     f <- -1.0E16
    }
    return(f)
 }
@@ -169,6 +170,7 @@ vg.GVA <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   dmLambda <- (mLambda.inv + mH)%*%mR
   
   dmLambda[Dinds] <- dmLambda[Dinds]*mR[Dinds]
+  cat("diag(dmLambda)", diag(dmLambda), "\n\n")
   #require(gridExtra)
   #require(lattice)
   #plot1 <- image(Matrix(mR))
@@ -343,7 +345,8 @@ fastinv = function(mR, p=NA, m=NA, blocksize=1)
   # Idea: This could be made faster by replacing with an equivalent
   # fastsolve function.
   
-  mR.inv.mZ = matrix(0, nrow=m*blocksize, ncol=m*blocksize)
+  u_dim = m*blocksize+spline_degree
+  mR.inv.mZ = matrix(0, nrow=u_dim, ncol=u_dim)
   if (blocksize == 1) {
     # If the blocksize is 1, we can simply take the reciprocal of the
     # diagonal.
@@ -351,18 +354,19 @@ fastinv = function(mR, p=NA, m=NA, blocksize=1)
   } else {
     # Iterate through the blocks, taking the inverse of each
     for (i in 1:m) {
+	  # FIXME: This will probably need to be changed to support splines.
       idx = ((i-1)*blocksize+1):(i*blocksize)
       mR.inv.mZ[idx, idx] = solve(mR[idx, idx])
     }
   }
   
   # Last p lines can be solved as normal
-  mR.inv.mX = solve(mR[(m*blocksize+1):(m*blocksize+p), (m*blocksize+1):(m*blocksize+p)], tol=1e-99)
+  mR.inv.mX = solve(mR[(u_dim+1):(u_dim+p), (u_dim+1):(u_dim+p)], tol=1e-99)
   # Construct inverse of mR.
   mR.inv = blockDiag(mR.inv.mZ, mR.inv.mX)
   # Because of diagonal form of mR.inv.mZ, this could probably be optimised
   # further.
-  mR.inv[(m*blocksize+1):(m*blocksize+p), 1:(m*blocksize)] = -mR.inv.mX %*% mR[(m*blocksize+1):(m*blocksize+p), 1:(m*blocksize)] %*% mR.inv.mZ
+  mR.inv[(u_dim+1):(u_dim+p), 1:(u_dim)] = -mR.inv.mX %*% mR[(u_dim+1):(u_dim+p), 1:(u_dim)] %*% mR.inv.mZ
   return(mR.inv)
   #return(solve(mR))
   #return(Matrix(data=mR.inv, sparse=TRUE))
@@ -509,7 +513,7 @@ vg.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m, bloc
 
 ###############################################################################
 
-fit.GVA_new2 <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, p=NA, m=NA, blocksize=NA)
+fit.GVA_new2 <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, p=NA, m=NA, blocksize=NA, spline_degree=NA)
 {
   #library(statmod)
   #N <- 15
@@ -519,16 +523,17 @@ fit.GVA_new2 <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, 
   d <- length(vmu)
   Dinds <- d*((1:d)-1)+(1:d)
   
+  u_dim = m*blocksize+spline_degree
   # Swap fixed and random effects in mLambda so that inverse of mR is quick to
   # calculate due to sparsity. If you do this, you have to re-order mSigma.inv,
   # vmu and mC as well.
-  mLambda_new = blockDiag(mLambda[(p+1):(p+m*blocksize), (p+1):(p+m*blocksize)], mLambda[1:p, 1:p])
-  mLambda_new[1:(m*blocksize), (m*blocksize+1):(m*blocksize+p)] = mLambda[(p+1):(p+(m*blocksize)), 1:p]
-  mLambda_new[(m*blocksize+1):(m*blocksize+p), 1:(m*blocksize)] = t(mLambda_new[1:(m*blocksize), (m*blocksize+1):(m*blocksize+p)])
+  mLambda_new = blockDiag(mLambda[(p+1):(p+u_dim), (p+1):(p+u_dim)], mLambda[1:p, 1:p])
+  mLambda_new[1:(u_dim), (u_dim+1):(u_dim+p)] = mLambda[(p+1):(p+(u_dim)), 1:p]
+  mLambda_new[(u_dim+1):(u_dim+p), 1:(u_dim)] = t(mLambda_new[1:(u_dim), (u_dim+1):(u_dim+p)])
   mLambda = mLambda_new
-  mSigma.inv = blockDiag(mSigma.inv[(p+1):(p+m*blocksize), (p+1):(p+m*blocksize)], mSigma.inv[1:p, 1:p])
-  vmu = c(vmu[(p+1):(p+m*blocksize)], vmu[1:p])
-  mC = mC[,c((p+1):(p+m*blocksize), 1:p)]
+  mSigma.inv = blockDiag(mSigma.inv[(p+1):(p+u_dim), (p+1):(p+u_dim)], mSigma.inv[1:p, 1:p])
+  vmu = c(vmu[(p+1):(p+u_dim)], vmu[1:p])
+  mC = mC[,c((p+1):(p+u_dim), 1:p)]
   #mC = Matrix(mC, sparse=TRUE)
   
   mR <- t(chol(solve(mLambda, tol=1.0E-99) + diag(1.0E-8,d)))
@@ -567,13 +572,13 @@ fit.GVA_new2 <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, 
   mLambda <- solve(mR%*%t(mR), tol=1.0E-99)
 
   # Swap everything back
-  mLambda_new = blockDiag(mLambda[(m*blocksize+1):(m*blocksize+p), (m*blocksize+1):(m*blocksize+p)], mLambda[1:(m*blocksize), 1:(m*blocksize)])
-  mLambda_new[1:p, (p+1):(m*blocksize+p)] = mLambda[(m*blocksize+1):(m*blocksize+p), 1:(m*blocksize)]
-  mLambda_new[(p+1):(m*blocksize+p), 1:p] = t(mLambda[(m*blocksize+1):(m*blocksize+p), 1:(m*blocksize)])
+  mLambda_new = blockDiag(mLambda[(u_dim+1):(u_dim+p), (u_dim+1):(u_dim+p)], mLambda[1:(u_dim), 1:(u_dim)])
+  mLambda_new[1:p, (p+1):(u_dim+p)] = mLambda[(u_dim+1):(u_dim+p), 1:(u_dim)]
+  mLambda_new[(p+1):(u_dim+p), 1:p] = t(mLambda[(u_dim+1):(u_dim+p), 1:(u_dim)])
   mLambda = mLambda_new
-  mSigma.inv = blockDiag(mSigma.inv[(m*blocksize+1):(m*blocksize+p), (m*blocksize+1):(m*blocksize+p)], mSigma.inv[1:(m*blocksize), 1:(m*blocksize)])
-  vmu = c(vmu[(m*blocksize+1):(m*blocksize+p)], vmu[1:(m*blocksize)])
-  mC = mC[,c((m*blocksize+1):(m*blocksize+p), 1:(m*blocksize))]
+  mSigma.inv = blockDiag(mSigma.inv[(u_dim+1):(u_dim+p), (u_dim+1):(u_dim+p)], mSigma.inv[1:(u_dim), 1:(u_dim)])
+  vmu = c(vmu[(u_dim+1):(u_dim+p)], vmu[1:(u_dim)])
+  mC = mC[,c((u_dim+1):(u_dim+p), 1:(u_dim))]
   return(list(res=res,vmu=vmu,mLambda=mLambda))
 }
 
