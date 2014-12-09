@@ -202,7 +202,7 @@ fit.GVA <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12)
   lower_constraint <- rep(-Inf, length(vmu))
   
   if (method=="L-BFGS-B") {
-    controls <- list(maxit=1000,trace=1,fnscale=-1,REPORT=1,factr=1.0E-5,lmm=10)
+    controls <- list(maxit=100,trace=1,fnscale=-1,REPORT=1,factr=1.0E-5,lmm=10)
   } else if (method=="Nelder-Mead") {
     controls <- list(maxit=100000000,trace=0,fnscale=-1,REPORT=1000,reltol=reltol) 
   } else {
@@ -581,6 +581,8 @@ fit.GVA_new2 <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, 
   return(list(res=res,vmu=vmu,mLambda=mLambda))
 }
 
+###############################################################################
+
 f.G_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,gh) 
 {
   d <- length(vmu)
@@ -676,8 +678,8 @@ vg.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   mLambda <- solve(mR%*%t(mR), tol=1.0E-99)
   
   vmu.til     <- mC%*%vmu
-  #vsigma2.til <- diag(mC%*%mLambda%*%t(mC))
-  vsigma2.til <- sapply(1:nrow(mC), function(i) {mC[i,]%*%mLambda%*%mC[i,]})
+  vsigma2.til <- diag(mC%*%mLambda%*%t(mC))
+  #vsigma2.til <- sapply(1:nrow(mC), function(i) {mC[i,]%*%mLambda%*%mC[i,]})
   res.B12 <- B12.fun("POISSON",vmu.til,vsigma2.til,gh)
   vB1 <- res.B12$vB1
   vB2 <- res.B12$vB2
@@ -692,6 +694,8 @@ vg.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   dmLambda <- -solve(mR, tol=1.0E-99)%*%(mLambda.inv + mH)%*%mLambda  
   #dmLambda <- -solve(mR, tol=1.0E-99)%*%(diag(rep(1, ncol(mC))) + mH%*%mLambda)
   dmLambda[Dinds] <- dmLambda[Dinds]*mR[Dinds]
+  cat("diag(mLambda)", diag(mLambda), "\n")
+  cat("diag(dmLambda)", diag(dmLambda), "\n")
   #print(sum(eigen(dmLambda)$values^2))
   
   #res <- vg.GVA.approx_new(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
@@ -794,7 +798,7 @@ fit.GVA_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, p
   lower_constraint <- rep(-Inf, length(vmu))
   
   if (method=="L-BFGS-B") {
-    controls <- list(maxit=1000,trace=1,fnscale=-1,REPORT=1,factr=1.0E-5,lmm=10)
+    controls <- list(maxit=100,trace=1,fnscale=-1,REPORT=1,factr=1.0E-5,lmm=10)
   } else if (method=="Nelder-Mead") {
     controls <- list(maxit=100000000,trace=0,fnscale=-1,REPORT=1000,reltol=reltol) 
   } else {
