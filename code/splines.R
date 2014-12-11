@@ -27,7 +27,7 @@ fit_spline = function(x, y)
   #x <- radiation ; y <- ozone^(1/3)
   #a <- 0 ; b <- 350 ;
   xg <- seq(a,b,length=101)
-  numIntKnots <- 20 ; lambda <-  1000
+  numIntKnots <- 20 ; lambda <-  0.001
   
   # Set up the design matrix and related quantities:
   
@@ -71,12 +71,13 @@ fit_spline = function(x, y)
   Bg <- bs(xg,knots=intKnots,degree=3,
            Boundary.knots=c(a,b),intercept=TRUE)
   fhatg <- Bg%*%nuHat
-  #par(mfrow=c(1,2))
-  #plot(x,y,xlim=range(xg),bty="l",type="n",xlab="radiation",
-  #     ylab="cuberoot of ozone",main="(a) direct fit; user 
-  #     choice of smooth. par.")
-  #lines(xg,fhatg,lwd=2)   
-  #points(x,y,lwd=2)
+  
+  par(mfrow=c(1,2))
+  plot(x,y,xlim=range(xg),bty="l",type="n",xlab="radiation",
+       ylab="cuberoot of ozone",main="(a) direct fit; user 
+       choice of smooth. par.")
+  lines(xg,fhatg,lwd=2)   
+  points(x,y,lwd=2)
   
   # Mixed model scatterplot smoothing with REML choice of smoothing parameter
   # -------------------------------------------------------------------------
