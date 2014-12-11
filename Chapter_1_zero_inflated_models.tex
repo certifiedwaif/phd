@@ -31,7 +31,7 @@ Keywords: Approximate Bayesian inference . mixed model . Markov chain Monte Carl
 application, such as data arising from physical activity studies, 
 insurance claims, hospital visits or defects in manufacturing processes.
 
-While simple forms of these models are easy to fit with maximum likelihood techniques,
+\noindent While simple forms of these models are easy to fit with maximum likelihood techniques,
 more general models incorporating random effects, splines and missing data typically
 have no closed form solutions. Fitting these models is typically done with Monte Carlo
 Markov Chain techniques, but these can be slow and prone to convergence problems. We
@@ -40,9 +40,9 @@ using a deterministic algorithm which converges much more quickly.
 
 % Cite prior publications in this area
 
-In this paper, we follow the earlier work of \ldots
+\noindent In this paper, we build upon the earlier work of \cite{lambert1992} and \cite{Ghosh20061360}.
 
-In Section \ref{sec:methodology} we provide the framework for our approach. In
+\noindent In Section \ref{sec:methodology} we provide the framework for our approach. In
 Section \ref{sec:methodology} we extend our approach to incorporate regression modelling
 and random effects. In Section \ref{sec:results} we show how our approach offers 
 computational advantages over existing approaches. In Section \ref{sec:application} we 
@@ -316,7 +316,7 @@ considered in this article.
 \log \underline{p}(\vmu, \mLambda; \vy) = \vp^T\vy^T\mC\vmu - \vp^T\exp \left (\mC \vmu + \half \mC \mLambda \mC^T \right ) - \half \vmu^T \mSigma^{-1} \vmu - \half \tr{(\mLambda \mSigma^{-1})}
 \end{align*}
 
-This can be optimised using a Newton-Raphson style algorithm where
+\noindent This can be optimised using a Newton-Raphson style algorithm where
 
 \begin{align*}
 \frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \vmu} &\approx \vp^T\mC(\vy - \exp{(\mC \vmu)}) - \mSigma^{-1} \vmu \\
@@ -468,7 +468,7 @@ generator with different seeds.
 \section{Theory of variational approximation of zero-inflated Poisson models}
 Let $Z_i = R_i Y_i$.
 
-Then the probability that $Z_i = 0$ is
+\noindent Then the probability that $Z_i = 0$ is
 $$
 \begin{array}{rl}
 P(Z_i = 0) &= P(R_i = 0)P(Y_i = y) + P(R_i = 1) P(Y_i = 0) - P(R_i = 0) P(Y_i = 0) \\
