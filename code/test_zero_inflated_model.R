@@ -251,7 +251,7 @@ test_spline = function(approximation="gva")
   
   sigma2.true = 0.01
   expected_beta = c(0, 1)
-  vf = 2+2*sin(pi*vx)
+  vf = 5+2*sin(pi*vx)
   vy = rpois(n,exp(vf))
  
   source("ZOsull.r")
