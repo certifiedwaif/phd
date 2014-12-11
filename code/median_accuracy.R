@@ -11,17 +11,26 @@ median_accuracy = function()
   accuracy = list()
   for (i in 1:ITER) {
     # Run code
-    result = compare_approximations(c(1, 2))
-    accuracy[[i]] = with(result, calculate_accuracy(mcmc_samples, var_result))
+    result = compare_approximations(c(2, 1))
+    accuracy[[i]] = with(result, calculate_accuracy(mcmc_samples, result_var, print_flag=TRUE))
   }
   # For name in names(accuracy)
-  boxplot(accuracy)
+  
+  result_df = data.frame()
+  for (i in 1:length(accuracy[[1]]$vu_accuracy)) {
+    result_df[1:ITER, paste0("vu_accuracy_", i)] = sapply(accuracy, function (x) x$vu_accuracy[i])
+  }
+  for (i in 1:length(accuracy[[1]]$vbeta_accuracy)) {
+    result_df[1:ITER, paste0("vbeta_accuracy_", i)] = sapply(accuracy, function (x) x$vbeta_accuracy[i])
+  }
+  result_df[1:ITER, "sigma2_u_accuracy"] = sapply(accuracy, function (x) x$sigma2_u_accuracy)
+  result_df[1:ITER, "rho_accuracy"] = sapply(accuracy, function (x) x$rho_accuracy)
+  pdf("median_accuracy.pdf")
+  boxplot(result_df)
+  dev.off()
 }
 
-# Graph of Var_q(theta) against Var(theta|y)
-# How to get this?
-# Run fits for a range of theta values?
-compare_approximations = function(vbeta)
+generate_test_mult = function(vbeta)
 {
   m = 20
   ni = 10
@@ -43,11 +52,48 @@ compare_approximations = function(vbeta)
   vy = test_data$vy
   
   multivariate = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau)
-  approximation = "gva2new"
-  result_var = zero_infl_var(multivariate, method=approximation, verbose=FALSE)
+
+  return(multivariate)
+}
+
+# Graph of Var_q(theta) against Var(theta|y)
+# How to get this?
+# Run fits for a range of theta values?
+compare_approximations = function(vbeta)
+{
+  multivariate = generate_test_mult(c(2, 1))
+  approximation = "gva"
+  result_var = zero_infl_var(multivariate, method=approximation, verbose=TRUE)
   mcmc_samples = mcmc_approximation(multivariate, iterations=1e4, mc.cores = 32)
   return(list(multivariate=multivariate, result_var=result_var, mcmc_samples=mcmc_samples))
 }
+
+is.between = function(x, a, b) x >= a && x <= b
+
+coverage_percentage = function()
+{
+	# Percentage coverage of the true parameter values by approximate 95%
+	# credible intervals based on variational Bayes approximate posterior
+	# density functions. The percentages are based on 100 replications.
+	
+	set.seed(1234)
+	counter = rep(0, 22)
+	for (i in 1:100) {
+		mult = generate_test_mult(c(2, 1))	
+		approximation = "gva2new"
+		result_var = zero_infl_var(mult, method=approximation, verbose=FALSE)
+    for (j in 1:length(result_var$vmu)) {
+  		# Check that true parameter is within 95% credible interval.
+      expected = c(2, 1, rep(0, 22))
+  		if (is.between(expected[j], result_var$vmu[j] - 1.96*sqrt(result_var$mLambda[j, j]), result_var$vmu[j] + 1.96*sqrt(result_var$mLambda[j, j]))) {
+  			# Increment counter
+  			counter[j] = counter[j] + 1
+  		}
+    }
+	}
+  print(counter)
+}
+coverage_percentage()
 
 mean_var = function(vbeta)
 {
@@ -65,9 +111,11 @@ mean_var = function(vbeta)
 }
 
 # This is most definitely a verona job
-for (theta in seq(1, 2, by=.01))
-	print(mean_var(c(1, theta)))
-
+print_mean_var = function()
+{
+  for (theta in seq(1, 2, by=.01))
+	  print(mean_var(c(1, theta)))
+}
 # Graph of E_q(theta) against E(theta|y)
 
 # For most important parameters: beta_1, beta_2
