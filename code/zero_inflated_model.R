@@ -191,7 +191,7 @@ zero_infl_var.univariate <- function(univariate, verbose=FALSE, plot_lower_bound
   return(params)
 }
 
-create_multivariate <- function(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, blocksize=1)
+create_multivariate <- function(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, m=ncol(mZ), blocksize=1, spline_degree=NA)
 {
   # Initialise
   n = length(vy)
@@ -214,15 +214,16 @@ create_multivariate <- function(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, 
   b_rho = n - sum(vp) + 1
   
   prior = list(a_sigma=a_sigma, b_sigma=b_sigma, a_rho=1, b_rho=1, sigma2.beta=sigma2.beta)
-  multivariate = list(vy=vy, mX=mX, mZ=mZ, blocksize=blocksize, mC=mC, vp=vp, vmu=vmu,
+  multivariate = list(vy=vy, vp=vp, vmu=vmu,
+                      mX=mX, mZ=mZ, mC=mC,
+                      m=m, blocksize=blocksize, spline_degree=spline_degree,
                       a_sigma=a_sigma, b_sigma=b_sigma,
                       a_rho=a_rho, b_rho=b_rho,
                       mLambda=mLambda,
                       prior=prior,
                       mSigma.beta.inv=mSigma.beta.inv,
                       mSigma.u.inv=mSigma.u.inv,
-                      mSigma.beta=solve(mSigma.beta.inv),
-                      mSigma.vu=mSigma.u.inv)
+                      mSigma.beta=solve(mSigma.beta.inv))
   class(multivariate) = "multivariate"
   return(multivariate)
 }
@@ -244,11 +245,13 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
     p = 0
   }
   if (!is.null(mult$mZ)) {
-    m = ncol(mult$mZ)/mult$blocksize 
+    m = mult$m
     blocksize = mult$blocksize
+    spline_degree = mult$spline_degree
     if (verbose) {
       cat("m", m, "\n")
       cat("blocksize", blocksize, "\n")
+      cat("spline_degree", spline_degree, "\n")
     }
   } else {
     m = 0
@@ -281,10 +284,11 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
     if (method == "laplacian") {
       fit1 = fit.Lap(mult$vmu, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, mult$mLambda)
     } else if (method == "gva") {	
+      #fit2 = fit.Lap(mult$vmu, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, mult$mLambda)
       fit1 = fit.GVA(mult$vmu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B")
     } else if (method == "gva2") {
-      #fit2 = fit.Lap(mult$vmu, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, mult$mLambda)
-      fit1 = fit.GVA_new(mult$vmu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B", p=p, m=m, blocksize=mult$blocksize)
+      fit2 = fit.Lap(mult$vmu, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, mult$mLambda)
+      fit1 = fit.GVA_new(fit2$vmu, fit2$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B", p=p, m=m, blocksize=mult$blocksize)
     } else if (method == "gva2new") {
       #fit2 = fit.Lap(mult$vmu, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, mult$mLambda)
       fit1 = fit.GVA_new2(mult$vmu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B", p=p, m=m, blocksize=mult$blocksize)
@@ -301,7 +305,7 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
     
     # Update parameters for q_vr
     if (length(zero.set) != 0) {
-      mult$vp[zero.set] = expit((mult$vy[zero.set]*mult$mC[zero.set,])%*%mult$vmu-exp(mult$mC[zero.set,]%*%mult$vmu + 0.5*diag((matrix(mult$mC[zero.set,], length(zero.set), p+m*blocksize))%*%mult$mLambda%*%t(matrix(mult$mC[zero.set,], length(zero.set), p+m*blocksize))) + digamma(mult$a_rho) - digamma(mult$b_rho)))
+      mult$vp[zero.set] = expit((mult$vy[zero.set]*mult$mC[zero.set,])%*%mult$vmu-exp(mult$mC[zero.set,]%*%mult$vmu + 0.5*diag((matrix(mult$mC[zero.set,], length(zero.set), p+m*blocksize+spline_degree))%*%mult$mLambda%*%t(matrix(mult$mC[zero.set,], length(zero.set), p+m*blocksize+spline_degree))) + digamma(mult$a_rho) - digamma(mult$b_rho)))
     }
     
     # Update parameters for q_rho
@@ -311,15 +315,17 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
     # Update parameters for q_sigma_u^2 if we need to
     if (!is.null(mult$mZ)) {
       # a_sigma is fixed
-      mult$a_sigma = mult$prior$a_sigma + m/2
-      u_idx = p + 1:(m*blocksize)  # (ncol(mult$mX)+1):ncol(mult$mC)
+      u_dim = m*blocksize+spline_degree
+      mult$a_sigma = mult$prior$a_sigma + u_dim/2
+      u_idx = p + 1:u_dim  # (ncol(mult$mX)+1):ncol(mult$mC)
+      # u_idx = p + 1:(m*blocksize) + spline_degree
       #tr_mSigma = ncol(mult$mZ) * mult$prior$a_sigma/mult$prior$b_sigma
       #mult$b_sigma = mult$prior$b_sigma + sum(vu^2)/2 + (tr_mSigma)/2
       mult$b_sigma = mult$prior$b_sigma + sum(mult$vmu[u_idx]^2)/2 + tr(mult$mLambda[u_idx, u_idx])/2    # Extract right elements of mLambda
       
       tau_sigma = mult$a_sigma/mult$b_sigma
       
-      mult$mSigma.u.inv = diag(tau_sigma, m*blocksize)
+      mult$mSigma.u.inv = diag(tau_sigma, u_dim)
     }
     
     vlower_bound[i] <- 0 # calculate_lower_bound(mult)

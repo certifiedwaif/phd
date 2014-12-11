@@ -234,6 +234,43 @@ test_multivariate_zip_half_zeros_random_intercept <- function(approximation="gva
 
 # Idea: Run each of the tests for convergence repeatedly.
 
+test_spline = function(approximation="gva")
+{
+  n = 5000
+  vx = matrix(sort(runif(n, -1, 1))) 
+  
+  mX = cbind(1,vx)
+ 
+  expected_rho = 1
+  #expected_mu = c(0, 1)
+  expected_sigma2_u = 0
+  sigma2.beta = 1e5
+  a_sigma = 1e5
+  b_sigma = 1e5
+  tau = 1.0E-5
+  
+  sigma2.true = 0.01
+  expected_beta = c(0, 1)
+  vf = 5+2*sin(pi*vx)
+  vy = rpois(n,exp(vf))
+ 
+  source("ZOsull.r")
+  numIntKnots <- 35
+  intKnots <- quantile(unique(x),seq(0,1,length=(numIntKnots+2))[-c(1,(numIntKnots+2))])
+  
+  mZ = ZOSull(vx,range.x=c(-1.1,1.1),intKnots=intKnots,drv=0)
+  #vy = 2+mX[,1]^3+rnorm(m)*.1
+  #result = fit_spline(vx, vy)
+  #result = fit_spline(mX[,1], vy)
+  #mZ = result$Z
+  
+  mZ <- mZ/max(mZ)
+ 
+  mult = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, m=0, blocksize=1, spline_degree=37)
+  
+  result_var = zero_infl_var(mult, method=approximation, verbose=TRUE)
+}
+
 main <- function()
 {
 	set.seed(5)
@@ -253,6 +290,7 @@ main <- function()
 	test_multivariate_zip_half_zeros_random_intercept("gva")
 	test_multivariate_zip_half_zeros_random_intercept("gva2")
 	test_multivariate_zip_half_zeros_random_intercept("gva_nr")
+  test_spline("gva")
 }
 
 #main()
