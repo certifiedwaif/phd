@@ -256,7 +256,7 @@ test_spline = function(approximation="gva")
  
   source("ZOsull.r")
   numIntKnots <- 35
-  intKnots <- quantile(unique(x),seq(0,1,length=(numIntKnots+2))[-c(1,(numIntKnots+2))])
+  intKnots <- quantile(unique(vx),seq(0,1,length=(numIntKnots+2))[-c(1,(numIntKnots+2))])
   
   mZ = ZOSull(vx,range.x=c(-1.1,1.1),intKnots=intKnots,drv=0)
   #vy = 2+mX[,1]^3+rnorm(m)*.1
@@ -266,7 +266,7 @@ test_spline = function(approximation="gva")
   
   mZ <- mZ/max(mZ)
  
-  mult = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, m=0, blocksize=1, spline_degree=37)
+  mult = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, m=0, blocksize=1, spline_dim=37)
   
   result_var = zero_infl_var(mult, method=approximation, verbose=TRUE)
 }

@@ -260,7 +260,7 @@ f.G_new2 <- function(vmu,mLambda,mR,vy,vr,mC,mSigma.inv,gh)
 
 ###############################################################################
 
-f.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m, blocksize, spline_degree)
+f.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m, blocksize, spline_dim)
 {
   d <- ncol(mC)  
   vmu <- vtheta[1:d]
@@ -271,7 +271,7 @@ f.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m, block
   }   
   #mLambda.inv = mR%*%t(mR)
   #mLambda <- solve(mLambda.inv, tol=1.0E-99)
-  mR.inv = fastinv(mR, p=p, m=m, blocksize=blocksize, spline_degree=spline_degree)
+  mR.inv = fastinv(mR, p=p, m=m, blocksize=blocksize, spline_dim=spline_dim)
   #mLambda <- t(mR.inv) %*% mR.inv
   mLambda <- crossprod(mR.inv)
   
@@ -340,12 +340,12 @@ printMatrix = function(mat) {
 }
 
 ###############################################################################
-fastinv = function(mR, p=NA, m=NA, blocksize=1, spline_degree=0)
+fastinv = function(mR, p=NA, m=NA, blocksize=1, spline_dim=0)
 {
   # Idea: This could be made faster by replacing with an equivalent
   # fastsolve function.
   
-  u_dim = m*blocksize+spline_degree
+  u_dim = m*blocksize+spline_dim
   mR.inv.mZ = matrix(0, nrow=u_dim, ncol=u_dim)
   if (blocksize == 1 && m > 0) {
     # If the blocksize is 1, we can simply take the reciprocal of the
@@ -360,11 +360,12 @@ fastinv = function(mR, p=NA, m=NA, blocksize=1, spline_degree=0)
         mR.inv.mZ[idx, idx] = solve(mR[idx, idx])
       }
     
-    if (spline_degree > 0) {
-      spline_idx = (m*blocksize+1):(m*blocksize+spline_degree)
+    if (spline_dim > 0) {
+      spline_idx = (m*blocksize+1):(m*blocksize+spline_dim)
       spline_mR = mR[spline_idx, spline_idx]
       #spline_mR = tril(spline_mR, -3)
-      mR.inv.mZ[spline_idx, spline_idx] = solve(spline_mR)
+      spline_mR = band(spline_mR, -5, 0)
+      mR.inv.mZ[spline_idx, spline_idx] = as.matrix(solve(spline_mR))
     }
   }
   
@@ -381,7 +382,7 @@ fastinv = function(mR, p=NA, m=NA, blocksize=1, spline_degree=0)
 }
 
 ###############################################################################
-vg.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m, blocksize, spline_degree)
+vg.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m, blocksize, spline_dim)
 {
   d <- ncol(mC)
   vmu <- vtheta[1:d]
@@ -394,7 +395,7 @@ vg.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m, bloc
   # mR is lower triangular. Can you rewrite this using forward solves and
   # backsolves?
   # New
-  mR.inv = fastinv(mR, p=p, m=m, blocksize=blocksize, spline_degree=spline_degree)
+  mR.inv = fastinv(mR, p=p, m=m, blocksize=blocksize, spline_dim=spline_dim)
   # Old
   #mR.inv = solve(mR, tol=1.0E-99)
   
@@ -504,7 +505,7 @@ vg.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m, bloc
 
 ###############################################################################
 
-fit.GVA_new2 <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, p=NA, m=NA, blocksize=NA, spline_degree=NA)
+fit.GVA_new2 <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, p=NA, m=NA, blocksize=NA, spline_dim=NA)
 {
   #library(statmod)
   #N <- 15
@@ -514,7 +515,7 @@ fit.GVA_new2 <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, 
   d <- length(vmu)
   Dinds <- d*((1:d)-1)+(1:d)
   
-  u_dim = m*blocksize+spline_degree
+  u_dim = m*blocksize+spline_dim
   # Swap fixed and random effects in mLambda so that inverse of mR is quick to
   # calculate due to sparsity. If you do this, you have to re-order mSigma.inv,
   # vmu and mC as well.
@@ -553,7 +554,7 @@ fit.GVA_new2 <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, 
   }
   res <- optim(par=vmu, fn=f.GVA_new2, gr=vg.GVA_new2,
                method=method,lower=lower_constraint, upper=Inf, control=controls,
-               vy=vy,vr=vr,mC=mC,mSigma.inv=mSigma.inv,gh=gh2,mR=mR*0,Rinds=Rinds,Dinds=Dinds, p=p, m=m, blocksize=blocksize, spline_degree=spline_degree)        
+               vy=vy,vr=vr,mC=mC,mSigma.inv=mSigma.inv,gh=gh2,mR=mR*0,Rinds=Rinds,Dinds=Dinds, p=p, m=m, blocksize=blocksize, spline_dim=spline_dim)        
   
   vtheta <- res$par 
   
