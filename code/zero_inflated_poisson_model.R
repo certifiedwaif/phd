@@ -4,7 +4,44 @@
 require(limma)
 require(Matrix)
 source("CalculateB.R")
+require(Rcpp)
+require(RcppEigen)
+require(inline)
 
+#fastdiag2 <- function(mC, mLambda)
+#{
+#  return(diag(mC%*%mLambda%*%t(mC)))
+#}
+
+#ftrans <- cxxfunction(signature(AA = "matrix"), transCpp,
+#                      + plugin = "RcppEigen")
+fastdiagcode = '
+  using Eigen::MatrixXd;
+  using Eigen::VectorXd;
+
+  typedef Eigen::Map<Eigen::MatrixXd> MapMatd;
+  const MapMatd C(Rcpp::as<MapMatd>(mC));
+  const MapMatd lambda(Rcpp::as<MapMatd>(mLambda));
+
+  VectorXd result(C.rows());
+
+  if (C.cols() != lambda.cols()) {
+    stop("mC and mLambda do not have the same numbers of columns");
+  }  
+
+  for (int i = 0; i < C.rows(); i++) {
+    //if (C.row(i).cols() != lambda.rows())
+    //  stop("Programming error: C.row(i).cols() != lambda.rows()");
+
+    VectorXd tmp = C.row(i) * lambda;
+
+    result[i] = tmp.dot(C.row(i));
+  }
+
+  return List::create(Named("product") = result); 
+'
+
+fastdiag2 <- cxxfunction(signature(mC = "matrix", mLambda = "matrix"), fastdiagcode, plugin = "RcppEigen")
 ###############################################################################
 
 f.lap <- function(vmu,vy,vr,mC,mSigma.inv,mLambda) 
@@ -12,7 +49,8 @@ f.lap <- function(vmu,vy,vr,mC,mSigma.inv,mLambda)
   d <- length(vmu)
   veta <- mC%*%vmu
   mSigma <- solve(mSigma.inv)
-  mDiag <- diag(mC%*%mLambda%*%t(mC))
+  #mDiag <- diag(mC%*%mLambda%*%t(mC))
+  mDiag <- fastdiag2(mC, mLambda)$product
 	f <- sum(vy*vr*veta - vr*exp(veta+0.5*mDiag)) - 0.5*t(vmu)%*%mSigma.inv%*%vmu - 0.5*sum(diag(mLambda%*%mSigma))
   return(f)
 }
@@ -70,7 +108,8 @@ f.G <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,gh)
   d <- length(vmu)
   
   vmu.til     <- mC%*%vmu
-  vsigma2.til <- diag(mC%*%mLambda%*%t(mC))
+  vsigma2.til <- fastdiag2(mC, mLambda)$product
+  #vsigma2.til <- diag(mC%*%mLambda%*%t(mC))
   #vsigma2.til <- sapply(1:nrow(mC), function(i) {mC[i,]%*%mLambda%*%mC[i,]})
   vB0 <- B0.fun("POISSON",vmu.til,vsigma2.til,gh) 
   
@@ -157,7 +196,8 @@ vg.GVA <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
 
   vmu.til     <- mC%*%vmu
   #vsigma2.til <- diag(mC%*%mLambda%*%t(mC))
-  vsigma2.til <- sapply(1:nrow(mC), function(i) {mC[i,]%*%mLambda%*%mC[i,]})
+  #vsigma2.til <- sapply(1:nrow(mC), function(i) {mC[i,]%*%mLambda%*%mC[i,]})
+  vsigma2.til <- fastdiag2(mC, mLambda)$product
   res.B12 <- B12.fun("POISSON",vmu.til,vsigma2.til,gh)
   vB1 <- res.B12$vB1
   vB2 <- res.B12$vB2
@@ -170,7 +210,7 @@ vg.GVA <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   dmLambda <- (mLambda.inv + mH)%*%mR
   
   dmLambda[Dinds] <- dmLambda[Dinds]*mR[Dinds]
-  cat("diag(dmLambda)", diag(dmLambda), "\n\n")
+  #cat("diag(dmLambda)", diag(dmLambda), "\n\n")
   #require(gridExtra)
   #require(lattice)
   #plot1 <- image(Matrix(mR))
@@ -203,7 +243,7 @@ fit.GVA <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12)
   lower_constraint <- rep(-Inf, length(vmu))
   
   if (method=="L-BFGS-B") {
-    controls <- list(maxit=100,trace=1,fnscale=-1,REPORT=1,factr=1.0E-5,lmm=10)
+    controls <- list(maxit=100,trace=0,fnscale=-1,REPORT=1,factr=1.0E-5,lmm=10)
   } else if (method=="Nelder-Mead") {
     controls <- list(maxit=100000000,trace=0,fnscale=-1,REPORT=1000,reltol=reltol) 
   } else {
@@ -581,7 +621,8 @@ f.G_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,gh)
   d <- length(vmu)
   
   vmu.til     <- mC%*%vmu
-  vsigma2.til <- diag(mC%*%mLambda%*%t(mC))
+  #vsigma2.til <- diag(mC%*%mLambda%*%t(mC))
+  vsigma2.til <- fastdiag2(mC, mLambda)
   #vsigma2.til <- sapply(1:nrow(mC), function(i) {mC[i,]%*%mLambda%*%mC[i,]})
   vB0 <- B0.fun("POISSON",vmu.til,vsigma2.til,gh) 
   
@@ -671,7 +712,8 @@ vg.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   mLambda <- solve(mR%*%t(mR), tol=1.0E-99)
   
   vmu.til     <- mC%*%vmu
-  vsigma2.til <- diag(mC%*%mLambda%*%t(mC))
+  #vsigma2.til <- diag(mC%*%mLambda%*%t(mC))
+  vsigma2.til <- fastdiag2(mC, mLambda)$product
   #vsigma2.til <- sapply(1:nrow(mC), function(i) {mC[i,]%*%mLambda%*%mC[i,]})
   res.B12 <- B12.fun("POISSON",vmu.til,vsigma2.til,gh)
   vB1 <- res.B12$vB1
@@ -829,7 +871,7 @@ mH.G_nr <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,vB2)
 
 ###############################################################################
 
-fit.GVA_nr <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, m=NA, p=NA, blocksize=NA)
+fit.GVA_nr <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, m=NA, p=NA, blocksize=NA, spline_dim=NA)
 {
  
   MAXITER <- 1000
@@ -842,7 +884,8 @@ fit.GVA_nr <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, m=
       # calculate B1
       # calculate B2
       vmu.til <- mC%*%vmu
-      vsigma2.til <- sapply(1:nrow(mC), function(i) {mC[i,]%*%mLambda%*%mC[i,]})
+      #vsigma2.til <- sapply(1:nrow(mC), function(i) {mC[i,]%*%mLambda%*%mC[i,]})
+      vsigma2.til <- fastdiag2(mC, mLambda)$product
       res.B12 <- B12.fun("POISSON",vmu.til,vsigma2.til,gh)
       vB1 <- res.B12$vB1
       vB2 <- res.B12$vB2      

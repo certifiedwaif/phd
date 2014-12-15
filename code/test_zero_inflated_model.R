@@ -264,11 +264,12 @@ test_spline = function(approximation="gva")
   #result = fit_spline(mX[,1], vy)
   #mZ = result$Z
   
-  mZ <- mZ/max(mZ)
+  #mZ <- mZ/max(mZ)
  
   mult = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, m=0, blocksize=1, spline_dim=37)
   
   result_var = zero_infl_var(mult, method=approximation, verbose=TRUE)
+  fastdiag2(mult$mC, result_var$mLambda)
 }
 
 main <- function()

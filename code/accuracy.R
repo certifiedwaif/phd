@@ -45,10 +45,7 @@ generate_test_data = function(m, ni)
   vy = test_data$vy
   
   # Test accuracy
-  mult = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau)
-  mult$n = n
-  mult$m = m
-  mult$ni = ni
+  mult = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, m=m, blocksize=1, spline_dim=0)
   
   return(mult)
 }
@@ -197,10 +194,10 @@ test_accuracies = function()
   #Sys.time() - now
   #print(image(Matrix(var1$mLambda)))
   
-  #now = Sys.time()
-  #var2 = test_accuracy(mult, mcmc_samples, "gva")
-  #Sys.time() - now
-  #print(image(Matrix(var2$mLambda)))
+  now = Sys.time()
+  var2 = test_accuracy(mult, mcmc_samples, "gva")
+  Sys.time() - now
+  print(image(Matrix(var2$var_result$mLambda)))
   
   #now = Sys.time()
   #var3 = test_accuracy(mult, mcmc_samples, "gva2")
@@ -215,10 +212,10 @@ test_accuracies = function()
   #summaryRprof()
   #print(image(Matrix(var3_new$mLambda)))
   
-  #now = Sys.time()
-  #var4 = test_accuracy(mult, mcmc_samples, "gva_nr")
-  #Sys.time() - now
-  #print(image(Matrix(var4$mLambda)))
+  now = Sys.time()
+  var4 = test_accuracy(mult, mcmc_samples, "gva_nr")
+  Sys.time() - now
+  print(image(Matrix(var4$mLambda)))
   
   #for (i in 1:100) {
   #  set.seed(i)
