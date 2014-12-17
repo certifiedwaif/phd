@@ -73,7 +73,7 @@ mcmc_approximation <- function(mult, iterations=1e3, mc.cores = 1)
   require(parallel)
   #source("multivariate_stan.R")
   
-  zip_data <- with(mult, list(N=length(vy), P=2, M=ncol(mZ), y=vy, X=mX, Z=mZ))
+  zip_data <- with(mult, list(N=length(vy), P=2, M=mult$m, y=vy, X=mX, Z=mZ))
   #print(str(zip_data))
   rng_seed <- 5;
   foo <- stan("multivariate_zip.stan", data=zip_data, chains = 0)
@@ -105,8 +105,8 @@ test_univariate_zip <- function()
 
 	# Test model fitting
 	univariate = create_univariate(vx, a_lambda, b_lambda)
-	result_var = zero_infl_var(univariate)
-  return(result_var)
+	var_result = zero_infl_var(univariate)
+  return(var_result)
 }
 
 test_multivariate_zip_no_zeros <- function(approximation="gva")
@@ -131,8 +131,8 @@ test_multivariate_zip_no_zeros <- function(approximation="gva")
 
 	# Test model fitting
 	multivariate = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma)
-	result_var = zero_infl_var(multivariate, verbose=TRUE, method=approximation)
-  return(result_var)
+	var_result = zero_infl_var(multivariate, verbose=TRUE, method=approximation)
+  return(var_result)
 }
 
 test_multivariate_zip_half_zeros <- function(approximation="gva")
@@ -155,8 +155,8 @@ test_multivariate_zip_half_zeros <- function(approximation="gva")
 
 	# Test model fitting
 	multivariate = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma)
-	result_var = zero_infl_var(multivariate, verbose=TRUE, method=approximation)
-  return(result_var)
+	var_result = zero_infl_var(multivariate, verbose=TRUE, method=approximation)
+  return(var_result)
 }
 
 test_multivariate_zip_no_zeros_random_intercept <- function(approximation="gva")
@@ -184,8 +184,8 @@ test_multivariate_zip_no_zeros_random_intercept <- function(approximation="gva")
 	
 	# Test model fitting
 	multivariate = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau)
-	result_var = zero_infl_var(multivariate, method=approximation, verbose=TRUE)
-  return(result_var)
+	var_result = zero_infl_var(multivariate, method=approximation, verbose=TRUE)
+  return(var_result)
 }
 
 # Create mZ matrix for random slopes
@@ -205,7 +205,7 @@ makeZ <- function(mX, m, ni, p=1)
   mZ2
 }
 
-test_multivariate_zip_half_zeros_random_intercept <- function(approximation="gva")
+test_multivariate_zip_half_zeros_random_slope <- function(approximation="gva")
 {
 	m = 20
 	ni = 10
@@ -228,8 +228,8 @@ test_multivariate_zip_half_zeros_random_intercept <- function(approximation="gva
 	
 	# Test model fitting
 	multivariate = create_multivariate(vy, mX, mZ, blocksize=2, sigma2.beta, a_sigma, b_sigma, tau)
-	result_var = zero_infl_var(multivariate, method=approximation, verbose=TRUE)
-  return(result_var)
+	var_result = zero_infl_var(multivariate, method=approximation, verbose=TRUE)
+  return(var_result)
 }
 
 # Idea: Run each of the tests for convergence repeatedly.
@@ -268,8 +268,8 @@ test_spline = function(approximation="gva")
  
   mult = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, m=0, blocksize=1, spline_dim=37)
   
-  result_var = zero_infl_var(mult, method=approximation, verbose=TRUE)
-  fastdiag2(mult$mC, result_var$mLambda)
+  var_result = zero_infl_var(mult, method=approximation, verbose=TRUE)
+  fastdiag2(mult$mC, var_result$mLambda)
 }
 
 main <- function()
