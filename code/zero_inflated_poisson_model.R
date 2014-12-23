@@ -2,8 +2,46 @@
 # zero-inflated model code.
 ###############################################################################
 require(limma)
+require(Matrix)
 source("CalculateB.R")
+require(Rcpp)
+require(RcppEigen)
+require(inline)
 
+#fastdiag2 <- function(mC, mLambda)
+#{
+#  return(diag(mC%*%mLambda%*%t(mC)))
+#}
+
+#ftrans <- cxxfunction(signature(AA = "matrix"), transCpp,
+#                      + plugin = "RcppEigen")
+fastdiagcode = '
+  using Eigen::MatrixXd;
+  using Eigen::VectorXd;
+
+  typedef Eigen::Map<Eigen::MatrixXd> MapMatd;
+  const MapMatd C(Rcpp::as<MapMatd>(mC));
+  const MapMatd lambda(Rcpp::as<MapMatd>(mLambda));
+
+  VectorXd result(C.rows());
+
+  if (C.cols() != lambda.cols()) {
+    stop("mC and mLambda do not have the same numbers of columns");
+  }  
+
+  for (int i = 0; i < C.rows(); i++) {
+    //if (C.row(i).cols() != lambda.rows())
+    //  stop("Programming error: C.row(i).cols() != lambda.rows()");
+
+    VectorXd tmp = C.row(i) * lambda;
+
+    result[i] = tmp.dot(C.row(i));
+  }
+
+  return List::create(Named("product") = result); 
+'
+
+fastdiag2 <- cxxfunction(signature(mC = "matrix", mLambda = "matrix"), fastdiagcode, plugin = "RcppEigen")
 ###############################################################################
 
 f.lap <- function(vmu,vy,vr,mC,mSigma.inv,mLambda) 
@@ -11,7 +49,8 @@ f.lap <- function(vmu,vy,vr,mC,mSigma.inv,mLambda)
   d <- length(vmu)
   veta <- mC%*%vmu
   mSigma <- solve(mSigma.inv)
-  mDiag <- diag(mC%*%mLambda%*%t(mC))
+  #mDiag <- diag(mC%*%mLambda%*%t(mC))
+  mDiag <- fastdiag2(mC, mLambda)$product
 	f <- sum(vy*vr*veta - vr*exp(veta+0.5*mDiag)) - 0.5*t(vmu)%*%mSigma.inv%*%vmu - 0.5*sum(diag(mLambda%*%mSigma))
   return(f)
 }
@@ -69,7 +108,8 @@ f.G <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,gh)
   d <- length(vmu)
   
   vmu.til     <- mC%*%vmu
-  vsigma2.til <- diag(mC%*%mLambda%*%t(mC))
+  vsigma2.til <- fastdiag2(mC, mLambda)$product
+  #vsigma2.til <- diag(mC%*%mLambda%*%t(mC))
   #vsigma2.til <- sapply(1:nrow(mC), function(i) {mC[i,]%*%mLambda%*%mC[i,]})
   vB0 <- B0.fun("POISSON",vmu.til,vsigma2.til,gh) 
   
@@ -156,7 +196,8 @@ vg.GVA <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
 
   vmu.til     <- mC%*%vmu
   #vsigma2.til <- diag(mC%*%mLambda%*%t(mC))
-  vsigma2.til <- sapply(1:nrow(mC), function(i) {mC[i,]%*%mLambda%*%mC[i,]})
+  #vsigma2.til <- sapply(1:nrow(mC), function(i) {mC[i,]%*%mLambda%*%mC[i,]})
+  vsigma2.til <- fastdiag2(mC, mLambda)$product
   res.B12 <- B12.fun("POISSON",vmu.til,vsigma2.til,gh)
   vB1 <- res.B12$vB1
   vB2 <- res.B12$vB2
@@ -169,7 +210,7 @@ vg.GVA <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   dmLambda <- (mLambda.inv + mH)%*%mR
   
   dmLambda[Dinds] <- dmLambda[Dinds]*mR[Dinds]
-  cat("diag(dmLambda)", diag(dmLambda), "\n\n")
+  #cat("diag(dmLambda)", diag(dmLambda), "\n\n")
   #require(gridExtra)
   #require(lattice)
   #plot1 <- image(Matrix(mR))
@@ -202,7 +243,7 @@ fit.GVA <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12)
   lower_constraint <- rep(-Inf, length(vmu))
   
   if (method=="L-BFGS-B") {
-    controls <- list(maxit=100,trace=1,fnscale=-1,REPORT=1,factr=1.0E-5,lmm=10)
+    controls <- list(maxit=100,trace=0,fnscale=-1,REPORT=1,factr=1.0E-5,lmm=10)
   } else if (method=="Nelder-Mead") {
     controls <- list(maxit=100000000,trace=0,fnscale=-1,REPORT=1000,reltol=reltol) 
   } else {
@@ -259,7 +300,7 @@ f.G_new2 <- function(vmu,mLambda,mR,vy,vr,mC,mSigma.inv,gh)
 
 ###############################################################################
 
-f.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m, blocksize)
+f.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m, blocksize, spline_dim)
 {
   d <- ncol(mC)  
   vmu <- vtheta[1:d]
@@ -270,7 +311,7 @@ f.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m, block
   }   
   #mLambda.inv = mR%*%t(mR)
   #mLambda <- solve(mLambda.inv, tol=1.0E-99)
-  mR.inv = fastinv(mR, p=p, m=m, blocksize=blocksize)
+  mR.inv = fastinv(mR, p=p, m=m, blocksize=blocksize, spline_dim=spline_dim)
   #mLambda <- t(mR.inv) %*% mR.inv
   mLambda <- crossprod(mR.inv)
   
@@ -339,23 +380,32 @@ printMatrix = function(mat) {
 }
 
 ###############################################################################
-fastinv = function(mR, p=NA, m=NA, blocksize=1)
+fastinv = function(mR, p=NA, m=NA, blocksize=1, spline_dim=0)
 {
   # Idea: This could be made faster by replacing with an equivalent
   # fastsolve function.
   
-  u_dim = m*blocksize+spline_degree
+  u_dim = m*blocksize+spline_dim
   mR.inv.mZ = matrix(0, nrow=u_dim, ncol=u_dim)
-  if (blocksize == 1) {
+  if (blocksize == 1 && m > 0) {
     # If the blocksize is 1, we can simply take the reciprocal of the
     # diagonal.
-    diag(mR.inv.mZ) = 1/diag(mR[1:m, 1:m])
+    diag(mR.inv.mZ) = 1/diag(mR[1:u_dim, 1:u_dim])
   } else {
     # Iterate through the blocks, taking the inverse of each
-    for (i in 1:m) {
-	  # FIXME: This will probably need to be changed to support splines.
-      idx = ((i-1)*blocksize+1):(i*blocksize)
-      mR.inv.mZ[idx, idx] = solve(mR[idx, idx])
+    if (m > 0)
+      for (i in 1:m) {
+	    # FIXME: This will probably need to be changed to support splines.
+        idx = ((i-1)*blocksize+1):(i*blocksize)
+        mR.inv.mZ[idx, idx] = solve(mR[idx, idx])
+      }
+    
+    if (spline_dim > 0) {
+      spline_idx = (m*blocksize+1):(m*blocksize+spline_dim)
+      spline_mR = mR[spline_idx, spline_idx]
+      #spline_mR = tril(spline_mR, -3)
+      spline_mR = band(spline_mR, -5, 0)
+      mR.inv.mZ[spline_idx, spline_idx] = as.matrix(solve(spline_mR))
     }
   }
   
@@ -372,7 +422,7 @@ fastinv = function(mR, p=NA, m=NA, blocksize=1)
 }
 
 ###############################################################################
-vg.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m, blocksize)
+vg.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m, blocksize, spline_dim)
 {
   d <- ncol(mC)
   vmu <- vtheta[1:d]
@@ -385,7 +435,7 @@ vg.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m, bloc
   # mR is lower triangular. Can you rewrite this using forward solves and
   # backsolves?
   # New
-  mR.inv = fastinv(mR, p=p, m=m, blocksize=blocksize)
+  mR.inv = fastinv(mR, p=p, m=m, blocksize=blocksize, spline_dim=spline_dim)
   # Old
   #mR.inv = solve(mR, tol=1.0E-99)
   
@@ -396,26 +446,9 @@ vg.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m, bloc
   #mLambda <- t(mR.inv) %*% mR.inv
   mLambda <- crossprod(mR.inv)
   vmu.til     <- mC%*%vmu
-  #vsigma2.til <- diag(mC %*% (mLambda %*%t(mC)))
-  #vsigma2.til <- sapply(1:nrow(mC), function(i) {mC[i,]%*%mLambda%*%mC[i,]})
-  #vsigma2.til <- apply(mC, 1, function(row) {row%*%(mLambda%*%row)})
-  #mR <- Matrix(mR, sparse=TRUE)
   a <- forwardsolve(mR, t(mC))
   vsigma2.til <- crossprod(a^2, rep(1, ncol(mC)))
-  #vsigma2.til <- apply(mC, 1, function(row) {crossprod(crossprod(mLambda, row), row)})
-  #vsigma2.til <- apply(mC, 1, function(row) {
-  #  #a <- forwardsolve(mR, row)
-  #  a <- solve(mR, row)
-  #  sum(a^2)
-  #})
-  #vsigma2.til = rep(0, nrow(mC))
-  #for (i in 1:length(nrow(mC))) {
-  #  vsigma2.til[i] = as.double(mC[i,]%*%mLambda%*%mC[i,])
-  #}
-  #vsigma2.til = rep(0, nrow(mC))
-  #for (i in 1:nrow(mC))
-  #  vsigma2.til[i] = as.numeric(mC[i,] %*% mLambda %*% mC[i,])
-  #vsigma2.til <- mC%*%Diagonal(x = diag(mLambda))%*%t(mC)
+
   res.B12 <- B12.fun("POISSON",vmu.til,vsigma2.til,gh)
   vB1 <- res.B12$vB1
   vB2 <- res.B12$vB2
@@ -512,7 +545,7 @@ vg.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m, bloc
 
 ###############################################################################
 
-fit.GVA_new2 <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, p=NA, m=NA, blocksize=NA, spline_degree=NA)
+fit.GVA_new2 <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, p=NA, m=NA, blocksize=NA, spline_dim=NA)
 {
   #library(statmod)
   #N <- 15
@@ -522,7 +555,7 @@ fit.GVA_new2 <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, 
   d <- length(vmu)
   Dinds <- d*((1:d)-1)+(1:d)
   
-  u_dim = m*blocksize+spline_degree
+  u_dim = m*blocksize+spline_dim
   # Swap fixed and random effects in mLambda so that inverse of mR is quick to
   # calculate due to sparsity. If you do this, you have to re-order mSigma.inv,
   # vmu and mC as well.
@@ -553,7 +586,7 @@ fit.GVA_new2 <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, 
   lower_constraint <- rep(-Inf, length(vmu))
   
   if (method=="L-BFGS-B") {
-    controls <- list(maxit=1000,trace=0,fnscale=-1,REPORT=1,factr=1.0E-5,lmm=10)
+    controls <- list(maxit=100,trace=0,fnscale=-1,REPORT=1,factr=1.0E-5,lmm=10)
   } else if (method=="Nelder-Mead") {
     controls <- list(maxit=100000000,trace=0,fnscale=-1,REPORT=1000,reltol=reltol) 
   } else {
@@ -561,7 +594,7 @@ fit.GVA_new2 <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, 
   }
   res <- optim(par=vmu, fn=f.GVA_new2, gr=vg.GVA_new2,
                method=method,lower=lower_constraint, upper=Inf, control=controls,
-               vy=vy,vr=vr,mC=mC,mSigma.inv=mSigma.inv,gh=gh2,mR=mR*0,Rinds=Rinds,Dinds=Dinds, p=p, m=m, blocksize=blocksize)        
+               vy=vy,vr=vr,mC=mC,mSigma.inv=mSigma.inv,gh=gh2,mR=mR*0,Rinds=Rinds,Dinds=Dinds, p=p, m=m, blocksize=blocksize, spline_dim=spline_dim)        
   
   vtheta <- res$par 
   
@@ -588,7 +621,8 @@ f.G_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,gh)
   d <- length(vmu)
   
   vmu.til     <- mC%*%vmu
-  vsigma2.til <- diag(mC%*%mLambda%*%t(mC))
+  #vsigma2.til <- diag(mC%*%mLambda%*%t(mC))
+  vsigma2.til <- fastdiag2(mC, mLambda)
   #vsigma2.til <- sapply(1:nrow(mC), function(i) {mC[i,]%*%mLambda%*%mC[i,]})
   vB0 <- B0.fun("POISSON",vmu.til,vsigma2.til,gh) 
   
@@ -678,7 +712,8 @@ vg.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   mLambda <- solve(mR%*%t(mR), tol=1.0E-99)
   
   vmu.til     <- mC%*%vmu
-  vsigma2.til <- diag(mC%*%mLambda%*%t(mC))
+  #vsigma2.til <- diag(mC%*%mLambda%*%t(mC))
+  vsigma2.til <- fastdiag2(mC, mLambda)$product
   #vsigma2.til <- sapply(1:nrow(mC), function(i) {mC[i,]%*%mLambda%*%mC[i,]})
   res.B12 <- B12.fun("POISSON",vmu.til,vsigma2.til,gh)
   vB1 <- res.B12$vB1
@@ -836,7 +871,7 @@ mH.G_nr <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,vB2)
 
 ###############################################################################
 
-fit.GVA_nr <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, m=NA, p=NA, blocksize=NA)
+fit.GVA_nr <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, m=NA, p=NA, blocksize=NA, spline_dim=NA)
 {
  
   MAXITER <- 1000
@@ -849,7 +884,8 @@ fit.GVA_nr <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, m=
       # calculate B1
       # calculate B2
       vmu.til <- mC%*%vmu
-      vsigma2.til <- sapply(1:nrow(mC), function(i) {mC[i,]%*%mLambda%*%mC[i,]})
+      #vsigma2.til <- sapply(1:nrow(mC), function(i) {mC[i,]%*%mLambda%*%mC[i,]})
+      vsigma2.til <- fastdiag2(mC, mLambda)$product
       res.B12 <- B12.fun("POISSON",vmu.til,vsigma2.til,gh)
       vB1 <- res.B12$vB1
       vB2 <- res.B12$vB2      

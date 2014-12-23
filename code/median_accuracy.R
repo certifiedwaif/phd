@@ -12,7 +12,7 @@ median_accuracy = function()
   for (i in 1:ITER) {
     # Run code
     result = compare_approximations(c(2, 1))
-    accuracy[[i]] = with(result, calculate_accuracy(mcmc_samples, result_var, print_flag=TRUE))
+    accuracy[[i]] = with(result, calculate_accuracy(mcmc_samples, var_result, print_flag=TRUE))
   }
   # For name in names(accuracy)
   
@@ -63,9 +63,9 @@ compare_approximations = function(vbeta)
 {
   multivariate = generate_test_mult(c(2, 1))
   approximation = "gva"
-  result_var = zero_infl_var(multivariate, method=approximation, verbose=TRUE)
+  var_result = zero_infl_var(multivariate, method=approximation, verbose=TRUE)
   mcmc_samples = mcmc_approximation(multivariate, iterations=1e4, mc.cores = 32)
-  return(list(multivariate=multivariate, result_var=result_var, mcmc_samples=mcmc_samples))
+  return(list(multivariate=multivariate, var_result=var_result, mcmc_samples=mcmc_samples))
 }
 
 is.between = function(x, a, b) x >= a && x <= b
@@ -81,11 +81,11 @@ coverage_percentage = function()
 	for (i in 1:100) {
 		mult = generate_test_mult(c(2, 1))	
 		approximation = "gva2new"
-		result_var = zero_infl_var(mult, method=approximation, verbose=FALSE)
-    for (j in 1:length(result_var$vmu)) {
+		var_result = zero_infl_var(mult, method=approximation, verbose=FALSE)
+    for (j in 1:length(var_result$vmu)) {
   		# Check that true parameter is within 95% credible interval.
       expected = c(2, 1, rep(0, 22))
-  		if (is.between(expected[j], result_var$vmu[j] - 1.96*sqrt(result_var$mLambda[j, j]), result_var$vmu[j] + 1.96*sqrt(result_var$mLambda[j, j]))) {
+  		if (is.between(expected[j], var_result$vmu[j] - 1.96*sqrt(var_result$mLambda[j, j]), var_result$vmu[j] + 1.96*sqrt(var_result$mLambda[j, j]))) {
   			# Increment counter
   			counter[j] = counter[j] + 1
   		}
@@ -99,9 +99,9 @@ mean_var = function(vbeta)
 {
   result = compare_approximations(vbeta)
   return(with(result, {
-  var_approx_mean = result_var$vmu[2]
+  var_approx_mean = var_result$vmu[2]
   mcmc_approx_mean = mean(mcmc_samples$vbeta[,2])
-  var_approx_var = result_var$mLambda[2,2]
+  var_approx_var = var_result$mLambda[2,2]
   mcmc_approx_var = var(mcmc_samples$vbeta[,2])
   list(var_approx_mean=var_approx_mean,
 		mcmc_approx_mean=mcmc_approx_mean,

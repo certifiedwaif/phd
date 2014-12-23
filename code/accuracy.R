@@ -45,16 +45,41 @@ generate_test_data = function(m, ni)
   vy = test_data$vy
   
   # Test accuracy
-  mult = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau)
-  mult$n = n
-  mult$m = m
-  mult$ni = ni
+  mult = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, m=m, blocksize=1, spline_dim=0)
   
+  return(mult)
+}
+
+generate_slope_test_data = function() {
+  m = 20
+  ni = 10
+  n = rep(ni,m)
+  mX = matrix(as.vector(cbind(rep(1, sum(n)), runif(sum(n), -1, 1))), sum(n), 2)
+  mZ = makeZ(mX, m, ni, p=2)
+  
+  expected_rho = 0.5
+  expected_beta = c(2, 1)
+  expected_sigma2_u = .5^2
+  a_sigma = 1e-2
+  b_sigma = 1e-2
+  
+  tau = 1.0E2
+  
+  sigma2.beta <- 1.0E3
+  
+  test_data = generate_multivariate_test_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u, verbose=TRUE)
+  vy = test_data$vy
+  
+  # Test model fitting
+  mult = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, m=m, blocksize=2, spline_dim=0)
   return(mult)
 }
 
 calculate_accuracy = function(mcmc_samples, var_result, print_flag=FALSE, plot_flag=FALSE)
 {
+  # TODO: Add support for checking the accuracy over multiple dimensions
+  # cubature$adaptIntegrate
+  
   if (plot_flag) pdf(paste0("accuracy_plots_", approximation, ".pdf"))
   #return(var_result)
   # vbeta accuracy
@@ -147,13 +172,13 @@ test_accuracy = function(mult, mcmc_samples, approximation, plot=FALSE)
 # Calculate accuracy ----
 # Approximate the L1 norm between the variational approximation and
 # the MCMC approximation
-calculate_accuracy2 <- function(result_mcmc, result_var)
+calculate_univariate_accuracy <- function(result_mcmc, var_result)
 {
   density_mcmc_rho = density(result_mcmc$vrho)
   integrand <- function(x)
   {
     fn = splinefun(density_mcmc_rho$x, density_mcmc_rho$y)
-    return(abs(fn(x) - dbeta(x, result_var$a_rho, result_var$b_rho)))
+    return(abs(fn(x) - dbeta(x, var_result$a_rho, var_result$b_rho)))
   }
   result = integrate(integrand, min(density_mcmc_rho$x), max(density_mcmc_rho$x), subdivisions = length(density_mcmc_rho$x))
   rho_accuracy = 1 - .5 * result$value
@@ -162,7 +187,7 @@ calculate_accuracy2 <- function(result_mcmc, result_var)
   integrand <- function(x)
   {
     fn = splinefun(density_mcmc_lambda$x, density_mcmc_lambda$y)
-    return(abs(fn(x) - dgamma(x, result_var$a_lambda, result_var$b_lambda)))
+    return(abs(fn(x) - dgamma(x, var_result$a_lambda, var_result$b_lambda)))
   }
   result = integrate(integrand, min(density_mcmc_lambda$x), max(density_mcmc_lambda$x), subdivisions = length(density_mcmc_lambda$x))
   lambda_accuracy = 1 - .5 * result$value
@@ -197,10 +222,10 @@ test_accuracies = function()
   #Sys.time() - now
   #print(image(Matrix(var1$mLambda)))
   
-  #now = Sys.time()
-  #var2 = test_accuracy(mult, mcmc_samples, "gva")
-  #Sys.time() - now
-  #print(image(Matrix(var2$mLambda)))
+  now = Sys.time()
+  var2 = test_accuracy(mult, mcmc_samples, "gva")
+  Sys.time() - now
+  print(image(Matrix(var2$var_result$mLambda)))
   
   #now = Sys.time()
   #var3 = test_accuracy(mult, mcmc_samples, "gva2")
@@ -215,10 +240,10 @@ test_accuracies = function()
   #summaryRprof()
   #print(image(Matrix(var3_new$mLambda)))
   
-  #now = Sys.time()
-  #var4 = test_accuracy(mult, mcmc_samples, "gva_nr")
-  #Sys.time() - now
-  #print(image(Matrix(var4$mLambda)))
+  now = Sys.time()
+  var4 = test_accuracy(mult, mcmc_samples, "gva_nr")
+  Sys.time() - now
+  print(image(Matrix(var4$mLambda)))
   
   #for (i in 1:100) {
   #  set.seed(i)
@@ -230,4 +255,9 @@ test_accuracies = function()
   #  var3 = test_accuracy(mult, mcmc_samples, "gva2")
   #  var4 = test_accuracy(mult, mcmc_samples, "gva_nr")
   #}
+  
+  mult = generate_slope_test_data()
+  # Monte Carlo Markov Chains approximation
+  mcmc_samples = mcmc_approximation(mult, iterations=1e3)
+  var1 = test_accuracy(mult, mcmc_samples, "laplacian")
 }

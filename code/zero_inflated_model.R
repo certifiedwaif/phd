@@ -191,7 +191,7 @@ zero_infl_var.univariate <- function(univariate, verbose=FALSE, plot_lower_bound
   return(params)
 }
 
-create_multivariate <- function(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, m=ncol(mZ), blocksize=1, spline_degree=NA)
+create_multivariate <- function(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, m=ncol(mZ), blocksize=1, spline_dim=NA)
 {
   # Initialise
   n = length(vy)
@@ -216,7 +216,7 @@ create_multivariate <- function(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, 
   prior = list(a_sigma=a_sigma, b_sigma=b_sigma, a_rho=1, b_rho=1, sigma2.beta=sigma2.beta)
   multivariate = list(vy=vy, vp=vp, vmu=vmu,
                       mX=mX, mZ=mZ, mC=mC,
-                      m=m, blocksize=blocksize, spline_degree=spline_degree,
+                      m=m, blocksize=blocksize, spline_dim=spline_dim,
                       a_sigma=a_sigma, b_sigma=b_sigma,
                       a_rho=a_rho, b_rho=b_rho,
                       mLambda=mLambda,
@@ -247,11 +247,11 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
   if (!is.null(mult$mZ)) {
     m = mult$m
     blocksize = mult$blocksize
-    spline_degree = mult$spline_degree
+    spline_dim = mult$spline_dim
     if (verbose) {
       cat("m", m, "\n")
       cat("blocksize", blocksize, "\n")
-      cat("spline_degree", spline_degree, "\n")
+      cat("spline_dim", spline_dim, "\n")
     }
   } else {
     m = 0
@@ -288,13 +288,13 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
       fit1 = fit.GVA(mult$vmu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B")
     } else if (method == "gva2") {
       fit2 = fit.Lap(mult$vmu, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, mult$mLambda)
-      fit1 = fit.GVA_new(fit2$vmu, fit2$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B", p=p, m=m, blocksize=mult$blocksize)
+      fit1 = fit.GVA_new(fit2$vmu, fit2$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B", p=p, m=m, blocksize=mult$blocksize, spline_dim=spline_dim)
     } else if (method == "gva2new") {
       #fit2 = fit.Lap(mult$vmu, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, mult$mLambda)
-      fit1 = fit.GVA_new2(mult$vmu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B", p=p, m=m, blocksize=mult$blocksize)
+      fit1 = fit.GVA_new2(mult$vmu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B", p=p, m=m, blocksize=mult$blocksize, spline_dim=spline_dim)
       #fit1 = fit.GVA_new2(mult$vmu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "BFGS", p=p, m=m)
     } else if (method == "gva_nr") {
-      fit1 = fit.GVA_nr(mult$vmu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B", p=p, m=m, blocksize=mult$blocksize)
+      fit1 = fit.GVA_nr(mult$vmu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B", p=p, m=m, blocksize=mult$blocksize, spline_dim=spline_dim)
     } else {
       stop("method must be either laplacian, gva, gva2, gva2new or gva_nr")
     }
@@ -305,7 +305,7 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
     
     # Update parameters for q_vr
     if (length(zero.set) != 0) {
-      mult$vp[zero.set] = expit((mult$vy[zero.set]*mult$mC[zero.set,])%*%mult$vmu-exp(mult$mC[zero.set,]%*%mult$vmu + 0.5*diag((matrix(mult$mC[zero.set,], length(zero.set), p+m*blocksize+spline_degree))%*%mult$mLambda%*%t(matrix(mult$mC[zero.set,], length(zero.set), p+m*blocksize+spline_degree))) + digamma(mult$a_rho) - digamma(mult$b_rho)))
+      mult$vp[zero.set] = expit((mult$vy[zero.set]*mult$mC[zero.set,])%*%mult$vmu-exp(mult$mC[zero.set,]%*%mult$vmu + 0.5*diag((matrix(mult$mC[zero.set,], length(zero.set), p+m*blocksize+spline_dim))%*%mult$mLambda%*%t(matrix(mult$mC[zero.set,], length(zero.set), p+m*blocksize+spline_dim))) + digamma(mult$a_rho) - digamma(mult$b_rho)))
     }
     
     # Update parameters for q_rho
@@ -315,10 +315,10 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
     # Update parameters for q_sigma_u^2 if we need to
     if (!is.null(mult$mZ)) {
       # a_sigma is fixed
-      u_dim = m*blocksize+spline_degree
+      u_dim = m*blocksize+spline_dim
       mult$a_sigma = mult$prior$a_sigma + u_dim/2
       u_idx = p + 1:u_dim  # (ncol(mult$mX)+1):ncol(mult$mC)
-      # u_idx = p + 1:(m*blocksize) + spline_degree
+      # u_idx = p + 1:(m*blocksize) + spline_dim
       #tr_mSigma = ncol(mult$mZ) * mult$prior$a_sigma/mult$prior$b_sigma
       #mult$b_sigma = mult$prior$b_sigma + sum(vu^2)/2 + (tr_mSigma)/2
       mult$b_sigma = mult$prior$b_sigma + sum(mult$vmu[u_idx]^2)/2 + tr(mult$mLambda[u_idx, u_idx])/2    # Extract right elements of mLambda
