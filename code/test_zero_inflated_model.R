@@ -269,7 +269,7 @@ test_spline = function(approximation="gva")
   mult = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, m=0, blocksize=1, spline_dim=37)
   
   var_result = zero_infl_var(mult, method=approximation, verbose=TRUE)
-  fastdiag2(mult$mC, var_result$mLambda)
+  fastdiag(mult$mC, var_result$mLambda)
 }
 
 main <- function()

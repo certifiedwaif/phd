@@ -1,6 +1,6 @@
 # variational_approximation_to_zero_inflated_model.R
 source("common.R")
-source("zero_inflated_poisson_model.R")
+source("gaussian.R")
 
 mcmc.univariate <- function(iterations, vx, a, b)
 {
