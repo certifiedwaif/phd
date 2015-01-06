@@ -4,7 +4,7 @@ source("zero_inflated_model.R")
 source("test_zero_inflated_model.R")
 source("rwmh.R")
 
-generate_test_data = function(m, ni)
+generate_int_test_data = function(m, ni)
 {
   m = m
   ni = ni
@@ -132,7 +132,7 @@ calculate_accuracy = function(mcmc_samples, var_result, print_flag=FALSE, plot_f
   
   # vu accuracy
   # FIXME: To check for random slopes accuracy, this section will have
-  # to get more complex.
+  # to get more complex. Or not, if John's right.
   vu_accuracy = rep(NA, ncol(mult$mZ))
   for (i in 1:ncol(mult$mZ)) {
     vu_accuracy[i] = calculate_accuracy3(mcmc_samples$u[,i], dnorm,
@@ -199,61 +199,74 @@ test_accuracies = function()
   # Need to be able to compare the solution paths of each approximation
   
   # Generate data
-  # for (i in 1:100) {
+  #for (i in 1:100) {
   #   set.seed(i)
-  #   mult = generate_test_data(20, 100)
+  #   mult = generate_int_test_data(20, 100)
   #   # Monte Carlo Markov Chains approximation
   #   mcmc_samples = mcmc_approximation(mult, iterations=1e6)
   #   # Save the results, because this takes such a long time to run.
-  # }
-  # save(mult, mcmc_samples, file="accuracy_good.RData")
-  # set.seed(1)
-  # mult = generate_test_data(20, 100)
-  # # Monte Carlo Markov Chains approximation
-  # mcmc_samples = mcmc_approximation(mult, iterations=1e4)
+  #}
+  #set.seed(1)
+  #mult = generate_int_test_data(20, 100)
+  #save(mult, mcmc_samples, file="accuracy_good.RData")
+  set.seed(1)
+  mult = generate_int_test_data(20, 100)
+  # Monte Carlo Markov Chains approximation
+  mcmc_samples = mcmc_approximation(mult, iterations=1e4)
   # Save the results, because this takes such a long time to run.
   #save(mult, mcmc_samples, file="accuracy.RData")
   #load(file="accuracy.RData")
   # Test all other approximations against it
   
   # Test multivariate approximation's accuracy
-  #now = Sys.time()
-  #var1 = test_accuracy(mult, mcmc_samples, "laplacian")
-  #Sys.time() - now
-  #print(image(Matrix(var1$mLambda)))
+  now = Sys.time()
+  var_result = zero_infl_var(mult, method="laplacian", verbose=TRUE)
+  var1 = calculate_accuracy(mcmc_samples, var_result)
+  Sys.time() - now
+  print(image(Matrix(var1$var_result$mLambda)))
   
   now = Sys.time()
-  var2 = test_accuracy(mult, mcmc_samples, "gva")
+  var_result = zero_infl_var(mult, method="gva", verbose=TRUE)
+  var2 = calculate_accuracy(mcmc_samples, var_result)
   Sys.time() - now
   print(image(Matrix(var2$var_result$mLambda)))
   
-  #now = Sys.time()
-  #var3 = test_accuracy(mult, mcmc_samples, "gva2")
-  #Sys.time() - now
-  #print(image(Matrix(var3$mLambda)))
-  
-  #Rprof()
   now = Sys.time()
-  var3_new = test_accuracy(mult, mcmc_samples, "gva2")
-  print(Sys.time() - now)
+  var_result = zero_infl_var(mult, method="gva2", verbose=TRUE)
+  var3 = calculate_accuracy(mcmc_samples, var_result)
+  Sys.time() - now
+  print(image(Matrix(var3$var_result$mLambda)))
+  
+  now = Sys.time()
+  var_result = zero_infl_var(mult, method="gva2new", verbose=TRUE)
+  var4 = calculate_accuracy(mcmc_samples, var_result)
+  Sys.time() - now
+  print(image(Matrix(var4$var_result$mLambda)))
+
+  #Rprof()
   #Rprof(NULL)
   #summaryRprof()
   #print(image(Matrix(var3_new$mLambda)))
   
   now = Sys.time()
-  var4 = test_accuracy(mult, mcmc_samples, "gva_nr")
+  var_result = zero_infl_var(mult, method="gva_nr", verbose=TRUE)
+  var5 = calculate_accuracy(mcmc_samples, var_result)
   Sys.time() - now
-  print(image(Matrix(var4$mLambda)))
+  print(image(Matrix(var5$var_result$mLambda)))
   
   #for (i in 1:100) {
   #  set.seed(i)
-  #  mult = generate_test_data(20, 100)
+  #  mult = generate_int_test_data(20, 100)
   #  mcmc_samples = mcmc_approximation(mult, iterations=1e4)
   #  
-  #  var1 = test_accuracy(mult, mcmc_samples, "laplacian")
-  #  var2 = test_accuracy(mult, mcmc_samples, "gva")
-  #  var3 = test_accuracy(mult, mcmc_samples, "gva2")
-  #  var4 = test_accuracy(mult, mcmc_samples, "gva_nr")
+#   var_result = zero_infl_var(mult, method="laplacian", verbose=TRUE)
+#   var1 = calculate_accuracy(mcmc_samples, var_result)
+#   var_result = zero_infl_var(mult, method="gva", verbose=TRUE)
+#   var2 = calculate_accuracy(mcmc_samples, var_result)
+#   var_result = zero_infl_var(mult, method="gva2", verbose=TRUE)
+#   var3 = calculate_accuracy(mcmc_samples, var_result)
+#   var_result = zero_infl_var(mult, method="gva_nr", verbose=TRUE)
+#   var4 = calculate_accuracy(mcmc_samples, var_result)
   #}
   
   mult = generate_slope_test_data()

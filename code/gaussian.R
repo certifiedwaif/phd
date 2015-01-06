@@ -8,12 +8,13 @@ require(Rcpp)
 require(RcppEigen)
 require(inline)
 
-#fastdiag2 <- function(mC, mLambda)
+#fastdiag <- function(mC, mLambda)
 #{
 #  return(diag(mC%*%mLambda%*%t(mC)))
 #}
 
-sourceCpp("fastdiag.cpp")
+sourceCpp(file = "fastdiag.cpp")
+
 ###############################################################################
 
 f.lap <- function(vmu,vy,vr,mC,mSigma.inv,mLambda) 
@@ -126,7 +127,7 @@ mH.G <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,vB2)
 {
   vw <-  vB2; dim(vw) <- NULL
   #mH <- -t(mC*vw)%*%mC - mSigma.inv
-  mH <- -t(mC*vr*vw)%*%(mC*vr) - mSigma.inv
+  mH <- -t(mC*(vr*vw))%*%(mC) - mSigma.inv
   return(mH)    
 }
 
@@ -313,7 +314,7 @@ mH.G_new2 <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,vB2)
 {
   vw <-  vB2; dim(vw) <- NULL
   #mH <- -t(mC*vw)%*%mC - mSigma.inv
-  #mH <- -t(mC*vr*vw)%*%(mC*vr) - mSigma.inv
+  #mH <- -t(mC*(vr*vw))%*%(mC*vr) - mSigma.inv
   mH <- -t(mC*(vr*vw))%*%(mC) - mSigma.inv
   return(mH)    
 }
@@ -379,7 +380,7 @@ fastinv = function(mR, p=NA, m=NA, blocksize=1, spline_dim=0)
   # further.
   mR.inv[(u_dim+1):(u_dim+p), 1:(u_dim)] = -mR.inv.mX %*% mR[(u_dim+1):(u_dim+p), 1:(u_dim)] %*% mR.inv.mZ
   return(mR.inv)
-  #return(solve(mR))
+  #return(solve(mR, tol=1e-99))
   #return(Matrix(data=mR.inv, sparse=TRUE))
 }
 
@@ -517,13 +518,18 @@ fit.GVA_new2 <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, 
   # Swap fixed and random effects in mLambda so that inverse of mR is quick to
   # calculate due to sparsity. If you do this, you have to re-order mSigma.inv,
   # vmu and mC as well.
-  mLambda_new = blockDiag(mLambda[(p+1):(p+u_dim), (p+1):(p+u_dim)], mLambda[1:p, 1:p])
-  mLambda_new[1:(u_dim), (u_dim+1):(u_dim+p)] = mLambda[(p+1):(p+(u_dim)), 1:p]
-  mLambda_new[(u_dim+1):(u_dim+p), 1:(u_dim)] = t(mLambda_new[1:(u_dim), (u_dim+1):(u_dim+p)])
+  #browser()
+  beta_idx = 1:p
+  u_idx = (p+1):(p+u_dim)
+  new_beta_idx = (u_dim+1):(u_dim+p)
+  new_u_idx = 1:u_dim
+  mLambda_new = blockDiag(mLambda[u_idx, u_idx], mLambda[beta_idx, beta_idx])
+  mLambda_new[new_u_idx, new_beta_idx] = mLambda[u_idx, beta_idx]
+  mLambda_new[new_beta_idx, new_u_idx] = t(mLambda[u_idx, beta_idx])
   mLambda = mLambda_new
-  mSigma.inv = blockDiag(mSigma.inv[(p+1):(p+u_dim), (p+1):(p+u_dim)], mSigma.inv[1:p, 1:p])
-  vmu = c(vmu[(p+1):(p+u_dim)], vmu[1:p])
-  mC = mC[,c((p+1):(p+u_dim), 1:p)]
+  mSigma.inv = blockDiag(mSigma.inv[u_idx, u_idx], mSigma.inv[beta_idx, beta_idx])
+  vmu = c(vmu[u_idx], vmu[beta_idx])
+  mC = mC[,c(u_idx, beta_idx)]
   #mC = Matrix(mC, sparse=TRUE)
   
   mR <- t(chol(solve(mLambda, tol=1.0E-99) + diag(1.0E-8,d)))
@@ -544,7 +550,7 @@ fit.GVA_new2 <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, 
   lower_constraint <- rep(-Inf, length(vmu))
   
   if (method=="L-BFGS-B") {
-    controls <- list(maxit=100,trace=0,fnscale=-1,REPORT=1,factr=1.0E-5,lmm=10)
+    controls <- list(maxit=1000,trace=0,fnscale=-1,REPORT=1,factr=1.0E-5,lmm=10)
   } else if (method=="Nelder-Mead") {
     controls <- list(maxit=100000000,trace=0,fnscale=-1,REPORT=1000,reltol=reltol) 
   } else {
@@ -562,13 +568,18 @@ fit.GVA_new2 <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, 
   mLambda <- solve(mR%*%t(mR), tol=1.0E-99)
 
   # Swap everything back
-  mLambda_new = blockDiag(mLambda[(u_dim+1):(u_dim+p), (u_dim+1):(u_dim+p)], mLambda[1:(u_dim), 1:(u_dim)])
-  mLambda_new[1:p, (p+1):(u_dim+p)] = mLambda[(u_dim+1):(u_dim+p), 1:(u_dim)]
-  mLambda_new[(p+1):(u_dim+p), 1:p] = t(mLambda[(u_dim+1):(u_dim+p), 1:(u_dim)])
+  beta_idx = (u_dim+1):(u_dim+p)
+  u_idx = 1:u_dim
+  new_beta_idx = 1:p
+  new_u_idx = (p+1):(p+u_dim)
+  mLambda_new = blockDiag(mLambda[beta_idx, beta_idx], mLambda[u_idx, u_idx])
+  mLambda_new[new_beta_idx, new_u_idx] = mLambda[beta_idx, u_idx]
+  mLambda_new[new_u_idx, new_beta_idx] = t(mLambda[beta_idx, u_idx])
   mLambda = mLambda_new
-  mSigma.inv = blockDiag(mSigma.inv[(u_dim+1):(u_dim+p), (u_dim+1):(u_dim+p)], mSigma.inv[1:(u_dim), 1:(u_dim)])
-  vmu = c(vmu[(u_dim+1):(u_dim+p)], vmu[1:(u_dim)])
-  mC = mC[,c((u_dim+1):(u_dim+p), 1:(u_dim))]
+  mSigma.inv = blockDiag(mSigma.inv[beta_idx, beta_idx], mSigma.inv[u_idx, u_idx])
+  vmu = c(vmu[beta_idx], vmu[u_idx])
+  mC = mC[,c(beta_idx, u_idx)]
+  
   return(list(res=res,vmu=vmu,mLambda=mLambda))
 }
 
