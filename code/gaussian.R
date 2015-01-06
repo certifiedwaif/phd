@@ -8,7 +8,6 @@ require(Rcpp)
 require(RcppEigen)
 
 sourceCpp(file = "fastdiag.cpp")
-
 ###############################################################################
 
 f.lap <- function(vmu,vy,vr,mC,mSigma.inv,mLambda) 
@@ -89,40 +88,40 @@ f.G <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,gh)
 
 f.GVA <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
 {
-   d <- ncol(mC)  
-   vmu <- vtheta[1:d]
-   mR[Rinds] <- vtheta[(1+d):length(vtheta)]
-   mR[Dinds] <- exp(mR[Dinds]) 
-    for (i in 1:length(Dinds)) {
+  d <- ncol(mC)  
+  vmu <- vtheta[1:d]
+  mR[Rinds] <- vtheta[(1+d):length(vtheta)]
+  mR[Dinds] <- exp(mR[Dinds]) 
+  for (i in 1:length(Dinds)) {
         mR[Dinds[i]] <- min(c(1.0E5,mR[Dinds[i]]))
-    }   
+  }   
   mLambda <- mR%*%t(mR)   
    
-   f <- sum(log(diag(mR))) + f.G(vmu,mLambda,vy,vr,mC,mSigma.inv,gh) 
-   f <- f + 0.5*d*log(2*pi) + 0.5*d
-   
-   if (!is.finite(f)) {
-     f <- -1.0E16
-   }
-   return(f)
+  f <- sum(log(diag(mR))) + f.G(vmu,mLambda,vy,vr,mC,mSigma.inv,gh) 
+  f <- f + 0.5*d*log(2*pi) + 0.5*d
+  
+  if (!is.finite(f)) {
+   f <- -1.0E16
+  }
+  return(f)
 }
 
 ###############################################################################
 
 vg.G <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,vB1) 
 {
-    vg <- t(mC)%*%(vr*(vy - vB1)) - mSigma.inv%*%vmu     
-    return(vg)
+  vg <- t(mC)%*%(vr*(vy - vB1)) - mSigma.inv%*%vmu     
+  return(vg)
 }
 
 ###############################################################################
 
 mH.G <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,vB2) 
 {
-    vw <-  vB2; dim(vw) <- NULL
-    #mH <- -t(mC*vw)%*%mC - mSigma.inv
-    mH <- -t(mC*vr*vw)%*%(mC*vr) - mSigma.inv
-    return(mH)    
+  vw <-  vB2; dim(vw) <- NULL
+  #mH <- -t(mC*vw)%*%mC - mSigma.inv
+  mH <- -t(mC*vr*vw)%*%(mC*vr) - mSigma.inv
+  return(mH)    
 }
 
 ###############################################################################
@@ -309,7 +308,7 @@ mH.G_new2 <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,vB2)
   vw <-  vB2; dim(vw) <- NULL
   #mH <- -t(mC*vw)%*%mC - mSigma.inv
   #mH <- -t(mC*vr*vw)%*%(mC*vr) - mSigma.inv
-  mH <- -t(mC*(vr*vw))%*%(mC)    - mSigma.inv
+  mH <- -t(mC*(vr*vw))%*%(mC) - mSigma.inv
   return(mH)    
 }
 
@@ -334,16 +333,6 @@ vg.GVA.approx_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
     vg.approx[i] <- (fp - fm)/(2*eps)
   }
   return(vg.approx)
-}
-
-###############################################################################
-printMatrix = function(mat) {
-  for (i in 1:nrow(mat)) {
-    for (j in 1:ncol(mat)) {
-      cat(mat[i, j], " ")
-    }
-    cat("\n")
-  }
 }
 
 ###############################################################################
@@ -458,10 +447,8 @@ vg.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m, bloc
   #print("diff")
   #print(mLambda - solve(mLambda.inv,tol=1.0E-99))
 
-
   #print("mR")
   #print(mR)
-
 
   #print(res)
   #bit <- res[(1+d):length(vtheta)]
@@ -469,8 +456,6 @@ vg.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m, bloc
   #print(cbind(bit,dmLambda[Rinds],bit-dmLambda[Rinds]))    
 
   #ans <- readline()
-
-
 
   # Check with numeric derivative
   #h = 1e-8
@@ -480,12 +465,12 @@ vg.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m, bloc
   #  mR_high[Rinds[i]] = mR_high[Rinds[i]] + h
   #  mR_low = mR
   #  mR_low[Rinds[i]] = mR_low[Rinds[i]] - h
-    #mLambda_high = solve(mR_high%*%t(mR_high), tol=1e-99)
-    #mLambda_low = solve(mR_low%*%t(mR_low), tol=1e-99)
-    #dmLambda2[Rinds[i]] = (-0.5*log(det(mLambda_high)) + f.G_new(vmu,mLambda_high,vy,vr,mC,mSigma.inv,gh)  + 0.5*log(det(mLambda_low)) - f.G_new(vmu,mLambda_low,vy,vr,mC,mSigma.inv,gh))/(2*h)
-    #vtheta_high = c(vmu, mR_high[Rinds])
-    #vtheta_low = c(vmu, mR_low[Rinds])
-    #dmLambda2[Rinds[i]] = (f.GVA_new(vtheta_high,vy,vr,mC,mSigma.inv,gh,mR_high,Rinds,Dinds) - f.GVA_new(vtheta_low,vy,vr,mC,mSigma.inv,gh,mR_low,Rinds,Dinds))/(2*h)
+  #mLambda_high = solve(mR_high%*%t(mR_high), tol=1e-99)
+  #mLambda_low = solve(mR_low%*%t(mR_low), tol=1e-99)
+  #dmLambda2[Rinds[i]] = (-0.5*log(det(mLambda_high)) + f.G_new(vmu,mLambda_high,vy,vr,mC,mSigma.inv,gh)  + 0.5*log(det(mLambda_low)) - f.G_new(vmu,mLambda_low,vy,vr,mC,mSigma.inv,gh))/(2*h)
+  #vtheta_high = c(vmu, mR_high[Rinds])
+  #vtheta_low = c(vmu, mR_low[Rinds])
+  #dmLambda2[Rinds[i]] = (f.GVA_new(vtheta_high,vy,vr,mC,mSigma.inv,gh,mR_high,Rinds,Dinds) - f.GVA_new(vtheta_low,vy,vr,mC,mSigma.inv,gh,mR_low,Rinds,Dinds))/(2*h)
   #  mLambda_high = solve(mR_high%*%t(mR_high), tol=1e-99)
   #  mLambda_low = solve(mR_low%*%t(mR_low), tol=1e-99)
   #  dmLambda2[Rinds[i]] = (f.G_new(vmu,mLambda_high,vy,vr,mC,mSigma.inv,gh) - f.G_new(vmu,mLambda_low,vy,vr,mC,mSigma.inv,gh))/(2*h)
@@ -657,8 +642,7 @@ vg.GVA.approx_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
     
     vthetam <- vtheta
     vthetam[i] <- vtheta[i] - eps
-    fm <- f.GVA_new(vthetam,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
-    
+    fm <- f.GVA_new(vthetam,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)    
     
     vg.approx[i] <- (fp - fm)/(2*eps)
   }
@@ -731,8 +715,6 @@ vg.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   
   #ans <- readline()
   
-  
-  
   # Check with numeric derivative
   #h = 1e-8
   #dmLambda2 = matrix(0, nrow(mLambda), ncol(mLambda))
@@ -759,18 +741,6 @@ vg.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   #  for (j in 1:nrow(dmLambda))
   #    cat(j, i, dmLambda[i, j], dmLambda2[i, j], dmLambda[i, j] - dmLambda2[i, j], "\n")
   #cat("\n")
-  
-  printMatrix = function(mat) {
-    for (i in 1:nrow(mat)) {
-      for (j in 1:ncol(mat)) {
-        cat(mat[i, j], " ")
-      }
-      cat("\n")
-    }
-  }
-  #printMatrix(dmLambda)
-  #printMatrix(dmLambda2)
-  #printMatrix(dmLambda-dmLambda2)
   
   vg[(1+d):length(vtheta)] <- dmLambda[Rinds]    
   #vg[(1+d):length(vtheta)] <- dmLambda2[Rinds]    
@@ -840,7 +810,6 @@ mH.G_nr <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,vB2)
 
 fit.GVA_nr <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, m=NA, p=NA, blocksize=NA, spline_dim=NA)
 {
- 
   MAXITER <- 1000
   TOL <- reltol
   
@@ -882,7 +851,6 @@ fit.GVA_nr <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, m=
       vmu <- vmu + mLambda%*%vg
         
       err <- max(abs(vmu - vmu.old)) 
-      #cat(ITER,err,"\n")
       if (err<TOL) {
         break;
       }

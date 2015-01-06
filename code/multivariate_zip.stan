@@ -1,5 +1,5 @@
 data {
-  int<lower=1> N; // number of schools 
+  int<lower=1> N; // number of subjects
   int<lower=1> P;
   int<lower=1> M;
   int<lower=0> y[N]; // estimated treatment effects

@@ -4,9 +4,6 @@ using Eigen::MatrixXd;
 using Eigen::VectorXd;
 
 // [[Rcpp::depends(RcppEigen)]]
-
-// For more on using Rcpp click the Help button on the editor toolbar
-
 typedef Eigen::Map<Eigen::MatrixXd> MapMatd;
 
 // [[Rcpp::export]]
