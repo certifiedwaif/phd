@@ -73,7 +73,8 @@ mcmc_approximation <- function(mult, iterations=1e3, mc.cores = 1)
   require(parallel)
   #source("multivariate_stan.R")
   
-  zip_data <- with(mult, list(N=length(vy), P=2, M=mult$m, y=vy, X=mX, Z=mZ))
+  u_dim = with(mult, m*blocksize+spline_dim)
+  zip_data <- with(mult, list(N=length(vy), P=2, M=u_dim, y=vy, X=mX, Z=mZ))
   #print(str(zip_data))
   rng_seed <- 5;
   foo <- stan("multivariate_zip.stan", data=zip_data, chains = 0)
@@ -269,7 +270,6 @@ test_spline = function(approximation="gva")
   mult = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, m=0, blocksize=1, spline_dim=37)
   
   var_result = zero_infl_var(mult, method=approximation, verbose=TRUE)
-  fastdiag(mult$mC, var_result$mLambda)
 }
 
 main <- function()

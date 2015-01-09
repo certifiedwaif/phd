@@ -288,7 +288,7 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
       fit1 = fit.GVA(mult$vmu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B")
     } else if (method == "gva2") {
       fit2 = fit.Lap(mult$vmu, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, mult$mLambda)
-      fit1 = fit.GVA_new(fit2$vmu, fit2$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B", p=p, m=m, blocksize=mult$blocksize, spline_dim=spline_dim)
+      fit1 = fit.GVA_new(fit2$vmu, fit2$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B", p=p, m=m, blocksize=mult$blocksize)
     } else if (method == "gva2new") {
       #fit2 = fit.Lap(mult$vmu, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, mult$mLambda)
       fit1 = fit.GVA_new2(mult$vmu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B", p=p, m=m, blocksize=mult$blocksize, spline_dim=spline_dim)
