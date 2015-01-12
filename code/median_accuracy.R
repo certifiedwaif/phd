@@ -83,27 +83,27 @@ coverage_percentage = function()
     
 		var_result = tryCatch(zero_infl_var(mult, method=approximation, verbose=FALSE),
                           error = function (E) { return(NULL) })
-    # If there was an error, re-try with another generated data set. Sometimes the
-    # optimiser gets passed a non-finite value.
-    if (is.null(var_result)) {
-      i = i - 1
-      next
-    }
-    for (j in 1:2)) {
+    	# If there was an error, re-try with another generated data set. Sometimes the
+    	# optimiser gets passed a non-finite value.
+    	if (is.null(var_result)) {
+      		i = i - 1
+      		next
+    	}
+    	for (j in 1:2) {
   		# Check that true parameter is within 95% credible interval.
-      expected = c(2, 1)
-  		if (is.between(expected[j], var_result$vmu[j] - 1.96*sqrt(var_result$mLambda[j, j]), var_result$vmu[j] + 1.96*sqrt(var_result$mLambda[j, j]))) {
-  			# Increment counter
-  			counter[j] = counter[j] + 1
-  		}
-    }
-    sum_vmu_vmu = sum(var_result$vmu[3:22])
-    sum_mLambda_vmu = sum(sqrt(var_result$mLambda[3:22, 3:22])) # I think this will be an over-estimate
-    if (is.between(0, sum_vmu_vmu - 1.96 * sum_mLambda_vmu, sum_vmu_vmu + 1.96 * sum_mLambda_vmu) {
-      counter[3] = counter[3] + 1
-    }
+      		expected = c(2, 1)
+  			if (is.between(expected[j], var_result$vmu[j] - 1.96*sqrt(var_result$mLambda[j, j]), var_result$vmu[j] + 1.96*sqrt(var_result$mLambda[j, j]))) {
+  				# Increment counter
+  				counter[j] = counter[j] + 1
+  			}
+    	}
+    	sum_vmu_vmu = sum(var_result$vmu[3:22])
+    	sum_mLambda_vmu = sum(sqrt(diag(var_result$mLambda[3:22, 3:22]))) # I think this will be an over-estimate
+    	if (is.between(0, sum_vmu_vmu - 1.96 * sum_mLambda_vmu, sum_vmu_vmu + 1.96 * sum_mLambda_vmu)) {
+      		counter[3] = counter[3] + 1
+    	}
 	}
-  print(counter)
+	print(counter)
 }
 coverage_percentage()
 
