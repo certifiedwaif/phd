@@ -51,7 +51,7 @@ generate_test_mult = function(vbeta)
   test_data = generate_multivariate_test_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u, verbose=FALSE)
   vy = test_data$vy
   
-  multivariate = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau)
+  multivariate = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, m=m, blocksize=1, spline_dim=0)
 
   return(multivariate)
 }
@@ -59,12 +59,11 @@ generate_test_mult = function(vbeta)
 # Graph of Var_q(theta) against Var(theta|y)
 # How to get this?
 # Run fits for a range of theta values?
-compare_approximations = function(vbeta)
+compare_approximations = function(vbeta, approximation="gva")
 {
   multivariate = generate_test_mult(c(2, 1))
-  approximation = "gva"
   var_result = zero_infl_var(multivariate, method=approximation, verbose=TRUE)
-  mcmc_samples = mcmc_approximation(multivariate, iterations=1e4, mc.cores = 32)
+  mcmc_samples = mcmc_approximation(multivariate, iterations=1e4, mc.cores = 4)
   return(list(multivariate=multivariate, var_result=var_result, mcmc_samples=mcmc_samples))
 }
 
@@ -77,18 +76,31 @@ coverage_percentage = function()
 	# density functions. The percentages are based on 100 replications.
 	
 	set.seed(1234)
-	counter = rep(0, 22)
-	for (i in 1:100) {
+	counter = rep(0, 3)
+	for (i in 1:10000) {
 		mult = generate_test_mult(c(2, 1))	
 		approximation = "gva2new"
-		var_result = zero_infl_var(mult, method=approximation, verbose=FALSE)
-    for (j in 1:length(var_result$vmu)) {
+    
+		var_result = tryCatch(zero_infl_var(mult, method=approximation, verbose=FALSE),
+                          error = function (E) { return(NULL) })
+    # If there was an error, re-try with another generated data set. Sometimes the
+    # optimiser gets passed a non-finite value.
+    if (is.null(var_result)) {
+      i = i - 1
+      next
+    }
+    for (j in 1:2)) {
   		# Check that true parameter is within 95% credible interval.
-      expected = c(2, 1, rep(0, 22))
+      expected = c(2, 1)
   		if (is.between(expected[j], var_result$vmu[j] - 1.96*sqrt(var_result$mLambda[j, j]), var_result$vmu[j] + 1.96*sqrt(var_result$mLambda[j, j]))) {
   			# Increment counter
   			counter[j] = counter[j] + 1
   		}
+    }
+    sum_vmu_vmu = sum(var_result$vmu[3:22])
+    sum_mLambda_vmu = sum(sqrt(var_result$mLambda[3:22, 3:22])) # I think this will be an over-estimate
+    if (is.between(0, sum_vmu_vmu - 1.96 * sum_mLambda_vmu, sum_vmu_vmu + 1.96 * sum_mLambda_vmu) {
+      counter[3] = counter[3] + 1
     }
 	}
   print(counter)
