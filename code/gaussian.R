@@ -825,7 +825,7 @@ mH.G_nr <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,vB2)
 
 fit.GVA_nr <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, m=NA, p=NA, blocksize=NA, spline_dim=NA)
 {
-  browser()
+  #browser()
   MAXITER <- 1000
   TOL <- reltol
   
@@ -851,18 +851,19 @@ fit.GVA_nr <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, m=
       # Use block inverse formula to speed computation
       # Let -mH = [A B]
       #           [B D]
+      u_dim = m*blocksize + spline_dim
       A = -mH[1:p, 1:p]
-      B = -mH[1:p, (p+1):(p+m)]
-      D = -mH[(p+1):(p+m), (p+1):(p+m)]
+      B = -mH[1:p, (p+1):(p+u_dim)]
+      D = -mH[(p+1):(p+u_dim), (p+1):(p+u_dim)]
       # Then -mH^{-1} = [(A - B D^-1 B^T)^-1, -(A-B D^-1 B^T)^-1 B D^-1]
       #                 [-D^-1 B^T (A - B D^-1 B^T)^-1, D^-1 + D^-1 B^T (A - B D^-1 B^T)^-1 B D^-1]
       # D^-1 and (A - B D^-1 B^T)^-1 appear repeatedly, so we precalculate them
       D.inv = solve(D)
       A_BDB.inv = solve(A - B %*% D.inv %*% t(B))
       mLambda[1:p, 1:p] = A_BDB.inv
-      mLambda[1:p, (p+1):(p+m)] = -A_BDB.inv %*% B %*% D.inv
-      mLambda[(p+1):(p+m), (p+1):(p+m)] = D.inv + D.inv %*% t(B) %*% A_BDB.inv %*% B %*% D.inv
-      mLambda[(p+1):(p+m), 1:p] = t(mLambda[1:p, (p+1):(p+m)])
+      mLambda[1:p, (p+1):(p+u_dim)] = -A_BDB.inv %*% B %*% D.inv
+      mLambda[(p+1):(p+u_dim), (p+1):(p+u_dim)] = D.inv + D.inv %*% t(B) %*% A_BDB.inv %*% B %*% D.inv
+      mLambda[(p+1):(p+u_dim), 1:p] = t(mLambda[1:p, (p+1):(p+u_dim)])
       
       vmu <- vmu + mLambda%*%vg
         
