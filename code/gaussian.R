@@ -282,12 +282,12 @@ f.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m, block
   }   
   #mLambda.inv = mR%*%t(mR)
   #mLambda <- solve(mLambda.inv, tol=1.0E-99)
-  mR.inv = fastinv(mR, p=p, m=m, blocksize=blocksize, spline_dim=spline_dim)
+  #mR.inv = fastinv(mR, p=p, m=m, blocksize=blocksize, spline_dim=spline_dim)
   #mLambda <- t(mR.inv) %*% mR.inv
-  mLambda <- crossprod(mR.inv)
+  #mLambda <- crossprod(mR.inv)
+  mLambda = chol2inv(t(mR))
   
-  #f <- -sum(log(diag(mR))) + f.G_new(vmu,mLambda,vy,vr,mC,mSigma.inv,gh) 
-  f <- sum(log(diag(mR.inv))) + f.G_new2(vmu,mLambda,mR, vy,vr,mC,mSigma.inv,gh) 
+  f <- -sum(log(diag(mR))) + f.G_new2(vmu,mLambda,mR, vy,vr,mC,mSigma.inv,gh) 
   f <- f + 0.5*d*log(2*pi) + 0.5*d
   
   if (!is.finite(f)) {
@@ -341,7 +341,7 @@ vg.GVA.approx_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
 }
 
 ###############################################################################
-fastinv = function(mR, p=NA, m=NA, blocksize=1, spline_dim=0)
+fastinv2 = function(mR, p=NA, m=NA, blocksize=1, spline_dim=0)
 {
   # Idea: This could be made faster by replacing with an equivalent
   # fastsolve function.
@@ -355,10 +355,11 @@ fastinv = function(mR, p=NA, m=NA, blocksize=1, spline_dim=0)
   } else {
     # Iterate through the blocks, taking the inverse of each
     if (m > 0)
+      # FIXME: This section of code is _slow_.
       for (i in 1:m) {
-	    # FIXME: This will probably need to be changed to support splines.
         idx = ((i-1)*blocksize+1):(i*blocksize)
         mR.inv.mZ[idx, idx] = solve(mR[idx, idx])
+        #mR.inv.mZ[idx, idx] = chol2inv(t(mR[idx, idx]))
       }
     
     if (spline_dim > 0) {
@@ -381,6 +382,8 @@ fastinv = function(mR, p=NA, m=NA, blocksize=1, spline_dim=0)
   #return(solve(mR, tol=1e-99))
   #return(Matrix(data=mR.inv, sparse=TRUE))
 }
+require(compiler)
+fastinv = cmpfun(fastinv2)
 
 ###############################################################################
 vg.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m, blocksize, spline_dim)
@@ -396,7 +399,7 @@ vg.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m, bloc
   # mR is lower triangular. Can you rewrite this using forward solves and
   # backsolves?
   # New
-  mR.inv = fastinv(mR, p=p, m=m, blocksize=blocksize, spline_dim=spline_dim)
+  #mR.inv = fastinv(mR, p=p, m=m, blocksize=blocksize, spline_dim=spline_dim)
   # Old
   #mR.inv = solve(mR, tol=1.0E-99)
   
@@ -405,7 +408,8 @@ vg.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m, bloc
   #mLambda <- solve(mLambda.inv, tol=1.0E-99)
   # New
   #mLambda <- t(mR.inv) %*% mR.inv
-  mLambda <- crossprod(mR.inv)
+  #mLambda <- crossprod(mR.inv)
+  mLambda <- chol2inv(t(mR))
   vmu.til     <- mC%*%vmu
   a <- forwardsolve(mR, t(mC))
   vsigma2.til <- crossprod(a^2, rep(1, ncol(mC)))
@@ -548,7 +552,7 @@ fit.GVA_new2 <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, 
   lower_constraint <- rep(-Inf, length(vmu))
   
   if (method=="L-BFGS-B") {
-    controls <- list(maxit=1000,trace=0,fnscale=-1,REPORT=1,factr=1.0E-5,lmm=10)
+    controls <- list(maxit=100,trace=0,fnscale=-1,REPORT=1,factr=1.0E-5,lmm=10)
   } else if (method=="Nelder-Mead") {
     controls <- list(maxit=100000000,trace=0,fnscale=-1,REPORT=1000,reltol=reltol) 
   } else {
@@ -785,7 +789,7 @@ fit.GVA_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, p
   lower_constraint <- rep(-Inf, length(vmu))
   
   if (method=="L-BFGS-B") {
-    controls <- list(maxit=100,trace=0,fnscale=-1,REPORT=1,factr=1.0E-5,lmm=10)
+    controls <- list(maxit=1000,trace=0,fnscale=-1,REPORT=1,factr=1.0E-5,lmm=10)
   } else if (method=="Nelder-Mead") {
     controls <- list(maxit=100000000,trace=0,fnscale=-1,REPORT=1000,reltol=reltol) 
   } else {
