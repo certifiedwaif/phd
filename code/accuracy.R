@@ -112,7 +112,7 @@ generate_spline_test_data = function()
   return(mult)
 }
 
-calculate_accuracy = function(mcmc_samples, var_result, print_flag=FALSE, plot_flag=FALSE)
+calculate_accuracy = function(mult, mcmc_samples, var_result, print_flag=FALSE, plot_flag=FALSE)
 {
   # TODO: Add support for checking the accuracy over multiple dimensions
   # cubature$adaptIntegrate
@@ -146,7 +146,7 @@ calculate_accuracy = function(mcmc_samples, var_result, print_flag=FALSE, plot_f
   
   # Kernel density estimates of MCMC-estimated posteriors
   # Use L_1 distance to compare against variational approximations of posteriors
-  
+ 
   accuracy_plot = function(mcmc_samples, dist_fn, param1, param2)
   {
     mcmc_density = density(mcmc_samples)
@@ -205,7 +205,7 @@ calculate_accuracy = function(mcmc_samples, var_result, print_flag=FALSE, plot_f
 test_accuracy = function(mult, mcmc_samples, approximation, plot=FALSE)
 {
   var_result = zero_infl_var(mult, method=approximation, verbose=TRUE)
-  return(calculate_accuracy(mcmc_samples, var_result))
+  return(calculate_accuracy(mult, mcmc_samples, var_result))
 }
 
 # Calculate accuracy ----
@@ -246,13 +246,13 @@ test_accuracies = function()
   #   # Save the results, because this takes such a long time to run.
   # }
   # save(mult, mcmc_samples, file="accuracy_good.RData")
-  set.seed(1)
-  mult = generate_test_data(10, 100)
+  #set.seed(1)
+  #mult = generate_test_data(10, 100)
   # Monte Carlo Markov Chains approximation
-  mcmc_samples = mcmc_approximation(mult, iterations=1e6, mc.cores = 32)
+  #mcmc_samples = mcmc_approximation(mult, iterations=1e6, mc.cores = 32)
 #   # Save the results, because this takes such a long time to run.
 #   #save(mult, mcmc_samples, file="accuracy.RData")
-  save(mult, mcmc_samples, file="accuracy_int.RData")
+  #save(mult, mcmc_samples, file="accuracy_int.RData")
   #load(file="accuracy_int.RData")
   #mult$spline_dim = 0
   #load(file="accuracy.RData")
@@ -295,6 +295,7 @@ test_accuracies = function()
   #print(image(Matrix(var4$result_var$mLambda)))
   print(var5)
   
+  save(var1, var2, var3, var4, var5, file="accuracy_results_int.RData")
   #for (i in 1:100) {
   #  set.seed(i)
   #  mult = generate_test_data(20, 100)
@@ -307,20 +308,21 @@ test_accuracies = function()
   #}
   
 }
+#test_accuracies()
 
 test_accuracies_slope = function()
 {
-  set.seed(1)
-  mult = generate_slope_test_data()
+  #set.seed(1)
+  #mult = generate_slope_test_data()
   # Monte Carlo Markov Chains approximation
-  mcmc_samples = mcmc_approximation(mult, iterations=1e6, mc.cores = 32)
-  save(mult, mcmc_samples, file="accuracy_slope.RData")  
-  #load(file="accuracy_slope.RData")
+  #mcmc_samples = mcmc_approximation(mult, iterations=1e6, mc.cores = 32)
+  #save(mult, mcmc_samples, file="accuracy_slope.RData")  
+  load(file="accuracy_slope.RData")
   
   now = Sys.time()
   var1 = test_accuracy(mult, mcmc_samples, "laplacian")
   print(Sys.time() - now)
-  print(image(Matrix(var1$var_result$mLambda)))
+  #print(image(Matrix(var1$var_result$mLambda)))
   print(var1)
   
   now = Sys.time()
@@ -343,10 +345,13 @@ test_accuracies_slope = function()
   
   #Rprof()
   now = Sys.time()
+  # GVA NR is unstable, and sometimes fails with an error
   var5 = test_accuracy(mult, mcmc_samples, "gva_nr")
   print(Sys.time() - now)
   #print(image(Matrix(var5$var_result$mLambda)))  
   print(var5)
+  
+  save(var1, var2, var3, var4, var5, file="accuracy_results_slope.RData")
   
   #Rprof(NULL)
   #summaryRprof()
