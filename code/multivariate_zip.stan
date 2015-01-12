@@ -25,7 +25,7 @@ model {
   u ~ normal(0, sigma_u);
   
   for (n in 1:N) {
-  eta <- dot_product(X[n], vbeta) + dot_product(Z[n], u);
+    eta <- dot_product(X[n], vbeta) + dot_product(Z[n], u);
     if (y[n] == 0)
       increment_log_prob(log_sum_exp(bernoulli_log(0, rho),
         bernoulli_log(1, rho) + poisson_log(y[n], exp(eta))));

@@ -6,7 +6,6 @@ require(Matrix)
 source("CalculateB.R")
 require(Rcpp)
 require(RcppEigen)
-require(inline)
 
 #fastdiag <- function(mC, mLambda)
 #{
@@ -14,7 +13,6 @@ require(inline)
 #}
 
 sourceCpp(file = "fastdiag.cpp")
-
 ###############################################################################
 
 f.lap <- function(vmu,vy,vr,mC,mSigma.inv,mLambda) 
@@ -697,8 +695,8 @@ vg.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   dmLambda <- -solve(mR, tol=1.0E-99)%*%(mLambda.inv + mH)%*%mLambda  
   #dmLambda <- -solve(mR, tol=1.0E-99)%*%(diag(rep(1, ncol(mC))) + mH%*%mLambda)
   dmLambda[Dinds] <- dmLambda[Dinds]*mR[Dinds]
-  cat("diag(mLambda)", diag(mLambda), "\n")
-  cat("diag(dmLambda)", diag(dmLambda), "\n")
+  #cat("diag(mLambda)", diag(mLambda), "\n")
+  #cat("diag(dmLambda)", diag(dmLambda), "\n")
   #print(sum(eigen(dmLambda)$values^2))
   
   #res <- vg.GVA.approx_new(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
@@ -787,7 +785,7 @@ fit.GVA_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, p
   lower_constraint <- rep(-Inf, length(vmu))
   
   if (method=="L-BFGS-B") {
-    controls <- list(maxit=100,trace=1,fnscale=-1,REPORT=1,factr=1.0E-5,lmm=10)
+    controls <- list(maxit=100,trace=0,fnscale=-1,REPORT=1,factr=1.0E-5,lmm=10)
   } else if (method=="Nelder-Mead") {
     controls <- list(maxit=100000000,trace=0,fnscale=-1,REPORT=1000,reltol=reltol) 
   } else {
@@ -827,6 +825,7 @@ mH.G_nr <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,vB2)
 
 fit.GVA_nr <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, m=NA, p=NA, blocksize=NA, spline_dim=NA)
 {
+  browser()
   MAXITER <- 1000
   TOL <- reltol
   
