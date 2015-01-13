@@ -78,12 +78,10 @@ SpMat fastinv(const MapMatd Rd, const int p, const int m, const int blocksize, c
   //std::cout << "Constructing sparse matrix" << std::endl;
   SpMat Rsp(Rd.rows(), Rd.cols());
   Rsp.setFromTriplets(triplets.begin(), triplets.end());
-  
-  //std::cout << Rsp << std::endl;
-  
+    
   // Solve for RHS = I
   //std::cout << "Solving" << std::endl;
-  Eigen::SimplicialCholesky<SpMat> solver;
+  Eigen::SparseLU<SpMat> solver;
   //std::cout << "maxIterations" << solver.maxIterations() << std::endl;
   //solver.setTolerance(1e-99);
   solver.compute(Rsp);
