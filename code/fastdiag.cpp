@@ -38,6 +38,9 @@ SpMat fastinv(const MapMatd Rd, const int p, const int m, const int blocksize, c
   typedef Eigen::Triplet<double> T;
   std:vector<T> triplets;
   
+  if (spline_dim > 0)
+    stop("We don't handle this case yet.\n");
+  
   //std::cout << "Built triplets list" << std::endl;
   triplets.reserve(m*blocksize/2 + p*p/2 + p*m*blocksize);
   // Insert entries for random effects
@@ -48,10 +51,10 @@ SpMat fastinv(const MapMatd Rd, const int p, const int m, const int blocksize, c
     for (int b_idx = 0; b_idx < blocksize; b_idx++) {
       const int offset = m_idx*blocksize;
       //std::cout << "offset " << offset << std::endl;
-      for (int row_idx = offset; row_idx < offset+b_idx+1; row_idx++) {
+      for (int row_idx = 0; row_idx < b_idx + 1; row_idx++) {
         //std::cout << "row_idx" << row_idx << std::endl;
         int i = offset+b_idx;
-        int j = offset+row_idx;
+        int j = offset+b_idx+row_idx;
         //std::cout << "loop: i " << i << " j " << j << " Rd(i, j) " << Rd(i, j) << std::endl;
 
         triplets.push_back(T(i, j, Rd(i, j)));
@@ -78,7 +81,8 @@ SpMat fastinv(const MapMatd Rd, const int p, const int m, const int blocksize, c
   //std::cout << "Constructing sparse matrix" << std::endl;
   SpMat Rsp(Rd.rows(), Rd.cols());
   Rsp.setFromTriplets(triplets.begin(), triplets.end());
-    
+  //std::cout << "Rsp " << Rsp << std::endl;
+
   // Solve for RHS = I
   //std::cout << "Solving" << std::endl;
   Eigen::SparseLU<SpMat> solver;
