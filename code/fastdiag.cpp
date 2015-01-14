@@ -54,7 +54,7 @@ SpMat fastinv(const MapMatd Rd, const int p, const int m, const int blocksize, c
       for (int row_idx = 0; row_idx < b_idx + 1; row_idx++) {
         //std::cout << "row_idx" << row_idx << std::endl;
         int i = offset+b_idx;
-        int j = offset+b_idx+row_idx;
+        int j = offset+row_idx;
         //std::cout << "loop: i " << i << " j " << j << " Rd(i, j) " << Rd(i, j) << std::endl;
 
         triplets.push_back(T(i, j, Rd(i, j)));
@@ -74,7 +74,7 @@ SpMat fastinv(const MapMatd Rd, const int p, const int m, const int blocksize, c
       
       //std::cout << "loop2: i " << i << " j " << j << " Rd(i, j) " << Rd(i, j) << std::endl;
 
-    triplets.push_back(T(i, j, Rd(i, j)));
+      triplets.push_back(T(i, j, Rd(i, j)));
     }
   }
   

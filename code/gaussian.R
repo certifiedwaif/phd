@@ -282,10 +282,12 @@ f.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m, block
   }   
   #mLambda.inv = mR%*%t(mR)
   #mLambda <- solve(mLambda.inv, tol=1.0E-99)
-  #mR.inv = fastinv(mR, p=p, m=m, blocksize=blocksize, spline_dim=spline_dim)
+  #mR.inv = fastinv2(mR, p=p, m=m, blocksize=blocksize, spline_dim=spline_dim)
   #mLambda <- t(mR.inv) %*% mR.inv
-  #mLambda <- crossprod(mR.inv)
-  mLambda = chol2inv(t(mR))
+  # TODO: You only need the _trace_ of this matrix?
+  mR.inv = fastinv(mR, p, m, blocksize, spline_dim)  
+  mLambda <- crossprod(mR.inv)
+  #mLambda = chol2inv(t(mR))
   
   f <- -sum(log(diag(mR))) + f.G_new2(vmu,mLambda,mR, vy,vr,mC,mSigma.inv,gh) 
   f <- f + 0.5*d*log(2*pi) + 0.5*d
@@ -382,8 +384,8 @@ fastinv2 = function(mR, p=NA, m=NA, blocksize=1, spline_dim=0)
   #return(solve(mR, tol=1e-99))
   #return(Matrix(data=mR.inv, sparse=TRUE))
 }
-require(compiler)
-fastinv = cmpfun(fastinv2)
+#require(compiler)
+#fastinv = cmpfun(fastinv2)
 
 ###############################################################################
 vg.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m, blocksize, spline_dim)
@@ -399,7 +401,9 @@ vg.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m, bloc
   # mR is lower triangular. Can you rewrite this using forward solves and
   # backsolves?
   # New
-  #mR.inv = fastinv(mR, p=p, m=m, blocksize=blocksize, spline_dim=spline_dim)
+  #mR.inv = fastinv2(mR, p=p, m=m, blocksize=blocksize, spline_dim=spline_dim)
+  mR.inv = as.matrix(fastinv(mR, p, m, blocksize, spline_dim))
+  #print(mR.inv - mR.inv2)
   # Old
   #mR.inv = solve(mR, tol=1.0E-99)
   
@@ -408,9 +412,10 @@ vg.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m, bloc
   #mLambda <- solve(mLambda.inv, tol=1.0E-99)
   # New
   #mLambda <- t(mR.inv) %*% mR.inv
-  #mLambda <- crossprod(mR.inv)
-  mLambda <- chol2inv(t(mR))
+  mLambda <- crossprod(mR.inv)
+  #mLambda <- chol2inv(t(mR))
   vmu.til     <- mC%*%vmu
+  # TODO: Fast solve
   a <- forwardsolve(mR, t(mC))
   vsigma2.til <- crossprod(a^2, rep(1, ncol(mC)))
 
