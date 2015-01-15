@@ -235,8 +235,9 @@ fit.GVA <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12)
 }
 ###############################################################################
 
-f.G_new2 <- function(vmu,mLambda,mR,vy,vr,mC,mSigma.inv,gh) 
+f.G_new2 <- function(vmu,mR,vy,vr,mC,mSigma.inv,gh,p, m, blocksize, spline_dim, mC_sp)
 {
+  #browser()
   d <- length(vmu)
   
   vmu.til     <- mC%*%vmu
@@ -255,9 +256,15 @@ f.G_new2 <- function(vmu,mLambda,mR,vy,vr,mC,mSigma.inv,gh)
   #})
   #browser()
   #mR <- Matrix(mR, sparse=TRUE)
-  a <- forwardsolve(mR, t(mC))
+  #mR_sp = sparse_R(mR, p, m, blocksize, spline_dim)
+  #mR.inv = fastinv2(mR, p=p, m=m, blocksize=blocksize, spline_dim=spline_dim)
+  #mR.inv2 = as.matrix(fastinv(mR, p, m, blocksize, spline_dim))
+  a <- solve(mR, t(mC))
   #browser()
   vsigma2.til <- crossprod(a^2, rep(1, ncol(mC)))                           
+  #mR.inv = fastinv(mR_sp)  
+  #mLambda <- crossprod(mR.inv)
+  mLambda <- chol2inv(mR)
   
   #vsigma2.til <- apply(mC, 1, function(row) {
   #  x <- row%*%t(mR.inv)
@@ -271,7 +278,7 @@ f.G_new2 <- function(vmu,mLambda,mR,vy,vr,mC,mSigma.inv,gh)
 
 ###############################################################################
 
-f.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m, blocksize, spline_dim)
+f.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m, blocksize, spline_dim, mC_sp)
 {
   d <- ncol(mC)  
   vmu <- vtheta[1:d]
@@ -285,17 +292,15 @@ f.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m, block
   #mR.inv = fastinv2(mR, p=p, m=m, blocksize=blocksize, spline_dim=spline_dim)
   #mLambda <- t(mR.inv) %*% mR.inv
   # TODO: You only need the _trace_ of this matrix?
-  mR.inv = fastinv(mR, p, m, blocksize, spline_dim)  
-  mLambda <- crossprod(mR.inv)
   #mLambda = chol2inv(t(mR))
   
-  f <- -sum(log(diag(mR))) + f.G_new2(vmu,mLambda,mR, vy,vr,mC,mSigma.inv,gh) 
+  f <- -sum(log(diag(mR))) + f.G_new2(vmu,mR, vy,vr,mC,mSigma.inv,gh, p, m, blocksize, spline_dim, mC_sp) 
   f <- f + 0.5*d*log(2*pi) + 0.5*d
   
   if (!is.finite(f)) {
     f <- -1.0E16
   }
-
+  #cat("f.GVA_new2: vmu ", vmu, " f ", f, "\n")
   return(f)
 }
 
@@ -388,7 +393,7 @@ fastinv2 = function(mR, p=NA, m=NA, blocksize=1, spline_dim=0)
 #fastinv = cmpfun(fastinv2)
 
 ###############################################################################
-vg.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m, blocksize, spline_dim)
+vg.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m, blocksize, spline_dim, mC_sp)
 {
   d <- ncol(mC)
   vmu <- vtheta[1:d]
@@ -401,8 +406,15 @@ vg.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m, bloc
   # mR is lower triangular. Can you rewrite this using forward solves and
   # backsolves?
   # New
+  #mR_sp = sparse_R(mR, p, m, blocksize, spline_dim)
   #mR.inv = fastinv2(mR, p=p, m=m, blocksize=blocksize, spline_dim=spline_dim)
-  mR.inv = as.matrix(fastinv(mR, p, m, blocksize, spline_dim))
+  #mR.inv = solve(mR)
+  #mR.inv = fastinv(mR_sp)  
+  #mLambda <- crossprod(mR.inv)
+  mLambda <- chol2inv(mR)
+  
+  #mR.inv = as.matrix(fastinv(mR, p, m, blocksize, spline_dim))
+  #mR.inv = fastinv(mR_sp)
   #print(mR.inv - mR.inv2)
   # Old
   #mR.inv = solve(mR, tol=1.0E-99)
@@ -412,12 +424,13 @@ vg.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m, bloc
   #mLambda <- solve(mLambda.inv, tol=1.0E-99)
   # New
   #mLambda <- t(mR.inv) %*% mR.inv
-  mLambda <- crossprod(mR.inv)
-  #mLambda <- chol2inv(t(mR))
+  #mLambda <- crossprod(mR.inv)
+  #mLambda <- chol2inv(mR_sp)
   vmu.til     <- mC%*%vmu
   # TODO: Fast solve
-  a <- forwardsolve(mR, t(mC))
+  a <- solve(mR, t(mC))
   vsigma2.til <- crossprod(a^2, rep(1, ncol(mC)))
+  #vsigma2.til <- fastdiag(mC, mLambda)
 
   res.B12 <- B12.fun("POISSON",vmu.til,vsigma2.til,gh)
   vB1 <- res.B12$vB1
@@ -427,9 +440,12 @@ vg.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m, bloc
   mH <- mH.G_new2(vmu,mLambda,vy,vr,mC,mSigma.inv,vB2)
   #dmLambda <- -mR.inv%*%(mLambda.inv + mH)%*%mLambda
   #dmLambda <- -mR.inv%*%(diag(1, ncol(mC)) + mH %*% mLambda)
-  dmLambda <- forwardsolve(-mR, diag(1, ncol(mC)) + mH %*% mLambda)
+  dmLambda <- -solve(mR, diag(1, ncol(mC)) + mH %*% mLambda)
+  #dmLambda <- -solve(mR, (mLambda.inv + mH)%*%mLambda)
   
   dmLambda[Dinds] <- dmLambda[Dinds]*mR[Dinds]
+  #cat("vg.GVA_new2: vg ", vg, " dmLambda ", as.matrix(dmLambda), "\n")
+  
   #require(gridExtra)
   #require(lattice)
   #plot1 <- image(Matrix(mR))
@@ -511,7 +527,7 @@ vg.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m, bloc
 
 ###############################################################################
 
-fit.GVA_new2 <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, p=NA, m=NA, blocksize=NA, spline_dim=NA)
+fit.GVA_new2 <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, p=NA, m=NA, blocksize=NA, spline_dim=NA, mC_sp)
 {
   #library(statmod)
   #N <- 15
@@ -565,7 +581,7 @@ fit.GVA_new2 <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, 
   }
   res <- optim(par=vmu, fn=f.GVA_new2, gr=vg.GVA_new2,
                method=method,lower=lower_constraint, upper=Inf, control=controls,
-               vy=vy,vr=vr,mC=mC,mSigma.inv=mSigma.inv,gh=gh2,mR=mR*0,Rinds=Rinds,Dinds=Dinds, p=p, m=m, blocksize=blocksize, spline_dim=spline_dim)        
+               vy=vy,vr=vr,mC=mC,mSigma.inv=mSigma.inv,gh=gh2,mR=mR*0,Rinds=Rinds,Dinds=Dinds, p=p, m=m, blocksize=blocksize, spline_dim=spline_dim, mC_sp=mC_sp)        
   
   vtheta <- res$par 
   
