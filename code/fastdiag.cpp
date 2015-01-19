@@ -83,7 +83,7 @@ SpMat fastinv(const MapMatd Rd, const int p, const int m, const int blocksize, c
   
   // Solve for RHS = I
   //std::cout << "Solving" << std::endl;
-  Eigen::SimplicialCholesky<SpMat> solver;
+  Eigen::SimplicialCholesky<SpMat, Eigen::Lower, Eigen::ColMajor> solver;
   //std::cout << "maxIterations" << solver.maxIterations() << std::endl;
   //solver.setTolerance(1e-99);
   solver.compute(Rsp);
@@ -92,4 +92,12 @@ SpMat fastinv(const MapMatd Rd, const int p, const int m, const int blocksize, c
   //std::cout << "I " << I << std::endl;
   //std::cout << "Returning" << std::endl;
   return solver.solve(I);
+}
+
+// [[Rcpp::export]]
+VectorXd fastsolve(SpMat R, SpMat C)
+{
+  Eigen::SimplicialCholesky<SpMat, Eigen::Lower, Eigen::ColMajor> solver;
+  solver.compute(R);
+  return solver.solve(C);
 }
