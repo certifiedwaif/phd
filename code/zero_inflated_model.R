@@ -1,4 +1,5 @@
 # variational_approximation_to_zero_inflated_model.R
+library(limma)
 source("common.R")
 source("gaussian.R")
 
@@ -116,18 +117,22 @@ calculate_lower_bound.multivariate <- function(multivariate, verbose=FALSE)
     T1 = T1 + .5*(p+m) + .5*log(det(mLambda))
     eps = 1e-10
     
-    # Something is wrong in T2. It sometimes goes backwards as we're optimised.
+    browser()
+    T2 = prior$v/2*(log(det(prior$psi)) + log(det(psi) ))
+    T2 = T2 + (m+.5)*log(2) + .5*log(det(psi)) + sum(digamma(.5*(v - 1:m + 1)))
+
+    # Something is wrong in T3. It sometimes goes backwards as we're optimised.
     # This should be unchanged from the univariate lower bound
     #if (verbose) cat("calculate_lower_bound: ", vp[zero.set], "\n")
     # 0 log 0 returns NaN. We sidestep this by adding epsilon to vp[zero.set]
     vp[zero.set] = vp[zero.set] + eps
-    T2 = sum(-vp[zero.set]*log(vp[zero.set]) - (1-vp[zero.set])*log(1-vp[zero.set]))
-    T2 = T2 - lbeta(prior$a_rho, prior$b_rho) + lbeta(a_rho, b_rho)
+    T3 = sum(-vp[zero.set]*log(vp[zero.set]) - (1-vp[zero.set])*log(1-vp[zero.set]))
+    T3 = T3 - lbeta(prior$a_rho, prior$b_rho) + lbeta(a_rho, b_rho)
     
 	if (verbose)
-    	cat("calculate_lower_bound: T1", T1, "T2", T2, "\n")
+    	cat("calculate_lower_bound: T1", T1, "T3", T3, "\n")
 
-    result = T1 + T2
+    result = T1 + T3
     result
   })
   
@@ -213,11 +218,20 @@ create_multivariate <- function(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, 
   a_rho = 1 + sum(vp)
   b_rho = n - sum(vp) + 1
   
-  prior = list(a_sigma=a_sigma, b_sigma=b_sigma, a_rho=1, b_rho=1, sigma2.beta=sigma2.beta)
+  # Set prior parameters for Inverse Wishart distribution
+  p=ncol(mZ)
+  v=2*a_sigma
+  psi=2*b_sigma*diag(1, rep(p))
+  
+  prior = list(a_sigma=a_sigma, b_sigma=b_sigma,
+               p=p, v=v, psi=psi,
+               a_rho=1, b_rho=1,
+               sigma2.beta=sigma2.beta)
   multivariate = list(vy=vy, vp=vp, vmu=vmu,
                       mX=mX, mZ=mZ, mC=mC,
                       m=m, blocksize=blocksize, spline_dim=spline_dim,
                       a_sigma=a_sigma, b_sigma=b_sigma,
+                      p=p, v=v, psi=psi,
                       a_rho=a_rho, b_rho=b_rho,
                       mLambda=mLambda,
                       prior=prior,
@@ -227,8 +241,6 @@ create_multivariate <- function(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, 
   class(multivariate) = "multivariate"
   return(multivariate)
 }
-
-library(limma)
 
 zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE)
 {
@@ -257,6 +269,8 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
     m = 0
     blocksize = 0
   }
+  
+  #mC_sp = Matrix(mult$mC, sparse=TRUE)
 
   zero.set = which(mult$vy == 0)
   nonzero.set = which(mult$vy != 0)
@@ -291,7 +305,7 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
       fit1 = fit.GVA_new(fit2$vmu, fit2$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B", p=p, m=m, blocksize=mult$blocksize)
     } else if (method == "gva2new") {
       #fit2 = fit.Lap(mult$vmu, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, mult$mLambda)
-      fit1 = fit.GVA_new2(mult$vmu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B", p=p, m=m, blocksize=mult$blocksize, spline_dim=spline_dim)
+      fit1 = fit.GVA_new2(mult$vmu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B", p=p, m=m, blocksize=mult$blocksize, spline_dim=spline_dim, mC_sp=mC_sp)
       #fit1 = fit.GVA_new2(mult$vmu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "BFGS", p=p, m=m)
     } else if (method == "gva_nr") {
       fit1 = fit.GVA_nr(mult$vmu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B", p=p, m=m, blocksize=mult$blocksize, spline_dim=spline_dim)
@@ -322,10 +336,13 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
       #tr_mSigma = ncol(mult$mZ) * mult$prior$a_sigma/mult$prior$b_sigma
       #mult$b_sigma = mult$prior$b_sigma + sum(vu^2)/2 + (tr_mSigma)/2
       mult$b_sigma = mult$prior$b_sigma + sum(mult$vmu[u_idx]^2)/2 + tr(mult$mLambda[u_idx, u_idx])/2    # Extract right elements of mLambda
+      mult$psi = with(mult, prior$psi + vmu[u_idx] %*% t(vmu[u_idx]) + mLambda[u_idx, u_idx])
       
       tau_sigma = mult$a_sigma/mult$b_sigma
       
       mult$mSigma.u.inv = diag(tau_sigma, u_dim)
+      
+      mult$mSigma.u.inv = with(mult, psi/(v + p - 1))
     }
     
     vlower_bound[i] <- 0 # calculate_lower_bound(mult)

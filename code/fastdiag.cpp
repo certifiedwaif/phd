@@ -31,7 +31,7 @@ VectorXd fastdiag(MapMatd C, MapMatd lambda)
 
 
 // [[Rcpp::export]]
-SpMat fastinv(const MapMatd Rd, const int p, const int m, const int blocksize, const int spline_dim)
+SpMat sparse_R(const MapMatd Rd, const int p, const int m, const int blocksize, const int spline_dim)
 {
   // Construct sparse version of R
   
@@ -82,14 +82,19 @@ SpMat fastinv(const MapMatd Rd, const int p, const int m, const int blocksize, c
   SpMat Rsp(Rd.rows(), Rd.cols());
   Rsp.setFromTriplets(triplets.begin(), triplets.end());
   //std::cout << "Rsp " << Rsp << std::endl;
+  return(Rsp);
+}
 
+// [[Rcpp::export]]
+SpMat fastinv(SpMat Rsp)
+{
   // Solve for RHS = I
   //std::cout << "Solving" << std::endl;
   Eigen::SparseLU<SpMat> solver;
   //std::cout << "maxIterations" << solver.maxIterations() << std::endl;
   //solver.setTolerance(1e-99);
   solver.compute(Rsp);
-  SparseMatrix<double> I(Rd.rows(),Rd.cols());
+  SparseMatrix<double> I(Rsp.rows(),Rsp.cols());
   I.setIdentity();
   //std::cout << "I " << I << std::endl;
   //std::cout << "Returning" << std::endl;

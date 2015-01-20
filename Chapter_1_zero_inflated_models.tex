@@ -148,7 +148,7 @@ T_1 & \ds =
 \alpha_\lambda \log{(\beta_\lambda)} + (\alpha_\lambda - 1) [\psi(\alpha_{q(\lambda)}) - \log{(\beta_{q(\lambda)})}] - \beta_\lambda \frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} - \log\Gamma(\alpha_\lambda) \\
 & \ds \quad -\vp^T\frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} + \bE_q[\vx^T \log{(\lambda \vr)}] - \log\Gamma(\vx+1)) \quad \mbox{and} 
 \\ [1ex]
-T_2 &= \sum \left [ - p_i \log p_i - (1 - p_i) \log (1 - p_i) \right ] - \log \Beta (\alpha_\rho, \beta_\rho) + \log \Beta (\alpha_q, \beta_q)
+T_2 &= - \vp^T \log \vp - (\vone - \vp)^T \log (\vone - \vp) - \log \Beta (\alpha_\rho, \beta_\rho) + \log \Beta (\alpha_q, \beta_q)
 \end{array}
 $$
 
@@ -225,10 +225,10 @@ p(\rho) &\propto 1 \\
 $$
 
 \subsection{Approximation}
-Let $r_0 = \{ r_i : y_i = 0 \}$.
+Let $\vr_0 = \{ r_i : y_i = 0 \}$.
 We assume an approximation of the form
 $$
-q(r_0, \vnu, \sigma_{\vu}^2, \rho) = q(\vnu) q(\mSigma_{\vu \vu}) q(\rho) q(r_0) \\
+q(\vr_0, \vnu, \sigma_{\vu}^2, \rho) = q(\vnu) q(\mSigma_{\vu \vu}) q(\rho) q(\vr_0) \\
 $$
 
 \noindent where $q(\vnu) = \mbox{N}(\vmu, \mLambda)$, $q(\sigma_{\vu}^2) = \mbox{Inv. Wishart}\left(v, p+1, \Psi + \vmu_\vu \vmu_\vu^T + \mLambda_{\vu \vu}\right)$ \mbox{and } $q(r_i) = \Bernoulli{(p_i)}$
@@ -286,20 +286,37 @@ $\mSigma_{\vu \vu}$
 \subsection{Lower bound}
 % Where are the priors for \vbeta and \vu
 \noindent The lower bound is equal to
-$\bE_q[\log{p(\vy, \vtheta)} - \log{q(\vtheta)}] = T_1 + T_2$,
-where $T_1$ is as defined below and $T_2$ is the same as in the univariate
-model.
+$\bE_q[\log{p(\vy, \vtheta)} - \log{q(\vtheta)}] = T_1 + T_2 + T_3$,
+where
 
 % This is the new T_1
 $$
 \begin{array}{rl}
-$T$_1 &= \bE_q[\log{p(\vy, \vnu)} - \log{q(\vnu)}] \\
+T_1 &= \bE_q[\log{p(\vy, \vnu)} - \log{q(\vnu)}] \\
 &= \quad \vy^T \mP \mC \vmu - \vp^T \exp{\left [\mC \vmu + \half \text{diag} (\mC \mLambda \mC^T)\right ]} - \vone^T\log \Gamma{(\vy + \vone)}\\
 & \quad + \frac{p + m}{2} (1 + \log{2 \pi}) + \half \log{|\mLambda|},
 \end{array}
 $$
 
-\noindent where $A_q = A + m/2$ and $B_q = B + \|\vmu_\vu\|^2/2 +  \tr{(\mLambda_{\vu \vu})}/2$.
+%\noindent where $A_q = A + m/2$ and $B_q = B + \|\vmu_\vu\|^2/2 +  \tr{(\mLambda_{\vu \vu})}/2$.
+
+$$
+\begin{array}{rl}
+T_2 &= \bE_q [\log p(\mSigma_{\vu \vu}) - \log q(\mSigma_{\vu \vu})] \\
+&= \bE_q [v/2(\log |\Psi| - \log |\Psi + \vmu_\vu \vmu_\vu^T + \mLambda_{\vu \vu}|) + \half \log 2 + \half \log|\mSigma_{\vu \vu}| \log \Gamma_{p+1}(v/2) - \log \Gamma_{p}(v/2)\\
+&\quad + \half \tr((\vmu_{\vu} \vmu_{\vu}^T + \mLambda_{\vu \vu}) \mSigma_{\vu \vu}^{-1}) ] \\
+&= \quad v/2(\log |\Psi| - \log |\Psi + \vmu_\vu \vmu_\vu^T + \mLambda_{\vu \vu}|) + \half \log 2 + \half \bE_q \log |\mSigma_{\vu \vu}| + \log \Gamma_{p+1}(v/2) - \log \Gamma_{p}(v/2) \\
+&\quad + \half \tr(\mI_m + \Psi(\Psi+ \vmu_\vu \vmu_\vu^T + \mLambda_{\vu \vu})^{-1}/(v + p + 2))
+\end{array}
+$$
+
+with
+
+$$
+\bE_q [\log |\mSigma_{\vu \vu}|] = m \log 2 + \log \left | \Psi + \vmu_\vu \vmu_\vu^T + \mLambda_{\vu \vu} \right | + \sum_{i=1}^m \Psi \left ( \frac{v - i + 1}{2} \right )
+$$
+
+$$T_3 = - \vp^T \log \vp - (\vone - \vp)^T \log (\vone - \vp) - \log \Beta (\alpha_\rho, \beta_\rho) + \log \Beta (\alpha_q, \beta_q)$$
 
 \subsection{Laplace-Variational Approximation}
 Laplace's method of approximation relies on a second order Taylor expansion of the
