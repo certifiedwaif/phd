@@ -111,16 +111,23 @@ calculate_lower_bound.multivariate <- function(multivariate, verbose=FALSE)
     T1 = T1 - sum(lgamma(vy + 1))
     T1 = T1 - .5*p*log(prior$sigma2.beta) - .5*(sum(vmu[beta_idx]^2) + tr(mLambda[beta_idx, beta_idx]))/prior$sigma2.beta
     if (!is.null(mZ)) {
-      T1 = T1 + prior$a_sigma * log (prior$b_sigma) - lgamma(prior$a_sigma)
-      T1 = T1 - a_sigma * log(b_sigma) + lgamma(a_sigma)
+      #T1 = T1 + prior$a_sigma * log (prior$b_sigma) - lgamma(prior$a_sigma)
+      #T1 = T1 - a_sigma * log(b_sigma) + lgamma(a_sigma)
     }
     T1 = T1 + .5*(p+m) + .5*log(det(mLambda))
     eps = 1e-10
     
-    browser()
-    T2 = prior$v/2*(log(det(prior$psi)) + log(det(psi) ))
-    T2 = T2 + (m+.5)*log(2) + .5*log(det(psi)) + sum(digamma(.5*(v - 1:m + 1)))
-
+    lgammap = function(a, p)
+    {
+      .25*p*(p-1)*log(pi) + sum(lgamma(a + .5*(1 - 1:p)))
+    }
+    
+    E_log_det_mSigma_u = sum(digamma(.5*(v + 1 - 1:p))) + p*log(2) - log(det(psi))
+    E_mSigma_u_inv = solve(psi)/(v+p+1)
+    T2 = .5*(prior$v*log(det(prior$psi)) - v*log(det(psi)))
+    T2 = T2 - lgammap(.5*prior$v, p) + lgammap(.5*v, p)
+    T2 = T2 + .5*E_log_det_mSigma_u - .5*tr(E_mSigma_u_inv*(prior$psi - psi))
+    
     # Something is wrong in T3. It sometimes goes backwards as we're optimised.
     # This should be unchanged from the univariate lower bound
     #if (verbose) cat("calculate_lower_bound: ", vp[zero.set], "\n")
@@ -130,9 +137,9 @@ calculate_lower_bound.multivariate <- function(multivariate, verbose=FALSE)
     T3 = T3 - lbeta(prior$a_rho, prior$b_rho) + lbeta(a_rho, b_rho)
     
 	if (verbose)
-    	cat("calculate_lower_bound: T1", T1, "T3", T3, "\n")
+    	cat("calculate_lower_bound: T1", T1, "T2", T2, "T3", T3, "\n")
 
-    result = T1 + T3
+    result = T1 + T2 + T3
     result
   })
   
@@ -220,7 +227,7 @@ create_multivariate <- function(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, 
   
   # Set prior parameters for Inverse Wishart distribution
   p=ncol(mZ)
-  v=2*a_sigma
+  v=p+3
   psi=2*b_sigma*diag(1, rep(p))
   
   prior = list(a_sigma=a_sigma, b_sigma=b_sigma,
@@ -341,8 +348,9 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
       tau_sigma = mult$a_sigma/mult$b_sigma
       
       mult$mSigma.u.inv = diag(tau_sigma, u_dim)
+      mult$psi = solve(mult$mSigma.u.inv)
       
-      mult$mSigma.u.inv = with(mult, psi/(v + p - 1))
+      #mult$mSigma.u.inv = with(mult, solve(psi)) # What multiplicative factor for psi?
     }
     
     vlower_bound[i] <- 0 # calculate_lower_bound(mult)
