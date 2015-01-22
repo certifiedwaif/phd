@@ -231,7 +231,7 @@ $$
 q(\vr_0, \vnu, \sigma_{\vu}^2, \rho) = q(\vnu) q(\mSigma_{\vu \vu}) q(\rho) q(\vr_0) \\
 $$
 
-\noindent where $q(\vnu) = \mbox{N}(\vmu, \mLambda)$, $q(\sigma_{\vu}^2) = \mbox{Inv. Wishart}\left(v, p+1, \Psi + \vmu_\vu \vmu_\vu^T + \mLambda_{\vu \vu}\right)$ \mbox{and } $q(r_i) = \Bernoulli{(p_i)}$
+\noindent where $q(\vnu) = \mbox{N}(\vmu, \mLambda)$, $q(\sigma_{\vu}^2) = \mbox{Inv. Wishart}\left(v + m + d, d, \Psi + \sum_{i=1}^m \vmu_i \vmu_i^T + \mLambda_{{\vu}_i} \right)$ \mbox{and } $q(r_i) = \Bernoulli{(p_i)}$
 
 \noindent with
 $$
@@ -253,7 +253,7 @@ q(\vr) &\propto \exp \left [ \bE_{-q(\vr)}y^T\mR(\mC\vmu) - \vr^T\exp{(\mC\vnu)}
 \end{array}
 $$
 
-\noindent where $\mD = \left( \Psi + \vmu_\vu \vmu_\vu^T + \mLambda_{\vu \vu} \right)/(v - p)$. 
+\noindent where $\mD =  (v + m) \left( \Psi + \sum_{i=1}^m \vmu_i \vmu_i^T + \mLambda_{{\vu}_i} \right)^{-1}$. 
 
 \noindent This is close in form to a Poisson regression model. Poisson regression models
 with normal priors have no closed form for their mean field updates due to
@@ -277,11 +277,10 @@ $\mSigma_{\vu \vu}$
 \STATE $\eta \leftarrow -\exp \left [ \mC \vmu + \half \diag{(\mC\mLambda\mC^T)} \right ] + \psi{(a_{q{(\rho)}})} - \psi{(b_{q{(\rho)}})}$
 \STATE $\vp_{q(\vr_0)} \leftarrow \expit{(\eta)}$
 % \mSigma_{\vu \vu}
-\STATE $\Psi_{q(\mSigma_{\vu \vu})} \leftarrow \Psi + \vmu_\vu \vmu_\vu^T + \mLambda_{\vu \vu}$
+\STATE $\Psi_{q(\mSigma_{\vu \vu})} \leftarrow \Psi + \sum_{i=1}^m \vmu_i \vmu_i^T + \mLambda_{{\vu}_i}$
 \ENDWHILE
 \end{algorithmic}
 \end{algorithm}
-
 
 \subsection{Lower bound}
 % Where are the priors for \vbeta and \vu

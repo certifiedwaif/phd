@@ -226,12 +226,11 @@ create_multivariate <- function(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, 
   b_rho = n - sum(vp) + 1
   
   # Set prior parameters for Inverse Wishart distribution
-  p=ncol(mZ)
-  v=p+3
-  psi=2*b_sigma*diag(1, rep(p))
+  v=prior$v + m
+  psi=diag(1, rep(blocksize))
   
   prior = list(a_sigma=a_sigma, b_sigma=b_sigma,
-               p=p, v=v, psi=psi,
+               v=v, psi=psi,
                a_rho=1, b_rho=1,
                sigma2.beta=sigma2.beta)
   multivariate = list(vy=vy, vp=vp, vmu=vmu,
@@ -251,7 +250,7 @@ create_multivariate <- function(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, 
 
 zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE)
 {
-  MAXITER <- 100
+  MAXITER <- 1000
   
   # Initialise
   N = length(mult$vy)
@@ -343,12 +342,19 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
       #tr_mSigma = ncol(mult$mZ) * mult$prior$a_sigma/mult$prior$b_sigma
       #mult$b_sigma = mult$prior$b_sigma + sum(vu^2)/2 + (tr_mSigma)/2
       mult$b_sigma = mult$prior$b_sigma + sum(mult$vmu[u_idx]^2)/2 + tr(mult$mLambda[u_idx, u_idx])/2    # Extract right elements of mLambda
-      mult$psi = with(mult, prior$psi + vmu[u_idx] %*% t(vmu[u_idx]) + mLambda[u_idx, u_idx])
+      #browser()
+      acc = matrix(0, blocksize, blocksize)
+      for (j in 1:m) {
+        j_idx = p + (j-1)*blocksize+(1:blocksize)
+        acc = acc + with(mult, vmu[j_idx] %*% t(vmu[j_idx]) + mLambda[j_idx, j_idx])
+      }
+      mult$psi = with(mult, prior$psi + acc)
       
       tau_sigma = mult$a_sigma/mult$b_sigma
       
       mult$mSigma.u.inv = diag(tau_sigma, u_dim)
-      mult$psi = solve(mult$mSigma.u.inv)
+  
+      mult$mSigma.u.inv = with(mult, kronecker(diag(1, m), solve(psi/(v - blocksize - 1))))
       
       #mult$mSigma.u.inv = with(mult, solve(psi)) # What multiplicative factor for psi?
     }
