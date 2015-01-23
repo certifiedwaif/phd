@@ -8,7 +8,6 @@ using namespace Rcpp;
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
 using Eigen::SparseMatrix;
-using Eigen::SimplicialCholesky;
 using Eigen::ConjugateGradient;
 
 typedef Eigen::Map<Eigen::MatrixXd> MapMatd;
@@ -29,14 +28,16 @@ VectorXd fastdiag(MapMatd C, MapMatd lambda)
   return result;
 }
 
-
 // [[Rcpp::export]]
-SpMat fastinv(const MapMatd Rd, const int p, const int m, const int blocksize, const int spline_dim)
+SpMat sparse_R(const MapMatd Rd, const int p, const int m, const int blocksize, const int spline_dim)
 {
   // Construct sparse version of R
   
   typedef Eigen::Triplet<double> T;
   std:vector<T> triplets;
+  
+  if (spline_dim > 0)
+    stop("We don't handle this case yet.\n");
   
   //std::cout << "Built triplets list" << std::endl;
   triplets.reserve(m*blocksize/2 + p*p/2 + p*m*blocksize);
@@ -48,7 +49,7 @@ SpMat fastinv(const MapMatd Rd, const int p, const int m, const int blocksize, c
     for (int b_idx = 0; b_idx < blocksize; b_idx++) {
       const int offset = m_idx*blocksize;
       //std::cout << "offset " << offset << std::endl;
-      for (int row_idx = offset; row_idx < offset+b_idx+1; row_idx++) {
+      for (int row_idx = 0; row_idx < b_idx + 1; row_idx++) {
         //std::cout << "row_idx" << row_idx << std::endl;
         int i = offset+b_idx;
         int j = offset+row_idx;
@@ -71,23 +72,26 @@ SpMat fastinv(const MapMatd Rd, const int p, const int m, const int blocksize, c
       
       //std::cout << "loop2: i " << i << " j " << j << " Rd(i, j) " << Rd(i, j) << std::endl;
 
-    triplets.push_back(T(i, j, Rd(i, j)));
+      triplets.push_back(T(i, j, Rd(i, j)));
     }
   }
   
   //std::cout << "Constructing sparse matrix" << std::endl;
   SpMat Rsp(Rd.rows(), Rd.cols());
   Rsp.setFromTriplets(triplets.begin(), triplets.end());
-  
-  //std::cout << Rsp << std::endl;
-  
+  return Rsp;
+}
+
+// [[Rcpp::export]]
+SpMat fastinv(SpMat Rsp)
+{
   // Solve for RHS = I
   //std::cout << "Solving" << std::endl;
-  Eigen::SimplicialCholesky<SpMat, Eigen::Lower, Eigen::ColMajor> solver;
+  Eigen::SparseLU<SpMat> solver;
   //std::cout << "maxIterations" << solver.maxIterations() << std::endl;
   //solver.setTolerance(1e-99);
   solver.compute(Rsp);
-  SparseMatrix<double> I(Rd.rows(),Rd.cols());
+  SparseMatrix<double> I(Rsp.rows(),Rsp.cols());
   I.setIdentity();
   //std::cout << "I " << I << std::endl;
   //std::cout << "Returning" << std::endl;
@@ -95,9 +99,14 @@ SpMat fastinv(const MapMatd Rd, const int p, const int m, const int blocksize, c
 }
 
 // [[Rcpp::export]]
-VectorXd fastsolve(SpMat R, SpMat C)
+MatrixXd fastsolve(SpMat R, MatrixXd C)
 {
-  Eigen::SimplicialCholesky<SpMat, Eigen::Lower, Eigen::ColMajor> solver;
+  Eigen::ConjugateGradient<SpMat> solver;
   solver.compute(R);
-  return solver.solve(C);
+  MatrixXd result(C.cols(), C.rows());
+  for (int i = 0; i < C.rows(); i++) {
+    result.col(i) = solver.solve(C.row(i).transpose());
+  }
+  
+  return result;
 }

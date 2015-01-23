@@ -18,7 +18,7 @@ print(solve(mR))
 print(fastinv(mR, 3, 1, 2, 0))
 print("Done!")
 print(mR%*%solve(mR))
-print(mR%*%fastinv(mR, 3, 1, 2, 0))
+print(t(mR)%*%fastinv(mR, 3, 1, 2, 0))
 
 require(microbenchmark)
 microbenchmark(solve(mR))

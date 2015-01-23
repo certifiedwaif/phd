@@ -208,7 +208,7 @@ model
 
 $$
 \begin{array}{rl}
-\log{p(y|\vr, \vbeta, \vu)} &= \vy^T \mR (\mC\vnu) - \vr^T \exp{(\mC\vnu)} - \vone^T \log{\Gamma{(\vy + \vone)}}, \\
+\log{p(\vy|\vr, \vbeta, \vu)} &= \vy^T \mR (\mC\vnu) - \vr^T \exp{(\mC\vnu)} - \vone^T \log{\Gamma{(\vy + \vone)}}, \\
 \mbox{ and }
 r_i &\sim \text{Bernoulli}(\rho) \\
 \end{array}
@@ -218,9 +218,9 @@ $$
 
 $$ 
 \begin{array}{rl}
-\log{p(\sigma_\vu^2)} &= \alpha_{\sigma_\vu^2} \log{(\beta_{\sigma_\vu^2})} - \log{\Gamma{(\alpha_{\sigma_\vu^2})}} - (\alpha_{\sigma_\vu^2} + 1) \log{(\sigma_{\vu}^2)} - \frac{\beta_{\sigma_\vu^2}}{\sigma_{\vu}^2},\\
+\log{p(\mSigma_\vu^2)} &= v/2 \log |\Psi| - \log \Gamma_p (v/2) - \frac{v+p+1}{2} \log | \mSigma_{\vu \vu}| - \half \tr (\Psi \mSigma^{-1}_{\vu \vu}),\\
 p(\rho) &\propto 1 \\
-\mbox{ and } \vnu|\sigma_\vu^2 &\sim N(0, \sigma_\vu^2). \\
+\mbox{ and } \vnu|\sigma_\vu^2 &\sim \mbox{N}(0, \sigma_\vu^2). \\
 \end{array}
 $$
 
@@ -228,12 +228,12 @@ $$
 Let $r_0 = \{ r_i : y_i = 0 \}$.
 We assume an approximation of the form
 $$
-q(r_0, \vnu, \sigma_{\vu}^2, \rho) = q(\vnu) q(\sigma_{\vu}^2) q(\rho) q(r_0) \\
+q(r_0, \vnu, \sigma_{\vu}^2, \rho) = q(\vnu) q(\mSigma_{\vu \vu}) q(\rho) q(r_0) \\
 $$
 
-\noindent where $q(\vnu) = \mbox{N}(\vmu, \mLambda)$, $q(\sigma_{\vu}^2) = \mbox{IG}\left(\alpha_{\sigma_u^2} + \frac{m}{2}, \beta_{\sigma_u^2} + \frac{\|\vmu_\vu\|^2}{2} + \frac{\tr(\mLambda_{\vu\vu})}{2}\right)$ \mbox{and } $q(r_i) = \Bernoulli{(p_i)}$.
+\noindent where $q(\vnu) = \mbox{N}(\vmu, \mLambda)$, $q(\sigma_{\vu}^2) = \mbox{Inv. Wishart}\left(v, p+1, \Psi + \vmu_\vu \vmu_\vu^T + \mLambda_{\vu \vu}\right)$ \mbox{and } $q(r_i) = \Bernoulli{(p_i)}$
 
-\noindent where
+\noindent with
 $$
 p_i = \expit\left[ \psi{(\alpha_{q(\rho)})} - \psi{(\beta_{q(\rho)})} - \exp{(c_i^T\vmu + \half c_i^T \mLambda c_i)} \right]
 $$
@@ -248,12 +248,12 @@ $$
 \noindent The optimal approximation for $\vr$ is
 $$
 \begin{array}{rl}
-q(\vr) &\propto \exp \left [ \bE_{-q(\vr)}y^T\mR(\mC\vmu) - \vr^T\exp{(\mC\vnu)}-\half \vnu^T \sigma_{\vu}^{-2} \mI \vnu \right ] \\
-&= \exp{\left [\vy^T\mR\mC \vmu - \vp^T \exp{\{\mC \vmu + \half \text{diag}(\mC \mLambda \mC^T)\}} - \half \vmu^T \mD \vmu - \half \text{tr}(\mLambda \mD )) \right ]}
+q(\vr) &\propto \exp \left [ \bE_{-q(\vr)}y^T\mR(\mC\vmu) - \vr^T\exp{(\mC\vnu)}-\half \vnu^T \mSigma_{\vu \vu} \vnu \right ] \\
+&= \exp{\left [\vy^T\mR\mC \vmu - \vp^T \exp{\{\mC \vmu + \half \text{diag}(\mC \mLambda \mC^T)\}} - \half \vmu^T \mD \vmu - \half \text{tr}(\mLambda \mD ) \right ]}
 \end{array}
 $$
 
-\noindent where $\mD = \left (\alpha_{q(\sigma_{\vu}^2)}/\beta_{q(\sigma_{\vu}^2)} \mI \right )$. 
+\noindent where $\mD = \left( \Psi + \vmu_\vu \vmu_\vu^T + \mLambda_{\vu \vu} \right)/(v - p)$. 
 
 \noindent This is close in form to a Poisson regression model. Poisson regression models
 with normal priors have no closed form for their mean field updates due to
@@ -263,22 +263,21 @@ non-conjugacy, but can be fit using Gaussian variational approximation
 \begin{algorithm}\label{alg:algorithm_two}
 \label{algorithm2}
 \caption[Algorithm 2]{Iterative scheme for obtaining the parameters in the
-optimal densities $q^*(\vmu, \mLambda)$, $q^*(\sigma_u^2)$ and $q^*(\rho)$}
+optimal densities $q^*(\vmu, \mLambda)$, $q^*(\mSigma_{\vu \vu})$ and $q^*(\rho)$}
 \begin{algorithmic}
 % Fit \vmu, \mLambda using Laplace approximation
-\REQUIRE{$\alpha_{q(\rho)} \leftarrow \alpha_\rho + \vone^T\vp, 
-\alpha_{q(\lambda)} \leftarrow \alpha_\lambda + \vone^T\vx$}
-\WHILE{the increase in $\log{\underline{p}}(\vx;q)$ is significant}
+\REQUIRE{$\alpha_{q(\rho)} \leftarrow \alpha_\rho + \vone^T\vp, p_{q(\mSigma_{\vu \vu})} \leftarrow p + 1$}
+\WHILE{the increase in $\log{\underline{p}}(\vy;q)$ is significant}
 % \vmu, \mLambda
 \STATE Optimise $\vmu$ and $\mLambda$ using $\vy, \mX, \mZ, \rho, \vp$ and
-$\alpha_{q(\sigma_u^2)}$, $\beta_{q(\sigma_u^2)}$
-\STATE $\beta_{q(\lambda)} \leftarrow \beta_\lambda + \vone^T\vp$
+$\mSigma_{\vu \vu}$
 % \vp
 % \rho is a prior? Not directly observed, except through \vr_i
 \STATE $\beta_{q(\rho)} \leftarrow \beta_\rho + n - \vone^T\vp$
 \STATE $\eta \leftarrow -\exp \left [ \mC \vmu + \half \diag{(\mC\mLambda\mC^T)} \right ] + \psi{(a_{q{(\rho)}})} - \psi{(b_{q{(\rho)}})}$
 \STATE $\vp_{q(\vr_0)} \leftarrow \expit{(\eta)}$
-% sigma_u^2
+% \mSigma_{\vu \vu}
+\STATE $\Psi_{q(\mSigma_{\vu \vu})} \leftarrow \Psi + \vmu_\vu \vmu_\vu^T + \mLambda_{\vu \vu}$
 \ENDWHILE
 \end{algorithmic}
 \end{algorithm}
@@ -330,7 +329,7 @@ considered in this article.
 \WHILE{the increase in $\log \underline{p}(\vmu, \mLambda; \vy)$ is significant}
 % \vmu, \mLambda
 \STATE $\mLambda \leftarrow \left [\vp^T \mC^T \text{diag}(\exp{(\mC \vmu)}) \mC + \mSigma^{-1} \right ]^{-1}$
-\STATE $\vmu \leftarrow \vmu + \mLambda \frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \mLambda}$
+\STATE $\vmu \leftarrow \vmu + \mLambda \frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \vmu}$
 \ENDWHILE
 \end{algorithmic}
 \end{algorithm}
