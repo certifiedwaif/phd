@@ -1,5 +1,6 @@
 # median_accuracy.R
 source("test_zero_inflated_model.R")
+source("mcmc.R")
 source("accuracy.R")
 
 # Repeatedly run trials and compare accuracy. Plot boxplots.

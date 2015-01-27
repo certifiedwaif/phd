@@ -2,6 +2,7 @@
 setwd("~/phd/code")
 source("zero_inflated_model.R")
 source("test_zero_inflated_model.R")
+source("mcmc.R")
 source("rwmh.R")
 
 generate_test_data = function(m, ni)
