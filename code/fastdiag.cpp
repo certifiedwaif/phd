@@ -79,12 +79,8 @@ SpMat sparse_R(const MapMatd Rd, const int p, const int m, const int blocksize, 
   //std::cout << "Constructing sparse matrix" << std::endl;
   SpMat Rsp(Rd.rows(), Rd.cols());
   Rsp.setFromTriplets(triplets.begin(), triplets.end());
-<<<<<<< HEAD
-  return Rsp;
-=======
   //std::cout << "Rsp " << Rsp << std::endl;
   return(Rsp);
->>>>>>> 6b20b88e1c7c5920c69efb1f7dd171223a5d37b5
 }
 
 // [[Rcpp::export]]

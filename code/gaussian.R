@@ -259,15 +259,10 @@ f.G_new2 <- function(vmu,mR,vy,vr,mC,mSigma.inv,gh,p, m, blocksize, spline_dim, 
   #mR_sp = sparse_R(mR, p, m, blocksize, spline_dim)
   #mR.inv = fastinv2(mR, p=p, m=m, blocksize=blocksize, spline_dim=spline_dim)
   #mR.inv2 = as.matrix(fastinv(mR, p, m, blocksize, spline_dim))
-<<<<<<< HEAD
   #a <- solve(mR, t(mC))
   a <- forwardsolve(mR, t(mC))
   #a <- fastsolve(mR_sp, mC)
   vsigma2.til <- crossprod(a^2, rep(1, ncol(mC)))
-  
-=======
-  a <- forwardsolve(mR, t(mC))
->>>>>>> 6b20b88e1c7c5920c69efb1f7dd171223a5d37b5
   #browser()
   #vsigma2.til <- crossprod(a^2, rep(1, ncol(mC)))                           
   #mR.inv = fastinv(mR_sp)  
@@ -437,10 +432,6 @@ vg.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m, bloc
   vmu.til     <- mC%*%vmu
   # TODO: Fast solve
   a <- forwardsolve(mR, t(mC))
-<<<<<<< HEAD
-  #a <- fastsolve(mR_sp, mC)
-=======
->>>>>>> 6b20b88e1c7c5920c69efb1f7dd171223a5d37b5
   vsigma2.til <- crossprod(a^2, rep(1, ncol(mC)))
   #vsigma2.til <- fastdiag(mC, mLambda)
 
