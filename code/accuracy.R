@@ -253,7 +253,7 @@ test_accuracies = function()
 #   # Save the results, because this takes such a long time to run.
 #   #save(mult, mcmc_samples, file="accuracy.RData")
   #save(mult, mcmc_samples, file="accuracy_int.RData")
-  #load(file="accuracy_int.RData")
+  load(file="accuracy_int.RData")
   #mult$spline_dim = 0
   #load(file="accuracy.RData")
   # Test all other approximations against it
@@ -262,40 +262,40 @@ test_accuracies = function()
   # Test multivariate approximation's accuracy
   now = Sys.time()
   var1 = test_accuracy(mult, mcmc_samples, "laplacian")
-  Sys.time() - now
+  print(Sys.time() - now)
   #print(image(Matrix(var1$var_result$mLambda)))
-  print(var1)
+  #print(var1)
   
   now = Sys.time()
   var2 = test_accuracy(mult, mcmc_samples, "gva")
-  Sys.time() - now
+  print(Sys.time() - now)
   #print(image(Matrix(var2$var_result$mLambda)))
-  print(var2)
+  #print(var2)
   
   now = Sys.time()
   var3 = test_accuracy(mult, mcmc_samples, "gva2")
-  Sys.time() - now
+  print(Sys.time() - now)
   #print(image(Matrix(var3$mLambda)))
-  print(var3)
+  #print(var3)
   
   #Rprof()
   now = Sys.time()
   var4 = test_accuracy(mult, mcmc_samples, "gva2new")
   print(Sys.time() - now)
   #print(image(Matrix(var4$var_result$mLambda)))
-  print(var4)
+  #print(var4)
   
   #Rprof(NULL)
-  #summaryRprof()
+  #print(summaryRprof())
   #print(image(Matrix(var3_new$mLambda)))
   
   now = Sys.time()
   var5 = test_accuracy(mult, mcmc_samples, "gva_nr")
-  Sys.time() - now
+  print(Sys.time() - now)
   #print(image(Matrix(var4$result_var$mLambda)))
-  print(var5)
+  #print(var5)
   
-  save(var1, var2, var3, var4, var5, file="accuracy_results_int.RData")
+  #save(var1, var2, var3, var4, var5, file="accuracy_results_int.RData")
   #for (i in 1:100) {
   #  set.seed(i)
   #  mult = generate_test_data(20, 100)
@@ -322,7 +322,6 @@ test_accuracies_slope = function()
   now = Sys.time()
   var1 = test_accuracy(mult, mcmc_samples, "laplacian")
   print(Sys.time() - now)
-  #print(image(Matrix(var1$var_result$mLambda)))
   print(var1)
   
   now = Sys.time()
@@ -333,28 +332,31 @@ test_accuracies_slope = function()
   
   now = Sys.time()
   var3 = test_accuracy(mult, mcmc_samples, "gva2")
-  print(Sys.time() - now)
   #print(image(Matrix(var3$var_result$mLambda)))
+  print(Sys.time() - now)
   print(var3)
 
+  print("gva2new")
   now = Sys.time()
+  #Rprof(line.profiling=TRUE)
   var4 = test_accuracy(mult, mcmc_samples, "gva2new")
-  print(Sys.time() - now)
+  #Rprof(NULL)
+  #print(summaryRprof(lines = "both"))
   #print(image(Matrix(var4$var_result$mLambda)))  
+  #var4 = test_accuracy(mult, mcmc_samples, "gva2new")
+  print(Sys.time() - now)
   print(var4)
   
-  #Rprof()
   now = Sys.time()
   # GVA NR is unstable, and sometimes fails with an error
+  #var5 = test_accuracy(mult, mcmc_samples, "gva_nr")
   var5 = test_accuracy(mult, mcmc_samples, "gva_nr")
   print(Sys.time() - now)
   #print(image(Matrix(var5$var_result$mLambda)))  
   print(var5)
   
-  save(var1, var2, var3, var4, var5, file="accuracy_results_slope.RData")
+  #save(var1, var2, var3, var4, var5, file="accuracy_results_slope.RData")
   
-  #Rprof(NULL)
-  #summaryRprof()
   #print(image(Matrix(var3_new$mLambda)))
   
   #now = Sys.time()
