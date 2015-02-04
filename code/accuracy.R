@@ -316,7 +316,7 @@ test_accuracies_slope = function()
   #set.seed(1)
   #mult = generate_slope_test_data()
   # Monte Carlo Markov Chains approximation
-  #mcmc_samples = mcmc_approximation(mult, iterations=1e6, mc.cores = 32)
+  mcmc_samples = mcmc_approximation(mult, iterations=1e3, mc.cores = 32)
   #save(mult, mcmc_samples, file="accuracy_slope.RData")  
   load(file="accuracy_slope.RData")
   
