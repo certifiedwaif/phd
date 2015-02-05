@@ -8,12 +8,20 @@ data {
   vector[M*B] Z[N]; // Random effects covariate matrix
 }
 
+transformed data {
+  vector[B] zeros;
+
+  for (i in 1:B)
+    zeros[i] <- 0.0;
+}
+
 parameters {
   vector[P] vbeta; 
   vector[B] u;
   cov_matrix[B] S;
+  cov_matrix[B] BetaPriorInv;
   real<lower=0, upper=1> rho;
-  real<lower=0> sigma_u;
+  cov_matrix[B] sigma_u;
 }
 
 model {
@@ -22,9 +30,9 @@ model {
   rho ~ beta(.01, .01);
   sigma_u ~ inv_wishart(B+1, S);
 
-  vbeta ~ normal(0, 100.0);
+  vbeta ~ multi_normal_prec(zeros, BetaPriorInv);
   
-  u ~ normal(0, sigma_u);
+  u ~ multi_normal(0, sigma_u);
   
   for (n in 1:N) {
     eta <- dot_product(X[n], vbeta) + dot_product(Z[n], u);
