@@ -1,0 +1,671 @@
+
+R version 3.1.2 (2014-10-31) -- "Pumpkin Helmet"
+Copyright (C) 2014 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> # accuracy.R
+> setwd("~/phd/code")
+> source("zero_inflated_model.R")
+> source("test_zero_inflated_model.R")
+> source("rwmh.R")
+> 
+> generate_test_data = function(m, ni)
++ {
++   m = m
++   ni = ni
++   n = rep(ni,m)
++   mX = matrix(as.vector(cbind(rep(1, sum(n)), runif(sum(n), -1, 1))), sum(n), 2)
++   #print("mX=")
++   #print(mX)
++   #cat("dim(mX)", dim(mX), "\n")
++   
++   #v = c(rep(1, g), rep(0, g))
++   # Indicator variables for groups
++   
++   #mZ = matrix(cbind(v, 1-v), sum(n), 2)
++   #mZ <- matrix(0,sum(n),m)
++   #count <- 0
++   #for (i in 1:m) {
++   #  mZ[count + (1:n[i]),i] <- 1
++   #  count <- count + n[i]
++   #}
++   
++   mZ <- kronecker(diag(1,m),rep(1,ni))
++   
++   #print("mZ=")
++   #print(mZ)
++   #cat("dim(mZ)", dim(mZ), "\n")
++   
++   expected_rho = 0.5
++   expected_beta = c(2, 1)
++   expected_sigma2_u = .5^2
++   a_sigma = 1e-2
++   b_sigma = 1e-2
++   
++   tau = 1.0E2
++   
++   sigma2.beta <- 1.0E3
++   
++   test_data = generate_multivariate_test_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u)
++   vy = test_data$vy
++   
++   # Test accuracy
++   mult = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, m=m, blocksize=1, spline_dim=0)
++   
++   return(mult)
++ }
+> 
+> generate_slope_test_data = function() {
++   m = 20
++   ni = 10
++   n = rep(ni,m)
++   mX = matrix(as.vector(cbind(rep(1, sum(n)), runif(sum(n), -1, 1))), sum(n), 2)
++   mZ = makeZ(mX, m, ni, p=2)
++   
++   expected_rho = 0.5
++   expected_beta = c(2, 1)
++   expected_sigma2_u = .5^2
++   a_sigma = 1e-2
++   b_sigma = 1e-2
++   
++   tau = 1.0E2
++   
++   sigma2.beta <- 1.0E3
++   
++   test_data = generate_multivariate_test_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u, verbose=TRUE)
++   vy = test_data$vy
++   
++   # Test model fitting
++   mult = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, m=m, blocksize=2, spline_dim=0)
++   return(mult)
++ }
+> 
+> generate_spline_test_data = function()
++ {
++   n = 5000
++   vx = matrix(sort(runif(n, -1, 1))) 
++   
++   mX = cbind(1,vx)
++   
++   expected_rho = 1
++   #expected_mu = c(0, 1)
++   expected_sigma2_u = 0
++   sigma2.beta = 1e5
++   a_sigma = 1e5
++   b_sigma = 1e5
++   tau = 1.0E-5
++   
++   sigma2.true = 0.01
++   expected_beta = c(0, 1)
++   vf = 5+2*sin(pi*vx)
++   vy = rpois(n,exp(vf))
++   
++   source("ZOsull.r")
++   numIntKnots <- 35
++   intKnots <- quantile(unique(vx),seq(0,1,length=(numIntKnots+2))[-c(1,(numIntKnots+2))])
++   
++   mZ = ZOSull(vx,range.x=c(-1.1,1.1),intKnots=intKnots,drv=0)
++   #vy = 2+mX[,1]^3+rnorm(m)*.1
++   #result = fit_spline(vx, vy)
++   #result = fit_spline(mX[,1], vy)
++   #mZ = result$Z
++   
++   #mZ <- mZ/max(mZ)
++   
++   mult = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, m=0, blocksize=1, spline_dim=37)
++   
++   return(mult)
++ }
+> 
+> calculate_accuracy = function(mult, mcmc_samples, var_result, print_flag=FALSE, plot_flag=FALSE)
++ {
++   # TODO: Add support for checking the accuracy over multiple dimensions
++   # cubature$adaptIntegrate
++   
++   if (plot_flag) pdf(paste0("accuracy_plots_", approximation, ".pdf"))
++   #return(var_result)
++   # vbeta accuracy
++   calculate_accuracy3 = function(mcmc_samples, dist_fn, param1, param2)
++   {
++     mcmc_density = density(mcmc_samples)
++     mcmc_fn = splinefun(mcmc_density$x, mcmc_density$y)
++     
++     integrand <- function(x)
++     {
++       return(abs(mcmc_fn(x) - dist_fn(x, param1, param2)))
++     }
++     result = integrate(integrand, min(mcmc_density$x), max(mcmc_density$x),
++                        subdivisions = length(mcmc_density$x))
++     accuracy = 1 - .5 * result$value
++     return(accuracy)
++   }
++   
++   # Compare MCMC distribution with variational approximation for each parameter
++   # vnu[i] ~ Normal, dnorm
++   # sigma2_u ~ IG, dgamma(1/x)
++   # rho ~ Beta, dbeta
++   # vr[i] ~ Bernoulli, dbinom
++   # For each parameter of interest,
++   # * estimate density of MCMC
++   # * compare with q distribution using L_1 norm
++   
++   # Kernel density estimates of MCMC-estimated posteriors
++   # Use L_1 distance to compare against variational approximations of posteriors
++  
++   accuracy_plot = function(mcmc_samples, dist_fn, param1, param2)
++   {
++     mcmc_density = density(mcmc_samples)
++     plot(mcmc_density)
++     curve(dist_fn(x, param1, param2),
++           from=min(mcmc_density$x), to=max(mcmc_density$x),
++           add=TRUE, lty=2, col="blue")
++   }
++   
++   vbeta_accuracy = rep(NA, ncol(mult$mX))
++   for (i in 1:ncol(mult$mX)) {
++     vbeta_accuracy[i] = calculate_accuracy3(mcmc_samples$vbeta[,i], dnorm,
++                                             var_result$vmu[i], sqrt(var_result$mLambda[i,i]))
++     if (print_flag) cat("vbeta[", i, "]", approximation, "accuracy:", vbeta_accuracy[i], "\n")
++     
++     param_name = sprintf("vbeta[%d]", 1)
++     if (plot_flag) accuracy_plot(mcmc_samples$vbeta[,i], dnorm,
++                             var_result$vmu[i], sqrt(var_result$mLambda[i,i]))
++   }
++   
++   # vu accuracy
++   # FIXME: To check for random slopes accuracy, this section will have
++   # to get more complex.
++   print(dim(mult$mZ))
++   print(dim(mcmc_samples$u))
++   vu_accuracy = rep(NA, ncol(mult$mZ))
++   for (i in 1:ncol(mult$mZ)) {
++     vu_accuracy[i] = calculate_accuracy3(mcmc_samples$u[,i], dnorm,
++                                          var_result$vmu[i+2], sqrt(var_result$mLambda[i+2,i+2]))
++     if (print_flag) cat("vu[", i, "]", approximation, "accuracy:", vu_accuracy[i], "\n")
++     if (plot_flag) accuracy_plot(mcmc_samples$u[,i], dnorm,
++                             var_result$vmu[i+2], sqrt(var_result$mLambda[i+2,i+2]))
++   }
++   
++   # sigma2_u accuracy
++   sigma2_u_accuracy = calculate_accuracy3(1/mcmc_samples$sigma_u^2, dgamma,
++                                           var_result$a_sigma, var_result$b_sigma)
++   if (print_flag) cat("sigma2_u", approximation, "accuracy:", sigma2_u_accuracy, "\n")
++   if (plot_flag) accuracy_plot(1/mcmc_samples$sigma_u^2, dgamma,
++                           var_result$a_sigma, var_result$b_sigma)
++   
++   # rho accuracy
++   rho_accuracy = calculate_accuracy3(mcmc_samples$rho, dbeta,
++                                      var_result$a_rho, var_result$b_rho)
++   if (print_flag) cat("rho", approximation, "accuracy: ", rho_accuracy, "\n")
++   if (plot_flag) accuracy_plot(mcmc_samples$rho, dbeta,
++                           var_result$a_rho, var_result$b_rho)
++   if (plot_flag) dev.off()
++   return(list(var_result=var_result,
++               vbeta_accuracy=vbeta_accuracy,
++               vu_accuracy=vu_accuracy,
++               sigma2_u_accuracy=sigma2_u_accuracy,
++               rho_accuracy=rho_accuracy))
++ }
+> 
+> test_accuracy = function(mult, mcmc_samples, approximation, plot=FALSE)
++ {
++   var_result = zero_infl_var(mult, method=approximation, verbose=TRUE)
++   return(calculate_accuracy(mult, mcmc_samples, var_result))
++ }
+> 
+> # Calculate accuracy ----
+> # Approximate the L1 norm between the variational approximation and
+> # the MCMC approximation
+> calculate_univariate_accuracy <- function(result_mcmc, var_result)
++ {
++   density_mcmc_rho = density(result_mcmc$vrho)
++   integrand <- function(x)
++   {
++     fn = splinefun(density_mcmc_rho$x, density_mcmc_rho$y)
++     return(abs(fn(x) - dbeta(x, var_result$a_rho, var_result$b_rho)))
++   }
++   result = integrate(integrand, min(density_mcmc_rho$x), max(density_mcmc_rho$x), subdivisions = length(density_mcmc_rho$x))
++   rho_accuracy = 1 - .5 * result$value
++   
++   density_mcmc_lambda = density(result_mcmc$vlambda)
++   integrand <- function(x)
++   {
++     fn = splinefun(density_mcmc_lambda$x, density_mcmc_lambda$y)
++     return(abs(fn(x) - dgamma(x, var_result$a_lambda, var_result$b_lambda)))
++   }
++   result = integrate(integrand, min(density_mcmc_lambda$x), max(density_mcmc_lambda$x), subdivisions = length(density_mcmc_lambda$x))
++   lambda_accuracy = 1 - .5 * result$value
++   return(list(rho_accuracy=rho_accuracy, lambda_accuracy=lambda_accuracy))
++ }
+> 
+> test_accuracies = function()
++ {
++   # Need to be able to compare the solution paths of each approximation
++   
++   # Generate data
++   # for (i in 1:100) {
++   #   set.seed(i)
++   #   mult = generate_test_data(20, 100)
++   #   # Monte Carlo Markov Chains approximation
++   #   mcmc_samples = mcmc_approximation(mult, iterations=1e6)
++   #   # Save the results, because this takes such a long time to run.
++   # }
++   # save(mult, mcmc_samples, file="accuracy_good.RData")
++   #set.seed(1)
++   #mult = generate_test_data(10, 100)
++   # Monte Carlo Markov Chains approximation
++   #mcmc_samples = mcmc_approximation(mult, iterations=1e6, mc.cores = 32)
++ #   # Save the results, because this takes such a long time to run.
++ #   #save(mult, mcmc_samples, file="accuracy.RData")
++   #save(mult, mcmc_samples, file="accuracy_int.RData")
++   load(file="accuracy_int.RData")
++   #mult$spline_dim = 0
++   #load(file="accuracy.RData")
++   # Test all other approximations against it
++   #load(file="accuracy.RData")
++   
++   # Test multivariate approximation's accuracy
++   now = Sys.time()
++   var1 = test_accuracy(mult, mcmc_samples, "laplacian")
++   Sys.time() - now
++   #print(image(Matrix(var1$var_result$mLambda)))
++   print(var1)
++   
++   now = Sys.time()
++   var2 = test_accuracy(mult, mcmc_samples, "gva")
++   Sys.time() - now
++   #print(image(Matrix(var2$var_result$mLambda)))
++   print(var2)
++   
++   now = Sys.time()
++   var3 = test_accuracy(mult, mcmc_samples, "gva2")
++   Sys.time() - now
++   #print(image(Matrix(var3$mLambda)))
++   print(var3)
++   
++   #Rprof()
++   now = Sys.time()
++   var4 = test_accuracy(mult, mcmc_samples, "gva2new")
++   print(Sys.time() - now)
++   #print(image(Matrix(var4$var_result$mLambda)))
++   print(var4)
++   
++   #Rprof(NULL)
++   #summaryRprof()
++   #print(image(Matrix(var3_new$mLambda)))
++   
++   now = Sys.time()
++   var5 = test_accuracy(mult, mcmc_samples, "gva_nr")
++   Sys.time() - now
++   #print(image(Matrix(var4$result_var$mLambda)))
++   print(var5)
++   
++   save(var1, var2, var3, var4, var5, file="accuracy_results_int.RData")
++   #for (i in 1:100) {
++   #  set.seed(i)
++   #  mult = generate_test_data(20, 100)
++   #  mcmc_samples = mcmc_approximation(mult, iterations=1e4)
++   #  
++   #  var1 = test_accuracy(mult, mcmc_samples, "laplacian")
++   #  var2 = test_accuracy(mult, mcmc_samples, "gva")
++   #  var3 = test_accuracy(mult, mcmc_samples, "gva2")
++   #  var4 = test_accuracy(mult, mcmc_samples, "gva_nr")
++   #}
++   
++ }
+> test_accuracies()
+N 1000 
+p 2 
+m 10 
+blocksize 1 
+spline_dim 0 
+calculate_lower_bound: T1 -2026 T2 -694.6948 
+ a_sigma 5.01 b_sigma 0.4017264
+calculate_lower_bound: T1 -1292.377 T2 -671.4252 
+Iteration  2 : lower bound  -1963.803  difference  756.8922  parameters  vmu 1.963662 0.9790854 0.0978112 -0.2707565 0.5458152 0.2604943 0.05153962 -0.008141049 -0.3491036 0.4204114 -0.5798342 -0.1680789 diag(mLambda) 0.008182921 0.0004054174 0.008994089 0.009360081 0.008774072 0.008867557 0.009022609 0.009051792 0.009444632 0.008775104 0.009815839 0.009272608 a_rho 535.7401 b_rho 466.2599 a_sigma 5.01 b_sigma 0.6129129
+calculate_lower_bound: T1 -1292.019 T2 -671.4144 
+Iteration  3 : lower bound  -1963.434  difference  0.3690308  parameters  vmu 1.954316 0.991449 0.1029046 -0.2746891 0.5555662 0.2666984 0.05446951 -0.005641055 -0.3555457 0.4299303 -0.6047538 -0.1687004 diag(mLambda) 0.01240043 0.0004082747 0.0132155 0.01359657 0.01299138 0.01308667 0.01324566 0.0132756 0.01368607 0.0129918 0.01409845 0.01350327 a_rho 535.7954 b_rho 466.2046 a_sigma 5.01 b_sigma 0.6639774
+calculate_lower_bound: T1 -1292.039 T2 -671.3839 
+Iteration  4 : lower bound  -1963.423  difference  0.010887  parameters  vmu 1.954092 0.9915511 0.1032759 -0.2749603 0.556252 0.267189 0.0547918 -0.005405884 -0.3559827 0.430653 -0.6068526 -0.1687012 diag(mLambda) 0.01341974 0.0004082869 0.01423532 0.01461772 0.01401077 0.01410626 0.01426555 0.01429561 0.01470766 0.01401116 0.01512409 0.01452391 a_rho 535.8077 b_rho 466.1923 a_sigma 5.01 b_sigma 0.6714603
+calculate_lower_bound: T1 -1292.042 T2 -671.3798 
+Iteration  5 : lower bound  -1963.422  difference  0.001150686  parameters  vmu 1.954051 0.9915789 0.1033257 -0.275008 0.5563498 0.2672565 0.05483346 -0.005376275 -0.3560475 0.4307541 -0.6071196 -0.1687064 diag(mLambda) 0.0135691 0.0004082924 0.01438476 0.01476736 0.01416015 0.01425566 0.01441501 0.01444508 0.01485735 0.01416054 0.0152743 0.01467347 a_rho 535.8093 b_rho 466.1907 a_sigma 5.01 b_sigma 0.6725305
+calculate_lower_bound: T1 -1292.042 T2 -671.3793 
+Iteration  6 : lower bound  -1963.421  difference  0.0001552098  parameters  vmu 1.954046 0.9915827 0.1033326 -0.275015 0.5563635 0.267266 0.0548392 -0.005372217 -0.3560568 0.4307683 -0.607156 -0.1687073 diag(mLambda) 0.01359047 0.0004082931 0.01440613 0.01478876 0.01418151 0.01427703 0.01443638 0.01446646 0.01487876 0.0141819 0.01529577 0.01469485 a_rho 535.8096 b_rho 466.1904 a_sigma 5.01 b_sigma 0.6726822
+calculate_lower_bound: T1 -1292.042 T2 -671.3792 
+Iteration  7 : lower bound  -1963.421  difference  2.181484e-05  parameters  vmu 1.954045 0.9915833 0.1033336 -0.275016 0.5563654 0.2672673 0.05484001 -0.005371647 -0.3560581 0.4307703 -0.6071611 -0.1687074 diag(mLambda) 0.01359349 0.0004082932 0.01440916 0.01479179 0.01418454 0.01428006 0.01443941 0.01446949 0.01488179 0.01418493 0.01529882 0.01469789 a_rho 535.8096 b_rho 466.1904 a_sigma 5.01 b_sigma 0.6727037
+calculate_lower_bound: T1 -1292.042 T2 -671.3792 
+Iteration  8 : lower bound  -1963.421  difference  3.083158e-06  parameters  vmu 1.954045 0.9915833 0.1033338 -0.2750161 0.5563657 0.2672675 0.05484012 -0.005371566 -0.3560583 0.4307706 -0.6071618 -0.1687074 diag(mLambda) 0.01359392 0.0004082932 0.01440959 0.01479222 0.01418497 0.01428049 0.01443984 0.01446992 0.01488222 0.01418536 0.01529925 0.01469832 a_rho 535.8096 b_rho 466.1904 a_sigma 5.01 b_sigma 0.6727067
+calculate_lower_bound: T1 -1292.042 T2 -671.3792 
+Iteration  9 : lower bound  -1963.421  difference  4.360736e-07  parameters  vmu 1.954045 0.9915833 0.1033338 -0.2750161 0.5563657 0.2672675 0.05484014 -0.005371555 -0.3560584 0.4307706 -0.607162 -0.1687074 diag(mLambda) 0.01359398 0.0004082932 0.01440965 0.01479228 0.01418503 0.01428055 0.0144399 0.01446998 0.01488228 0.01418542 0.01529931 0.01469838 a_rho 535.8096 b_rho 466.1904 a_sigma 5.01 b_sigma 0.6727071
+calculate_lower_bound: T1 -1292.042 T2 -671.3792 
+Iteration  10 : lower bound  -1963.421  difference  6.166829e-08  parameters  vmu 1.954045 0.9915833 0.1033338 -0.2750161 0.5563657 0.2672675 0.05484014 -0.005371553 -0.3560584 0.4307706 -0.607162 -0.1687074 diag(mLambda) 0.01359399 0.0004082932 0.01440966 0.01479229 0.01418504 0.01428056 0.01443991 0.01446998 0.01488229 0.01418542 0.01529932 0.01469838 a_rho 535.8096 b_rho 466.1904 a_sigma 5.01 b_sigma 0.6727072
+calculate_lower_bound: T1 -1292.042 T2 -671.3792 
+Iteration  11 : lower bound  -1963.421  difference  8.717052e-09  parameters  vmu 1.954045 0.9915833 0.1033338 -0.2750161 0.5563657 0.2672675 0.05484014 -0.005371553 -0.3560584 0.4307706 -0.607162 -0.1687074 diag(mLambda) 0.01359399 0.0004082932 0.01440966 0.01479229 0.01418504 0.01428056 0.01443991 0.01446999 0.01488229 0.01418543 0.01529932 0.01469839 a_rho 535.8096 b_rho 466.1904 a_sigma 5.01 b_sigma 0.6727072
+calculate_lower_bound: T1 -1292.042 T2 -671.3792 
+Iteration  12 : lower bound  -1963.421  difference  1.185754e-09  parameters  vmu 1.954045 0.9915833 0.1033338 -0.2750161 0.5563657 0.2672675 0.05484014 -0.005371553 -0.3560584 0.4307706 -0.607162 -0.1687074 diag(mLambda) 0.01359399 0.0004082932 0.01440966 0.01479229 0.01418504 0.01428056 0.01443991 0.01446999 0.01488229 0.01418543 0.01529932 0.01469839 a_rho 535.8096 b_rho 466.1904 a_sigma 5.01 b_sigma 0.6727072
+calculate_lower_bound: T1 -1292.042 T2 -671.3792 
+Iteration  13 : lower bound  -1963.421  difference  1.925855e-10  parameters  vmu 1.954045 0.9915833 0.1033338 -0.2750161 0.5563657 0.2672675 0.05484014 -0.005371553 -0.3560584 0.4307706 -0.607162 -0.1687074 diag(mLambda) 0.01359399 0.0004082932 0.01440966 0.01479229 0.01418504 0.01428056 0.01443991 0.01446999 0.01488229 0.01418543 0.01529932 0.01469839 a_rho 535.8096 b_rho 466.1904 a_sigma 5.01 b_sigma 0.6727072
+calculate_lower_bound: T1 -1292.042 T2 -671.3792 
+Iteration  14 : lower bound  -1963.421  difference  5.047696e-11  parameters  vmu 1.954045 0.9915833 0.1033338 -0.2750161 0.5563657 0.2672675 0.05484014 -0.005371553 -0.3560584 0.4307706 -0.607162 -0.1687074 diag(mLambda) 0.01359399 0.0004082932 0.01440966 0.01479229 0.01418504 0.01428056 0.01443991 0.01446999 0.01488229 0.01418543 0.01529932 0.01469839 a_rho 535.8096 b_rho 466.1904 a_sigma 5.01 b_sigma 0.6727072
+calculate_lower_bound: T1 -1292.042 T2 -671.3792 
+Iteration  15 : lower bound  -1963.421  difference  2.364686e-11  parameters  vmu 1.954045 0.9915833 0.1033338 -0.2750161 0.5563657 0.2672675 0.05484014 -0.005371553 -0.3560584 0.4307706 -0.607162 -0.1687074 diag(mLambda) 0.01359399 0.0004082932 0.01440966 0.01479229 0.01418504 0.01428056 0.01443991 0.01446999 0.01488229 0.01418543 0.01529932 0.01469839 a_rho 535.8096 b_rho 466.1904 a_sigma 5.01 b_sigma 0.6727072
+calculate_lower_bound: T1 -1292.042 T2 -671.3792 
+Iteration  16 : lower bound  -1963.421  difference  1.455192e-11  parameters  vmu 1.954045 0.9915833 0.1033338 -0.2750161 0.5563657 0.2672675 0.05484014 -0.005371553 -0.3560584 0.4307706 -0.607162 -0.1687074 diag(mLambda) 0.01359399 0.0004082932 0.01440966 0.01479229 0.01418504 0.01428056 0.01443991 0.01446999 0.01488229 0.01418543 0.01529932 0.01469839 a_rho 535.8096 b_rho 466.1904 a_sigma 5.01 b_sigma 0.6727072
+calculate_lower_bound: T1 -1292.042 T2 -671.3792 
+Iteration  17 : lower bound  -1963.421  difference  2.50111e-12  parameters  vmu 1.954045 0.9915833 0.1033338 -0.2750161 0.5563657 0.2672675 0.05484014 -0.005371553 -0.3560584 0.4307706 -0.607162 -0.1687074 diag(mLambda) 0.01359399 0.0004082932 0.01440966 0.01479229 0.01418504 0.01428056 0.01443991 0.01446999 0.01488229 0.01418543 0.01529932 0.01469839 a_rho 535.8096 b_rho 466.1904 a_sigma 5.01 b_sigma 0.6727072
+calculate_lower_bound: T1 -1292.042 T2 -671.3792 
+Iteration  18 : lower bound  -1963.421  difference  1.136868e-12  parameters  vmu 1.954045 0.9915833 0.1033338 -0.2750161 0.5563657 0.2672675 0.05484014 -0.005371553 -0.3560584 0.4307706 -0.607162 -0.1687074 diag(mLambda) 0.01359399 0.0004082932 0.01440966 0.01479229 0.01418504 0.01428056 0.01443991 0.01446999 0.01488229 0.01418543 0.01529932 0.01469839 a_rho 535.8096 b_rho 466.1904 a_sigma 5.01 b_sigma 0.6727072
+calculate_lower_bound: T1 -1292.042 T2 -671.3792 
+Iteration  19 : lower bound  -1963.421  difference  5.229595e-12  parameters  vmu 1.954045 0.9915833 0.1033338 -0.2750161 0.5563657 0.2672675 0.05484014 -0.005371553 -0.3560584 0.4307706 -0.607162 -0.1687074 diag(mLambda) 0.01359399 0.0004082932 0.01440966 0.01479229 0.01418504 0.01428056 0.01443991 0.01446999 0.01488229 0.01418543 0.01529932 0.01469839 a_rho 535.8096 b_rho 466.1904 a_sigma 5.01 b_sigma 0.6727072
+calculate_lower_bound: T1 -1292.042 T2 -671.3792 
+Iteration  20 : lower bound  -1963.421  difference  -1.364242e-12  parameters  vmu 1.954045 0.9915833 0.1033338 -0.2750161 0.5563657 0.2672675 0.05484014 -0.005371553 -0.3560584 0.4307706 -0.607162 -0.1687074 diag(mLambda) 0.01359399 0.0004082932 0.01440966 0.01479229 0.01418504 0.01428056 0.01443991 0.01446999 0.01488229 0.01418543 0.01529932 0.01469839 a_rho 535.8096 b_rho 466.1904 a_sigma 5.01 b_sigma 0.6727072
+[1] 1000   10
+[1] 2000000      10
+$var_result
+$var_result$vmu
+           [,1]
+1   1.954044911
+2   0.991583340
+1   0.103333783
+2  -0.275016123
+3   0.556365733
+4   0.267267514
+5   0.054840139
+6  -0.005371553
+7  -0.356058363
+8   0.430770632
+9  -0.607161968
+10 -0.168707421
+
+$var_result$mLambda
+               1             2             1             2             3
+1   0.0135939930 -1.268801e-04 -1.344821e-02 -1.339831e-02 -1.348995e-02
+2  -0.0001268801  4.082932e-04  5.435410e-06  2.162981e-07  4.635365e-05
+1  -0.0134482150  5.435410e-06  1.440966e-02  1.329145e-02  1.336875e-02
+2  -0.0133983057  2.162981e-07  1.329145e-02  1.479229e-02  1.332015e-02
+3  -0.0134899476  4.635365e-05  1.336875e-02  1.332015e-02  1.418504e-02
+4  -0.0134601023 -8.808675e-06  1.335542e-02  1.330757e-02  1.338335e-02
+5  -0.0134381028 -1.501241e-05  1.333542e-02  1.328772e-02  1.336269e-02
+6  -0.0134347727 -1.346883e-05  1.333166e-02  1.328396e-02  1.335908e-02
+7  -0.0133850782 -5.862567e-06  1.328012e-02  1.323251e-02  1.330819e-02
+8  -0.0134768844  6.571134e-06  1.336753e-02  1.331944e-02  1.339703e-02
+9  -0.0133309843 -1.089013e-05  1.322794e-02  1.318058e-02  1.325539e-02
+10 -0.0134086751 -4.550915e-06  1.330314e-02  1.325543e-02  1.333139e-02
+               4             5             6             7             8
+1  -1.346010e-02 -1.343810e-02 -1.343477e-02 -1.338508e-02 -1.347688e-02
+2  -8.808675e-06 -1.501241e-05 -1.346883e-05 -5.862567e-06  6.571134e-06
+1   1.335542e-02  1.333542e-02  1.333166e-02  1.328012e-02  1.336753e-02
+2   1.330757e-02  1.328772e-02  1.328396e-02  1.323251e-02  1.331944e-02
+3   1.338335e-02  1.336269e-02  1.335908e-02  1.330819e-02  1.339703e-02
+4   1.428056e-02  1.335212e-02  1.334831e-02  1.329644e-02  1.338352e-02
+5   1.335212e-02  1.443991e-02  1.332861e-02  1.327670e-02  1.336346e-02
+6   1.334831e-02  1.332861e-02  1.446999e-02  1.327292e-02  1.335970e-02
+7   1.329644e-02  1.327670e-02  1.327292e-02  1.488229e-02  1.330807e-02
+8   1.338352e-02  1.336346e-02  1.335970e-02  1.330807e-02  1.418543e-02
+9   1.324437e-02  1.322479e-02  1.322100e-02  1.316958e-02  1.325577e-02
+10  1.331944e-02  1.329965e-02  1.329587e-02  1.324428e-02  1.333114e-02
+               9            10
+1  -1.333098e-02 -1.340868e-02
+2  -1.089013e-05 -4.550915e-06
+1   1.322794e-02  1.330314e-02
+2   1.318058e-02  1.325543e-02
+3   1.325539e-02  1.333139e-02
+4   1.324437e-02  1.331944e-02
+5   1.322479e-02  1.329965e-02
+6   1.322100e-02  1.329587e-02
+7   1.316958e-02  1.324428e-02
+8   1.325577e-02  1.333114e-02
+9   1.529932e-02  1.319236e-02
+10  1.319236e-02  1.469839e-02
+
+$var_result$a_rho
+[1] 535.8096
+
+$var_result$b_rho
+[1] 466.1904
+
+$var_result$a_sigma
+[1] 5.01
+
+$var_result$b_sigma
+[1] 0.6727072
+
+$var_result$vlower_bound
+ [1] -2720.695 -1963.803 -1963.434 -1963.423 -1963.422 -1963.421 -1963.421
+ [8] -1963.421 -1963.421 -1963.421 -1963.421 -1963.421 -1963.421 -1963.421
+[15] -1963.421 -1963.421 -1963.421 -1963.421 -1963.421 -1963.421
+
+
+$vbeta_accuracy
+[1] 0.9552267 0.7898488
+
+$vu_accuracy
+ [1] 0.9537607 0.9464600 0.9545889 0.9544692 0.9522091 0.9533737 0.9499700
+ [8] 0.9505550 0.9381767 0.9519851
+
+$sigma2_u_accuracy
+[1] 0.9611518
+
+$rho_accuracy
+[1] 0.8928871
+
+N 1000 
+p 2 
+m 10 
+blocksize 1 
+spline_dim 0 
+calculate_lower_bound: T1 -2028.114 T2 -694.6948 
+ a_sigma 5.01 b_sigma 0.4021572
+calculate_lower_bound: T1 -1291.51 T2 -671.3834 
+Iteration  2 : lower bound  -1962.893  difference  759.9153  parameters  vmu 1.962374 0.9792059 0.09804766 -0.2711323 0.5462744 0.2608207 0.05162066 -0.007981414 -0.3493429 0.4206784 -0.5806254 -0.1681776 diag(mLambda) 0.008337952 0.0007849644 0.009745526 0.01067774 0.009342638 0.009535302 0.009928081 0.009843996 0.01046423 0.009701606 0.01133817 0.01021041 a_rho 535.7525 b_rho 466.2475 a_sigma 5.01 b_sigma 0.6187528
+calculate_lower_bound: T1 -1291.191 T2 -671.3684 
+Iteration  3 : lower bound  -1962.559  difference  0.3340426  parameters  vmu 1.952977 0.9916036 0.1031859 -0.275128 0.5561176 0.2670878 0.0545828 -0.005456076 -0.3558512 0.4302878 -0.6057735 -0.1688125 diag(mLambda) 0.01266385 0.0007799724 0.01408496 0.01504895 0.0136736 0.01387064 0.01427136 0.01418655 0.01482985 0.01403635 0.0157478 0.01456398 a_rho 535.8096 b_rho 466.1904 a_sigma 5.01 b_sigma 0.6707527
+calculate_lower_bound: T1 -1291.213 T2 -671.3378 
+Iteration  4 : lower bound  -1962.551  difference  0.008401916  parameters  vmu 1.952748 0.9917083 0.1035602 -0.2754007 0.5568067 0.2675814 0.05490748 -0.005218377 -0.3562894 0.4310136 -0.6078896 -0.1688119 diag(mLambda) 0.01370193 0.0007799682 0.01512495 0.0160934 0.01471238 0.01490998 0.0153119 0.015227 0.01587361 0.0150757 0.01679844 0.01560599 a_rho 535.8219 b_rho 466.1781 a_sigma 5.01 b_sigma 0.6783607
+calculate_lower_bound: T1 -1291.216 T2 -671.3338 
+Iteration  5 : lower bound  -1962.55  difference  0.0007786788  parameters  vmu 1.952707 0.9917362 0.1036104 -0.2754482 0.5569048 0.2676492 0.05494944 -0.005188409 -0.356354 0.431115 -0.6081575 -0.1688168 diag(mLambda) 0.01385373 0.0007799658 0.015277 0.01624606 0.01486427 0.01506195 0.01546403 0.01537911 0.01602616 0.01522767 0.01695194 0.01575831 a_rho 535.8236 b_rho 466.1764 a_sigma 5.01 b_sigma 0.6794459
+calculate_lower_bound: T1 -1291.217 T2 -671.3332 
+Iteration  6 : lower bound  -1962.55  difference  0.0001028477  parameters  vmu 1.952702 0.99174 0.1036172 -0.2754552 0.5569184 0.2676586 0.0549551 -0.005184426 -0.3563633 0.431129 -0.6081941 -0.1688178 diag(mLambda) 0.01387541 0.0007799652 0.01529872 0.01626787 0.01488596 0.01508365 0.01548576 0.01540084 0.01604796 0.01524938 0.01697389 0.01578007 a_rho 535.8238 b_rho 466.1762 a_sigma 5.01 b_sigma 0.6795994
+calculate_lower_bound: T1 -1291.217 T2 -671.3331 
+Iteration  7 : lower bound  -1962.55  difference  1.432631e-05  parameters  vmu 1.9527 0.9917405 0.1036188 -0.2754555 0.556921 0.2676606 0.05495656 -0.005183199 -0.356364 0.4311316 -0.6081985 -0.1688172 diag(mLambda) 0.01387845 0.0007799643 0.01530176 0.01627092 0.014889 0.01508669 0.0154888 0.01540388 0.01605101 0.01525242 0.01697694 0.01578312 a_rho 535.8238 b_rho 466.1762 a_sigma 5.01 b_sigma 0.6796209
+calculate_lower_bound: T1 -1291.217 T2 -671.3331 
+Iteration  8 : lower bound  -1962.55  difference  2.142063e-06  parameters  vmu 1.952701 0.9917406 0.1036185 -0.2754562 0.5569207 0.2676602 0.05495617 -0.005183623 -0.3563647 0.4311314 -0.6081998 -0.1688178 diag(mLambda) 0.01387887 0.000779965 0.01530219 0.01627134 0.01488942 0.01508712 0.01548922 0.01540431 0.01605143 0.01525284 0.01697737 0.01578354 a_rho 535.8238 b_rho 466.1762 a_sigma 5.01 b_sigma 0.679624
+calculate_lower_bound: T1 -1291.217 T2 -671.3331 
+Iteration  9 : lower bound  -1962.55  difference  2.142142e-07  parameters  vmu 1.952701 0.9917406 0.1036185 -0.2754562 0.5569208 0.2676602 0.05495617 -0.005183633 -0.3563647 0.4311314 -0.6081999 -0.1688178 diag(mLambda) 0.01387894 0.0007799654 0.01530226 0.01627141 0.01488949 0.01508719 0.0154893 0.01540438 0.0160515 0.01525291 0.01697744 0.01578361 a_rho 535.8238 b_rho 466.1762 a_sigma 5.01 b_sigma 0.6796244
+calculate_lower_bound: T1 -1291.217 T2 -671.3331 
+Iteration  10 : lower bound  -1962.55  difference  9.569294e-08  parameters  vmu 1.952701 0.9917406 0.1036185 -0.2754562 0.5569208 0.2676603 0.05495621 -0.005183592 -0.3563647 0.4311315 -0.6081999 -0.1688178 diag(mLambda) 0.01387895 0.0007799654 0.01530227 0.01627143 0.01488951 0.0150872 0.01548931 0.01540439 0.01605152 0.01525293 0.01697745 0.01578363 a_rho 535.8238 b_rho 466.1762 a_sigma 5.01 b_sigma 0.6796245
+calculate_lower_bound: T1 -1291.217 T2 -671.3331 
+Iteration  11 : lower bound  -1962.55  difference  -3.664809e-08  parameters  vmu 1.952701 0.9917406 0.1036184 -0.2754563 0.5569207 0.2676602 0.05495613 -0.005183672 -0.3563648 0.4311314 -0.6082 -0.1688178 diag(mLambda) 0.01387896 0.0007799653 0.01530228 0.01627143 0.01488951 0.01508721 0.01548932 0.0154044 0.01605152 0.01525293 0.01697746 0.01578363 a_rho 535.8238 b_rho 466.1762 a_sigma 5.01 b_sigma 0.6796246
+[1] 1000   10
+[1] 2000000      10
+$var_result
+$var_result$vmu
+ [1]  1.952700940  0.991740607  0.103618416 -0.275456279  0.556920717
+ [6]  0.267660211  0.054956128 -0.005183672 -0.356364769  0.431131401
+[11] -0.608199961 -0.168817832
+
+$var_result$mLambda
+               [,1]          [,2]          [,3]          [,4]          [,5]
+ [1,]  0.0138789574 -2.472523e-04 -1.361663e-02 -1.347854e-02 -1.368880e-02
+ [2,] -0.0002472523  7.799653e-04  2.340014e-05 -2.353966e-05  8.208022e-05
+ [3,] -0.0136166250  2.340014e-05  1.530228e-02  1.329829e-02  1.347578e-02
+ [4,] -0.0134785412 -2.353966e-05  1.329829e-02  1.627143e-02  1.334887e-02
+ [5,] -0.0136887959  8.208022e-05  1.347578e-02  1.334887e-02  1.488951e-02
+ [6,] -0.0136287829 -2.464627e-05  1.344676e-02  1.332650e-02  1.349784e-02
+ [7,] -0.0135755164 -3.142976e-05  1.339615e-02  1.327676e-02  1.344652e-02
+ [8,] -0.0135820358 -4.550251e-05  1.340656e-02  1.328791e-02  1.345591e-02
+ [9,] -0.0135041728 -3.100579e-05  1.332568e-02  1.320690e-02  1.337580e-02
+[10,] -0.0136447039  8.841996e-05  1.343051e-02  1.330362e-02  1.349001e-02
+[11,] -0.0133829326 -4.323890e-05  1.320957e-02  1.309258e-02  1.325832e-02
+[12,] -0.0135496166  5.430767e-06  1.336019e-02  1.323892e-02  1.341319e-02
+               [,6]          [,7]          [,8]          [,9]         [,10]
+ [1,] -1.362878e-02 -1.357552e-02 -1.358204e-02 -1.350417e-02 -1.364470e-02
+ [2,] -2.464627e-05 -3.142976e-05 -4.550251e-05 -3.100579e-05  8.841996e-05
+ [3,]  1.344676e-02  1.339615e-02  1.340656e-02  1.332568e-02  1.343051e-02
+ [4,]  1.332650e-02  1.327676e-02  1.328791e-02  1.320690e-02  1.330362e-02
+ [5,]  1.349784e-02  1.344652e-02  1.345591e-02  1.337580e-02  1.349001e-02
+ [6,]  1.508721e-02  1.342505e-02  1.343634e-02  1.335441e-02  1.345208e-02
+ [7,]  1.342505e-02  1.548932e-02  1.338638e-02  1.330462e-02  1.340088e-02
+ [8,]  1.343634e-02  1.338638e-02  1.540440e-02  1.331593e-02  1.341012e-02
+ [9,]  1.335441e-02  1.330462e-02  1.331593e-02  1.605152e-02  1.333040e-02
+[10,]  1.345208e-02  1.340088e-02  1.341012e-02  1.333040e-02  1.525293e-02
+[11,]  1.323882e-02  1.318958e-02  1.320102e-02  1.312017e-02  1.321322e-02
+[12,]  1.338674e-02  1.333652e-02  1.334720e-02  1.326635e-02  1.336798e-02
+              [,11]         [,12]
+ [1,] -0.0133829326 -1.354962e-02
+ [2,] -0.0000432389  5.430767e-06
+ [3,]  0.0132095732  1.336019e-02
+ [4,]  0.0130925778  1.323892e-02
+ [5,]  0.0132583213  1.341319e-02
+ [6,]  0.0132388238  1.338674e-02
+ [7,]  0.0131895799  1.333652e-02
+ [8,]  0.0132010192  1.334720e-02
+ [9,]  0.0131201706  1.326635e-02
+[10,]  0.0132132174  1.336798e-02
+[11,]  0.0169774571  1.315105e-02
+[12,]  0.0131510522  1.578363e-02
+
+$var_result$a_rho
+[1] 535.8238
+
+$var_result$b_rho
+[1] 466.1762
+
+$var_result$a_sigma
+[1] 5.01
+
+$var_result$b_sigma
+[1] 0.6796246
+
+$var_result$vlower_bound
+ [1] -2722.808 -1962.893 -1962.559 -1962.551 -1962.550 -1962.550 -1962.550
+ [8] -1962.550 -1962.550 -1962.550 -1962.550
+
+
+$vbeta_accuracy
+[1] 0.9608667 0.8781325
+
+$vu_accuracy
+ [1] 0.9659271 0.9666479 0.9642331 0.9656637 0.9662443 0.9661013 0.9657398
+ [8] 0.9653874 0.9601304 0.9667572
+
+$sigma2_u_accuracy
+[1] 0.962611
+
+$rho_accuracy
+[1] 0.8932379
+
+N 1000 
+p 2 
+m 10 
+blocksize 1 
+spline_dim 0 
+calculate_lower_bound: T1 -2028.114 T2 -694.6948 
+ a_sigma 5.01 b_sigma 0.4021572
+calculate_lower_bound: T1 -1291.705 T2 -671.3728 
+Iteration  2 : lower bound  -1963.077  difference  759.731  parameters  vmu 1.961896 0.9793967 0.09835245 -0.2709185 0.5466789 0.2613814 0.0521169 -0.007495011 -0.3487965 0.421491 -0.5799086 -0.16751 diag(mLambda) 0.009120218 0.0007590299 0.01006552 0.01098491 0.01033822 0.01042091 0.01093597 0.01079909 0.01142184 0.01015819 0.01179286 0.009234638 a_rho 535.7559 b_rho 466.2441 a_sigma 5.01 b_sigma 0.6214199
+calculate_lower_bound: T1 -1291.42 T2 -671.395 
+Iteration  3 : lower bound  -1962.815  difference  0.2627349  parameters  vmu 1.953075 0.9912532 0.1038789 -0.2761131 0.5555349 0.2670922 0.05367477 -0.006233012 -0.3567594 0.431213 -0.6033714 -0.1691647 diag(mLambda) 0.01153234 0.0008602414 0.0135602 0.01341493 0.01183597 0.01428797 0.0141584 0.01381929 0.01472346 0.01247125 0.01406089 0.01200534 a_rho 535.7984 b_rho 466.2016 a_sigma 5.01 b_sigma 0.6650699
+calculate_lower_bound: T1 -1291.598 T2 -671.5873 
+Iteration  4 : lower bound  -1963.185  difference  -0.3707536  parameters  vmu 1.954233 0.9898803 0.1017099 -0.2776895 0.5554243 0.2686867 0.05162641 -0.008574642 -0.3566124 0.4327142 -0.5940904 -0.1696021 diag(mLambda) 0.01620999 0.0009631413 0.01543849 0.02237579 0.01395011 0.01544582 0.01789698 0.01760851 0.01866091 0.01749908 0.01352315 0.01457596 a_rho 535.7276 b_rho 466.2724 a_sigma 5.01 b_sigma 0.6769904
+[1] 1000   10
+[1] 2000000      10
+$var_result
+$var_result$vmu
+ [1]  1.954233350  0.989880265  0.101709901 -0.277689473  0.555424258
+ [6]  0.268686748  0.051626409 -0.008574642 -0.356612356  0.432714201
+[11] -0.594090372 -0.169602112
+
+$var_result$mLambda
+              1             2             1            2             3
+1   0.016209987 -1.881290e-04 -0.0150167473 -0.017653797 -1.453873e-02
+2  -0.000188129  9.631413e-04 -0.0001143305 -0.000150436 -4.298524e-05
+1  -0.015016747 -1.143305e-04  0.0154384865  0.016403521  1.350985e-02
+2  -0.017653797 -1.504360e-04  0.0164035208  0.022375786  1.585653e-02
+3  -0.014538727 -4.298524e-05  0.0135098546  0.015856530  1.395011e-02
+4  -0.015209888 -1.444176e-04  0.0141607574  0.016620990  1.370931e-02
+5  -0.016253940 -1.682702e-04  0.0151307375  0.017757772  1.465166e-02
+6  -0.016114066 -1.638612e-04  0.0150006158  0.017605131  1.452533e-02
+7  -0.016258337 -1.522303e-04  0.0151182378  0.017739062  1.464886e-02
+8  -0.016311482 -1.234904e-04  0.0151761975  0.017811695  1.469503e-02
+9  -0.013420873 -1.351776e-04  0.0124630386  0.014616498  1.208932e-02
+10 -0.014438355 -1.329028e-04  0.0134180518  0.015737214  1.300827e-02
+               4             5             6             7             8
+1  -0.0152098878 -0.0162539397 -0.0161140656 -0.0162583366 -0.0163114823
+2  -0.0001444176 -0.0001682702 -0.0001638612 -0.0001522303 -0.0001234904
+1   0.0141607574  0.0151307375  0.0150006158  0.0151182378  0.0151761975
+2   0.0166209896  0.0177577723  0.0176051314  0.0177390618  0.0178116953
+3   0.0137093123  0.0146516645  0.0145253271  0.0146488635  0.0146950303
+4   0.0154458214  0.0153638479  0.0152309358  0.0153613147  0.0154038779
+5   0.0153638479  0.0178969774  0.0162730590  0.0164141909  0.0164564838
+6   0.0152309358  0.0162730590  0.0176085123  0.0162837169  0.0163194969
+7   0.0153613147  0.0164141909  0.0162837169  0.0186609126  0.0164728232
+8   0.0154038779  0.0164564838  0.0163194969  0.0164728232  0.0174990794
+9   0.0126812011  0.0135531676  0.0134525839  0.0135807573  0.0136189683
+10  0.0136411449  0.0145759511  0.0144632759  0.0145994631  0.0146225775
+               9            10
+1  -0.0134208731 -0.0144383552
+2  -0.0001351776 -0.0001329028
+1   0.0124630386  0.0134180518
+2   0.0146164984  0.0157372143
+3   0.0120893180  0.0130082651
+4   0.0126812011  0.0136411449
+5   0.0135531676  0.0145759511
+6   0.0134525839  0.0144632759
+7   0.0135807573  0.0145994631
+8   0.0136189683  0.0146225775
+9   0.0135231529  0.0122370945
+10  0.0122370945  0.0145759563
+
+$var_result$a_rho
+[1] 535.7276
+
+$var_result$b_rho
+[1] 466.2724
+
+$var_result$a_sigma
+[1] 5.01
+
+$var_result$b_sigma
+[1] 0.6769904
+
+$var_result$vlower_bound
+[1] -2722.808 -1963.077 -1962.815 -1963.185
+
+
+$vbeta_accuracy
+[1] 0.9653844 0.8571189
+
+$vu_accuracy
+ [1] 0.9663875 0.9481101 0.9504454 0.9702916 0.9745841 0.9755764 0.9767170
+ [8] 0.9762603 0.8941568 0.9501426
+
+$sigma2_u_accuracy
+[1] 0.9623007
+
+$rho_accuracy
+[1] 0.8908644
+
+N 1000 
+p 2 
+m 10 
+blocksize 1 
+spline_dim 0 
+calculate_lower_bound: T1 -2030.836 T2 -694.6948 
+ a_sigma 5.01 b_sigma 0.3970894
+calculate_lower_bound: T1 -1292.903 T2 -671.3894 
+Iteration  2 : lower bound  -1964.292  difference  761.2382  parameters  vmu 1.96242 0.9791945 0.09783819 -0.2712057 0.5460179 0.2605378 0.05137857 -0.008157241 -0.3492643 0.4202053 -0.5806982 -0.1682035 diag(mLambda) 0.0007519747 0.0007778985 0.002183195 0.003437175 0.001627099 0.001911061 0.002441215 0.002328607 0.003155298 0.002102354 0.004310282 0.002811764 a_rho 535.7506 b_rho 466.2494 a_sigma 5.01 b_sigma 0.5811078
