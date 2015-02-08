@@ -174,12 +174,13 @@ calculate_accuracy = function(mult, mcmc_samples, var_result, print_flag=FALSE, 
   print(dim(mult$mZ))
   print(dim(mcmc_samples$u))
   vu_accuracy = rep(NA, ncol(mult$mZ))
+  browser()
   for (i in 1:ncol(mult$mZ)) {
-    vu_accuracy[i] = calculate_accuracy3(mcmc_samples$u[,i], dnorm,
-                                         var_result$vmu[i+2], sqrt(var_result$mLambda[i+2,i+2]))
+    vu_accuracy[i] = calculate_accuracy3(mcmc_samples$u[,i,1], dnorm,
+                                         var_result$vmu[i+mult$p], sqrt(var_result$mLambda[i+mult$p,i+mult$p]))
     if (print_flag) cat("vu[", i, "]", approximation, "accuracy:", vu_accuracy[i], "\n")
-    if (plot_flag) accuracy_plot(mcmc_samples$u[,i], dnorm,
-                            var_result$vmu[i+2], sqrt(var_result$mLambda[i+2,i+2]))
+    if (plot_flag) accuracy_plot(mcmc_samples$u[,i,1], dnorm,
+                            var_result$vmu[i+mult$p], sqrt(var_result$mLambda[i+mult$p,i+mult$p]))
   }
   
   # sigma2_u accuracy
@@ -316,9 +317,9 @@ test_accuracies_slope = function()
   #set.seed(1)
   #mult = generate_slope_test_data()
   # Monte Carlo Markov Chains approximation
-  mcmc_samples = mcmc_approximation(mult, iterations=1e3, mc.cores = 32)
-  #save(mult, mcmc_samples, file="accuracy_slope.RData")  
-  load(file="accuracy_slope.RData")
+  #mcmc_samples = mcmc_approximation(mult, iterations=1e3, mc.cores = 32)
+  #save(mult, mcmc_samples, file="data/accuracy_slope.RData")  
+  load(file="data/accuracy_slope.RData")
   
   now = Sys.time()
   var1 = test_accuracy(mult, mcmc_samples, "laplacian")
