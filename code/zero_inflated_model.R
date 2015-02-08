@@ -203,7 +203,7 @@ zero_infl_var.univariate <- function(univariate, verbose=FALSE, plot_lower_bound
   return(params)
 }
 
-create_multivariate <- function(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, m=ncol(mZ), blocksize=1, spline_dim=NA)
+create_multivariate <- function(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, m=ncol(mZ), blocksize=1, spline_dim=NA, v=m+2)
 {
   # Initialise
   n = length(vy)
@@ -215,6 +215,7 @@ create_multivariate <- function(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, 
   }
   vmu = rep(0, ncol(mC))
   
+  p = ncol(mX)
   mSigma.beta.inv = diag(1/sigma2.beta, ncol(mX))
   if (!is.null(ncol(mZ))) {
     mSigma.u.inv = diag(tau, ncol(mZ))
@@ -226,13 +227,13 @@ create_multivariate <- function(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, 
   b_rho = n - sum(vp) + 1
   
   # Set prior parameters for Inverse Wishart distribution
-  v=prior$v + m
   psi=diag(1, rep(blocksize))
   
   prior = list(a_sigma=a_sigma, b_sigma=b_sigma,
                v=v, psi=psi,
                a_rho=1, b_rho=1,
                sigma2.beta=sigma2.beta)
+  v=prior$v + m
   multivariate = list(vy=vy, vp=vp, vmu=vmu,
                       mX=mX, mZ=mZ, mC=mC,
                       m=m, blocksize=blocksize, spline_dim=spline_dim,
