@@ -113,7 +113,7 @@ generate_spline_test_data = function()
   return(mult)
 }
 
-calculate_accuracy = function(mult, mcmc_samples, var_result, print_flag=FALSE, plot_flag=FALSE)
+calculate_accuracies = function(mult, mcmc_samples, var_result, print_flag=FALSE, plot_flag=FALSE)
 {
   # TODO: Add support for checking the accuracy over multiple dimensions
   # cubature$adaptIntegrate
@@ -121,7 +121,7 @@ calculate_accuracy = function(mult, mcmc_samples, var_result, print_flag=FALSE, 
   if (plot_flag) pdf(paste0("accuracy_plots_", approximation, ".pdf"))
   #return(var_result)
   # vbeta accuracy
-  calculate_accuracy3 = function(mcmc_samples, dist_fn, param1, param2)
+  calculate_accuracy = function(mcmc_samples, dist_fn, param1, param2)
   {
     mcmc_density = density(mcmc_samples)
     mcmc_fn = splinefun(mcmc_density$x, mcmc_density$y)
@@ -159,11 +159,11 @@ calculate_accuracy = function(mult, mcmc_samples, var_result, print_flag=FALSE, 
   
   vbeta_accuracy = rep(NA, ncol(mult$mX))
   for (i in 1:ncol(mult$mX)) {
-    vbeta_accuracy[i] = calculate_accuracy3(mcmc_samples$vbeta[,i], dnorm,
+    vbeta_accuracy[i] = calculate_accuracy(mcmc_samples$vbeta[,i], dnorm,
                                             var_result$vmu[i], sqrt(var_result$mLambda[i,i]))
     if (print_flag) cat("vbeta[", i, "]", approximation, "accuracy:", vbeta_accuracy[i], "\n")
     
-    param_name = sprintf("vbeta[%d]", 1)
+    param_name = sprintf("vbeta[%d]", i)
     if (plot_flag) accuracy_plot(mcmc_samples$vbeta[,i], dnorm,
                             var_result$vmu[i], sqrt(var_result$mLambda[i,i]))
   }
@@ -174,24 +174,25 @@ calculate_accuracy = function(mult, mcmc_samples, var_result, print_flag=FALSE, 
   print(dim(mult$mZ))
   print(dim(mcmc_samples$u))
   vu_accuracy = rep(NA, ncol(mult$mZ))
-  browser()
   for (i in 1:ncol(mult$mZ)) {
-    vu_accuracy[i] = calculate_accuracy3(mcmc_samples$u[,i,1], dnorm,
+    B = mult$blocksize
+    vu_accuracy[i] = calculate_accuracy(mcmc_samples$u[,ceiling(i/B),(i %% B)+1], dnorm,
                                          var_result$vmu[i+mult$p], sqrt(var_result$mLambda[i+mult$p,i+mult$p]))
     if (print_flag) cat("vu[", i, "]", approximation, "accuracy:", vu_accuracy[i], "\n")
-    if (plot_flag) accuracy_plot(mcmc_samples$u[,i,1], dnorm,
+    if (plot_flag) accuracy_plot(mcmc_samples$u[,ceil(i/B),(i %% B)+1], dnorm,
                             var_result$vmu[i+mult$p], sqrt(var_result$mLambda[i+mult$p,i+mult$p]))
   }
   
   # sigma2_u accuracy
-  sigma2_u_accuracy = calculate_accuracy3(1/mcmc_samples$sigma_u^2, dgamma,
+  # FIXME - this may be wrong for blocksize != 1?
+  sigma2_u_accuracy = calculate_accuracy(1/mcmc_samples$sigma_u^2, dgamma,
                                           var_result$a_sigma, var_result$b_sigma)
   if (print_flag) cat("sigma2_u", approximation, "accuracy:", sigma2_u_accuracy, "\n")
   if (plot_flag) accuracy_plot(1/mcmc_samples$sigma_u^2, dgamma,
                           var_result$a_sigma, var_result$b_sigma)
   
   # rho accuracy
-  rho_accuracy = calculate_accuracy3(mcmc_samples$rho, dbeta,
+  rho_accuracy = calculate_accuracy(mcmc_samples$rho, dbeta,
                                      var_result$a_rho, var_result$b_rho)
   if (print_flag) cat("rho", approximation, "accuracy: ", rho_accuracy, "\n")
   if (plot_flag) accuracy_plot(mcmc_samples$rho, dbeta,
@@ -207,7 +208,7 @@ calculate_accuracy = function(mult, mcmc_samples, var_result, print_flag=FALSE, 
 test_accuracy = function(mult, mcmc_samples, approximation, plot=FALSE)
 {
   var_result = zero_infl_var(mult, method=approximation, verbose=TRUE)
-  return(calculate_accuracy(mult, mcmc_samples, var_result))
+  return(calculate_accuracies(mult, mcmc_samples, var_result))
 }
 
 # Calculate accuracy ----
@@ -314,12 +315,12 @@ test_accuracies = function()
 
 test_accuracies_slope = function()
 {
-  #set.seed(1)
-  #mult = generate_slope_test_data()
+  set.seed(1)
+  mult = generate_slope_test_data()
   # Monte Carlo Markov Chains approximation
-  #mcmc_samples = mcmc_approximation(mult, iterations=1e3, mc.cores = 32)
-  #save(mult, mcmc_samples, file="data/accuracy_slope.RData")  
-  load(file="data/accuracy_slope.RData")
+  mcmc_samples = mcmc_approximation(mult, iterations=1e4, mc.cores = 4)
+  save(mult, mcmc_samples, file="data/accuracy_slope.RData")  
+  #load(file="data/accuracy_slope.RData")
   
   now = Sys.time()
   var1 = test_accuracy(mult, mcmc_samples, "laplacian")
