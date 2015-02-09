@@ -52,8 +52,8 @@ generate_test_data = function(m, ni)
 }
 
 generate_slope_test_data = function() {
-  m = 20
-  ni = 10
+  m = 10
+  ni = 5
   n = rep(ni,m)
   mX = matrix(as.vector(cbind(rep(1, sum(n)), runif(sum(n), -1, 1))), sum(n), 2)
   mZ = makeZ(mX, m, ni, p=2)
@@ -176,10 +176,10 @@ calculate_accuracies = function(mult, mcmc_samples, var_result, print_flag=FALSE
   vu_accuracy = rep(NA, ncol(mult$mZ))
   for (i in 1:ncol(mult$mZ)) {
     B = mult$blocksize
-    vu_accuracy[i] = calculate_accuracy(mcmc_samples$u[,ceiling(i/B),(i %% B)+1], dnorm,
+    vu_accuracy[i] = calculate_accuracy(mcmc_samples$vu[,ceiling(i/B),(i %% B)+1], dnorm,
                                          var_result$vmu[i+mult$p], sqrt(var_result$mLambda[i+mult$p,i+mult$p]))
     if (print_flag) cat("vu[", i, "]", approximation, "accuracy:", vu_accuracy[i], "\n")
-    if (plot_flag) accuracy_plot(mcmc_samples$u[,ceil(i/B),(i %% B)+1], dnorm,
+    if (plot_flag) accuracy_plot(mcmc_samples$vu[,ceil(i/B),(i %% B)+1], dnorm,
                             var_result$vmu[i+mult$p], sqrt(var_result$mLambda[i+mult$p,i+mult$p]))
   }
   
@@ -315,12 +315,12 @@ test_accuracies = function()
 
 test_accuracies_slope = function()
 {
-  set.seed(1)
-  mult = generate_slope_test_data()
+  #set.seed(1)
+  #mult = generate_slope_test_data()
   # Monte Carlo Markov Chains approximation
-  mcmc_samples = mcmc_approximation(mult, iterations=1e4, mc.cores = 4)
-  save(mult, mcmc_samples, file="data/accuracy_slope.RData")  
-  #load(file="data/accuracy_slope.RData")
+  #mcmc_samples = mcmc_approximation(mult, iterations=1e3, mc.cores = 4)
+  #save(mult, mcmc_samples, file="data/accuracy_slope.RData")  
+  load(file="data/accuracy_slope.RData")
   
   now = Sys.time()
   var1 = test_accuracy(mult, mcmc_samples, "laplacian")
