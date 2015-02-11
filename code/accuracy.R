@@ -179,7 +179,11 @@ calculate_accuracies = function(mult, mcmc_samples, var_result, approximation, p
     vu_accuracy[i] = calculate_accuracy(mcmc_samples$vu[,ceiling(i/B),(i %% B)+1], dnorm,
                                          var_result$vmu[i+mult$p], sqrt(var_result$mLambda[i+mult$p,i+mult$p]))
     if (print_flag) cat("vu[", i, "]", approximation, "accuracy:", vu_accuracy[i], "\n")
+<<<<<<< HEAD
     if (plot_flag) accuracy_plot(mcmc_samples$vu[,ceiling(i/B),(i %% B)+1], dnorm,
+=======
+    if (plot_flag) accuracy_plot(mcmc_samples$vu[,ceil(i/B),(i %% B)+1], dnorm,
+>>>>>>> 839588c7086c20338ecb02c729f065c70f44d436
                             var_result$vmu[i+mult$p], sqrt(var_result$mLambda[i+mult$p,i+mult$p]))
   }
   
