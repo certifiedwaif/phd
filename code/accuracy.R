@@ -52,8 +52,8 @@ generate_test_data = function(m, ni)
 }
 
 generate_slope_test_data = function() {
-  m = 20
-  ni = 10
+  m = 10
+  ni = 5
   n = rep(ni,m)
   mX = matrix(as.vector(cbind(rep(1, sum(n)), runif(sum(n), -1, 1))), sum(n), 2)
   mZ = makeZ(mX, m, ni, p=2)
@@ -66,7 +66,7 @@ generate_slope_test_data = function() {
   
   tau = 1.0E2
   
-  sigma2.beta <- 1.0E3
+  sigma2.beta <- 1.0E5
   
   test_data = generate_multivariate_test_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u, verbose=TRUE)
   vy = test_data$vy
@@ -113,7 +113,7 @@ generate_spline_test_data = function()
   return(mult)
 }
 
-calculate_accuracies = function(mult, mcmc_samples, var_result, print_flag=FALSE, plot_flag=FALSE)
+calculate_accuracies = function(mult, mcmc_samples, var_result, approximation, print_flag=FALSE, plot_flag=FALSE)
 {
   # TODO: Add support for checking the accuracy over multiple dimensions
   # cubature$adaptIntegrate
@@ -176,10 +176,10 @@ calculate_accuracies = function(mult, mcmc_samples, var_result, print_flag=FALSE
   vu_accuracy = rep(NA, ncol(mult$mZ))
   for (i in 1:ncol(mult$mZ)) {
     B = mult$blocksize
-    vu_accuracy[i] = calculate_accuracy(mcmc_samples$u[,ceiling(i/B),(i %% B)+1], dnorm,
+    vu_accuracy[i] = calculate_accuracy(mcmc_samples$vu[,ceiling(i/B),(i %% B)+1], dnorm,
                                          var_result$vmu[i+mult$p], sqrt(var_result$mLambda[i+mult$p,i+mult$p]))
     if (print_flag) cat("vu[", i, "]", approximation, "accuracy:", vu_accuracy[i], "\n")
-    if (plot_flag) accuracy_plot(mcmc_samples$u[,ceil(i/B),(i %% B)+1], dnorm,
+    if (plot_flag) accuracy_plot(mcmc_samples$vu[,ceiling(i/B),(i %% B)+1], dnorm,
                             var_result$vmu[i+mult$p], sqrt(var_result$mLambda[i+mult$p,i+mult$p]))
   }
   
@@ -208,7 +208,7 @@ calculate_accuracies = function(mult, mcmc_samples, var_result, print_flag=FALSE
 test_accuracy = function(mult, mcmc_samples, approximation, plot=FALSE)
 {
   var_result = zero_infl_var(mult, method=approximation, verbose=TRUE)
-  return(calculate_accuracies(mult, mcmc_samples, var_result))
+  return(calculate_accuracies(mult, mcmc_samples, var_result, approximation, plot_flag=plot))
 }
 
 # Calculate accuracy ----
@@ -318,23 +318,23 @@ test_accuracies_slope = function()
   set.seed(1)
   mult = generate_slope_test_data()
   # Monte Carlo Markov Chains approximation
-  mcmc_samples = mcmc_approximation(mult, iterations=1e4, mc.cores = 4)
+  mcmc_samples = mcmc_approximation(mult, iterations=1e5, warmup=2e3, mc.cores = 1)
   save(mult, mcmc_samples, file="data/accuracy_slope.RData")  
   #load(file="data/accuracy_slope.RData")
   
   now = Sys.time()
-  var1 = test_accuracy(mult, mcmc_samples, "laplacian")
+  var1 = test_accuracy(mult, mcmc_samples, "laplacian", plot=TRUE)
   print(Sys.time() - now)
   print(var1)
   
   now = Sys.time()
-  var2 = test_accuracy(mult, mcmc_samples, "gva")
+  var2 = test_accuracy(mult, mcmc_samples, "gva", plot=TRUE)
   print(Sys.time() - now)
   #print(image(Matrix(var2$var_result$mLambda)))
   print(var2)
   
   now = Sys.time()
-  var3 = test_accuracy(mult, mcmc_samples, "gva2")
+  var3 = test_accuracy(mult, mcmc_samples, "gva2", plot=TRUE)
   #print(image(Matrix(var3$var_result$mLambda)))
   print(Sys.time() - now)
   print(var3)
@@ -342,7 +342,7 @@ test_accuracies_slope = function()
   print("gva2new")
   now = Sys.time()
   #Rprof(line.profiling=TRUE)
-  var4 = test_accuracy(mult, mcmc_samples, "gva2new")
+  var4 = test_accuracy(mult, mcmc_samples, "gva2new", plot=TRUE)
   #Rprof(NULL)
   #print(summaryRprof(lines = "both"))
   #print(image(Matrix(var4$var_result$mLambda)))  
@@ -353,7 +353,7 @@ test_accuracies_slope = function()
   now = Sys.time()
   # GVA NR is unstable, and sometimes fails with an error
   #var5 = test_accuracy(mult, mcmc_samples, "gva_nr")
-  var5 = test_accuracy(mult, mcmc_samples, "gva_nr")
+  var5 = test_accuracy(mult, mcmc_samples, "gva_nr", plot=TRUE)
   print(Sys.time() - now)
   #print(image(Matrix(var5$var_result$mLambda)))  
   print(var5)
