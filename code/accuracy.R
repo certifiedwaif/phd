@@ -1,7 +1,6 @@
 # accuracy.R
-setwd("~/phd/code")
 source("zero_inflated_model.R")
-source("test_zero_inflated_model.R")
+source("generate.R")
 source("mcmc.R")
 source("rwmh.R")
 
@@ -42,7 +41,7 @@ generate_test_data = function(m, ni)
   
   sigma2.beta <- 1.0E3
   
-  test_data = generate_multivariate_test_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u)
+  test_data = gen_mult_test_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u)
   vy = test_data$vy
   
   # Test accuracy
@@ -68,7 +67,7 @@ generate_slope_test_data = function() {
   
   sigma2.beta <- 1.0E5
   
-  test_data = generate_multivariate_test_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u, verbose=TRUE)
+  test_data = gen_mult_test_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u, verbose=TRUE)
   vy = test_data$vy
   
   # Test model fitting
@@ -174,16 +173,18 @@ calculate_accuracies = function(mult, mcmc_samples, var_result, approximation, p
   print(dim(mult$mZ))
   print(dim(mcmc_samples$u))
   vu_accuracy = rep(NA, ncol(mult$mZ))
+  B = mult$blocksize
+  b_idx = 1
   for (i in 1:ncol(mult$mZ)) {
-    B = mult$blocksize
-    vu_accuracy[i] = calculate_accuracy(mcmc_samples$vu[,ceiling(i/B),(i %% B)+1], dnorm,
+    # TODO: The B - (i %% B) expression only works for B=2. Rewrite this.
+    m_idx = ceiling(i/B)
+    b_idx = b_idx + 1
+    if (b_idx > B)
+      b_idx=1
+    vu_accuracy[i] = calculate_accuracy(mcmc_samples$vu[,m_idx,b_idx], dnorm,
                                          var_result$vmu[i+mult$p], sqrt(var_result$mLambda[i+mult$p,i+mult$p]))
     if (print_flag) cat("vu[", i, "]", approximation, "accuracy:", vu_accuracy[i], "\n")
-<<<<<<< HEAD
-    if (plot_flag) accuracy_plot(mcmc_samples$vu[,ceiling(i/B),(i %% B)+1], dnorm,
-=======
-    if (plot_flag) accuracy_plot(mcmc_samples$vu[,ceil(i/B),(i %% B)+1], dnorm,
->>>>>>> 839588c7086c20338ecb02c729f065c70f44d436
+    if (plot_flag) accuracy_plot(mcmc_samples$vu[,m_idx,b_idx], dnorm,
                             var_result$vmu[i+mult$p], sqrt(var_result$mLambda[i+mult$p,i+mult$p]))
   }
   
@@ -253,14 +254,14 @@ test_accuracies = function()
   #   # Save the results, because this takes such a long time to run.
   # }
   # save(mult, mcmc_samples, file="accuracy_good.RData")
-  #set.seed(1)
-  #mult = generate_test_data(10, 100)
+  set.seed(1)
+  mult = generate_test_data(10, 100)
   # Monte Carlo Markov Chains approximation
-  #mcmc_samples = mcmc_approximation(mult, iterations=1e6, mc.cores = 32)
+  mcmc_samples = mcmc_approximation(mult, iterations=1e6, warmup = 1e4)
 #   # Save the results, because this takes such a long time to run.
 #   #save(mult, mcmc_samples, file="accuracy.RData")
-  #save(mult, mcmc_samples, file="accuracy_int.RData")
-  load(file="accuracy_int.RData")
+  save(mult, mcmc_samples, file="data/accuracy_int.RData")
+  #load(file="data/accuracy_int.RData")
   #mult$spline_dim = 0
   #load(file="accuracy.RData")
   # Test all other approximations against it
@@ -271,26 +272,26 @@ test_accuracies = function()
   var1 = test_accuracy(mult, mcmc_samples, "laplacian")
   print(Sys.time() - now)
   #print(image(Matrix(var1$var_result$mLambda)))
-  #print(var1)
+  print(var1)
   
   now = Sys.time()
   var2 = test_accuracy(mult, mcmc_samples, "gva")
   print(Sys.time() - now)
   #print(image(Matrix(var2$var_result$mLambda)))
-  #print(var2)
+  print(var2)
   
   now = Sys.time()
-  var3 = test_accuracy(mult, mcmc_samples, "gva2")
+  var3 = test_accuracy(mult, mcmc_samples, "gva2", plot=TRUE)
   print(Sys.time() - now)
   #print(image(Matrix(var3$mLambda)))
-  #print(var3)
+  print(var3)
   
   #Rprof()
   now = Sys.time()
   var4 = test_accuracy(mult, mcmc_samples, "gva2new")
   print(Sys.time() - now)
   #print(image(Matrix(var4$var_result$mLambda)))
-  #print(var4)
+  print(var4)
   
   #Rprof(NULL)
   #print(summaryRprof())
@@ -300,7 +301,7 @@ test_accuracies = function()
   var5 = test_accuracy(mult, mcmc_samples, "gva_nr")
   print(Sys.time() - now)
   #print(image(Matrix(var4$result_var$mLambda)))
-  #print(var5)
+  print(var5)
   
   #save(var1, var2, var3, var4, var5, file="accuracy_results_int.RData")
   #for (i in 1:100) {
@@ -315,16 +316,16 @@ test_accuracies = function()
   #}
   
 }
-#test_accuracies()
+test_accuracies()
 
 test_accuracies_slope = function()
 {
-  set.seed(1)
-  mult = generate_slope_test_data()
+  #set.seed(1)
+  #mult = generate_slope_test_data()
   # Monte Carlo Markov Chains approximation
-  mcmc_samples = mcmc_approximation(mult, iterations=1e5, warmup=2e3, mc.cores = 1)
-  save(mult, mcmc_samples, file="data/accuracy_slope.RData")  
-  #load(file="data/accuracy_slope.RData")
+  #mcmc_samples = mcmc_approximation(mult, iterations=1e5, warmup=2e3, mc.cores = 1)
+  #save(mult, mcmc_samples, file="data/accuracy_slope.RData")  
+  load(file="data/accuracy_slope.RData")
   
   now = Sys.time()
   var1 = test_accuracy(mult, mcmc_samples, "laplacian", plot=TRUE)
@@ -406,4 +407,4 @@ test_accuracies_slope = function()
   #print(image(Matrix(var5$var_result$mLambda)))  
   #var5
 }
-test_accuracies_slope()
+#test_accuracies_slope()
