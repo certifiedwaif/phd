@@ -1,5 +1,5 @@
 # median_accuracy.R
-source("test_zero_inflated_model.R")
+source("generate.R")
 source("mcmc.R")
 source("accuracy.R")
 
@@ -49,7 +49,7 @@ generate_test_mult = function(vbeta)
   
   sigma2.beta <- 1.0E3
   
-  test_data = generate_multivariate_test_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u, verbose=FALSE)
+  test_data = gen_mult_test_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u, verbose=FALSE)
   vy = test_data$vy
   
   multivariate = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, m=m, blocksize=1, spline_dim=0)
