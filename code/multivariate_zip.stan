@@ -12,11 +12,8 @@ transformed data {
   vector[P] zeros_beta;
   vector[B] zeros_u;
 
-  for (i in 1:P)
-    zeros_beta[i] <- 0.0;
-
-  for (i in 1:B)
-    zeros_u[i] <- 0.0;
+  zeros_beta <- rep_vector(0, P);
+  zeros_u <- rep_vector(0, B);
 }
 
 parameters {
@@ -26,6 +23,7 @@ parameters {
   cov_matrix[P] BetaPrior;
   real<lower=0, upper=1> rho;
   cov_matrix[B] sigma_u;
+  //real<lower=0> v;
 }
 
 model {
@@ -33,16 +31,15 @@ model {
   vector[B*M] u;
   matrix[P,P] chol_BetaPrior;
 
-  rho ~ beta(.01, .01);
+  rho ~ beta(1.0, 1.0);
+  // sigma_u ~ inv_wishart(v, S);
   sigma_u ~ inv_wishart(B+1, S);
+
 
   chol_BetaPrior <- cholesky_decompose(BetaPrior);
   vbeta ~ multi_normal_cholesky(zeros_beta, chol_BetaPrior);
   
-  for (m in 1:M)
-    vu[m] ~ multi_normal(zeros_u, sigma_u);
-  //for (m in 1:M)
-  //  u[m] ~ multi_normal(zeros_u, sigma_u);
+  vu ~ multi_normal(zeros_u, sigma_u);
   
   for (n in 1:N) {
     for (m in 1:M)
@@ -56,8 +53,8 @@ model {
 
     if (y[n] == 0)
       increment_log_prob(log_sum_exp(bernoulli_log(0, rho),
-        bernoulli_log(1, rho) + poisson_log(y[n], exp(eta))));
+        bernoulli_log(1, rho) + poisson_log_log(y[n], eta)));
     else
-      increment_log_prob(bernoulli_log(1, rho) + poisson_log(y[n], exp(eta)));
+      increment_log_prob(bernoulli_log(1, rho) + poisson_log_log(y[n], eta));
   };
 }
