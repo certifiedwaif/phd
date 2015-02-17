@@ -7,62 +7,7 @@ source("zero_inflated_model.R")
 source("rwmh.R")
 require(testthat)
 #require(Matrix)
-
-generate_univariate_test_data <- function (n, rho, lambda)
-{
-	vx = rep(NA, n)
-	for (i in 1:n) {
-		if (runif(1) <= rho) {
-			vx[i] = rpois(1, lambda)
-		} else {
-			vx[i] = 0
-		}
-	}
-	return(vx)
-}
-
-generate_multivariate_test_data <- function (mX, mZ, m, n, rho, vbeta, sigma2_u, verbose=FALSE)
-{
-	if (is.null(mZ)) {
-		mC = mX
-	} else {
-		mC = cbind(mX, mZ)
-	}
-	vy = rep(NA, sum(n))
-	vu = rep(NA, length(n))
-	if (verbose)
-		cat("vy", vy, "\n")
-	idx = 0
-	for (i in 1:length(n)) {
-		if (sigma2_u == 0)
-			vu[i] = 0
-		else
-			vu[i] = rnorm(1, 0, sqrt(sigma2_u))
-
-		for (j in 1:n[i]) {
-			idx = idx + 1
-			if (verbose)
-				cat("idx", idx, "\n")
-
-			if (runif(1) <= rho) {
-				veta = mX[idx,] %*% vbeta + vu[i]
-				if (verbose)
-					cat("veta", veta, "\n")
-				vy[idx] = rpois(1, exp(veta))
-				if (verbose)
-					cat("Generated vy[idx]", vy[idx], "\n")
-			} else {
-				vy[idx] = 0
-			}
-		}
-	}
-	if (verbose)
-		cat("vy", vy, "\n")
-	if(NA %in% vy)
-		stop("NAs in vy")
-	result = list(vy=vy, vu=vu)
-	return(result)
-}
+source("generate.R")
 
 test_univariate_zip <- function()
 {
@@ -99,7 +44,7 @@ test_multivariate_zip_no_zeros <- function(approximation="gva")
   sigma2.beta = 1e5
 	a_sigma = 1e5
 	b_sigma = 1e5
-  test_data = generate_multivariate_test_data(mX, NULL, m, n, expected_rho, expected_mu, expected_sigma2_u)
+  test_data = gen_mult_test_data(mX, NULL, m, n, expected_rho, expected_mu, expected_sigma2_u)
 	vy = test_data$vy
 
 	# Test model fitting
@@ -123,7 +68,7 @@ test_multivariate_zip_half_zeros <- function(approximation="gva")
 	sigma2.beta = 1e5  
 	a_sigma = 1e5
 	b_sigma = 1e5
-	test_data = generate_multivariate_test_data(mX, NULL, m, n, expected_rho, expected_mu, expected_sigma2_u)
+	test_data = gen_mult_test_data(mX, NULL, m, n, expected_rho, expected_mu, expected_sigma2_u)
 	vy = test_data$vy
 
 	# Test model fitting
@@ -152,7 +97,7 @@ test_multivariate_zip_no_zeros_random_intercept <- function(approximation="gva")
 	
 	tau = 1.0E2
 	
-	test_data = generate_multivariate_test_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u, verbose=TRUE)
+	test_data = gen_mult_test_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u, verbose=TRUE)
 	vy = test_data$vy
 	
 	# Test model fitting
@@ -196,7 +141,7 @@ test_multivariate_zip_half_zeros_random_slope <- function(approximation="gva")
 	
 	sigma2.beta <- 1.0E3
 	
-	test_data = generate_multivariate_test_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u, verbose=TRUE)
+	test_data = gen_mult_test_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u, verbose=TRUE)
 	vy = test_data$vy
 	
 	# Test model fitting
