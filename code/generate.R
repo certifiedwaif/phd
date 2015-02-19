@@ -113,7 +113,8 @@ makeZ <- function(mX, m, ni, p=1)
   mZ2 = matrix(0, nrow=m*ni, ncol=2*m)
   for (i in 1:m) {
     row_idx = ni*(i-1)+1:ni
-    mZ2[row_idx,((i-1)*p+1):(i*p)] = mX[row_idx,]
+    col_idx = ((i-1)*p+1):(i*p)
+    mZ2[row_idx,col_idx] = mX[row_idx,]
   }
   mZ2
 }
@@ -166,7 +167,7 @@ generate_test_data = function(m, ni)
 
 generate_slope_test_data = function() {
   m = 10
-  ni = 5
+  ni =10
   n = rep(ni,m)
   mX = matrix(as.vector(cbind(rep(1, sum(n)), runif(sum(n), -1, 1))), sum(n), 2)
   mZ = makeZ(mX, m, ni, p=2)
@@ -181,7 +182,7 @@ generate_slope_test_data = function() {
   
   sigma2.beta <- 1.0E5
   
-  test_data = gen_mult_test_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u, verbose=TRUE)
+  test_data = gen_mult_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u, verbose=TRUE)
   vy = test_data$vy
   
   # Test model fitting
