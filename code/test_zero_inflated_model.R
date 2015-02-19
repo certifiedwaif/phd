@@ -106,23 +106,6 @@ test_multivariate_zip_no_zeros_random_intercept <- function(approximation="gva")
   return(var_result)
 }
 
-# Create mZ matrix for random slopes
-# There's probably a better way to do this
-makeZ <- function(mX, m, ni, p=1)
-{
-  n = rep(ni,m)
-  mX = matrix(as.vector(cbind(rep(1, sum(n)), runif(sum(n), -1, 1))), sum(n), 2)
-  mZ <- kronecker(diag(1,m),rep(1,ni))
-  # Create mZ matrix for random slopes
-  # There's probably a better way to do this
-  mZ2 = matrix(0, nrow=m*ni, ncol=2*m)
-  for (i in 1:m) {
-    row_idx = ni*(i-1)+1:ni
-    mZ2[row_idx,((i-1)*p+1):(i*p)] = mX[row_idx,]
-  }
-  mZ2
-}
-
 test_multivariate_zip_half_zeros_random_slope <- function(approximation="gva")
 {
 	m = 20

@@ -4,114 +4,6 @@ source("generate.R")
 source("mcmc.R")
 source("rwmh.R")
 
-generate_test_data = function(m, ni)
-{
-  m = m
-  ni = ni
-  n = rep(ni,m)
-  mX = matrix(as.vector(cbind(rep(1, sum(n)), runif(sum(n), -1, 1))), sum(n), 2)
-  #print("mX=")
-  #print(mX)
-  #cat("dim(mX)", dim(mX), "\n")
-  
-  #v = c(rep(1, g), rep(0, g))
-  # Indicator variables for groups
-  
-  #mZ = matrix(cbind(v, 1-v), sum(n), 2)
-  #mZ <- matrix(0,sum(n),m)
-  #count <- 0
-  #for (i in 1:m) {
-  #  mZ[count + (1:n[i]),i] <- 1
-  #  count <- count + n[i]
-  #}
-  
-  mZ <- kronecker(diag(1,m),rep(1,ni))
-  
-  #print("mZ=")
-  #print(mZ)
-  #cat("dim(mZ)", dim(mZ), "\n")
-  
-  expected_rho = 0.5
-  expected_beta = c(2, 1)
-  expected_sigma2_u = .5^2
-  a_sigma = 1e-2
-  b_sigma = 1e-2
-  
-  tau = 1.0E2
-  
-  sigma2.beta <- 1.0E3
-  
-  test_data = gen_mult_test_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u)
-  vy = test_data$vy
-  
-  # Test accuracy
-  mult = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, m=m, blocksize=1, spline_dim=0)
-  
-  return(mult)
-}
-
-generate_slope_test_data = function() {
-  m = 10
-  ni = 5
-  n = rep(ni,m)
-  mX = matrix(as.vector(cbind(rep(1, sum(n)), runif(sum(n), -1, 1))), sum(n), 2)
-  mZ = makeZ(mX, m, ni, p=2)
-  
-  expected_rho = 0.5
-  expected_beta = c(2, 1)
-  expected_sigma2_u = .5^2
-  a_sigma = 1e-2
-  b_sigma = 1e-2
-  
-  tau = 1.0E2
-  
-  sigma2.beta <- 1.0E5
-  
-  test_data = gen_mult_test_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u, verbose=TRUE)
-  vy = test_data$vy
-  
-  # Test model fitting
-  mult = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, m=m, blocksize=2, spline_dim=0)
-  return(mult)
-}
-
-generate_spline_test_data = function()
-{
-  n = 5000
-  vx = matrix(sort(runif(n, -1, 1))) 
-  
-  mX = cbind(1,vx)
-  
-  expected_rho = 1
-  #expected_mu = c(0, 1)
-  expected_sigma2_u = 0
-  sigma2.beta = 1e5
-  a_sigma = 1e5
-  b_sigma = 1e5
-  tau = 1.0E-5
-  
-  sigma2.true = 0.01
-  expected_beta = c(0, 1)
-  vf = 5+2*sin(pi*vx)
-  vy = rpois(n,exp(vf))
-  
-  source("ZOsull.r")
-  numIntKnots <- 35
-  intKnots <- quantile(unique(vx),seq(0,1,length=(numIntKnots+2))[-c(1,(numIntKnots+2))])
-  
-  mZ = ZOSull(vx,range.x=c(-1.1,1.1),intKnots=intKnots,drv=0)
-  #vy = 2+mX[,1]^3+rnorm(m)*.1
-  #result = fit_spline(vx, vy)
-  #result = fit_spline(mX[,1], vy)
-  #mZ = result$Z
-  
-  #mZ <- mZ/max(mZ)
-  
-  mult = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, m=0, blocksize=1, spline_dim=37)
-  
-  return(mult)
-}
-
 calculate_accuracies = function(mult, mcmc_samples, var_result, approximation, print_flag=FALSE, plot_flag=FALSE)
 {
   # TODO: Add support for checking the accuracy over multiple dimensions
@@ -190,6 +82,7 @@ calculate_accuracies = function(mult, mcmc_samples, var_result, approximation, p
   
   # sigma2_u accuracy
   # FIXME - this may be wrong for blocksize != 1?
+  # This is totally wrong for the Inverse Wishart model?
   sigma2_u_accuracy = calculate_accuracy(1/mcmc_samples$sigma_u^2, dgamma,
                                           var_result$a_sigma, var_result$b_sigma)
   if (print_flag) cat("sigma2_u", approximation, "accuracy:", sigma2_u_accuracy, "\n")
@@ -254,14 +147,14 @@ test_accuracies = function()
   #   # Save the results, because this takes such a long time to run.
   # }
   # save(mult, mcmc_samples, file="accuracy_good.RData")
-  set.seed(1)
-  mult = generate_test_data(10, 100)
+  #set.seed(1)
+  #mult = generate_test_data(10, 100)
   # Monte Carlo Markov Chains approximation
-  mcmc_samples = mcmc_approximation(mult, iterations=1e6, warmup = 1e4)
+  #mcmc_samples = mcmc_approximation(mult, iterations=1e6, warmup = 1e4)
 #   # Save the results, because this takes such a long time to run.
 #   #save(mult, mcmc_samples, file="accuracy.RData")
-  save(mult, mcmc_samples, file="data/accuracy_int.RData")
-  #load(file="data/accuracy_int.RData")
+  #save(mult, mcmc_samples, file="data/accuracy_int.RData")
+  load(file="data/accuracy_int_2015_02_17.RData")
   #mult$spline_dim = 0
   #load(file="accuracy.RData")
   # Test all other approximations against it
@@ -316,7 +209,7 @@ test_accuracies = function()
   #}
   
 }
-test_accuracies()
+#test_accuracies()
 
 test_accuracies_slope = function()
 {
@@ -325,7 +218,7 @@ test_accuracies_slope = function()
   # Monte Carlo Markov Chains approximation
   #mcmc_samples = mcmc_approximation(mult, iterations=1e5, warmup=2e3, mc.cores = 1)
   #save(mult, mcmc_samples, file="data/accuracy_slope.RData")  
-  load(file="data/accuracy_slope.RData")
+  load(file="data/accuracy_slope_2015_02_17.RData")
   
   now = Sys.time()
   var1 = test_accuracy(mult, mcmc_samples, "laplacian", plot=TRUE)
@@ -407,4 +300,4 @@ test_accuracies_slope = function()
   #print(image(Matrix(var5$var_result$mLambda)))  
   #var5
 }
-#test_accuracies_slope()
+test_accuracies_slope()

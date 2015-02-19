@@ -101,3 +101,128 @@ gen_mult_data_inv_wish <- function (mX, mZ, m, n, rho, vbeta, v, psi, verbose=FA
   return(result)
 }
 
+# Create mZ matrix for random slopes
+# There's probably a better way to do this
+makeZ <- function(mX, m, ni, p=1)
+{
+  n = rep(ni,m)
+  mX = matrix(as.vector(cbind(rep(1, sum(n)), runif(sum(n), -1, 1))), sum(n), 2)
+  mZ <- kronecker(diag(1,m),rep(1,ni))
+  # Create mZ matrix for random slopes
+  # There's probably a better way to do this
+  mZ2 = matrix(0, nrow=m*ni, ncol=2*m)
+  for (i in 1:m) {
+    row_idx = ni*(i-1)+1:ni
+    mZ2[row_idx,((i-1)*p+1):(i*p)] = mX[row_idx,]
+  }
+  mZ2
+}
+
+generate_test_data = function(m, ni)
+{
+  m = m
+  ni = ni
+  n = rep(ni,m)
+  mX = matrix(as.vector(cbind(rep(1, sum(n)), runif(sum(n), -1, 1))), sum(n), 2)
+  #print("mX=")
+  #print(mX)
+  #cat("dim(mX)", dim(mX), "\n")
+  
+  #v = c(rep(1, g), rep(0, g))
+  # Indicator variables for groups
+  
+  #mZ = matrix(cbind(v, 1-v), sum(n), 2)
+  #mZ <- matrix(0,sum(n),m)
+  #count <- 0
+  #for (i in 1:m) {
+  #  mZ[count + (1:n[i]),i] <- 1
+  #  count <- count + n[i]
+  #}
+  
+  mZ <- kronecker(diag(1,m),rep(1,ni))
+  
+  #print("mZ=")
+  #print(mZ)
+  #cat("dim(mZ)", dim(mZ), "\n")
+  
+  expected_rho = 0.5
+  expected_beta = c(2, 1)
+  expected_sigma2_u = .5^2
+  a_sigma = 1e-2
+  b_sigma = 1e-2
+  
+  tau = 1.0E2
+  
+  sigma2.beta <- 1.0E3
+  
+  test_data = gen_mult_test_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u)
+  vy = test_data$vy
+  
+  # Test accuracy
+  mult = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, m=m, blocksize=1, spline_dim=0)
+  
+  return(mult)
+}
+
+generate_slope_test_data = function() {
+  m = 10
+  ni = 5
+  n = rep(ni,m)
+  mX = matrix(as.vector(cbind(rep(1, sum(n)), runif(sum(n), -1, 1))), sum(n), 2)
+  mZ = makeZ(mX, m, ni, p=2)
+  
+  expected_rho = 0.5
+  expected_beta = c(2, 1)
+  expected_sigma2_u = .5^2
+  a_sigma = 1e-2
+  b_sigma = 1e-2
+  
+  tau = 1.0E2
+  
+  sigma2.beta <- 1.0E5
+  
+  test_data = gen_mult_test_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u, verbose=TRUE)
+  vy = test_data$vy
+  
+  # Test model fitting
+  mult = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, m=m, blocksize=2, spline_dim=0)
+  return(mult)
+}
+
+generate_spline_test_data = function()
+{
+  n = 5000
+  vx = matrix(sort(runif(n, -1, 1))) 
+  
+  mX = cbind(1,vx)
+  
+  expected_rho = 1
+  #expected_mu = c(0, 1)
+  expected_sigma2_u = 0
+  sigma2.beta = 1e5
+  a_sigma = 1e5
+  b_sigma = 1e5
+  tau = 1.0E-5
+  
+  sigma2.true = 0.01
+  expected_beta = c(0, 1)
+  vf = 5+2*sin(pi*vx)
+  vy = rpois(n,exp(vf))
+  
+  source("ZOsull.r")
+  numIntKnots <- 35
+  intKnots <- quantile(unique(vx),seq(0,1,length=(numIntKnots+2))[-c(1,(numIntKnots+2))])
+  
+  mZ = ZOSull(vx,range.x=c(-1.1,1.1),intKnots=intKnots,drv=0)
+  #vy = 2+mX[,1]^3+rnorm(m)*.1
+  #result = fit_spline(vx, vy)
+  #result = fit_spline(mX[,1], vy)
+  #mZ = result$Z
+  
+  #mZ <- mZ/max(mZ)
+  
+  mult = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, m=0, blocksize=1, spline_dim=37)
+  
+  return(mult)
+}
+
