@@ -105,18 +105,22 @@ gen_mult_data_inv_wish <- function (mX, mZ, m, n, rho, vbeta, v, psi, verbose=FA
 # There's probably a better way to do this
 makeZ <- function(mX, m, ni, p=1)
 {
-  n = rep(ni,m)
-  mX = matrix(as.vector(cbind(rep(1, sum(n)), runif(sum(n), -1, 1))), sum(n), 2)
-  mZ <- kronecker(diag(1,m),rep(1,ni))
+  # FIXME: This is elegant, but doesn't quite work. The matrix produced is
+  # too large, dim(mX) * dim(groupIntercepts) whereas we want dim(mX)
+  #groupIntercepts <- kronecker(diag(1,m),rep(1,ni))
+  #mZ = kronecker(mX, groupIntercepts)
+  #return(mZ)
+
   # Create mZ matrix for random slopes
   # There's probably a better way to do this
+  # TODO: Rewrite with the Kronecker product
   mZ2 = matrix(0, nrow=m*ni, ncol=2*m)
   for (i in 1:m) {
     row_idx = ni*(i-1)+1:ni
     col_idx = ((i-1)*p+1):(i*p)
     mZ2[row_idx,col_idx] = mX[row_idx,]
   }
-  mZ2
+  return(mZ2)
 }
 
 generate_test_data = function(m, ni)
