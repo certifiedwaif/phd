@@ -5,7 +5,7 @@ data {
   int<lower=1> M; // Number of subjects
   int<lower=0> y[N]; // Estimated treatment effects
   vector[P] X[N]; // Fixed effects covariate matrix
-  vector[B*M] Z[N]; // Random effects covariate matrix
+  vector[B*(M-1)] Z[N]; // Random effects covariate matrix
 }
 
 transformed data {
@@ -28,7 +28,7 @@ parameters {
 
 model {
   real eta;
-  vector[B*M] u;
+  vector[B*(M-1)] u;
   matrix[P,P] chol_BetaPrior;
 
   rho ~ beta(1.0, 1.0);
@@ -42,7 +42,7 @@ model {
   vu ~ multi_normal(zeros_u, sigma_u);
   
   for (n in 1:N) {
-    for (m in 1:M)
+    for (m in 1:(M-1))
       for (b in 1:B)
         u[(m-1)*B+b] <- vu[m][b];
 
