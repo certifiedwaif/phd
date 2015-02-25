@@ -101,6 +101,7 @@ gen_mult_data_inv_wish <- function (mX, mZ, m, n, rho, vbeta, v, psi, verbose=FA
   return(result)
 }
 
+
 # Create mZ matrix for random slopes
 # There's probably a better way to do this
 makeZ <- function(mX, m, ni, p=1)
@@ -120,7 +121,11 @@ makeZ <- function(mX, m, ni, p=1)
     col_idx = ((i-1)*p+1):(i*p)
     mZ2[row_idx,col_idx] = mX[row_idx,]
   }
-  return(mZ2)
+
+  # Mean centre variables where appropriate
+  groupInd <- kronecker(diag(1,m),cbind(rep(0,ni), rep(1,ni)))
+  result = mZ2 - ifelse(groupInd, colMeans(groupInd*mZ2), 0)
+  return(result)
 }
 
 generate_test_data = function(m, ni)
@@ -169,13 +174,22 @@ generate_test_data = function(m, ni)
   return(mult)
 }
 
-generate_slope_test_data = function() {
+generate_slope_test_data = function()
+{
   m = 10
   ni =10
-  n = rep(ni,m)
-  mX = matrix(as.vector(cbind(rep(1, sum(n)), runif(sum(n), -1, 1))), sum(n), 2)
-  mZ = makeZ(mX, m, ni, p=2)
+  n = rep(ni, m)
+  # FIXME: This code sucks. Re-write using gl and model.matrix
+  x = runif(m*ni, -1, 1)
+  groups = gl(m, ni)
+  mC = model.matrix(~1+x+groups*x)
+  p = 2
+  mX = mC[,1:p]
+  mZ = mC[,p+(1:((m-1)*p))]
   
+  # Centre slope term?
+  #mX = cbind(mX[,1], scale(mX[,2]))
+    
   expected_rho = 0.5
   expected_beta = c(2, 1)
   expected_sigma2_u = .5^2
