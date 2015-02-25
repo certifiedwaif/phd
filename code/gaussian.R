@@ -356,7 +356,7 @@ fastinv2 = function(mR, p=NA, m=NA, blocksize=1, spline_dim=0)
   # Idea: This could be made faster by replacing with an equivalent
   # fastsolve function.
   
-  u_dim = m*blocksize+spline_dim
+  u_dim = (m-1)*blocksize+spline_dim
   mR.inv.mZ = matrix(0, nrow=u_dim, ncol=u_dim)
   if (blocksize == 1 && m > 0) {
     # If the blocksize is 1, we can simply take the reciprocal of the
@@ -540,7 +540,7 @@ fit.GVA_new2 <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, 
   d <- length(vmu)
   Dinds <- d*((1:d)-1)+(1:d)
   
-  u_dim = m*blocksize+spline_dim
+  u_dim = (m-1)*blocksize+spline_dim
   # Swap fixed and random effects in mLambda so that inverse of mR is quick to
   # calculate due to sparsity. If you do this, you have to re-order mSigma.inv,
   # vmu and mC as well.
@@ -879,7 +879,7 @@ fit.GVA_nr <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, m=
       # Use block inverse formula to speed computation
       # Let -mH = [A B]
       #           [B D]
-      u_dim = m*blocksize + spline_dim
+      u_dim = (m-1)*blocksize + spline_dim
       A = -mH[1:p, 1:p]
       B = -mH[1:p, (p+1):(p+u_dim)]
       D = -mH[(p+1):(p+u_dim), (p+1):(p+u_dim)]
