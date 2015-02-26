@@ -56,6 +56,26 @@ gen_mult_data <- function (mX, mZ, m, n, rho, vbeta, sigma2_u, verbose=FALSE)
   return(result)
 }
 
+gen_slope_data = function(vx, vbeta, vu, rho, m, ni)
+{
+  eta = matrix(NA, m, ni)
+  zeta = matrix(NA, m, ni)
+  r = matrix(NA, m, ni)
+  eta = matrix(NA, m, ni)
+  y = matrix(NA, m, ni)
+  
+  for (i in 1:m) {
+    for (j in 1:ni) {
+      eta[i, j] = vbeta[1] + vbeta[2]*vx[i, j] + vu[i, 1] + vu[i, 2]*vx[i, j]
+      zeta[i, j] = rpois(1, exp(eta[i, j]))
+      r[i, j] = rbinom(1, 1, rho)
+      y[i, j] = r[i, j] * zeta[i, j]
+    }
+  }
+  
+  return(y)
+}
+
 gen_mult_data_inv_wish <- function (mX, mZ, m, n, rho, vbeta, v, psi, verbose=FALSE)
 {
   if (is.null(mZ)) {
@@ -178,7 +198,7 @@ generate_slope_test_data = function()
 {
   m = 10
   ni =10
-  n = rep(ni, m)
+  n = m*ni
   # FIXME: This code sucks. Re-write using gl and model.matrix
   x = runif(m*ni, -1, 1)
   groups = gl(m, ni)
@@ -186,24 +206,24 @@ generate_slope_test_data = function()
   p = 2
   mX = mC[,1:p]
   mZ = mC[,p+(1:((m-1)*p))]
+  # TODO: Re-order columns of z so that columns for same groups are adjacent
+  # This will ensure banded structure of t(mC) %*% mC
   
   # Centre slope term?
   #mX = cbind(mX[,1], scale(mX[,2]))
-    
-  expected_rho = 0.5
-  expected_beta = c(2, 1)
-  expected_sigma2_u = .5^2
+  vx = matrix(runif(n, -1, 1), m, ni)
+  vbeta = c(2, 1)
+  mSigma_0 = matrix(c( 1.0, -0.5,
+                      -0.5,  1.0), 2, 2)
+  vu = rmvnorm(n, sigma = mSigma_0)
+  rho = 0.5
+  vy = as.vector(gen_slope_data(vx, vbeta, vu, rho, m, ni))
+  
+  # Create mult object
   a_sigma = 1e-2
   b_sigma = 1e-2
-  
   tau = 1.0E2
-  
   sigma2.beta <- 1.0E5
-  
-  test_data = gen_mult_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u, verbose=TRUE)
-  vy = test_data$vy
-  
-  # Test model fitting
   mult = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, m=m, blocksize=2, spline_dim=0)
   return(mult)
 }
