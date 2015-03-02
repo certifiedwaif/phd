@@ -194,10 +194,8 @@ generate_test_data = function(m, ni)
   return(mult)
 }
 
-generate_slope_test_data = function()
+generate_slope_test_data = function(m = 10, ni =10)
 {
-  m = 10
-  ni =10
   n = m*ni
   # FIXME: This code sucks. Re-write using gl and model.matrix
   x = runif(m*ni, -1, 1)
@@ -208,6 +206,12 @@ generate_slope_test_data = function()
   mZ = mC[,p+(1:((m-1)*p))]
   # TODO: Re-order columns of z so that columns for same groups are adjacent
   # This will ensure banded structure of t(mC) %*% mC
+  # Take 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+  # to   1, 6, 2, 7, 3, 8, 4, 9, 5, 10
+  # This works because R stores its matrices using the Fortran convention of
+  # column-major ordering. Yes, I was surprised too!
+  ordering = rbind(1:(m-1), (m-1)+1:(m-1))
+  mZ_reordered = mZ[, as.vector(ordering)]
   
   # Centre slope term?
   #mX = cbind(mX[,1], scale(mX[,2]))
@@ -224,7 +228,7 @@ generate_slope_test_data = function()
   b_sigma = 1e-2
   tau = 1.0E2
   sigma2.beta <- 1.0E5
-  mult = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, m=m, blocksize=2, spline_dim=0)
+  mult = create_multivariate(vy, mX, mZ_reordered, sigma2.beta, a_sigma, b_sigma, tau, m=m, blocksize=2, spline_dim=0)
   return(mult)
 }
 
