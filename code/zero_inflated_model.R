@@ -113,7 +113,7 @@ create_multivariate <- function(vy, mX, mZ, sigma2.beta, m=ncol(mZ), blocksize=1
   v=prior$v + m
   
   if (!is.null(ncol(mZ))) {
-    mSigma.u.inv = kronecker(diag(1, (m-1)), mPsi/(v + blocksize - 1))
+    mSigma.u.inv = kronecker(diag(1, (m-1)), mPsi)
   } else {
     mSigma.u.inv = NULL
   }
