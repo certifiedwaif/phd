@@ -52,7 +52,7 @@ generate_test_mult = function(vbeta)
   test_data = generate_multivariate_test_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u, verbose=FALSE)
   vy = test_data$vy
   
-  multivariate = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, m=m, blocksize=1, spline_dim=0)
+  multivariate = create_multivariate(vy, mX, mZ, sigma2.beta, m=m, blocksize=1, spline_dim=0)
 
   return(multivariate)
 }

@@ -83,11 +83,11 @@ calculate_accuracies = function(mult, mcmc_samples, var_result, approximation, p
   # sigma2_u accuracy
   # FIXME - this may be wrong for blocksize != 1?
   # This is totally wrong for the Inverse Wishart model?
-  sigma2_u_accuracy = calculate_accuracy(1/mcmc_samples$sigma_u^2, dgamma,
-                                          var_result$a_sigma, var_result$b_sigma)
-  if (print_flag) cat("sigma2_u", approximation, "accuracy:", sigma2_u_accuracy, "\n")
-  if (plot_flag) accuracy_plot(1/mcmc_samples$sigma_u^2, dgamma,
-                          var_result$a_sigma, var_result$b_sigma)
+  #sigma2_u_accuracy = calculate_accuracy(1/mcmc_samples$sigma_u^2, dgamma,
+  #                                        var_result$a_sigma, var_result$b_sigma)
+  #if (print_flag) cat("sigma2_u", approximation, "accuracy:", sigma2_u_accuracy, "\n")
+  #if (plot_flag) accuracy_plot(1/mcmc_samples$sigma_u^2, dgamma,
+  #                        var_result$a_sigma, var_result$b_sigma)
   
   # rho accuracy
   rho_accuracy = calculate_accuracy(mcmc_samples$rho, dbeta,
@@ -99,7 +99,7 @@ calculate_accuracies = function(mult, mcmc_samples, var_result, approximation, p
   return(list(var_result=var_result,
               vbeta_accuracy=vbeta_accuracy,
               vu_accuracy=vu_accuracy,
-              sigma2_u_accuracy=sigma2_u_accuracy,
+              #sigma2_u_accuracy=sigma2_u_accuracy,
               rho_accuracy=rho_accuracy))
 }
 
@@ -213,12 +213,12 @@ test_accuracies = function()
 
 test_accuracies_slope = function()
 {
-  #set.seed(1)
-  #mult = generate_slope_test_data()
+  set.seed(1)
+  mult = generate_slope_test_data()
   # Monte Carlo Markov Chains approximation
-  #mcmc_samples = mcmc_approximation(mult, iterations=1e5, warmup=2e3, mc.cores = 1)
-  #save(mult, mcmc_samples, file="data/accuracy_slope.RData")  
-  load(file="data/accuracy_slope_2015_02_17.RData")
+  mcmc_samples = mcmc_approximation(mult, iterations=1e5, warmup=1e3, mc.cores = 1)
+  save(mult, mcmc_samples, file="data/accuracy_slope_2015_03_02.RData")  
+  #load(file="data/accuracy_slope_2015_03_02.RData")
   
   now = Sys.time()
   var1 = test_accuracy(mult, mcmc_samples, "laplacian", plot=TRUE)

@@ -189,7 +189,7 @@ generate_test_data = function(m, ni)
   vy = test_data$vy
   
   # Test accuracy
-  mult = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, m=m, blocksize=1, spline_dim=0)
+  mult = create_multivariate(vy, mX, mZ, sigma2.beta, m=m, blocksize=1, spline_dim=0)
   
   return(mult)
 }
@@ -228,7 +228,7 @@ generate_slope_test_data = function(m = 10, ni =10)
   b_sigma = 1e-2
   tau = 1.0E2
   sigma2.beta <- 1.0E5
-  mult = create_multivariate(vy, mX, mZ_reordered, sigma2.beta, a_sigma, b_sigma, tau, m=m, blocksize=2, spline_dim=0)
+  mult = create_multivariate(vy, mX, mZ_reordered, sigma2.beta, m=m, blocksize=2, spline_dim=0)
   return(mult)
 }
 
@@ -264,7 +264,7 @@ generate_spline_test_data = function()
   
   #mZ <- mZ/max(mZ)
   
-  mult = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, m=0, blocksize=1, spline_dim=37)
+  mult = create_multivariate(vy, mX, mZ, sigma2.beta, m=0, blocksize=1, spline_dim=37)
   
   return(mult)
 }

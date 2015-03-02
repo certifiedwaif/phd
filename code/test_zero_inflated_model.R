@@ -48,7 +48,7 @@ test_multivariate_zip_no_zeros <- function(approximation="gva")
 	vy = test_data$vy
 
 	# Test model fitting
-	multivariate = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma)
+	multivariate = create_multivariate(vy, mX, mZ, sigma2.beta)
 	var_result = zero_infl_var(multivariate, verbose=TRUE, method=approximation)
   return(var_result)
 }
@@ -72,7 +72,7 @@ test_multivariate_zip_half_zeros <- function(approximation="gva")
 	vy = test_data$vy
 
 	# Test model fitting
-	multivariate = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma)
+	multivariate = create_multivariate(vy, mX, mZ, sigma2.beta)
 	var_result = zero_infl_var(multivariate, verbose=TRUE, method=approximation)
   return(var_result)
 }
@@ -101,7 +101,7 @@ test_multivariate_zip_no_zeros_random_intercept <- function(approximation="gva")
 	vy = test_data$vy
 	
 	# Test model fitting
-	multivariate = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau)
+	multivariate = create_multivariate(vy, mX, mZ, sigma2.beta)
 	var_result = zero_infl_var(multivariate, method=approximation, verbose=TRUE)
   return(var_result)
 }
@@ -128,7 +128,7 @@ test_multivariate_zip_half_zeros_random_slope <- function(approximation="gva")
 	vy = test_data$vy
 	
 	# Test model fitting
-	multivariate = create_multivariate(vy, mX, mZ, blocksize=2, sigma2.beta, a_sigma, b_sigma, tau)
+	multivariate = create_multivariate(vy, mX, mZ, blocksize=2, sigma2.beta)
 	var_result = zero_infl_var(multivariate, method=approximation, verbose=TRUE)
   return(var_result)
 }
@@ -167,7 +167,7 @@ test_spline = function(approximation="gva")
   
   #mZ <- mZ/max(mZ)
  
-  mult = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, m=0, blocksize=1, spline_dim=37)
+  mult = create_multivariate(vy, mX, mZ, sigma2.beta, m=0, blocksize=1, spline_dim=37)
   
   var_result = zero_infl_var(mult, method=approximation, verbose=TRUE)
 }

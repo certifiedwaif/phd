@@ -3,7 +3,6 @@ library(limma)
 source("common.R")
 source("gaussian.R")
 
-
 mcmc <- function(object)
 {
   UseMethod("zero_infl_mcmc", object)
@@ -86,8 +85,7 @@ calculate_lower_bound <- function(object, verbose=verbose)
   UseMethod("calculate_lower_bound", object)
 }
 
-
-create_multivariate <- function(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, m=ncol(mZ), blocksize=1, spline_dim=NA, v=blocksize+1)
+create_multivariate <- function(vy, mX, mZ, sigma2.beta, m=ncol(mZ), blocksize=1, spline_dim=NA, v=blocksize+1)
 {
   # Initialise
   n = length(vy)
@@ -101,28 +99,28 @@ create_multivariate <- function(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau, 
   
   p = ncol(mX)
   mSigma.beta.inv = diag(1/sigma2.beta, ncol(mX))
-  if (!is.null(ncol(mZ))) {
-    mSigma.u.inv = diag(tau, ncol(mZ))
-  } else {
-    mSigma.u.inv = NULL
-  }
   mLambda = diag(rep(1, ncol(mC)))
   a_rho = 1 + sum(vp)
   b_rho = n - sum(vp) + 1
   
   # Set prior parameters for Inverse Wishart distribution
   #mPsi=diag(1, rep(blocksize))
-  mPsi = 1e-5*matrix(c(1, 0, 0, 1), 2, 2)
+  mPsi = 1e-5*matrix(c(1, 0, 0, 1), blocksize, blocksize)
   
-  prior = list(a_sigma=a_sigma, b_sigma=b_sigma,
-               v=v, mPsi=mPsi,
+  prior = list(v=v, mPsi=mPsi,
                a_rho=1, b_rho=1,
                sigma2.beta=sigma2.beta)
   v=prior$v + m
+  
+  if (!is.null(ncol(mZ))) {
+    mSigma.u.inv = kronecker(diag(1, (m-1)), mPsi/(v + blocksize - 1))
+  } else {
+    mSigma.u.inv = NULL
+  }
+  
   multivariate = list(vy=vy, vp=vp, vmu=vmu,
                       mX=mX, mZ=mZ, mC=mC,
                       m=m, blocksize=blocksize, spline_dim=spline_dim,
-                      a_sigma=a_sigma, b_sigma=b_sigma,
                       p=p, v=v, mPsi=mPsi,
                       a_rho=a_rho, b_rho=b_rho,
                       mLambda=mLambda,
