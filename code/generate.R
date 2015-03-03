@@ -61,7 +61,6 @@ gen_slope_data = function(vx, vbeta, vu, rho, m, ni)
   eta = matrix(NA, m, ni)
   zeta = matrix(NA, m, ni)
   r = matrix(NA, m, ni)
-  eta = matrix(NA, m, ni)
   y = matrix(NA, m, ni)
   
   for (i in 1:m) {
@@ -122,10 +121,10 @@ generate_test_data = function(m, ni)
   return(mult)
 }
 
-generate_slope_test_data = function(m = 10, ni =10)
+generate_slope_test_data = function(m = 5, ni = 20)
 {
   n = m*ni
-  x = runif(n, -1, 1)
+  x = rnorm(n, 0, 1)
   vx = t(matrix(x, ni, m))
   groups = gl(m, ni)
   mC = model.matrix(~1+x+groups*x)
@@ -146,7 +145,7 @@ generate_slope_test_data = function(m = 10, ni =10)
   vbeta = c(2, 1)
   mSigma_0 = matrix(c( 1.0, -0.5,
                       -0.5,  1.0), 2, 2)
-  vu = rmvnorm(n, sigma = mSigma_0)
+  vu = rmvnorm(m, sigma = mSigma_0)
   rho = 1.0
   vy = as.vector(gen_slope_data(vx, vbeta, vu, rho, m, ni))
   
