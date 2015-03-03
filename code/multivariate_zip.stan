@@ -36,12 +36,17 @@ model {
   chol_BetaPrior <- cholesky_decompose(BetaPrior);
   vbeta ~ multi_normal_cholesky(zeros_beta, chol_BetaPrior);
   
-  for (m in 1:(M-1)) {
-    vu[m] ~ multi_normal(zeros_u, sigma_u);
-  }
+  // This definitely works, but it's slow.
+  //for (m in 1:(M-1)) {
+  //  vu[m] ~ multi_normal(zeros_u, sigma_u);
+  //}
+  // This is faster. But does it work?
+  vu ~ multi_normal(zeros_u, sigma_u);
   
   for (n in 1:N) {
     // This code smells
+    // to_vector?
+    // i.e. u <- to_vector(vu);
     for (m in 1:(M-1))
       for (b in 1:B) {
         u[(m-1)*B+b] <- vu[m][b];
