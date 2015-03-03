@@ -76,78 +76,6 @@ gen_slope_data = function(vx, vbeta, vu, rho, m, ni)
   return(y)
 }
 
-gen_mult_data_inv_wish <- function (mX, mZ, m, n, rho, vbeta, v, psi, verbose=FALSE)
-{
-  if (is.null(mZ)) {
-    mC = mX
-  } else {
-    mC = cbind(mX, mZ)
-  }
-  vy = rep(NA, sum(n))
-  vu = rep(NA, length(n))
-  if (verbose)
-    cat("vy", vy, "\n")
-  idx = 0
-  for (i in 1:length(n)) {
-    sigma2_u = solve(rWishart(1, v, solve(psi)))
-    vu = rmvnorm(1, rep(0, ncol(mZ)), sigma2_u)
-    #if (sigma2_u == 0)
-    #  vu[i] = 0
-    #else
-    #  vu[i] = rnorm(1, 0, sqrt(sigma2_u))
-    
-    for (j in 1:n[i]) {
-      idx = idx + 1
-      if (verbose)
-        cat("idx", idx, "\n")
-      
-      if (runif(1) <= rho) {
-        veta = mX[idx,] %*% vbeta + vu[i]
-        if (verbose)
-          cat("veta", veta, "\n")
-        vy[idx] = rpois(1, exp(veta))
-        if (verbose)
-          cat("Generated vy[idx]", vy[idx], "\n")
-      } else {
-        vy[idx] = 0
-      }
-    }
-  }
-  if (verbose)
-    cat("vy", vy, "\n")
-  if(NA %in% vy)
-    stop("NAs in vy")
-  result = list(vy=vy, vu=vu)
-  return(result)
-}
-
-
-# Create mZ matrix for random slopes
-# There's probably a better way to do this
-makeZ <- function(mX, m, ni, p=1)
-{
-  # FIXME: This is elegant, but doesn't quite work. The matrix produced is
-  # too large, dim(mX) * dim(groupIntercepts) whereas we want dim(mX)
-  #groupIntercepts <- kronecker(diag(1,m),rep(1,ni))
-  #mZ = kronecker(mX, groupIntercepts)
-  #return(mZ)
-
-  # Create mZ matrix for random slopes
-  # There's probably a better way to do this
-  # TODO: Rewrite with the Kronecker product
-  mZ2 = matrix(0, nrow=m*ni, ncol=2*m)
-  for (i in 1:m) {
-    row_idx = ni*(i-1)+1:ni
-    col_idx = ((i-1)*p+1):(i*p)
-    mZ2[row_idx,col_idx] = mX[row_idx,]
-  }
-
-  # Mean centre variables where appropriate
-  groupInd <- kronecker(diag(1,m),cbind(rep(0,ni), rep(1,ni)))
-  result = mZ2 - ifelse(groupInd, colMeans(groupInd*mZ2), 0)
-  return(result)
-}
-
 generate_test_data = function(m, ni)
 {
   m = m
@@ -197,8 +125,8 @@ generate_test_data = function(m, ni)
 generate_slope_test_data = function(m = 10, ni =10)
 {
   n = m*ni
-  # FIXME: This code sucks. Re-write using gl and model.matrix
-  x = runif(m*ni, -1, 1)
+  x = runif(n, -1, 1)
+  vx = t(matrix(x, ni, m))
   groups = gl(m, ni)
   mC = model.matrix(~1+x+groups*x)
   p = 2
@@ -215,18 +143,14 @@ generate_slope_test_data = function(m = 10, ni =10)
   
   # Centre slope term?
   #mX = cbind(mX[,1], scale(mX[,2]))
-  vx = matrix(runif(n, -1, 1), m, ni)
   vbeta = c(2, 1)
   mSigma_0 = matrix(c( 1.0, -0.5,
                       -0.5,  1.0), 2, 2)
   vu = rmvnorm(n, sigma = mSigma_0)
-  rho = 0.5
+  rho = 1.0
   vy = as.vector(gen_slope_data(vx, vbeta, vu, rho, m, ni))
   
   # Create mult object
-  a_sigma = 1e-2
-  b_sigma = 1e-2
-  tau = 1.0E2
   sigma2.beta <- 1.0E5
   mult = create_multivariate(vy, mX, mZ_reordered, sigma2.beta, m=m, blocksize=2, spline_dim=0)
   return(mult)
