@@ -8,11 +8,10 @@ mcmc_approximation <- function(mult, iterations=1e3, warmup=floor(iterations/2),
   require(parallel)
   #source("multivariate_stan.R")
   
-  #browser()
   #mS = matrix(c(1, 0, 0, 1), 2, 2)
   u_dim = with(mult, m*blocksize+spline_dim)
   zip_data <- with(mult, list(N=length(vy), P=2, M=m, B=blocksize, y=vy, X=mX, Z=mZ,
-                              psi=mPsi, BetaPrior=mSigma.beta)) #, v=prior$v))
+                              psi=prior$mPsi, BetaPrior=mSigma.beta)) #, v=prior$v))
   #print(str(zip_data))
   rng_seed <- 5;
   fit <- stan("multivariate_zip.stan", data=zip_data, iter=iterations, warmup=warmup, chains = 1)
@@ -25,7 +24,6 @@ mcmc_approximation <- function(mult, iterations=1e3, warmup=floor(iterations/2),
   
   #fit <- stan(model_code = zip_code, data = zip_dat, 
   #            iter = 1e5, chains = 4)  
-  
   mcmc_samples = extract(fit)
   return(mcmc_samples)
 }
