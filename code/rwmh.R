@@ -84,7 +84,6 @@ mcmc <- function(mult, iterations=1e3, burnin=round(iterations/10), thinning=10)
     # Iterate
     # TODO: To reduce memory consumption, implement thinning
     for (i in 2:ITERATIONS) {
-      #browser()
 		ret <- RandomWalkMetropolisHastings(mult, vnu[,i-1],mR,vr[,i-1])
       vnu[,i] <- ret[[1]]
 		accept[i] <- ret[[2]]

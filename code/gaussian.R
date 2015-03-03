@@ -237,7 +237,6 @@ fit.GVA <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12)
 
 f.G_new2 <- function(vmu,mR,vy,vr,mC,mSigma.inv,gh,p, m, blocksize, spline_dim, mC_sp)
 {
-  #browser()
   d <- length(vmu)
   
   vmu.til     <- mC%*%vmu
@@ -254,7 +253,6 @@ f.G_new2 <- function(vmu,mR,vy,vr,mC,mSigma.inv,gh,p, m, blocksize, spline_dim, 
   #  a <- forwardsolve(mR, row)
   #  sum(a^2)
   #})
-  #browser()
   #mR <- Matrix(mR, sparse=TRUE)
   #mR_sp = sparse_R(mR, p, m, blocksize, spline_dim)
   #mR.inv = fastinv2(mR, p=p, m=m, blocksize=blocksize, spline_dim=spline_dim)
@@ -263,7 +261,6 @@ f.G_new2 <- function(vmu,mR,vy,vr,mC,mSigma.inv,gh,p, m, blocksize, spline_dim, 
   a <- forwardsolve(mR, t(mC))
   #a <- fastsolve(mR_sp, mC)
   vsigma2.til <- crossprod(a^2, rep(1, ncol(mC)))
-  #browser()
   #vsigma2.til <- crossprod(a^2, rep(1, ncol(mC)))                           
   #mR.inv = fastinv(mR_sp)  
   #mLambda <- crossprod(mR.inv)
@@ -544,7 +541,6 @@ fit.GVA_new2 <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, 
   # Swap fixed and random effects in mLambda so that inverse of mR is quick to
   # calculate due to sparsity. If you do this, you have to re-order mSigma.inv,
   # vmu and mC as well.
-  #browser()
   beta_idx = 1:p
   u_idx = (p+1):(p+u_dim)
   new_beta_idx = (u_dim+1):(u_dim+p)
@@ -853,7 +849,6 @@ mH.G_nr <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,vB2)
 
 fit.GVA_nr <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, m=NA, p=NA, blocksize=NA, spline_dim=NA)
 {
-  #browser()
   MAXITER <- 1000
   TOL <- reltol
   
