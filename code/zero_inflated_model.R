@@ -134,7 +134,6 @@ create_multivariate <- function(vy, mX, mZ, sigma2.beta, m=ncol(mZ), blocksize=1
 
 zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE)
 {
-  #browser()
   MAXITER <- 30
   
   # Initialise
@@ -227,7 +226,6 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
       #tr_mSigma = ncol(mult$mZ) * mult$prior$a_sigma/mult$prior$b_sigma
       #mult$b_sigma = mult$prior$b_sigma + sum(vu^2)/2 + (tr_mSigma)/2
       mult$b_sigma = mult$prior$b_sigma + sum(mult$vmu[u_idx]^2)/2 + tr(mult$mLambda[u_idx, u_idx])/2    # Extract right elements of mLambda
-      #browser()
       
       # FIXME: This code is hard to read
       acc = matrix(0, blocksize, blocksize)
