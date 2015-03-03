@@ -18,7 +18,7 @@ transformed data {
 
 parameters {
   vector[P] vbeta; 
-  vector[B] vu[M];
+  vector[B] vu[M-1];
   cov_matrix[B] psi;
   cov_matrix[P] BetaPrior;
   real<lower=0, upper=1> rho;
@@ -27,24 +27,25 @@ parameters {
 
 model {
   real eta;
-  vector[B*(M-1)] u;
   matrix[P,P] chol_BetaPrior;
+  vector[B*(M-1)] u;
 
   rho ~ beta(1.0, 1.0);
   sigma_u ~ inv_wishart(B+1, psi);
 
-
   chol_BetaPrior <- cholesky_decompose(BetaPrior);
   vbeta ~ multi_normal_cholesky(zeros_beta, chol_BetaPrior);
   
-  for (m in 1:M) {
+  for (m in 1:(M-1)) {
     vu[m] ~ multi_normal(zeros_u, sigma_u);
   }
   
   for (n in 1:N) {
+    // This code smells
     for (m in 1:(M-1))
-      for (b in 1:B)
+      for (b in 1:B) {
         u[(m-1)*B+b] <- vu[m][b];
+      }
 
     eta <- dot_product(X[n], vbeta) + dot_product(Z[n], u);
 
