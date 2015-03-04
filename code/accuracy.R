@@ -4,6 +4,30 @@ source("generate.R")
 source("mcmc.R")
 source("rwmh.R")
 
+calculate_accuracy = function(mcmc_samples, dist_fn, param1, param2)
+{
+  mcmc_density = density(mcmc_samples)
+  mcmc_fn = splinefun(mcmc_density$x, mcmc_density$y)
+  
+  integrand <- function(x)
+  {
+    return(abs(mcmc_fn(x) - dist_fn(x, param1, param2)))
+  }
+  result = integrate(integrand, min(mcmc_density$x), max(mcmc_density$x),
+                     subdivisions = length(mcmc_density$x))
+  accuracy = 1 - .5 * result$value
+  return(accuracy)
+}
+
+accuracy_plot = function(mcmc_samples, dist_fn, param1, param2)
+{
+  mcmc_density = density(mcmc_samples)
+  plot(mcmc_density)
+  curve(dist_fn(x, param1, param2),
+        from=min(mcmc_density$x), to=max(mcmc_density$x),
+        add=TRUE, lty=2, col="blue")
+}
+
 calculate_accuracies = function(mult, mcmc_samples, var_result, approximation, print_flag=FALSE, plot_flag=FALSE)
 {
   # TODO: Add support for checking the accuracy over multiple dimensions
@@ -12,20 +36,6 @@ calculate_accuracies = function(mult, mcmc_samples, var_result, approximation, p
   if (plot_flag) pdf(paste0("accuracy_plots_", approximation, ".pdf"))
   #return(var_result)
   # vbeta accuracy
-  calculate_accuracy = function(mcmc_samples, dist_fn, param1, param2)
-  {
-    mcmc_density = density(mcmc_samples)
-    mcmc_fn = splinefun(mcmc_density$x, mcmc_density$y)
-    
-    integrand <- function(x)
-    {
-      return(abs(mcmc_fn(x) - dist_fn(x, param1, param2)))
-    }
-    result = integrate(integrand, min(mcmc_density$x), max(mcmc_density$x),
-                       subdivisions = length(mcmc_density$x))
-    accuracy = 1 - .5 * result$value
-    return(accuracy)
-  }
   
   # Compare MCMC distribution with variational approximation for each parameter
   # vnu[i] ~ Normal, dnorm
@@ -39,15 +49,6 @@ calculate_accuracies = function(mult, mcmc_samples, var_result, approximation, p
   # Kernel density estimates of MCMC-estimated posteriors
   # Use L_1 distance to compare against variational approximations of posteriors
  
-  accuracy_plot = function(mcmc_samples, dist_fn, param1, param2)
-  {
-    mcmc_density = density(mcmc_samples)
-    plot(mcmc_density)
-    curve(dist_fn(x, param1, param2),
-          from=min(mcmc_density$x), to=max(mcmc_density$x),
-          add=TRUE, lty=2, col="blue")
-  }
-  
   vbeta_accuracy = rep(NA, ncol(mult$mX))
   for (i in 1:ncol(mult$mX)) {
     vbeta_accuracy[i] = calculate_accuracy(mcmc_samples$vbeta[,i], dnorm,
@@ -68,7 +69,6 @@ calculate_accuracies = function(mult, mcmc_samples, var_result, approximation, p
   B = mult$blocksize
   b_idx = 1
   for (i in 1:ncol(mult$mZ)) {
-    # TODO: The B - (i %% B) expression only works for B=2. Rewrite this.
     m_idx = ceiling(i/B)
     vu_accuracy[i] = calculate_accuracy(mcmc_samples$vu[,m_idx,b_idx], dnorm,
                                          var_result$vmu[i+mult$p], sqrt(var_result$mLambda[i+mult$p,i+mult$p]))
@@ -215,9 +215,10 @@ test_accuracies = function()
 test_accuracies_slope = function()
 {
   # Monte Carlo Markov Chains approximation
-  set.seed(1)
+  seed = 1
+  set.seed(seed)
   mult = generate_slope_test_data()
-  mcmc_samples = mcmc_approximation(mult, iterations=1e4, warmup=1e3, mc.cores = 1)
+  mcmc_samples = mcmc_approximation(mult, seed=seed, iterations=1e6, warmup=1e5)
   save(mult, mcmc_samples, file="data/accuracy_slope_2015_03_03.RData")  
   #load(file="data/accuracy_slope_2015_03_03.RData")
   
