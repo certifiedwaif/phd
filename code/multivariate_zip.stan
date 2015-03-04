@@ -37,11 +37,11 @@ model {
   vbeta ~ multi_normal_cholesky(zeros_beta, chol_BetaPrior);
   
   // This definitely works, but it's slow.
-  //for (m in 1:(M-1)) {
-  //  vu[m] ~ multi_normal(zeros_u, sigma_u);
-  //}
-  // This is faster. But does it work?
-  vu ~ multi_normal(zeros_u, sigma_u);
+  for (m in 1:(M-1)) {
+    vu[m] ~ multi_normal(zeros_u, sigma_u);
+  }
+  // This is faster. But does it work? Seems to, but distributions are weird.
+  //vu ~ multi_normal(zeros_u, sigma_u);
   
   for (n in 1:N) {
     // This code smells
