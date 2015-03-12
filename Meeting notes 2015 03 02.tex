@@ -1,0 +1,49 @@
+\documentclass{article}[12pt]
+\usepackage{amsmath}
+\input{include.tex}
+\input{Definitions.tex}
+\title{Meeting notes - 9/3/2015}
+\begin{document}
+
+\maketitle
+
+I updated John on my progress with the zero-inflated Poisson mixed model with random
+intercepts and slopes. For my test case, all algorithms currently work well except GVA with
+$\mLambda = (\mR^T\mR)^{-1}$. The algorithm does not perform as well as the others, getting
+poor accuracy, as little as $33\%$ for the fixed effects.
+
+John mentioned that either parameterisation (meaning $\mLambda=\mR^T \mR$ or 
+$\mLambda=(\mR^T \mR)^{-1})$) span space of semi-definite matrices, but when optimising the 
+GVA lower bound they may have different local optima.
+
+He suggested a number of possible next steps.
+
+\begin{itemize}
+\item Look at different starting points.
+
+\item Sensitivity analysis
+\begin{enumerate}
+\item[a] $\vr = \vone_n$.
+\item[b] Fit Poisson mixed model using only $y > 0$ data.
+\item[c] Predict $\vr$ from (a)
+\item[d] Random $\vr$ - see sensitivity - $\vr = \vone$, $y > 0$.
+$\vr$ random $y=0$ with problem $\half$ or prob of $0$.
+\item[e] $r=1$ for $y > 0$, $\vr=\vzero$ for $y=0$.
+\end{enumerate}
+
+\item John suggest I do the same for the Laplace's method of approximation approach.
+
+\item Mixture models. Use k means to start centres.
+
+\item Look at $\vmu$. Check that this is being estimated correctly. (Update: I've since
+done this, and it is).
+
+\item blocksize 4 or 5 dimensional, higher dimensional quadrature type methods
+MCEM.
+
+\item I said I wanted to review my vector calculus and matrix calculus. John said he'd
+already asked me to do this. I responded that I had, but that I understood my problem
+much better now.
+\end{itemize}
+
+\end{document}
