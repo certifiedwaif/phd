@@ -13,7 +13,7 @@ beta_entropy <- function(alpha, beta)
   lbeta(alpha, beta) - (alpha-1)*digamma(alpha) - (beta-1)*digamma(beta) + (alpha+beta-2)*digamma(alpha+beta)
 }	
 
-calculate_lower_bound.multivariate <- function(multivariate, verbose=FALSE)
+calculate_lower_bound <- function(multivariate, verbose=FALSE)
 {
   result = with(multivariate, {
     p = ncol(mX)
@@ -75,11 +75,6 @@ calculate_lower_bound.multivariate <- function(multivariate, verbose=FALSE)
   return(result)
 }
 
-calculate_lower_bound <- function(object, verbose=verbose)
-{
-  UseMethod("calculate_lower_bound", object)
-}
-
 create_multivariate <- function(vy, mX, mZ, sigma2.beta, m=ncol(mZ), blocksize=1, spline_dim=NA, v=blocksize+1)
 {
   # Initialise
@@ -127,7 +122,7 @@ create_multivariate <- function(vy, mX, mZ, sigma2.beta, m=ncol(mZ), blocksize=1
   return(multivariate)
 }
 
-zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE)
+zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE)
 {
   MAXITER <- 100
   
@@ -187,7 +182,7 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
       fit1 = fit.GVA(mult$vmu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B")
     } else if (method == "gva2") {
       #fit2 = fit.Lap(mult$vmu, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, mult$mLambda)
-      fit1 = fit.GVA_new(mult$vmu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B", p=p, m=m, blocksize=mult$blocksize)
+      fit1 = fit.GVA_new(mult$vmu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B", p=p, m=m, blocksize=mult$blocksize, , spline_dim=spline_dim)
     } else if (method == "gva2new") {
       #fit2 = fit.Lap(mult$vmu, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, mult$mLambda)
       fit1 = fit.GVA_new2(mult$vmu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B", p=p, m=m, blocksize=mult$blocksize, spline_dim=spline_dim, mC_sp=mC_sp)
@@ -258,9 +253,4 @@ zero_infl_var.multivariate <- function(mult, method="gva", verbose=FALSE, plot_l
   params = list(vmu=mult$vmu, mLambda=mult$mLambda, a_rho=mult$a_rho, b_rho=mult$b_rho,
                 a_sigma=mult$a_sigma, b_sigma=mult$b_sigma, vlower_bound=vlower_bound)
   return(params)
-}
-
-zero_infl_var <- function(object, method="laplacian", verbose=FALSE, plot_lower_bound=FALSE)
-{
-  UseMethod("zero_infl_var", object)
 }

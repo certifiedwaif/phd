@@ -5,11 +5,7 @@ require(Matrix)
 source("CalculateB.R")
 require(Rcpp)
 require(RcppEigen)
-
-#fastdiag <- function(mC, mLambda)
-#{
-#  return(diag(mC%*%mLambda%*%t(mC)))
-#}
+require(numDeriv)
 
 sourceCpp(file = "fastdiag.cpp")
 
@@ -227,7 +223,8 @@ f.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   #  mR[Dinds[i]] <- min(c(1.0E5,mR[Dinds[i]]))
   #}
   mLambda.inv = t(mR)%*%mR
-  mLambda <- solve(mLambda.inv, tol=1.0E-99)
+  #mLambda <- solve(mLambda.inv, tol=1.0E-99)
+  mLambda <- chol2inv(mR)
   
   f <- -sum(log(diag(mR))) + f.G(vmu,mLambda,vy,vr,mC,mSigma.inv,gh) 
   f <- f + 0.5*d*log(2*pi) + 0.5*d
@@ -268,8 +265,10 @@ vg.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   #for (i in 1:length(Dinds)) {
   #  mR[Dinds[i]] <- min(c(1.0E3,mR[Dinds[i]]))
   #}    
-  mLambda.inv <- t(mR)%*%mR
-  mLambda <- solve(mLambda.inv, tol=1.0E-99)
+  #mLambda.inv <- t(mR)%*%mR
+  mLambda.inv <- tcrossprod(mR)
+  #mLambda <- solve(mLambda.inv, tol=1.0E-99)
+  mLambda <- chol2inv(mR)
   
   vmu.til     <- mC%*%vmu
   #vsigma2.til <- diag(mC%*%mLambda%*%t(mC))
@@ -288,7 +287,10 @@ vg.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   # backsolves?
   #dmLambda <- -solve(mR, tol=1.0E-99)%*%(mLambda.inv + mH)%*%mLambda  
   #dmR <- -solve(mR,  (mLambda.inv + mH)%*%mLambda, tol=1e-99)
-  dmR <- -0.5*mLambda%*%(mLambda.inv + mH)%*%mLambda%*%(mR + t(mR))
+  dmR <- -0.5*(mLambda.inv + mH)%*%mLambda%*%(t(mR)+mR)%*%mLambda
+  dmR2 <- -(mLambda.inv + mH)%*%mLambda%*%t(mR)%*%mLambda
+  dmR3 <- -(mLambda.inv + mH)%*%mLambda%*%mR%*%mLambda
+  # Would this be more accurate using solves?
   #dmR <- -0.5*(diag(1, rep(ncol(mLambda))) + mLambda%*%mH)%*%(mR + t(mR))%*%mLambda
   #dmLambda <- .5*(mLambda.inv + mH)%*%mR
   #dmLambda <- -mR%*%mLambda%*%(mLambda.inv + mH)%*%mLambda
@@ -304,8 +306,9 @@ vg.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
     vtheta_prime[(1+d):length(vtheta_prime)] <- mR_prime[Rinds]
     f.GVA_new(vtheta_prime,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   }
-  dmR_check <- matrix(grad(func, as.vector(t(mR))), nrow(mR), ncol(mR))
-  #browser()
+  dmR_check <- matrix(grad(func, as.vector(mR)), nrow(mR), ncol(mR))
+  # Idea: Check whether dmR deviates too far from dmR_check?
+  browser()
   cat("GVA2 vmu", vmu, "mR", mR[1:2, 1:2], "dmR", dmR[1:2, 1:2], "\n")
   
   #vg[(1+d):length(vtheta)] <- dmLambda[Rinds]    
@@ -400,7 +403,7 @@ fit.GVA_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, p
   return(list(res=res,vmu=vmu,mLambda=mLambda))
 }
 
-# Newton-Raphson Gaussian variational approxmation ----
+# Newton-Raphson Gaussian variational approximation ----
 vg.G_nr <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,vB1) 
 {
   vg <- t(mC)%*%(vr*(vy - vB1)) - mSigma.inv%*%vmu     

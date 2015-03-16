@@ -299,7 +299,7 @@ vg.GVA_new2 <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds, p, m, bloc
 
 ###############################################################################
 
-fit.GVA_new2 <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, p=NA, m=NA, blocksize=NA, spline_dim=NA, mC_sp)
+fit.GVA_new2 <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, p=NA, m=NA, blocksize=NA, spline_dim=NA)
 {
   #library(statmod)
   #N <- 15
@@ -361,6 +361,8 @@ fit.GVA_new2 <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, 
   mR[Rinds] <- vtheta[(1+d):P]
   mR[Dinds] <- exp(mR[Dinds])  
   mLambda <- solve(mR%*%t(mR), tol=1.0E-99)
+  
+  browser()
 
   # Swap everything back
   beta_idx = (u_dim+1):(u_dim+p)
