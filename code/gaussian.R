@@ -218,13 +218,12 @@ f.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   d <- ncol(mC)  
   vmu <- vtheta[1:d]
   mR[Rinds] <- vtheta[(1+d):length(vtheta)]
-  #mR[Dinds] <- exp(mR[Dinds]) 
-  #for (i in 1:length(Dinds)) {
-  #  mR[Dinds[i]] <- min(c(1.0E5,mR[Dinds[i]]))
-  #}
-  mLambda.inv = t(mR)%*%mR
-  #mLambda <- solve(mLambda.inv, tol=1.0E-99)
-  mLambda <- chol2inv(mR)
+  mR[Dinds] <- exp(mR[Dinds]) 
+  for (i in 1:length(Dinds)) {
+    mR[Dinds[i]] <- min(c(1.0E5,mR[Dinds[i]]))
+  }
+  mLambda.inv = tcrossprod(mR)
+  mLambda <- chol2inv(t(mR))
   
   f <- -sum(log(diag(mR))) + f.G(vmu,mLambda,vy,vr,mC,mSigma.inv,gh) 
   f <- f + 0.5*d*log(2*pi) + 0.5*d
@@ -258,22 +257,20 @@ vg.GVA.approx_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
 
 vg.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
 {
+  browser()
+  
   d <- ncol(mC)
   vmu <- vtheta[1:d]
   mR[Rinds] <- vtheta[(1+d):length(vtheta)]
-  #mR[Dinds] <- exp(mR[Dinds]) 
-  #for (i in 1:length(Dinds)) {
-  #  mR[Dinds[i]] <- min(c(1.0E3,mR[Dinds[i]]))
-  #}    
-  #mLambda.inv <- t(mR)%*%mR
+  mR[Dinds] <- exp(mR[Dinds]) 
+  for (i in 1:length(Dinds)) {
+    mR[Dinds[i]] <- min(c(1.0E3,mR[Dinds[i]]))
+  }    
   mLambda.inv <- tcrossprod(mR)
-  #mLambda <- solve(mLambda.inv, tol=1.0E-99)
-  mLambda <- chol2inv(mR)
+  mLambda <- chol2inv(t(mR))
   
   vmu.til     <- mC%*%vmu
-  #vsigma2.til <- diag(mC%*%mLambda%*%t(mC))
   vsigma2.til <- fastdiag(mC, mLambda)
-  #vsigma2.til <- sapply(1:nrow(mC), function(i) {mC[i,]%*%mLambda%*%mC[i,]})
   res.B12 <- B12.fun("POISSON",vmu.til,vsigma2.til,gh)
   vB1 <- res.B12$vB1
   vB2 <- res.B12$vB2
@@ -281,7 +278,6 @@ vg.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   vg <- 0*vmu
   vg[1:d] <- vg.G(vmu,mLambda,vy,vr,mC,mSigma.inv,vB1) 
   
-  #mLambda.inv <- mR%*%t(mR)
   mH <- mH.G(vmu,mLambda,vy,vr,mC,mSigma.inv,vB2)
   # mR is lower triangular. Can you rewrite this using forward solves and
   # backsolves?
@@ -295,25 +291,27 @@ vg.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   #dmLambda <- .5*(mLambda.inv + mH)%*%mR
   #dmLambda <- -mR%*%mLambda%*%(mLambda.inv + mH)%*%mLambda
   #dmLambda <- -(mLambda.inv + mH)%*%mLambda%*%(t(mR) + mR)%*%mLambda
-  #dmR[Dinds] <- dmR[Dinds]*mR[Dinds]
+  dmR[Dinds] <- dmR[Dinds]*mR[Dinds]
+  dmR2[Dinds] <- dmR2[Dinds]*mR[Dinds]
+  dmR3[Dinds] <- dmR3[Dinds]*mR[Dinds]
   # Check derivative numerically
   func <- function(x)
   {
     mR_prime = matrix(x, nrow(mR), ncol(mR))
+    mR_prime[Dinds] = log(mR_prime[Dinds])
     d <- ncol(mC)
     vtheta_prime = 0*vtheta
-    vtheta_prime[1:d] <- vmu
+    vtheta_prime[1:d] <- vmu    
     vtheta_prime[(1+d):length(vtheta_prime)] <- mR_prime[Rinds]
     f.GVA_new(vtheta_prime,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   }
   dmR_check <- matrix(grad(func, as.vector(mR)), nrow(mR), ncol(mR))
   # Idea: Check whether dmR deviates too far from dmR_check?
-  browser()
-  cat("GVA2 vmu", vmu, "mR", mR[1:2, 1:2], "dmR", dmR[1:2, 1:2], "\n")
+  cat("GVA2 vmu", vmu, "dvmu", vg[1:d], "mR", mR[1:2, 1:2], "dmR", dmR[1:2, 1:2], "\n")
   
   #vg[(1+d):length(vtheta)] <- dmLambda[Rinds]    
-  vg[(1+d):length(vtheta)] <- dmR[Rinds]    
-  #vg[(1+d):length(vtheta)] <- dmR_check[Rinds]    
+  #vg[(1+d):length(vtheta)] <- dmR[Rinds]    
+  vg[(1+d):length(vtheta)] <- dmR_check[Rinds]    
   
 #   require(gridExtra)
 #   require(lattice)
@@ -328,9 +326,44 @@ vg.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   return(vg)
 }
 
+# Swap fixed and random effects in mLambda so that inverse of mR is quick to
+# calculate due to sparsity. If you do this, you have to re-order mSigma.inv,
+# vmu and mC as well.
+swap_mX_mZ <- function(mLambda, mSigma.inv, mC, p, u_dim)
+{
+  beta_idx = 1:p
+  u_idx = (p+1):(p+u_dim)
+  new_beta_idx = (u_dim+1):(u_dim+p)
+  new_u_idx = 1:u_dim
+  mLambda_new = blockDiag(mLambda[u_idx, u_idx], mLambda[beta_idx, beta_idx])
+  mLambda_new[new_u_idx, new_beta_idx] = mLambda[u_idx, beta_idx]
+  mLambda_new[new_beta_idx, new_u_idx] = t(mLambda[u_idx, beta_idx])
+  mLambda = mLambda_new
+  mSigma.inv = blockDiag(mSigma.inv[u_idx, u_idx], mSigma.inv[beta_idx, beta_idx])
+  vmu = c(vmu[u_idx], vmu[beta_idx])
+  mC = mC[,c(u_idx, beta_idx)]
+  return(list(vmu=vmu, mLambda=mLambda, mSigma.inv=mSigma.inv, mC=mC))
+}
+
+# Swap everything back
+swap_mX_mZ_back <- function(mLambda, mSigma.inv, mC, p, u_dim)
+{
+  beta_idx = (u_dim+1):(u_dim+p)
+  u_idx = 1:u_dim
+  new_beta_idx = 1:p
+  new_u_idx = (p+1):(p+u_dim)
+  mLambda_new = blockDiag(mLambda[beta_idx, beta_idx], mLambda[u_idx, u_idx])
+  mLambda_new[new_beta_idx, new_u_idx] = mLambda[beta_idx, u_idx]
+  mLambda_new[new_u_idx, new_beta_idx] = t(mLambda[beta_idx, u_idx])
+  mLambda = mLambda_new
+  mSigma.inv = blockDiag(mSigma.inv[beta_idx, beta_idx], mSigma.inv[u_idx, u_idx])
+  vmu = c(vmu[beta_idx], vmu[u_idx])
+  mC = mC[,c(beta_idx, u_idx)]
+  return(list(vmu=vmu, mLambda=mLambda, mSigma.inv=mSigma.inv, mC=mC))
+}
+
 fit.GVA_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, p=NA, m=NA, blocksize=NA, spline_dim=NA)
 {
-  #browser()
   #library(statmod)
   #N <- 15
   #gh  <- gauss.quad(N,kind="hermite")
@@ -341,28 +374,9 @@ fit.GVA_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, p
   
   u_dim = (m-1)*blocksize+spline_dim
 
-  # Swap fixed and random effects in mLambda so that inverse of mR is quick to
-  # calculate due to sparsity. If you do this, you have to re-order mSigma.inv,
-  # vmu and mC as well.
-#   beta_idx = 1:p
-#   u_idx = (p+1):(p+u_dim)
-#   new_beta_idx = (u_dim+1):(u_dim+p)
-#   new_u_idx = 1:u_dim
-#   mLambda_new = blockDiag(mLambda[u_idx, u_idx], mLambda[beta_idx, beta_idx])
-#   mLambda_new[new_u_idx, new_beta_idx] = mLambda[u_idx, beta_idx]
-#   mLambda_new[new_beta_idx, new_u_idx] = t(mLambda[u_idx, beta_idx])
-#   mLambda = mLambda_new
-#   mSigma.inv = blockDiag(mSigma.inv[u_idx, u_idx], mSigma.inv[beta_idx, beta_idx])
-#   vmu = c(vmu[u_idx], vmu[beta_idx])
-#   mC = mC[,c(u_idx, beta_idx)]
-  
-  # This line is suspect
-  mR <- chol(solve(mLambda, tol=1.0E-99)) + diag(1.0E-8,d)
-  #mR <- t(chol(mLambda + diag(1.0E-8,d)))
-  #cat("mR", mR, "\n")
-  #cat("mSigma.inv", mSigma.inv, "\n")
-  #mR[Dinds] <- log(mR[Dinds])
-  Rinds <- which(upper.tri(mR,diag=TRUE))
+  mR <- t(chol(solve(mLambda, tol=1.0E-99))) + diag(1.0E-8,d)
+  mR[Dinds] <- log(mR[Dinds])
+  Rinds <- which(lower.tri(mR,diag=TRUE))
   vmu <- c(vmu,mR[Rinds])
   P <- length(vmu)
 
@@ -381,24 +395,10 @@ fit.GVA_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, p
   
   vmu <- vtheta[1:d]
   mR[Rinds] <- vtheta[(1+d):P]
-  #mR[Dinds] <- exp(mR[Dinds])  
-  print(image(Matrix(t(mR)%*%mR)))
-  mLambda <- solve(t(mR)%*%mR, tol=1.0E-99)
-  #mLambda <- mR%*%t(mR)
+  mR[Dinds] <- exp(mR[Dinds])  
+  print(image(Matrix(mR%*%t(mR))))
+  mLambda <- solve(mR%*%t(mR), tol=1.0E-99)
   browser()
-  
-  # Swap everything back
-#   beta_idx = (u_dim+1):(u_dim+p)
-#   u_idx = 1:u_dim
-#   new_beta_idx = 1:p
-#   new_u_idx = (p+1):(p+u_dim)
-#   mLambda_new = blockDiag(mLambda[beta_idx, beta_idx], mLambda[u_idx, u_idx])
-#   mLambda_new[new_beta_idx, new_u_idx] = mLambda[beta_idx, u_idx]
-#   mLambda_new[new_u_idx, new_beta_idx] = t(mLambda[beta_idx, u_idx])
-#   mLambda = mLambda_new
-#   mSigma.inv = blockDiag(mSigma.inv[beta_idx, beta_idx], mSigma.inv[u_idx, u_idx])
-#   vmu = c(vmu[beta_idx], vmu[u_idx])
-#   mC = mC[,c(beta_idx, u_idx)]
   
   return(list(res=res,vmu=vmu,mLambda=mLambda))
 }
