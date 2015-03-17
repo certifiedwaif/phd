@@ -142,9 +142,9 @@ generate_slope_test_data = function(m = 5, ni = 20)
   
   # Centre slope term?
   #mX = cbind(mX[,1], scale(mX[,2]))
-  vbeta = c(2, 1)
-  mSigma_0 = matrix(c( 1.0, -0.5,
-                      -0.5,  1.0), 2, 2)
+  vbeta = c(1.5, 0.5)
+  mSigma_0 = matrix(c( 1.0, -0.3,
+                      -0.3,  1.0), 2, 2)
   vu = rmvnorm(m, sigma = mSigma_0)
   rho = 1.0
   vy = as.vector(gen_slope_data(vx, vbeta, vu, rho, m, ni))

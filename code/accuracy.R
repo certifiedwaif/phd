@@ -218,8 +218,8 @@ test_accuracies_slope = function()
   #seed = 1
   #set.seed(seed)
   #mult = generate_slope_test_data()
-  #mcmc_samples = mcmc_approximation(mult, seed=seed, iterations=1e6, warmup=1e5)
-  #save(mult, mcmc_samples, file="data/accuracy_slope_2015_03_03.RData")  
+  #mcmc_samples = mcmc_approximation(mult, seed=seed, iterations=1e5, warmup=1e4)
+  #save(mult, mcmc_samples, file="data/accuracy_slope_2015_03_17.RData")  
   load(file="data/accuracy_slope_2015_03_03.RData")
   
   now = Sys.time()
