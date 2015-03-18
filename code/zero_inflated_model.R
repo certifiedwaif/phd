@@ -1,4 +1,4 @@
-# variational_approximation_to_zero_inflated_model.R
+# zero_inflated_model.R
 library(limma)
 source("common.R")
 source("gaussian.R")
@@ -115,6 +115,7 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
   MAXITER <- 100
   
   # Initialise variables from mult
+  N = length(mult$vy)
   vy = mult$vy
   vp = mult$vp
   mX = mult$mX
