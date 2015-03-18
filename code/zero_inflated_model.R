@@ -114,21 +114,38 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
 {
   MAXITER <- 100
   
-  # Initialise
-  N = length(mult$vy)
+  # Initialise variables from mult
+  vy = mult$vy
+  vp = mult$vp
+  mX = mult$mX
+  mZ = mult$mZ
+  mC = mult$mC
+  mSigma.beta.inv = mult$mSigma.beta.inv
+  mSigma.u.inv = mult$mSigma.u.inv
+  mSigma = mult$mSigma
+  vmu = mult$vmu
+  mLambda = mult$mLambda
+  a_rho = mult$a_rho
+  b_rho = mult$b_rho
+  prior = mult$prior
+  mPsi = mult$mPsi
+  v = mult$v
+  m = mult$m
+  spline_dim = mult$spline_dim
+  blocksize = mult$blocksize
 
   if (verbose) cat("N", N, "\n")
-  if (!is.null(mult$mX)) {
-    p = ncol(mult$mX) 
+  if (!is.null(mX)) {
+    p = ncol(mX) 
     if (verbose) cat("p", p, "\n")
   }	else {
     p = 0
   }
 
-  if (!is.null(mult$mZ)) {
-    m = mult$m
-    blocksize = mult$blocksize
-    spline_dim = mult$spline_dim
+  if (!is.null(mZ)) {
+    m = m
+    blocksize = blocksize
+    spline_dim = spline_dim
     if (verbose) {
       cat("m", m, "\n")
       cat("blocksize", blocksize, "\n")
@@ -139,8 +156,8 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
     blocksize = 0
   }
   
-  zero.set = which(mult$vy == 0)
-  nonzero.set = which(mult$vy != 0)
+  zero.set = which(vy == 0)
+  nonzero.set = which(vy != 0)
   vlower_bound <- c()
   
   i = 0
@@ -153,82 +170,101 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
     
     i = i+1
     
-    if (!is.null(mult$mSigma.u.inv)) {
-      mult$mSigma.inv <- blockDiag(mult$mSigma.beta.inv,mult$mSigma.u.inv)
+    if (!is.null(mSigma.u.inv)) {
+      mSigma.inv <- blockDiag(mSigma.beta.inv,mSigma.u.inv)
     } else {
-      mult$mSigma.inv <- mult$mSigma.beta.inv
+      mSigma.inv <- mSigma.beta.inv
     }
     
     # Update parameter for q_vnu by maximising using the Gaussian Variational Approximation from Dr Ormerod's Poisson mixed model code
     if (method == "laplacian") {
-      fit1 = fit.Lap(mult$vmu, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, mult$mLambda)
+      fit1 = fit.Lap(vmu, vy, vp, mC, mSigma.inv, mLambda)
     } else if (method == "gva") {	
-      #fit2 = fit.Lap(mult$vmu, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, mult$mLambda)
-      fit1 = fit.GVA(mult$vmu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B")
+      #fit2 = fit.Lap(vmu, vy, vp, mC, mSigma.inv, mLambda)
+      fit1 = fit.GVA(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B")
     } else if (method == "gva2") {
-      fit2 = fit.Lap(mult$vmu, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, mult$mLambda)
-      fit1 = fit.GVA_new(fit2$vmu, fit2$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B", p=p, m=m, blocksize=mult$blocksize, , spline_dim=spline_dim)
+      fit2 = fit.Lap(vmu, vy, vp, mC, mSigma.inv, mLambda)
+      fit1 = fit.GVA_new(fit2$vmu, fit2$mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B", p=p, m=m, blocksize=blocksize, , spline_dim=spline_dim)
     } else if (method == "gva2new") {
-      #fit2 = fit.Lap(mult$vmu, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, mult$mLambda)
-      fit1 = fit.GVA_new2(mult$vmu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B", p=p, m=m, blocksize=mult$blocksize, spline_dim=spline_dim, mC_sp=mC_sp)
-      #fit1 = fit.GVA_new2(mult$vmu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "BFGS", p=p, m=m)
+      #fit2 = fit.Lap(vmu, vy, vp, mC, mSigma.inv, mLambda)
+      fit1 = fit.GVA_new2(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B", p=p, m=m, blocksize=blocksize, spline_dim=spline_dim, mC_sp=mC_sp)
+      #fit1 = fit.GVA_new2(vmu, mLambda, vy, vp, mC, mSigma.inv, "BFGS", p=p, m=m)
     } else if (method == "gva_nr") {
-      fit1 = fit.GVA_nr(mult$vmu, mult$mLambda, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, "L-BFGS-B", p=p, m=m, blocksize=mult$blocksize, spline_dim=spline_dim)
+      fit1 = fit.GVA_nr(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B", p=p, m=m, blocksize=blocksize, spline_dim=spline_dim)
     } else {
       stop("method must be either laplacian, gva, gva2, gva2new or gva_nr")
     }
     
-    mult$vmu = fit1$vmu
-    mult$mLambda = fit1$mLambda
-    mult$f = fit1$res$value
+    vmu = fit1$vmu
+    mLambda = fit1$mLambda
+    f = fit1$res$value
     
     # Update parameters for q_vr
     if (length(zero.set) != 0) {
-      mult$vp[zero.set] = expit((mult$vy[zero.set]*mult$mC[zero.set,])%*%mult$vmu-exp(mult$mC[zero.set,]%*%mult$vmu + 0.5*diag((matrix(mult$mC[zero.set,], length(zero.set), p+(m-1)*blocksize+spline_dim))%*%mult$mLambda%*%t(matrix(mult$mC[zero.set,], length(zero.set), p+(m-1)*blocksize+spline_dim))) + digamma(mult$a_rho) - digamma(mult$b_rho)))
+      vp[zero.set] = expit((vy[zero.set]*mC[zero.set,])%*%vmu-exp(mC[zero.set,]%*%vmu + 0.5*diag((matrix(mC[zero.set,], length(zero.set), p+(m-1)*blocksize+spline_dim))%*%mLambda%*%t(matrix(mC[zero.set,], length(zero.set), p+(m-1)*blocksize+spline_dim))) + digamma(a_rho) - digamma(b_rho)))
     }
     
     # Update parameters for q_rho
-    mult$a_rho = mult$prior$a_rho + sum(mult$vp)
-    mult$b_rho = mult$prior$b_rho + N - sum(mult$vp)
+    a_rho = prior$a_rho + sum(vp)
+    b_rho = prior$b_rho + N - sum(vp)
     
     # Update parameters for q_sigma_u^2 if we need to
-    if (!is.null(mult$mZ)) {
+    if (!is.null(mZ)) {
       u_dim = (m-1)*blocksize+spline_dim
-      u_idx = p + 1:u_dim  # (ncol(mult$mX)+1):ncol(mult$mC)
+      u_idx = p + 1:u_dim  # (ncol(mX)+1):ncol(mC)
 
       # a_sigma is fixed
-      #mult$a_sigma = mult$prior$a_sigma + u_dim/2
-      #mult$b_sigma = mult$prior$b_sigma + sum(vu^2)/2 + (tr_mSigma)/2
-      #tr_mSigma = ncol(mult$mZ) * mult$prior$a_sigma/mult$prior$b_sigma
+      #a_sigma = prior$a_sigma + u_dim/2
+      #b_sigma = prior$b_sigma + sum(vu^2)/2 + (tr_mSigma)/2
+      #tr_mSigma = ncol(mZ) * prior$a_sigma/prior$b_sigma
 
       # Extract right elements of mLambda
-      mult$b_sigma = mult$prior$b_sigma + sum(mult$vmu[u_idx]^2)/2 + tr(mult$mLambda[u_idx, u_idx])/2    
+      b_sigma = prior$b_sigma + sum(vmu[u_idx]^2)/2 + tr(mLambda[u_idx, u_idx])/2    
       
       acc = matrix(0, blocksize, blocksize)
       for (j in 1:(m-1)) {
         j_idx = p + (j-1)*blocksize+(1:blocksize)
-        acc = acc + with(mult, vmu[j_idx] %*% t(vmu[j_idx]) + mLambda[j_idx, j_idx])
+        acc = acc + vmu[j_idx] %*% t(vmu[j_idx]) + mLambda[j_idx, j_idx]
       }
-      mult$mPsi = with(mult, prior$mPsi + acc)
+      mPsi = prior$mPsi + acc
       
-      #tau_sigma = mult$a_sigma/mult$b_sigma
-      
-      #mult$mSigma.u.inv = diag(tau_sigma, u_dim)
-  
-      mult$mSigma.u.inv = with(mult, kronecker(diag(1, m-1), solve(mPsi/(v - blocksize - 1))))
-      
-      #mult$mSigma.u.inv = with(mult, solve(mPsi)) # What multiplicative factor for psi?
+      #tau_sigma = a_sigma/b_sigma
+      #mSigma.u.inv = diag(tau_sigma, u_dim)
+      mSigma.u.inv = kronecker(diag(1, m-1), solve(mPsi/(v - blocksize - 1)))
+      #mSigma.u.inv = solve(mPsi) # What multiplicative factor for psi?
     }
     
-    vlower_bound[i] <- 0 # calculate_lower_bound(mult)
+    # Restore all variables into mult so that we can calculate the lower
+    # bound.
+    mult$vy = vy
+    mult$vp = vp
+    mult$mX = mX
+    mult$mZ = mZ
+    mult$mC = mC
+    mult$mSigma.beta.inv = mSigma.beta.inv
+    mult$mSigma.u.inv = mSigma.u.inv
+    mult$mSigma = mSigma
+    mult$vmu = vmu
+    mult$mLambda = mLambda
+    mult$a_rho = a_rho
+    mult$b_rho = b_rho
+    mult$prior = prior
+    mult$mPsi = mPsi
+    mult$v = v
+    mult$m = m
+    mult$spline_dim = spline_dim
+    mult$blocksize = blocksize
+    mult$f = f
+
+    vlower_bound[i] <- 0 
     vlower_bound[i] <- calculate_lower_bound(mult, verbose=verbose)
     
     if (verbose && i > 1)
       cat("Iteration ", i, ": lower bound ", vlower_bound[i], " difference ",
-          vlower_bound[i] - vlower_bound[i-1], " parameters ", "vmu", mult$vmu,
-          "diag(mLambda)", diag(mult$mLambda), "a_rho", mult$a_rho, "b_rho", mult$b_rho)
-    if (verbose && !is.null(mult$mZ)) {
-      cat(" mSigma.u.inv ", mult$mSigma.u.inv)
+          vlower_bound[i] - vlower_bound[i-1], " parameters ", "vmu", vmu,
+          "diag(mLambda)", diag(mLambda), "a_rho", a_rho, "b_rho", b_rho)
+    if (verbose && !is.null(mZ)) {
+      cat(" mSigma.u.inv ", mSigma.u.inv)
     }
     if (verbose) cat("\n")
   }
@@ -236,7 +272,7 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
   if (plot_lower_bound)
     plot(vlower_bound,type="l")
   
-  params = list(vmu=mult$vmu, mLambda=mult$mLambda, a_rho=mult$a_rho, b_rho=mult$b_rho,
-                a_sigma=mult$a_sigma, b_sigma=mult$b_sigma, vlower_bound=vlower_bound)
+  params = list(vmu=vmu, mLambda=mLambda, a_rho=a_rho, b_rho=b_rho,
+                mSigma=mSigma, vlower_bound=vlower_bound)
   return(params)
 }
