@@ -4,7 +4,7 @@ source("mcmc.R")
 source("accuracy.R")
 
 # Repeatedly run trials and compare accuracy. Plot boxplots.
-median_accuracy = function()
+median_accuracy <- function()
 {
   ITER = 100
 
@@ -31,7 +31,7 @@ median_accuracy = function()
   dev.off()
 }
 
-generate_test_mult = function(vbeta)
+generate_test_mult <- function(vbeta)
 {
   m = 20
   ni = 10
@@ -60,7 +60,7 @@ generate_test_mult = function(vbeta)
 # Graph of Var_q(theta) against Var(theta|y)
 # How to get this?
 # Run fits for a range of theta values?
-compare_approximations = function(vbeta, approximation="gva")
+compare_approximations <- function(vbeta, approximation="gva")
 {
   multivariate = generate_test_mult(c(2, 1))
   var_result = zero_infl_var(multivariate, method=approximation, verbose=TRUE)
@@ -68,9 +68,9 @@ compare_approximations = function(vbeta, approximation="gva")
   return(list(multivariate=multivariate, var_result=var_result, mcmc_samples=mcmc_samples))
 }
 
-is.between = function(x, a, b) x >= a && x <= b
+is.between <- function(x, a, b) x >= a && x <= b
 
-coverage_percentage = function()
+coverage_percentage <- function()
 {
 	# Percentage coverage of the true parameter values by approximate 95%
 	# credible intervals based on variational Bayes approximate posterior
@@ -83,7 +83,7 @@ coverage_percentage = function()
 		approximation = "gva2new"
     
 		var_result = tryCatch(zero_infl_var(mult, method=approximation, verbose=FALSE),
-                          error = function (E) { return(NULL) })
+                          error <- function (E) { return(NULL) })
     	# If there was an error, re-try with another generated data set. Sometimes the
     	# optimiser gets passed a non-finite value.
     	if (is.null(var_result)) {
@@ -108,7 +108,7 @@ coverage_percentage = function()
 }
 coverage_percentage()
 
-mean_var = function(vbeta)
+mean_var <- function(vbeta)
 {
   result = compare_approximations(vbeta)
   return(with(result, {
@@ -124,7 +124,7 @@ mean_var = function(vbeta)
 }
 
 # This is most definitely a verona job
-print_mean_var = function()
+print_mean_var <- function()
 {
   for (theta in seq(1, 2, by=.01))
 	  print(mean_var(c(1, theta)))
@@ -133,11 +133,11 @@ print_mean_var = function()
 
 # For most important parameters: beta_1, beta_2
 
-plot_graphs = function()
+plot_graphs <- function()
 {
   # Read files, plot graphs
   require(stringr)
-  fn = function(fname)
+  fn <- function(fname)
   {
     lines = readLines(fname)
     num_str = str_match(lines, "[0-9]*\\.[0-9]*")
