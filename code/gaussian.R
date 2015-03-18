@@ -406,44 +406,43 @@ fit.GVA_nr <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e
   MAXITER <- 1000
   TOL <- reltol
   
-  for (ITER in 1:MAXITER) 
-  {
-      vmu.old <- vmu
-      
-      # calculate B1
-      # calculate B2
-      vmu.til <- mC%*%vmu
-      vsigma2.til <- fastdiag(mC, mLambda)
-      res.B12 <- B12.fun("POISSON",vmu.til,vsigma2.til,gh)
-      vB1 <- res.B12$vB1
-      vB2 <- res.B12$vB2      
+  for (ITER in 1:MAXITER) {
+    vmu.old <- vmu
     
-      vg <- vg.G_nr(vmu,mLambda,vy,vr,mC,mSigma.inv,vB1) 
-      mH <- mH.G_nr(vmu,mLambda,vy,vr,mC,mSigma.inv,vB2) 
+    # calculate B1
+    # calculate B2
+    vmu.til <- mC%*%vmu
+    vsigma2.til <- fastdiag(mC, mLambda)
+    res.B12 <- B12.fun("POISSON",vmu.til,vsigma2.til,gh)
+    vB1 <- res.B12$vB1
+    vB2 <- res.B12$vB2      
+
+    vg <- vg.G_nr(vmu,mLambda,vy,vr,mC,mSigma.inv,vB1) 
+    mH <- mH.G_nr(vmu,mLambda,vy,vr,mC,mSigma.inv,vB2) 
+    
+    # Use block inverse formula to speed computation
+    # Let -mH = [A B]
+    #           [B D]
+    u_dim = (m-1)*blocksize + spline_dim
+    A = -mH[1:p, 1:p]
+    B = -mH[1:p, (p+1):(p+u_dim)]
+    D = -mH[(p+1):(p+u_dim), (p+1):(p+u_dim)]
+    # Then -mH^{-1} = [(A - B D^-1 B^T)^-1, -(A-B D^-1 B^T)^-1 B D^-1]
+    #                 [-D^-1 B^T (A - B D^-1 B^T)^-1, D^-1 + D^-1 B^T (A - B D^-1 B^T)^-1 B D^-1]
+    # D^-1 and (A - B D^-1 B^T)^-1 appear repeatedly, so we precalculate them
+    D.inv = solve(D)
+    A_BDB.inv = solve(A - B %*% D.inv %*% t(B))
+    mLambda[1:p, 1:p] = A_BDB.inv
+    mLambda[1:p, (p+1):(p+u_dim)] = -A_BDB.inv %*% B %*% D.inv
+    mLambda[(p+1):(p+u_dim), (p+1):(p+u_dim)] = D.inv + D.inv %*% t(B) %*% A_BDB.inv %*% B %*% D.inv
+    mLambda[(p+1):(p+u_dim), 1:p] = t(mLambda[1:p, (p+1):(p+u_dim)])
+    
+    vmu <- vmu + mLambda%*%vg
       
-      # Use block inverse formula to speed computation
-      # Let -mH = [A B]
-      #           [B D]
-      u_dim = (m-1)*blocksize + spline_dim
-      A = -mH[1:p, 1:p]
-      B = -mH[1:p, (p+1):(p+u_dim)]
-      D = -mH[(p+1):(p+u_dim), (p+1):(p+u_dim)]
-      # Then -mH^{-1} = [(A - B D^-1 B^T)^-1, -(A-B D^-1 B^T)^-1 B D^-1]
-      #                 [-D^-1 B^T (A - B D^-1 B^T)^-1, D^-1 + D^-1 B^T (A - B D^-1 B^T)^-1 B D^-1]
-      # D^-1 and (A - B D^-1 B^T)^-1 appear repeatedly, so we precalculate them
-      D.inv = solve(D)
-      A_BDB.inv = solve(A - B %*% D.inv %*% t(B))
-      mLambda[1:p, 1:p] = A_BDB.inv
-      mLambda[1:p, (p+1):(p+u_dim)] = -A_BDB.inv %*% B %*% D.inv
-      mLambda[(p+1):(p+u_dim), (p+1):(p+u_dim)] = D.inv + D.inv %*% t(B) %*% A_BDB.inv %*% B %*% D.inv
-      mLambda[(p+1):(p+u_dim), 1:p] = t(mLambda[1:p, (p+1):(p+u_dim)])
-      
-      vmu <- vmu + mLambda%*%vg
-        
-      err <- max(abs(vmu - vmu.old)) 
-      if (err<TOL) {
-        break;
-      }
+    err <- max(abs(vmu - vmu.old)) 
+    if (err<TOL) {
+      break;
+    }
   } 
   
   return(list(vmu=vmu, mLambda=mLambda))
