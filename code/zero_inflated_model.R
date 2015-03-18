@@ -3,24 +3,14 @@ library(limma)
 source("common.R")
 source("gaussian.R")
 
-gamma_entropy <- function(alpha, beta)
+calculate_lower_bound <- function(mult, verbose=FALSE)
 {
-  alpha - log(beta) + lgamma(alpha) - (alpha-1) * digamma(alpha)
-}
-
-beta_entropy <- function(alpha, beta)
-{
-  lbeta(alpha, beta) - (alpha-1)*digamma(alpha) - (beta-1)*digamma(beta) + (alpha+beta-2)*digamma(alpha+beta)
-}	
-
-calculate_lower_bound <- function(multivariate, verbose=FALSE)
-{
-  result = with(multivariate, {
+  result = with(mult, {
     p = ncol(mX)
     beta_idx = 1:p
     if (!is.null(mZ)) {
       m = ncol(mZ) 
-      u_idx = p + (1:m)  # (ncol(mult$mX)+1):ncol(mult$mC)
+      u_idx = p + (1:m)  
       vu = vmu[u_idx]
     } else {
       m = 0
@@ -29,24 +19,24 @@ calculate_lower_bound <- function(multivariate, verbose=FALSE)
     zero.set <- which(vy==0)
     
     # Terms for (beta, u)
-    #result = result + (vy*vp) %*% mC %*% vmu
-    #mat <- matrix(0.5 * (t(vmu) %*% mLambda %*% vmu), nrow = nrow(mC), ncol = 1)
-    #result = result - vp %*% exp(mC %*% vmu + mat) - sum(lgamma(vy + 1))
-    #result = result + 0.5 * (det(2*pi*mLambda) + t(vmu) %*% solve(mLambda) %*% vmu)
-    
-    # Terms for (beta, u)
     T1 = t(vy*vp) %*% mC %*% vmu
     T1 = T1 - t(vp) %*% exp(mC %*% vmu + .5 * diag(mC%*%mLambda%*%t(mC)))
     T1 = T1 - sum(lgamma(vy + 1))
     T1 = T1 - .5*p*log(prior$sigma2.beta) - .5*(sum(vmu[beta_idx]^2) + tr(mLambda[beta_idx, beta_idx]))/prior$sigma2.beta
-    if (!is.null(mZ)) {
-      #T1 = T1 + prior$a_sigma * log (prior$b_sigma) - lgamma(prior$a_sigma)
-      #T1 = T1 - a_sigma * log(b_sigma) + lgamma(a_sigma)
-    }
     T1 = T1 + .5*(p+m) + .5*log(det(mLambda))
     eps = 1e-10
     
-    lgammap = function(a, p)
+    gamma_entropy <- function(alpha, beta)
+    {
+      alpha - log(beta) + lgamma(alpha) - (alpha-1) * digamma(alpha)
+    }
+
+    beta_entropy <- function(alpha, beta)
+    {
+      lbeta(alpha, beta) - (alpha-1)*digamma(alpha) - (beta-1)*digamma(beta) + (alpha+beta-2)*digamma(alpha+beta)
+    } 
+
+    lgammap <- function(a, p)
     {
       .25*p*(p-1)*log(pi) + sum(lgamma(a + .5*(1 - 1:p)))
     }
@@ -57,19 +47,17 @@ calculate_lower_bound <- function(multivariate, verbose=FALSE)
     T2 = T2 - lgammap(.5*prior$v, p) + lgammap(.5*v, p)
     T2 = T2 + .5*E_log_det_mSigma_u - .5*tr(E_mSigma_u_inv*(prior$mPsi - mPsi))
     
-    # Something is wrong in T3. It sometimes goes backwards as we're optimised.
-    # This should be unchanged from the univariate lower bound
     #if (verbose) cat("calculate_lower_bound: ", vp[zero.set], "\n")
     # 0 log 0 returns NaN. We sidestep this by adding epsilon to vp[zero.set]
     vp[zero.set] = vp[zero.set] + eps
     T3 = sum(-vp[zero.set]*log(vp[zero.set]) - (1-vp[zero.set])*log(1-vp[zero.set]))
     T3 = T3 - lbeta(prior$a_rho, prior$b_rho) + lbeta(a_rho, b_rho)
     
-	if (verbose)
-    	cat("calculate_lower_bound: T1", T1, "T2", T2, "T3", T3, "\n")
+  	if (verbose) {
+      	cat("calculate_lower_bound: T1", T1, "T2", T2, "T3", T3, "\n")
+    }
 
-    result = T1 + T2 + T3
-    result
+    T1 + T2 + T3
   })
   
   return(result)
@@ -108,7 +96,7 @@ create_multivariate <- function(vy, mX, mZ, sigma2.beta, m=ncol(mZ), blocksize=1
     mSigma.u.inv = NULL
   }
   
-  multivariate = list(vy=vy, vp=vp, vmu=vmu,
+  mult = list(vy=vy, vp=vp, vmu=vmu,
                       mX=mX, mZ=mZ, mC=mC,
                       m=m, blocksize=blocksize, spline_dim=spline_dim,
                       p=p, v=v, mPsi=mPsi,
@@ -118,8 +106,8 @@ create_multivariate <- function(vy, mX, mZ, sigma2.beta, m=ncol(mZ), blocksize=1
                       mSigma.beta.inv=mSigma.beta.inv,
                       mSigma.u.inv=mSigma.u.inv,
                       mSigma.beta=solve(mSigma.beta.inv))
-  class(multivariate) = "multivariate"
-  return(multivariate)
+  class(mult) = "multivariate"
+  return(mult)
 }
 
 zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE)
@@ -136,6 +124,7 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
   }	else {
     p = 0
   }
+
   if (!is.null(mult$mZ)) {
     m = mult$m
     blocksize = mult$blocksize
@@ -150,8 +139,6 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
     blocksize = 0
   }
   
-  #mC_sp = Matrix(mult$mC, sparse=TRUE)
-
   zero.set = which(mult$vy == 0)
   nonzero.set = which(mult$vy != 0)
   vlower_bound <- c()
@@ -159,7 +146,6 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
   i = 0
   # Iterate ----
   while ( (i <= 1) || is.nan(vlower_bound[i] - vlower_bound[i - 1]) || (vlower_bound[i] > vlower_bound[i-1])  ) {
-  #while ( (i <= MAXITER)  ) {	
     if (i >= MAXITER) {
       cat("Iteration limit reached, breaking ...")
       break
@@ -173,8 +159,7 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
       mult$mSigma.inv <- mult$mSigma.beta.inv
     }
     
-    # Update parameter for q_vnu
-    # Maximise the Gaussian Variational Approximation using Dr Ormerod's Poisson mixed model code
+    # Update parameter for q_vnu by maximising using the Gaussian Variational Approximation from Dr Ormerod's Poisson mixed model code
     if (method == "laplacian") {
       fit1 = fit.Lap(mult$vmu, mult$vy, mult$vp, mult$mC, mult$mSigma.inv, mult$mLambda)
     } else if (method == "gva") {	
@@ -208,16 +193,17 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
     
     # Update parameters for q_sigma_u^2 if we need to
     if (!is.null(mult$mZ)) {
-      # a_sigma is fixed
       u_dim = (m-1)*blocksize+spline_dim
-      mult$a_sigma = mult$prior$a_sigma + u_dim/2
       u_idx = p + 1:u_dim  # (ncol(mult$mX)+1):ncol(mult$mC)
-      # u_idx = p + 1:(m*blocksize) + spline_dim
-      #tr_mSigma = ncol(mult$mZ) * mult$prior$a_sigma/mult$prior$b_sigma
+
+      # a_sigma is fixed
+      #mult$a_sigma = mult$prior$a_sigma + u_dim/2
       #mult$b_sigma = mult$prior$b_sigma + sum(vu^2)/2 + (tr_mSigma)/2
-      mult$b_sigma = mult$prior$b_sigma + sum(mult$vmu[u_idx]^2)/2 + tr(mult$mLambda[u_idx, u_idx])/2    # Extract right elements of mLambda
+      #tr_mSigma = ncol(mult$mZ) * mult$prior$a_sigma/mult$prior$b_sigma
+
+      # Extract right elements of mLambda
+      mult$b_sigma = mult$prior$b_sigma + sum(mult$vmu[u_idx]^2)/2 + tr(mult$mLambda[u_idx, u_idx])/2    
       
-      # FIXME: This code is hard to read
       acc = matrix(0, blocksize, blocksize)
       for (j in 1:(m-1)) {
         j_idx = p + (j-1)*blocksize+(1:blocksize)
