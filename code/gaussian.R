@@ -1,5 +1,6 @@
 # John Ormerod's Poisson regression code, slightly modified to be used by my
 # zero-inflated model code.
+
 require(limma)
 require(Matrix)
 source("CalculateB.R")
@@ -17,7 +18,6 @@ f.lap <- function(vmu,vy,vr,mC,mSigma.inv,mLambda)
   d <- length(vmu)
   veta <- mC%*%vmu
   mSigma <- solve(mSigma.inv)
-  #mDiag <- diag(mC%*%mLambda%*%t(mC))
   mDiag <- fastdiag(mC, mLambda)
 	f <- sum(vy*vr*veta - vr*exp(veta+0.5*mDiag)) - 0.5*t(vmu)%*%mSigma.inv%*%vmu - 0.5*sum(diag(mLambda%*%mSigma))
   return(f)
@@ -34,7 +34,6 @@ vg.lap <- function(vmu,vy,vr,mC,mSigma.inv,mLambda)
 
 mH.lap <- function(vmu,vy,vr,mC,mSigma.inv,mLambda) 
 {
-    #mDiag <- sapply(1:ncol(mC), function(i) sum(mC[i,] * mLambda[, i] * mC[, i]))
     vw <- exp(mC%*%vmu); dim(vw) <- NULL
     mH <- -t(mC*vw)%*%mC - mSigma.inv
     return(mH)
@@ -42,24 +41,21 @@ mH.lap <- function(vmu,vy,vr,mC,mSigma.inv,mLambda)
 
 fit.Lap <- function(vmu,vy,vr,mC,mSigma.inv,mLambda) 
 {
-    #browser()
-    MAXITER <- 100
-    
-    for (ITER in 1:MAXITER) {
-        f  <- f.lap(vmu,vy,vr,mC,mSigma.inv,mLambda)
-        vg <- vg.lap(vmu,vy,vr,mC,mSigma.inv,mLambda)
-        mH <- mH.lap(vmu,vy,vr,mC,mSigma.inv,mLambda)
-        mLambda <- solve(-mH,tol=1.0E-99)
-        vmu <- vmu + mLambda%*%vg
-        #print(c(ITER,f,max(abs(vg))))
-        #cat("iterations", ITER, "f", f, "max(abs(vg))", max(abs(vg)))
-        if (max(abs(vg))<1.0E-8) {
-            break;
-        }
-    } 
+  MAXITER <- 100
+  
+  for (ITER in 1:MAXITER) {
+      f  <- f.lap(vmu,vy,vr,mC,mSigma.inv,mLambda)
+      vg <- vg.lap(vmu,vy,vr,mC,mSigma.inv,mLambda)
+      mH <- mH.lap(vmu,vy,vr,mC,mSigma.inv,mLambda)
+      mLambda <- solve(-mH,tol=1.0E-99)
+      vmu <- vmu + mLambda%*%vg
+      if (max(abs(vg))<1.0E-8) {
+          break;
+      }
+  } 
 
-    f <- f.lap(vmu,vy,vr,mC,mSigma.inv,mLambda) + 0.5*log(det(mLambda%*%mSigma.inv))
-    return(list(vmu=vmu,mLambda=mLambda,f=f))
+  f <- f.lap(vmu,vy,vr,mC,mSigma.inv,mLambda) + 0.5*log(det(mLambda%*%mSigma.inv))
+  return(list(vmu=vmu,mLambda=mLambda,f=f))
 }
 
 # Gaussian variational approxmation, mLambda = mR mR^T ----
@@ -69,8 +65,6 @@ f.G <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,gh)
   
   vmu.til     <- mC%*%vmu
   vsigma2.til <- fastdiag(mC, mLambda)
-  #vsigma2.til <- diag(mC%*%mLambda%*%t(mC))
-  #vsigma2.til <- sapply(1:nrow(mC), function(i) {mC[i,]%*%mLambda%*%mC[i,]})
   vB0 <- B0.fun("POISSON",vmu.til,vsigma2.til,gh) 
   
   f <- sum(vr*(vy*vmu.til - vB0)) - 0.5*t(vmu)%*%mSigma.inv%*%vmu - 0.5*tr(mSigma.inv%*%mLambda)
@@ -144,8 +138,6 @@ vg.GVA <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   mLambda <- mR%*%t(mR)   
 
   vmu.til     <- mC%*%vmu
-  #vsigma2.til <- diag(mC%*%mLambda%*%t(mC))
-  #vsigma2.til <- sapply(1:nrow(mC), function(i) {mC[i,]%*%mLambda%*%mC[i,]})
   vsigma2.til <- fastdiag(mC, mLambda)
   res.B12 <- B12.fun("POISSON",vmu.til,vsigma2.til,gh)
   vB1 <- res.B12$vB1
@@ -161,15 +153,6 @@ vg.GVA <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   cat("GVA mLambda", mLambda[1:2, 1:2], "dmLambda", dmLambda[1:2, 1:2], "\n")
   
   dmLambda[Dinds] <- dmLambda[Dinds]*mR[Dinds]
-  #cat("diag(dmLambda)", diag(dmLambda), "\n\n")
-  #require(gridExtra)
-  #require(lattice)
-  #plot1 <- image(Matrix(mR))
-  #plot2 <- image(Matrix(dmLambda))
-  #grob <- grid.arrange(plot1, plot2, ncol=2)
-  #ans <- readline()
-  #if (ans == "Q") stop("Time to go!")
-  #print(sum(eigen(dmLambda)$values^2))
 
   vg[(1+d):length(vtheta)] <- dmLambda[Rinds]    
  
@@ -184,7 +167,6 @@ fit.GVA <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12)
   Dinds <- d*((1:d)-1)+(1:d)
           
   mR <- t(chol(mLambda + diag(1.0E-8,d)))
-  #cat("mR", mR, "\n")
   mR[Dinds] <- log(mR[Dinds])
   Rinds <- which(lower.tri(mR,diag=TRUE))
 	vmu <- c(vmu,mR[Rinds])
@@ -259,7 +241,6 @@ vg.GVA.approx_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
 
 vg.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
 {
-  #browser()
   
   d <- ncol(mC)
   vmu <- vtheta[1:d]
@@ -311,20 +292,11 @@ vg.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   }
   dmR_check <- matrix(grad(func, as.vector(t(mR))), nrow(mR), ncol(mR))
   # Idea: Check whether dmR deviates too far from dmR_check?
-  cat("GVA2 vmu", vmu[9:10], "\ndvmu", vg[9:10], "\nmR", mR[9:10, 9:10], "\ndmR", dmR[9:10, 9:10], "\ndmR_check", dmR_check[9:10, 9:10])
+  cat("GVA2 vmu", vmu[9:10], "\ndvmu", vg[9:10], "\nmR", mR[9:10, 9:10], "\ndmR",
+    dmR[9:10, 9:10], "\ndmR_check", dmR_check[9:10, 9:10])
   
   #vg[(1+d):length(vtheta)] <- dmR[Rinds]    
   vg[(1+d):length(vtheta)] <- dmR_check[Rinds]    
-  
-#   require(gridExtra)
-#   require(lattice)
-#   plot1 <- image(Matrix(mR))
-#   plot2 <- image(Matrix(mLambda))
-#   plot3 <- image(Matrix(dmLambda))
-#   plot4 <- image(Matrix(mH))
-#   grob <- grid.arrange(plot1, plot2, plot3, plot4, ncol=2, nrow=2)
-#   ans <- readline()
-#   if (ans == "Q") stop("Time to go!")
   
   return(vg)
 }
@@ -367,10 +339,9 @@ swap_mX_mZ_back <- function(vmu, mLambda, mSigma.inv, mC, p, u_dim)
 
 fit.GVA_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, p=NA, m=NA, blocksize=NA, spline_dim=NA)
 {
-  #library(statmod)
   #N <- 15
   #gh  <- gauss.quad(N,kind="hermite")
-  gh2 <- NULL #list(x=gh$nodes,w=gh$weights,w.til=gh$weights*exp(gh$nodes^2))
+  gh2 <- NULL 
   
   d <- length(vmu)
   Dinds <- d*((1:d)-1)+(1:d)
@@ -384,21 +355,18 @@ fit.GVA_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, p
   mC <- result$mC
 
   mR <- t(chol(solve(mLambda, tol=1.0E-99))) + diag(1.0E-8,d)
-  Rinds <- which(lower.tri(mR,diag=TRUE))
+  Rinds <- which(lower.tri(mR, diag=TRUE))
   mR[Dinds] <- log(mR[Dinds])
   vmu <- c(vmu,mR[Rinds])
   P <- length(vmu)
 
   if (method=="L-BFGS-B") {
-    controls <- list(maxit=1000,trace=1,fnscale=-1,REPORT=1,factr=1.0E-5,lmm=10)
+    controls <- list(maxit=1000, trace=1, fnscale=-1, REPORT=1, factr=1.0E-5, lmm=10)
   } else if (method=="Nelder-Mead") {
-    controls <- list(maxit=100000000,trace=0,fnscale=-1,REPORT=1000,reltol=reltol) 
+    controls <- list(maxit=100000000, trace=0, fnscale=-1, REPORT=1000, reltol=reltol) 
   } else {
-    controls <- list(maxit=1000,trace=0,fnscale=-1,REPORT=1,reltol=reltol) 
+    controls <- list(maxit=1000, trace=0, fnscale=-1, REPORT=1, reltol=reltol) 
   }
-  #res <- optim(par=vmu, fn=f.GVA_new, gr=vg.GVA_new,
-  #             method=method, upper=Inf, control=controls,
-  #             vy=vy,vr=vr,mC=mC,mSigma.inv=mSigma.inv,gh=gh2,mR=mR*0,Rinds=Rinds,Dinds=Dinds)        
   res <- optim(par=vmu, fn=f.GVA_new, gr=vg.GVA_new,
                method=method, upper=Inf, control=controls,
                vy=vy,vr=vr,mC=mC,mSigma.inv=mSigma.inv,gh=gh2,mR=mR*0,Rinds=Rinds,Dinds=Dinds)        
@@ -410,7 +378,6 @@ fit.GVA_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, p
   mR[Dinds] <- exp(mR[Dinds])  
   print(image(Matrix(mR%*%t(mR))))
   mLambda <- solve(mR%*%t(mR), tol=1.0E-99)
-  #browser()
 
   result <- swap_mX_mZ_back(vmu, mLambda, mSigma.inv, mC, p, u_dim)
   vmu <- result$vmu
@@ -418,23 +385,23 @@ fit.GVA_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, p
   mSigma.inv <- result$mSigma.inv
   mC <- result$mC
   
-  return(list(res=res,vmu=vmu,mLambda=mLambda))
+  return(list(res=res, vmu=vmu, mLambda=mLambda))
 }
 
 # Newton-Raphson Gaussian variational approximation ----
-vg.G_nr <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,vB1) 
+vg.G_nr <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, vB1) 
 {
   vg <- t(mC)%*%(vr*(vy - vB1)) - mSigma.inv%*%vmu     
   return(vg)
 }
 
-mH.G_nr <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,vB2) 
+mH.G_nr <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, vB2) 
 {
   mH <- -t(mC*as.vector(vr*vB2))%*%mC - mSigma.inv 
   return(mH)
 }
 
-fit.GVA_nr <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, m=NA, p=NA, blocksize=NA, spline_dim=NA)
+fit.GVA_nr <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e-12, m=NA, p=NA, blocksize=NA, spline_dim=NA)
 {
   MAXITER <- 1000
   TOL <- reltol
@@ -446,7 +413,6 @@ fit.GVA_nr <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, m=
       # calculate B1
       # calculate B2
       vmu.til <- mC%*%vmu
-      #vsigma2.til <- sapply(1:nrow(mC), function(i) {mC[i,]%*%mLambda%*%mC[i,]})
       vsigma2.til <- fastdiag(mC, mLambda)
       res.B12 <- B12.fun("POISSON",vmu.til,vsigma2.til,gh)
       vB1 <- res.B12$vB1
@@ -455,9 +421,6 @@ fit.GVA_nr <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, m=
       vg <- vg.G_nr(vmu,mLambda,vy,vr,mC,mSigma.inv,vB1) 
       mH <- mH.G_nr(vmu,mLambda,vy,vr,mC,mSigma.inv,vB2) 
       
-      # Old version
-      #mLambda <- solve(-mH,tol=1.0E-99)
-      # New version
       # Use block inverse formula to speed computation
       # Let -mH = [A B]
       #           [B D]
@@ -483,5 +446,5 @@ fit.GVA_nr <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, m=
       }
   } 
   
-  return(list(vmu=vmu,mLambda=mLambda))
+  return(list(vmu=vmu, mLambda=mLambda))
 }
