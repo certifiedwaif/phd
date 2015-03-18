@@ -4,7 +4,7 @@ source("generate.R")
 source("mcmc.R")
 source("rwmh.R")
 
-calculate_accuracy = function(mcmc_samples, dist_fn, param1, param2)
+calculate_accuracy <- function(mcmc_samples, dist_fn, param1, param2)
 {
   mcmc_density = density(mcmc_samples)
   mcmc_fn = splinefun(mcmc_density$x, mcmc_density$y)
@@ -19,7 +19,7 @@ calculate_accuracy = function(mcmc_samples, dist_fn, param1, param2)
   return(accuracy)
 }
 
-accuracy_plot = function(mcmc_samples, dist_fn, param1, param2)
+accuracy_plot <- function(mcmc_samples, dist_fn, param1, param2)
 {
   mcmc_density = density(mcmc_samples)
   plot(mcmc_density)
@@ -28,7 +28,7 @@ accuracy_plot = function(mcmc_samples, dist_fn, param1, param2)
         add=TRUE, lty=2, col="blue")
 }
 
-calculate_accuracies = function(mult, mcmc_samples, var_result, approximation, print_flag=FALSE, plot_flag=FALSE)
+calculate_accuracies <- function(mult, mcmc_samples, var_result, approximation, print_flag=FALSE, plot_flag=FALSE)
 {
   # TODO: Add support for checking the accuracy over multiple dimensions
   # cubature$adaptIntegrate
@@ -104,7 +104,7 @@ calculate_accuracies = function(mult, mcmc_samples, var_result, approximation, p
               rho_accuracy=rho_accuracy))
 }
 
-test_accuracy = function(mult, mcmc_samples, approximation, plot=FALSE)
+test_accuracy <- function(mult, mcmc_samples, approximation, plot=FALSE)
 {
   var_result = zero_infl_var(mult, method=approximation, verbose=TRUE)
   return(calculate_accuracies(mult, mcmc_samples, var_result, approximation, plot_flag=plot))
@@ -135,7 +135,7 @@ calculate_univariate_accuracy <- function(result_mcmc, var_result)
   return(list(rho_accuracy=rho_accuracy, lambda_accuracy=lambda_accuracy))
 }
 
-test_accuracies = function()
+test_accuracies <- function()
 {
   # Need to be able to compare the solution paths of each approximation
   
@@ -212,7 +212,7 @@ test_accuracies = function()
 }
 #test_accuracies()
 
-test_accuracies_slope = function()
+test_accuracies_slope <- function()
 {
   # Monte Carlo Markov Chains approximation
   #seed = 1
