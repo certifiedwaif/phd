@@ -1,3 +1,11 @@
+/*
+
+  fastdiag.cpp
+
+  Provide a fast version of the calculation mC mLambda mC^T in C++ using Eigen
+
+*/
+
 // [[Rcpp::depends(RcppEigen)]]
 #include <RcppEigen.h>
 #include <Eigen/SparseCholesky>
@@ -12,6 +20,7 @@ using Eigen::ConjugateGradient;
 
 typedef Eigen::Map<Eigen::MatrixXd> MapMatd;
 typedef Eigen::SparseMatrix<double> SpMat;
+
 // [[Rcpp::export]]
 VectorXd fastdiag(MapMatd C, MapMatd lambda)
 {
