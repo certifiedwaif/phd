@@ -33,7 +33,7 @@ calculate_accuracies <- function(mult, mcmc_samples, var_result, approximation, 
   # TODO: Add support for checking the accuracy over multiple dimensions
   # cubature$adaptIntegrate
   
-  if (plot_flag) pdf(paste0("accuracy_plots_", approximation, ".pdf"))
+  if (plot_flag) pdf(paste0("results/accuracy_plots_", approximation, ".pdf"))
   #return(var_result)
   # vbeta accuracy
   
@@ -215,12 +215,12 @@ test_accuracies <- function()
 test_accuracies_slope <- function()
 {
   # Monte Carlo Markov Chains approximation
-  #seed = 1
-  #set.seed(seed)
-  #mult = generate_slope_test_data()
-  #mcmc_samples = mcmc_approximation(mult, seed=seed, iterations=1e5, warmup=1e4)
-  #save(mult, mcmc_samples, file="data/accuracy_slope_2015_03_17.RData")  
-  load(file="data/accuracy_slope_2015_03_03.RData")
+  # seed = 1
+  # set.seed(seed)
+  # mult = generate_slope_test_data()
+  # mcmc_samples = mcmc_approximation(mult, seed=seed, iterations=1e5, warmup=1e4)
+  # save(mult, mcmc_samples, file="data/accuracy_slope_2015_03_19.RData")  
+  load(file="data/accuracy_slope_2015_03_19.RData")
   
   now = Sys.time()
   var1 = test_accuracy(mult, mcmc_samples, "laplacian", plot=TRUE)
