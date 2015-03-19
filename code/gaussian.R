@@ -7,7 +7,6 @@ source("CalculateB.R")
 require(Rcpp)
 require(RcppEigen)
 require(numDeriv)
-require(optimx)
 
 sourceCpp(file = "fastdiag.cpp")
 
@@ -19,7 +18,8 @@ f.lap <- function(vmu,vy,vr,mC,mSigma.inv,mLambda)
   veta <- mC%*%vmu
   mSigma <- solve(mSigma.inv)
   mDiag <- fastdiag(mC, mLambda)
-	f <- sum(vy*vr*veta - vr*exp(veta+0.5*mDiag)) - 0.5*t(vmu)%*%mSigma.inv%*%vmu - 0.5*sum(diag(mLambda%*%mSigma))
+	f <- sum(vy*vr*veta - vr*exp(veta+0.5*mDiag)) - 0.5*t(vmu)%*%mSigma.inv%*%vmu - 
+            0.5*sum(diag(mLambda%*%mSigma))
   return(f)
 }
 
@@ -27,9 +27,9 @@ norm <- function(v) sqrt(sum(v^2))
 
 vg.lap <- function(vmu,vy,vr,mC,mSigma.inv,mLambda) 
 {       
-    vg <- t(mC)%*%(vr*vy - vr*exp(mC%*%vmu)) - mSigma.inv%*%vmu
-    
-    return(vg)
+  vg <- t(mC)%*%(vr*vy - vr*exp(mC%*%vmu)) - mSigma.inv%*%vmu
+  
+  return(vg)
 }
 
 mH.lap <- function(vmu,vy,vr,mC,mSigma.inv,mLambda) 
@@ -112,15 +112,15 @@ vg.GVA.approx <- function(vmu,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
 	f <- f.GVA(vmu,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
 	vg.approx <- matrix(0,P,1)
 	for (i in 1:P) {
-	   vmup <- vmu 
-	   vmup[i] <- vmu[i] + eps
-	   fp <- f.GVA(vmup,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
-	   
-	   vmum <- vmu 
-	   vmum[i] <- vmu[i] - eps
-	   fm <- f.GVA(vmum,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
-	   
-	   vg.approx[i] <- (fp - fm)/(2*eps)
+   vmup <- vmu 
+   vmup[i] <- vmu[i] + eps
+   fp <- f.GVA(vmup,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
+   
+   vmum <- vmu 
+   vmum[i] <- vmu[i] - eps
+   fm <- f.GVA(vmum,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
+   
+   vg.approx[i] <- (fp - fm)/(2*eps)
 	}
 	return(vg.approx)
 }
@@ -181,8 +181,8 @@ fit.GVA <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12)
     controls <- list(maxit=1000,trace=0,fnscale=-1,REPORT=1,reltol=reltol) 
   }
   res <- optim(par=vmu, fn=f.GVA, gr=vg.GVA,
-      method=method,lower=lower_constraint, upper=Inf, control=controls,
-      vy=vy,vr=vr,mC=mC,mSigma.inv=mSigma.inv,gh=gh2,mR=mR*0,Rinds=Rinds,Dinds=Dinds)        
+                method=method,lower=lower_constraint, upper=Inf, control=controls,
+                vy=vy,vr=vr,mC=mC,mSigma.inv=mSigma.inv,gh=gh2,mR=mR*0,Rinds=Rinds,Dinds=Dinds)        
       
   vtheta <- res$par 
   
@@ -337,7 +337,8 @@ swap_mX_mZ_back <- function(vmu, mLambda, mSigma.inv, mC, p, u_dim)
   return(list(vmu=vmu, mLambda=mLambda, mSigma.inv=mSigma.inv, mC=mC))
 }
 
-fit.GVA_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, p=NA, m=NA, blocksize=NA, spline_dim=NA)
+fit.GVA_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, p=NA, m=NA, 
+                        blocksize=NA, spline_dim=NA)
 {
   #N <- 15
   #gh  <- gauss.quad(N,kind="hermite")
@@ -401,7 +402,8 @@ mH.G_nr <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, vB2)
   return(mH)
 }
 
-fit.GVA_nr <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e-12, m=NA, p=NA, blocksize=NA, spline_dim=NA)
+fit.GVA_nr <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e-12, m=NA, p=NA, 
+                        blocksize=NA, spline_dim=NA)
 {
   MAXITER <- 1000
   TOL <- reltol
@@ -432,10 +434,12 @@ fit.GVA_nr <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e
     # D^-1 and (A - B D^-1 B^T)^-1 appear repeatedly, so we precalculate them
     D.inv = solve(D)
     A_BDB.inv = solve(A - B %*% D.inv %*% t(B))
-    mLambda[1:p, 1:p] = A_BDB.inv
-    mLambda[1:p, (p+1):(p+u_dim)] = -A_BDB.inv %*% B %*% D.inv
-    mLambda[(p+1):(p+u_dim), (p+1):(p+u_dim)] = D.inv + D.inv %*% t(B) %*% A_BDB.inv %*% B %*% D.inv
-    mLambda[(p+1):(p+u_dim), 1:p] = t(mLambda[1:p, (p+1):(p+u_dim)])
+    beta_idx = 1:p
+    u_idx = (p+1):(p+u_dim)
+    mLambda[beta_idx, beta_idx] = A_BDB.inv
+    mLambda[beta_idx, u_idx] = -A_BDB.inv %*% B %*% D.inv
+    mLambda[u_idx, u_idx] = D.inv + D.inv %*% t(B) %*% A_BDB.inv %*% B %*% D.inv
+    mLambda[u_idx, beta_idx] = t(mLambda[beta_idx, u_idx])
     
     vmu <- vmu + mLambda%*%vg
       
