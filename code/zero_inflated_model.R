@@ -1,4 +1,4 @@
-# variational_approximation_to_zero_inflated_model.R
+# zero_inflated_model.R
 library(limma)
 source("common.R")
 source("gaussian.R")
