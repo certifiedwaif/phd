@@ -115,6 +115,7 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
   MAXITER <- 100
   
   # Initialise variables from mult
+  N = length(mult$vy)
   vy = mult$vy
   vp = mult$vp
   mX = mult$mX
@@ -162,7 +163,8 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
   
   i = 0
   # Iterate ----
-  while ( (i <= 1) || is.nan(vlower_bound[i] - vlower_bound[i - 1]) || (vlower_bound[i] > vlower_bound[i-1])  ) {
+  while ( (i <= 1) || is.nan(vlower_bound[i] - vlower_bound[i - 1]) ||
+         (vlower_bound[i] > vlower_bound[i-1])  ) {
     if (i >= MAXITER) {
       cat("Iteration limit reached, breaking ...")
       break
@@ -184,13 +186,11 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
       fit1 = fit.GVA(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B")
     } else if (method == "gva2") {
       fit2 = fit.Lap(vmu, vy, vp, mC, mSigma.inv, mLambda)
-      fit1 = fit.GVA_new(fit2$vmu, fit2$mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B", p=p, m=m, blocksize=blocksize, , spline_dim=spline_dim)
-    } else if (method == "gva2new") {
-      #fit2 = fit.Lap(vmu, vy, vp, mC, mSigma.inv, mLambda)
-      fit1 = fit.GVA_new2(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B", p=p, m=m, blocksize=blocksize, spline_dim=spline_dim, mC_sp=mC_sp)
-      #fit1 = fit.GVA_new2(vmu, mLambda, vy, vp, mC, mSigma.inv, "BFGS", p=p, m=m)
+      fit1 = fit.GVA_new(fit2$vmu, fit2$mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B", p=p, m=m,
+                          blocksize=blocksize, , spline_dim=spline_dim)
     } else if (method == "gva_nr") {
-      fit1 = fit.GVA_nr(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B", p=p, m=m, blocksize=blocksize, spline_dim=spline_dim)
+      fit1 = fit.GVA_nr(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B", p=p, m=m, 
+                        blocksize=blocksize, spline_dim=spline_dim)
     } else {
       stop("method must be either laplacian, gva, gva2, gva2new or gva_nr")
     }
@@ -200,8 +200,11 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
     f = fit1$res$value
     
     # Update parameters for q_vr
+    mC_zero = matrix(mC[zero.set,], length(zero.set), p+(m-1)*blocksize+spline_dim)
     if (length(zero.set) != 0) {
-      vp[zero.set] = expit((vy[zero.set]*mC[zero.set,])%*%vmu-exp(mC[zero.set,]%*%vmu + 0.5*diag((matrix(mC[zero.set,], length(zero.set), p+(m-1)*blocksize+spline_dim))%*%mLambda%*%t(matrix(mC[zero.set,], length(zero.set), p+(m-1)*blocksize+spline_dim))) + digamma(a_rho) - digamma(b_rho)))
+      vp[zero.set] = expit((vy[zero.set]*mC[zero.set,])%*%vmu-exp(mC[zero.set,]%*%vmu + 
+                            0.5*diag((mC_zero)%*%mLambda%*%t(mC_zero)) + 
+                            digamma(a_rho) - digamma(b_rho)))
     }
     
     # Update parameters for q_rho
