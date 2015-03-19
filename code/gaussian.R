@@ -7,7 +7,6 @@ source("CalculateB.R")
 require(Rcpp)
 require(RcppEigen)
 require(numDeriv)
-require(optimx)
 
 sourceCpp(file = "fastdiag.cpp")
 
