@@ -1,0 +1,77 @@
+\documentclass{beamer}
+\mode<presentaiton>
+\title{Floating point and all that ...}
+\author{Mark Greenaway}
+\begin{document}
+\begin{frame}
+\frametitle{Double precision floating point numbers}
+\begin{itemize}
+\item Representation: 64 bits
+\item 1 sign bit
+\item 53 mantissa bits
+\item 11 exponent bits
+
+\item Can represent between $10^{-308}$ and $10^{308}$, accuracy of about 16 decimal places.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+Consider machine numbers of the form $x_1 \ldots x_{L_B} e$ with mantissa length L, base B, digits $x_1, \ldots, x_L$ and exponent $e \in \mathbb{Z}$. 
+By definition, such a number is assigned the value
+\begin{align*}
+\sum_{i=1:L} x_i B^{e-i} &= x_1 B^{e-1} + x_2 B^{e-2} + \ldots + x_L B^{e-L} \\
+&= B^{e-L}(x_1 B^{L-1} + x_2 B^{L-2} + \ldots + x_L)
+\end{align*}
+
+i.e. the number is essentially the value of a polynomial at the point B.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{What happens when we add a large number to a small number?}
+Let's say we have 5 digits in our mantissa, and work in base 10 for clarity.
+\begin{align*}
+1.2345 = 12345 \times 10^{-4}
+\end{align*}
+Let's try adding 12345 to 1.2345.
+\begin{align*}
+1234&5. +\\
+&1.2345\\
+=1234&6.2345 \\
+\approx 1234&6
+\end{align*}
+due to rounding.
+\end{frame}
+
+\begin{frame}
+\frametitle{Implications}
+\begin{itemize}
+\item We must approximate the reals with a finite representation
+\item All arithmetic is approximate
+\item Associativity is lost $(a + b) + c \ne a + (b + c)$
+\item Example: Calculating means $\bar{x} = \frac{1}{n} \sum_{i=1}^n x_i \ne \frac{1}{n} \sum_i=1^n x_{(i)}$
+\item R implements the second of these, as it's more accurate
+\item Evaluation of expressions requires understanding of round-off, truncation etc.
+\item How should we reason about this? Interval arithmetic
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Problems with solving linear systems of equations}
+How would you solve the following?
+\begin{align*}
+A = \begin{pmatrix}
+1&10^{20}&10^{10}&1\\
+10^{20}&10^{20}&1&10^{40}\\
+10^{10}&1&10^{40}&10^{50}\\
+1&10^{40}&10^{50}&1
+\end{pmatrix}
+\end{align*}
+How should we choose a pivot? These problems are of considerable practical interest e.g.
+in solving least squares problems:
+\begin{align*}
+\hat{\beta} = (X^TX)^{-1}X^T Y
+\end{align*}
+\end{frame}
+
+\end{document}
