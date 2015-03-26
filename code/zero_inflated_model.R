@@ -5,74 +5,74 @@ source("gaussian.R")
 
 calculate_lower_bound <- function(mult, verbose=FALSE)
 {
-	vy = mult$vy
-  vp = mult$vp
-  vmu = mult$vmu
-  mX = mult$mX
-  mZ = mult$mZ
-  mC = mult$mC
-  m = mult$m
-  blocksize = mult$blocksize
-  spline_dim = mult$spline_dim
-  p = mult$p
-  v = mult$v
-  mPsi = mult$mPsi
-  a_rho = mult$a_rho
-  b_rho = mult$b_rho
-  mLambda = mult$mLambda
-  prior = mult$prior
-  mSigma.beta.inv = mult$mSigma.beta.inv
-  mSigma.u.inv = mult$mSigma.u.inv
-  mSigma.beta = mult$mSigma.beta
+	vy <- mult$vy
+  vp <- mult$vp
+  vmu <- mult$vmu
+  mX <- mult$mX
+  mZ <- mult$mZ
+  mC <- mult$mC
+  m <- mult$m
+  blocksize <- mult$blocksize
+  spline_dim <- mult$spline_dim
+  p <- mult$p
+  v <- mult$v
+  mPsi <- mult$mPsi
+  a_rho <- mult$a_rho
+  b_rho <- mult$b_rho
+  mLambda <- mult$mLambda
+  prior <- mult$prior
+  mSigma.beta.inv <- mult$mSigma.beta.inv
+  mSigma.u.inv <- mult$mSigma.u.inv
+  mSigma.beta <- mult$mSigma.beta
 	
-	p = ncol(mX)
-	beta_idx = 1:p
+	p <- ncol(mX)
+	beta_idx <- 1:p
 	if (!is.null(mZ)) {
-	  m = ncol(mZ) 
-	  u_idx = p + (1:m)  
-	  vu = vmu[u_idx]
+	  m <- ncol(mZ) 
+	  u_idx <- p + (1:m)  
+	  vu <- vmu[u_idx]
 	} else {
-	  m = 0
+	  m <- 0
 	}
 
 	zero.set <- which(vy==0)
 
 	# Terms for (beta, u)
-	T1 = t(vy*vp) %*% mC %*% vmu
-	T1 = T1 - t(vp) %*% exp(mC %*% vmu + .5 * diag(mC%*%mLambda%*%t(mC)))
-	T1 = T1 - sum(lgamma(vy + 1))
-	T1 = T1 - .5*p*log(prior$sigma2.beta) - .5*(sum(vmu[beta_idx]^2) + tr(mLambda[beta_idx, beta_idx]))/prior$sigma2.beta
-	T1 = T1 + .5*(p+m) + .5*log(det(mLambda))
-	eps = 1e-10
+	T1 <- t(vy*vp) %*% mC %*% vmu
+	T1 <- T1 - t(vp) %*% exp(mC %*% vmu + .5 * diag(mC %*% mLambda %*% t(mC)))
+	T1 <- T1 - sum(lgamma(vy + 1))
+	T1 <- T1 - .5 * p * log(prior$sigma2.beta) - .5 * (sum(vmu[beta_idx]^2) + tr(mLambda[beta_idx, beta_idx])) / prior$sigma2.beta
+	T1 <- T1 + .5 * (p + m) + .5 * log(det(mLambda))
+	eps <- 1e-10
 
 	gamma_entropy <- function(alpha, beta)
 	{
-	  alpha - log(beta) + lgamma(alpha) - (alpha-1) * digamma(alpha)
+	  alpha - log(beta) + lgamma(alpha) - (alpha - 1) * digamma(alpha)
 	}
 
 	beta_entropy <- function(alpha, beta)
 	{
-	  lbeta(alpha, beta) - (alpha-1)*digamma(alpha) - (beta-1)*digamma(beta) + (alpha+beta-2)*digamma(alpha+beta)
+	  lbeta(alpha, beta) - (alpha - 1) * digamma(alpha) - (beta - 1) * digamma(beta) + (alpha + beta - 2) * digamma(alpha + beta)
 	} 
 
 	lgammap <- function(a, p)
 	{
-	  .25*p*(p-1)*log(pi) + sum(lgamma(a + .5*(1 - 1:p)))
+	  .25 * p * (p - 1) * log(pi) + sum(lgamma(a + .5 * (1 - 1:p)))
 	}
 
-	E_log_det_mSigma_u = sum(digamma(.5*(v + 1 - 1:p))) + p*log(2) - log(det(mPsi))
-	E_mSigma_u_inv = solve(mPsi)/(v+p+1)
-	T2 = .5*(prior$v*log(det(prior$mPsi)) - v*log(det(mPsi)))
-	T2 = T2 - lgammap(.5*prior$v, p) + lgammap(.5*v, p)
-	T2 = T2 + .5*E_log_det_mSigma_u - .5*tr(E_mSigma_u_inv*(prior$mPsi - mPsi))
+	E_log_det_mSigma_u <- sum(digamma(.5 * (v + 1 - 1:p))) + p * log(2) - log(det(mPsi))
+	E_mSigma_u_inv <- solve(mPsi) / (v + p + 1)
+	T2 <- .5 * (prior$v * log(det(prior$mPsi)) - v * log(det(mPsi)))
+	T2 <- T2 - lgammap(.5 * prior$v, p) + lgammap(.5 * v, p)
+	T2 <- T2 + .5 * E_log_det_mSigma_u - .5 * tr(E_mSigma_u_inv * (prior$mPsi - mPsi))
 
 	#if (verbose) cat("calculate_lower_bound: ", vp[zero.set], "\n")
 	# 0 log 0 returns NaN. We sidestep this by adding epsilon to vp[zero.set]
-	vp[zero.set] = vp[zero.set] + eps
-	T3 = sum(-vp[zero.set]*log(vp[zero.set]) - (1-vp[zero.set])*log(1-vp[zero.set]))
-	T3 = T3 - lbeta(prior$a_rho, prior$b_rho) + lbeta(a_rho, b_rho)
+	vp[zero.set] <- vp[zero.set] + eps
+	T3 <- sum(-vp[zero.set] * log(vp[zero.set]) - (1 - vp[zero.set]) * log(1 - vp[zero.set]))
+	T3 <- T3 - lbeta(prior$a_rho, prior$b_rho) + lbeta(a_rho, b_rho)
 
-		if (verbose) {
+	if (verbose) {
 	  	cat("calculate_lower_bound: T1", T1, "T2", T2, "T3", T3, "\n")
 	}
   
@@ -92,22 +92,22 @@ create_multivariate <- function(vy, mX, mZ, sigma2.beta, m=ncol(mZ), blocksize=1
   vmu <- rep(0, ncol(mC))
   
   p <- ncol(mX)
-  mSigma.beta.inv <- diag(1/sigma2.beta, ncol(mX))
+  mSigma.beta.inv <- diag(1 / sigma2.beta, ncol(mX))
   mLambda <- diag(rep(1, ncol(mC)))
   a_rho <- 1 + sum(vp)
   b_rho <- n - sum(vp) + 1
   
   # Set prior parameters for Inverse Wishart distribution
   #mPsi=diag(1, rep(blocksize))
-  mPsi <- 1e-5*matrix(c(1, 0, 0, 1), blocksize, blocksize)
+  mPsi <- 1e-5 * matrix(c(1, 0, 0, 1), blocksize, blocksize)
   
   prior <- list(v=v, mPsi=mPsi,
-               a_rho=1, b_rho=1,
-               sigma2.beta=sigma2.beta)
+                a_rho=1, b_rho=1,
+                sigma2.beta=sigma2.beta)
   v=prior$v + m
   
   if (!is.null(ncol(mZ))) {
-    mSigma.u.inv <- kronecker(diag(1, (m-1)), mPsi)
+    mSigma.u.inv <- kronecker(diag(1, (m - 1)), mPsi)
   } else {
     mSigma.u.inv <- NULL
   }
@@ -151,10 +151,14 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
   spline_dim <- mult$spline_dim
   blocksize <- mult$blocksize
 
-  if (verbose) cat("N", N, "\n")
+  if (verbose) {
+    cat("N", N, "\n")
+    cat("p", p, "\n")
+  }
+  
   if (!is.null(mX)) {
     p <- ncol(mX) 
-    if (verbose) cat("p", p, "\n")
+    
   }	else {
     p <- 0
   }
@@ -179,17 +183,17 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
   
   i <- 0
   # Iterate ----
-  while ( (i <= 1) || is.nan(vlower_bound[i] - vlower_bound[i - 1]) ||
-         (vlower_bound[i] > vlower_bound[i-1])  ) {
+  while ((i <= 1) || is.nan(vlower_bound[i] - vlower_bound[i - 1]) ||
+         (vlower_bound[i] > vlower_bound[i-1])) {
     if (i >= MAXITER) {
       cat("Iteration limit reached, breaking ...")
       break
     }
     
-    i <- i+1
+    i <- i + 1
     
     if (!is.null(mSigma.u.inv)) {
-      mSigma.inv <- blockDiag(mSigma.beta.inv,mSigma.u.inv)
+      mSigma.inv <- blockDiag(mSigma.beta.inv, mSigma.u.inv)
     } else {
       mSigma.inv <- mSigma.beta.inv
     }
@@ -218,8 +222,8 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
     # Update parameters for q_vr
     mC_zero <- matrix(mC[zero.set,], length(zero.set), p+(m-1)*blocksize+spline_dim)
     if (length(zero.set) != 0) {
-      vp[zero.set] <- expit((vy[zero.set]*mC[zero.set,])%*%vmu-exp(mC[zero.set,]%*%vmu + 
-                            0.5*diag((mC_zero)%*%mLambda%*%t(mC_zero)) + 
+      vp[zero.set] <- expit((vy[zero.set] * mC[zero.set,]) %*% vmu-exp(mC[zero.set,] %*% vmu + 
+                            0.5 * diag((mC_zero) %*% mLambda %*% t(mC_zero)) + 
                             digamma(a_rho) - digamma(b_rho)))
     }
     
@@ -229,7 +233,7 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
     
     # Update parameters for q_sigma_u^2 if we need to
     if (!is.null(mZ)) {
-      u_dim <- (m-1)*blocksize+spline_dim
+      u_dim <- (m - 1) * blocksize + spline_dim
       u_idx <- p + 1:u_dim  # (ncol(mX)+1):ncol(mC)
 
       # a_sigma is fixed
@@ -242,14 +246,14 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
       
       acc <- matrix(0, blocksize, blocksize)
       for (j in 1:(m-1)) {
-        j_idx <- p + (j-1)*blocksize+(1:blocksize)
+        j_idx <- p + (j-1) * blocksize+(1:blocksize)
         acc <- acc + vmu[j_idx] %*% t(vmu[j_idx]) + mLambda[j_idx, j_idx]
       }
       mPsi <- prior$mPsi + acc
       
       #tau_sigma <- a_sigma/b_sigma
       #mSigma.u.inv <- diag(tau_sigma, u_dim)
-      mSigma.u.inv <- kronecker(diag(1, m-1), solve(mPsi/(v - blocksize - 1)))
+      mSigma.u.inv <- kronecker(diag(1, m - 1), solve(mPsi/(v - blocksize - 1)))
       #mSigma.u.inv <- solve(mPsi) # What multiplicative factor for psi?
     }
     
@@ -278,14 +282,16 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
     vlower_bound[i] <- 0 
     vlower_bound[i] <- calculate_lower_bound(mult, verbose=verbose)
     
-    if (verbose && i > 1)
-      cat("Iteration ", i, ": lower bound ", vlower_bound[i], " difference ",
-          vlower_bound[i] - vlower_bound[i-1], " parameters ", "vmu", vmu,
-          "diag(mLambda)", diag(mLambda), "a_rho", a_rho, "b_rho", b_rho)
-    if (verbose && !is.null(mZ)) {
-      cat(" mSigma.u.inv ", mSigma.u.inv)
+    if (verbose) {
+      if (i > 1)
+        cat("Iteration ", i, ": lower bound ", vlower_bound[i], " difference ",
+            vlower_bound[i] - vlower_bound[i-1], " parameters ", "vmu", vmu,
+            "diag(mLambda)", diag(mLambda), "a_rho", a_rho, "b_rho", b_rho)
+      if (!is.null(mZ)) {
+        cat(" mSigma.u.inv ", mSigma.u.inv)
+      }
+      cat("\n")
     }
-    if (verbose) cat("\n")
   }
   
   if (plot_lower_bound)
