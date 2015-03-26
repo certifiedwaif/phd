@@ -15,11 +15,11 @@ sourceCpp(file = "fastdiag.cpp")
 f.lap <- function(vmu,vy,vr,mC,mSigma.inv,mLambda) 
 {
   d <- length(vmu)
-  veta <- mC%*%vmu
+  veta <- mC %*% vmu
   mSigma <- solve(mSigma.inv)
   mDiag <- fastdiag(mC, mLambda)
-	f <- sum(vy*vr*veta - vr*exp(veta+0.5*mDiag)) - 0.5*t(vmu)%*%mSigma.inv%*%vmu - 
-            0.5*sum(diag(mLambda%*%mSigma))
+	f <- sum(vy * vr * veta - vr*exp(veta+0.5*mDiag)) - 0.5*t(vmu) %*% mSigma.inv %*% vmu - 
+            0.5 * sum(diag(mLambda %*% mSigma))
   return(f)
 }
 
@@ -27,15 +27,15 @@ norm <- function(v) sqrt(sum(v^2))
 
 vg.lap <- function(vmu,vy,vr,mC,mSigma.inv,mLambda) 
 {       
-  vg <- t(mC)%*%(vr*vy - vr*exp(mC%*%vmu)) - mSigma.inv%*%vmu
+  vg <- t(mC) %*% (vr * vy - vr * exp(mC %*% vmu)) - mSigma.inv %*% vmu
   
   return(vg)
 }
 
 mH.lap <- function(vmu,vy,vr,mC,mSigma.inv,mLambda) 
 {
-    vw <- exp(mC%*%vmu); dim(vw) <- NULL
-    mH <- -t(mC*vw)%*%mC - mSigma.inv
+    vw <- exp(mC %*% vmu); dim(vw) <- NULL
+    mH <- -t(mC * vw) %*% mC - mSigma.inv
     return(mH)
 }
 
@@ -48,13 +48,13 @@ fit.Lap <- function(vmu,vy,vr,mC,mSigma.inv,mLambda)
       vg <- vg.lap(vmu,vy,vr,mC,mSigma.inv,mLambda)
       mH <- mH.lap(vmu,vy,vr,mC,mSigma.inv,mLambda)
       mLambda <- solve(-mH,tol=1.0E-99)
-      vmu <- vmu + mLambda%*%vg
+      vmu <- vmu + mLambda %*% vg
       if (max(abs(vg))<1.0E-8) {
           break;
       }
   } 
 
-  f <- f.lap(vmu,vy,vr,mC,mSigma.inv,mLambda) + 0.5*log(det(mLambda%*%mSigma.inv))
+  f <- f.lap(vmu,vy,vr,mC,mSigma.inv,mLambda) + 0.5*log(det(mLambda %*% mSigma.inv))
   return(list(vmu=vmu,mLambda=mLambda,f=f))
 }
 
@@ -63,12 +63,12 @@ f.G <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,gh)
 {
   d <- length(vmu)
   
-  vmu.til     <- mC%*%vmu
+  vmu.til     <- mC %*% vmu
   vsigma2.til <- fastdiag(mC, mLambda)
   vB0 <- B0.fun("POISSON",vmu.til,vsigma2.til,gh) 
   
-  f <- sum(vr*(vy*vmu.til - vB0)) - 0.5*t(vmu)%*%mSigma.inv%*%vmu - 0.5*tr(mSigma.inv%*%mLambda)
-  f <- f - 0.5*d*log(2*pi) + 0.5*log(det(mSigma.inv)) 
+  f <- sum(vr * (vy * vmu.til - vB0)) - 0.5 * t(vmu) %*% mSigma.inv %*% vmu - 0.5 * tr(mSigma.inv %*% mLambda)
+  f <- f - 0.5 * d * log(2 * pi) + 0.5 * log(det(mSigma.inv)) 
   return(f)
 }
 
@@ -81,10 +81,10 @@ f.GVA <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   for (i in 1:length(Dinds)) {
         mR[Dinds[i]] <- min(c(1.0E5,mR[Dinds[i]]))
   }   
-  mLambda <- mR%*%t(mR)   
+  mLambda <- mR %*% t(mR)   
    
   f <- sum(log(diag(mR))) + f.G(vmu,mLambda,vy,vr,mC,mSigma.inv,gh) 
-  f <- f + 0.5*d*log(2*pi) + 0.5*d
+  f <- f + 0.5 * d * log(2 * pi) + 0.5 * d
   
   if (!is.finite(f)) {
    f <- -1.0E16
@@ -94,20 +94,23 @@ f.GVA <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
 
 vg.G <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,vB1) 
 {
-  vg <- t(mC)%*%(vr*(vy - vB1)) - mSigma.inv%*%vmu     
+  vg <- t(mC) %*% (vr * (vy - vB1)) - mSigma.inv %*% vmu     
   return(vg)
 }
 
 mH.G <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,vB2) 
 {
-  vw <-  vB2; dim(vw) <- NULL
-  mH <- -t(mC*(vr*vw))%*%(mC) - mSigma.inv
+  vw <-  vB2
+  dim(vw) <- NULL
+  mH <- -t(mC * (vr * vw)) %*% (mC) - mSigma.inv
   return(mH)    
 }
 
 vg.GVA.approx <- function(vmu,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
 {
-  n <- length(vy); P <- length(vmu); d <- ncol(mC)
+  n <- length(vy)
+  P <- length(vmu)
+  d <- ncol(mC)
 	eps <- 1.0E-6
 	f <- f.GVA(vmu,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
 	vg.approx <- matrix(0,P,1)
@@ -120,7 +123,7 @@ vg.GVA.approx <- function(vmu,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
    vmum[i] <- vmu[i] - eps
    fm <- f.GVA(vmum,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
    
-   vg.approx[i] <- (fp - fm)/(2*eps)
+   vg.approx[i] <- (fp - fm) / (2 * eps)
 	}
 	return(vg.approx)
 }
@@ -129,15 +132,15 @@ vg.GVA <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
 {
   d <- ncol(mC)
   vmu <- vtheta[1:d]
-  mR[Rinds] <- vtheta[(1+d):length(vtheta)]
+  mR[Rinds] <- vtheta[(1 + d):length(vtheta)]
 
   mR[Dinds] <- exp(mR[Dinds]) 
   for (i in 1:length(Dinds)) {
     mR[Dinds[i]] <- min(c(1.0E3,mR[Dinds[i]]))
   }    
-  mLambda <- mR%*%t(mR)   
+  mLambda <- mR %*% t(mR)   
 
-  vmu.til     <- mC%*%vmu
+  vmu.til     <- mC %*% vmu
   vsigma2.til <- fastdiag(mC, mLambda)
   res.B12 <- B12.fun("POISSON",vmu.til,vsigma2.til,gh)
   vB1 <- res.B12$vB1
@@ -146,10 +149,10 @@ vg.GVA <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   vg <- 0*vmu
   vg[1:d] <- vg.G(vmu,mLambda,vy,vr,mC,mSigma.inv,vB1) 
 
-  mLambda.inv <- solve(mR%*%t(mR),tol=1.0E-99)
+  mLambda.inv <- solve(mR %*% t(mR),tol=1.0E-99)
   mH <- mH.G(vmu,mLambda,vy,vr,mC,mSigma.inv,vB2)
-  #dmLambda <- (mLambda.inv + mH)%*%mR
-  dmLambda <- .5*(mLambda.inv + mH)%*%mR
+  #dmLambda <- (mLambda.inv + mH) %*% mR
+  dmLambda <- .5 * (mLambda.inv + mH) %*% mR
   cat("GVA mLambda", mLambda[1:2, 1:2], "dmLambda", dmLambda[1:2, 1:2], "\n")
   
   dmLambda[Dinds] <- dmLambda[Dinds]*mR[Dinds]
@@ -164,7 +167,7 @@ fit.GVA <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12)
   gh2 <- NULL #list(x=gh$nodes,w=gh$weights,w.til=gh$weights*exp(gh$nodes^2))
 		
   d <- length(vmu)
-  Dinds <- d*((1:d)-1)+(1:d)
+  Dinds <- d * ((1:d)-1)+(1:d)
           
   mR <- t(chol(mLambda + diag(1.0E-8,d)))
   mR[Dinds] <- log(mR[Dinds])
@@ -190,8 +193,8 @@ fit.GVA <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12)
   mR[Rinds] <- vtheta[(1+d):P]
   mR[Dinds] <- exp(mR[Dinds])
   
-  print(image(Matrix(solve(mR%*%t(mR)))))
-  mLambda <- mR%*%t(mR)
+  print(image(Matrix(solve(mR %*% t(mR)))))
+  mLambda <- mR %*% t(mR)
   
   return(list(res=res,vmu=vmu,mLambda=mLambda))
 }
@@ -210,7 +213,7 @@ f.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   mLambda <- chol2inv(t(mR))
   
   f <- -sum(log(diag(mR))) + f.G(vmu,mLambda,vy,vr,mC,mSigma.inv,gh) 
-  f <- f + 0.5*d*log(2*pi) + 0.5*d
+  f <- f + 0.5 * d * log(2 * pi) + 0.5*d
   
   if (!is.finite(f)) {
     f <- -1.0E16
@@ -221,7 +224,9 @@ f.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
 
 vg.GVA.approx_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
 {
-  n <- length(vy); P <- length(vtheta); d <- ncol(mC)
+  n <- length(vy)
+  P <- length(vtheta)
+  d <- ncol(mC)
   eps <- 1.0E-6
   f <- f.GVA_new(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   vg.approx <- matrix(0,P,1)
@@ -234,7 +239,7 @@ vg.GVA.approx_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
     vthetam[i] <- vtheta[i] - eps
     fm <- f.GVA_new(vthetam,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)    
     
-    vg.approx[i] <- (fp - fm)/(2*eps)
+    vg.approx[i] <- (fp - fm) / (2 * eps)
   }
   return(vg.approx)
 }
@@ -253,7 +258,7 @@ vg.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   #mLambda <- chol2inv(t(mR))
   mLambda = tcrossprod(solve(mR, tol=1e-99))
   
-  vmu.til     <- mC%*%vmu
+  vmu.til     <- mC %*% vmu
   vsigma2.til <- fastdiag(mC, mLambda)
   res.B12 <- B12.fun("POISSON",vmu.til,vsigma2.til,gh)
   vB1 <- res.B12$vB1
@@ -265,17 +270,17 @@ vg.GVA_new <- function(vtheta,vy,vr,mC,mSigma.inv,gh,mR,Rinds,Dinds)
   mH <- mH.G(vmu,mLambda,vy,vr,mC,mSigma.inv,vB2)
   # mR is lower triangular. Can you rewrite this using forward solves and
   # backsolves?
-  #dmLambda <- -solve(mR, tol=1.0E-99)%*%(mLambda.inv + mH)%*%mLambda  
-  #dmR <- -solve(mR,  (mLambda.inv + mH)%*%mLambda, tol=1e-99)
-  #dmR <- -0.5*(mLambda.inv + mH)%*%mLambda%*%(t(mR)+mR)%*%mLambda
-  #dmR2 <- -(mLambda.inv + mH)%*%mLambda%*%t(mR)%*%mLambda
-  #dmR <- -(mLambda.inv + mH)%*%mLambda%*%mR%*%mLambda
-  dmR <- -(mLambda.inv + mH)%*%solve(t(mR))%*%solve(t(mR))%*%solve(mR)
+  #dmLambda <- -solve(mR, tol=1.0E-99) %*% (mLambda.inv + mH) %*% mLambda  
+  #dmR <- -solve(mR,  (mLambda.inv + mH) %*% mLambda, tol=1e-99)
+  #dmR <- -0.5*(mLambda.inv + mH) %*% mLambda %*% (t(mR)+mR) %*% mLambda
+  #dmR2 <- -(mLambda.inv + mH) %*% mLambda %*% t(mR) %*% mLambda
+  #dmR <- -(mLambda.inv + mH) %*% mLambda %*% mR %*% mLambda
+  dmR <- -(mLambda.inv + mH) %*% solve(t(mR)) %*% solve(t(mR)) %*% solve(mR)
   # Would this be more accurate using solves?
-  #dmR <- -0.5*(diag(1, rep(ncol(mLambda))) + mLambda%*%mH)%*%(mR + t(mR))%*%mLambda
-  #dmLambda <- .5*(mLambda.inv + mH)%*%mR
-  #dmLambda <- -mR%*%mLambda%*%(mLambda.inv + mH)%*%mLambda
-  #dmLambda <- -(mLambda.inv + mH)%*%mLambda%*%(t(mR) + mR)%*%mLambda
+  #dmR <- -0.5*(diag(1, rep(ncol(mLambda))) + mLambda %*% mH) %*% (mR + t(mR)) %*% mLambda
+  #dmLambda <- .5*(mLambda.inv + mH) %*% mR
+  #dmLambda <- -mR %*% mLambda %*% (mLambda.inv + mH) %*% mLambda
+  #dmLambda <- -(mLambda.inv + mH) %*% mLambda %*% (t(mR) + mR) %*% mLambda
   #dmR[Dinds] <- dmR[Dinds]*mR[Dinds]
   #dmR[Dinds] <- dmR2[Dinds]*mR[Dinds]
   dmR[Dinds] <- dmR[Dinds]*mR[Dinds]
@@ -345,9 +350,9 @@ fit.GVA_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, p
   gh2 <- NULL 
   
   d <- length(vmu)
-  Dinds <- d*((1:d)-1)+(1:d)
+  Dinds <- d * ((1:d) - 1) + (1:d)
   
-  u_dim = (m-1)*blocksize+spline_dim
+  u_dim = (m - 1) * blocksize + spline_dim
 
   result <- swap_mX_mZ(vmu, mLambda, mSigma.inv, mC, p, u_dim)
   vmu <- result$vmu
@@ -377,8 +382,8 @@ fit.GVA_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, p
   vmu <- vtheta[1:d]
   mR[Rinds] <- vtheta[(1+d):P]
   mR[Dinds] <- exp(mR[Dinds])  
-  print(image(Matrix(mR%*%t(mR))))
-  mLambda <- solve(mR%*%t(mR), tol=1.0E-99)
+  print(image(Matrix(mR %*% t(mR))))
+  mLambda <- solve(mR %*% t(mR), tol=1.0E-99)
 
   result <- swap_mX_mZ_back(vmu, mLambda, mSigma.inv, mC, p, u_dim)
   vmu <- result$vmu
@@ -392,13 +397,13 @@ fit.GVA_new <- function(vmu,mLambda,vy,vr,mC,mSigma.inv,method,reltol=1.0e-12, p
 # Newton-Raphson Gaussian variational approximation ----
 vg.G_nr <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, vB1) 
 {
-  vg <- t(mC)%*%(vr*(vy - vB1)) - mSigma.inv%*%vmu     
+  vg <- t(mC) %*% (vr*(vy - vB1)) - mSigma.inv %*% vmu     
   return(vg)
 }
 
 mH.G_nr <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, vB2) 
 {
-  mH <- -t(mC*as.vector(vr*vB2))%*%mC - mSigma.inv 
+  mH <- -t(mC*as.vector(vr*vB2)) %*% mC - mSigma.inv 
   return(mH)
 }
 
@@ -413,7 +418,7 @@ fit.GVA_nr <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e
     
     # calculate B1
     # calculate B2
-    vmu.til <- mC%*%vmu
+    vmu.til <- mC %*% vmu
     vsigma2.til <- fastdiag(mC, mLambda)
     res.B12 <- B12.fun("POISSON",vmu.til,vsigma2.til,gh)
     vB1 <- res.B12$vB1
@@ -425,23 +430,23 @@ fit.GVA_nr <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e
     # Use block inverse formula to speed computation
     # Let -mH = [A B]
     #           [B D]
-    u_dim = (m-1)*blocksize + spline_dim
+    u_dim = (m - 1) * blocksize + spline_dim
     A = -mH[1:p, 1:p]
-    B = -mH[1:p, (p+1):(p+u_dim)]
-    D = -mH[(p+1):(p+u_dim), (p+1):(p+u_dim)]
+    B = -mH[1:p, (p + 1):(p + u_dim)]
+    D = -mH[(p + 1):(p + u_dim), (p + 1):(p + u_dim)]
     # Then -mH^{-1} = [(A - B D^-1 B^T)^-1, -(A-B D^-1 B^T)^-1 B D^-1]
     #                 [-D^-1 B^T (A - B D^-1 B^T)^-1, D^-1 + D^-1 B^T (A - B D^-1 B^T)^-1 B D^-1]
     # D^-1 and (A - B D^-1 B^T)^-1 appear repeatedly, so we precalculate them
     D.inv = solve(D)
     A_BDB.inv = solve(A - B %*% D.inv %*% t(B))
     beta_idx = 1:p
-    u_idx = (p+1):(p+u_dim)
+    u_idx = (p + 1):(p + u_dim)
     mLambda[beta_idx, beta_idx] = A_BDB.inv
     mLambda[beta_idx, u_idx] = -A_BDB.inv %*% B %*% D.inv
     mLambda[u_idx, u_idx] = D.inv + D.inv %*% t(B) %*% A_BDB.inv %*% B %*% D.inv
     mLambda[u_idx, beta_idx] = t(mLambda[beta_idx, u_idx])
     
-    vmu <- vmu + mLambda%*%vg
+    vmu <- vmu + mLambda %*% vg
       
     err <- max(abs(vmu - vmu.old)) 
     if (err<TOL) {
