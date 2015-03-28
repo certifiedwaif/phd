@@ -132,6 +132,7 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
   
   # Initialise variables from mult
   N <- length(mult$vy)
+  p <- mult$p
   vy <- mult$vy
   vp <- mult$vp
   mX <- mult$mX
@@ -151,16 +152,15 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
   spline_dim <- mult$spline_dim
   blocksize <- mult$blocksize
 
+  if (!is.null(mX)) {
+    p <- ncol(mX)   
+  } else {
+    p <- 0
+  }
+
   if (verbose) {
     cat("N", N, "\n")
     cat("p", p, "\n")
-  }
-  
-  if (!is.null(mX)) {
-    p <- ncol(mX) 
-    
-  }	else {
-    p <- 0
   }
 
   if (!is.null(mZ)) {
