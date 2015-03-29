@@ -19,7 +19,7 @@ f.lap <- function(vmu, vy, vr, mC, mSigma.inv, mLambda)
   mSigma <- solve(mSigma.inv)
   mDiag <- fastdiag(mC, mLambda)
   f <- sum(vy * vr * veta - vr*exp(veta+0.5*mDiag)) - 0.5*t(vmu) %*% mSigma.inv %*% vmu - 
-            0.5 * sum(diag(mLambda %*% mSigma))
+           0.5 * sum(diag(mLambda %*% mSigma))
   return(f)
 }
 
