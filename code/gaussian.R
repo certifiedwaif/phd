@@ -103,7 +103,7 @@ mH.G <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, vB2)
 {
   vw <-  vB2
   dim(vw) <- NULL
-  mH <- -t(mC * (vr * vw)) %*% (mC) - mSigma.inv
+  mH <- -t(mC * (vr * vw)) %*% (mC) - 0.5 * tr(mSigma.inv)
   return(mH)    
 }
 
@@ -153,7 +153,7 @@ vg.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
   mLambda.inv <- solve(mR %*% t(mR), tol=1.0E-99)
   mH <- mH.G(vmu, mLambda, vy, vr, mC, mSigma.inv, vB2)
   #dmLambda <- (mLambda.inv + mH) %*% mR
-  dmLambda <- .5 * (mLambda.inv + mH) %*% mR
+  dmLambda <- (0.5 * mLambda.inv + mH) %*% mR
   cat("GVA mLambda", mLambda[1:2, 1:2], "dmLambda", dmLambda[1:2, 1:2], "\n")
   
   dmLambda[Dinds] <- dmLambda[Dinds]*mR[Dinds]
@@ -177,9 +177,9 @@ fit.GVA <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e-12
   lower_constraint <- rep(-Inf, length(vmu))
   
   if (method=="L-BFGS-B") {
-    controls <- list(maxit=100, trace=1, fnscale=-1, REPORT=1, factr=1.0E-5, lmm=10)
+    controls <- list(maxit=100, trace=0, fnscale=-1, REPORT=1, factr=1.0E-5, lmm=10)
   } else if (method=="Nelder-Mead") {
-    controls <- list(maxit=100000000, trace=0, fnscale=-1, REPORT=1000, reltol=reltol) 
+    controls <- list(maxit=100000000, trace=0, fnscale=-1, REPORT=1, reltol=reltol) 
   } else {
     controls <- list(maxit=1000, trace=0, fnscale=-1, REPORT=1, reltol=reltol) 
   }
@@ -193,7 +193,6 @@ fit.GVA <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e-12
   mR[Rinds] <- vtheta[(1+d):P]
   mR[Dinds] <- exp(mR[Dinds])
   
-  print(image(Matrix(solve(mR %*% t(mR)))))
   mLambda <- mR %*% t(mR)
   
   return(list(res=res, vmu=vmu, mLambda=mLambda))
@@ -255,8 +254,7 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
     mR[Dinds[i]] <- min(c(1.0E3, mR[Dinds[i]]))
   }    
   mLambda.inv <- tcrossprod(mR)
-  #mLambda <- chol2inv(t(mR))
-  mLambda <- tcrossprod(solve(mR, tol=1e-99))
+  mLambda <- solve(mLambda.inv, tol=1e-99)
   
   vmu.til <- mC %*% vmu
   vsigma2.til <- fastdiag(mC, mLambda)
@@ -268,22 +266,14 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
   vg[1:d] <- vg.G(vmu, mLambda, vy, vr, mC, mSigma.inv, vB1) 
   
   mH <- mH.G(vmu, mLambda, vy, vr, mC, mSigma.inv, vB2)
+  
   # mR is lower triangular. Can you rewrite this using forward solves and
   # backsolves?
-  #dmLambda <- -solve(mR, tol=1.0E-99) %*% (mLambda.inv + mH) %*% mLambda  
-  #dmR <- -solve(mR, (mLambda.inv + mH) %*% mLambda, tol=1e-99)
-  #dmR <- -0.5*(mLambda.inv + mH) %*% mLambda %*% (t(mR)+mR) %*% mLambda
-  #dmR2 <- -(mLambda.inv + mH) %*% mLambda %*% t(mR) %*% mLambda
-  #dmR <- -(mLambda.inv + mH) %*% mLambda %*% mR %*% mLambda
-  dmR <- -(mLambda.inv + mH) %*% solve(t(mR)) %*% solve(t(mR)) %*% solve(mR)
-  # Would this be more accurate using solves?
-  #dmR <- -0.5*(diag(1, rep(ncol(mLambda))) + mLambda %*% mH) %*% (mR + t(mR)) %*% mLambda
-  #dmLambda <- .5*(mLambda.inv + mH) %*% mR
-  #dmLambda <- -mR %*% mLambda %*% (mLambda.inv + mH) %*% mLambda
-  #dmLambda <- -(mLambda.inv + mH) %*% mLambda %*% (t(mR) + mR) %*% mLambda
-  #dmR[Dinds] <- dmR[Dinds]*mR[Dinds]
-  #dmR[Dinds] <- dmR2[Dinds]*mR[Dinds]
+  dmLambda <- (0.5 * tr(mLambda.inv) + mH)
+  dmLambda_dmR <- -mLambda %*% (t(mR) + mR) %*% mLambda
+  dmR <- dmLambda %*% dmLambda_dmR
   dmR[Dinds] <- dmR[Dinds] * mR[Dinds]
+
   # Check derivative numerically
   func <- function(x)
   {
@@ -296,12 +286,12 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
     f.GVA_new(vtheta_prime, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
   }
   dmR_check <- matrix(grad(func, as.vector(t(mR))), nrow(mR), ncol(mR))
-  # Idea: Check whether dmR deviates too far from dmR_check?
+  
   cat("GVA2 vmu", vmu[9:10], "\ndvmu", vg[9:10], "\nmR", mR[9:10, 9:10], "\ndmR", 
 			dmR[9:10, 9:10], "\ndmR_check", dmR_check[9:10, 9:10])
   
-  #vg[(1+d):length(vtheta)] <- dmR[Rinds]    
-  vg[(1+d):length(vtheta)] <- dmR_check[Rinds]    
+  vg[(1+d):length(vtheta)] <- dmR[Rinds]    
+  #vg[(1+d):length(vtheta)] <- dmR_check[Rinds]    
   
   return(vg)
 }
