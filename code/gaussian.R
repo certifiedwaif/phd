@@ -204,10 +204,10 @@ f.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
   d <- ncol(mC)  
   vmu <- vtheta[1:d]
   mR[Rinds] <- vtheta[(1+d):length(vtheta)]
-  mR[Dinds] <- exp(mR[Dinds]) 
-  for (i in 1:length(Dinds)) {
-    mR[Dinds[i]] <- min(c(1.0E5, mR[Dinds[i]]))
-  }
+  # mR[Dinds] <- exp(mR[Dinds]) 
+  # for (i in 1:length(Dinds)) {
+  #   mR[Dinds[i]] <- min(c(1.0E5, mR[Dinds[i]]))
+  # }
   mLambda.inv <- tcrossprod(mR)
   mLambda <- chol2inv(t(mR))
   
@@ -249,10 +249,10 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
   d <- ncol(mC)
   vmu <- vtheta[1:d]
   mR[Rinds] <- vtheta[(1+d):length(vtheta)]
-  mR[Dinds] <- exp(mR[Dinds]) 
-  for (i in 1:length(Dinds)) {
-    mR[Dinds[i]] <- min(c(1.0E3, mR[Dinds[i]]))
-  }    
+  # mR[Dinds] <- exp(mR[Dinds]) 
+  # for (i in 1:length(Dinds)) {
+  #   mR[Dinds[i]] <- min(c(1.0E3, mR[Dinds[i]]))
+  # }    
   mLambda.inv <- tcrossprod(mR)
   mLambda <- solve(mLambda.inv, tol=1e-99)
   
@@ -272,23 +272,23 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
   dmLambda <- (0.5 * tr(mLambda.inv) + mH)
   dmLambda_dmR <- -mLambda %*% (t(mR) + mR) %*% mLambda
   dmR <- dmLambda %*% dmLambda_dmR
-  dmR[Dinds] <- dmR[Dinds] * mR[Dinds]
+  #dmR[Dinds] <- dmR[Dinds] * mR[Dinds]
 
   # Check derivative numerically
   func <- function(x)
   {
     mR_prime <- matrix(x, nrow(mR), ncol(mR))
-    mR_prime[Dinds] <- log(mR_prime[Dinds])
+    #mR_prime[Dinds] <- log(mR_prime[Dinds])
     d <- ncol(mC)
     vtheta_prime <- 0 * vtheta
     vtheta_prime[1:d] <- vmu    
     vtheta_prime[(1+d):length(vtheta_prime)] <- mR_prime[Rinds]
     f.GVA_new(vtheta_prime, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
   }
-  dmR_check <- matrix(grad(func, as.vector(t(mR))), nrow(mR), ncol(mR))
+  #dmR_check <- matrix(grad(func, as.vector(t(mR))), nrow(mR), ncol(mR))
   
   cat("GVA2 vmu", vmu[9:10], "\ndvmu", vg[9:10], "\nmR", mR[9:10, 9:10], "\ndmR", 
-			dmR[9:10, 9:10], "\ndmR_check", dmR_check[9:10, 9:10])
+			dmR[9:10, 9:10]) #, "\ndmR_check", dmR_check[9:10, 9:10])
   
   vg[(1+d):length(vtheta)] <- dmR[Rinds]    
   #vg[(1+d):length(vtheta)] <- dmR_check[Rinds]    
@@ -350,9 +350,9 @@ fit.GVA_new <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0
   mSigma.inv <- result$mSigma.inv
   mC <- result$mC
 
-  mR <- t(chol(solve(mLambda, tol=1.0E-99))) + diag(1.0E-8, d)
+  mR <- t(chol(solve(mLambda, tol=1.0E-99)))
   Rinds <- which(lower.tri(mR, diag=TRUE))
-  mR[Dinds] <- log(mR[Dinds])
+  # mR[Dinds] <- log(mR[Dinds])
   vmu <- c(vmu, mR[Rinds])
   P <- length(vmu)
 
@@ -371,7 +371,7 @@ fit.GVA_new <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0
   
   vmu <- vtheta[1:d]
   mR[Rinds] <- vtheta[(1+d):P]
-  mR[Dinds] <- exp(mR[Dinds])  
+  # mR[Dinds] <- exp(mR[Dinds])  
   print(image(Matrix(mR %*% t(mR))))
   mLambda <- solve(mR %*% t(mR), tol=1.0E-99)
 
