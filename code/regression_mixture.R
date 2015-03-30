@@ -45,12 +45,12 @@ tr <- function(m) sum(diag(m))
 # @return A list of the fitted parameters
 vb <- function(data)
 {
-	n = data$n
-	mX = data$mX
-	vy = data$vy
-	A_1 = data$A_1
-	A_2 = data$A_2
-	B = data$B
+	n <- data$n
+	mX <- data$mX
+	vy <- data$vy
+	A_1 <- data$A_1
+	A_2 <- data$A_2
+	B <- data$B
 
 	# Initialise
 	ITERATIONS <- 10
