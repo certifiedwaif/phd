@@ -8,9 +8,9 @@ generate <- function()
 	alpha_true_model <- c(1, -1)
 	beta_true_model <- c(-1, 1)
 	prob <- 0.5
-	A_1 <- 0.1
-	A_2 <- 0.1
-	B <- 0.1
+	A_1 <- 1e5
+	A_2 <- 1e5
+	B <- 1e5
 	sigma2_alpha <- 1.0
 	sigma2_beta <- 1.0
 	vy <- rep(NA, n)
@@ -25,8 +25,8 @@ generate <- function()
 	}
 
 	return(list(A_1=A_1, A_2=A_2, B=B,
-				n=n, mX=mX, alpha_true_model=alpha_true_model,
-				beta_true_model=beta_true_model, prob=prob, vy=vy))
+							n=n, mX=mX, alpha_true_model=alpha_true_model,
+							beta_true_model=beta_true_model, prob=prob, vy=vy))
 }
 
 logit <- function(p)
@@ -87,13 +87,13 @@ vb <- function(data)
 		diag(mP) <- vp
 		r_1 <- A_1 + 0.5 * sum(vp)
 		psi_1 <- as.vector(B + 0.5 * (t(vp) %*% (vy - mX %*% vm_alpha)^2 + tr(mS_alpha %*% (t(mX) %*% mP %*% mX))))
-		r_0 <- A_2 + 0.5 * sum(mI_n - vp)
-		psi_0 <- as.vector(B + 0.5 * (t(mI_n - vp) %*% (vy - mX %*% vm_beta)^2 + tr(mS_beta %*% (t(mX) %*% (mI_n - mP) %*% mX))))
+		r_0 <- A_2 + 0.5 * sum(mI_n - mP)
+		psi_0 <- as.vector(B + 0.5 * (t(1 - vp) %*% (vy - mX %*% vm_beta)^2 + tr(mS_beta %*% (t(mX) %*% (mI_n - mP) %*% mX))))
 	}
 
 	return(list(mS_alpha=mS_alpha, mS_beta=mS_beta, vm_alpha=vm_alpha,
-				vm_beta=vm_beta, veta=veta, vp=vp, mP=mP, r_1=r_1,
-				psi_1=psi_1, r_0=r_0, psi_0=psi_0))
+							vm_beta=vm_beta, veta=veta, vp=vp, mP=mP, r_1=r_1,
+							psi_1=psi_1, r_0=r_0, psi_0=psi_0))
 }
 
 main <- function()
