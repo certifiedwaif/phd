@@ -205,9 +205,13 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
       #fit2 <- fit.Lap(vmu, vy, vp, mC, mSigma.inv, mLambda)
       fit1 <- fit.GVA(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B")
     } else if (method == "gva2") {
-      fit2 <- fit.Lap(vmu, vy, vp, mC, mSigma.inv, mLambda)
-      fit1 <- fit.GVA_new(fit2$vmu, fit2$mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B", p=p, m=m,
-                          blocksize=blocksize, spline_dim=spline_dim)
+      if (i <= 2) {
+        fit1 <- fit.Lap(vmu, vy, vp, mC, mSigma.inv, mLambda)
+      } else {
+        fit_lap <- fit.Lap(vmu, vy, vp, mC, mSigma.inv, mLambda)
+        fit1 <- fit.GVA_new(fit_lap$vmu, fit_lap$mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B", p=p, m=m,
+                            blocksize=blocksize, spline_dim=spline_dim)
+      }
     } else if (method == "gva_nr") {
       fit1 <- fit.GVA_nr(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B", p=p, m=m, 
                         blocksize=blocksize, spline_dim=spline_dim)
