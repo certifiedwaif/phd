@@ -1,0 +1,45 @@
+\documentclass{article}[12pt]
+\usepackage{amsmath}
+\input{include.tex}
+\input{Definitions.tex}
+\title{Differentiating the Gaussian Variational Lower Bound}
+
+\begin{document}
+\begin{align*}
+\log \underline{p}(\vmu, \mLambda; \vy, \vp) &= \vy^T \mP \mC \vmu - \vp B(\mC \vu, \diag{(\mC \mLambda \mC^T)}) - \half \vmu^T \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} \\
+&- \frac{d}{2} \log(2 \pi) + \half \log(\mSigma^{-1}) + \frac{d}{2} \log{2 \pi} + \frac{d}{2} + \half \log |\mLambda| \\
+&= -\vp B(\mC \vmu, \diag{(\mC \mLambda \mC^T)}) - \half \tr{(\mSigma^{-1} \mLambda)} + \half \log |\mLambda| + \text{terms not depending on $\mLambda$}
+\end{align*}
+
+Adopting the notation from Matrix Calculus with Applications to Econometrics and 
+Statistics 3rd ed., the derivative of this expression with respect to $\mLambda$ is
+\[
+D_\mLambda \log \underline{p}(\vmu, \mLambda; \vy, \vp) = -\vp \mC B'(\mC \vmu, \diag{(\mC \mLambda \mC^T)}) \mC^T - \half \tr{(\mSigma^{-1})} + \half d \log |\mLambda|
+\]
+
+Now
+\begin{align*}
+\half d \log |\mLambda| &= \tr \mLambda^{-1} d \mLambda
+\end{align*}
+
+so the above expression becomes
+\begin{align*}
+ -\vp \mC B'(\mC \vmu, \diag{(\mC \mLambda \mC^T)}) \mC^T - \half \tr{(\mSigma^{-1})} + \half \tr{(\mLambda^{-1})}
+\end{align*}
+
+This matches \texttt{vg.GVA}.
+
+Now, set $\mLambda = (\mR \mR)^{-1}$. What about the above expression changes?
+
+\[
+D_\mR \log \underline{p}(\vmu, \mLambda; \vy, \vp) = \left [ -\vp \mC B'(\mC \vmu, \diag{(\mC \mLambda \mC^T)}) \mC^T - \half \tr{(\mSigma^{-1})} + \half \tr{(\mLambda^{-1})} \right ] d_\mR \mLambda
+\]
+
+\begin{align*}
+d_\mR \mLambda &= -(\mR \mR^T)^{-1} (d\mR \mR^T) (\mR \mR^T) \\
+&=-(\mR \mR^T)^{-1} (\mR^T + \mR) (\mR \mR^T) \\
+\end{align*}
+
+Recall that the diagonals are exponentiated, do after these derivatives are calculated, the
+diagonal of $\mR$ should be multiplied by itself.
+\end{document}
