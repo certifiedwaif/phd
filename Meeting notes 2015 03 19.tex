@@ -1,16 +1,26 @@
-\documentclass{amsart}
+\documentclass{article}[12pt]
+\usepackage{amsmath}
+\input{include.tex}
+\input{Definitions.tex}
+\title{Meeting notes - 19/3/2015}
+
 \begin{document}
 Warm start with Laplace's Method of Approximation
+
 Literature review
+
 10 or 20 papers with zero-inflated models, preferably with mixed effects.
+
 Numeric derivative is wrong.
+
 fixed pt unstable.
 
 \begin{align*}
-f(\vmu, \mLambda)
-g(\vmu, \mLambda) = \frac{\partial f}{\partial \vmu}
-H(\vmu, \mLambda) = \frac{\partial^2 f}{\partial \vmu \partial \vmu^T}
-\mLambda \leftarrow [-H(\vmu, \mLambda)]^{-1}
-\vmu \leftarrow \vmu + \mLambda g(\vmu, \mLambda)
+f(\vmu, \mLambda)\\
+g(\vmu, \mLambda) &= \frac{\partial f}{\partial \vmu}\\
+H(\vmu, \mLambda) &= \frac{\partial^2 f}{\partial \vmu \partial \vmu^T}\\
+\mLambda &\leftarrow [-H(\vmu, \mLambda)]^{-1}\\
+\vmu &\leftarrow \vmu + \mLambda g(\vmu, \mLambda)
 \end{align*}
+
 \end{document}
