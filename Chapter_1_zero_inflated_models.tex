@@ -40,7 +40,8 @@ using a deterministic algorithm which converges much more quickly.
 
 % Cite prior publications in this area
 
-\noindent In this paper, we build upon the earlier work of \cite{lambert1992} and \cite{Ghosh20061360}.
+\noindent In this paper, we build upon the earlier work of \cite{lambert1992} and
+\cite{Ghosh20061360}.
 
 \noindent In Section \ref{sec:methodology} we provide the framework for our approach. In
 Section \ref{sec:methodology} we extend our approach to incorporate regression modelling
@@ -76,18 +77,18 @@ $$
 y_i = r_i x_i, 1 \leq i \leq n,
 $$
 
-\noindent where $x_i \sim \Poisson{(\lambda)}$ independent of $r_i \stackrel{\text{ind.}}{\sim} \Bernoulli{(\rho)}, 1 \leq i \leq n$.
+\noindent where $x_i \sim \Poisson{(\lambda)}$ independent of
+$r_i \stackrel{\text{ind.}}{\sim} \Bernoulli{(\rho)}, 1 \leq i \leq n$.
 
-We employ priors $\rho \sim \Unif{(0, 1)}$ and
-$\lambda \sim \myGamma{(0.01, 0.01)}$. 
+We employ priors $\rho \sim \Unif{(0, 1)}$ and $\lambda \sim \myGamma{(0.01, 0.01)}$. 
  
 % TODO: Add graphical model
 
-  We use a factorised approximation to the full likelihood, as detailed in \citep{ormerod10}.
+We use a factorised approximation to the full likelihood, as detailed in \citep{ormerod10}.
 The use of conjugate priors in the full model yields easier mean field updates in the
 variational approximation.
 
-  It can be shown via standard algebraic manipulations that the
+It can be shown via standard algebraic manipulations that the
 full conditionals for $\lambda, \rho$ and $\vr$ are:
 
 $$
@@ -180,9 +181,6 @@ optimal densities $q^*(\lambda)$ and $q^*(\rho)$}
 %By taking the expectation of each full conditional with respect to 
 
 % This should be made the numerical experiment section.
-\subsection{Results}
-A data set of 10,000 points were simulated from the univariate ZIP model with
-$\lambda = 1$ and $\rho = 0.5$. The vague gamma prior $\alpha_\lambda = 0.01$ and $\beta_\lambda = 0.01$ was chosen for $\lambda$.
 
 \section{Extending the zero-inflated Poisson model to a regression model}
 \noindent The above univariate model demonstrates that variational approximations are well-suited
@@ -393,6 +391,10 @@ variational lower bound to be done over fewer parameters, and for inverses of $\
 to be calculated more quickly - a reduction from $O((m + p)^3)$ to
 $O(m + (pm)^2 + p^3)$, which is a substantial reduction in computation if $m$ is 
 substantially greater than $p$, as is typical in applications.
+
+% TODO: The above computational complexity results may well be true, but I wouldn't trust them.
+% It's been a long time since that thinking was done, and some of it was most likely wrong.
+% The sparse matrix experiments that I've done generally haven't panned out very well.	
 
 % More complicated functions and derivatives, but more accurate
 % Can be quite fast because of the special form of $\mR$.
