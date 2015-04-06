@@ -7,7 +7,7 @@
 \begin{document}
 \begin{align*}
 \log \underline{p}(\vmu, \mLambda; \vy, \vp) &= \vy^T \mP \mC \vmu - \vp B(\mC \vu, \diag{(\mC \mLambda \mC^T)}) - \half \vmu^T \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} \\
-&- \frac{d}{2} \log(2 \pi) + \half \log(\mSigma^{-1}) + \frac{d}{2} \log{2 \pi} + \frac{d}{2} + \half \log |\mLambda| \\
+&\quad - \frac{d}{2} \log(2 \pi) + \half \log(\mSigma^{-1}) + \frac{d}{2} \log{2 \pi} + \frac{d}{2} + \half \log |\mLambda| \\
 &= -\vp B(\mC \vmu, \diag{(\mC \mLambda \mC^T)}) - \half \tr{(\mSigma^{-1} \mLambda)} + \half \log |\mLambda| + \text{terms not depending on $\mLambda$}
 \end{align*}
 
