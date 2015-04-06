@@ -245,7 +245,7 @@ vg.GVA.approx_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Din
 
 vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
 {
-  
+  browser()
   d <- ncol(mC)
   vmu <- vtheta[1:d]
   mR[Rinds] <- vtheta[(1+d):length(vtheta)]
@@ -255,13 +255,17 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
   }    
   
   # mR/mLambda.inv are sparse, so should be able to quickly solve
-  #mR <- Matrix(mR)
+  # TODO: Threshold. Anything below 1e-15 is essentially zero.
+  mR[abs(mR) < 1e-14] <- 0
+  mR <- Matrix(mR, sparse=TRUE)
   mLambda.inv <- tcrossprod(mR)
   mLambda <- solve(mLambda.inv, tol=1e-99)
-  
+
   vmu.til <- mC %*% vmu
-  vsigma2.til <- fastdiag(mC, mLambda)
-  #vsigma2.til <- forwardsolve(mR, mC)^2
+  #vsigma2.til <- fastdiag(mC, mLambda)
+  # TODO: Use sparse version of mC
+  va <- forwardsolve(mR, t(mC))
+  vsigma2.til <- apply(va^2, 2, sum)
   res.B12 <- B12.fun("POISSON", vmu.til, vsigma2.til, gh)
   vB1 <- res.B12$vB1
   vB2 <- res.B12$vB2
@@ -274,9 +278,13 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
   # mR is lower triangular. Can you rewrite this using forward solves and
   # backsolves?
   dmLambda <- (0.5 * tr(mLambda.inv) + mH)
+  # TODO: Re-write all the expressions involving mLambda as solves
+  # involving mR.
   dmLambda_dmR <- -mLambda %*% (t(mR) + mR) %*% mLambda
   dmR <- dmLambda %*% dmLambda_dmR
   dmR[Dinds] <- dmR[Dinds] * mR[Dinds]
+  mR <- as.matrix(mR)
+  dmR <- as.matrix(dmR)
 
   # Check derivative numerically
   func <- function(x)
