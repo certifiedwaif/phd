@@ -93,13 +93,13 @@ f.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
   return(f)
 }
 
-vg.G <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, vB1) 
+vg.G <- function(vmu, vy, vr, mC, mSigma.inv, vB1) 
 {
   vg <- t(mC) %*% (vr * (vy - vB1)) - mSigma.inv %*% vmu     
   return(vg)
 }
 
-mH.G <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, vB2) 
+mH.G <- function(vmu, vy, vr, mC, mSigma.inv, vB2) 
 {
   vw <-  vB2
   dim(vw) <- NULL
@@ -148,13 +148,13 @@ vg.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
   vB2 <- res.B12$vB2
   
   vg <- 0*vmu
-  vg[1:d] <- vg.G(vmu, mLambda, vy, vr, mC, mSigma.inv, vB1) 
+  vg[1:d] <- vg.G(vmu, vy, vr, mC, mSigma.inv, vB1) 
 
   mLambda.inv <- solve(mR %*% t(mR), tol=1.0E-99)
-  mH <- mH.G(vmu, mLambda, vy, vr, mC, mSigma.inv, vB2)
+  mH <- mH.G(vmu, vy, vr, mC, mSigma.inv, vB2)
   #dmLambda <- (mLambda.inv + mH) %*% mR
   dmLambda <- (0.5 * mLambda.inv + mH) %*% mR
-  cat("GVA mLambda", mLambda[1:2, 1:2], "dmLambda", dmLambda[1:2, 1:2], "\n")
+  #cat("GVA mLambda", mLambda[1:2, 1:2], "dmLambda", dmLambda[1:2, 1:2], "\n")
   
   dmLambda[Dinds] <- dmLambda[Dinds]*mR[Dinds]
   vg[(1+d):length(vtheta)] <- dmLambda[Rinds]    
@@ -199,7 +199,27 @@ fit.GVA <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e-12
 }
 
 # Gaussian variational approxmation, mLambda = (mR mR^T)^-1 ----
-f.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
+f.G_new <- function(vmu, mR, vy, vr, mC, mSigma.inv, gh) 
+{
+  d <- length(vmu)
+  
+  #mR[abs(mR) < 1e-14] <- 0
+  #mR <- as(mR, "sparseMatrix")
+  mLambda.inv <- tcrossprod(mR)
+  #mLambda <- solve(mLambda.inv, tol=1e-99)
+
+  vmu.til <- mC %*% vmu
+  # TODO: Use sparse version of mC
+  va <- forwardsolve(mR, t(mC))
+  vsigma2.til <- colSums(va^2)
+  vB0 <- B0.fun("POISSON", vmu.til, vsigma2.til, gh) 
+  
+  f <- sum(vr * (vy * vmu.til - vB0)) - 0.5 * t(vmu) %*% mSigma.inv %*% vmu - 0.5 * tr(forwardsolve(mR, backsolve(t(mR), mSigma.inv)))
+  f <- f - 0.5 * d * log(2 * pi) + 0.5 * log(det(mSigma.inv)) 
+  return(f)
+}
+
+f.GVA_new <- function(vtheta, vy, vr, mC, mC_sp, mSigma.inv, gh, mR, Rinds, Dinds)
 {
   d <- ncol(mC)  
   vmu <- vtheta[1:d]
@@ -208,10 +228,8 @@ f.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
   for (i in 1:length(Dinds)) {
     mR[Dinds[i]] <- min(c(1.0E5, mR[Dinds[i]]))
   }
-  mLambda.inv <- tcrossprod(mR)
-  mLambda <- chol2inv(t(mR))
   
-  f <- -sum(log(diag(mR))) + f.G(vmu, mLambda, vy, vr, mC, mSigma.inv, gh) 
+  f <- -sum(log(diag(mR))) + f.G_new(vmu, mR, vy, vr, mC, mSigma.inv, gh) 
   f <- f + 0.5 * d * log(2 * pi) + 0.5*d
   
   if (!is.finite(f)) {
@@ -245,7 +263,6 @@ vg.GVA.approx_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Din
 
 vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
 {
-  browser()
   d <- ncol(mC)
   vmu <- vtheta[1:d]
   mR[Rinds] <- vtheta[(1+d):length(vtheta)]
@@ -255,52 +272,54 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
   }    
   
   # mR/mLambda.inv are sparse, so should be able to quickly solve
-  # TODO: Threshold. Anything below 1e-15 is essentially zero.
-  mR[abs(mR) < 1e-14] <- 0
-  mR <- Matrix(mR, sparse=TRUE)
+  #mR[abs(mR) < 1e-14] <- 0
+  #mR <- Matrix(mR, sparse=TRUE)
+  #mR <- as(mR, "sparseMatrix")
   mLambda.inv <- tcrossprod(mR)
-  mLambda <- solve(mLambda.inv, tol=1e-99)
+  #mLambda <- solve(mLambda.inv, tol=1e-99)
 
   vmu.til <- mC %*% vmu
   #vsigma2.til <- fastdiag(mC, mLambda)
   # TODO: Use sparse version of mC
   va <- forwardsolve(mR, t(mC))
-  vsigma2.til <- apply(va^2, 2, sum)
+  vsigma2.til <- colSums(va^2)
   res.B12 <- B12.fun("POISSON", vmu.til, vsigma2.til, gh)
   vB1 <- res.B12$vB1
   vB2 <- res.B12$vB2
   
   vg <- 0 * vmu
-  vg[1:d] <- vg.G(vmu, mLambda, vy, vr, mC, mSigma.inv, vB1) 
+  vg[1:d] <- vg.G(vmu, vy, vr, mC, mSigma.inv, vB1) 
   
-  mH <- mH.G(vmu, mLambda, vy, vr, mC, mSigma.inv, vB2)
+  mH <- mH.G(vmu, vy, vr, mC, mSigma.inv, vB2)
   
   # mR is lower triangular. Can you rewrite this using forward solves and
   # backsolves?
   dmLambda <- (0.5 * tr(mLambda.inv) + mH)
   # TODO: Re-write all the expressions involving mLambda as solves
   # involving mR.
-  dmLambda_dmR <- -mLambda %*% (t(mR) + mR) %*% mLambda
+  #dmLambda_dmR <- -solve(mLambda.inv, solve(mLambda.inv, mR))
+  #dmLambda_dmR <- -solve(mLambda.inv, solve(mLambda.inv, (t(mR) + mR)))
+  dmLambda_dmR <- -forwardsolve(mR, backsolve(t(mR), forwardsolve(mR, backsolve(t(mR), (t(mR) + mR)))))
   dmR <- dmLambda %*% dmLambda_dmR
+  #mR <- as.matrix(mR)
+  #dmR <- as.matrix(dmR)
   dmR[Dinds] <- dmR[Dinds] * mR[Dinds]
-  mR <- as.matrix(mR)
-  dmR <- as.matrix(dmR)
 
   # Check derivative numerically
-  func <- function(x)
-  {
-    mR_prime <- matrix(x, nrow(mR), ncol(mR))
-    #mR_prime[Dinds] <- log(mR_prime[Dinds])
-    d <- ncol(mC)
-    vtheta_prime <- 0 * vtheta
-    vtheta_prime[1:d] <- vmu    
-    vtheta_prime[(1+d):length(vtheta_prime)] <- mR_prime[Rinds]
-    f.GVA_new(vtheta_prime, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
-  }
+  # func <- function(x)
+  # {
+  #   mR_prime <- matrix(x, nrow(mR), ncol(mR))
+  #   #mR_prime[Dinds] <- log(mR_prime[Dinds])
+  #   d <- ncol(mC)
+  #   vtheta_prime <- 0 * vtheta
+  #   vtheta_prime[1:d] <- vmu    
+  #   vtheta_prime[(1+d):length(vtheta_prime)] <- mR_prime[Rinds]
+  #   f.GVA_new(vtheta_prime, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
+  # }
   #dmR_check <- matrix(grad(func, as.vector(t(mR))), nrow(mR), ncol(mR))
   
-  cat("GVA2 vmu", vmu[9:10], "\ndvmu", vg[9:10], "\nmR", mR[9:10, 9:10], "\ndmR", 
-			dmR[9:10, 9:10]) #, "\ndmR_check", dmR_check[9:10, 9:10])
+  # cat("GVA2 vmu", vmu[9:10], "\ndvmu", vg[9:10], "\nmR", mR[9:10, 9:10], "\ndmR", 
+		# 	dmR[9:10, 9:10]) #, "\ndmR_check", dmR_check[9:10, 9:10])
   
   vg[(1+d):length(vtheta)] <- dmR[Rinds]    
   #vg[(1+d):length(vtheta)] <- dmR_check[Rinds]    
@@ -367,6 +386,7 @@ fit.GVA_new <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0
   mR[Dinds] <- log(mR[Dinds])
   vmu <- c(vmu, mR[Rinds])
   P <- length(vmu)
+  mC_sp <- as(mC, "sparseMatrix")
 
   if (method=="L-BFGS-B") {
     controls <- list(maxit=1000, trace=1, fnscale=-1, REPORT=1, factr=1.0E-5, lmm=10)
