@@ -274,14 +274,14 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
   # mR/mLambda.inv are sparse, so should be able to quickly solve
   #mR[abs(mR) < 1e-14] <- 0
   #mR <- Matrix(mR, sparse=TRUE)
-  #mR <- as(mR, "sparseMatrix")
+  mR <- as(mR, "sparseMatrix")
   mLambda.inv <- tcrossprod(mR)
   #mLambda <- solve(mLambda.inv, tol=1e-99)
 
   vmu.til <- mC %*% vmu
   #vsigma2.til <- fastdiag(mC, mLambda)
   # TODO: Use sparse version of mC
-  va <- forwardsolve(mR, t(mC))
+  va <- solve(mR, t(mC))
   vsigma2.til <- colSums(va^2)
   res.B12 <- B12.fun("POISSON", vmu.til, vsigma2.til, gh)
   vB1 <- res.B12$vB1
@@ -299,7 +299,9 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
   # involving mR.
   #dmLambda_dmR <- -solve(mLambda.inv, solve(mLambda.inv, mR))
   #dmLambda_dmR <- -solve(mLambda.inv, solve(mLambda.inv, (t(mR) + mR)))
-  dmLambda_dmR <- -forwardsolve(mR, backsolve(t(mR), forwardsolve(mR, backsolve(t(mR), (t(mR) + mR)))))
+  #dmLambda_dmR <- -forwardsolve(mR, backsolve(t(mR), forwardsolve(mR, backsolve(t(mR), (t(mR) + mR)))))
+  #dmLambda_dmR <- -forwardsolve(mR, backsolve(t(mR), forwardsolve(mR, backsolve(t(mR), mR))))
+  dmLambda_dmR <- -solve(mLambda.inv, solve(mLambda.inv, mR))
   dmR <- dmLambda %*% dmLambda_dmR
   #mR <- as.matrix(mR)
   #dmR <- as.matrix(dmR)
@@ -382,11 +384,12 @@ fit.GVA_new <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0
   mC <- result$mC
 
   mR <- t(chol(solve(mLambda, tol=1.0E-99)))
-  Rinds <- which(lower.tri(mR, diag=TRUE))
+  mR[abs(mR) < 1e-14] <- 0
+  Rinds <- which(mR != 0)
   mR[Dinds] <- log(mR[Dinds])
   vmu <- c(vmu, mR[Rinds])
   P <- length(vmu)
-  mC_sp <- as(mC, "sparseMatrix")
+  #mC_sp <- as(mC, "sparseMatrix")
 
   if (method=="L-BFGS-B") {
     controls <- list(maxit=1000, trace=1, fnscale=-1, REPORT=1, factr=1.0E-5, lmm=10)
@@ -404,8 +407,8 @@ fit.GVA_new <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0
   vmu <- vtheta[1:d]
   mR[Rinds] <- vtheta[(1+d):P]
   mR[Dinds] <- exp(mR[Dinds])  
-  print(image(Matrix(mR %*% t(mR))))
-  mLambda <- solve(mR %*% t(mR), tol=1.0E-99)
+  #print(image(Matrix(mR %*% t(mR))))
+  mLambda <- solve(tcrossprod(mR), tol=1.0E-99)
 
   result <- swap_mX_mZ_back(vmu, mLambda, mSigma.inv, mC, p, u_dim)
   vmu <- result$vmu
