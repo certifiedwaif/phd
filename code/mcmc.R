@@ -14,6 +14,7 @@ mcmc_approximation <- function(mult, seed=1, iterations=1e3, warmup=floor(iterat
   u_dim <- with(mult, m*blocksize+spline_dim)
   zip_data <- with(mult, list(N=length(vy), P=2, M=m, B=blocksize, y=vy, X=mX, Z=mZ,
                               psi=prior$mPsi, BetaPrior=mSigma.beta)) #, v=prior$v))
+	fit <- stan("multivariate_zip.stan", seed=seed, data=zip_data, iter=iterations, warmup=warmup, chains = 1)
   mcmc_samples <- extract(fit)
 
   return(mcmc_samples)
