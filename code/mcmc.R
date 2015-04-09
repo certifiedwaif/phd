@@ -1,6 +1,6 @@
 # mcmc.R
-require(rstan)
-require(parallel)
+library(rstan)
+library(parallel)
 # Andrew Gelman says that this magical line of code automatically makes Stan
 # run in parallel and cache compiled models.
 # Two minutes later: Hey, it actually works!
