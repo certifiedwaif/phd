@@ -206,7 +206,7 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
       fit1 <- fit.GVA(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B")
     } else if (method == "gva2") {
       if (i <= 2) {
-        fit1 <- fit.Lap(vmu, vy, vp, mC, mSigma.inv, mLambda)
+        fit1 <- fit.GVA(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B")
       } else {
         fit_lap <- fit.Lap(vmu, vy, vp, mC, mSigma.inv, mLambda)
         fit1 <- fit.GVA_new(fit_lap$vmu, fit_lap$mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B", p=p, m=m,
