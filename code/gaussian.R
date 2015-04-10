@@ -76,13 +76,12 @@ f.G <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, gh)
 
 f.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
 {
-  d <- ncol(mC)  
+  d <- ncol(mC)
+  # TODO: Cache if you can
   vmu <- vtheta[1:d]
   mR[Rinds] <- vtheta[(1+d):length(vtheta)]
   mR[Dinds] <- exp(mR[Dinds]) 
-  for (i in 1:length(Dinds)) {
-        mR[Dinds[i]] <- min(c(1.0E5, mR[Dinds[i]]))
-  }   
+  mR[Dinds] <- min(c(1.0E5, mR[Dinds]))
   mLambda <- mR %*% t(mR)   
    
   f <- sum(log(diag(mR))) + f.G(vmu, mLambda, vy, vr, mC, mSigma.inv, gh) 
@@ -134,15 +133,15 @@ vg.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
 {
   d <- ncol(mC)
   vmu <- vtheta[1:d]
+  # TODO: Cache if you can
   mR[Rinds] <- vtheta[(1 + d):length(vtheta)]
 
   mR[Dinds] <- exp(mR[Dinds]) 
-  for (i in 1:length(Dinds)) {
-    mR[Dinds[i]] <- min(c(1.0E3, mR[Dinds[i]]))
-  }    
+  mR[Dinds] <- min(c(1.0E3, mR[Dinds]))
   mLambda <- mR %*% t(mR)   
 
   vmu.til     <- mC %*% vmu
+  # Idea: Could multiply by mR and then square?
   vsigma2.til <- fastdiag(mC, mLambda)
   res.B12 <- B12.fun("POISSON", vmu.til, vsigma2.til, gh)
   vB1 <- res.B12$vB1
@@ -221,6 +220,7 @@ f.G_new <- function(vmu, mR, mR_sp, vy, vr, mC, tmC, mC_sp, tmC_sp, mSigma.inv, 
 
 f.GVA_new <- function(vtheta, vy, vr, mC, tmC, mC_sp, tmC_sp, mSigma.inv, gh, mR, mR_sp, Rinds, Dinds)
 {
+  # TODO: Cache if you can
   d <- ncol(mC)  
   vmu <- vtheta[1:d]
   mR[Rinds] <- vtheta[(1+d):length(vtheta)]
@@ -262,6 +262,7 @@ vg.GVA.approx_new <- function(vtheta, vy, vr, mC, tmC, mC_sp, tmC_sp, mSigma.inv
 
 vg.GVA_new <- function(vtheta, vy, vr, mC, tmC, mC_sp, tmC_sp, mSigma.inv, gh, mR, mR_sp, Rinds, Dinds)
 {
+  # TODO: Cache if you can
   d <- ncol(mC)
   vmu <- vtheta[1:d]
   mR[Rinds] <- vtheta[(1+d):length(vtheta)]
@@ -447,7 +448,7 @@ mH.G_nr <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, vB2)
   return(mH)
 }
 
-fit.GVA_nr <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e-12, m=NA, p=NA, 
+afit.GVA_nr <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e-12, m=NA, p=NA, 
                         blocksize=NA, spline_dim=NA)
 {
   MAXITER <- 1000
