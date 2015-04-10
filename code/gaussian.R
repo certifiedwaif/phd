@@ -448,7 +448,7 @@ mH.G_nr <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, vB2)
   return(mH)
 }
 
-afit.GVA_nr <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e-12, m=NA, p=NA, 
+fit.GVA_nr <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e-12, m=NA, p=NA, 
                         blocksize=NA, spline_dim=NA)
 {
   MAXITER <- 1000
