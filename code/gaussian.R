@@ -200,15 +200,10 @@ fit.GVA <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e-12
 }
 
 # Gaussian variational approxmation, mLambda = (mR mR^T)^-1 ----
-f.G_new <- function(vmu, mR, mR_sp, vy, vr, mC, tmC, mC_sp, tmC_sp, mSigma.inv, gh) 
+f.G_new <- function(vmu, mR, vy, vr, mC, mSigma.inv, gh) 
 {
   d <- length(vmu)
   
-  #mR[abs(mR) < 1e-10] <- 0
-  #mR <- as(mR, "sparseMatrix")
-  #mLambda.inv <- tcrossprod(mR)
-  #mLambda <- solve(mLambda.inv, tol=1e-99)
-
   vmu.til <- mC %*% vmu
   va <- forwardsolve(mR, tmC)
   vsigma2.til <- colSums(va^2)
@@ -219,16 +214,15 @@ f.G_new <- function(vmu, mR, mR_sp, vy, vr, mC, tmC, mC_sp, tmC_sp, mSigma.inv, 
   return(f)
 }
 
-f.GVA_new <- function(vtheta, vy, vr, mC, tmC, mC_sp, tmC_sp, mSigma.inv, gh, mR, mR_sp, Rinds, Dinds)
+f.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, mR_sp, Rinds, Dinds)
 {
   d <- ncol(mC)  
   vmu <- vtheta[1:d]
   mR[Rinds] <- vtheta[(1+d):length(vtheta)]
   mR[Dinds] <- exp(mR[Dinds]) 
   mR[Dinds] <- min(1.0E3, mR[Dinds])
-  #mR_sp@x <- mR[Rinds]
   
-  f <- -sum(log(diag(mR))) + f.G_new(vmu, mR, mR_sp, vy, vr, mC, tmC, mC_sp, tmC_sp, mSigma.inv, gh) 
+  f <- -sum(log(diag(mR))) + f.G_new(vmu, mR, vy, vr, mC, mSigma.inv, gh) 
   f <- f + 0.5 * d * log(2 * pi) + 0.5*d
   
   if (!is.finite(f)) {
@@ -238,29 +232,29 @@ f.GVA_new <- function(vtheta, vy, vr, mC, tmC, mC_sp, tmC_sp, mSigma.inv, gh, mR
   return(f)
 }
 
-vg.GVA.approx_new <- function(vtheta, vy, vr, mC, tmC, mC_sp, tmC_sp, mSigma.inv, gh, mR, mR_sp, Rinds, Dinds)
+vg.GVA.approx_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
 {
   n <- length(vy)
   P <- length(vtheta)
   d <- ncol(mC)
   eps <- 1.0E-6
-  f <- f.GVA_new(vtheta, vy, vr, mC, tmC, mC_sp, tmC_sp, mSigma.inv, gh, mR, Rinds, Dinds)
+  f <- f.GVA_new(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
   vg.approx <- matrix(0, P, 1)
   for (i in 1:P) {
     vthetap <- vtheta
     vthetap[i] <- vtheta[i] + eps
-    fp <- f.GVA_new(vthetap, vy, vr, mC, tmC, mC_sp, tmC_sp, mSigma.inv, gh, mR, Rinds, Dinds)
+    fp <- f.GVA_new(vthetap, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
     
     vthetam <- vtheta
     vthetam[i] <- vtheta[i] - eps
-    fm <- f.GVA_new(vthetam, vy, vr, mC, tmC, mC_sp, tmC_sp, mSigma.inv, gh, mR, Rinds, Dinds)    
+    fm <- f.GVA_new(vthetam, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)    
     
     vg.approx[i] <- (fp - fm) / (2 * eps)
   }
   return(vg.approx)
 }
 
-vg.GVA_new <- function(vtheta, vy, vr, mC, tmC, mC_sp, tmC_sp, mSigma.inv, gh, mR, mR_sp, Rinds, Dinds)
+vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
 {
   d <- ncol(mC)
   vmu <- vtheta[1:d]
@@ -276,7 +270,7 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, tmC, mC_sp, tmC_sp, mSigma.inv, gh, m
   vmu.til <- mC %*% vmu
   #vsigma2.til <- fastdiag(mC, mLambda)
   # TODO: Use sparse version of mC
-  va <- forwardsolve(mR, tmC)
+  va <- forwardsolve(mR, t(mC))
   vsigma2.til <- colSums(va^2)
   res.B12 <- B12.fun("POISSON", vmu.til, vsigma2.til, gh)
   vB1 <- res.B12$vB1
@@ -287,19 +281,13 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, tmC, mC_sp, tmC_sp, mSigma.inv, gh, m
   
   mH <- mH.G(vmu, vy, vr, mC, mSigma.inv, vB2)
   
-  # mR is lower triangular. Can you rewrite this using forward solves and
-  # backsolves?
   dmLambda <- (0.5 * tr(mLambda.inv) + mH)
-  # TODO: Re-write all the expressions involving mLambda as solves
-  # involving mR.
   #dmLambda_dmR <- -solve(mLambda.inv, solve(mLambda.inv, mR))
   #dmLambda_dmR <- -solve(mLambda.inv, solve(mLambda.inv, (t(mR) + mR)))
   #dmLambda_dmR <- -forwardsolve(mR, backsolve(t(mR), forwardsolve(mR, backsolve(t(mR), (t(mR) + mR)))))
   #dmLambda_dmR <- -forwardsolve(mR, backsolve(t(mR), forwardsolve(mR, backsolve(t(mR), mR))))
   dmLambda_dmR <- -forwardsolve(mR, backsolve(t(mR), mR))
   dmR <- dmLambda %*% dmLambda_dmR
-  #mR <- as.matrix(mR)
-  #dmR <- as.matrix(dmR)
   dmR[Dinds] <- dmR[Dinds] * mR[Dinds]
 
   # Check derivative numerically
@@ -385,25 +373,6 @@ fit.GVA_new <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0
   mR[Dinds] <- log(mR[Dinds])
   vmu <- c(vmu, mR[Rinds])
   P <- length(vmu)
-  mC_sp <- as(mC, "sparseMatrix")
-  tmC_sp <- t(mC_sp)
-  # mR_sp <- new("dtCMatrix", Dim=c(d, d), diag="N", uplo="L", x=mR[Rinds],
-  #               i=c(0L, 1L, 38L, 39L, 1L, 38L, 39L, 2L, 3L, 38L, 39L, 3L, 38L, 
-  #                   39L, 4L, 5L, 38L, 39L, 5L, 38L, 39L, 6L, 7L, 38L, 39L, 7L, 38L, 
-  #                   39L, 8L, 9L, 38L, 39L, 9L, 38L, 39L, 10L, 11L, 38L, 39L, 11L, 
-  #                   38L, 39L, 12L, 13L, 38L, 39L, 13L, 38L, 39L, 14L, 15L, 38L, 39L, 
-  #                   15L, 38L, 39L, 16L, 17L, 38L, 39L, 17L, 38L, 39L, 18L, 19L, 38L, 
-  #                   39L, 19L, 38L, 39L, 20L, 21L, 38L, 39L, 21L, 38L, 39L, 22L, 23L, 
-  #                   38L, 39L, 23L, 38L, 39L, 24L, 25L, 38L, 39L, 25L, 38L, 39L, 26L, 
-  #                   27L, 38L, 39L, 27L, 38L, 39L, 28L, 29L, 38L, 39L, 29L, 38L, 39L, 
-  #                   30L, 31L, 38L, 39L, 31L, 38L, 39L, 32L, 33L, 38L, 39L, 33L, 38L, 
-  #                   39L, 34L, 35L, 38L, 39L, 35L, 38L, 39L, 36L, 37L, 38L, 39L, 37L, 
-  #                   38L, 39L, 38L, 39L, 39L),
-  #               p=c(0L, 4L, 7L, 11L, 14L, 18L, 21L, 25L, 28L, 32L, 35L, 39L, 42L, 
-  #                   46L, 49L, 53L, 56L, 60L, 63L, 67L, 70L, 74L, 77L, 81L, 84L, 88L, 
-  #                   91L, 95L, 98L, 102L, 105L, 109L, 112L, 116L, 119L, 123L, 126L, 
-  #                   130L, 133L, 135L, 136L))
-  mR_sp <- as(mR, "dtCMatrix")
 
   if (method=="L-BFGS-B") {
     controls <- list(maxit=1000, trace=0, fnscale=-1, REPORT=1, factr=1.0E-5, lmm=10)
@@ -414,8 +383,8 @@ fit.GVA_new <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0
   }
   res <- optim(par=vmu, fn=f.GVA_new, gr=vg.GVA_new, 
                method=method, upper=Inf, control=controls, 
-               vy=vy, vr=vr, mC=mC, tmC=tmC, mC_sp=mC_sp, tmC_sp=tmC_sp, mSigma.inv=mSigma.inv,
-               gh=gh2, mR=mR*0, mR_sp=mR_sp, Rinds=Rinds, Dinds=Dinds)        
+               vy=vy, vr=vr, mC=mC, mSigma.inv=mSigma.inv,
+               gh=gh2, mR=mR*0, Rinds=Rinds, Dinds=Dinds)        
   
   vtheta <- res$par 
   
