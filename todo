@@ -1,6 +1,23 @@
 To Do list
 ==========
 
+14/4/2015
+---------
+- Write up meeting notes from yesterday
+- Splines
+- Read more Numerical Recipes - more of the linear algebra chapter, and the
+	chapter on non-linear optimisation, particularly as it relates to L-BFGS
+- Prepare for tutorials
+- Implement caching in gaussian.R
+- Make appointment to see better chair etc.
+- Write sigma2 accuracy code
+
+13/4/2015
+---------
+- It turns out that Reference BLAS already checks for zeros in its' linear algebra routines.
+	So there's no need to optimise this case.
+- Present what you've learned to the rest of the group.
+
 9/4/2015
 --------
 - At the end of yesterday, sparse matrices seemed to finally be helping. Check that this gain is 
