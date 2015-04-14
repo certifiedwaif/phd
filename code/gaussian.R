@@ -6,6 +6,7 @@ library(Matrix)
 library(Rcpp)
 library(RcppEigen)
 library(numDeriv)
+library(digest)
 
 source("CalculateB.R")
 sourceCpp(file="fastdiag.cpp")
@@ -151,7 +152,7 @@ vg.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
   vg <- 0*vmu
   vg[1:d] <- vg.G(vmu, vy, vr, mC, mSigma.inv, vB1) 
 
-  mLambda.inv <- solve(mR %*% t(mR), tol=1.0E-99)
+  mLambda.inv <- solve(tcrossprod(mR), tol=1.0E-99)
   mH <- mH.G(vmu, vy, vr, mC, mSigma.inv, vB2)
   #dmLambda <- (mLambda.inv + mH) %*% mR
   dmLambda <- (0.5 * mLambda.inv + mH) %*% mR
@@ -200,29 +201,51 @@ fit.GVA <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e-12
 }
 
 # Gaussian variational approxmation, mLambda = (mR mR^T)^-1 ----
-f.G_new <- function(vmu, mR, vy, vr, mC, mSigma.inv, gh) 
+calc_cache <- function(hash, vtheta, mC, Rinds, Dinds)
+{
+  d <- ncol(mC)
+  vmu <- vtheta[1:d]
+  mR <- matrix(0, d, d)
+  mR[Rinds] <- vtheta[(1+d):length(vtheta)]
+  mR[Dinds] <- exp(mR[Dinds])
+  mR[Dinds] <- min(1.0E3, mR[Dinds])
+  
+  mLambda.inv <- tcrossprod(mR)
+
+  vmu.til <- mC %*% vmu
+  va <- forwardsolve(mR, t(mC))
+  vsigma2.til <- colSums(va^2)
+
+  return(list(hash=hash, vmu=vmu,
+              mR=mR, mLambda.inv=mLambda.inv,
+              vmu.til=vmu.til, vsigma2.til=vsigma2.til))
+}
+
+f.G_new <- function(vmu, mR, vy, vr, mC, vmu.til, vsigma2.til, mSigma.inv, gh) 
 {
   d <- length(vmu)
-  
-  vmu.til <- mC %*% vmu
-  va <- forwardsolve(mR, tmC)
-  vsigma2.til <- colSums(va^2)
   vB0 <- B0.fun("POISSON", vmu.til, vsigma2.til, gh) 
   
-  f <- sum(vr * (vy * vmu.til - vB0)) - 0.5 * t(vmu) %*% mSigma.inv %*% vmu - 0.5 * tr(forwardsolve(mR, backsolve(t(mR), mSigma.inv)))
+  f <- sum(vr * (vy * vmu.til - vB0)) - 0.5 * t(vmu) %*% mSigma.inv %*% vmu
+  f <- f - 0.5 * tr(forwardsolve(mR, backsolve(mR, mSigma.inv, transpose=TRUE)))
   f <- f - 0.5 * d * log(2 * pi) + 0.5 * log(det(mSigma.inv)) 
   return(f)
 }
 
-f.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, mR_sp, Rinds, Dinds)
+f.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
 {
-  d <- ncol(mC)  
-  vmu <- vtheta[1:d]
-  mR[Rinds] <- vtheta[(1+d):length(vtheta)]
-  mR[Dinds] <- exp(mR[Dinds]) 
-  mR[Dinds] <- min(1.0E3, mR[Dinds])
+  hash <- digest(vtheta, algo="md5")
+  if (is.null(cache$hash) || cache$hash != hash) {
+    cache <<- calc_cache(hash, vtheta, mC, Rinds, Dinds)
+  }
+  vmu <- cache$vmu
+  mR <- cache$mR
+  mLambda.inv <- cache$mLambda.inv
+  vmu.til <- cache$vmu.til
+  vsigma2.til <- cache$vsigma2.til
   
-  f <- -sum(log(diag(mR))) + f.G_new(vmu, mR, vy, vr, mC, mSigma.inv, gh) 
+  d <- length(vmu)
+  f <- -sum(log(diag(mR))) + f.G_new(vmu, mR, vy, vr, mC, vmu.til, vsigma2.til, mSigma.inv, gh) 
   f <- f + 0.5 * d * log(2 * pi) + 0.5*d
   
   if (!is.finite(f)) {
@@ -256,37 +279,31 @@ vg.GVA.approx_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Din
 
 vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
 {
-  d <- ncol(mC)
-  vmu <- vtheta[1:d]
-  mR[Rinds] <- vtheta[(1+d):length(vtheta)]
-  mR[Dinds] <- exp(mR[Dinds])
-  mR[Dinds] <- min(1.0E3, mR[Dinds])
+  hash <- digest(vtheta, algo="md5")
+  if (is.null(cache$hash) || cache$hash != hash) {
+    cache <<- calc_cache(vtheta, mC, Rinds, Dinds)
+  }
+  vmu <- cache$vmu
+  mR <- cache$mR
+  mLambda.inv <- cache$mLambda.inv
+  vmu.til <- cache$vmu.til
+  vsigma2.til <- cache$vsigma2.til
   
-  # mR/mLambda.inv are sparse, so should be able to quickly solve
-  #mR_sp@x <- mR[Rinds]
-  mLambda.inv <- tcrossprod(mR)
-  #mLambda <- solve(mLambda.inv, tol=1e-99)
-
-  vmu.til <- mC %*% vmu
-  #vsigma2.til <- fastdiag(mC, mLambda)
-  # TODO: Use sparse version of mC
-  va <- forwardsolve(mR, t(mC))
-  vsigma2.til <- colSums(va^2)
   res.B12 <- B12.fun("POISSON", vmu.til, vsigma2.til, gh)
   vB1 <- res.B12$vB1
   vB2 <- res.B12$vB2
   
+  d <- length(vmu)
   vg <- 0 * vmu
   vg[1:d] <- vg.G(vmu, vy, vr, mC, mSigma.inv, vB1) 
   
   mH <- mH.G(vmu, vy, vr, mC, mSigma.inv, vB2)
-  
   dmLambda <- (0.5 * tr(mLambda.inv) + mH)
   #dmLambda_dmR <- -solve(mLambda.inv, solve(mLambda.inv, mR))
   #dmLambda_dmR <- -solve(mLambda.inv, solve(mLambda.inv, (t(mR) + mR)))
   #dmLambda_dmR <- -forwardsolve(mR, backsolve(t(mR), forwardsolve(mR, backsolve(t(mR), (t(mR) + mR)))))
   #dmLambda_dmR <- -forwardsolve(mR, backsolve(t(mR), forwardsolve(mR, backsolve(t(mR), mR))))
-  dmLambda_dmR <- -forwardsolve(mR, backsolve(t(mR), mR))
+  dmLambda_dmR <- -forwardsolve(mR, backsolve(mR, mR, transpose=TRUE))
   dmR <- dmLambda %*% dmLambda_dmR
   dmR[Dinds] <- dmR[Dinds] * mR[Dinds]
 
@@ -354,6 +371,7 @@ fit.GVA_new <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0
   #N <- 15
   #gh  <- gauss.quad(N, kind="hermite")
   gh2 <- NULL 
+  cache <<- list(hash=NULL)
   
   d <- length(vmu)
   Dinds <- d * ((1:d) - 1) + (1:d)
