@@ -84,7 +84,7 @@ f.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
   for (i in 1:length(Dinds)) {
         mR[Dinds[i]] <- min(c(1.0E5, mR[Dinds[i]]))
   }   
-  mLambda <- mR %*% t(mR)   
+  mLambda <- tcrossprod(mR)
    
   f <- sum(log(diag(mR))) + f.G(vmu, mLambda, vy, vr, mC, mSigma.inv, gh) 
   f <- f + 0.5 * d * log(2 * pi) + 0.5 * d
@@ -141,7 +141,7 @@ vg.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
   for (i in 1:length(Dinds)) {
     mR[Dinds[i]] <- min(c(1.0E3, mR[Dinds[i]]))
   }    
-  mLambda <- mR %*% t(mR)   
+  mLambda <- tcrossprod(mR)
 
   vmu.til     <- mC %*% vmu
   vsigma2.til <- fastdiag(mC, mLambda)
@@ -152,7 +152,7 @@ vg.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
   vg <- 0*vmu
   vg[1:d] <- vg.G(vmu, vy, vr, mC, mSigma.inv, vB1) 
 
-  mLambda.inv <- solve(tcrossprod(mR), tol=1.0E-99)
+  mLambda.inv <- solve(mLambda, tol=1.0E-99)
   mH <- mH.G(vmu, vy, vr, mC, mSigma.inv, vB2)
   #dmLambda <- (mLambda.inv + mH) %*% mR
   dmLambda <- (0.5 * mLambda.inv + mH) %*% mR
