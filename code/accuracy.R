@@ -49,13 +49,13 @@ calculate_accuracies <- function(mult, mcmc_samples, var_result, approximation, 
   # Kernel density estimates of MCMC-estimated posteriors
   # Use L_1 distance to compare against variational approximations of posteriors
  
-  vbeta_accuracy = rep(NA, ncol(mult$mX))
+  vbeta_accuracy <- rep(NA, ncol(mult$mX))
   for (i in 1:ncol(mult$mX)) {
-    vbeta_accuracy[i] = calculate_accuracy(mcmc_samples$vbeta[,i], dnorm,
+    vbeta_accuracy[i] <- calculate_accuracy(mcmc_samples$vbeta[,i], dnorm,
                                             var_result$vmu[i], sqrt(var_result$mLambda[i,i]))
     if (print_flag) cat("vbeta[", i, "]", approximation, "accuracy:", vbeta_accuracy[i], "\n")
     
-    param_name = sprintf("vbeta[%d]", i)
+    param_name <- sprintf("vbeta[%d]", i)
     if (plot_flag) accuracy_plot(mcmc_samples$vbeta[,i], dnorm,
                             var_result$vmu[i], sqrt(var_result$mLambda[i,i]))
   }
@@ -65,18 +65,18 @@ calculate_accuracies <- function(mult, mcmc_samples, var_result, approximation, 
   # to get more complex.
   print(dim(mult$mZ))
   print(dim(mcmc_samples$u))
-  vu_accuracy = rep(NA, ncol(mult$mZ))
-  B = mult$blocksize
-  b_idx = 1
+  vu_accuracy <- rep(NA, ncol(mult$mZ))
+  B <- mult$blocksize
+  b_idx <- 1
   for (i in 1:ncol(mult$mZ)) {
-    m_idx = ceiling(i/B)
-    vu_accuracy[i] = calculate_accuracy(mcmc_samples$vu[,m_idx,b_idx], dnorm,
+    m_idx <- ceiling(i/B)
+    vu_accuracy[i] <- calculate_accuracy(mcmc_samples$vu[,m_idx,b_idx], dnorm,
                                          var_result$vmu[i+mult$p], sqrt(var_result$mLambda[i+mult$p,i+mult$p]))
     if (print_flag) cat("vu[", i, "]", approximation, "accuracy:", vu_accuracy[i], "\n")
     if (plot_flag) accuracy_plot(mcmc_samples$vu[,m_idx,b_idx], dnorm,
                             var_result$vmu[i+mult$p], sqrt(var_result$mLambda[i+mult$p,i+mult$p]))
 
-    b_idx = b_idx + 1
+    b_idx <- b_idx + 1
     if (b_idx > B)
       b_idx=1
   }
@@ -84,14 +84,17 @@ calculate_accuracies <- function(mult, mcmc_samples, var_result, approximation, 
   # sigma2_u accuracy
   # FIXME - this may be wrong for blocksize != 1?
   # This is totally wrong for the Inverse Wishart model?
-  #sigma2_u_accuracy = calculate_accuracy(1/mcmc_samples$sigma_u^2, dgamma,
+  #sigma2_u_accuracy <- calculate_accuracy(1/mcmc_samples$sigma_u^2, dgamma,
   #                                        var_result$a_sigma, var_result$b_sigma)
   #if (print_flag) cat("sigma2_u", approximation, "accuracy:", sigma2_u_accuracy, "\n")
   #if (plot_flag) accuracy_plot(1/mcmc_samples$sigma_u^2, dgamma,
   #                        var_result$a_sigma, var_result$b_sigma)
+  # TODO: Can I just modify this to check each of the diagonals of the covariance matrices?
+  # According to Wikipedia's article on Wishart distributions, the diagonal elements follow
+  # chi-squared distributions
   
   # rho accuracy
-  rho_accuracy = calculate_accuracy(mcmc_samples$rho, dbeta,
+  rho_accuracy <- calculate_accuracy(mcmc_samples$rho, dbeta,
                                      var_result$a_rho, var_result$b_rho)
   if (print_flag) cat("rho", approximation, "accuracy: ", rho_accuracy, "\n")
   if (plot_flag) accuracy_plot(mcmc_samples$rho, dbeta,
