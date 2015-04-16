@@ -6,15 +6,28 @@ library(parallel)
 # Two minutes later: Hey, it actually works!
 #source("http://mc-stan.org/rstan/stan.R")
 
-mcmc_approximation <- function(mult, seed=1, iterations=1e3, warmup=floor(iterations/2), mc.cores=1)
+mcmc_approximation <- function(mult, seed=1, iterations=1e3,
+															 warmup=floor(iterations/2), mc.cores=1,
+															 stan_file="multivariate_zip.stan")
 {
   # Use Stan to create MCMC samples, because Stan deals much better with highly
   # correlated posteriors.
   
-  u_dim <- with(mult, m*blocksize+spline_dim)
-  zip_data <- with(mult, list(N=length(vy), P=2, M=m, B=blocksize, y=vy, X=mX, Z=mZ,
-                              psi=prior$mPsi, BetaPrior=mSigma.beta)) #, v=prior$v))
-	fit <- stan("multivariate_zip.stan", seed=seed, data=zip_data, iter=iterations, warmup=warmup, chains = 1)
+  m <- mult$m
+  blocksize <- mult$blocksize
+  spline_dim <- mult$spline_dim
+  u_dim <- m * blocksize + spline_dim
+  mX <- mult$mX
+  mZ <- mult$mZ
+  vy <- mult$vy
+  mPsi <- mult$prior$mPsi
+  mSigma.beta <- mult$mSigma.beta
+  
+  zip_data <- list(N=length(vy), P=2, M=m, B=blocksize, spline_dim=spline_dim,
+  								 y=vy, X=mX, Z=mZ,
+                   psi=mPsi, BetaPrior=mSigma.beta) #, v=prior$v))
+
+	fit <- stan(stan_file, seed=seed, data=zip_data, iter=iterations, warmup=warmup, chains = 1)
   mcmc_samples <- extract(fit)
 
   return(mcmc_samples)

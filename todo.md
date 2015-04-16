@@ -1,10 +1,43 @@
 To Do list
 ==========
 
+16/4/2015
+---------
+- Teach classes, enter rolls
+	Done
+- The Stan sampler is currently rejecting every proposed sample
+	The solution was to have two seperate Stan source files, one for random intercepts and slopes
+	and another for splines. There's currently no requirement to have both together, although
+	there's no reason why we couldn't do this. It's just harder.
+- Read the chapter on non-linear optimisation, particularly as it relates to
+	L-BFGS
+- Make appointment to see better chair etc.
+	I went looking for the relevant room in the IT building, but couldn't find it. I'll go again
+	next week.
+- Write sigma2 accuracy code
+- Read Challis
+- Literature review
+- Put code into a package. Hadley Wickham shows you how:
+	http://r-pkgs.had.co.nz/r.html
+
+15/4/2015
+---------
+- Continue with splines. Implement something today. A lot of progress was
+	made on this
+- Read the chapter on non-linear optimisation, particularly as it relates to
+	L-BFGS
+- Make appointment to see better chair etc.
+- Write sigma2 accuracy code
+- Read Challis
+- Literature review
+
 14/4/2015
 ---------
 - Write up meeting notes from yesterday
 - Splines
+	Read the relevant sections of Numerical Recipes, my numerical analysis book and 
+	semiparametric regression. I have a good understanding now. This ties in well with
+	the Computational Projects in Applied Mathematics course that I'm sitting in on.
 - Read more Numerical Recipes - more of the linear algebra chapter, and the
 	chapter on non-linear optimisation, particularly as it relates to L-BFGS
 - Prepare for tutorials

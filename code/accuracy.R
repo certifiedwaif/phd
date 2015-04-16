@@ -324,4 +324,29 @@ test_accuracies_slope <- function()
   #print(image(Matrix(var5$var_result$mLambda)))  
   #var5
 }
-test_accuracies_slope()
+#test_accuracies_slope()
+
+test_accuracies_spline <- function()
+{
+  # Monte Carlo Markov Chains approximation
+  seed <- 1
+  set.seed(seed)
+  mult <- generate_spline_test_data()
+  mcmc_samples <- mcmc_approximation(mult, seed=seed, iterations=1e5, warmup=1e4,
+                                      stan_file="multivariate_zip_splines.stan")
+  save(mult, mcmc_samples, file="data/accuracy_spline_2015_04_16.RData")  
+  #load(file="data/accuracy_slope_2015_04_09.RData")
+  # load(file="data_macbook/accuracy_slope_2015_03_30.RData")
+  
+  #now <- Sys.time()
+  #var1 <- test_accuracy(mult, mcmc_samples, "laplacian", plot=TRUE)
+  #print(Sys.time() - now)
+  #print(var1)
+  
+  now <- Sys.time()
+  var2 <- test_accuracy(mult, mcmc_samples, "gva", plot=TRUE)
+  print(Sys.time() - now)
+  #print(image(Matrix(var2$var_result$mLambda)))
+  print(var2)
+}
+test_accuracies_spline()

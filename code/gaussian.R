@@ -77,13 +77,12 @@ f.G <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, gh)
 
 f.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
 {
-  d <- ncol(mC)  
+  d <- ncol(mC)
+  # TODO: Cache if you can
   vmu <- vtheta[1:d]
   mR[Rinds] <- vtheta[(1+d):length(vtheta)]
   mR[Dinds] <- exp(mR[Dinds]) 
-  for (i in 1:length(Dinds)) {
-        mR[Dinds[i]] <- min(c(1.0E5, mR[Dinds[i]]))
-  }   
+  mR[Dinds] <- min(c(1.0E5, mR[Dinds]))
   mLambda <- tcrossprod(mR)
    
   f <- sum(log(diag(mR))) + f.G(vmu, mLambda, vy, vr, mC, mSigma.inv, gh) 
@@ -135,15 +134,15 @@ vg.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
 {
   d <- ncol(mC)
   vmu <- vtheta[1:d]
+  # TODO: Cache if you can
   mR[Rinds] <- vtheta[(1 + d):length(vtheta)]
 
   mR[Dinds] <- exp(mR[Dinds]) 
-  for (i in 1:length(Dinds)) {
-    mR[Dinds[i]] <- min(c(1.0E3, mR[Dinds[i]]))
-  }    
+  mR[Dinds] <- min(c(1.0E3, mR[Dinds]))
   mLambda <- tcrossprod(mR)
 
   vmu.til     <- mC %*% vmu
+  # Idea: Could multiply by mR and then square?
   vsigma2.til <- fastdiag(mC, mLambda)
   res.B12 <- B12.fun("POISSON", vmu.til, vsigma2.til, gh)
   vB1 <- res.B12$vB1

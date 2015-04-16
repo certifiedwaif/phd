@@ -79,7 +79,7 @@ calculate_lower_bound <- function(mult, verbose=FALSE)
 	return(T1 + T2 + T3)
 }
 
-create_multivariate <- function(vy, mX, mZ, sigma2.beta, m=ncol(mZ), blocksize=1, spline_dim=NA, v=blocksize+1)
+create_mult <- function(vy, mX, mZ, sigma2.beta, m=ncol(mZ), blocksize=1, spline_dim=NA, v=blocksize+1)
 {
   # Initialise
   n <- length(vy)
@@ -107,7 +107,13 @@ create_multivariate <- function(vy, mX, mZ, sigma2.beta, m=ncol(mZ), blocksize=1
   v=prior$v + m
   
   if (!is.null(ncol(mZ))) {
-    mSigma.u.inv <- kronecker(diag(1, (m - 1)), mPsi)
+    # TODO: We don't yet handle the case where there are splines and random intecepts/
+    # slopes.
+    if (m == 1) {
+      mSigma.u.inv <- diag(1, spline_dim)
+    } else {
+      mSigma.u.inv <- kronecker(diag(1, (m - 1)), mPsi)
+    }
   } else {
     mSigma.u.inv <- NULL
   }
@@ -257,7 +263,13 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
       
       #tau_sigma <- a_sigma/b_sigma
       #mSigma.u.inv <- diag(tau_sigma, u_dim)
-      mSigma.u.inv <- kronecker(diag(1, m - 1), solve(mPsi/(v - blocksize - 1)))
+      # TODO: This doesn't handle the case where you have splines and random intercepts
+      # or slopes.
+      if (m == 1) {
+        mSigma.u.inv <- solve(mPsi/(v - blocksize - 1))
+      } else {
+        mSigma.u.inv <- kronecker(diag(1, m - 1), solve(mPsi/(v - blocksize - 1)))
+      }
       #mSigma.u.inv <- solve(mPsi) # What multiplicative factor for psi?
     }
     

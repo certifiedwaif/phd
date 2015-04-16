@@ -1,4 +1,5 @@
 # generate.R
+source("splines.R")
 
 generate_univariate_test_data <- function (n, rho, lambda)
 {
@@ -116,7 +117,7 @@ generate_test_data <- function(m, ni)
   vy <- test_data$vy
   
   # Test accuracy
-  mult <- create_multivariate(vy, mX, mZ, sigma2.beta, m=m, blocksize=1, spline_dim=0)
+  mult <- create_mult(vy, mX, mZ, sigma2.beta, m=m, blocksize=1, spline_dim=0)
   
   return(mult)
 }
@@ -151,13 +152,12 @@ generate_slope_test_data <- function(m=5, ni=20)
   
   # Create mult object
   sigma2.beta <- 1.0E5
-  mult <- create_multivariate(vy, mX, mZ_reordered, sigma2.beta, m=m, blocksize=2, spline_dim=0)
+  mult <- create_mult(vy, mX, mZ_reordered, sigma2.beta, m=m, blocksize=2, spline_dim=0)
   return(mult)
 }
 
-generate_spline_test_data <- function()
+generate_spline_test_data <- function(n=5000)
 {
-  n <- 5000
   vx <- matrix(sort(runif(n, -1, 1))) 
   
   mX <- cbind(1,vx)
@@ -172,10 +172,9 @@ generate_spline_test_data <- function()
   
   sigma2.true <- 0.01
   expected_beta <- c(0, 1)
-  vf <- 5+2*sin(pi*vx)
+  vf <- 5 + 2 * sin(pi * vx)
   vy <- rpois(n,exp(vf))
   
-  source("ZOsull.r")
   numIntKnots <- 35
   intKnots <- quantile(unique(vx),seq(0,1,length=(numIntKnots+2))[-c(1,(numIntKnots+2))])
   
@@ -187,7 +186,7 @@ generate_spline_test_data <- function()
   
   #mZ <- mZ/max(mZ)
   
-  mult <- create_multivariate(vy, mX, mZ, sigma2.beta, m=0, blocksize=1, spline_dim=37)
+  mult <- create_mult(vy, mX, mZ, sigma2.beta, m=1, blocksize=0, spline_dim=37)
   
   return(mult)
 }
