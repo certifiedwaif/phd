@@ -28,7 +28,6 @@ parameters {
 model {
   real eta;
   matrix[P,P] chol_BetaPrior;
-  matrix[B, B] chol_sigma_u;
   vector[B*(M-1)] u;
 
   rho ~ beta(1.0, 1.0);
@@ -36,11 +35,10 @@ model {
 
   chol_BetaPrior <- cholesky_decompose(BetaPrior);
   vbeta ~ multi_normal_cholesky(zeros_beta, chol_BetaPrior);
- 
-  chol_sigma_u <- cholesky_decompose(sigma_u);
+  
   // This definitely works, but it's slow.
   for (m in 1:M) {
-    vu[m] ~ multi_normal_cholesky(zeros_u, chol_sigma_u);
+    vu[m] ~ multi_normal(zeros_u, sigma_u);
   }
   // This is faster. But does it work? Seems to, but distributions are weird.
   //vu ~ multi_normal(zeros_u, sigma_u);
