@@ -79,7 +79,7 @@ calculate_lower_bound <- function(mult, verbose=FALSE)
 	return(T1 + T2 + T3)
 }
 
-create_mult <- function(vy, mX, mZ, sigma2.beta, m=ncol(mZ), blocksize=1, spline_dim=NA, v=blocksize+1)
+create_mult <- function(vy, mX, mZ, sigma2.beta, m=ncol(mZ), blocksize=1, spline_dim=0, v=blocksize + spline_dim + 1)
 {
   # Initialise
   n <- length(vy)
@@ -99,7 +99,7 @@ create_mult <- function(vy, mX, mZ, sigma2.beta, m=ncol(mZ), blocksize=1, spline
   
   # Set prior parameters for Inverse Wishart distribution
   #mPsi=diag(1, rep(blocksize))
-  mPsi <- 1e-5 * matrix(c(1, 0, 0, 1), blocksize, blocksize)
+  mPsi <- 1e-5 * diag(1, blocksize + spline_dim)
   
   prior <- list(v=v, mPsi=mPsi,
                 a_rho=1, b_rho=1,
@@ -254,10 +254,16 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
       # Extract right elements of mLambda
       #b_sigma <- prior$b_sigma + sum(vmu[u_idx]^2)/2 + tr(mLambda[u_idx, u_idx])/2    
       
-      acc <- matrix(0, blocksize, blocksize)
-      for (j in 1:(m-1)) {
-        j_idx <- p + (j-1) * blocksize+(1:blocksize)
-        acc <- acc + vmu[j_idx] %*% t(vmu[j_idx]) + mLambda[j_idx, j_idx]
+      if (spline_dim == 0) {
+        acc <- matrix(0, blocksize, blocksize)
+        for (j in 1:(m-1)) {
+          j_idx <- p + (j-1) * blocksize+(1:blocksize)
+          acc <- acc + vmu[j_idx] %*% t(vmu[j_idx]) + mLambda[j_idx, j_idx]
+        }
+      } else {
+        acc <- matrix(0, spline_dim, spline_dim)
+        spline_idx <- (p + 1):length(vmu)
+        acc <- vmu[spline_idx] %*% t(vmu[spline_idx]) + mLambda[spline_idx, spline_idx]
       }
       mPsi <- prior$mPsi + acc
       
