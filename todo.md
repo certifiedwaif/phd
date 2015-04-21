@@ -1,5 +1,14 @@
 To Do list
 ==========
+20/04/2015
+----------
+- Type up notes taken in the meeting this morning with John and Sarah.
+	Done, but they need to be checked.
+- Continue trying to fit splines.
+	The MCMC took forty eight hours, but it completed successfully. Some problems in
+	zero_inflated_model.R with not dealing with spline_dim.
+	Optimiser is failing with non-finite value.
+	The test case I've chosen is pretty terrible, so I should use something simpler.
 
 16/4/2015
 ---------
