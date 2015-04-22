@@ -11,35 +11,37 @@
 &= -\vp B(\mC \vmu, \diag{(\mC \mLambda \mC^T)}) - \half \tr{(\mSigma^{-1} \mLambda)} + \half \log |\mLambda| + \text{terms not depending on $\mLambda$}
 \end{align*}
 
-Adopting the notation from Matrix Calculus with Applications to Econometrics and 
+\noindent Adopting the notation from Matrix Calculus with Applications to Econometrics and 
 Statistics 3rd ed., the derivative of this expression with respect to $\mLambda$ is
-\[
-D_\mLambda \log \underline{p}(\vmu, \mLambda; \vy, \vp) = -\vp \mC B'(\mC \vmu, \diag{(\mC \mLambda \mC^T)}) \mC^T - \half \tr{(\mSigma^{-1})} + \half d \log |\mLambda|
-\]
+\begin{align*}
+D_\mLambda \log \underline{p}(\vmu, \mLambda; \vy, \vp) &= -\vp \mC B'(\mC \vmu, \diag{(\mC \mLambda \mC^T)}) \mC^T - \half \tr{(\mSigma^{-1})} + \half d \log |\mLambda| \\
+ &=-\vp \mC B'(\mC \vmu, \diag{(\mC \mLambda \mC^T)}) \mC^T - \half \tr{(\mSigma^{-1})} + \half \tr{(\mLambda^{-1})}
+\end{align*}
 
-Now
+\noindent recalling that
+
 \begin{align*}
 \half d \log |\mLambda| &= \tr \mLambda^{-1} d \mLambda
 \end{align*}
 
-so the above expression becomes
+\noindent As $\mLambda = \mR \mR^T$,
 \begin{align*}
- -\vp \mC B'(\mC \vmu, \diag{(\mC \mLambda \mC^T)}) \mC^T - \half \tr{(\mSigma^{-1})} + \half \tr{(\mLambda^{-1})}
+D_\mLambda \log \underline{p}(\vmu, \mLambda; \vy, \vp) &= D_\mLambda \log \underline{p}(\vmu, \mLambda; \vy, \vp) d_\mR \mLambda \\
+&= \left [-\vp \mC B'(\mC \vmu, \diag{(\mC \mLambda \mC^T)}) \mC^T - \half \tr{(\mSigma^{-1})} + \half \tr{(\mLambda^{-1})}\right ] (\mR^T + \mR)
 \end{align*}
 
-This matches \texttt{vg.GVA}.
-
-Now, set $\mLambda = (\mR \mR)^{-1}$. What about the above expression changes?
+\noindent This matches \texttt{vg.GVA}. Now, set $\mLambda = (\mR \mR)^{-1}$. What about the
+above expression changes?
 
 \[
 D_\mR \log \underline{p}(\vmu, \mLambda; \vy, \vp) = \left [ -\vp \mC B'(\mC \vmu, \diag{(\mC \mLambda \mC^T)}) \mC^T - \half \tr{(\mSigma^{-1})} + \half \tr{(\mLambda^{-1})} \right ] d_\mR \mLambda
 \]
 
 \begin{align*}
-d_\mR \mLambda &= -(\mR \mR^T)^{-1} (d\mR \mR^T) (\mR \mR^T) \\
-&=-(\mR \mR^T)^{-1} (\mR^T + \mR) (\mR \mR^T) \\
+d_\mR \mLambda &= -(\mR \mR^T)^{-1} (d\mR \mR^T) (\mR \mR^T)^{-1} \\
+&=-(\mR \mR^T)^{-1} (\mR^T + \mR) (\mR \mR^T)^{-1} \\
 \end{align*}
 
-Recall that the diagonals are exponentiated, do after these derivatives are calculated, the
-diagonal of $\mR$ should be multiplied by itself.
+\noindent Recall that the diagonals are exponentiated, so after these derivatives are
+calculated, the diagonal of $\mR$ should be multiplied by itself.
 \end{document}
