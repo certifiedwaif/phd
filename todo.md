@@ -2,11 +2,13 @@ To Do list
 ==========
 23/04/2015
 ----------
+- OH&S - chair
+- Boxes for moving
+- SU Maker Club - fill out form
 - Teach tutorial
 	Done
 - Check data generation process
 	This looks fine. We're sorting the x values appropriately.
-- Enter rolls
 - Check MCMC
 - Check details of VB
 - Meet with John to discuss the problem
@@ -16,11 +18,15 @@ To Do list
 	of $\mX$, so when we form $\mC$, the matrix is not of full rank and so the cross-product
 	of mC with itself is not invertible. This of course makes model fitting impossible. It's
 	surprising that anything was working at all!
-- OH&S - chair
+- Clean up mail spool
+	Done
+- Enter rolls
+	Done
 - Claim pay
-- Boxes for moving
-- SU Maker Club - fill out form
-
+	Done
+- Pay phone bill
+	Done
+	
 22/04/2015
 ----------
 - Re-ran MCMC with 20k samples. MCMC and VB still get different \vmu, which can't
