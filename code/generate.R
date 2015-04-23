@@ -171,7 +171,7 @@ generate_spline_test_data <- function(n=100)
   
   sigma2.true <- 0.01
   expected_beta <- c(0, 1)
-  vf <- 5 + 2 * sin(pi * vx)
+  vf <- 2 + sin(pi * vx)
   vy <- rpois(n, exp(vf))
   
   numIntKnots <- 10
