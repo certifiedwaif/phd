@@ -4,10 +4,22 @@ To Do list
 ----------
 - Teach tutorial
 	Done
-- Look at data generation process
-- Look at MCMC
-- Look at details of VB
-
+- Check data generation process
+	This looks fine. We're sorting the x values appropriately.
+- Enter rolls
+- Check MCMC
+- Check details of VB
+- Meet with John to discuss the problem
+	See the meeting notes for 2015 04 23 for more details, but the problem was basically that
+	the ZOSull function returns a matrix using the bspline function which includes the basis
+	terms [1 x x^2 x^3 (x-K)_+^3 ...]. The first two components [1 x] are exactly the contents
+	of $\mX$, so when we form $\mC$, the matrix is not of full rank and so the cross-product
+	of mC with itself is not invertible. This of course makes model fitting impossible. It's
+	surprising that anything was working at all!
+- OH&S - chair
+- Claim pay
+- Boxes for moving
+- SU Maker Club - fill out form
 
 22/04/2015
 ----------
