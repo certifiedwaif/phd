@@ -1,5 +1,33 @@
 To Do list
 ==========
+23/04/2015
+----------
+- Teach tutorial
+	Done
+- Look at data generation process
+- Look at MCMC
+- Look at details of VB
+
+
+22/04/2015
+----------
+- Re-ran MCMC with 20k samples. MCMC and VB still get different \vmu, which can't
+	be right.
+- Teach tutorial
+	Done
+- Learned more matrix calculus
+	I didn't understand why the adjugate of a matrix behaved as it did. So I proved that
+	\mA adj(\mA) = det(A) \mI
+
+21/04/2015
+----------
+- Figure out why optimiser goes outside of the parameter space.
+	Because you didn't tell it not to! Set a lower constraint of -15 for
+	everything.
+- The VB algorithm stops pretty early. Check that the lower bound is
+	really right.
+- Check matrix derivative in GVA.
+
 20/04/2015
 ----------
 - Type up notes taken in the meeting this morning with John and Sarah.
