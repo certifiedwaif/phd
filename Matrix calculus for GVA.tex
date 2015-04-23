@@ -5,6 +5,73 @@
 \title{Differentiating the Gaussian Variational Lower Bound}
 
 \begin{document}
+\section{John's way}
+
+Use the trace to do derivatives element by element.
+
+\begin{equation*}
+\frac{\partial \log p(y;\vmu, \mLambda)}{\partial \mLambda_{ij}} = \half \tr ((\mLambda^{-1} - \mC^T \mW \mC - \mB)\frac{\partial \mLambda}{\partial \mLambda_{ij}})
+\end{equation*}
+
+\begin{align*}
+\mC &= [\mX, \mZ] \\
+\mW &= \diag(f(\vmu, \mLambda)) \\
+\mLambda &= \begin{bmatrix}
+\mLambda_{11} & \mLambda_{12} &  &\\
+\mLambda_{21} & \mLambda_{22} &  &\\
+& & \ddots & \\
+& & & \mLambda_{p \times p}
+\end{bmatrix}
+\end{align*}
+
+\noindent NR update
+\begin{align*}
+\mLambda &\leftarrow (\mC^T \mW \mC + \mB)^{-1} \\
+\vmu &\leftarrow \vmu + \mLambda \mC^T (\vy - \mB^{(1)}(\mC\vmu, \diag (\mC \mLambda \mC^T))) - \mB \vmu
+\end{align*}
+
+$$
+\frac{\partial \log p (\vy;\vmu, \mLambda)}{\partial r_{ij}} = \half \tr \left ((\mLambda^{-1} - \mC^T \mW \mC - \mB) \frac{\partial \mLambda}{\partial r_{ij}} \right )
+$$
+
+\begin{align*}
+\mLambda &= \mR^T \mR, \\
+\mR &= \begin{bmatrix}
+e^{r_{11}} & r_{12} & r_{13} & \dots & r_{1p} \\
+& e^{r_{22}} & & & & \\
+&  & \ddots & & & \\
+&  & & & & e^{r_{pp}}\\
+\end{bmatrix}
+\end{align*}
+
+\noindent Recall that
+$$E_{ij} =
+\begin{cases}
+0 & i \ne j \\
+1 & i = j
+\end{cases}
+$$
+
+\noindent Consider the proposal that instead of $\mLambda = \mR^T \mR$, we choose
+$\mLambda = (\mR^T \mR)^{-1}$. Then
+
+\begin{align*}
+\frac{\partial \log p(\vy; \vmu, \mLambda)}{\partial r_{ij}} &= - \half \tr \left( (\mLambda^{-1} - \mC^T \mW \mC - \mB) \times \mLambda \frac{\partial R^T R}{\partial r_{ij}} \mLambda \right) \\
+&= - \half \tr \left( \mLambda(\mLambda^{-1} - \mC^T\mW\mC - B)\mLambda \times [(E_{ij} e^{I(i=j)r_{ij}})^T \mR + \mR^T E_{ij} e^{I(i=j) r_{ij}}] \right) \\
+&= - \tr (\mR \mLambda (\mLambda^{-1} - \mC^T \mW \mC - \mB) \mLambda E_{ij})e^{I(i=j) r_{ij}} \\
+&= - (\mR \mLambda (\mLambda^{-1} - \mC^T \mW \mC - \mB) \mLambda)_{ij} e^{I(i=j) r_{ij}} \\
+&= - (\mR^{-T} (\mLambda^{-1} - \mC^T \mW \mC - \mB) \mLambda)_{ij} e^{I(i=j) r_{ij}}
+\end{align*}
+
+\noindent as $\mLambda = (\mR^T \mR)^{-1} = \mR^{-1} \mR^{-T}$.
+
+\noindent Here, I think $\mW = B^{(1)}(\vmu, \mLambda)$ and $\mB = \mSigma^{-1}$.
+
+\section{Mark's way}
+
+Read Matrix Calculus with Applications to Econometrics and 
+Statistics 3rd ed. Differentiate whole matrices.
+
 \begin{align*}
 \log \underline{p}(\vmu, \mLambda; \vy, \vp) &= \vy^T \mP \mC \vmu - \vp B(\mC \vu, \diag{(\mC \mLambda \mC^T)}) - \half \vmu^T \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} \\
 &\quad - \frac{d}{2} \log(2 \pi) + \half \log(\mSigma^{-1}) + \frac{d}{2} \log{2 \pi} + \frac{d}{2} + \half \log |\mLambda| \\
@@ -36,9 +103,9 @@ above expression changes?
 \[
 D_\mR \log \underline{p}(\vmu, \mLambda; \vy, \vp) = \left [ -\vp \mC B'(\mC \vmu, \diag{(\mC \mLambda \mC^T)}) \mC^T - \half \tr{(\mSigma^{-1})} + \half \tr{(\mLambda^{-1})} \right ] d_\mR \mLambda
 \]
-
+where
 \begin{align*}
-d_\mR \mLambda &= -(\mR \mR^T)^{-1} (d\mR \mR^T) (\mR \mR^T)^{-1} \\
+d_\mR \mLambda &= -(\mR \mR^T)^{-1} (d(\mR \mR^T)) (\mR \mR^T)^{-1} \\
 &=-(\mR \mR^T)^{-1} (\mR^T + \mR) (\mR \mR^T)^{-1} \\
 \end{align*}
 
