@@ -78,9 +78,13 @@ f.G <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, gh)
 f.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
 {
   d <- ncol(mC)
+  cat("f.GVA: vtheta[1:d]", round(vtheta[1:d], 2), "\n")
+  
   # TODO: Cache if you can
   vmu <- vtheta[1:d]
   mR[Rinds] <- vtheta[(1+d):length(vtheta)]
+  cat("f.GVA: mR")
+  print(round(mR, 2))
   mR[Dinds] <- exp(mR[Dinds]) 
   mR[Dinds] <- min(c(1.0E5, mR[Dinds]))
   mLambda <- tcrossprod(mR)
@@ -89,8 +93,9 @@ f.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
   f <- f + 0.5 * d * log(2 * pi) + 0.5 * d
   
   if (!is.finite(f)) {
-   f <- -1.0E16
+    f <- -1.0E16
   }
+  # cat("f.VGA: f", f, "vmu", vmu, "diag(mR)", diag(mR), "\n")
   return(f)
 }
 
@@ -153,12 +158,17 @@ vg.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
 
   mLambda.inv <- solve(mLambda, tol=1.0E-99)
   mH <- mH.G(vmu, vy, vr, mC, mSigma.inv, vB2)
-  #dmLambda <- (mLambda.inv + mH) %*% mR
-  dmLambda <- (0.5 * mLambda.inv + mH) %*% mR
+  dmLambda <- 0.5 * (mLambda.inv + mH) %*% mR
+  #dmLambda <- (0.5 * tr(mLambda.inv) + mH) %*% mR
   #cat("GVA mLambda", mLambda[1:2, 1:2], "dmLambda", dmLambda[1:2, 1:2], "\n")
   
   dmLambda[Dinds] <- dmLambda[Dinds]*mR[Dinds]
-  vg[(1+d):length(vtheta)] <- dmLambda[Rinds]    
+  #if (any(!is.finite(dmLambda) || is.nan(dmLambda))) {
+  #  dmLambda <- matrix(0, d, d)
+  #}
+  # cat("vg.GVA: dmLambda", dmLambda, "\n")
+  vg[(1+d):length(vtheta)] <- dmLambda[Rinds]
+  #cat("vg.GVA: vg", vg, "norm", sqrt(sum(vg^2)), "\n")
  
   return(vg)
 }
@@ -176,6 +186,7 @@ fit.GVA <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e-12
 	vmu <- c(vmu, mR[Rinds])
   P <- length(vmu)
   lower_constraint <- rep(-Inf, length(vmu))
+  #lower_constraint[(d + 1):length(vmu)] <- -15
   
   if (method=="L-BFGS-B") {
     controls <- list(maxit=100, trace=0, fnscale=-1, REPORT=1, factr=1.0E-5, lmm=10)
@@ -300,9 +311,8 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
   dmLambda <- (0.5 * tr(mLambda.inv) + mH)
   #dmLambda_dmR <- -solve(mLambda.inv, solve(mLambda.inv, mR))
   #dmLambda_dmR <- -solve(mLambda.inv, solve(mLambda.inv, (t(mR) + mR)))
-  #dmLambda_dmR <- -forwardsolve(mR, backsolve(t(mR), forwardsolve(mR, backsolve(t(mR), (t(mR) + mR)))))
+  dmLambda_dmR <- -forwardsolve(mR, backsolve(t(mR), forwardsolve(mR, backsolve(t(mR), (t(mR) + mR)))))
   #dmLambda_dmR <- -forwardsolve(mR, backsolve(t(mR), forwardsolve(mR, backsolve(t(mR), mR))))
-  dmLambda_dmR <- -forwardsolve(mR, backsolve(mR, mR, transpose=TRUE))
   dmR <- dmLambda %*% dmLambda_dmR
   dmR[Dinds] <- dmR[Dinds] * mR[Dinds]
 
