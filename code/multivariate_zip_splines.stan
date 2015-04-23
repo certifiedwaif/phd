@@ -42,8 +42,7 @@ model {
     eta <- dot_product(X[n], vbeta) + dot_product(Z[n], vu);
 
     if (y[n] == 0)
-      increment_log_prob(log_sum_exp(bernoulli_log(0, rho),
-        bernoulli_log(1, rho) + poisson_log_log(y[n], eta)));
+      increment_log_prob(log_sum_exp(bernoulli_log(0, rho), bernoulli_log(1, rho) + poisson_log_log(y[n], eta)));
     else
       increment_log_prob(bernoulli_log(1, rho) + poisson_log_log(y[n], eta));
   };
