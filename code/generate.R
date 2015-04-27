@@ -187,6 +187,13 @@ generate_spline_test_data <- function(n=100)
   
   mult <- create_mult(vy, mX, mZ, sigma2_beta, m=1, blocksize=0, spline_dim=12)
   
+  # Check whether we've accidentally created a data matrix with repeated
+  # columns. This can happen when, for instance, the basis vectors [1 x]
+  # are inadvertenty repeated.
+  if (abs(det(tcrossprod(mult$mC))) < 1e-7) {
+    stop("The cross-product of mC^T is singular. Perhaps you repeated some basis vectors?")
+  }
+  
   return(mult)
 }
 
