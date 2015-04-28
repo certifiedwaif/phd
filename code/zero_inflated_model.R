@@ -41,7 +41,9 @@ calculate_lower_bound <- function(mult, verbose=FALSE)
 	T1 <- t(vy*vp) %*% mC %*% vmu
 	T1 <- T1 - t(vp) %*% exp(mC %*% vmu + .5 * diag(mC %*% mLambda %*% t(mC)))
 	T1 <- T1 - sum(lgamma(vy + 1))
-	T1 <- T1 - .5 * p * log(prior$sigma2.beta) - .5 * (sum(vmu[beta_idx]^2) + tr(mLambda[beta_idx, beta_idx])) / prior$sigma2.beta
+  if (p > 0) {
+	 T1 <- T1 - .5 * p * log(prior$sigma2.beta) - .5 * (sum(vmu[beta_idx]^2) + tr(mLambda[beta_idx, beta_idx])) / prior$sigma2.beta
+  }
 	T1 <- T1 + .5 * (p + m) + .5 * log(det(mLambda))
 	eps <- 1e-10
 
@@ -86,13 +88,23 @@ create_mult <- function(vy, mX, mZ, sigma2.beta, m=ncol(mZ), blocksize=1, spline
   vp <- rep(1, n)
   if (is.null(mZ)) {
     mC <- mX
-  } else {
+  } else if (is.null(mX)) {
+    mC <- mZ
+  }
+  else {
     mC <- cbind(mX, mZ)
   }
   vmu <- rep(0, ncol(mC))
   
-  p <- ncol(mX)
-  mSigma.beta.inv <- diag(1 / sigma2.beta, ncol(mX))
+  if (!is.null(ncol(mX))) {
+    p <- ncol(mX)
+    mSigma.beta.inv <- diag(1 / sigma2.beta, ncol(mX))
+    mSigma.beta <- solve(mSigma.beta.inv)
+  } else {
+    p <- 0
+    mSigma.beta.inv <- NULL
+    mSigma.beta <- NULL
+  }
   mLambda <- diag(rep(1, ncol(mC)))
   a_rho <- 1 + sum(vp)
   b_rho <- n - sum(vp) + 1
@@ -117,6 +129,14 @@ create_mult <- function(vy, mX, mZ, sigma2.beta, m=ncol(mZ), blocksize=1, spline
   } else {
     mSigma.u.inv <- NULL
   }
+
+  if (is.null(mSigma.u.inv)) {
+    mSigma <- mSigma.beta
+  } else if (is.null(mSigma.beta)) {
+    mSigma <- solve(mSigma.u.inv)
+  } else {
+    mSigma <- blockDiag(mSigma.beta, solve(mSigma.u.inv))
+  }
   
   mult <- list(vy=vy, vp=vp, vmu=vmu,
                 mX=mX, mZ=mZ, mC=mC,
@@ -125,9 +145,8 @@ create_mult <- function(vy, mX, mZ, sigma2.beta, m=ncol(mZ), blocksize=1, spline
                 a_rho=a_rho, b_rho=b_rho,
                 mLambda=mLambda,
                 prior=prior,
-                mSigma.beta.inv=mSigma.beta.inv,
-                mSigma.u.inv=mSigma.u.inv,
-                mSigma.beta=solve(mSigma.beta.inv))
+                mSigma.beta.inv=mSigma.beta.inv
+                mSigma.u.inv=mSigma.u.inv)
   class(mult) <- "multivariate"
   return(mult)
 }
@@ -146,7 +165,6 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
   mC <- mult$mC
   mSigma.beta.inv <- mult$mSigma.beta.inv
   mSigma.u.inv <- mult$mSigma.u.inv
-  mSigma <- mult$mSigma
   vmu <- mult$vmu
   mLambda <- mult$mLambda
   a_rho <- mult$a_rho
@@ -198,10 +216,12 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
     
     i <- i + 1
     
-    if (!is.null(mSigma.u.inv)) {
+    if (!is.null(mSigma.u.inv) && !is.null(mSigma.beta.inv)) {
       mSigma.inv <- blockDiag(mSigma.beta.inv, mSigma.u.inv)
-    } else {
+    } else if (!is.null(mSigma.u.inv)) {
       mSigma.inv <- mSigma.beta.inv
+    } else {
+      mSigma.inv <- mSigma.u.inv
     }
     
     # Update parameter for q_vnu by maximising using the Gaussian Variational Approximation from Dr Ormerod's Poisson mixed model code
@@ -288,7 +308,6 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
     mult$mC <- mC
     mult$mSigma.beta.inv <- mSigma.beta.inv
     mult$mSigma.u.inv <- mSigma.u.inv
-    mult$mSigma <- mSigma
     mult$vmu <- vmu
     mult$mLambda <- mLambda
     mult$a_rho <- a_rho
