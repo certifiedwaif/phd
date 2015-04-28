@@ -1,5 +1,19 @@
 To Do list
 ==========
+27/04/2015
+----------
+- Install R packages
+To install limma:
+source("http://bioconductor.org/biocLite.R")
+biocLite("limma")
+
+To install rstan:
+source('http://mc-stan.org/rstan/install.R', echo = TRUE, max.deparse.length = 2000)
+install_rstan()
+
+To install the other packages from CRAN:
+install.packages(c("Rcpp", "RcppEigen", "numDeriv", "digest"))
+
 23/04/2015
 ----------
 - OH&S - chair
