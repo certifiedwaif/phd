@@ -171,13 +171,13 @@ generate_spline_test_data <- function(n=100)
   
   sigma2.true <- 0.01
   expected_beta <- c(0, 1)
-  vf <- 2 + sin(pi * vx)
+  vf <- sin(pi * vx)
   vy <- rpois(n, exp(vf))
   
   numIntKnots <- 10
   intKnots <- quantile(unique(vx), seq(0, 1, length=(numIntKnots+2))[-c(1, (numIntKnots+2))])
   
-  mZ <- ZOSull(vx, range.x=c(-1.1, 1.1), intKnots=intKnots, drv=0)
+  mZ <- ZOSull(vf, range.x=c(-1.1, 1.1), intKnots=intKnots, drv=0)
   #vy <- 2+mX[,1]^3+rnorm(m)*.1
   #result <- fit_spline(vx, vy)
   #result <- fit_spline(mX[,1], vy)
@@ -185,14 +185,16 @@ generate_spline_test_data <- function(n=100)
   
   #mZ <- mZ/max(mZ)
   
-  mult <- create_mult(vy, mX, mZ, sigma2_beta, m=1, blocksize=0, spline_dim=12)
+  # mult <- create_mult(vy, mX, mZ, sigma2_beta, m=1, blocksize=0, spline_dim=12)
+  mult <- create_mult(vy, NULL, mZ, NULL, m=1, blocksize=0, spline_dim=12)
   
   # Check whether we've accidentally created a data matrix with repeated
   # columns. This can happen when, for instance, the basis vectors [1 x]
   # are inadvertenty repeated.
-  if (abs(det(tcrossprod(mult$mC))) < 1e-7) {
-    stop("The cross-product of mC^T is singular. Perhaps you repeated some basis vectors?")
-  }
+  # browser()
+  # if (abs(det(crossprod(mult$mC))) < 1e-99) {
+  #   stop("The cross-product of mC is singular. Perhaps you repeated some basis vectors?")
+  # }
   
   return(mult)
 }
