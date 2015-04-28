@@ -2,7 +2,6 @@
 source("zero_inflated_model.R")
 source("generate.R")
 source("mcmc.R")
-source("rwmh.R")
 
 calculate_accuracy <- function(mcmc_samples, dist_fn, param1, param2)
 {
@@ -50,9 +49,11 @@ calculate_accuracies <- function(mult, mcmc_samples, var_result, approximation, 
   # Use L_1 distance to compare against variational approximations of posteriors
  
   vbeta_accuracy <- rep(NA, ncol(mult$mX))
+  vbeta_means <- rep(NA, ncol(mult$mX))
   for (i in 1:ncol(mult$mX)) {
     vbeta_accuracy[i] <- calculate_accuracy(mcmc_samples$vbeta[,i], dnorm,
                                             var_result$vmu[i], sqrt(var_result$mLambda[i,i]))
+    vbeta_means[i] <- mean(mcmc_samples$vbeta[, i])
     if (print_flag) cat("vbeta[", i, "]", approximation, "accuracy:", vbeta_accuracy[i], "\n")
     
     param_name <- sprintf("vbeta[%d]", i)
@@ -61,24 +62,35 @@ calculate_accuracies <- function(mult, mcmc_samples, var_result, approximation, 
   }
   
   # vu accuracy
-  # FIXME: To check for random slopes accuracy, this section will have
-  # to get more complex.
-  print(dim(mult$mZ))
-  print(dim(mcmc_samples$u))
   vu_accuracy <- rep(NA, ncol(mult$mZ))
-  B <- mult$blocksize
-  b_idx <- 1
-  for (i in 1:ncol(mult$mZ)) {
-    m_idx <- ceiling(i/B)
-    vu_accuracy[i] <- calculate_accuracy(mcmc_samples$vu[,m_idx,b_idx], dnorm,
-                                         var_result$vmu[i+mult$p], sqrt(var_result$mLambda[i+mult$p,i+mult$p]))
-    if (print_flag) cat("vu[", i, "]", approximation, "accuracy:", vu_accuracy[i], "\n")
-    if (plot_flag) accuracy_plot(mcmc_samples$vu[,m_idx,b_idx], dnorm,
-                            var_result$vmu[i+mult$p], sqrt(var_result$mLambda[i+mult$p,i+mult$p]))
+  vu_means <- rep(NA, ncol(mult$mZ))
+  if (mult$spline_dim == 0) {
+    # FIXME: Does this really have to be this complicated?
+    B <- mult$blocksize
+    b_idx <- 1
+    for (i in 1:ncol(mult$mZ)) {
+      m_idx <- ceiling(i / B)
+      vu_mean <- var_result$vmu[i + mult$p]
+      vu_means[i] <- mean(mcmc_samples$vu[, m_idx, b_idx])
+      vu_sd <- sqrt(var_result$mLambda[i + mult$p, i + mult$p])
+      vu_accuracy[i] <- calculate_accuracy(mcmc_samples$vu[, m_idx, b_idx], dnorm, vu_mean, vu_sd)
+      if (print_flag) cat("vu[", i, "]", approximation, "accuracy:", vu_accuracy[i], "\n")
+      if (plot_flag) accuracy_plot(mcmc_samples$vu[, m_idx, b_idx], dnorm, vu_mean, vu_sd)
 
-    b_idx <- b_idx + 1
-    if (b_idx > B)
-      b_idx=1
+      b_idx <- b_idx + 1
+      if (b_idx > B)
+        b_idx=1
+    }
+  } else {
+    for (i in 1:ncol(mult$mZ)) {
+      vu_mean <- var_result$vmu[i + mult$p]
+      vu_sd <- sqrt(var_result$mLambda[i + mult$p, i + mult$p])
+      vu_accuracy[i] <- calculate_accuracy(mcmc_samples$vu[, i], dnorm, vu_mean, vu_sd)
+      vu_means[i] <- mean(mcmc_samples$vu[, i])
+      if (print_flag) cat("vu[", i, "]", approximation, "accuracy:", vu_accuracy[i], "\n")
+      if (plot_flag) accuracy_plot(mcmc_samples$vu[, i], dnorm, vu_mean, vu_sd)
+    }
+    
   }
   
   # sigma2_u accuracy
@@ -101,7 +113,9 @@ calculate_accuracies <- function(mult, mcmc_samples, var_result, approximation, 
                           var_result$a_rho, var_result$b_rho)
   if (plot_flag) dev.off()
   return(list(var_result=var_result,
+              vbeta_means=vbeta_means,
               vbeta_accuracy=vbeta_accuracy,
+              vu_means=vu_means,
               vu_accuracy=vu_accuracy,
               #sigma2_u_accuracy=sigma2_u_accuracy,
               rho_accuracy=rho_accuracy))
@@ -332,14 +346,16 @@ test_accuracies_slope <- function()
 test_accuracies_spline <- function()
 {
   # Monte Carlo Markov Chains approximation
-  seed <- 1
-  set.seed(seed)
-  mult <- generate_spline_test_data()
-  mcmc_samples <- mcmc_approximation(mult, seed=seed, iterations=1e5, warmup=1e4,
-                                      stan_file="multivariate_zip_splines.stan")
-  save(mult, mcmc_samples, file="data/accuracy_spline_2015_04_16.RData")  
-  #load(file="data/accuracy_slope_2015_04_09.RData")
+  # seed <- 1
+  # set.seed(seed)
+  # mult <- generate_spline_test_data()
+  # mcmc_samples <- mcmc_approximation(mult, seed=seed, iterations=2e4, warmup=1e3,
+  #                                     stan_file="multivariate_zip_splines.stan")
+  # save(mult, mcmc_samples, file="data/accuracy_spline_2015_04_27.RData")  
+  load(file="data/accuracy_spline_2015_04_27.RData")  
+  # load(file="data/accuracy_spline_2015_04_23.RData")
   # load(file="data_macbook/accuracy_slope_2015_03_30.RData")
+  #load(file="data/accuracy_spline_2015_04_16.RData")    
   
   #now <- Sys.time()
   #var1 <- test_accuracy(mult, mcmc_samples, "laplacian", plot=TRUE)
