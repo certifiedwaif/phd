@@ -43,7 +43,6 @@ mH.lap <- function(vmu, vy, vr, mC, mSigma.inv, mLambda)
 
 fit.Lap <- function(vmu, vy, vr, mC, mSigma.inv, mLambda) 
 {
-  #browser()
   MAXITER <- 100
   
   for (ITER in 1:MAXITER) {
