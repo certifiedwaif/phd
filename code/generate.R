@@ -177,7 +177,7 @@ generate_spline_test_data <- function(n=100)
   numIntKnots <- 10
   intKnots <- quantile(unique(vx), seq(0, 1, length=(numIntKnots+2))[-c(1, (numIntKnots+2))])
   
-  mZ <- ZOSull(vf, range.x=c(-1.1, 1.1), intKnots=intKnots, drv=0)
+  mZ <- ZOSull(vx, range.x=c(-1.1, 1.1), intKnots=intKnots, drv=0)
   #vy <- 2+mX[,1]^3+rnorm(m)*.1
   #result <- fit_spline(vx, vy)
   #result <- fit_spline(mX[,1], vy)
