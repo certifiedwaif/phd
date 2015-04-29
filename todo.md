@@ -1,7 +1,37 @@
 To Do list
 ==========
+
+29/04/2015
+----------
+- Prepare for tutorial
+	Done, but I was cutting it fine
+- Give tutorial
+	Done
+- Mark assignments - due next week
+- Continue modifying the software to work p=0
+	It's producing garbage results at present
+- Fix bugs in the lower bound
+- Try to rationalise the notation in the draft of the paper I've done
+	There were two scalars both named p, one the dimension of the fixed effects and the other
+	the dimension of the inverse Wishart distribution that we're using. This was quite a mess.
+	I've introduced a new variable d to play the wrole of the second scalar.
+- Something funny is going on in ZOSull once we calculate Z = B %*% LZ
+	B is nice and banded as we expect, but Z = B LZ is mostly small values/zeroes.
+
+
+28/04/2015
+----------
+- Sidestep repeated columns problem by building a spline model that uses random effects
+	only
+	I started modifying the software to be allow no fixed effects in a model. This turned up
+	all sorts of errors and edge cases in the code which needed to be dispensed with.
+- Attend Advanced R reading group
+
 27/04/2015
 ----------
+- Spent an hour and a half understanding ten lines of code that calculates the Omega
+	penalty matrix in ZOSull.
+
 - Install R packages
 To install limma:
 source("http://bioconductor.org/biocLite.R")
