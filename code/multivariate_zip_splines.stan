@@ -1,5 +1,6 @@
 data {
   int<lower=1> N; // Number of observations
+  int<lower=1> v; // Degrees of freedom of Inv. Wishart distribution
   # int<lower=1> P; // Number of fixed effects covariates
   int<lower=1> spline_dim; // Number of dimensions for spline random effects
   int<lower=0> y[N]; // Estimated treatment effects
@@ -30,7 +31,7 @@ model {
   matrix[spline_dim, spline_dim] chol_sigma_u;
 
   rho ~ beta(1.0, 1.0);
-  sigma_u ~ inv_wishart(spline_dim + 1, psi);
+  sigma_u ~ inv_wishart(v, psi);
 
   # chol_BetaPrior <- cholesky_decompose(BetaPrior);
   # vbeta ~ multi_normal_cholesky(zeros_beta, chol_BetaPrior);
