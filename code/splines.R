@@ -141,7 +141,7 @@ fit_spline <- function(x,  y)
 
 # TODO: There's a lot of duplication between this code and the code above. Merge
 # it all together as much as you can.
-ZOSull <- function(x,range.x, intKnots, drv=0, stability_check=FALSE)
+ZOSull <- function(x, range.x, intKnots, drv=0, stability_check=FALSE)
 {
    if (drv>2) stop("splines not smooth enough for more than 2 derivatives")
 
