@@ -49,8 +49,8 @@ fit_spline <- function(x,  y)
     allKnots <- c(rep(a, 4), intKnots, rep(b, 4)) 
     K <- length(intKnots)
     L <- 3 * (K + 8)
-    xtilde <- (rep(allKnots, each=3)[-c(1, (L-1), L)] + 
-                 rep(allKnots, each=3)[-c(1, 2, L)])/2
+    xtilde <- (rep(allKnots, each=3)[-c(1, (L - 1), L)] + 
+                 rep(allKnots, each=3)[-c(1, 2, L)]) / 2
     wts <- rep(diff(allKnots), each=3) * rep(c(1, 4, 1)/6, K + 7)
     Bdd <- spline.des(allKnots, xtilde, derivs=rep(2, length(xtilde)),
                       outer.ok=TRUE)$design  
@@ -62,20 +62,20 @@ fit_spline <- function(x,  y)
   
   # Obtain the coefficients:
   
-  nuHat <- solve(BTB+lambda*Omega, BTy)
+  nuHat <- solve(BTB + lambda*Omega, BTy)
   
   # For large K the following alternative Cholesky-based
   # approach can be considerably faster (O(K),  because 
   # B'B+ lambda*Omega is banded diagonal):
   
-  cholFac <- chol(BTB+lambda*Omega)
+  cholFac <- chol(BTB + lambda * Omega)
   nuHat <- backsolve(cholFac, forwardsolve(t(cholFac), BTy)) 
   
   # Display the fit:
   
   Bg <- bs(xg, knots=intKnots, degree=3,
            Boundary.knots=c(a, b), intercept=TRUE)
-  fhatg <- Bg%*%nuHat
+  fhatg <- Bg %*% nuHat
   
   par(mfrow=c(1, 2))
   plot(x, y, xlim=range(xg), bty="l", type="n", xlab="radiation",
@@ -109,7 +109,7 @@ fit_spline <- function(x,  y)
   # Form the X and Z matrices:
   
   X <- cbind(rep(1, length(x)), x)
-  Z <- B%*%LZ
+  Z <- B %*% LZ
   
   # Fit using lme() with REML choice of smoothing parameter:
   
@@ -139,71 +139,69 @@ fit_spline <- function(x,  y)
 
 # Last changed: 03 SEP 2007
 
-# TODO: There's a lot of duplication between this code and the code above. Merge
-# it all together as much as you can.
 ZOSull <- function(x, range.x, intKnots, drv=0, stability_check=FALSE)
 {
-   if (drv>2) stop("splines not smooth enough for more than 2 derivatives")
+  if (drv>2) stop("splines not smooth enough for more than 2 derivatives")
 
-   # Set defaults for `range.x' and `intKnots'
+  # Set defaults for `range.x' and `intKnots'
 
-   if (missing(range.x))
-      range.x <- c(1.05*min(x)-0.05*max(x), 1.05*max(x)-0.05*min(x))
-   
-   if (missing(intKnots))
-   {
-      numIntKnots <- min(length(unique(x)), 35)
-      intKnots <- quantile(unique(x), seq(0, 1, length=(numIntKnots+2))[-c(1, (numIntKnots+2))])
-   }
-   numIntKnots <- length(intKnots) 
+  if (missing(range.x))
+    range.x <- c(1.05*min(x)-0.05*max(x), 1.05*max(x)-0.05*min(x))
 
-   # Obtain the penalty matrix.
+  if (missing(intKnots))
+  {
+    numIntKnots <- min(length(unique(x)), 35)
+    intKnots <- quantile(unique(x), seq(0, 1, length=(numIntKnots+2))[-c(1, (numIntKnots+2))])
+  }
+  numIntKnots <- length(intKnots) 
 
-   allKnots <- c(rep(range.x[1],  4),  intKnots,  rep(range.x[2],  4)) 
-   K <- length(intKnots)
-   L <- 3 * (K + 8)
-   xtilde <- (rep(allKnots, each=3)[-c(1, (L - 1), L)] +  
-              rep(allKnots, each=3)[-c(1, 2, L)]) / 2
+  # Obtain the penalty matrix.
 
-   wts <- rep(diff(allKnots), each=3) * rep(c(1, 4, 1) / 6, K + 7)
-   Bdd <- spline.des(allKnots, xtilde, derivs=rep(2, length(xtilde)),
-                     outer.ok=TRUE)$design  
-   Omega     <- t(Bdd * wts) %*% Bdd     
+  allKnots <- c(rep(range.x[1],  4),  intKnots,  rep(range.x[2],  4)) 
+  K <- length(intKnots)
+  L <- 3 * (K + 8)
+  xtilde <- (rep(allKnots, each=3)[-c(1, (L - 1), L)] +  
+            rep(allKnots, each=3)[-c(1, 2, L)]) / 2
 
-   # Use the spectral decomposition of Omega to obtain Z.
+  wts <- rep(diff(allKnots), each=3) * rep(c(1, 4, 1) / 6, K + 7)
+  Bdd <- spline.des(allKnots, xtilde, derivs=rep(2, length(xtilde)),
+                   outer.ok=TRUE)$design  
+  Omega     <- t(Bdd * wts) %*% Bdd     
 
-   eigOmega <- eigen(Omega)
-   indsZ <- 1:(numIntKnots + 2)
-   UZ <- eigOmega$vectors[, indsZ]
-   LZ <- t(t(UZ) / sqrt(eigOmega$values[indsZ]))
+  # Use the spectral decomposition of Omega to obtain Z.
 
-   if (stability_check) {
-       # Perform stability check.   
-    
-       indsX <- (numIntKnots + 3):(numIntKnots + 4)
-       UX <- eigOmega$vectors[, indsX]   
-       L <- cbind(UX, LZ)
-       stabCheck <- t(crossprod(L, t(crossprod(L, Omega))))          
-       if (sum(stabCheck^2) > 1.0001*(numIntKnots+2))
-           stop("WARNING: NUMERICAL INSTABILITY ARISING\\
-                  FROM SPECTRAL DECOMPOSITION")
-   }
+  eigOmega <- eigen(Omega)
+  indsZ <- 1:(numIntKnots + 2)
+  UZ <- eigOmega$vectors[, indsZ]
+  LZ <- t(t(UZ) / sqrt(eigOmega$values[indsZ]))
 
-   # Obtain B and post-multiply by LZ matrix to get Z.
+  if (stability_check) {
+     # Perform stability check.   
 
-   B <- spline.des(allKnots, x, derivs=rep(drv, length(x)), outer.ok=TRUE)$design  
-   
-   Z <- B %*% LZ
+     indsX <- (numIntKnots + 3):(numIntKnots + 4)
+     UX <- eigOmega$vectors[, indsX]   
+     L <- cbind(UX, LZ)
+     stabCheck <- t(crossprod(L, t(crossprod(L, Omega))))          
+     if (sum(stabCheck^2) > 1.0001*(numIntKnots+2))
+         stop("WARNING: NUMERICAL INSTABILITY ARISING\\
+                FROM SPECTRAL DECOMPOSITION")
+  }
 
-   # Add the `range.x' and 'intKnots' as attributes
-   # of the return object.
+  # Obtain B and post-multiply by LZ matrix to get Z.
 
-   attr(Z, "range.x") <- range.x
-   attr(Z, "intKnots") <- intKnots
+  B <- spline.des(allKnots, x, derivs=rep(drv, length(x)), outer.ok=TRUE)$design  
 
-   # Return Z matrix with 2 attributes.
+  Z <- B %*% LZ
 
-   return(Z)
+  # Add the `range.x' and 'intKnots' as attributes
+  # of the return object.
+
+  attr(Z, "range.x") <- range.x
+  attr(Z, "intKnots") <- intKnots
+
+  # Return Z matrix with 2 attributes.
+
+  return(Z)
 }
 
 ########## End of ZOSull ##########
