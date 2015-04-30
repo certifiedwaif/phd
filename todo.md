@@ -1,6 +1,16 @@
 To Do list
 ==========
 
+30/04/2015
+----------
+- Give tutorial
+	Done
+- I worked out that the function I was trying to fit looked like noise. I changed it to
+	something more reasonable.
+- Caught a bug in the mean field update. I was using block size in the divisor for the Inverse
+	Wishart update which is correct when doing random intercepts or random slopes, but wrong when 
+	doing splines
+
 29/04/2015
 ----------
 - Prepare for tutorial
