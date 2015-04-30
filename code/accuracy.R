@@ -48,51 +48,60 @@ calculate_accuracies <- function(mult, mcmc_samples, var_result, approximation, 
   # Kernel density estimates of MCMC-estimated posteriors
   # Use L_1 distance to compare against variational approximations of posteriors
  
-  vbeta_accuracy <- rep(NA, ncol(mult$mX))
-  vbeta_means <- rep(NA, ncol(mult$mX))
-  for (i in 1:ncol(mult$mX)) {
-    vbeta_accuracy[i] <- calculate_accuracy(mcmc_samples$vbeta[,i], dnorm,
-                                            var_result$vmu[i], sqrt(var_result$mLambda[i,i]))
-    vbeta_means[i] <- mean(mcmc_samples$vbeta[, i])
-    if (print_flag) cat("vbeta[", i, "]", approximation, "accuracy:", vbeta_accuracy[i], "\n")
-    
-    param_name <- sprintf("vbeta[%d]", i)
-    if (plot_flag) accuracy_plot(mcmc_samples$vbeta[,i], dnorm,
-                            var_result$vmu[i], sqrt(var_result$mLambda[i,i]))
-  }
-  
-  # vu accuracy
-  vu_accuracy <- rep(NA, ncol(mult$mZ))
-  vu_means <- rep(NA, ncol(mult$mZ))
-  if (mult$spline_dim == 0) {
-    # FIXME: Does this really have to be this complicated?
-    B <- mult$blocksize
-    b_idx <- 1
-    for (i in 1:ncol(mult$mZ)) {
-      m_idx <- ceiling(i / B)
-      vu_mean <- var_result$vmu[i + mult$p]
-      vu_means[i] <- mean(mcmc_samples$vu[, m_idx, b_idx])
-      vu_sd <- sqrt(var_result$mLambda[i + mult$p, i + mult$p])
-      vu_accuracy[i] <- calculate_accuracy(mcmc_samples$vu[, m_idx, b_idx], dnorm, vu_mean, vu_sd)
-      if (print_flag) cat("vu[", i, "]", approximation, "accuracy:", vu_accuracy[i], "\n")
-      if (plot_flag) accuracy_plot(mcmc_samples$vu[, m_idx, b_idx], dnorm, vu_mean, vu_sd)
-
-      b_idx <- b_idx + 1
-      if (b_idx > B)
-        b_idx=1
+  if (mult$p > 0) {
+    vbeta_accuracy <- rep(NA, ncol(mult$mX))
+    vbeta_means <- rep(NA, ncol(mult$mX))
+    for (i in 1:ncol(mult$mX)) {
+      vbeta_accuracy[i] <- calculate_accuracy(mcmc_samples$vbeta[,i], dnorm,
+                                              var_result$vmu[i], sqrt(var_result$mLambda[i,i]))
+      vbeta_means[i] <- mean(mcmc_samples$vbeta[, i])
+      if (print_flag) cat("vbeta[", i, "]", approximation, "accuracy:", vbeta_accuracy[i], "\n")
+      
+      param_name <- sprintf("vbeta[%d]", i)
+      if (plot_flag) accuracy_plot(mcmc_samples$vbeta[,i], dnorm,
+                              var_result$vmu[i], sqrt(var_result$mLambda[i,i]))
     }
   } else {
-    for (i in 1:ncol(mult$mZ)) {
-      vu_mean <- var_result$vmu[i + mult$p]
-      vu_sd <- sqrt(var_result$mLambda[i + mult$p, i + mult$p])
-      vu_accuracy[i] <- calculate_accuracy(mcmc_samples$vu[, i], dnorm, vu_mean, vu_sd)
-      vu_means[i] <- mean(mcmc_samples$vu[, i])
-      if (print_flag) cat("vu[", i, "]", approximation, "accuracy:", vu_accuracy[i], "\n")
-      if (plot_flag) accuracy_plot(mcmc_samples$vu[, i], dnorm, vu_mean, vu_sd)
-    }
-    
+    vbeta_accuracy <- NULL
+    vbeta_means <- NULL
   }
   
+  if (mult$m > 0) {
+    # vu accuracy
+    vu_accuracy <- rep(NA, ncol(mult$mZ))
+    vu_means <- rep(NA, ncol(mult$mZ))
+    if (mult$spline_dim == 0) {
+      # FIXME: Does this really have to be this complicated?
+      B <- mult$blocksize
+      b_idx <- 1
+      for (i in 1:ncol(mult$mZ)) {
+        m_idx <- ceiling(i / B)
+        vu_mean <- var_result$vmu[i + mult$p]
+        vu_means[i] <- mean(mcmc_samples$vu[, m_idx, b_idx])
+        vu_sd <- sqrt(var_result$mLambda[i + mult$p, i + mult$p])
+        vu_accuracy[i] <- calculate_accuracy(mcmc_samples$vu[, m_idx, b_idx], dnorm, vu_mean, vu_sd)
+        if (print_flag) cat("vu[", i, "]", approximation, "accuracy:", vu_accuracy[i], "\n")
+        if (plot_flag) accuracy_plot(mcmc_samples$vu[, m_idx, b_idx], dnorm, vu_mean, vu_sd)
+
+        b_idx <- b_idx + 1
+        if (b_idx > B)
+        b_idx=1
+      }
+    } else {
+      for (i in 1:ncol(mult$mZ)) {
+        vu_mean <- var_result$vmu[i + mult$p]
+        vu_sd <- sqrt(var_result$mLambda[i + mult$p, i + mult$p])
+        vu_accuracy[i] <- calculate_accuracy(mcmc_samples$vu[, i], dnorm, vu_mean, vu_sd)
+        vu_means[i] <- mean(mcmc_samples$vu[, i])
+        if (print_flag) cat("vu[", i, "]", approximation, "accuracy:", vu_accuracy[i], "\n")
+        if (plot_flag) accuracy_plot(mcmc_samples$vu[, i], dnorm, vu_mean, vu_sd)
+      }
+    }
+  } else {
+    vu_accuracy <- NULL
+    vu_means <- NULL
+  }
+
   # sigma2_u accuracy
   # FIXME - this may be wrong for blocksize != 1?
   # This is totally wrong for the Inverse Wishart model?
@@ -180,7 +189,7 @@ test_accuracies <- function()
   
   # Test multivariate approximation's accuracy
   now = Sys.time()
-  var1 = test_accuracy(mult, mcmc_samples, "laplacian")
+  var1 = test_accuracy(mult, mcmc_samples, "laplace")
   print(Sys.time() - now)
   #print(image(Matrix(var1$var_result$mLambda)))
   print(var1)
@@ -220,7 +229,7 @@ test_accuracies <- function()
   #  mult = generate_test_data(20, 100)
   #  mcmc_samples = mcmc_approximation(mult, iterations=1e4)
   #  
-  #  var1 = test_accuracy(mult, mcmc_samples, "laplacian")
+  #  var1 = test_accuracy(mult, mcmc_samples, "laplace")
   #  var2 = test_accuracy(mult, mcmc_samples, "gva")
   #  var3 = test_accuracy(mult, mcmc_samples, "gva2")
   #  var4 = test_accuracy(mult, mcmc_samples, "gva_nr")
@@ -241,7 +250,7 @@ test_accuracies_slope <- function()
   # load(file="data_macbook/accuracy_slope_2015_03_30.RData")
   
   #now <- Sys.time()
-  #var1 <- test_accuracy(mult, mcmc_samples, "laplacian", plot=TRUE)
+  #var1 <- test_accuracy(mult, mcmc_samples, "laplace", plot=TRUE)
   #print(Sys.time() - now)
   #print(var1)
   
@@ -295,8 +304,6 @@ test_accuracies_slope <- function()
   #print(image(Matrix(var5$var_result$mLambda)))  
   # print(var5)
   
-  #browser()
-  
   #save(var1, var2, var3, var4, var5, file="accuracy_results_slope.RData")
   
   #print(image(Matrix(var3_new$mLambda)))
@@ -311,7 +318,7 @@ test_accuracies_slope <- function()
 #   save(mult, mcmc_samples, file="accuracy_spline.RData")    
 
   #now = Sys.time()
-  #var1 = test_accuracy(mult, mcmc_samples, "laplacian")
+  #var1 = test_accuracy(mult, mcmc_samples, "laplace")
   #Sys.time() - now
   #print(image(Matrix(var1$var_result$mLambda)))
   #var1
@@ -349,23 +356,24 @@ test_accuracies_spline <- function()
   # seed <- 1
   # set.seed(seed)
   # mult <- generate_spline_test_data()
-  # mcmc_samples <- mcmc_approximation(mult, seed=seed, iterations=2e4, warmup=1e3,
+  # mcmc_samples <- mcmc_approximation(mult, seed=seed, iterations=2e5, warmup=1e3,
   #                                     stan_file="multivariate_zip_splines.stan")
-  # save(mult, mcmc_samples, file="data/accuracy_spline_2015_04_27.RData")  
+  # save(mult, mcmc_samples, file="data/accuracy_spline_2015_04_27.RData")
   load(file="data/accuracy_spline_2015_04_27.RData")  
   # load(file="data/accuracy_spline_2015_04_23.RData")
   # load(file="data_macbook/accuracy_slope_2015_03_30.RData")
   #load(file="data/accuracy_spline_2015_04_16.RData")    
   
-  #now <- Sys.time()
-  #var1 <- test_accuracy(mult, mcmc_samples, "laplacian", plot=TRUE)
-  #print(Sys.time() - now)
-  #print(var1)
+  now <- Sys.time()
+  var1 <- test_accuracy(mult, mcmc_samples, "laplace", plot=TRUE)
+  print(Sys.time() - now)
+  print(var1)
   
   now <- Sys.time()
   var2 <- test_accuracy(mult, mcmc_samples, "gva", plot=TRUE)
   print(Sys.time() - now)
   #print(image(Matrix(var2$var_result$mLambda)))
   print(var2)
+
 }
 test_accuracies_spline()
