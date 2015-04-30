@@ -158,26 +158,17 @@ generate_slope_test_data <- function(m=5, ni=20)
 
 generate_spline_test_data <- function(n=100)
 {
-  vx <- matrix(sort(runif(n, -1, 1))) 
+  vx <- matrix(sort(runif(n, -pi / 2, pi  / 2))) 
   
-  mX <- cbind(1,vx)
+  mX <- cbind(1, vx)
   
-  expected_rho <- 1
-  expected_sigma2_u <- 0
-  sigma2_beta <- 1e5
-  a_sigma <- 1e5
-  b_sigma <- 1e5
-  tau <- 1.0E-5
-  
-  sigma2.true <- 0.01
-  expected_beta <- c(0, 1)
-  vf <- sin(pi * vx)
-  vy <- rpois(n, exp(vf))
+  vf <- 6 + 4 * sin(pi * vx)
+  vy <- rpois(n, vf)
   
   numIntKnots <- 10
-  intKnots <- quantile(unique(vx), seq(0, 1, length=(numIntKnots+2))[-c(1, (numIntKnots+2))])
+  intKnots <- quantile(unique(vx), seq(0, 1, length=(numIntKnots + 2))[-c(1, (numIntKnots + 2))])
   
-  mZ <- ZOSull(vx, range.x=c(-1.1, 1.1), intKnots=intKnots, drv=0)
+  mZ <- ZOSull(vx, range.x=c(-1.1 * pi / 2, 1.1 * pi / 2), intKnots=intKnots, drv=0)
   #vy <- 2+mX[,1]^3+rnorm(m)*.1
   #result <- fit_spline(vx, vy)
   #result <- fit_spline(mX[,1], vy)
@@ -186,12 +177,11 @@ generate_spline_test_data <- function(n=100)
   #mZ <- mZ/max(mZ)
   
   # mult <- create_mult(vy, mX, mZ, sigma2_beta, m=1, blocksize=0, spline_dim=12)
-  mult <- create_mult(vy, NULL, mZ, NULL, m=1, blocksize=0, spline_dim=12)
+  mult <- create_mult(vy, NULL, mZ, NULL, m=1, blocksize=0, spline_dim=12, v=15)
   
   # Check whether we've accidentally created a data matrix with repeated
   # columns. This can happen when, for instance, the basis vectors [1 x]
   # are inadvertenty repeated.
-  # browser()
   # if (abs(det(crossprod(mult$mC))) < 1e-99) {
   #   stop("The cross-product of mC is singular. Perhaps you repeated some basis vectors?")
   # }
