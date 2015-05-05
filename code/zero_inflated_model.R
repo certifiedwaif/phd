@@ -69,7 +69,7 @@ calculate_lower_bound <- function(mult, verbose=FALSE)
 	return(T1 + T2 + T3)
 }
 
-create_mult <- function(vy, mX, mZ, sigma2.beta, m=ncol(mZ), blocksize=1, spline_dim=0, v=NA)
+create_mult <- function(vy, mX, mZ, sigma2.beta, m=ncol(mZ), blocksize=1, spline_dim=0, v=0)
 {
   # Initialise
   n <- length(vy)
@@ -141,7 +141,7 @@ create_mult <- function(vy, mX, mZ, sigma2.beta, m=ncol(mZ), blocksize=1, spline
 
 zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE)
 {
-  MAXITER <- 30
+  MAXITER <- 2000
   
   # Initialise variables from mult
   N <- length(mult$vy)
@@ -185,9 +185,9 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
   
   i <- 0
   # Iterate ----
-  while ((i <= 1) || is.nan(vlower_bound[i] - vlower_bound[i - 1]) ||
-        (vlower_bound[i] > vlower_bound[i - 1])) {
-  #for (i in 1:MAXITER) {
+  #while ((i <= 1) || is.nan(vlower_bound[i] - vlower_bound[i - 1]) ||
+  #      (vlower_bound[i] > vlower_bound[i - 1])) {
+  for (i in 1:MAXITER) {
     if (i >= MAXITER) {
       cat("Iteration limit reached, breaking ...")
       break
@@ -207,16 +207,12 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
     if (method == "laplace") {
       fit1 <- fit.Lap(vmu, vy, vp, mC, mSigma.inv, mLambda)
     } else if (method == "gva") {	
-      fit2 <- fit.Lap(vmu, vy, vp, mC, mSigma.inv, mLambda)
-      fit1 <- fit.GVA(fit2$vmu, fit2$mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B")
+      fit_lap <- fit.Lap(vmu, vy, vp, mC, mSigma.inv, mLambda)
+      fit1 <- fit.GVA(fit_lap$vmu, fit_lap$mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B")
     } else if (method == "gva2") {
-      if (i <= 2) {
-        fit1 <- fit.GVA(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B")
-      } else {
-        fit_lap <- fit.Lap(vmu, vy, vp, mC, mSigma.inv, mLambda)
-        fit1 <- fit.GVA_new(fit_lap$vmu, fit_lap$mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B", p=p, m=m,
-                            blocksize=blocksize, spline_dim=spline_dim)
-      }
+      fit_lap <- fit.Lap(vmu, vy, vp, mC, mSigma.inv, mLambda)
+      fit1 <- fit.GVA_new(fit_lap$vmu, fit_lap$mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B", p=p, m=m,
+                         blocksize=blocksize, spline_dim=spline_dim)
     } else if (method == "gva_nr") {
       fit1 <- fit.GVA_nr(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B", p=p, m=m, 
                         blocksize=blocksize, spline_dim=spline_dim)
