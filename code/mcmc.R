@@ -11,7 +11,6 @@ mcmc_approximation <- function(mult, seed=1, iterations=NA, warmup=NA, mc.cores=
 {
   # Use Stan to create MCMC samples, because Stan deals much better with highly
   # correlated posteriors.
-  
   m <- mult$m
   blocksize <- mult$blocksize
   spline_dim <- mult$spline_dim
@@ -23,7 +22,7 @@ mcmc_approximation <- function(mult, seed=1, iterations=NA, warmup=NA, mc.cores=
   mSigma.beta <- mult$mSigma.beta
   
   zip_data <- list(N=length(vy), P=2, M=m, B=blocksize, spline_dim=spline_dim,
-  								 y=vy, X=mX, Z=mZ,
+  								 y=vy, X=mX, Z=as.matrix(mZ),
                    v=v, psi=mPsi, BetaPrior=mSigma.beta)
 
 	fit <- stan(stan_file, seed=seed, data=zip_data, iter=iterations, warmup=warmup, chains=1)
