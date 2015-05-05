@@ -1,5 +1,26 @@
 To Do list
 ==========
+05/05/2015
+----------
+- Get random slopes working again
+	Done. It works quite nicely now.
+- Get splines working.
+	Fail. Nothing I'm trying works. I don't know what the problem is.
+- Correct derivative in GVA code
+	I still don't believe this is right. Check with numeric differentiation.
+- Attend Advanced R reading group
+	Done
+
+04/05/2015
+----------
+- Attend meeting
+	We talked about model selection
+- Continue to debug spline problems
+	* ZOSull doesn't seem to work properly in the range [-pi/2, pi/2]. Works much better in
+		the range [10, 100].
+	* Stan always seems to get roughly the same answer, even if I change the function, whereas
+		the variational approximation gives different answers. This makes me suspect that Stan
+		is doing something strange.
 
 30/04/2015
 ----------
