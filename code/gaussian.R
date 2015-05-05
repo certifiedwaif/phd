@@ -49,10 +49,29 @@ fit.Lap <- function(vmu, vy, vr, mC, mSigma.inv, mLambda)
     f  <- f.lap(vmu, vy, vr, mC, mSigma.inv, mLambda)
     vg <- vg.lap(vmu, vy, vr, mC, mSigma.inv, mLambda)
     mH <- mH.lap(vmu, vy, vr, mC, mSigma.inv, mLambda)
+
+    # This algorithm can be numerically unstable. If the derivative becomes
+    # infinite, we should return the last vmu and mLambda, rather than
+    # updating them.
+    if (any(is.nan(vg) || is.infinite(vg))) {
+      break
+    }
+
+    old_mLambda <- mLambda
+    old_vmu <- vmu
     mLambda <- solve(-mH, tol=1.0E-99)
     vmu <- vmu + mLambda %*% vg
+    
+    if (any(diag(mLambda < 0.0))) {
+      # We've gone out of the allowable parameter space. Take the last known
+      # good value.
+      vmu <- old_vmu
+      mLambda <- old_mLambda
+      break
+    }
+    
     if (max(abs(vg)) < 1.0E-8) {
-        break;
+        break
     }
   } 
 
@@ -155,18 +174,33 @@ vg.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
   vg <- 0*vmu
   vg[1:d] <- vg.G(vmu, vy, vr, mC, mSigma.inv, vB1) 
 
-  mLambda.inv <- solve(mLambda, tol=1.0E-99)
+  mLambda.inv <- solve(mLambda, tol=1e-99)
   mH <- mH.G(vmu, vy, vr, mC, mSigma.inv, vB2)
-  dmLambda <- 0.5 * (mLambda.inv + mH) %*% mR
-  #dmLambda <- (0.5 * tr(mLambda.inv) + mH) %*% mR
+  # dmLambda <- (mLambda.inv + mH) %*% mR
+  # dmLambda <- 0.5 * (mLambda.inv + mH) %*% mR
+  dmLambda <- (0.5 * tr(mLambda.inv) + mH) %*% mR
   #cat("GVA mLambda", mLambda[1:2, 1:2], "dmLambda", dmLambda[1:2, 1:2], "\n")
   
   dmLambda[Dinds] <- dmLambda[Dinds]*mR[Dinds]
+
+  # Check derivative numerically
+  # func <- function(x)
+  # {
+  #   mR_prime <- matrix(x, nrow(mR), ncol(mR))
+  #   mR_prime[Dinds] <- log(mR_prime[Dinds])
+  #   d <- ncol(mC)
+  #   vtheta_prime <- 0 * vtheta
+  #   vtheta_prime[1:d] <- vmu    
+  #   vtheta_prime[(1+d):length(vtheta_prime)] <- mR_prime[Rinds]
+  #   f.GVA(vtheta_prime, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
+  # }
+  # dmLambda_check <- matrix(grad(func, as.vector(t(mR))), nrow(mR), ncol(mR))
   #if (any(!is.finite(dmLambda) || is.nan(dmLambda))) {
   #  dmLambda <- matrix(0, d, d)
   #}
   # cat("vg.GVA: dmLambda", dmLambda, "\n")
   vg[(1 + d):length(vtheta)] <- dmLambda[Rinds]
+  # vg[(1 + d):length(vtheta)] <- dmLambda_check[Rinds]
   #cat("vg.GVA: vg", vg, "norm", sqrt(sum(vg^2)), "\n")
  
   return(vg)
