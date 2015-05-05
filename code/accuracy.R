@@ -241,18 +241,18 @@ test_accuracies <- function()
 test_accuracies_slope <- function()
 {
   # Monte Carlo Markov Chains approximation
-  seed <- 1
-  set.seed(seed)
-  mult <- generate_slope_test_data(m=20, ni=10)
-  mcmc_samples <- mcmc_approximation(mult, seed=seed, iterations=2e4, warmup=1e3)
-  save(mult, mcmc_samples, file="data/accuracy_slope_2015_05_05.RData")  
-  # load(file="data/accuracy_slope_2015_04_09.RData")
+  # seed <- 1
+  # set.seed(seed)
+  # mult <- generate_slope_test_data(m=20, ni=10)
+  # mcmc_samples <- mcmc_approximation(mult, seed=seed, iterations=2e4, warmup=1e3)
+  # save(mult, mcmc_samples, file="data/accuracy_slope_2015_05_05.RData")  
+  load(file="data/accuracy_slope_2015_05_05.RData")
   # load(file="data_macbook/accuracy_slope_2015_03_30.RData")
   
-  #now <- Sys.time()
-  #var1 <- test_accuracy(mult, mcmc_samples, "laplace", plot=TRUE)
-  #print(Sys.time() - now)
-  #print(var1)
+  now <- Sys.time()
+  var1 <- test_accuracy(mult, mcmc_samples, "laplace", plot=TRUE)
+  print(Sys.time() - now)
+  print(var1)
   
   now <- Sys.time()
   var2 <- test_accuracy(mult, mcmc_samples, "gva", plot=TRUE)
@@ -265,6 +265,12 @@ test_accuracies_slope <- function()
   print(Sys.time() - now)
   #print(image(Matrix(var3$var_result$mLambda)))
   print(var3)
+
+  now <- Sys.time()
+  var4 <- test_accuracy(mult, mcmc_samples, "gva_nr", plot=TRUE)
+  print(Sys.time() - now)
+  #print(image(Matrix(var4$var_result$mLambda)))
+  print(var4)
 }
 test_accuracies_slope()
 
