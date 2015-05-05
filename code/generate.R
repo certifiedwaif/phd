@@ -1,4 +1,5 @@
 # generate.R
+library(mvtnorm)
 source("splines.R")
 
 generate_univariate_test_data <- function (n, rho, lambda)
@@ -122,11 +123,12 @@ generate_test_data <- function(m, ni)
   return(mult)
 }
 
-generate_slope_test_data <- function(m=5, ni=20)
+generate_slope_test_data <- function(m=10, ni=20)
 {
   n <- m*ni
   x <- rnorm(n, 0, 1)
   vx <- t(matrix(x, ni, m))
+  # TODO: Rewrite this
   groups <- gl(m, ni)
   mC <- model.matrix(~1+x+groups*x)
   p <- 2
@@ -144,7 +146,7 @@ generate_slope_test_data <- function(m=5, ni=20)
   # Centre slope term?
   #mX <- cbind(mX[,1], scale(mX[,2]))
   vbeta <- c(1.5, 0.5)
-  mSigma_0 <- matrix(c( 1.0, -0.3,
+  mSigma_0 <- matrix(c(1.0, -0.3,
                       -0.3,  1.0), 2, 2)
   vu <- rmvnorm(m, sigma <- mSigma_0)
   rho <- 1.0
@@ -152,46 +154,40 @@ generate_slope_test_data <- function(m=5, ni=20)
   
   # Create mult object
   sigma2.beta <- 1.0E5
-  mult <- create_mult(vy, mX, mZ_reordered, sigma2.beta, m=m, blocksize=2, spline_dim=0)
+  mult <- create_mult(vy, mX, mZ_reordered, sigma2.beta, m=m, blocksize=2, spline_dim=0, v=2+2)
+  mult$vmu <- lm.fit(mult$mC, log(mult$vy + 1))$coefficients
   return(mult)
 }
 
 generate_spline_test_data <- function(n=100)
 {
-  vx <- matrix(sort(runif(n, -1, 1))) 
+  a <- 10
+  b <- 100
+  vx <- matrix(sort(runif(n, a, b))) 
   
-  mX <- cbind(1,vx)
+  mX <- matrix(0, n, 2)
+  # mX <- NULL
+  sigma2.beta <- 1.0E5
   
-  expected_rho <- 1
-  expected_sigma2_u <- 0
-  sigma2_beta <- 1e5
-  a_sigma <- 1e5
-  b_sigma <- 1e5
-  tau <- 1.0E-5
+  vf <- 4 + sin(pi * vx)
+  #vf <- 2 + vx 
+  vy <- rpois(n, vf)
   
-  sigma2.true <- 0.01
-  expected_beta <- c(0, 1)
-  vf <- sin(pi * vx)
-  vy <- rpois(n, exp(vf))
+  numIntKnots <- 24
+  intKnots <- quantile(unique(vx), seq(0, 1, length=(numIntKnots + 2))[-c(1, (numIntKnots + 2))])
   
-  numIntKnots <- 10
-  intKnots <- quantile(unique(vx), seq(0, 1, length=(numIntKnots+2))[-c(1, (numIntKnots+2))])
-  
-  mZ <- ZOSull(vf, range.x=c(-1.1, 1.1), intKnots=intKnots, drv=0)
-  #vy <- 2+mX[,1]^3+rnorm(m)*.1
-  #result <- fit_spline(vx, vy)
-  #result <- fit_spline(mX[,1], vy)
-  #mZ <- result$Z
-  
+  mZ <- ZOSull(vx, range.x=range(vx), intKnots=intKnots, drv=0)
   #mZ <- mZ/max(mZ)
   
   # mult <- create_mult(vy, mX, mZ, sigma2_beta, m=1, blocksize=0, spline_dim=12)
-  mult <- create_mult(vy, NULL, mZ, NULL, m=1, blocksize=0, spline_dim=12)
+  sigma2_beta <- 1.0E5
+  mult <- create_mult(vy, mX, mZ, sigma2_beta, m=1, blocksize=0, spline_dim=(numIntKnots + 2),
+                      v=(numIntKnots + 2) + 1)
+  mult$vmu <- lm.fit(mult$mC, log(mult$vy + 1))$coefficients
   
   # Check whether we've accidentally created a data matrix with repeated
   # columns. This can happen when, for instance, the basis vectors [1 x]
   # are inadvertenty repeated.
-  # browser()
   # if (abs(det(crossprod(mult$mC))) < 1e-99) {
   #   stop("The cross-product of mC is singular. Perhaps you repeated some basis vectors?")
   # }

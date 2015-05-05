@@ -1,7 +1,68 @@
 To Do list
 ==========
+05/05/2015
+----------
+- Get random slopes working again
+	Done. It works quite nicely now.
+- Get splines working.
+	Fail. Nothing I'm trying works. I don't know what the problem is.
+- Correct derivative in GVA code
+	I still don't believe this is right. Check with numeric differentiation.
+- Attend Advanced R reading group
+	Done
+
+04/05/2015
+----------
+- Attend meeting
+	We talked about model selection
+- Continue to debug spline problems
+	* ZOSull doesn't seem to work properly in the range [-pi/2, pi/2]. Works much better in
+		the range [10, 100].
+	* Stan always seems to get roughly the same answer, even if I change the function, whereas
+		the variational approximation gives different answers. This makes me suspect that Stan
+		is doing something strange.
+
+30/04/2015
+----------
+- Give tutorial
+	Done
+- I worked out that the function I was trying to fit looked like noise. I changed it to
+	something more reasonable.
+- Caught a bug in the mean field update. I was using block size in the divisor for the Inverse
+	Wishart update which is correct when doing random intercepts or random slopes, but wrong when 
+	doing splines
+
+29/04/2015
+----------
+- Prepare for tutorial
+	Done, but I was cutting it fine
+- Give tutorial
+	Done
+- Mark assignments - due next week
+- Continue modifying the software to work p=0
+	It's producing garbage results at present
+- Fix bugs in the lower bound
+- Try to rationalise the notation in the draft of the paper I've done
+	There were two scalars both named p, one the dimension of the fixed effects and the other
+	the dimension of the inverse Wishart distribution that we're using. This was quite a mess.
+	I've introduced a new variable d to play the wrole of the second scalar.
+- Something funny is going on in ZOSull once we calculate Z = B %*% LZ
+	B is nice and banded as we expect, but Z = B LZ is mostly small values/zeroes.
+
+
+28/04/2015
+----------
+- Sidestep repeated columns problem by building a spline model that uses random effects
+	only
+	I started modifying the software to be allow no fixed effects in a model. This turned up
+	all sorts of errors and edge cases in the code which needed to be dispensed with.
+- Attend Advanced R reading group
+
 27/04/2015
 ----------
+- Spent an hour and a half understanding ten lines of code that calculates the Omega
+	penalty matrix in ZOSull.
+
 - Install R packages
 To install limma:
 source("http://bioconductor.org/biocLite.R")
