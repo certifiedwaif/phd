@@ -141,17 +141,17 @@ fit_spline <- function(x,  y)
 
 ZOSull <- function(x, range.x, intKnots, drv=0, stability_check=FALSE)
 {
-  if (drv>2) stop("splines not smooth enough for more than 2 derivatives")
+  if (drv > 2) stop("splines not smooth enough for more than 2 derivatives")
 
   # Set defaults for `range.x' and `intKnots'
 
   if (missing(range.x))
-    range.x <- c(1.05*min(x)-0.05*max(x), 1.05*max(x)-0.05*min(x))
+    range.x <- c(1.05 * min(x) - 0.05 * max(x), 1.05 * max(x) - 0.05 * min(x))
 
   if (missing(intKnots))
   {
     numIntKnots <- min(length(unique(x)), 35)
-    intKnots <- quantile(unique(x), seq(0, 1, length=(numIntKnots+2))[-c(1, (numIntKnots+2))])
+    intKnots <- quantile(unique(x), seq(0, 1, length=(numIntKnots + 2))[-c(1, (numIntKnots + 2))])
   }
   numIntKnots <- length(intKnots) 
 
@@ -182,7 +182,7 @@ ZOSull <- function(x, range.x, intKnots, drv=0, stability_check=FALSE)
      UX <- eigOmega$vectors[, indsX]   
      L <- cbind(UX, LZ)
      stabCheck <- t(crossprod(L, t(crossprod(L, Omega))))          
-     if (sum(stabCheck^2) > 1.0001*(numIntKnots+2))
+     if (sum(stabCheck ^ 2) > 1.0001 * (numIntKnots + 2))
          stop("WARNING: NUMERICAL INSTABILITY ARISING\\
                 FROM SPECTRAL DECOMPOSITION")
   }
