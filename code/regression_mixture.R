@@ -74,7 +74,6 @@ vb <- function(data)
 	sigmainv2_alpha <- r_1/psi_1
 	sigmainv2_beta <- r_0/psi_0
   
-  browser()
 	for (i in 1:ITERATIONS) {
 		# Mean field update
 		mS_alpha <- solve((r_1/psi_1) * t(mX) %*% mP %*% mX + sigmainv2_alpha * mI_p)
