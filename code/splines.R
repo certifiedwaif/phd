@@ -204,5 +204,64 @@ ZOSull <- function(x, range.x, intKnots, drv=0, stability_check=FALSE)
   return(Z)
 }
 
-########## End of ZOSull ##########
 
+formOmega <- function(a,b,intKnots)
+{
+  allKnots <- c(rep(a,2),intKnots,rep(b,4)) 
+  u <- unique(allKnots)
+  R <- length(u)
+  xtilde <- c()
+  wts <- c()
+  for (i in 1:(R-1)) {
+    A <- u[i]
+    B <- u[i+1]
+    d <- B - A
+    wt <- d * c(1, 4, 1) / 6
+    xtilde <- c(xtilde, A, (A + B) / 2, B)
+    wts <- c(wts, wt)
+  }
+   
+  Bdd <- spline.des(allKnots,xtilde,derivs=rep(2,length(xtilde)),outer.ok=TRUE)$design  
+  Omega <- t(Bdd * wts) %*% Bdd     
+  
+  return(list(Omega=Omega, allKnots=allKnots))
+}
+
+ZOSull2 <- function(x, range.x, intKnots, allKnots=NULL, Omega=NULL, drv=0, stability_check=FALSE)
+{
+  # Use the spectral decomposition of Omega to obtain Z.
+  numIntKnots <- length(intKnots)
+  eigOmega <- eigen(Omega)
+  indsZ <- 1:(numIntKnots + 2)
+  UZ <- eigOmega$vectors[, indsZ]
+  LZ <- t(t(UZ) / sqrt(eigOmega$values[indsZ]))
+
+  if (stability_check) {
+     # Perform stability check.   
+
+     indsX <- (numIntKnots + 3):(numIntKnots + 4)
+     UX <- eigOmega$vectors[, indsX]   
+     L <- cbind(UX, LZ)
+     stabCheck <- t(crossprod(L, t(crossprod(L, Omega))))          
+     if (sum(stabCheck ^ 2) > 1.0001 * (numIntKnots + 2))
+         stop("WARNING: NUMERICAL INSTABILITY ARISING\\
+                FROM SPECTRAL DECOMPOSITION")
+  }
+
+  # Obtain B and post-multiply by LZ matrix to get Z.
+
+  B <- spline.des(allKnots, x, derivs=rep(drv, length(x)), outer.ok=TRUE)$design  
+
+  #Z <- B %*% LZ
+  Z <- B
+
+  # Add the `range.x' and 'intKnots' as attributes
+  # of the return object.
+
+  attr(Z, "range.x") <- range.x
+  attr(Z, "intKnots") <- intKnots
+
+  # Return Z matrix with 2 attributes.
+
+  return(Z)
+}
