@@ -244,15 +244,15 @@ test_accuracies_slope <- function()
   # seed <- 1
   # set.seed(seed)
   # mult <- generate_slope_test_data(m=20, ni=10)
-  # mcmc_samples <- mcmc_approximation(mult, seed=seed, iterations=1e6, warmup=1e4)
-  #save(mult, mcmc_samples, file="data/accuracy_slope_2015_04_09.RData")  
-  load(file="data/accuracy_slope_2015_04_09.RData")
+  # mcmc_samples <- mcmc_approximation(mult, seed=seed, iterations=1e5, warmup=1e4)
+  # save(mult, mcmc_samples, file="data/accuracy_slope_2015_05_04.RData")  
+  load(file="data/accuracy_slope_2015_05_04.RData")
   # load(file="data_macbook/accuracy_slope_2015_03_30.RData")
   
-  #now <- Sys.time()
-  #var1 <- test_accuracy(mult, mcmc_samples, "laplace", plot=TRUE)
-  #print(Sys.time() - now)
-  #print(var1)
+  now <- Sys.time()
+  var1 <- test_accuracy(mult, mcmc_samples, "laplace", plot=TRUE)
+  print(Sys.time() - now)
+  print(var1)
   
   now <- Sys.time()
   var2 <- test_accuracy(mult, mcmc_samples, "gva", plot=TRUE)
@@ -267,113 +267,49 @@ test_accuracies_slope <- function()
   print(var3)
 
   now <- Sys.time()
-  Rprof(line.profiling=TRUE, interval=0.001)
-  #var3 <- test_accuracy(mult, mcmc_samples, "gva2", plot=TRUE)
-  var2 <- zero_infl_var(mult, method="gva", verbose=FALSE)
-  Rprof(NULL)
-  print(summaryRprof(lines="both"))
-  #print(image(Matrix(var2$var_result$mLambda)))
+  var4 <- test_accuracy(mult, mcmc_samples, "gva_nr", plot=TRUE)
   print(Sys.time() - now)
-  print(var2)
-
-  now <- Sys.time()
-  Rprof(line.profiling=TRUE, interval=0.001)
-  #var3 <- test_accuracy(mult, mcmc_samples, "gva2", plot=TRUE)
-  var3 <- zero_infl_var(mult, method="gva2", verbose=FALSE)
-  Rprof(NULL)
-  print(summaryRprof(lines="both"))
-  #print(image(Matrix(var3$var_result$mLambda)))
-  print(Sys.time() - now)
-  print(var3)
-
-  #now <- Sys.time()
-  #Rprof(line.profiling=TRUE)
-  #var4 <- test_accuracy(mult, mcmc_samples, "gva2new", plot=TRUE)
-  #Rprof(NULL)
-  #print(summaryRprof(lines <- "both"))
-  #print(image(Matrix(var4$var_result$mLambda)))  
-  #var4 <- test_accuracy(mult, mcmc_samples, "gva2new")
-  #print(Sys.time() - now)
-  #print(var4)
-  
-  # now <- Sys.time()
-  # GVA NR is unstable, and sometimes fails with an error
-  #var5 <- test_accuracy(mult, mcmc_samples, "gva_nr")
-  # var5 <- test_accuracy(mult, mcmc_samples, "gva_nr", plot=TRUE)
-  # print(Sys.time() - now)
-  #print(image(Matrix(var5$var_result$mLambda)))  
-  # print(var5)
-  
-  #save(var1, var2, var3, var4, var5, file="accuracy_results_slope.RData")
-  
-  #print(image(Matrix(var3_new$mLambda)))
-  
-  #now = Sys.time()
-  #var4 = test_accuracy(mult, mcmc_samples, "gva_nr")
-  #Sys.time() - now
-  #print(image(Matrix(var4$mLambda)))
-
-#   mult = generate_spline_test_data()
-#   mcmc_samples = mcmc_approximation(mult, iterations=1e4)
-#   save(mult, mcmc_samples, file="accuracy_spline.RData")    
-
-  #now = Sys.time()
-  #var1 = test_accuracy(mult, mcmc_samples, "laplace")
-  #Sys.time() - now
-  #print(image(Matrix(var1$var_result$mLambda)))
-  #var1
-  
-  #now = Sys.time()
-  #var2 = test_accuracy(mult, mcmc_samples, "gva")
-  #Sys.time() - now
-  #print(image(Matrix(var2$var_result$mLambda)))
-  #var2
-  
-  #now = Sys.time()
-  #var3 = test_accuracy(mult, mcmc_samples, "gva2")
-  #Sys.time() - now
-  #print(image(Matrix(var3$var_result$mLambda)))
-  #var3
-  
-  #now = Sys.time()
-  #var4 = test_accuracy(mult, mcmc_samples, "gva2new")
-  #Sys.time() - now
-  #print(image(Matrix(var4$var_result$mLambda)))  
-  #var4
-  
-  #Rprof()
-  #now = Sys.time()
-  #var5 = test_accuracy(mult, mcmc_samples, "gva_nr")
-  #print(Sys.time() - now)
-  #print(image(Matrix(var5$var_result$mLambda)))  
-  #var5
+  #print(image(Matrix(var4$var_result$mLambda)))
+  print(var4)
 }
-#test_accuracies_slope()
+# test_accuracies_slope()
 
 test_accuracies_spline <- function()
 {
   # Monte Carlo Markov Chains approximation
-  # seed <- 1
-  # set.seed(seed)
-  # mult <- generate_spline_test_data()
-  # mcmc_samples <- mcmc_approximation(mult, seed=seed, iterations=2e5, warmup=1e3,
-  #                                     stan_file="multivariate_zip_splines.stan")
-  # save(mult, mcmc_samples, file="data/accuracy_spline_2015_04_27.RData")
-  load(file="data/accuracy_spline_2015_04_27.RData")  
+  seed <- 1
+  set.seed(seed)
+  mult <- generate_spline_test_data()
+  # mcmc_samples <- mcmc_approximation(mult, seed=seed, iterations=2e4, warmup=1e3)
+  mcmc_samples <- mcmc_approximation(mult, seed=seed, iterations=1e6, warmup=1e4,
+                                     stan_file="multivariate_zip_splines.stan")
+  save(mult, mcmc_samples, file="data/accuracy_spline_2015_05_04.RData")
+  # load(file="data/accuracy_spline_2015_05_04.RData")  
   # load(file="data/accuracy_spline_2015_04_23.RData")
   # load(file="data_macbook/accuracy_slope_2015_03_30.RData")
-  #load(file="data/accuracy_spline_2015_04_16.RData")    
+  # load(file="data/accuracy_spline_2015_04_16.RData")    
   
   now <- Sys.time()
   var1 <- test_accuracy(mult, mcmc_samples, "laplace", plot=TRUE)
   print(Sys.time() - now)
   print(var1)
   
-  now <- Sys.time()
-  var2 <- test_accuracy(mult, mcmc_samples, "gva", plot=TRUE)
-  print(Sys.time() - now)
-  #print(image(Matrix(var2$var_result$mLambda)))
-  print(var2)
+  # now <- Sys.time()
+  # var2 <- test_accuracy(mult, mcmc_samples, "gva", plot=TRUE)
+  # print(Sys.time() - now)
+  # #print(image(Matrix(var2$var_result$mLambda)))
+  # print(var2)
 
+  # now <- Sys.time()
+  # var3 <- test_accuracy(mult, mcmc_samples, "gva2", plot=TRUE)
+  # print(Sys.time() - now)
+  # #print(image(Matrix(var3$var_result$mLambda)))
+  # print(var3)
+
+  now <- Sys.time()
+  var4 <- test_accuracy(mult, mcmc_samples, "gva_nr", plot=TRUE)
+  print(Sys.time() - now)
+  #print(image(Matrix(var4$var_result$mLambda)))
+  print(var4)
 }
 test_accuracies_spline()
