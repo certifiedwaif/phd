@@ -1,0 +1,56 @@
+\documentclass{article}[12pt]
+\usepackage{amsmath}
+\input{include.tex}
+\input{Definitions.tex}
+\title{Meeting notes - 07/06/2015}
+\author{Mark Greenaway}
+
+\begin{document}
+\maketitle
+
+\section{B-Spline basics}
+
+Recall that a smooth function
+\[
+	S_{n, t}(x) = \sum_i \alpha_i B_{i, n} (x)
+\]
+
+can be constructed as a linear combination of the B-Spline functions, which are recursively
+defined as
+\begin{align*}
+	B_{i, 1} (x) &:= 
+	\begin{cases}
+		1 & \text{if } t_i \leq x < t_{i + 1} \\
+		0 & \text{otherwise}
+	\end{cases} \\
+	B_{i, k} (x) &:= \frac{x - t_i}{t_{i + k - 1} - t_i} B_{i, k - 1}(x) +
+									\frac{t_{i + k}}{t_{i + k} - t_{i + 1}} B_{i + 1, k - 1} (x)
+\end{align*}.
+
+These functions have local support, and can be evaluated using de Boor's algorithm,
+which is numerically stable. Moreover, their derivatives can be evaluated at any point.
+
+\section{Meeting}
+
+I went to see John, who was trying to modify the existing code for calculating Omega
+to exclude anything that was linearly dependent with $[1 x]$. The code is very clever,
+and perfect for the previous case which it was being used, but because of its vectorised
+structure it was very hard to modify.
+
+We approximate the penalty integral by Simpson's Rule.
+\[
+	(x_2 - x_1) \left [\frac{f(x_1) + 4 f(\frac{x_1 + x_2}{2}) + f(x_2)}{6} \right ]
+\]
+
+\begin{align*}
+	\mX &= [1, x] \\
+	\mZ &= \tilde \mB \\
+	\vbeta &\sim N(\vzero, \sigma_\vbeta^2 \mI) \\
+	\vu &\sim N(\vzero, \sigma_\vu^2 \mOmega) \\
+	&\int f''(x)^2 dx \\
+	&\int \vv^T C''(x) C''(x)^T \vv dx
+\end{align*}
+
+I was ignorant of the fact that $\mOmega$ was used in the prior.
+
+\end{document}
