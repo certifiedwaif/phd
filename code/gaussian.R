@@ -176,31 +176,40 @@ vg.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
 
   mLambda.inv <- solve(mLambda, tol=1e-99)
   mH <- mH.G(vmu, vy, vr, mC, mSigma.inv, vB2)
-  # dmLambda <- (mLambda.inv + mH) %*% mR
+  dmLambda <- (mLambda.inv + mH) %*% mR
   # dmLambda <- 0.5 * (mLambda.inv + mH) %*% mR
-  dmLambda <- (0.5 * tr(mLambda.inv) + mH) %*% mR
+  # dmLambda <- (0.5 * tr(mLambda.inv) + mH) %*% mR
   #cat("GVA mLambda", mLambda[1:2, 1:2], "dmLambda", dmLambda[1:2, 1:2], "\n")
   
   dmLambda[Dinds] <- dmLambda[Dinds]*mR[Dinds]
 
   # Check derivative numerically
-  # func <- function(x)
-  # {
-  #   mR_prime <- matrix(x, nrow(mR), ncol(mR))
-  #   mR_prime[Dinds] <- log(mR_prime[Dinds])
-  #   d <- ncol(mC)
-  #   vtheta_prime <- 0 * vtheta
-  #   vtheta_prime[1:d] <- vmu    
-  #   vtheta_prime[(1+d):length(vtheta_prime)] <- mR_prime[Rinds]
-  #   f.GVA(vtheta_prime, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
-  # }
-  # dmLambda_check <- matrix(grad(func, as.vector(t(mR))), nrow(mR), ncol(mR))
-  #if (any(!is.finite(dmLambda) || is.nan(dmLambda))) {
+  func <- function(x)
+  {
+    mR_prime <- matrix(x, nrow(mR), ncol(mR))
+    mR_prime[Dinds] <- log(mR_prime[Dinds])
+    d <- ncol(mC)
+    vtheta_prime <- 0 * vtheta
+    vtheta_prime[1:d] <- vmu    
+    vtheta_prime[(1+d):length(vtheta_prime)] <- mR_prime[Rinds]
+    f.GVA(vtheta_prime, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
+  }
+  dmLambda_check <- matrix(grad(func, as.vector(mR)), nrow(mR), ncol(mR))
+  # if (any(!is.finite(dmLambda) || is.nan(dmLambda))) {
   #  dmLambda <- matrix(0, d, d)
-  #}
-  # cat("vg.GVA: dmLambda", dmLambda, "\n")
-  vg[(1 + d):length(vtheta)] <- dmLambda[Rinds]
-  # vg[(1 + d):length(vtheta)] <- dmLambda_check[Rinds]
+  # }
+
+  # if (any(abs(dmLambda[Rinds] - dmLambda_check[Rinds]) > 1e-6)) {
+  #   cat("Analytic and numeric derivatives disagree.\n")
+  #   print(round(dmLambda, 2))
+  #   print(round(dmLambda_check, 2))
+  #   print(round(dmLambda - dmLambda_check, 2))
+  #   # browser()
+  # }
+  
+  # # cat("vg.GVA: dmLambda", dmLambda, "\n")
+  # vg[(1 + d):length(vtheta)] <- dmLambda[Rinds]
+  vg[(1 + d):length(vtheta)] <- dmLambda_check[Rinds]
   #cat("vg.GVA: vg", vg, "norm", sqrt(sum(vg^2)), "\n")
  
   return(vg)
@@ -341,7 +350,8 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
   vg[1:d] <- vg.G(vmu, vy, vr, mC, mSigma.inv, vB1) 
   
   mH <- mH.G(vmu, vy, vr, mC, mSigma.inv, vB2)
-  dmLambda <- (0.5 * tr(mLambda.inv) + mH)
+  dmLambda <- 0.5 * (mLambda.inv + mH) %*% mR
+  # dmLambda <- (0.5 * tr(mLambda.inv) + mH)
   #dmLambda_dmR <- -solve(mLambda.inv, solve(mLambda.inv, mR))
   #dmLambda_dmR <- -solve(mLambda.inv, solve(mLambda.inv, (t(mR) + mR)))
   dmLambda_dmR <- -forwardsolve(mR, backsolve(t(mR), forwardsolve(mR, backsolve(t(mR), (t(mR) + mR)))))
@@ -360,7 +370,7 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
   #   vtheta_prime[(1+d):length(vtheta_prime)] <- mR_prime[Rinds]
   #   f.GVA_new(vtheta_prime, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
   # }
-  #dmR_check <- matrix(grad(func, as.vector(t(mR))), nrow(mR), ncol(mR))
+  #dmR_check <- matrix(grad(func, as.vector(mR)), nrow(mR), ncol(mR))
   
   # cat("GVA2 vmu", vmu[9:10], "\ndvmu", vg[9:10], "\nmR", mR[9:10, 9:10], "\ndmR", 
 		# 	dmR[9:10, 9:10]) #, "\ndmR_check", dmR_check[9:10, 9:10])

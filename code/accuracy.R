@@ -244,9 +244,15 @@ test_accuracies_slope <- function()
   # seed <- 1
   # set.seed(seed)
   # mult <- generate_slope_test_data(m=20, ni=10)
+<<<<<<< HEAD
   # mcmc_samples <- mcmc_approximation(mult, seed=seed, iterations=1e5, warmup=1e4)
   # save(mult, mcmc_samples, file="data/accuracy_slope_2015_05_04.RData")  
   load(file="data/accuracy_slope_2015_05_04.RData")
+=======
+  # mcmc_samples <- mcmc_approximation(mult, seed=seed, iterations=2e4, warmup=1e3)
+  # save(mult, mcmc_samples, file="data/accuracy_slope_2015_05_05.RData")  
+  load(file="data/accuracy_slope_2015_05_05.RData")
+>>>>>>> 4bd702bd48e4836a4be26632e368d7cdd2628895
   # load(file="data_macbook/accuracy_slope_2015_03_30.RData")
   
   now <- Sys.time()
@@ -312,4 +318,4 @@ test_accuracies_spline <- function()
   #print(image(Matrix(var4$var_result$mLambda)))
   print(var4)
 }
-test_accuracies_spline()
+# test_accuracies_spline()

@@ -1,5 +1,15 @@
 To Do list
 ==========
+
+07/05/2015
+----------
+- Write up meeting notes
+	Done
+- Use John's new formOmega code to construct mZ
+- Fit model
+	Almost worked!
+- Fill in report for Samuel
+
 05/05/2015
 ----------
 - Get random slopes working again

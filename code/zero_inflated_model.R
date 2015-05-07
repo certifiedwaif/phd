@@ -133,8 +133,7 @@ create_mult <- function(vy, mX, mZ, sigma2.beta, m=ncol(mZ), blocksize=1, spline
                 mLambda=mLambda,
                 prior=prior,
                 mSigma.beta.inv=mSigma.beta.inv,
-                mSigma.u.inv=mSigma.u.inv,
-                mSigma.inv=mSigma.inv)
+                mSigma.u.inv=mSigma.u.inv)
   class(mult) <- "multivariate"
   return(mult)
 }
