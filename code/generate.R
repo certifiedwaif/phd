@@ -161,29 +161,33 @@ generate_slope_test_data <- function(m=10, ni=20)
 
 generate_spline_test_data <- function(n=100)
 {
-  a <- 10
-  b <- 100
+  a <- -1
+  b <- 1
   vx <- matrix(sort(runif(n, a, b))) 
   
-  mX <- matrix(0, n, 2)
+  mX <- cbind(rep(1, n), vx)
   # mX <- NULL
-  sigma2.beta <- 1.0E5
+  sigma2_beta <- 1.0E5
   
   vf <- 4 + sin(pi * vx)
-  #vf <- 2 + vx 
-  vy <- rpois(n, vf)
+  vy <- rpois(n, exp(vf))
   
-  numIntKnots <- 24
+  numIntKnots <- 10
   intKnots <- quantile(unique(vx), seq(0, 1, length=(numIntKnots + 2))[-c(1, (numIntKnots + 2))])
   
-  mZ <- ZOSull(vx, range.x=range(vx), intKnots=intKnots, drv=0)
+  result <- formOmega(a, b, intKnots)
+  mZ <- ZOSull2(vx, range.x=range(vx), intKnots=intKnots, allKnots=result$allKnots,
+                Omega=result$Omega, drv=0)
   #mZ <- mZ/max(mZ)
   
   # mult <- create_mult(vy, mX, mZ, sigma2_beta, m=1, blocksize=0, spline_dim=12)
   sigma2_beta <- 1.0E5
   mult <- create_mult(vy, mX, mZ, sigma2_beta, m=1, blocksize=0, spline_dim=(numIntKnots + 2),
                       v=(numIntKnots + 2) + 1)
-  mult$vmu <- lm.fit(mult$mC, log(mult$vy + 1))$coefficients
+  mult$vmu <- glm.fit(mult$mC, mult$vy, family=poisson())$coefficients
+  # TODO: You need to set mPsi <- mOmega
+  mult$prior$mPsi <- result$Omega
+  mult$mPsi <- result$Omega
   
   # Check whether we've accidentally created a data matrix with repeated
   # columns. This can happen when, for instance, the basis vectors [1 x]
