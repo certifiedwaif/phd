@@ -141,7 +141,7 @@ create_mult <- function(vy, mX, mZ, sigma2.beta, m=ncol(mZ), blocksize=1, spline
 
 zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE)
 {
-  MAXITER <- 2000
+  MAXITER <- 1000
   
   # Initialise variables from mult
   N <- length(mult$vy)
@@ -171,8 +171,6 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
   }
 
   if (!is.null(mZ)) {
-    blocksize <- blocksize
-    spline_dim <- spline_dim
     if (verbose) {
       cat("m", m, "\n")
       cat("blocksize", blocksize, "\n")
