@@ -1,0 +1,98 @@
+\documentclass{beamer}
+
+\usetheme{Warsaw}
+\usepackage{graphicx}
+\usepackage{ulem}
+\input{include.tex}
+\input{Definitions.tex}
+
+\usefonttheme{serif}
+
+\title{Progress update}
+\author{Mark Greenaway\\PhD candidate\\markg@maths.usyd.edu.au}
+
+\mode<presentation>
+{ \usetheme{boxes} }
+
+\begin{document}
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}
+\frametitle{B-Splines}
+Recall that a smooth function
+\[
+	S_{n, t}(x) = \sum_i \alpha_i B_{i, n} (x)
+\]
+
+can be constructed as a linear combination of the B-Spline functions, which are recursively
+defined as
+\begin{align*}
+	B_{i, 1} (x) &:= 
+	\begin{cases}
+		1 & \text{if } t_i \leq x < t_{i + 1} \\
+		0 & \text{otherwise}
+	\end{cases} \\
+	B_{i, k} (x) &:= \frac{x - t_i}{t_{i + k - 1} - t_i} B_{i, k - 1}(x) +
+									\frac{t_{i + k} - x}{t_{i + k} - t_{i + 1}} B_{i + 1, k - 1} (x)
+\end{align*}
+
+%These functions have local support, and can be evaluated using de Boor's algorithm,
+%which is numerically stable. Moreover, their derivatives can be evaluated at any point.
+
+\includegraphics[height=40mm, width=100mm]{BSpline_basis.pdf}
+\end{frame}
+
+\begin{frame}
+If we are modelling $y_i = f(x_i)$ on an interval $[a, b]$, an estimate of $f$ at location
+$x \in \mathbb{R}$ can be obtained within our mixed model framework with
+
+\begin{align*}
+	\mX &= [\vone, \vx] \\
+	\mZ &= \tilde \mB_x = [B_1(x), \ldots, B_K(x), B_{K+2}(x)]\\
+	\vbeta &\sim N(\vzero, \sigma_\vbeta^2 \mI) \\
+	\vu &\sim N(\vzero, \sigma_\vu^2 \mOmega) \\
+	\mOmega_{ij} &= \int B''_i(x) B''_j(x) dx \\
+\end{align*}
+
+with the $B_i$ functions defined with respect to the knots $[a, a, \kappa_1, \ldots,
+\kappa_n, b, b, b, b]$ and evaluated on $\vx$.
+
+$\kappa_i$ are suitably defined internal knots such as the quantiles of $\vx$. We evaluate 
+the integral above using Simpson's Rule.
+\end{frame}
+
+\begin{frame}
+We were originally  trying to use the $\mOmega$ generation code from the O'Sullivan Penalised 
+Splines paper, but $\mZ$ contained a linear combination of $[\vone, \vx]$ in its columns. So 
+we changed the knots we evaluate $\mB$ on to avoid this.
+
+The original code was very cleverly vectorised. Unfortunately, that made it hard to modify
+for a new situation. We rewrote the code to use for loops. I $\heartsuit$ for loops.
+\end{frame}
+
+\begin{frame}
+	\includegraphics[height=100mm, width=100mm]{bspline_mZ.pdf}
+\end{frame}
+
+\begin{frame}
+	\includegraphics[height=100mm, width=100mm]{bspline_mOmega.pdf}
+\end{frame}
+
+\begin{frame}
+\frametitle{Remaining problems}
+\begin{itemize}
+\item The means of the random effects components are still off
+\item Distributions don't look quite right. Sampler problem?
+\item Laplace's method and Newton-Raphson algorithms currently complete, but
+			Gaussian Variational Approximations currently explode with non-finite function
+			errors from the optimiser
+\end{itemize}
+
+This is still better than the MCMC and VB results seeming to have almost no relationship
+to each other.
+
+\end{frame}
+
+\end{document}
