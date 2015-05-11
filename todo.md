@@ -1,6 +1,20 @@
 To Do list
 ==========
 
+11/05/2015
+----------
+- I prepared a presentation to update people on my progress. I asked Shila for some
+	time, which she allocated. But in the end, we ran out of time.
+
+	I sent the presentation and associated graphs to John.
+- I'm supposed to present in two weeks. I don't expect to be able to complete anything
+	major in that time, but hopefully I can make enough progress that I have something to
+	show.
+- Susan Lin said that she got two out of three wrong in this week's quiz, and she wondered
+	if there was a mistake.
+- Pay claims, assignment marks
+- Training Report for Samuel
+
 07/05/2015
 ----------
 - Write up meeting notes
