@@ -24,7 +24,7 @@ defined as
 		0 & \text{otherwise}
 	\end{cases} \\
 	B_{i, k} (x) &:= \frac{x - t_i}{t_{i + k - 1} - t_i} B_{i, k - 1}(x) +
-									\frac{t_{i + k}}{t_{i + k} - t_{i + 1}} B_{i + 1, k - 1} (x)
+									\frac{t_{i + k} - x}{t_{i + k} - t_{i + 1}} B_{i + 1, k - 1} (x)
 \end{align*}.
 
 These functions have local support, and can be evaluated using de Boor's algorithm,
