@@ -1,6 +1,14 @@
 To Do list
 ==========
 
+18/05/2015
+----------
+- John said that BSpline models can be non-identifiable. I should check the chains, and
+	plot the functions based on the coefficients that I've fit.
+- Finish the report for Samuel Mueller.
+- Fill in roles.
+- Report missing mark for student.
+
 14/05/2015
 ----------
 - Returned the ute
