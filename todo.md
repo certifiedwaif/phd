@@ -1,6 +1,24 @@
 To Do list
 ==========
 
+14/05/2015
+----------
+- Returned the ute
+- Tutored
+- Begun filling in Postgraduate School Progress and Training Needs Analysis
+	It's complicated - I need to summarise my progress to date and training needs. So I'll
+	write a draft first, and then write my final copy.
+
+13/05/2015
+----------
+- Tutored
+- Hired a ute to transport Dex's stuff
+- Re-assembled Dex's loft bed
+
+12//05/2015
+-----------
+- Disassembled Dex's loft bed
+
 11/05/2015
 ----------
 - I prepared a presentation to update people on my progress. I asked Shila for some
