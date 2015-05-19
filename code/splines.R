@@ -204,7 +204,6 @@ ZOSull <- function(x, range.x, intKnots, drv=0, stability_check=FALSE)
   return(Z)
 }
 
-
 formOmega <- function(a,b,intKnots)
 {
   allKnots <- c(rep(a,2),intKnots,rep(b,4)) 

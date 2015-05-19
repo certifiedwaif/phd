@@ -113,7 +113,7 @@ f.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
   if (!is.finite(f)) {
     f <- -1.0E16
   }
-  # cat("f.VGA: f", f, "vmu", vmu, "diag(mR)", diag(mR), "\n")
+  cat("f.VGA: f", round(f, 2), "vmu", round(vmu, 2), "diag(mR)", round(diag(mR), 2), "\n")
   return(f)
 }
 
@@ -208,9 +208,9 @@ vg.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
   # }
   
   # # cat("vg.GVA: dmLambda", dmLambda, "\n")
-  # vg[(1 + d):length(vtheta)] <- dmLambda[Rinds]
-  vg[(1 + d):length(vtheta)] <- dmLambda_check[Rinds]
-  #cat("vg.GVA: vg", vg, "norm", sqrt(sum(vg^2)), "\n")
+  vg[(1 + d):length(vtheta)] <- dmLambda[Rinds]
+  # vg[(1 + d):length(vtheta)] <- dmLambda_check[Rinds]
+  cat("vg.GVA: vg", round(vg, 2), "norm", sqrt(sum(vg^2)), "\n")
  
   return(vg)
 }
@@ -231,7 +231,7 @@ fit.GVA <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e-12
   #lower_constraint[(d + 1):length(vmu)] <- -15
   
   if (method == "L-BFGS-B") {
-    controls <- list(maxit=100, trace=0, fnscale=-1, REPORT=1, factr=1.0E-5, lmm=10)
+    controls <- list(maxit=100, trace=0, fnscale=-1, REPORT=1, factr=1.0E-5, lmm=10, reltol=reltol)
   } else if (method=="Nelder-Mead") {
     controls <- list(maxit=100000000, trace=0, fnscale=-1, REPORT=1, reltol=reltol) 
   } else {
@@ -350,7 +350,7 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
   vg[1:d] <- vg.G(vmu, vy, vr, mC, mSigma.inv, vB1) 
   
   mH <- mH.G(vmu, vy, vr, mC, mSigma.inv, vB2)
-  dmLambda <- 0.5 * (mLambda.inv + mH) %*% mR
+  dmLambda <- (mLambda.inv + mH) %*% mR
   # dmLambda <- (0.5 * tr(mLambda.inv) + mH)
   #dmLambda_dmR <- -solve(mLambda.inv, solve(mLambda.inv, mR))
   #dmLambda_dmR <- -solve(mLambda.inv, solve(mLambda.inv, (t(mR) + mR)))
@@ -370,13 +370,13 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
   #   vtheta_prime[(1+d):length(vtheta_prime)] <- mR_prime[Rinds]
   #   f.GVA_new(vtheta_prime, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
   # }
-  #dmR_check <- matrix(grad(func, as.vector(mR)), nrow(mR), ncol(mR))
+  # dmR_check <- matrix(grad(func, as.vector(mR)), nrow(mR), ncol(mR))
   
   # cat("GVA2 vmu", vmu[9:10], "\ndvmu", vg[9:10], "\nmR", mR[9:10, 9:10], "\ndmR", 
 		# 	dmR[9:10, 9:10]) #, "\ndmR_check", dmR_check[9:10, 9:10])
   
   vg[(1 + d):length(vtheta)] <- dmR[Rinds]    
-  #vg[(1+d):length(vtheta)] <- dmR_check[Rinds]    
+  # vg[(1+d):length(vtheta)] <- dmR_check[Rinds]    
   
   return(vg)
 }

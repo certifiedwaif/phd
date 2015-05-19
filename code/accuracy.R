@@ -136,6 +136,52 @@ test_accuracy <- function(mult, mcmc_samples, approximation, plot=FALSE)
   return(calculate_accuracies(mult, mcmc_samples, var_result, approximation, plot_flag=plot))
 }
 
+mcmc_means <- function(mult, mcmc_samples)
+{
+  mX <- mult$mX
+  mZ <- mult$mZ
+  
+  vbeta_means <- rep(NA, ncol(mX))
+  for (p in 1:ncol(mX)) {
+    vbeta_means[p] <- mean(mcmc_samples$vbeta[, p])
+  }
+
+  vu_means <- rep(NA, ncol(mZ))
+  for (m in 1:ncol(mZ)) {
+    vu_means[m] <- mean(mcmc_samples$vu[, m])
+  }
+
+  return(list(vbeta_means=vbeta_means,
+              vu_means=vu_means,
+              vmu=c(vbeta_means, vu_means)))
+}
+
+test_spline_accuracy <- function(mult, allKnots, mcmc_samples, approximation, plot=FALSE)
+{
+  var_result <- zero_infl_var(mult, method=approximation, verbose=TRUE)
+  # Calculate the mean for vbeta, vu
+  mcmc_means <- mcmc_means(mult, mcmc_samples)
+  # Construct a BSpline matrix over the range we wish to plot
+  # Plot the function using our MCMC and VB estimates
+  # mCtilde %*% vmu
+  xtilde <- seq(from=-1, to=1, by=1e-2)
+  result <- spline.des(allKnots, xtilde, derivs=rep(0, length(xtilde)), outer.ok=TRUE)
+  mC_tilde <- cbind(1, xtilde, result$design)
+  f_hat_vb <- mC_tilde %*% var_result$vmu
+  f_hat_mcmc <- mC_tilde %*% mcmc_means$vmu
+  # TODO: Plot true function as well
+  if (plot) {
+    plot(mult$mX[,2], mult$vy)
+    vf <- 4 + sin(pi * xtilde)
+    lines(xtilde, exp(vf), type="l", col="black")
+    lines(xtilde, exp(f_hat_mcmc), type="l", col="red")
+    lines(xtilde, exp(f_hat_vb), type="l", col="blue")
+    legend("topleft", c("True function", "MCMC", "VB"), fill=c("black", "red", "blue"))
+  }
+  #return(calculate_accuracies(mult, mcmc_samples, var_result, approximation, plot_flag=plot))
+  return()
+}
+
 # Calculate accuracy ----
 # Approximate the L1 norm between the variational approximation and
 # the MCMC approximation
@@ -244,15 +290,9 @@ test_accuracies_slope <- function()
   # seed <- 1
   # set.seed(seed)
   # mult <- generate_slope_test_data(m=20, ni=10)
-<<<<<<< HEAD
   # mcmc_samples <- mcmc_approximation(mult, seed=seed, iterations=1e5, warmup=1e4)
   # save(mult, mcmc_samples, file="data/accuracy_slope_2015_05_04.RData")  
   load(file="data/accuracy_slope_2015_05_04.RData")
-=======
-  # mcmc_samples <- mcmc_approximation(mult, seed=seed, iterations=2e4, warmup=1e3)
-  # save(mult, mcmc_samples, file="data/accuracy_slope_2015_05_05.RData")  
-  load(file="data/accuracy_slope_2015_05_05.RData")
->>>>>>> 4bd702bd48e4836a4be26632e368d7cdd2628895
   # load(file="data_macbook/accuracy_slope_2015_03_30.RData")
   
   now <- Sys.time()
@@ -283,22 +323,21 @@ test_accuracies_slope <- function()
 test_accuracies_spline <- function()
 {
   # Monte Carlo Markov Chains approximation
-  seed <- 1
-  set.seed(seed)
-  mult <- generate_spline_test_data()
-  # mcmc_samples <- mcmc_approximation(mult, seed=seed, iterations=2e4, warmup=1e3)
-  mcmc_samples <- mcmc_approximation(mult, seed=seed, iterations=1e6, warmup=1e4,
-                                     stan_file="multivariate_zip_splines.stan")
-  save(mult, mcmc_samples, file="data/accuracy_spline_2015_05_04.RData")
-  # load(file="data/accuracy_spline_2015_05_04.RData")  
-  # load(file="data/accuracy_spline_2015_04_23.RData")
-  # load(file="data_macbook/accuracy_slope_2015_03_30.RData")
-  # load(file="data/accuracy_spline_2015_04_16.RData")    
+  # seed <- 1
+  # set.seed(seed)
+  # result <- generate_spline_test_data()
+  # mult <- result$mult
+  # allKnots <- result$allKnots
+  # # mcmc_samples <- mcmc_approximation(mult, seed=seed, iterations=2e4, warmup=1e3)
+  # mcmc_samples <- mcmc_approximation(mult, seed=seed, iterations=1e5, warmup=1e3,
+  #                                    stan_file="multivariate_zip_splines.stan")
+  # save(mult, mcmc_samples, allKnots, file="data/accuracy_spline_2015_05_19.RData")
+  load(file="data/accuracy_spline_2015_05_19.RData")
   
-  now <- Sys.time()
-  var1 <- test_accuracy(mult, mcmc_samples, "laplace", plot=TRUE)
-  print(Sys.time() - now)
-  print(var1)
+  # now <- Sys.time()
+  # var1 <- test_accuracy(mult, mcmc_samples, "laplace", plot=TRUE)
+  # print(Sys.time() - now)
+  # print(var1)
   
   # now <- Sys.time()
   # var2 <- test_accuracy(mult, mcmc_samples, "gva", plot=TRUE)
@@ -312,10 +351,14 @@ test_accuracies_spline <- function()
   # #print(image(Matrix(var3$var_result$mLambda)))
   # print(var3)
 
-  now <- Sys.time()
-  var4 <- test_accuracy(mult, mcmc_samples, "gva_nr", plot=TRUE)
-  print(Sys.time() - now)
-  #print(image(Matrix(var4$var_result$mLambda)))
-  print(var4)
+  # now <- Sys.time()
+  # var4 <- test_accuracy(mult, mcmc_samples, "gva_nr", plot=TRUE)
+  # print(Sys.time() - now)
+  # #print(image(Matrix(var4$var_result$mLambda)))
+  # print(var4)
+
+  # John says I should look at the functions
+  test_spline_accuracy(mult, allKnots, mcmc_samples, "gva", plot=TRUE)
+  # test_spline_accuracy(mult, allKnots, mcmc_samples, "gva_nr", plot=TRUE)
 }
-# test_accuracies_spline()
+test_accuracies_spline()

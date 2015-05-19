@@ -196,6 +196,6 @@ generate_spline_test_data <- function(n=100)
   #   stop("The cross-product of mC is singular. Perhaps you repeated some basis vectors?")
   # }
   
-  return(mult)
+  return(list(mult=mult, allKnots=result$allKnots))
 }
 
