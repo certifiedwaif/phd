@@ -3,8 +3,11 @@ To Do list
 
 18/05/2015
 ----------
-- John said that BSpline models can be non-identifiable. I should check the chains, and
-	plot the functions based on the coefficients that I've fit.
+- John said that BSpline models can be non-identifiable.
+	* I should check the chains, and
+	* plot the functions based on the coefficients that I've fit.
+	How do I plot the functions? I have a vector of co-efficients, but haven't yet found out
+	how to evaluate the BSpline functions using them
 - Finish the report for Samuel Mueller.
 - Fill in roles.
 - Report missing mark for student.
