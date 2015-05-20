@@ -323,16 +323,18 @@ test_accuracies_slope <- function()
 test_accuracies_spline <- function()
 {
   # Monte Carlo Markov Chains approximation
-  # seed <- 1
-  # set.seed(seed)
-  # result <- generate_spline_test_data()
-  # mult <- result$mult
-  # allKnots <- result$allKnots
-  # # mcmc_samples <- mcmc_approximation(mult, seed=seed, iterations=2e4, warmup=1e3)
-  # mcmc_samples <- mcmc_approximation(mult, seed=seed, iterations=1e5, warmup=1e3,
-  #                                    stan_file="multivariate_zip_splines.stan")
-  # save(mult, mcmc_samples, allKnots, file="data/accuracy_spline_2015_05_19.RData")
-  load(file="data/accuracy_spline_2015_05_19.RData")
+  seed <- 1
+  set.seed(seed)
+  result <- generate_spline_test_data()
+  mult <- result$mult
+  allKnots <- result$allKnots
+  mcmc_result <- mcmc_approximation(mult, seed=seed, iterations=1e5, warmup=1e3,
+                                    stan_file="multivariate_zip_splines.stan")
+  mcmc_samples <- mcmc_result$mcmc_samples
+  fit <- mcmc_result$fit
+  print(fit)
+  save(mult, mcmc_samples, fit, allKnots, file="data/accuracy_spline_2015_05_19.RData")
+  # load(file="data/accuracy_spline_2015_05_19.RData")
   
   # now <- Sys.time()
   # var1 <- test_accuracy(mult, mcmc_samples, "laplace", plot=TRUE)

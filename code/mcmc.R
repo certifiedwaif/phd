@@ -28,5 +28,6 @@ mcmc_approximation <- function(mult, seed=1, iterations=NA, warmup=NA, mc.cores=
 	fit <- stan(stan_file, seed=seed, data=zip_data, iter=iterations, warmup=warmup, chains=1)
   mcmc_samples <- extract(fit)
 
-  return(mcmc_samples)
+  return(list(fit=fit,
+              mcmc_samples=mcmc_samples))
 }
