@@ -153,6 +153,50 @@ vg.GVA.approx <- function(vmu, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
 	return(vg.approx)
 }
 
+vtheta_enc <- function(vmu, mR)
+{
+  diag(mR) <- log(diag(mR))
+  Rinds <- which(lower.tri(mR, diag=TRUE))
+  c(vmu, mR[Rinds])
+}
+
+vtheta_dec <- function(vtheta, d)
+{
+  vmu <- vtheta[1:d]
+  mR <- matrix(0, d, d)
+  Rinds <- which(lower.tri(mR, diag=TRUE))
+  mR[Rinds] <- vtheta[(d + 1):length(vtheta)]
+  diag(mR) <- exp(diag(mR))
+  return(list(vmu=vmu, mR=mR))
+}
+
+vg.GVA.mat_approx <- function(vmu, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
+{
+  n <- length(vy)
+  P <- length(vmu)
+  d <- ncol(mC)
+  eps <- 1.0E-6
+  f <- f.GVA(vmu, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
+  vg.approx <- matrix(0, P, P)
+  for (i in 1:d) {
+    for (j in 1:d) {
+      mRp <- mR 
+      mRp[i, j] <- mR[i, j] + eps
+      vtheta <- vtheta_enc(vmu, mRp)
+      fp <- f.GVA(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
+
+      mRm <- mR 
+      mRm[i, j] <- mR[i, j] - eps
+      vtheta <- vtheta_enc(vmu, mRm)
+      fm <- f.GVA(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
+
+      vg.approx[i, j] <- (fp - fm) / (2 * eps)
+    }
+  }
+  return(vg.approx)
+}
+
+
 vg.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
 {
   d <- ncol(mC)
