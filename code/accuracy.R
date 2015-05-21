@@ -1,26 +1,57 @@
 # accuracy.R
 source("zero_inflated_model.R")
 source("generate.R")
-source("mcmc.R")
+library(rstan)
+
+# Andrew Gelman says that this magical line of code automatically makes Stan
+# run in parallel and cache compiled models.
+# Two minutes later: Hey, it actually works!
+# Some time later: Sometimes it works.
+#source("http://mc-stan.org/rstan/stan.R")
+mcmc_approximation <- function(mult, seed=1, iterations=NA, warmup=NA, mc.cores=1,
+                               stan_file="multivariate_zip.stan")
+{
+  # Use Stan to create MCMC samples, because Stan deals much better with highly
+  # correlated posteriors.
+  m <- mult$m
+  blocksize <- mult$blocksize
+  spline_dim <- mult$spline_dim
+  mX <- mult$mX
+  mZ <- mult$mZ
+  vy <- mult$vy
+  mPsi <- mult$prior$mPsi
+  v <- mult$prior$v
+  mSigma.beta <- mult$mSigma.beta
+  
+  zip_data <- list(N=length(vy), P=2, M=m, B=blocksize, spline_dim=spline_dim,
+                   y=vy, X=mX, Z=as.matrix(mZ),
+                   v=v, psi=mPsi, BetaPrior=mSigma.beta)
+
+  fit <- stan(stan_file, seed=seed, data=zip_data, iter=iterations, warmup=warmup, chains=1)
+  mcmc_samples <- extract(fit)
+
+  return(list(fit=fit,
+              mcmc_samples=mcmc_samples))
+}
 
 calculate_accuracy <- function(mcmc_samples, dist_fn, param1, param2)
 {
-  mcmc_density = density(mcmc_samples)
-  mcmc_fn = splinefun(mcmc_density$x, mcmc_density$y)
+  mcmc_density <- density(mcmc_samples)
+  mcmc_fn <- splinefun(mcmc_density$x, mcmc_density$y)
   
   integrand <- function(x)
   {
     return(abs(mcmc_fn(x) - dist_fn(x, param1, param2)))
   }
-  result = integrate(integrand, min(mcmc_density$x), max(mcmc_density$x),
+  result <- integrate(integrand, min(mcmc_density$x), max(mcmc_density$x),
                      subdivisions = length(mcmc_density$x))
-  accuracy = 1 - .5 * result$value
+  accuracy <- 1 - .5 * result$value
   return(accuracy)
 }
 
 accuracy_plot <- function(mcmc_samples, dist_fn, param1, param2)
 {
-  mcmc_density = density(mcmc_samples)
+  mcmc_density <- density(mcmc_samples)
   plot(mcmc_density)
   curve(dist_fn(x, param1, param2),
         from=min(mcmc_density$x), to=max(mcmc_density$x),
@@ -130,12 +161,8 @@ calculate_accuracies <- function(mult, mcmc_samples, var_result, approximation, 
               rho_accuracy=rho_accuracy))
 }
 
-test_accuracy <- function(mult, mcmc_samples, approximation, plot=FALSE)
-{
-  var_result = zero_infl_var(mult, method=approximation, verbose=TRUE)
-  return(calculate_accuracies(mult, mcmc_samples, var_result, approximation, plot_flag=plot))
-}
-
+# FIXME: This function should be unnecessary. Stan's fit object already contains this
+# information and more.
 mcmc_means <- function(mult, mcmc_samples)
 {
   mX <- mult$mX
@@ -182,31 +209,6 @@ test_spline_accuracy <- function(mult, allKnots, mcmc_samples, approximation, pl
   return()
 }
 
-# Calculate accuracy ----
-# Approximate the L1 norm between the variational approximation and
-# the MCMC approximation
-calculate_univariate_accuracy <- function(result_mcmc, var_result)
-{
-  density_mcmc_rho = density(result_mcmc$vrho)
-  integrand <- function(x)
-  {
-    fn = splinefun(density_mcmc_rho$x, density_mcmc_rho$y)
-    return(abs(fn(x) - dbeta(x, var_result$a_rho, var_result$b_rho)))
-  }
-  result = integrate(integrand, min(density_mcmc_rho$x), max(density_mcmc_rho$x), subdivisions = length(density_mcmc_rho$x))
-  rho_accuracy = 1 - .5 * result$value
-  
-  density_mcmc_lambda = density(result_mcmc$vlambda)
-  integrand <- function(x)
-  {
-    fn = splinefun(density_mcmc_lambda$x, density_mcmc_lambda$y)
-    return(abs(fn(x) - dgamma(x, var_result$a_lambda, var_result$b_lambda)))
-  }
-  result = integrate(integrand, min(density_mcmc_lambda$x), max(density_mcmc_lambda$x), subdivisions = length(density_mcmc_lambda$x))
-  lambda_accuracy = 1 - .5 * result$value
-  return(list(rho_accuracy=rho_accuracy, lambda_accuracy=lambda_accuracy))
-}
-
 test_accuracies <- function()
 {
   # Need to be able to compare the solution paths of each approximation
@@ -234,53 +236,33 @@ test_accuracies <- function()
   #load(file="accuracy.RData")
   
   # Test multivariate approximation's accuracy
-  now = Sys.time()
-  var1 = test_accuracy(mult, mcmc_samples, "laplace")
+  now <- Sys.time()
+  var1_result <- zero_infl_var(mult, method="laplace", verbose=TRUE)
+  var1_accuracy <- calculate_accuracies(mult, mcmc_samples, var1_result, "laplace", plot_flag=plot)
   print(Sys.time() - now)
   #print(image(Matrix(var1$var_result$mLambda)))
-  print(var1)
+  print(var1_accuracy)
   
-  now = Sys.time()
-  var2 = test_accuracy(mult, mcmc_samples, "gva")
+  now <- Sys.time()
+  var2_result <- zero_infl_var(mult, method="gva", verbose=TRUE)
+  var2_accuracy <- calculate_accuracies(mult, mcmc_samples, var2_result, "gva", plot_flag=plot)
   print(Sys.time() - now)
   #print(image(Matrix(var2$var_result$mLambda)))
-  print(var2)
-  
-  now = Sys.time()
-  var3 = test_accuracy(mult, mcmc_samples, "gva2", plot=TRUE)
+  print(var2_accuracy)
+
+  now <- Sys.time()
+  var3_result <- zero_infl_var(mult, method="gva2", verbose=TRUE)
+  var3_accuracy <- calculate_accuracies(mult, mcmc_samples, var3_result, "gva2", plot_flag=plot)
   print(Sys.time() - now)
-  #print(image(Matrix(var3$mLambda)))
-  print(var3)
-  
-  #Rprof()
-  #now = Sys.time()
-  #var4 = test_accuracy(mult, mcmc_samples, "gva2new")
-  #print(Sys.time() - now)
+  #print(image(Matrix(var3$var_result$mLambda)))
+  print(var3_accuracy)
+
+  now <- Sys.time()
+  var4_result <- zero_infl_var(mult, method="gva_nr", verbose=TRUE)
+  var4_accuracy <- calculate_accuracies(mult, mcmc_samples, var4_result, "gva_nr", plot_flag=plot)
+  print(Sys.time() - now)
   #print(image(Matrix(var4$var_result$mLambda)))
-  #print(var4)
-  
-  #Rprof(NULL)
-  #print(summaryRprof())
-  #print(image(Matrix(var3_new$mLambda)))
-  
-  now = Sys.time()
-  var5 = test_accuracy(mult, mcmc_samples, "gva_nr")
-  print(Sys.time() - now)
-  #print(image(Matrix(var4$result_var$mLambda)))
-  print(var5)
-  
-  #save(var1, var2, var3, var4, var5, file="accuracy_results_int.RData")
-  #for (i in 1:100) {
-  #  set.seed(i)
-  #  mult = generate_test_data(20, 100)
-  #  mcmc_samples = mcmc_approximation(mult, iterations=1e4)
-  #  
-  #  var1 = test_accuracy(mult, mcmc_samples, "laplace")
-  #  var2 = test_accuracy(mult, mcmc_samples, "gva")
-  #  var3 = test_accuracy(mult, mcmc_samples, "gva2")
-  #  var4 = test_accuracy(mult, mcmc_samples, "gva_nr")
-  #}
-  
+  print(var4_accuracy)
 }
 #test_accuracies()
 
@@ -296,27 +278,32 @@ test_accuracies_slope <- function()
   # load(file="data_macbook/accuracy_slope_2015_03_30.RData")
   
   now <- Sys.time()
-  var1 <- test_accuracy(mult, mcmc_samples, "laplace", plot=TRUE)
+  var1_result <- zero_infl_var(mult, method="laplace", verbose=TRUE)
+  var1_accuracy <- calculate_accuracies(mult, mcmc_samples, var1_result, "laplace", plot_flag=plot)
   print(Sys.time() - now)
-  print(var1)
+  #print(image(Matrix(var1$var_result$mLambda)))
+  print(var1_accuracy)
   
   now <- Sys.time()
-  var2 <- test_accuracy(mult, mcmc_samples, "gva", plot=TRUE)
+  var2_result <- zero_infl_var(mult, method="gva", verbose=TRUE)
+  var2_accuracy <- calculate_accuracies(mult, mcmc_samples, var2_result, "gva", plot_flag=plot)
   print(Sys.time() - now)
   #print(image(Matrix(var2$var_result$mLambda)))
-  print(var2)
-  
-  now <- Sys.time()
-  var3 <- test_accuracy(mult, mcmc_samples, "gva2", plot=TRUE)
-  print(Sys.time() - now)
-  #print(image(Matrix(var3$var_result$mLambda)))
-  print(var3)
+  print(var2_accuracy)
 
   now <- Sys.time()
-  var4 <- test_accuracy(mult, mcmc_samples, "gva_nr", plot=TRUE)
+  var3_result <- zero_infl_var(mult, method="gva2", verbose=TRUE)
+  var3_accuracy <- calculate_accuracies(mult, mcmc_samples, var3_result, "gva2", plot_flag=plot)
+  print(Sys.time() - now)
+  #print(image(Matrix(var3$var_result$mLambda)))
+  print(var3_accuracy)
+
+  now <- Sys.time()
+  var4_result <- zero_infl_var(mult, method="gva_nr", verbose=TRUE)
+  var4_accuracy <- calculate_accuracies(mult, mcmc_samples, var4_result, "gva_nr", plot_flag=plot)
   print(Sys.time() - now)
   #print(image(Matrix(var4$var_result$mLambda)))
-  print(var4)
+  print(var4_accuracy)
 }
 # test_accuracies_slope()
 
