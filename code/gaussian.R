@@ -470,7 +470,6 @@ fit.GVA_new <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0
 
   mR <- t(chol(solve(mLambda, tol=1.0E-99)))
   vtheta <- vtheta_enc(vmu, mR)
-  P <- length(vmu)
 
   if (method == "L-BFGS-B") {
     controls <- list(maxit=1000, trace=0, fnscale=-1, REPORT=1, factr=1.0E-5, lmm=10)
@@ -479,7 +478,7 @@ fit.GVA_new <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0
   } else {
     controls <- list(maxit=1000, trace=0, fnscale=-1, REPORT=1, reltol=reltol) 
   }
-  res <- optim(par=vmu, fn=f.GVA_new, gr=vg.GVA_new, 
+  res <- optim(par=vtheta, fn=f.GVA_new, gr=vg.GVA_new, 
                method=method, upper=Inf, control=controls, 
                vy=vy, vr=vr, mC=mC, mSigma.inv=mSigma.inv,
                gh=gh2, mR=mR*0, Rinds=Rinds, Dinds=Dinds)        
