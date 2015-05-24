@@ -1,6 +1,15 @@
 To Do list
 ==========
 
+25/05/2015
+----------
+- Finish draft of Progress Report, and send it to Samuel
+- Continue investigating matrix derivative in GVA algorithm
+- Prepare presentation of progress
+  Show spline fits
+  Show effective sample sizes
+
+
 18/05/2015
 ----------
 - John said that BSpline models can be non-identifiable.
