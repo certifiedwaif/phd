@@ -279,7 +279,7 @@ test_accuracies_slope <- function()
   
   now <- Sys.time()
   var1_result <- zero_infl_var(mult, method="laplace", verbose=TRUE)
-  var1_accuracy <- calculate_accuracies(mult, mcmc_samples, var1_result, "laplace", plot_flag=plot)
+  var1_accuracy <- calculate_accuracies(mult, mcmc_samples, var1_result, "laplace", plot_flag=TRUE)
   print(Sys.time() - now)
   #print(image(Matrix(var1$var_result$mLambda)))
   print(var1_accuracy)
@@ -310,18 +310,18 @@ test_accuracies_slope <- function()
 test_accuracies_spline <- function()
 {
   # Monte Carlo Markov Chains approximation
-  seed <- 1
-  set.seed(seed)
-  result <- generate_spline_test_data()
-  mult <- result$mult
-  allKnots <- result$allKnots
-  mcmc_result <- mcmc_approximation(mult, seed=seed, iterations=1e5, warmup=1e3,
-                                    stan_file="multivariate_zip_splines.stan")
-  mcmc_samples <- mcmc_result$mcmc_samples
-  fit <- mcmc_result$fit
-  print(fit)
-  save(mult, mcmc_samples, fit, allKnots, file="data/accuracy_spline_2015_05_19.RData")
-  # load(file="data/accuracy_spline_2015_05_19.RData")
+  # seed <- 1
+  # set.seed(seed)
+  # result <- generate_spline_test_data()
+  # mult <- result$mult
+  # allKnots <- result$allKnots
+  # mcmc_result <- mcmc_approximation(mult, seed=seed, iterations=1e5, warmup=1e3,
+  #                                   stan_file="multivariate_zip_splines.stan")
+  # mcmc_samples <- mcmc_result$mcmc_samples
+  # fit <- mcmc_result$fit
+  # print(fit)
+  # save(mult, mcmc_samples, fit, allKnots, file="data/accuracy_spline_2015_05_19.RData")
+  load(file="data/accuracy_spline_2015_05_19.RData")
   
   # now <- Sys.time()
   # var1 <- test_accuracy(mult, mcmc_samples, "laplace", plot=TRUE)
@@ -347,7 +347,7 @@ test_accuracies_spline <- function()
   # print(var4)
 
   # John says I should look at the functions
-  test_spline_accuracy(mult, allKnots, mcmc_samples, "gva", plot=TRUE)
+  test_spline_accuracy(mult, allKnots, mcmc_samples, "gva2", plot=TRUE)
   # test_spline_accuracy(mult, allKnots, mcmc_samples, "gva_nr", plot=TRUE)
 }
 test_accuracies_spline()
