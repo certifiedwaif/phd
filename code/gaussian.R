@@ -92,7 +92,7 @@ vtheta_dec <- function(vtheta, d)
   Rinds <- which(lower.tri(mR, diag=TRUE))
   mR[Rinds] <- vtheta[(d + 1):length(vtheta)]
   diag(mR) <- exp(diag(mR))
-  diag(mR) <- min(c(1.0E3, diag(mR)))
+  # diag(mR) <- min(c(1.0E3, diag(mR)))
   return(list(vmu=vmu, mR=mR, Rinds=Rinds))
 }
 
@@ -123,9 +123,9 @@ f.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
   mLambda <- tcrossprod(mR)
   
   # cat("sum(log(diag(mR))): ", sum(log(diag(mR))), "\n") 
-  # f <- sum(log(diag(mR))) + f.G(vmu, mLambda, vy, vr, mC, mSigma.inv, gh)
+  f <- -0.5 * sum(log(diag(mR))) + f.G(vmu, mLambda, vy, vr, mC, mSigma.inv, gh)
   # It's something to do with this first term. 
-  f <- -0.5 * log(det(mLambda)) + f.G(vmu, mLambda, vy, vr, mC, mSigma.inv, gh)
+  # f <- -0.5 * log(det(mLambda)) + f.G(vmu, mLambda, vy, vr, mC, mSigma.inv, gh)
   f <- f + 0.5 * d * log(2 * pi) + 0.5 * d
   
   if (!is.finite(f)) {
@@ -217,12 +217,12 @@ vg.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
 
   mLambda.inv <- solve(mLambda, tol=1e-99)
   mH <- mH.G(vmu, vy, vr, mC, mSigma.inv, vB2)
-  dmLambda <- (-mLambda.inv + mH) %*% mR
+  dmLambda <- (-0.5 * mLambda.inv + mH) %*% mR
   # dmLambda <- 0.5 * (mLambda.inv + mH) %*% mR
   # dmLambda <- (0.5 * tr(mLambda.inv) + mH) %*% mR
   #cat("GVA mLambda", mLambda[1:2, 1:2], "dmLambda", dmLambda[1:2, 1:2], "\n")
   
-  diag(dmLambda) <- diag(dmLambda) * diag(mR)
+  #diag(dmLambda) <- diag(dmLambda) * diag(mR)
   # dmLambda_tmp <- matrix(0, d, d)
   # dmLambda_tmp[Rinds] <- dmLambda[Rinds]
   # dmLambda <- dmLambda_tmp
@@ -233,12 +233,12 @@ vg.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
    dmLambda <- matrix(0, d, d)
   }
 
-  if (any(abs(dmLambda[Rinds] - dmLambda_check[Rinds]) > 1e-6)) {
+  if (any(abs(dmLambda[Rinds] - dmLambda_check[Rinds]) > 1)) {
     cat("Analytic and numeric derivatives disagree.\n")
     # print(round(dmLambda, 2))
     # print(round(dmLambda_check, 2))
-    # print(round(dmLambda - dmLambda_check, 2))
-    print(round(diag(dmLambda - dmLambda_check), 2))
+    print(round(dmLambda - dmLambda_check, 2))
+    # print(round(diag(dmLambda - dmLambda_check), 2))
     # browser()
   } else {
     cat("Analytic and numeric derivatives agree.\n")
