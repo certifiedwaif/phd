@@ -5,7 +5,6 @@ library(limma)
 library(Matrix)
 library(Rcpp)
 library(RcppEigen)
-library(numDeriv)
 library(digest)
 
 source("CalculateB.R")
@@ -105,7 +104,10 @@ f.G <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, gh)
   vmu.til     <- mC %*% vmu
   vsigma2.til <- fastdiag(mC, mLambda)
   vB0 <- B0.fun("POISSON", vmu.til, vsigma2.til, gh) 
-  
+  # cat("sum(vr * (vy * vmu.til - vB0)): ", sum(vr * (vy * vmu.til - vB0)), "\n")
+  # cat("0.5 * t(vmu) %*% mSigma.inv %*% vmu:", 0.5 * t(vmu) %*% mSigma.inv %*% vmu, "\n")
+  # cat("0.5 * tr(mSigma.inv %*% mLambda)", 0.5 * tr(mSigma.inv %*% mLambda), "\n")
+  # cat("0.5 * log(det(mSigma.inv))", log(det(mSigma.inv)), "\n")
   f <- sum(vr * (vy * vmu.til - vB0)) - 0.5 * t(vmu) %*% mSigma.inv %*% vmu - 0.5 * tr(mSigma.inv %*% mLambda)
   f <- f - 0.5 * d * log(2 * pi) + 0.5 * log(det(mSigma.inv)) 
   return(f)
@@ -119,8 +121,11 @@ f.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
   mR <- decode$mR
   
   mLambda <- tcrossprod(mR)
-   
-  f <- sum(log(diag(mR))) + f.G(vmu, mLambda, vy, vr, mC, mSigma.inv, gh) 
+  
+  # cat("sum(log(diag(mR))): ", sum(log(diag(mR))), "\n") 
+  # f <- sum(log(diag(mR))) + f.G(vmu, mLambda, vy, vr, mC, mSigma.inv, gh)
+  # It's something to do with this first term. 
+  f <- -0.5 * log(det(mLambda)) + f.G(vmu, mLambda, vy, vr, mC, mSigma.inv, gh)
   f <- f + 0.5 * d * log(2 * pi) + 0.5 * d
   
   if (!is.finite(f)) {
@@ -140,60 +145,55 @@ mH.G <- function(vmu, vy, vr, mC, mSigma.inv, vB2)
 {
   vw <-  vB2
   dim(vw) <- NULL
-  mH <- -t(mC * (vr * vw)) %*% (mC) - 0.5 * tr(mSigma.inv)
+  # cat("- 0.5 * tr(mSigma.inv)", - 0.5 * tr(mSigma.inv), "\n")
+  mH <- -t(mC * (vr * vw)) %*% (mC) - mSigma.inv
   return(mH)    
 }
 
 vg.GVA.approx <- function(vmu, vy, vr, mC, mSigma.inv, gh)
 {
   n <- length(vy)
-  P <- length(vmu)
   d <- ncol(mC)
 	eps <- 1.0E-6
-	f <- f.GVA(vmu, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
-	vg.approx <- matrix(0, P, 1)
-	for (i in 1:P) {
+	f <- f.GVA(vmu, vy, vr, mC, mSigma.inv, gh)
+	vg.approx <- matrix(0, dmLambda_check, 1)
+	for (i in 1:d) {
 		vmup <- vmu 
 		vmup[i] <- vmu[i] + eps
-		fp <- f.GVA(vmup, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
+		fp <- f.GVA(vmup, vy, vr, mC, mSigma.inv, gh)
 
 		vmum <- vmu 
 		vmum[i] <- vmu[i] - eps
-		fm <- f.GVA(vmum, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
+		fm <- f.GVA(vmum, vy, vr, mC, mSigma.inv, gh)
 
 		vg.approx[i] <- (fp - fm) / (2 * eps)
 	}
 	return(vg.approx)
 }
 
-
-vg.GVA.mat_approx <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
+vg.GVA.mat_approx <- function(vmu, mR, vy, vr, mC, mSigma.inv, gh)
 {
   d <- ncol(mC)
-  decode <- vtheta_dec(vtheta, d)
-  vmu <- decode$vmu
-  mR <- decode$mR
-  
+
   eps <- 1.0E-6
   vg.approx <- matrix(0, d, d)
+  mR_copy <- mR
   for (i in 1:d) {
     for (j in 1:d) {
-      mRp <- mR 
-      mRp[i, j] <- mR[i, j] + eps
-      vtheta <- vtheta_enc(vmu, mRp)
+      mR_copy[i, j] <- mR_copy[i, j] + eps
+      vtheta <- vtheta_enc(vmu, mR_copy)
       fp <- f.GVA(vtheta, vy, vr, mC, mSigma.inv, gh)
 
-      mRm <- mR 
-      mRm[i, j] <- mR[i, j] - eps
-      vtheta <- vtheta_enc(vmu, mRm)
+      mR_copy[i, j] <- mR_copy[i, j] - 2 * eps
+      vtheta <- vtheta_enc(vmu, mR_copy)
       fm <- f.GVA(vtheta, vy, vr, mC, mSigma.inv, gh)
+      mR_copy[i, j] <- mR_copy[i, j] + eps
 
       vg.approx[i, j] <- (fp - fm) / (2 * eps)
     }
   }
   return(vg.approx)
 }
-
 
 vg.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
 {
@@ -212,43 +212,36 @@ vg.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
   vB1 <- res.B12$vB1
   vB2 <- res.B12$vB2
   
-  vg <- 0*vmu
+  vg <- rep(0, length(vtheta))
   vg[1:d] <- vg.G(vmu, vy, vr, mC, mSigma.inv, vB1) 
 
   mLambda.inv <- solve(mLambda, tol=1e-99)
   mH <- mH.G(vmu, vy, vr, mC, mSigma.inv, vB2)
-  dmLambda <- (mLambda.inv + mH) %*% mR
+  dmLambda <- (-mLambda.inv + mH) %*% mR
   # dmLambda <- 0.5 * (mLambda.inv + mH) %*% mR
   # dmLambda <- (0.5 * tr(mLambda.inv) + mH) %*% mR
   #cat("GVA mLambda", mLambda[1:2, 1:2], "dmLambda", dmLambda[1:2, 1:2], "\n")
   
   diag(dmLambda) <- diag(dmLambda) * diag(mR)
+  # dmLambda_tmp <- matrix(0, d, d)
+  # dmLambda_tmp[Rinds] <- dmLambda[Rinds]
+  # dmLambda <- dmLambda_tmp
 
   # Check derivative numerically
-  func <- function(x)
-  {
-    mR_prime <- matrix(x, nrow(mR), ncol(mR))
-    diag(mR_prime) <- log(diag(mR_prime))
-    d <- ncol(mC)
-    vtheta_prime <- 0 * vtheta
-    vtheta_prime[1:d] <- vmu    
-    vtheta_prime[(1+d):length(vtheta_prime)] <- mR_prime[Rinds]
-    f.GVA(vtheta_prime, vy, vr, mC, mSigma.inv, gh)
-  }
-  dmLambda_check <- matrix(grad(func, as.vector(mR)), nrow(mR), ncol(mR))
+  dmLambda_check <- vg.GVA.mat_approx(vmu, mR, vy, vr, mC, mSigma.inv, gh)
   if (any(!is.finite(dmLambda) || is.nan(dmLambda))) {
    dmLambda <- matrix(0, d, d)
   }
-  # I'm not sure that I believe this
-  # Go back to John's simpler matrix derivative code and check with that
-  
 
   if (any(abs(dmLambda[Rinds] - dmLambda_check[Rinds]) > 1e-6)) {
     cat("Analytic and numeric derivatives disagree.\n")
-    print(round(dmLambda, 2))
-    print(round(dmLambda_check, 2))
-    print(round(dmLambda - dmLambda_check, 2))
+    # print(round(dmLambda, 2))
+    # print(round(dmLambda_check, 2))
+    # print(round(dmLambda - dmLambda_check, 2))
+    print(round(diag(dmLambda - dmLambda_check), 2))
     # browser()
+  } else {
+    cat("Analytic and numeric derivatives agree.\n")
   }
   
   # # cat("vg.GVA: dmLambda", dmLambda, "\n")
@@ -270,7 +263,7 @@ fit.GVA <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e-12
   #lower_constraint[(d + 1):length(vmu)] <- -15
   
   if (method == "L-BFGS-B") {
-    controls <- list(maxit=100, trace=0, fnscale=-1, REPORT=1, factr=1.0E-5, lmm=10, pgtol=reltol)
+    controls <- list(maxit=100, trace=6, fnscale=-1, REPORT=1, factr=1.0E-5, lmm=10, pgtol=reltol)
   } else if (method=="Nelder-Mead") {
     controls <- list(maxit=100000000, trace=0, fnscale=-1, REPORT=1, reltol=reltol) 
   } else {
@@ -297,6 +290,7 @@ calc_cache <- function(hash, vtheta, mC)
   decode <- vtheta_dec(vtheta, d)
   vmu <- decode$vmu
   mR <- decode$mR
+  Rinds <- decode$Rinds
   
   mLambda.inv <- tcrossprod(mR)
 
@@ -305,7 +299,7 @@ calc_cache <- function(hash, vtheta, mC)
   vsigma2.til <- colSums(va^2)
 
   return(list(hash=hash, vmu=vmu,
-              mR=mR, mLambda.inv=mLambda.inv,
+              mR=mR, Rinds=Rinds, mLambda.inv=mLambda.inv,
               vmu.til=vmu.til, vsigma2.til=vsigma2.til))
 }
 
@@ -373,6 +367,7 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
   }
   vmu <- cache$vmu
   mR <- cache$mR
+  Rinds <- cache$Rinds
   mLambda.inv <- cache$mLambda.inv
   vmu.til <- cache$vmu.til
   vsigma2.til <- cache$vsigma2.til
@@ -396,16 +391,6 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
   dmR[Dinds] <- dmR[Dinds] * mR[Dinds]
 
   # Check derivative numerically
-  # func <- function(x)
-  # {
-  #   mR_prime <- matrix(x, nrow(mR), ncol(mR))
-  #   #mR_prime[Dinds] <- log(mR_prime[Dinds])
-  #   d <- ncol(mC)
-  #   vtheta_prime <- 0 * vtheta
-  #   vtheta_prime[1:d] <- vmu    
-  #   vtheta_prime[(1+d):length(vtheta_prime)] <- mR_prime[Rinds]
-  #   f.GVA_new(vtheta_prime, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
-  # }
   # dmR_check <- matrix(grad(func, as.vector(mR)), nrow(mR), ncol(mR))
   
   # cat("GVA2 vmu", vmu[9:10], "\ndvmu", vg[9:10], "\nmR", mR[9:10, 9:10], "\ndmR", 
