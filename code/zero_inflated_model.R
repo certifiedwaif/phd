@@ -3,20 +3,6 @@ library(limma)
 source("common.R")
 source("gaussian.R")
 
-gamma_entropy <- function(alpha, beta)
-{
-  alpha - log(beta) + lgamma(alpha) - (alpha - 1) * digamma(alpha)
-}
-
-beta_entropy <- function(alpha, beta)
-{
-  lbeta(alpha, beta) - (alpha - 1) * digamma(alpha) - (beta - 1) * digamma(beta) + (alpha + beta - 2) * digamma(alpha + beta)
-} 
-
-lgammap <- function(a, p)
-{
-  .25 * p * (p - 1) * log(pi) + sum(lgamma(a + .5 * (1 - 1:p)))
-}
 
 calculate_lower_bound <- function(mult, verbose=FALSE)
 {
@@ -182,9 +168,10 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
   
   i <- 0
   # Iterate ----
-  #while ((i <= 1) || is.nan(vlower_bound[i] - vlower_bound[i - 1]) ||
-  #      (vlower_bound[i] > vlower_bound[i - 1])) {
-  for (i in 1:MAXITER) {
+  # TODO: Add check on whether parameters are still changing
+  while ((i <= 1) || is.nan(vlower_bound[i] - vlower_bound[i - 1]) ||
+        (vlower_bound[i] > vlower_bound[i - 1])) {
+  #for (i in 1:MAXITER) {
     if (i >= MAXITER) {
       cat("Iteration limit reached, breaking ...")
       break
