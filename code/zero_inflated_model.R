@@ -140,7 +140,7 @@ create_mult <- function(vy, mX, mZ, sigma2.beta, m=ncol(mZ), blocksize=1, spline
 
 zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE)
 {
-  MAXITER <- 1000
+  MAXITER <- 5
   
   # Initialise variables from mult
   N <- length(mult$vy)
@@ -206,6 +206,7 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
     } else if (method == "gva") {	
       fit_lap <- fit.Lap(vmu, vy, vp, mC, mSigma.inv, mLambda)
       fit1 <- fit.GVA(fit_lap$vmu, fit_lap$mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B")
+      # fit1 <- fit.GVA(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B")
     } else if (method == "gva2") {
       fit_lap <- fit.Lap(vmu, vy, vp, mC, mSigma.inv, mLambda)
       fit1 <- fit.GVA_new(fit_lap$vmu, fit_lap$mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B", p=p, m=m,
