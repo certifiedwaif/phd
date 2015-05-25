@@ -1,6 +1,11 @@
 To Do list
 ==========
 
+21/05/2015
+----------
+- GVA succeeds on the spline test case after five iterations
+- GVA2 currently fails with a non-finite value supplied by optim
+
 18/05/2015
 ----------
 - John said that BSpline models can be non-identifiable.
