@@ -1,12 +1,6 @@
 To Do list
 ==========
 
-<<<<<<< HEAD
-21/05/2015
-----------
-- GVA succeeds on the spline test case after five iterations
-- GVA2 currently fails with a non-finite value supplied by optim
-=======
 25/05/2015
 ----------
 - Finish draft of Progress Report, and send it to Samuel
@@ -15,7 +9,10 @@ To Do list
   Show spline fits
   Show effective sample sizes
 
->>>>>>> ac2c6c67046994cba0276a1bcbeb4a7cd7a899cc
+21/05/2015
+----------
+- GVA succeeds on the spline test case after five iterations
+- GVA2 currently fails with a non-finite value supplied by optim
 
 18/05/2015
 ----------
