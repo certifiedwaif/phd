@@ -5,9 +5,16 @@ To Do list
 ----------
 - Finish draft of Progress Report, and send it to Samuel
 - Continue investigating matrix derivative in GVA algorithm
+	The matrix derivative seems definitely wrong.
+	I have some ideas as to why, but my attempts to fix it have just left me more confused.
+- The use of vtheta in various places in the code base is getting in my way. I'm
+	going to make sure that vtheta is only a parameter in functions which get called directly by
+	optim.
 - Prepare presentation of progress
   Show spline fits
   Show effective sample sizes
+
+  The meeting was cancelled today
 
 21/05/2015
 ----------
