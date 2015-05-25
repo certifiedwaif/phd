@@ -104,10 +104,6 @@ f.G <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, gh)
   vmu.til     <- mC %*% vmu
   vsigma2.til <- fastdiag(mC, mLambda)
   vB0 <- B0.fun("POISSON", vmu.til, vsigma2.til, gh) 
-  # cat("sum(vr * (vy * vmu.til - vB0)): ", sum(vr * (vy * vmu.til - vB0)), "\n")
-  # cat("0.5 * t(vmu) %*% mSigma.inv %*% vmu:", 0.5 * t(vmu) %*% mSigma.inv %*% vmu, "\n")
-  # cat("0.5 * tr(mSigma.inv %*% mLambda)", 0.5 * tr(mSigma.inv %*% mLambda), "\n")
-  # cat("0.5 * log(det(mSigma.inv))", log(det(mSigma.inv)), "\n")
   f <- sum(vr * (vy * vmu.til - vB0)) - 0.5 * t(vmu) %*% mSigma.inv %*% vmu - 0.5 * tr(mSigma.inv %*% mLambda)
   f <- f - 0.5 * d * log(2 * pi) + 0.5 * log(det(mSigma.inv)) 
   return(f)
@@ -122,10 +118,7 @@ f.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
   
   mLambda <- tcrossprod(mR)
   
-  # cat("sum(log(diag(mR))): ", sum(log(diag(mR))), "\n") 
   f <- -0.5 * sum(log(diag(mR))) + f.G(vmu, mLambda, vy, vr, mC, mSigma.inv, gh)
-  # It's something to do with this first term. 
-  # f <- -0.5 * log(det(mLambda)) + f.G(vmu, mLambda, vy, vr, mC, mSigma.inv, gh)
   f <- f + 0.5 * d * log(2 * pi) + 0.5 * d
   
   if (!is.finite(f)) {
@@ -145,7 +138,6 @@ mH.G <- function(vmu, vy, vr, mC, mSigma.inv, vB2)
 {
   vw <-  vB2
   dim(vw) <- NULL
-  # cat("- 0.5 * tr(mSigma.inv)", - 0.5 * tr(mSigma.inv), "\n")
   mH <- -t(mC * (vr * vw)) %*% (mC) - mSigma.inv
   return(mH)    
 }
@@ -218,14 +210,6 @@ vg.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
   mLambda.inv <- solve(mLambda, tol=1e-99)
   mH <- mH.G(vmu, vy, vr, mC, mSigma.inv, vB2)
   dmLambda <- (-0.5 * mLambda.inv + mH) %*% mR
-  # dmLambda <- 0.5 * (mLambda.inv + mH) %*% mR
-  # dmLambda <- (0.5 * tr(mLambda.inv) + mH) %*% mR
-  #cat("GVA mLambda", mLambda[1:2, 1:2], "dmLambda", dmLambda[1:2, 1:2], "\n")
-  
-  #diag(dmLambda) <- diag(dmLambda) * diag(mR)
-  # dmLambda_tmp <- matrix(0, d, d)
-  # dmLambda_tmp[Rinds] <- dmLambda[Rinds]
-  # dmLambda <- dmLambda_tmp
 
   # Check derivative numerically
   dmLambda_check <- vg.GVA.mat_approx(vmu, mR, vy, vr, mC, mSigma.inv, gh)
@@ -263,7 +247,7 @@ fit.GVA <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e-12
   #lower_constraint[(d + 1):length(vmu)] <- -15
   
   if (method == "L-BFGS-B") {
-    controls <- list(maxit=100, trace=6, fnscale=-1, REPORT=1, factr=1.0E-5, lmm=10, pgtol=reltol)
+    controls <- list(maxit=100, trace=0, fnscale=-1, REPORT=1, factr=1.0E-5, lmm=10, pgtol=reltol)
   } else if (method=="Nelder-Mead") {
     controls <- list(maxit=100000000, trace=0, fnscale=-1, REPORT=1, reltol=reltol) 
   } else {
