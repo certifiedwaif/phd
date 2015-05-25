@@ -113,7 +113,7 @@ f.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
   if (!is.finite(f)) {
     f <- -1.0E16
   }
-  cat("f.VGA: f", round(f, 2), "vmu", round(vmu, 2), "diag(mR)", round(diag(mR), 2), "\n")
+  #cat("f.GVA: f", round(f, 2), "vmu", round(vmu, 2), "diag(mR)", round(diag(mR), 2), "\n")
   return(f)
 }
 
@@ -195,17 +195,20 @@ vg.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
     f.GVA(vtheta_prime, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
   }
   dmLambda_check <- matrix(grad(func, as.vector(mR)), nrow(mR), ncol(mR))
-  # if (any(!is.finite(dmLambda) || is.nan(dmLambda))) {
-  #  dmLambda <- matrix(0, d, d)
-  # }
+  if (any(!is.finite(dmLambda) || is.nan(dmLambda))) {
+   dmLambda <- matrix(0, d, d)
+  }
+  # I'm not sure that I believe this
+  # Go back to John's simpler matrix derivative code and check with that
+  
 
-  # if (any(abs(dmLambda[Rinds] - dmLambda_check[Rinds]) > 1e-6)) {
-  #   cat("Analytic and numeric derivatives disagree.\n")
-  #   print(round(dmLambda, 2))
-  #   print(round(dmLambda_check, 2))
-  #   print(round(dmLambda - dmLambda_check, 2))
-  #   # browser()
-  # }
+  if (any(abs(dmLambda[Rinds] - dmLambda_check[Rinds]) > 1e-6)) {
+    cat("Analytic and numeric derivatives disagree.\n")
+    print(round(dmLambda, 2))
+    print(round(dmLambda_check, 2))
+    print(round(dmLambda - dmLambda_check, 2))
+    # browser()
+  }
   
   # # cat("vg.GVA: dmLambda", dmLambda, "\n")
   vg[(1 + d):length(vtheta)] <- dmLambda[Rinds]
