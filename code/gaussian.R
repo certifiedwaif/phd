@@ -92,7 +92,7 @@ vtheta_dec <- function(vtheta, d)
   Rinds <- which(lower.tri(mR, diag=TRUE))
   mR[Rinds] <- vtheta[(d + 1):length(vtheta)]
   diag(mR) <- exp(diag(mR))
-  # diag(mR) <- min(c(1.0E3, diag(mR)))
+  diag(mR) <- min(c(1.0E3, diag(mR)))
   return(list(vmu=vmu, mR=mR, Rinds=Rinds))
 }
 
@@ -118,7 +118,8 @@ f.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
   
   mLambda <- tcrossprod(mR)
   
-  f <- -0.5 * sum(log(diag(mR))) + f.G(vmu, mLambda, vy, vr, mC, mSigma.inv, gh)
+  # f <- sum(log(diag(mR))) + f.G(vmu, mLambda, vy, vr, mC, mSigma.inv, gh)
+  f <- -sum(log(diag(mR))) + f.G(vmu, mLambda, vy, vr, mC, mSigma.inv, gh)
   f <- f + 0.5 * d * log(2 * pi) + 0.5 * d
   
   if (!is.finite(f)) {
@@ -209,7 +210,8 @@ vg.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
 
   mLambda.inv <- solve(mLambda, tol=1e-99)
   mH <- mH.G(vmu, vy, vr, mC, mSigma.inv, vB2)
-  dmLambda <- (-0.5 * mLambda.inv + mH) %*% mR
+  dmLambda <- (-mLambda.inv + mH) %*% mR
+  # dmLambda <- (mLambda.inv + mH) %*% mR
 
   # Check derivative numerically
   dmLambda_check <- vg.GVA.mat_approx(vmu, mR, vy, vr, mC, mSigma.inv, gh)
@@ -247,7 +249,7 @@ fit.GVA <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e-12
   #lower_constraint[(d + 1):length(vmu)] <- -15
   
   if (method == "L-BFGS-B") {
-    controls <- list(maxit=100, trace=0, fnscale=-1, REPORT=1, factr=1.0E-5, lmm=10, pgtol=reltol)
+    controls <- list(maxit=100, trace=6, fnscale=-1, REPORT=1, factr=1.0E-5, lmm=10, pgtol=reltol)
   } else if (method=="Nelder-Mead") {
     controls <- list(maxit=100000000, trace=0, fnscale=-1, REPORT=1, reltol=reltol) 
   } else {

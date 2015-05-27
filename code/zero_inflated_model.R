@@ -171,7 +171,7 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
   # TODO: Add check on whether parameters are still changing
   while ((i <= 1) || is.nan(vlower_bound[i] - vlower_bound[i - 1]) ||
         (vlower_bound[i] > vlower_bound[i - 1])) {
-  #for (i in 1:MAXITER) {
+  # for (i in 1:MAXITER) {
     if (i >= MAXITER) {
       cat("Iteration limit reached, breaking ...")
       break
@@ -191,8 +191,15 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
     if (method == "laplace") {
       fit1 <- fit.Lap(vmu, vy, vp, mC, mSigma.inv, mLambda)
     } else if (method == "gva") {	
-      fit_lap <- fit.Lap(vmu, vy, vp, mC, mSigma.inv, mLambda)
-      fit1 <- fit.GVA(fit_lap$vmu, fit_lap$mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B")
+      if (i <= 2) {
+        fit1 <- fit.Lap(vmu, vy, vp, mC, mSigma.inv, mLambda)
+      } else {
+        # Idea: If L-BFGS-B fails due to sovle a computationally singular linear system,
+        # try another Laplace update instead.
+        # fit_lap <- fit.Lap(vmu, vy, vp, mC, mSigma.inv, mLambda)
+        # fit1 <- fit.GVA(fit_lap$vmu, fit_lap$mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B")
+        fit1 <- fit.GVA(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B")
+      }
       # fit1 <- fit.GVA(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B")
     } else if (method == "gva2") {
       fit_lap <- fit.Lap(vmu, vy, vp, mC, mSigma.inv, mLambda)
