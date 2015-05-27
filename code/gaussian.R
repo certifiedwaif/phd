@@ -313,7 +313,7 @@ f.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
   vsigma2.til <- cache$vsigma2.til
   
   d <- length(vmu)
-  f <- -sum(log(diag(mR))) + f.G_new(vmu, mR, vy, vr, mC, vmu.til, vsigma2.til, mSigma.inv, gh) 
+  f <- sum(log(diag(mR))) + f.G_new(vmu, mR, vy, vr, mC, vmu.til, vsigma2.til, mSigma.inv, gh) 
   f <- f + 0.5 * d * log(2 * pi) + 0.5*d
   
   if (!is.finite(f)) {
@@ -363,15 +363,14 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh, mR, Rinds, Dinds)
   vB2 <- res.B12$vB2
   
   d <- length(vmu)
-  vg <- 0 * vmu
+  vg <- rep(0, length(vtheta))
   vg[1:d] <- vg.G(vmu, vy, vr, mC, mSigma.inv, vB1) 
   
   mH <- mH.G(vmu, vy, vr, mC, mSigma.inv, vB2)
-  dmLambda <- (mLambda.inv + mH) %*% mR
-  # dmLambda <- (0.5 * tr(mLambda.inv) + mH)
-  #dmLambda_dmR <- -solve(mLambda.inv, solve(mLambda.inv, mR))
-  #dmLambda_dmR <- -solve(mLambda.inv, solve(mLambda.inv, (t(mR) + mR)))
-  dmLambda_dmR <- -forwardsolve(mR, backsolve(t(mR), forwardsolve(mR, backsolve(t(mR), (t(mR) + mR)))))
+  dmLambda <- (-mLambda.inv + mH)
+  # FIXME: We can substantially optimise this.
+  mLambda <- solve(mLambda.inv)
+  dmLambda_dmR <- -mLambda %*% mR %*% mLambda
   #dmLambda_dmR <- -forwardsolve(mR, backsolve(t(mR), forwardsolve(mR, backsolve(t(mR), mR))))
   dmR <- dmLambda %*% dmLambda_dmR
   dmR[Dinds] <- dmR[Dinds] * mR[Dinds]
@@ -458,7 +457,7 @@ fit.GVA_new <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0
                gh=gh2, mR=mR*0, Rinds=Rinds, Dinds=Dinds)        
   
   vtheta <- res$par 
-  decode <- vtheta_decode(vtheta, d)
+  decode <- vtheta_dec(vtheta, d)
   vmu <- decode$vmu
   mR <- decode$mR
   mLambda <- solve(tcrossprod(mR), tol=1.0E-99)
