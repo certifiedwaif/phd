@@ -1,6 +1,12 @@
 To Do list
 ==========
 
+28/05/2015
+----------
+- Fixed overflow in GVA (!)
+- Derivatives in GVA and GVA2 are correct, checked numerically
+- All accuracy tests run
+
 25/05/2015
 ----------
 - Finish draft of Progress Report, and send it to Samuel
