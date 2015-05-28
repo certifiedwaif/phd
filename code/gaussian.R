@@ -89,10 +89,11 @@ vtheta_dec <- function(vtheta, d)
 {
   vmu <- vtheta[1:d]
   mR <- matrix(0, d, d)
+  Dinds <- d*((1:d)-1)+(1:d)    
   Rinds <- which(lower.tri(mR, diag=TRUE))
   mR[Rinds] <- vtheta[(d + 1):length(vtheta)]
   diag(mR) <- exp(diag(mR))
-  return(list(vmu=vmu, mR=mR, Rinds=Rinds))
+  return(list(vmu=vmu, mR=mR, Dinds=Dinds, Rinds=Rinds))
 }
 
 # Gaussian variational approxmation, mLambda = mR mR^T ----
@@ -100,7 +101,8 @@ f.G <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, gh)
 {
   d <- length(vmu)
   
-  vmu.til     <- min(mC %*% vmu, 100)
+  # vmu.til     <- min(mC %*% vmu, 1000)
+  vmu.til     <- mC %*% vmu
   vsigma2.til <- fastdiag(mC, mLambda)
   vB0 <- B0.fun("POISSON", vmu.til, vsigma2.til, gh) 
   f <- sum(vr * (vy * vmu.til - vB0))
@@ -115,9 +117,16 @@ f.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
   decode <- vtheta_dec(vtheta, d)
   vmu <- decode$vmu
   mR <- decode$mR
+  Dinds <- decode$Dinds
+
+  # Threshold entries in the diagonal of mR at 10,000
+  for (i in 1:length(Dinds)) {
+      mR[Dinds[i]] <- min(c(1.0E5,mR[Dinds[i]]))
+  }   
+
 
   mLambda <- tcrossprod(mR)
-  f <- -sum(log(diag(mR))) + f.G(vmu, mLambda, vy, vr, mC, mSigma.inv, gh)
+  f <- sum(log(diag(mR))) + f.G(vmu, mLambda, vy, vr, mC, mSigma.inv, gh)
   f <- f + 0.5 * d * log(2 * pi) + 0.5 * d
   
   if (is.nan(f) || !is.finite(f)) {
@@ -192,7 +201,13 @@ vg.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
   decode <- vtheta_dec(vtheta, d)
   vmu <- decode$vmu
   mR <- decode$mR
+  Dinds <- decode$Dinds
   Rinds <- decode$Rinds
+
+  # Threshold entries of mR at 1,000
+  for (i in 1:length(Dinds)) {
+      mR[Dinds[i]] <- min(c(1.0E3,mR[Dinds[i]]))
+  }    
 
   mLambda <- tcrossprod(mR)
 
@@ -208,7 +223,7 @@ vg.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
 
   mLambda.inv <- solve(mLambda + diag(1e-8, d), tol=1e-99)
   mH <- mH.G(vmu, vy, vr, mC, mSigma.inv, vB2)
-  dmLambda <- (-mLambda.inv + mH) %*% mR
+  dmLambda <- (mLambda.inv + mH) %*% mR
   # dmLambda <- (mLambda.inv + mH) %*% mR
 
   # Check derivative numerically

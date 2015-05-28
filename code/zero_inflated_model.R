@@ -126,7 +126,7 @@ create_mult <- function(vy, mX, mZ, sigma2.beta, m=ncol(mZ), blocksize=1, spline
 
 zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE)
 {
-  MAXITER <- 30
+  MAXITER <- 100
   
   # Initialise variables from mult
   N <- length(mult$vy)
