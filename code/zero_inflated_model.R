@@ -126,7 +126,7 @@ create_mult <- function(vy, mX, mZ, sigma2.beta, m=ncol(mZ), blocksize=1, spline
 
 zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE)
 {
-  MAXITER <- 5
+  MAXITER <- 30
   
   # Initialise variables from mult
   N <- length(mult$vy)
@@ -156,7 +156,7 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
   i <- 0
   # Iterate ----
   # TODO: Add check on whether parameters are still changing
-  while ((i <= 1) || is.nan(vlower_bound[i] - vlower_bound[i - 1]) ||
+  while ((i <= 2) || is.nan(vlower_bound[i] - vlower_bound[i - 1]) ||
         (vlower_bound[i] > vlower_bound[i - 1])) {
   # for (i in 1:MAXITER) {
     if (i >= MAXITER) {
@@ -178,7 +178,7 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
     if (method == "laplace") {
       fit1 <- fit.Lap(vmu, vy, vp, mC, mSigma.inv, mLambda)
     } else if (method == "gva") {	
-      if (i <= 2) {
+      if (i <= 1) {
         fit1 <- fit.Lap(vmu, vy, vp, mC, mSigma.inv, mLambda)
       } else {
         # Idea: If L-BFGS-B fails due to sovle a computationally singular linear system,
