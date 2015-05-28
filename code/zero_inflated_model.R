@@ -150,19 +150,6 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
   spline_dim <- mult$spline_dim
   blocksize <- mult$blocksize
 
-  if (verbose) {
-    cat("N", N, "\n")
-    cat("p", p, "\n")
-  }
-
-  if (!is.null(mZ)) {
-    if (verbose) {
-      cat("m", m, "\n")
-      cat("blocksize", blocksize, "\n")
-      cat("spline_dim", spline_dim, "\n")
-    }
-  }
-  
   zero.set <- which(vy == 0)
   vlower_bound <- c()
   
@@ -202,11 +189,10 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
       }
       # fit1 <- fit.GVA(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B")
     } else if (method == "gva2") {
-      if (i <= 2) {
+      if (i <= 1) {
         fit1 <- fit.Lap(vmu, vy, vp, mC, mSigma.inv, mLambda)
       } else {
-        fit1 <- fit.GVA_new(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B", p=p, m=m,
-                           blocksize=blocksize, spline_dim=spline_dim)
+        fit1 <- fit.GVA_new(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B")
       }
     } else if (method == "gva_nr") {
       fit1 <- fit.GVA_nr(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B", p=p, m=m, 
