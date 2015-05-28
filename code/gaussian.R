@@ -92,7 +92,6 @@ vtheta_dec <- function(vtheta, d)
   Rinds <- which(lower.tri(mR, diag=TRUE))
   mR[Rinds] <- vtheta[(d + 1):length(vtheta)]
   diag(mR) <- exp(diag(mR))
-  # diag(mR) <- min(c(1.0E3, diag(mR)))
   return(list(vmu=vmu, mR=mR, Rinds=Rinds))
 }
 
@@ -101,10 +100,11 @@ f.G <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, gh)
 {
   d <- length(vmu)
   
-  vmu.til     <- mC %*% vmu
+  vmu.til     <- min(mC %*% vmu, 100)
   vsigma2.til <- fastdiag(mC, mLambda)
   vB0 <- B0.fun("POISSON", vmu.til, vsigma2.til, gh) 
-  f <- sum(vr * (vy * vmu.til - vB0)) - 0.5 * t(vmu) %*% mSigma.inv %*% vmu - 0.5 * tr(mSigma.inv %*% mLambda)
+  f <- sum(vr * (vy * vmu.til - vB0))
+  f <- f - 0.5 * t(vmu) %*% mSigma.inv %*% vmu - 0.5 * tr(mSigma.inv %*% mLambda)
   f <- f - 0.5 * d * log(2 * pi) + 0.5 * log(det(mSigma.inv)) 
   return(f)
 }
@@ -115,13 +115,12 @@ f.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
   decode <- vtheta_dec(vtheta, d)
   vmu <- decode$vmu
   mR <- decode$mR
-  
+
   mLambda <- tcrossprod(mR)
-  
   f <- -sum(log(diag(mR))) + f.G(vmu, mLambda, vy, vr, mC, mSigma.inv, gh)
   f <- f + 0.5 * d * log(2 * pi) + 0.5 * d
   
-  if (!is.finite(f)) {
+  if (is.nan(f) || !is.finite(f)) {
     f <- -1.0E16
   }
 
@@ -207,16 +206,16 @@ vg.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
   vg <- rep(0, length(vtheta))
   vg[1:d] <- vg.G(vmu, vy, vr, mC, mSigma.inv, vB1) 
 
-  mLambda.inv <- solve(mLambda, tol=1e-99)
+  mLambda.inv <- solve(mLambda + diag(1e-8, d), tol=1e-99)
   mH <- mH.G(vmu, vy, vr, mC, mSigma.inv, vB2)
   dmLambda <- (-mLambda.inv + mH) %*% mR
   # dmLambda <- (mLambda.inv + mH) %*% mR
 
   # Check derivative numerically
   # dmLambda_check <- vg.GVA.mat_approx(vmu, mR, vy, vr, mC, mSigma.inv, gh)
-  # if (any(!is.finite(dmLambda) || is.nan(dmLambda))) {
-  #  dmLambda <- matrix(0, d, d)
-  # }
+  if (any(!is.finite(dmLambda) || is.nan(dmLambda))) {
+   dmLambda <- matrix(0, d, d)
+  }
 
   # if (any(abs(dmLambda[Rinds] - dmLambda_check[Rinds]) > 1)) {
   #   cat("Analytic and numeric derivatives disagree.\n")
@@ -244,6 +243,9 @@ fit.GVA <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e-12
   d <- length(vmu)
   mR <- t(chol(mLambda + diag(1.0E-8, d)))
 	vtheta <- vtheta_enc(vmu, mR)
+  lower_constraint <- rep(-Inf, length(vtheta))
+  # Dinds <- d*((1:d)-1)+(1:d)    
+  # lower_constraint[d + Dinds] <- -8
   
   if (method == "L-BFGS-B") {
     controls <- list(maxit=100, trace=6, fnscale=-1, REPORT=1, factr=1.0E-5, lmm=10, pgtol=reltol)
@@ -290,7 +292,6 @@ f.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
   mLambda <- solve(mLambda.inv, tol=1e-99)
   
   f <- sum(log(diag(mR))) + f.G(vmu, mLambda, vy, vr, mC, mSigma.inv, gh)
-  # f <- -sum(log(diag(mR))) + f.G_new(vmu, mLambda, vy, vr, mC, mSigma.inv, gh)
   f <- f + 0.5 * d * log(2 * pi) + 0.5 * d
   
   if (!is.finite(f)) {
