@@ -1,6 +1,10 @@
 To Do list
 ==========
 
+31/05/2015
+----------
+- Install SublimeREPL and R-Box packages in Sublime. Then you can work in Sublime most of the time.
+
 28/05/2015
 ----------
 - Fixed overflow in GVA (!)
