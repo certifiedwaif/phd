@@ -31,3 +31,23 @@ VectorXd fastdiag(MapMatd C, MapMatd lambda)
 
   return result;
 }
+
+// [[Rcpp::export]]
+VectorXd fastsolve(MapMatd C, MapMatd R)
+{
+  VectorXd result(C.rows());
+
+  if (C.cols() != R.cols()) {
+    stop("mC and mR do not have the same numbers of columns");
+  }  
+
+  // for (int i = 0; i < C.rows(); i++) {
+  //   VectorXd a = R.triangularView<Eigen::Lower>().solve(C.row(i).transpose());
+  //   result[i] = a.dot(a);
+  // }
+
+  MatrixXd sol = R.triangularView<Eigen::Lower>().solve(C.transpose());
+  result = sol.colwise().squaredNorm();
+
+  return result;
+}
