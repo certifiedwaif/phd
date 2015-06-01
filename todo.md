@@ -4,6 +4,10 @@ To Do list
 31/05/2015
 ----------
 - Install SublimeREPL and R-Box packages in Sublime. Then you can work in Sublime most of the time.
+	Done.
+- Install Monokai-Black, just so you feel at home.
+  mR <- new("dtrMatrix", uplo="L", diag="N", x=as.vector(decode$mR), Dim=as.integer(c(d, d)))
+
 
 28/05/2015
 ----------
