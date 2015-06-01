@@ -221,7 +221,8 @@ vg.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
   vg <- rep(0, length(vtheta))
   vg[1:d] <- vg.G(vmu, vy, vr, mC, mSigma.inv, vB1) 
 
-  mLambda.inv <- solve(mLambda + diag(1e-8, d), tol=1e-99)
+  # mLambda.inv <- solve(mLambda + diag(1e-8, d), tol=1e-99)
+  mLambda.inv <- chol2inv(t(mR))
   mH <- mH.G(vmu, vy, vr, mC, mSigma.inv, vB2)
   dmLambda <- (mLambda.inv + mH) %*% mR
   # dmLambda <- (mLambda.inv + mH) %*% mR
@@ -289,7 +290,10 @@ f.G_new <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, gh)
   d <- length(vmu)
   
   vmu.til     <- mC %*% vmu
+  # va <- forwardsolve(mR, t(mC))
+  # vsigma2.til <- colSums(va^2)
   vsigma2.til <- fastdiag(mC, mLambda)
+  # vsigma2.til <- fastsolve(mC, mR)
   vB0 <- B0.fun("POISSON", vmu.til, vsigma2.til, gh) 
   f <- sum(vr * (vy * vmu.til - vB0)) - 0.5 * t(vmu) %*% mSigma.inv %*% vmu - 0.5 * tr(mSigma.inv %*% mLambda)
   f <- f - 0.5 * d * log(2 * pi) + 0.5 * log(det(mSigma.inv)) 
@@ -303,8 +307,8 @@ f.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
   vmu <- decode$vmu
   mR <- decode$mR
   
-  mLambda.inv <- tcrossprod(mR)
-  mLambda <- solve(mLambda.inv, tol=1e-99)
+  # mLambda.inv <- tcrossprod(mR)
+  mLambda <- chol2inv(t(mR))
   
   f <- sum(log(diag(mR))) + f.G(vmu, mLambda, vy, vr, mC, mSigma.inv, gh)
   f <- f + 0.5 * d * log(2 * pi) + 0.5 * d
@@ -381,14 +385,20 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
   decode <- vtheta_dec(vtheta, d)
   vmu <- decode$vmu
   mR <- decode$mR
+  # mR <- new("dtrMatrix", uplo="L", diag="N", x=as.vector(decode$mR), Dim=as.integer(c(d, d)))
   Rinds <- decode$Rinds
+  Dinds <- decode$Dinds
 
   mLambda.inv <- tcrossprod(mR)
-  mLambda <- solve(mLambda.inv, tol=1e-99)
+  # mLambda <- solve(mLambda.inv, tol=1e-99)
+  mLambda <- chol2inv(t(mR))
 
   vmu.til     <- mC %*% vmu
   # Idea: Could multiply by mR and then square?
+  # va <- forwardsolve(mR, t(mC))
+  # vsigma2.til <- colSums(va^2)
   vsigma2.til <- fastdiag(mC, mLambda)
+  # vsigma2.til <- fastsolve(mC, mR)
   res.B12 <- B12.fun("POISSON", vmu.til, vsigma2.til, gh)
   vB1 <- res.B12$vB1
   vB2 <- res.B12$vB2
@@ -397,7 +407,16 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
   vg[1:d] <- vg.G(vmu, vy, vr, mC, mSigma.inv, vB1) 
 
   mH <- mH.G(vmu, vy, vr, mC, mSigma.inv, vB2)
+  cat("rcond(mLambda.inv)", rcond(mLambda.inv), "\n")
+  cat("rcond(mH)", rcond(mH), "\n")
+  cat("rcond(mLambda.inv + mH)", rcond(mLambda.inv + mH), "\n")
+  cat("rcond(mLambda)", rcond(mLambda), "\n")
+  cat("rcond(mR)", rcond(mR), "\n")
   dmLambda <- (mLambda.inv + mH) %*% (-mLambda %*% mR %*% mLambda)
+  # Accuracy of beta_1 decreased
+  # dmLambda <- -mLambda %*% (mLambda.inv + mH) %*% mR %*% mLambda
+  # dmLambda <- -(diag(1, d) + mLambda %*% mH) %*% mR %*% mLambda
+  # dmLambda <- forwardsolve(mR, -(mR + mH / mR[Dinds]) / mR[Dinds]^2)
 
   # Check derivative numerically
   # dmLambda_check <- vg.GVA_new.mat_approx(vmu, mR, vy, vr, mC, mSigma.inv, gh)
