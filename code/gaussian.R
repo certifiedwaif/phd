@@ -292,8 +292,8 @@ f.G_new <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, gh)
   vmu.til     <- mC %*% vmu
   # va <- forwardsolve(mR, t(mC))
   # vsigma2.til <- colSums(va^2)
-  vsigma2.til <- fastdiag(mC, mLambda)
-  # vsigma2.til <- fastsolve(mC, mR)
+  # vsigma2.til <- fastdiag(mC, mLambda)
+  vsigma2.til <- fastsolve(mC, mR)
   vB0 <- B0.fun("POISSON", vmu.til, vsigma2.til, gh) 
   f <- sum(vr * (vy * vmu.til - vB0)) - 0.5 * t(vmu) %*% mSigma.inv %*% vmu - 0.5 * tr(mSigma.inv %*% mLambda)
   f <- f - 0.5 * d * log(2 * pi) + 0.5 * log(det(mSigma.inv)) 
@@ -389,7 +389,7 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
   Rinds <- decode$Rinds
   Dinds <- decode$Dinds
 
-  mLambda.inv <- tcrossprod(mR)
+  # mLambda.inv <- tcrossprod(mR)
   # mLambda <- solve(mLambda.inv, tol=1e-99)
   mLambda <- chol2inv(t(mR))
 
@@ -397,8 +397,8 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
   # Idea: Could multiply by mR and then square?
   # va <- forwardsolve(mR, t(mC))
   # vsigma2.til <- colSums(va^2)
-  vsigma2.til <- fastdiag(mC, mLambda)
-  # vsigma2.til <- fastsolve(mC, mR)
+  # vsigma2.til <- fastdiag(mC, mLambda)
+  vsigma2.til <- fastsolve(mC, mR)
   res.B12 <- B12.fun("POISSON", vmu.til, vsigma2.til, gh)
   vB1 <- res.B12$vB1
   vB2 <- res.B12$vB2
@@ -407,12 +407,21 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
   vg[1:d] <- vg.G(vmu, vy, vr, mC, mSigma.inv, vB1) 
 
   mH <- mH.G(vmu, vy, vr, mC, mSigma.inv, vB2)
-  cat("rcond(mLambda.inv)", rcond(mLambda.inv), "\n")
-  cat("rcond(mH)", rcond(mH), "\n")
-  cat("rcond(mLambda.inv + mH)", rcond(mLambda.inv + mH), "\n")
-  cat("rcond(mLambda)", rcond(mLambda), "\n")
-  cat("rcond(mR)", rcond(mR), "\n")
-  dmLambda <- (mLambda.inv + mH) %*% (-mLambda %*% mR %*% mLambda)
+  # cat("rcond(mLambda.inv)", rcond(mLambda.inv), "\n")
+  # cat("rcond(mH)", rcond(mH), "\n")
+  # cat("rcond(mLambda.inv + mH)", rcond(mLambda.inv + mH), "\n")
+  # cat("rcond(mLambda)", rcond(mLambda), "\n")
+  # cat("rcond(mR)", rcond(mR), "\n")
+  # dmLambda <- (mLambda.inv + mH) %*% (-mLambda %*% mR %*% mLambda)
+  mR_mLambda <- mR %*% mLambda
+  # mR_mLambda <- t(backsolve(mR, forwardsolve(mR, t(mR)), transpose=TRUE))
+  # dmLambda <- -(mR_mLambda + mH %*% mLambda %*% mR_mLambda)
+  # 97% for the fixed slope, but 89.6% for the fixed intercept
+  # dmLambda <- -(mR_mLambda + mH %*% forwardsolve(tcrossprod(mR), mR_mLambda))
+  # 90.28% on the fixed intercept, 92.65% on the slope
+  dmLambda <- -(mR_mLambda + mH %*% solve(tcrossprod(mR), mR_mLambda, tol=1e-99))
+  # This is very clever, but seems to mess up the accuracy
+  # dmLambda <- -(mR_mLambda + mH %*% backsolve(mR, forwardsolve(mR, mR_mLambda), transpose=TRUE))
   # Accuracy of beta_1 decreased
   # dmLambda <- -mLambda %*% (mLambda.inv + mH) %*% mR %*% mLambda
   # dmLambda <- -(diag(1, d) + mLambda %*% mH) %*% mR %*% mLambda
