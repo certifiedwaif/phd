@@ -114,11 +114,11 @@ generate_test_data <- function(m, ni)
   
   sigma2.beta <- 1.0E3
   
-  test_data <- gen_mult_test_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u)
+  test_data <- gen_mult_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u)
   vy <- test_data$vy
   
   # Test accuracy
-  mult <- create_mult(vy, mX, mZ, sigma2.beta, m=m, blocksize=1, spline_dim=0)
+  mult <- create_mult(vy, mX, mZ[, 2:m], sigma2.beta, m=m, blocksize=1, spline_dim=0, v=2)
   
   return(mult)
 }
