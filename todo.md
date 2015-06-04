@@ -1,12 +1,42 @@
 To Do list
 ==========
 
+04/06/2015
+----------
+- Tutored last Thurs 10am class
+	They were a little more attentive, and I didn't make any arithmetic mistakes.
+- Attended Winter School MATH1005 meeting
+- Reading papers on zero-inflated models
+
+
+03/06/2015
+----------
+- Tutored last Wed 11am class
+	Only half the class was there. Most of them are already in holiday mode. Some people asked
+	good exam questions.
+- Spent more time trying alternate expressions for the derivative of GVA2.
+- Got chewed out by Samuel for not submitting my Postgraduate School Progress Report and
+	Training Needs Analysis
+	I've completed it now, and just need John to sign off on his part.
+- Run simulations
+	I'm running the 1e6 samples MCMCs for random intercepts and random slopes.
+- Median accuracy/Coverage?
+- Literature review
+- Read more numerical linear algebra/numerical analysis
+	James Demmel's books and lecture notes are really good
+- Prepare presentation
+
 31/05/2015
 ----------
 - Install SublimeREPL and R-Box packages in Sublime. Then you can work in Sublime most of the time.
 	Done.
 - Install Monokai-Black, just so you feel at home.
+- Tried Matrix library again.
   mR <- new("dtrMatrix", uplo="L", diag="N", x=as.vector(decode$mR), Dim=as.integer(c(d, d)))
+  Just as disappointing as always. Constructing the matrix takes more time than using it 
+  saves.
+- I got fed up with pushing against the R performance wall, and wrote fastsolve in C++ using
+	Eigen.
 
 
 28/05/2015
