@@ -5,7 +5,7 @@ library(limma)
 library(Matrix)
 library(Rcpp)
 library(RcppEigen)
-library(digest)
+library(optimx)
 
 source("CalculateB.R")
 sourceCpp(file="fastdiag.cpp")
@@ -58,7 +58,8 @@ fit.Lap <- function(vmu, vy, vr, mC, mSigma.inv, mLambda)
 
     old_mLambda <- mLambda
     old_vmu <- vmu
-    mLambda <- solve(-mH, tol=1.0E-99)
+    # FIXME: Need to handle the case where solve can't successfully invert
+    mLambda <- solve(-mH + diag(1e-8, length(vmu)), tol=1.0E-99)
     vmu <- vmu + mLambda %*% vg
     
     if (any(diag(mLambda < 0.0))) {
@@ -119,11 +120,10 @@ f.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
   mR <- decode$mR
   Dinds <- decode$Dinds
 
-  # Threshold entries in the diagonal of mR at 10,000
+  # Threshold entries in the diagonal of mR at 100,000
   for (i in 1:length(Dinds)) {
       mR[Dinds[i]] <- min(c(1.0E5,mR[Dinds[i]]))
   }   
-
 
   mLambda <- tcrossprod(mR)
   f <- sum(log(diag(mR))) + f.G(vmu, mLambda, vy, vr, mC, mSigma.inv, gh)
@@ -204,9 +204,9 @@ vg.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
   Dinds <- decode$Dinds
   Rinds <- decode$Rinds
 
-  # Threshold entries of mR at 1,000
+  # Threshold entries of mR at 100,000
   for (i in 1:length(Dinds)) {
-      mR[Dinds[i]] <- min(c(1.0E3,mR[Dinds[i]]))
+      mR[Dinds[i]] <- min(c(1.0E5, mR[Dinds[i]]))
   }    
 
   mLambda <- tcrossprod(mR)
@@ -225,6 +225,7 @@ vg.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
   mLambda.inv <- chol2inv(t(mR))
   mH <- mH.G(vmu, vy, vr, mC, mSigma.inv, vB2)
   dmLambda <- (mLambda.inv + mH) %*% mR
+  dmLambda[Dinds] <- dmLambda[Dinds] * mR[Dinds]
   # dmLambda <- (mLambda.inv + mH) %*% mR
 
   # Check derivative numerically
@@ -285,18 +286,32 @@ fit.GVA <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e-12
 }
 
 # Gaussian variational approxmation, mLambda = (mR mR^T)^-1 ----
-f.G_new <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, gh) 
+f.G_new <- function(vmu, mR, vy, vr, mC, mSigma.inv, gh) 
 {
   d <- length(vmu)
   
   vmu.til     <- mC %*% vmu
+  # cat("vmu.til", vmu.til, "\n")
   # va <- forwardsolve(mR, t(mC))
   # vsigma2.til <- colSums(va^2)
-  # vsigma2.til <- fastdiag(mC, mLambda)
   vsigma2.til <- fastsolve(mC, mR)
+  # cat("vsigma2.til", vsigma2.til, "\n")
+  # for (i in 1:length(vsigma2.til)) {
+  #   if (vsigma2.til[i] > 1) {
+  #     vsigma2.til[i] <- 1
+  #   }
+  # }
+  # cat("vsigma2.til", vsigma2.til, "\n")
+  mLambda <- chol2inv(t(mR) + diag(1e-8, d))
+  # vsigma2.til <- fastdiag(mC, mLambda)
   vB0 <- B0.fun("POISSON", vmu.til, vsigma2.til, gh) 
-  f <- sum(vr * (vy * vmu.til - vB0)) - 0.5 * t(vmu) %*% mSigma.inv %*% vmu - 0.5 * tr(mSigma.inv %*% mLambda)
-  f <- f - 0.5 * d * log(2 * pi) + 0.5 * log(det(mSigma.inv)) 
+  # cat("vB0", vB0, "\n")
+  if (any(!is.finite(vB0))) {
+    f <- -1.0E16
+  } else {
+    f <- sum(vr * (vy * vmu.til - vB0)) - 0.5 * t(vmu) %*% mSigma.inv %*% vmu - 0.5 * tr(mSigma.inv %*% mLambda)
+    f <- f - 0.5 * d * log(2 * pi) + 0.5 * log(det(mSigma.inv)) 
+  }
   return(f)
 }
 
@@ -306,17 +321,21 @@ f.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
   decode <- vtheta_dec(vtheta, d)
   vmu <- decode$vmu
   mR <- decode$mR
-  
+  Dinds <- decode$Dinds
+
+  # Threshold entries of mR at 1e-2
+  #cat("mR[Dinds]", mR[Dinds], "\n")    
+
   # mLambda.inv <- tcrossprod(mR)
-  mLambda <- chol2inv(t(mR))
   
-  f <- sum(log(diag(mR))) + f.G(vmu, mLambda, vy, vr, mC, mSigma.inv, gh)
+  # cat("sum(log(diag(mR)))", sum(log(diag(mR))), "\n")
+  f <- sum(log(diag(mR))) + f.G_new(vmu, mR, vy, vr, mC, mSigma.inv, gh)
   f <- f + 0.5 * d * log(2 * pi) + 0.5 * d
   
-  if (!is.finite(f)) {
+  if (!is.finite(f) || abs(f) > 1e36) {
     f <- -1.0E16
   }
-  #cat("f.GVA_new: f", round(f, 2), "vmu", round(vmu, 2), "diag(mR)", round(diag(mR), 2), "\n")
+  # cat("f.GVA_new: f", round(f, 2), "vmu", round(vmu, 2), "diag(mR)", round(diag(mR), 2), "\n")
   return(f)
 }
 
@@ -389,19 +408,30 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
   Rinds <- decode$Rinds
   Dinds <- decode$Dinds
 
+  # cat("mR[Dinds]", mR[Dinds], "\n")    
+
   # mLambda.inv <- tcrossprod(mR)
   # mLambda <- solve(mLambda.inv, tol=1e-99)
-  mLambda <- chol2inv(t(mR))
+  mLambda <- chol2inv(t(mR) + diag(1e-8, d))
+  # cat("diag(mLambda)", diag(mLambda), "\n")
 
   vmu.til     <- mC %*% vmu
+  # cat("vmu.til", vmu.til, "\n")
   # Idea: Could multiply by mR and then square?
   # va <- forwardsolve(mR, t(mC))
   # vsigma2.til <- colSums(va^2)
   # vsigma2.til <- fastdiag(mC, mLambda)
   vsigma2.til <- fastsolve(mC, mR)
+  # cat("vsigma2.til", vsigma2.til, "\n")
   res.B12 <- B12.fun("POISSON", vmu.til, vsigma2.til, gh)
   vB1 <- res.B12$vB1
   vB2 <- res.B12$vB2
+  if (any(!is.finite(vB1) || !is.finite(vB2))) {
+    cat("vB1", vB1, "\n")
+    cat("vB2", vB2, "\n")
+    vB1 <- 1
+    vB2 <- 1
+  }
   
   vg <- rep(0, length(vtheta))
   vg[1:d] <- vg.G(vmu, vy, vr, mC, mSigma.inv, vB1) 
@@ -419,7 +449,8 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
   # 97% for the fixed slope, but 89.6% for the fixed intercept
   # dmLambda <- -(mR_mLambda + mH %*% forwardsolve(tcrossprod(mR), mR_mLambda))
   # 90.28% on the fixed intercept, 92.65% on the slope
-  dmLambda <- -(mR_mLambda + mH %*% solve(tcrossprod(mR), mR_mLambda, tol=1e-99))
+  dmLambda <- -(mR_mLambda + mH %*% solve(tcrossprod(mR) + diag(1e-8, d), mR_mLambda, tol=1e-99))
+  dmLambda[Dinds] <- dmLambda[Dinds] * mR[Dinds]
   # This is very clever, but seems to mess up the accuracy
   # dmLambda <- -(mR_mLambda + mH %*% backsolve(mR, forwardsolve(mR, mR_mLambda), transpose=TRUE))
   # Accuracy of beta_1 decreased
@@ -447,7 +478,7 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
   # # cat("vg.GVA_new: dmLambda", dmLambda, "\n")
   vg[(1 + d):length(vtheta)] <- dmLambda[Rinds]
   # vg[(1 + d):length(vtheta)] <- dmLambda_check[Rinds]
-  #cat("vg.GVA_new: vg", round(vg, 2), "norm", sqrt(sum(vg^2)), "\n")
+  # cat("vg.GVA_new: vg", round(vg, 2), "norm", sqrt(sum(vg^2)), "\n")
  
   return(vg)
 }
@@ -500,6 +531,7 @@ fit.GVA_nr <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e
   MAXITER <- 1000
   TOL <- reltol
   
+  d <- ncol(mC)
   for (ITER in 1:MAXITER) {
     vmu.old <- vmu
     
@@ -524,7 +556,8 @@ fit.GVA_nr <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e
     # Then -mH^{-1} = [(A - B D^-1 B^T)^-1, -(A-B D^-1 B^T)^-1 B D^-1]
     #                 [-D^-1 B^T (A - B D^-1 B^T)^-1, D^-1 + D^-1 B^T (A - B D^-1 B^T)^-1 B D^-1]
     # D^-1 and (A - B D^-1 B^T)^-1 appear repeatedly, so we precalculate them
-    D.inv <- solve(D)
+    #cat("diag(D)", diag(D), "\n")
+    D.inv <- solve(D + diag(1e-8, u_dim))
     A_BDB.inv <- solve(A - B %*% D.inv %*% t(B))
     beta_idx <- 1:p
     u_idx <- (p + 1):(p + u_dim)
