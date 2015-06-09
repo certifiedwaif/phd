@@ -77,7 +77,7 @@ gen_slope_data <- function(vx, vbeta, vu, rho, m, ni)
   return(y)
 }
 
-generate_test_data <- function(m, ni)
+generate_test_data <- function(m, ni, expected_beta = c(2, 1), expected_rho = 1.0)
 {
   m <- m
   ni <- ni
@@ -98,14 +98,14 @@ generate_test_data <- function(m, ni)
   #  count <- count + n[i]
   #}
   
-  mZ <- kronecker(diag(1,m),rep(1,ni))
+  mZ <- kronecker(diag(1,m), rep(1,ni))
   
   #print("mZ=")
   #print(mZ)
   #cat("dim(mZ)", dim(mZ), "\n")
   
-  expected_rho <- 0.5
-  expected_beta <- c(2, 1)
+  #expected_rho <- 0.5
+  #expected_rho <- 0.75
   expected_sigma2_u <- .5^2
   a_sigma <- 1e-2
   b_sigma <- 1e-2
