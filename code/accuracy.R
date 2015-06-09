@@ -280,7 +280,7 @@ test_accuracies <- function()
   print(var4_accuracy$vu_accuracy)
   print(var4_accuracy$rho_accuracy)
 }
-test_accuracies()
+# test_accuracies()
 
 test_accuracies_slope <- function()
 {
@@ -327,7 +327,7 @@ test_accuracies_slope <- function()
   print(var4_accuracy$vu_accuracy)
   print(var4_accuracy$rho_accuracy)
 }
-test_accuracies_slope()
+# test_accuracies_slope()
 
 test_accuracies_spline <- function()
 {
