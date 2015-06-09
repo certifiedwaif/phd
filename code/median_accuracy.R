@@ -30,38 +30,12 @@ median_accuracy <- function()
   dev.off()
 }
 
-generate_test_mult <- function(vbeta)
-{
-  m <- 20
-  ni <- 10
-  n <- rep(ni,m)
-  mX <- matrix(as.vector(cbind(rep(1, sum(n)), runif(sum(n), -1, 1))), sum(n), 2)
-  mZ <- kronecker(diag(1,m),rep(1,ni))
-  
-  expected_rho <- 0.5
-  expected_beta <- vbeta
-  expected_sigma2_u <- .5^2
-  a_sigma <- 1e-2
-  b_sigma <- 1e-2
-  
-  tau <- 1.0E2
-  
-  sigma2.beta <- 1.0E3
-  
-  test_data <- generate_multivariate_test_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u, verbose=FALSE)
-  vy <- test_data$vy
-  
-  multivariate <- create_multivariate(vy, mX, mZ, sigma2.beta, m=m, blocksize=1, spline_dim=0)
-
-  return(multivariate)
-}
-
 # Graph of Var_q(theta) against Var(theta|y)
 # How to get this?
 # Run fits for a range of theta values?
 compare_approximations <- function(vbeta, approximation="gva")
 {
-  multivariate <- generate_test_mult(c(2, 1))
+  multivariate <- generate_test_mult(expected_beta = c(2, 1))
   var_result <- zero_infl_var(multivariate, method=approximation, verbose=TRUE)
   mcmc_samples <- mcmc_approximation(multivariate, iterations=1e4, mc.cores = 4)
   return(list(multivariate=multivariate, var_result=var_result, mcmc_samples=mcmc_samples))
@@ -73,35 +47,46 @@ coverage_percentage <- function()
 {
 	# Percentage coverage of the true parameter values by approximate 95%
 	# credible intervals based on variational Bayes approximate posterior
-	# density functions. The percentages are based on 100 replications.
+	# density functions. The percentages are based on 1000 replications.
 	
-	set.seed(1234)
+	set.seed(12345)
 	counter <- rep(0, 3)
-	for (i in 1:10000) {
-		mult <- generate_test_mult(c(2, 1))	
-		approximation <- "gva2new"
+  p <- 2
+  # If ni is substantially smaller than m, you're probably going to get a lot of
+  # overflow errors.
+  m <- 10
+  ni <- 20
+  expected_beta <- c(2, 1)
+  expected_rho <- c(0.5, 1)
+	for (i in 1:1000) {
+    cat("i", i, "counter", counter, "percentage", round(100*counter/i, 2), "\n")
+		mult <- generate_test_data(m, ni, expected_beta = expected_beta, expected_rho = 0.5)
+		approximation <- "gva2"
     
-		var_result <- tryCatch(zero_infl_var(mult, method=approximation, verbose=FALSE),
-                          error <- function (E) { return(NULL) })
-    	# If there was an error, re-try with another generated data set. Sometimes the
-    	# optimiser gets passed a non-finite value.
-    	if (is.null(var_result)) {
-      		i <- i - 1
-      		next
-    	}
-    	for (j in 1:2) {
-  		# Check that true parameter is within 95% credible interval.
-      		expected <- c(2, 1)
-  			if (is.between(expected[j], var_result$vmu[j] - 1.96*sqrt(var_result$mLambda[j, j]), var_result$vmu[j] + 1.96*sqrt(var_result$mLambda[j, j]))) {
-  				# Increment counter
-  				counter[j] <- counter[j] + 1
-  			}
-    	}
-    	sum_vmu_vmu <- sum(var_result$vmu[3:22])
-    	sum_mLambda_vmu <- sum(sqrt(diag(var_result$mLambda[3:22, 3:22]))) # I think this will be an over-estimate
-    	if (is.between(0, sum_vmu_vmu - 1.96 * sum_mLambda_vmu, sum_vmu_vmu + 1.96 * sum_mLambda_vmu)) {
-      		counter[3] <- counter[3] + 1
-    	}
+		# var_result <- tryCatch(zero_infl_var(mult, method=approximation, verbose=FALSE),
+    #                        error <- function (E) { return(NULL) })
+    var_result <- zero_infl_var(mult, method=approximation, verbose=FALSE)
+  	# If there was an error, re-try with another generated data set. Sometimes the
+  	# optimiser gets passed a non-finite value.
+  	if (is.null(var_result)) {
+    		i <- i - 1
+    		next
+  	}
+
+    # TODO: Fix intercepts
+  	for (j in 1:p) {
+		  # Check that true parameter is within 95% credible interval.
+			if (is.between(expected_beta[j], var_result$vmu[j] - 1.96*sqrt(var_result$mLambda[j, j]), var_result$vmu[j] + 1.96*sqrt(var_result$mLambda[j, j]))) {
+				# Increment counter
+				counter[j] <- counter[j] + 1
+			}
+  	}
+    u_dim <- (p + 1):(p + m - 1)
+  	sum_vmu_vmu <- sum(var_result$vmu[u_dim])
+  	sum_mLambda_vmu <- sum(sqrt(diag(var_result$mLambda[u_dim, u_dim]))) # I think this will be an over-estimate
+  	if (is.between(0, sum_vmu_vmu - 1.96 * sum_mLambda_vmu, sum_vmu_vmu + 1.96 * sum_mLambda_vmu)) {
+    		counter[p + 1] <- counter[p + 1] + 1
+  	}
 	}
 	print(counter)
 }
