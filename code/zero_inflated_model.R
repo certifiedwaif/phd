@@ -160,7 +160,9 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
         (vlower_bound[i] > vlower_bound[i - 1])) {
   # for (i in 1:MAXITER) {
     if (i >= MAXITER) {
-      cat("Iteration limit reached, breaking ...")
+      if (verbose) {
+        cat("Iteration limit reached, breaking ...")
+      }
       break
     }
     
@@ -193,6 +195,10 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
         fit1 <- fit.Lap(vmu, vy, vp, mC, mSigma.inv, mLambda)
       } else {
         fit1 <- fit.GVA_new(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B")
+        # If you use L-BFGS-B, this code will overflow frequently - about one time in ten.
+        # If you use BFGS or CG, you'll get strange errors about one time in a thousand.
+        # CG also isn't very accurate.
+        # fit1 <- fit.GVA_new(vmu, mLambda, vy, vp, mC, mSigma.inv, "BFGS")
       }
     } else if (method == "gva_nr") {
       fit1 <- fit.GVA_nr(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B", p=p, m=m, 
