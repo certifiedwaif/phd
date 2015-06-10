@@ -5,7 +5,6 @@ library(limma)
 library(Matrix)
 library(Rcpp)
 library(RcppEigen)
-library(optimx)
 
 source("CalculateB.R")
 sourceCpp(file="fastdiag.cpp")
@@ -408,6 +407,9 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
   Rinds <- decode$Rinds
   Dinds <- decode$Dinds
 
+  for (i in 1:length(Dinds)) {
+      mR[Dinds[i]] <- min(c(1.0E5, mR[Dinds[i]]))
+  }    
   # cat("mR[Dinds]", mR[Dinds], "\n")    
 
   # mLambda.inv <- tcrossprod(mR)
@@ -426,9 +428,9 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
   res.B12 <- B12.fun("POISSON", vmu.til, vsigma2.til, gh)
   vB1 <- res.B12$vB1
   vB2 <- res.B12$vB2
-  if (any(!is.finite(vB1) || !is.finite(vB2))) {
-    cat("vB1", vB1, "\n")
-    cat("vB2", vB2, "\n")
+  if (any(!is.finite(vB1)) || any(!is.finite(vB2)) || any(abs(vB1) > 1e300)) {
+    # cat("vB1", vB1, "\n")
+    # cat("vB2", vB2, "\n")
     vB1 <- 1
     vB2 <- 1
   }
@@ -447,9 +449,9 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
   # mR_mLambda <- t(backsolve(mR, forwardsolve(mR, t(mR)), transpose=TRUE))
   # dmLambda <- -(mR_mLambda + mH %*% mLambda %*% mR_mLambda)
   # 97% for the fixed slope, but 89.6% for the fixed intercept
-  # dmLambda <- -(mR_mLambda + mH %*% forwardsolve(tcrossprod(mR), mR_mLambda))
+  dmLambda <- -(mR_mLambda + mH %*% forwardsolve(tcrossprod(mR) + diag(1e-8, d), mR_mLambda))
   # 90.28% on the fixed intercept, 92.65% on the slope
-  dmLambda <- -(mR_mLambda + mH %*% solve(tcrossprod(mR) + diag(1e-8, d), mR_mLambda, tol=1e-99))
+  #dmLambda <- -(mR_mLambda + mH %*% solve(tcrossprod(mR) + diag(1e-8, d), mR_mLambda, tol=1e-99))
   dmLambda[Dinds] <- dmLambda[Dinds] * mR[Dinds]
   # This is very clever, but seems to mess up the accuracy
   # dmLambda <- -(mR_mLambda + mH %*% backsolve(mR, forwardsolve(mR, mR_mLambda), transpose=TRUE))
@@ -478,8 +480,12 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
   # # cat("vg.GVA_new: dmLambda", dmLambda, "\n")
   vg[(1 + d):length(vtheta)] <- dmLambda[Rinds]
   # vg[(1 + d):length(vtheta)] <- dmLambda_check[Rinds]
-  # cat("vg.GVA_new: vg", round(vg, 2), "norm", sqrt(sum(vg^2)), "\n")
- 
+  if (any(!is.finite(vg)) || any(is.nan(vg))) {
+    cat("vmu", vmu, "\n")
+    cat("diag(mR)", diag(mR), "\n")
+    cat("vg.GVA_new: vg", round(vg, 2), "norm", sqrt(sum(vg^2)), "\n")
+    browser()
+  }
   return(vg)
 }
 
