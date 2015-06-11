@@ -126,6 +126,7 @@ create_mult <- function(vy, mX, mZ, sigma2.beta, m=ncol(mZ), blocksize=1, spline
 
 zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE)
 {
+  # browser()
   MAXITER <- 100
   
   # Initialise variables from mult
@@ -182,6 +183,10 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
     } else if (method == "gva") {	
       if (i <= 1) {
         fit1 <- fit.Lap(vmu, vy, vp, mC, mSigma.inv, mLambda)
+        eig <- eigen(fit1$mLambda)
+        if (any(is.complex(eig$values)) || any(eig$values < 1e-8)) {
+          fit1 <- fit.GVA(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B")
+        }
       } else {
         # Idea: If L-BFGS-B fails due to sovle a computationally singular linear system,
         # try another Laplace update instead.
@@ -193,6 +198,12 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
     } else if (method == "gva2") {
       if (i <= 1) {
         fit1 <- fit.Lap(vmu, vy, vp, mC, mSigma.inv, mLambda)
+        eig <- eigen(fit1$mLambda)
+        # Very occasionally, fit.Lap will return a non-invertible mLambda. In that case,
+        # fall back to L-BFGS.
+        if (any(is.complex(eig$values)) || any(eig$values < 1e-8)) {
+          fit1 <- fit.GVA_new(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B")
+        }
       } else {
         fit1 <- fit.GVA_new(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B")
         # If you use L-BFGS-B, this code will overflow frequently - about one time in ten.
@@ -213,8 +224,9 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
     
     # Update parameters for q_vr
     if (length(zero.set) != 0) {
+      # cat("zero.set", zero.set, "\n")
       vp[zero.set] <- expit((vy[zero.set] * mC[zero.set,]) %*% vmu - exp(mC[zero.set,] %*% vmu + 
-                            0.5 * diag((mC[zero.set,]) %*% mLambda %*% t(mC[zero.set,])) + 
+                            0.5 * diag(mC[zero.set,] %*% mLambda %*% t(mC[zero.set,])) + 
                             digamma(a_rho) - digamma(b_rho)))
     }
     
@@ -291,6 +303,6 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
     plot(vlower_bound, type="l")
   
   params <- list(vmu=vmu, mLambda=mLambda, a_rho=a_rho, b_rho=b_rho,
-                 mSigma=solve(mSigma.inv), vlower_bound=vlower_bound)
+                 mSigma=solve(mSigma.inv + diag(1e-8, ncol(mSigma.inv))), vlower_bound=vlower_bound)
   return(params)
 }

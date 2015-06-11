@@ -58,7 +58,12 @@ fit.Lap <- function(vmu, vy, vr, mC, mSigma.inv, mLambda)
     old_mLambda <- mLambda
     old_vmu <- vmu
     # FIXME: Need to handle the case where solve can't successfully invert
-    mLambda <- solve(-mH + diag(1e-8, length(vmu)), tol=1.0E-99)
+    mLambda <- tryCatch(solve(-mH + diag(1e-8, length(vmu)), tol=1.0E-99), error = function(e) {NULL})
+    # If we can't invert -mH, keep old mLambda and return
+    if (is.null(mLambda)) {
+      mLambda <- old_mLambda
+      break
+    }
     vmu <- vmu + mLambda %*% vg
     
     if (any(diag(mLambda < 0.0))) {
@@ -259,7 +264,6 @@ fit.GVA <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e-12
   d <- length(vmu)
   mR <- t(chol(mLambda + diag(1.0E-8, d)))
 	vtheta <- vtheta_enc(vmu, mR)
-  lower_constraint <- rep(-Inf, length(vtheta))
   # Dinds <- d*((1:d)-1)+(1:d)    
   # lower_constraint[d + Dinds] <- -8
   
@@ -271,7 +275,7 @@ fit.GVA <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e-12
     controls <- list(maxit=1000, trace=0, fnscale=-1, REPORT=1, reltol=reltol) 
   }
   res <- optim(par=vtheta, fn=f.GVA, gr=vg.GVA, 
-                method=method, lower=lower_constraint, upper=Inf, control=controls, 
+                method=method, lower=-Inf, upper=Inf, control=controls, 
                 vy=vy, vr=vr, mC=mC, mSigma.inv=mSigma.inv, gh=gh2)        
       
   vtheta <- res$par 
@@ -285,6 +289,24 @@ fit.GVA <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e-12
 }
 
 # Gaussian variational approxmation, mLambda = (mR mR^T)^-1 ----
+vtheta_enc_new <- function(vmu, mR)
+{
+  diag(mR) <- -log(diag(mR))
+  Rinds <- which(lower.tri(mR, diag=TRUE))
+  c(vmu, mR[Rinds])
+}
+
+vtheta_dec_new <- function(vtheta, d)
+{
+  vmu <- vtheta[1:d]
+  mR <- matrix(0, d, d)
+  Dinds <- d*((1:d)-1)+(1:d)    
+  Rinds <- which(lower.tri(mR, diag=TRUE))
+  mR[Rinds] <- vtheta[(d + 1):length(vtheta)]
+  diag(mR) <- exp(-diag(mR))
+  return(list(vmu=vmu, mR=mR, Dinds=Dinds, Rinds=Rinds))
+}
+
 f.G_new <- function(vmu, mR, vy, vr, mC, mSigma.inv, gh) 
 {
   d <- length(vmu)
@@ -317,10 +339,15 @@ f.G_new <- function(vmu, mR, vy, vr, mC, mSigma.inv, gh)
 f.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
 {
   d <- ncol(mC)
-  decode <- vtheta_dec(vtheta, d)
+  decode <- vtheta_dec_new(vtheta, d)
   vmu <- decode$vmu
   mR <- decode$mR
   Dinds <- decode$Dinds
+  for (i in 1:length(Dinds)) {
+    mR[Dinds[i]] <- min(c(1.0E5, mR[Dinds[i]]))
+    mR[Dinds[i]] <- max(c(1.0E-5, mR[Dinds[i]]))
+  }   
+
 
   # Threshold entries of mR at 1e-2
   #cat("mR[Dinds]", mR[Dinds], "\n")    
@@ -383,11 +410,11 @@ vg.GVA_new.mat_approx <- function(vmu, mR, vy, vr, mC, mSigma.inv, gh)
   for (i in 1:d) {
     for (j in 1:d) {
       mR_copy[i, j] <- mR_copy[i, j] + eps
-      vtheta <- vtheta_enc(vmu, mR_copy)
+      vtheta <- vtheta_enc_new(vmu, mR_copy)
       fp <- f.GVA_new(vtheta, vy, vr, mC, mSigma.inv, gh)
 
       mR_copy[i, j] <- mR_copy[i, j] - 2 * eps
-      vtheta <- vtheta_enc(vmu, mR_copy)
+      vtheta <- vtheta_enc_new(vmu, mR_copy)
       fm <- f.GVA_new(vtheta, vy, vr, mC, mSigma.inv, gh)
       mR_copy[i, j] <- mR_copy[i, j] + eps
 
@@ -400,7 +427,7 @@ vg.GVA_new.mat_approx <- function(vmu, mR, vy, vr, mC, mSigma.inv, gh)
 vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
 {
   d <- ncol(mC)
-  decode <- vtheta_dec(vtheta, d)
+  decode <- vtheta_dec_new(vtheta, d)
   vmu <- decode$vmu
   mR <- decode$mR
   # mR <- new("dtrMatrix", uplo="L", diag="N", x=as.vector(decode$mR), Dim=as.integer(c(d, d)))
@@ -409,6 +436,7 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
 
   for (i in 1:length(Dinds)) {
       mR[Dinds[i]] <- min(c(1.0E5, mR[Dinds[i]]))
+      mR[Dinds[i]] <- max(c(1.0E-5, mR[Dinds[i]]))
   }    
   # cat("mR[Dinds]", mR[Dinds], "\n")    
 
@@ -428,7 +456,7 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
   res.B12 <- B12.fun("POISSON", vmu.til, vsigma2.til, gh)
   vB1 <- res.B12$vB1
   vB2 <- res.B12$vB2
-  if (any(!is.finite(vB1)) || any(!is.finite(vB2)) || any(abs(vB1) > 1e300)) {
+  if (any(!is.finite(vB1)) || any(!is.finite(vB2)) || any(abs(vB1) > 1e100)) {
     # cat("vB1", vB1, "\n")
     # cat("vB2", vB2, "\n")
     vB1 <- 1
@@ -451,8 +479,8 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
   # 97% for the fixed slope, but 89.6% for the fixed intercept
   dmLambda <- -(mR_mLambda + mH %*% forwardsolve(tcrossprod(mR) + diag(1e-8, d), mR_mLambda))
   # 90.28% on the fixed intercept, 92.65% on the slope
-  #dmLambda <- -(mR_mLambda + mH %*% solve(tcrossprod(mR) + diag(1e-8, d), mR_mLambda, tol=1e-99))
-  dmLambda[Dinds] <- dmLambda[Dinds] * mR[Dinds]
+  # dmLambda <- -(mR_mLambda + mH %*% solve(tcrossprod(mR) + diag(1e-8, d), mR_mLambda, tol=1e-99))
+  dmLambda[Dinds] <- dmLambda[Dinds] * -mR[Dinds]
   # This is very clever, but seems to mess up the accuracy
   # dmLambda <- -(mR_mLambda + mH %*% backsolve(mR, forwardsolve(mR, mR_mLambda), transpose=TRUE))
   # Accuracy of beta_1 decreased
@@ -494,8 +522,9 @@ fit.GVA_new <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0
   gh2 <- NULL #list(x=gh$nodes, w=gh$weights, w.til=gh$weights*exp(gh$nodes^2))
     
   d <- length(vmu)
+
   mR <- t(chol(solve(mLambda + diag(1.0E-8, d))))
-  vtheta <- vtheta_enc(vmu, mR)
+  vtheta <- vtheta_enc_new(vmu, mR)
   
   if (method == "L-BFGS-B") {
     controls <- list(maxit=100, trace=0, fnscale=-1, REPORT=1, factr=1.0E-5, lmm=10, pgtol=reltol)
@@ -509,11 +538,11 @@ fit.GVA_new <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0
                 vy=vy, vr=vr, mC=mC, mSigma.inv=mSigma.inv, gh=gh2)        
       
   vtheta <- res$par 
-  decode <- vtheta_dec(vtheta, d)
+  decode <- vtheta_dec_new(vtheta, d)
   vmu <- decode$vmu
   mR <- decode$mR
   
-  mLambda <- solve(mR %*% t(mR), tol=1e-99)
+  mLambda <- solve(mR %*% t(mR) + diag(1e-8, d), tol=1e-99)
   
   return(list(res=res, vmu=vmu, mLambda=mLambda))
 }
