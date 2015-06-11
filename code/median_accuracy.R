@@ -9,12 +9,21 @@ median_accuracy <- function()
 
   set.seed(1234)
   accuracy <- list()
+  # Saving the fit allows us to skip the recompilation of the C++ for the model
+  stanfit <- NA
   for (i in 1:ITER) {
     # Run code
-    result <- compare_approximations(c(2, 1))
-    accuracy[[i]] <- with(result, calculate_accuracy(mcmc_samples, var_result, print_flag=TRUE))
+    approximation <- "gva2"
+    m <- 20
+    ni <- 25
+    mult <- generate_test_data(m, ni, expected_beta = c(2, 1), expected_rho = 0.5)
+    var_result <- zero_infl_var(mult, method=approximation, verbose=TRUE)
+    stanfit <- mcmc_approximation(mult, iterations=1e4, warmup=1e3, mc.cores = 1)
+    mcmc_samples <- stanfit$mcmc_samples
+    accuracy[[i]] <- calculate_accuracies(mult, mcmc_samples, var_result, approximation, print_flag=TRUE)
   }
   # For name in names(accuracy)
+  save(accuracy, file = "accuracy.RData")
   
   result_df <- data.frame()
   for (i in 1:length(accuracy[[1]]$vu_accuracy)) {
@@ -33,13 +42,8 @@ median_accuracy <- function()
 # Graph of Var_q(theta) against Var(theta|y)
 # How to get this?
 # Run fits for a range of theta values?
-compare_approximations <- function(vbeta, approximation="gva")
-{
-  multivariate <- generate_test_mult(expected_beta = c(2, 1))
-  var_result <- zero_infl_var(multivariate, method=approximation, verbose=TRUE)
-  mcmc_samples <- mcmc_approximation(multivariate, iterations=1e4, mc.cores = 4)
-  return(list(multivariate=multivariate, var_result=var_result, mcmc_samples=mcmc_samples))
-}
+
+#median_accuracy()
 
 is.between <- function(x, a, b) x >= a && x <= b
 
@@ -47,21 +51,21 @@ coverage_percentage <- function()
 {
 	# Percentage coverage of the true parameter values by approximate 95%
 	# credible intervals based on variational Bayes approximate posterior
-	# density functions. The percentages are based on 1000 replications.
+	# density functions. The percentages are based on 10,000 replications.
 	
-	set.seed(12345)
 	counter <- rep(0, 3)
   p <- 2
   # If ni is substantially smaller than m, you're probably going to get a lot of
   # overflow errors.
   m <- 10
-  ni <- 20
+  ni <- 25
   expected_beta <- c(2, 1)
-  expected_rho <- c(0.5, 1)
-	for (i in 1:1000) {
-    cat("i", i, "counter", counter, "percentage", round(100*counter/i, 2), "\n")
-		mult <- generate_test_data(m, ni, expected_beta = expected_beta, expected_rho = 0.5)
-		approximation <- "gva2"
+  expected_rho <- 0.5
+	for (i in 1:1e4) {
+    set.seed(i)
+      cat("i", i, "counter", counter, "percentage", round(100*counter/i, 2), "\n")
+		mult <- generate_test_data(m, ni, expected_beta = expected_beta, expected_rho = expected_rho)
+		approximation <- "gva"
     
 		# var_result <- tryCatch(zero_infl_var(mult, method=approximation, verbose=FALSE),
     #                        error <- function (E) { return(NULL) })
@@ -74,17 +78,29 @@ coverage_percentage <- function()
   	}
 
     # TODO: Fix intercepts
-  	for (j in 1:p) {
-		  # Check that true parameter is within 95% credible interval.
-			if (is.between(expected_beta[j], var_result$vmu[j] - 1.96*sqrt(var_result$mLambda[j, j]), var_result$vmu[j] + 1.96*sqrt(var_result$mLambda[j, j]))) {
-				# Increment counter
-				counter[j] <- counter[j] + 1
-			}
-  	}
+    for (j in 1:p) {
+      # Check that true parameter is within 95% credible interval.
+      lci <- var_result$vmu[j] - 1.96*sqrt(var_result$mLambda[j, j])
+      uci <- var_result$vmu[j] + 1.96*sqrt(var_result$mLambda[j, j])
+      # cat("vbeta lci[", j, "]", lci, "\n")
+      # cat("vbeta uci[", j, "]", uci, "\n")
+      if (is.between(expected_beta[j], lci, uci)) {
+        # Increment counter
+        counter[j] <- counter[j] + 1
+      }
+    }
+
     u_dim <- (p + 1):(p + m - 1)
-  	sum_vmu_vmu <- sum(var_result$vmu[u_dim])
-  	sum_mLambda_vmu <- sum(sqrt(diag(var_result$mLambda[u_dim, u_dim]))) # I think this will be an over-estimate
-  	if (is.between(0, sum_vmu_vmu - 1.96 * sum_mLambda_vmu, sum_vmu_vmu + 1.96 * sum_mLambda_vmu)) {
+  	sum_vmu_vu <- sum(var_result$vmu[u_dim])
+  	sum_mLambda_vu <- sum(sqrt(diag(var_result$mLambda[u_dim, u_dim]))) # I think this will be an over-estimate
+    lci <- sum_vmu_vu - 1.96*sum_mLambda_vu
+    uci <- sum_vmu_vu + 1.96*sum_mLambda_vu
+    # cat("vu lci", lci, "\n")
+    # cat("vu uci", uci, "\n")
+
+    # cat("vbeta[1] + sum_vu", var_result$vmu[1] + sum_vmu_vu, "\n")
+
+  	if (is.between(0, sum_vmu_vu - 1.96 * sum_mLambda_vu, sum_vmu_vu + 1.96 * sum_mLambda_vu)) {
     		counter[p + 1] <- counter[p + 1] + 1
   	}
 	}
