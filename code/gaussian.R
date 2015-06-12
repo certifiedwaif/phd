@@ -569,6 +569,7 @@ fit.GVA_nr <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e
   d <- ncol(mC)
   for (ITER in 1:MAXITER) {
     vmu.old <- vmu
+    mLambda.old <- mLambda
     
     # calculate B1
     # calculate B2
@@ -591,8 +592,16 @@ fit.GVA_nr <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e
     # Then -mH^{-1} = [(A - B D^-1 B^T)^-1, -(A-B D^-1 B^T)^-1 B D^-1]
     #                 [-D^-1 B^T (A - B D^-1 B^T)^-1, D^-1 + D^-1 B^T (A - B D^-1 B^T)^-1 B D^-1]
     # D^-1 and (A - B D^-1 B^T)^-1 appear repeatedly, so we precalculate them
-    #cat("diag(D)", diag(D), "\n")
-    D.inv <- solve(D + diag(1e-8, u_dim))
+    D.inv <- tryCatch(solve(D), error=function(e) NULL)
+    # We can't invert D, so bail out with the last known good vmu and mLambda.
+    # This probably means that the answer we've come up with to our optimisation
+    # problem isn't very good, because we're in a part of the parameter space that
+    # we shouldn't be in!
+    if (is.null(D.inv)) {
+      vmu <- vmu.old
+      mLambda <- mLambda.old
+      break
+    }
     A_BDB.inv <- solve(A - B %*% D.inv %*% t(B))
     beta_idx <- 1:p
     u_idx <- (p + 1):(p + u_dim)
@@ -603,7 +612,14 @@ fit.GVA_nr <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e
     
     vmu <- vmu + mLambda %*% vg
       
-    err <- max(abs(vmu - vmu.old)) 
+    err <- max(abs(vmu - vmu.old))
+    if (is.nan(err)) {
+      # vmu and mLambda are probably full of NaNs as well, so return last good
+      # vmu and mLambda
+      vmu <- vmu.old
+      mLambda <- mLambda.old
+      break
+    }
     if (err < TOL) {
       break;
     }
