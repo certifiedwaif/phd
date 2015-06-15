@@ -1,9 +1,11 @@
+#!/usr/bin/env Rscript
 # median_accuracy.R
+require(optparse)
 source("test_zero_inflated_model.R")
 source("accuracy.R")
 
 # Repeatedly run trials and compare accuracy. Plot boxplots.
-median_accuracy <- function()
+median_accuracy <- function(approximation="gva")
 {
   ITER <- 100
 
@@ -15,14 +17,18 @@ median_accuracy <- function()
   stanfit <- NA
   for (i in 1:ITER) {
     # Run code
-    approximation <- "gva2"
     m <- 20
-    ni <- 25
+    ni <- 10
     mult <- generate_test_data(m, ni, expected_beta = c(2, 1), expected_rho = 0.5)
     var_result <- zero_infl_var(mult, method=approximation, verbose=TRUE)
     stanfit <- mcmc_approximation(mult, iterations=1e4, warmup=1e3, mc.cores = 1)
     mcmc_samples <- stanfit$mcmc_samples
-    accuracy[[i]] <- calculate_accuracies(mult, mcmc_samples, var_result, approximation, print_flag=TRUE)
+    accuracy[[i]] <- tryCatch(calculate_accuracies(mult, mcmc_samples, var_result, approximation, print_flag=TRUE),
+                              error=function(e) NULL)
+    # Check whether integrate() failed
+    if (is.null(accuracy[[i]])) {
+      i <- i - 1
+    }
   }
   # For name in names(accuracy)
   save(accuracy, file = "accuracy.RData")
@@ -45,11 +51,11 @@ median_accuracy <- function()
 # How to get this?
 # Run fits for a range of theta values?
 
-#median_accuracy()
+# median_accuracy()
 
 is.between <- function(x, a, b) x >= a && x <= b
 
-coverage_percentage <- function()
+coverage_percentage <- function(approximation="gva")
 {
 	# Percentage coverage of the true parameter values by approximate 95%
 	# credible intervals based on variational Bayes approximate posterior
@@ -67,7 +73,6 @@ coverage_percentage <- function()
     set.seed(i)
       cat("i", i, "counter", counter, "percentage", round(100*counter/i, 2), "\n")
 		mult <- generate_test_data(m, ni, expected_beta = expected_beta, expected_rho = expected_rho)
-		approximation <- "gva_nr"
     
 		# var_result <- tryCatch(zero_infl_var(mult, method=approximation, verbose=FALSE),
     #                        error <- function (E) { return(NULL) })
@@ -108,7 +113,7 @@ coverage_percentage <- function()
 	}
 	print(counter)
 }
-coverage_percentage()
+# coverage_percentage()
 
 mean_var <- function(vbeta)
 {
@@ -159,3 +164,22 @@ plot_graphs <- function()
   points(var_var, col=2)
   plot(mcmc_var, var_var)
 }
+
+main <- function()
+{
+  option_list <- list(make_option(c("-a", "--approximation"), default="gva"),
+                      make_option(c("-c", "--coverage_percentage"), action="store_true", default=FALSE),
+                      make_option(c("-m", "--median_accuracy"),  action="store_true", default=FALSE))
+  opt <- parse_args(OptionParser(option_list=option_list))
+  print(opt)
+  approximation <- opt$approximation
+  if (opt$median_accuracy) {
+    median_accuracy(approximation=approximation)
+  }
+
+  if (opt$coverage_percentage) {
+    coverage_percentage(approximation=approximation)
+  }
+}
+
+main()
