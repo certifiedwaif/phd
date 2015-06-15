@@ -10,6 +10,8 @@ median_accuracy <- function()
   set.seed(1234)
   accuracy <- list()
   # Saving the fit allows us to skip the recompilation of the C++ for the model
+  # Update: Well, it's supposed to. Stan seems to want to keep recompiling the
+  # model anyway, regardless of what I do.
   stanfit <- NA
   for (i in 1:ITER) {
     # Run code
@@ -65,7 +67,7 @@ coverage_percentage <- function()
     set.seed(i)
       cat("i", i, "counter", counter, "percentage", round(100*counter/i, 2), "\n")
 		mult <- generate_test_data(m, ni, expected_beta = expected_beta, expected_rho = expected_rho)
-		approximation <- "gva"
+		approximation <- "gva_nr"
     
 		# var_result <- tryCatch(zero_infl_var(mult, method=approximation, verbose=FALSE),
     #                        error <- function (E) { return(NULL) })
