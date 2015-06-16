@@ -1,6 +1,7 @@
 #!/usr/bin/env Rscript
 # median_accuracy.R
-require(optparse)
+library(optparse)
+library(parallel)
 source("test_zero_inflated_model.R")
 source("accuracy.R")
 
@@ -9,27 +10,30 @@ median_accuracy <- function(approximation="gva")
 {
   ITER <- 100
 
-  set.seed(1234)
-  accuracy <- list()
   # Saving the fit allows us to skip the recompilation of the C++ for the model
   # Update: Well, it's supposed to. Stan seems to want to keep recompiling the
   # model anyway, regardless of what I do.
   stanfit <- NA
-  for (i in 1:ITER) {
+  accuracy <- mclapply(1:ITER, function(i) {
+    set.seed(i)
     # Run code
     m <- 20
     ni <- 10
-    mult <- generate_test_data(m, ni, expected_beta = c(2, 1), expected_rho = 0.5)
-    var_result <- zero_infl_var(mult, method=approximation, verbose=TRUE)
-    stanfit <- mcmc_approximation(mult, iterations=1e4, warmup=1e3, mc.cores = 1)
-    mcmc_samples <- stanfit$mcmc_samples
-    accuracy[[i]] <- tryCatch(calculate_accuracies(mult, mcmc_samples, var_result, approximation, print_flag=TRUE),
-                              error=function(e) NULL)
-    # Check whether integrate() failed. If so, generate another data set and re-try.
-    if (is.null(accuracy[[i]])) {
-      i <- i - 1
+    done <- FALSE
+    while (!done) {
+      done <- TRUE
+      mult <- generate_test_data(m, ni, expected_beta = c(2, 1), expected_rho = 0.5)
+      var_result <- zero_infl_var(mult, method=approximation, verbose=TRUE)
+      stanfit <- mcmc_approximation(mult, iterations=1e4, warmup=1e3, mc.cores = 1)
+      mcmc_samples <- stanfit$mcmc_samples
+      result <- tryCatch(calculate_accuracies(mult, mcmc_samples, var_result, approximation, print_flag=TRUE),
+                                error=function(e) NULL)
+      # Check whether integrate() failed. If so, generate another data set and re-try.
+      if (is.null(result)) {
+        done <- FALSE
+      }
     }
-  }
+  }, mc.cores = 4)
   
   # For name in names(accuracy)
   save(accuracy, file = sprintf("accuracy_list_%s.RData", approximation))
