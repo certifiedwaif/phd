@@ -1,10 +1,46 @@
 To Do list
 ==========
 
+16/06/2015
+----------
+- Rewrote boxplot code for median_accuracy
+- Running median accuracy tasks for gva, laplace and gva_nr.
+- The accuracy for the slope co-efficient is good, but for all other parameters it's not
+  especially good. Perhaps I need to run the MCMC for longer than 1e4.
+- coverage_percentage is better for GVA2 if m > ni, as will typically be the case in 
+  applications. When m < ni, GVA seems to perform better. We're still faster in both cases
+  though.
+- Look at Journal of Computational Statistics
+- Work on presentation on tools:
+  * GitHub/Version control
+  * Package development
+  * Profiling and debugging
+  * AWS
+  * Text editors/Sublime Text as an example
+  * UNIX
+  * Hadley Wickham's various contributions to the R ecosystem: testthat, magrittr, dplyr
+  * Twitter and the blogosphere
+- Application to physical activity data
+- Read more about numerical linear algebra and optimisation
+- Think about speeding things up with mclapply
+  Done. This was really easy. I should do the same thing with coverage_percentage.
+- Fill in Tutorial Preferences form
+- Drop off solutions to Diana Warren
+  Done
+- Change convergence test in zero_inflated_model to check whether lower bound has stopped
+  increases _and_ parameters have stopped changing.
+- What am I going to write about in my paper?
+  Look at draft
+  Look up expressions for accuracy of solving systems, so that you can compare methods of
+  solving \mLambda and \mLambda^-1
+
 15/06/2015
 ----------
 - Error analysis for solving linear systems
   https://www.fields.utoronto.ca/programs/scientific/09-10/FoCM/courses/Cucker5.pdf
+- Rewrote median_accuracy.R as a script that accepts command line arguments, so that you
+  can run it from the command line.
+- Found another overflow in Laplace's method in gaussian.R
 
 04/06/2015
 ----------
