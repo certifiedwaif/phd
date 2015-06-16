@@ -33,6 +33,7 @@ median_accuracy <- function(approximation="gva")
         done <- FALSE
       }
     }
+    result
   }, mc.cores = 4)
   
   # For name in names(accuracy)
@@ -44,7 +45,7 @@ median_accuracy <- function(approximation="gva")
   rho_accuracy <- sapply(accuracy, function(x) {x$rho_accuracy})
   accuracy_df <- cbind(vbeta_accuracy, vu_accuracy, rho_accuracy)
   pdf(sprintf("median_accuracy_%s.pdf", approximation))
-  boxplot(accuracy_df)
+  boxplot(accuracy_df, ylim=c(0, 1))
   dev.off()
 }
 
