@@ -25,25 +25,22 @@ median_accuracy <- function(approximation="gva")
     mcmc_samples <- stanfit$mcmc_samples
     accuracy[[i]] <- tryCatch(calculate_accuracies(mult, mcmc_samples, var_result, approximation, print_flag=TRUE),
                               error=function(e) NULL)
-    # Check whether integrate() failed
+    # Check whether integrate() failed. If so, generate another data set and re-try.
     if (is.null(accuracy[[i]])) {
       i <- i - 1
     }
   }
-  # For name in names(accuracy)
-  save(accuracy, file = "accuracy.RData")
   
-  result_df <- data.frame()
-  for (i in 1:length(accuracy[[1]]$vu_accuracy)) {
-    result_df[1:ITER, paste0("vu_accuracy_", i)] <- sapply(accuracy, function (x) x$vu_accuracy[i])
-  }
-  for (i in 1:length(accuracy[[1]]$vbeta_accuracy)) {
-    result_df[1:ITER, paste0("vbeta_accuracy_", i)] <- sapply(accuracy, function (x) x$vbeta_accuracy[i])
-  }
-  result_df[1:ITER, "sigma2_u_accuracy"] <- sapply(accuracy, function (x) x$sigma2_u_accuracy)
-  result_df[1:ITER, "rho_accuracy"] <- sapply(accuracy, function (x) x$rho_accuracy)
-  pdf("median_accuracy.pdf")
-  boxplot(result_df)
+  # For name in names(accuracy)
+  save(accuracy, file = sprintf("accuracy_list_%s.RData", approximation))
+  
+  # Construct a data frame
+  vbeta_accuracy <- t(sapply(accuracy, function(x) {x$vbeta_accuracy}))
+  vu_accuracy <- t(sapply(accuracy, function(x) {x$vu_accuracy}))
+  rho_accuracy <- sapply(accuracy, function(x) {x$rho_accuracy})
+  accuracy_df <- cbind(vbeta_accuracy, vu_accuracy, rho_accuracy)
+  pdf(sprintf("median_accuracy_%s.pdf", approximation))
+  boxplot(accuracy_df)
   dev.off()
 }
 
@@ -171,7 +168,6 @@ main <- function()
                       make_option(c("-c", "--coverage_percentage"), action="store_true", default=FALSE),
                       make_option(c("-m", "--median_accuracy"),  action="store_true", default=FALSE))
   opt <- parse_args(OptionParser(option_list=option_list))
-  print(opt)
   approximation <- opt$approximation
   if (opt$median_accuracy) {
     median_accuracy(approximation=approximation)
