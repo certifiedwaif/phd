@@ -290,19 +290,12 @@ where
 $$
 \begin{array}{rl}
 T_1 &= \bE_q[\log{p(\vy, \vnu)} - \log{q(\vnu)}] \\
-&= \quad \vy^T \mP \mC \vmu - \vp^T \exp{\left [\mC \vmu + \half \text{diag} (\mC \mLambda \mC^T)\right ]} - \vone^T\log \Gamma{(\vy + \vone)}\\
-& \quad + \frac{p + m}{2} (1 + \log{2 \pi}) + \half \log{|\mLambda|},
-\end{array}
-$$
-
-%\noindent where $A_q = A + m/2$ and $B_q = B + \|\vmu_\vu\|^2/2 +  \tr{(\mLambda_{\vu \vu})}/2$.
-
-$$
-\begin{array}{rl}
+&= \vy^T \mP \mC \vmu - \vp^T \exp{\left [\mC \vmu + \half \text{diag} (\mC \mLambda \mC^T)\right ]} - \vone^T\log \Gamma{(\vy + \vone)}\\
+& \quad + \frac{p + m}{2} (1 + \log{2 \pi}) + \half \log{|\mLambda|}, \\
 T_2 &= \bE_q [\log p(\mSigma_{\vu \vu}) - \log q(\mSigma_{\vu \vu})] \\
 &= \bE_q [v/2(\log |\Psi| - \log |\Psi + \vmu_\vu \vmu_\vu^T + \mLambda_{\vu \vu}|) + \half \log 2 + \half \log|\mSigma_{\vu \vu}| \log \Gamma_{p+1}(v/2) - \log \Gamma_{p}(v/2)\\
 &\quad + \half \tr((\vmu_{\vu} \vmu_{\vu}^T + \mLambda_{\vu \vu}) \mSigma_{\vu \vu}^{-1}) ] \\
-&= \quad v/2(\log |\Psi| - \log |\Psi + \vmu_\vu \vmu_\vu^T + \mLambda_{\vu \vu}|) + \half \log 2 + \half \bE_q \log |\mSigma_{\vu \vu}| + \log \Gamma_{p+1}(v/2) - \log \Gamma_{p}(v/2) \\
+&= v/2(\log |\Psi| - \log |\Psi + \vmu_\vu \vmu_\vu^T + \mLambda_{\vu \vu}|) + \half \log 2 + \half \bE_q \log |\mSigma_{\vu \vu}| + \log \Gamma_{p+1}(v/2) - \log \Gamma_{p}(v/2) \\
 &\quad + \half \tr(\mI_m + \Psi(\Psi+ \vmu_\vu \vmu_\vu^T + \mLambda_{\vu \vu})^{-1}/(v + p + 2))
 \end{array}
 $$
@@ -315,6 +308,7 @@ $$
 
 $$T_3 = - \vp^T \log \vp - (\vone - \vp)^T \log (\vone - \vp) - \log \Beta (\alpha_\rho, \beta_\rho) + \log \Beta (\alpha_q, \beta_q)$$
 
+\section{Algorithms for fitting the variational approximation}
 \subsection{Laplace-Variational Approximation}
 Laplace's method of approximation relies on a second order Taylor expansion of the
 log likelihood around the mode. This can then be optimised with Newton-Raphson
@@ -350,47 +344,37 @@ considered in this article.
 
 \subsection{Optimising the GVA lower bound}
 % Detail techniques used for fitting models.
-The Gaussian variational lower bound in Algorithm 2 can be optimised using a 
-variety of algorithms. Each of these algorithms is a trade-off between accuracy, 
-stability and speed.
+The Gaussian variational lower bound in Algorithm 2 can be optimised
+using a  variety of algorithms. Each of these algorithms is a trade-off between
+accuracy,  stability and speed. The Gaussian variational lower bound is
+optimised using the L-BFGS-B  algorithm.
 
-\subsubsection{GVA}
-% More complicated functions and derivatives, but more accurate
-The first variant of the Gaussian Variational Approximation algorithm
-optimises the Gaussian variational lower bound of the log likelihood with respect
-to $\vmu$ and the Cholesky decomposition $\mR$ of $\mLambda$, that is,
-$\mLambda = \mR \mR^T$. This algorithm trades the computational complexity of 
-numerically evaluating the integral in Equation \ref{eq:gva} for greatly increased 
-accuracy in the approximating posterior distribution. The resulting function is below and 
-can be optimised with L-BFGS:
+\subsubsection{GVA} % More complicated functions and derivatives, but more
+accurate The first variant of the Gaussian Variational Approximation algorithm
+optimises the Gaussian variational lower bound of the log likelihood with
+respect to $\vmu$ and the Cholesky decomposition $\mR$ of $\mLambda$, that is,
+$\mLambda = \mR \mR^T$. This algorithm trades the computational complexity of
+numerically evaluating an integral for greatly increased accuracy in the
+approximating posterior distribution. The resulting function is below and  can
+be optimised with L-BFGS:
 
 % Detail the function and its derivatives
-\begin{align}\label{eq:gva}
-\log \underline{p}(\vmu, \mLambda; \vy) &= \vp^T\vy^T\mC \vmu - \vp^T \B(\mC \vmu, \text{diag}(\mC \mLambda \mC^T)) - \half \vmu \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} \\
-&\quad - \frac{d}{2} \log{(2 \pi)} + \half \log{|\mSigma^{-1}|} + \frac{d}{2} \log{(2 \pi)} + \frac{d}{2} + \log{|\mR|}
-\end{align}
-
 \begin{align*}
-\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu} &= \mC^T \vp^T(\vy - \B(\mC \vmu, \mC \mLambda \mC^T)) - \mSigma^{-1} \vmu
+\log \underline{p}(\vmu, \mLambda; \vy) &= \vy^T\mP \mC \vmu - \vp^T \B(\mC \vmu, \text{diag}(\mC \mLambda \mC^T)) - \half \vmu \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} \\
+&\quad - \frac{d}{2} \log{(2 \pi)} + \half \log{|\mSigma^{-1}|} + \frac{d}{2} \log{(2 \pi)} + \frac{d}{2} + \log{|\mR|} \\
+\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu} &= \mC^T \vp^T(\vy - \B^{(1)}(\mC \vmu, \mC \mLambda \mC^T)) - \mSigma^{-1} \vmu \\
+\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda} &= \left [\mLambda^{-1} - \vp^T \mC^T \text{diag}(\B^{(2)}(\mC \vmu, \mC \mLambda \mC^T)) \mC \vp) - \mSigma^{-1} \right ] \mR
 \end{align*}
 
-\begin{align*}
-\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda} &= \left [\mLambda^{-1} - \vp^T \mC^T \text{diag}(\B(\mC \vmu, \mC \mLambda \mC^T)) \mC \vp) - \mSigma^{-1} \right ] \mR
-\end{align*} 
- 
 \subsubsection{GVA2}
 The second variant of the Gaussian Variational Approximation algorithm is similiar 
 to the first, but instead of optimising $\vmu$ and $\mR$ where $\mLambda=\mR \mR^T$,
 instead we optimise $\mR$ where $\mLambda = (\mR \mR^T)^{-1}$.
 % The function and derivatives change
 
-\noindent By re-ordering the columns and rows of $\mR$ so that random effects
-precede fixed effects, the assumption of independence between the components of
-$\vu$ ensures sparsity of $\mR$. This allows optimisation of the Gaussian 
-variational lower bound to be done over fewer parameters, and for inverses of $\mR$ 
-to be calculated more quickly - a reduction from $O((m + p)^3)$ to
-$O(m + (pm)^2 + p^3)$, which is a substantial reduction in computation if $m$ is 
-substantially greater than $p$, as is typical in applications.
+\noindent This new parameterisation allows us to solve $\mR \vx = \vc_i$ and then square
+rather than performing the matrix multiplication $\vc_i \mLambda \vc_i$ as we do in the GVA
+variant of the algorithm.
 
 % TODO: The above computational complexity results may well be true, but I wouldn't trust them.
 % It's been a long time since that thinking was done, and some of it was most likely wrong.
@@ -423,8 +407,10 @@ algorithm, but as the parameterisation of $\mLambda$ has changed, the
 derivative with respect to $\mLambda$ is now
 
 \begin{align*}
-\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda} &= -\mR^{-1}\left [\mLambda^{-1} - \mH \right ]\mLambda \\
-&= -\mR^{-1} (\mI + \mH \mLambda)
+\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda}
+&= \quad(\mLambda^{-1} + \mH)(-\mLambda \mR \mLambda) \\
+&= -(\mI + \mH\mLambda)\mR\mLambda \\
+&= - (\mR\mLambda + \mH\mLambda\mR\mLambda)
 \end{align*} 
 
 \noindent where $\mH = \vp^T \mC^T \text{diag}(\B^{(2)}(\mC \vmu, \mC \mLambda \mC^T)) \mC \vp - \mSigma^{-1}$.
@@ -437,10 +423,7 @@ variational lower bound. This algorithm is fast, but potentially unstable.
 % Essentially a very straightforward optimisation approach, but potentially unstable.
 % Detail the function and its derivatives
 \begin{align*}
-\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu} &= \mC^T\vp \left [\vy - \B^{1}(\mC \vmu, \text{diag}(\mC \mLambda \mC^T)) \right ] - \mSigma^{-1} \vmu
-\end{align*}
-
-\begin{align*}
+\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu} &= \quad \mC^T\vp \left [\vy - \B^{1}(\mC \vmu, \text{diag}(\mC \mLambda \mC^T)) \right ] - \mSigma^{-1} \vmu \\
 \frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda} &= -\mC^T \text{diag}(\vp \odot \B^{(2)}(\mC \vmu, \text{diag}(\mC \mLambda \mC^T))) - \mSigma^{-1}
 \end{align*}
 
@@ -561,19 +544,6 @@ $\rho$ &0.988&0.981&0.982&0.983&0.981\\
 
 
 \section{Application}\label{sec:application}
-
-% This section can probably be dropped.
-\section{Theory of variational approximation of zero-inflated Poisson models}
-Let $Z_i = R_i Y_i$.
-
-\noindent Then the probability that $Z_i = 0$ is
-$$
-\begin{array}{rl}
-P(Z_i = 0) &= P(R_i = 0)P(Y_i = y) + P(R_i = 1) P(Y_i = 0) - P(R_i = 0) P(Y_i = 0) \\
-&= (1 - \rho) + \rho e^{-\lambda} - (1 - \rho) e^{-\lambda} \\
-&= (1 - \rho) + e^{-\lambda}(2 \rho - 1)
-\end{array}
-$$
 
 \section{Appendix} 
 
@@ -759,7 +729,7 @@ $$
 $$
 
 $$
-\frac{\rho^{\vone^T\vr} (1 - \rho)^{\vone^T(\vone - \vr)}}{\Beta{\alpha_\rho + \vone^T \vr, \beta_\rho + \vone^T(\vone - \vr)}}
+\frac{\rho^{\vone^T\vr} (1 - \rho)^{\vone^T(\vone - \vr)}}{\Beta({\alpha_\rho + \vone^T \vr, \beta_\rho + \vone^T(\vone - \vr)})}
 $$
 
 $$
@@ -774,7 +744,7 @@ $r_i = 1$. So $x_i^{r_i} = I(x \ne 0)$ and hence the likelihood can be re-writte
 
 $$
 \begin{array}{ll}
-p(r_i | \text{rest}) & \ds = \frac{(e^{-\lambda + \logit{(\rho)}})^{r_i}}{I(x_i = 0) + (e^{-\lambda + \logit{(\rho)}})^{r_i}}
+p(r_i | \text{rest}) & \ds = \frac{\left(e^{-\lambda + \logit{(\rho)}} \right)^{r_i}}{I(x_i = 0) + \left(e^{-\lambda + \logit{(\rho)}}\right)^{r_i}}
 \end{array}
 $$
 

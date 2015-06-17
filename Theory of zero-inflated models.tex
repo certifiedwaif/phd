@@ -1,0 +1,12 @@
+% This section can probably be dropped.
+\section{Theory of variational approximation of zero-inflated Poisson models}
+Let $Z_i = R_i Y_i$.
+
+\noindent Then the probability that $Z_i = 0$ is
+$$
+\begin{array}{rl}
+P(Z_i = 0) &= P(R_i = 0)P(Y_i = y) + P(R_i = 1) P(Y_i = 0) - P(R_i = 0) P(Y_i = 0) \\
+&= (1 - \rho) + \rho e^{-\lambda} - (1 - \rho) e^{-\lambda} \\
+&= (1 - \rho) + e^{-\lambda}(2 \rho - 1)
+\end{array}
+$$
