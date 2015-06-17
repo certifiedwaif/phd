@@ -16,7 +16,7 @@ f.lap <- function(vmu, vy, vr, mC, mSigma.inv, mLambda)
   d <- length(vmu)
   veta <- mC %*% vmu
   mSigma <- solve(mSigma.inv)
-  mDiag <- fastdiag(mC, mLambda)
+  mDiag <- fastdiag(mLambda, mC)
   f <- sum(vy * vr * veta - vr * exp(veta + 0.5 * mDiag)) - 0.5 * t(vmu) %*% mSigma.inv %*% vmu - 
            0.5 * sum(diag(mLambda %*% mSigma))
   return(f)
@@ -102,13 +102,14 @@ vtheta_dec <- function(vtheta, d)
 }
 
 # Gaussian variational approxmation, mLambda = mR mR^T ----
-f.G <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, gh) 
+f.G <- function(vmu, mR, vy, vr, mC, mSigma.inv, gh) 
 {
   d <- length(vmu)
   
   # vmu.til     <- min(mC %*% vmu, 1000)
   vmu.til     <- mC %*% vmu
-  vsigma2.til <- fastdiag(mC, mLambda)
+  vsigma2.til <- fastdiag2(mR, mC)
+  mLambda <- tcrossprod(mR)
   vB0 <- B0.fun("POISSON", vmu.til, vsigma2.til, gh) 
   f <- sum(vr * (vy * vmu.til - vB0))
   f <- f - 0.5 * t(vmu) %*% mSigma.inv %*% vmu - 0.5 * tr(mSigma.inv %*% mLambda)
@@ -129,8 +130,7 @@ f.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
       mR[Dinds[i]] <- min(c(1.0E5,mR[Dinds[i]]))
   }   
 
-  mLambda <- tcrossprod(mR)
-  f <- sum(log(diag(mR))) + f.G(vmu, mLambda, vy, vr, mC, mSigma.inv, gh)
+  f <- sum(log(diag(mR))) + f.G(vmu, mR, vy, vr, mC, mSigma.inv, gh)
   f <- f + 0.5 * d * log(2 * pi) + 0.5 * d
   
   if (is.nan(f) || !is.finite(f)) {
@@ -213,11 +213,11 @@ vg.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
       mR[Dinds[i]] <- min(c(1.0E5, mR[Dinds[i]]))
   }    
 
-  mLambda <- tcrossprod(mR)
+  # mLambda <- tcrossprod(mR)
 
   vmu.til     <- mC %*% vmu
   # Idea: Could multiply by mR and then square?
-  vsigma2.til <- fastdiag(mC, mLambda)
+  vsigma2.til <- fastdiag2(mR, mC)
   res.B12 <- B12.fun("POISSON", vmu.til, vsigma2.til, gh)
   vB1 <- res.B12$vB1
   vB2 <- res.B12$vB2
@@ -315,7 +315,7 @@ f.G_new <- function(vmu, mR, vy, vr, mC, mSigma.inv, gh)
   # cat("vmu.til", vmu.til, "\n")
   # va <- forwardsolve(mR, t(mC))
   # vsigma2.til <- colSums(va^2)
-  vsigma2.til <- fastsolve(mC, mR)
+  vsigma2.til <- fastsolve(mR, mC)
   # cat("vsigma2.til", vsigma2.til, "\n")
   # for (i in 1:length(vsigma2.til)) {
   #   if (vsigma2.til[i] > 1) {
@@ -324,7 +324,7 @@ f.G_new <- function(vmu, mR, vy, vr, mC, mSigma.inv, gh)
   # }
   # cat("vsigma2.til", vsigma2.til, "\n")
   mLambda <- chol2inv(t(mR) + diag(1e-8, d))
-  # vsigma2.til <- fastdiag(mC, mLambda)
+  # vsigma2.til <- fastdiag(mLambda, mC)
   vB0 <- B0.fun("POISSON", vmu.til, vsigma2.til, gh) 
   # cat("vB0", vB0, "\n")
   if (any(!is.finite(vB0))) {
@@ -450,8 +450,8 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
   # Idea: Could multiply by mR and then square?
   # va <- forwardsolve(mR, t(mC))
   # vsigma2.til <- colSums(va^2)
-  # vsigma2.til <- fastdiag(mC, mLambda)
-  vsigma2.til <- fastsolve(mC, mR)
+  # vsigma2.til <- fastdiag(mLambda, mC)
+  vsigma2.til <- fastsolve(mR, mC)
   # cat("vsigma2.til", vsigma2.til, "\n")
   res.B12 <- B12.fun("POISSON", vmu.til, vsigma2.til, gh)
   vB1 <- res.B12$vB1
@@ -574,7 +574,7 @@ fit.GVA_nr <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e
     # calculate B1
     # calculate B2
     vmu.til <- mC %*% vmu
-    vsigma2.til <- fastdiag(mC, mLambda)
+    vsigma2.til <- fastdiag(mLambda, mC)
     res.B12 <- B12.fun("POISSON", vmu.til, vsigma2.til, gh)
     vB1 <- res.B12$vB1
     vB2 <- res.B12$vB2      

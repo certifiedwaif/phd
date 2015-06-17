@@ -17,7 +17,7 @@ using Eigen::VectorXd;
 typedef Eigen::Map<Eigen::MatrixXd> MapMatd;
 
 // [[Rcpp::export]]
-VectorXd fastdiag(MapMatd C, MapMatd lambda)
+VectorXd fastdiag(MapMatd lambda, MapMatd C)
 {
   VectorXd result(C.rows());
 
@@ -33,7 +33,23 @@ VectorXd fastdiag(MapMatd C, MapMatd lambda)
 }
 
 // [[Rcpp::export]]
-VectorXd fastsolve(MapMatd C, MapMatd R)
+VectorXd fastdiag2(MapMatd R, MapMatd C)
+{
+  VectorXd result(C.rows());
+
+  if (C.cols() != R.cols()) {
+    stop("mR and mR do not have the same numbers of columns");
+  }  
+
+  for (int i = 0; i < C.rows(); i++) {
+    result[i] = (C.row(i) * R.triangularView<Eigen::Lower>()).squaredNorm();
+  }
+
+  return result;
+}
+
+// [[Rcpp::export]]
+VectorXd fastsolve(MapMatd R, MapMatd C)
 {
   VectorXd result(C.rows());
 
