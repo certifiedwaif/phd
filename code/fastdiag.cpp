@@ -41,9 +41,11 @@ VectorXd fastdiag2(MapMatd R, MapMatd C)
     stop("mR and mR do not have the same numbers of columns");
   }  
 
-  for (int i = 0; i < C.rows(); i++) {
-    result[i] = (C.row(i) * R.triangularView<Eigen::Lower>()).squaredNorm();
-  }
+  // for (int i = 0; i < C.rows(); i++) {
+  //   result[i] = (C.row(i) * R.triangularView<Eigen::Lower>()).squaredNorm();
+  // }
+
+  result = (C * R.triangularView<Eigen::Lower>()).rowwise().squaredNorm();
 
   return result;
 }
