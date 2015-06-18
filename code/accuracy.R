@@ -34,14 +34,14 @@ mcmc_approximation <- function(mult, seed=1, iterations=NA, warmup=NA, mc.cores=
               mcmc_samples=mcmc_samples))
 }
 
-calculate_accuracy <- function(mcmc_samples, dist_fn, param1, param2)
+calculate_accuracy <- function(mcmc_samples, dist_fn, ...)
 {
   mcmc_density <- density(mcmc_samples)
   mcmc_fn <- splinefun(mcmc_density$x, mcmc_density$y)
   
   integrand <- function(x)
   {
-    return(abs(mcmc_fn(x) - dist_fn(x, param1, param2)))
+    return(abs(mcmc_fn(x) - dist_fn(x, ...)))
   }
   result <- integrate(integrand, min(mcmc_density$x), max(mcmc_density$x),
                      subdivisions = length(mcmc_density$x))
@@ -49,13 +49,17 @@ calculate_accuracy <- function(mcmc_samples, dist_fn, param1, param2)
   return(accuracy)
 }
 
-accuracy_plot <- function(mcmc_samples, dist_fn, param1, param2)
+accuracy_plot <- function(mcmc_samples, dist_fn, ...)
 {
   mcmc_density <- density(mcmc_samples)
-  plot(mcmc_density)
-  curve(dist_fn(x, param1, param2),
+  curve(dist_fn(x, ...),
         from=min(mcmc_density$x), to=max(mcmc_density$x),
-        add=TRUE, lty=2, col="blue")
+        lty=2, col="blue")
+  # lines(mcmc_density)
+  mcmc_fn <- splinefun(mcmc_density$x, mcmc_density$y)
+  curve(mcmc_fn,
+        from=min(mcmc_density$x), to=max(mcmc_density$x),
+        lty=1, col="black", add=TRUE)
 }
 
 calculate_accuracies <- function(mult, mcmc_samples, var_result, approximation, print_flag=FALSE, plot_flag=FALSE)
@@ -90,7 +94,7 @@ calculate_accuracies <- function(mult, mcmc_samples, var_result, approximation, 
       
       param_name <- sprintf("vbeta[%d]", i)
       if (plot_flag) accuracy_plot(mcmc_samples$vbeta[,i], dnorm,
-                              var_result$vmu[i], sqrt(var_result$mLambda[i,i]))
+                                   var_result$vmu[i], sqrt(var_result$mLambda[i,i]))
     }
   } else {
     vbeta_accuracy <- NULL
@@ -144,6 +148,35 @@ calculate_accuracies <- function(mult, mcmc_samples, var_result, approximation, 
   # TODO: Can I just modify this to check each of the diagonals of the covariance matrices?
   # According to Wikipedia's article on Wishart distributions, the diagonal elements follow
   # chi-squared distributions
+  # TODO: Add mSigma.beta accuracy
+  # \sigma_Z^2 <- solve(mSigma)[i, i]^2
+  # sigma2_z * dchisq(x, df = v)
+  # TODO: Add mSigma.u accuracy
+  sigma2_vu_accuracy <- rep(0, B)
+  v <- 4
+  d <- var_result$mult$d
+  # E_mPsi_inv <- var_result$mult$mPsi / (4 - 2 - 1)
+  sigma_u_inv <- array(0, c(dim(mcmc_samples$sigma_u)[1], 2, 2))
+  a <- mcmc_samples$sigma_u[, 1, 1]
+  b <- mcmc_samples$sigma_u[, 1, 2]
+  c <- mcmc_samples$sigma_u[, 2, 1]
+  d <- mcmc_samples$sigma_u[, 2, 2]
+  sigma_u_inv[, 1, 1] <- d / (a * d - b * c)
+  sigma_u_inv[, 1, 2] <- -b / (a * d - b * c)
+  sigma_u_inv[, 2, 1] <- -c / (a * d - b * c)
+  sigma_u_inv[, 2, 2] <- a / (a * d - b * c)
+
+  for (i in 1:B) {
+    # sigma2 <- E_mPsi_inv[i, i]
+    sigma2 <- var_result$mult$mPsi[i, i]
+    sigma2_vu_accuracy[i] <- calculate_accuracy(sigma_u_inv[, i, i],
+                                               function(x, ...) dgamma(x/sqrt(sigma2), ...), v/2, sigma2/2)
+    if (print_flag)
+      cat("sigma2_u[", i, "]", approximation, "accuracy:", sigma2_vu_accuracy[i], "\n")
+    if (plot_flag)
+      accuracy_plot(sigma_u_inv[, i, i], function(x, ...) dgamma(x/sqrt(sigma2), ...), v/2, sigma2/2)
+    
+  }
   
   # rho accuracy
   rho_accuracy <- calculate_accuracy(mcmc_samples$rho, dbeta,
@@ -285,49 +318,49 @@ test_accuracies <- function()
 test_accuracies_slope <- function()
 {
   # Monte Carlo Markov Chains approximation
-  seed <- 1
-  set.seed(seed)
-  mult <- generate_slope_test_data(m=20, ni=10)
-  result <-  mcmc_approximation(mult, iterations=1e6, warmup = 1e4)
-  fit <- result$fit
-  mcmc_samples <- result$mcmc_samples
-  save(mult, mcmc_samples, fit, file="data/accuracy_slope_2015_05_04.RData")  
-  # load(file="data/accuracy_slope_2015_05_04.RData")
+  # seed <- 1
+  # set.seed(seed)
+  # mult <- generate_slope_test_data(m=20, ni=10)
+  # result <-  mcmc_approximation(mult, iterations=1e5, warmup = 1e4)
+  # fit <- result$fit
+  # mcmc_samples <- result$mcmc_samples
+  # save(mult, mcmc_samples, fit, file="data/accuracy_slope_2015_05_04.RData")  
+  load(file="data/accuracy_slope_2015_05_04.RData")
   # load(file="data_macbook/accuracy_slope_2015_03_30.RData")
   
   now <- Sys.time()
   var1_result <- zero_infl_var(mult, method="laplace", verbose=TRUE)
-  var1_accuracy <- calculate_accuracies(mult, mcmc_samples, var1_result, "laplace", plot_flag=TRUE)
+  var1_accuracy <- calculate_accuracies(mult, mcmc_samples, var1_result, "laplace", print_flag=TRUE, plot_flag=TRUE)
   print(Sys.time() - now)
-  print(var1_accuracy$vbeta_accuracy)
-  print(var1_accuracy$vu_accuracy)
-  print(var1_accuracy$rho_accuracy)
+  # print(var1_accuracy$vbeta_accuracy)
+  # print(var1_accuracy$vu_accuracy)
+  # print(var1_accuracy$rho_accuracy)
   
   now <- Sys.time()
   var2_result <- zero_infl_var(mult, method="gva", verbose=TRUE)
-  var2_accuracy <- calculate_accuracies(mult, mcmc_samples, var2_result, "gva", plot_flag=TRUE)
+  var2_accuracy <- calculate_accuracies(mult, mcmc_samples, var2_result, "gva", print_flag=TRUE, plot_flag=TRUE)
   print(Sys.time() - now)
-  print(var2_accuracy$vbeta_accuracy)
-  print(var2_accuracy$vu_accuracy)
-  print(var2_accuracy$rho_accuracy)
+  # print(var2_accuracy$vbeta_accuracy)
+  # print(var2_accuracy$vu_accuracy)
+  # print(var2_accuracy$rho_accuracy)
 
   now <- Sys.time()
   var3_result <- zero_infl_var(mult, method="gva2", verbose=TRUE)
-  var3_accuracy <- calculate_accuracies(mult, mcmc_samples, var3_result, "gva2", plot_flag=TRUE)
+  var3_accuracy <- calculate_accuracies(mult, mcmc_samples, var3_result, "gva2", print_flag=TRUE, plot_flag=TRUE)
   print(Sys.time() - now)
-  print(var3_accuracy$vbeta_accuracy)
-  print(var3_accuracy$vu_accuracy)
-  print(var3_accuracy$rho_accuracy)
+  # print(var3_accuracy$vbeta_accuracy)
+  # print(var3_accuracy$vu_accuracy)
+  # print(var3_accuracy$rho_accuracy)
 
   now <- Sys.time()
   var4_result <- zero_infl_var(mult, method="gva_nr", verbose=TRUE)
-  var4_accuracy <- calculate_accuracies(mult, mcmc_samples, var4_result, "gva_nr", plot_flag=TRUE)
+  var4_accuracy <- calculate_accuracies(mult, mcmc_samples, var4_result, "gva_nr", print_flag=TRUE, plot_flag=TRUE)
   print(Sys.time() - now)
-  print(var4_accuracy$vbeta_accuracy)
-  print(var4_accuracy$vu_accuracy)
-  print(var4_accuracy$rho_accuracy)
+  # print(var4_accuracy$vbeta_accuracy)
+  # print(var4_accuracy$vu_accuracy)
+  # print(var4_accuracy$rho_accuracy)
 }
-# test_accuracies_slope()
+test_accuracies_slope()
 
 test_accuracies_spline <- function()
 {
