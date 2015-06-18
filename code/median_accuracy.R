@@ -8,45 +8,51 @@ source("accuracy.R")
 # Repeatedly run trials and compare accuracy. Plot boxplots.
 median_accuracy <- function(approximation="gva")
 {
-  ITER <- 100
+  # ITER <- 100
 
-  # Saving the fit allows us to skip the recompilation of the C++ for the model
-  # Update: Well, it's supposed to. Stan seems to want to keep recompiling the
-  # model anyway, regardless of what I do.
-  stanfit <- NA
-  accuracy <- mclapply(1:ITER, function(i) {
-    set.seed(i)
-    # Run code
-    m <- 20
-    ni <- 10
-    done <- FALSE
-    while (!done) {
-      done <- TRUE
-      mult <- generate_test_data(m, ni, expected_beta = c(2, 1), expected_rho = 0.5)
-      var_result <- zero_infl_var(mult, method=approximation, verbose=TRUE)
-      stanfit <- mcmc_approximation(mult, iterations=1e4, warmup=1e3, mc.cores = 1)
-      mcmc_samples <- stanfit$mcmc_samples
-      result <- tryCatch(calculate_accuracies(mult, mcmc_samples, var_result, approximation, print_flag=TRUE),
-                                error=function(e) NULL)
-      # Check whether integrate() failed. If so, generate another data set and re-try.
-      if (is.null(result)) {
-        done <- FALSE
-      }
-    }
-    result
-  }, mc.cores = 4)
+  # # Saving the fit allows us to skip the recompilation of the C++ for the model
+  # # Update: Well, it's supposed to. Stan seems to want to keep recompiling the
+  # # model anyway, regardless of what I do.
+  # stanfit <- NA
+  # accuracy <- mclapply(1:ITER, function(i) {
+  #   set.seed(i)
+  #   # Run code
+  #   m <- 20
+  #   ni <- 10
+  #   done <- FALSE
+  #   while (!done) {
+  #     done <- TRUE
+  #     mult <- generate_test_data(m, ni, expected_beta = c(2, 1), expected_rho = 0.5)
+  #     var_result <- zero_infl_var(mult, method=approximation, verbose=TRUE)
+  #     stanfit <- mcmc_approximation(mult, iterations=1e5, warmup=1e4, mc.cores = 1)
+  #     mcmc_samples <- stanfit$mcmc_samples
+  #     result <- tryCatch(calculate_accuracies(mult, mcmc_samples, var_result, approximation, print_flag=TRUE),
+  #                               error=function(e) NULL)
+  #     # Check whether integrate() failed. If so, generate another data set and re-try.
+  #     if (is.null(result)) {
+  #       done <- FALSE
+  #     }
+  #   }
+  #   result
+  # }, mc.cores = 16)
   
-  # For name in names(accuracy)
-  save(accuracy, file = sprintf("accuracy_list_%s.RData", approximation))
+  # # For name in names(accuracy)
+  # save(accuracy, file = sprintf("results/accuracy_list_%s.RData", approximation))
   
-  # Construct a data frame
-  vbeta_accuracy <- t(sapply(accuracy, function(x) {x$vbeta_accuracy}))
-  vu_accuracy <- t(sapply(accuracy, function(x) {x$vu_accuracy}))
-  rho_accuracy <- sapply(accuracy, function(x) {x$rho_accuracy})
-  accuracy_df <- cbind(vbeta_accuracy, vu_accuracy, rho_accuracy)
-  pdf(sprintf("median_accuracy_%s.pdf", approximation))
-  boxplot(accuracy_df, ylim=c(0, 1))
-  dev.off()
+  for (approximation in c("laplace", "gva", "gva2", "gva_nr")) {
+    load(file = sprintf("results/accuracy_list_%s.RData", approximation))
+    
+    # Construct a data frame
+    vbeta_accuracy <- t(sapply(accuracy, function(x) {x$vbeta_accuracy}))
+    vu_accuracy <- t(sapply(accuracy, function(x) {x$vu_accuracy}))
+    rho_accuracy <- sapply(accuracy, function(x) {x$rho_accuracy})
+    accuracy_df <- cbind(vbeta_accuracy, vu_accuracy, rho_accuracy)
+    pdf(sprintf("results/median_accuracy_%s.pdf", approximation))
+    boxplot(accuracy_df, ylim=c(0, 1))
+    axis(1, at=1:22, labels=c(expression(bold(beta)[0], bold(beta)[1], bold(u)[1], bold(u)[2], bold(u)[3], bold(u)[4], bold(u)[5], bold(u)[6], bold(u)[7], bold(u)[8], bold(u)[9], bold(u)[11], bold(u)[12], bold(u)[13], bold(u)[14], bold(u)[15], bold(u)[16], bold(u)[17], bold(u)[18], bold(u)[19], bold(u)[20], rho)))
+    title(sprintf("%s median accuracy", approximation))
+    dev.off()
+  }
 }
 
 # Graph of Var_q(theta) against Var(theta|y)
