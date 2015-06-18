@@ -477,9 +477,9 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
   # mR_mLambda <- t(backsolve(mR, forwardsolve(mR, t(mR)), transpose=TRUE))
   # dmLambda <- -(mR_mLambda + mH %*% mLambda %*% mR_mLambda)
   # 97% for the fixed slope, but 89.6% for the fixed intercept
-  dmLambda <- -(mR_mLambda + mH %*% forwardsolve(tcrossprod(mR) + diag(1e-8, d), mR_mLambda))
+  # dmLambda <- -(mR_mLambda + mH %*% forwardsolve(tcrossprod(mR) + diag(1e-8, d), mR_mLambda))
   # 90.28% on the fixed intercept, 92.65% on the slope
-  # dmLambda <- -(mR_mLambda + mH %*% solve(tcrossprod(mR) + diag(1e-8, d), mR_mLambda, tol=1e-99))
+  dmLambda <- -(mR_mLambda + mH %*% solve(tcrossprod(mR) + diag(1e-8, d), mR_mLambda, tol=1e-99))
   dmLambda[Dinds] <- dmLambda[Dinds] * -mR[Dinds]
   # This is very clever, but seems to mess up the accuracy
   # dmLambda <- -(mR_mLambda + mH %*% backsolve(mR, forwardsolve(mR, mR_mLambda), transpose=TRUE))
