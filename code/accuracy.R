@@ -37,11 +37,16 @@ mcmc_approximation <- function(mult, seed=1, iterations=NA, warmup=NA, mc.cores=
 calculate_accuracy <- function(mcmc_samples, dist_fn, ...)
 {
   mcmc_density <- density(mcmc_samples)
-  mcmc_fn <- splinefun(mcmc_density$x, mcmc_density$y)
+  opt <- optimize(function(x) dist_fn(x, ...), interval=c(min(mcmc_density$x), max(mcmc_density$x)), maximum=TRUE)
+  mcmc_fn <- splinefun(mcmc_density$x, mcmc_density$y * opt$object / max(mcmc_density$y))
+  result1 <- integrate(mcmc_fn, min(mcmc_density$x), max(mcmc_density$x),
+                     subdivisions = length(mcmc_density$x))
+  result2 <- integrate(function(x) dist_fn(x, ...), min(mcmc_density$x), max(mcmc_density$x),
+                     subdivisions = length(mcmc_density$x))
   
   integrand <- function(x)
   {
-    return(abs(mcmc_fn(x) - dist_fn(x, ...)))
+    return(abs(mcmc_fn(x)/result1$value - dist_fn(x, ...)/result2$value))
   }
   result <- integrate(integrand, min(mcmc_density$x), max(mcmc_density$x),
                      subdivisions = length(mcmc_density$x))
@@ -52,14 +57,17 @@ calculate_accuracy <- function(mcmc_samples, dist_fn, ...)
 accuracy_plot <- function(mcmc_samples, dist_fn, ...)
 {
   mcmc_density <- density(mcmc_samples)
+  # Find the maximum of the function and use it to normalise plots.
+  opt <- optimize(function(x) dist_fn(x, ...), interval=c(min(mcmc_density$x), max(mcmc_density$x)), maximum=TRUE)
+  # browser()
   curve(dist_fn(x, ...),
         from=min(mcmc_density$x), to=max(mcmc_density$x),
         lty=2, col="blue")
-  # lines(mcmc_density)
-  mcmc_fn <- splinefun(mcmc_density$x, mcmc_density$y)
-  curve(mcmc_fn,
-        from=min(mcmc_density$x), to=max(mcmc_density$x),
-        lty=1, col="black", add=TRUE)
+  lines(mcmc_density$x, mcmc_density$y * opt$object / max(mcmc_density$y))
+  # mcmc_fn <- splinefun(mcmc_density$x, mcmc_density$y)
+  # curve(mcmc_fn(x, ...),
+  #       from=min(mcmc_density$x), to=max(mcmc_density$x),
+  #       lty=1, col="black", add=TRUE)
 }
 
 calculate_accuracies <- function(mult, mcmc_samples, var_result, approximation, print_flag=FALSE, plot_flag=FALSE)
