@@ -3,7 +3,6 @@ library(limma)
 source("common.R")
 source("gaussian.R")
 
-
 calculate_lower_bound <- function(mult, verbose=FALSE)
 {
 	vy <- mult$vy
@@ -89,7 +88,7 @@ create_mult <- function(vy, mX, mZ, sigma2.beta, m=ncol(mZ), blocksize=1, spline
   prior <- list(v=v, mPsi=mPsi,
                 a_rho=1, b_rho=1,
                 sigma2.beta=sigma2.beta)
-  v <- prior$v + m
+  v <- prior$v + b
   
   if (!is.null(ncol(mZ))) {
     # TODO: We don't yet handle the case where there are splines and random intecepts/
@@ -303,6 +302,7 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
     plot(vlower_bound, type="l")
   
   params <- list(vmu=vmu, mLambda=mLambda, a_rho=a_rho, b_rho=b_rho,
-                 mSigma=solve(mSigma.inv + diag(1e-8, ncol(mSigma.inv))), vlower_bound=vlower_bound)
+                 mSigma=solve(mSigma.inv + diag(1e-8, ncol(mSigma.inv))),
+                 mult=mult, vlower_bound=vlower_bound)
   return(params)
 }
