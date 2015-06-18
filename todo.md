@@ -1,6 +1,18 @@
 To Do list
 ==========
 
+18/06/2015
+----------
+- Get accuracy of variance components.
+  This turned out to be harder than I would have expected. dgamma() sometimes doesn't
+  integrate to 1, and density functions produced by density() sometimes don't either!
+- Try to answer more questions from a MATH1015 student, whose exam is tomorrow.
+
+17/06/2015
+----------
+- Helped a student out with a confidence interval question, because I'm too nice to watch
+  them flounder.
+
 16/06/2015
 ----------
 - Rewrote boxplot code for median_accuracy
@@ -20,6 +32,7 @@ To Do list
   * UNIX
   * Hadley Wickham's various contributions to the R ecosystem: testthat, magrittr, dplyr
   * Twitter and the blogosphere
+  * Leechblock
 - Application to physical activity data
 - Read more about numerical linear algebra and optimisation
 - Think about speeding things up with mclapply
