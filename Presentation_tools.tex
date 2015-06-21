@@ -1,0 +1,159 @@
+\documentclass{beamer}
+
+\usetheme{Warsaw}
+\usepackage{graphicx}
+\usepackage{ulem}
+\input{include.tex}
+\input{Definitions.tex}
+
+\usefonttheme{serif}
+
+\title{Tools}
+\author{Mark Greenaway\\PhD candidate\\markg@maths.usyd.edu.au}
+
+\mode<presentation>
+{ \usetheme{boxes} }
+
+\begin{document}
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}
+\frametitle{Tools}
+\begin{itemize}
+\item I did computer science first
+\item Then I got bored and switched to maths/statistics
+\item Now I'm somewhere in the intersection
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{It's an R world \ldots}
+\begin{itemize}
+\item There's been an explosion of interest in data science in the last few years, which has 
+			lead to a lot of people from the tech. industry coming into the community
+\item The data science world has basically settled on two main languages: R and Python
+\item R is also an important programming language in Bioinformatics
+\item De facto standard in statistical research
+\item Most statisticians would rather not learn another language
+\item The good news is you don't have to: R is recognised as a first-class citizen in the data
+			science world, and everything is expected to integrate with it
+\item R's approach has been so successful that other languages have begun to copy it e.g. 					data frames, which is a clear signal that we're doing something right
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Version control}
+\begin{itemize}
+\item "Dropbox for code"
+\item Several popular version control systems: Git/GitHub, Subversion, Mercurial
+\item GitHub most popular in the wider tech. community
+\item Keep track of changes
+\item Collaborate with others
+\item Option of keeping repositories private if you don't want your code to be public yet
+\item All popular R environments and text editors integrate with version control, so using it
+			is not too much harder than saving files once it's set up
+\item Many packages are now released on GitHub first, before being released on CRAN
+\item Example: https://github.com/hadley/ggplot2
+\end{itemize}
+\end{frame}
+
+% \begin{frame}
+% \frametitle{Text editors/Integrated Development Environments}
+% \begin{itemize}
+% \item Most of us use RStudio
+% \item Lots of other options depending on your needs: Emacs, Vim, Sublime
+% \item All have syntax highlighting, ability to run R commands, navigate R functions, code
+% 			folding etc.
+% \end{itemize}
+% \end{frame}
+
+\begin{frame}
+\frametitle{Hadley Wickham/RStudio's contributions \ldots}
+\begin{itemize}
+\item ggplot2 - Grammar of Graphics
+\item ggvis - Interactive Grammar of Graphics for R - the next vewrsion of ggplot!
+\item readr - Read flat files (CSV, TSV, FWF) into R up to 10x faster than base
+\item dplyr - split/apply/combine; plyr for data frames
+\item magrittr - ``Ceci n'est pas un pipe'' Piping. Ideas from functional programming.
+			This library is becoming extremely popular
+\item stringr - String handling
+\item lubridate - Date and time
+\item testthat - Regression testing framework
+\item Advanced R - the first few chapters are useful. The later chapters are perhaps a little
+			esoteric for most people
+\item R Packages
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Visualisation/Web applications}
+\begin{itemize}
+\item A lot of visualisation libraries are available in Javascript
+\item htmlwidgets - Integrates R with Javascript. The following packages are already
+			available:
+			\begin{itemize}
+			\item Leaflet - Geo-spatial mapping
+			\item dygraphs - Time series charting
+			\item MetricsGraphics - Scatterplots and line charts with D3
+			\item networkD3 - Graph data visualisation with D3
+			\item d3heatmap - Interactive heatmaps with D3
+			\item DataTables - Tabular data display
+			\item threejs - 3D scatterplots and globes
+			\item DiagrammeR - Diagrams and flowcharts
+			\end{itemize}
+\item shiny - Build a web application in R in five minutes
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Spark}
+\begin{itemize}
+\item Successor to Hadoop
+\item R support integrated into the main release: SparkR
+\item Resilient Distributed Datasets (RDDs)
+\item MLlib - distributed machine learning framework
+	\begin{itemize}
+  \item summary statistics, correlations, stratified sampling, hypothesis testing, random data generation
+  \item classification and regression: SVMs, logistic regression, linear regression, decision trees, naive Bayes
+  \item collaborative filtering: alternating least squares (ALS)
+  \item clustering: k-means, Latent Dirichlet Allocation (LDA)
+  \item dimensionality reduction: singular value decomposition (SVD), principal component analysis (PCA)
+  \item feature extraction and transformation
+  \item optimization primitives: stochastic gradient descent, limited-memory BFGS (L-BFGS)
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{The cloud \ldots}
+\begin{itemize}
+\item The cloud is someone else's computer
+\item Cloud providers in Sydney: Amazon Web Services, Anchor, Rackspace etc.
+\item Choice of Windows, Linux or whatever you like. If you choose Windows, Microsoft's 
+			licencing fees will be included in your monthly bill
+\item Bioconductor is available as an AMI (Amazon Machine Image)
+\item You can rent a machine as powerful as verona on demand for ~$\$2.31$ an hour, if you 
+			don't need much storage
+\item It'll cost you $\$6.96$ if you want 24 2 gig. hard disks as well
+\item Assuming verona cost ~$\$30,000$, that's enough to rent the machine above for ~6 months
+\item It still makes sense to buy machines. But it's also nice to be able to rent them for
+			short periods.
+\item It's good to have options.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Keeping up with all this stuff \ldots}
+\begin{itemize}
+\item The pace of change in this area is \emph{relentless}.
+\item Twitter - Hadley Wickham and many other prominent R developers are on Twitter. If you 
+			have a problem with something you can often ask them directly
+\item Blogs - http://www.r-bloggers.com/ is a good starting point. Manage with an RSS reader 				like Feedly
+\item If you're spending too much time on social media, you could try Leechblock.
+			Works for me
+\end{itemize}
+\end{frame}
+
+\end{document}
