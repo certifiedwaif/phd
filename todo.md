@@ -1,6 +1,37 @@
 To Do list
 ==========
 
+22/06/2015
+----------
+- Finish presentation of tools
+- Melanoma meeting
+  Jean suggested that I add qqplots, present numerical accuracies
+- Give presentation
+  That was nerve-wracking
+- Meet with John
+  Like me, he's nervous about the apparent contradiction between the good accuracy
+  plots
+- Meeting with John
+  Intercept 2
+  Slope 1
+  rho 0.5
+  Variance components .5^2
+  Increasing variance components e.g. variance components 3.0 would ruin everything
+  Example where accuracy low (i.e. reproducible example, find out why)
+  Give data to John for median accuracy
+  Things to check:
+  * Accuracy poor for all or some
+  * GVA NR, is max. iteration limit reached
+  * Label plots with accuracy, multiple simulations
+  * Same data being supplied to MCMC and VB?
+  * Terminating early?
+- Implement changing parameters idea? i.e. stop if lower bound stops increasing and
+  parameters stop changing?
+
+21/06/2015
+----------
+- Write presentation of tools
+
 18/06/2015
 ----------
 - Get accuracy of variance components.
