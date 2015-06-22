@@ -82,7 +82,7 @@ generate_test_data <- function(m, ni, expected_beta = c(2, 1), expected_rho = 1.
   m <- m
   ni <- ni
   n <- rep(ni,m)
-  mX <- matrix(as.vector(cbind(rep(1, sum(n)), runif(sum(n), -1, 1))), sum(n), 2)
+  mX <- matrix(as.vector(cbind(rep(1, sum(n)), rnorm(sum(n), 0, 1))), sum(n), 2)
   #print("mX=")
   #print(mX)
   #cat("dim(mX)", dim(mX), "\n")
@@ -145,17 +145,16 @@ generate_slope_test_data <- function(m=10, ni=20)
   
   # Centre slope term?
   #mX <- cbind(mX[,1], scale(mX[,2]))
-  vbeta <- c(1.5, 0.5)
+  vbeta <- c(2, 1)
   mSigma_0 <- matrix(c(1.0, -0.3,
                       -0.3,  1.0), 2, 2)
   vu <- rmvnorm(m, sigma <- mSigma_0)
-  rho <- 1.0
+  rho <- 0.5
   vy <- as.vector(gen_slope_data(vx, vbeta, vu, rho, m, ni))
   
   # Create mult object
   sigma2.beta <- 1.0E5
   mult <- create_mult(vy, mX, mZ_reordered, sigma2.beta, m=m, blocksize=2, spline_dim=0, v=2+2)
-  mult$vmu <- lm.fit(mult$mC, log(mult$vy + 1))$coefficients
   return(mult)
 }
 
@@ -184,7 +183,7 @@ generate_spline_test_data <- function(n=100)
   sigma2_beta <- 1.0E5
   mult <- create_mult(vy, mX, mZ, sigma2_beta, m=1, blocksize=0, spline_dim=(numIntKnots + 2),
                       v=(numIntKnots + 2) + 1)
-  mult$vmu <- glm.fit(mult$mC, mult$vy, family=poisson())$coefficients
+  # mult$vmu <- glm.fit(mult$mC, mult$vy, family=poisson())$coefficients
   # TODO: You need to set mPsi <- mOmega
   mult$prior$mPsi <- result$Omega
   mult$mPsi <- result$Omega
