@@ -152,7 +152,9 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
 
   zero.set <- which(vy == 0)
   vlower_bound <- c()
-  
+
+  # Make an initial guess for vmu
+  vmu <- glm.fit(mult$mC, mult$vy, family=poisson())$coefficients
   i <- 0
   # Iterate ----
   # TODO: Add check on whether parameters are still changing
