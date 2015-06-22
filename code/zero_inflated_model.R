@@ -88,7 +88,7 @@ create_mult <- function(vy, mX, mZ, sigma2.beta, m=ncol(mZ), blocksize=1, spline
   prior <- list(v=v, mPsi=mPsi,
                 a_rho=1, b_rho=1,
                 sigma2.beta=sigma2.beta)
-  v <- prior$v + b
+  v <- prior$v + blocksize
   
   if (!is.null(ncol(mZ))) {
     # TODO: We don't yet handle the case where there are splines and random intecepts/
