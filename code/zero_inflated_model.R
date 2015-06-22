@@ -88,7 +88,7 @@ create_mult <- function(vy, mX, mZ, sigma2.beta, m=ncol(mZ), blocksize=1, spline
   prior <- list(v=v, mPsi=mPsi,
                 a_rho=1, b_rho=1,
                 sigma2.beta=sigma2.beta)
-  v <- prior$v + b
+  v <- prior$v + blocksize
   
   if (!is.null(ncol(mZ))) {
     # TODO: We don't yet handle the case where there are splines and random intecepts/
@@ -152,7 +152,9 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
 
   zero.set <- which(vy == 0)
   vlower_bound <- c()
-  
+
+  # Make an initial guess for vmu
+  vmu <- glm.fit(mult$mC, mult$vy, family=poisson())$coefficients
   i <- 0
   # Iterate ----
   # TODO: Add check on whether parameters are still changing
