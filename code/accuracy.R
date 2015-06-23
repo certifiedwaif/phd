@@ -1,15 +1,18 @@
+#!/usr/bin/env Rscript
 # accuracy.R
 source("zero_inflated_model.R")
 source("generate.R")
 library(rstan)
+library(optparse)
 
 # Andrew Gelman says that this magical line of code automatically makes Stan
 # run in parallel and cache compiled models.
 # Two minutes later: Hey, it actually works!
 # Some time later: Sometimes it works.
 #source("http://mc-stan.org/rstan/stan.R")
+
 mcmc_approximation <- function(mult, seed=1, iterations=NA, warmup=NA, mc.cores=1,
-                               stan_file="multivariate_zip.stan")
+                               stan_file="multivariate_zip.stan", stan_fit=NA)
 {
   # Use Stan to create MCMC samples, because Stan deals much better with highly
   # correlated posteriors.
@@ -27,7 +30,8 @@ mcmc_approximation <- function(mult, seed=1, iterations=NA, warmup=NA, mc.cores=
                    y=vy, X=mX, Z=as.matrix(mZ),
                    v=v, psi=mPsi, BetaPrior=mSigma.beta)
 
-  fit <- stan(stan_file, seed=seed, data=zip_data, iter=iterations, warmup=warmup, chains=1)
+  fit <- stan(stan_file, fit=stan_fit, seed=seed, data=zip_data, iter=iterations, warmup=warmup,
+              chains=1)
   mcmc_samples <- extract(fit)
 
   return(list(fit=fit,
@@ -64,18 +68,19 @@ accuracy_plot <- function(title, mcmc_samples, dist_fn, ...)
         from=min(mcmc_density$x), to=max(mcmc_density$x),
         lty=2, col="blue")
   lines(mcmc_density$x, mcmc_density$y * opt$object / max(mcmc_density$y))
+  title(title)
   # mcmc_fn <- splinefun(mcmc_density$x, mcmc_density$y)
   # curve(mcmc_fn(x, ...),
   #       from=min(mcmc_density$x), to=max(mcmc_density$x),
   #       lty=1, col="black", add=TRUE)
 }
 
-calculate_accuracies <- function(mult, mcmc_samples, var_result, approximation, print_flag=FALSE, plot_flag=FALSE)
+calculate_accuracies <- function(test, mult, mcmc_samples, var_result, approximation, print_flag=FALSE, plot_flag=FALSE)
 {
   # TODO: Add support for checking the accuracy over multiple dimensions
   # cubature$adaptIntegrate
   
-  if (plot_flag) pdf(paste0("results/accuracy_plots_", approximation, ".pdf"))
+  if (plot_flag) pdf(paste0("results/accuracy_plots_", test, "_", approximation, ".pdf"))
   #return(var_result)
   # vbeta accuracy
   
@@ -98,7 +103,7 @@ calculate_accuracies <- function(mult, mcmc_samples, var_result, approximation, 
       vbeta_accuracy[i] <- calculate_accuracy(mcmc_samples$vbeta[,i], dnorm,
                                               var_result$vmu[i], sqrt(var_result$mLambda[i,i]))
       vbeta_means[i] <- mean(mcmc_samples$vbeta[, i])
-      title <- sprintf("%s vbeta[%d] accuracy: %d", approximation, i, vbeta_accuracy[i])
+      title <- sprintf("%s vbeta[%d] accuracy: %f", approximation, i, vbeta_accuracy[i])
       if (print_flag) print(title)
       if (plot_flag) accuracy_plot(title, mcmc_samples$vbeta[,i], dnorm,
                                    var_result$vmu[i], sqrt(var_result$mLambda[i,i]))
@@ -122,7 +127,7 @@ calculate_accuracies <- function(mult, mcmc_samples, var_result, approximation, 
         vu_means[i] <- mean(mcmc_samples$vu[, m_idx, b_idx])
         vu_sd <- sqrt(var_result$mLambda[i + mult$p, i + mult$p])
         vu_accuracy[i] <- calculate_accuracy(mcmc_samples$vu[, m_idx, b_idx], dnorm, vu_mean, vu_sd)
-        title <- sprintf("%s vu[%d] accuracy: %d", approximation, i, vu_accuracy[i])
+        title <- sprintf("%s vu[%d] accuracy: %f", approximation, i, vu_accuracy[i])
         if (print_flag) print(title)
         if (plot_flag) accuracy_plot(title, mcmc_samples$vu[, m_idx, b_idx], dnorm, vu_mean, vu_sd)
 
@@ -136,7 +141,7 @@ calculate_accuracies <- function(mult, mcmc_samples, var_result, approximation, 
         vu_sd <- sqrt(var_result$mLambda[i + mult$p, i + mult$p])
         vu_accuracy[i] <- calculate_accuracy(mcmc_samples$vu[, i], dnorm, vu_mean, vu_sd)
         vu_means[i] <- mean(mcmc_samples$vu[, i])
-        title <- sprintf("%s vu[%d] accuracy:", approximation, i, vu_accuracy[i], "\n")
+        title <- sprintf("%s vu[%d] accuracy: %f", approximation, i, vu_accuracy[i], "\n")
         if (print_flag) print(title)
         if (plot_flag) accuracy_plot(title, mcmc_samples$vu[, i], dnorm, vu_mean, vu_sd)
       }
@@ -162,25 +167,31 @@ calculate_accuracies <- function(mult, mcmc_samples, var_result, approximation, 
   # sigma2_z * dchisq(x, df = v)
   # TODO: Add mSigma.u accuracy
   sigma2_vu_accuracy <- rep(0, B)
-  v <- 4
-  d <- var_result$mult$d
-  # E_mPsi_inv <- var_result$mult$mPsi / (4 - 2 - 1)
-  sigma_u_inv <- array(0, c(dim(mcmc_samples$sigma_u)[1], 2, 2))
-  a <- mcmc_samples$sigma_u[, 1, 1]
-  b <- mcmc_samples$sigma_u[, 1, 2]
-  c <- mcmc_samples$sigma_u[, 2, 1]
-  d <- mcmc_samples$sigma_u[, 2, 2]
-  sigma_u_inv[, 1, 1] <- d / (a * d - b * c)
-  sigma_u_inv[, 1, 2] <- -b / (a * d - b * c)
-  sigma_u_inv[, 2, 1] <- -c / (a * d - b * c)
-  sigma_u_inv[, 2, 2] <- a / (a * d - b * c)
-
+  if (B == 2) {
+    v <- 4
+    d <- var_result$mult$d
+    # E_mPsi_inv <- var_result$mult$mPsi / (4 - 2 - 1)
+    sigma_u_inv <- array(0, c(dim(mcmc_samples$sigma_u)[1], 2, 2))
+    a <- mcmc_samples$sigma_u[, 1, 1]
+    b <- mcmc_samples$sigma_u[, 1, 2]
+    c <- mcmc_samples$sigma_u[, 2, 1]
+    d <- mcmc_samples$sigma_u[, 2, 2]
+    sigma_u_inv[, 1, 1] <- d / (a * d - b * c)
+    sigma_u_inv[, 1, 2] <- -b / (a * d - b * c)
+    sigma_u_inv[, 2, 1] <- -c / (a * d - b * c)
+    sigma_u_inv[, 2, 2] <- a / (a * d - b * c)
+  } else {
+    v <- 2
+    sigma_u_inv <- array(0, c(dim(mcmc_samples$sigma_u)[1], 1, 1))
+    sigma_u_inv[, 1, 1] <- 1 / mcmc_samples$sigma_u[, 1, 1]
+    print(dim(sigma_u_inv))
+  }
   for (i in 1:B) {
     # sigma2 <- E_mPsi_inv[i, i]
-    sigma2 <- var_result$mult$mPsi[i, i]
+    sigma2 <- var_result$mPsi[i, i]
     sigma2_vu_accuracy[i] <- calculate_accuracy(sigma_u_inv[, i, i],
                                                function(x, ...) dgamma(x/sqrt(sigma2), ...), v/2, sigma2/2)
-    title <- sprintf("%s sigma2_u[%d] accuracy: %d", approximation, i, sigma2_vu_accuracy[i])
+    title <- sprintf("%s sigma2_u[%d] accuracy: %f", approximation, i, sigma2_vu_accuracy[i])
     if (print_flag) print(title)
     if (plot_flag)
       accuracy_plot(title, sigma_u_inv[, i, i], function(x, ...) dgamma(x/sqrt(sigma2), ...), v/2, sigma2/2)
@@ -190,7 +201,7 @@ calculate_accuracies <- function(mult, mcmc_samples, var_result, approximation, 
   # rho accuracy
   rho_accuracy <- calculate_accuracy(mcmc_samples$rho, dbeta,
                                      var_result$a_rho, var_result$b_rho)
-  sprintf("%s rho accuracy: %d", approximation, rho_accuracy, "\n")
+  title <- sprintf("%s rho accuracy: %f", approximation, rho_accuracy, "\n")
   if (print_flag) print(title)
   if (plot_flag) accuracy_plot(title, mcmc_samples$rho, dbeta,
                           var_result$a_rho, var_result$b_rho)
@@ -200,38 +211,14 @@ calculate_accuracies <- function(mult, mcmc_samples, var_result, approximation, 
               vbeta_accuracy=vbeta_accuracy,
               vu_means=vu_means,
               vu_accuracy=vu_accuracy,
-              #sigma2_u_accuracy=sigma2_u_accuracy,
+              sigma2_vu_accuracy=sigma2_vu_accuracy,
               rho_accuracy=rho_accuracy))
 }
 
-# FIXME: This function should be unnecessary. Stan's fit object already contains this
-# information and more.
-# Current used by test_spline_accuracy
-mcmc_means <- function(mult, mcmc_samples)
-{
-  mX <- mult$mX
-  mZ <- mult$mZ
-  
-  vbeta_means <- rep(NA, ncol(mX))
-  for (p in 1:ncol(mX)) {
-    vbeta_means[p] <- mean(mcmc_samples$vbeta[, p])
-  }
-
-  vu_means <- rep(NA, ncol(mZ))
-  for (m in 1:ncol(mZ)) {
-    vu_means[m] <- mean(mcmc_samples$vu[, m])
-  }
-
-  return(list(vbeta_means=vbeta_means,
-              vu_means=vu_means,
-              vmu=c(vbeta_means, vu_means)))
-}
-
-test_spline_accuracy <- function(mult, allKnots, mcmc_samples, approximation, plot=FALSE)
+test_spline_accuracy <- function(mult, allKnots, fit, approximation, plot=FALSE)
 {
   var_result <- zero_infl_var(mult, method=approximation, verbose=TRUE)
   # Calculate the mean for vbeta, vu
-  mcmc_means <- mcmc_means(mult, mcmc_samples)
   # Construct a BSpline matrix over the range we wish to plot
   # Plot the function using our MCMC and VB estimates
   # mCtilde %*% vmu
@@ -239,15 +226,17 @@ test_spline_accuracy <- function(mult, allKnots, mcmc_samples, approximation, pl
   result <- spline.des(allKnots, xtilde, derivs=rep(0, length(xtilde)), outer.ok=TRUE)
   mC_tilde <- cbind(1, xtilde, result$design)
   f_hat_vb <- mC_tilde %*% var_result$vmu
-  f_hat_mcmc <- mC_tilde %*% mcmc_means$vmu
-  # TODO: Plot true function as well
+  # FIXME: This is probably broken
+  f_hat_mcmc <- mC_tilde %*% fit$vmu$mean
   if (plot) {
+    pdf(sprintf("results/accuracy_plots_spline_%s.pdf", approximation))
     plot(mult$mX[,2], mult$vy)
     vf <- 4 + sin(pi * xtilde)
     lines(xtilde, exp(vf), type="l", col="black")
     lines(xtilde, exp(f_hat_mcmc), type="l", col="red")
     lines(xtilde, exp(f_hat_vb), type="l", col="blue")
     legend("topleft", c("True function", "MCMC", "VB"), fill=c("black", "red", "blue"))
+    dev.off()
   }
   #return(calculate_accuracies(mult, mcmc_samples, var_result, approximation, plot_flag=plot))
   return()
@@ -289,7 +278,7 @@ test_accuracies_intercept <- function(save=FALSE)
   # Test multivariate approximation's accuracy
   now <- Sys.time()
   var1_result <- zero_infl_var(mult, method="laplace", verbose=TRUE)
-  var1_accuracy <- calculate_accuracies(mult, mcmc_samples, var1_result, "laplace", plot_flag=FALSE)
+  var1_accuracy <- calculate_accuracies("intercept", mult, mcmc_samples, var1_result, "laplace", plot_flag=FALSE)
   print(Sys.time() - now)
   # #print(image(Matrix(var1$var_result$mLambda)))
   # print(var1_accuracy)
@@ -299,7 +288,7 @@ test_accuracies_intercept <- function(save=FALSE)
   
   now <- Sys.time()
   var2_result <- zero_infl_var(mult, method="gva", verbose=TRUE)
-  var2_accuracy <- calculate_accuracies(mult, mcmc_samples, var2_result, "gva", plot_flag=FALSE)
+  var2_accuracy <- calculate_accuracies("intercept", mult, mcmc_samples, var2_result, "gva", plot_flag=FALSE)
   print(Sys.time() - now)
   # #print(image(Matrix(var2$var_result$mLambda)))
   # print(var2_accuracy)
@@ -309,7 +298,7 @@ test_accuracies_intercept <- function(save=FALSE)
 
   now <- Sys.time()
   var3_result <- zero_infl_var(mult, method="gva2", verbose=TRUE)
-  var3_accuracy <- calculate_accuracies(mult, mcmc_samples, var3_result, "gva2", plot_flag=FALSE)
+  var3_accuracy <- calculate_accuracies("intercept", mult, mcmc_samples, var3_result, "gva2", plot_flag=FALSE)
   print(Sys.time() - now)
   #print(image(Matrix(var3$var_result$mLambda)))
   # print(var3_accuracy)
@@ -319,7 +308,7 @@ test_accuracies_intercept <- function(save=FALSE)
 
   now <- Sys.time()
   var4_result <- zero_infl_var(mult, method="gva_nr", verbose=TRUE)
-  var4_accuracy <- calculate_accuracies(mult, mcmc_samples, var4_result, "gva_nr", plot_flag=FALSE)
+  var4_accuracy <- calculate_accuracies("intercept", mult, mcmc_samples, var4_result, "gva_nr", plot_flag=FALSE)
   print(Sys.time() - now)
   # #print(image(Matrix(var4$var_result$mLambda)))
   # print(var4_accuracy)
@@ -353,17 +342,17 @@ test_accuracies_slope <- function(save=FALSE)
   # m <- 20
   # mult$vmu <- c(2, 1, rep(0, (m-1) * 2))
   
-  # now <- Sys.time()
-  # var1_result <- zero_infl_var(mult, method="laplace", verbose=TRUE)
-  # var1_accuracy <- calculate_accuracies(mult, mcmc_samples, var1_result, "laplace", print_flag=TRUE, plot_flag=TRUE)
-  # print(Sys.time() - now)
-  # print(var1_accuracy$vbeta_accuracy)
-  # print(var1_accuracy$vu_accuracy)
-  # print(var1_accuracy$rho_accuracy)
+  now <- Sys.time()
+  var1_result <- zero_infl_var(mult, method="laplace", verbose=TRUE)
+  var1_accuracy <- calculate_accuracies("slope", mult, mcmc_samples, var1_result, "laplace", print_flag=TRUE, plot_flag=TRUE)
+  print(Sys.time() - now)
+  print(var1_accuracy$vbeta_accuracy)
+  print(var1_accuracy$vu_accuracy)
+  print(var1_accuracy$rho_accuracy)
   
   now <- Sys.time()
   var2_result <- zero_infl_var(mult, method="gva", verbose=TRUE)
-  var2_accuracy <- calculate_accuracies(mult, mcmc_samples, var2_result, "gva", print_flag=TRUE, plot_flag=TRUE)
+  var2_accuracy <- calculate_accuracies("slope", mult, mcmc_samples, var2_result, "gva", print_flag=TRUE, plot_flag=TRUE)
   print(Sys.time() - now)
   # print(var2_accuracy$vbeta_accuracy)
   # print(var2_accuracy$vu_accuracy)
@@ -371,7 +360,7 @@ test_accuracies_slope <- function(save=FALSE)
 
   now <- Sys.time()
   var3_result <- zero_infl_var(mult, method="gva2", verbose=TRUE)
-  var3_accuracy <- calculate_accuracies(mult, mcmc_samples, var3_result, "gva2", print_flag=TRUE, plot_flag=TRUE)
+  var3_accuracy <- calculate_accuracies("slope", mult, mcmc_samples, var3_result, "gva2", print_flag=TRUE, plot_flag=TRUE)
   print(Sys.time() - now)
   # print(var3_accuracy$vbeta_accuracy)
   # print(var3_accuracy$vu_accuracy)
@@ -379,7 +368,7 @@ test_accuracies_slope <- function(save=FALSE)
 
   now <- Sys.time()
   var4_result <- zero_infl_var(mult, method="gva_nr", verbose=TRUE)
-  var4_accuracy <- calculate_accuracies(mult, mcmc_samples, var4_result, "gva_nr", print_flag=TRUE, plot_flag=TRUE)
+  var4_accuracy <- calculate_accuracies("slope", mult, mcmc_samples, var4_result, "gva_nr", print_flag=TRUE, plot_flag=TRUE)
   print(Sys.time() - now)
   # print(var4_accuracy$vbeta_accuracy)
   # print(var4_accuracy$vu_accuracy)
@@ -415,20 +404,19 @@ test_accuracies_spline <- function(save=FALSE)
 
 main <- function()
 {
-  option_list <- list(make_option(c("-t", "--test"), default="slope"),
-                      make_option(c("-s", "--save"), action="store_true", default=FALSE),
+  option_list <- list(make_option(c("-a", "--accuracy"), default="slope"),
+                      make_option(c("-s", "--save"), action="store_true", default=FALSE))
   opt <- parse_args(OptionParser(option_list=option_list))
-  test <- opt$test
-  if (test == "intercept") {
+  accuracy <- opt$accuracy
+  if (accuracy == "intercept") {
     test_accuracies_intercept(opt$save)
   }
-  if (test == "slope") {
+  if (accuracy == "slope") {
     test_accuracies_slope(opt$save)
   }
-  if (test == "spline") {
+  if (accuracy == "spline") {
     test_accuracies_spline(opt$save)
   }
-
 }
 
-main()
+# main()
