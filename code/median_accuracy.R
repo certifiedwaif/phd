@@ -13,7 +13,7 @@ median_accuracy <- function(approximation="gva")
   # Saving the fit allows us to skip the recompilation of the C++ for the model
   # Update: Well, it's supposed to. Stan seems to want to keep recompiling the
   # model anyway, regardless of what I do.
-  stanfit <- NA
+  stan_fit <- NA
   accuracy <- mclapply(1:ITER, function(i) {
     set.seed(i)
     # Run code
@@ -25,17 +25,26 @@ median_accuracy <- function(approximation="gva")
       mult <- generate_test_data(m, ni, expected_beta = c(2, 1), expected_rho = 0.5)
       # Make an initial guess for vmu
       var_result <- zero_infl_var(mult, method=approximation, verbose=TRUE)
-      stanfit <- mcmc_approximation(mult, iterations=1e4, warmup=1e3, mc.cores = 1)
+      stanfit <- mcmc_approximation(mult, iterations=1e4, warmup=1e3, mc.cores = 1,
+                                    stan_fit=stan_fit)
       mcmc_samples <- stanfit$mcmc_samples
-      result <- tryCatch(calculate_accuracies(mult, mcmc_samples, var_result, approximation, print_flag=TRUE),
-                                error=function(e) NULL)
+      result <- tryCatch(calculate_accuracies("", mult, mcmc_samples, var_result, approximation, print_flag=TRUE),
+                                error=function(e) {
+                                  print(e)
+                                  NULL
+                                })
+      # print(result)
+      # result <- calculate_accuracies("", mult, mcmc_samples, var_result, approximation,
+      #                                print_flag=TRUE)
+
       # Check whether integrate() failed. If so, generate another data set and re-try.
       if (is.null(result)) {
         done <- FALSE
       }
     }
+    save(result, file = sprintf("results/accuracy_result_%d_%s.RData", i, approximation))
     result
-  }, mc.cores = 16)
+  }, mc.cores = 32)
   
   # For name in names(accuracy)
   save(accuracy, file = sprintf("results/accuracy_list_%s.RData", approximation))
@@ -191,3 +200,7 @@ main <- function()
 }
 
 main()
+time: invalid option -- 'm'
+Usage: time [-apvV] [-f format] [-o file] [--append] [--verbose]
+       [--portability] [--format=format] [--output=file] [--version]
+       [--quiet] [--help] command [arg...]
