@@ -1,6 +1,20 @@
 To Do list
 ==========
 
+23/06/2015
+----------
+- Work through first four weeks of solutions for Dr Di Warren
+  Done.
+- Run more median accuracy tasks on Maths department servers
+  I'm only running 10,000 MCMC samples for each comparison, which is not very accurate,
+  and it's taking ~1/2 a day or more to produce the data.
+- Help Jean with parallel R question
+  Done. mclapply
+- Annotate accuracy plots
+  Code written. Testing now.
+- accuracy.R should be command-line driven as well?
+  Done
+
 22/06/2015
 ----------
 - Finish presentation of tools
@@ -25,6 +39,16 @@ To Do list
   * Label plots with accuracy, multiple simulations
   * Same data being supplied to MCMC and VB?
   * Terminating early?
+- Found problems:
+  * I was initialising vmu with lm or glm in the random slopes and spline cases,
+    but not the random intercepts case. This initial value has a large bearing on how
+    well the optimisation goes from that point. In median_accuracy, I was using the random
+    intercepts case.
+  * Data for the random intercepts case was being generated uniformly in the interval
+    [-1, 1]. This gives a very narrow range of data, leading to a problem which is very
+    hard to solve given how many things we're trying to estimate. For random slopes and splines, was generated from N(0, 1). We now use this option for the random
+    intercepts case as well.
+  * Low effective sampling of MCMC for some parameters
 - Implement changing parameters idea? i.e. stop if lower bound stops increasing and
   parameters stop changing?
 
