@@ -17,15 +17,15 @@ median_accuracy <- function(approximation="gva")
   accuracy <- mclapply(1:ITER, function(i) {
     set.seed(i)
     # Run code
-    m <- 20
-    ni <- 10
+    m <- 10
+    ni <- 100
     done <- FALSE
     while (!done) {
       done <- TRUE
-      mult <- generate_test_data(m, ni, expected_beta = c(2, 1), expected_rho = 0.5)
+      mult <- generate_test_data(m, ni, expected_beta = c(2, 1), expected_rho = 0.9)
       # Make an initial guess for vmu
       var_result <- zero_infl_var(mult, method=approximation, verbose=TRUE)
-      stanfit <- mcmc_approximation(mult, iterations=1e4, warmup=1e3, mc.cores = 1,
+      stanfit <- mcmc_approximation(mult, iterations=1e5, warmup=5e3, mc.cores = 1,
                                     stan_fit=stan_fit)
       mcmc_samples <- stanfit$mcmc_samples
       result <- tryCatch(calculate_accuracies("", mult, mcmc_samples, var_result, approximation, print_flag=TRUE),
@@ -50,16 +50,21 @@ median_accuracy <- function(approximation="gva")
   save(accuracy, file = sprintf("results/accuracy_list_%s.RData", approximation))
   
   # for (approximation in c("laplace", "gva", "gva2", "gva_nr")) {
+  # for (approximation in c("gva", "gva2")) {
   #   load(file = sprintf("results/accuracy_list_%s.RData", approximation))
     
   #   # Construct a data frame
   #   vbeta_accuracy <- t(sapply(accuracy, function(x) {x$vbeta_accuracy}))
   #   vu_accuracy <- t(sapply(accuracy, function(x) {x$vu_accuracy}))
+  #   sigma2_vu_accuracy <- sapply(accuracy, function(x) {x$sigma2_vu_accuracy})
   #   rho_accuracy <- sapply(accuracy, function(x) {x$rho_accuracy})
-  #   accuracy_df <- cbind(vbeta_accuracy, vu_accuracy, rho_accuracy)
+  #   accuracy_df <- cbind(vbeta_accuracy, vu_accuracy, sigma2_vu_accuracy, rho_accuracy)
+  #   colnames(accuracy_df) <- c("vbeta_0", "vbeta_1", 
+  #     sapply(1:19, function(x) paste0("vu_", x)),
+  #     "sigma2_vu", "rho")
   #   pdf(sprintf("results/median_accuracy_%s.pdf", approximation))
   #   boxplot(accuracy_df, ylim=c(0, 1))
-  #   axis(1, at=1:22, labels=c(expression(bold(beta)[0], bold(beta)[1], bold(u)[1], bold(u)[2], bold(u)[3], bold(u)[4], bold(u)[5], bold(u)[6], bold(u)[7], bold(u)[8], bold(u)[9], bold(u)[11], bold(u)[12], bold(u)[13], bold(u)[14], bold(u)[15], bold(u)[16], bold(u)[17], bold(u)[18], bold(u)[19], bold(u)[20], rho)))
+  #   axis(1, at=1:23, labels=c(expression(bold(beta)[0], bold(beta)[1], bold(u)[1], bold(u)[2], bold(u)[3], bold(u)[4], bold(u)[5], bold(u)[6], bold(u)[7], bold(u)[8], bold(u)[9], bold(u)[11], bold(u)[12], bold(u)[13], bold(u)[14], bold(u)[15], bold(u)[16], bold(u)[17], bold(u)[18], bold(u)[19], bold(u)[20], bold(sigma^2[u]), rho)))
   #   title(sprintf("%s median accuracy", approximation))
   #   dev.off()
   # }
@@ -200,7 +205,3 @@ main <- function()
 }
 
 main()
-time: invalid option -- 'm'
-Usage: time [-apvV] [-f format] [-o file] [--append] [--verbose]
-       [--portability] [--format=format] [--output=file] [--version]
-       [--quiet] [--help] command [arg...]
