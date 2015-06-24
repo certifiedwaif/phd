@@ -22,7 +22,7 @@ median_accuracy <- function(approximation="gva")
     done <- FALSE
     while (!done) {
       done <- TRUE
-      mult <- generate_test_data(m, ni, expected_beta = c(2, 1), expected_rho = 0.9)
+      mult <- generate_int_test_data(m, ni, expected_beta = c(2, 1), expected_rho = 0.5)
       # Make an initial guess for vmu
       var_result <- zero_infl_var(mult, method=approximation, verbose=TRUE)
       stanfit <- mcmc_approximation(mult, iterations=1e5, warmup=5e3, mc.cores = 1,
