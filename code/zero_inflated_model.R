@@ -303,8 +303,9 @@ zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FA
   if (plot_lower_bound)
     plot(vlower_bound, type="l")
   
-  params <- list(vmu=vmu, mLambda=mLambda, a_rho=a_rho, b_rho=b_rho,
-                 mSigma=solve(mSigma.inv + diag(1e-8, ncol(mSigma.inv))),
-                 mult=mult, vlower_bound=vlower_bound)
-  return(params)
+  mult$mSigma <- solve(mSigma.inv + diag(1e-8, ncol(mSigma.inv)))
+  mult$vlower_bound <- vlower_bound
+  mult$iterations <- i
+
+  return(mult)
 }
