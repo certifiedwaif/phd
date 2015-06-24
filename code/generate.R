@@ -15,50 +15,8 @@ generate_univariate_test_data <- function (n, rho, lambda)
   return(vx)
 }
 
-gen_mult_data <- function (mX, mZ, m, n, rho, vbeta, sigma2_u, verbose=FALSE)
-{
-  if (is.null(mZ)) {
-    mC <- mX
-  } else {
-    mC <- cbind(mX, mZ)
-  }
-  vy <- rep(NA, sum(n))
-  vu <- rep(NA, length(n))
-  if (verbose)
-    cat("vy", vy, "\n")
-  idx <- 0
-  for (i in 1:length(n)) {
-    if (sigma2_u == 0)
-      vu[i] <- 0
-    else
-      vu[i] <- rnorm(1, 0, sqrt(sigma2_u))
-    
-    for (j in 1:n[i]) {
-      idx <- idx + 1
-      if (verbose)
-        cat("idx", idx, "\n")
-      
-      if (runif(1) <= rho) {
-        veta <- mX[idx,] %*% vbeta + vu[i]
-        if (verbose)
-          cat("veta", veta, "\n")
-        vy[idx] <- rpois(1, exp(veta))
-        if (verbose)
-          cat("Generated vy[idx]", vy[idx], "\n")
-      } else {
-        vy[idx] <- 0
-      }
-    }
-  }
-  if (verbose)
-    cat("vy", vy, "\n")
-  if(NA %in% vy)
-    stop("NAs in vy")
-  result <- list(vy=vy, vu=vu)
-  return(result)
-}
-
-gen_slope_data <- function(vx, vbeta, vu, rho, m, ni)
+# TODO: Rewrite. Why not use the same data generation code as for slopes?
+gen_int_data <- function (vx, vbeta, vu, rho, m, ni)
 {
   eta <- matrix(NA, m, ni)
   zeta <- matrix(NA, m, ni)
@@ -67,7 +25,7 @@ gen_slope_data <- function(vx, vbeta, vu, rho, m, ni)
   
   for (i in 1:m) {
     for (j in 1:ni) {
-      eta[i, j] <- vbeta[1] + vbeta[2]*vx[i, j] + vu[i, 1] + vu[i, 2]*vx[i, j]
+      eta[i, j] <- vbeta[1] + vbeta[2] * vx[i, j] + vu[i, 1]
       zeta[i, j] <- rpois(1, exp(eta[i, j]))
       r[i, j] <- rbinom(1, 1, rho)
       y[i, j] <- r[i, j] * zeta[i, j]
@@ -77,55 +35,52 @@ gen_slope_data <- function(vx, vbeta, vu, rho, m, ni)
   return(y)
 }
 
-generate_test_data <- function(m, ni, expected_beta = c(2, 1), expected_rho = 1.0)
+generate_int_test_data <- function(m, ni, expected_beta = c(2, 1), expected_rho = 1.0)
 {
-  m <- m
-  ni <- ni
-  n <- rep(ni,m)
-  mX <- matrix(as.vector(cbind(rep(1, sum(n)), rnorm(sum(n), 0, 1))), sum(n), 2)
-  #print("mX=")
-  #print(mX)
-  #cat("dim(mX)", dim(mX), "\n")
-  
-  #v <- c(rep(1, g), rep(0, g))
-  # Indicator variables for groups
-  
-  #mZ <- matrix(cbind(v, 1-v), sum(n), 2)
-  #mZ <- matrix(0,sum(n),m)
-  #count <- 0
-  #for (i in 1:m) {
-  #  mZ[count + (1:n[i]),i] <- 1
-  #  count <- count + n[i]
-  #}
+  n <- m * ni
+  x <- rnorm(n, 0, 1)
+  vx <- t(matrix(x, ni, m))
+  mX <- cbind(rep(1, n), x)
   
   mZ <- kronecker(diag(1,m), rep(1,ni))
+  mZ <- mZ[, 2:m]
+
+  mSigma_0 <- matrix(c(1.0), 1, 1)
+  vu <- rmvnorm(m, sigma <- mSigma_0)
   
-  #print("mZ=")
-  #print(mZ)
-  #cat("dim(mZ)", dim(mZ), "\n")
-  
-  #expected_rho <- 0.5
-  #expected_rho <- 0.75
   expected_sigma2_u <- .5^2
-  a_sigma <- 1e-2
-  b_sigma <- 1e-2
   
-  tau <- 1.0E2
+  vy <- as.vector(gen_int_data(vx, expected_beta, vu, expected_rho, m, ni))
   
-  sigma2.beta <- 1.0E3
-  
-  test_data <- gen_mult_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u)
-  vy <- test_data$vy
-  
+  sigma2.beta <- 1.0E5
   # Test accuracy
-  mult <- create_mult(vy, mX, mZ[, 2:m], sigma2.beta, m=m, blocksize=1, spline_dim=0, v=2)
+  mult <- create_mult(vy, mX, mZ, sigma2.beta, m=m, blocksize=1, spline_dim=0, v=2)
   
   return(mult)
 }
 
-generate_slope_test_data <- function(m=10, ni=20)
+gen_slope_data <- function(mX, vbeta, vu, rho, m, ni)
 {
-  n <- m*ni
+  eta <- matrix(NA, m, ni)
+  zeta <- matrix(NA, m, ni)
+  r <- matrix(NA, m, ni)
+  y <- matrix(NA, m, ni)
+  
+  for (i in 1:m) {
+    for (j in 1:ni) {
+      eta[i, j] <- vbeta[1] + vbeta[2]*mX[i, j] + vu[i, 1] + vu[i, 2] * mX[i, j]
+      zeta[i, j] <- rpois(1, exp(eta[i, j]))
+      r[i, j] <- rbinom(1, 1, rho)
+      y[i, j] <- r[i, j] * zeta[i, j]
+    }
+  }
+  
+  return(y)
+}
+
+generate_slope_test_data <- function(m=10, ni=20, expected_beta=c(2, 1), expected_rho=0.5)
+{
+  n <- m * ni
   x <- rnorm(n, 0, 1)
   vx <- t(matrix(x, ni, m))
   # TODO: Rewrite this

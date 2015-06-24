@@ -257,9 +257,11 @@ test_accuracies_intercept <- function(save=FALSE)
   # save(mult, mcmc_samples, file="accuracy_good.RData")
   if (save) {
     set.seed(1)
-    mult <- generate_test_data(10, 100)
+    m <- 20
+    ni <- 10
+    mult <- generate_int_test_data(m, ni, expected_beta = c(2, 1), expected_rho = 1.0)
     # Monte Carlo Markov Chains approximation
-    result <- mcmc_approximation(mult, iterations=1e6, warmup = 1e4)
+    result <- mcmc_approximation(mult, iterations=5e4, warmup = 5e3)
     fit <- result$fit
     mcmc_samples <- result$mcmc_samples
   #   # Save the results, because this takes such a long time to run.
@@ -278,7 +280,7 @@ test_accuracies_intercept <- function(save=FALSE)
   # Test multivariate approximation's accuracy
   now <- Sys.time()
   var1_result <- zero_infl_var(mult, method="laplace", verbose=TRUE)
-  var1_accuracy <- calculate_accuracies("intercept", mult, mcmc_samples, var1_result, "laplace", plot_flag=FALSE)
+  var1_accuracy <- calculate_accuracies("intercept", mult, mcmc_samples, var1_result, "laplace", plot_flag=TRUE)
   print(Sys.time() - now)
   # #print(image(Matrix(var1$var_result$mLambda)))
   # print(var1_accuracy)
@@ -288,7 +290,7 @@ test_accuracies_intercept <- function(save=FALSE)
   
   now <- Sys.time()
   var2_result <- zero_infl_var(mult, method="gva", verbose=TRUE)
-  var2_accuracy <- calculate_accuracies("intercept", mult, mcmc_samples, var2_result, "gva", plot_flag=FALSE)
+  var2_accuracy <- calculate_accuracies("intercept", mult, mcmc_samples, var2_result, "gva", plot_flag=TRUE)
   print(Sys.time() - now)
   # #print(image(Matrix(var2$var_result$mLambda)))
   # print(var2_accuracy)
@@ -298,7 +300,7 @@ test_accuracies_intercept <- function(save=FALSE)
 
   now <- Sys.time()
   var3_result <- zero_infl_var(mult, method="gva2", verbose=TRUE)
-  var3_accuracy <- calculate_accuracies("intercept", mult, mcmc_samples, var3_result, "gva2", plot_flag=FALSE)
+  var3_accuracy <- calculate_accuracies("intercept", mult, mcmc_samples, var3_result, "gva2", plot_flag=TRUE)
   print(Sys.time() - now)
   #print(image(Matrix(var3$var_result$mLambda)))
   # print(var3_accuracy)
@@ -308,7 +310,7 @@ test_accuracies_intercept <- function(save=FALSE)
 
   now <- Sys.time()
   var4_result <- zero_infl_var(mult, method="gva_nr", verbose=TRUE)
-  var4_accuracy <- calculate_accuracies("intercept", mult, mcmc_samples, var4_result, "gva_nr", plot_flag=FALSE)
+  var4_accuracy <- calculate_accuracies("intercept", mult, mcmc_samples, var4_result, "gva_nr", plot_flag=TRUE)
   print(Sys.time() - now)
   # #print(image(Matrix(var4$var_result$mLambda)))
   # print(var4_accuracy)
@@ -419,4 +421,4 @@ main <- function()
   }
 }
 
-# main()
+main()
