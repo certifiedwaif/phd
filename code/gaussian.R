@@ -268,7 +268,7 @@ fit.GVA <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e-12
   # lower_constraint[d + Dinds] <- -8
   
   if (method == "L-BFGS-B") {
-    controls <- list(maxit=100, trace=0, fnscale=-1, REPORT=1, factr=1.0E-5, lmm=10, pgtol=reltol)
+    controls <- list(maxit=1000, trace=6, fnscale=-1, REPORT=1, factr=1.0E-5, lmm=10, pgtol=reltol)
   } else if (method=="Nelder-Mead") {
     controls <- list(maxit=100000000, trace=0, fnscale=-1, REPORT=1, reltol=reltol) 
   } else {
@@ -527,7 +527,7 @@ fit.GVA_new <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0
   vtheta <- vtheta_enc_new(vmu, mR)
   
   if (method == "L-BFGS-B") {
-    controls <- list(maxit=100, trace=0, fnscale=-1, REPORT=1, factr=1.0E-5, lmm=10, pgtol=reltol)
+    controls <- list(maxit=1000, trace=0, fnscale=-1, REPORT=1, factr=1.0E-5, lmm=10, pgtol=reltol)
   } else if (method=="Nelder-Mead") {
     controls <- list(maxit=100000000, trace=0, fnscale=-1, REPORT=1, reltol=reltol) 
   } else {
