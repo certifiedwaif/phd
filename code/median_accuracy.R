@@ -2,10 +2,30 @@
 # median_accuracy.R
 library(optparse)
 library(parallel)
-source("test_zero_inflated_model.R")
+source("generate.R")
+source("zero_inflated_model.R")
 source("accuracy.R")
 
 # Repeatedly run trials and compare accuracy. Plot boxplots.
+save_mcmc_data <- function()
+{
+  ITER <- 100
+
+  # Saving the fit allows us to skip the recompilation of the C++ for the model
+  # Update: Well, it's supposed to. Stan seems to want to keep recompiling the
+  # model anyway, regardless of what I do.
+  accuracy <- mclapply(1:ITER, function(i) {
+    set.seed(i)
+    # Run code
+    m <- 20
+    ni <- 10
+    mult <- generate_int_test_data(m, ni, expected_beta = c(2, 1), expected_rho = 0.6)
+    # Idea: Save generated data so we can reproduce problem data sets?
+    stan_fit <- mcmc(mult, iterations=1e5, warmup=1e4, mc.cores = 1)
+    save(stan_fit, file = sprintf("/dskh/nobackup/markg/phd/stan_fit_%d.RData", i))
+  }, mc.cores = 32)
+}
+
 median_accuracy <- function(approximation="gva")
 {
   ITER <- 100
@@ -14,7 +34,7 @@ median_accuracy <- function(approximation="gva")
   # Update: Well, it's supposed to. Stan seems to want to keep recompiling the
   # model anyway, regardless of what I do.
   stan_fit <- NA
-  accuracy <- mclapply(1:ITER, function(i) {
+  accuracy <- lapply(1:ITER, function(i) {
     set.seed(i)
     # Run code
     m <- 20
@@ -22,11 +42,10 @@ median_accuracy <- function(approximation="gva")
     done <- FALSE
     while (!done) {
       done <- TRUE
-      mult <- generate_int_test_data(m, ni, expected_beta = c(2, 1), expected_rho = 0.5)
-      # Make an initial guess for vmu
+      mult <- generate_int_test_data(m, ni, expected_beta = c(2, 1), expected_rho = 0.6)
+      # Idea: Save generated data so we can reproduce problem data sets?
       var_result <- zipvb(mult, method=approximation, verbose=TRUE)
-      stan_fit <- mcmc(mult, iterations=1e5, warmup=5e3, mc.cores = 1,
-                                    stan_fit=stan_fit)
+      load(file = sprintf("/dskh/nobackup/markg/phd/stan_fit_%d.RData", i))
       mcmc_samples <- stan_fit$mcmc_samples
       result <- tryCatch(calculate_accuracies("", mult, mcmc_samples, var_result, approximation, print_flag=TRUE),
                                 error=function(e) {
@@ -44,23 +63,30 @@ median_accuracy <- function(approximation="gva")
     }
     save(result, file = sprintf("results/accuracy_result_%d_%s.RData", i, approximation))
     result
-  }, mc.cores = 32)
+  })#, mc.cores = 32)
   
   save(accuracy, file = sprintf("results/accuracy_list_%s.RData", approximation))
 }
 
-median_accuracy_graph <- function(approximation="gva") {
-  load(file = sprintf("results/accuracy_list_%s.RData", approximation))
-  
+create_accuracy_df <- function(accuracy, make_colnames=FALSE) {
   # Construct a data frame
   vbeta_accuracy <- t(sapply(accuracy, function(x) {x$vbeta_accuracy}))
   vu_accuracy <- t(sapply(accuracy, function(x) {x$vu_accuracy}))
   sigma2_vu_accuracy <- sapply(accuracy, function(x) {x$sigma2_vu_accuracy})
   rho_accuracy <- sapply(accuracy, function(x) {x$rho_accuracy})
   accuracy_df <- cbind(vbeta_accuracy, vu_accuracy, sigma2_vu_accuracy, rho_accuracy)
-  # colnames(accuracy_df) <- c("vbeta_0", "vbeta_1", 
-  #   sapply(1:19, function(x) paste0("vu_", x)),
-  #   "sigma2_vu", "rho")
+  if (make_colnames) {
+    colnames(accuracy_df) <- c("vbeta_0", "vbeta_1", 
+      sapply(1:19, function(x) paste0("vu_", x)),
+      "sigma2_vu", "rho")
+  }
+  accuracy_df
+}
+
+median_accuracy_graph <- function(approximation="gva") {
+  load(file = sprintf("results/accuracy_list_%s.RData", approximation))
+  
+  accuracy_df <- create_accuracy_df(accuracy)
   pdf(sprintf("results/median_accuracy_%s.pdf", approximation))
   boxplot(accuracy_df, ylim=c(0, 1))
   axis(1, at=1:23, labels=c(expression(bold(beta)[0], bold(beta)[1], bold(u)[1], bold(u)[2], bold(u)[3], bold(u)[4], bold(u)[5], bold(u)[6], bold(u)[7], bold(u)[8], bold(u)[9], bold(u)[11], bold(u)[12], bold(u)[13], bold(u)[14], bold(u)[15], bold(u)[16], bold(u)[17], bold(u)[18], bold(u)[19], bold(u)[20], bold(sigma[u]^2), rho)))
@@ -72,7 +98,14 @@ median_accuracy_graph_all <- function() {
   # for (approximation in c("gva", "gva2")) {
   for (approximation in c("laplace", "gva", "gva2", "gva_nr")) {
     median_accuracy_graph(approximation=approximation)
+    median_accuracy_csv(approximation=approximation)
   }
+}
+
+median_accuracy_csv <- function(approximation="gva") {
+  load(file = sprintf("results/accuracy_list_%s.RData", approximation))
+  accuracy_df <- create_accuracy_df(accuracy, make_colnames=TRUE)
+  write.csv(accuracy_df, file=sprintf("results/accuracy_list_%s.csv", approximation))
 }
 
 # Graph of Var_q(theta) against Var(theta|y)
