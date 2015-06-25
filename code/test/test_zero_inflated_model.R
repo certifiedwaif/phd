@@ -4,7 +4,7 @@
 # Check that lower bounds are monotonically increasing
 # Compare accuracy against MCMC
 source("zero_inflated_model.R")
-source("rwmh.R")
+# source("rwmh.R")
 require(testthat)
 #require(Matrix)
 source("generate.R")
