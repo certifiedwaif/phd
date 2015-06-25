@@ -17,17 +17,17 @@ median_accuracy <- function(approximation="gva")
   accuracy <- mclapply(1:ITER, function(i) {
     set.seed(i)
     # Run code
-    m <- 10
-    ni <- 100
+    m <- 20
+    ni <- 10
     done <- FALSE
     while (!done) {
       done <- TRUE
       mult <- generate_int_test_data(m, ni, expected_beta = c(2, 1), expected_rho = 0.5)
       # Make an initial guess for vmu
-      var_result <- zero_infl_var(mult, method=approximation, verbose=TRUE)
-      stanfit <- mcmc_approximation(mult, iterations=1e5, warmup=5e3, mc.cores = 1,
+      var_result <- zipvb(mult, method=approximation, verbose=TRUE)
+      stan_fit <- mcmc(mult, iterations=1e5, warmup=5e3, mc.cores = 1,
                                     stan_fit=stan_fit)
-      mcmc_samples <- stanfit$mcmc_samples
+      mcmc_samples <- stan_fit$mcmc_samples
       result <- tryCatch(calculate_accuracies("", mult, mcmc_samples, var_result, approximation, print_flag=TRUE),
                                 error=function(e) {
                                   print(e)
@@ -46,28 +46,33 @@ median_accuracy <- function(approximation="gva")
     result
   }, mc.cores = 32)
   
-  # For name in names(accuracy)
   save(accuracy, file = sprintf("results/accuracy_list_%s.RData", approximation))
+}
+
+median_accuracy_graph <- function(approximation="gva") {
+  load(file = sprintf("results/accuracy_list_%s.RData", approximation))
   
-  # for (approximation in c("laplace", "gva", "gva2", "gva_nr")) {
+  # Construct a data frame
+  vbeta_accuracy <- t(sapply(accuracy, function(x) {x$vbeta_accuracy}))
+  vu_accuracy <- t(sapply(accuracy, function(x) {x$vu_accuracy}))
+  sigma2_vu_accuracy <- sapply(accuracy, function(x) {x$sigma2_vu_accuracy})
+  rho_accuracy <- sapply(accuracy, function(x) {x$rho_accuracy})
+  accuracy_df <- cbind(vbeta_accuracy, vu_accuracy, sigma2_vu_accuracy, rho_accuracy)
+  # colnames(accuracy_df) <- c("vbeta_0", "vbeta_1", 
+  #   sapply(1:19, function(x) paste0("vu_", x)),
+  #   "sigma2_vu", "rho")
+  pdf(sprintf("results/median_accuracy_%s.pdf", approximation))
+  boxplot(accuracy_df, ylim=c(0, 1))
+  axis(1, at=1:23, labels=c(expression(bold(beta)[0], bold(beta)[1], bold(u)[1], bold(u)[2], bold(u)[3], bold(u)[4], bold(u)[5], bold(u)[6], bold(u)[7], bold(u)[8], bold(u)[9], bold(u)[11], bold(u)[12], bold(u)[13], bold(u)[14], bold(u)[15], bold(u)[16], bold(u)[17], bold(u)[18], bold(u)[19], bold(u)[20], bold(sigma[u]^2), rho)))
+  title(sprintf("%s median accuracy", approximation))
+  dev.off()
+}
+
+median_accuracy_graph_all <- function() {
   # for (approximation in c("gva", "gva2")) {
-  #   load(file = sprintf("results/accuracy_list_%s.RData", approximation))
-    
-  #   # Construct a data frame
-  #   vbeta_accuracy <- t(sapply(accuracy, function(x) {x$vbeta_accuracy}))
-  #   vu_accuracy <- t(sapply(accuracy, function(x) {x$vu_accuracy}))
-  #   sigma2_vu_accuracy <- sapply(accuracy, function(x) {x$sigma2_vu_accuracy})
-  #   rho_accuracy <- sapply(accuracy, function(x) {x$rho_accuracy})
-  #   accuracy_df <- cbind(vbeta_accuracy, vu_accuracy, sigma2_vu_accuracy, rho_accuracy)
-  #   colnames(accuracy_df) <- c("vbeta_0", "vbeta_1", 
-  #     sapply(1:19, function(x) paste0("vu_", x)),
-  #     "sigma2_vu", "rho")
-  #   pdf(sprintf("results/median_accuracy_%s.pdf", approximation))
-  #   boxplot(accuracy_df, ylim=c(0, 1))
-  #   axis(1, at=1:23, labels=c(expression(bold(beta)[0], bold(beta)[1], bold(u)[1], bold(u)[2], bold(u)[3], bold(u)[4], bold(u)[5], bold(u)[6], bold(u)[7], bold(u)[8], bold(u)[9], bold(u)[11], bold(u)[12], bold(u)[13], bold(u)[14], bold(u)[15], bold(u)[16], bold(u)[17], bold(u)[18], bold(u)[19], bold(u)[20], bold(sigma^2[u]), rho)))
-  #   title(sprintf("%s median accuracy", approximation))
-  #   dev.off()
-  # }
+  for (approximation in c("laplace", "gva", "gva2", "gva_nr")) {
+    median_accuracy_graph(approximation=approximation)
+  }
 }
 
 # Graph of Var_q(theta) against Var(theta|y)
@@ -97,9 +102,9 @@ coverage_percentage <- function(approximation="gva")
       cat("i", i, "counter", counter, "percentage", round(100*counter/i, 2), "\n")
 		mult <- generate_test_data(m, ni, expected_beta = expected_beta, expected_rho = expected_rho)
     
-		# var_result <- tryCatch(zero_infl_var(mult, method=approximation, verbose=FALSE),
+		# var_result <- tryCatch(zipvb(mult, method=approximation, verbose=FALSE),
     #                        error <- function (E) { return(NULL) })
-    var_result <- zero_infl_var(mult, method=approximation, verbose=FALSE)
+    var_result <- zipvb(mult, method=approximation, verbose=FALSE)
   	# If there was an error, re-try with another generated data set. Sometimes the
   	# optimiser gets passed a non-finite value.
   	if (is.null(var_result)) {

@@ -123,9 +123,8 @@ create_mult <- function(vy, mX, mZ, sigma2.beta, m=ncol(mZ), blocksize=1, spline
   return(mult)
 }
 
-zero_infl_var <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE)
+zipvb <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE)
 {
-  # browser()
   MAXITER <- 100
   
   # Initialise variables from mult

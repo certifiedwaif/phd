@@ -11,7 +11,7 @@ library(optparse)
 # Some time later: Sometimes it works.
 #source("http://mc-stan.org/rstan/stan.R")
 
-mcmc_approximation <- function(mult, seed=1, iterations=NA, warmup=NA, mc.cores=1,
+mcmc <- function(mult, seed=1, iterations=NA, warmup=NA, mc.cores=1,
                                stan_file="multivariate_zip.stan", stan_fit=NA)
 {
   # Use Stan to create MCMC samples, because Stan deals much better with highly
@@ -217,7 +217,7 @@ calculate_accuracies <- function(test, mult, mcmc_samples, var_result, approxima
 
 test_spline_accuracy <- function(mult, allKnots, fit, approximation, plot=FALSE)
 {
-  var_result <- zero_infl_var(mult, method=approximation, verbose=TRUE)
+  var_result <- zipvb(mult, method=approximation, verbose=TRUE)
   # Calculate the mean for vbeta, vu
   # Construct a BSpline matrix over the range we wish to plot
   # Plot the function using our MCMC and VB estimates
@@ -251,7 +251,7 @@ test_accuracies_intercept <- function(save=FALSE)
   #   set.seed(i)
   #   mult = generate_test_data(20, 100)
   #   # Monte Carlo Markov Chains approximation
-  #   mcmc_samples = mcmc_approximation(mult, iterations=1e6)
+  #   mcmc_samples = mcmc(mult, iterations=1e6)
   #   # Save the results, because this takes such a long time to run.
   # }
   # save(mult, mcmc_samples, file="accuracy_good.RData")
@@ -261,7 +261,7 @@ test_accuracies_intercept <- function(save=FALSE)
     ni <- 10
     mult <- generate_int_test_data(m, ni, expected_beta = c(2, 1), expected_rho = 0.5)
     # Monte Carlo Markov Chains approximation
-    result <- mcmc_approximation(mult, iterations=1e5, warmup = 1e4)
+    result <- mcmc(mult, iterations=1e5, warmup = 1e4)
     fit <- result$fit
     mcmc_samples <- result$mcmc_samples
   #   # Save the results, because this takes such a long time to run.
@@ -279,7 +279,7 @@ test_accuracies_intercept <- function(save=FALSE)
   
   # Test multivariate approximation's accuracy
   now <- Sys.time()
-  var1_result <- zero_infl_var(mult, method="laplace", verbose=TRUE)
+  var1_result <- zipvb(mult, method="laplace", verbose=TRUE)
   print(Sys.time() - now)
   var1_accuracy <- calculate_accuracies("intercept", mult, mcmc_samples, var1_result, "laplace", plot_flag=TRUE)
   # #print(image(Matrix(var1$var_result$mLambda)))
@@ -289,7 +289,7 @@ test_accuracies_intercept <- function(save=FALSE)
   print(var1_accuracy$rho_accuracy)
   
   now <- Sys.time()
-  var2_result <- zero_infl_var(mult, method="gva", verbose=TRUE)
+  var2_result <- zipvb(mult, method="gva", verbose=TRUE)
   print(Sys.time() - now)
   var2_accuracy <- calculate_accuracies("intercept", mult, mcmc_samples, var2_result, "gva", plot_flag=TRUE)
   # #print(image(Matrix(var2$var_result$mLambda)))
@@ -299,7 +299,7 @@ test_accuracies_intercept <- function(save=FALSE)
   print(var2_accuracy$rho_accuracy)
 
   now <- Sys.time()
-  var3_result <- zero_infl_var(mult, method="gva2", verbose=TRUE)
+  var3_result <- zipvb(mult, method="gva2", verbose=TRUE)
   print(Sys.time() - now)
   var3_accuracy <- calculate_accuracies("intercept", mult, mcmc_samples, var3_result, "gva2", plot_flag=TRUE)
   #print(image(Matrix(var3$var_result$mLambda)))
@@ -309,7 +309,7 @@ test_accuracies_intercept <- function(save=FALSE)
   print(var3_accuracy$rho_accuracy)
 
   now <- Sys.time()
-  var4_result <- zero_infl_var(mult, method="gva_nr", verbose=TRUE)
+  var4_result <- zipvb(mult, method="gva_nr", verbose=TRUE)
   print(Sys.time() - now)
   var4_accuracy <- calculate_accuracies("intercept", mult, mcmc_samples, var4_result, "gva_nr", plot_flag=TRUE)
   # #print(image(Matrix(var4$var_result$mLambda)))
@@ -331,7 +331,7 @@ test_accuracies_slope <- function(save=FALSE)
     seed <- 3
     set.seed(seed)
     mult <- generate_slope_test_data(m=20, ni=10)
-    result <-  mcmc_approximation(mult, iterations=3e4, warmup = 5e3)
+    result <-  mcmc(mult, iterations=3e4, warmup = 5e3)
     fit <- result$fit
     print(fit)
     mcmc_samples <- result$mcmc_samples
@@ -345,7 +345,7 @@ test_accuracies_slope <- function(save=FALSE)
   # mult$vmu <- c(2, 1, rep(0, (m-1) * 2))
   
   now <- Sys.time()
-  var1_result <- zero_infl_var(mult, method="laplace", verbose=TRUE)
+  var1_result <- zipvb(mult, method="laplace", verbose=TRUE)
   print(Sys.time() - now)
   var1_accuracy <- calculate_accuracies("slope", mult, mcmc_samples, var1_result, "laplace", print_flag=TRUE, plot_flag=TRUE)
   print(var1_accuracy$vbeta_accuracy)
@@ -353,7 +353,7 @@ test_accuracies_slope <- function(save=FALSE)
   print(var1_accuracy$rho_accuracy)
   
   now <- Sys.time()
-  var2_result <- zero_infl_var(mult, method="gva", verbose=TRUE)
+  var2_result <- zipvb(mult, method="gva", verbose=TRUE)
   print(Sys.time() - now)
   var2_accuracy <- calculate_accuracies("slope", mult, mcmc_samples, var2_result, "gva", print_flag=TRUE, plot_flag=TRUE)
   print(var2_accuracy$vbeta_accuracy)
@@ -361,7 +361,7 @@ test_accuracies_slope <- function(save=FALSE)
   print(var2_accuracy$rho_accuracy)
 
   now <- Sys.time()
-  var3_result <- zero_infl_var(mult, method="gva2", verbose=TRUE)
+  var3_result <- zipvb(mult, method="gva2", verbose=TRUE)
   print(Sys.time() - now)
   var3_accuracy <- calculate_accuracies("slope", mult, mcmc_samples, var3_result, "gva2", print_flag=TRUE, plot_flag=TRUE)
   print(var3_accuracy$vbeta_accuracy)
@@ -369,7 +369,7 @@ test_accuracies_slope <- function(save=FALSE)
   print(var3_accuracy$rho_accuracy)
 
   now <- Sys.time()
-  var4_result <- zero_infl_var(mult, method="gva_nr", verbose=TRUE)
+  var4_result <- zipvb(mult, method="gva_nr", verbose=TRUE)
   print(Sys.time() - now)
   var4_accuracy <- calculate_accuracies("slope", mult, mcmc_samples, var4_result, "gva_nr", print_flag=TRUE, plot_flag=TRUE)
   print(var4_accuracy$vbeta_accuracy)
@@ -387,7 +387,7 @@ test_accuracies_spline <- function(save=FALSE)
     result <- generate_spline_test_data()
     mult <- result$mult
     allKnots <- result$allKnots
-    mcmc_result <- mcmc_approximation(mult, seed=seed, iterations=1e5, warmup=1e3,
+    mcmc_result <- mcmc(mult, seed=seed, iterations=1e5, warmup=1e3,
                                       stan_file="multivariate_zip_splines.stan")
     mcmc_samples <- mcmc_result$mcmc_samples
     fit <- mcmc_result$fit
