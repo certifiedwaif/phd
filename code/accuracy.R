@@ -184,7 +184,6 @@ calculate_accuracies <- function(test, mult, mcmc_samples, var_result, approxima
     v <- 2
     sigma_u_inv <- array(0, c(dim(mcmc_samples$sigma_u)[1], 1, 1))
     sigma_u_inv[, 1, 1] <- 1 / mcmc_samples$sigma_u[, 1, 1]
-    print(dim(sigma_u_inv))
   }
   for (i in 1:B) {
     # sigma2 <- E_mPsi_inv[i, i]
