@@ -1,6 +1,20 @@
 To Do list
 ==========
 
+25/06/2015
+----------
+- Using the median accuracy results to find bugs/weird corner cases
+  In a couple of cases, optimiser was stopping too early, giving poor results.
+  In one case I've found, the optimiser is just going off in a completely
+  weird direction and never recovering until finally a non-finite value is return from the
+  fn.
+  0.5 zeroes is too hard, but we can solve 0.4 zeroes.
+- Testing is taking a long time. We should create a set of test files, store them on verona
+  or a machine with large disks and then test against those repeatedly. It's currently taking
+  ~40 minutes to get feedback, which is stupid.
+  Done, and it helped a lot.
+- Now I have a lot
+
 23/06/2015
 ----------
 - Work through first four weeks of solutions for Dr Di Warren
@@ -14,6 +28,17 @@ To Do list
   Code written. Testing now.
 - accuracy.R should be command-line driven as well?
   Done
+- Check when maximum iterations are reached
+- Update John
+- Fill in and hand in tutoring preferences form
+  Holidays in October
+- Claim pay for tutoring
+- Invoice for MeanPath
+- Add legend to accuracy plots
+- qqplots?
+- Questions: Why does the optimiser go crazy sometimes
+  How to check if iterations are exhausted - return the number of iterations used from
+  zipvb
 
 22/06/2015
 ----------
@@ -297,7 +322,7 @@ source('http://mc-stan.org/rstan/install.R', echo = TRUE, max.deparse.length = 2
 install_rstan()
 
 To install the other packages from CRAN:
-install.packages(c("Rcpp", "RcppEigen", "numDeriv", "digest"))
+install.packages(c("Rcpp", "RcppEigen"))
 
 23/04/2015
 ----------
