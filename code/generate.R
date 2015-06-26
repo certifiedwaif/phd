@@ -15,7 +15,6 @@ generate_univariate_test_data <- function (n, rho, lambda)
   return(vx)
 }
 
-# TODO: Rewrite. Why not use the same data generation code as for slopes?
 gen_int_data <- function (vx, vbeta, vu, rho, m, ni)
 {
   eta <- matrix(NA, m, ni)
@@ -32,7 +31,7 @@ gen_int_data <- function (vx, vbeta, vu, rho, m, ni)
     }
   }
   
-  return(y)
+  return(as.vector(y))
 }
 
 generate_int_test_data <- function(m, ni, expected_beta = c(2, 1), expected_rho = 1.0)
@@ -50,7 +49,7 @@ generate_int_test_data <- function(m, ni, expected_beta = c(2, 1), expected_rho 
   
   expected_sigma2_u <- .5^2
   
-  vy <- as.vector(gen_int_data(vx, expected_beta, vu, expected_rho, m, ni))
+  vy <- gen_int_data(vx, expected_beta, vu, expected_rho, m, ni)
   
   sigma2.beta <- 1.0E5
   # Test accuracy
@@ -75,7 +74,7 @@ gen_slope_data <- function(mX, vbeta, vu, rho, m, ni)
     }
   }
   
-  return(y)
+  return(as.vector(y))
 }
 
 generate_slope_test_data <- function(m=10, ni=20, expected_beta=c(2, 1), expected_rho=0.5)
@@ -89,12 +88,13 @@ generate_slope_test_data <- function(m=10, ni=20, expected_beta=c(2, 1), expecte
   p <- 2
   mX <- mC[,1:p]
   mZ <- mC[,p+(1:((m-1)*p))]
-  # TODO: Re-order columns of z so that columns for same groups are adjacent
+  # Re-order columns of z so that columns for same groups are adjacent
   # This will ensure banded structure of t(mC) %*% mC
   # Take 1, 2, 3, 4, 5, 6, 7, 8, 9, 10
   # to   1, 6, 2, 7, 3, 8, 4, 9, 5, 10
   # This works because R stores its matrices using the Fortran convention of
   # column-major ordering. Yes, I was surprised too!
+  # TODO: This is ghastly. Rewrite to use the Kronecker product.
   ordering <- rbind(1:(m-1), (m-1)+1:(m-1))
   mZ_reordered <- mZ[, as.vector(ordering)]
   
@@ -105,7 +105,7 @@ generate_slope_test_data <- function(m=10, ni=20, expected_beta=c(2, 1), expecte
                       -0.3,  1.0), 2, 2)
   vu <- rmvnorm(m, sigma <- mSigma_0)
   rho <- 0.5
-  vy <- as.vector(gen_slope_data(vx, vbeta, vu, rho, m, ni))
+  vy <- gen_slope_data(vx, vbeta, vu, rho, m, ni)
   
   # Create mult object
   sigma2.beta <- 1.0E5
