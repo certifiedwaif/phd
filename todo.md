@@ -1,6 +1,15 @@
 To Do list
 ==========
 
+29/06/2015
+----------
+- Install lintr with:
+  library(devtools)
+  install_github('jimhester/lintr') 
+  I haven't got it working yet.
+- Bug fixes:
+  * 76 GVA2 - Looks like early convergence
+
 25/06/2015
 ----------
 - Using the median accuracy results to find bugs/weird corner cases
@@ -8,7 +17,7 @@ To Do list
   In one case I've found, the optimiser is just going off in a completely
   weird direction and never recovering until finally a non-finite value is return from the
   fn.
-  0.5 zeroes is too hard, but we can solve 0.4 zeroes.
+  0.5 zeroes is too hard, but we can solve 0.4 zeroes aka rho = 0.6.
 - Testing is taking a long time. We should create a set of test files, store them on verona
   or a machine with large disks and then test against those repeatedly. It's currently taking
   ~40 minutes to get feedback, which is stupid.
