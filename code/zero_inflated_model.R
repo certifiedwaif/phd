@@ -188,7 +188,7 @@ zipvb <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE)
           fit1 <- fit.GVA(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B")
         }
       } else {
-        # Idea: If L-BFGS-B fails due to sovle a computationally singular linear system,
+        # Idea: If L-BFGS-B fails due to solve a computationally singular linear system,
         # try another Laplace update instead.
         # fit_lap <- fit.Lap(vmu, vy, vp, mC, mSigma.inv, mLambda)
         # fit1 <- fit.GVA(fit_lap$vmu, fit_lap$mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B")
