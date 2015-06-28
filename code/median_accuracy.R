@@ -26,6 +26,18 @@ save_mcmc_data <- function()
   }, mc.cores = 32)
 }
 
+load_stan_data <- function(i)
+{
+  hostname <- Sys.info()["nodename"]
+  if (hostname == "verona")
+    load(file = sprintf("/dskh/nobackup/markg/phd/stan_fit_%d.RData", i))
+  else if (hostname == "markg-OptiPlex-9020")
+    load(file = sprintf("/home/markg/phd_data/stan_fit_%d.RData", i))
+  else
+    stop("Cannot find hostname")
+  return(stan_fit)
+}
+
 median_accuracy <- function(approximation="gva")
 {
   ITER <- 100
@@ -34,7 +46,7 @@ median_accuracy <- function(approximation="gva")
   # Update: Well, it's supposed to. Stan seems to want to keep recompiling the
   # model anyway, regardless of what I do.
   stan_fit <- NA
-  accuracy <- lapply(1:ITER, function(i) {
+  accuracy <- mclapply(1:ITER, function(i) {
     set.seed(i)
     # Run code
     m <- 20
@@ -45,7 +57,7 @@ median_accuracy <- function(approximation="gva")
       mult <- generate_int_test_data(m, ni, expected_beta = c(2, 1), expected_rho = 0.6)
       # Idea: Save generated data so we can reproduce problem data sets?
       var_result <- zipvb(mult, method=approximation, verbose=TRUE)
-      load(file = sprintf("/dskh/nobackup/markg/phd/stan_fit_%d.RData", i))
+      stan_fit <- load_stan_data(i)
       mcmc_samples <- stan_fit$mcmc_samples
       result <- tryCatch(calculate_accuracies("", mult, mcmc_samples, var_result, approximation, print_flag=TRUE),
                                 error=function(e) {
@@ -63,7 +75,7 @@ median_accuracy <- function(approximation="gva")
     }
     save(result, file = sprintf("results/accuracy_result_%d_%s.RData", i, approximation))
     result
-  })#, mc.cores = 32)
+  }, mc.cores = 32)
   
   save(accuracy, file = sprintf("results/accuracy_list_%s.RData", approximation))
 }
