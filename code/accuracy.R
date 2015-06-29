@@ -181,7 +181,7 @@ calculate_accuracies <- function(test, mult, mcmc_samples, var_result, approxima
     sigma_u_inv[, 2, 1] <- -c / (a * d - b * c)
     sigma_u_inv[, 2, 2] <- a / (a * d - b * c)
   } else {
-    v <- 2
+    v <- 4
     sigma_u_inv <- array(0, c(dim(mcmc_samples$sigma_u)[1], 1, 1))
     sigma_u_inv[, 1, 1] <- 1 / mcmc_samples$sigma_u[, 1, 1]
   }
