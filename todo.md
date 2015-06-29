@@ -3,12 +3,21 @@ To Do list
 
 29/06/2015
 ----------
+- Progress update
+- Met with John quickly
+  John commented that variance component accuracy is low
+
+28/06/2015
+----------
 - Install lintr with:
   library(devtools)
   install_github('jimhester/lintr') 
   I haven't got it working yet.
 - Bug fixes:
   * 76 GVA2 - Looks like early convergence
+    But why? L-BFGS-B can't seem to solve the problem.
+- Increase degrees of freedom for the Inverse Wishart from 2 to 4. v > p + 1 for the expectation
+  to be valid.
 
 25/06/2015
 ----------
