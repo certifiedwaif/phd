@@ -45,7 +45,7 @@ generate_int_test_data <- function(m, ni, expected_beta = c(2, 1), expected_rho 
   mZ <- mZ[, 2:m]
 
   mSigma_0 <- matrix(c(1.0), 1, 1)
-  vu <- rmvnorm(m, sigma <- mSigma_0)
+  vu <- rmvnorm(m, sigma=mSigma_0)
   
   expected_sigma2_u <- .5^2
   
@@ -53,7 +53,7 @@ generate_int_test_data <- function(m, ni, expected_beta = c(2, 1), expected_rho 
   
   sigma2.beta <- 1.0E5
   # Test accuracy
-  mult <- create_mult(vy, mX, mZ, sigma2.beta, m=m, blocksize=1, spline_dim=0, v=2)
+  mult <- create_mult(vy, mX, mZ, sigma2.beta, m=m, blocksize=1, spline_dim=0, v=4)
   
   return(mult)
 }
@@ -103,7 +103,7 @@ generate_slope_test_data <- function(m=10, ni=20, expected_beta=c(2, 1), expecte
   vbeta <- c(2, 1)
   mSigma_0 <- matrix(c(1.0, -0.3,
                       -0.3,  1.0), 2, 2)
-  vu <- rmvnorm(m, sigma <- mSigma_0)
+  vu <- rmvnorm(m, sigma=mSigma_0)
   rho <- 0.5
   vy <- gen_slope_data(vx, vbeta, vu, rho, m, ni)
   
