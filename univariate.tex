@@ -1,0 +1,112 @@
+\subsection{Variational Bayes for zero-inflated count models}
+
+\noindent Consider the model
+
+$$
+y_i = r_i x_i, 1 \leq i \leq n,
+$$
+
+\noindent where $x_i \sim \Poisson{(\lambda)}$ independent of
+$r_i \stackrel{\text{ind.}}{\sim} \Bernoulli{(\rho)}, 1 \leq i \leq n$.
+
+We employ priors $\rho \sim \Unif{(0, 1)}$ and $\lambda \sim \Gamma{(0.01, 0.01)}$. 
+ 
+% TODO: Add graphical model
+
+We use a factorised approximation to the full likelihood, as detailed in \citep{ormerod10}.
+The use of conjugate priors in the full model yields easier mean field updates in the
+variational approximation.
+
+It can be shown via standard algebraic manipulations that the
+full conditionals for $\lambda, \rho$ and $\vr$ are:
+
+$$
+\begin{array}{rl}
+\lambda | \textbf{rest} &\sim \myGamma{(\alpha_\lambda + \vone^T\vx, \beta_\lambda + \vone^T\vr)}, \\ [0.5ex]
+\rho | \textbf{rest} &\sim \Beta{(\alpha_\rho + \vone^T \vr, \beta_\rho + n - \vone^T\vr)} \\ [0.5ex]
+\mbox{ and } \quad r_i | \textbf{rest} &\sim \Bernoulli{(\text{expit}(\eta_i))}, \quad 1 \leq i \leq n.
+\end{array}
+$$
+
+% Step Two: Assume q(r_i) = Bernoulli(\rho_i), 1 \leq i \leq n for some known \rho_i. Find the
+% variational Bayes updates of the q-densities q(\lambda) and q(\rho) corresponding to the
+% factorisation
+% q(\vr, \lambda, \rho) = q(\lambda) q(\rho) \sum_{i=1}^n q(r_i)
+
+\noindent We assume a factorised approximation of the form
+
+$$
+q(\lambda, \rho, \vp) = q(\lambda) q(\rho) \left [ \prod_{i=1}^n q(r_i) \right ]
+$$
+
+\noindent where $q(\lambda)$ is a Gamma distribution, $q(\rho)$ is a Beta distribution 
+and $q(r_i)$ are Bernoulli distributions.
+
+\noindent This leads to the following functional forms of the optimal q-densities
+
+$$
+\begin{array}{l}
+\mbox{$q^*(\lambda)$ is the $\myGamma{\alpha_{q(\lambda)}, \beta_{q(\lambda)}}$ density function,} \\ [0.5ex]
+\mbox{$q^*(\rho)$ is the $\text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)})$ density function, and} \\ [0.5ex]
+\mbox{$q^*(r_i)$  is the $\text{Bernoulli}(p_{q(r_i)})$ density function, $1 \leq i \leq n$,}
+\end{array}
+$$
+
+%$$
+%\begin{array}{c}
+%q^*(\lambda) \sim \myGamma(\alpha_{q(\lambda)}, %\beta_{q(\lambda)}),
+%q^*(\rho) \sim \text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)}),
+%\quad \mbox{ and } \quad  
+%q^*(r_i) \sim \text{Bernoulli}(p_{q(r_i)}), \ \ 1 \leq i \leq n,
+%\end{array}
+%$$
+
+\noindent where the parameters are updated according to Algorithm \ref{algorithm1}. 
+
+\subsection{Lower bound}
+The lower bound of the univariate model can be calculated directly to be
+$$
+\begin{array}{rl}
+\bE_q \left\{ \log{p(\vx, \vr, \lambda, \rho)} - \log{q(\vr, \lambda, \rho)} \right\} &= T_1 + T_2 \\
+\end{array}
+$$
+
+\noindent where
+$$
+\begin{array}{rl}
+T_1 & \ds =
+\alpha_\lambda \log{(\beta_\lambda)} + (\alpha_\lambda - 1) [\psi(\alpha_{q(\lambda)}) - \log{(\beta_{q(\lambda)})}] - \beta_\lambda \frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} - \log\Gamma(\alpha_\lambda) \\
+& \ds \quad -\vp^T\frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} + \bE_q[\vx^T \log{(\lambda \vr)}] - \log\Gamma(\vx+1)) \quad \mbox{and} 
+\\ [1ex]
+T_2 &= - \vp^T \log \vp - (\vone - \vp)^T \log (\vone - \vp) - \log \Beta (\alpha_\rho, \beta_\rho) + \log \Beta (\alpha_q, \beta_q)
+\end{array}
+$$
+
+\noindent with 
+$$
+\bE [x_i \log{(\lambda r_i)}]  =
+	\begin{cases}
+	0 & \textbf{if } x_i = 0 \\
+	\bE_q [\log \lambda] = \psi(\alpha_{q(\lambda)}) - \log{(\beta_{q(\lambda)})} & \textbf{if } x_i \ne 0. \\
+	\end{cases}
+$$
+
+\begin{algorithm} 
+\caption[Algorithm 1]{Iterative scheme for obtaining the parameters in the
+optimal densities $q^*(\lambda)$ and $q^*(\rho)$}
+\begin{algorithmic}
+\REQUIRE{$\alpha_{q(\rho)} \leftarrow \alpha_\rho + \vone^T\vp, 
+\alpha_{q(\lambda)} \leftarrow \alpha_\lambda + \vone^T\vx$}
+\WHILE{the increase in $\log{\underline{p}}(\vx;q)$ is significant}
+\STATE $\beta_{q(\rho)} \leftarrow \beta_\rho + n - \vone^T\vp$
+\STATE $\eta \leftarrow -\alpha_{q(\lambda)}/\beta_{q(\lambda)} + \psi{(a_{q{(\rho)}})} - \psi{(b_{q{(\rho)}})}$
+\STATE $\vp_{q(\vr_0)} \leftarrow \expit{(\eta)}$
+\STATE $\beta_{q(\lambda)} \leftarrow \beta_\lambda + \vone^T\vp$
+\ENDWHILE
+\end{algorithmic}
+\label{algorithm1}
+\end{algorithm}
+
+%By taking the expectation of each full conditional with respect to 
+
+% This should be made the numerical experiment section.
