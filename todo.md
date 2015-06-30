@@ -10,7 +10,11 @@ To Do list
   That is, I was inverting and then dividing, rather than dividing and then inverting.
 
   This had the effect of raising the accuracy of _all_ the intercepts above 80%!
-
+- To do: mean of random effects
+  Re-arrange boxplots so that accuracy of methods can be compared
+  Think of revisions to paper
+  Median accuracy for slopes and splines
+  
 29/06/2015
 ----------
 - Progress update
