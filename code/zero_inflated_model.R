@@ -88,7 +88,7 @@ create_mult <- function(vy, mX, mZ, sigma2.beta, m=ncol(mZ), blocksize=1, spline
   prior <- list(v=v, mPsi=mPsi,
                 a_rho=1, b_rho=1,
                 sigma2.beta=sigma2.beta)
-  v <- prior$v + blocksize
+  v <- prior$v + m
   
   if (!is.null(ncol(mZ))) {
     # TODO: We don't yet handle the case where there are splines and random intecepts/
@@ -143,11 +143,11 @@ zipvb <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE)
   b_rho <- mult$b_rho
   prior <- mult$prior
   mPsi <- mult$mPsi
-  v <- mult$v
   d <- mult$d
   m <- mult$m
   spline_dim <- mult$spline_dim
   blocksize <- mult$blocksize
+  v <- prior$v + m
 
   zero.set <- which(vy == 0)
   vlower_bound <- c()
@@ -265,9 +265,9 @@ zipvb <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE)
       # TODO: This doesn't handle the case where you have splines and random intercepts
       # or slopes.
       if (m == 1) {
-        mSigma.u.inv <- solve(mPsi)/(v - d - 1)
+        mSigma.u.inv <- solve(mPsi/(v - d - 1))
       } else {
-        mSigma.u.inv <- kronecker(diag(1, m - 1), solve(mPsi)/(v - d - 1))
+        mSigma.u.inv <- kronecker(diag(1, m - 1), solve(mPsi/(v - d - 1)))
       }
       #mSigma.u.inv <- solve(mPsi) # What multiplicative factor for psi?
     }
