@@ -1,11 +1,23 @@
 To Do list
 ==========
 
+30/06/2015
+----------
+- Found major bug:
+    mSigma.u.inv <- kronecker(diag(1, m - 1), solve(mPsi)/(v - d - 1))
+  should have been
+    mSigma.u.inv <- kronecker(diag(1, m - 1), solve(mPsi/(v - d - 1)))
+  That is, I was inverting and then dividing, rather than dividing and then inverting.
+
+  This had the effect of raising the accuracy of _all_ the intercepts above 80%!
+
 29/06/2015
 ----------
 - Progress update
 - Met with John quickly
   John commented that variance component accuracy is low
+- Increase degrees of freedom for the Inverse Wishart from 2 to 4. v > p + 1 for the expectation
+  to be valid.
 
 28/06/2015
 ----------
@@ -16,8 +28,6 @@ To Do list
 - Bug fixes:
   * 76 GVA2 - Looks like early convergence
     But why? L-BFGS-B can't seem to solve the problem.
-- Increase degrees of freedom for the Inverse Wishart from 2 to 4. v > p + 1 for the expectation
-  to be valid.
 
 25/06/2015
 ----------
