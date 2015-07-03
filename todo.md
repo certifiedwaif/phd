@@ -1,6 +1,12 @@
 To Do list
 ==========
 
+02/06/2015
+----------
+- In random slopes median accuracy, occasionally mLambda's diagonal contains a huge
+  value and the rest of the fit is garbage. T1 in the lower bound is usually Inf in these
+  cases.
+
 30/06/2015
 ----------
 - Found major bug:
