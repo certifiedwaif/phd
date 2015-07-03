@@ -7,7 +7,22 @@ source("zero_inflated_model.R")
 source("accuracy.R")
 
 # Repeatedly run trials and compare accuracy. Plot boxplots.
-save_mcmc_data <- function()
+generate_test_case <- function(i, test) {
+  set.seed(i)
+  # Run code
+  if (test == "intercept") {
+    m <- 20
+    ni <- 10
+    mult <- generate_int_test_data(m, ni, expected_beta = c(2, 1), expected_rho = 0.7)
+  } else if (test == "slope") {
+    m <- 20
+    ni <- 10
+    mult <- generate_slope_test_data(m=20, ni=10, expected_beta=c(2, 1), expected_rho=0.5)
+  }
+  mult
+}
+
+save_mcmc_data <- function(test)
 {
   ITER <- 100
 
@@ -15,69 +30,44 @@ save_mcmc_data <- function()
   # Update: Well, it's supposed to. Stan seems to want to keep recompiling the
   # model anyway, regardless of what I do.
   accuracy <- mclapply(1:ITER, function(i) {
-    set.seed(i)
-    # Run code
-    m <- 20
-    ni <- 10
-    mult <- generate_int_test_data(m, ni, expected_beta = c(2, 1), expected_rho = 0.6)
     # Idea: Save generated data so we can reproduce problem data sets?
+    mult <- generate_test_case(i, test)
     stan_fit <- mcmc(mult, iterations=1e5, warmup=1e4, mc.cores = 1)
-    save(stan_fit, file = sprintf("/dskh/nobackup/markg/phd/stan_fit_%d.RData", i))
+    save(stan_fit, file = sprintf("/dskh/nobackup/markg/phd/stan_fit_%s_%d.RData", test, i))
   }, mc.cores = 32)
 }
 
-load_stan_data <- function(i)
+load_stan_data <- function(i, test)
 {
   hostname <- Sys.info()["nodename"]
-  if (hostname == "verona")
-    load(file = sprintf("/dskh/nobackup/markg/phd/stan_fit_%d.RData", i))
+  if (hostname == "verona.maths.usyd.edu.au")
+    load(file = sprintf("/dskh/nobackup/markg/phd/stan_fit_%s_%d.RData", test, i))
   else if (hostname == "markg-OptiPlex-9020")
-    load(file = sprintf("/home/markg/phd_data/stan_fit_%d.RData", i))
+    load(file = sprintf("/home/markg/phd_data/stan_fit_%s_%d.RData", test, i))
   else
     stop("Cannot find hostname")
   return(stan_fit)
 }
 
-median_accuracy <- function(approximation="gva")
+median_accuracy <- function(approximation="gva", test="intercept")
 {
   ITER <- 100
 
   # Saving the fit allows us to skip the recompilation of the C++ for the model
   # Update: Well, it's supposed to. Stan seems to want to keep recompiling the
   # model anyway, regardless of what I do.
-  stan_fit <- NA
-  accuracy <- mclapply(1:ITER, function(i) {
-    set.seed(i)
-    # Run code
-    m <- 20
-    ni <- 10
-    done <- FALSE
-    while (!done) {
-      done <- TRUE
-      mult <- generate_int_test_data(m, ni, expected_beta = c(2, 1), expected_rho = 0.6)
-      # Idea: Save generated data so we can reproduce problem data sets?
-      var_result <- zipvb(mult, method=approximation, verbose=TRUE)
-      stan_fit <- load_stan_data(i)
-      mcmc_samples <- stan_fit$mcmc_samples
-      result <- tryCatch(calculate_accuracies("", mult, mcmc_samples, var_result, approximation, print_flag=TRUE),
-                                error=function(e) {
-                                  print(e)
-                                  NULL
-                                })
-      # print(result)
-      # result <- calculate_accuracies("", mult, mcmc_samples, var_result, approximation,
-      #                                print_flag=TRUE)
-
-      # Check whether integrate() failed. If so, generate another data set and re-try.
-      if (is.null(result)) {
-        done <- FALSE
-      }
-    }
-    save(result, file = sprintf("results/accuracy_result_%d_%s.RData", i, approximation))
+  accuracy <- lapply(1:ITER, function(i) {
+    mult <- generate_test_case(i, test)
+    var_result <- zipvb(mult, method=approximation, verbose=TRUE)
+    stan_fit <- load_stan_data(i, test)
+    mcmc_samples <- stan_fit$mcmc_samples
+    result <- calculate_accuracies("", mult, mcmc_samples, var_result, approximation, print_flag=TRUE)
+    save(result, file = sprintf("results/accuracy_result_%s_%s_%d.RData", approximation, test, i))
     result
-  }, mc.cores = 32)
+  }) # , mc.cores = 32)
   
-  save(accuracy, file = sprintf("results/accuracy_list_%s.RData", approximation))
+  save(accuracy, file = sprintf("results/accuracy_list_%s_%s.RData", approximation, test))
+  median_accuracy_graph_all(test)
 }
 
 create_accuracy_df <- function(accuracy, make_colnames=FALSE) {
@@ -95,26 +85,38 @@ create_accuracy_df <- function(accuracy, make_colnames=FALSE) {
   accuracy_df
 }
 
-median_accuracy_graph <- function(approximation="gva") {
-  load(file = sprintf("results/accuracy_list_%s.RData", approximation))
+median_accuracy_graph <- function(approximation="gva", test="intercept") {
+  load(file = sprintf("results/accuracy_list_%s_%s.RData", approximation, test))
   
   accuracy_df <- create_accuracy_df(accuracy)
-  pdf(sprintf("results/median_accuracy_%s.pdf", approximation))
-  boxplot(accuracy_df, ylim=c(0, 1))
-  axis(1, at=1:23, labels=c(expression(bold(beta)[0], bold(beta)[1], bold(u)[1], bold(u)[2], bold(u)[3], bold(u)[4], bold(u)[5], bold(u)[6], bold(u)[7], bold(u)[8], bold(u)[9], bold(u)[11], bold(u)[12], bold(u)[13], bold(u)[14], bold(u)[15], bold(u)[16], bold(u)[17], bold(u)[18], bold(u)[19], bold(u)[20], bold(sigma[u]^2), rho)))
-  title(sprintf("%s median accuracy", approximation))
+  pdf(sprintf("results/median_accuracy_%s_%s.pdf", approximation, test))
+  # Should be plotting mean, and comparing approximations
+  if (test == "intercept") {
+    mean_vu <- tapply(mean, 2, accuracy_df[, 3:22])
+    accuracy_df2 <- cbind(accuracy_df[, c("vbeta_0", "vbeta_1", "sigma2_vu", "rho")])
+    boxplot(accuracy_df2, ylim=c(0, 1))
+    axis(1, at=1:5, labels=c(expression(bold(beta)[0], bold(beta)[1], bold(u)[1], bold(sigma[u]^2), rho)))
+  } else if (test == "slope") {
+    mean_vu <- matrix(0, 100, 2)
+    mean_vu[, 1] <- tapply(mean, 2, accuracy_df[, 3 + 0:19 * 2])
+    mean_vu[, 2] <- tapply(mean, 2, accuracy_df[, 3 + 1 + 0:19 * 2])
+    accuracy_df2 <- cbind(accuracy_df[, c("vbeta_0", "vbeta_1", "sigma2_vu_1", "sigma2_vu_2", "rho")])
+    boxplot(accuracy_df2, ylim=c(0, 1))
+    axis(1, at=1:7, labels=c(expression(bold(beta)[0], bold(beta)[1], bold(u)[1], bold(u)[2], bold(sigma[u1]^2), bold(sigma[u2]^2), rho)))
+  }
+  title(sprintf("%s %s median accuracy", approximation, test))
   dev.off()
 }
 
-median_accuracy_graph_all <- function() {
+median_accuracy_graph_all <- function(test) {
   # for (approximation in c("gva", "gva2")) {
   for (approximation in c("laplace", "gva", "gva2", "gva_nr")) {
-    median_accuracy_graph(approximation=approximation)
-    median_accuracy_csv(approximation=approximation)
+    median_accuracy_graph(approximation=approximation, test=test)
+    median_accuracy_csv(approximation=approximation, test=test)
   }
 }
 
-median_accuracy_csv <- function(approximation="gva") {
+median_accuracy_csv <- function(approximation="gva", test=test) {
   load(file = sprintf("results/accuracy_list_%s.RData", approximation))
   accuracy_df <- create_accuracy_df(accuracy, make_colnames=TRUE)
   write.csv(accuracy_df, file=sprintf("results/accuracy_list_%s.csv", approximation))
@@ -241,12 +243,14 @@ plot_graphs <- function()
 main <- function()
 {
   option_list <- list(make_option(c("-a", "--approximation"), default="gva"),
+                      make_option(c("-t", "--test"), default="intercept"),
                       make_option(c("-c", "--coverage_percentage"), action="store_true", default=FALSE),
                       make_option(c("-m", "--median_accuracy"),  action="store_true", default=FALSE))
   opt <- parse_args(OptionParser(option_list=option_list))
   approximation <- opt$approximation
+  test <- opt$test
   if (opt$median_accuracy) {
-    median_accuracy(approximation=approximation)
+    median_accuracy(approximation=approximation, test=test)
   }
 
   if (opt$coverage_percentage) {
