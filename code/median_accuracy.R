@@ -17,7 +17,7 @@ generate_test_case <- function(i, test) {
   } else if (test == "slope") {
     m <- 20
     ni <- 10
-    mult <- generate_slope_test_data(m=20, ni=10, expected_beta=c(2, 1), expected_rho=0.5)
+    mult <- generate_slope_test_data(m=20, ni=10, expected_beta=c(2, 1), expected_rho=0.7)
   }
   mult
 }
@@ -57,11 +57,14 @@ median_accuracy <- function(approximation="gva", test="intercept")
   # Update: Well, it's supposed to. Stan seems to want to keep recompiling the
   # model anyway, regardless of what I do.
   accuracy <- lapply(1:ITER, function(i) {
+    cat("Test case", i, "\n")
     mult <- generate_test_case(i, test)
     var_result <- zipvb(mult, method=approximation, verbose=TRUE)
     stan_fit <- load_stan_data(i, test)
     mcmc_samples <- stan_fit$mcmc_samples
     # Must handle the case where integrate() throws a non-finite function value error
+    # If the integration fails, something must have gone fundamentally wrong, and we should
+    # figure out why.
     result <- calculate_accuracies("", mult, mcmc_samples, var_result, approximation, print_flag=TRUE)
     save(result, file = sprintf("results/accuracy_result_%s_%s_%d.RData", approximation, test, i))
     result
