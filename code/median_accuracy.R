@@ -61,26 +61,27 @@ median_accuracy <- function(approximation="gva", test="intercept")
     var_result <- zipvb(mult, method=approximation, verbose=TRUE)
     stan_fit <- load_stan_data(i, test)
     mcmc_samples <- stan_fit$mcmc_samples
+    # Must handle the case where integrate() throws a non-finite function value error
     result <- calculate_accuracies("", mult, mcmc_samples, var_result, approximation, print_flag=TRUE)
     save(result, file = sprintf("results/accuracy_result_%s_%s_%d.RData", approximation, test, i))
     result
   }) # , mc.cores = 32)
   
   save(accuracy, file = sprintf("results/accuracy_list_%s_%s.RData", approximation, test))
-  median_accuracy_graph_all(test)
+  # median_accuracy_graph_all(test)
 }
 
 create_accuracy_df <- function(accuracy, make_colnames=FALSE) {
   # Construct a data frame
   vbeta_accuracy <- t(sapply(accuracy, function(x) {x$vbeta_accuracy}))
   vu_accuracy <- t(sapply(accuracy, function(x) {x$vu_accuracy}))
-  sigma2_vu_accuracy <- sapply(accuracy, function(x) {x$sigma2_vu_accuracy})
+  sigma2_vu_accuracy <- t(sapply(accuracy, function(x) {x$sigma2_vu_accuracy}))
   rho_accuracy <- sapply(accuracy, function(x) {x$rho_accuracy})
   accuracy_df <- cbind(vbeta_accuracy, vu_accuracy, sigma2_vu_accuracy, rho_accuracy)
   if (make_colnames) {
     colnames(accuracy_df) <- c("vbeta_0", "vbeta_1", 
-      sapply(1:19, function(x) paste0("vu_", x)),
-      "sigma2_vu", "rho")
+      sapply(1:ncol(vu_accuracy), function(x) paste0("vu_", x)),
+      sapply(1:ncol(sigma2_vu_accuracy), function(x) paste0("sigma2_vu_", x)), "rho")
   }
   accuracy_df
 }
@@ -88,19 +89,23 @@ create_accuracy_df <- function(accuracy, make_colnames=FALSE) {
 median_accuracy_graph <- function(approximation="gva", test="intercept") {
   load(file = sprintf("results/accuracy_list_%s_%s.RData", approximation, test))
   
-  accuracy_df <- create_accuracy_df(accuracy)
+  accuracy_df <- create_accuracy_df(accuracy, make_colnames=TRUE)
+  browser()
   pdf(sprintf("results/median_accuracy_%s_%s.pdf", approximation, test))
   # Should be plotting mean, and comparing approximations
   if (test == "intercept") {
-    mean_vu <- tapply(mean, 2, accuracy_df[, 3:22])
+    mean_vu <- apply(accuracy_df[, 3:22], 1, mean)
     accuracy_df2 <- cbind(accuracy_df[, c("vbeta_0", "vbeta_1", "sigma2_vu", "rho")])
     boxplot(accuracy_df2, ylim=c(0, 1))
     axis(1, at=1:5, labels=c(expression(bold(beta)[0], bold(beta)[1], bold(u)[1], bold(sigma[u]^2), rho)))
   } else if (test == "slope") {
     mean_vu <- matrix(0, 100, 2)
-    mean_vu[, 1] <- tapply(mean, 2, accuracy_df[, 3 + 0:19 * 2])
-    mean_vu[, 2] <- tapply(mean, 2, accuracy_df[, 3 + 1 + 0:19 * 2])
-    accuracy_df2 <- cbind(accuracy_df[, c("vbeta_0", "vbeta_1", "sigma2_vu_1", "sigma2_vu_2", "rho")])
+    mean_vu[, 1] <- apply(accuracy_df[, 3 + 0:19 * 2], 1, mean)
+    mean_vu[, 2] <- apply(accuracy_df[, 3 + 1 + 0:19 * 2], 1, mean)
+    mean_vu_df <- data.frame(mean_vu_0=mean_vu[, 1], mean_vu_1=mean_vu[, 2])
+    accuracy_df2 <- cbind(accuracy_df[, c("vbeta_0", "vbeta_1")],
+                          mean_vu_df,
+                          accuracy_df[, c("sigma2_vu_1", "sigma2_vu_2", "rho")])
     boxplot(accuracy_df2, ylim=c(0, 1))
     axis(1, at=1:7, labels=c(expression(bold(beta)[0], bold(beta)[1], bold(u)[1], bold(u)[2], bold(sigma[u1]^2), bold(sigma[u2]^2), rho)))
   }
