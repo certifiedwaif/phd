@@ -236,10 +236,14 @@ considered in this article.
 
 \subsection{Optimising the GVA lower bound}
 % Detail techniques used for fitting models.
+% TODO: Talk more about numerical scheme. This explanation is terrible!
 The Gaussian variational lower bound in Algorithm 2 can be optimised
 using a  variety of algorithms. Each of these algorithms is a trade-off between
-accuracy,  stability and speed. The Gaussian variational lower bound is
-optimised using the L-BFGS-B  algorithm.
+accuracy,  stability and speed. The variational lower bound is not necessarily unimodal,
+leading to potential difficulty in optimising to the global maximum. However, for fixed
+$\vp$ and $\mSigma$, the variational lower bound is log-concave, and so standard
+optimisation methods such as L-BFGS-B work well. This led to an extremely accurate approximation
+of the true posterior at the expense of some additional computational effort.
 
 \subsubsection{GVA, $\mLambda = \mR \mR^\top$}
 % TODO: Should talk about the reasons for choosing the various parameterisations
@@ -255,7 +259,7 @@ be optimised with L-BFGS-B:
 
 % Detail the function and its derivatives
 \begin{align*}
-\log \underline{p}(\vmu, \mLambda; \vy) &= \vy^\top\mP \mC \vmu - \vp^\top \B(\mC \vmu, \text{diag}(\mC \mLambda \mC^\top)) - \half \vmu \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} + \log{|\mR|} \\
+\log \underline{p}(\vmu, \mLambda; \vy) &= \vy^\top\mP \mC \vmu - \vp^\top \B(\mC \vmu, \text{diag}(\mC \mLambda \mC^\top)) - \half \vmu^\top \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} + \log{|\mR|} \\
 &\quad - \frac{d}{2} \log{(2 \pi)} + \half \log{|\mSigma^{-1}|} + \frac{d}{2} \log{(2 \pi)} + \frac{d}{2} \\
 \frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu} &= \mC^\top \vp^\top(\vy - \B^{(1)}(\mC \vmu, \mC \mLambda \mC^\top)) - \mSigma^{-1} \vmu \\
 \frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda} &= \left [\mLambda^{-1} - \vp^\top \mC^\top \text{diag}(\B^{(2)}(\mC \vmu, \mC \mLambda \mC^\top)) \mC \vp) - \mSigma^{-1} \right ] \mR
@@ -282,18 +286,11 @@ $\text{diag}(\mC \mLambda \mC^\top)$ directly.
 % Detail the function and its derivatives under this parameterisation
 % Difficulties re: multimodal likelihood, tricks to get that to work
 % I think it's log concave for \vp and \mSigma fixed
-\noindent The variational lower bound is not necessarily unimodal, leading to 
-potential difficulty in optimising to the global maximum. However, for fixed
-$\vp$ and $\mSigma$, the variational lower bound is log-concave, and so standard
-optimisation methods such as L-BFGS-B work well.
-% TODO: Talk more about numerical scheme. This explanation is terrible!
-This led to an extremely accurate approximation of the true posterior at the expense 
-of some additional computational effort.
 
 \noindent The Gaussian variational lower bound is
 
 \begin{align*}
-\log \underline{p}(\vmu, \mLambda; \vy) &= \vy\mP\mC \vmu - \vp^\top \B(\mC \vmu, \text{diag}(\mC \mLambda \mC^\top)) - \half \vmu \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} \\
+\log \underline{p}(\vmu, \mLambda; \vy) &= \vy\mP\mC \vmu - \vp^\top \B(\mC \vmu, \text{diag}(\mC \mLambda \mC^\top)) - \half \vmu^\top \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} \\
 &\quad- \frac{d}{2} \log{(2 \pi)} + \half \log{|\mSigma^{-1}|} + \frac{d}{2} \log{(2 \pi)} + \frac{d}{2} - \log{|\mR|}
 \end{align*}
 
