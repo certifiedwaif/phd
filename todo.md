@@ -1,6 +1,39 @@
 To Do list
 ==========
 
+08/06/2015
+----------
+- Re-run median accuracy for slope test case with the new MCMC data
+  GVA crashed on test case 4. This turned out to be due to normalisation issues in the
+  accuracy integral. So I've fixed that.
+  GVA and GVA2 work pretty reliably. GVA2 is a little faster.
+  GVA_nr is very fast, but unstable/unreliable. Occasionally the lower bound becomes infinite
+  and the results are complete nonsense.
+  Laplace takes a very long time to converge, and the accuracy results aren't that great.
+
+07/06/2015
+----------
+- Re-run MCMC
+  I'd hardcoded some settings. That came back to bite me. I have to re-run the whole
+  task now.
+- R linting
+- Writing
+- Check quiz answers
+
+06/06/2015
+----------
+- Fix crashes coming from integrate() in median_accuracy()
+- Fix crash coming from create_accuracy_df() in median_accuracy_graph()
+  Done. We can now produce a median accuracy graph.
+- Mark reports
+  Done
+- Fill in spreadsheet of reports
+  Done
+- Fill in HR
+- Meanpath invoice
+- Scan report marking template sheets
+- Respond to Suzanne's email re: True stories
+
 02/06/2015
 ----------
 - In random slopes median accuracy, occasionally mLambda's diagonal contains a huge
