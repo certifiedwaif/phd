@@ -83,7 +83,7 @@ integrate2 <- function(f, min_x, max_x, n)
   trapezoidal.integration(vx, vf)
 }
 
-calculate_accuracy <- function(mcmc_samples, dist_fn, ...)
+calculate_accuracy_normalised <- function(mcmc_samples, dist_fn, ...)
 {
   mcmc_density <- density(mcmc_samples)
   opt <- optimize(function(x) dist_fn(x, ...), interval=c(min(mcmc_density$x), max(mcmc_density$x)), maximum=TRUE)
@@ -96,6 +96,21 @@ calculate_accuracy <- function(mcmc_samples, dist_fn, ...)
   integrand <- function(x)
   {
     return(abs(mcmc_fn(x)/result1$value - dist_fn(x, ...)/result2$value))
+  }
+  result <- integrate(integrand, min(mcmc_density$x), max(mcmc_density$x),
+                     subdivisions = length(mcmc_density$x))
+  accuracy <- 1 - .5 * result$value
+  return(accuracy)
+}
+
+calculate_accuracy <- function(mcmc_samples, dist_fn, ...)
+{
+  mcmc_density <- density(mcmc_samples)
+  mcmc_fn <- splinefun(mcmc_density$x, mcmc_density$y)
+  
+  integrand <- function(x)
+  {
+    return(abs(mcmc_fn(x) - dist_fn(x, ...)))
   }
   result <- integrate(integrand, min(mcmc_density$x), max(mcmc_density$x),
                      subdivisions = length(mcmc_density$x))
@@ -233,7 +248,7 @@ calculate_accuracies <- function(test, mult, mcmc_samples, var_result, approxima
   for (i in 1:B) {
     # sigma2 <- E_mPsi_inv[i, i]
     sigma2 <- var_result$mPsi[i, i]
-    sigma2_vu_accuracy[i] <- calculate_accuracy(sigma_u_inv[, i, i],
+    sigma2_vu_accuracy[i] <- calculate_accuracy_normalised(sigma_u_inv[, i, i],
                                                function(x, ...) dgamma(x/sqrt(sigma2), ...), v/2, sigma2/2)
     title <- sprintf("%s sigma2_u[%d] accuracy: %f", approximation, i, sigma2_vu_accuracy[i])
     if (print_flag) print(title)
