@@ -100,12 +100,10 @@ generate_slope_test_data <- function(m=10, ni=20, expected_beta=c(2, 1), expecte
   
   # Centre slope term?
   #mX <- cbind(mX[,1], scale(mX[,2]))
-  vbeta <- c(2, 1)
   mSigma_0 <- matrix(c(1.0, -0.3,
                       -0.3,  1.0), 2, 2)
   vu <- rmvnorm(m, sigma=mSigma_0)
-  rho <- 0.5
-  vy <- gen_slope_data(vx, vbeta, vu, rho, m, ni)
+  vy <- gen_slope_data(vx, expected_beta, vu, expected_rho, m, ni)
   
   # Create mult object
   sigma2.beta <- 1.0E5
