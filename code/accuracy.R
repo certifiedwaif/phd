@@ -75,12 +75,12 @@ trapezoidal.integration = function(x, f)
   return(integral)
 }
 
-integrate2 <- function(f, min_x, max_x, n)
+integrate2 <- function(f, min_x, max_x, subdivisions = 0)
 {
   # Calculate x and f for trapezoidal.integration
-  vx <- seq(min_x, max_x, length.out=n)
-  vf <- f(x)
-  trapezoidal.integration(vx, vf)
+  vx <- seq(min_x, max_x, length.out = subdivisions)
+  vf <- f(vx)
+  list(value=trapezoidal.integration(vx, vf))
 }
 
 calculate_accuracy_normalised <- function(mcmc_samples, dist_fn, ...)
@@ -97,7 +97,7 @@ calculate_accuracy_normalised <- function(mcmc_samples, dist_fn, ...)
   {
     return(abs(mcmc_fn(x)/result1$value - dist_fn(x, ...)/result2$value))
   }
-  result <- integrate(integrand, min(mcmc_density$x), max(mcmc_density$x),
+  result <- integrate2(integrand, min(mcmc_density$x), max(mcmc_density$x),
                      subdivisions = length(mcmc_density$x))
   accuracy <- 1 - .5 * result$value
   return(accuracy)
@@ -112,7 +112,7 @@ calculate_accuracy <- function(mcmc_samples, dist_fn, ...)
   {
     return(abs(mcmc_fn(x) - dist_fn(x, ...)))
   }
-  result <- integrate(integrand, min(mcmc_density$x), max(mcmc_density$x),
+  result <- integrate2(integrand, min(mcmc_density$x), max(mcmc_density$x),
                      subdivisions = length(mcmc_density$x))
   accuracy <- 1 - .5 * result$value
   return(accuracy)
