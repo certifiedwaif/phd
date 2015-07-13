@@ -465,19 +465,19 @@ test_accuracies_spline <- function(save=FALSE)
 
 main <- function()
 {
-  option_list <- list(make_option(c("-a", "--accuracy"), default="slope"),
+  option_list <- list(make_option(c("-t", "--test"), default="slope"),
                       make_option(c("-s", "--save"), action="store_true", default=FALSE))
   opt <- parse_args(OptionParser(option_list=option_list))
-  accuracy <- opt$accuracy
-  if (accuracy == "intercept") {
+  test <- opt$test
+  if (test == "intercept") {
     test_accuracies_intercept(opt$save)
   }
-  if (accuracy == "slope") {
+  if (test == "slope") {
     test_accuracies_slope(opt$save)
   }
-  if (accuracy == "spline") {
+  if (test == "spline") {
     test_accuracies_spline(opt$save)
   }
 }
 
-# main()
+main()
