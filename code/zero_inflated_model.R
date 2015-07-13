@@ -158,8 +158,14 @@ zipvb <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE)
   # Iterate ----
   # TODO: Add check on whether parameters are still changing
   while ((i <= 2) || is.nan(vlower_bound[i] - vlower_bound[i - 1]) ||
-        (vlower_bound[i] > vlower_bound[i - 1])) {
+        (vlower_bound[i] > vlower_bound[i - 1]) ||
+        sqrt(sum((mult$vmu - old_vmu)^2)) > 1e-8) {
   # for (i in 1:MAXITER) {
+    if (i > 0) {
+      cat("vmu", mult$vmu, "\n")
+      cat("old_vmu", old_vmu, "\n")
+      cat("Diff in norm of vmu", sqrt(sum((mult$vmu - old_vmu)^2)), "\n")
+    }
     if (i >= MAXITER) {
       if (verbose) {
         cat("Iteration limit reached, breaking ...")
@@ -178,6 +184,7 @@ zipvb <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE)
     }
     
     # Update parameter for q_vnu by maximising using the Gaussian Variational Approximation from Dr Ormerod's Poisson mixed model code
+    old_vmu <- vmu
     if (method == "laplace") {
       fit1 <- fit.Lap(vmu, vy, vp, mC, mSigma.inv, mLambda)
     } else if (method == "gva") {	
@@ -285,7 +292,7 @@ zipvb <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE)
     mult$f <- f
 
     vlower_bound[i] <- calculate_lower_bound(mult, verbose=verbose)
-    
+
     if (verbose) {
       if (i > 1)
         cat("Iteration ", i, ": lower bound ", vlower_bound[i], " difference ",
