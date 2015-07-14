@@ -355,7 +355,7 @@ f.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
   # mLambda.inv <- tcrossprod(mR)
   
   # cat("sum(log(diag(mR)))", sum(log(diag(mR))), "\n")
-  f <- sum(log(diag(mR))) + f.G_new(vmu, mR, vy, vr, mC, mSigma.inv, gh)
+  f <- -sum(log(diag(mR))) + f.G_new(vmu, mR, vy, vr, mC, mSigma.inv, gh)
   f <- f + 0.5 * d * log(2 * pi) + 0.5 * d
   
   if (!is.finite(f) || abs(f) > 1e36) {
@@ -440,7 +440,7 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
   }    
   # cat("mR[Dinds]", mR[Dinds], "\n")    
 
-  # mLambda.inv <- tcrossprod(mR)
+  mLambda.inv <- tcrossprod(mR)
   # mLambda <- solve(mLambda.inv, tol=1e-99)
   mLambda <- chol2inv(t(mR) + diag(1e-8, d))
   # cat("diag(mLambda)", diag(mLambda), "\n")
@@ -472,14 +472,14 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
   # cat("rcond(mLambda.inv + mH)", rcond(mLambda.inv + mH), "\n")
   # cat("rcond(mLambda)", rcond(mLambda), "\n")
   # cat("rcond(mR)", rcond(mR), "\n")
-  # dmLambda <- (mLambda.inv + mH) %*% (-mLambda %*% mR %*% mLambda)
-  mR_mLambda <- mR %*% mLambda
+  dmLambda <- (mLambda.inv + mH) %*% (-mLambda %*% mR %*% mLambda)
+  # mR_mLambda <- mR %*% mLambda
   # mR_mLambda <- t(backsolve(mR, forwardsolve(mR, t(mR)), transpose=TRUE))
   # dmLambda <- -(mR_mLambda + mH %*% mLambda %*% mR_mLambda)
   # 97% for the fixed slope, but 89.6% for the fixed intercept
   # dmLambda <- -(mR_mLambda + mH %*% forwardsolve(tcrossprod(mR) + diag(1e-8, d), mR_mLambda))
   # 90.28% on the fixed intercept, 92.65% on the slope
-  dmLambda <- -(mR_mLambda + mH %*% solve(tcrossprod(mR) + diag(1e-8, d), mR_mLambda, tol=1e-99))
+  # dmLambda <- -(mR_mLambda + mH %*% solve(tcrossprod(mR) + diag(1e-8, d), mR_mLambda, tol=1e-99))
   dmLambda[Dinds] <- dmLambda[Dinds] * -mR[Dinds]
   # This is very clever, but seems to mess up the accuracy
   # dmLambda <- -(mR_mLambda + mH %*% backsolve(mR, forwardsolve(mR, mR_mLambda), transpose=TRUE))
@@ -512,7 +512,6 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
     cat("vmu", vmu, "\n")
     cat("diag(mR)", diag(mR), "\n")
     cat("vg.GVA_new: vg", round(vg, 2), "norm", sqrt(sum(vg^2)), "\n")
-    browser()
   }
   return(vg)
 }

@@ -203,8 +203,9 @@ zipvb <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE)
       }
       # fit1 <- fit.GVA(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B")
     } else if (method == "gva2") {
-      if (i <= 1) {
-        fit1 <- fit.Lap(vmu, vy, vp, mC, mSigma.inv, mLambda)
+      if (i <= 2) {
+        fit1 <- fit.GVA_nr(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B", p=p, m=m, 
+                          blocksize=blocksize, spline_dim=spline_dim)
         eig <- eigen(fit1$mLambda)
         # Very occasionally, fit.Lap will return a non-invertible mLambda. In that case,
         # fall back to L-BFGS.
