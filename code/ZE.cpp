@@ -152,9 +152,6 @@ void ZE_exact_fast(vec vy, mat mX, int LARGEP)
 				// d <- 1/(XTX[vw[j-1],vw[j-1]] - sum(v*Zv))
 				mat d = 1/(XTX.submat(newVar, newVar)) - sum(v*Zv);
 				// lmZ[[q]][linds11[[q]]] <- lmZ[[q-1]] + d*Zv%*%t(Zv)
-				// lmZ[[q]][linds12[[q]]] <- -d*Zv
-				// lmZ[[q]][linds21[[q]]] <- -d*Zv
-				// lmZ[[q]][linds22[[q]]] <- d
 				lmZ[q].submat(get_rows(linds11[q]), get_cols(linds11[q])) = lmZ[q-1] + d*Zv*Zv.t();
 				// lmZ[q][linds12[q]] <- -d*Zv;
 				lmZ[q].submat(get_rows(linds12[q]), get_cols(linds12[q])) = -d*Zv;
