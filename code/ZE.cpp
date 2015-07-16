@@ -1,23 +1,67 @@
 #include <iostream>
-#include <armadillo>
 #include <list>
 #include <utility>
+#include <armadillo>
 
 using namespace std;
 using namespace arma;
 
+// From the Wikipedia page on Gray code
+/*
+        The purpose of this function is to convert an unsigned
+        binary number to reflected binary Gray code.
+
+        The operator >> is shift right. The operator ^ is exclusive or.
+*/
+unsigned int binaryToGray(unsigned int num)
+{
+        return (num >> 1) ^ num;
+}
+
+/*
+        The purpose of this function is to convert a reflected binary
+        Gray code number to a binary number.
+*/
+unsigned int grayToBinary(unsigned int num)
+{
+    unsigned int mask;
+    for (mask = num >> 1; mask != 0; mask = mask >> 1)
+    {
+        num = num ^ mask;
+    }
+    return num;
+}
+
+vec binaryToVec(unsigned int num, int p)
+{
+  vec result(p);
+  for (int i = 0; i < p; i++) {
+    result[(p - 1) - i] = num & 1;
+    num >>= 1;
+  }
+  return(result);
+}
+
 mat greycode(int p)
 {
-	mat result(p, p);
-	throw "greycode not implemented yet\n";
-	return(result);
+  int rows = 1 << p;
+  mat result(rows, p);
+  for (unsigned int i = 0; i < rows; i++) {
+    result.row(i) = binaryToVec(binaryToGray(i));
+  }
+  return(result);
 }
 
 mat diff(mat x)
 {
-	mat result(x.n_rows, x.n_cols);
-	throw "diff not implemented yet\n";
-	return(result);
+	mat d(x.n_rows - 1, x.n_cols);
+	// For each column, calculate the difference between the current row and the previous row
+	for (int i = 0; i < x.n_cols; i++) {
+    for (int j = 0; j < x.n_rows - 1; j++) {
+      d[i, j] = x[i + 1, j] - x[i, j];
+    }
+	}
+	return(d);
 }
 
 uvec get_rows(vector<pair<int, int> > pairs)
@@ -38,7 +82,7 @@ uvec get_cols(vector<pair<int, int> > pairs)
 	return(col_idx);
 }
 
-void ZE_exact_fast(vec vy, mat mX, int LARGEP) 
+void ZE_exact_fast(vec vy, mat mX, int LARGEP)
 {
 	// n <- length(vy)
 	int n = vy.n_elem;
@@ -67,8 +111,8 @@ void ZE_exact_fast(vec vy, mat mX, int LARGEP)
 		one_to_p[i] = i;
 	}
 	vec vw = abs(mD * one_to_p);
-	// res.con <- ZE.constants(n,p,LARGEP) 
-	
+	// res.con <- ZE.constants(n,p,LARGEP)
+
 	// lmZ <- list()
 	std::vector<mat> lmZ;
 	// linds11 <- list()
@@ -99,7 +143,7 @@ void ZE_exact_fast(vec vy, mat mX, int LARGEP)
 			linds22[i].push_back(make_pair(i, i));
 		}
 	}
-	
+
 	// XTX <- t(mX)%*%mX
 	mat XTX = mX.t() * mX;
 	// XTy <- t(mX)%*%vy
@@ -114,7 +158,7 @@ void ZE_exact_fast(vec vy, mat mX, int LARGEP)
 	uvec inds;
 	uvec indsNew;
 	unsigned int k;
-	// for (j in 2:nrow(mA)) 
+	// for (j in 2:nrow(mA))
 	for (int j = 1; j < mA.n_rows; j++)
 	{
 		uvec newVar(1);
@@ -137,7 +181,7 @@ void ZE_exact_fast(vec vy, mat mX, int LARGEP)
 		q = vq[j];
 		// if (q==1) {
 		if (q == 1) {
-			// lmZ[[1]] <- 1/XTX[indsNew,indsNew] 
+			// lmZ[[1]] <- 1/XTX[indsNew,indsNew]
 			lmZ[1] = 1/XTX.submat(indsNew, indsNew);
 			// Zb <- lmZ[[1]]*b
 			vec Zb = lmZ[1] * b;
@@ -171,14 +215,14 @@ void ZE_exact_fast(vec vy, mat mX, int LARGEP)
 			}
 			// Zb <- lmZ[[q]]%*%b
 			Zb = lmZ[q] * b;
-		} 
-		// vR2[j]  <- sum(b*Zb) 
+		}
+		// vR2[j]  <- sum(b*Zb)
 		vR2[j] = sum(b * Zb);
 		// inds <- indsNew
 		inds = indsNew;
 	}
 	// vR2 <- vR2/yTy
-	vR2 = vR2/yTy; 
+	vR2 = vR2/yTy;
 	// vlog.ZE  <-  -res.con$vcon[vq+1]*log(1 - vR2) + res.con$vpen[vq+1]
 	// vlog.ZE  = -res_con$vcon[vq+1]*log(1 - vR2) + res_con$vpen[vq+1];
 	// return(list(mA=mA,vlog.ZE=vlog.ZE))
@@ -186,5 +230,12 @@ void ZE_exact_fast(vec vy, mat mX, int LARGEP)
 
 int main(int argc, char **argv)
 {
+	vec vy;
+	vy << 10 << 20 << endr;
+	mat mX;
+	mX << 10 << 20 << endr
+		 << 30 << 40 << endr;
+	ZE_exact_fast(vy, mX, 10);
+
 	return 0;
 }
