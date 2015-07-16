@@ -15,7 +15,7 @@ using namespace arma;
 */
 unsigned int binaryToGray(unsigned int num)
 {
-        return (num >> 1) ^ num;
+  return (num >> 1) ^ num;
 }
 
 /*
@@ -24,12 +24,12 @@ unsigned int binaryToGray(unsigned int num)
 */
 unsigned int grayToBinary(unsigned int num)
 {
-    unsigned int mask;
-    for (mask = num >> 1; mask != 0; mask = mask >> 1)
-    {
-        num = num ^ mask;
-    }
-    return num;
+  unsigned int mask;
+  for (mask = num >> 1; mask != 0; mask = mask >> 1)
+  {
+    num = num ^ mask;
+  }
+  return num;
 }
 
 vec binaryToVec(unsigned int num, int p)
@@ -44,10 +44,10 @@ vec binaryToVec(unsigned int num, int p)
 
 mat greycode(int p)
 {
-  int rows = 1 << p;
+  unsigned int rows = 1 << p;
   mat result(rows, p);
   for (unsigned int i = 0; i < rows; i++) {
-    result.row(i) = binaryToVec(binaryToGray(i));
+    result.row(i) = binaryToVec(binaryToGray(i), p).t();
   }
   return(result);
 }
@@ -56,9 +56,9 @@ mat diff(mat x)
 {
 	mat d(x.n_rows - 1, x.n_cols);
 	// For each column, calculate the difference between the current row and the previous row
-	for (int i = 0; i < x.n_cols; i++) {
-    for (int j = 0; j < x.n_rows - 1; j++) {
-      d[i, j] = x[i + 1, j] - x[i, j];
+	for (unsigned int i = 0; i < x.n_rows - 1; i++) {
+    for (unsigned int j = 0; j < x.n_cols; j++) {
+      d(i, j) = x(i + 1, j) - x(i, j);
     }
 	}
 	return(d);
@@ -67,7 +67,7 @@ mat diff(mat x)
 uvec get_rows(vector<pair<int, int> > pairs)
 {
 	uvec row_idx(pairs.size());
-	for (int i = 0; i < pairs.size(); i++) {
+	for (unsigned int i = 0; i < pairs.size(); i++) {
 		row_idx[i] = pairs[i].first;
 	}
 	return(row_idx);
@@ -76,7 +76,7 @@ uvec get_rows(vector<pair<int, int> > pairs)
 uvec get_cols(vector<pair<int, int> > pairs)
 {
 	uvec col_idx(pairs.size());
-	for (int i = 0; i < pairs.size(); i++) {
+	for (unsigned int i = 0; i < pairs.size(); i++) {
 		col_idx[i] = pairs[i].second;
 	}
 	return(col_idx);
@@ -100,13 +100,13 @@ void ZE_exact_fast(vec vy, mat mX, int LARGEP)
 	// vs <- (mD%*%vonep)==1
 	vector<bool> vs(mD.n_rows);
 	vec result = mD * vonep;
-	for (int i = 0; i < mD.n_rows; i++) {
-		vs[i] = result[i, 1] == 1 ? true : false;
+	for (unsigned int i = 0; i < mD.n_rows; i++) {
+		vs[i] = result[i] == 1 ? true : false;
 	}
 	// vq <- mA%*%vonep
 	vec vq = mA * vonep;
 	// vw <- abs(mD%*%matrix(1:p,p,1))
-	vec one_to_p;
+	vec one_to_p(p);
 	for (int i = 0; i < p; i++) {
 		one_to_p[i] = i;
 	}
@@ -114,19 +114,19 @@ void ZE_exact_fast(vec vy, mat mX, int LARGEP)
 	// res.con <- ZE.constants(n,p,LARGEP)
 
 	// lmZ <- list()
-	std::vector<mat> lmZ;
+	std::vector<mat> lmZ(p);
 	// linds11 <- list()
 	// linds12 <- list()
 	// linds21 <- list()
 	// linds22 <- list()
-	std::vector<std::vector<pair<int, int> > > linds11;
-	std::vector<std::vector<pair<int, int> > > linds12;
-	std::vector<std::vector<pair<int, int> > > linds21;
-	std::vector<std::vector<pair<int, int> > > linds22;
+	std::vector<std::vector<pair<int, int> > > linds11(p);
+	std::vector<std::vector<pair<int, int> > > linds12(p);
+	std::vector<std::vector<pair<int, int> > > linds21(p);
+	std::vector<std::vector<pair<int, int> > > linds22(p);
 	// for (i in 1:p) {
 	for (int i=0; i < p; i++) {
 	// 	lmZ[[i]] <- matrix(0,i,i)
-		lmZ[i].zeros();
+		lmZ[i] = zeros<mat>(i, i);
 	// 	inds <- 1:(i-1)
 	// 	mZ11 <- matrix(FALSE,i,i); mZ11[inds,inds] <- TRUE
 	// 	mZ12 <- matrix(FALSE,i,i); mZ12[inds,i]    <- TRUE
@@ -159,14 +159,14 @@ void ZE_exact_fast(vec vy, mat mX, int LARGEP)
 	uvec indsNew;
 	unsigned int k;
 	// for (j in 2:nrow(mA))
-	for (int j = 1; j < mA.n_rows; j++)
+	for (unsigned int j = 1; j < mA.n_rows; j++)
 	{
 		uvec newVar(1);
 		newVar[1] = vw[j-1];
 		if (vs[j-1]) {
 			// Adding variable
 			// indsNew <- c(inds,vw[j-1])
-			indsNew = join_horiz(inds, newVar);
+			indsNew = join_horiz(inds.t(), newVar);
 		} else {
 			// Removing varable
 	// 		k <- which(inds==vw[j-1])
@@ -184,7 +184,7 @@ void ZE_exact_fast(vec vy, mat mX, int LARGEP)
 			// lmZ[[1]] <- 1/XTX[indsNew,indsNew]
 			lmZ[1] = 1/XTX.submat(indsNew, indsNew);
 			// Zb <- lmZ[[1]]*b
-			vec Zb = lmZ[1] * b;
+			Zb = lmZ[1] * b;
 		} else {
 			if (vs[j-1]) {
 				// v <- XTX[inds,vw[j-1]]
@@ -211,7 +211,7 @@ void ZE_exact_fast(vec vy, mat mX, int LARGEP)
 				// lmZ[[q]] <- lmZ[[q+1]][-k,-k] -  ZO/lmZ[[q+1]][k,k]
 				mat m = join_vert(join_horiz(lmZ[q+1].submat(1, 1, k-1, k-1), lmZ[q+1].submat(1, k+1, 1, k-1)),
 													join_horiz(lmZ[q+1].submat(k+1, 1, lmZ[q+1].n_rows, k-1), lmZ[q+1].submat(k+1, k+1, lmZ[q+1].n_rows, lmZ[q+1].n_cols)));
-				lmZ[q] = m - ZO/lmZ[q+1][k,k];
+				lmZ[q] = m - ZO/lmZ[q+1](k,k);
 			}
 			// Zb <- lmZ[[q]]%*%b
 			Zb = lmZ[q] * b;
