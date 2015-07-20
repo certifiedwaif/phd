@@ -133,7 +133,7 @@ void ZE_exact_fast(vec vy, mat mX, int LARGEP)
   // for (i in 1:p) {
   for (int i=0; i < p; i++) {
   //   lmZ[[i]] <- matrix(0,i,i)
-    lmZ[i] = zeros<mat>(i, i);
+    lmZ[i] = zeros<mat>(i + 1, i + 1);
   //   inds <- 1:(i-1)
   //   mZ11 <- matrix(FALSE,i,i); mZ11[inds,inds] <- TRUE
   //   mZ12 <- matrix(FALSE,i,i); mZ12[inds,i]    <- TRUE
@@ -166,26 +166,26 @@ void ZE_exact_fast(vec vy, mat mX, int LARGEP)
   uvec indsNew;
   unsigned int k;
   // for (j in 2:nrow(mA))
-  for (unsigned int j = 1; j < mA.n_rows; j++)
+  for (unsigned int j = 2; j < mA.n_rows; j++)
   {
     uvec newVar(1);
-    newVar[0] = vw[j-1];
-    if (vs[j-1]) {
+    newVar[0] = vw[j-2];
+    if (vs[j-2]) {
       // Adding variable
       // indsNew <- c(inds,vw[j-1])
       indsNew = join_vert(inds, newVar);
     } else {
       // Removing varable
   //     k <- which(inds==vw[j-1])
-      uvec kvec = find(inds == vw[j-1]);
+      uvec kvec = find(inds == vw[j-2]);
       k = kvec[1];
       // indsNew <- inds[-k]
-      indsNew = find(inds != vw[j-1]);
+      indsNew = find(inds != vw[j-2]);
     }
     // b <- XTy[indsNew]
     vec b = XTy.elem(indsNew);
     // q <- vq[j]
-    q = vq[j];
+    q = vq[j-1];
     // if (q==1) {
     if (q == 1) {
       // lmZ[[1]] <- 1/XTX[indsNew,indsNew]
@@ -193,11 +193,11 @@ void ZE_exact_fast(vec vy, mat mX, int LARGEP)
       // Zb <- lmZ[[1]]*b
       Zb = lmZ[0] * b;
     } else {
-      if (vs[j-1]) {
+      if (vs[j-2]) {
         // v <- XTX[inds,vw[j-1]]
-        vec newVar2(inds.n_rows);
-        newVar2.fill(vw[j-1]);
-        vec v = XTX.submat(inds, newVar);
+        uvec newVar2(inds.n_rows);
+        newVar2.fill(vw[j-2]);
+        vec v = XTX.submat(inds, newVar2);
         // Zv <- lmZ[[q-1]]%*%v
         vec Zv = lmZ[q - 2] * v;
         // d <- 1/(XTX[vw[j-1],vw[j-1]] - sum(v*Zv))
@@ -224,7 +224,7 @@ void ZE_exact_fast(vec vy, mat mX, int LARGEP)
       Zb = lmZ[q - 1] * b;
     }
     // vR2[j]  <- sum(b*Zb)
-    vR2[j] = sum(b * Zb);
+    vR2[j] = sum(b % Zb);
     // inds <- indsNew
     inds = indsNew;
   }
