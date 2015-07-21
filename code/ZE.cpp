@@ -39,10 +39,10 @@ unsigned int grayToBinary(unsigned int num)
   return num;
 }
 
-vec binaryToVec(unsigned int num, int p)
+vec binaryToVec(unsigned int num, unsigned int p)
 {
   vec result(p);
-  for (int i = 0; i < p; i++) {
+  for (unsigned int i = 0; i < p; i++) {
     result[(p - 1) - i] = num & 1;
     num >>= 1;
   }
@@ -77,6 +77,8 @@ uvec get_rows(vector<pair<int, int> > pairs)
   for (unsigned int i = 0; i < pairs.size(); i++) {
     row_idx[i] = pairs[i].first;
   }
+  row_idx = unique(row_idx);
+  cout << "get_rows" << row_idx;
   return(row_idx);
 }
 
@@ -86,6 +88,8 @@ uvec get_cols(vector<pair<int, int> > pairs)
   for (unsigned int i = 0; i < pairs.size(); i++) {
     col_idx[i] = pairs[i].second;
   }
+  col_idx = unique(col_idx);
+  cout << "get_cols" << col_idx;
   return(col_idx);
 }
 
@@ -112,12 +116,14 @@ void ZE_exact_fast(vec vy, mat mX, int LARGEP)
   }
   // vq <- mA%*%vonep
   vec vq = mA * vonep;
+  cout << "vq " << vq.submat(0, 0, 9, 0);
   // vw <- abs(mD%*%matrix(1:p,p,1))
   vec one_to_p(p);
   for (int i = 0; i < p; i++) {
-    one_to_p[i] = i;
+    one_to_p[i] = i + 1;
   }
   vec vw = abs(mD * one_to_p);
+  cout << "vw " << vw.submat(0, 0, 9, 0);
   // res.con <- ZE.constants(n,p,LARGEP)
 
   // lmZ <- list()
@@ -166,62 +172,83 @@ void ZE_exact_fast(vec vy, mat mX, int LARGEP)
   uvec indsNew;
   unsigned int k;
   // for (j in 2:nrow(mA))
-  for (unsigned int j = 2; j < mA.n_rows; j++)
-  {
+  for (unsigned int j = 1; j < mA.n_rows; j++) {
     uvec newVar(1);
-    newVar[0] = vw[j-2];
-    if (vs[j-2]) {
+    newVar[0] = vw[j-1] - 1;
+    if (vs[j-1]) {
       // Adding variable
       // indsNew <- c(inds,vw[j-1])
       indsNew = join_vert(inds, newVar);
+      cout << "Add variable" << newVar;
     } else {
-      // Removing varable
+      // Removing variable
+        cout << "Remove variable" << newVar;
   //     k <- which(inds==vw[j-1])
-      uvec kvec = find(inds == vw[j-2]);
-      k = kvec[1];
+      uvec kvec = find(inds == (vw[j-1] - 1));
+      cout << "vw[j-1]" << vw[j-1] - 1<< endl;
+      cout << "inds " << inds;
+      cout << "kvec " << kvec;
+	  k = kvec[0];
       // indsNew <- inds[-k]
-      indsNew = find(inds != vw[j-2]);
+      indsNew = find(inds != (vw[j-1] - 1));
     }
     // b <- XTy[indsNew]
     vec b = XTy.elem(indsNew);
     // q <- vq[j]
-    q = vq[j-1];
+    q = vq[j] - 1;
     // if (q==1) {
-    if (q == 1) {
+    if (q == 0) {
       // lmZ[[1]] <- 1/XTX[indsNew,indsNew]
       lmZ[0] = 1/XTX.submat(indsNew, indsNew);
       // Zb <- lmZ[[1]]*b
       Zb = lmZ[0] * b;
     } else {
-      if (vs[j-2]) {
+      if (vs[j-1]) {
         // v <- XTX[inds,vw[j-1]]
-        uvec newVar2(inds.n_rows);
-        newVar2.fill(vw[j-2]);
+        uvec newVar2(1);
+        newVar2[0] = vw[j-1] - 1;
+        cout << "j " << j << " ";
+        cout << "rows" << inds;
+        cout << "cols" << newVar2;
         vec v = XTX.submat(inds, newVar2);
         // Zv <- lmZ[[q-1]]%*%v
-        vec Zv = lmZ[q - 2] * v;
+        vec Zv = lmZ[q - 1] * v;
         // d <- 1/(XTX[vw[j-1],vw[j-1]] - sum(v*Zv))
-        mat d = 1/(XTX.submat(newVar, newVar)) - sum(v*Zv);
+        vec d(Zv.n_rows);
+        vec val = 1/(XTX.submat(newVar2, newVar2) - sum(v % Zv));
+        d.fill(val[0]);
         // lmZ[[q]][linds11[[q]]] <- lmZ[[q-1]] + d*Zv%*%t(Zv)
-        lmZ[q - 1].submat(get_rows(linds11[q - 1]), get_cols(linds11[q - 1])) = lmZ[q-2] + d*Zv*Zv.t();
+        lmZ[q].submat(get_rows(linds11[q]), get_cols(linds11[q])) = lmZ[q - 1] + d % Zv*Zv.t();
         // lmZ[q][linds12[q]] <- -d*Zv;
-        lmZ[q - 1].submat(get_rows(linds12[q - 1]), get_cols(linds12[q - 1])) = -d*Zv;
+        vec val2 = -d % Zv;
+        uvec rows = get_rows(linds12[q]);
+        uvec cols = get_cols(linds12[q]);
+        mat mat2(rows.n_rows, cols.n_rows);
+        for (unsigned int i2 = 0; i2 < cols.n_rows; i2++) {
+        	mat2.col(i2) = val2;
+        }
+
+        lmZ[q - 1].submat(rows, cols) = mat2;
         // lmZ[q][linds21[q]] <- -d*Zv;
-        lmZ[q - 1].submat(get_rows(linds21[q - 1]), get_cols(linds21[q - 1])) = -d*Zv;
+        lmZ[q].submat(get_rows(linds21[q]), get_cols(linds21[q])) = mat2.t();
         // lmZ[q][linds22[q]] <- d;
-        lmZ[q - 1].submat(get_rows(linds22[q - 1]), get_cols(linds22[q - 1])) = d;
+        uvec rows2 = get_rows(linds22[q]);
+        uvec cols2 = get_cols(linds22[q]);
+        mat d2(rows2.n_rows, cols2.n_cols);
+        d2.fill(val[0]);
+        lmZ[q].submat(rows2, cols2) = d2;
       } else {
         // Z12 <- lmZ[[q+1]][-k,k]
-        mat Z12 = join_horiz(lmZ[q].rows(1, k - 1).col(k), lmZ[q].rows(k + 1, lmZ[q].n_rows).col(k));
+        mat Z12 = join_vert(lmZ[q].rows(0, k - 2).col(k - 1), lmZ[q].rows(k, lmZ[q].n_rows).col(k - 1));
         // ZO <- Z12%*%t(Z12)
         mat ZO = Z12 * Z12.t();
         // lmZ[[q]] <- lmZ[[q+1]][-k,-k] -  ZO/lmZ[[q+1]][k,k]
-        mat m = join_vert(join_horiz(lmZ[q].submat(0, 0, k-1, k-1), lmZ[q].submat(0, k+1, k-1, k-1)),
-                          join_horiz(lmZ[q].submat(k+1, 0, lmZ[q].n_rows, k-1), lmZ[q].submat(k+1, k+1, lmZ[q].n_rows, lmZ[q].n_cols)));
-        lmZ[q - 1] = m - ZO/lmZ[q](k,k);
+        mat m = join_vert(join_horiz(lmZ[q+1].submat(0, 0, k-1, k-1), lmZ[q+1].submat(0, k+1, k-1, k-1)),
+                          join_horiz(lmZ[q+1].submat(k+1, 0, lmZ[q+1].n_rows, k-1), lmZ[q+1].submat(k+1, k+1, lmZ[q+1].n_rows, lmZ[q+1].n_cols)));
+        lmZ[q] = m - ZO / lmZ[q + 1](k,k);
       }
       // Zb <- lmZ[[q]]%*%b
-      Zb = lmZ[q - 1] * b;
+      Zb = lmZ[q] * b;
     }
     // vR2[j]  <- sum(b*Zb)
     vR2[j] = sum(b % Zb);
