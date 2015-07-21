@@ -78,7 +78,7 @@ uvec get_rows(vector<pair<int, int> > pairs)
     row_idx[i] = pairs[i].first;
   }
   row_idx = unique(row_idx);
-  cout << "get_rows" << row_idx;
+//  cout << "get_rows" << row_idx;
   return(row_idx);
 }
 
@@ -89,11 +89,44 @@ uvec get_cols(vector<pair<int, int> > pairs)
     col_idx[i] = pairs[i].second;
   }
   col_idx = unique(col_idx);
-  cout << "get_cols" << col_idx;
+//  cout << "get_cols" << col_idx;
   return(col_idx);
 }
 
-void ZE_exact_fast(vec vy, mat mX, int LARGEP)
+vec all_but_k_vec(vec v, unsigned int k)
+{
+	vec result(v.n_rows - 1);
+	unsigned int i_idx = 0;
+	for (unsigned int i = 0; i < v.n_rows; i++) {
+		if (i != k) {
+			result[i_idx] = v[i];
+			i_idx++;
+		}
+	}
+	return result;
+}
+
+mat all_but_k_mat(mat m, unsigned int k)
+// Omit the kth row and column from m
+{
+	mat result(m.n_rows - 1, m.n_cols - 1);
+	unsigned int i_idx = 0, j_idx = 0;
+	for (unsigned int i = 0; i < m.n_rows; i++) {
+		j_idx = 0;
+		for (unsigned int j = 0; j < m.n_cols; j++) {
+			if (j != k && i != k) {
+				result(i_idx, j_idx) = m(i, j);
+				j_idx++;
+			}
+		}
+		if (i != k) {
+			i_idx++;
+		}
+	}
+	return result;
+}
+
+vec ZE_exact_fast(vec vy, mat mX, int LARGEP)
 {
   // n <- length(vy)
   int n = vy.n_elem;
@@ -116,14 +149,14 @@ void ZE_exact_fast(vec vy, mat mX, int LARGEP)
   }
   // vq <- mA%*%vonep
   vec vq = mA * vonep;
-  cout << "vq " << vq.submat(0, 0, 9, 0);
+//  cout << "vq " << vq.submat(0, 0, 9, 0);
   // vw <- abs(mD%*%matrix(1:p,p,1))
   vec one_to_p(p);
   for (int i = 0; i < p; i++) {
     one_to_p[i] = i + 1;
   }
   vec vw = abs(mD * one_to_p);
-  cout << "vw " << vw.submat(0, 0, 9, 0);
+//  cout << "vw " << vw.submat(0, 0, 9, 0);
   // res.con <- ZE.constants(n,p,LARGEP)
 
   // lmZ <- list()
@@ -179,18 +212,20 @@ void ZE_exact_fast(vec vy, mat mX, int LARGEP)
       // Adding variable
       // indsNew <- c(inds,vw[j-1])
       indsNew = join_vert(inds, newVar);
-      cout << "Add variable" << newVar;
+//      cout << "Add variable" << newVar;
+//      cout << "indsNew" << indsNew;
     } else {
       // Removing variable
-        cout << "Remove variable" << newVar;
+//        cout << "Remove variable" << newVar;
   //     k <- which(inds==vw[j-1])
       uvec kvec = find(inds == (vw[j-1] - 1));
-      cout << "vw[j-1]" << vw[j-1] - 1<< endl;
-      cout << "inds " << inds;
-      cout << "kvec " << kvec;
+//      cout << "vw[j-1]" << (vw[j-1] - 1) << endl;
+//      cout << "inds " << inds;
+//      cout << "kvec " << kvec;
 	  k = kvec[0];
       // indsNew <- inds[-k]
-      indsNew = find(inds != (vw[j-1] - 1));
+      indsNew = inds.rows(find(inds != newVar[0]));
+//      cout << "indsNew" << indsNew;
     }
     // b <- XTy[indsNew]
     vec b = XTy.elem(indsNew);
@@ -207,9 +242,9 @@ void ZE_exact_fast(vec vy, mat mX, int LARGEP)
         // v <- XTX[inds,vw[j-1]]
         uvec newVar2(1);
         newVar2[0] = vw[j-1] - 1;
-        cout << "j " << j << " ";
-        cout << "rows" << inds;
-        cout << "cols" << newVar2;
+//        cout << "j " << j << " ";
+//        cout << "rows" << inds;
+//        cout << "cols" << newVar2;
         vec v = XTX.submat(inds, newVar2);
         // Zv <- lmZ[[q-1]]%*%v
         vec Zv = lmZ[q - 1] * v;
@@ -228,7 +263,7 @@ void ZE_exact_fast(vec vy, mat mX, int LARGEP)
         	mat2.col(i2) = val2;
         }
 
-        lmZ[q - 1].submat(rows, cols) = mat2;
+        lmZ[q].submat(rows, cols) = mat2;
         // lmZ[q][linds21[q]] <- -d*Zv;
         lmZ[q].submat(get_rows(linds21[q]), get_cols(linds21[q])) = mat2.t();
         // lmZ[q][linds22[q]] <- d;
@@ -239,12 +274,14 @@ void ZE_exact_fast(vec vy, mat mX, int LARGEP)
         lmZ[q].submat(rows2, cols2) = d2;
       } else {
         // Z12 <- lmZ[[q+1]][-k,k]
-        mat Z12 = join_vert(lmZ[q].rows(0, k - 2).col(k - 1), lmZ[q].rows(k, lmZ[q].n_rows).col(k - 1));
+
+        vec Z12;
+        Z12 = all_but_k_vec(lmZ[q + 1].col(k), k);
+//        cout << "Z12" << Z12;
         // ZO <- Z12%*%t(Z12)
         mat ZO = Z12 * Z12.t();
         // lmZ[[q]] <- lmZ[[q+1]][-k,-k] -  ZO/lmZ[[q+1]][k,k]
-        mat m = join_vert(join_horiz(lmZ[q+1].submat(0, 0, k-1, k-1), lmZ[q+1].submat(0, k+1, k-1, k-1)),
-                          join_horiz(lmZ[q+1].submat(k+1, 0, lmZ[q+1].n_rows, k-1), lmZ[q+1].submat(k+1, k+1, lmZ[q+1].n_rows, lmZ[q+1].n_cols)));
+        mat m = all_but_k_mat(lmZ[q + 1], k);
         lmZ[q] = m - ZO / lmZ[q + 1](k,k);
       }
       // Zb <- lmZ[[q]]%*%b
@@ -256,10 +293,11 @@ void ZE_exact_fast(vec vy, mat mX, int LARGEP)
     inds = indsNew;
   }
   // vR2 <- vR2/yTy
-  vR2 = vR2/yTy;
+  vR2 = vR2/yTy(0, 0);
   // vlog.ZE  <-  -res.con$vcon[vq+1]*log(1 - vR2) + res.con$vpen[vq+1]
   // vlog.ZE  = -res_con$vcon[vq+1]*log(1 - vR2) + res_con$vpen[vq+1];
   // return(list(mA=mA,vlog.ZE=vlog.ZE))
+  return(vR2);
 }
 
 int main(int argc, char **argv)
@@ -273,7 +311,7 @@ int main(int argc, char **argv)
   //   << 30 << 40 << endr;
   // Load vy
   // Load mX
-  ZE_exact_fast(vy, mX, 19);
+  vec result = ZE_exact_fast(vy, mX, 19);
 
   return 0;
 }
