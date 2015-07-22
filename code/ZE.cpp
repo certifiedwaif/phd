@@ -5,11 +5,13 @@
  *      Author: markg
  */
 
+// [[Rcpp::depends(RcppArmadillo)]]
+#include <RcppArmadillo.h>
 #include <iostream>
 #include <list>
 #include <utility>
-#include <armadillo>
 
+using namespace Rcpp;
 using namespace std;
 using namespace arma;
 
@@ -78,7 +80,7 @@ uvec get_rows(vector<pair<int, int> > pairs)
     row_idx[i] = pairs[i].first;
   }
   row_idx = unique(row_idx);
-  cout << "get_rows" << row_idx;
+  // cout << "get_rows" << row_idx;
   return(row_idx);
 }
 
@@ -89,7 +91,7 @@ uvec get_cols(vector<pair<int, int> > pairs)
     col_idx[i] = pairs[i].second;
   }
   col_idx = unique(col_idx);
-  cout << "get_cols" << col_idx;
+  // cout << "get_cols" << col_idx;
   return(col_idx);
 }
 
@@ -126,7 +128,7 @@ mat all_but_k_mat(mat m, unsigned int k)
 	return result;
 }
 
-vec ZE_exact_fast(vec vy, mat mX, int LARGEP)
+vec ZE_exact_fast_cpp(vec vy, mat mX, bool LARGEP)
 {
   // n <- length(vy)
   int n = vy.n_elem;
@@ -149,14 +151,14 @@ vec ZE_exact_fast(vec vy, mat mX, int LARGEP)
   }
   // vq <- mA%*%vonep
   vec vq = mA * vonep;
-  cout << "vq " << vq.submat(0, 0, 9, 0);
+  // cout << "vq " << vq.submat(0, 0, 9, 0);
   // vw <- abs(mD%*%matrix(1:p,p,1))
   vec one_to_p(p);
   for (int i = 0; i < p; i++) {
     one_to_p[i] = i + 1;
   }
   vec vw = abs(mD * one_to_p);
-  cout << "vw " << vw.submat(0, 0, 9, 0);
+  // cout << "vw " << vw.submat(0, 0, 9, 0);
   // res.con <- ZE.constants(n,p,LARGEP)
 
   // lmZ <- list()
@@ -212,28 +214,28 @@ vec ZE_exact_fast(vec vy, mat mX, int LARGEP)
       // Adding variable
       // indsNew <- c(inds,vw[j-1])
       indsNew = join_vert(inds, newVar);
-      cout << "Add variable" << newVar;
-      cout << "indsNew" << indsNew;
+      // cout << "Add variable" << newVar;
+      // cout << "indsNew" << indsNew;
     } else {
       // Removing variable
-        cout << "Remove variable" << newVar;
+        // cout << "Remove variable" << newVar;
   //     k <- which(inds==vw[j-1])
       uvec kvec = find(inds == (vw[j-1] - 1));
-      cout << "vw[j-1]" << (vw[j-1] - 1) << endl;
-      cout << "inds " << inds;
-      cout << "kvec " << kvec;
+      // cout << "vw[j-1]" << (vw[j-1] - 1) << endl;
+      // cout << "inds " << inds;
+      // cout << "kvec " << kvec;
 	  k = kvec[0];
       // indsNew <- inds[-k]
       indsNew = inds.rows(find(inds != newVar[0]));
-      cout << "indsNew" << indsNew;
+      // cout << "indsNew" << indsNew;
     }
     // b <- XTy[indsNew]
     vec b = XTy.elem(indsNew);
-    cout << "XTy" << XTy;
-    cout << "b" << b;
+    // cout << "XTy" << XTy;
+    // cout << "b" << b;
     // q <- vq[j]
     q = vq[j] - 1;
-    cout << "q" << q << endl;
+    // cout << "q" << q << endl;
     // if (q==1) {
     if (q == 0) {
       // lmZ[[1]] <- 1/XTX[indsNew,indsNew]
@@ -245,9 +247,9 @@ vec ZE_exact_fast(vec vy, mat mX, int LARGEP)
         // v <- XTX[inds,vw[j-1]]
         uvec newVar2(1);
         newVar2[0] = vw[j-1] - 1;
-        cout << "j " << j << " ";
-        cout << "rows" << inds;
-        cout << "cols" << newVar2;
+        // cout << "j " << j << " ";
+        // cout << "rows" << inds;
+        // cout << "cols" << newVar2;
         vec v = XTX.submat(inds, newVar2);
         // Zv <- lmZ[[q-1]]%*%v
         vec Zv = lmZ[q - 1] * v;
@@ -255,9 +257,9 @@ vec ZE_exact_fast(vec vy, mat mX, int LARGEP)
         vec d(Zv.n_rows);
         vec val = 1/(XTX.submat(newVar2, newVar2) - sum(v % Zv));
         d.fill(val[0]);
-        cout << "v" << v;
-        cout << "Zv" << Zv;
-        cout << "d" << d;
+        // cout << "v" << v;
+        // cout << "Zv" << Zv;
+        // cout << "d" << d;
         // lmZ[[q]][linds11[[q]]] <- lmZ[[q-1]] + d*Zv%*%t(Zv)
         lmZ[q].submat(get_rows(linds11[q]), get_cols(linds11[q])) = lmZ[q - 1] + d % Zv*Zv.t();
         // lmZ[q][linds12[q]] <- -d*Zv;
@@ -283,7 +285,7 @@ vec ZE_exact_fast(vec vy, mat mX, int LARGEP)
 
         vec Z12;
         Z12 = all_but_k_vec(lmZ[q + 1].col(k), k);
-//        cout << "Z12" << Z12;
+//        // cout << "Z12" << Z12;
         // ZO <- Z12%*%t(Z12)
         mat ZO = Z12 * Z12.t();
         // lmZ[[q]] <- lmZ[[q+1]][-k,-k] -  ZO/lmZ[[q+1]][k,k]
@@ -295,13 +297,13 @@ vec ZE_exact_fast(vec vy, mat mX, int LARGEP)
     }
     // vR2[j]  <- sum(b*Zb)
     vR2[j] = sum(b % Zb);
-    cout << "vR2[j]" << vR2[j] << endl;
+    // cout << "vR2[j]" << vR2[j] << endl;
     // inds <- indsNew
     inds = indsNew;
   }
   // vR2 <- vR2/yTy
   vR2 = vR2/yTy(0, 0);
-  cout << "First ten elements of vR2" << vR2.submat(0, 0, 9, 0);
+  // cout << "First ten elements of vR2" << vR2.submat(0, 0, 9, 0);
   // Do this in the calling code, where it's easier.
   // vlog.ZE  <-  -res.con$vcon[vq+1]*log(1 - vR2) + res.con$vpen[vq+1]
   // vlog.ZE  = -res_con$vcon[vq+1]*log(1 - vR2) + res_con$vpen[vq+1];
@@ -309,23 +311,32 @@ vec ZE_exact_fast(vec vy, mat mX, int LARGEP)
   return(vR2);
 }
 
-int main(int argc, char **argv)
+// [[Rcpp::export]]
+List ZE_exact_fast(NumericVector vy_R, NumericMatrix mX_R)
 {
-  vec vy;
-  mat mX;
-  vy.load("vy.csv", csv_ascii);
-  cout << "vy" << vy.submat(0, 0, 9, 0);
-  mX.load("mX.csv", csv_ascii);
-  cout << "mX" << mX.submat(0, 0, 9, 18);
-  //vy << 10 << 20 << endr;
-  //mX << 10 << 20 << endr
-  //   << 30 << 40 << endr;
-  // Load vy
-  // Load mX
-  vec result = ZE_exact_fast(vy, mX, 19);
-
-  return 0;
+	vec vy = Rcpp::as<vec>(vy_R);
+	mat mX = Rcpp::as<mat>(mX_R);
+	vec vR2 = ZE_exact_fast_cpp(vy, mX, false);
+	return Rcpp::List::create(Rcpp::Named("vR2")=vR2);
 }
+
+// int main(int argc, char **argv)
+// {
+//   vec vy;
+//   mat mX;
+//   vy.load("vy.csv", csv_ascii);
+//   cout << "vy" << vy.submat(0, 0, 9, 0);
+//   mX.load("mX.csv", csv_ascii);
+//   cout << "mX" << mX.submat(0, 0, 9, 18);
+//   //vy << 10 << 20 << endr;
+//   //mX << 10 << 20 << endr
+//   //   << 30 << 40 << endr;
+//   // Load vy
+//   // Load mX
+//   vec result = ZE_exact_fast(vy, mX, 19);
+
+//   return 0;
+// }
 
 
 

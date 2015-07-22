@@ -1,3 +1,8 @@
+library(Rcpp)
+library(RcppArmadillo)
+
+sourceCpp(file="ZE.cpp")
+
 ################################################################################
 
 greycode <- function(p) 
@@ -135,13 +140,18 @@ ZE.exact.fast <- function(vy,mX,LARGEP)
 	inds <- c()
 	for (j in 2:nrow(mA)) 
 	{
+		cat("Iteration", j, "\n")
 		if (vs[j-1]) {
 			# Adding variable
+			cat("Adding", vw[j-1], "\n")
 			indsNew <- c(inds,vw[j-1])
+			cat("indsNew", indsNew, "\n")
 		} else {
 			# Removing varable
+			cat("Removing", vw[j-1], "\n")
 			k <- which(inds==vw[j-1])
 			indsNew <- inds[-k]
+			cat("indsNew", indsNew, "\n")
 		}
 		b <- XTy[indsNew]
 		q <- vq[j]
@@ -153,6 +163,9 @@ ZE.exact.fast <- function(vy,mX,LARGEP)
 				v <- XTX[inds,vw[j-1]]
 				Zv <- lmZ[[q-1]]%*%v
 				d <- 1/(XTX[vw[j-1],vw[j-1]] - sum(v*Zv))
+				cat("v", v, "\n")
+				cat("Zv", Zv, "\n")
+				cat("d", d, "\n")
 				lmZ[[q]][linds11[[q]]] <- lmZ[[q-1]] + d*Zv%*%t(Zv)
 				lmZ[[q]][linds12[[q]]] <- -d*Zv
 				lmZ[[q]][linds21[[q]]] <- -d*Zv
@@ -169,7 +182,7 @@ ZE.exact.fast <- function(vy,mX,LARGEP)
 	}
 	vR2 <- vR2/yTy 
 	vlog.ZE  <-  -res.con$vcon[vq+1]*log(1 - vR2) + res.con$vpen[vq+1]
-	return(list(mA=mA,vlog.ZE=vlog.ZE))
+	return(list(mA=mA,vlog.ZE=vlog.ZE, vR2=vR2))
 }
 
 ################################################################################
