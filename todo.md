@@ -1,6 +1,39 @@
 To Do list
 ==========
 
+22/07/2015
+----------
+- Spent the last few days converting one of John's R programs into C++. This resulted in
+  a 13.3 times speed-up (!).
+- Package the C++ code up in R
+- Spline median accuracy, focus on the functions themselves
+  It should just be accuracy(true function, fitted function) across all MCMC runs and
+  approximations
+  i.e. loop through all the data sets, loading them
+  do the VB approximation
+  note the accuracy
+  graph it
+- Claim pay
+  Last semester
+  Winter school
+
+15/06/2015
+----------
+- GVA2
+  real  22m32.521s
+  user  22m19.472s
+  sys 0m8.429s
+
+  Will GVA be faster? Or slower?
+  real  45m52.144s
+  user  45m22.574s
+  sys 0m12.253s
+
+  Quite a difference.
+
+- Splines next
+  This is going to be complicated, I expect everything will break.
+
 08/06/2015
 ----------
 - Re-run median accuracy for slope test case with the new MCMC data
