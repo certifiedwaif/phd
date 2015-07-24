@@ -13,13 +13,15 @@ generate_test_case <- function(i, test) {
   if (test == "intercept") {
     m <- 20
     ni <- 10
-    mult <- generate_int_test_data(m, ni, expected_beta = c(2, 1), expected_rho = 0.7)
+    result <- generate_int_test_data(m, ni, expected_beta = c(2, 1), expected_rho = 0.7)
   } else if (test == "slope") {
     m <- 20
     ni <- 10
-    mult <- generate_slope_test_data(m=20, ni=10, expected_beta=c(2, 1), expected_rho=0.7)
+    result <- generate_slope_test_data(m=20, ni=10, expected_beta=c(2, 1), expected_rho=0.7)
+  } else if (test == "spline") {
+    result <- generate_spline_test_data()
   }
-  mult
+  result
 }
 
 save_mcmc_data <- function(test)
@@ -58,14 +60,30 @@ median_accuracy <- function(approximation="gva", test="intercept")
   # model anyway, regardless of what I do.
   accuracy <- lapply(1:ITER, function(i) {
     cat("Test case", i, "\n")
-    mult <- generate_test_case(i, test)
+    result <- generate_test_case(i, test)
+    allKnots <- result$allKnots
+    mult <- result$mult
     var_result <- zipvb(mult, method=approximation, verbose=TRUE)
     stan_fit <- load_stan_data(i, test)
     mcmc_samples <- stan_fit$mcmc_samples
     # Must handle the case where integrate() throws a non-finite function value error
     # If the integration fails, something must have gone fundamentally wrong, and we should
     # figure out why.
-    result <- calculate_accuracies("", mult, mcmc_samples, var_result, approximation, print_flag=TRUE)
+    if (test == "spline") {
+      vy <- mult$vy
+      vx <- mult$mX[,1]
+      xtilde <- seq(from=-1, to=1, by=1e-2)
+      result <- spline.des(allKnots, xtilde, derivs=rep(0, length(xtilde)), outer.ok=TRUE)
+      mC_tilde <- cbind(1, xtilde, result$design)
+      f_hat_vb <- mC_tilde %*% var_result$vmu
+      # FIXME: This is probably broken
+      f_hat_mcmc <- mC_tilde %*% fit$vmu$mean
+
+      result <- calculate_accuracy_spline()
+    } else {
+      result <- calculate_accuracies("", mult, mcmc_samples, var_result, approximation, print_flag=TRUE)
+    }
+    # In spline case, should calculate accuracy of the fit functions
     save(result, file = sprintf("results/accuracy_result_%s_%s_%d.RData", approximation, test, i))
     result
   }) # , mc.cores = 32)
