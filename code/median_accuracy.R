@@ -91,7 +91,7 @@ median_accuracy <- function(approximation="gva", test="intercept")
       f_hat_mcmc <- mC_tilde %*% mcmc_vmu
       mcmc_spline_fn <- splinefun(xtilde, f_hat_mcmc)
       vb_spline_fn <- splinefun(xtilde, f_hat_vb)
-      result <- calculate_accuracy_spline(mcmc_spline_fn, vb_spline_fn)
+      result <- calculate_accuracy_spline(xtilde, mcmc_spline_fn, vb_spline_fn)
     } else {
       result <- calculate_accuracies("", mult, mcmc_samples, var_result, approximation, print_flag=TRUE)
     }

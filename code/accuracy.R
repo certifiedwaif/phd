@@ -118,6 +118,19 @@ calculate_accuracy <- function(mcmc_samples, dist_fn, ...)
   return(accuracy)
 }
 
+calculate_accuracy_spline <- function(vx, mcmc_fn, vb_fn)
+{
+  integrand <- function(x)
+  {
+    return(abs(mcmc_fn(x) - vb_fn(x)))
+  }
+  result <- integrate2(integrand, min(vx), max(vx),
+                     subdivisions = length(vx))
+  accuracy <- 1 - .5 * result$value
+  return(accuracy)
+  
+}
+
 accuracy_plot <- function(title, mcmc_samples, dist_fn, ...)
 {
   mcmc_density <- density(mcmc_samples)
@@ -226,6 +239,13 @@ calculate_accuracies <- function(test, mult, mcmc_samples, var_result, approxima
   # \sigma_Z^2 <- solve(mSigma)[i, i]^2
   # sigma2_z * dchisq(x, df = v)
   # TODO: Add mSigma.u accuracy
+  # TODO: Need to generalise this to the splines case
+  # We need to iterate through the sigma_u samples, inverting each matrix
+  n <- dim(mcmc_samples$sigma_u)[1]
+  sigma_u_inv <- array(0, dim(mcmc_samples$sigma_u))
+  for (i in 1:n) {
+    sigma_u_inv[i, , ] <- solve(sigma_u[i, , ])
+  }
   sigma2_vu_accuracy <- rep(0, B)
   if (B == 2) {
     v <- 4
@@ -480,4 +500,4 @@ main <- function()
   }
 }
 
-main()
+# main()
