@@ -18,6 +18,10 @@ generate_test_case <- function(i, test) {
     m <- 20
     ni <- 10
     mult <- generate_slope_test_data(m=20, ni=10, expected_beta=c(2, 1), expected_rho=0.7)
+  } else if (test == "spline") {
+    result <- generate_spline_test_data()
+    mult <- result$mult
+    allKnots <- result$allKnots
   }
   mult
 }
@@ -29,12 +33,17 @@ save_mcmc_data <- function(test)
   # Saving the fit allows us to skip the recompilation of the C++ for the model
   # Update: Well, it's supposed to. Stan seems to want to keep recompiling the
   # model anyway, regardless of what I do.
-  accuracy <- mclapply(1:ITER, function(i) {
+  accuracy <- lapply(1:ITER, function(i) {
     # Idea: Save generated data so we can reproduce problem data sets?
     mult <- generate_test_case(i, test)
-    stan_fit <- mcmc(mult, iterations=1e5, warmup=1e4, mc.cores = 1)
+    if (test == "spline") {
+      stan_fit <- mcmc(mult, seed=i, iterations=1e5, warmup=1e3,
+                          stan_file="multivariate_zip_splines.stan")
+    } else {
+      stan_fit <- mcmc(mult, iterations=3e4, warmup=5e3, mc.cores = 1)
+    }
     save(stan_fit, file = sprintf("/dskh/nobackup/markg/phd/stan_fit_%s_%d.RData", test, i))
-  }, mc.cores = 32)
+  }) # , mc.cores = 32)
 }
 
 load_stan_data <- function(i, test)
@@ -65,7 +74,7 @@ median_accuracy <- function(approximation="gva", test="intercept")
     # Must handle the case where integrate() throws a non-finite function value error
     # If the integration fails, something must have gone fundamentally wrong, and we should
     # figure out why.
-    result <- calculate_accuracies("", mult, mcmc_samples, var_result, approximation, print_flag=TRUE)
+    result <- calculate_accuracies("test_case_four", mult, mcmc_samples, var_result, approximation, print_flag=TRUE, plot_flag=TRUE)
     save(result, file = sprintf("results/accuracy_result_%s_%s_%d.RData", approximation, test, i))
     result
   }) # , mc.cores = 32)
@@ -90,10 +99,10 @@ create_accuracy_df <- function(accuracy, make_colnames=FALSE) {
 }
 
 median_accuracy_graph <- function(approximation="gva", test="intercept") {
+  cat("median_accuracy_graph: approximation", approximation, ", test", test, "\n")
   load(file = sprintf("results/accuracy_list_%s_%s.RData", approximation, test))
   
   accuracy_df <- create_accuracy_df(accuracy, make_colnames=TRUE)
-  browser()
   pdf(sprintf("results/median_accuracy_%s_%s.pdf", approximation, test))
   # Should be plotting mean, and comparing approximations
   if (test == "intercept") {
@@ -111,6 +120,9 @@ median_accuracy_graph <- function(approximation="gva", test="intercept") {
                           accuracy_df[, c("sigma2_vu_1", "sigma2_vu_2", "rho")])
     boxplot(accuracy_df2, ylim=c(0, 1))
     axis(1, at=1:7, labels=c(expression(bold(beta)[0], bold(beta)[1], bold(u)[1], bold(u)[2], bold(sigma[u1]^2), bold(sigma[u2]^2), rho)))
+  } else if (test == "spline") {
+    # TODO: Base on random slopes case
+    stop("I have no idea what to do")
   }
   title(sprintf("%s %s median accuracy", approximation, test))
   dev.off()
@@ -125,7 +137,7 @@ median_accuracy_graph_all <- function(test) {
 }
 
 median_accuracy_csv <- function(approximation="gva", test=test) {
-  load(file = sprintf("results/accuracy_list_%s.RData", approximation))
+  load(file = sprintf("results/accuracy_list_%s_%s.RData", approximation, test))
   accuracy_df <- create_accuracy_df(accuracy, make_colnames=TRUE)
   write.csv(accuracy_df, file=sprintf("results/accuracy_list_%s.csv", approximation))
 }
