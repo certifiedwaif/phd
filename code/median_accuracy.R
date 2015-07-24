@@ -84,10 +84,14 @@ median_accuracy <- function(approximation="gva", test="intercept")
       result <- spline.des(allKnots, xtilde, derivs=rep(0, length(xtilde)), outer.ok=TRUE)
       mC_tilde <- cbind(1, xtilde, result$design)
       f_hat_vb <- mC_tilde %*% var_result$vmu
-      # FIXME: This is probably broken
-      f_hat_mcmc <- mC_tilde %*% fit$vmu$mean
-
-      result <- calculate_accuracy_spline()
+      pars <- stan_fit$fit@sim$pars_oi
+      probs <- c(0.025, 0.25, 0.5, 0.75, 0.975)
+      s <- summary(stan_fit$fit, pars, probs)
+      mcmc_vmu <- s$summary[1:14, 1]
+      f_hat_mcmc <- mC_tilde %*% mcmc_vmu
+      mcmc_spline_fn <- splinefun(xtilde, f_hat_mcmc)
+      vb_spline_fn <- splinefun(xtilde, f_hat_vb)
+      result <- calculate_accuracy_spline(mcmc_spline_fn, vb_spline_fn)
     } else {
       result <- calculate_accuracies("", mult, mcmc_samples, var_result, approximation, print_flag=TRUE)
     }
