@@ -181,13 +181,13 @@ where
 $$
 \begin{array}{rl}
 T_1 &= \bE_q[\log{p(\vy, \vnu)} - \log{q(\vnu)}] \\
-&= \vy \mP \mC \vmu - \vp^\top \exp{\left [\mC \vmu + \half \text{diag} (\mC \mLambda \mC^\top)\right ]} - \vone^\top\log \Gamma{(\vy + \vone)}\\
+&= \vy \mP \mC \vmu - \vp^\top \exp{\left[ \mC \vmu + \half \text{diag} (\mC \mLambda \mC^\top) \right]} - \vone^\top\log \Gamma{(\vy + \vone)}\\
 & \quad + \frac{p + m}{2} (1 + \log{2 \pi}) + \half \log{|\mLambda|}, \\
-T_2 &= \bE_q [\log p(\mSigma_{\vu \vu}) - \log q(\mSigma_{\vu \vu})] \\
-&= \bE_q [v/2(\log |\Psi| - \log |\Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu}|) + \half \log 2 + \half \log|\mSigma_{\vu \vu}| \log \Gamma_{p+1}(v/2) - \log \Gamma_{p}(v/2)\\
-&\quad + \half \tr((\vmu_{\vu} \vmu_{\vu}^\top + \mLambda_{\vu \vu}) \mSigma_{\vu \vu}^{-1}) ] \\
-&= v/2(\log |\Psi| - \log |\Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu}|) + \half \log 2 + \half \bE_q \log |\mSigma_{\vu \vu}| + \log \Gamma_{p+1}(v/2) - \log \Gamma_{p}(v/2) \\
-&\quad + \half \tr(\mI_m + \Psi(\Psi+ \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu})^{-1}/(v + p + 2)) \\
+T_2 &= \bE_q \left[ \log p(\mSigma_{\vu \vu}) - \log q(\mSigma_{\vu \vu}) \right] \\
+&= \bE_q \big[ v/2(\log |\Psi| - \log |\Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu}|) + \half \log 2 + \half \log|\mSigma_{\vu \vu}| \log \Gamma_{p+1}(v/2) - \log \Gamma_{p}(v/2)\\
+&\quad + \half \tr((\vmu_{\vu} \vmu_{\vu}^\top + \mLambda_{\vu \vu}) \mSigma_{\vu \vu}^{-1}) \big] \\
+&= v/2\big(\log |\Psi| - \log |\Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu}|\big) + \half \log 2 + \half \bE_q \log |\mSigma_{\vu \vu}| + \log \Gamma_{p+1}(v/2) - \log \Gamma_{p}(v/2) \\
+&\quad + \half \tr\big(\mI_m + \Psi(\Psi+ \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu})^{-1}/(v + p + 2)\big) \\
 T_3 &= - \vp^\top \log \vp - (\vone - \vp)^\top \log (\vone - \vp) - \log \Beta (\alpha_\rho, \beta_\rho) + \log \Beta (\alpha_q, \beta_q)
 \end{array}
 $$
@@ -195,7 +195,7 @@ $$
 where
 
 $$
-\bE_q [\log |\mSigma_{\vu \vu}|] = m \log 2 + \log \left | \Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu} \right | + \sum_{i=1}^m \Psi \left ( \frac{v - i + 1}{2} \right )
+\bE_q \big[ \log |\mSigma_{\vu \vu}| \big] = m \log 2 + \log \left | \Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu} \right | + \sum_{i=1}^m \Psi \left ( \frac{v - i + 1}{2} \right )
 $$
 
 $$$$
@@ -315,7 +315,7 @@ variational lower bound. This algorithm is fast, but potentially unstable.
 % Essentially a very straightforward optimisation approach, but potentially unstable.
 % Detail the function and its derivatives
 \begin{align*}
-\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu} &= \quad \mC^\top\vp \left [\vy - \B^{1}(\mC \vmu, \text{diag}(\mC \mLambda \mC^\top)) \right ] - \mSigma^{-1} \vmu \\
+\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu} &= \quad \mC^\top\vp \left [\vy - \B^{(1)}(\mC \vmu, \text{diag}(\mC \mLambda \mC^\top)) \right ] - \mSigma^{-1} \vmu \\
 \frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda} &= -\mC^\top \text{diag}(\vp \odot \B^{(2)}(\mC \vmu, \text{diag}(\mC \mLambda \mC^\top))) - \mSigma^{-1}
 \end{align*}
 
@@ -345,7 +345,8 @@ by kernel density estimate from a 1 million MCMC sample produced using Stan.
 
 \noindent The stability of the algorithms was confirmed by running them on 10,000 
 different data sets that were randomly generated after having initialised the random 
-number generator with different seeds.
+number generator with different seeds. Median accuracy of the algorithms was assessed
+by running them on 100 randomly generated data sets.
 
 % Table of accuracy results - intercept model
 \begin{table}
