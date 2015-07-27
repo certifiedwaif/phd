@@ -1,6 +1,17 @@
 To Do list
 ==========
 
+27/07/2015
+----------
+- Check accuracy results for splines for GVA
+- Run median accuracy for splines for other approximations
+- Pay claims for Winter School
+- Prepare for tutoring second year stats
+- Prepare presentation for melanoma meeting
+- Invoice for Meanpath
+- Proof of citizenship for University of Sydney
+- Submit results from Winter School to Dianne
+
 22/07/2015
 ----------
 - Spent the last few days converting one of John's R programs into C++. This resulted in
