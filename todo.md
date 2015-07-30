@@ -1,16 +1,72 @@
 To Do list
 ==========
 
+30/07/2015
+----------
+- Spline accuracy results are now good (!)
+- Application
+- Marking
+
+29/07/2015
+----------
+- Try fixing spline accuracy problems by lowering the maximum number of VB iterations
+  to 20.
+  The problem turned out to be the MCMC! Generating a different data set from the same
+  seed and re-running fixed it.
+
+28/07/2015
+----------
+- Poor accuracy for Test case 97 has something to do with diag(mLambda) having some large
+  values.
+  > vaccuracy
+    [1] 0.8970096 0.8539605 0.9023597 0.8229834 0.9060690 0.8744393 0.8984698
+    [8] 0.8354486 0.8441881 0.8366873 0.7080212 0.8499089 0.9160671 0.8074408
+   [15] 0.8082496 0.7628658 0.8706933 0.8767969 0.7005117 0.8522690 0.8163083
+   [22] 0.8784463 0.7271954 0.6014027 0.4452374 0.7133955 0.8697347 0.8842829
+   [29] 0.8028537 0.7025526 0.5527570 0.9047466 0.8384766 0.8831617 0.8355878
+   [36] 0.8853087 0.6911480 0.8992032 0.8451538 0.9117479 0.8412023 0.8538672
+   [43] 0.8649741 0.8747038 0.5066782 0.8723054 0.8013161 0.8542742 0.8870647
+   [50] 0.7792468 0.8829639 0.4386193 0.8283087 0.7846913 0.8583867 0.8405602
+   [57] 0.8241351 0.7029739 0.9174753 0.5346066 0.5671533 0.7324143 0.8498585
+   [64] 0.5499912 0.7246882 0.8484476 0.8996635 0.8119486 0.7715703 0.9362681
+   [71] 0.6509210 0.7006210 0.6682824 0.8349544 0.7625612 0.6258402 0.8863403
+   [78] 0.6876932 0.6964111 0.8551330 0.8045416 0.8036846 0.7262400 0.7989986
+   [85] 0.6739237 0.8345746 0.6920244 0.8490511 0.8819539 0.6701659 0.9095995
+   [92] 0.8956516 0.7851022 0.8487144 0.7899954 0.8580233 0.4214853 0.9157717
+   [99] 0.8129945 0.9029803
+  > order(vaccuracy)
+    [1]  97  52  25  45  60  64  31  61  24  76  71  73  90  85  78  37  87  79
+   [19]  19  72  30  58  11  26  65  83  23  62  75  16  69  50  54  93  95  84
+   [37]  47  29  82  81  14  15  68  99  21   4  57  53  86  74   8  35  10  33
+   [55]  56  41   9  39  66  94  88  63  12  20  42   2  48  80  96  55  43  27
+   [73]  17  46   6  44  18  22  89  51  34  28  36  77  49  92   1   7  38  67
+   [91]   3 100  32   5  91  40  98  13  59  70  
+
+   Having looked at the logs, I think the problem is that if we keep iterating
+   beyond a certain point we go from a good solution to a ludicrous one. This is
+   because as vmu goes to silly negative values, the diagonals of mLambda become
+   large to accomodate this. I'm trying to side step the problem by doing less
+   iterations.
+
+   My computation is taking forever to run today.
+- Prepare for two o'clock tutorial.
+- Application
+
 27/07/2015
 ----------
 - Check accuracy results for splines for GVA
+  Done. There are bad results for a small number of test cases: 
 - Run median accuracy for splines for other approximations
+  Done.
 - Pay claims for Winter School
 - Prepare for tutoring second year stats
+  Jennifer did it instead.
 - Prepare presentation for melanoma meeting
+  Done
 - Invoice for Meanpath
 - Proof of citizenship for University of Sydney
 - Submit results from Winter School to Dianne
+  Done
 
 22/07/2015
 ----------
