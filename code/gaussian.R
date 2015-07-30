@@ -440,7 +440,7 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
   }    
   # cat("mR[Dinds]", mR[Dinds], "\n")    
 
-  mLambda.inv <- tcrossprod(mR)
+  # mLambda.inv <- tcrossprod(mR)
   # mLambda <- solve(mLambda.inv, tol=1e-99)
   mLambda <- chol2inv(t(mR) + diag(1e-8, d))
   # cat("diag(mLambda)", diag(mLambda), "\n")
@@ -472,10 +472,10 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
   # cat("rcond(mLambda.inv + mH)", rcond(mLambda.inv + mH), "\n")
   # cat("rcond(mLambda)", rcond(mLambda), "\n")
   # cat("rcond(mR)", rcond(mR), "\n")
-  dmLambda <- (mLambda.inv + mH) %*% (-mLambda %*% mR %*% mLambda)
-  # mR_mLambda <- mR %*% mLambda
+  # dmLambda <- (mLambda.inv + mH) %*% (-mLambda %*% mR %*% mLambda)
+  mR_mLambda <- mR %*% mLambda
   # mR_mLambda <- t(backsolve(mR, forwardsolve(mR, t(mR)), transpose=TRUE))
-  # dmLambda <- -(mR_mLambda + mH %*% mLambda %*% mR_mLambda)
+  dmLambda <- -(mR_mLambda + mH %*% mLambda %*% mR_mLambda)
   # 97% for the fixed slope, but 89.6% for the fixed intercept
   # dmLambda <- -(mR_mLambda + mH %*% forwardsolve(tcrossprod(mR) + diag(1e-8, d), mR_mLambda))
   # 90.28% on the fixed intercept, 92.65% on the slope
