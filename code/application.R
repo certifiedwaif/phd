@@ -13,6 +13,8 @@ long12_subset <- subset(long12_analyse, Id %in% Ids$Id)
 vy <- long12_subset$mintot
 mX <- subset(long12_subset, select=-c(mintot, Id))
 mX <- cbind(1, subset(long12_subset, select=time))
+# Scale time, otherwise everything overlows and fails horribly
+mX$time <- scale(mX$time)
 m <- dim(Ids)[1]
 ni <- 3
 mZ <- matrix(0, ni * m, m * 2)
@@ -22,15 +24,24 @@ for (idx in 1:length(i)) {
 	mZ[i[idx], (j[idx] - 1) * 2 + 1] <- 1
 	mZ[i[idx], (j[idx] - 1) * 2 + 2] <- mX$time[idx]
 }
+# threshold <- 300
+# vy[vy > threshold] <- threshold
+# vy <- vy / 10C
 # Construct mult object
-fit <- glm(mintot~time, family=poisson(), data=long12_subset)
 # mult <- create_mult(vy, mX, mZ[, 3:ncol(mZ)], 1e-5, m=125, blocksize=2)
+# There were two zeroes in a row, so I interpolated.
+vy[194] <- 30
 mult <- create_mult(vy, as.matrix(mX), mZ[, 3:ncol(mZ)], 1e5,
 										m=125, blocksize=2)
+# Initialise vmu to something not too far off, but without giving the whole game away.
+mult$vmu[1:2] <- c(log(1 + mean(vy)), 1)
+#mult$mLambda <- solve(crossprod(mult$mC))
 # mult$vmu <- c(coef(fit))
 # VB fit.
 # TODO: This overflows! Fix. Look at the likelihood, and see where it's
 # coming from.
-fit <- zipvb(mult, method="gva")
+
+# Laplace works because there's no 0.5 * sigma2 argument to the exponential
+fit <- zipvb(mult, method="gva2", verbose=TRUE)
 # MCMC fit.
 # Compare.
