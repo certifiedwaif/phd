@@ -383,6 +383,21 @@ $\rho$ &0.911&0.896&0.896&0.896&0.896\\
 \end{tabular}
 \end{table}
 
+\begin{table}
+\label{tab:accuracy_spline}
+\caption{Table of accuracy - Splines}
+\begin{tabular}{l|l}
+\hline
+Approximation & Accuracy \\
+\hline
+Laplace's Method & 0.969 \\
+GVA & 0.969 \\
+GVA2 & 0.969 \\
+GVA NR & 0.969 \\
+\hline
+\end{tabular}
+\end{table}
+
 % Graphs - exactly what sort of graphs do we need?
 % Median accuracy
 % Increase in lower bound
@@ -390,6 +405,30 @@ $\rho$ &0.911&0.896&0.896&0.896&0.896\\
 % key parameters, such as, say, vbeta[2]
 
 \section{Application}\label{sec:application}
+
+% This is a draft, depending on the preliminaries of getting permission, of course.
+This model implemented above was applied to physical activity data.
+273 individuals in a longitudinal study, observed at baseline, three months and twelve
+months. The research outcome of interest was to ascertain whether improvements in physical
+activity were achieved and maintained by the majority of participants in the study.
+A zero-inflated random slopes Poisson model was fit using the GVA2 algorithm above.
+% Table of results
+% How do I present the random effects
+% Covariance?
+% Other parameters?
+% > diag(fit$mLambda[1:2, 1:2])
+% [1] 0.0008489323 0.0006191579
+% Do you need accuracy results?
+\begin{table}
+\begin{tabular}{|l|llll|}
+\hline
+Covariate & Posterior Mean & Lower 95\% Credible Interval &  Upper 95\% Credible Interval \\
+\hline
+Intercept & 5.73 & 5.72 & 5.74 \\
+Slope & 0.28 & 0.27 & 0.29 \\
+\hline
+\end{tabular}
+\end{table}
 
 \section{Appendix} 
 % TODO: Mean field updates?
