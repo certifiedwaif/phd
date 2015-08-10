@@ -1,6 +1,72 @@
 To Do list
 ==========
 
+10/08/2015
+----------
+- Prepare for STAT2012 tutorials
+  Done
+- I was able to get the application to work last week, so it's time to move on.
+- Replace B() functions in draft paper with explicit functions
+- Email PRC about using the data
+- Think about thesis
+- Mark lab reports from STAT2012
+- Claim pay for Winter School
+- Claim pay for work to date during this semester
+- Send scan of passport to HR
+- Fix sigma accuracy calculation.
+  I'm really not looking forward to this.
+
+03/08/2015
+----------
+- Application
+  I'm looking at the PRC data set. There's a sea of variables.
+    [1] "Id"                      "age"                     "agegrp"                 
+    [4] "Gender"                  "Education"               "Employment"             
+    [7] "Income"                  "Language"                "Indigenous"             
+   [10] "enough_Income"           "SEIFA_quintile"          "aria_mean"              
+   [13] "aria_cat"                "Gprequired"              "suff_pa"                
+   [16] "enough_fruit"            "enough_veg"              "waistcircrisk"          
+   [19] "baselinedata"            "threemonth"              "twelvemonth"            
+   [22] "heightcm"                "time"                    "weight"                 
+   [25] "waistcirc"               "fruitday"                "vegday"                 
+   [28] "chips"                   "redmeat"                 "sausage"                
+   [31] "takeaway"                "nuts"                    "cakes"                  
+   [34] "sweets"                  "legumes"                 "cereal"                 
+   [37] "trimfatmeat"             "olive"                   "otheroil"               
+   [40] "margarine"               "butter"                  "chickentrim"            
+   [43] "lowfmilk"                "litecream"               "lfcheese"               
+   [46] "spreadlowf"              "wholepasta"              "brownrice"              
+   [49] "breads"                  "PAtired"                 "PAstress"               
+   [52] "PAdemands"               "PAdepress"               "diethurry"              
+   [55] "dietstress"              "dietdemands"             "dietdepress"            
+   [58] "oftenPA"                 "PAwhen"                  "wherePA"                
+   [61] "whomPA"                  "rainPA"                  "goalPA"                 
+   [64] "incidgoal"               "whencycle"               "oftenwalk"              
+   [67] "wupstairs"               "incidbackup"             "cookbook"               
+   [70] "functiona"               "tablenice"               "planhealthy"            
+   [73] "preparef"                "fameasier"               "PAwithyou"              
+   [76] "regPAfam"                "choicewgoal"             "PAhelpgoal"             
+   [79] "sadcheer"                "nervous"                 "restless"               
+   [82] "hopeless"                "effort"                  "worthless"              
+   [85] "timeswalked"             "modtimes"                "vigtimes"               
+   [88] "minwalked"               "minvig"                  "bmi_cat"                
+   [91] "bmi"                     "too_short"               "tottimes"               
+   [94] "mintot"                  "minmod"                  "fat_score"              
+   [97] "fibre_score"             "total_score"             "social_support_pa"      
+  [100] "social_support_eating"   "planning_healthy_eating" "planning_incidental_pa" 
+  [103] "planning_structured_pa"  "confidence_eating"       "confidence_pa"
+
+  Splines, mixed models, what to do?
+  Can you find and read the paper? Or just remember what was important?
+  What should go into mX and mZ? What should the covariance matrix look like?
+
+  Update: Okay, I've thought about it a bit. The primary outcome of interest is the positive
+  relationship between time and total minutes of physical activity aka mintot. There are
+  273 individuals, observed at 3 time points, 0, 3 and 12 months.
+  A random slope model on time with zero inflation seems appropriate, using fixed effects to
+  adjust for other covariates of interest. Adjust for all the standard things, socioeconomic
+  and demographic factors, and of course age.
+   
 30/07/2015
 ----------
 - Spline accuracy results are now good (!)
