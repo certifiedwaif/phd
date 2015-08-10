@@ -259,10 +259,10 @@ be optimised with L-BFGS-B:
 
 % Detail the function and its derivatives
 \begin{align*}
-\log \underline{p}(\vmu, \mLambda; \vy) &= \vy^\top\mP \mC \vmu - \vp^\top \B(\mC \vmu, \text{diag}(\mC \mLambda \mC^\top)) - \half \vmu^\top \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} + \log{|\mR|} \\
+\log \underline{p}(\vmu, \mLambda; \vy) &= \vy^\top\mP \mC \vmu - \vp^\top \exp(\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)) - \half \vmu^\top \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} + \log{|\mR|} \\
 &\quad - \frac{d}{2} \log{(2 \pi)} + \half \log{|\mSigma^{-1}|} + \frac{d}{2} \log{(2 \pi)} + \frac{d}{2} \\
-\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu} &= \mC^\top \vp^\top(\vy - \B^{(1)}(\mC \vmu, \mC \mLambda \mC^\top)) - \mSigma^{-1} \vmu \\
-\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda} &= \left [\mLambda^{-1} - \vp^\top \mC^\top \text{diag}(\B^{(2)}(\mC \vmu, \mC \mLambda \mC^\top)) \mC \vp) - \mSigma^{-1} \right ] \mR
+\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu} &= \mC \vp^\top(\vy - \mC^\top \exp(\mC \vmu, \mC \mLambda \mC^\top)) - \mSigma^{-1} \vmu \\
+\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda} &= \left [\mLambda^{-1} - \vp^\top \mC^\top \exp(\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)) \mC \vp) - \mSigma^{-1} \right ] \mR
 \end{align*}
 
 \subsubsection{GVA, $\mLambda = \left (\mR \mR^\top \right )^{-1}$}
@@ -271,7 +271,7 @@ to the first, but instead of optimising $\vmu$ and $\mR$ where $\mLambda=\mR \mR
 instead we optimise $\mR$ where $\mLambda = (\mR \mR^\top)^{-1}$.
 % The function and derivatives change
 
-\noindent This new parameterisation allows us to calculate $\B(\mC \vmu,
+\noindent This new parameterisation allows us to calculate $\exp(\mC \vmu + \half
 \text{diag}(\mC \mLambda \mC^\top))$ and its derivatives by solving $\mR \va = \mC_{i},
  i=1, \ldots, n$ for $\va$ and then calculating $\va^\top\va$ rather than calculating
 $\text{diag}(\mC \mLambda \mC^\top)$ directly.
@@ -290,7 +290,7 @@ $\text{diag}(\mC \mLambda \mC^\top)$ directly.
 \noindent The Gaussian variational lower bound is
 
 \begin{align*}
-\log \underline{p}(\vmu, \mLambda; \vy) &= \vy\mP\mC \vmu - \vp^\top \B(\mC \vmu, \text{diag}(\mC \mLambda \mC^\top)) - \half \vmu^\top \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} \\
+\log \underline{p}(\vmu, \mLambda; \vy) &= \vy\mP\mC \vmu - \vp^\top \exp(\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)) - \half \vmu^\top \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} \\
 &\quad- \frac{d}{2} \log{(2 \pi)} + \half \log{|\mSigma^{-1}|} + \frac{d}{2} \log{(2 \pi)} + \frac{d}{2} - \log{|\mR|}
 \end{align*}
 
@@ -315,8 +315,8 @@ variational lower bound. This algorithm is fast, but potentially unstable.
 % Essentially a very straightforward optimisation approach, but potentially unstable.
 % Detail the function and its derivatives
 \begin{align*}
-\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu} &= \quad \mC^\top\vp \left [\vy - \B^{(1)}(\mC \vmu, \text{diag}(\mC \mLambda \mC^\top)) \right ] - \mSigma^{-1} \vmu \\
-\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda} &= -\mC^\top \text{diag}(\vp \odot \B^{(2)}(\mC \vmu, \text{diag}(\mC \mLambda \mC^\top))) - \mSigma^{-1}
+\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu} &= \quad \mC^\top\vp \left [\vy - \mC\exp(\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)) \right ] - \mSigma^{-1} \vmu \\
+\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda} &= -\mC^\top \text{diag}(\vp \odot \exp(\mC \vmu +\half \text{diag}(\mC \mLambda \mC^\top))) - \mSigma^{-1}
 \end{align*}
 
 \begin{algorithm}\label{alg:algorithm_nr}
@@ -327,7 +327,7 @@ given $\vy$, $\mC$ and $\vp$}
 % Fit \vmu, \mLambda using Laplace approximation
 \WHILE{the increase in $\log{\underline{p}}(\vmu, \mLambda; \vy)$ is significant}
 % \vmu, \mLambda
-\STATE $\mLambda \leftarrow \left [ \mC^\top\vp^\top B^{(2)}(\mC \vmu, \text{diag}(\mC \mLambda \mC^\top)) \mC \right ]^{-1}$
+\STATE $\mLambda \leftarrow \left [ \mC^\top\vp^\top \exp(\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)) \mC \right ]^{-1}$
 \STATE $\vmu \leftarrow \vmu + \mLambda \frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu}$
 \ENDWHILE
 \end{algorithmic}
@@ -347,6 +347,8 @@ by kernel density estimate from a 1 million MCMC sample produced using Stan.
 different data sets that were randomly generated after having initialised the random 
 number generator with different seeds. Median accuracy of the algorithms was assessed
 by running them on 100 randomly generated data sets.
+
+% TODO - Graphs of median accuracy
 
 % Table of accuracy results - intercept model
 \begin{table}
