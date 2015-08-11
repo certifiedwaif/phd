@@ -243,9 +243,9 @@ calculate_accuracies <- function(test, mult, mcmc_samples, var_result, approxima
   # We need to iterate through the sigma_u samples, inverting each matrix
   n <- dim(mcmc_samples$sigma_u)[1]
   sigma_u_inv <- array(0, dim(mcmc_samples$sigma_u))
-  for (i in 1:n) {
-    sigma_u_inv[i, , ] <- solve(sigma_u[i, , ])
-  }
+  # for (i in 1:n) {
+  #   sigma_u_inv[i, , ] <- solve(sigma_u[i, , ])
+  # }
   sigma2_vu_accuracy <- rep(0, B)
   if (B == 2) {
     v <- 4
@@ -267,9 +267,9 @@ calculate_accuracies <- function(test, mult, mcmc_samples, var_result, approxima
   }
   for (i in 1:B) {
     # sigma2 <- E_mPsi_inv[i, i]
-    sigma2 <- var_result$mPsi[i, i]
+    sigma2_inv <- var_result$solve(mPsi)[i, i]
     sigma2_vu_accuracy[i] <- calculate_accuracy_normalised(sigma_u_inv[, i, i],
-                                               function(x, ...) dgamma(x/sqrt(sigma2), ...), v/2, sigma2/2)
+                                               function(x, ...) dgamma(x * sigma2_inv, ...), v/2, sigma2/2)
     title <- sprintf("%s sigma2_u[%d] accuracy: %f", approximation, i, sigma2_vu_accuracy[i])
     if (print_flag) print(title)
     if (plot_flag)
@@ -358,43 +358,47 @@ test_accuracies_intercept <- function(save=FALSE)
   
   # Test multivariate approximation's accuracy
   now <- Sys.time()
-  var1_result <- zipvb(mult, method="laplace", verbose=TRUE)
+  var1_result <- zipvb(mult, method="laplace", verbose=FALSE)
   print(Sys.time() - now)
   var1_accuracy <- calculate_accuracies("intercept", mult, mcmc_samples, var1_result, "laplace", plot_flag=TRUE)
   # #print(image(Matrix(var1$var_result$mLambda)))
   # print(var1_accuracy)
   print(var1_accuracy$vbeta_accuracy)
-  print(var1_accuracy$vu_accuracy)
+  print(mean(var1_accuracy$vu_accuracy))
+  print(var1_accuracy$sigma2_vu_accuracy)
   print(var1_accuracy$rho_accuracy)
   
   now <- Sys.time()
-  var2_result <- zipvb(mult, method="gva", verbose=TRUE)
+  var2_result <- zipvb(mult, method="gva", verbose=FALSE)
   print(Sys.time() - now)
   var2_accuracy <- calculate_accuracies("intercept", mult, mcmc_samples, var2_result, "gva", plot_flag=TRUE)
   # #print(image(Matrix(var2$var_result$mLambda)))
   # print(var2_accuracy)
   print(var2_accuracy$vbeta_accuracy)
-  print(var2_accuracy$vu_accuracy)
+  print(mean(var2_accuracy$vu_accuracy))
+  print(var2_accuracy$sigma2_vu_accuracy)
   print(var2_accuracy$rho_accuracy)
 
   now <- Sys.time()
-  var3_result <- zipvb(mult, method="gva2", verbose=TRUE)
+  var3_result <- zipvb(mult, method="gva2", verbose=FALSE)
   print(Sys.time() - now)
   var3_accuracy <- calculate_accuracies("intercept", mult, mcmc_samples, var3_result, "gva2", plot_flag=TRUE)
   #print(image(Matrix(var3$var_result$mLambda)))
   # print(var3_accuracy)
   print(var3_accuracy$vbeta_accuracy)
-  print(var3_accuracy$vu_accuracy)
+  print(mean(var3_accuracy$vu_accuracy))
+  print(var3_accuracy$sigma2_vu_accuracy)
   print(var3_accuracy$rho_accuracy)
 
   now <- Sys.time()
-  var4_result <- zipvb(mult, method="gva_nr", verbose=TRUE)
+  var4_result <- zipvb(mult, method="gva_nr", verbose=FALSE)
   print(Sys.time() - now)
   var4_accuracy <- calculate_accuracies("intercept", mult, mcmc_samples, var4_result, "gva_nr", plot_flag=TRUE)
   # #print(image(Matrix(var4$var_result$mLambda)))
   # print(var4_accuracy)
   print(var4_accuracy$vbeta_accuracy)
-  print(var4_accuracy$vu_accuracy)
+  print(mean(var4_accuracy$vu_accuracy))
+  print(var4_accuracy$sigma2_vu_accuracy)
   print(var4_accuracy$rho_accuracy)
 }
 # test_accuracies()
@@ -424,35 +428,39 @@ test_accuracies_slope <- function(save=FALSE)
   # mult$vmu <- c(2, 1, rep(0, (m-1) * 2))
   
   now <- Sys.time()
-  var1_result <- zipvb(mult, method="laplace", verbose=TRUE)
+  var1_result <- zipvb(mult, method="laplace", verbose=FALSE)
   print(Sys.time() - now)
-  var1_accuracy <- calculate_accuracies("slope", mult, mcmc_samples, var1_result, "laplace", print_flag=TRUE, plot_flag=TRUE)
+  var1_accuracy <- calculate_accuracies("slope", mult, mcmc_samples, var1_result, "laplace", print_flag=FALSE, plot_flag=FALSE)
   print(var1_accuracy$vbeta_accuracy)
-  print(var1_accuracy$vu_accuracy)
+  print(mean(var1_accuracy$vu_accuracy))
+  print(var1_accuracy$sigma2_vu_accuracy)
   print(var1_accuracy$rho_accuracy)
   
   now <- Sys.time()
-  var2_result <- zipvb(mult, method="gva", verbose=TRUE)
+  var2_result <- zipvb(mult, method="gva", verbose=FALSE)
   print(Sys.time() - now)
-  var2_accuracy <- calculate_accuracies("slope", mult, mcmc_samples, var2_result, "gva", print_flag=TRUE, plot_flag=TRUE)
+  var2_accuracy <- calculate_accuracies("slope", mult, mcmc_samples, var2_result, "gva", print_flag=FALSE, plot_flag=FALSE)
   print(var2_accuracy$vbeta_accuracy)
-  print(var2_accuracy$vu_accuracy)
+  print(mean(var2_accuracy$vu_accuracy))
+  print(var2_accuracy$sigma2_vu_accuracy)
   print(var2_accuracy$rho_accuracy)
 
   now <- Sys.time()
-  var3_result <- zipvb(mult, method="gva2", verbose=TRUE)
+  var3_result <- zipvb(mult, method="gva2", verbose=FALSE)
   print(Sys.time() - now)
-  var3_accuracy <- calculate_accuracies("slope", mult, mcmc_samples, var3_result, "gva2", print_flag=TRUE, plot_flag=TRUE)
+  var3_accuracy <- calculate_accuracies("slope", mult, mcmc_samples, var3_result, "gva2", print_flag=FALSE, plot_flag=FALSE)
   print(var3_accuracy$vbeta_accuracy)
-  print(var3_accuracy$vu_accuracy)
+  print(mean(var3_accuracy$vu_accuracy))
+  print(var3_accuracy$sigma2_vu_accuracy)
   print(var3_accuracy$rho_accuracy)
 
   now <- Sys.time()
-  var4_result <- zipvb(mult, method="gva_nr", verbose=TRUE)
+  var4_result <- zipvb(mult, method="gva_nr", verbose=FALSE)
   print(Sys.time() - now)
-  var4_accuracy <- calculate_accuracies("slope", mult, mcmc_samples, var4_result, "gva_nr", print_flag=TRUE, plot_flag=TRUE)
+  var4_accuracy <- calculate_accuracies("slope", mult, mcmc_samples, var4_result, "gva_nr", print_flag=FALSE, plot_flag=FALSE)
   print(var4_accuracy$vbeta_accuracy)
-  print(var4_accuracy$vu_accuracy)
+  print(mean(var4_accuracy$vu_accuracy))
+  print(var4_accuracy$sigma2_vu_accuracy)
   print(var4_accuracy$rho_accuracy)
 }
 # test_accuracies_slope()
