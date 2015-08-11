@@ -267,13 +267,13 @@ calculate_accuracies <- function(test, mult, mcmc_samples, var_result, approxima
   }
   for (i in 1:B) {
     # sigma2 <- E_mPsi_inv[i, i]
-    sigma2_inv <- var_result$solve(mPsi)[i, i]
+    sigma2_inv <- solve(var_result$mPsi)[i, i]
     sigma2_vu_accuracy[i] <- calculate_accuracy_normalised(sigma_u_inv[, i, i],
-                                               function(x, ...) dgamma(x * sigma2_inv, ...), v/2, sigma2/2)
+                                               function(x, ...) dgamma(1 / x * sigma2_inv, ...), v/2, 2)
     title <- sprintf("%s sigma2_u[%d] accuracy: %f", approximation, i, sigma2_vu_accuracy[i])
     if (print_flag) print(title)
     if (plot_flag)
-      accuracy_plot(title, sigma_u_inv[, i, i], function(x, ...) dgamma(x/sqrt(sigma2), ...), v/2, sigma2/2)
+      accuracy_plot(title, sigma_u_inv[, i, i], function(x, ...) dgamma(1 / x * sigma2_inv, ...), v/2, 2)
     
   }
   
@@ -508,4 +508,4 @@ main <- function()
   }
 }
 
-# main()
+main()
