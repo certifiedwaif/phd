@@ -1,20 +1,46 @@
 To Do list
 ==========
 
+12/08/2015
+----------
+- Email PH about data release
+  Done
+- Email HR with passport information
+  Done
+- Enter marks for computer prac last week
+  Done
+- Renew British passport
+- Give computer prac at 3pm
+- Entered some numerical results for variance components of random slopes model in
+  paper draft
+- Coverage percentiles
+  Running
+- Figure out what to do about graphs you need to produce, and where in your draft paper
+  they need to go
+  Need to produce median accuracy graphs which have different kinds of approximations side by
+  side, with correct labelling
+
 10/08/2015
 ----------
 - Prepare for STAT2012 tutorials
-  Done
+  Done. That didn't go very well, I'll prepare better for tomorrow.
 - I was able to get the application to work last week, so it's time to move on.
+  Gather more results
+  Graphs
+  Write
 - Replace B() functions in draft paper with explicit functions
 - Email PRC about using the data
 - Think about thesis
+  Numeric problems with GVA
+  Optimisation/domain of attraction
+  Zero inflated Poisson models
 - Mark lab reports from STAT2012
 - Claim pay for Winter School
 - Claim pay for work to date during this semester
 - Send scan of passport to HR
 - Fix sigma accuracy calculation.
   I'm really not looking forward to this.
+- Coverage percentile
 
 03/08/2015
 ----------
