@@ -361,7 +361,7 @@ by running them on 100 randomly generated data sets.
 $\vbeta_1$ & $0.833$ & $0.908$ & $0.908$ & $0.908$ \\ 
 $\vbeta_2$ & $0.770$ & $0.987$ & $0.987$ & $0.987$ \\ 
 Mean of $\vu$ & $0.807$ & $0.947$ & $0.947$ & $0.947$ \\
-$\sigma^2_\vu$ & $???$ & $???$ & $???$ & $???$ \\ 
+$\sigma^2_{\vu_1}$ & $???$ & $???$ & $???$ & $???$ \\ 
 $\rho$ & $0.976$ & $0.974$ & $0.974$ &  $0.974$ \\ 
 \hline
 \end{tabular}
@@ -370,15 +370,16 @@ $\rho$ & $0.976$ & $0.974$ & $0.974$ &  $0.974$ \\
 \begin{table}
 \label{tab:accuracy_slope}
 \caption{Table of accuracy - Random slope model}
-\begin{tabular}{l|lllll}
+\begin{tabular}{l|llll}
 \hline
 & Laplace's Method & GVA $(\mLambda = \mR \mR^\top)$ & GVA $(\mLambda = (\mR \mR^\top)^{-1})$ & GVA NR\\
 \hline
-$\vbeta_1$     &0.658&0.879&0.893&0.893&0.879\\
-$\vbeta_2$     &0.692&0.883&0.899&0.899&0.883\\
-Mean of $\vu$        &0.719&0.908&0.911&0.912&0.908\\
-$\sigma^2_\vu$ &???&???&???&???&???\\
-$\rho$ &0.911&0.896&0.896&0.896&0.896\\
+$\vbeta_1$     &0.658&0.879&0.893&0.879\\
+$\vbeta_2$     &0.692&0.883&0.899&0.883\\
+Mean of $\vu$        &0.719&0.908&0.911&0.908\\
+$\sigma^2_{\vu_1}$ &0.720&0.713&0.713&0.687\\
+$\sigma^2_{\vu_2}$ &0.716&0.714&0.714&0.698\\
+$\rho$ &0.911&0.896&0.896&0.896\\
 \hline
 \end{tabular}
 \end{table}
@@ -426,6 +427,8 @@ Covariate & Posterior Mean & Lower 95\% Credible Interval &  Upper 95\% Credible
 \hline
 Intercept & 5.73 & 5.72 & 5.74 \\
 Slope & 0.28 & 0.27 & 0.29 \\
+% Zero inflation
+$\rho$ & 0.92 & & \\
 \hline
 \end{tabular}
 \end{table}
