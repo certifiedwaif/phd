@@ -1,5 +1,6 @@
 #!/usr/bin/env Rscript
 # median_accuracy.R
+library(plyr)
 library(optparse)
 library(parallel)
 source("generate.R")
@@ -19,9 +20,9 @@ generate_test_case <- function(i, test) {
     ni <- 10
     mult <- generate_slope_test_data(m=20, ni=10, expected_beta=c(2, 1), expected_rho=0.7)
   } else if (test == "spline") {
-    result <- generate_spline_test_data()
-    mult <- result$mult
-    allKnots <- result$allKnots
+    # result <- generate_spline_test_data()
+    # mult <- result$mult
+    # allKnots <- result$allKnots
     result <- generate_spline_test_data()
   }
   result
@@ -35,12 +36,15 @@ save_mcmc_data <- function(test)
   # Update: Well, it's supposed to. Stan seems to want to keep recompiling the
   # model anyway, regardless of what I do.
   accuracy <- lapply(1:ITER, function(i) {
+  # accuracy <- lapply(97, function(i) {
     # Idea: Save generated data so we can reproduce problem data sets?
-    mult <- generate_test_case(i, test)
+    result <- generate_test_case(i, test)
     if (test == "spline") {
+      mult <- result$mult
       stan_fit <- mcmc(mult, seed=i, iterations=1e5, warmup=1e3,
                           stan_file="multivariate_zip_splines.stan")
     } else {
+      mult <- result
       stan_fit <- mcmc(mult, iterations=3e4, warmup=5e3, mc.cores = 1)
     }
     save(stan_fit, file = sprintf("/dskh/nobackup/markg/phd/stan_fit_%s_%d.RData", test, i))
@@ -119,13 +123,29 @@ create_accuracy_df <- function(accuracy, make_colnames=FALSE) {
   accuracy_df
 }
 
+# Somehow do this across all approximations.
+# So for each parameter, plot the Laplace, GVA, GVA2 and GVA2 accuracy
+# But label the x axis only for the parameter. Use a legend to indicate the approximation
 median_accuracy_graph <- function(approximation="gva", test="intercept") {
-  cat("median_accuracy_graph: approximation", approximation, ", test", test, "\n")
-  load(file = sprintf("results/accuracy_list_%s_%s.RData", approximation, test))
-  
-  accuracy_df <- create_accuracy_df(accuracy, make_colnames=TRUE)
-  pdf(sprintf("results/median_accuracy_%s_%s.pdf", approximation, test))
+  accuracy_df <- data.frame()
+  for (approximation in c("laplace", "gva", "gva2", "gva_nr")) {
+    # Create accuracy data frame
+    # Merge with other accuracy data frames
+    cat("median_accuracy_graph: approximation", approximation, ", test", test, "\n")
+    load(file = sprintf("results/accuracy_list_%s_%s.RData", approximation, test))
+    
+    accuracy_df_delta <- create_accuracy_df(accuracy, make_colnames=TRUE)
+    accuracy_df <- rbind(accuracy_df, cbind(approximation, accuracy_df_delta))
+  }
+
+  # Create graph
+  # Order by parameter, then approximation within that
+
+  pdf(sprintf("results/median_accuracy_%s.pdf", test))
   # Should be plotting mean, and comparing approximations
+  for (approximation in c("laplace", "gva", "gva2", "gva_nr")) {
+    
+  }
   if (test == "intercept") {
     mean_vu <- apply(accuracy_df[, 3:22], 1, mean)
     accuracy_df2 <- cbind(accuracy_df[, c("vbeta_0", "vbeta_1", "sigma2_vu", "rho")])
@@ -171,7 +191,7 @@ median_accuracy_csv <- function(approximation="gva", test=test) {
 
 is.between <- function(x, a, b) x >= a && x <= b
 
-coverage_percentage <- function(approximation="gva")
+coverage_percentage <- function(approximation="gva", test="intercept")
 {
 	# Percentage coverage of the true parameter values by approximate 95%
 	# credible intervals based on variational Bayes approximate posterior
@@ -188,7 +208,8 @@ coverage_percentage <- function(approximation="gva")
 	for (i in 1:1e4) {
     set.seed(i)
       cat("i", i, "counter", counter, "percentage", round(100*counter/i, 2), "\n")
-		mult <- generate_test_data(m, ni, expected_beta = expected_beta, expected_rho = expected_rho)
+		# mult <- generate_test_data(m, ni, expected_beta = expected_beta, expected_rho = expected_rho)
+    mult <- generate_test_case(i, test)
     
 		# var_result <- tryCatch(zipvb(mult, method=approximation, verbose=FALSE),
     #                        error <- function (E) { return(NULL) })
