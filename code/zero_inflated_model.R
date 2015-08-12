@@ -3,56 +3,6 @@ library(limma)
 source("common.R")
 source("gaussian.R")
 
-calculate_lower_bound <- function(mult, verbose=FALSE)
-{
-	vy <- mult$vy
-  vp <- mult$vp
-  vmu <- mult$vmu
-  mX <- mult$mX
-  mC <- mult$mC
-  m <- mult$m
-  p <- mult$p
-  v <- mult$v
-  d <- mult$d
-  mPsi <- mult$mPsi
-  a_rho <- mult$a_rho
-  b_rho <- mult$b_rho
-  mLambda <- mult$mLambda
-  prior <- mult$prior
-
-	if (!is.null(mX)) {
-  	beta_idx <- 1:p
-  }
-  
-	zero.set <- which(vy == 0)
-
-	# Terms for (beta, u)
-	T1 <- t(vy * vp) %*% mC %*% vmu
-	T1 <- T1 - t(vp) %*% exp(mC %*% vmu + .5 * diag(mC %*% mLambda %*% t(mC)))
-	T1 <- T1 - sum(lgamma(vy + 1))
-  if (p > 0) {
-	 T1 <- T1 - .5 * p * log(prior$sigma2.beta) - .5 * (sum(vmu[beta_idx] ^ 2) + tr(mLambda[beta_idx, beta_idx])) / prior$sigma2.beta
-  }
-	T1 <- T1 + .5 * (p + m) + .5 * log(det(mLambda))
-	eps <- 1e-10
-
-	E_log_det_mSigma_u <- sum(digamma(.5 * (v + 1 - 1:d))) + d * log(2) - log(det(mPsi))
-	E_mSigma_u_inv <- solve(mPsi) / (v + d + 1)
-	T2 <- .5 * (prior$v * log(det(prior$mPsi)) - v * log(det(mPsi)))
-	T2 <- T2 - lgammap(.5 * prior$v, d) + lgammap(.5 * v, d)
-	T2 <- T2 + .5 * E_log_det_mSigma_u - .5 * tr(E_mSigma_u_inv * (prior$mPsi - mPsi))
-
-	#if (verbose) cat("calculate_lower_bound: ", vp[zero.set], "\n")
-	# 0 log 0 returns NaN. We sidestep this by adding epsilon to vp[zero.set]
-	T3 <- sum(-vp[zero.set] * log(vp[zero.set] + eps) - (1 - vp[zero.set]) * log(1 - vp[zero.set] + eps))
-	T3 <- T3 - lbeta(prior$a_rho, prior$b_rho) + lbeta(a_rho, b_rho)
-
-	if (verbose) {
-	  	cat("calculate_lower_bound: T1", T1, "T2", T2, "T3", T3, "\n")
-	}
-  
-	return(T1 + T2 + T3)
-}
 
 create_mult <- function(vy, mX, mZ, sigma2.beta, m=ncol(mZ), blocksize=1, spline_dim=0, v=0)
 {
@@ -123,9 +73,61 @@ create_mult <- function(vy, mX, mZ, sigma2.beta, m=ncol(mZ), blocksize=1, spline
   return(mult)
 }
 
+calculate_lower_bound <- function(mult, verbose=FALSE)
+{
+	vy <- mult$vy
+  vp <- mult$vp
+  vmu <- mult$vmu
+  mX <- mult$mX
+  mC <- mult$mC
+  m <- mult$m
+  p <- mult$p
+  v <- mult$v
+  d <- mult$d
+  mPsi <- mult$mPsi
+  a_rho <- mult$a_rho
+  b_rho <- mult$b_rho
+  mLambda <- mult$mLambda
+  prior <- mult$prior
+
+	if (!is.null(mX)) {
+  	beta_idx <- 1:p
+  }
+  
+	zero.set <- which(vy == 0)
+
+	# Terms for (beta, u)
+	T1 <- t(vy * vp) %*% mC %*% vmu
+	T1 <- T1 - t(vp) %*% exp(mC %*% vmu + .5 * diag(mC %*% mLambda %*% t(mC)))
+	T1 <- T1 - sum(lgamma(vy + 1))
+  if (p > 0) {
+	 T1 <- T1 - .5 * p * log(prior$sigma2.beta) - .5 * (sum(vmu[beta_idx] ^ 2) + tr(mLambda[beta_idx, beta_idx])) / prior$sigma2.beta
+  }
+	T1 <- T1 + .5 * (p + m) + .5 * log(det(mLambda))
+	eps <- 1e-10
+
+	E_log_det_mSigma_u <- sum(digamma(.5 * (v + 1 - 1:d))) + d * log(2) - log(det(mPsi))
+	E_mSigma_u_inv <- solve(mPsi) / (v + d + 1)
+	T2 <- .5 * (prior$v * log(det(prior$mPsi)) - v * log(det(mPsi)))
+	T2 <- T2 - lgammap(.5 * prior$v, d) + lgammap(.5 * v, d)
+	T2 <- T2 + .5 * E_log_det_mSigma_u - .5 * tr(E_mSigma_u_inv * (prior$mPsi - mPsi))
+
+	#if (verbose) cat("calculate_lower_bound: ", vp[zero.set], "\n")
+	# 0 log 0 returns NaN. We sidestep this by adding epsilon to vp[zero.set]
+	T3 <- sum(-vp[zero.set] * log(vp[zero.set] + eps) - (1 - vp[zero.set]) * log(1 - vp[zero.set] + eps))
+	T3 <- T3 - lbeta(prior$a_rho, prior$b_rho) + lbeta(a_rho, b_rho)
+
+	if (verbose) {
+	  	cat("calculate_lower_bound: T1", T1, "T2", T2, "T3", T3, "\n")
+	}
+  
+	return(T1 + T2 + T3)
+}
+
 zipvb <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE)
 {
-  MAXITER <- 100
+  # browser()
+  MAXITER <- 30
   
   # Initialise variables from mult
   N <- length(mult$vy)
@@ -153,7 +155,8 @@ zipvb <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE)
   vlower_bound <- c()
 
   # Make an initial guess for vmu
-  vmu <- glm.fit(mult$mC, mult$vy, family=poisson())$coefficients
+  fit <- glm.fit(mult$mC, mult$vy, family=poisson())
+  vmu <- fit$coefficients
   i <- 0
   # Iterate ----
   # TODO: Add check on whether parameters are still changing
@@ -161,7 +164,7 @@ zipvb <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE)
         (vlower_bound[i] > vlower_bound[i - 1]) ||
         sqrt(sum((mult$vmu - old_vmu)^2)) > 1e-8) {
   # for (i in 1:MAXITER) {
-    if (i > 0) {
+    if (i > 0 && verbose) {
       cat("vmu", mult$vmu, "\n")
       cat("old_vmu", old_vmu, "\n")
       cat("Diff in norm of vmu", sqrt(sum((mult$vmu - old_vmu)^2)), "\n")
