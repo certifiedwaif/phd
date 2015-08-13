@@ -1,6 +1,20 @@
 To Do list
 ==========
 
+13/08/2015
+----------
+- Why doesn't coverage percentage work anymore?
+  Why is E[\vbeta|\vy, \mX] not what you think it is?
+- Fix up tickets with Jetstar
+- Passport application
+  Entered details, form printed, paid for.
+- Chase Ben about boxes
+- Book car for Lewys
+- Lecture
+  Done
+- Pay claim
+- Median graph
+
 12/08/2015
 ----------
 - Email PH about data release
