@@ -1,6 +1,5 @@
 #!/usr/bin/env Rscript
 # median_accuracy.R
-library(plyr)
 library(optparse)
 library(parallel)
 source("generate.R")
@@ -142,10 +141,14 @@ median_accuracy_graph <- function(approximation="gva", test="intercept") {
   # Order by parameter, then approximation within that
 
   pdf(sprintf("results/median_accuracy_%s.pdf", test))
-  # Should be plotting mean, and comparing approximations
-  for (approximation in c("laplace", "gva", "gva2", "gva_nr")) {
-    
-  }
+  # For all parameters of interest
+  par(mfrow=c(1, 4))
+  # Just label the graphs and move on.
+  boxplot(as.numeric(as.character(vbeta_0))~approximation, main="vbeta_0", data=accuracy_df)
+  boxplot(as.numeric(as.character(vbeta_1))~approximation, main="vbeta_1",  data=accuracy_df)
+  boxplot(as.numeric(as.character(sigma2_vu_1))~approximation, main="sigma2_vu_1",  data=accuracy_df)
+  boxplot(as.numeric(as.character(sigma2_vu_2))~approximation, main="sigma2_vu_2",  data=accuracy_df)
+  par(mfrow=c(1, 1))
   if (test == "intercept") {
     mean_vu <- apply(accuracy_df[, 3:22], 1, mean)
     accuracy_df2 <- cbind(accuracy_df[, c("vbeta_0", "vbeta_1", "sigma2_vu", "rho")])
@@ -204,7 +207,8 @@ coverage_percentage <- function(approximation="gva", test="intercept")
   m <- 10
   ni <- 25
   expected_beta <- c(2, 1)
-  expected_rho <- 0.5
+  expected_rho <- 0.7
+  result <- matrix(0, 1e4, 42)
 	for (i in 1:1e4) {
     set.seed(i)
       cat("i", i, "counter", counter, "percentage", round(100*counter/i, 2), "\n")
@@ -214,6 +218,8 @@ coverage_percentage <- function(approximation="gva", test="intercept")
 		# var_result <- tryCatch(zipvb(mult, method=approximation, verbose=FALSE),
     #                        error <- function (E) { return(NULL) })
     var_result <- zipvb(mult, method=approximation, verbose=FALSE)
+    cat("vmu", var_result$vmu, "\n")
+    result[i, ] <- var_result$vmu
   	# If there was an error, re-try with another generated data set. Sometimes the
   	# optimiser gets passed a non-finite value.
   	if (is.null(var_result)) {
@@ -248,6 +254,7 @@ coverage_percentage <- function(approximation="gva", test="intercept")
     		counter[p + 1] <- counter[p + 1] + 1
   	}
 	}
+  write.csv(result, file="results/coverage_results.csv")
 	print(counter)
 }
 # coverage_percentage()
