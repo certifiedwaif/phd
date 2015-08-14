@@ -1,11 +1,62 @@
 To Do list
 ==========
 
+14/08/2015
+----------
+- Why doesn't coverage percentage work anymore?
+  Why is E[\vbeta|\vy, \mX] not what you think it is?
+  log(\vr \vy) =  (\mX \vbeta + \mZ \vu)
+  Is it the test case?
+  Could you get the expected parameters from the MCMC runs?
+  If I could just get that to work ...
+- PH hasn't responded to my data request, and she might not.
+  Need a backup plan.
+- Speed
+  Need to nail this down once and for all. I think that the L-BFGS-B traversal is faster for
+  GVA2 than for GVA. But I've made a lot of changes since I tested this last, which makes me nervous.
+  Still seems to be true. Running accuracy.R -t slope I get:
+  Time difference of 2.472427 secs
+  [1] 0.6580959 0.6919876
+  [1] 0.7191744
+  [1] 0.5296653 0.5219726
+  [1] 0.9107536
+  Time difference of 4.899895 secs
+  [1] 0.8786032 0.8833411
+  [1] 0.9080758
+  [1] 0.5235579 0.5155404
+  [1] 0.8958491
+  Time difference of 2.40483 secs
+  [1] 0.8932545 0.8988409
+  [1] 0.9117547
+  [1] 0.5235019 0.5154443
+  [1] 0.8958394
+  Time difference of 0.4393022 secs
+  [1] 0.8786032 0.8833409
+  [1] 0.9080757
+  [1] 0.5235580 0.5155404
+  [1] 0.8958491
+
+  markg@markg-OptiPlex-9020:~/phd/code$ grep -i iteration /tmp/gva_log.txt | wc -l
+  3810
+  markg@markg-OptiPlex-9020:~/phd/code$ grep -i iteration /tmp/gva2_log.txt | wc -l
+  849  
+  
+  That's that.
+  
+- John wants me to take advantage of the sparsity of \mLambda = (\mR \mR)^\top by making
+  Rinds include only the nonzero entries of \mLambda. I really doubt this is going to help very
+  much, as it will only effect the execution of optim(), but we'll see. It's worth a try.
+  mC2 <- mC
+  mC2[mC != 0] <- 1
+  ones <- crossprod(mC2) + solve(mSigma.inv)
+  Rinds <- lower.tri(mLambda) intersect ones
+
 13/08/2015
 ----------
 - Why doesn't coverage percentage work anymore?
   Why is E[\vbeta|\vy, \mX] not what you think it is?
 - Fix up tickets with Jetstar
+  Done
 - Passport application
   Entered details, form printed, paid for.
 - Chase Ben about boxes
@@ -13,7 +64,11 @@ To Do list
 - Lecture
   Done
 - Pay claim
+  Winter School - What days did I work? That's quite a lot of money.
+  Tutorial so far this semester. That's also quite a lot of money.
 - Median graph
+  Done, although not very pretty
+- 
 
 12/08/2015
 ----------
