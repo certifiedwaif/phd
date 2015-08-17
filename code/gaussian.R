@@ -303,7 +303,7 @@ vtheta_dec_new <- function(vtheta, d, Rinds)
   Dinds <- d*((1:d)-1)+(1:d)    
   mR[Rinds] <- vtheta[(d + 1):length(vtheta)]
   diag(mR) <- exp(-diag(mR))
-  return(list(vmu=vmu, mR=mR, Dinds=Dinds, Rinds=Rinds))
+  return(list(vmu=vmu, mR=mR, Dinds=Dinds))
 }
 
 f.G_new <- function(vmu, mR, vy, vr, mC, mSigma.inv, gh) 
@@ -514,22 +514,68 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh, Rinds)
   return(vg)
 }
 
-fit.GVA_new <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e-12)
+# Swap fixed and random effects in mLambda so that inverse of mR is quick to
+# calculate due to sparsity. If you do this, you have to re-order mSigma.inv,
+# vmu and mC as well.
+swap_mX_mZ <- function(vmu, mLambda, mSigma.inv, mC, p, u_dim)
+{
+  beta_idx = 1:p
+  u_idx = (p+1):(p+u_dim)
+  new_beta_idx = (u_dim+1):(u_dim+p)
+  new_u_idx = 1:u_dim
+  mLambda_new = blockDiag(mLambda[u_idx, u_idx], mLambda[beta_idx, beta_idx])
+  mLambda_new[new_u_idx, new_beta_idx] = mLambda[u_idx, beta_idx]
+  mLambda_new[new_beta_idx, new_u_idx] = t(mLambda[u_idx, beta_idx])
+  mLambda = mLambda_new
+  mSigma.inv = blockDiag(mSigma.inv[u_idx, u_idx], mSigma.inv[beta_idx, beta_idx])
+  vmu = c(vmu[u_idx], vmu[beta_idx])
+  mC = mC[,c(u_idx, beta_idx)]
+  return(list(vmu=vmu, mLambda=mLambda, mSigma.inv=mSigma.inv, mC=mC))
+}
+
+# Swap everything back
+swap_mX_mZ_back <- function(vmu, mLambda, mSigma.inv, mC, p, u_dim)
+{
+  beta_idx = (u_dim+1):(u_dim+p)
+  u_idx = 1:u_dim
+  new_beta_idx = 1:p
+  new_u_idx = (p+1):(p+u_dim)
+  mLambda_new = blockDiag(mLambda[beta_idx, beta_idx], mLambda[u_idx, u_idx])
+  mLambda_new[new_beta_idx, new_u_idx] = mLambda[beta_idx, u_idx]
+  mLambda_new[new_u_idx, new_beta_idx] = t(mLambda[beta_idx, u_idx])
+  mLambda = mLambda_new
+  mSigma.inv = blockDiag(mSigma.inv[beta_idx, beta_idx], mSigma.inv[u_idx, u_idx])
+  vmu = c(vmu[beta_idx], vmu[u_idx])
+  mC = mC[,c(beta_idx, u_idx)]
+  return(list(vmu=vmu, mLambda=mLambda, mSigma.inv=mSigma.inv, mC=mC))
+}
+
+fit.GVA_new <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e-12, p=NA, m=NA, blocksize=NA, spline_dim=NA)
 {
   
   gh2 <- NULL #list(x=gh$nodes, w=gh$weights, w.til=gh$weights*exp(gh$nodes^2))
     
   d <- length(vmu)
 
+  # Swap order of parameters so that random effects are before fixed effects
+  u_dim = (m-1)*blocksize+spline_dim
+  result <- swap_mX_mZ(vmu, mLambda, mSigma.inv, mC, p, u_dim)
+  vmu <- result$vmu
+  mLambda <- result$mLambda
+  mSigma.inv <- result$mSigma.inv
+  mC <- result$mC
+
   mR <- t(chol(solve(mLambda + diag(1.0E-8, d))))
   mC2 <- mC
   mC2[mC != 0] <- 1
-  ones <- crossprod(mC2) + solve(mSigma.inv)
+  ones <- crossprod(mC2)# + solve(mSigma.inv)
   ones[ones != 0] <- 1
   Rinds <- intersect(which(lower.tri(mR, diag=TRUE)), which(ones == 1))
   # Rinds <- which(lower.tri(mR, diag=TRUE))
   print(length(Rinds))
   vtheta <- vtheta_enc_new(vmu, mR, Rinds)
+
+
   
   if (method == "L-BFGS-B") {
     controls <- list(maxit=1000, trace=0, fnscale=-1, REPORT=1, factr=1.0E-5, lmm=10, pgtol=reltol)
@@ -546,9 +592,17 @@ fit.GVA_new <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0
   decode <- vtheta_dec_new(vtheta, d, Rinds)
   vmu <- decode$vmu
   mR <- decode$mR
+  # browser()
   
-  mLambda <- solve(mR %*% t(mR) + diag(1e-8, d), tol=1e-99)
-  
+  mLambda <- solve(crossprod(t(mR)) + diag(1e-8, d), tol=1e-99)
+
+  # Swap back
+  result <- swap_mX_mZ_back(vmu, mLambda, mSigma.inv, mC, p, u_dim)
+  vmu <- result$vmu
+  mLambda <- result$mLambda
+  mSigma.inv <- result$mSigma.inv
+  mC <- result$mC
+
   return(list(res=res, vmu=vmu, mLambda=mLambda))
 }
 

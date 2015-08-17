@@ -213,10 +213,12 @@ zipvb <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE)
         # Very occasionally, fit.Lap will return a non-invertible mLambda. In that case,
         # fall back to L-BFGS.
         if (any(is.complex(eig$values)) || any(eig$values < 1e-8)) {
-          fit1 <- fit.GVA_new(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B")
+          fit1 <- fit.GVA_new(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B", p=p, m=m, 
+                        blocksize=blocksize, spline_dim=spline_dim)
         }
       } else {
-        fit1 <- fit.GVA_new(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B")
+        fit1 <- fit.GVA_new(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B", p=p, m=m, 
+                        blocksize=blocksize, spline_dim=spline_dim)
         # If you use L-BFGS-B, this code will overflow frequently - about one time in ten.
         # If you use BFGS or CG, you'll get strange errors about one time in a thousand.
         # CG also isn't very accurate.
