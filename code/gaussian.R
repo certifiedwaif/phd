@@ -289,19 +289,18 @@ fit.GVA <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e-12
 }
 
 # Gaussian variational approxmation, mLambda = (mR mR^T)^-1 ----
-vtheta_enc_new <- function(vmu, mR)
+vtheta_enc_new <- function(vmu, mR, Rinds)
 {
   diag(mR) <- -log(diag(mR))
-  Rinds <- which(lower.tri(mR, diag=TRUE))
   c(vmu, mR[Rinds])
 }
 
-vtheta_dec_new <- function(vtheta, d)
+vtheta_dec_new <- function(vtheta, d, Rinds)
 {
+  # browser()
   vmu <- vtheta[1:d]
   mR <- matrix(0, d, d)
   Dinds <- d*((1:d)-1)+(1:d)    
-  Rinds <- which(lower.tri(mR, diag=TRUE))
   mR[Rinds] <- vtheta[(d + 1):length(vtheta)]
   diag(mR) <- exp(-diag(mR))
   return(list(vmu=vmu, mR=mR, Dinds=Dinds, Rinds=Rinds))
@@ -310,7 +309,7 @@ vtheta_dec_new <- function(vtheta, d)
 f.G_new <- function(vmu, mR, vy, vr, mC, mSigma.inv, gh) 
 {
   d <- length(vmu)
-  
+  # cat("vmu", vmu, "\n")
   vmu.til     <- mC %*% vmu
   # cat("vmu.til", vmu.til, "\n")
   # va <- forwardsolve(mR, t(mC))
@@ -322,11 +321,12 @@ f.G_new <- function(vmu, mR, vy, vr, mC, mSigma.inv, gh)
   #     vsigma2.til[i] <- 1
   #   }
   # }
-  # cat("vsigma2.til", vsigma2.til, "\n")
   mLambda <- chol2inv(t(mR) + diag(1e-8, d))
   # vsigma2.til <- fastdiag(mLambda, mC)
   vB0 <- B0.fun("POISSON", vmu.til, vsigma2.til, gh) 
   # cat("vB0", vB0, "\n")
+  # cat("sum(vy * vmu.til - vB0)", sum(vy * vmu.til - vB0), "\n")
+  # cat("sum(vr * (vy * vmu.til - vB0))", sum(vr * (vy * vmu.til - vB0)), "\n")
   if (any(!is.finite(vB0))) {
     f <- -1.0E16
   } else {
@@ -336,10 +336,10 @@ f.G_new <- function(vmu, mR, vy, vr, mC, mSigma.inv, gh)
   return(f)
 }
 
-f.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
+f.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh, Rinds)
 {
   d <- ncol(mC)
-  decode <- vtheta_dec_new(vtheta, d)
+  decode <- vtheta_dec_new(vtheta, d, Rinds)
   vmu <- decode$vmu
   mR <- decode$mR
   Dinds <- decode$Dinds
@@ -347,7 +347,6 @@ f.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
     mR[Dinds[i]] <- min(c(1.0E5, mR[Dinds[i]]))
     mR[Dinds[i]] <- max(c(1.0E-5, mR[Dinds[i]]))
   }   
-
 
   # Threshold entries of mR at 1e-2
   #cat("mR[Dinds]", mR[Dinds], "\n")    
@@ -379,28 +378,28 @@ mH.G_new <- function(vmu, vy, vr, mC, mSigma.inv, vB2)
   return(mH)    
 }
 
-vg.GVA_new.approx <- function(vmu, vy, vr, mC, mSigma.inv, gh)
+vg.GVA_new.approx <- function(vmu, vy, vr, mC, mSigma.inv, gh, Rinds)
 {
   n <- length(vy)
   d <- ncol(mC)
   eps <- 1.0E-6
-  f <- f.GVA_new(vmu, vy, vr, mC, mSigma.inv, gh)
+  f <- f.GVA_new(vmu, vy, vr, mC, mSigma.inv, gh, Rinds)
   vg.approx <- matrix(0, dmLambda_check, 1)
   for (i in 1:d) {
     vmup <- vmu 
     vmup[i] <- vmu[i] + eps
-    fp <- f.GVA_new(vmup, vy, vr, mC, mSigma.inv, gh)
+    fp <- f.GVA_new(vmup, vy, vr, mC, mSigma.inv, gh, Rinds)
 
     vmum <- vmu 
     vmum[i] <- vmu[i] - eps
-    fm <- f.GVA_new(vmum, vy, vr, mC, mSigma.inv, gh)
+    fm <- f.GVA_new(vmum, vy, vr, mC, mSigma.inv, gh, Rinds)
 
     vg.approx[i] <- (fp - fm) / (2 * eps)
   }
   return(vg.approx)
 }
 
-vg.GVA_new.mat_approx <- function(vmu, mR, vy, vr, mC, mSigma.inv, gh)
+vg.GVA_new.mat_approx <- function(vmu, mR, vy, vr, mC, mSigma.inv, gh, Rinds)
 {
   d <- ncol(mC)
 
@@ -410,12 +409,12 @@ vg.GVA_new.mat_approx <- function(vmu, mR, vy, vr, mC, mSigma.inv, gh)
   for (i in 1:d) {
     for (j in 1:d) {
       mR_copy[i, j] <- mR_copy[i, j] + eps
-      vtheta <- vtheta_enc_new(vmu, mR_copy)
-      fp <- f.GVA_new(vtheta, vy, vr, mC, mSigma.inv, gh)
+      vtheta <- vtheta_enc_new(vmu, mR_copy, Rinds)
+      fp <- f.GVA_new(vtheta, vy, vr, mC, mSigma.inv, gh, Rinds)
 
       mR_copy[i, j] <- mR_copy[i, j] - 2 * eps
-      vtheta <- vtheta_enc_new(vmu, mR_copy)
-      fm <- f.GVA_new(vtheta, vy, vr, mC, mSigma.inv, gh)
+      vtheta <- vtheta_enc_new(vmu, mR_copy, Rinds)
+      fm <- f.GVA_new(vtheta, vy, vr, mC, mSigma.inv, gh, Rinds)
       mR_copy[i, j] <- mR_copy[i, j] + eps
 
       vg.approx[i, j] <- (fp - fm) / (2 * eps)
@@ -424,14 +423,13 @@ vg.GVA_new.mat_approx <- function(vmu, mR, vy, vr, mC, mSigma.inv, gh)
   return(vg.approx)
 }
 
-vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
+vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh, Rinds)
 {
   d <- ncol(mC)
-  decode <- vtheta_dec_new(vtheta, d)
+  decode <- vtheta_dec_new(vtheta, d, Rinds)
   vmu <- decode$vmu
   mR <- decode$mR
   # mR <- new("dtrMatrix", uplo="L", diag="N", x=as.vector(decode$mR), Dim=as.integer(c(d, d)))
-  Rinds <- decode$Rinds
   Dinds <- decode$Dinds
 
   for (i in 1:length(Dinds)) {
@@ -518,12 +516,20 @@ vg.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
 
 fit.GVA_new <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e-12)
 {
+  
   gh2 <- NULL #list(x=gh$nodes, w=gh$weights, w.til=gh$weights*exp(gh$nodes^2))
     
   d <- length(vmu)
 
   mR <- t(chol(solve(mLambda + diag(1.0E-8, d))))
-  vtheta <- vtheta_enc_new(vmu, mR)
+  mC2 <- mC
+  mC2[mC != 0] <- 1
+  ones <- crossprod(mC2) + solve(mSigma.inv)
+  ones[ones != 0] <- 1
+  Rinds <- intersect(which(lower.tri(mR, diag=TRUE)), which(ones == 1))
+  # Rinds <- which(lower.tri(mR, diag=TRUE))
+  print(length(Rinds))
+  vtheta <- vtheta_enc_new(vmu, mR, Rinds)
   
   if (method == "L-BFGS-B") {
     controls <- list(maxit=1000, trace=0, fnscale=-1, REPORT=1, factr=1.0E-5, lmm=10, pgtol=reltol)
@@ -534,10 +540,10 @@ fit.GVA_new <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0
   }
   res <- optim(par=vtheta, fn=f.GVA_new, gr=vg.GVA_new, 
                 method=method, lower=-Inf, upper=Inf, control=controls, 
-                vy=vy, vr=vr, mC=mC, mSigma.inv=mSigma.inv, gh=gh2)        
+                vy=vy, vr=vr, mC=mC, mSigma.inv=mSigma.inv, gh=gh2, Rinds=Rinds)        
       
   vtheta <- res$par 
-  decode <- vtheta_dec_new(vtheta, d)
+  decode <- vtheta_dec_new(vtheta, d, Rinds)
   vmu <- decode$vmu
   mR <- decode$mR
   
