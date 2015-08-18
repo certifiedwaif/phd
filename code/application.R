@@ -42,6 +42,12 @@ mult$vmu[1:2] <- c(log(1 + mean(vy)), 1)
 # coming from.
 
 # Laplace works because there's no 0.5 * sigma2 argument to the exponential
-fit <- zipvb(mult, method="gva2", verbose=TRUE)
+now <- Sys.time()
+fit <- zipvb(mult, method="gva", verbose=FALSE)
+print(Sys.time() - now)
+
+now <- Sys.time()
+fit2 <- zipvb(mult, method="gva2", verbose=FALSE)
+print(Sys.time() - now)
 # MCMC fit.
 # Compare.
