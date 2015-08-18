@@ -1,6 +1,28 @@
 To Do list
 ==========
 
+19/08/2015
+----------
+- Try new dimension reduction code on the application example.
+  It worked, but from my point of view, the results are disappointing.
+  Time difference of 2.963303 mins
+  Time difference of 55.16225 secs  
+- Teach
+  Done
+- Enter marks for last week's computer practicals
+  Done
+- Claim money
+- Find data set
+- Pack
+- Passport
+
+18/08/2015
+----------
+- I tried the dimension reduction idea. So far, it's not panning out. But I wonder if I need
+  to re-order the covariance matrix. I still have code for that in the repository.
+
+  It worked!
+
 14/08/2015
 ----------
 - Why doesn't coverage percentage work anymore?
