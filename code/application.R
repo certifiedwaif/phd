@@ -51,3 +51,29 @@ fit2 <- zipvb(mult, method="gva2", verbose=FALSE)
 print(Sys.time() - now)
 # MCMC fit.
 # Compare.
+
+# I might not be able to use that data set. Instead, I could use the roach data set
+# from ARM.
+roaches <- read.csv(file="../ARM_Data/roaches/roachdata.csv")
+fit <- glm (y ~ roach1 + treatment + senior, family=poisson, offset=log(exposure2), data=roaches)
+summary(fit)
+# Construct vy, mX, and mZ
+# Maybe there's a better way to do these things
+colnames(roaches)[2] <- "roach2"
+colnames(roaches)
+# Doing things this way will not work for our case. This data set is wide, and you need it to
+# be long.
+roaches_long <- matrix(NA, nrow(roaches) * 2, ncol(roaches) - 2)
+idx <- 1
+roaches_mat <- as.matrix(roaches)
+for (i in 1:nrow(roaches_mat)) {
+	roaches_long[idx, 1] <- 0
+	roaches_long[idx + 1, 1] <- roaches_mat[i, "exposure2"]
+	roaches_long[idx, 2] <- roaches_mat[i, "roach1"]
+	roaches_long[idx, 3:4] <- roaches_mat[i, 4:5]
+	roaches_long[idx + 1, 2] <- roaches_mat[i, "roach2"]
+	roaches_long[idx + 1, 3:4] <- roaches_mat[i, 4:5]
+	idx <- idx + 2
+}
+colnames(roaches_long) <- c("time", "roaches", "treatment", "senior")
+roaches_long_df <- as.data.frame(roaches_long)
