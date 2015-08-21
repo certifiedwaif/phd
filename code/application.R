@@ -62,6 +62,13 @@ IPM_BASELINE_R2 <- read.csv(file="../ARM_Data/roaches/IPM_BASELINE_R2.csv")
 IPM_BASELINE_R2_032006 <- read.csv(file="../ARM_Data/roaches/IPM_BASELINE_R2.csv")
 roaches <- cbind(RoachCounts, IPM_BASELINE_R2_032006)
 # Must exclude entries where second observation is NA
+# Get first five from each building.
+roaches <- sqldf("select * from roaches where hasround2 = 1")
+# roaches_new <- data.frame()
+# for (building in 1:9) {
+# 	roaches_new <- rbind(roaches_new, sqldf(sprintf("select * from roaches where building = %d limit 5", building)))
+# }
+# roaches <- roaches_new
 # Convert from wide to long
 roaches_long <- matrix(NA, nrow(roaches) * 2, 9)
 colnames(roaches_long) <- c("time", "treatment", "senior", "building", "stories", "hasround2", "roachsum", "trapmiss", "trapdays")
@@ -80,6 +87,14 @@ for (row_idx in 1:nrow(roaches)) {
 	roaches_long[row_idx * 2, 2:6] <- roaches[row_idx, 7:11]
 }
 
-fit <- glm (y ~ roach1 + treatment + senior, family=poisson, offset=log(exposure2), data=roaches)
+fit <- glm(roachsum~time*treatment+senior+factor(building)+stories, data=roaches_long, family=poisson())
 summary(fit)
 # Construct vy, mX, and mZ
+mX <- model.matrix(~time*treatment+senior+stories, data=roaches_long)
+mZ <- model.matrix(~factor(building), data=roaches_long)
+mZ <- mZ[, 2:ncol(mZ)]
+
+vy <- with(roaches_long, roachsum / trapdays)
+
+mult <- create_mult(vy, mX, mZ, 1e5, m=13, blocksize=1)
+fit1 <- zipvb(mult, method="gva", verbose=TRUE)
