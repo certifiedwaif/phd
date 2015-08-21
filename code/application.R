@@ -54,26 +54,32 @@ print(Sys.time() - now)
 
 # I might not be able to use that data set. Instead, I could use the roach data set
 # from ARM.
-roaches <- read.csv(file="../ARM_Data/roaches/roachdata.csv")
+# IPM_BASELINE_R2.csv        RoachCounts.csv
+# IPM_BASELINE_R2_032006.csv roachdata.csv
+roachdata <- read.csv(file="../ARM_Data/roaches/roachdata.csv")
+RoachCounts <- read.csv(file="../ARM_Data/roaches/RoachCounts.csv")
+IPM_BASELINE_R2 <- read.csv(file="../ARM_Data/roaches/IPM_BASELINE_R2.csv")
+IPM_BASELINE_R2_032006 <- read.csv(file="../ARM_Data/roaches/IPM_BASELINE_R2.csv")
+roaches <- cbind(RoachCounts, IPM_BASELINE_R2_032006)
+# Must exclude entries where second observation is NA
+# Convert from wide to long
+roaches_long <- matrix(NA, nrow(roaches) * 2, 9)
+colnames(roaches_long) <- c("time", "treatment", "senior", "building", "stories", "hasround2", "roachsum", "trapmiss", "trapdays")
+roaches_long <- as.data.frame(roaches_long)
+for (row_idx in 1:nrow(roaches)) {
+	roaches_long[row_idx * 2 - 1, "time"] <- 1
+	roaches_long[row_idx * 2 - 1, "roachsum"] <- roaches[row_idx, "roachsum1"]
+	roaches_long[row_idx * 2 - 1, "trapmiss"] <- roaches[row_idx, "trapmiss1"]
+	roaches_long[row_idx * 2 - 1, "trapdays"] <- roaches[row_idx, "trapdays1"]
+	roaches_long[row_idx * 2 - 1, 2:6] <- roaches[row_idx, 7:11]
+
+	roaches_long[row_idx * 2, "time"] <- 2
+	roaches_long[row_idx * 2, "roachsum"] <- roaches[row_idx, "roachsum2"]
+	roaches_long[row_idx * 2, "trapmiss"] <- roaches[row_idx, "trapmiss2"]
+	roaches_long[row_idx * 2, "trapdays"] <- roaches[row_idx, "trapdays2"]
+	roaches_long[row_idx * 2, 2:6] <- roaches[row_idx, 7:11]
+}
+
 fit <- glm (y ~ roach1 + treatment + senior, family=poisson, offset=log(exposure2), data=roaches)
 summary(fit)
 # Construct vy, mX, and mZ
-# Maybe there's a better way to do these things
-colnames(roaches)[2] <- "roach2"
-colnames(roaches)
-# Doing things this way will not work for our case. This data set is wide, and you need it to
-# be long.
-roaches_long <- matrix(NA, nrow(roaches) * 2, ncol(roaches) - 2)
-idx <- 1
-roaches_mat <- as.matrix(roaches)
-for (i in 1:nrow(roaches_mat)) {
-	roaches_long[idx, 1] <- 0
-	roaches_long[idx + 1, 1] <- roaches_mat[i, "exposure2"]
-	roaches_long[idx, 2] <- roaches_mat[i, "roach1"]
-	roaches_long[idx, 3:4] <- roaches_mat[i, 4:5]
-	roaches_long[idx + 1, 2] <- roaches_mat[i, "roach2"]
-	roaches_long[idx + 1, 3:4] <- roaches_mat[i, 4:5]
-	idx <- idx + 2
-}
-colnames(roaches_long) <- c("time", "roaches", "treatment", "senior")
-roaches_long_df <- as.data.frame(roaches_long)
