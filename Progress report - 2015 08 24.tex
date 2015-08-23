@@ -1,0 +1,51 @@
+\documentclass{beamer}
+
+\usetheme{Warsaw}
+\usepackage{graphicx}
+\usepackage{ulem}
+\input{include.tex}
+\input{Definitions.tex}
+
+\usefonttheme{serif}
+
+\title{Progress report - 24/08/2015}
+\author{Mark Greenaway\\PhD candidate\\markg@maths.usyd.edu.au}
+
+\mode<presentation>
+{ \usetheme{boxes} }
+
+\begin{document}
+\begin{frame}
+\maketitle
+\end{frame}
+
+\begin{frame}{Dimension reduction on covariance matrices}
+\begin{itemize}
+\item It worked! Took around two hours to implement.
+\item Optimising over the sparse covariance matrices is three times faster than optimising
+		over the dense covariance matrices.
+\item Would probably be even better if I could exploit sparse matrices fully.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Application}
+\begin{itemize}
+\item I found an alternative data set on cockroaches.
+\item Cockroach traps are laid in apartments and observed at two timepoints.
+\item Number of cockroaches trapped, number of trap misses and number of days the trap was laid
+	  before cockroaches were collected are recorded at each of the two timepoints.
+\item Some apartments were not followed up.
+\item Pest treatment, senior, building number and the number of stories of the building are also
+      recorded.
+\item Many apartments are observed within the same building, leading to a hierarchical model.
+\item Random intercept for each building.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Next project: Bayesian model selection}
+\begin{itemize}
+\item The literature looks interesting
+\end{itemize}
+\end{frame}
+
+\end{document}
