@@ -1,6 +1,19 @@
 To Do list
 ==========
 
+24/08/2015
+----------
+- Passport
+- Prepare for teaching
+  Done
+- Continue with application
+- Bayesian model selection
+- Write!
+- Claim pay
+  Done for 27/7, 28/7, 29/7, 3/8, 4/8, 5/8, 10/8, 11/8, 12/8, 17/8, 18/8, 19/8
+  Not sure what to do about Winter School. I'm afraid that Sonia's going to scream at me.
+
+
 19/08/2015
 ----------
 - Try new dimension reduction code on the application example.
