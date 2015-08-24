@@ -4,15 +4,18 @@ To Do list
 24/08/2015
 ----------
 - Passport
+  Sent! Wow, I actually did it.
 - Prepare for teaching
   Done
 - Continue with application
+  It runs, but there's some weird stuff in diag(mLambda).
 - Bayesian model selection
 - Write!
+  You could draft the section on the dimension reduction
 - Claim pay
   Done for 27/7, 28/7, 29/7, 3/8, 4/8, 5/8, 10/8, 11/8, 12/8, 17/8, 18/8, 19/8
   Not sure what to do about Winter School. I'm afraid that Sonia's going to scream at me.
-
+- Pack
 
 19/08/2015
 ----------
