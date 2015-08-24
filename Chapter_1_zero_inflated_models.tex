@@ -287,6 +287,15 @@ $\text{diag}(\mC \mLambda \mC^\top)$ directly.
 % Difficulties re: multimodal likelihood, tricks to get that to work
 % I think it's log concave for \vp and \mSigma fixed
 
+% Include diagram?
+By re-ordering $\mC = [\mX \mZ]$ to $\mC = [\mZ \mX]$, and re-ordering the dimensions
+of $\vmu, \mLambda and \mSigma$ in the same manner, the independence between the
+blocks relating to the random effects in $\mZ$ induce sparsity in the Cholesky factor $\mR$
+of $\mLambda$. Thus the Gaussian $q(\vnu) \sim N(\vmu, \mLambda)$ can be optimised over a space
+of $\half p (p + 1) + pq + \half q (q + 1)$ rather than dimension $\half (p + mq) (p + mq + 1)$ 
+as in the dense parameterisation. This leads to subtantial performance gains when m is large,
+as is typically the case in practice. % You could calculate the difference explcitly.
+
 \noindent The Gaussian variational lower bound is
 
 \begin{align*}
@@ -432,6 +441,9 @@ $\rho$ & 0.92 & & \\
 \hline
 \end{tabular}
 \end{table}
+
+% Figure: Median accuracy graph intercept
+% Figure: Median accuracy graph slope
 
 \section{Appendix} 
 % TODO: Mean field updates?
