@@ -56,6 +56,8 @@ print(Sys.time() - now)
 # from ARM.
 # IPM_BASELINE_R2.csv        RoachCounts.csv
 # IPM_BASELINE_R2_032006.csv roachdata.csv
+library(sqldf)
+
 roachdata <- read.csv(file="../ARM_Data/roaches/roachdata.csv")
 RoachCounts <- read.csv(file="../ARM_Data/roaches/RoachCounts.csv")
 IPM_BASELINE_R2 <- read.csv(file="../ARM_Data/roaches/IPM_BASELINE_R2.csv")
@@ -87,14 +89,18 @@ for (row_idx in 1:nrow(roaches)) {
 	roaches_long[row_idx * 2, 2:6] <- roaches[row_idx, 7:11]
 }
 
-fit <- glm(roachsum~time*treatment+senior+factor(building)+stories, data=roaches_long, family=poisson())
+fit <- glm(roachsum~time+treatment+senior, data=roaches_long, family=poisson())
 summary(fit)
+# Need to fix NAs
+model_mat <- model.matrix(roachsum~time+time:treatment+senior+factor(building), data=roaches_long)
+
 # Construct vy, mX, and mZ
-mX <- model.matrix(~time*treatment+senior+stories, data=roaches_long)
+mX <- model.matrix(~time+time:treatment+senior, data=roaches_long)
 mZ <- model.matrix(~factor(building), data=roaches_long)
 mZ <- mZ[, 2:ncol(mZ)]
 
-vy <- with(roaches_long, roachsum / trapdays)
+vy <- with(roaches_long, roachsum)
 
 mult <- create_mult(vy, mX, mZ, 1e5, m=13, blocksize=1)
-fit1 <- zipvb(mult, method="gva", verbose=TRUE)
+# Why does this work with GVA NR, but go crazy with GVA2?
+fit1 <- zipvb(mult, method="gva_nr", verbose=TRUE)
