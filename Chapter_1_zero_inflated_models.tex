@@ -422,6 +422,14 @@ This model implemented above was applied to physical activity data.
 months. The research outcome of interest was to ascertain whether improvements in physical
 activity were achieved and maintained by the majority of participants in the study.
 A zero-inflated random slopes Poisson model was fit using the GVA2 algorithm above.
+The results can be seen in Table \ref{tab:application_roaches}.
+
+The GVA2 algorithm was used to fit a random intercept model to the Roaches data set provided
+by Andrew Gelman.
+% Table of results - Estimates, 95% credible intervals, accuracy
+% I'm not at all looking forward to doing the MCMC for this
+% Or resolving the overflow in mLambda in the model fit
+
 % Table of results
 % How do I present the random effects
 % Covariance?
@@ -429,21 +437,31 @@ A zero-inflated random slopes Poisson model was fit using the GVA2 algorithm abo
 % > diag(fit$mLambda[1:2, 1:2])
 % [1] 0.0008489323 0.0006191579
 % Do you need accuracy results?
+
+% Table of results - Estimates, 95% credible intervals, accuracy
+% I'm not at all looking forward to doing the MCMC for this
+% Or resolving the overflow in mLambda in the model fit
+
 \begin{table}
+\label{tab:application_roaches}
+\caption{Table of results - Roaches}
 \begin{tabular}{|l|llll|}
 \hline
 Covariate & Posterior Mean & Lower 95\% Credible Interval &  Upper 95\% Credible Interval \\
 \hline
-Intercept & 5.73 & 5.72 & 5.74 \\
-Slope & 0.28 & 0.27 & 0.29 \\
-% Zero inflation
-$\rho$ & 0.92 & & \\
+Intercept &&&&\\
+Time&&&&\\
+Time:Treatment&&&&\\
+Senior&&&&\\
+Random intercept&&&&\\
+$\rho$&&&&\\
 \hline
 \end{tabular}
 \end{table}
 
 % Figure: Median accuracy graph intercept
 % Figure: Median accuracy graph slope
+
 
 \section{Appendix} 
 % TODO: Mean field updates?
