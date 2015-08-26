@@ -453,8 +453,8 @@ Intercept & 3.179 & 3.157 & 3.201 & \\
 Time & -0.046 & -0.053 & -0.039 & \\
 Time:Treatment & -0.428 & -0.434 & -0.406 & \\
 Senior & -0.976 & -1.015 & -0.936 & \\
-Random intercept & & & & \\
-$\rho$ & & & & \\
+Random intercept & -1.600 & -1.705 & -1.491 & \\
+$\rho$ & 0.711 & 0.673 & 0.750 & \\
 \hline
 \end{tabular}
 \end{table}
@@ -476,9 +476,14 @@ $\rho$ & & & & \\
 % 11 -1.079 -1.107 -1.052
 % 12 -1.681 -1.737 -1.624
 
+%> round(cbind(fit1$vmu, lci, uci), 3)
+%  fit1$a_rho
+% [1] 377.2375
+% > fit1$b_rho
+% [1] 152.7625
+
 % Figure: Median accuracy graph intercept
 % Figure: Median accuracy graph slope
-
 
 \section{Appendix} 
 % TODO: Mean field updates?
