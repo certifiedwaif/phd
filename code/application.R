@@ -2,6 +2,7 @@
 
 library(sqldf)
 source("zero_inflated_model.R")
+source("accuracy.R")
 
 # Load the data set.
 long12_analyse <- read.csv(file="data/long12_analyse.csv", header=TRUE)
@@ -57,6 +58,7 @@ print(Sys.time() - now)
 # IPM_BASELINE_R2.csv        RoachCounts.csv
 # IPM_BASELINE_R2_032006.csv roachdata.csv
 source("zero_inflated_model.R")
+source("accuracy.R")
 library(sqldf)
 
 roachdata <- read.csv(file="../ARM_Data/roaches/roachdata.csv")
@@ -101,12 +103,17 @@ mX <- model.matrix(~time+time:treatment, data=roaches_long)
 mZ <- model.matrix(~factor(building), data=roaches_long)
 mZ <- mZ[, 2:ncol(mZ)]
 
-vy <- with(roaches_long, roachsum / trapdays)
+vy <- round(with(roaches_long, roachsum / trapdays))
 
-mult <- create_mult(vy, mX, mZ, 1e5, m=13, blocksize=1)
+mult <- create_mult(vy, mX, mZ, 1e5, m=13, blocksize=1, v=2)
 kappa(mult$mC)
 # Condition number for this matrix is very high.
 # Why does this work with GVA NR, but go crazy with GVA2?
 # Need more rounds of GVA NR to get mLambda in the ballpark.
 # 2 is too few. 5 is enough.
 fit1 <- zipvb(mult, method="gva2", verbose=TRUE)
+
+# Check accuracy
+stan_fit <- mcmc(mult, p=3, iterations=1e5, warmup=1e4, mc.cores = 1)
+var_accuracy <- calculate_accuracies("application", mult, stan_fit$mcmc_samples, fit1, "gva2", plot_flag=TRUE)
+var_accuracy
