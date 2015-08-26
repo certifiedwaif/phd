@@ -1,6 +1,20 @@
 To Do list
 ==========
 
+25/08/2015
+----------
+- Write about application
+- Give draft to John
+- Fix problem in application
+  Done - it was because the senior column in mX was highly collinear with mZ. I have no idea
+  why this was true, but I don't even really care about the senior column. I was just including
+  it to adjust for more covariates.
+- Accuracy for application
+- What graphs do you need?
+- Think about getting an nVidia card
+- Moving
+- Vaccinations
+
 24/08/2015
 ----------
 - Passport
