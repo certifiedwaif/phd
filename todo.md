@@ -1,6 +1,12 @@
 To Do list
 ==========
 
+26/08/2015
+----------
+- Continue writing up application
+- Meet with John
+- Computer practical
+
 24/08/2015
 ----------
 - Passport
