@@ -127,7 +127,7 @@ calculate_lower_bound <- function(mult, verbose=FALSE)
 zipvb <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE)
 {
   # browser()
-  MAXITER <- 30
+  MAXITER <- 10
   
   # Initialise variables from mult
   N <- length(mult$vy)
@@ -155,8 +155,9 @@ zipvb <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE)
   vlower_bound <- c()
 
   # Make an initial guess for vmu
-  fit <- glm.fit(mult$mC, mult$vy, family=poisson())
-  vmu <- fit$coefficients
+  # fit <- glm.fit(mult$mC, mult$vy, family=poisson())
+  # vmu <- fit$coefficients
+  # vmu[is.na(vmu)] <- 0
   i <- 0
   # Iterate ----
   # TODO: Add check on whether parameters are still changing
@@ -206,7 +207,7 @@ zipvb <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE)
       }
       # fit1 <- fit.GVA(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B")
     } else if (method == "gva2") {
-      if (i <= 2) {
+      if (i <= 5) {
         fit1 <- fit.GVA_nr(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B", p=p, m=m, 
                           blocksize=blocksize, spline_dim=spline_dim)
         eig <- eigen(fit1$mLambda)

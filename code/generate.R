@@ -1,3 +1,4 @@
+
 # generate.R
 library(mvtnorm)
 source("splines.R")

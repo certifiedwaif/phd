@@ -56,6 +56,7 @@ print(Sys.time() - now)
 # from ARM.
 # IPM_BASELINE_R2.csv        RoachCounts.csv
 # IPM_BASELINE_R2_032006.csv roachdata.csv
+source("zero_inflated_model.R")
 library(sqldf)
 
 roachdata <- read.csv(file="../ARM_Data/roaches/roachdata.csv")
@@ -95,12 +96,17 @@ summary(fit)
 model_mat <- model.matrix(roachsum~time+time:treatment+senior+factor(building), data=roaches_long)
 
 # Construct vy, mX, and mZ
-mX <- model.matrix(~time+time:treatment+senior, data=roaches_long)
+#mX <- model.matrix(~time+time:treatment+senior, data=roaches_long)
+mX <- model.matrix(~time+time:treatment, data=roaches_long)
 mZ <- model.matrix(~factor(building), data=roaches_long)
 mZ <- mZ[, 2:ncol(mZ)]
 
-vy <- with(roaches_long, roachsum)
+vy <- with(roaches_long, roachsum / trapdays)
 
 mult <- create_mult(vy, mX, mZ, 1e5, m=13, blocksize=1)
+kappa(mult$mC)
+# Condition number for this matrix is very high.
 # Why does this work with GVA NR, but go crazy with GVA2?
-fit1 <- zipvb(mult, method="gva_nr", verbose=TRUE)
+# Need more rounds of GVA NR to get mLambda in the ballpark.
+# 2 is too few. 5 is enough.
+fit1 <- zipvb(mult, method="gva2", verbose=TRUE)

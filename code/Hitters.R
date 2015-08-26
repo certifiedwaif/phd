@@ -1,5 +1,6 @@
 
 rm(list = ls())
+set.seed(1)
 
 ##########################################################################3
 
@@ -42,6 +43,9 @@ vgamma <- rep(0,p)
 vgamma[inds.true] <- 1
 
 ##############################################
+
+write.table(y.n, sep=",", file="vy.csv", row.names = FALSE, col.names = FALSE)
+write.table(X.n, sep=",", file="mX.csv", row.names = FALSE, col.names = FALSE)
 
 source("ZE.R")
 

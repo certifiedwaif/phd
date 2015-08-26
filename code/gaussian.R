@@ -572,7 +572,7 @@ fit.GVA_new <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0
   ones[ones != 0] <- 1
   Rinds <- intersect(which(lower.tri(mR, diag=TRUE)), which(ones == 1))
   # Rinds <- which(lower.tri(mR, diag=TRUE))
-  print(length(Rinds))
+  # print(length(Rinds))
   vtheta <- vtheta_enc_new(vmu, mR, Rinds)
 
 
