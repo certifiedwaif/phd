@@ -8,7 +8,7 @@
 
 \usefonttheme{serif}
 
-\title{Progress report - 24/08/2015}
+\title{Progress report - 31/08/2015}
 \author{Mark Greenaway\\PhD candidate\\markg@maths.usyd.edu.au}
 
 \mode<presentation>
@@ -30,7 +30,7 @@
 
 \begin{frame}{Application}
 \begin{itemize}
-\item I found an alternative data set on cockroaches.
+\item I found an alternative data set on cockroaches, provided by Andrew Gelman.
 \item Cockroach traps are laid in apartments and observed at two timepoints.
 \item Number of cockroaches trapped, number of trap misses and number of days the trap was laid
 	  before cockroaches were collected are recorded at each of the two timepoints.
@@ -38,13 +38,54 @@
 \item Pest treatment, senior, building number and the number of stories of the building are also
       recorded.
 \item Many apartments are observed within the same building, leading to a hierarchical model.
-\item Random intercept for each building.
+\item Random intercept for each building, 13 buildings.
 \end{itemize}
+\end{frame}
+
+\begin{frame}{Preparing to fit the model}
+\begin{itemize}
+\item As is usually the case, real data sets need to be cleaned and reshaped so that a model can
+actually be fit to them. Clean data sets and trouble free model fits only occur in undergraduate
+courses.
+\item The data was provided in four CSV files, in wide format.
+\item Apartments which were not followed up were excluded.
+\item Reshaped from wide to long format using a for loop.
+\item The data matrices were initially highly collinear ($\kappa \approx 10^{15}$). Diagnosed and fixed this
+using the kappa command to estimate the condition number of the $\mC$ matrix.
+\item Problem column turned out to be senior, which I didn't need. So I dropped it.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Application results}
+\begin{table}
+\label{tab:application_roaches}
+\caption{Table of results - Roaches}
+\begin{tabular}{|l|cccc|}
+\hline
+Covariate & Posterior Mean & LCI &  UCI & Accuracy \\
+\hline
+Intercept & 3.179 & 3.157 & 3.201 & 0.896 \\
+Time & -0.046 & -0.053 & -0.039 & 0.965 \\
+Time:Treatment & -0.428 & -0.434 & -0.406 & 0.929 \\
+Mean random\\  intercept & -1.600 & -1.705 & -1.491 & 0.895 \\
+$\rho$ & 0.711 & 0.673 & 0.750 & 0.876 \\
+\hline
+\end{tabular}
+\end{table}
 \end{frame}
 
 \begin{frame}{Next project: Bayesian model selection}
 \begin{itemize}
-\item The literature looks interesting
+\item The model selection literature looks interesting, but I don't know much about model selection yet.
+			Starting to read.
+\item Some initial experiments converting R code to C++ have been promising. Roughly ten times speed-up
+			with three days of effort.
+\item Our current approach fits all of the models, using rank one updates and
+			downdates to re-use computation from previous model fits.
+\item Are there heuristics we can use to avoid fitting all of the models?
+\item We might need to investigate these approaches if we want to handle thousands or hundreds of thousands
+			of variables.
+\item GPUs are available with thousands of cores. But this isn't magic - $2^p$ still grows very quickly.
 \end{itemize}
 \end{frame}
 
