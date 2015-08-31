@@ -1,6 +1,18 @@
 To Do list
 ==========
 
+31/08/2015
+----------
+- Literature review
+  The Practical Implementation of Bayesian Model Selection - Hugh Chipman, Edward I. George and
+  Robert E. McCulloch (2001)
+  I think John's Graycode idea has already been done. Will discuss with him.
+
+  Kadane, J. B., & Lazar, N. A. (2004). Methods and criteria for model selection. Journal of the American Statistical Association, 99(465), 279+. Retrieved from http://go.galegroup.com.ezproxy1.library.usyd.edu.au/ps/i.do?id=GALE%7CA115848665&v=2.1&u=usyd&it=r&p=EAIM&sw=w&asid=27f177a02afe00f5c37c10024f546e5d
+
+- John is still reviewing my draft. I expect he'll find lots of things that he doesn't like.
+- Should work on producing graphs that I know will be needed.
+
 26/08/2015
 ----------
 - Continue writing up application
