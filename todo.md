@@ -1,6 +1,36 @@
 To Do list
 ==========
 
+02/09/2015
+----------
+- Enter computer prac marks
+  Done, but can't post the marks to the web, because that option is greyed out.
+- Prepare for computer prac
+  They've never seen ANOVA before!
+  Done
+- Thomas's first tutorial at 14:00
+  Done
+- John's corrections
+  I've begun the process.
+- New spline accuracy method
+- Local solutions
+- Comment on stability of fixed point updates
+  I think John wants them to be bad. I'm not sure they're that bad, actually.
+
+01/09/2015
+----------
+- Keep cleaning up your desk
+- Thesis? You need a plan.
+  VB
+  Zero inflation
+  GVA
+  Parameterisation of covariance matrices
+- Talk about first paper with John.
+  We're meeting today at 3pm.
+- Keep reviewing literature.
+  Reading Approaches for Bayesian Variable Selection, George and McCulloch, 1997
+- Mark computer practicals, and post results to the web
+
 31/08/2015
 ----------
 - Literature review
