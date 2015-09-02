@@ -69,6 +69,7 @@ model.
 
 \subsection{Variational Bayesian inference}
 
+Nonparametric and fixed form. \cite{RohdeWand2015}.
 
 \section{Extending the zero-inflated Poisson model to a regression model}
 
@@ -89,7 +90,7 @@ and smoothing splines in our models.
 % Idea: We can use an approximation of the from q(\beta, \u, \Sigma) q(\rho) \Product q(r_i)
 % and use GVA on q(\beta, \u, \Sigma) and mean field updates on \rho and r_i
 
-\subsection{Model}
+\subsection{Base Model}
 Let $\mR = \diag{(\vr)}$. Let $\mC = [\mX \mZ], \vnu = [\vbeta^\top \vu^\top]^\top$. Consider the
 model
 
@@ -105,7 +106,7 @@ $$
 
 $$ 
 \begin{array}{rl}
-\log{p(\mSigma_{\vu \vu})} &= \text{Inv. Wishart}(\mPsi, v),\\
+\log{p(\mSigma_{\vu \vu})} &= \text{Inverse Wishart}(\mPsi, v),\\
 p(\rho) &\propto 1 \\
 \mbox{ and } \vnu|\sigma_\vu^2 &\sim \mbox{N}(\vzero, \sigma_\vu^2). \\
 \end{array}
@@ -118,8 +119,8 @@ $$
 q(\vr_0, \vnu, \sigma_{\vu}^2, \rho) = q(\vnu) q(\mSigma_{\vu \vu}) q(\rho) q(\vr_0) \\
 $$
 
-\noindent where $q(\vnu) = \mbox{N}(\vmu, \mLambda)$,
-$q(\sigma_{\vu}^2) = \mbox{Inv. Wishart}\left(\mPsi + \sum_{i=1}^m \vmu_i \vmu_i^\top + \mLambda_{\vu_i \vu_i}, v + m + d\right)$ \mbox{and } $q(r_i) = \Bernoulli{(p_i)}$
+\noindent where 
+$q(\sigma_{\vu}^2) = \mbox{Inverse Wishart}\left(\mPsi + \sum_{i=1}^m \vmu_i \vmu_i^\top + \mLambda_{\vu_i \vu_i}, v + m + d\right)$ \mbox{and } $q(r_i) = \Bernoulli{(p_i)}$
 
 \noindent with
 $$
@@ -136,69 +137,40 @@ $$
 \noindent The optimal approximation for $\vr$ is
 $$
 \begin{array}{rl}
-q(\vr) &\propto \exp \left [ \bE_{-q(\vr)}\vy^\top\mR(\mC\vmu) - \vr^\top\exp{(\mC\vnu)}-\half \vnu^\top \mSigma_{\vu \vu} \vnu \right ] \\
+q(\vr) &\propto \exp \left [ \bE_{-q(\vr)}\vy^\top\mR(\mC\vmu) - \vr^\top\exp{(\mC\vnu)}-\half \vnu^\top \mSigma_{\vu \vu} \vnu \right ] \\ [1ex]
 	&= \exp{ \left\{ \vy^\top\mR\mC \vmu - \vr^\top \exp{[\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)]} - \half \vmu^\top \mD \vmu - \half \text{tr}(\mLambda \mD ) \right\} }
 \end{array}
 $$
 
-\noindent where $\mD =  \left( (\mPsi + \sum_{i=1}^m \vmu_i \vmu_i^\top + \mLambda_{\vu_i\vu_i}) / (v - d - 1) \right)^{-1}$. 
+\noindent where $\mD =  \left[ (\mPsi + \sum_{i=1}^m \vmu_i \vmu_i^\top + \mLambda_{\vu_i\vu_i}) / (v - d - 1) \right]^{-1}$. 
 
 \noindent This is close in form to a Poisson regression model. Poisson regression models
 with normal priors have no closed form for their mean field updates due to
 non-conjugacy, but can be fit using Gaussian variational approximation
-\citep{ormerod09}. The model can be fit using Algorithm 2 below.
+\citep{ormerod09}. The model can be fit using Algorithm \ref{alg:algorithm_one} below.
 
-\begin{algorithm}\label{alg:algorithm_two}
-\label{algorithm2}
-\caption[Algorithm 2]{Iterative scheme for obtaining the parameters in the
+\begin{algorithm}
+\label{alg:algorithm_one}
+\caption[Algorithm 1]{Iterative scheme for obtaining the parameters in the
 optimal densities $q^*(\vmu, \mLambda)$, $q^*(\mSigma_{\vu \vu})$ and $q^*(\rho)$}
 \begin{algorithmic}
 % Fit \vmu, \mLambda using Laplace approximation
-\REQUIRE{$\alpha_{q(\rho)} \leftarrow \alpha_\rho + \vone^\top\vp, p_{q(\mSigma_{\vu \vu})} \leftarrow p + 1$}
+\REQUIRE{$\alpha_{q(\rho)} \leftarrow \alpha_\rho + \vone^\top\vp, p_{q(\mSigma_{\vu \vu})} \leftarrow p + 1$} \\[1ex]
 \WHILE{the increase in $\log{\underline{p}}(\vy;q)$ is significant}
 % \vmu, \mLambda
-\STATE Optimise $\vmu$ and $\mLambda$ using $\vy, \mC, \vp$ and
-$\mSigma_{\vu \vu}$
+\STATE Optimise $\vmu$ and $\mLambda$ using $\vy, \mC, \vp$ and $\mSigma_{\vu \vu}$ \\[1ex]
 % \vp
 % \rho is a prior? Not directly observed, except through \vr_i
-\STATE $\beta_{q(\rho)} \leftarrow \beta_\rho + n - \vone^\top\vp$
-\STATE $\eta \leftarrow -\exp \left [ \mC \vmu + \half \diag{(\mC\mLambda\mC^\top)} \right ] + \psi{(\alpha_{q{(\rho)}})} - \psi{(\beta_{q{(\rho)}})}$
-\STATE $\vp_{q(\vr_0)} \leftarrow \expit{(\eta)}$
+\STATE $\beta_{q(\rho)} \leftarrow \beta_\rho + n - \vone^\top\vp$ \\[1ex]
+\STATE $\eta \leftarrow -\exp \left [ \mC \vmu + \half \diag{(\mC\mLambda\mC^\top)} \right ] + \psi{(\alpha_{q{(\rho)}})} - \psi{(\beta_{q{(\rho)}})}$ \\[1ex]
+\STATE $\vp_{q(\vr_0)} \leftarrow \expit{(\eta)}$ \\[1ex]
 % \mSigma_{\vu \vu}
-\STATE $\mPsi_{q(\mSigma_{\vu \vu})} \leftarrow \Psi + \sum_{i=1}^m \vmu_i \vmu_i^\top + \mLambda_{{\vu}_i}$
+\STATE $\mPsi_{q(\mSigma_{\vu \vu})} \leftarrow \Psi + \sum_{i=1}^m \vmu_i \vmu_i^\top + \mLambda_{{\vu}_i}$ \\[1ex]
 \STATE $\mSigma_{\vu\vu} \leftarrow [\mPsi_{q(\mSigma_{\vu \vu})}/(v - d - 1)]^{-1}$
 \ENDWHILE
 \end{algorithmic}
 \end{algorithm}
 
-\subsection{Lower bound}
-% Where are the priors for \vbeta and \vu
-\noindent The lower bound is equal to
-$\bE_q[\log{p(\vy, \vtheta)} - \log{q(\vtheta)}] = T_1 + T_2 + T_3$,
-where
-
-% This is the new T_1
-$$
-\begin{array}{rl}
-T_1 &= \bE_q[\log{p(\vy, \vnu)} - \log{q(\vnu)}] \\
-&= \vy \mP \mC \vmu - \vp^\top \exp{\left[ \mC \vmu + \half \text{diag} (\mC \mLambda \mC^\top) \right]} - \vone^\top\log \Gamma{(\vy + \vone)}\\
-& \quad + \frac{p + m}{2} (1 + \log{2 \pi}) + \half \log{|\mLambda|}, \\
-T_2 &= \bE_q \left[ \log p(\mSigma_{\vu \vu}) - \log q(\mSigma_{\vu \vu}) \right] \\
-&= \bE_q \big[ v/2(\log |\Psi| - \log |\Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu}|) + \half \log 2 + \half \log|\mSigma_{\vu \vu}| \log \Gamma_{p+1}(v/2) - \log \Gamma_{p}(v/2)\\
-&\quad + \half \tr((\vmu_{\vu} \vmu_{\vu}^\top + \mLambda_{\vu \vu}) \mSigma_{\vu \vu}^{-1}) \big] \\
-&= v/2\big(\log |\Psi| - \log |\Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu}|\big) + \half \log 2 + \half \bE_q \log |\mSigma_{\vu \vu}| + \log \Gamma_{p+1}(v/2) - \log \Gamma_{p}(v/2) \\
-&\quad + \half \tr\big(\mI_m + \Psi(\Psi+ \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu})^{-1}/(v + p + 2)\big) \\
-T_3 &= - \vp^\top \log \vp - (\vone - \vp)^\top \log (\vone - \vp) - \log \Beta (\alpha_\rho, \beta_\rho) + \log \Beta (\alpha_q, \beta_q)
-\end{array}
-$$
-
-where
-
-$$
-\bE_q \big[ \log |\mSigma_{\vu \vu}| \big] = m \log 2 + \log \left | \Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu} \right | + \sum_{i=1}^m \Psi \left ( \frac{v - i + 1}{2} \right )
-$$
-
-$$$$
 
 \section{Algorithms for fitting the variational approximation}
 \subsection{Laplace-Variational Approximation}
@@ -212,14 +184,14 @@ considered in this article.
 % Detail the function and its derivatives
 \noindent Taylor expanding the variational lower bound once around the mode yields the following function
 \begin{align*}
-\log \underline{p}(\vmu, \mLambda; \vy) = \vp^\top\vy^\top\mC\vmu - \vp^\top\exp \left (\mC \vmu + \half \mC \mLambda \mC^\top \right ) - \half \vmu^\top \mSigma^{-1} \vmu - \half \tr{(\mLambda \mSigma^{-1})}
+\log \underline{p}(\vmu, \mLambda; \vy) = \vy^\top\mP\mC\vmu - \vp^\top\exp \left (\mC \vmu \right ) - \half \vmu^\top \mSigma^{-1} \vmu
 \end{align*}
 
 \noindent This can be optimised using a Newton-Raphson style algorithm where
 
 \begin{align*}
-\frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \vmu} &\approx \vp^\top\mC(\vy - \exp{(\mC \vmu)}) - \mSigma^{-1} \vmu \\
-\frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \mLambda} &\approx -\vp^\top \mC^\top \text{diag}(\exp{(\mC \vmu)}) \mC - \mSigma^{-1}
+\frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \vmu} &\approx \mP \mC (\vy - \exp{(\mC \vmu)}) - \mSigma^{-1} \vmu \\
+\frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \mLambda} &\approx - \mC^\top \text{diag}(\vp e^{(\mC \vmu)}) \mC - \mSigma^{-1}
 \end{align*}
 
 \begin{algorithm}\label{alg:algorithm_three}
@@ -487,6 +459,34 @@ $\rho$ & 0.711 & 0.673 & 0.750 & 0.876 \\
 
 \section{Appendix} 
 % TODO: Mean field updates?
+\subsection{Lower bound}
+% Where are the priors for \vbeta and \vu
+\noindent The lower bound is equal to
+$\bE_q[\log{p(\vy, \vtheta)} - \log{q(\vtheta)}] = T_1 + T_2 + T_3$,
+where
+
+% This is the new T_1
+$$
+\begin{array}{rl}
+T_1 &= \bE_q[\log{p(\vy, \vnu)} - \log{q(\vnu)}] \\
+&= \vy \mP \mC \vmu - \vp^\top \exp{\left[ \mC \vmu + \half \text{diag} (\mC \mLambda \mC^\top) \right]} - \vone^\top\log \Gamma{(\vy + \vone)}\\
+& \quad + \frac{p + m}{2} (1 + \log{2 \pi}) + \half \log{|\mLambda|}, \\
+T_2 &= \bE_q \left[ \log p(\mSigma_{\vu \vu}) - \log q(\mSigma_{\vu \vu}) \right] \\
+&= \bE_q \big[ v/2(\log |\Psi| - \log |\Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu}|) + \half \log 2 + \half \log|\mSigma_{\vu \vu}| \log \Gamma_{p+1}(v/2) - \log \Gamma_{p}(v/2)\\
+&\quad + \half \tr((\vmu_{\vu} \vmu_{\vu}^\top + \mLambda_{\vu \vu}) \mSigma_{\vu \vu}^{-1}) \big] \\
+&= v/2\big(\log |\Psi| - \log |\Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu}|\big) + \half \log 2 + \half \bE_q \log |\mSigma_{\vu \vu}| + \log \Gamma_{p+1}(v/2) - \log \Gamma_{p}(v/2) \\
+&\quad + \half \tr\big(\mI_m + \Psi(\Psi+ \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu})^{-1}/(v + p + 2)\big) \\
+T_3 &= - \vp^\top \log \vp - (\vone - \vp)^\top \log (\vone - \vp) - \log \Beta (\alpha_\rho, \beta_\rho) + \log \Beta (\alpha_q, \beta_q)
+\end{array}
+$$
+
+where
+
+$$
+\bE_q \big[ \log |\mSigma_{\vu \vu}| \big] = m \log 2 + \log \left | \Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu} \right | + \sum_{i=1}^m \Psi \left ( \frac{v - i + 1}{2} \right )
+$$
+
+$$$$
 
 \bibliographystyle{elsarticle-harv}
 \bibliography{Chapter_1_zero_inflated_models}
