@@ -50,16 +50,6 @@ computational advantages over existing approaches. In Section \ref{sec:applicati
 show an application of our method to physical activity data. Appendices contain details 
 of our MCMC samplers.
 
-\subsection{Notation}
-
-The notation $\vx \sim N(\vmu, \mLambda)$ means that $\vx$ has a multivariate normal
-density with mean $\vmu$ and covariance $\mLambda$. If $x$ has an inverse gamma
-distribution, denoted $x \sim \mbox{IG}(\alpha, \beta)$, then it has density
-$p(x) = \beta^\alpha \Gamma(\alpha)^{-1}x^{-\alpha-1} \exp{(-\beta/x)}, x, \alpha,
-\beta > 0$.
-If $\vx$ is a vector of length $d$ then $\mbox{diag}(\vx)$ is the $d \times d$
-diagonal matrix whose diagonal elements are $\vx$.
-
 \section{Methodology}\label{sec:methodology}
 
 In this section we present a VB approach to a Bayesian zero-inflated Poisson model
@@ -150,9 +140,9 @@ non-conjugacy, but can be fit using Gaussian variational approximation
 \citep{ormerod09}. The model can be fit using Algorithm \ref{alg:algorithm_one} below.
 
 \begin{algorithm}
-\label{alg:algorithm_one}
 \caption[Algorithm 1]{Iterative scheme for obtaining the parameters in the
 optimal densities $q^*(\vmu, \mLambda)$, $q^*(\mSigma_{\vu \vu})$ and $q^*(\rho)$}
+\label{alg:algorithm_one}
 \begin{algorithmic}
 % Fit \vmu, \mLambda using Laplace approximation
 \REQUIRE{$\alpha_{q(\rho)} \leftarrow \alpha_\rho + \vone^\top\vp, p_{q(\mSigma_{\vu \vu})} \leftarrow p + 1$} \\[1ex]
@@ -194,14 +184,17 @@ considered in this article.
 \frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \mLambda} &\approx - \mC^\top \text{diag}(\vp e^{(\mC \vmu)}) \mC - \mSigma^{-1}
 \end{align*}
 
-\begin{algorithm}\label{alg:algorithm_three}
-\caption[Algorithm 3]{Newton-Raphson scheme for optimising $\log \underline{p}(\vmu, \mLambda; \vy)$}
+The steps of the algorithm are provided in Algorithm \ref{alg:laplace_alg}.
+
+\begin{algorithm}
+\caption{Laplace scheme for optimising $\log \underline{p}(\vmu, \mLambda; \vy)$}
+\label{alg:laplace_alg}
 \begin{algorithmic}
 % Fit \vmu, \mLambda using Laplace approximation
 \WHILE{the increase in $\log \underline{p}(\vmu, \mLambda; \vy)$ is significant}
 % \vmu, \mLambda
-\STATE $\mLambda \leftarrow \left [\vp^\top \mC^\top \text{diag}(\exp{(\mC \vmu)}) \mC + \mSigma^{-1} \right ]^{-1}$
-\STATE $\vmu \leftarrow \vmu + \mLambda \frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \vmu}$
+\STATE $\mLambda \leftarrow \left [\mP \mC^\top \text{diag}(\exp{(\mC \vmu)}) \mC + \mSigma^{-1} \right ]^{-1}$ 
+\STATE $\vmu \leftarrow \vmu + \mLambda \left [ \frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \vmu}  \right ]$
 \ENDWHILE
 \end{algorithmic}
 \end{algorithm}
@@ -209,9 +202,9 @@ considered in this article.
 \subsection{Optimising the GVA lower bound}
 % Detail techniques used for fitting models.
 % TODO: Talk more about numerical scheme. This explanation is terrible!
-The Gaussian variational lower bound in Algorithm 2 can be optimised
-using a  variety of algorithms. Each of these algorithms is a trade-off between
-accuracy,  stability and speed. The variational lower bound is not necessarily unimodal,
+Assuming $q(\vnu) \sim N(\vmu, \mLambda)$, the Gaussian variational lower bound in Algorithm
+\ref{alg:algorithm_one} can be optimised using a  variety of algorithms. Each of these algorithms is a
+trade-off between accuracy,  stability and speed. The variational lower bound is not necessarily unimodal,
 leading to potential difficulty in optimising to the global maximum. However, for fixed
 $\vp$ and $\mSigma$, the variational lower bound is log-concave, and so standard
 optimisation methods such as L-BFGS-B work well. This led to an extremely accurate approximation
@@ -233,8 +226,8 @@ be optimised with L-BFGS-B:
 \begin{align*}
 \log \underline{p}(\vmu, \mLambda; \vy) &= \vy^\top\mP \mC \vmu - \vp^\top \exp(\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)) - \half \vmu^\top \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} + \log{|\mR|} \\
 &\quad - \frac{d}{2} \log{(2 \pi)} + \half \log{|\mSigma^{-1}|} + \frac{d}{2} \log{(2 \pi)} + \frac{d}{2} \\
-\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu} &= \mC \vp^\top(\vy - \mC^\top \exp(\mC \vmu, \mC \mLambda \mC^\top)) - \mSigma^{-1} \vmu \\
-\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda} &= \left [\mLambda^{-1} - \vp^\top \mC^\top \exp(\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)) \mC \vp) - \mSigma^{-1} \right ] \mR
+\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu} &= \mP \mC (\vy - \mC^\top \exp(\mC \vmu + \half \text{diag}{(\mC \mLambda \mC^\top)})) - \mSigma^{-1} \vmu \\
+\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda} &= \left [\mLambda^{-1} - \mP \mC^\top \exp(\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)) \mP \mC) - \mSigma^{-1} \right ] \mR
 \end{align*}
 
 \subsubsection{GVA, $\mLambda = \left (\mR \mR^\top \right )^{-1}$}
@@ -286,13 +279,14 @@ derivative with respect to $\mLambda$ is now
 &= - (\mR\mLambda + \mH\mLambda\mR\mLambda)
 \end{align*} 
 
-\noindent where $\mH = \vp^\top \mC^\top \text{diag}(\B^{(2)}(\mC \vmu, \mC \mLambda \mC^\top)) \mC \vp - \mSigma^{-1}$.
+\noindent where $\mH = (\mP \mC)^\top \text{diag}(\B^{(2)}(\mC \vmu, \mC \mLambda \mC^\top)) \mP \mC - \mSigma^{-1}$.
 
 
-\subsubsection{GVA NR}
+\subsubsection{GVA fixed point}
 % Fixed point update of \mLambda
 This variant of the algorithm uses Newton-Raphson-like optimisation on the Gaussian
-variational lower bound. This algorithm is fast, but potentially unstable.
+variational lower bound. This algorithm is fast, but potentially unstable. The steps are presented in
+Algorithm \ref{alg:algorithm_nr}.
 % Essentially a very straightforward optimisation approach, but potentially unstable.
 % Detail the function and its derivatives
 \begin{align*}
@@ -300,16 +294,16 @@ variational lower bound. This algorithm is fast, but potentially unstable.
 \frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda} &= -\mC^\top \text{diag}(\vp \odot \exp(\mC \vmu +\half \text{diag}(\mC \mLambda \mC^\top))) - \mSigma^{-1}
 \end{align*}
 
-\begin{algorithm}\label{alg:algorithm_nr}
-\label{algorithm_nr}
+\begin{algorithm}
 \caption[Algorithm GVA NR]{Iterative scheme for obtaining optimal $\vmu$ and $\mLambda$
 given $\vy$, $\mC$ and $\vp$}
+\label{alg:algorithm_nr}
 \begin{algorithmic}
 % Fit \vmu, \mLambda using Laplace approximation
 \WHILE{the increase in $\log{\underline{p}}(\vmu, \mLambda; \vy)$ is significant}
 % \vmu, \mLambda
-\STATE $\mLambda \leftarrow \left [ \mC^\top\vp^\top \exp(\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)) \mC \right ]^{-1}$
-\STATE $\vmu \leftarrow \vmu + \mLambda \frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu}$
+\STATE $\mLambda \leftarrow \left [ \mP \mC^\top \exp(\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)) \mC \right ]^{-1}$
+\STATE $\vmu \leftarrow \vmu + \mLambda \left [ \frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu} \right ]$
 \ENDWHILE
 \end{algorithmic}
 \end{algorithm}
@@ -329,15 +323,19 @@ different data sets that were randomly generated after having initialised the ra
 number generator with different seeds. Median accuracy of the algorithms was assessed
 by running them on 100 randomly generated data sets.
 
+The results for the random intercept, random slope and spline accuracy are presented in
+Table \ref{tab:accuracy_int}, Table \ref{tab:accuracy_slope} and Table \ref{tab:accuracy_spline}
+respectively.
+
 % TODO - Graphs of median accuracy
 
 % Table of accuracy results - intercept model
 \begin{table}
-\label{tab:accuracy_int}
 \caption{Table of accuracy - Random intercept model}
+\label{tab:accuracy_int}
 \begin{tabular}{l|llll}
 \hline
-& Laplace's Method & GVA $(\mLambda = \mR \mR^\top)$ & GVA2 $(\mLambda = (\mR \mR^\top)^{-1})$ & GVA NR\\
+& Laplace's Method & GVA $(\mLambda = \mR \mR^\top)$ & GVA2 $(\mLambda = (\mR \mR^\top)^{-1})$ & GVA FP\\
 \hline
 $\vbeta_1$ & $0.833$ & $0.908$ & $0.908$ & $0.908$ \\ 
 $\vbeta_2$ & $0.770$ & $0.987$ & $0.987$ & $0.987$ \\ 
@@ -349,11 +347,11 @@ $\rho$ & $0.976$ & $0.974$ & $0.974$ &  $0.974$ \\
 \end{table}
 
 \begin{table}
-\label{tab:accuracy_slope}
 \caption{Table of accuracy - Random slope model}
+\label{tab:accuracy_slope}
 \begin{tabular}{l|llll}
 \hline
-& Laplace's Method & GVA $(\mLambda = \mR \mR^\top)$ & GVA $(\mLambda = (\mR \mR^\top)^{-1})$ & GVA NR\\
+& Laplace's Method & GVA $(\mLambda = \mR \mR^\top)$ & GVA $(\mLambda = (\mR \mR^\top)^{-1})$ & GVA FP\\
 \hline
 $\vbeta_1$     &0.658&0.879&0.893&0.879\\
 $\vbeta_2$     &0.692&0.883&0.899&0.883\\
@@ -366,8 +364,8 @@ $\rho$ &0.911&0.896&0.896&0.896\\
 \end{table}
 
 \begin{table}
-\label{tab:accuracy_spline}
 \caption{Table of accuracy - Splines}
+\label{tab:accuracy_spline}
 \begin{tabular}{l|l}
 \hline
 Approximation & Accuracy \\
@@ -397,7 +395,7 @@ A zero-inflated random slopes Poisson model was fit using the GVA2 algorithm abo
 The results can be seen in Table \ref{tab:application_roaches}.
 
 The GVA2 algorithm was used to fit a random intercept model to the Roaches data set provided
-by Andrew Gelman.
+by Andrew Gelman. The results are presented in Table \ref{tab:application_roaches}.
 % Table of results - Estimates, 95% credible intervals, accuracy
 % I'm not at all looking forward to doing the MCMC for this
 % Or resolving the overflow in mLambda in the model fit
@@ -415,9 +413,9 @@ by Andrew Gelman.
 % Or resolving the overflow in mLambda in the model fit
 
 \begin{table}
-\label{tab:application_roaches}
 \caption{Table of results - Roaches}
-\begin{tabular}{|l|llll|}
+\label{tab:application_roaches}
+\begin{tabular}{l|llll}
 \hline
 Covariate & Posterior Mean & Lower 95\% Credible Interval &  Upper 95\% Credible Interval \\
 \hline
@@ -480,13 +478,7 @@ T_3 &= - \vp^\top \log \vp - (\vone - \vp)^\top \log (\vone - \vp) - \log \Beta 
 \end{array}
 $$
 
-where
-
-$$
-\bE_q \big[ \log |\mSigma_{\vu \vu}| \big] = m \log 2 + \log \left | \Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu} \right | + \sum_{i=1}^m \Psi \left ( \frac{v - i + 1}{2} \right )
-$$
-
-$$$$
+where $\bE_q \big[ \log |\mSigma_{\vu \vu}| \big] = m \log 2 + \log \left | \Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu} \right | + \sum_{i=1}^m \Psi \left ( \frac{v - i + 1}{2} \right )$
 
 \bibliographystyle{elsarticle-harv}
 \bibliography{Chapter_1_zero_inflated_models}
