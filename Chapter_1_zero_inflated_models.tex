@@ -13,7 +13,7 @@
 \usepackage{graphicx}
 \usepackage{algorithm,algorithmic}
 
-\title{Variational approximations to zero-inflated Bayesian models}
+\title{Variational approximations for zero-inflated Semiparametric Regression models}
 \author{Mark Greenaway}
 \input{include.tex}
 \input{Definitions.tex}
@@ -22,7 +22,7 @@
 
 Abstract:
 
-Keywords: Approximate Bayesian inference . mixed model . Markov chain Monte Carlo
+Keywords: Approximate Bayesian inference ; mixed model ; Markov chain Monte Carlo ; Stan ; penalized splines .
 
 \section{Introduction}
 
@@ -40,8 +40,8 @@ using a deterministic algorithm which converges much more quickly.
 
 % Cite prior publications in this area
 
-\noindent In this paper, we build upon the earlier work of \cite{lambert1992} and
-\cite{Ghosh20061360}.
+\noindent In this paper, we build upon the earlier work of \cite{lambert1992},
+\cite{Ghosh20061360} and \cite{VatsaWilson2014}.
 
 \noindent In Section \ref{sec:methodology} we provide the framework for our approach. In
 Section \ref{sec:methodology} we extend our approach to incorporate regression modelling
