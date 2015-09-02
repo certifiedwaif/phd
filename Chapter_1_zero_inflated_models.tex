@@ -193,8 +193,8 @@ The steps of the algorithm are provided in Algorithm \ref{alg:laplace_alg}.
 % Fit \vmu, \mLambda using Laplace approximation
 \WHILE{the increase in $\log \underline{p}(\vmu, \mLambda; \vy)$ is significant}
 % \vmu, \mLambda
-\STATE $\mLambda \leftarrow \left [\mP \mC^\top \text{diag}(\exp{(\mC \vmu)}) \mC + \mSigma^{-1} \right ]^{-1}$ 
-\STATE $\vmu \leftarrow \vmu + \mLambda \left [ \frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \vmu}  \right ]$
+\STATE $\mLambda \leftarrow \left [\mP \mC^\top \text{diag}(\exp{(\mC \vmu)}) \mC + \mSigma^{-1} \right ]^{-1}$ \\ [1ex] 
+\STATE $\vmu \leftarrow \vmu + \mLambda \left [ \frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \vmu}  \right ]$ \\ [1ex]
 \ENDWHILE
 \end{algorithmic}
 \end{algorithm}
@@ -302,7 +302,7 @@ given $\vy$, $\mC$ and $\vp$}
 % Fit \vmu, \mLambda using Laplace approximation
 \WHILE{the increase in $\log{\underline{p}}(\vmu, \mLambda; \vy)$ is significant}
 % \vmu, \mLambda
-\STATE $\mLambda \leftarrow \left [ \mP \mC^\top \exp(\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)) \mC \right ]^{-1}$
+\STATE $\mLambda \leftarrow \left [ \mP \mC^\top \exp(\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)) \mC \right ]^{-1}$ \\ [1ex]
 \STATE $\vmu \leftarrow \vmu + \mLambda \left [ \frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu} \right ]$
 \ENDWHILE
 \end{algorithmic}
