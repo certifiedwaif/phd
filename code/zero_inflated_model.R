@@ -155,9 +155,9 @@ zipvb <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE)
   vlower_bound <- c()
 
   # Make an initial guess for vmu
-  # fit <- glm.fit(mult$mC, mult$vy, family=poisson())
-  # vmu <- fit$coefficients
-  # vmu[is.na(vmu)] <- 0
+  fit <- glm.fit(mult$mC, mult$vy, family=poisson())
+  vmu <- fit$coefficients
+  vmu[is.na(vmu)] <- 0
   i <- 0
   # Iterate ----
   # TODO: Add check on whether parameters are still changing

@@ -305,8 +305,21 @@ test_spline_accuracy <- function(mult, allKnots, fit, approximation, plot=FALSE)
   result <- spline.des(allKnots, xtilde, derivs=rep(0, length(xtilde)), outer.ok=TRUE)
   mC_tilde <- cbind(1, xtilde, result$design)
   f_hat_vb <- mC_tilde %*% var_result$vmu
-  # FIXME: This is probably broken
-  f_hat_mcmc <- mC_tilde %*% fit$vmu$mean
+  # John said this isn't good enough.
+  # We should do a grid search from -1 to 1, simulating from the normal that
+  # VB
+  vmu_vb <- var_result$vmu
+  mLambda_vb <- var_result$mLambda
+  # MCMC
+  vbeta_mcmc <- apply(fit$vbeta, 2, mean)
+  vu_mcmc <- apply(fit$vu, 2, mean)
+  vmu_mcmc <- c(vbeta_mcmc, vu_mcmc)
+  f_hat_mcmc <- mC_tilde %*% vmu_mcmc
+  rho <- mean(fit$rho)
+  sigma_u_mcmc <- apply(fit$sigma_u, c(2, 3), mean)
+  sigma_beta_mcmc <- apply(fit$BetaPrior, c(2, 3), mean)
+  # I've got the values, but they're very high. Something is probably wrong here.
+
   if (plot) {
     pdf(sprintf("results/accuracy_plots_spline_%s.pdf", approximation))
     plot(mult$mX[,2], mult$vy)
@@ -508,4 +521,4 @@ main <- function()
   }
 }
 
-main()
+# main()
