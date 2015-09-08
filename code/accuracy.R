@@ -4,6 +4,8 @@ source("zero_inflated_model.R")
 source("generate.R")
 library(rstan)
 library(optparse)
+library(mvtnorm)
+library(limma)
 
 # Andrew Gelman says that this magical line of code automatically makes Stan
 # run in parallel and cache compiled models.
@@ -305,8 +307,44 @@ test_spline_accuracy <- function(mult, allKnots, fit, approximation, plot=FALSE)
   result <- spline.des(allKnots, xtilde, derivs=rep(0, length(xtilde)), outer.ok=TRUE)
   mC_tilde <- cbind(1, xtilde, result$design)
   f_hat_vb <- mC_tilde %*% var_result$vmu
-  # FIXME: This is probably broken
-  f_hat_mcmc <- mC_tilde %*% fit$vmu$mean
+  # John said this isn't good enough.
+  # We should do a grid search from -1 to 1, simulating from the normal that
+  # VB
+  vmu_vb <- var_result$vmu
+  mLambda_vb <- var_result$mLambda
+  # MCMC
+  vbeta_mcmc <- apply(fit$vbeta, 2, mean)
+  vu_mcmc <- apply(fit$vu, 2, mean)
+  vmu_mcmc <- c(vbeta_mcmc, vu_mcmc)
+  vmu_mcmc_samples <- with(fit, cbind(vbeta, vu))
+  sigma_vmu_mcmc <- var(vmu_mcmc_samples)
+  rho <- mean(fit$rho)
+  sigma_u_mcmc <- apply(fit$sigma_u, c(2, 3), mean)
+  sigma_beta_mcmc <- apply(fit$BetaPrior, c(2, 3), mean)
+
+  for (x in seq(from=-1, to=1, by=1e-2)) {
+    f_hat_vb <- rep(NA, 100)
+    f_hat_mcmc <- rep(NA, 100)
+    for (j in 1:100) {
+      # Create an appropriate mC
+      # Need an mC with enough columns for all knots
+      mC_x <- cbind(1, x, spline.des(allKnots, x, derivs=c(0), outer.ok=TRUE)$design)
+
+      # Generate samples - simulate vbeta, vu
+
+      vmu_vb_sim <- t(rmvnorm(1, vmu_vb, mLambda_vb))
+      f_hat_vb[j] <- mC_x %*% vmu_vb_sim
+
+      vmu_mcmc_sim <- t(rmvnorm(1, vmu_mcmc, sigma_vmu_mcmc))
+      f_hat_mcmc[j] <- mC_x %*% vmu_mcmc_sim
+      # Prediction intervals
+      # Keep generating f_hats
+    }
+    print(quantile(f_hat_vb))
+    print(quantile(f_hat_mcmc))
+  }
+  
+
   if (plot) {
     pdf(sprintf("results/accuracy_plots_spline_%s.pdf", approximation))
     plot(mult$mX[,2], mult$vy)
@@ -508,4 +546,4 @@ main <- function()
   }
 }
 
-main()
+# main()

@@ -1,6 +1,80 @@
 To Do list
 ==========
 
+08/09/2015
+----------
+- Make more progress with splines accuracy
+  * Figure out how to sample from the MCMC distribution and do a grid search.
+    Try using the mean of sigma as the covariance matrix and the mean of (beta, u) as the
+    mean of the multivariate normal.
+    Done
+  * Write rest of the algorithm that finds the 95% confidence intervals via grid search.
+  * Look at overflowing values for sigma_u - no idea how to fix this. It's coming from Stan.
+    Try different functions.
+    Not sure where to begin. Have tried changing some priors.
+- Organise with DHL to get passport in some way
+- Claim pay
+- Tutor STAT2012 14:00 class
+- Mark computer practicals
+
+07/09/2015
+----------
+- Prepare for STAT2012 tutorial.
+- Give Monday STAT2012 tutorial.
+  We only got through the first two questions!
+
+03/09/2015
+----------
+- Bayesian lecture
+  Done
+- Tutor Thomas's section class for the week
+  Done
+- Plan computational work
+  Spline accuracy - Grid search
+  Generate samples from the N(\vmu, \mLambda) distribution produced from VB and MCMC fits
+
+02/09/2015
+----------
+- Enter computer prac marks
+  Done, but can't post the marks to the web, because that option is greyed out.
+- Prepare for computer prac
+  They've never seen ANOVA before!
+  Done
+- Thomas's first tutorial at 14:00
+  Done
+- John's corrections
+  I've begun the process.
+- New spline accuracy method
+- Local solutions
+- Comment on stability of fixed point updates
+  I think John wants them to be bad. I'm not sure they're that bad, actually.
+
+01/09/2015
+----------
+- Keep cleaning up your desk
+- Thesis? You need a plan.
+  VB
+  Zero inflation
+  GVA
+  Parameterisation of covariance matrices
+- Talk about first paper with John.
+  We're meeting today at 3pm.
+- Keep reviewing literature.
+  Reading Approaches for Bayesian Variable Selection, George and McCulloch, 1997
+- Mark computer practicals, and post results to the web
+
+31/08/2015
+----------
+- Literature review
+  The Practical Implementation of Bayesian Model Selection - Hugh Chipman, Edward I. George and
+  Robert E. McCulloch (2001)
+  I think John's Graycode idea has already been done. Will discuss with him.
+
+  Kadane, J. B., & Lazar, N. A. (2004). Methods and criteria for model selection. Journal of the American Statistical Association, 99(465), 279+. Retrieved from http://go.galegroup.com.ezproxy1.library.usyd.edu.au/ps/i.do?id=GALE%7CA115848665&v=2.1&u=usyd&it=r&p=EAIM&sw=w&asid=27f177a02afe00f5c37c10024f546e5d
+
+- John is still reviewing my draft. I expect he'll find lots of things that he doesn't like.
+- Should work on producing graphs that I know will be needed.
+
 26/08/2015
 ----------
 - Continue writing up application
