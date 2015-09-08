@@ -4,6 +4,8 @@ source("zero_inflated_model.R")
 source("generate.R")
 library(rstan)
 library(optparse)
+library(mvtnorm)
+library(limma)
 
 # Andrew Gelman says that this magical line of code automatically makes Stan
 # run in parallel and cache compiled models.
@@ -313,12 +315,28 @@ test_spline_accuracy <- function(mult, allKnots, fit, approximation, plot=FALSE)
   # MCMC
   vbeta_mcmc <- apply(fit$vbeta, 2, mean)
   vu_mcmc <- apply(fit$vu, 2, mean)
-  vmu_mcmc <- c(vbeta_mcmc, vu_mcmc)
-  f_hat_mcmc <- mC_tilde %*% vmu_mcmc
   rho <- mean(fit$rho)
   sigma_u_mcmc <- apply(fit$sigma_u, c(2, 3), mean)
   sigma_beta_mcmc <- apply(fit$BetaPrior, c(2, 3), mean)
-  # I've got the values, but they're very high. Something is probably wrong here.
+
+  for (x in seq(from=-1, to=1, by=1e-2)) {
+    # Create an appropriate mC
+    # Need an mC with enough columns for all knots
+    mC_x <- cbind(1, x, spline.des(allKnots, x, derivs=c(0), outer.ok=TRUE)$design)
+
+    # Generate samples - simulate vbeta, vu
+    vmu_mcmc <- c(vbeta_mcmc, vu_mcmc)
+    sigma <- blockDiag(sigma_u_mcmc, sigma_beta_mcmc)
+
+    vmu_vb_sim <- t(rmvnorm(1, vmu_vb, mLambda_vb))
+    f_hat_vb <- mC_x %*% vmu_vb_sim
+
+    vmu_mcmc_sim <- t(rmvnorm(1, vmu_mcmc, sigma))
+    f_hat_mcmc <- mC_x %*% vmu_mcmc_sim
+    # Prediction intervals
+    # Keep generating f_hats
+  }
+  
 
   if (plot) {
     pdf(sprintf("results/accuracy_plots_spline_%s.pdf", approximation))
