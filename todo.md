@@ -4,6 +4,7 @@ To Do list
 26/08/2015
 ----------
 - Continue writing up application
+  Most numeric results finished. Now need accuracy.
 - Meet with John
 - Computer practical
 
