@@ -11,7 +11,7 @@ library(optparse)
 # Some time later: Sometimes it works.
 #source("http://mc-stan.org/rstan/stan.R")
 
-mcmc <- function(mult, seed=1, iterations=NA, warmup=NA, mc.cores=1,
+mcmc <- function(mult, seed=1, iterations=NA, warmup=NA, mc.cores=1, p=2,
                                stan_file="multivariate_zip.stan", stan_fit=NA)
 {
   # Use Stan to create MCMC samples, because Stan deals much better with highly
@@ -26,7 +26,7 @@ mcmc <- function(mult, seed=1, iterations=NA, warmup=NA, mc.cores=1,
   v <- mult$prior$v
   mSigma.beta <- mult$mSigma.beta
   
-  zip_data <- list(N=length(vy), P=2, M=m, B=blocksize, spline_dim=spline_dim,
+  zip_data <- list(N=length(vy), P=p, M=m, B=blocksize, spline_dim=spline_dim,
                    y=vy, X=mX, Z=as.matrix(mZ),
                    v=v, psi=mPsi, BetaPrior=mSigma.beta)
 
