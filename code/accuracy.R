@@ -339,7 +339,6 @@ test_spline_accuracy <- function(mult, allKnots, fit, approximation, plot=FALSE)
       # Prediction intervals
       # Keep generating f_hats
     }
-    browser()
     print(quantile(f_hat_vb))
     print(quantile(f_hat_mcmc))
   }
