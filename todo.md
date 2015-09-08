@@ -8,11 +8,14 @@ To Do list
     Try using the mean of sigma as the covariance matrix and the mean of (beta, u) as the
     mean of the multivariate normal.
     Done
+  * Write rest of the algorithm that finds the 95% confidence intervals via grid search.
   * Look at overflowing values for sigma_u - no idea how to fix this. It's coming from Stan.
     Try different functions.
+    Not sure where to begin. Have tried changing some priors.
 - Organise with DHL to get passport in some way
 - Claim pay
 - Tutor STAT2012 14:00 class
+- Mark computer practicals
 
 07/09/2015
 ----------
