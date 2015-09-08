@@ -1,6 +1,35 @@
 To Do list
 ==========
 
+08/09/2015
+----------
+- Make more progress with splines accuracy
+  * Figure out how to sample from the MCMC distribution and do a grid search.
+    Try using the mean of sigma as the covariance matrix and the mean of (beta, u) as the
+    mean of the multivariate normal.
+    Done
+  * Look at overflowing values for sigma_u - no idea how to fix this. It's coming from Stan.
+    Try different functions.
+- Organise with DHL to get passport in some way
+- Claim pay
+- Tutor STAT2012 14:00 class
+
+07/09/2015
+----------
+- Prepare for STAT2012 tutorial.
+- Give Monday STAT2012 tutorial.
+  We only got through the first two questions!
+
+03/09/2015
+----------
+- Bayesian lecture
+  Done
+- Tutor Thomas's section class for the week
+  Done
+- Plan computational work
+  Spline accuracy - Grid search
+  Generate samples from the N(\vmu, \mLambda) distribution produced from VB and MCMC fits
+
 02/09/2015
 ----------
 - Enter computer prac marks
