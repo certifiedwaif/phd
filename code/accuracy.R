@@ -299,14 +299,6 @@ calculate_accuracies <- function(test, mult, mcmc_samples, var_result, approxima
 test_spline_accuracy <- function(mult, allKnots, fit, approximation, plot=FALSE)
 {
   var_result <- zipvb(mult, method=approximation, verbose=TRUE)
-  # Calculate the mean for vbeta, vu
-  # Construct a BSpline matrix over the range we wish to plot
-  # Plot the function using our MCMC and VB estimates
-  # mCtilde %*% vmu
-  xtilde <- seq(from=-1, to=1, by=1e-2)
-  result <- spline.des(allKnots, xtilde, derivs=rep(0, length(xtilde)), outer.ok=TRUE)
-  mC_tilde <- cbind(1, xtilde, result$design)
-  f_hat_vb <- mC_tilde %*% var_result$vmu
   # John said this isn't good enough.
   # We should do a grid search from -1 to 1, simulating from the normal that
   # VB
@@ -316,22 +308,26 @@ test_spline_accuracy <- function(mult, allKnots, fit, approximation, plot=FALSE)
   vbeta_mcmc <- apply(fit$vbeta, 2, mean)
   vu_mcmc <- apply(fit$vu, 2, mean)
   vmu_mcmc <- c(vbeta_mcmc, vu_mcmc)
-  vmu_mcmc_samples <- with(fit, cbind(vbeta, vu))
+  vmu_mcmc_samples <- cbind(fit$vbeta, fit$vu)
   sigma_vmu_mcmc <- var(vmu_mcmc_samples)
   rho <- mean(fit$rho)
   sigma_u_mcmc <- apply(fit$sigma_u, c(2, 3), mean)
   sigma_beta_mcmc <- apply(fit$BetaPrior, c(2, 3), mean)
 
-  for (x in seq(from=-1, to=1, by=1e-2)) {
+  x <- seq(from=-1, to=1, by=1e-2)
+  vb_lci <- rep(0, length(x))
+  vb_uci <- rep(0, length(x))
+  mcmc_lci <- rep(0, length(x))
+  mcmc_uci <- rep(0, length(x))
+  for (i in 1:length(x)) {
     f_hat_vb <- rep(NA, 100)
     f_hat_mcmc <- rep(NA, 100)
     for (j in 1:100) {
       # Create an appropriate mC
       # Need an mC with enough columns for all knots
-      mC_x <- cbind(1, x, spline.des(allKnots, x, derivs=c(0), outer.ok=TRUE)$design)
+      mC_x <- cbind(1, x[i], spline.des(allKnots, x[i], derivs=c(0), outer.ok=TRUE)$design)
 
       # Generate samples - simulate vbeta, vu
-
       vmu_vb_sim <- t(rmvnorm(1, vmu_vb, mLambda_vb))
       f_hat_vb[j] <- mC_x %*% vmu_vb_sim
 
@@ -340,21 +336,40 @@ test_spline_accuracy <- function(mult, allKnots, fit, approximation, plot=FALSE)
       # Prediction intervals
       # Keep generating f_hats
     }
-    print(quantile(f_hat_vb))
-    print(quantile(f_hat_mcmc))
+    vb_quantiles <- quantile(f_hat_vb, c(.025, .975))
+    vb_lci[i] <- vb_quantiles[1]
+    vb_uci[i] <- vb_quantiles[2]
+    mcmc_quantiles <- quantile(f_hat_mcmc, c(.025, .975))
+    mcmc_lci[i] <- mcmc_quantiles[1]
+    mcmc_uci[i] <- mcmc_quantiles[2]
   }
+  plot(x, exp(vb_lci), type="l", col="blue", ylim=c(0, 225))
+  lines(x, exp(vb_uci), col="blue")
+  lines(x, exp(mcmc_lci), col="red")
+  lines(x, exp(mcmc_uci), col="red")
+  # legend("topleft", c("VB", "MCMC"), fill=c("blue", "red"))
   
+  # Calculate the mean for vbeta, vu
+  # Construct a BSpline matrix over the range we wish to plot
+  # Plot the function using our MCMC and VB estimates
+  # mCtilde %*% vmu
+  xtilde <- seq(from=-1, to=1, by=1e-2)
+  result <- spline.des(allKnots, xtilde, derivs=rep(0, length(xtilde)), outer.ok=TRUE)
+  mC_tilde <- cbind(1, xtilde, result$design)
+  f_hat_vb <- mC_tilde %*% var_result$vmu
+  f_hat_mcmc <- mC_tilde %*% vmu_mcmc
 
-  if (plot) {
-    pdf(sprintf("results/accuracy_plots_spline_%s.pdf", approximation))
-    plot(mult$mX[,2], mult$vy)
+  # if (plot) {
+    # pdf(sprintf("results/accuracy_plots_spline_%s.pdf", approximation))
+    points(mult$mX[,2], mult$vy)
     vf <- 4 + sin(pi * xtilde)
     lines(xtilde, exp(vf), type="l", col="black")
     lines(xtilde, exp(f_hat_mcmc), type="l", col="red")
     lines(xtilde, exp(f_hat_vb), type="l", col="blue")
     legend("topleft", c("True function", "MCMC", "VB"), fill=c("black", "red", "blue"))
-    dev.off()
-  }
+    # dev.off()
+  # }
+  browser()
   #return(calculate_accuracies(mult, mcmc_samples, var_result, approximation, plot_flag=plot))
   return()
 }
