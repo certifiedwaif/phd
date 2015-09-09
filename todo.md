@@ -1,6 +1,13 @@
 To Do list
 ==========
 
+09/09/2015
+----------
+- Work on plotting prediction intervals
+- Local solutions
+- GVA fixed point sparsity
+- Send John latest draft
+
 08/09/2015
 ----------
 - Make more progress with splines accuracy
@@ -83,6 +90,7 @@ To Do list
 26/08/2015
 ----------
 - Continue writing up application
+  Most numeric results finished. Now need accuracy.
 - Meet with John
 - Computer practical
 
