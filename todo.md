@@ -12,6 +12,11 @@ To Do list
   * Look at overflowing values for sigma_u - no idea how to fix this. It's coming from Stan.
     Try different functions.
     Not sure where to begin. Have tried changing some priors.
+    Not sure what's causing the overflow, or what to try next. Adding more debugging prints, in
+    desperation.
+    Side-step problem by using the variation of the betas themselves? Isn't that a much smarter thing
+    to do? And will incorporate all of the variation from the rest of the model. You won't be estimating the
+    variance.
 - Organise with DHL to get passport in some way
 - Claim pay
 - Tutor STAT2012 14:00 class
