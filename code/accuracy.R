@@ -322,19 +322,13 @@ test_spline_accuracy <- function(mult, allKnots, fit, approximation, plot=FALSE)
   for (i in 1:length(x)) {
     f_hat_vb <- rep(NA, 100)
     f_hat_mcmc <- rep(NA, 100)
-    for (j in 1:100) {
+    for (j in 1:1000) {
       # Create an appropriate mC
-      # Need an mC with enough columns for all knots
       mC_x <- cbind(1, x[i], spline.des(allKnots, x[i], derivs=c(0), outer.ok=TRUE)$design)
 
       # Generate samples - simulate vbeta, vu
-      vmu_vb_sim <- t(rmvnorm(1, vmu_vb, mLambda_vb))
-      f_hat_vb[j] <- mC_x %*% vmu_vb_sim
-
-      vmu_mcmc_sim <- t(rmvnorm(1, vmu_mcmc, sigma_vmu_mcmc))
-      f_hat_mcmc[j] <- mC_x %*% vmu_mcmc_sim
-      # Prediction intervals
-      # Keep generating f_hats
+      f_hat_vb[j] <- t(rmvnorm(1, mC_x %*% vmu_vb, mC_x %*% mLambda_vb %*% t(mC_x)))
+      f_hat_mcmc[j] <- t(rmvnorm(1, mC_x %*% vmu_mcmc, mC_x %*% sigma_vmu_mcmc %*% t(mC_x)))
     }
     vb_quantiles <- quantile(f_hat_vb, c(.025, .975))
     vb_lci[i] <- vb_quantiles[1]
@@ -343,6 +337,7 @@ test_spline_accuracy <- function(mult, allKnots, fit, approximation, plot=FALSE)
     mcmc_lci[i] <- mcmc_quantiles[1]
     mcmc_uci[i] <- mcmc_quantiles[2]
   }
+  pdf(sprintf("results/splines_ci_%s.pdf", approximation))
   plot(x, exp(vb_lci), type="l", col="blue", ylim=c(0, 225))
   lines(x, exp(vb_uci), col="blue")
   lines(x, exp(mcmc_lci), col="red")
@@ -369,7 +364,7 @@ test_spline_accuracy <- function(mult, allKnots, fit, approximation, plot=FALSE)
     legend("topleft", c("True function", "MCMC", "VB"), fill=c("black", "red", "blue"))
     # dev.off()
   # }
-  browser()
+  dev.off()
   #return(calculate_accuracies(mult, mcmc_samples, var_result, approximation, plot_flag=plot))
   return()
 }
@@ -527,7 +522,7 @@ test_accuracies_spline <- function(save=FALSE)
     result <- generate_spline_test_data()
     mult <- result$mult
     allKnots <- result$allKnots
-    mcmc_result <- mcmc(mult, seed=seed, iterations=1e5, warmup=1e3,
+    mcmc_result <- mcmc(mult, seed=seed, iterations=1e6, warmup=5e3,
                                       stan_file="multivariate_zip_splines.stan")
     mcmc_samples <- mcmc_result$mcmc_samples
     fit <- mcmc_result$fit
@@ -561,4 +556,4 @@ main <- function()
   }
 }
 
-# main()
+main()
