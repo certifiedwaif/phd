@@ -304,15 +304,11 @@ test_spline_accuracy <- function(mult, allKnots, fit, approximation, plot=FALSE)
   # VB
   vmu_vb <- var_result$vmu
   mLambda_vb <- var_result$mLambda
-  # MCMC
+
   vbeta_mcmc <- apply(fit$vbeta, 2, mean)
   vu_mcmc <- apply(fit$vu, 2, mean)
   vmu_mcmc <- c(vbeta_mcmc, vu_mcmc)
   vmu_mcmc_samples <- cbind(fit$vbeta, fit$vu)
-  sigma_vmu_mcmc <- var(vmu_mcmc_samples)
-  rho <- mean(fit$rho)
-  sigma_u_mcmc <- apply(fit$sigma_u, c(2, 3), mean)
-  sigma_beta_mcmc <- apply(fit$BetaPrior, c(2, 3), mean)
 
   x <- seq(from=-1, to=1, by=1e-2)
   vb_lci <- rep(0, length(x))
@@ -320,15 +316,20 @@ test_spline_accuracy <- function(mult, allKnots, fit, approximation, plot=FALSE)
   mcmc_lci <- rep(0, length(x))
   mcmc_uci <- rep(0, length(x))
   for (i in 1:length(x)) {
-    f_hat_vb <- rep(NA, 100)
-    f_hat_mcmc <- rep(NA, 100)
-    for (j in 1:1000) {
+    NUM_REPS <- 1000
+    f_hat_vb <- rep(NA, NUM_REPS)
+    f_hat_mcmc <- rep(NA, NUM_REPS)
+    for (j in 1:NUM_REPS) {
       # Create an appropriate mC
       mC_x <- cbind(1, x[i], spline.des(allKnots, x[i], derivs=c(0), outer.ok=TRUE)$design)
 
       # Generate samples - simulate vbeta, vu
       f_hat_vb[j] <- t(rmvnorm(1, mC_x %*% vmu_vb, mC_x %*% mLambda_vb %*% t(mC_x)))
-      f_hat_mcmc[j] <- t(rmvnorm(1, mC_x %*% vmu_mcmc, mC_x %*% sigma_vmu_mcmc %*% t(mC_x)))
+      sample_idx <- sample(dim(fit$vbeta)[1], 1)
+      vbeta_mcmc <- fit$vbeta[sample_idx, ]
+      vu_mcmc <- fit$vu[sample_idx, ]
+      vnu_mcmc <- c(vbeta_mcmc, vu_mcmc)
+      f_hat_mcmc[j] <- t(mC_x %*% vnu_mcmc)
     }
     vb_quantiles <- quantile(f_hat_vb, c(.025, .975))
     vb_lci[i] <- vb_quantiles[1]
@@ -337,34 +338,34 @@ test_spline_accuracy <- function(mult, allKnots, fit, approximation, plot=FALSE)
     mcmc_lci[i] <- mcmc_quantiles[1]
     mcmc_uci[i] <- mcmc_quantiles[2]
   }
-  pdf(sprintf("results/splines_ci_%s.pdf", approximation))
-  plot(x, exp(vb_lci), type="l", col="blue", ylim=c(0, 225))
-  lines(x, exp(vb_uci), col="blue")
-  lines(x, exp(mcmc_lci), col="red")
-  lines(x, exp(mcmc_uci), col="red")
-  # legend("topleft", c("VB", "MCMC"), fill=c("blue", "red"))
-  
-  # Calculate the mean for vbeta, vu
-  # Construct a BSpline matrix over the range we wish to plot
-  # Plot the function using our MCMC and VB estimates
-  # mCtilde %*% vmu
-  xtilde <- seq(from=-1, to=1, by=1e-2)
-  result <- spline.des(allKnots, xtilde, derivs=rep(0, length(xtilde)), outer.ok=TRUE)
-  mC_tilde <- cbind(1, xtilde, result$design)
-  f_hat_vb <- mC_tilde %*% var_result$vmu
-  f_hat_mcmc <- mC_tilde %*% vmu_mcmc
 
-  # if (plot) {
-    # pdf(sprintf("results/accuracy_plots_spline_%s.pdf", approximation))
+  if (plot) {
+    pdf(sprintf("results/accuracy_plots_spline_%s.pdf", approximation))
+    # pdf(sprintf("results/splines_ci_%s.pdf", approximation))
+    plot(x, exp(vb_lci), type="l", col="blue", ylim=c(0, 225))
+    lines(x, exp(vb_uci), col="blue")
+    lines(x, exp(mcmc_lci), col="red")
+    lines(x, exp(mcmc_uci), col="red")
+    # legend("topleft", c("VB", "MCMC"), fill=c("blue", "red"))
+    
+    # Calculate the mean for vbeta, vu
+    # Construct a BSpline matrix over the range we wish to plot
+    # Plot the function using our MCMC and VB estimates
+    # mCtilde %*% vmu
+    xtilde <- seq(from=-1, to=1, by=1e-2)
+    result <- spline.des(allKnots, xtilde, derivs=rep(0, length(xtilde)), outer.ok=TRUE)
+    mC_tilde <- cbind(1, xtilde, result$design)
+    f_hat_vb <- mC_tilde %*% var_result$vmu
+    f_hat_mcmc <- mC_tilde %*% vmu_mcmc
+
     points(mult$mX[,2], mult$vy)
     vf <- 4 + sin(pi * xtilde)
     lines(xtilde, exp(vf), type="l", col="black")
     lines(xtilde, exp(f_hat_mcmc), type="l", col="red")
     lines(xtilde, exp(f_hat_vb), type="l", col="blue")
     legend("topleft", c("True function", "MCMC", "VB"), fill=c("black", "red", "blue"))
-    # dev.off()
-  # }
-  dev.off()
+    dev.off()
+  }
   #return(calculate_accuracies(mult, mcmc_samples, var_result, approximation, plot_flag=plot))
   return()
 }
@@ -522,7 +523,7 @@ test_accuracies_spline <- function(save=FALSE)
     result <- generate_spline_test_data()
     mult <- result$mult
     allKnots <- result$allKnots
-    mcmc_result <- mcmc(mult, seed=seed, iterations=1e6, warmup=5e3,
+    mcmc_result <- mcmc(mult, seed=seed, iterations=1e5, warmup=1e3,
                                       stan_file="multivariate_zip_splines.stan")
     mcmc_samples <- mcmc_result$mcmc_samples
     fit <- mcmc_result$fit
@@ -556,4 +557,4 @@ main <- function()
   }
 }
 
-main()
+# main()

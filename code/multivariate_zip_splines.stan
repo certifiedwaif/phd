@@ -34,9 +34,11 @@ model {
   sigma_u ~ inv_wishart(v, psi);
 
   chol_BetaPrior <- cholesky_decompose(BetaPrior);
+  # print("chol_BetaPrior", chol_BetaPrior);
   vbeta ~ multi_normal_cholesky(zeros_beta, chol_BetaPrior);
 
   chol_sigma_u <- cholesky_decompose(sigma_u);
+  # print("chol_sigma_u", chol_sigma_u);
   vu ~ multi_normal_cholesky(zeros_u, chol_sigma_u);
   
   for (n in 1:N) {
