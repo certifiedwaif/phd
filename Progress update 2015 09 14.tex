@@ -19,28 +19,46 @@
 \maketitle
 \end{frame}
 
-\begin{frame}{What I've been up to this week}
+\begin{frame}{What I've been up to last week}
 \begin{itemize}
-\item Working on first paper. Calculating confidence intervals for splines.
-\item Reading about BFGS in Classical and Modern Numerical Analysis.
+\item Calculating confidence intervals for splines.
+\item Reading Classical and Modern Numerical Analysis: Theory, Methods and Practice by Azmy S. Ackleh,
+			Edward James Allen, R. Baker Kearfott, Padmanabhan Seshaiyer.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Classical and Modern Numerical Analysis and BFGS}
+\begin{itemize}
+\item This book achieves an amazing level of conciseness and clarity relative to other books on numerical
+			methods that I've read. There are some nice proofs.
+\item Numerical Optimisation by Nocedal and Wright is better for more depth.
+\item BFGS approximates the inverse of the Hessian in Newton-Raphson with rank one updates based on
+			the change in	gradient between iterations.
+\item L-BFGS is an extension of this idea, which stores the last few gradient vectors and approximates the
+			inverse Hessian from that.
+\item In both algorithms, we avoid having to invert a p by p matrix, which saves us $O(p^3)$ floating
+			point operations.
+\item This rank one update idea seems very powerful.
 \end{itemize}
 \end{frame}
 
 \begin{frame}{Calculating confidence intervals for splines}
 \begin{itemize}
-\item We're trying to examine the difference between the VB and MCMC fits.
-We expect the MCMC fit to have more variance.
-\item Confidence intervals are calculated by grid search, calculating the
-appropriate $\mC_x$ for each value of $x$ with an appropriate set of knots.
-\item We then sample from the appropriate fitted distribution from VB and MCMC 
-1,000 times and take upper and lower quintiles.
+\item We're examining the difference between the VB and MCMC fits. We expect the MCMC fit to have
+more variance.
+\item The spline model is $\hat{f}_x = \mC_x \vnu$, $\vnu \sim \text{N}(\vmu, \mLambda)$.
+\item In this case, we model the function $f(x) = 4 \sin(\pi x)$ on the interval $[-1, 1]$. As I'm
+			working with Poisson models, I then exponentiate.
+\item We calculate the appropriate $\mC_x$ for each value of $x$ within the range of the function.
+\item We then sample from $\mC_x \vnu$ where the distribution of $\vnu$ is taken from the MCMC and VB
+			model fits, and take the 95\% CI at each point $x$.
 \end{itemize}
 \end{frame}
 
 \begin{frame}{Distribution that I was sampling from}
 \begin{itemize}
-\item I was generating samples $\vnu \sim N(\vmu, \mLambda)$ and then 
-calculating $\hat{f} = \mC_x \vnu$.
+\item I was generating samples $\vnu \sim \text{N}(\vmu, \mLambda)$ and then 
+calculating $\hat{f}_x = \mC_x \vnu$.
 % First image
 \begin{figure}
 \includegraphics[width=75mm, height=75mm]{code/results/prediction_ci.pdf}
@@ -50,13 +68,20 @@ calculating $\hat{f} = \mC_x \vnu$.
 
 \begin{frame}{Distributions I should have been sampling from}
 \begin{itemize}
-\item I should have been generating samples from $\hat{f} \sim N(\mC_x \vmu, \mC_x \mLambda \mC_x^\top)$.
+\item I should have been generating samples from $\hat{f}_x \sim \text{N}(\mC_x \vmu, \mC_x \mLambda \mC_x^\top)$.
 % Second image
 \begin{figure}
 \includegraphics[width=75mm, height=75mm]{code/results/splines_ci_gva2.pdf}
 \end{figure}
-\item That's better, but the confidence intervals are still the same size.
-I'm not sure why this is yet. The MCMC might not be sampling effectively.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Why are the confidence intervals such similiar widths?}
+\begin{itemize}
+\item That's better, but the MCMC fit doesn't seem to be noticeably wider.
+\item Perhaps the MCMC isn't sampling very effectively?
+\item Maybe something else is wrong.
+\item Requires further investigation.
 \end{itemize}
 \end{frame}
 
