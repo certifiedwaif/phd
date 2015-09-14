@@ -37,13 +37,24 @@ appropriate $\mC_x$ for each value of $x$ with an appropriate set of knots.
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Distributions that I was sampling from}
+\begin{frame}{Distribution that I was sampling from}
 \begin{itemize}
 \item I was generating samples $\vnu \sim N(\vmu, \mLambda)$ and then 
 calculating $\hat{f} = \mC_x \vnu$.
 % First image
-\item I should have been generating samples $\hat{f} \sim N(\mC_x \vmu, \mC \mLambda \mC_x^\top)$.
+\begin{figure}
+\includegraphics[width=75mm, height=75mm]{code/results/prediction_ci.pdf}
+\end{figure}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Distributions I should have been sampling from}
+\begin{itemize}
+\item I should have been generating samples from $\hat{f} \sim N(\mC_x \vmu, \mC_x \mLambda \mC_x^\top)$.
 % Second image
+\begin{figure}
+\includegraphics[width=75mm, height=75mm]{code/results/splines_ci_gva2.pdf}
+\end{figure}
 \item That's better, but the confidence intervals are still the same size.
 I'm not sure why this is yet. The MCMC might not be sampling effectively.
 \end{itemize}
