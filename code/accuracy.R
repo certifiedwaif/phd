@@ -316,7 +316,7 @@ test_spline_accuracy <- function(mult, allKnots, fit, approximation, plot=FALSE)
   mcmc_lci <- rep(0, length(x))
   mcmc_uci <- rep(0, length(x))
   for (i in 1:length(x)) {
-    NUM_REPS <- 1000
+    NUM_REPS <- 10000
     f_hat_vb <- rep(NA, NUM_REPS)
     f_hat_mcmc <- rep(NA, NUM_REPS)
     for (j in 1:NUM_REPS) {
@@ -342,10 +342,10 @@ test_spline_accuracy <- function(mult, allKnots, fit, approximation, plot=FALSE)
   if (plot) {
     pdf(sprintf("results/accuracy_plots_spline_%s.pdf", approximation))
     # pdf(sprintf("results/splines_ci_%s.pdf", approximation))
-    plot(x, exp(vb_lci), type="l", col="blue", ylim=c(0, 225))
-    lines(x, exp(vb_uci), col="blue")
-    lines(x, exp(mcmc_lci), col="red")
-    lines(x, exp(mcmc_uci), col="red")
+    plot(x, vb_lci, type="l", col="blue", ylim=c(2.5, 5.5))
+    lines(x, vb_uci, col="blue")
+    lines(x, mcmc_lci, col="red")
+    lines(x, mcmc_uci, col="red")
     # legend("topleft", c("VB", "MCMC"), fill=c("blue", "red"))
     
     # Calculate the mean for vbeta, vu
@@ -358,11 +358,11 @@ test_spline_accuracy <- function(mult, allKnots, fit, approximation, plot=FALSE)
     f_hat_vb <- mC_tilde %*% var_result$vmu
     f_hat_mcmc <- mC_tilde %*% vmu_mcmc
 
-    points(mult$mX[,2], mult$vy)
+    points(mult$mX[,2], log(mult$vy))
     vf <- 4 + sin(pi * xtilde)
-    lines(xtilde, exp(vf), type="l", col="black")
-    lines(xtilde, exp(f_hat_mcmc), type="l", col="red")
-    lines(xtilde, exp(f_hat_vb), type="l", col="blue")
+    lines(xtilde, vf, type="l", col="black")
+    lines(xtilde, f_hat_mcmc, type="l", col="red")
+    lines(xtilde, f_hat_vb, type="l", col="blue")
     legend("topleft", c("True function", "MCMC", "VB"), fill=c("black", "red", "blue"))
     dev.off()
   }
@@ -557,4 +557,4 @@ main <- function()
   }
 }
 
-# main()
+main()
