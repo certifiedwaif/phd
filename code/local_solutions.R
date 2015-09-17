@@ -22,11 +22,25 @@ sigma2.beta <- 1e5
 mult <- create_mult(vy, mX, mZ, sigma2.beta, m=3, blocksize=1, v=2)
 
 # Start fits from a range of points on a 2 dimensional grid
-for (init_intercept in seq(-3, 3, 1e-2)) {
-	for (init_slope in seq(-3, 3, 1e-2)) {
+for (init_intercept in seq(-3, 3, 1e-1)) {
+	for (init_slope in seq(-3, 3, 1e-1)) {
+	# for (init_slope in seq(-0.39, 3, 1e-2)) {
+		cat("init_intercept", init_intercept, "\n")
+		cat("init_slope", init_slope, "\n")
 		mult$vmu[1] <- init_intercept
 		mult$vmu[2] <- init_slope
-		fit <- zipvb(mult, method="laplace", glm_init=FALSE)
+		fit <- zipvb(mult, method="gva2", verbose=FALSE, glm_init=FALSE)
 		print(fit$vmu)
 	}
 }
+
+# Bad point for GVA
+# > init_intercept
+# [1] -3
+# > init_slope
+# [1] -0.39
+# > 
+
+# mult$vmu[1] <- -3
+# mult$vmu[2] <- -0.17
+# fit <- zipvb(mult, method="gva", verbose=TRUE, glm_init=FALSE)
