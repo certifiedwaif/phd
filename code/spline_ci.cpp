@@ -4,6 +4,8 @@
 
 */
 
+// [[Rcpp::plugins(cpp11)]]
+
 // [[Rcpp::depends(RcppEigen)]]
 #include <RcppEigen.h>
 #include "eigenmvn.h"
