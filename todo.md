@@ -1,6 +1,45 @@
 To Do list
 ==========
 
+17/09/2015
+----------
+- Write the inner loop of the spline confidence interval code in C++.
+  Done. That wasn't as hard as I thought.
+- Find an example of a function where the VB approximates worse than the MCMC.
+  After a bit of experimentation, I think that I've found one. 3 + 3 * sin(pi * x) on [-1, 1]
+  The high part of the function is approximated very well. The low part of the function is harder
+  to estimate. MCMC is able to nearly recover the true function, whereas VB doesn't.
+- Local solutions.
+  Start from a range of grid points in a 2 by 2 space. See which problems are solvable, and which problems
+  are not.
+  Do I remove all of my overflow protection?
+  Construct mZ with one block.
+  Done, running.
+  GVA2 seems very stable.
+- Began reading D Rohde and Matt Wand's paper "Semiparametric Mean Field Variational Bayes: General
+Principles and Numerical Issues" again. Reading Fisher information distance: a geometric reading by
+S. I. R. Costa, S. A. Santos and J. E. Strapasson to get an idea about hyperbolic distance between
+normal distributions.
+
+16/09/2015
+----------
+- Supervise quiz at 9am.
+  Done
+- Enter marks for Computer Prac Week 7
+  Done
+- Prepare for Computer Prac Week 8
+- Continue searching for a low count spline
+  More points?
+- Local solutions
+- Claim pay
+- Scan and send back investment form
+
+15/09/2015
+----------
+- Approximation is so close because VB is doing well.
+- Fix the knots.
+- Try a spline example with low counts.
+
 14/09/2015
 ----------
 - Melanoma meeting

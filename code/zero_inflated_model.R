@@ -124,7 +124,7 @@ calculate_lower_bound <- function(mult, verbose=FALSE)
 	return(T1 + T2 + T3)
 }
 
-zipvb <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE)
+zipvb <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE, glm_init=TRUE)
 {
   # browser()
   MAXITER <- 10
@@ -155,9 +155,11 @@ zipvb <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE)
   vlower_bound <- c()
 
   # Make an initial guess for vmu
-  fit <- glm.fit(mult$mC, mult$vy, family=poisson())
-  vmu <- fit$coefficients
-  vmu[is.na(vmu)] <- 0
+  if (glm_init) {
+    fit <- glm.fit(mult$mC, mult$vy, family=poisson())
+    vmu <- fit$coefficients
+  }
+  # vmu[is.na(vmu)] <- 0
   i <- 0
   # Iterate ----
   # TODO: Add check on whether parameters are still changing
