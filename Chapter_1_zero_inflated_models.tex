@@ -59,7 +59,26 @@ model.
 
 \subsection{Variational Bayesian inference}
 
+% TODO: Flesh this out!
 Nonparametric and fixed form. \cite{RohdeWand2015}.
+
+Semiparametric mean field Variational Bayes is an approximate Bayesian inference method
+which works by minimising the Kullback-Leibler divergence between the true posterior
+and an approximating distribution. This is achieved by iteratively maximising the variational
+lower bound using mean field updates until its' increase is negligible and convergence is
+achieved.
+
+\begin{align*}
+\log p(\vy) &= \log p(\vy) \int q(\vtheta) d \vtheta \\
+&= \int q(\vtheta) \log \{ \frac{p(\vtheta, \vy) / q(\vtheta)}{p(\vtheta | \vy) / q(\vtheta)} \} d \vtheta \\
+&= \int q(\vtheta) \log \frac{p(\vy, \vtheta)}{q(\vtheta)} d \vtheta +
+	 \int q(\vtheta) \log \frac{q(\vtheta)}{p(\vtheta|\vy)} d \vtheta \\
+& \geq \int q(\vtheta) \log \frac{p(\vy, \vtheta)}{q(\vtheta)} d \vtheta
+\end{align*}
+
+$$
+q^*(\vtheta) = \argmin_{q \in Q} \text{KL} {q(\vtheta) || p(\vtheta|\vy)}
+$$
 
 \section{Extending the zero-inflated Poisson model to a regression model}
 
