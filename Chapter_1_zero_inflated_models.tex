@@ -59,14 +59,10 @@ model.
 
 \subsection{Variational Bayesian inference}
 
-% TODO: Flesh this out!
-Nonparametric and fixed form. \cite{RohdeWand2015}.
-
-Semiparametric mean field Variational Bayes is an approximate Bayesian inference method
-which works by minimising the Kullback-Leibler divergence between the true posterior
-and an approximating distribution. This is achieved by iteratively maximising the variational
-lower bound using mean field updates until its' increase is negligible and convergence is
-achieved.
+Semiparametric mean field Variational Bayes is an approximate Bayesian inference method \cite{RohdeWand2015}.
+The approximation is found by iteratively minimising the Kullback-Leibler divergence between the true posterior
+and an approximating distribution, and thus maximising the variational lower bound as defined in Equation
+\ref{eq:lower_bound_defn}.
 
 \begin{align*}
 \log p(\vy) &= \log p(\vy) \int q(\vtheta) d \vtheta \\
@@ -76,19 +72,34 @@ achieved.
 & \geq \int q(\vtheta) \log \frac{p(\vy, \vtheta)}{q(\vtheta)} d \vtheta
 \end{align*}
 
+\begin{equation}
+\label{eq:lower_bound_defn}
+\int q(\vtheta) \log \frac{p(\vy, \vtheta)}{q(\vtheta)} d \vtheta
+\end{equation}
+
+\noindent Thus the optimal approximation $q^*(\vtheta)$ is
+
 $$
-q^*(\vtheta) = \argmin_{q \in Q} \text{KL} {q(\vtheta) || p(\vtheta|\vy)}
+q^*(\vtheta) = \argmin_{q \in Q} \text{KL} \{ {q(\vtheta) || p(\vtheta|\vy)} \}
 $$
 
-\section{Extending the zero-inflated Poisson model to a regression model}
+\noindent A common approach is to assume an approximation in a factorised form
+$$q(\vtheta) = \Pi_{i=1}^M q(\theta_i)$$
+The variational lower bound is maximised iteratively. On each iteration, the value of each parameter in the
+model is calculated as the expectation of the full likelihood relative to the other parameters in the model, 
+which is referred to as the mean field update:
+$$q_i^*(\theta_i) \propto \exp{\{ \bE_{-q(\theta_i)} \log p(\vy, \vtheta) \}}$$
+This is done for each parameter in the model in turn.
+This continues until the variational lower bound's increase is negligible and convergence is achieved.
 
-\noindent The above univariate model demonstrates that variational approximations are well-suited
-to accelerating the fit of Bayesian zero-inflated models to data. Typically zero-inflated
-models arise in applications where we wish to build multivariate regression models. To be able to
-construct multivariate models with as much generality as possible, we specify the full
-model as a General Design Bayesian Generalized Linear Mixed Model, as in \citep{zhao06}.
-This allows us to incorporate within-subject correlation, measurement error, missing data
-and smoothing splines in our models.
+
+\section{The zero-inflated Poisson model to a regression model}
+
+\noindent Variational approximations are well-suited to accelerating the fit of Bayesian zero-inflated models
+to data. Typically zero-inflated models arise in applications where we wish to build multivariate regression 
+models. To be able to construct multivariate models with as much generality as possible, we specify the full
+model as a General Design Bayesian Generalized Linear Mixed Model, as in \citep{zhao06}. This allows us to 
+incorporate within-subject correlation, measurement error, missing data and smoothing splines in our models.
 
 % TODO: Lower bound graph
 % TODO: Accuracy of approximations
@@ -99,7 +110,7 @@ and smoothing splines in our models.
 % Idea: We can use an approximation of the from q(\beta, \u, \Sigma) q(\rho) \Product q(r_i)
 % and use GVA on q(\beta, \u, \Sigma) and mean field updates on \rho and r_i
 
-\subsection{Base Model}
+\subsection{Model}
 Let $\mR = \diag{(\vr)}$. Let $\mC = [\mX \mZ], \vnu = [\vbeta^\top \vu^\top]^\top$. Consider the
 model
 
