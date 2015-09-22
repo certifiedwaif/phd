@@ -193,12 +193,16 @@ optimal densities $q^*(\vmu, \mLambda)$, $q^*(\mSigma_{\vu \vu})$ and $q^*(\rho)
 
 
 \section{Algorithms for fitting the variational approximation}
+
+In this article, we compare the accuracy, stability and speed of a number of algorithms for fitting the 
+variational approximation to our model.
+
 \subsection{Laplace-Variational Approximation}
-Laplace's method of approximation relies on a second order Taylor expansion of the
-log likelihood around the mode. This can then be optimised with Newton-Raphson
-iterations. The algorithm is very quick to execute, but the resulting approximate
-posterior distributions are not as accurate as those produced by the other algorithms
-considered in this article.
+Laplace's method of approximation uses the second order Taylor expansion of the
+log likelihood around the mode to find a Gaussian approximation of the full posterior.
+This can then be optimised with Newton-Raphson style iterations. The algorithm is very
+quick to execute, but the resulting approximate posterior distributions are not as accurate
+as those produced by the other algorithms considered in this article.
 
 % NR
 % Detail the function and its derivatives
@@ -214,7 +218,7 @@ considered in this article.
 \frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \mLambda} &\approx - \mC^\top \text{diag}(\vp e^{(\mC \vmu)}) \mC - \mSigma^{-1}
 \end{align*}
 
-The steps of the algorithm are provided in Algorithm \ref{alg:laplace_alg}.
+\noindent The steps of the algorithm are shown in Algorithm \ref{alg:laplace_alg}.
 
 \begin{algorithm}
 \caption{Laplace scheme for optimising $\log \underline{p}(\vmu, \mLambda; \vy)$}
@@ -233,9 +237,8 @@ The steps of the algorithm are provided in Algorithm \ref{alg:laplace_alg}.
 % Detail techniques used for fitting models.
 % TODO: Talk more about numerical scheme. This explanation is terrible!
 Assuming $q(\vnu) \sim N(\vmu, \mLambda)$, the Gaussian variational lower bound in Algorithm
-\ref{alg:algorithm_one} can be optimised using a  variety of algorithms. Each of these algorithms is a
-trade-off between accuracy,  stability and speed. The variational lower bound is not necessarily unimodal,
-leading to potential difficulty in optimising to the global maximum. However, for fixed
+\ref{alg:algorithm_one} can be optimised using a  variety of algorithms. The variational lower bound is not 
+necessarily unimodal, leading to potential difficulty in optimising to the global maximum. However, for fixed
 $\vp$ and $\mSigma$, the variational lower bound is log-concave, and so standard
 optimisation methods such as L-BFGS-B work well. This led to an extremely accurate approximation
 of the true posterior at the expense of some additional computational effort.
@@ -271,10 +274,6 @@ instead we optimise $\mR$ where $\mLambda = (\mR \mR^\top)^{-1}$.
  i=1, \ldots, n$ for $\va$ and then calculating $\va^\top\va$ rather than calculating
 $\text{diag}(\mC \mLambda \mC^\top)$ directly.
 
-% Re-order the covariance matrix so that Chevron form is ``reversed''. This makes
-% the Cholesky factorisation very simple, and reduces the number of parameters that
-% you need to optimise and store.
-
 % More complicated functions and derivatives, but more accurate
 % Can be quite fast because of the special form of $\mR$.
 
@@ -283,13 +282,13 @@ $\text{diag}(\mC \mLambda \mC^\top)$ directly.
 % I think it's log concave for \vp and \mSigma fixed
 
 % Include diagram?
-By re-ordering $\mC = [\mX \mZ]$ to $\mC = [\mZ \mX]$, and re-ordering the dimensions
+\noindent By re-ordering $\mC = [\mX \mZ]$ to $\mC = [\mZ \mX]$, and re-ordering the dimensions
 of $\vmu, \mLambda$ and $\mSigma$ in the same manner, the independence between the
 blocks relating to the random effects in $\mZ$ induce sparsity in the Cholesky factor $\mR$
 of $\mLambda$. Thus the Gaussian $q(\vnu) \sim N(\vmu, \mLambda)$ can be optimised over a space
 of $\half p (p + 1) + pq + \half q (q + 1)$ rather than dimension $\half (p + mq) (p + mq + 1)$ 
 as in the dense parameterisation. This leads to subtantial performance gains when m is large,
-as is typically the case in practice. % You could calculate the difference explcitly.
+as is typically the case in problems of practical importance such as clinical trials.
 
 \noindent The Gaussian variational lower bound is
 
@@ -315,7 +314,7 @@ derivative with respect to $\mLambda$ is now
 \subsubsection{GVA fixed point}
 % Fixed point update of \mLambda
 This variant of the algorithm uses Newton-Raphson-like optimisation on the Gaussian
-variational lower bound. This algorithm is fast, but potentially unstable. The steps are presented in
+variational lower bound. This algorithm is fast, but unstable. The steps are presented in
 Algorithm \ref{alg:algorithm_nr}.
 % Essentially a very straightforward optimisation approach, but potentially unstable.
 % Detail the function and its derivatives
@@ -353,7 +352,7 @@ different data sets that were randomly generated after having initialised the ra
 number generator with different seeds. Median accuracy of the algorithms was assessed
 by running them on 100 randomly generated data sets.
 
-The results for the random intercept, random slope and spline accuracy are presented in
+\noindent The results for the random intercept, random slope and spline accuracy are presented in
 Table \ref{tab:accuracy_int}, Table \ref{tab:accuracy_slope} and Table \ref{tab:accuracy_spline}
 respectively.
 
@@ -363,7 +362,7 @@ respectively.
 \begin{table}
 \caption{Table of accuracy - Random intercept model}
 \label{tab:accuracy_int}
-\begin{tabular}{l|llll}
+\begin{tabular}{|l|llll|}
 \hline
 & Laplace's Method & GVA $(\mLambda = \mR \mR^\top)$ & GVA2 $(\mLambda = (\mR \mR^\top)^{-1})$ & GVA FP\\
 \hline
@@ -379,7 +378,7 @@ $\rho$ & $0.976$ & $0.974$ & $0.974$ &  $0.974$ \\
 \begin{table}
 \caption{Table of accuracy - Random slope model}
 \label{tab:accuracy_slope}
-\begin{tabular}{l|llll}
+\begin{tabular}{|l|llll|}
 \hline
 & Laplace's Method & GVA $(\mLambda = \mR \mR^\top)$ & GVA $(\mLambda = (\mR \mR^\top)^{-1})$ & GVA FP\\
 \hline
@@ -416,48 +415,8 @@ GVA NR & 0.969 \\
 
 \section{Application}\label{sec:application}
 
-% This is a draft, depending on the preliminaries of getting permission, of course.
-This model implemented above was applied to physical activity data.
-273 individuals in a longitudinal study, observed at baseline, three months and twelve
-months. The research outcome of interest was to ascertain whether improvements in physical
-activity were achieved and maintained by the majority of participants in the study.
-A zero-inflated random slopes Poisson model was fit using the GVA2 algorithm above.
-The results can be seen in Table \ref{tab:application_roaches}.
-
-The GVA2 algorithm was used to fit a random intercept model to the Roaches data set provided
+\noindent The GVA2 algorithm was used to fit a random intercept model to the Roaches data set provided
 by Andrew Gelman. The results are presented in Table \ref{tab:application_roaches}.
-% Table of results - Estimates, 95% credible intervals, accuracy
-% I'm not at all looking forward to doing the MCMC for this
-% Or resolving the overflow in mLambda in the model fit
-
-% Table of results
-% How do I present the random effects
-% Covariance?
-% Other parameters?
-% > diag(fit$mLambda[1:2, 1:2])
-% [1] 0.0008489323 0.0006191579
-% Do you need accuracy results?
-
-% Table of results - Estimates, 95% credible intervals, accuracy
-% I'm not at all looking forward to doing the MCMC for this
-% Or resolving the overflow in mLambda in the model fit
-
-\begin{table}
-\caption{Table of results - Roaches}
-\label{tab:application_roaches}
-\begin{tabular}{l|llll}
-\hline
-Covariate & Posterior Mean & Lower 95\% Credible Interval &  Upper 95\% Credible Interval \\
-\hline
-Intercept & 3.179 & 3.157 & 3.201 & 0.896 \\
-Time & -0.046 & -0.053 & -0.039 & 0.965 \\
-Time:Treatment & -0.428 & -0.434 & -0.406 & 0.929 \\
-Random intercept & -1.600 & -1.705 & -1.491 & 0.895 \\
-$\sigma^2_{\vu_1}$ & & & & \\
-$\rho$ & 0.711 & 0.673 & 0.750 & 0.876 \\
-\hline
-\end{tabular}
-\end{table}
 
 %              lci    uci
 % 1   3.179  3.157  3.201
@@ -482,14 +441,32 @@ $\rho$ & 0.711 & 0.673 & 0.750 & 0.876 \\
 % > fit1$b_rho
 % [1] 152.7625
 
+\begin{table}
+\caption{Table of results - Roaches}
+\label{tab:application_roaches}
+\begin{tabular}{|l|llll|}
+\hline
+Covariate & Posterior Mean & Lower 95\% CI &  Upper 95\% CI & Accuracy \\
+\hline
+Intercept & 3.179 & 3.157 & 3.201 & 0.896 \\
+Time & -0.046 & -0.053 & -0.039 & 0.965 \\
+Time:Treatment & -0.428 & -0.434 & -0.406 & 0.929 \\
+Random intercept & -1.600 & -1.705 & -1.491 & 0.895 \\
+$\sigma^2_{\vu_1}$ & & & & \\
+$\rho$ & 0.711 & 0.673 & 0.750 & 0.876 \\
+\hline
+\end{tabular}
+\end{table}
+
 % Figure: Median accuracy graph intercept
 % Figure: Median accuracy graph slope
 
+\newpage
 \section{Appendix} 
 % TODO: Mean field updates?
-\subsection{Lower bound}
+\subsection{Calculation of the Variational Lower bound}
 % Where are the priors for \vbeta and \vu
-\noindent The lower bound is equal to
+\noindent The variational lower bound is equal to
 $\bE_q[\log{p(\vy, \vtheta)} - \log{q(\vtheta)}] = T_1 + T_2 + T_3$,
 where
 
@@ -497,18 +474,18 @@ where
 $$
 \begin{array}{rl}
 T_1 &= \bE_q[\log{p(\vy, \vnu)} - \log{q(\vnu)}] \\
-&= \vy \mP \mC \vmu - \vp^\top \exp{\left[ \mC \vmu + \half \text{diag} (\mC \mLambda \mC^\top) \right]} - \vone^\top\log \Gamma{(\vy + \vone)}\\
+&= \quad \vy \mP \mC \vmu - \vp^\top \exp{\left[ \mC \vmu + \half \text{diag} (\mC \mLambda \mC^\top) \right]} - \vone^\top\log \Gamma{(\vy + \vone)}\\
 & \quad + \frac{p + m}{2} (1 + \log{2 \pi}) + \half \log{|\mLambda|}, \\
-T_2 &= \bE_q \left[ \log p(\mSigma_{\vu \vu}) - \log q(\mSigma_{\vu \vu}) \right] \\
-&= \bE_q \big[ v/2(\log |\Psi| - \log |\Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu}|) + \half \log 2 + \half \log|\mSigma_{\vu \vu}| \log \Gamma_{p+1}(v/2) - \log \Gamma_{p}(v/2)\\
+T_2 &= \quad \bE_q \left[ \log p(\mSigma_{\vu \vu}) - \log q(\mSigma_{\vu \vu}) \right] \\
+&= \quad \bE_q \big[ v/2(\log |\Psi| - \log |\Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu}|) + \half \log 2 + \half \log|\mSigma_{\vu \vu}| \log \Gamma_{p+1}(v/2) - \log \Gamma_{p}(v/2)\\
 &\quad + \half \tr((\vmu_{\vu} \vmu_{\vu}^\top + \mLambda_{\vu \vu}) \mSigma_{\vu \vu}^{-1}) \big] \\
-&= v/2\big(\log |\Psi| - \log |\Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu}|\big) + \half \log 2 + \half \bE_q \log |\mSigma_{\vu \vu}| + \log \Gamma_{p+1}(v/2) - \log \Gamma_{p}(v/2) \\
+&= \quad v/2\big(\log |\Psi| - \log |\Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu}|\big) + \half \log 2 + \half \bE_q \log |\mSigma_{\vu \vu}| + \log \Gamma_{p+1}(v/2) - \log \Gamma_{p}(v/2) \\
 &\quad + \half \tr\big(\mI_m + \Psi(\Psi+ \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu})^{-1}/(v + p + 2)\big) \\
 T_3 &= - \vp^\top \log \vp - (\vone - \vp)^\top \log (\vone - \vp) - \log \Beta (\alpha_\rho, \beta_\rho) + \log \Beta (\alpha_q, \beta_q)
 \end{array}
 $$
 
-where $\bE_q \big[ \log |\mSigma_{\vu \vu}| \big] = m \log 2 + \log \left | \Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu} \right | + \sum_{i=1}^m \Psi \left ( \frac{v - i + 1}{2} \right )$
+\noindent with $\bE_q \big[ \log |\mSigma_{\vu \vu}| \big] = m \log 2 + \log \left | \Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu} \right | + \sum_{i=1}^m \Psi \left ( \frac{v - i + 1}{2} \right )$
 
 \bibliographystyle{elsarticle-harv}
 \bibliography{Chapter_1_zero_inflated_models}
