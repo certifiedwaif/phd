@@ -1,6 +1,21 @@
 To Do list
 ==========
 
+Dr Dowsett 47290388
+47290435 after hours
+1300 883 698 24/7
+
+
+21/09/2015
+----------
+- Presentation
+  Done
+- Prepare for tutorial
+  Jennifer hasn't released the solutions yet
+- Print out and mark computer pracs from email
+- Stability
+- Write
+
 17/09/2015
 ----------
 - Write the inner loop of the spline confidence interval code in C++.
