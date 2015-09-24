@@ -343,11 +343,11 @@ test_spline_accuracy <- function(mult, allKnots, fit, approximation, plot=FALSE)
     # }
     
     vb_quantiles <- quantile(f_hat_vb, c(.025, .975))
-    vb_lci[i] <- vb_quantiles[1]
-    vb_uci[i] <- vb_quantiles[2]
+    vb_lci[i] <- max(vb_quantiles[1], 0)
+    vb_uci[i] <- max(vb_quantiles[2], 0)
     mcmc_quantiles <- quantile(f_hat_mcmc, c(.025, .975))
-    mcmc_lci[i] <- mcmc_quantiles[1]
-    mcmc_uci[i] <- mcmc_quantiles[2]
+    mcmc_lci[i] <- max(mcmc_quantiles[1], 0)
+    mcmc_uci[i] <- max(mcmc_quantiles[2], 0)
   }
 
   if (plot) {
