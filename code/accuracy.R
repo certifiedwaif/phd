@@ -353,10 +353,12 @@ test_spline_accuracy <- function(mult, allKnots, fit, approximation, plot=FALSE)
   if (plot) {
     pdf(sprintf("results/accuracy_plots_spline_%s.pdf", approximation))
     # pdf(sprintf("results/splines_ci_%s.pdf", approximation))
-    plot(x, vb_lci, type="l", col="blue", ylim=c(0.0, 6.0), lty=2)
-    lines(x, vb_uci, col="blue", lty=2)
-    lines(x, mcmc_lci, col="red", lty=2)
-    lines(x, mcmc_uci, col="red", lty=2)
+    within_bounds_idx <- (mult$mX[, 2] > -1) && (mult$mX[, 2] < 1)
+    plot(x[within_bounds_idx], vb_lci[within_bounds_idx], type="l", col="blue", ylab=expression(log(3 + 3 * sin(pi * x))),
+         xlim=c(-1.0, 1.0), ylim=c(0.0, 6.0), lty=2)
+    lines(x[within_bounds_idx], vb_uci[within_bounds_idx], col="blue", lty=2)
+    lines(x[within_bounds_idx], mcmc_lci[within_bounds_idx], col="red", lty=2)
+    lines(x[within_bounds_idx], mcmc_uci[within_bounds_idx], col="red", lty=2)
     # legend("topleft", c("VB", "MCMC"), fill=c("blue", "red"))
     
     # Calculate the mean for vbeta, vu
@@ -369,12 +371,14 @@ test_spline_accuracy <- function(mult, allKnots, fit, approximation, plot=FALSE)
     f_hat_vb <- mC_tilde %*% var_result$vmu
     f_hat_mcmc <- mC_tilde %*% vmu_mcmc
 
-    points(mult$mX[,2], log(mult$vy))
+    points(mult$mX[within_bounds_idx,2], log(mult$vy[within_bounds_idx]),
+           xlim=c(-1, 1))
     vf <- 3.0 + 3 * sin(pi * xtilde)
-    lines(xtilde, vf, type="l", col="black")
-    lines(xtilde, f_hat_mcmc, type="l", col="red")
-    lines(xtilde, f_hat_vb, type="l", col="blue")
-    legend("topleft", c("True function", "MCMC estimate", "VB estimate"), fill=c("black", "red", "blue"))
+    lines(xtilde[1:(length(xtilde)-1)], vf[1:(length(xtilde)-1)], type="l", col="black")
+    lines(xtilde[1:(length(xtilde)-1)], f_hat_mcmc[1:(length(xtilde)-1)], type="l", col="red")
+    lines(xtilde[1:(length(xtilde)-1)], f_hat_vb[1:(length(xtilde)-1)], type="l", col="blue")
+    legend("topleft", c("True function", "MCMC estimate", "VB estimate"),
+           fill=c("black", "red", "blue"))
     dev.off()
   }
   #return(calculate_accuracies(mult, mcmc_samples, var_result, approximation, plot_flag=plot))
