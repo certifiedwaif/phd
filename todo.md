@@ -1,10 +1,13 @@
 To Do list
 ==========
 
+28/09/2015
+----------
+- Set up Trello for PhD work
+
 Dr Dowsett 47290388
 47290435 after hours
 1300 883 698 24/7
-
 
 21/09/2015
 ----------
