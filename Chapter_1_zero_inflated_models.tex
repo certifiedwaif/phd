@@ -25,6 +25,7 @@ Abstract:
 Keywords: Approximate Bayesian inference ; mixed model ; Markov chain Monte Carlo ; Stan ; penalized splines .
 
 \section{Introduction}
+\label{sec:introduction}
 
 % First, simplest zero-inflated count model to consider.
 \noindent Count data with a large number of zero counts arises in many areas of
@@ -43,12 +44,13 @@ using a deterministic algorithm which converges much more quickly.
 \noindent In this paper, we build upon the earlier work of \cite{lambert1992},
 \cite{Ghosh20061360} and \cite{VatsaWilson2014}.
 
-\noindent In Section \ref{sec:methodology} we provide the framework for our approach. In
+\noindent In Section \ref{sec:introduction} we provide the framework for our approach. In
 Section \ref{sec:methodology} we extend our approach to incorporate regression modelling
-and random effects. In Section \ref{sec:results} we show how our approach offers 
-computational advantages over existing approaches. In Section \ref{sec:application} we 
-show an application of our method to physical activity data. Appendices contain details 
-of our MCMC samplers.
+and random effects. In Section \ref{sec:algorithms} we present algorithms for fitting these models.
+In Section \ref{sec:results} we show how our approach offers computational advantages
+over existing approaches. In Section \ref{sec:application} we show an application of our
+method to physical activity data. Appendices contain details of our variational lower bound
+derivation.
 
 \section{Methodology}\label{sec:methodology}
 
@@ -59,18 +61,21 @@ model.
 
 \subsection{Variational Bayesian inference}
 
-Semiparametric mean field Variational Bayes is an approximate Bayesian inference method \cite{RohdeWand2015}.
-The approximation is found by iteratively minimising the Kullback-Leibler divergence between the true posterior
-and an approximating distribution, and thus maximising the variational lower bound as defined in Equation
-\ref{eq:lower_bound_defn}.
+Semiparametric mean field Variational Bayes is an approximate Bayesian inference method as detailed in,
+for example, \cite{RohdeWand2015}. As can be seen from the following derivation, the log of the full
+likelihood bounds the lower bound above.
 
 \begin{align*}
 \log p(\vy) &= \log p(\vy) \int q(\vtheta) d \vtheta \\
 &= \int q(\vtheta) \log \{ \frac{p(\vtheta, \vy) / q(\vtheta)}{p(\vtheta | \vy) / q(\vtheta)} \} d \vtheta \\
 &= \int q(\vtheta) \log \frac{p(\vy, \vtheta)}{q(\vtheta)} d \vtheta +
-	 \int q(\vtheta) \log \frac{q(\vtheta)}{p(\vtheta|\vy)} d \vtheta \\
-& \geq \int q(\vtheta) \log \frac{p(\vy, \vtheta)}{q(\vtheta)} d \vtheta
+	 \text{KL} \{ {q(\vtheta) || p(\vtheta|\vy)} \} % \\
+%& \geq \int q(\vtheta) \log \frac{p(\vy, \vtheta)}{q(\vtheta)} d \vtheta
 \end{align*}
+
+\noindent The approximation is found by iteratively minimising the Kullback-Leibler divergence between the true 
+posterior and an approximating distribution, and thus maximising the variational lower bound as defined in 
+Equation \ref{eq:lower_bound_defn}.
 
 \begin{equation}
 \label{eq:lower_bound_defn}
@@ -166,7 +171,7 @@ $$
 
 \noindent This is close in form to a Poisson regression model. Poisson regression models
 with normal priors have no closed form for their mean field updates due to
-non-conjugacy, but can be fit using Gaussian variational approximation
+non-conjugacy, but can be fit using Gaussian Variational Approximation, as in
 \citep{ormerod09}. The model can be fit using Algorithm \ref{alg:algorithm_one} below.
 
 \begin{algorithm}
@@ -193,29 +198,30 @@ optimal densities $q^*(\vmu, \mLambda)$, $q^*(\mSigma_{\vu \vu})$ and $q^*(\rho)
 
 
 \section{Algorithms for fitting the variational approximation}
+\label{sec:algorithms}
 
-In this article, we compare the accuracy, stability and speed of a number of algorithms for fitting the 
+In this section, we compare the accuracy, stability and speed of a number of algorithms for fitting the 
 variational approximation to our model.
 
 \subsection{Laplace-Variational Approximation}
 Laplace's method of approximation uses the second order Taylor expansion of the
-log likelihood around the mode to find a Gaussian approximation of the full posterior.
-This can then be optimised with Newton-Raphson style iterations. The algorithm is very
+full log likelihood around the mode to find a Gaussian approximation to the full posterior.
+This can then be optimised using Newton-Raphson style iterations. The algorithm is very
 quick to execute, but the resulting approximate posterior distributions are not as accurate
 as those produced by the other algorithms considered in this article.
 
 % NR
 % Detail the function and its derivatives
-\noindent Taylor expanding the variational lower bound once around the mode yields the following function
+\noindent Taylor expanding the full log likelihood once around the mode yields the following function
 \begin{align*}
-\log \underline{p}(\vmu, \mLambda; \vy) = \vy^\top\mP\mC\vmu - \vp^\top\exp \left (\mC \vmu \right ) - \half \vmu^\top \mSigma^{-1} \vmu
+\log \underline{p}(\vmu, \mLambda; \vy) = \vy^\top\mP\mC\vmu - \vp^\top\exp \left (\mC \vmu \right ) - \half \vmu^\top \mSigma^{-1} \vmu.
 \end{align*}
 
 \noindent This can be optimised using a Newton-Raphson style algorithm where
 
 \begin{align*}
-\frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \vmu} &\approx \mP \mC (\vy - \exp{(\mC \vmu)}) - \mSigma^{-1} \vmu \\
-\frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \mLambda} &\approx - \mC^\top \text{diag}(\vp e^{(\mC \vmu)}) \mC - \mSigma^{-1}
+\frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \vmu} &\approx \mP \mC (\vy - \exp{(\mC \vmu)}) - \mSigma^{-1} \vmu \text{ and} \\
+\frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \mLambda} &\approx - \mC^\top \text{diag}(\vp e^{(\mC \vmu)}) \mC - \mSigma^{-1}.
 \end{align*}
 
 \noindent The steps of the algorithm are shown in Algorithm \ref{alg:laplace_alg}.
@@ -253,14 +259,19 @@ respect to $\vmu$ and the Cholesky decomposition $\mR$ of $\mLambda$, that is,
 $\mLambda = \mR \mR^\top$. This algorithm trades the computational complexity of
 numerically evaluating an integral for greatly increased accuracy in the
 approximating posterior distribution. The resulting function is below and  can
-be optimised with L-BFGS-B:
+be optimised with L-BFGS-B
 
 % Detail the function and its derivatives
 \begin{align*}
-\log \underline{p}(\vmu, \mLambda; \vy) &= \vy^\top\mP \mC \vmu - \vp^\top \exp(\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)) - \half \vmu^\top \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} + \log{|\mR|} \\
+\log \underline{p}(\vmu, \mLambda; \vy) &= \quad \vy^\top\mP \mC \vmu - \vp^\top \exp(\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)) - \half \vmu^\top \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} + \log{|\mR|} \\
 &\quad - \frac{d}{2} \log{(2 \pi)} + \half \log{|\mSigma^{-1}|} + \frac{d}{2} \log{(2 \pi)} + \frac{d}{2} \\
-\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu} &= \mP \mC (\vy - \mC^\top \exp(\mC \vmu + \half \text{diag}{(\mC \mLambda \mC^\top)})) - \mSigma^{-1} \vmu \\
-\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda} &= \left [\mLambda^{-1} - \mP \mC^\top \exp(\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)) \mP \mC) - \mSigma^{-1} \right ] \mR
+\end{align*}
+
+using the derivatives
+
+\begin{align*}
+\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu} &= \mP \mC (\vy - \mC^\top \exp(\mC \vmu + \half \text{diag}{(\mC \mLambda \mC^\top)})) - \mSigma^{-1} \vmu \text{ and}\\
+\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda} &= \left [\mLambda^{-1} - \mP \mC^\top \exp(\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)) \mP \mC) - \mSigma^{-1} \right ] \mR.
 \end{align*}
 
 \subsubsection{GVA, $\mLambda = \left (\mR \mR^\top \right )^{-1}$}
@@ -290,37 +301,37 @@ of $\half p (p + 1) + pq + \half q (q + 1)$ rather than dimension $\half (p + mq
 as in the dense parameterisation. This leads to subtantial performance gains when m is large,
 as is typically the case in problems of practical importance such as clinical trials.
 
-\noindent The Gaussian variational lower bound is
+\noindent The Gaussian variational lower bound in this parameterisation is
 
 \begin{align*}
-\log \underline{p}(\vmu, \mLambda; \vy) &= \vy\mP\mC \vmu - \vp^\top \exp(\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)) - \half \vmu^\top \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} \\
+\log \underline{p}(\vmu, \mLambda; \vy) &= \quad \vy\mP\mC \vmu - \vp^\top \exp(\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)) - \half \vmu^\top \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} \\
 &\quad- \frac{d}{2} \log{(2 \pi)} + \half \log{|\mSigma^{-1}|} + \frac{d}{2} \log{(2 \pi)} + \frac{d}{2} - \log{|\mR|}
 \end{align*}
 
 \noindent The derivative with respect to $\vmu$ is the same as that in the GVA 
 algorithm, but as the parameterisation of $\mLambda$ has changed, the  
-derivative with respect to $\mLambda$ is now
+derivative with respect to $\mLambda$ becomes
 
 \begin{align*}
-\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda}
+\partial \log \underline{p}(\vmu, \mLambda; \vy)/\partial \mLambda
 &= \hphantom{-}(\mLambda^{-1} + \mH)(-\mLambda \mR \mLambda) \\
 &= -(\mI + \mH\mLambda)\mR\mLambda \\
 &= - (\mR\mLambda + \mH\mLambda\mR\mLambda)
 \end{align*} 
 
-\noindent where $\mH = (\mP \mC)^\top \text{diag}(\B^{(2)}(\mC \vmu, \mC \mLambda \mC^\top)) \mP \mC - \mSigma^{-1}$.
+\noindent where $\mH = (\mP \mC)^\top \text{diag}(\exp(\mC \vmu + \half \mC \mLambda \mC^\top)) \mP \mC - \mSigma^{-1}$.
 
 
 \subsubsection{GVA fixed point}
 % Fixed point update of \mLambda
-This variant of the algorithm uses Newton-Raphson-like optimisation on the Gaussian
+This variant of the algorithm uses Newton-Raphson-like fixed point updates on the Gaussian
 variational lower bound. This algorithm is fast, but unstable. The steps are presented in
-Algorithm \ref{alg:algorithm_nr}.
+Algorithm \ref{alg:algorithm_nr} where
 % Essentially a very straightforward optimisation approach, but potentially unstable.
 % Detail the function and its derivatives
 \begin{align*}
-\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu} &= \quad \mC^\top\vp \left [\vy - \mC\exp(\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)) \right ] - \mSigma^{-1} \vmu \\
-\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda} &= -\mC^\top \text{diag}(\vp \odot \exp(\mC \vmu +\half \text{diag}(\mC \mLambda \mC^\top))) - \mSigma^{-1}
+\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu} &= \quad \mC^\top\vp \left [\vy - \mC\exp(\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)) \right ] - \mSigma^{-1} \vmu \text{ and}\\
+\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda} &= -\mC^\top \text{diag}(\vp \odot \exp(\mC \vmu +\half \text{diag}(\mC \mLambda \mC^\top))) - \mSigma^{-1}.
 \end{align*}
 
 \begin{algorithm}
@@ -339,11 +350,12 @@ given $\vy$, $\mC$ and $\vp$}
 
 % Splines
 
-\subsection{Results/Numerical experiments}\label{sec:results}
+\section{Results/Numerical experiments}
+\label{sec:results}
 
 % Comparison with MCMC
-Our approximation algorithms were compared with the posterior distribution estimated
-by kernel density estimate from a 1 million MCMC sample produced using Stan.
+The algorithms described in Section \ref{sec:algorithms} were compared with the posterior distribution estimated
+by MCMC. This was done by kernel density estimate from a 1 million sample run of MCMC performed using Stan.
 % It works
 % Stability was confirmed over 100 randomly generated data sets.
 
@@ -369,7 +381,7 @@ respectively.
 $\vbeta_1$ & $0.833$ & $0.908$ & $0.908$ & $0.908$ \\ 
 $\vbeta_2$ & $0.770$ & $0.987$ & $0.987$ & $0.987$ \\ 
 Mean of $\vu$ & $0.807$ & $0.947$ & $0.947$ & $0.947$ \\
-$\sigma^2_{\vu_1}$ & $???$ & $???$ & $???$ & $???$ \\ 
+$\sigma^2_{\vu_1}$ & $0.473$ & $0.471$ & $0.471$ & $0.471$ \\ 
 $\rho$ & $0.976$ & $0.974$ & $0.974$ &  $0.974$ \\ 
 \hline
 \end{tabular}
@@ -395,7 +407,7 @@ $\rho$ &0.911&0.896&0.896&0.896\\
 \begin{table}
 \caption{Table of accuracy - Splines}
 \label{tab:accuracy_spline}
-\begin{tabular}{l|l}
+\begin{tabular}{|l|l|}
 \hline
 Approximation & Accuracy \\
 \hline
@@ -406,6 +418,12 @@ GVA NR & 0.969 \\
 \hline
 \end{tabular}
 \end{table}
+
+\begin{figure}
+\label{fig:spline}
+\caption{Comparison of VB and MCMC spline fits with the true function}
+\includegraphics[width=100mm, height=100mm]{code/results/accuracy_plots_spline_gva2.pdf}
+\end{figure}
 
 % Graphs - exactly what sort of graphs do we need?
 % Median accuracy
@@ -473,11 +491,11 @@ where
 % This is the new T_1
 $$
 \begin{array}{rl}
-T_1 &= \bE_q[\log{p(\vy, \vnu)} - \log{q(\vnu)}] \\
+T_1 &= \quad \bE_q[\log{p(\vy, \vnu)} - \log{q(\vnu)}] \\
 &= \quad \vy \mP \mC \vmu - \vp^\top \exp{\left[ \mC \vmu + \half \text{diag} (\mC \mLambda \mC^\top) \right]} - \vone^\top\log \Gamma{(\vy + \vone)}\\
 & \quad + \frac{p + m}{2} (1 + \log{2 \pi}) + \half \log{|\mLambda|}, \\
 T_2 &= \quad \bE_q \left[ \log p(\mSigma_{\vu \vu}) - \log q(\mSigma_{\vu \vu}) \right] \\
-&= \quad \bE_q \big[ v/2(\log |\Psi| - \log |\Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu}|) + \half \log 2 + \half \log|\mSigma_{\vu \vu}| \log \Gamma_{p+1}(v/2) - \log \Gamma_{p}(v/2)\\
+&= \quad \bE_q \big[ v/2(\log |\Psi| - \log |\Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu}|) + \half \log 2 + \half \log|\mSigma_{\vu \vu}| + \log \Gamma_{p+1}(v/2) - \log \Gamma_{p}(v/2)\\
 &\quad + \half \tr((\vmu_{\vu} \vmu_{\vu}^\top + \mLambda_{\vu \vu}) \mSigma_{\vu \vu}^{-1}) \big] \\
 &= \quad v/2\big(\log |\Psi| - \log |\Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu}|\big) + \half \log 2 + \half \bE_q \log |\mSigma_{\vu \vu}| + \log \Gamma_{p+1}(v/2) - \log \Gamma_{p}(v/2) \\
 &\quad + \half \tr\big(\mI_m + \Psi(\Psi+ \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu})^{-1}/(v + p + 2)\big) \\
