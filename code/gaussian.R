@@ -51,14 +51,15 @@ fit.Lap <- function(vmu, vy, vr, mC, mSigma.inv, mLambda)
     # This algorithm can be numerically unstable. If the derivative becomes
     # infinite, we should return the last vmu and mLambda, rather than
     # updating them.
-    if (any(is.nan(vg) || is.infinite(vg))) {
-      break
-    }
+    # if (any(is.nan(vg) || is.infinite(vg))) {
+    #   break
+    # }
 
     old_mLambda <- mLambda
     old_vmu <- vmu
     # FIXME: Need to handle the case where solve can't successfully invert
-    mLambda <- tryCatch(solve(-mH + diag(1e-8, length(vmu)), tol=1.0E-99), error = function(e) {NULL})
+    # mLambda <- tryCatch(solve(-mH + diag(1e-8, length(vmu)), tol=1.0E-99), error = function(e) {NULL})
+    mLambda <- solve(-mH + diag(1e-8, length(vmu)), tol=1.0E-99)
     # If we can't invert -mH, keep old mLambda and return
     if (is.null(mLambda)) {
       mLambda <- old_mLambda
@@ -66,17 +67,17 @@ fit.Lap <- function(vmu, vy, vr, mC, mSigma.inv, mLambda)
     }
     vmu <- vmu + mLambda %*% vg
     
-    if (any(diag(mLambda < 0.0))) {
-      # We've gone out of the allowable parameter space. Take the last known
-      # good value.
-      vmu <- old_vmu
-      mLambda <- old_mLambda
-      break
-    }
+    # if (any(diag(mLambda < 0.0))) {
+    #   # We've gone out of the allowable parameter space. Take the last known
+    #   # good value.
+    #   vmu <- old_vmu
+    #   mLambda <- old_mLambda
+    #   break
+    # }
     
-    if (max(abs(vg)) < 1.0E-8) {
-        break
-    }
+    # if (max(abs(vg)) < 1.0E-8) {
+    #     break
+    # }
   }
 
   f <- f.lap(vmu, vy, vr, mC, mSigma.inv, mLambda) + 0.5*log(det(mLambda %*% mSigma.inv))
@@ -574,8 +575,6 @@ fit.GVA_new <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0
   # Rinds <- which(lower.tri(mR, diag=TRUE))
   # print(length(Rinds))
   vtheta <- vtheta_enc_new(vmu, mR, Rinds)
-
-
   
   if (method == "L-BFGS-B") {
     controls <- list(maxit=1000, trace=0, fnscale=-1, REPORT=1, factr=1.0E-5, lmm=10, pgtol=reltol)
@@ -651,7 +650,8 @@ fit.GVA_nr <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e
     # Then -mH^{-1} = [(A - B D^-1 B^T)^-1, -(A-B D^-1 B^T)^-1 B D^-1]
     #                 [-D^-1 B^T (A - B D^-1 B^T)^-1, D^-1 + D^-1 B^T (A - B D^-1 B^T)^-1 B D^-1]
     # D^-1 and (A - B D^-1 B^T)^-1 appear repeatedly, so we precalculate them
-    D.inv <- tryCatch(solve(D), error=function(e) NULL)
+    # D.inv <- tryCatch(solve(D), error=function(e) NULL)
+    D.inv <- solve(D)
     # We can't invert D, so bail out with the last known good vmu and mLambda.
     # This probably means that the answer we've come up with to our optimisation
     # problem isn't very good, because we're in a part of the parameter space that
@@ -672,13 +672,13 @@ fit.GVA_nr <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e
     vmu <- vmu + mLambda %*% vg
       
     err <- max(abs(vmu - vmu.old))
-    if (is.nan(err)) {
-      # vmu and mLambda are probably full of NaNs as well, so return last good
-      # vmu and mLambda
-      vmu <- vmu.old
-      mLambda <- mLambda.old
-      break
-    }
+    # if (is.nan(err)) {
+    #   # vmu and mLambda are probably full of NaNs as well, so return last good
+    #   # vmu and mLambda
+    #   vmu <- vmu.old
+    #   mLambda <- mLambda.old
+    #   break
+    # }
     if (err < TOL) {
       break;
     }
