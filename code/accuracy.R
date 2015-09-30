@@ -13,6 +13,9 @@ library(limma)
 # Some time later: Sometimes it works.
 #source("http://mc-stan.org/rstan/stan.R")
 
+rstan_options(auto_write = TRUE)
+options(mc.cores = parallel::detectCores())
+
 mcmc <- function(mult, seed=1, iterations=NA, warmup=NA, mc.cores=1, p=2,
                                stan_file="multivariate_zip.stan", stan_fit=NA)
 {
@@ -32,6 +35,7 @@ mcmc <- function(mult, seed=1, iterations=NA, warmup=NA, mc.cores=1, p=2,
                    y=vy, X=mX, Z=as.matrix(mZ),
                    v=v, psi=mPsi, BetaPrior=mSigma.beta)
 
+  options(mc.cores = mc.cores)
   fit <- stan(stan_file, fit=stan_fit, seed=seed, data=zip_data, iter=iterations, warmup=warmup,
               chains=1)
   mcmc_samples <- extract(fit)
@@ -575,4 +579,4 @@ main <- function()
   }
 }
 
-main()
+# main()
