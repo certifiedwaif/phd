@@ -25,9 +25,9 @@
 
 \subsection{Definition}
 
-Consider a model $p(\vtheta|\vy)$ which is of interest to us but computationally difficult or intractable to fit. 
-We may be able to gain much of the same insight from a given data set by fitting an accurate approximation of
-the model, allowing us to summarise the data and perform statistical inference.
+Consider a model $p(\vtheta|\vy)$ which is of interest to us but computationally difficult or intractable to 
+fit. We may be able to gain much of the same insight from a given data set by fitting an accurate approximation 
+of the model, allowing us to summarise the data and perform statistical inference.
 
 Call the approximating model $q(\theta)$. Then we seek a $q(\theta)$ which approximates $p(\vtheta|\vy)$
 as closely as possible in some sense. A useful measure of distance between probability distributions is the
@@ -53,7 +53,7 @@ $$
 Consider the second order Taylor expansion of $\log f(\vtheta)$ around the mode $\vtheta_m$
 
 $$
-\log f(\vtheta) \approx f(\vtheta_m) + (\vtheta - \vtheta_m) \nabla \log f(\vtheta) + \half (\vtheta - \vtheta_m)^\top \mH_{\log f}(\vtheta_m) (\vtheta - \vtheta_m) + \sO(\log f''')
+\log f(\vtheta) \approx f(\vtheta_m) + (\vtheta - \vtheta_m) \nabla \log f(\vtheta) + \half (\vtheta - \vtheta_m)^\top \mH_{\log f}(\vtheta_m) (\vtheta - \vtheta_m) + \sO(\log f''').
 $$
 
 Assuming that $\vtheta$ is a stationary point of $\log f$, then $\nabla f(\vtheta) = \vzero$ and so
@@ -74,7 +74,7 @@ The approximation is crude but can be quite accurate if the likelihood is symmet
 Consider the second order Taylor expansion of $f(\vtheta)$ around $\vtheta_{n}$
 
 $$
-f(\vtheta) \approx f(\vtheta_{n}) + \nabla f(\vtheta_{n}) \Delta \vtheta_{n} + \half \Delta x^\top \mH_f(\vtheta_{n}) \Delta x + \sO(f''')
+f(\vtheta) \approx f(\vtheta_{n}) + \nabla f(\vtheta_{n}) \Delta \vtheta_{n} + \half \Delta x^\top \mH_f(\vtheta_{n}) \Delta x + \sO(f''').
 $$
 
 This expression attains its' maxima with respect to $\Delta x$ when
@@ -97,7 +97,7 @@ Execution of this algorithm requires the calculation of a vector addition, dot p
 linear system for each iteration. The vector addition and dot product can both be performed in $p$ flops,
 where $p$ is the dimension of the problem. The expensive part of the computation is the solution of the linear
 system $\mH_f(\vtheta_n) \Delta \vtheta$, which takes $\sO(p^3)$ flops. Even on modern computer systems, this
-can quickly become computationally intractable even for problems of modest size. This motivates the development
+can quickly become computationally intractable for problems of modest size. This motivates the development
 of Quasi-Newton algorithms, such as BFGS, L-BFGS and L-BFGS-B, discussed in Section \ref{sec:quasi_newton}.
 
 \subsubsection{Radius of convergence and convergence to local solutions}
