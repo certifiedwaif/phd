@@ -27,10 +27,11 @@ local_solutions <- function(approximation)
 
 	counter <- 0
 	errors <- 0
+	vmus <- matrix(NA, 1e5, 4)
 
 	# Start fits from a range of points on a 2 dimensional grid
-	for (init_intercept in seq(-3, 3, 1e-2)) {
-		for (init_slope in seq(-3, 3, 1e-2)) {
+	for (init_intercept in seq(-5, 5, 1e-1)) {
+		for (init_slope in seq(-5, 5, 1e-1)) {
 			cat("init_intercept", init_intercept, "\n")
 			cat("init_slope", init_slope, "\n")
 			cat("counter", counter, "\n")
@@ -44,6 +45,7 @@ local_solutions <- function(approximation)
 				errors <- errors + 1
 			} else {
 				print(str(fit))
+				vmus[counter, ] <- fit$vmu
 			}
 			counter <- counter + 1
 		}
@@ -62,6 +64,7 @@ local_solutions <- function(approximation)
 	
 	cat("Counter", counter, "\n")
 	cat("Errors", errors, "\n")
+	print(vmus[1:(counter - 1), ])
 }
 
 main <- function()
