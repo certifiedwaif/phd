@@ -59,7 +59,7 @@ $$
 Assuming that $\vtheta$ is a stationary point of $\log f$, then $\nabla f(\vtheta) = \vzero$ and so
 
 $$
-\log f(\vtheta) \approx f(\vtheta_m) + \half (\vtheta - \vtheta_m)^\top \mH_{\log f}(\vtheta_m) (\vtheta - \vtheta_m) + \sO(f''')
+\log f(\vtheta) \approx f(\vtheta_m) + \half (\vtheta - \vtheta_m)^\top \mH_{\log f}(\vtheta_m) (\vtheta - \vtheta_m) + \sO(\| \vtheta - \vtheta_m \|^3)
 $$
 
 at such a point. The quadratic form in $\vtheta$ in the approximate expresion for the log likelihood above gives 
@@ -74,7 +74,7 @@ The approximation is crude but can be quite accurate if the likelihood is symmet
 Consider the second order Taylor expansion of $f(\vtheta)$ around $\vtheta_{n}$
 
 $$
-f(\vtheta) \approx f(\vtheta_{n}) + \nabla f(\vtheta_{n}) \Delta \vtheta_{n} + \half \Delta x^\top \mH_f(\vtheta_{n}) \Delta x + \sO(f''').
+f(\vtheta) \approx f(\vtheta_{n}) + \nabla f(\vtheta_{n}) \Delta \vtheta_{n} + \half \Delta x^\top \mH_f(\vtheta_{n}) \Delta x + \sO(\| \Delta \vtheta_{n} \|^3).
 $$
 
 This expression attains its' maxima with respect to $\Delta x$ when
@@ -108,6 +108,48 @@ L-BFGS-B
 
 \subsubsection{Definition}
 
+% Wolfe conditions
+The problem of interest is to find
+
+$$
+\min_\vx f(\vx)
+$$
+
+for some smooth $f: \R^n -> \R$. Each step involves approximately solving the subproblem
+
+$$
+\min_\alpha f(\vx_k + \alpha \vp_k)
+$$
+
+where $\vx_k$ is the current best guess, $\vp_k \in \R^n$ is a search direction and $\alpha$ is the
+step length.
+
+Denote a univariate function $\phi$ restricted to the direction $\vp_k$ as
+$\phi(\alpha) = f(\vx_k + \alpha \vp_k)$. A step length $\alpha_k$ is said to satisfy the \emph{Wolfe conditions}
+is the following two inequalities hold:
+
+\begin{enumerate}
+\item[i] $f(\vx_k + \alpha_k \vp_k) \leq f(\vx_k) + c_1 \alpha_k \vp_k^\top \grad f(\vx_k)$ \text{(Armijo rule)}
+\item[ii] $\vp_k^\top \grad f(\vx_k + \alpha_k \vp_k) \geq c_2 \vp_k^\top \grad f(\vx_k)$ \text{(curvature condition)}
+\end{enumerate}
+
+The first condition ensures that the step length $\alpha_k$ decreases $f$ sufficiently, while the second condition
+ensures that the slope had been sufficiently reduced.
+
+The rationale for imposing the Wolfe conditions in an optimisation algorithm where
+$\vx_{k+1} = x_k + \alpha \vp_k$ is to ensure the convergence of the gradient to zero. In particular, if the
+cosine of the angle between $\vp_k$ and the gradient,
+
+$$
+\cos \theta_k = \frac{\nabla f(\vx_k)^\top \vp_k}{\|\nabla f(\vx_k)\| \|\vp_k\|}
+$$
+
+is bounded away from zero and the Wolfe conditions hold, then $\nabla f(\vx_k) \to 0$.
+
+An additional moptivation, in the case of a quasi-Newton method is that if $\vp_k = - \mB_k^{-1} \nabla f(\vx_k)$,
+where the matrix $\mB_k$ is updated by the BFGS or DFP formula, then if $\mB_k$ is positive definite condition ii
+implies $\mB_{k+1}$ is also positive definite.
+
 \subsubsection{Time and memory complexity}
 
 \section{Numerical matters}
@@ -134,6 +176,6 @@ $\mD_\mLambda$ the matrix derivative with respect to $\mLambda$
 $\mH_\mLambda$ the Hessian with respect to $\mLambda$
 
 \bibliographystyle{elsarticle-harv}
-\bibliography{references}
+\bibliography{Chapter_0_preliminary}
 
 \end{document}
