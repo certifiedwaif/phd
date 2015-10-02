@@ -434,6 +434,28 @@ GVA NR & 0.969 \\
 
 \subsection{Stability results}
 
+The numerical stability of each fitting algorithm in Section \ref{sec:algorithms} was assessed by
+initialising each algorithm from a range of different starting points. Errors due to numerical instability and 
+the fitted $\vmu$ were recorded for each starting point.
+
+A data set of 100 individuals in ten groups (m=10) was generated from a model with a fixed intercept and slope, 
+and a random intercept. $\vmu$ was initialised from a grid of points on the interval $[-4.5, 5]$ for intercept 
+and slope. The error counts are presented in Table \ref{tab:stability_results}.
+
+\begin{table}
+\caption{Count of numerical errors for each algorithm during stability tests}
+\label{tab:stability_results}
+\begin{tabular}{|l|l|}
+\hline
+Algorithm & Error \\
+\hline
+Laplace's algorithm & 9,216 \\
+GVA & 1,771 \\
+GVA2 & 776 \\
+GVA FP & 992 \\
+\hline
+\end{tabular}
+\end{table}
 
 \section{Application}\label{sec:application}
 
