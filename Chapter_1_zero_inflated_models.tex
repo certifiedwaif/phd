@@ -280,14 +280,14 @@ $\vmu$ and the Cholesky factor $\mR$ of $\mLambda$, we instead optimise the Chol
 $\mLambda$ i.e. $\mLambda = (\mR \mR^\top)^{-1}$.
 
 This new choice of parameterisation allows us to calculate $\exp(\mC \vmu + \half
-\text{diag}(\mC \mLambda \mC^\top))$ and its derivatives by solving $\mR \va = \mC_{i},
- i=1, \ldots, n$ for $\va$ and then calculating $\va^\top\va$ rather than calculating
+\text{diag}(\mC \mLambda \mC^\top))$ and its derivatives by solving the linear system 
+$\mR \va = \mC_{i}, i=1, \ldots, n$ for $\va$ and then calculating $\va^\top\va$ rather than calculating
 $\text{diag}(\mC \mLambda \mC^\top)$ directly.
 
-By re-ordering $\mC = [\mX \mZ]$ to $\mC = [\mZ \mX]$, and re-ordering the dimensions
-of $\vmu, \mLambda$ and $\mSigma$ in the same manner, the independence between the
+By interchanging the fixed and random effects in $\mC = [\mX \mZ]$ to $\mC = [\mZ \mX]$, and re-ordering the 
+dimensions of $\vmu, \mLambda$ and $\mSigma$ in the same manner, the independence between the
 blocks relating to the random effects in $\mZ$ induce sparsity in the Cholesky factor $\mR$
-of $\mLambda$. Thus the Gaussian $q(\vnu) \sim N(\vmu, \mLambda)$ can be optimised over a space
+of $\mLambda^{-1}$. Thus the Gaussian $q(\vnu) \sim N(\vmu, \mLambda)$ can be optimised over a space
 of $\half p (p + 1) + pq + \half q (q + 1)$ rather than dimension $\half (p + mq) (p + mq + 1)$ 
 as in the dense parameterisation. This leads to subtantial performance gains when m is large,
 as is typically the case in problems of practical importance such as clinical trials or the application
@@ -305,7 +305,7 @@ algorithm, but as the parameterisation of $\mLambda$ has changed, the
 derivative with respect to $\mLambda$ becomes
 
 \begin{align*}
-\partial \log \underline{p}(\vmu, \mLambda; \vy)/\partial \mLambda
+\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda}
 &= \hphantom{-}(\mLambda^{-1} + \mH)(-\mLambda \mR \mLambda) \\
 &= -(\mI + \mH\mLambda)\mR\mLambda \\
 &= - (\mR\mLambda + \mH\mLambda\mR\mLambda)
@@ -341,15 +341,15 @@ given $\vy$, $\mC$ and $\vp$}
 
 % Splines
 
-\section{Results/Numerical experiments}
+\section{Numerical results}
 \label{sec:results}
 
-The accuracy of each model fitting algorithm presented in Section \ref{sec:algorithms}} was assessed by comparing 
+The accuracy of each model fitting algorithm presented in Section \ref{sec:algorithms} was assessed by comparing 
 the approximating distribution of each parameter with the posterior distribution of Monte Carlo Markov Chain 
 samples of that parameter. 1 million Monte Carlo Markov Chain samples were generated using Stan.
 
 The results for the random intercept, random slope and spline accuracy are presented in
-Table \ref{tab:accuracy_int}, Table \ref{tab:accuracy_slope} and Table \ref{tab:accuracy_spline}
+Table \ref{tab:accuracy_int}, Table \ref{tab:accuracy_slope} and Figure \ref{fig:spline},
 respectively.
 
 The stability of the algorithms was confirmed by running them on 10,000 
@@ -433,9 +433,9 @@ and slope. The error counts are presented in Table \ref{tab:stability_results}.
 \begin{table}
 \caption{Count of numerical errors for each algorithm during stability tests}
 \label{tab:stability_results}
-\begin{tabular}{|l|l|}
+\begin{tabular}{|l|r|}
 \hline
-Algorithm & Error \\
+Algorithm & Error count \\
 \hline
 Laplace's algorithm & 9,216 \\
 GVA & 1,771 \\
@@ -486,6 +486,21 @@ Time:Treatment & -0.428 & -0.434 & -0.406 & 0.929 \\
 Random intercept & -1.600 & -1.705 & -1.491 & 0.895 \\
 $\sigma^2_{\vu_1}$ & 0.577 & 0.574 & 0.574 & 0.574 \\
 $\rho$ & 0.711 & 0.673 & 0.750 & 0.876 \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{table}
+\caption{Table of results - Speed}
+\label{tab:application_roaches_speed}
+\begin{tabular}{|l|l|}
+\hline
+Algorithm & Time to fit model (seconds) \\
+\hline
+Laplace's method & 0.740 \\
+GVA & 2.151 \\
+GVA2 & 0.747 \\
+GVA FP & 0.176 \\
 \hline
 \end{tabular}
 \end{table}
