@@ -175,6 +175,41 @@ A useful introduction is \cite{wand02}, while a more comprehensive treatment can
 $\mD_\mLambda$ the matrix derivative with respect to $\mLambda$
 $\mH_\mLambda$ the Hessian with respect to $\mLambda$
 
+\section{B-Splines}
+
+% This is taken from the Wikipedia page on the subject
+A B-Spline is a piecewise polynomial function of degree $< n$ in a variable $x$. It is defined over a
+domain $t_0 \leq x \leq t_m, m=n$. The points where $x = t_j$ are known as knots or break-points. The
+number of internal knots is equal to the degree of the polynomial if there are no knot multiplicities.
+The knots must be in ascending order. The number of knots is the minimum for the degree of the B-spline,
+which has a non-zero value in the range between the first and last knot. Each piece of the function is a
+polynomial of degree $< n$ between and including adjacent knots. A B-Spline is a continuous function at the
+knots. When all internal knots are distinct its derivatives are also continuous up to the derivative of degree
+$n - 1$. If internal knots are coincident at a given value of x, the continuity of derivative order is reduced
+by 1 for each additional knot.
+
+For any given set of knots, the B-spline is unique, hence the name, B being short for Basis. The usefulness
+of B-splines lies in the fact that any spline function of order $n$ on a given set of knots can be expressed
+as a linear combination of B-spline:
+
+% B-Splines
+$$
+S_{n, t}(x) = \sum_i \alpha_i B_{i, n}(x)
+$$
+
+where
+
+\begin{align*}
+B_{i, 1}(x) &:= \begin{cases}
+1 & \text{if } t_i \leq x < t_{i+1} \\
+0 & \text{otherwise}
+\end{cases} \\
+B_{i, k}(x) &:= \frac{x - t_i}{t_{i + k - 1} - t_i} B_{i, k-1} (x) + \frac{t_{i + k} - x}{t_{i + k} - t_{i + 1}} B_{i, k-1} (x)
+\end{align*}
+
+% Divided difference notation?
+% Lagrange's interpolating polynomials?
+
 \bibliographystyle{elsarticle-harv}
 \bibliography{Chapter_0_preliminary}
 
