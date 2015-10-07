@@ -129,8 +129,8 @@ $\phi(\alpha) = f(\vx_k + \alpha \vp_k)$. A step length $\alpha_k$ is said to sa
 is the following two inequalities hold:
 
 \begin{enumerate}
-\item[i] $f(\vx_k + \alpha_k \vp_k) \leq f(\vx_k) + c_1 \alpha_k \vp_k^\top \grad f(\vx_k)$ \text{(Armijo rule)}
-\item[ii] $\vp_k^\top \grad f(\vx_k + \alpha_k \vp_k) \geq c_2 \vp_k^\top \grad f(\vx_k)$ \text{(curvature condition)}
+\item[(i)] $f(\vx_k + \alpha_k \vp_k) \leq f(\vx_k) + c_1 \alpha_k \vp_k^\top \nabla f(\vx_k)$ \text{(Armijo rule)}
+\item[(ii)] $\vp_k^\top \nabla f(\vx_k + \alpha_k \vp_k) \geq c_2 \vp_k^\top \nabla f(\vx_k)$ \text{(curvature condition)}
 \end{enumerate}
 
 The first condition ensures that the step length $\alpha_k$ decreases $f$ sufficiently, while the second condition
@@ -146,7 +146,7 @@ $$
 
 is bounded away from zero and the Wolfe conditions hold, then $\nabla f(\vx_k) \to 0$.
 
-An additional moptivation, in the case of a quasi-Newton method is that if $\vp_k = - \mB_k^{-1} \nabla f(\vx_k)$,
+An additional motivation, in the case of a quasi-Newton method is that if $\vp_k = - \mB_k^{-1} \nabla f(\vx_k)$,
 where the matrix $\mB_k$ is updated by the BFGS or DFP formula, then if $\mB_k$ is positive definite condition ii
 implies $\mB_{k+1}$ is also positive definite.
 
@@ -172,11 +172,31 @@ A useful introduction is \cite{wand02}, while a more comprehensive treatment can
 
 \subsection{Notation}
 
-$\mD_\mLambda$ the matrix derivative with respect to $\mLambda$
-$\mH_\mLambda$ the Hessian with respect to $\mLambda$
+Given a function $f:\R^{n \times n} \to \R$ of a matrix $\mLambda$, we denote the matrix derivative of $f$ with 
+respect to $\mLambda$ as $\mD_\mLambda f$, and the Hessian of $f$ with respect to $\mLambda$ as
+$\mH_\mLambda f$ the Hessian with respect to $\mLambda$.
 
-\section{B-Splines}
+The Hessian matrix is a $d \times d$ matrix whose $(i, j)$-th entry is equal to
 
+$$
+\frac{\partial^2}{\partial x_i x_j} f(\vx)
+$$
+
+and is denoted by $\mH f(\vx)$.
+
+\section{Splines}
+The most general form of the univariate regression problem is
+
+$$
+y_i = f(x_i)
+$$
+
+where $f: \R \to \R$ is unknown, and we wish to estimate it as $\hat{f}$. We treat the functional form of
+$f$ as unknown, and attempt to estimate it purely from the data available to us. Fully non-parametric regression
+is a difficult problem to solve, but the problem can be simplified by pre-specifying the points at which the
+function may change curvature, the so-called knots.
+
+\subsection{B-Splines}
 % This is taken from the Wikipedia page on the subject
 A B-Spline is a piecewise polynomial function of degree $< n$ in a variable $x$. It is defined over a
 domain $t_0 \leq x \leq t_m, m=n$. The points where $x = t_j$ are known as knots or break-points. The
@@ -209,6 +229,40 @@ B_{i, k}(x) &:= \frac{x - t_i}{t_{i + k - 1} - t_i} B_{i, k-1} (x) + \frac{t_{i 
 
 % Divided difference notation?
 % Lagrange's interpolating polynomials?
+% Semiparametric regression / Connection to mixed models
+Using a mixed models setup to fit spline models, protects against overfitting.
+Construct an $\mZ$ matrix with the appropriate B-Spline function evaluations in each of the rows, where
+each column corresponds to a knot.
+
+\subsection{Degrees of freedom}
+
+% From Section 2.5.2, Semiparametric regression
+
+Consider the fixed effects model $\vy = \mX \vbeta$ where $\mX \in \R^{n \times p}$. If the hat matrix is
+defined as $\mH = \mX (\mX^\top\mX)^{-1} \mX^\top$ then
+
+\begin{align*}
+\tr(\mH) &= \tr[\mX(\mX^\top\mX)^{-1}\mX^\top] \\
+&= \tr[\mX^\top\mX (\mX^\top\mX)^{-1}] \\
+&= \tr(\mI_p) \\
+&= p
+\end{align*}
+
+which is the number of parameters in the fixed effects model. Thus we use the trace of the hat matrix as
+the definition of the effective degrees of freedom of the model. This definition then naturally extends to
+more general smoother matrices which can be used to fit models involving splines or other kinds of smoothing.
+
+\section{Generalised Linear Mixed models}
+
+Exponential family
+Canonical form
+$$
+y^\top \mC \vnu - b(\mC \vnu)
+$$
+
+Different choices of the function $b:\R \to \R$ lead to different generalised linear mixed models.
+
+Table of b functions
 
 \bibliographystyle{elsarticle-harv}
 \bibliography{Chapter_0_preliminary}
