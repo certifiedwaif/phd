@@ -46,6 +46,8 @@ $$
 
 % Mean field update
 
+A more thorough introduction to the topic of variational approximations is available in \cite{ormerod10}.
+
 \subsection{Laplace's Method of approximation}
 
 \subsubsection{Definition}
@@ -230,6 +232,7 @@ B_{i, k}(x) &:= \frac{x - t_i}{t_{i + k - 1} - t_i} B_{i, k-1} (x) + \frac{t_{i 
 % Divided difference notation?
 % Lagrange's interpolating polynomials?
 % Semiparametric regression / Connection to mixed models
+We follow the discussion of semiparametric regression in \cite{RuppertWandCarroll}.
 Using a mixed models setup to fit spline models, protects against overfitting.
 Construct an $\mZ$ matrix with the appropriate B-Spline function evaluations in each of the rows, where
 each column corresponds to a knot.
@@ -254,10 +257,20 @@ more general smoother matrices which can be used to fit models involving splines
 
 \section{Generalised Linear Mixed models}
 
-Exponential family
+\subsection{Exponential family}
+
+An exponential family is a set of probability distributions of the form
+$$
+f_X(x|\vtheta) = h(x) g(\theta) \exp(\eta(\theta) \dot T(x)).
+$$
+
+Most commonly used probability distributions in statistics such as normal, exponential, gamma,
+chi-squared, beta, Dirichlet, Bernoulli, categorical, Poisson, Wishart and Inverse Wishart can
+be represented in this form.
+
 Canonical form
 $$
-y^\top \mC \vnu - b(\mC \vnu)
+\vy^\top \mC \vnu - b(\mC \vnu)
 $$
 
 Different choices of the function $b:\R \to \R$ lead to different generalised linear mixed models.
