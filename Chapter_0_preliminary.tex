@@ -160,6 +160,7 @@ implies $\mB_{k+1}$ is also positive definite.
 \subsection{Numerical differentiation and integration}
 \subsection{Numerical linear algebra}
 \subsection{Difficulty of inverting linear systems}
+Sparsity of a matrix does not ensure sparsity of its' inverse.
 
 \section{Positive semi-definite matrices}
 A positive semidefinite matrix $\mLambda$ is a square matrix of size $n \times n$ such that for any vector
@@ -269,13 +270,46 @@ chi-squared, beta, Dirichlet, Bernoulli, categorical, Poisson, Wishart and Inver
 be represented in this form.
 
 Canonical form
+
 $$
-\vy^\top \mC \vnu - b(\mC \vnu)
+\log p(\vnu; \vy) = \vy^\top \mC \vnu - b(\mC \vnu)
 $$
 
-Different choices of the function $b:\R \to \R$ lead to different generalised linear mixed models.
+Different choices of the function $b:\R \to \R$ lead to different generalised linear mixed models. A set
+of available functions and corresponding distributions is presented in Table \ref{tab:b_functions}.
 
-Table of b functions
+\begin{table}
+\caption{Table of b functions}
+\label{tab:b_functions}
+\begin{tabular}{|l|lll|}
+\hline
+Distribution & Parameter & Natural parameter & Inverse parameter mapping \\
+\hline
+Bernoulli distribution & $p$ & $\log{\frac{p}{1 - p}}$ & $\frac{1}{1 + e^\eta}$ \\
+Poisson distribution & $\lambda$ & \log \lambda & e^\eta \\
+Normal distribution (known variance) & $\mu$ & $\frac{\mu}{\sigma}$ & $\sigma \eta$ \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Bias of MLE}
+
+How does this relate to Bayesian estimation? Maybe it's just interesting background.
+
+\section{Model selection}
+
+Given a full data matrix $\mX \in \R^{n \times p}$, we may wish to find the subset of variables
+$\gamma \in \{ 1 \ldots p \}$ such that $\mX_\gamma \vbeta$ describe the data in $\vy$ best, in some
+sense.
+
+In a frequentist context, there are many measures which can be used to judge which model is best,
+such as AIC, BIC etc. These are functions $f: \gamma \to \R^+$ which allow the models under consideration to
+be ranked, and the best model chosen from those available. Thus the optimal model under such a measure
+f is
+
+$$
+\gamma^* = \max_\gamma f(\gamma)
+$$
 
 \bibliographystyle{elsarticle-harv}
 \bibliography{Chapter_0_preliminary}
