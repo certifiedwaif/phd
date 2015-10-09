@@ -45,6 +45,8 @@ q^*(\vtheta) = \argmin_{q \in Q} \KL \{ {q(\vtheta) || p(\vtheta|\vy)} \}.
 $$
 
 % Mean field update
+Factored approximation
+Mean field update
 
 A more thorough introduction to the topic of variational approximations is available in \cite{ormerod10}.
 
@@ -55,7 +57,7 @@ A more thorough introduction to the topic of variational approximations is avail
 Consider the second order Taylor expansion of $\log f(\vtheta)$ around the mode $\vtheta_m$
 
 $$
-\log f(\vtheta) \approx f(\vtheta_m) + (\vtheta - \vtheta_m) \nabla \log f(\vtheta) + \half (\vtheta - \vtheta_m)^\top \mH_{\log f}(\vtheta_m) (\vtheta - \vtheta_m) + \sO(\log f''').
+\log f(\vtheta) \approx f(\vtheta_m) + (\vtheta - \vtheta_m) \nabla \log f(\vtheta) + \half (\vtheta - \vtheta_m)^\top \mH_{\log f}(\vtheta_m) (\vtheta - \vtheta_m) + \sO(\|\vtheta - \vtheta_m\|^3).
 $$
 
 Assuming that $\vtheta$ is a stationary point of $\log f$, then $\nabla f(\vtheta) = \vzero$ and so
@@ -117,7 +119,7 @@ $$
 \min_\vx f(\vx)
 $$
 
-for some smooth $f: \R^n -> \R$. Each step involves approximately solving the subproblem
+for some smooth $f: \R^n \to \R$. Each step involves approximately solving the subproblem
 
 $$
 \min_\alpha f(\vx_k + \alpha \vp_k)
@@ -156,11 +158,51 @@ implies $\mB_{k+1}$ is also positive definite.
 
 \section{Numerical matters}
 
+In this section, I'd like to talk about floating point representation and its' consequences, numerical
+analysis/error bounds and in particular their relevance to numerical linear algebra.
+
 \subsection{Floating point numbers}
+
+$$\text{sign } \text{significand} \times \text{base}^\text{exponent}$$
+
+IEEE 754: floating point in modern computers
+
+On modern computers, IEEE 754 is ubiquitous, and the base is $2$.
+
+Error bounds on $+, -, *, /, \sqrt$
+
+$$
+\text{fl}(a \text{ op } b) = (1 + \epsilon) (a \text{ op } b) \text{ provided $\text{fl}(a \text{ op } b)$ neither overflows nor underflows}
+$$
+
+where $\epsilon$ is the machine epsilon, the minimum difference between $1$ and the next representable
+floating point number.
+
+Exceptional values: $\pm \infty$, $\text{NaN}$
+
+When doing arithmetic on computers, it is important to understand the full ramifications of this.
+
+\begin{enumerate}
+\item All numerical values are in fact approximations within an interval.
+\item Every arithmetic operation has an associated amount of error, and these errors accumulate as more
+			arithmetic operations are performed.
+\end{enumerate}
+
+The field of numerical analysis (references Classical and Modern Numerical Analysis,
+Demmel's course: http://www.cs.berkeley.edu/~demmel/cs267/lecture21/lecture21.html, Kahan) analyses numerical 
+algorithms to assess their error bounds, and attempt to mitigate these problems as much as possible to allow
+us to solve numerical problems on modern computers.
+
+Truncation and round-off error
+Numerical stability
+
 \subsection{Numerical differentiation and integration}
 \subsection{Numerical linear algebra}
 \subsection{Difficulty of inverting linear systems}
+
 Sparsity of a matrix does not ensure sparsity of its' inverse.
+Inverting a matrix is an inherently unstable operation. The number of floating point operations involved
+leads to magnification of error.
 
 \section{Positive semi-definite matrices}
 A positive semidefinite matrix $\mLambda$ is a square matrix of size $n \times n$ such that for any vector
@@ -295,6 +337,7 @@ Normal distribution (known variance) & $\mu$ & $\frac{\mu}{\sigma}$ & $\sigma \e
 \subsection{Bias of MLE}
 
 How does this relate to Bayesian estimation? Maybe it's just interesting background.
+Bernstein-von Mises Theorem
 
 \section{Model selection}
 
@@ -302,7 +345,7 @@ Given a full data matrix $\mX \in \R^{n \times p}$, we may wish to find the subs
 $\gamma \in \{ 1 \ldots p \}$ such that $\mX_\gamma \vbeta$ describe the data in $\vy$ best, in some
 sense.
 
-In a frequentist context, there are many measures which can be used to judge which model is best,
+In a frequentist context, there are many functions which can be used to judge which model is best,
 such as AIC, BIC etc. These are functions $f: \gamma \to \R^+$ which allow the models under consideration to
 be ranked, and the best model chosen from those available. Thus the optimal model under such a measure
 f is
@@ -310,6 +353,9 @@ f is
 $$
 \gamma^* = \max_\gamma f(\gamma)
 $$
+
+These functions typically attempt to balance log likelihood against the complexity of the model, achieving
+a compromise between each.
 
 \bibliographystyle{elsarticle-harv}
 \bibliography{Chapter_0_preliminary}
