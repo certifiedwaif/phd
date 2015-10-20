@@ -43,10 +43,9 @@ local_solutions <- function(approximation)
 	vmus <- matrix(NA, (10 * 1e2)^2, 2 + 9)
 
 	# Start fits from a range of points on a 2 dimensional grid
-	GRID_BOUNDS <- 5
 	GRID_SIZE <- 1e-1
-	for (init_intercept in seq(- 4.5, GRID_BOUNDS, GRID_SIZE)) {
-		for (init_slope in seq(- 4.5, GRID_BOUNDS, GRID_SIZE)) {
+	for (init_intercept in seq(- 4.5, 5, GRID_SIZE)) {
+		for (init_slope in seq(- 4.5, 5, GRID_SIZE)) {
 			cat("init_intercept", init_intercept, "\n")
 			cat("init_slope", init_slope, "\n")
 			cat("counter", counter, "\n")
