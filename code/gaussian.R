@@ -51,15 +51,14 @@ fit.Lap <- function(vmu, vy, vr, mC, mSigma.inv, mLambda)
     # This algorithm can be numerically unstable. If the derivative becomes
     # infinite, we should return the last vmu and mLambda, rather than
     # updating them.
-    # if (any(is.nan(vg) || is.infinite(vg))) {
-    #   break
-    # }
+    if (any(is.nan(vg) || is.infinite(vg))) {
+      break
+    }
 
     old_mLambda <- mLambda
     old_vmu <- vmu
     # FIXME: Need to handle the case where solve can't successfully invert
-    # mLambda <- tryCatch(solve(-mH + diag(1e-8, length(vmu)), tol=1.0E-99), error = function(e) {NULL})
-    mLambda <- solve(-mH + diag(1e-8, length(vmu)), tol=1.0E-99)
+    mLambda <- tryCatch(solve(-mH + diag(1e-8, length(vmu)), tol=1.0E-99), error = function(e) {NULL})
     # If we can't invert -mH, keep old mLambda and return
     if (is.null(mLambda)) {
       mLambda <- old_mLambda
@@ -67,17 +66,17 @@ fit.Lap <- function(vmu, vy, vr, mC, mSigma.inv, mLambda)
     }
     vmu <- vmu + mLambda %*% vg
     
-    # if (any(diag(mLambda < 0.0))) {
-    #   # We've gone out of the allowable parameter space. Take the last known
-    #   # good value.
-    #   vmu <- old_vmu
-    #   mLambda <- old_mLambda
-    #   break
-    # }
+    if (any(diag(mLambda < 0.0))) {
+      # We've gone out of the allowable parameter space. Take the last known
+      # good value.
+      vmu <- old_vmu
+      mLambda <- old_mLambda
+      break
+    }
     
-    # if (max(abs(vg)) < 1.0E-8) {
-    #     break
-    # }
+    if (max(abs(vg)) < 1.0E-8) {
+        break
+    }
   }
 
   f <- f.lap(vmu, vy, vr, mC, mSigma.inv, mLambda) + 0.5*log(det(mLambda %*% mSigma.inv))
@@ -672,13 +671,13 @@ fit.GVA_nr <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e
     vmu <- vmu + mLambda %*% vg
       
     err <- max(abs(vmu - vmu.old))
-    # if (is.nan(err)) {
-    #   # vmu and mLambda are probably full of NaNs as well, so return last good
-    #   # vmu and mLambda
-    #   vmu <- vmu.old
-    #   mLambda <- mLambda.old
-    #   break
-    # }
+    if (is.nan(err)) {
+      # vmu and mLambda are probably full of NaNs as well, so return last good
+      # vmu and mLambda
+      vmu <- vmu.old
+      mLambda <- mLambda.old
+      break
+    }
     if (err < TOL) {
       break;
     }
