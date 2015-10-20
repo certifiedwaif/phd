@@ -74,7 +74,7 @@ lower bound above.
 %& \geq \int q(\vtheta) \log \frac{p(\vy, \vtheta)}{q(\vtheta)} d \vtheta
 \end{align*}
 
-The approximation is found by iteratively minimising the Kullback-Leibler divergence between the true 
+The approximation is fit by iteratively minimising the Kullback-Leibler divergence between the true 
 posterior and an approximating distribution, and thus maximising the variational lower bound as defined in 
 Equation \ref{eq:lower_bound_defn}.
 
@@ -333,7 +333,7 @@ given $\vy$, $\mC$ and $\vp$}
 % Fit \vmu, \mLambda using Laplace approximation
 \WHILE{the increase in $\log{\underline{p}}(\vmu, \mLambda; \vy)$ is significant}
 % \vmu, \mLambda
-\STATE $\mLambda \leftarrow \left [ \mP \mC^\top \exp(\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)) \mC \right ]^{-1}$ \\ [1ex]
+\STATE $\mLambda \leftarrow \left [ \mP^\top \mC^\top \exp(\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)) \mC \mP \right ]^{-1}$ \\ [1ex]
 \STATE $\vmu \leftarrow \vmu + \mLambda \left [ \frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu} \right ]$
 \ENDWHILE
 \end{algorithmic}
@@ -358,12 +358,23 @@ number generator with different seeds. Median accuracy of the algorithms was ass
 by running them on 100 randomly generated data sets.
 
 % TODO - Graphs of median accuracy
+\begin{figure}
+\caption{Median accuracy of random intercept}
+\label{fig:median_accuracy_intercept}
+\includegraphics[width=100mm, height=100mm]{code/results/median_accuracy_gva2.pdf}
+\end{figure}
+
+\begin{figure}
+\caption{Median accuracy of slope}
+\label{fig:median_accuracy_slope}
+\includegraphics[width=100mm, height=100mm]{code/results/median_accuracy_gva2_slope.pdf}
+\end{figure}
 
 % Table of accuracy results - intercept model
 \begin{table}
 \caption{Table of accuracy - Random intercept model}
 \label{tab:accuracy_int}
-\begin{tabular}{|l|cccc|}
+\begin{tabular}{|l|rrrr|}
 \hline
 & Laplace's Method & GVA $(\mLambda = \mR \mR^\top)$ & GVA2 $(\mLambda = (\mR \mR^\top)^{-1})$ & GVA FP\\
 \hline
@@ -379,7 +390,7 @@ $\rho$ & $0.976$ & $0.974$ & $0.974$ &  $0.974$ \\
 \begin{table}
 \caption{Table of accuracy - Random slope model}
 \label{tab:accuracy_slope}
-\begin{tabular}{|l|cccc|}
+\begin{tabular}{|l|rrrr|}
 \hline
 & Laplace's Method & GVA $(\mLambda = \mR \mR^\top)$ & GVA $(\mLambda = (\mR \mR^\top)^{-1})$ & GVA FP\\
 \hline
@@ -437,9 +448,9 @@ and slope. The error counts are presented in Table \ref{tab:stability_results}.
 \hline
 Algorithm & Error count \\
 \hline
-Laplace's algorithm & 9,216 \\
+Laplace's algorithm & 12 \\
 GVA & 1,771 \\
-GVA2 & 776 \\
+GVA2 & 537 \\
 GVA FP & 992 \\
 \hline
 \end{tabular}
@@ -476,7 +487,7 @@ by Andrew Gelman. The results are presented in Table \ref{tab:application_roache
 \begin{table}
 \caption{Table of results - Roaches}
 \label{tab:application_roaches}
-\begin{tabular}{|l|llll|}
+\begin{tabular}{|l|rrrr|}
 \hline
 Covariate & Posterior Mean & Lower 95\% CI &  Upper 95\% CI & Accuracy \\
 \hline
@@ -490,10 +501,34 @@ $\rho$ & 0.711 & 0.673 & 0.750 & 0.876 \\
 \end{tabular}
 \end{table}
 
+\begin{figure}
+\caption{Accuracy graph for fixed intercept of roach model}
+\label{fig:accuracy_roach_intercept}
+\includegraphics[width=100mm, height=100mm]{code/results/1_accuracy_plots_application_gva2.pdf}
+\end{figure}
+
+\begin{figure}
+\caption{Accuracy graph for fixed slope of roach model}
+\label{fig:accuracy_roach_slope}
+\includegraphics[width=100mm, height=100mm]{code/results/2_accuracy_plots_application_gva2.pdf}
+\end{figure}
+
+\begin{figure}
+\caption{Accuracy graph for $\sigma_u^2$ of roach model}
+\label{fig:accuracy_roach_sigmau2}
+\includegraphics[width=100mm, height=100mm]{code/results/16_accuracy_plots_application_gva2.pdf}
+\end{figure}
+
+\begin{figure}
+\caption{Accuracy graph for $\rho$ of roach model}
+\label{fig:accuracy_roach_rho}
+\includegraphics[width=100mm, height=100mm]{code/results/17_accuracy_plots_application_gva2.pdf}
+\end{figure}
+
 \begin{table}
 \caption{Table of results - Speed}
 \label{tab:application_roaches_speed}
-\begin{tabular}{|l|l|}
+\begin{tabular}{|l|r|}
 \hline
 Algorithm & Time to fit model (seconds) \\
 \hline
