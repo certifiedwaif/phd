@@ -347,23 +347,23 @@ test_spline_accuracy <- function(mult, allKnots, fit, approximation, plot=FALSE)
     # }
     
     vb_quantiles <- quantile(f_hat_vb, c(.025, .975))
-    vb_lci[i] <- max(vb_quantiles[1], 0)
-    vb_uci[i] <- max(vb_quantiles[2], 0)
+    vb_lci[i] <- vb_quantiles[1]
+    vb_uci[i] <- vb_quantiles[2]
     mcmc_quantiles <- quantile(f_hat_mcmc, c(.025, .975))
-    mcmc_lci[i] <- max(mcmc_quantiles[1], 0)
-    mcmc_uci[i] <- max(mcmc_quantiles[2], 0)
+    mcmc_lci[i] <- mcmc_quantiles[1]
+    mcmc_uci[i] <- mcmc_quantiles[2]
   }
 
   if (plot) {
     pdf(sprintf("results/accuracy_plots_spline_%s.pdf", approximation))
     # pdf(sprintf("results/splines_ci_%s.pdf", approximation))
     within_bounds_idx <- (mult$mX[, 2] > -1) && (mult$mX[, 2] < 1)
-    plot(x[within_bounds_idx], vb_lci[within_bounds_idx], type="l", col="blue",
-         xlab="x", ylab=expression(log(3 + 3 * sin(pi * x))),
-         xlim=c(-1.0, 1.0), ylim=c(0.0, 6.0), lty=2)
-    lines(x[within_bounds_idx], vb_uci[within_bounds_idx], col="blue", lty=2)
-    lines(x[within_bounds_idx], mcmc_lci[within_bounds_idx], col="red", lty=2)
-    lines(x[within_bounds_idx], mcmc_uci[within_bounds_idx], col="red", lty=2)
+    plot(x[within_bounds_idx], exp(vb_lci[within_bounds_idx]), type="l", col="blue",
+         xlab="x", ylab=expression(3 + 3 * sin(pi * x)),
+         xlim=c(-1.0, 1.0), ylim=c(0.0, exp(6.0)), lty=2)
+    lines(x[within_bounds_idx], exp(vb_uci[within_bounds_idx]), col="blue", lty=2)
+    lines(x[within_bounds_idx], exp(mcmc_lci[within_bounds_idx]), col="red", lty=2)
+    lines(x[within_bounds_idx], exp(mcmc_uci[within_bounds_idx]), col="red", lty=2)
     # legend("topleft", c("VB", "MCMC"), fill=c("blue", "red"))
     
     # Calculate the mean for vbeta, vu
@@ -376,12 +376,12 @@ test_spline_accuracy <- function(mult, allKnots, fit, approximation, plot=FALSE)
     f_hat_vb <- mC_tilde %*% var_result$vmu
     f_hat_mcmc <- mC_tilde %*% vmu_mcmc
 
-    points(mult$mX[within_bounds_idx,2], log(mult$vy[within_bounds_idx]),
+    points(mult$mX[within_bounds_idx,2], mult$vy[within_bounds_idx],
            xlim=c(-1, 1))
     vf <- 3.0 + 3 * sin(pi * xtilde)
-    lines(xtilde[1:(length(xtilde)-1)], vf[1:(length(xtilde)-1)], type="l", col="black")
-    lines(xtilde[1:(length(xtilde)-1)], f_hat_mcmc[1:(length(xtilde)-1)], type="l", col="red")
-    lines(xtilde[1:(length(xtilde)-1)], f_hat_vb[1:(length(xtilde)-1)], type="l", col="blue")
+    lines(xtilde[1:(length(xtilde)-1)], exp(vf[1:(length(xtilde)-1)]), type="l", col="black")
+    lines(xtilde[1:(length(xtilde)-1)], exp(f_hat_mcmc[1:(length(xtilde)-1)]), type="l", col="red")
+    lines(xtilde[1:(length(xtilde)-1)], exp(f_hat_vb[1:(length(xtilde)-1)]), type="l", col="blue")
     legend("topleft", c("True function", "MCMC estimate", "VB estimate"),
            fill=c("black", "red", "blue"))
     dev.off()
@@ -579,4 +579,4 @@ main <- function()
   }
 }
 
-# main()
+main()
