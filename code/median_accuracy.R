@@ -17,7 +17,7 @@ generate_test_case <- function(i, test) {
   } else if (test == "slope") {
     m <- 20
     ni <- 10
-    mult <- generate_slope_test_data(m=20, ni=10, expected_beta=c(2, 1), expected_rho=0.7)
+    result <- generate_slope_test_data(m=20, ni=10, expected_beta=c(2, 1), expected_rho=0.7)
   } else if (test == "spline") {
     # result <- generate_spline_test_data()
     # mult <- result$mult
@@ -72,8 +72,12 @@ median_accuracy <- function(approximation="gva", test="intercept")
   accuracy <- lapply(1:ITER, function(i) {
     cat("Test case", i, "\n")
     result <- generate_test_case(i, test)
-    allKnots <- result$allKnots
-    mult <- result$mult
+    if (test == "spline") {
+      allKnots <- result$allKnots
+      mult <- result$mult
+    } else {
+      mult <- result
+    }
     var_result <- zipvb(mult, method=approximation, verbose=TRUE)
     stan_fit <- load_stan_data(i, test)
     mcmc_samples <- stan_fit$mcmc_samples
@@ -162,6 +166,7 @@ median_accuracy_graph <- function(approximation="gva", test="intercept") {
     accuracy_df2 <- cbind(accuracy_df[, c("vbeta_0", "vbeta_1")],
                           mean_vu_df,
                           accuracy_df[, c("sigma2_vu_1", "sigma2_vu_2", "rho")])
+    colnames(accuracy_df2) <- rep("", 7)
     boxplot(accuracy_df2, ylim=c(0, 1))
     axis(1, at=1:7, labels=c(expression(bold(beta)[0], bold(beta)[1], bold(u)[1], bold(u)[2], bold(sigma[u1]^2), bold(sigma[u2]^2), rho)))
   } else if (test == "spline") {
