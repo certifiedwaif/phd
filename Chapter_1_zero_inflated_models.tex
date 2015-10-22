@@ -525,17 +525,19 @@ $\rho$ & 0.711 & 0.673 & 0.750 & 0.876 \\
 \includegraphics[width=100mm, height=100mm]{code/results/17_accuracy_plots_application_gva2.pdf}
 \end{figure}
 
+The test case was a random slope model with $m=50$ groups, each containing $n_i = 100$ individuals.
+
 \begin{table}
 \caption{Table of results - Speed}
-\label{tab:application_roaches_speed}
+\label{tab:application_slope_speed}
 \begin{tabular}{|l|r|}
 \hline
-Algorithm & Time to fit model (seconds) \\
+Algorithm & Time to fit model \\
 \hline
-Laplace's method & 0.740 \\
-GVA & 2.151 \\
-GVA2 & 0.747 \\
-GVA FP & 0.176 \\
+Laplace's method & 17.9595 seconds \\
+GVA & 1.208631 minutes \\
+GVA2 & 27.36819 seconds \\
+GVA FP & 4.927715 seconds \\
 \hline
 \end{tabular}
 \end{table}
