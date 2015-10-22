@@ -300,96 +300,6 @@ calculate_accuracies <- function(test, mult, mcmc_samples, var_result, approxima
               rho_accuracy=rho_accuracy))
 }
 
-# Sys.setenv("PKG_CXXFLAGS"="-std=c++11")
-sourceCpp(file="spline_ci.cpp")
-
-test_spline_accuracy <- function(mult, allKnots, fit, approximation, plot=FALSE)
-{
-  # Change the knots
-  # Small count example
-  var_result <- zipvb(mult, method=approximation, verbose=TRUE)
-  # John said this isn't good enough.
-  # We should do a grid search from -1 to 1, simulating from the normal that
-  # VB
-  vmu_vb <- var_result$vmu
-  mLambda_vb <- var_result$mLambda
-
-  vbeta_mcmc <- apply(fit$vbeta, 2, mean)
-  vu_mcmc <- apply(fit$vu, 2, mean)
-  vmu_mcmc <- c(vbeta_mcmc, vu_mcmc)
-  vmu_mcmc_samples <- cbind(fit$vbeta, fit$vu)
-
-  x <- seq(from=-1, to=1, by=1e-2)
-  vb_lci <- rep(0, length(x))
-  vb_uci <- rep(0, length(x))
-  mcmc_lci <- rep(0, length(x))
-  mcmc_uci <- rep(0, length(x))
-  for (i in 1:length(x)) {
-    NUM_REPS <- 1000
-    f_hat_vb <- rep(NA, NUM_REPS)
-    f_hat_mcmc <- rep(NA, NUM_REPS)
-    # Create an appropriate mC
-    mC_x <- cbind(1, x[i], spline.des(allKnots, x[i], derivs=c(0), outer.ok=TRUE)$design)
-
-    result <- spline_ci(NUM_REPS, mC_x, vmu_vb, mLambda_vb, fit$vbeta, fit$vu)
-    f_hat_vb <- result$f_hat_vb
-    f_hat_mcmc <- result$f_hat_mcmc
-    
-    # for (j in 1:NUM_REPS) {
-
-    #   # Generate samples - simulate vbeta, vu
-    #   f_hat_vb[j] <- t(rmvnorm(1, mC_x %*% vmu_vb, mC_x %*% mLambda_vb %*% t(mC_x)))
-    #   sample_idx <- sample(dim(fit$vbeta)[1], 1)
-    #   vbeta_mcmc <- fit$vbeta[sample_idx, ]
-    #   vu_mcmc <- fit$vu[sample_idx, ]
-    #   vnu_mcmc <- c(vbeta_mcmc, vu_mcmc)
-    #   f_hat_mcmc[j] <- t(mC_x %*% vnu_mcmc)
-    # }
-    
-    vb_quantiles <- quantile(f_hat_vb, c(.025, .975))
-    vb_lci[i] <- vb_quantiles[1]
-    vb_uci[i] <- vb_quantiles[2]
-    mcmc_quantiles <- quantile(f_hat_mcmc, c(.025, .975))
-    mcmc_lci[i] <- mcmc_quantiles[1]
-    mcmc_uci[i] <- mcmc_quantiles[2]
-  }
-
-  if (plot) {
-    pdf(sprintf("results/accuracy_plots_spline_%s.pdf", approximation))
-    # pdf(sprintf("results/splines_ci_%s.pdf", approximation))
-    within_bounds_idx <- (mult$mX[, 2] > -1) && (mult$mX[, 2] < 1)
-    plot(x[within_bounds_idx], exp(vb_lci[within_bounds_idx]), type="l", col="blue",
-         xlab="x", ylab=expression(3 + 3 * sin(pi * x)),
-         xlim=c(-1.0, 1.0), ylim=c(0.0, exp(6.0)), lty=2)
-    lines(x[within_bounds_idx], exp(vb_uci[within_bounds_idx]), col="blue", lty=2)
-    lines(x[within_bounds_idx], exp(mcmc_lci[within_bounds_idx]), col="red", lty=2)
-    lines(x[within_bounds_idx], exp(mcmc_uci[within_bounds_idx]), col="red", lty=2)
-    # legend("topleft", c("VB", "MCMC"), fill=c("blue", "red"))
-    
-    # Calculate the mean for vbeta, vu
-    # Construct a BSpline matrix over the range we wish to plot
-    # Plot the function using our MCMC and VB estimates
-    # mCtilde %*% vmu
-    xtilde <- seq(from=-1, to=1, by=1e-2)
-    result <- spline.des(allKnots, xtilde, derivs=rep(0, length(xtilde)), outer.ok=TRUE)
-    mC_tilde <- cbind(1, xtilde, result$design)
-    f_hat_vb <- mC_tilde %*% var_result$vmu
-    f_hat_mcmc <- mC_tilde %*% vmu_mcmc
-
-    points(mult$mX[within_bounds_idx,2], mult$vy[within_bounds_idx],
-           xlim=c(-1, 1))
-    vf <- 3.0 + 3 * sin(pi * xtilde)
-    lines(xtilde[1:(length(xtilde)-1)], exp(vf[1:(length(xtilde)-1)]), type="l", col="black")
-    lines(xtilde[1:(length(xtilde)-1)], exp(f_hat_mcmc[1:(length(xtilde)-1)]), type="l", col="red")
-    lines(xtilde[1:(length(xtilde)-1)], exp(f_hat_vb[1:(length(xtilde)-1)]), type="l", col="blue")
-    legend("topleft", c("True function", "MCMC estimate", "VB estimate"),
-           fill=c("black", "red", "blue"))
-    dev.off()
-  }
-  #return(calculate_accuracies(mult, mcmc_samples, var_result, approximation, plot_flag=plot))
-  return()
-}
-
 test_accuracies_intercept <- function(save=FALSE)
 {
   # Need to be able to compare the solution paths of each approximation
@@ -482,8 +392,8 @@ test_accuracies_slope <- function(save=FALSE)
   if (save) {
     seed <- 3
     set.seed(seed)
-    mult <- generate_slope_test_data(m=20, ni=10)
-    result <-  mcmc(mult, iterations=3e4, warmup = 5e3)
+    mult <- generate_slope_test_data(m=50, ni=100)
+    result <-  mcmc(mult, iterations=3e5, warmup = 5e4)
     fit <- result$fit
     print(fit)
     mcmc_samples <- result$mcmc_samples
@@ -533,6 +443,96 @@ test_accuracies_slope <- function(save=FALSE)
   print(var4_accuracy$rho_accuracy)
 }
 # test_accuracies_slope()
+
+# Sys.setenv("PKG_CXXFLAGS"="-std=c++11")
+sourceCpp(file="spline_ci.cpp")
+
+test_spline_accuracy <- function(mult, allKnots, fit, approximation, plot=FALSE)
+{
+  # Change the knots
+  # Small count example
+  var_result <- zipvb(mult, method=approximation, verbose=TRUE)
+  # John said this isn't good enough.
+  # We should do a grid search from -1 to 1, simulating from the normal that
+  # VB
+  vmu_vb <- var_result$vmu
+  mLambda_vb <- var_result$mLambda
+
+  vbeta_mcmc <- apply(fit$vbeta, 2, mean)
+  vu_mcmc <- apply(fit$vu, 2, mean)
+  vmu_mcmc <- c(vbeta_mcmc, vu_mcmc)
+  vmu_mcmc_samples <- cbind(fit$vbeta, fit$vu)
+
+  x <- seq(from=-1, to=1, by=1e-2)
+  vb_lci <- rep(0, length(x))
+  vb_uci <- rep(0, length(x))
+  mcmc_lci <- rep(0, length(x))
+  mcmc_uci <- rep(0, length(x))
+  for (i in 1:length(x)) {
+    NUM_REPS <- 1000
+    f_hat_vb <- rep(NA, NUM_REPS)
+    f_hat_mcmc <- rep(NA, NUM_REPS)
+    # Create an appropriate mC
+    mC_x <- cbind(1, x[i], spline.des(allKnots, x[i], derivs=c(0), outer.ok=TRUE)$design)
+
+    result <- spline_ci(NUM_REPS, mC_x, vmu_vb, mLambda_vb, fit$vbeta, fit$vu)
+    f_hat_vb <- result$f_hat_vb
+    f_hat_mcmc <- result$f_hat_mcmc
+    
+    # for (j in 1:NUM_REPS) {
+
+    #   # Generate samples - simulate vbeta, vu
+    #   f_hat_vb[j] <- t(rmvnorm(1, mC_x %*% vmu_vb, mC_x %*% mLambda_vb %*% t(mC_x)))
+    #   sample_idx <- sample(dim(fit$vbeta)[1], 1)
+    #   vbeta_mcmc <- fit$vbeta[sample_idx, ]
+    #   vu_mcmc <- fit$vu[sample_idx, ]
+    #   vnu_mcmc <- c(vbeta_mcmc, vu_mcmc)
+    #   f_hat_mcmc[j] <- t(mC_x %*% vnu_mcmc)
+    # }
+    
+    vb_quantiles <- quantile(f_hat_vb, c(.025, .975))
+    vb_lci[i] <- vb_quantiles[1]
+    vb_uci[i] <- vb_quantiles[2]
+    mcmc_quantiles <- quantile(f_hat_mcmc, c(.025, .975))
+    mcmc_lci[i] <- mcmc_quantiles[1]
+    mcmc_uci[i] <- mcmc_quantiles[2]
+  }
+
+  if (plot) {
+    pdf(sprintf("results/accuracy_plots_spline_%s.pdf", approximation))
+    # pdf(sprintf("results/splines_ci_%s.pdf", approximation))
+    within_bounds_idx <- (mult$mX[, 2] > -1) && (mult$mX[, 2] < 1)
+    plot(x[within_bounds_idx], exp(vb_lci[within_bounds_idx]), type="l", col="blue",
+         xlab="x", ylab=expression(3 + 3 * sin(pi * x)),
+         xlim=c(-1.0, 1.0), ylim=c(0.0, exp(4.0)), lty=2)
+    lines(x[within_bounds_idx], exp(vb_uci[within_bounds_idx]), col="blue", lty=2)
+    lines(x[within_bounds_idx], exp(mcmc_lci[within_bounds_idx]), col="red", lty=2)
+    lines(x[within_bounds_idx], exp(mcmc_uci[within_bounds_idx]), col="red", lty=2)
+    # legend("topleft", c("VB", "MCMC"), fill=c("blue", "red"))
+    
+    # Calculate the mean for vbeta, vu
+    # Construct a BSpline matrix over the range we wish to plot
+    # Plot the function using our MCMC and VB estimates
+    # mCtilde %*% vmu
+    xtilde <- seq(from=-1, to=1, by=1e-2)
+    result <- spline.des(allKnots, xtilde, derivs=rep(0, length(xtilde)), outer.ok=TRUE)
+    mC_tilde <- cbind(1, xtilde, result$design)
+    f_hat_vb <- mC_tilde %*% var_result$vmu
+    f_hat_mcmc <- mC_tilde %*% vmu_mcmc
+
+    points(mult$mX[within_bounds_idx,2], mult$vy[within_bounds_idx],
+           xlim=c(-1, 1))
+    vf <- 3 + 3 * sin(pi * xtilde)
+    lines(xtilde[1:(length(xtilde)-1)], exp(vf[1:(length(xtilde)-1)]), type="l", col="black")
+    lines(xtilde[1:(length(xtilde)-1)], exp(f_hat_mcmc[1:(length(xtilde)-1)]), type="l", col="red")
+    lines(xtilde[1:(length(xtilde)-1)], exp(f_hat_vb[1:(length(xtilde)-1)]), type="l", col="blue")
+    legend("topleft", c("True function", "MCMC estimate", "VB estimate"),
+           fill=c("black", "red", "blue"))
+    dev.off()
+  }
+  #return(calculate_accuracies(mult, mcmc_samples, var_result, approximation, plot_flag=plot))
+  return()
+}
 
 test_accuracies_spline <- function(save=FALSE)
 {
