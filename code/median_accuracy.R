@@ -108,7 +108,7 @@ median_accuracy <- function(approximation="gva", test="intercept")
   }) # , mc.cores = 32)
   
   save(accuracy, file = sprintf("results/accuracy_list_%s_%s.RData", approximation, test))
-  # median_accuracy_graph_all(test)
+  median_accuracy_graph_all(test)
 }
 
 create_accuracy_df <- function(accuracy, make_colnames=FALSE) {
@@ -159,7 +159,7 @@ median_accuracy_graph <- function(approximation="gva", test="intercept") {
     boxplot(accuracy_df2, ylim=c(0, 1))
     axis(1, at=1:5, labels=c(expression(bold(beta)[0], bold(beta)[1], bold(u)[1], bold(sigma[u]^2), rho)))
   } else if (test == "slope") {
-    mean_vu <- matrix(0, 100, 2)
+    mean_vu <- matrix(0, 400, 2)
     mean_vu[, 1] <- apply(accuracy_df[, 3 + 0:19 * 2], 1, mean)
     mean_vu[, 2] <- apply(accuracy_df[, 3 + 1 + 0:19 * 2], 1, mean)
     mean_vu_df <- data.frame(mean_vu_0=mean_vu[, 1], mean_vu_1=mean_vu[, 2])
