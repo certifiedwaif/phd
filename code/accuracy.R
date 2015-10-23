@@ -106,7 +106,7 @@ calculate_accuracy_normalised <- function(mcmc_samples, dist_fn, ...)
   result <- integrate2(integrand, min(mcmc_density$x), max(mcmc_density$x),
                      subdivisions = length(mcmc_density$x))
   accuracy <- 1 - .5 * result$value
-  return(accuracy)
+  return(round(100 * accuracy, 0))
 }
 
 calculate_accuracy <- function(mcmc_samples, dist_fn, ...)
@@ -121,7 +121,7 @@ calculate_accuracy <- function(mcmc_samples, dist_fn, ...)
   result <- integrate2(integrand, min(mcmc_density$x), max(mcmc_density$x),
                      subdivisions = length(mcmc_density$x))
   accuracy <- 1 - .5 * result$value
-  return(accuracy)
+  return(round(100 * accuracy, 0))
 }
 
 calculate_accuracy_spline <- function(vx, mcmc_fn, vb_fn)
@@ -147,6 +147,7 @@ accuracy_plot <- function(title, mcmc_samples, dist_fn, ...)
         from=min(mcmc_density$x), to=max(mcmc_density$x),
         lty=2, col="blue")
   lines(mcmc_density$x, mcmc_density$y * opt$object / max(mcmc_density$y))
+  legend("topright", c("MCMC estimate", "VB estimate"), lty=c(1, 2))
   title(title)
   # mcmc_fn <- splinefun(mcmc_density$x, mcmc_density$y)
   # curve(mcmc_fn(x, ...),
@@ -182,7 +183,7 @@ calculate_accuracies <- function(test, mult, mcmc_samples, var_result, approxima
       vbeta_accuracy[i] <- calculate_accuracy(mcmc_samples$vbeta[,i], dnorm,
                                               var_result$vmu[i], sqrt(var_result$mLambda[i,i]))
       vbeta_means[i] <- mean(mcmc_samples$vbeta[, i])
-      title <- sprintf("%s vbeta[%d] accuracy: %f", approximation, i, vbeta_accuracy[i])
+      title <- sprintf("%s vbeta[%d] accuracy: %2f", approximation, i, vbeta_accuracy[i])
       if (print_flag) print(title)
       if (plot_flag) accuracy_plot(title, mcmc_samples$vbeta[,i], dnorm,
                                    var_result$vmu[i], sqrt(var_result$mLambda[i,i]))
@@ -206,7 +207,7 @@ calculate_accuracies <- function(test, mult, mcmc_samples, var_result, approxima
         vu_means[i] <- mean(mcmc_samples$vu[, m_idx, b_idx])
         vu_sd <- sqrt(var_result$mLambda[i + mult$p, i + mult$p])
         vu_accuracy[i] <- calculate_accuracy(mcmc_samples$vu[, m_idx, b_idx], dnorm, vu_mean, vu_sd)
-        title <- sprintf("%s vu[%d] accuracy: %f", approximation, i, vu_accuracy[i])
+        title <- sprintf("%s vu[%d] accuracy: %2f", approximation, i, vu_accuracy[i])
         if (print_flag) print(title)
         if (plot_flag) accuracy_plot(title, mcmc_samples$vu[, m_idx, b_idx], dnorm, vu_mean, vu_sd)
 
@@ -220,7 +221,7 @@ calculate_accuracies <- function(test, mult, mcmc_samples, var_result, approxima
         vu_sd <- sqrt(var_result$mLambda[i + mult$p, i + mult$p])
         vu_accuracy[i] <- calculate_accuracy(mcmc_samples$vu[, i], dnorm, vu_mean, vu_sd)
         vu_means[i] <- mean(mcmc_samples$vu[, i])
-        title <- sprintf("%s vu[%d] accuracy: %f", approximation, i, vu_accuracy[i], "\n")
+        title <- sprintf("%s vu[%d] accuracy: %2f", approximation, i, vu_accuracy[i], "\n")
         if (print_flag) print(title)
         if (plot_flag) accuracy_plot(title, mcmc_samples$vu[, i], dnorm, vu_mean, vu_sd)
       }
@@ -276,7 +277,7 @@ calculate_accuracies <- function(test, mult, mcmc_samples, var_result, approxima
     sigma2_inv <- solve(var_result$mPsi)[i, i]
     sigma2_vu_accuracy[i] <- calculate_accuracy_normalised(sigma_u_inv[, i, i],
                                                function(x, ...) dgamma(1 / x * sigma2_inv, ...), v/2, 2)
-    title <- sprintf("%s sigma2_u[%d] accuracy: %f", approximation, i, sigma2_vu_accuracy[i])
+    title <- sprintf("%s sigma2_u[%d] accuracy: %2f", approximation, i, sigma2_vu_accuracy[i])
     if (print_flag) print(title)
     if (plot_flag)
       accuracy_plot(title, sigma_u_inv[, i, i], function(x, ...) dgamma(1 / x * sigma2_inv, ...), v/2, 2)
@@ -286,7 +287,7 @@ calculate_accuracies <- function(test, mult, mcmc_samples, var_result, approxima
   # rho accuracy
   rho_accuracy <- calculate_accuracy(mcmc_samples$rho, dbeta,
                                      var_result$a_rho, var_result$b_rho)
-  title <- sprintf("%s rho accuracy: %f", approximation, rho_accuracy, "\n")
+  title <- sprintf("%s rho accuracy: %2f", approximation, rho_accuracy, "\n")
   if (print_flag) print(title)
   if (plot_flag) accuracy_plot(title, mcmc_samples$rho, dbeta,
                           var_result$a_rho, var_result$b_rho)
@@ -406,36 +407,44 @@ test_accuracies_slope <- function(save=FALSE)
   # m <- 20
   # mult$vmu <- c(2, 1, rep(0, (m-1) * 2))
   
-  now <- Sys.time()
-  var1_result <- zipvb(mult, method="laplace", verbose=FALSE)
-  print(Sys.time() - now)
+  for (i in 1:10) {
+    now <- Sys.time()
+    var1_result <- zipvb(mult, method="laplace", verbose=FALSE)
+    cat("Laplace", Sys.time() - now, "\n")
+  }
   var1_accuracy <- calculate_accuracies("slope", mult, mcmc_samples, var1_result, "laplace", print_flag=FALSE, plot_flag=FALSE)
   print(var1_accuracy$vbeta_accuracy)
   print(mean(var1_accuracy$vu_accuracy))
   print(var1_accuracy$sigma2_vu_accuracy)
   print(var1_accuracy$rho_accuracy)
   
-  now <- Sys.time()
-  var2_result <- zipvb(mult, method="gva", verbose=FALSE)
-  print(Sys.time() - now)
+  for (i in 1:10) {
+    now <- Sys.time()
+    var2_result <- zipvb(mult, method="gva", verbose=FALSE)
+    cat("GVA", Sys.time() - now, "\n")
+  }
   var2_accuracy <- calculate_accuracies("slope", mult, mcmc_samples, var2_result, "gva", print_flag=FALSE, plot_flag=FALSE)
   print(var2_accuracy$vbeta_accuracy)
   print(mean(var2_accuracy$vu_accuracy))
   print(var2_accuracy$sigma2_vu_accuracy)
   print(var2_accuracy$rho_accuracy)
 
-  now <- Sys.time()
-  var3_result <- zipvb(mult, method="gva2", verbose=TRUE)
-  print(Sys.time() - now)
+  for (i in 1:10) {
+    now <- Sys.time()
+    var3_result <- zipvb(mult, method="gva2", verbose=TRUE)
+    cat("GVA2", Sys.time() - now, "\n")
+  }
   var3_accuracy <- calculate_accuracies("slope", mult, mcmc_samples, var3_result, "gva2", print_flag=FALSE, plot_flag=TRUE)
   print(var3_accuracy$vbeta_accuracy)
   print(mean(var3_accuracy$vu_accuracy))
   print(var3_accuracy$sigma2_vu_accuracy)
   print(var3_accuracy$rho_accuracy)
 
-  now <- Sys.time()
-  var4_result <- zipvb(mult, method="gva_nr", verbose=FALSE)
-  print(Sys.time() - now)
+  for (i in 1:10) {
+    now <- Sys.time()
+    var4_result <- zipvb(mult, method="gva_nr", verbose=FALSE)
+    cat("GVA NR", Sys.time() - now, "\n")
+  }
   var4_accuracy <- calculate_accuracies("slope", mult, mcmc_samples, var4_result, "gva_nr", print_flag=FALSE, plot_flag=FALSE)
   print(var4_accuracy$vbeta_accuracy)
   print(mean(var4_accuracy$vu_accuracy))
