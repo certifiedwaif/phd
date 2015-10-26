@@ -46,13 +46,14 @@ save_mcmc <- function(test)
       mult <- result
       stan_fit <- mcmc(mult, iterations=1e5, warmup=1e4, mc.cores = 1)
     }
+    hostname <- Sys.info()["nodename"]
     if (hostname == "verona.maths.usyd.edu.au")
       save(stan_fit, file = sprintf("/dskh/nobackup/markg/phd/stan_fit_%s_%d.RData", test, i))
     else if (hostname == "markg-OptiPlex-9020")
       save(stan_fit, file = sprintf("/home/markg/phd_data/stan_fit_%s_%d.RData", test, i))
     else
       stop("Cannot find hostname")
-  }, mc.cores = 32)
+  }, mc.cores = 40)
 }
 
 load_stan_data <- function(i, test)
@@ -190,6 +191,40 @@ median_accuracy_graph_all <- function(test) {
     median_accuracy_graph(approximation=approximation, test=test)
     median_accuracy_csv(approximation=approximation, test=test)
   }
+
+  # Load all of the data files
+  accuracy_df <- data.frame()
+  for (approximation in c("laplace", "gva", "gva2", "gva_nr")) {
+    load(file = sprintf("results/accuracy_list_%s_%s.RData", approximation, test))
+    
+    accuracy_df_delta <- create_accuracy_df(accuracy, make_colnames=TRUE)
+    accuracy_df <- rbind(accuracy_df, cbind(approximation, accuracy_df_delta))
+  }
+
+  # Take the mean of the random effects components for intercept and slope  
+  mean_vu <- matrix(0, nrow(accuracy_df), 2)
+  mean_vu[, 1] <- apply(accuracy_df[, 3 + 0:19 * 2], 2, function(x) mean(as.numeric(x)))
+  mean_vu[, 2] <- apply(accuracy_df[, 3 + 1 + 0:19 * 2], 2,  function(x) mean(as.numeric(x)))
+  mean_vu_df <- data.frame(mean_vu_0=mean_vu[, 1], mean_vu_1=mean_vu[, 2])
+  accuracy_df2 <- cbind(accuracy_df[, c("vbeta_0", "vbeta_1")],
+                        mean_vu_df,
+                        accuracy_df[, c("sigma2_vu_1", "sigma2_vu_2", "rho")])
+  parameters <- colnames(accuracy_df2)
+  
+  # Construct a data frame with a column for each combination of approximation and parameter
+  acc <- data.frame(a=rep(NA, 100))
+  for (param in parameters) {
+    for (approximation in c("laplace", "gva", "gva2", "gva_nr")) {
+      # Take the mean of the vu accuracies
+      accuracy_numbers <- as.numeric(as.character(accuracy_df2[accuracy_df$approximation == approximation, param]))
+      acc <- cbind(acc, accuracy_numbers)
+      colnames(acc)[length(colnames(acc))] <- sprintf("%s_%s", approximation, param)
+    }
+  }
+  acc <- acc[, 2:ncol(acc)]
+
+  # Plot the combined graph
+  boxplot(acc)
 }
 
 median_accuracy_csv <- function(approximation="gva", test=test) {
