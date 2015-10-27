@@ -224,7 +224,7 @@ median_accuracy_graph_all <- function(test) {
   # acc <- acc[, 2:ncol(acc)]
 
   # Plot the combined graph
-  # pdf("results/median_accuracy_combined.pdf")
+  pdf("results/median_accuracy_combined.pdf")
   boxplot(acc,
           col=1:4,
           xaxt="n",
@@ -237,11 +237,11 @@ median_accuracy_graph_all <- function(test) {
                   expression(sigma[bold(u)[0]]),
                   expression(sigma[bold(u)[1]]),
                   expression(rho)),
-       at = 1:7 * 4,
+       at = 1:7 * 4 - 0.25,
        tick=TRUE)
   legend("bottomright", c("Laplace", "GVA", "GVA2", "GVA FP"), lty=1, col=1:4)
   title("Combined median accuracy graph")
-  # dev.off()
+  dev.off()
   # TODO: Label the axes better
   # TODO: Why are the accuracies for the variance components so low, although the estimation for the vbeta
   # components is better?
