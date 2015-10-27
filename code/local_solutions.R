@@ -44,12 +44,13 @@ local_solutions <- function(approximation)
 
 	# Start fits from a range of points on a 2 dimensional grid
 	GRID_SIZE <- 1e-1
+	error_locations <- list()
 	for (init_intercept in seq(- 4.5, 5, GRID_SIZE)) {
 		for (init_slope in seq(- 4.5, 5, GRID_SIZE)) {
-			cat("init_intercept", init_intercept, "\n")
-			cat("init_slope", init_slope, "\n")
-			cat("counter", counter, "\n")
-			cat("errors", errors, "\n")
+			cat("init_intercept", init_intercept, "")
+			cat("init_slope", init_slope, "")
+			cat("counter", counter, "")
+			cat("errors", errors, "")
 			mult$vmu[1] <- init_intercept
 			mult$vmu[2] <- init_slope
 			fit <- tryCatch(zipvb(mult, method=approximation, verbose=FALSE, glm_init=FALSE),
@@ -60,6 +61,7 @@ local_solutions <- function(approximation)
 			if (is.null(fit)) {
 				print("Caught error")
 				errors <- errors + 1
+				error_locations <- c(error_locations, list(intercept=init_intercept, slope=init_slope))
 			} else {
 				# print(str(fit))
 				vmus[counter, ] <- fit$vmu
@@ -81,7 +83,8 @@ local_solutions <- function(approximation)
 	
 	cat("Counter", counter, "\n")
 	cat("Errors", errors, "\n")
-	return(vmus[1:(counter - 1), ])
+	return(list(vmus=vmus[1:(counter - 1), ],
+							error_locations=error_locations))
 }
 
 main <- function()
@@ -89,7 +92,10 @@ main <- function()
   option_list <- list(make_option(c("-a", "--approximation"), default="gva"))
   opt <- parse_args(OptionParser(option_list=option_list))
   approximation <- opt$approximation
-  vmus <- local_solutions(approximation)
+  result <- local_solutions(approximation)
+  vmus <- result$vmus
+  error_locations <- result$error_locations
   write.csv(vmus, file=sprintf("local_solutions_%s_vmus.csv", approximation))
+  write.csv(error_locations, file=sprintf("local_solutions_%s_error_locations.csv", approximation))
 }
 main()
