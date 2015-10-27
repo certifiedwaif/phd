@@ -187,10 +187,10 @@ median_accuracy_graph <- function(approximation="gva", test="intercept") {
 
 median_accuracy_graph_all <- function(test) {
   # for (approximation in c("gva", "gva2")) {
-  for (approximation in c("laplace", "gva", "gva2", "gva_nr")) {
-    median_accuracy_graph(approximation=approximation, test=test)
-    median_accuracy_csv(approximation=approximation, test=test)
-  }
+  # for (approximation in c("laplace", "gva", "gva2", "gva_nr")) {
+  #   median_accuracy_graph(approximation=approximation, test=test)
+  #   median_accuracy_csv(approximation=approximation, test=test)
+  # }
 
   # Load all of the data files
   accuracy_df <- data.frame()
@@ -221,14 +221,27 @@ median_accuracy_graph_all <- function(test) {
       colnames(acc)[length(colnames(acc))] <- sprintf("%s_%s", approximation, param)
     }
   }
-  acc <- acc[, 2:ncol(acc)]
+  # acc <- acc[, 2:ncol(acc)]
 
   # Plot the combined graph
-  pdf("results/median_accuracy_combined.pdf")
-  boxplot(acc, col=1:4, ylab="Accuracy")
+  # pdf("results/median_accuracy_combined.pdf")
+  boxplot(acc,
+          col=1:4,
+          xaxt="n",
+          ylab="Accuracy")
+  axis(1,
+       labels = c(expression(bold(beta)[0]), 
+                  expression(bold(beta)[1]),
+                  expression(bold(u)[0]),
+                  expression(bold(u)[1]),
+                  expression(sigma[bold(u)[0]]),
+                  expression(sigma[bold(u)[1]]),
+                  expression(rho)),
+       at = 1:7 * 4,
+       tick=TRUE)
   legend("bottomright", c("Laplace", "GVA", "GVA2", "GVA FP"), lty=1, col=1:4)
   title("Combined median accuracy graph")
-  dev.off()
+  # dev.off()
   # TODO: Label the axes better
   # TODO: Why are the accuracies for the variance components so low, although the estimation for the vbeta
   # components is better?
@@ -383,4 +396,4 @@ main <- function()
     coverage_percentage(approximation=approximation)
   }
 }
-main()
+# main()
