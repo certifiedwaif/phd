@@ -124,6 +124,8 @@ create_accuracy_df <- function(accuracy, make_colnames=FALSE) {
   vbeta_accuracy <- t(sapply(accuracy, function(x) {x$vbeta_accuracy}))
   vu_accuracy <- t(sapply(accuracy, function(x) {x$vu_accuracy}))
   sigma2_vu_accuracy <- t(sapply(accuracy, function(x) {x$sigma2_vu_accuracy}))
+  if (class("sigma2_vu_accuracy") != "matrix")
+    sigma2_vu_accuracy <- as.matrix(sigma2_vu_accuracy)
   rho_accuracy <- sapply(accuracy, function(x) {x$rho_accuracy})
   accuracy_df <- cbind(vbeta_accuracy, vu_accuracy, sigma2_vu_accuracy, rho_accuracy)
   if (make_colnames) {
@@ -201,14 +203,36 @@ median_accuracy_graph_all <- function(test) {
     accuracy_df <- rbind(accuracy_df, cbind(approximation, accuracy_df_delta))
   }
 
-  # Take the mean of the random effects components for intercept and slope  
-  mean_vu <- matrix(0, nrow(accuracy_df), 2)
-  mean_vu[, 1] <- apply(accuracy_df[, 3 + 0:19 * 2], 2, function(x) mean(as.numeric(x)))
-  mean_vu[, 2] <- apply(accuracy_df[, 3 + 1 + 0:19 * 2], 2,  function(x) mean(as.numeric(x)))
-  mean_vu_df <- data.frame(mean_vu_0=mean_vu[, 1], mean_vu_1=mean_vu[, 2])
-  accuracy_df2 <- cbind(accuracy_df[, c("vbeta_0", "vbeta_1")],
-                        mean_vu_df,
-                        accuracy_df[, c("sigma2_vu_1", "sigma2_vu_2", "rho")])
+  # Take the mean of the random effects components for intercept and slope
+
+  calculate_mean_vu <- function(accuracy_df, b)
+  {
+    mean_vu <- matrix(0, nrow(accuracy_df), b)
+    for (i in 1:b) {
+      mean_vu[, i] <- apply(accuracy_df[, (p + 1) + i - 1 + 0:(m - 1) * b], 2, function(x) mean(as.numeric(x)))
+    }
+    return(mean_vu)
+  }
+
+  if (test == "intercept") {
+    p <- 2
+    m <- 20
+    b <- 1
+    mean_vu <- calculate_mean_vu(accuracy_df, b)
+    mean_vu_df <- data.frame(mean_vu_0=mean_vu[, 1])
+    accuracy_df2 <- cbind(accuracy_df[, c("vbeta_0", "vbeta_1")],
+                          mean_vu_df,
+                          accuracy_df[, c("sigma2_vu_1", "rho")])
+  } else if (test == "slope") {
+    p <- 2
+    m <- 20
+    b <- 2
+    mean_vu <- calculate_mean_vu(accuracy_df, b)
+    mean_vu_df <- data.frame(mean_vu_0=mean_vu[, 1], mean_vu_1=mean_vu[, 2])
+    accuracy_df2 <- cbind(accuracy_df[, c("vbeta_0", "vbeta_1")],
+                          mean_vu_df,
+                          accuracy_df[, c("sigma2_vu_1", "sigma2_vu_2", "rho")])
+  }
   parameters <- colnames(accuracy_df2)
   
   # Construct a data frame with a column for each combination of approximation and parameter
@@ -221,26 +245,41 @@ median_accuracy_graph_all <- function(test) {
       colnames(acc)[length(colnames(acc))] <- sprintf("%s_%s", approximation, param)
     }
   }
-  # acc <- acc[, 2:ncol(acc)]
+  acc <- acc[, 2:ncol(acc)]
 
   # Plot the combined graph
-  pdf("results/median_accuracy_combined.pdf")
+  pdf(sprintf("results/median_accuracy_combined_%s.pdf", test))
+  if (test == "slope") {
+    acc <- 100.0 * acc
+  }
   boxplot(acc,
           col=1:4,
           xaxt="n",
+          ylim=c(0.0, 100.0),
           ylab="Accuracy")
-  axis(1,
-       labels = c(expression(bold(beta)[0]), 
-                  expression(bold(beta)[1]),
-                  expression(bold(u)[0]),
-                  expression(bold(u)[1]),
-                  expression(sigma[bold(u)[0]]),
-                  expression(sigma[bold(u)[1]]),
-                  expression(rho)),
-       at = 1:7 * 4 - 0.25,
-       tick=TRUE)
+  if (test == "intercept") {
+    axis(1,
+         labels = c(expression(bold(beta)[0]), 
+                    expression(bold(beta)[1]),
+                    expression(bold(u)[0]),
+                    expression(sigma[bold(u)[0]]),
+                    expression(rho)),
+         at = 1:5 * 4 - 0.25,
+         tick=TRUE)
+  } else if (test == "slope") {
+    axis(1,
+         labels = c(expression(bold(beta)[0]), 
+                    expression(bold(beta)[1]),
+                    expression(bold(u)[0]),
+                    expression(bold(u)[1]),
+                    expression(sigma[bold(u)[0]]),
+                    expression(sigma[bold(u)[1]]),
+                    expression(rho)),
+         at = 1:7 * 4 - 0.25,
+         tick=TRUE)
+  }
   legend("bottomright", c("Laplace", "GVA", "GVA2", "GVA FP"), lty=1, col=1:4)
-  title("Combined median accuracy graph")
+  title(sprintf("Combined median accuracy graph - %s", test))
   dev.off()
   # TODO: Label the axes better
   # TODO: Why are the accuracies for the variance components so low, although the estimation for the vbeta
@@ -390,10 +429,11 @@ main <- function()
     save_mcmc(test)
   } else if (opt$median_accuracy) {
     approximation <- opt$approximation
-    median_accuracy(approximation=approximation, test=test, save_flag=opt$save_flag)
+    save_flag <- opt$save_flag
+    median_accuracy(approximation=approximation, test=test, save_flag=save_flag)
   } else if (opt$coverage_percentage) {
     approximation <- opt$approximation
     coverage_percentage(approximation=approximation)
   }
 }
-# main()
+main()
