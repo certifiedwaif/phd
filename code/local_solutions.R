@@ -39,18 +39,18 @@ local_solutions <- function(approximation)
 	mult <- create_mult(vy, mX, mZ, sigma2.beta, m=10, blocksize=1, v=2)
 
 	counter <- 0
-	errors <- 0
+	error_count <- 0
 	vmus <- matrix(NA, (10 * 1e2)^2, 2 + 9)
 
 	# Start fits from a range of points on a 2 dimensional grid
 	GRID_SIZE <- 1e-1
-	error_locations <- list()
+	error_locations <- c(-99, -99)
 	for (init_intercept in seq(- 4.5, 5, GRID_SIZE)) {
 		for (init_slope in seq(- 4.5, 5, GRID_SIZE)) {
 			cat("init_intercept", init_intercept, "")
 			cat("init_slope", init_slope, "")
 			cat("counter", counter, "")
-			cat("errors", errors, "")
+			cat("error_count", error_count, "")
 			mult$vmu[1] <- init_intercept
 			mult$vmu[2] <- init_slope
 			fit <- tryCatch(zipvb(mult, method=approximation, verbose=FALSE, glm_init=FALSE),
@@ -60,8 +60,9 @@ local_solutions <- function(approximation)
 											})
 			if (is.null(fit)) {
 				print("Caught error")
-				errors <- errors + 1
-				error_locations <- c(error_locations, list(intercept=init_intercept, slope=init_slope))
+				error_count <- error_count + 1
+				error_locations <- rbind(error_locations,
+																 c(init_intercept, init_slope))
 			} else {
 				# print(str(fit))
 				vmus[counter, ] <- fit$vmu
@@ -82,9 +83,29 @@ local_solutions <- function(approximation)
 	# fit <- zipvb(mult, method="gva", verbose=TRUE, glm_init=FALSE)
 	
 	cat("Counter", counter, "\n")
-	cat("Errors", errors, "\n")
+	cat("Error_count", error_count, "\n")
 	return(list(vmus=vmus[1:(counter - 1), ],
-							error_locations=error_locations))
+							error_locations=error_locations[2:error_count, ]))
+}
+
+display_local_solutions <- function(error_locations)
+{
+	min_x <- min(x)
+	max_x <- max(x)
+	min_y <- min(y)
+	max_y <- max(y)
+
+	x <- seq(min_x, max_x, by=0.1)
+	y <- seq(min_y, max_y, by=0.1)
+
+	image_mat <- matrix(x, y, matrix(0, length(x), length(y)))
+	for (i in 1:nrow(error_locations)) {
+		err_x <- error_locations[i, 2]
+		err_y <- error_locations[i, 3]
+		image_mat[err_x, err_y] <- 1
+	}
+
+	image(x, y, image_mat)
 }
 
 main <- function()
@@ -95,7 +116,7 @@ main <- function()
   result <- local_solutions(approximation)
   vmus <- result$vmus
   error_locations <- result$error_locations
-  write.csv(vmus, file=sprintf("local_solutions_%s_vmus.csv", approximation))
-  write.csv(error_locations, file=sprintf("local_solutions_%s_error_locations.csv", approximation))
+  write.csv(vmus, file=sprintf("results/local_solutions_%s_vmus.csv", approximation))
+  write.csv(error_locations, file=sprintf("results/local_solutions_%s_error_locations.csv", approximation))
 }
 main()
