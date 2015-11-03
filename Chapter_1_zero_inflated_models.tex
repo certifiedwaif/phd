@@ -38,7 +38,9 @@ more general models incorporating random effects, splines and missing data typic
 have no closed form solutions. Fitting these models is typically done with Monte Carlo
 Markov Chain techniques, but these can be slow and prone to convergence problems. We
 propose using Variational Bayes to fit close approximations to these models
-using a deterministic algorithm which converges much more quickly.
+using a deterministic algorithm which converges much more quickly. \cite{BIOM:BIOM1030}
+\cite{BIMJ:BIMJ200390024} \cite{JOFP:rethink} \cite{Min01042005} \cite{Shankar1997829}
+\cite{Hall2000} \cite{LeeWangScottYauMcLachlan2006}
 
 % Cite prior publications in this area
 
@@ -63,8 +65,8 @@ model.
 \subsection{Variational Bayesian inference}
 
 Semiparametric mean field Variational Bayes is an approximate Bayesian inference method as detailed in
-\cite{RohdeWand2015}. As can be seen from the following derivation, the log of the full likelihood bounds the 
-lower bound above.
+\cite{ormerod10} and \cite{RohdeWand2015}. As can be seen from the following derivation, the log of the full likelihood 
+bounds the lower bound above.
 
 \begin{align*}
 \log p(\vy) &= \log p(\vy) \int q(\vtheta) d \vtheta \\
