@@ -649,8 +649,8 @@ fit.GVA_nr <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e
     # Then -mH^{-1} = [(A - B D^-1 B^T)^-1, -(A-B D^-1 B^T)^-1 B D^-1]
     #                 [-D^-1 B^T (A - B D^-1 B^T)^-1, D^-1 + D^-1 B^T (A - B D^-1 B^T)^-1 B D^-1]
     # D^-1 and (A - B D^-1 B^T)^-1 appear repeatedly, so we precalculate them
-    # D.inv <- tryCatch(solve(D), error=function(e) NULL)
-    D.inv <- solve(D)
+    D.inv <- tryCatch(solve(D), error=function(e) NULL)
+    # D.inv <- solve(D)
     # We can't invert D, so bail out with the last known good vmu and mLambda.
     # This probably means that the answer we've come up with to our optimisation
     # problem isn't very good, because we're in a part of the parameter space that

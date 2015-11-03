@@ -254,8 +254,8 @@ calculate_accuracies <- function(test, mult, mcmc_samples, var_result, approxima
   #   sigma_u_inv[i, , ] <- solve(sigma_u[i, , ])
   # }
   sigma2_vu_accuracy <- rep(0, B)
+  v <- mult$v
   if (B == 2) {
-    v <- mult$v
     # E_mPsi_inv <- var_result$mult$mPsi / (4 - 2 - 1)
     sigma_u_inv <- array(0, c(dim(mcmc_samples$sigma_u)[1], 2, 2))
     a <- mcmc_samples$sigma_u[, 1, 1]
@@ -266,21 +266,24 @@ calculate_accuracies <- function(test, mult, mcmc_samples, var_result, approxima
     sigma_u_inv[, 1, 2] <- -b / (a * d - b * c)
     sigma_u_inv[, 2, 1] <- -c / (a * d - b * c)
     sigma_u_inv[, 2, 2] <- a / (a * d - b * c)
+    # sigma_u_inv <- mcmc_samples$sigma_u
   } else {
-    v <- mult$v
     sigma_u_inv <- array(0, c(dim(mcmc_samples$sigma_u)[1], 1, 1))
     sigma_u_inv[, 1, 1] <- 1 / mcmc_samples$sigma_u[, 1, 1]
+    # sigma_u_inv[, 1, 1] <- mcmc_samples$sigma_u[, 1, 1]
   }
+  mPsi_inv <- solve(var_result$mPsi)
   for (i in 1:B) {
     # sigma2 <- E_mPsi_inv[i, i]
     # sigma2_inv <- solve(var_result$mPsi)[i, i]
-    sigma2_inv <- solve(var_result$mPsi)[i, i]
+    sigma_vu <- sqrt(mPsi_inv[i, i])
+    # sigma_vu <- sqrt(var_result$mPsi[i, i])
     sigma2_vu_accuracy[i] <- calculate_accuracy_normalised(sigma_u_inv[, i, i],
-                                               function(x, ...) dgamma(x / sqrt(sigma2_inv), ...), v / 2, 2)
+                                               function(x, ...) dchisq(x / sigma_vu, df = v, ...))
     title <- sprintf("%s sigma2_u[%d] accuracy: %2.0f%%", approximation, i, sigma2_vu_accuracy[i])
     if (print_flag) print(title)
     if (plot_flag) {
-      accuracy_plot(title, sigma_u_inv[, i, i], function(x, ...) dgamma(x / sqrt(sigma2_inv), ...), v / 2, 2)
+      accuracy_plot(title, sigma_u_inv[, i, i], function(x, ...) dchisq(x / sigma_vu, df = v, ...))
     }
   }
   
@@ -505,7 +508,7 @@ test_spline_accuracy <- function(mult, allKnots, fit, approximation, plot=FALSE)
     within_bounds_idx <- (mult$mX[, 2] > -1) && (mult$mX[, 2] < 1)
     plot(x[within_bounds_idx], exp(vb_lci[within_bounds_idx]), type="l", col="blue",
          xlab="x", ylab=expression(3 + 3 * sin(pi * x)),
-         xlim=c(-1.0, 1.0), ylim=c(0.0, exp(4.0)), lty=2)
+         xlim=c(-1.0, 1.0), ylim=c(0.0, exp(6.0)), lty=2)
     lines(x[within_bounds_idx], exp(vb_uci[within_bounds_idx]), col="blue", lty=2)
     lines(x[within_bounds_idx], exp(mcmc_lci[within_bounds_idx]), col="red", lty=2)
     lines(x[within_bounds_idx], exp(mcmc_uci[within_bounds_idx]), col="red", lty=2)
@@ -580,4 +583,4 @@ main <- function()
   }
 }
 
-# main()
+main()
