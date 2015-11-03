@@ -113,23 +113,23 @@ kappa(mult$mC)
 # Need more rounds of GVA NR to get mLambda in the ballpark.
 # 2 is too few. 5 is enough.
 
-now <- Sys.time()
-fit1 <- zipvb(mult, method="laplace", verbose=FALSE)
-print(Sys.time() - now)
+# now <- Sys.time()
+# fit1 <- zipvb(mult, method="laplace", verbose=FALSE)
+# cat("Laplace", Sys.time() - now, "\n")
 
-now <- Sys.time()
-fit2 <- zipvb(mult, method="gva", verbose=FALSE)
-print(Sys.time() - now)
+# now <- Sys.time()
+# fit2 <- zipvb(mult, method="gva", verbose=FALSE)
+# cat("GVA", Sys.time() - now, "\n")
 
 now <- Sys.time()
 fit3 <- zipvb(mult, method="gva2", verbose=FALSE)
-print(Sys.time() - now)
+cat("GVA2", Sys.time() - now, "\n")
 
-now <- Sys.time()
-fit4 <- zipvb(mult, method="gva_nr", verbose=FALSE)
-print(Sys.time() - now)
+# now <- Sys.time()
+# fit4 <- zipvb(mult, method="gva_nr", verbose=FALSE)
+# cat("GVA_NR", Sys.time() - now, "\n")
 
 # Check accuracy
-# stan_fit <- mcmc(mult, p=3, iterations=1e5, warmup=1e4, mc.cores = 1)
-# var_accuracy <- calculate_accuracies("application", mult, stan_fit$mcmc_samples, fit1, "gva_nr", plot_flag=TRUE)
-# print(var_accuracy)
+stan_fit <- mcmc(mult, p=3, iterations=1e5, warmup=1e4, mc.cores = 1)
+var_accuracy <- calculate_accuracies("application", mult, stan_fit$mcmc_samples, fit3, "gva2", plot_flag=TRUE)
+print(var_accuracy)
