@@ -38,7 +38,7 @@ create_mult <- function(vy, mX, mZ, sigma2.beta, m=ncol(mZ), blocksize=1, spline
   prior <- list(v=v, mPsi=mPsi,
                 a_rho=1, b_rho=1,
                 sigma2.beta=sigma2.beta)
-  v <- prior$v + m
+  v <- prior$v + m + p
   
   if (!is.null(ncol(mZ))) {
     # TODO: We don't yet handle the case where there are splines and random intecepts/
@@ -149,7 +149,7 @@ zipvb <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE, glm
   m <- mult$m
   spline_dim <- mult$spline_dim
   blocksize <- mult$blocksize
-  v <- prior$v + m
+  v <- mult$v
 
   zero.set <- which(vy == 0)
   vlower_bound <- c()
