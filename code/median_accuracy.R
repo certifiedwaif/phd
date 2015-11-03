@@ -17,6 +17,7 @@ generate_test_case <- function(i, test) {
   } else if (test == "slope") {
     m <- 20
     ni <- 10
+
     result <- generate_slope_test_data(m=20, ni=10, expected_beta=c(2, 1), expected_rho=0.7)
   } else if (test == "spline") {
     # result <- generate_spline_test_data()
@@ -107,7 +108,8 @@ median_accuracy <- function(approximation="gva", test="intercept", save_flag=FAL
         vb_spline_fn <- splinefun(xtilde, f_hat_vb)
         result <- calculate_accuracy_spline(xtilde, mcmc_spline_fn, vb_spline_fn)
       } else {
-        result <- calculate_accuracies("", mult, mcmc_samples, var_result, approximation, print_flag=TRUE)
+        result <- calculate_accuracies("", mult, mcmc_samples, var_result, approximation, print_flag=TRUE,
+                                       plot_flag=TRUE)
       }
       # In spline case, should calculate accuracy of the fit functions
       save(result, file = sprintf("results/accuracy_result_%s_%s_%d.RData", approximation, test, i))
@@ -249,9 +251,9 @@ median_accuracy_graph_all <- function(test) {
 
   # Plot the combined graph
   pdf(sprintf("results/median_accuracy_combined_%s.pdf", test))
-  if (test == "slope") {
-    acc <- 100.0 * acc
-  }
+  # if (test == "slope") {
+  #   acc <- 100.0 * acc
+  # }
   boxplot(acc,
           col=1:4,
           xaxt="n",
