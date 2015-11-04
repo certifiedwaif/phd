@@ -28,7 +28,6 @@ Keywords: Approximate Bayesian inference ; mixed model ; Markov chain Monte Carl
 \section{Introduction}
 \label{sec:introduction}
 
-% First, simplest zero-inflated count model to consider.
 Count data with a large number of zero counts arises in many areas of
 application, such as data arising from physical activity studies, 
 insurance claims, hospital visits or defects in manufacturing processes.
@@ -41,8 +40,6 @@ propose using Variational Bayes to fit close approximations to these models
 using a deterministic algorithm which converges much more quickly. \cite{BIOM:BIOM1030}
 \cite{BIMJ:BIMJ200390024} \cite{JOFP:rethink} \cite{Min01042005} \cite{Shankar1997829}
 \cite{Hall2000} \cite{LeeWangScottYauMcLachlan2006}
-
-% Cite prior publications in this area
 
 In this paper, we build upon the earlier work of \cite{lambert1992},
 \cite{Ghosh20061360} and \cite{VatsaWilson2014}.
@@ -108,12 +105,6 @@ models. To be able to construct multivariate models with as much generality as p
 model as a General Design Bayesian Generalized Linear Mixed Model, as in \citep{zhao06}. This allows us to 
 incorporate within-subject correlation, measurement error, missing data and smoothing splines in our models.
 
-% TODO: Lower bound graph
-% TODO: Accuracy of approximations
-% TODO: Application, physical activity data
-% Random intercept, longitudinal data
-% Graph demonstrating additional zeroes
-
 % Idea: We can use an approximation of the from q(\beta, \u, \Sigma) q(\rho) \Product q(r_i)
 % and use GVA on q(\beta, \u, \Sigma) and mean field updates on \rho and r_i
 
@@ -157,10 +148,7 @@ $$
 
 \text{when} $\vy_i = 0$.
 
-% What on Earth is this section doing here? This is very random.
 %$\propto \exp{\left \{-r_i \bE_{-r_i} [\exp{(c_i^\top\vnu)}] + r_i [\psi(\alpha_\rho) - \psi(\beta_\rho)] \right \} }.\\$
-
-% Include derivations for mean field updates at the end?
 
 The optimal approximation for $\vr$ is
 $$
@@ -182,13 +170,11 @@ non-conjugacy, but can be fit using Gaussian Variational Approximation, as in
 optimal densities $q^*(\vmu, \mLambda)$, $q^*(\mSigma_{\vu \vu})$ and $q^*(\rho)$}
 \label{alg:algorithm_one}
 \begin{algorithmic}
-% Fit \vmu, \mLambda using Laplace approximation
 \REQUIRE{$\alpha_{q(\rho)} \leftarrow \alpha_\rho + \vone^\top\vp, p_{q(\mSigma_{\vu \vu})} \leftarrow p + 1$} \\[1ex]
 \WHILE{the increase in $\log{\underline{p}}(\vy;q)$ is significant}
 % \vmu, \mLambda
 \STATE Optimise $\vmu$ and $\mLambda$ using $\vy, \mC, \vp$ and $\mSigma_{\vu \vu}$ \\[1ex]
 % \vp
-% \rho is a prior? Not directly observed, except through \vr_i
 \STATE $\beta_{q(\rho)} \leftarrow \beta_\rho + n - \vone^\top\vp$ \\[1ex]
 \STATE $\eta \leftarrow -\exp \left [ \mC \vmu + \half \diag{(\mC\mLambda\mC^\top)} \right ] + \psi{(\alpha_{q{(\rho)}})} - \psi{(\beta_{q{(\rho)}})}$ \\[1ex]
 \STATE $\vp_{q(\vr_0)} \leftarrow \expit{(\eta)}$ \\[1ex]
@@ -382,11 +368,11 @@ by running them on 100 randomly generated data sets. The results are presented i
 \hline
 & Laplace's Method & GVA $(\mLambda = \mR \mR^\top)$ & GVA2 $(\mLambda = (\mR \mR^\top)^{-1})$ & GVA FP\\
 \hline
-$\vbeta_1$ & $0.83$ & $0.91$ & $0.91$ & $0.91$ \\ 
-$\vbeta_2$ & $0.77$ & $0.99$ & $0.99$ & $0.99$ \\ 
-Mean of $\vu$ & $0.81$ & $0.95$ & $0.95$ & $0.95$ \\
-$\sigma^2_{\vu_1}$ & $0.47$ & $0.47$ & $0.47$ & $0.47$ \\ 
-$\rho$ & $0.98$ & $0.97$ & $0.97$ &  $0.97$ \\ 
+$\vbeta_1$ & $83\%$ & $91\%$ & $91\%$ & $91\%$ \\ 
+$\vbeta_2$ & $77\%$ & $99\%$ & $99\%$ & $99\%$ \\ 
+Mean of $\vu$ & $81\%$ & $95\%$ & $95\%$ & $95\%$ \\
+$\sigma^2_{\vu_1}$ & $47\%$ & $47\%$ & $47\%$ & $47\%$ \\ 
+$\rho$ & $98\%$ & $97\%$ & $97\%$ &  $97\%$ \\ 
 \hline
 \end{tabular}
 \end{table}
@@ -398,12 +384,12 @@ $\rho$ & $0.98$ & $0.97$ & $0.97$ &  $0.97$ \\
 \hline
 & Laplace's Method & GVA $(\mLambda = \mR \mR^\top)$ & GVA $(\mLambda = (\mR \mR^\top)^{-1})$ & GVA FP\\
 \hline
-$\vbeta_1$     &0.66&0.88&0.89&0.88\\
-$\vbeta_2$     &0.69&0.88&0.90&0.88\\
-Mean of $\vu$        &0.72&0.91&0.91&0.91\\
-$\sigma^2_{\vu_1}$ &0.72&0.71&0.71&0.69\\
-$\sigma^2_{\vu_2}$ &0.72&0.71&0.71&0.70\\
-$\rho$ &0.91&0.90&0.90&0.90\\
+$\vbeta_1$     &66\%&88\%&89\%&88\%\\
+$\vbeta_2$     &69\%&88\%&90\%&88\%\\
+Mean of $\vu$        &72\%&91\%&91\%&91\%\\
+$\sigma^2_{\vu_1}$ &72\%&71\%&71\%&69\%\\
+$\sigma^2_{\vu_2}$ &72\%&71\%&71\%&70\%\\
+$\rho$ &91\%&90\%&90\%&90\%\\
 \hline
 \end{tabular}
 \end{table}
@@ -495,12 +481,12 @@ by Andrew Gelman. The results are presented in Table \ref{tab:application_roache
 \hline
 Covariate & Posterior Mean & Lower 95\% CI &  Upper 95\% CI & Accuracy \\
 \hline
-Intercept & 3.18 & 3.16 & 3.20 & 0.90 \\
-Time & -0.05 & -0.05 & -0.04 & 0.97 \\
-Time:Treatment & -0.43 & -0.43 & -0.41 & 0.93 \\
-Random intercept & -1.60 & -1.71 & -1.49 & 0.90 \\
-$\sigma^2_{\vu_1}$ & 0.58 & 0.57 & 0.57 & 0.57 \\
-$\rho$ & 0.71 & 0.67 & 0.75 & 0.88 \\
+Intercept & 3.18 & 3.16 & 3.20 & 90\% \\
+Time & -0.05 & -0.05 & -0.04 & 97\% \\
+Time:Treatment & -0.43 & -0.43 & -0.41 & 93\% \\
+Random intercept & -1.60 & -1.71 & -1.49 & 90\% \\
+$\sigma^2_{\vu_1}$ & 0.58 & 0.57 & 0.57 & 57\% \\
+$\rho$ & 0.71 & 0.67 & 0.75 & 88\% \\
 \hline
 \end{tabular}
 \end{table}
