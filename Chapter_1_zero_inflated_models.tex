@@ -29,45 +29,37 @@ Keywords: Approximate Bayesian inference ; mixed model ; Markov chain Monte Carl
 \section{Introduction}
 \label{sec:introduction}
 
-Count data with a large number of zero counts arises in many areas of
-application, such as data arising from physical activity studies, insurance
-claims, hospital visits or defects in manufacturing processes. These models have
-been used for many applications, including \cite{BIOM:BIOM1030}
-\cite{BIMJ:BIMJ200390024} \cite{JOFP:rethink} \cite{Min01042005}
-\cite{Shankar1997829} \cite{Hall2000} \cite{LeeWangScottYauMcLachlan2006}
+Count data with a large number of zero counts arises in many areas of application, such as data arising from
+physical activity studies, insurance claims, hospital visits or defects in manufacturing processes. These
+models have been used for many applications, including \cite{BIOM:BIOM1030} \cite{BIMJ:BIMJ200390024}
+\cite{JOFP:rethink} \cite{Min01042005} \cite{Shankar1997829} \cite{Hall2000}
+\cite{LeeWangScottYauMcLachlan2006}
 
-While simple forms of these models are easy to fit with maximum likelihood
-techniques, more general models incorporating random effects, splines and
-missing data typically have no closed form solutions. Fitting these models is
-typically done with Monte Carlo Markov Chain techniques, but these can be slow
-and prone to convergence problems. We propose using Variational Bayes to fit
-close approximations to these models using a deterministic algorithm which
-converges much more quickly.
+While simple forms of these models are easy to fit with maximum likelihood techniques, more general models
+incorporating random effects, splines and missing data typically have no closed form solutions. Fitting these
+models is typically done with Monte Carlo Markov Chain techniques, but these can be slow and prone to
+convergence problems. We propose using Variational Bayes to fit close approximations to these models using a
+deterministic algorithm which converges much more quickly.
 
-In this paper, we build upon the earlier work of \cite{lambert1992},
-\cite{Ghosh20061360} and \cite{VatsaWilson2014}.
+In this paper, we build upon the earlier work of \cite{lambert1992}, \cite{Ghosh20061360} and
+\cite{VatsaWilson2014}.
 
-In Section \ref{sec:introduction} we provide the framework for our approach. In
-Section \ref{sec:methodology} we extend our approach to incorporate regression
-modelling and random effects. In Section \ref{sec:algorithms} we present
-algorithms for fitting these models. In Section \ref{sec:results} we show how
-our approach offers computational advantages over existing approaches. In
-Section \ref{sec:application} we show an application of our method to physical
-activity data. Appendices contain details of our variational lower bound
-derivation.
+In Section \ref{sec:introduction} we provide the framework for our approach. In Section \ref{sec:methodology}
+we extend our approach to incorporate regression modelling and random effects. In Section \ref{sec:algorithms}
+we present algorithms for fitting these models. In Section \ref{sec:results} we show how our approach offers
+computational advantages over existing approaches. In Section \ref{sec:application} we show an application of
+our method to physical activity data. Appendices contain details of our variational lower bound derivation.
 
 \section{Methodology}\label{sec:methodology}
 
-In this section we present a VB approach to a Bayesian zero-inflated Poisson
-model for count data with extra zeroes. After introducing Bayesian zero-inflated
-models and VB methodology we derive the VB factorised approximation to the full
-Bayesian model.
+In this section we present a VB approach to a Bayesian zero-inflated Poisson model for count data with extra
+zeroes. After introducing Bayesian zero-inflated models and VB methodology we derive the VB factorised
+approximation to the full Bayesian model.
 
 \subsection{Variational Bayesian inference}
 
-Semiparametric mean field Variational Bayes is an approximate Bayesian inference
-method as detailed in \cite{ormerod10} and \cite{RohdeWand2015}. The essential
-idea is that the log likelihood can be rewritten as
+Semiparametric mean field Variational Bayes is an approximate Bayesian inference method as detailed in
+\cite{ormerod10} and \cite{RohdeWand2015}. The essential idea is that the log likelihood can be rewritten as
 
 \begin{align*}
 \log p(\vy) &= \log p(\vy) \int q(\vtheta) d \vtheta \\
@@ -77,12 +69,11 @@ idea is that the log likelihood can be rewritten as
 %& \geq \int q(\vtheta) \log \frac{p(\vy, \vtheta)}{q(\vtheta)} d \vtheta
 \end{align*}
 
-which is the sum of the the KL divergence between the true posterior and an
-approximation and a variational lower bound.
+which is the sum of the the KL divergence between the true posterior and an approximation and a variational
+lower bound.
 
-The approximation is fit by iteratively minimising the Kullback-Leibler
-divergence between the true posterior and an approximating distribution, and
-thus maximising the variational lower bound as defined in Equation
+The approximation is fit by iteratively minimising the Kullback-Leibler divergence between the true posterior
+and an approximating distribution, and thus maximising the variational lower bound as defined in Equation
 \ref{eq:lower_bound_defn}.
 
 \begin{equation}
@@ -100,25 +91,22 @@ A common approach is to assume an approximation in a factorised form
 
 $$q(\vtheta) = \Pi_{i=1}^M q(\theta_i).$$
 
-The variational lower bound is maximised iteratively. On each iteration, the
-value of each parameter in the model is calculated as the expectation of the
-full likelihood relative to the other parameters in the model, which is referred
-to as the mean field update:
+The variational lower bound is maximised iteratively. On each iteration, the value of each parameter in the
+model is calculated as the expectation of the full likelihood relative to the other parameters in the model,
+which is referred to as the mean field update:
 
 $$q_i^*(\theta_i) \propto \exp{\{ \bE_{-q(\theta_i)} \log p(\vy, \vtheta) \}}$$
 
-This is done for each parameter in the model in turn until the variational lower
-bound's increase is negligible and convergence is achieved.
+This is done for each parameter in the model in turn until the variational lower bound's increase is
+negligible and convergence is achieved.
 
 \section{The zero-inflated Poisson regression model}
 
-Variational approximations are well-suited to accelerating the fit of Bayesian
-zero-inflated models to data. Typically zero-inflated models arise in
-applications where we wish to build multivariate regression models. To be able
-to construct multivariate models with as much generality as possible, we specify
-the full model as a General Design Bayesian Generalized Linear Mixed Model, as
-in \citep{zhao06}. This allows us to incorporate within-subject correlation,
-measurement error, missing data and smoothing splines in our models.
+Variational approximations are well-suited to accelerating the fit of Bayesian zero-inflated models to data.
+Typically zero-inflated models arise in applications where we wish to build multivariate regression models. To
+be able to construct multivariate models with as much generality as possible, we specify the full model as a
+General Design Bayesian Generalized Linear Mixed Model, as in \citep{zhao06}. This allows us to incorporate
+within-subject correlation, measurement error, missing data and smoothing splines in our models.
 
 % Idea: We can use an approximation of the from q(\beta, \u, \Sigma) q(\rho) \Product q(r_i)
 % and use GVA on q(\beta, \u, \Sigma) and mean field updates on \rho and r_i
@@ -176,11 +164,9 @@ $$
 
 where $\mD = \left[ (\mPsi + \sum_{i=1}^m \vmu_i \vmu_i^\top + \mLambda_{\vu_i\vu_i}) / (v - d - 1) \right]^{-1}$. 
 
-This is close in form to a Poisson regression model. Poisson regression models
-with normal priors have no closed form for their mean field updates due to non-
-conjugacy, but can be fit using Gaussian Variational Approximation, as in
-\citep{ormerod09}. The model can be fit using Algorithm \ref{alg:algorithm_one}
-below.
+This is close in form to a Poisson regression model. Poisson regression models with normal priors have no
+closed form for their mean field updates due to non- conjugacy, but can be fit using Gaussian Variational
+Approximation, as in \citep{ormerod09}. The model can be fit using Algorithm \ref{alg:algorithm_one} below.
 
 \begin{algorithm}
 \caption[Algorithm 1]{Iterative scheme for obtaining the parameters in the
@@ -205,23 +191,20 @@ optimal densities $q^*(\vmu, \mLambda)$, $q^*(\mSigma_{\vu \vu})$ and $q^*(\rho)
 \section{Model fitting algorithms}
 \label{sec:algorithms}
 
-In this section, we compare the accuracy, stability and speed of a number of
-algorithms for fitting the variational approximation to our model.
+In this section, we compare the accuracy, stability and speed of a number of algorithms for fitting the
+variational approximation to our model.
 
 \subsection{Laplace-Variational Approximation}
 
-Laplace's method of approximation uses the second order Taylor expansion of the
-full log likelihood around the mode to find a Gaussian approximation to the full
-posterior. This can then be optimised using Newton-Raphson style iterations. The
-algorithm is very quick to execute, but the resulting approximate posterior
-distributions are not as accurate as those produced by the other algorithms
-considered in this article.
+Laplace's method of approximation uses the second order Taylor expansion of the full log likelihood around the
+mode to find a Gaussian approximation to the full posterior. This can then be optimised using Newton-Raphson
+style iterations. The algorithm is very quick to execute, but the resulting approximate posterior
+distributions are not as accurate as those produced by the other algorithms considered in this article.
 
 % NR
 % Detail the function and its derivatives
 
-Taylor expanding the full log likelihood once around the mode yields the
-following function
+Taylor expanding the full log likelihood once around the mode yields the following function
 
 \begin{align*}
 \log \underline{p}(\vmu, \mLambda; \vy) = \vy^\top\mP\mC\vmu - \vp^\top\exp \left (\mC \vmu \right ) - \half \vmu^\top \mSigma^{-1} \vmu.
@@ -253,24 +236,20 @@ The steps of the algorithm are shown in Algorithm \ref{alg:laplace_alg}.
 
 % Detail techniques used for fitting models.
 
-Assuming $q(\vnu) \sim N(\vmu, \mLambda)$, the Gaussian variational lower bound
-in Algorithm \ref{alg:algorithm_one} can be optimised using a variety of
-algorithms. The variational lower bound is not necessarily unimodal, leading to
-potential difficulty in optimising to the global maximum. However, for fixed
-$\vp$ and $\mSigma$, the variational lower bound is log-concave, and so standard
-optimisation methods such as L-BFGS-B work well. This led to an extremely
-accurate approximation of the true posterior at the expense of some additional
-computational effort.
+Assuming $q(\vnu) \sim N(\vmu, \mLambda)$, the Gaussian variational lower bound in Algorithm
+\ref{alg:algorithm_one} can be optimised using a variety of algorithms. The variational lower bound is not
+necessarily unimodal, leading to potential difficulty in optimising to the global maximum. However, for fixed
+$\vp$ and $\mSigma$, the variational lower bound is log-concave, and so standard optimisation methods such as
+L-BFGS-B work well. This led to an extremely accurate approximation of the true posterior at the expense of
+some additional computational effort.
 
-\subsubsection{GVA, $\mLambda = \mR \mR^\top$}
+\subsubsection{GVA, $mLambda = mR mR^top$}
 
-The first variant of the Gaussian Variational Approximation algorithm optimises
-the Gaussian variational lower bound of the log likelihood with respect to
-$\vmu$ and the Cholesky decomposition $\mR$ of $\mLambda$, that is, $\mLambda =
-\mR \mR^\top$. This algorithm trades the computational complexity of numerically
-evaluating an integral for greatly increased accuracy in the approximating
-posterior distribution. The resulting function is below and can be optimised
-with L-BFGS-B.
+The first variant of the Gaussian Variational Approximation algorithm optimises the Gaussian variational lower
+bound of the log likelihood with respect to $\vmu$ and the Cholesky decomposition $\mR$ of $\mLambda$, that
+is, $\mLambda = \mR \mR^\top$. This algorithm trades the computational complexity of numerically evaluating an
+integral for greatly increased accuracy in the approximating posterior distribution. The resulting function is
+below and can be optimised with L-BFGS-B.
 
 % Detail the function and its derivatives
 \begin{align*}
@@ -287,28 +266,22 @@ using the derivatives
 
 \subsubsection{GVA, $\mLambda = \left (\mR \mR^\top \right )^{-1}$}
 
-The second variant of the Gaussian Variational Approximation algorithm is
-similiar to the first, but instead of optimising the Gaussian variational lower
-bound with respect to $\vmu$ and the Cholesky factor $\mR$ of $\mLambda$, we
-instead optimise the Cholesky factor of the inverse of $\mLambda$ i.e. $\mLambda
-= (\mR \mR^\top)^{-1}$.
+The second variant of the Gaussian Variational Approximation algorithm is similiar to the first, but instead
+of optimising the Gaussian variational lower bound with respect to $\vmu$ and the Cholesky factor $\mR$ of
+$\mLambda$, we instead optimise the Cholesky factor of the inverse of $\mLambda$ i.e. $\mLambda = (\mR
+\mR^\top)^{-1}$.
 
-This new choice of parameterisation allows us to calculate $\exp(\mC \vmu +
-\half \text{diag}(\mC \mLambda \mC^\top))$ and its derivatives by solving the
-linear system $\mR \va = \mC_{i}, i=1, \ldots, n$ for $\va$ and then
-calculating $\va^\top\va$ rather than calculating $\text{diag}(\mC \mLambda
-\mC^\top)$ directly.
+This new choice of parameterisation allows us to calculate $\exp(\mC \vmu + \half \text{diag}(\mC \mLambda
+\mC^\top))$ and its derivatives by solving the linear system $\mR \va = \mC_{i}, i=1, \ldots, n$ for $\va$ and
+then calculating $\va^\top\va$ rather than calculating $\text{diag}(\mC \mLambda \mC^\top)$ directly.
 
-By interchanging the fixed and random effects in $\mC = [\mX \mZ]$ to $\mC =
-[\mZ \mX]$, and re-ordering the dimensions of $\vmu, \mLambda$ and $\mSigma$ in
-the same manner, the independence between the blocks relating to the random
-effects in $\mZ$ induce sparsity in the Cholesky factor $\mR$ of
-$\mLambda^{-1}$. Thus the Gaussian $q(\vnu) \sim N(\vmu, \mLambda)$ can be
-optimised over a space of dimension $\half p (p + 1) + pq + \half q (q + 1)$
-rather than dimension $\half (p + mq) (p + mq + 1)$ as in the dense
-parameterisation. This leads to subtantial performance gains when m is large, as
-is typically the case in problems of practical importance such as clinical
-trials or the application presented in Section \ref{sec:application}.
+By interchanging the fixed and random effects in $\mC = [\mX \mZ]$ to $\mC = [\mZ \mX]$, and re- ordering the
+dimensions of $\vmu, \mLambda$ and $\mSigma$ in the same manner, the independence between the blocks relating
+to the random effects in $\mZ$ induce sparsity in the Cholesky factor $\mR$ of $\mLambda^{-1}$. Thus the
+Gaussian $q(\vnu) \sim N(\vmu, \mLambda)$ can be optimised over a space of dimension $\half p (p + 1) + pq +
+\half q (q + 1)$ rather than dimension $\half (p + mq) (p + mq + 1)$ as in the dense parameterisation. This
+leads to subtantial performance gains when m is large, as is typically the case in problems of practical
+importance such as clinical trials or the application presented in Section \ref{sec:application}.
 
 The Gaussian variational lower bound in this parameterisation is
 
@@ -317,9 +290,8 @@ The Gaussian variational lower bound in this parameterisation is
 &\quad- \frac{d}{2} \log{(2 \pi)} + \half \log{|\mSigma^{-1}|} + \frac{d}{2} \log{(2 \pi)} + \frac{d}{2} - \log{|\mR|}
 \end{align*}
 
-The derivative with respect to $\vmu$ is the same as that in the GVA algorithm,
-but as the parameterisation of $\mLambda$ has changed, the  derivative with
-respect to $\mLambda$ becomes
+The derivative with respect to $\vmu$ is the same as that in the GVA algorithm, but as the parameterisation of
+$\mLambda$ has changed, the  derivative with respect to $\mLambda$ becomes
 
 \begin{align*}
 \frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda}
@@ -335,9 +307,8 @@ where $\mH = (\mP \mC)^\top \text{diag}(\exp(\mC \vmu + \half \mC \mLambda \mC^\
 
 % Fixed point update of \mLambda
 
-This variant of the algorithm uses Newton-Raphson-like fixed point updates on
-the Gaussian variational lower bound. This algorithm is fast, but unstable. The
-steps are presented in Algorithm \ref{alg:algorithm_nr} where
+This variant of the algorithm uses Newton-Raphson-like fixed point updates on the Gaussian variational lower
+bound. This algorithm is fast, but unstable. The steps are presented in Algorithm \ref{alg:algorithm_nr} where
 
 \begin{align*}
 \frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu} &= \quad \mC^\top\vp \left [\vy - \mC\exp(\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)) \right ] - \mSigma^{-1} \vmu \text{ and}\\
@@ -363,32 +334,26 @@ given $\vy$, $\mC$ and $\vp$}
 \section{Numerical results}
 \label{sec:results}
 
-The accuracy of each model fitting algorithm presented in Section
-\ref{sec:algorithms} was assessed by comparing the approximating distribution
-of each parameter with the posterior distribution of Monte Carlo Markov Chain
-samples of that parameter. 1 million Monte Carlo Markov Chain samples were
-generated using Stan. Random intercept, random slope and spline models were
-evaluated.
+The accuracy of each model fitting algorithm presented in Section \ref{sec:algorithms} was assessed by
+comparing the approximating distribution of each parameter with the posterior distribution of Monte Carlo
+Markov Chain samples of that parameter. 1 million Monte Carlo Markov Chain samples were generated using Stan.
+Random intercept, random slope and spline models were evaluated.
 
-A random intercept model was simulated with $\vbeta = (2, 1)^\top$, $\rho =
-0.5$, $m = 20$, $n_i = 10$ and $b = 1$. The results are presented in Table
-\ref{tab:accuracy_int}.
+A random intercept model was simulated with $\vbeta = (2, 1)^\top$, $\rho = 0.5$, $m = 20$, $n_i = 10$ and $b
+= 1$. The results are presented in Table \ref{tab:accuracy_int}.
 
-A random slope model was simulated with $\vbeta = (2, 1)^\top$, $\rho = 0.5$, $m
-= 20$, $n_i = 10$ and $b = 2$. The results are presented in Table
-\ref{tab:accuracy_slope}.
+A random slope model was simulated with $\vbeta = (2, 1)^\top$, $\rho = 0.5$, $m = 20$, $n_i = 10$ and $b =
+2$. The results are presented in Table \ref{tab:accuracy_slope}.
 
-A spline model was fit to a data set generated from the function $3 + 3 \sin{\pi
-x}$ on the interval $[-1, 1]$. The resulting model fits are presented in Figure
-\ref{fig:spline}.
+A spline model was fit to a data set generated from the function $3 + 3 \sin{\pi x}$ on the interval $[-1,
+1]$. The resulting model fits are presented in Figure \ref{fig:spline}.
 
-The stability of the algorithms was confirmed by running them on 10,000
-different data sets that were randomly generated after having initialised the
-random number generator with different seeds.
+The stability of the algorithms was confirmed by running them on 10,000 different data sets that were randomly
+generated after having initialised the random number generator with different seeds.
 
-Median accuracy of the algorithms was assessed by running them on 100 randomly
-generated data sets. The results are presented in Figure
-\ref{fig:median_accuracy_intercept} and Figure \ref{fig:median_accuracy_slope}.
+Median accuracy of the algorithms was assessed by running them on 100 randomly generated data sets. The
+results are presented in Figure \ref{fig:median_accuracy_intercept} and Figure
+\ref{fig:median_accuracy_slope}.
 
 % Figure: Median accuracy graph intercept
 \begin{figure}
@@ -467,15 +432,14 @@ $\rho$ &91\%&90\%&90\%&90\%\\
 
 \subsection{Stability results}
 
-The numerical stability of each fitting algorithm in Section
-\ref{sec:algorithms} was assessed by initialising each algorithm from a range of
-different starting points. Errors due to numerical instability and the fitted
+The numerical stability of each fitting algorithm in Section \ref{sec:algorithms} was assessed by initialising
+each algorithm from a range of different starting points. Errors due to numerical instability and the fitted
 $\vmu$ were recorded for each starting point.
 
-A data set of 100 individuals in ten groups (m=10) was generated from a model
-with a fixed intercept and slope, and a random intercept. $\vmu$ was
-initialised from a grid of points on the interval $[-4.5, 5]$ for intercept and
-slope. The error counts are presented in Table \ref{tab:stability_results}.
+A data set of 100 individuals in ten groups (m=10) was generated from a model with a fixed intercept
+and slope, and a random intercept. $\vmu$ was initialised from a grid of points on the interval
+$[-4.5, 5]$ for intercept and slope. The error counts are presented in Table
+\ref{tab:stability_results}.
 
 \begin{table}
 \caption{Count of numerical errors for each algorithm during stability tests}
@@ -494,9 +458,8 @@ GVA FP & 992 \\
 
 \section{Application}\label{sec:application}
 
-The GVA2 algorithm was used to fit a random intercept model to the Roaches data
-set provided by Andrew Gelman. The results are presented in Table
-\ref{tab:application_roaches}.
+The GVA2 algorithm was used to fit a random intercept model to the Roaches data set provided by Andrew Gelman.
+The results are presented in Table \ref{tab:application_roaches}.
 
 %       lci  uci
 % 1  3.179 3.157 3.201
@@ -575,10 +538,9 @@ $\rho$ & 0.71 & 0.67 & 0.75 & 88\% \\
 % \includegraphics[width=100mm, height=100mm]{code/results/application_variance.pdf}
 % \end{figure}
 
-To assess the speed of each approach, a test case was constructed of a random
-slope model with $m=50$ groups, each containing $n_i = 100$ individuals. A model
-was then fit to this data set ten times using each algorithm, and the results
-averaged. They are presented in Table \ref{tab:application_slope_speed}.
+To assess the speed of each approach, a test case was constructed of a random slope model with $m=50$ groups,
+each containing $n_i = 100$ individuals. A model was then fit to this data set ten times using each algorithm,
+and the results averaged. They are presented in Table \ref{tab:application_slope_speed}.
 
 \begin{table}
 \caption{Table of results - Speed}
