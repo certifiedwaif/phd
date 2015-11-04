@@ -6,8 +6,8 @@
 \addtolength{\textheight}{1.3in}%
 \addtolength{\topmargin}{-.8in}%
 \addtolength{\marginparpush}{-.75in}%
-%\setlength\parindent{0pt}
-%\setlength{\bibsep}{0pt plus 0.3ex}
+\setlength\parindent{0pt}
+% \setlength{\bibsep}{0pt plus 0.3ex}
 
 \usepackage[authoryear]{natbib}
 \usepackage{graphicx}
@@ -19,7 +19,6 @@
 \input{include.tex}
 \input{Definitions.tex}
 \begin{document}
-\setlength{\parindent}{0pt}
 \maketitle
 
 Abstract:
@@ -31,24 +30,24 @@ Keywords: Approximate Bayesian inference ; mixed model ; Markov chain Monte Carl
 
 Count data with a large number of zero counts arises in many areas of application, such as data arising from
 physical activity studies, insurance claims, hospital visits or defects in manufacturing processes. These
-models have been used for many applications, including \cite{BIOM:BIOM1030} \cite{BIMJ:BIMJ200390024}
-\cite{JOFP:rethink} \cite{Min01042005} \cite{Shankar1997829} \cite{Hall2000}
-\cite{LeeWangScottYauMcLachlan2006}
+models have been used for many applications, including defects in manufacturing \cite{lambert1992},
+horticulture \cite{BIOM:BIOM1030} \cite{Hall2000}, length of stay data from hospital admissions
+\cite{BIMJ:BIMJ200390024}, psychology \cite{JOFP:rethink}, pharmaceutical studies \cite{Min01042005}, traffic
+accidents on roadways \cite{Shankar1997829} and longitudinal studies \cite{LeeWangScottYauMcLachlan2006}.
 
-While simple forms of these models are easy to fit with maximum likelihood techniques, more general models
-incorporating random effects, splines and missing data typically have no closed form solutions. Fitting these
-models is typically done with Monte Carlo Markov Chain techniques, but these can be slow and prone to
-convergence problems. We propose using Variational Bayes to fit close approximations to these models using a
-deterministic algorithm which converges much more quickly.
+In this paper, we build upon the earlier work on Bayesian zero-inflated models of \cite{Ghosh20061360} and
+\cite{VatsaWilson2014}. While simple forms of these models are easy to fit with maximum likelihood techniques,
+more general models incorporating random effects, splines and missing data typically have no closed form
+solutions. Fitting these models is typically done with Monte Carlo Markov Chain techniques, but these can be
+slow and prone to convergence problems. We propose using Variational Bayes to fit close approximations to
+these models using a deterministic algorithm which converges much more quickly.
 
-In this paper, we build upon the earlier work of \cite{lambert1992}, \cite{Ghosh20061360} and
-\cite{VatsaWilson2014}.
-
-In Section \ref{sec:introduction} we provide the framework for our approach. In Section \ref{sec:methodology}
-we extend our approach to incorporate regression modelling and random effects. In Section \ref{sec:algorithms}
-we present algorithms for fitting these models. In Section \ref{sec:results} we show how our approach offers
-computational advantages over existing approaches. In Section \ref{sec:application} we show an application of
-our method to physical activity data. Appendices contain details of our variational lower bound derivation.
+In Section \ref{sec:introduction} we introduce the model of interest. In Section \ref{sec:methodology} we
+provide a framework for our approach incorporating regression modelling and random effects. In Section
+\ref{sec:algorithms} we present algorithms for fitting these models. In Section \ref{sec:results} we show how
+our approach offers computational advantages over existing approaches. In Section \ref{sec:application} we
+show an application of our method to physical activity data. Appendices contain details of our variational
+lower bound derivation.
 
 \section{Methodology}\label{sec:methodology}
 
