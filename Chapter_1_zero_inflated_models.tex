@@ -291,7 +291,7 @@ By interchanging the fixed and random effects in $\mC = [\mX \mZ]$ to $\mC = [\m
 dimensions of $\vmu, \mLambda$ and $\mSigma$ in the same manner, the independence between the
 blocks relating to the random effects in $\mZ$ induce sparsity in the Cholesky factor $\mR$
 of $\mLambda^{-1}$. Thus the Gaussian $q(\vnu) \sim N(\vmu, \mLambda)$ can be optimised over a space
-of $\half p (p + 1) + pq + \half q (q + 1)$ rather than dimension $\half (p + mq) (p + mq + 1)$ 
+of dimension $\half p (p + 1) + pq + \half q (q + 1)$ rather than dimension $\half (p + mq) (p + mq + 1)$ 
 as in the dense parameterisation. This leads to subtantial performance gains when m is large,
 as is typically the case in problems of practical importance such as clinical trials or the application
 presented in Section \ref{sec:application}.
@@ -506,28 +506,41 @@ $\rho$ & 0.71 & 0.67 & 0.75 & 0.88 \\
 \end{table}
 
 \begin{figure}
-\caption{Accuracy graph for fixed intercept of roach model}
-\label{fig:accuracy_roach_intercept}
-\includegraphics[width=100mm, height=100mm]{code/results/1_accuracy_plots_application_gva2.pdf}
+	\caption{Accuracy graphs for roach model}
+	\label{fig:accuracy_roach}
+	\centering
+	% \includepdf[width=75mm,height=75mm,pages={1,2,3,16},nup=2x2]{code/results/accuracy_plots_application_gva2.pdf}
+	\begin{tabular}{@{}c@{\hspace{.5cm}}c@{}}
+		\includegraphics[page=1,width=.45\textwidth]{code/results/accuracy_plots_application_gva2.pdf} & 
+		\includegraphics[page=2,width=.45\textwidth]{code/results/accuracy_plots_application_gva2.pdf} \\[.5cm]
+		\includegraphics[page=3,width=.45\textwidth]{code/results/accuracy_plots_application_gva2.pdf} &
+		\includegraphics[page=16,width=.45\textwidth]{code/results/accuracy_plots_application_gva2.pdf} \\[.5cm]
+	\end{tabular}
 \end{figure}
 
-\begin{figure}
-\caption{Accuracy graph for fixed slope of roach model}
-\label{fig:accuracy_roach_slope}
-\includegraphics[width=100mm, height=100mm]{code/results/2_accuracy_plots_application_gva2.pdf}
-\end{figure}
+% \begin{figure}
+% \caption{Accuracy graph for fixed intercept of roach model}
+% \label{fig:accuracy_roach_intercept}
+% \includegraphics[width=100mm, height=100mm]{code/results/application_fixed_intercept.pdf}
+% \end{figure}
 
-\begin{figure}
-\caption{Accuracy graph for $\sigma_u^2$ of roach model}
-\label{fig:accuracy_roach_sigmau2}
-\includegraphics[width=100mm, height=100mm]{code/results/16_accuracy_plots_application_gva2.pdf}
-\end{figure}
+% \begin{figure}
+% \caption{Accuracy graph for fixed slope of roach model}
+% \label{fig:accuracy_roach_slope}
+% \includegraphics[width=100mm, height=100mm]{code/results/application_fixed_slope_1.pdf}
+% \end{figure}
 
-\begin{figure}
-\caption{Accuracy graph for $\rho$ of roach model}
-\label{fig:accuracy_roach_rho}
-\includegraphics[width=100mm, height=100mm]{code/results/17_accuracy_plots_application_gva2.pdf}
-\end{figure}
+% \begin{figure}
+% \caption{Accuracy graph for $\sigma_u^2$ of roach model}
+% \label{fig:accuracy_roach_sigmau2}
+% \includegraphics[width=100mm, height=100mm]{code/results/application_fixed_slope_2.pdf}
+% \end{figure}
+
+% \begin{figure}
+% \caption{Accuracy graph for $\rho$ of roach model}
+% \label{fig:accuracy_roach_rho}
+% \includegraphics[width=100mm, height=100mm]{code/results/application_variance.pdf}
+% \end{figure}
 
 To assess the speed of each approach, a test case was constructed of a random slope model with $m=50$ groups, 
 each containing $n_i = 100$ individuals. A model was then fit to this data set ten times using each algorithm,
