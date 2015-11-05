@@ -23,24 +23,26 @@
 
 Abstract:
 
-Keywords: Approximate Bayesian inference ; mixed model ; Markov chain Monte Carlo ; Stan ; penalized splines .
+Keywords: Approximate Bayesian inference ; mixed model ; Markov chain Monte Carlo ; Stan ; 
+					penalized splines .
 
 \section{Introduction}
 \label{sec:introduction}
 
 Count data with a large number of zero counts arises in many areas of application, such as data arising from
 physical activity studies, insurance claims, hospital visits or defects in manufacturing processes. These
-models have been used for many applications, including defects in manufacturing \cite{lambert1992},
-horticulture \cite{BIOM:BIOM1030} \cite{Hall2000}, length of stay data from hospital admissions
-\cite{BIMJ:BIMJ200390024}, psychology \cite{JOFP:rethink}, pharmaceutical studies \cite{Min01042005}, traffic
-accidents on roadways \cite{Shankar1997829} and longitudinal studies \cite{LeeWangScottYauMcLachlan2006}.
+models have been used for many applications, including defects in manufacturing in \cite{lambert1992},
+horticulture in \cite{BIOM:BIOM1030} and \cite{Hall2000}, length of stay data from hospital admissions in
+\cite{BIMJ:BIMJ200390024}, psychology in \cite{JOFP:rethink}, pharmaceutical studies in \cite{Min01042005},
+traffic accidents on roadways in \cite{Shankar1997829} and longitudinal studies in
+\cite{LeeWangScottYauMcLachlan2006}.
 
 In this paper, we build upon the earlier work on Bayesian zero-inflated models of \cite{Ghosh20061360} and
 \cite{VatsaWilson2014}. While simple forms of these models are easy to fit with maximum likelihood techniques,
 more general models incorporating random effects, splines and missing data typically have no closed form
 solutions. Fitting these models is typically done with Monte Carlo Markov Chain techniques, but these can be
-slow and prone to convergence problems. We propose using Variational Bayes to fit close approximations to
-these models using a deterministic algorithm which converges much more quickly.
+slow and prone to convergence problems. We use Variational Bayes to fit close approximations to these models
+using a deterministic algorithm which converges much more quickly.
 
 In Section \ref{sec:introduction} we introduce the model of interest. In Section \ref{sec:methodology} we
 provide a framework for our approach incorporating regression modelling and random effects. In Section
@@ -49,7 +51,8 @@ our approach offers computational advantages over existing approaches. In Sectio
 show an application of our method to physical activity data. Appendices contain details of our variational
 lower bound derivation.
 
-\section{Methodology}\label{sec:methodology}
+\section{Methodology}
+\label{sec:methodology}
 
 In this section we present a VB approach to a Bayesian zero-inflated Poisson model for count data with extra
 zeroes. After introducing Bayesian zero-inflated models and VB methodology we derive the VB factorised
@@ -105,21 +108,28 @@ Variational approximations are well-suited to accelerating the fit of Bayesian z
 Typically zero-inflated models arise in applications where we wish to build multivariate regression models. To
 be able to construct multivariate models with as much generality as possible, we specify the full model as a
 General Design Bayesian Generalized Linear Mixed Model, as in \citep{zhao06}. This allows us to incorporate
-within-subject correlation, measurement error, missing data and smoothing splines in our models.
+within-subject correlation, measurement error, missing data and smoothing splines (as in \cite{Wand2008}) in
+our models.
 
 % Idea: We can use an approximation of the from q(\beta, \u, \Sigma) q(\rho) \Product q(r_i)
 % and use GVA on q(\beta, \u, \Sigma) and mean field updates on \rho and r_i
 
-\subsection{Model}
+\subsection{Model and data}
 
-Let $\mR = \diag{(\vr)}$. Let $\mC = [\mX \mZ], \vnu = [\vbeta^\top
-\vu^\top]^\top$. Consider the model
+The $j$th predictor/response pair for the $i$th group is denoted by $(\vx_{ij}, \vy_{ij}), 1 \leq j \leq n_i,
+1 \leq i \leq m$, where the $\vx_{ij}$ are unrestricted, while the $\vy_{ij}$ are nonnegative integers.
+
+For each $1 \leq i \leq m$, define the $n_i \times 1$ vectors $\vy_{ij} = [\vy_{i 1}, \ldots, \vy_{i
+n_i}]^\top$ and $\vone_i = [1, \ldots, 1^\top$, where the first of these vectors is the response. It is
+reasonable to assume that the vectors $\vy_1, \ldots, \vy_m$ are independent of each other.
+
+Let $\mR = \diag{(\vr)}$, $\mC = [\mX \mZ]$ and $\vnu = [\vbeta^\top \vu^\top]^\top$. Consider the model
 
 $$
 \begin{array}{rl}
 \log{p(\vy|\vr, \vbeta, \vu)} &= \vy^\top \mR (\mC\vnu) - \vr^\top \exp{(\mC\vnu)} - \vone^\top \log{\Gamma{(\vy + \vone)}}, \\
 \mbox{ and }
-r_i &\sim \text{Bernoulli}(\rho) \\
+r_i &\sim \text{Bernoulli}(\rho), 1 \leq i \leq n \\
 \end{array}
 $$
 
@@ -129,9 +139,11 @@ $$
 \begin{array}{rl}
 \log{p(\mSigma_{\vu \vu})} &= \text{Inverse Wishart}(\mPsi, v),\\
 p(\rho) &\propto 1 \\
-\mbox{ and } \vnu|\sigma_\vu^2 &\sim \mbox{N}(\vzero, \sigma_\vu^2). \\
+\mbox{ and } \vnu|\sigma_\vu^2 &\sim \mbox{N}(\vzero, \sigma_\vu^2 \mI)\\
 \end{array}
 $$
+
+where $\mX$ is $n \times p$, $\mZ$ is $n \times mb$ and $\mSigma_{\vu \vu}$ and $\mPsi$ are $b \times b$.
 
 \subsection{Approximation}
 Let $\vr_0 = \{ r_i : y_i = 0 \}$.
@@ -161,7 +173,7 @@ q(\vr) &\propto \exp \left [ \bE_{-q(\vr)}\vy^\top\mR(\mC\vmu) - \vr^\top\exp{(\
 \end{array}
 $$
 
-where $\mD = \left[ (\mPsi + \sum_{i=1}^m \vmu_i \vmu_i^\top + \mLambda_{\vu_i\vu_i}) / (v - d - 1) \right]^{-1}$. 
+where $\mD = \left[ (\mPsi + \sum_{i=1}^m \vmu_i \vmu_i^\top + \mLambda_{\vu_i\vu_i}) / (v - p - 1) \right]^{-1}$. 
 
 This is close in form to a Poisson regression model. Poisson regression models with normal priors have no
 closed form for their mean field updates due to non- conjugacy, but can be fit using Gaussian Variational
@@ -239,10 +251,10 @@ Assuming $q(\vnu) \sim N(\vmu, \mLambda)$, the Gaussian variational lower bound 
 \ref{alg:algorithm_one} can be optimised using a variety of algorithms. The variational lower bound is not
 necessarily unimodal, leading to potential difficulty in optimising to the global maximum. However, for fixed
 $\vp$ and $\mSigma$, the variational lower bound is log-concave, and so standard optimisation methods such as
-L-BFGS-B work well. This led to an extremely accurate approximation of the true posterior at the expense of
-some additional computational effort.
+L-BFGS-B as described in, for example, \cite{Liu1989}, work well. This led to an extremely accurate
+approximation of the true posterior at the expense of some additional computational effort.
 
-\subsubsection{GVA, $mLambda = mR mR^top$}
+\subsubsection{GVA, ($\mLambda = \mR \mR^\top$)}
 
 The first variant of the Gaussian Variational Approximation algorithm optimises the Gaussian variational lower
 bound of the log likelihood with respect to $\vmu$ and the Cholesky decomposition $\mR$ of $\mLambda$, that
@@ -253,7 +265,7 @@ below and can be optimised with L-BFGS-B.
 % Detail the function and its derivatives
 \begin{align*}
 \log \underline{p}(\vmu, \mLambda; \vy) &= \quad \vy^\top\mP \mC \vmu - \vp^\top \exp(\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)) - \half \vmu^\top \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} + \log{|\mR|} \\
-&\quad - \frac{d}{2} \log{(2 \pi)} + \half \log{|\mSigma^{-1}|} + \frac{d}{2} \log{(2 \pi)} + \frac{d}{2} \\
+&\quad - \frac{p}{2} \log{(2 \pi)} + \half \log{|\mSigma^{-1}|} + \frac{p}{2} \log{(2 \pi)} + \frac{p}{2} \\
 \end{align*}
 
 using the derivatives
@@ -286,7 +298,7 @@ The Gaussian variational lower bound in this parameterisation is
 
 \begin{align*}
 \log \underline{p}(\vmu, \mLambda; \vy) &= \quad \vy\mP\mC \vmu - \vp^\top \exp(\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)) - \half \vmu^\top \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} \\
-&\quad- \frac{d}{2} \log{(2 \pi)} + \half \log{|\mSigma^{-1}|} + \frac{d}{2} \log{(2 \pi)} + \frac{d}{2} - \log{|\mR|}
+&\quad- \frac{p}{2} \log{(2 \pi)} + \half \log{|\mSigma^{-1}|} + \frac{p}{2} \log{(2 \pi)} + \frac{p}{2} - \log{|\mR|}
 \end{align*}
 
 The derivative with respect to $\vmu$ is the same as that in the GVA algorithm, but as the parameterisation of
@@ -336,16 +348,20 @@ given $\vy$, $\mC$ and $\vp$}
 The accuracy of each model fitting algorithm presented in Section \ref{sec:algorithms} was assessed by
 comparing the approximating distribution of each parameter with the posterior distribution of Monte Carlo
 Markov Chain samples of that parameter. 1 million Monte Carlo Markov Chain samples were generated using Stan.
-Random intercept, random slope and spline models were evaluated.
+The accuracy of examples of random intercept, random slope and spline models were evaluated using this method.
 
-A random intercept model was simulated with $\vbeta = (2, 1)^\top$, $\rho = 0.5$, $m = 20$, $n_i = 10$ and $b
-= 1$. The results are presented in Table \ref{tab:accuracy_int}.
+\subsection{Simulated data}
 
-A random slope model was simulated with $\vbeta = (2, 1)^\top$, $\rho = 0.5$, $m = 20$, $n_i = 10$ and $b =
-2$. The results are presented in Table \ref{tab:accuracy_slope}.
+For each of these simulations, the model using was as presented in Section \ref{sec:methodology}.
 
-A spline model was fit to a data set generated from the function $3 + 3 \sin{\pi x}$ on the interval $[-1,
-1]$. The resulting model fits are presented in Figure \ref{fig:spline}.
+\begin{enumerate}
+\item Random intercept model was simulated with $\vbeta = (2, 1)^\top$, $\rho = 0.5$, $m = 20$, $n_i = 10$ and
+$b = 1$. The results are presented in Table \ref{tab:accuracy_int}.
+\item Random slope model was simulated with $\vbeta = (2, 1)^\top$, $\rho = 0.5$, $m = 20$, $n_i = 10$ and $b
+= 2$. The results are presented in Table \ref{tab:accuracy_slope}.
+\item Spline model was fit to a data set generated from the function $3 + 3 \sin{(\pi x)}$ on the interval
+$[-1, 1]$. The resulting model fits are presented in Figure \ref{fig:spline}.
+\end{enumerate}
 
 The stability of the algorithms was confirmed by running them on 10,000 different data sets that were randomly
 generated after having initialised the random number generator with different seeds.
@@ -455,7 +471,10 @@ GVA FP & 992 \\
 \end{tabular}
 \end{table}
 
-\section{Application}\label{sec:application}
+\section{Application}
+\label{sec:application}
+
+% TODO: You need to describe the data set and the model.
 
 The GVA2 algorithm was used to fit a random intercept model to the Roaches data set provided by Andrew Gelman.
 The results are presented in Table \ref{tab:application_roaches}.
@@ -556,6 +575,9 @@ GVA FP & 4.83 s & 0.07 s \\
 \end{tabular}
 \end{table}
 
+\section{Discussion}
+
+
 \newpage
 \section{Appendix} 
 % TODO: Mean field updates?
@@ -581,6 +603,10 @@ T_3 &= - \vp^\top \log \vp - (\vone - \vp)^\top \log (\vone - \vp) - \log \Beta 
 $$
 
 with $\bE_q \big[ \log |\mSigma_{\vu \vu}| \big] = m \log 2 + \log \left | \Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu} \right | + \sum_{i=1}^m \Psi \left ( \frac{v - i + 1}{2} \right )$
+
+\subsection{Numerical stability of fitting algorithms with respect to starting point}
+
+% TODO: Generate images using local_solutions.R and place here
 
 \bibliographystyle{elsarticle-harv}
 \bibliography{Chapter_1_zero_inflated_models}
