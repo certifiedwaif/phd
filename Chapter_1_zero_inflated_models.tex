@@ -120,7 +120,7 @@ The $j$th predictor/response pair for the $i$th group is denoted by $(\vx_{ij}, 
 1 \leq i \leq m$, where the $\vx_{ij}$ are unrestricted, while the $\vy_{ij}$ are nonnegative integers.
 
 For each $1 \leq i \leq m$, define the $n_i \times 1$ vectors $\vy_{ij} = [\vy_{i 1}, \ldots, \vy_{i
-n_i}]^\top$ and $\vone_i = [1, \ldots, 1^\top$, where the first of these vectors is the response. It is
+n_i}]^\top$ and $\vone_i = [1, \ldots, 1]^\top$, where the first of these vectors is the response. It is
 reasonable to assume that the vectors $\vy_1, \ldots, \vy_m$ are independent of each other.
 
 Let $\mR = \diag{(\vr)}$, $\mC = [\mX \mZ]$ and $\vnu = [\vbeta^\top \vu^\top]^\top$. Consider the model
@@ -265,7 +265,7 @@ below and can be optimised with L-BFGS-B.
 % Detail the function and its derivatives
 \begin{align*}
 \log \underline{p}(\vmu, \mLambda; \vy) &= \quad \vy^\top\mP \mC \vmu - \vp^\top \exp(\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)) - \half \vmu^\top \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} + \log{|\mR|} \\
-&\quad - \frac{p}{2} \log{(2 \pi)} + \half \log{|\mSigma^{-1}|} + \frac{p}{2} \log{(2 \pi)} + \frac{p}{2} \\
+&\quad - \tfrac{p}{2} \log{(2 \pi)} + \half \log{|\mSigma^{-1}|} + \tfrac{p}{2} \log{(2 \pi)} + \tfrac{p}{2} \\
 \end{align*}
 
 using the derivatives
@@ -298,7 +298,7 @@ The Gaussian variational lower bound in this parameterisation is
 
 \begin{align*}
 \log \underline{p}(\vmu, \mLambda; \vy) &= \quad \vy\mP\mC \vmu - \vp^\top \exp(\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)) - \half \vmu^\top \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} \\
-&\quad- \frac{p}{2} \log{(2 \pi)} + \half \log{|\mSigma^{-1}|} + \frac{p}{2} \log{(2 \pi)} + \frac{p}{2} - \log{|\mR|}
+&\quad- \tfrac{p}{2} \log{(2 \pi)} + \half \log{|\mSigma^{-1}|} + \tfrac{p}{2} \log{(2 \pi)} + \tfrac{p}{2} - \log{|\mR|}
 \end{align*}
 
 The derivative with respect to $\vmu$ is the same as that in the GVA algorithm, but as the parameterisation of
