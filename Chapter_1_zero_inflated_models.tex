@@ -254,7 +254,7 @@ $\vp$ and $\mSigma$, the variational lower bound is log-concave, and so standard
 L-BFGS-B as described in, for example, \cite{Liu1989}, work well. This led to an extremely accurate
 approximation of the true posterior at the expense of some additional computational effort.
 
-\subsubsection{GVA, ($\mLambda = \mR \mR^\top$)}
+\subsubsection{GVA}
 
 The first variant of the Gaussian Variational Approximation algorithm optimises the Gaussian variational lower
 bound of the log likelihood with respect to $\vmu$ and the Cholesky decomposition $\mR$ of $\mLambda$, that
@@ -275,12 +275,12 @@ using the derivatives
 \frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda} &= \left [\mLambda^{-1} - \mP \mC^\top \exp(\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)) \mP \mC) - \mSigma^{-1} \right ] \mR.
 \end{align*}
 
-\subsubsection{GVA, $\mLambda = \left (\mR \mR^\top \right )^{-1}$}
+\subsubsection{GVA, new parameterisation}
 
 The second variant of the Gaussian Variational Approximation algorithm is similiar to the first, but instead
 of optimising the Gaussian variational lower bound with respect to $\vmu$ and the Cholesky factor $\mR$ of
 $\mLambda$, we instead optimise the Cholesky factor of the inverse of $\mLambda$ i.e. $\mLambda = (\mR
-\mR^\top)^{-1}$.
+\mR^\top)^{-1}$. This algorithm is henceforth referred to as GVA NP.
 
 This new choice of parameterisation allows us to calculate $\exp(\mC \vmu + \half \text{diag}(\mC \mLambda
 \mC^\top))$ and its derivatives by solving the linear system $\mR \va = \mC_{i}, i=1, \ldots, n$ for $\va$ and
@@ -388,7 +388,7 @@ results are presented in Figure \ref{fig:median_accuracy_intercept} and Figure
 \label{tab:accuracy_int}
 \begin{tabular}{|l|rrrr|}
 \hline
-& Laplace's Method & GVA $(\mLambda = \mR \mR^\top)$ & GVA2 $(\mLambda = (\mR \mR^\top)^{-1})$ & GVA FP\\
+& Laplace's Method & GVA $(\mLambda = \mR \mR^\top)$ & GVA NP $(\mLambda = (\mR \mR^\top)^{-1})$ & GVA FP\\
 \hline
 $\vbeta_1$ & $83\%$ & $91\%$ & $91\%$ & $91\%$ \\ 
 $\vbeta_2$ & $77\%$ & $99\%$ & $99\%$ & $99\%$ \\ 
@@ -425,7 +425,7 @@ $\rho$ &91\%&90\%&90\%&90\%\\
 % \hline
 % Laplace's Method & 0.969 \\
 % GVA & 0.969 \\
-% GVA2 & 0.969 \\
+% GVA NP & 0.969 \\
 % GVA NR & 0.969 \\
 % \hline
 % \end{tabular}
@@ -434,7 +434,7 @@ $\rho$ &91\%&90\%&90\%&90\%\\
 \begin{figure}
 \label{fig:spline}
 \caption{Comparison of VB and MCMC spline fits with the true function}
-\includegraphics[width=100mm, height=100mm]{code/results/accuracy_plots_spline_gva2.pdf}
+\includegraphics[width=100mm, height=100mm]{code/results/accuracy_plots_spline_GVA2.pdf}
 \end{figure}
 
 % Graphs - exactly what sort of graphs do we need?
@@ -463,7 +463,7 @@ Algorithm & Error count \\
 \hline
 Laplace's algorithm & 12 \\
 GVA & 1,771 \\
-GVA2 & 537 \\
+GVA NP & 537 \\
 GVA FP & 992 \\
 \hline
 \end{tabular}
@@ -474,8 +474,16 @@ GVA FP & 992 \\
 
 % TODO: You need to describe the data set and the model.
 
-The GVA2 algorithm was used to fit a random intercept model to the Roaches data set provided by Andrew Gelman.
-The results are presented in Table \ref{tab:application_roaches}.
+The model fitting was applied to the cockroach data set from \cite{Gelman2007} taken from a study on the
+effect of integrated pest management in controlling cockroach levels in urban apartments. The data set
+contains data on 160 treatment and 104 control apartments, along with the response $y_i$ in each apartment of
+the number of cockroaches caught in a set of traps. The apartments had the traps deployed for different
+numbers of days, $u_i$, which was handled by using a log offset \cite{Agresti2002}. The predictors in the data
+set included the pre-treatment roach level, a treatment indicator, the time of the observation and an
+indicator for whether the apartment is in a ``senior'' building restricted to the elderly.
+
+The GVA NP algorithm was used to fit a random intercept model to the Roaches data set provided by Andrew
+Gelman. The results are presented in Table \ref{tab:application_roaches}.
 
 %       lci  uci
 % 1  3.179 3.157 3.201
@@ -521,12 +529,12 @@ $\rho$ & 0.71 & 0.67 & 0.75 & 88\% \\
 	\caption{Accuracy graphs for roach model}
 	\label{fig:accuracy_roach}
 	\centering
-	% \includepdf[width=75mm,height=75mm,pages={1,2,3,16},nup=2x2]{code/results/accuracy_plots_application_gva2.pdf}
+	% \includepdf[width=75mm,height=75mm,pages={1,2,3,16},nup=2x2]{code/results/accuracy_plots_application_GVA2.pdf}
 	\begin{tabular}{@{}c@{\hspace{.5cm}}c@{}}
-		\includegraphics[page=1,width=.45\textwidth]{code/results/accuracy_plots_application_gva2.pdf} & 
-		\includegraphics[page=2,width=.45\textwidth]{code/results/accuracy_plots_application_gva2.pdf} \\[.5cm]
-		\includegraphics[page=3,width=.45\textwidth]{code/results/accuracy_plots_application_gva2.pdf} &
-		\includegraphics[page=16,width=.45\textwidth]{code/results/accuracy_plots_application_gva2.pdf} \\[.5cm]
+		\includegraphics[page=1,width=.45\textwidth]{code/results/accuracy_plots_application_GVA2.pdf} & 
+		\includegraphics[page=2,width=.45\textwidth]{code/results/accuracy_plots_application_GVA2.pdf} \\[.5cm]
+		\includegraphics[page=3,width=.45\textwidth]{code/results/accuracy_plots_application_GVA2.pdf} &
+		\includegraphics[page=16,width=.45\textwidth]{code/results/accuracy_plots_application_GVA2.pdf} \\[.5cm]
 	\end{tabular}
 \end{figure}
 
@@ -567,7 +575,7 @@ Algorithm & Mean (seconds) & Standard deviation (seconds) \\
 \hline
 Laplace's method & 18.79 s & 0.07 s \\
 GVA & 76.18 s & 1.24 s \\
-GVA2 & 27.55 s & 0.66 s \\
+GVA NP & 27.55 s & 0.66 s \\
 GVA FP & 4.83 s & 0.07 s \\
 \hline
 \end{tabular}
