@@ -21,7 +21,10 @@
 \begin{document}
 \maketitle
 
-Abstract:
+Abstract: A Variational Bayes approach using Gaussian Variational Approximation to zero-inflated Poisson
+regression models using the latent variable representation from \ldots is presented. We demonstrate on
+simulated and real datasets that our approach is flexible enough to handle random effects and  smoothing
+splines while remaining computationally efficient.
 
 Keywords: Approximate Bayesian inference ; mixed model ; Markov chain Monte Carlo ; Stan ; 
 					penalized splines .
@@ -50,8 +53,8 @@ models using a deterministic algorithm which converges much more quickly.
 
 We allow a flexible regression modelling approach by using a Gaussian Variational Approximation
 \cite{ormerod09} on the regression parameters to allow a non-conjugate Gaussian prior to be used, making the
-resulting Gaussian posterior on the regression parameters easy to interpret. We adopt a Mean Field Variational
-Bayes (VB) approach is used on the other parameters in the model.
+resulting Gaussian posterior of the regression parameters easy to interpret. We adopt a Mean Field Variational
+Bayes (VB) approach on the other parameters in the model to derive the rest of the approximation.
 
 In Section \ref{sec:methodology} we briefly introduce Variational Bayes methodogy. In Section
 \ref{sec:model_and_data} we define our model and provide a framework for our approach incorporating regression
@@ -59,7 +62,7 @@ modelling and random effects. In Section \ref{sec:algorithms} we present algorit
 In Section \ref{sec:results} we perform numerical experiments on simulated data which show how our approach
 offers computational advantages over existing approaches. In Section \ref{sec:application} we show an
 application of our method to physical activity data. An appending contains details of our variational lower
-bound derivation.
+bound derivation. Finally, in Section \ref{sec:discussion} we conclude with a discussion of the results.
 
 \section{Methodology}
 \label{sec:methodology}
@@ -363,7 +366,7 @@ The accuracy of examples of random intercept, random slope and spline models wer
 
 \subsection{Simulated data}
 
-For each of these simulations, the model using was as presented in Section \ref{sec:methodology}.
+For each of these simulations, the model is as presented in Section \ref{sec:methodology}.
 
 Several common application scenarios were simulated and their accuracy evaluated. A random intercept model was
 simulated with $\vbeta = (2, 1)^\top$, $\rho = 0.5$, $m = 20$, $n_i = 10$ and $b = 1$. The results are
@@ -372,8 +375,8 @@ $\rho = 0.5$, $m = 20$, $n_i = 10$ and $b = 2$. The results are presented in Tab
 Spline model was fit to a data set generated from the function $3 + 3 \sin{(\pi x)}$ on the interval $[-1,
 1]$. The resulting model fits are presented in Figure \ref{fig:spline}.
 
-The stability of the algorithms was confirmed by running them on 10,000 different data sets that were randomly
-generated after having initialised the random number generator with different seeds.
+% The stability of the algorithms was confirmed by running them on 10,000 different data sets that were randomly
+% generated after having initialised the random number generator with different seeds.
 
 Median accuracy of the algorithms was assessed by running them on 100 randomly generated data sets. The
 results are presented in Figure \ref{fig:median_accuracy_intercept} and Figure
@@ -593,7 +596,7 @@ GVA FP & 4.83 s & 0.07 s \\
 \end{table}
 
 \section{Discussion}
-
+\label{sec:discussion}
 
 \newpage
 \section{Appendix} 
