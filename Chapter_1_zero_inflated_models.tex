@@ -199,7 +199,7 @@ optimal densities $q^*(\vmu, \mLambda)$, $q^*(\mSigma_{\vu \vu})$ and $q^*(\rho)
 \end{algorithmic}
 \end{algorithm}
 
-\section{Model fitting algorithms}
+\section{Numerical optimisation strategies}
 \label{sec:algorithms}
 
 In this section, we compare the accuracy, stability and speed of a number of algorithms for fitting the
@@ -354,14 +354,12 @@ The accuracy of examples of random intercept, random slope and spline models wer
 
 For each of these simulations, the model using was as presented in Section \ref{sec:methodology}.
 
-\begin{enumerate}
-\item Random intercept model was simulated with $\vbeta = (2, 1)^\top$, $\rho = 0.5$, $m = 20$, $n_i = 10$ and
-$b = 1$. The results are presented in Table \ref{tab:accuracy_int}.
-\item Random slope model was simulated with $\vbeta = (2, 1)^\top$, $\rho = 0.5$, $m = 20$, $n_i = 10$ and $b
-= 2$. The results are presented in Table \ref{tab:accuracy_slope}.
-\item Spline model was fit to a data set generated from the function $3 + 3 \sin{(\pi x)}$ on the interval
-$[-1, 1]$. The resulting model fits are presented in Figure \ref{fig:spline}.
-\end{enumerate}
+Several common application scenarios were simulated and their accuracy evaluated. A random intercept model was
+simulated with $\vbeta = (2, 1)^\top$, $\rho = 0.5$, $m = 20$, $n_i = 10$ and $b = 1$. The results are
+presented in Table \ref{tab:accuracy_int}. A random slope model was simulated with $\vbeta = (2, 1)^\top$,
+$\rho = 0.5$, $m = 20$, $n_i = 10$ and $b = 2$. The results are presented in Table \ref{tab:accuracy_slope}.
+Spline model was fit to a data set generated from the function $3 + 3 \sin{(\pi x)}$ on the interval $[-1,
+1]$. The resulting model fits are presented in Figure \ref{fig:spline}.
 
 The stability of the algorithms was confirmed by running them on 10,000 different data sets that were randomly
 generated after having initialised the random number generator with different seeds.
@@ -395,7 +393,7 @@ results are presented in Figure \ref{fig:median_accuracy_intercept} and Figure
 $\vbeta_1$ & $83\%$ & $91\%$ & $91\%$ & $91\%$ \\ 
 $\vbeta_2$ & $77\%$ & $99\%$ & $99\%$ & $99\%$ \\ 
 Mean of $\vu$ & $81\%$ & $95\%$ & $95\%$ & $95\%$ \\
-$\sigma^2_{\vu_1}$ & $47\%$ & $47\%$ & $47\%$ & $47\%$ \\ 
+$\sigma^2_{\vu_1}$ & $63.0\%$ & $63.4\%$ & $63.4\%$ & $63.4\%$ \\ 
 $\rho$ & $98\%$ & $97\%$ & $97\%$ & $97\%$ \\ 
 \hline
 \end{tabular}
