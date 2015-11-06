@@ -1,0 +1,54 @@
+\documentclass{amsart}
+\title{Meeting with Dr John Ormerod - 05/11/2015}
+
+\input{Definitions.tex}
+
+\begin{document}
+
+\maketitle
+
+\begin{itemize}
+	\item Looked at Bayesian Inference exam
+	\item Writing, look at SVM paper, Rohde and Wand
+	\item Change GVA2 new parameterisation to GVA NP
+	\item latex2exp
+	\item SN - Skew normals
+\end{itemize}
+
+\section{Skew normal idea}
+
+\subsection{Definitions}
+
+\begin{align*}
+\log p(\vy, \vtheta) & \\
+\log q(\vtheta) &= \log{[2 \phi(\vtheta;\vmu, \mSigma) \Phi(\alpha^\top(\vtheta - \vmu))]} \\
+\zeta_k(x) & = \frac{\partial^k \log \phi(x)}{\partial x^k} \\
+\kappa &= \alpha^\top(\vtheta - \vmu) \\
+g & = -\mSigma^{-1} (\vtheta - \vmu) + \zeta_1(\kappa) \alpha \\
+H & = -\mSigma^{-1} + \zeta_2(\kappa) \alpha \alpha^\top \\
+r_{ijk} & = \zeta_3(\kappa) \alpha_i \alpha_j \alpha_k, d_1 = \sqrt[3]{\frac{d_{111}}{\zeta_3(\kappa)}} \\
+d_{111} &= \zeta_3 d_1 \\\
+d_{222} &= \zeta_3 d_2^3
+\end{align*}
+
+\begin{align*}
+\mSigma &= [-H + \zeta_2 \alpha \alpha^\top]^{-1} \\
+&= [-H]^{-1} - \frac{[-H]^{-1} \alpha \alpha^\top [-H]^{-1}}{1/\zeta_2 + \alpha^\top[-H]^{-1}\alpha} \\
+\end{align*}
+
+For brevity, $\mLambda \equiv [-H]^{-1}$.
+
+\begin{align*}
+(\vtheta - \vmu) &= -\mSigma + \zeta_1(\kappa) \mSigma \alpha \\
+&=-\mLambda + \frac{\mLambda \alpha \alpha^\top \mLambda g}{1/\zeta_2 + \alpha^\top \mLambda \top}
+	+ \zeta_1(\kappa) \mLambda \alpha
+	- \frac{\zeta_1{\kappa} \mLambda \alpha \alpha^\top \mLambda \alpha}{1/\zeta_2 + \alpha^\top\mLambda\alpha}
+\end{align*}
+
+Now, pre-multiply by $\kappa$
+
+% TODO - fill this in
+
+This reduces the dimension of the skew parameters to 1, via $\kappa$
+
+\end{document}
