@@ -43,11 +43,16 @@ For brevity, $\mLambda \equiv [-H]^{-1}$.
 &=-\mLambda + \frac{\mLambda \alpha \alpha^\top \mLambda g}{1/\zeta_2 + \alpha^\top \mLambda \top}
 	+ \zeta_1(\kappa) \mLambda \alpha
 	- \frac{\zeta_1{\kappa} \mLambda \alpha \alpha^\top \mLambda \alpha}{1/\zeta_2 + \alpha^\top\mLambda\alpha}
+	\text{ via the Sherman-Morrison-Woodbury formula}
 \end{align*}
 
 Now, pre-multiply by $\kappa$
 
 % TODO - fill this in
+\begin{align*}
+\kappa = \alpha^\top(\vtheta - \vmu) &= -\alpha^\top \mSigma g + \zeta_1(\kappa) \alpha^\top \mSigma \alpha \\
+&= \frac{f^\top \mLambda g}{\zeta_3^{1/3}} + \frac{f^\top \mLambda f f^\top \mLambda g / \zeta_3}{1 / \zeta_2 + f^\top \mLambda f / \zeta_3^{2 / 3}} + \frac{\zeta_1(\kappa) f^\top \mLambda f}{\zeta_3^{2 / 3}} - \frac{\zeta_1(\kappa) f^\top \mLambda f \frac{f^\top \mLambda f}{\zeta_3^{4 / 3}}}{1 / \zeta_2 + \frac{f^\top \mLambda f}{\zeta_3^{2/3}}}
+\end{align*}
 
 This reduces the dimension of the skew parameters to 1, via $\kappa$
 
