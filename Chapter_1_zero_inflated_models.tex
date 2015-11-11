@@ -40,20 +40,29 @@ models have been used for many applications, including defects in manufacturing 
 horticulture in \cite{BIOM:BIOM1030} and \cite{Hall2000}, length of stay data from hospital admissions in
 \cite{BIMJ:BIMJ200390024}, psychology in \cite{JOFP:rethink}, pharmaceutical studies in \cite{Min01042005},
 traffic accidents on roadways in \cite{Shankar1997829} and longitudinal studies in
-\cite{LeeWangScottYauMcLachlan2006}. The strength of the approach derives from modelling the zero and non-zero
-data seperately.
+\cite{LeeWangScottYauMcLachlan2006}.
+
+The strength of the approach derives from modelling the zero and non-zero count data seperately as a mixture
+of distributions for the zero and non-zero components, allowing analysis of both the proportion of zeroes in
+the data set and the conditions for the transition from zero to non-zero. When combined with a multivariate
+mixed model regression framework, an extremely rich class of models can be fit allowing a broad range of
+applications to be addressed. Often the transition from zero to non-zero has a direct interpretation in the
+area of application, and is interesting in its' own right. In the example application presented in this paper,
+the zero component represents an apartment completely free of roaches, while the non-zero component represents
+an apartment where roaches have been able to live and reproduce, possibly in spite of pest control treatment
+aimed at preventing them from doing so.
 
 In this paper, we build upon the earlier work on Bayesian zero-inflated models of \cite{Ghosh20061360} and
-\cite{VatsaWilson2014}. While simple forms of these models are easy to fit with maximum likelihood techniques,
-more general models incorporating random effects, splines and missing data typically have no closed form
-solutions.
+\cite{VatsaWilson2014}. While simple forms of these models are easy to fit with standard maximum likelihood
+techniques, more general models incorporating random effects, splines and missing data typically have no
+closed form solutions and hence present a greater computational challenge to fit.
 
 Fitting these models is typically done with Monte Carlo Markov Chain techniques, but these can be slow and
 prone to convergence problems. We build upon a latent variable representation of these models, and to allow a
 tractable Variational Bayes approximation to be derived. This allows us to fit close approximations to these
 models using a deterministic algorithm which converges much more quickly.
 
-We allow a flexible regression modelling approach by using a Gaussian Variational Approximation
+We allow a flexible regression modelling approach by using a Gaussian Variational Approximation as defined in
 \cite{ormerod09} on the regression parameters to allow a non-conjugate Gaussian prior to be used, making the
 resulting Gaussian posterior of the regression parameters easy to interpret. We adopt a Mean Field Variational
 Bayes (VB) approach on the other parameters in the model to derive the rest of the approximation.
