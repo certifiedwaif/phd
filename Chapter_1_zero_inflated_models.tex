@@ -67,13 +67,17 @@ We allow a flexible regression modelling approach by using a Gaussian Variationa
 resulting Gaussian posterior of the regression parameters easy to interpret. We adopt a Mean Field Variational
 Bayes (VB) approach on the other parameters in the model to derive the rest of the approximation.
 
-In Section \ref{sec:methodology} we briefly introduce Variational Bayes methodogy. In Section
-\ref{sec:model_and_data} we define our model and provide a framework for our approach incorporating regression
-modelling and random effects. In Section \ref{sec:algorithms} we present algorithms for fitting these models.
-In Section \ref{sec:results} we perform numerical experiments on simulated data which show how our approach
-offers computational advantages over existing approaches. In Section \ref{sec:application} we show an
-application of our method to physical activity data. An appending contains details of our variational lower
-bound derivation. Finally, in Section \ref{sec:discussion} we conclude with a discussion of the results.
+The focus of this paper is on developing a method of fitting flexible ZIP regression models accurately, and
+showing the advantages of our method to previously presented methods. In Section \ref{sec:methodology} we
+briefly introduce Variational Bayes methodogy. In Section \ref{sec:model_and_data} we define our model and
+provide a framework for our approach incorporating regression modelling and random effects. In Section
+\ref{sec:algorithms} we present algorithms for fitting these models, along with a new parameterisation which
+offers substantial advantages in accuracy, numerical stability and computational speed. In Section
+\ref{sec:results} we perform numerical experiments on simulated data which show how our approach offers
+computational advantages over existing approaches. In Section \ref{sec:application} we show an application of
+our method to a multi-level longitudinal study of pest control in apartments. Finally, in Section
+\ref{sec:discussion} we conclude with a discussion of the results. An appendix contains details of the
+derivation of the variational lower bound for our model.
 
 \section{Methodology}
 \label{sec:methodology}
@@ -228,7 +232,7 @@ optimal densities $q^*(\vmu, \mLambda)$, $q^*(\mSigma_{\vu \vu})$ and $q^*(\rho)
 \label{sec:algorithms}
 
 In this section, we compare the accuracy, stability and speed of a number of algorithms for fitting the
-variational approximation to our model.
+Gaussian component of our model.
 
 \subsection{Laplace-Variational Approximation}
 
@@ -589,7 +593,11 @@ $\rho$ & 0.71 & 0.67 & 0.75 & 88\% \\
 
 To assess the speed of each approach, a test case was constructed of a random slope model with $m=50$ groups,
 each containing $n_i = 100$ individuals. A model was then fit to this data set ten times using each algorithm,
-and the results averaged. They are presented in Table \ref{tab:application_slope_speed}.
+and the results averaged. They are presented in Table \ref{tab:application_slope_speed}. It should be noted
+that the speed of the GVA and GVA FP algorithms was impaired by their implementation in R using the
+\texttt{optim()} function, which makes many function calls during its' execution. If the same algorithms were
+re-implemented in another language with a vectorising compiler and modern well-implemented numerical linear
+algebra libraries such as C++, the performance would be substantially improved.
 
 \begin{table}
 \caption{Table of results - Speed}
