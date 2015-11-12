@@ -89,32 +89,13 @@ approximation to the full Bayesian model.
 \subsection{Variational Bayesian inference}
 
 Semiparametric mean field Variational Bayes is an approximate Bayesian inference method as detailed in
-\cite{ormerod10} and \cite{RohdeWand2015}. The essential idea is that the log likelihood can be rewritten as
-
-\begin{align*}
-\log p(\vy) &= \log p(\vy) \int q(\vtheta) d \vtheta \\
-&= \int q(\vtheta) \log \{ \frac{p(\vtheta, \vy) / q(\vtheta)}{p(\vtheta | \vy) / q(\vtheta)} \} d \vtheta \\
-&= \int q(\vtheta) \log \frac{p(\vy, \vtheta)}{q(\vtheta)} d \vtheta +
-	 \text{KL} \{ {q(\vtheta) || p(\vtheta|\vy)} \} % \\
-%& \geq \int q(\vtheta) \log \frac{p(\vy, \vtheta)}{q(\vtheta)} d \vtheta
-\end{align*}
-
-which is the sum of the the KL divergence between the true posterior and an approximation and a variational
-lower bound.
+\cite{ormerod10} and \cite{RohdeWand2015}.
 
 The approximation is fit by iteratively minimising the Kullback-Leibler divergence between the true posterior
-and an approximating distribution, and thus maximising the variational lower bound as defined in Equation
-\ref{eq:lower_bound_defn}.
-
-\begin{equation}
-\label{eq:lower_bound_defn}
-\int q(\vtheta) \log \frac{p(\vy, \vtheta)}{q(\vtheta)} d \vtheta
-\end{equation}
-
-Thus the optimal approximation $q^*(\vtheta)$ is
+and an approximating distribution. Thus the optimal approximation $q^*(\vtheta)$ is
 
 $$
-q^*(\vtheta) = \argmin_{q \in Q} \text{KL} \{ {q(\vtheta) || p(\vtheta|\vy)} \}.
+q^*(\vtheta) = \argmin_{\vxi \in \Xi} \text{KL} \{ {q(\vtheta|\vxi) || p(\vtheta|\vy)} \}.
 $$
 
 A common approach is to assume an approximation in a factorised form
@@ -129,6 +110,12 @@ $$q_i^*(\theta_i) \propto \exp{\{ \bE_{-q(\theta_i)} \log p(\vy, \vtheta) \}}$$
 
 This is done for each parameter in the model in turn until the variational lower bound's increase is
 negligible and convergence is achieved.
+
+This approach works well for classes of models where all of the parameters are conjugate. For more general
+classes of models, mean field updates are not analytically tractable and general gradient-based optimisation
+methods must be used, as for the Gaussian Variational Approximation (see \cite{ormerod09}) used in this paper.
+These methods are generally difficult to apply in practice, as the problems can involve the optimisation of
+many parameters over high-dimensional, constrained spaces whose constraints cannot be simply expressed.
 
 \section{The zero-inflated Poisson regression model}
 \label{sec:model_and_data}
@@ -245,13 +232,11 @@ distributions are not as accurate as those produced by the other algorithms cons
 % Detail the function and its derivatives
 
 Taylor expanding the full log likelihood once around the mode yields the following function
-
 \begin{align*}
 \log \underline{p}(\vmu, \mLambda; \vy) = \vy^\top\mP\mC\vmu - \vp^\top\exp \left (\mC \vmu \right ) - \half \vmu^\top \mSigma^{-1} \vmu.
 \end{align*}
 
 This can be optimised using a Newton-Raphson style algorithm where
-
 \begin{align*}
 \frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \vmu} &\approx \mP \mC (\vy - \exp{(\mC \vmu)}) - \mSigma^{-1} \vmu \text{ and} \\
 \frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \mLambda} &\approx - \mC^\top \text{diag}(\vp e^{(\mC \vmu)}) \mC - \mSigma^{-1}.
@@ -290,15 +275,13 @@ bound of the log likelihood with respect to $\vmu$ and the Cholesky decompositio
 is, $\mLambda = \mR \mR^\top$. This algorithm trades the computational complexity of numerically evaluating an
 integral for greatly increased accuracy in the approximating posterior distribution. The resulting function is
 below and can be optimised with L-BFGS-B.
-
 % Detail the function and its derivatives
 \begin{align*}
-\log \underline{p}(\vmu, \mLambda; \vy) &= \quad \vy^\top\mP \mC \vmu - \vp^\top \exp(\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)) - \half \vmu^\top \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} + \log{|\mR|} \\
+\log \underline{p}(\vmu, \mLambda; \vy) &= \quad \vy^\top\mP \mC \vmu - \vp^\top \exp[\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)] - \half \vmu^\top \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} + \log{|\mR|} \\
 &\quad - \tfrac{p}{2} \log{(2 \pi)} + \half \log{|\mSigma^{-1}|} + \tfrac{p}{2} \log{(2 \pi)} + \tfrac{p}{2} \\
 \end{align*}
 
 using the derivatives
-
 \begin{align*}
 \frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu} &= \mP \mC (\vy - \mC^\top \exp(\mC \vmu + \half \text{diag}{(\mC \mLambda \mC^\top)})) - \mSigma^{-1} \vmu \text{ and}\\
 \frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda} &= \left [\mLambda^{-1} - \mP \mC^\top \exp(\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)) \mP \mC) - \mSigma^{-1} \right ] \mR.
@@ -321,10 +304,10 @@ to the random effects in $\mZ$ induce sparsity in the Cholesky factor $\mR$ of $
 Gaussian $q(\vnu) \sim N(\vmu, \mLambda)$ can be optimised over a space of dimension $\half p (p + 1) + pq +
 \half q (q + 1)$ rather than dimension $\half (p + mq) (p + mq + 1)$ as in the dense parameterisation. This
 leads to subtantial performance gains when m is large, as is typically the case in problems of practical
-importance such as clinical trials or the application presented in Section \ref{sec:application}.
+importance such as longitudinal or clinical trials or the application presented in Section
+\ref{sec:application}.
 
 The Gaussian variational lower bound in this parameterisation is
-
 \begin{align*}
 \log \underline{p}(\vmu, \mLambda; \vy) &= \quad \vy\mP\mC \vmu - \vp^\top \exp(\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)) - \half \vmu^\top \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} \\
 &\quad- \tfrac{p}{2} \log{(2 \pi)} + \half \log{|\mSigma^{-1}|} + \tfrac{p}{2} \log{(2 \pi)} + \tfrac{p}{2} - \log{|\mR|}
@@ -332,7 +315,6 @@ The Gaussian variational lower bound in this parameterisation is
 
 The derivative with respect to $\vmu$ is the same as that in the GVA algorithm, but as the parameterisation of
 $\mLambda$ has changed, the  derivative with respect to $\mLambda$ becomes
-
 \begin{align*}
 \frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda}
 &= \hphantom{-}(\mLambda^{-1} + \mH)(-\mLambda \mR \mLambda) \\
@@ -349,7 +331,6 @@ where $\mH = (\mP \mC)^\top \text{diag}(\exp(\mC \vmu + \half \mC \mLambda \mC^\
 
 This variant of the algorithm uses Newton-Raphson-like fixed point updates on the Gaussian variational lower
 bound. This algorithm is fast, but unstable. The steps are presented in Algorithm \ref{alg:algorithm_nr} where
-
 \begin{align*}
 \frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu} &= \quad \mC^\top\vp \left [\vy - \mC\exp(\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)) \right ] - \mSigma^{-1} \vmu \text{ and}\\
 \frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda} &= -\mC^\top \text{diag}(\vp^\top \exp(\mC \vmu +\half \text{diag}(\mC \mLambda \mC^\top))) - \mSigma^{-1}.
@@ -616,6 +597,11 @@ GVA FP & 4.83 s & 0.07 s \\
 
 \section{Discussion}
 \label{sec:discussion}
+\begin{itemize}
+\item Numerical issues
+\item What worked well
+\item What didn't
+\end{itemize}
 
 \newpage
 \section{Appendix} 
