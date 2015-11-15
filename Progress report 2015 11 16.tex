@@ -16,33 +16,78 @@
 
 \begin{document}
 \begin{frame}
-\maketitle
+	\maketitle
 \end{frame}
 
 \begin{frame}{Median accuracy graph}
-\includegraphics[width=90mm, height=90mm]{code/results/median_accuracy_combined_slope.pdf}
+	\includegraphics[width=90mm, height=90mm]{code/results/median_accuracy_combined_slope.pdf}
 \end{frame}
 
-Progress update
-Numerical work mostly done
-	Median accuracy
-	Combined accuracy graph
+\begin{frame}{Accuracy graphs for the roach model}
+	\begin{figure}
+		\centering
+		\begin{tabular}{@{}c@{\hspace{.4cm}}c@{}}
+			\includegraphics[page=1,width=.4\textwidth]{code/results/accuracy_plots_application_GVA2.pdf} & 
+			\includegraphics[page=2,width=.4\textwidth]{code/results/accuracy_plots_application_GVA2.pdf} \\[.4cm]
+			\includegraphics[page=3,width=.4\textwidth]{code/results/accuracy_plots_application_GVA2.pdf} &
+			\includegraphics[page=16,width=.4\textwidth]{code/results/accuracy_plots_application_GVA2.pdf} \\[.4cm]
+		\end{tabular}
+	\end{figure}
+\end{frame}
 
-Writing
-	Paper is taking shape
-	Writing in LaTeX with Sublime Text - let's me focus on the text
-	Reference managers like Mendeley speed things up
+\begin{frame}{Writing}
+	\begin{itemize}
+		\item My first paper is taking shape
+		\item My introduction is still too short, so I'll be working on that
+		\item Writing in LaTeX with Sublime Text - let's me focus on the text
+		\item Reference managers like Mendeley speed things up
+		\item Rediscovering my inner pedant
+	\end{itemize}
+\end{frame}
 
-Why did it take so long?
-	Numerical issues
-	Speed rabbit hole
-	Rusty
-	Programming takes forever
+\begin{frame}{Why did it take so long?}
+	\begin{itemize}
+		\item Rusty - I'd been away from mathematical statistics for four years and had a lot of things to
+					relearn
+		\item A lot of new things to learn - I was new to variational approximations
+		\item Numerical issues, primarily overflows
+		\item Speed rabbit hole
+		\item Programming takes forever
+		\item Testing. So much testing.
+	\end{itemize}
+\end{frame}
 
-Future
-	Model selection
-	Skew normals
-	More C++
-	GPUs
+\begin{frame}{What worked?}
+	\begin{itemize}
+		\item git
+		\item C++
+		\item Command line programs/repeatibiliity
+		\item Reading books on numerical analysis/numerical linear algebra to figure out what was going on
+		\item Using a programmer's text editor for my R coding - I need to be able to see all the code. I like
+					Sublime Text, but I'd also recommend Vim and Emacs
+		\item Trello
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{What didn't?}
+	\begin{itemize}
+		\item I've developed a love/hate relationship with R. Great for interactive data analysis, or
+					prototyping an idea
+		\item Not listening to my supervisor enough. But that never works
+		\item Putting off learning things. You'll just have to learn them later anyway
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Future}
+	\begin{itemize}
+		\item Package - seperate fitting code and testing code
+		\item Model selection
+		\item Skew normals
+		\item Logistic regression
+		\item More C++
+		\item GPUs
+		\item Quite a lot of reading and writing
+	\end{itemize}
+\end{frame}
 
 \end{document}
