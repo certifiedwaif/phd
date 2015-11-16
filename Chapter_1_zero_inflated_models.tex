@@ -6,7 +6,7 @@
 \addtolength{\textheight}{1.3in}%
 \addtolength{\topmargin}{-.8in}%
 \addtolength{\marginparpush}{-.75in}%
-\setlength\parindent{0pt}
+% \setlength\parindent{0pt}
 % \setlength{\bibsep}{0pt plus 0.3ex}
 
 \usepackage[authoryear]{natbib}
@@ -58,7 +58,7 @@ techniques, more general models incorporating random effects, splines and missin
 closed form solutions and hence present a greater computational challenge to fit.
 
 Fitting these models is typically done with Monte Carlo Markov Chain techniques, but these can be slow and
-prone to convergence problems. We build upon a latent variable representation of these models, and to allow a
+prone to convergence problems. We build upon a latent variable representation of these models to allow a
 tractable Variational Bayes approximation to be derived. This allows us to fit close approximations to these
 models using a deterministic algorithm which converges much more quickly.
 
@@ -547,30 +547,6 @@ $\rho$ & 0.71 & 0.67 & 0.75 & 88\% \\
 		\includegraphics[page=16,width=.45\textwidth]{code/results/accuracy_plots_application_GVA2.pdf} \\[.5cm]
 	\end{tabular}
 \end{figure}
-
-% \begin{figure}
-% \caption{Accuracy graph for fixed intercept of roach model}
-% \label{fig:accuracy_roach_intercept}
-% \includegraphics[width=100mm, height=100mm]{code/results/application_fixed_intercept.pdf}
-% \end{figure}
-
-% \begin{figure}
-% \caption{Accuracy graph for fixed slope of roach model}
-% \label{fig:accuracy_roach_slope}
-% \includegraphics[width=100mm, height=100mm]{code/results/application_fixed_slope_1.pdf}
-% \end{figure}
-
-% \begin{figure}
-% \caption{Accuracy graph for $\sigma_u^2$ of roach model}
-% \label{fig:accuracy_roach_sigmau2}
-% \includegraphics[width=100mm, height=100mm]{code/results/application_fixed_slope_2.pdf}
-% \end{figure}
-
-% \begin{figure}
-% \caption{Accuracy graph for $\rho$ of roach model}
-% \label{fig:accuracy_roach_rho}
-% \includegraphics[width=100mm, height=100mm]{code/results/application_variance.pdf}
-% \end{figure}
 
 To assess the speed of each approach, a test case was constructed of a random slope model with $m=50$ groups,
 each containing $n_i = 100$ individuals. A model was then fit to this data set ten times using each algorithm,
