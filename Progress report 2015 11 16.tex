@@ -19,6 +19,14 @@
 	\maketitle
 \end{frame}
 
+\begin{frame}{Numerical experiments}
+	\begin{itemize}
+		\item The numerical experiments for the paper are mostly done
+		\item I don't believe it either
+		\item Still more to do in the future for my thesis, but that's a problem for future Mark to contend with
+	\end{itemize}
+\end{frame}
+
 \begin{frame}{Median accuracy graph}
 	\includegraphics[width=90mm, height=90mm]{code/results/median_accuracy_combined_slope.pdf}
 \end{frame}
@@ -48,39 +56,43 @@
 \begin{frame}{Why did it take so long?}
 	\begin{itemize}
 		\item Rusty - I'd been away from mathematical statistics for four years and had a lot of things to
-					relearn
-		\item A lot of new things to learn - I was new to variational approximations
+					re-learn
+		\item A lot of new things to learn as well - I was new to variational approximations
 		\item Numerical issues, primarily overflows
-		\item Speed rabbit hole
+		\item Speed rabbit hole - I now know a lot about R performance. But I'm not sure whether it was really
+					worth it
 		\item Programming takes forever
-		\item Testing. So much testing.
+		\item Testing. So much testing
 	\end{itemize}
 \end{frame}
 
-\begin{frame}{What worked?}
+\begin{frame}{What worked well?}
 	\begin{itemize}
-		\item git
-		\item C++
+		\item Trello/Getting Things Done
+		\item git/GitHub
+		\item I've developed a love/hate relationship with R. Great for prototyping a numerical idea
+		\item C++ for speeding up critical sections of code
 		\item Command line programs/repeatibiliity
 		\item Reading books on numerical analysis/numerical linear algebra to figure out what was going on
 		\item Using a programmer's text editor for my R coding - I need to be able to see all the code. I like
-					Sublime Text, but I'd also recommend Vim and Emacs
-		\item Trello
+					Sublime Text, but I'd also recommend Vim and Emacs. It's all about what works for you
 	\end{itemize}
 \end{frame}
 
-\begin{frame}{What didn't?}
+\begin{frame}{What didn't work well?}
 	\begin{itemize}
-		\item I've developed a love/hate relationship with R. Great for interactive data analysis, or
-					prototyping an idea
-		\item Not listening to my supervisor enough. But that never works
+		\item As I said, I've developed a love/hate relationship with R. Great for interactive data analysis, or
+					prototyping an idea. Frankly, not great for other things
+		\item Optimising the performance of R code is quite difficult, even for experienced R 
+					programmers who understand the underlying implementation quite well
+		\item I didn't listen to my supervisor enough. But that never works well
 		\item Putting off learning things. You'll just have to learn them later anyway
 	\end{itemize}
 \end{frame}
 
-\begin{frame}{Future}
+\begin{frame}{Future work}
 	\begin{itemize}
-		\item Package - seperate fitting code and testing code
+		\item Package the code - seperate fitting code and testing code
 		\item Model selection
 		\item Skew normals
 		\item Logistic regression
