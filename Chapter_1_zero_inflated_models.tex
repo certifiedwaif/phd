@@ -35,12 +35,13 @@ Keywords: Approximate Bayesian inference ; mixed model ; Markov chain Monte Carl
 \label{sec:introduction}
 
 Count data with a large number of zero counts arises in many areas of application, such as data arising from
-physical activity studies, insurance claims, hospital visits or defects in manufacturing processes. These
-models have been used for many applications, including defects in manufacturing in \cite{lambert1992},
-horticulture in \cite{BIOM:BIOM1030} and \cite{Hall2000}, length of stay data from hospital admissions in
-\cite{BIMJ:BIMJ200390024}, psychology in \cite{JOFP:rethink}, pharmaceutical studies in \cite{Min01042005},
-traffic accidents on roadways in \cite{Shankar1997829} and longitudinal studies in
-\cite{LeeWangScottYauMcLachlan2006}.
+physical activity studies, insurance claims, hospital visits or defects in manufacturing processes. Zero
+inflation is a frequent cause of overdispersion in Poisson data, and not accounting for the extra zeroes leads
+may lead to biased parameter estimates. These models have been used for many applications, including defects
+in manufacturing in \cite{lambert1992}, horticulture in \cite{BIOM:BIOM1030} and \cite{Hall2000}, length of
+stay data from hospital admissions in \cite{BIMJ:BIMJ200390024}, psychology in \cite{JOFP:rethink},
+pharmaceutical studies in \cite{Min01042005}, traffic accidents on roadways in \cite{Shankar1997829} and
+longitudinal studies in \cite{LeeWangScottYauMcLachlan2006}.
 
 The strength of the approach derives from modelling the zero and non-zero count data seperately as a mixture
 of distributions for the zero and non-zero components, allowing analysis of both the proportion of zeroes in
