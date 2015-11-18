@@ -6,6 +6,7 @@ library(rstan)
 library(optparse)
 library(mvtnorm)
 library(limma)
+library(latex2exp)
 
 # Andrew Gelman says that this magical line of code automatically makes Stan
 # run in parallel and cache compiled models.
@@ -183,7 +184,7 @@ calculate_accuracies <- function(test, mult, mcmc_samples, var_result, approxima
       vbeta_accuracy[i] <- calculate_accuracy(mcmc_samples$vbeta[,i], dnorm,
                                               var_result$vmu[i], sqrt(var_result$mLambda[i,i]))
       vbeta_means[i] <- mean(mcmc_samples$vbeta[, i])
-      title <- sprintf("%s vbeta[%d] accuracy: %2.0f%%", approximation, i, vbeta_accuracy[i])
+      title <- latex2exp(sprintf("%s $\\vectorfonttwo{ \\beta_%d}$ accuracy: %2.0f%%", approximation, i, vbeta_accuracy[i]))
       if (print_flag) print(title)
       if (plot_flag) accuracy_plot(title, mcmc_samples$vbeta[,i], dnorm,
                                    var_result$vmu[i], sqrt(var_result$mLambda[i,i]))
@@ -280,7 +281,10 @@ calculate_accuracies <- function(test, mult, mcmc_samples, var_result, approxima
     # sigma_vu <- sqrt(var_result$mPsi[i, i])
     sigma2_vu_accuracy[i] <- calculate_accuracy_normalised(sigma_u_inv[, i, i],
                                                function(x, ...) dchisq(x / sigma_vu, df = v, ...))
-    title <- sprintf("%s sigma2_u[%d] accuracy: %2.0f%%", approximation, i, sigma2_vu_accuracy[i])
+    title <- latex2exp(sprintf("%s $\\sigma^2_{u_%d}$ accuracy: %2.0f%%",
+                       approximation,
+                       i,
+                       sigma2_vu_accuracy[i]))
     if (print_flag) print(title)
     if (plot_flag) {
       accuracy_plot(title, sigma_u_inv[, i, i], function(x, ...) dchisq(x / sigma_vu, df = v, ...))
@@ -389,14 +393,10 @@ test_accuracies_intercept <- function(save=FALSE)
 test_accuracies_slope <- function(save=FALSE)
 {
   # Monte Carlo Markov Chains approximation
-  # 1 good
-  # 2, 3 bad - good with more samples
-  # 4 good
-  # 5 bad
   if (save) {
     seed <- 3
     set.seed(seed)
-    mult <- generate_slope_test_data(m=50, ni=100)
+    mult <- generate_slope_test_data(m=20, ni=10)
     result <-  mcmc(mult, iterations=3e5, warmup = 5e4)
     fit <- result$fit
     print(fit)
