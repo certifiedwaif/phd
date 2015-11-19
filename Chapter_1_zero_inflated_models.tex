@@ -68,18 +68,20 @@ We allow a flexible regression modelling approach by using a Gaussian Variationa
 resulting Gaussian posterior of the regression parameters easy to interpret. We adopt a Mean Field Variational
 Bayes (VB) approach on the other parameters in the model to derive the rest of the approximation.
 
-Maximise the variational lower bound with respect to $\vmu, \mLambda$, keeping $\vp, \mSigma, \rho$ fixed. The
-difficulty is in the maximisation of $\mLambda$ - the dimension of the covariance matrix is $p^2$, and the
-space of covariance matrices is constrained.
-Optimise Cholesky factor or Cholesky factor of inverse, ensuring symmetry.
-Use knowledge of the regression model to specify a sparse matrix structure, greatly reducing the 
-dimension of the problem.
-Parameterise diagonals with $\exp{(d_ii)} / \exp{(-d_ii)}$ to ensure unique positive definiteness.
-This parameterisation can lead to overflow, which we dealt with by thresholding.
-Over can lead to singular matrices when attempting to invert $\mLambda$. This problem was mitigated by 
-instead working with the Cholesky factorisation of $\mLambda^{-1}$, allowing us to solve rather than
-invert and multiply, which is also faster and more numerically stable.
-Different ways to calculate the gradient.
+We fit the Gaussian part of our approximation $q(\vbeta, \vu) \sim \N(\vmu, \mLambda)$ by maximising the
+variational lower bound with respect to $\vmu, \mLambda$, keeping $\vp, \mSigma, \rho$ fixed. The most
+challenging part of this process computationally is in the maximisation with respective to the covariance
+matrix $\mLambda$ as the dimension of the covariance matrix is $p^2$, and the space of covariance matrices is
+constrained to be positive semi-definite. We deal with this difficulty by optimising the variational lower
+bound with respect to the Cholesky factor $\mR$ of $\mLambda$ or of the inverse $\mLambda^{-1}$,
+parameterising the diagonals with $\exp{(d_{ii})}$ in the case of the normal parameterisation and
+$\exp{(-d_{ii})}$ in the case of the inverse parameterisation to ensure symmetry, uniqueness and positive
+definiteness. This parameterisation can lead to numeric overflow, which we dealt with by thresholding the
+values of the  diagonals. Overflow can lead to singular matrices when attempting to invert $\mLambda$. This
+problem was mitigated by  instead working with the Cholesky factorisation of $\mLambda^{-1}$, allowing us to
+solve rather than invert and multiply, which is also faster and more numerically stable. We use knowledge of
+the regression model we are fitting to specify a sparse matrix structure, greatly  reducing the dimension of
+the problem and thus improving both computational speed and numeric accuracy.
 
 The focus of this paper is on developing a method of fitting flexible ZIP regression models accurately, and
 showing the advantages of our method to previously presented methods. In Section \ref{sec:methodology} we
