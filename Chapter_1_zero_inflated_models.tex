@@ -70,18 +70,18 @@ Bayes (VB) approach on the other parameters in the model to derive the rest of t
 
 We fit the Gaussian part of our approximation $q(\vbeta, \vu) \sim \N(\vmu, \mLambda)$ by maximising the
 variational lower bound with respect to $\vmu, \mLambda$, keeping $\vp, \mSigma, \rho$ fixed. The most
-challenging part of this process computationally is in the maximisation with respective to the covariance
-matrix $\mLambda$ as the dimension of the covariance matrix is $p^2$, and the space of covariance matrices is
-constrained to be positive semi-definite. We deal with this difficulty by optimising the variational lower
-bound with respect to the Cholesky factor $\mR$ of $\mLambda$ or of the inverse $\mLambda^{-1}$,
-parameterising the diagonals with $\exp{(d_{ii})}$ in the case of the normal parameterisation and
-$\exp{(-d_{ii})}$ in the case of the inverse parameterisation to ensure symmetry, uniqueness and positive
-definiteness. This parameterisation can lead to numeric overflow, which we dealt with by thresholding the
-values of the  diagonals. Overflow can lead to singular matrices when attempting to invert $\mLambda$. This
-problem was mitigated by  instead working with the Cholesky factorisation of $\mLambda^{-1}$, allowing us to
-solve rather than invert and multiply, which is also faster and more numerically stable. We use knowledge of
-the regression model we are fitting to specify a sparse matrix structure, greatly  reducing the dimension of
-the problem and thus improving both computational speed and numeric accuracy.
+challenging part of this process computationally is in the maximisation of the variational lower bound with
+respective to the covariance matrix $\mLambda$ as the dimension of the covariance matrix is $p^2$, and the
+space of covariance matrices is constrained to be positive semi-definite. We deal with this difficulty by
+optimising the variational lower bound with respect to the Cholesky factor $\mR$ of $\mLambda$ or of the
+inverse $\mLambda^{-1}$, parameterising the diagonals with $\exp{(d_{ii})}$ in the case of the normal
+parameterisation and $\exp{(-d_{ii})}$ in the case of the inverse parameterisation to ensure symmetry,
+uniqueness and positive definiteness. This parameterisation can lead to numeric overflow, which we dealt with
+by thresholding the values of the  diagonals. Overflow can lead to singular matrices when attempting to invert
+$\mLambda$. This problem was mitigated by  instead working with the Cholesky factorisation of $\mLambda^{-1}$,
+allowing us to solve rather than invert and multiply, which is also faster and more numerically stable. We use
+knowledge of the regression model we are fitting to specify a sparse matrix structure, greatly  reducing the
+dimension of the problem and thus improving both computational speed and numeric accuracy.
 
 The focus of this paper is on developing a method of fitting flexible ZIP regression models accurately, and
 showing the advantages of our method to previously presented methods. In Section \ref{sec:methodology} we
@@ -591,12 +591,17 @@ GVA FP & 4.83 s & 0.07 s \\
 \item What didn't
 \end{itemize}
 
-MFVB parameterisation for ZIP models in considerable generality
+MFVB parameterisation for ZIP models in considerable generality We have described a Variational Bayes
+approximation to Zero-Inflated Poisson regression models which allows such models to be fit with considerable
+generality. We have also devised and extensively tested a number of alternative approaches for fitting such
+models, and extended one of these alternative approaches with a new parameterisation. Using MCMC methods as
+the gold standard to test against, we have assessed the accuracy and computational speed of these algoritms.
+
+Variational Bayes allow estimation of Bayesian ZIP models in a fraction of the time taken to fit the same
+model using even the best MCMC methods available, with only a small loss of accuracy.
 
 New parameterisation for Gaussian Variational Approximation, with the significant advantages of sparsity,
-improved stability and speed, and no loss of accuracy
-
-Substantially faster than MCMC for the same models
+improved stability and speed, and no loss of accuracy.
 
 Using the exponential function to parameterise the main diagonal coupled with L-BFGS-B's unconstrained line
 search and optim()'s lack of robustness to infinities lead to many overflow problems which may have been
