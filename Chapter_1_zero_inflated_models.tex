@@ -157,23 +157,19 @@ reasonable to assume that the vectors $\vy_1, \ldots, \vy_m$ are independent of 
 
 Let $\mR = \diag{(\vr)}$, $\mC = [\mX, \mZ]$ and $\vnu = [\vbeta^\top, \vu^\top]^\top$. Consider the model
 
-$$
-\begin{array}{rl}
+\begin{align*}
 \log{p(\vy|\vr, \vbeta, \vu)} &= \vy^\top \mR (\mC\vnu) - \vr^\top \exp{(\mC\vnu)} - \vone^\top \log{\Gamma{(\vy + \vone)}}, \\
 \mbox{ and }
-r_i &\sim \text{Bernoulli}(\rho), 1 \leq i \leq n \\
-\end{array}
-$$
+r_i &\sim \text{Bernoulli}(\rho), 1 \leq i \leq n
+\end{align*}
 
 with priors
 
-$$ 
-\begin{array}{rl}
+\begin{align*}
 \log{p(\mSigma_{\vu \vu})} &= \text{Inverse Wishart}(\mPsi, v),\\
 p(\rho) &\propto 1 \\
-\mbox{ and } \vnu|\sigma_\vu^2 &\sim \mbox{N}(\vzero, \sigma_\vu^2 \mI)\\
-\end{array}
-$$
+\mbox{ and } \vnu|\sigma_\vu^2 &\sim \mbox{N}(\vzero, \sigma_\vu^2 \mI)
+\end{align*}
 
 where $\mX$ is $n \times p$, $\mZ$ is $n \times mb$ and $\mSigma_{\vu \vu}$ and $\mPsi$ are $b \times b$.
 
@@ -594,6 +590,24 @@ GVA FP & 4.83 s & 0.07 s \\
 \item What worked well
 \item What didn't
 \end{itemize}
+
+MFVB parameterisation for ZIP models in considerable generality
+
+New parameterisation for Gaussian Variational Approximation, with the significant advantages of sparsity,
+improved stability and speed, and no loss of accuracy
+
+Substantially faster than MCMC for the same models
+
+Using the exponential function to parameterise the main diagonal coupled with L-BFGS-B's unconstrained line
+search and optim()'s lack of robustness to infinities lead to many overflow problems which may have been
+lessened or dealt with entirely by using a function with a less aggressive growth rate, such as a piecewise
+quadratic.
+
+Sensitivity to starting point.
+
+Final result was good. Application to roach model did quite well
+
+Difficulty in optimising performance in R, C++ or better use of libraries is the solution.
 
 \newpage
 \section{Appendix} 
