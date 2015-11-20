@@ -130,13 +130,13 @@ cat("GVA2", Sys.time() - now, "\n")
 # cat("GVA_NR", Sys.time() - now, "\n")
 
 # Check accuracy
-save <- FALSE
+save <- TRUE
 if (save) {
   mcmc_result <- mcmc(mult, p=3, iterations=1e5, warmup=1e4, mc.cores = 1)
   mcmc_samples <- mcmc_result$mcmc_samples
   fit <- mcmc_result$fit
   print(fit)
-  save(mult, mcmc_samples, fit, allKnots, file="data/accuracy_application_2015_11_20.RData")
+  save(mult, mcmc_samples, fit, file="data/accuracy_application_2015_11_20.RData")
   # save(mult, mcmc_samples, fit, allKnots, file="/tmp/accuracy_spline_2015_05_19.RData")
 } else {
   load(file="data/accuracy_application_2015_11_20.RData")
