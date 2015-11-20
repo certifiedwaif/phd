@@ -26,8 +26,8 @@
 Abstract: A Variational Bayes approach using Gaussian Variational Approximation to zero-inflated Poisson
 regression models using the latent variable representation from \cite{Ghosh20061360} is presented. We
 demonstrate on simulated and real datasets that our approach is flexible enough to handle random effects and
-smoothing splines while remaining computationally efficient. We also present a new parameterisation for
-the Gaussian Variational Approximation which provides increased speed and numerical stability while preserving
+smoothing splines while remaining computationally efficient. We also present a new parameterisation for the
+Gaussian Variational Approximation which provides increased speed and numerical stability while preserving
 accuracy.
 
 Keywords: Approximate Bayesian inference ; mixed model ; Markov chain Monte Carlo ; Stan ; 
@@ -593,28 +593,43 @@ GVA FP & 4.83 s & 0.07 s \\
 \item What didn't
 \end{itemize}
 
-MFVB parameterisation for ZIP models in considerable generality We have described a Variational Bayes
-approximation to Zero-Inflated Poisson regression models which allows such models to be fit with considerable
-generality. We have also devised and extensively tested a number of alternative approaches for fitting such
-models, and extended one of these alternative approaches with a new parameterisation. Using MCMC methods as
-the gold standard to test against, we have assessed the accuracy and computational speed of these algoritms.
+We have described a Variational Bayes approximation to Zero-Inflated Poisson regression models which allows
+such models to be fit with considerable generality. We have also devised and extensively tested a number of
+alternative approaches for fitting such models, and extended one of these alternative approaches with a new
+parameterisation. Using MCMC methods as the gold standard to test against, we have assessed the accuracy and
+computational speed of these algoritms.
 
-Variational Bayes allow estimation of Bayesian ZIP models in a fraction of the time taken to fit the same
-model using even the best MCMC methods available, with only a small loss of accuracy.
+The use of Mean Field Variational Bayes allows estimation of Bayesian ZIP models in a fraction of the time
+taken to fit the same model using even the best MCMC methods available, with only a small loss of accuracy.
+This is of great utility in applications where speed matters, such as model selection or when applied
+statisticians are experimenting with many models, as is typical in practice.
 
-New parameterisation for Gaussian Variational Approximation, with the significant advantages of sparsity,
-improved stability and speed, and no loss of accuracy.
+The new parameterisation of Gaussian Variational Approximation using the Cholesky factorisation of the inverse
+of $\mLambda$ presented in Section \ref{sec:algorithms} provides significant advantages.  It is well known
+that the inverse of a sparse matrix need not be sparse. Fitting mixed models generally leads to covariance
+matrices with an arrow head structure. Due to the sparsity of our parameterisation of $\mLambda^{-1}$,  our
+algorithm for fitting these models leads to an optimisation problem of significantly lower dimension. This
+allows the model to be fit more quickly, and with greatly improved numerical stability and with no loss of
+accuracy.
 
 Using the exponential function to parameterise the main diagonal coupled with L-BFGS-B's unconstrained line
 search and optim()'s lack of robustness to infinities lead to many overflow problems which may have been
-lessened or dealt with entirely by using a function with a less aggressive growth rate, such as a piecewise
-quadratic.
+lessened or dealt with entirely by using a function with a less aggressive growth rate, such as an appropriate
+piecewise quadratic.
 
-Sensitivity to starting point.
+Some of the algorithms which we experimented with were found to be very sensitive to their starting points.
+While these algorithms are typically initialised with a starting point as close as possible to the final
+solution, this gives some sense of the stability of each algorithm.
 
-Final result was good. Application to roach model did quite well
+* Final result was good. Application to roach model did quite well
 
-Difficulty in optimising performance in R, C++ or better use of libraries is the solution.
+This article presents the essential ideas necessary for a performant implementation implementing model fitting
+for ZIP regression models, but the performance would be even better if our algorithm was re-implemented in a
+compiled language with good numeric libraries such as C++ with Eigen. The majority of the performance
+improvements over existing approaches come from avoiding unneccessary matrix inversion, which is a
+computationally expensive $O(p^3)$ and numerically unstable process, and from constructing and calculating
+with sparse matrices. The gains of these approaches, particularly from sparse matrix techniques, can be
+difficult to fully realise in R without expert knowledge of the underlying implementation and libraries.
 
 \newpage
 \section{Appendix} 
