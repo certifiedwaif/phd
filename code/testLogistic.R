@@ -1,7 +1,6 @@
 #!/usr/bin/env Rscript
 # testLogistic.R
 library(Rcpp)
-setwd("~/Downloads/john/")
 sourceCpp(file="fitLogistic.cpp")
 load("CPM_IJC_AMELIA.RData")
 
@@ -231,7 +230,7 @@ vsize <- apply(models,1,sum) + 1
 models <- models[vsize<=NUMVARS,]
 
 print("Bohning")
-library(lineprof)
+# library(lineprof)
 a3 <- proc.time()[3];
 res <- ALL_bohning(vy, mX, models, 1e-5, 1e-3) 
 b3 <- proc.time()[3];   

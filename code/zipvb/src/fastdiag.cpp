@@ -8,14 +8,7 @@
 
 // [[Rcpp::depends(RcppEigen)]]
 #include <RcppEigen.h>
-
-using std::vector;
-using namespace Rcpp;
-using namespace Eigen;
-using Eigen::MatrixXd;
-using Eigen::VectorXd;
-
-typedef Eigen::Map<Eigen::MatrixXd> MapMatd;
+#include "zipvb_types.hpp"
 
 // [[Rcpp::export]]
 VectorXd fastdiag(MapMatd lambda, MapMatd C)

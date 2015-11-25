@@ -184,7 +184,7 @@ calculate_accuracies <- function(test, mult, mcmc_samples, var_result, approxima
       vbeta_accuracy[i] <- calculate_accuracy(mcmc_samples$vbeta[,i], dnorm,
                                               var_result$vmu[i], sqrt(var_result$mLambda[i,i]))
       vbeta_means[i] <- mean(mcmc_samples$vbeta[, i])
-      title <- latex2exp(sprintf("%s $\\vectorfonttwo{ \\beta_%d}$ accuracy: %2.0f%%", approximation, i, vbeta_accuracy[i]))
+      title <- latex2exp(sprintf("%s $\\textbf{\\beta_%d}$ accuracy: %2.0f%%", approximation, i, vbeta_accuracy[i]))
       if (print_flag) print(title)
       if (plot_flag) accuracy_plot(title, mcmc_samples$vbeta[,i], dnorm,
                                    var_result$vmu[i], sqrt(var_result$mLambda[i,i]))

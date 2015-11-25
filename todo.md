@@ -1,6 +1,31 @@
 To Do list
 ==========
 
+17/11/2015
+----------
+In the last period I claimed pay up to 16/09/2015
+Mon 2pm
+Tue 2pm
+Wed 3pm
+21/9 2pm
+22/9 2pm
+23/9 3pm
+28/9 2pm
+29/9 2pm
+30/9 3pm
+5/10 2pm
+6/10 2pm
+7/10 3pm
+12/10 2pm
+13/10 2pm
+14/10 3pm
+19/10 2pm
+20/10 2pm
+21/10 3pm
+26/10 2pm
+27/10 2pm
+28/10 3pm
+
 22/10/2015
 ----------
 Time difference of 17.9595 secs

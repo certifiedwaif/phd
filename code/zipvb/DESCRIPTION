@@ -1,0 +1,10 @@
+Package: zipvb
+Title: Fit Bayesian Zero-Inflated Poisson Regression Models using Gaussian Variational Bayes
+Version: 0.0.0.9000
+Authors@R: person("Mark", "Greenaway", email = "markg@maths.usyd.edu.au", role = c("aut", "cre"))
+Description: Fit Bayesian Zero-Inflated Poisson Regression Models using Gaussian Variational Bayes
+Depends: R (>= 3.2.2)
+License: What license is it under?
+LazyData: true
+LinkingTo: Rcpp, RcppEigen
+Imports: Rcpp, RcppEigen

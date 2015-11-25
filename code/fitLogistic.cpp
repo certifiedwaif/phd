@@ -41,9 +41,9 @@ mat ALL_bohning_cpp(const vec vy, const mat mX, const mat models, const double t
 	
 // 	for (j in 1:nrow(models)) 
 // 	{	 
+	omp_set_num_threads(48);
 	// #pragma omp parallel for shared(mBeta) private(vgamma, inds1, one_to_n, mX1, vmu, mI, mSigma_inv, mA, vmu_old, vxi, vb, vc, err) default(none) schedule(auto)
-	// omp_set_num_threads(4);
-	// #pragma omp parallel for
+	#pragma omp parallel for
 	for (int j = 0; j < models.n_rows; j++) {
 // 		vgamma <- c(1,models[j,])
 		// Rcout << "Constructing vgamma" << endl;

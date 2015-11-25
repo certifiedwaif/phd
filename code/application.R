@@ -130,7 +130,8 @@ cat("GVA2", Sys.time() - now, "\n")
 # cat("GVA_NR", Sys.time() - now, "\n")
 
 # Check accuracy
-save <- TRUE
+# save <- TRUE
+save <- FALSE
 if (save) {
   mcmc_result <- mcmc(mult, p=3, iterations=1e5, warmup=1e4, mc.cores = 1)
   mcmc_samples <- mcmc_result$mcmc_samples
@@ -143,5 +144,5 @@ if (save) {
   # load(file="/tmp/accuracy_spline_2015_05_19.RData")
 }
 
-var_accuracy <- calculate_accuracies("application", mult, mcmc_samples, fit3, "gva2", plot_flag=TRUE)
+var_accuracy <- calculate_accuracies("application", mult, mcmc_samples, fit3, "GVA NP", plot_flag=TRUE)
 print(var_accuracy)
