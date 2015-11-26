@@ -616,7 +616,9 @@ Some of the algorithms which we experimented with were found to be very sensitiv
 While these algorithms are typically initialised with a starting point as close as possible to the final
 solution, this gives some sense of the stability of each algorithm.
 
-* Final result was good. Application to roach model did quite well
+Our application of these ideas to Andrew Gelman's data showed that the new parameterisation very effectively
+speeds up fitting zero-inflated mixed models to real world data with a large number of groups, while still
+maintaining excellent accuracy versus an MCMC approach.
 
 This article presents the essential ideas necessary for a performant implementation implementing model fitting
 for ZIP regression models, but the performance would be even better if our algorithm was re-implemented in a
