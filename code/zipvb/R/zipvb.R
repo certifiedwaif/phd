@@ -1,5 +1,6 @@
 #'@title Package-level documentation
-#'@description Mark, you know this bit, not me.
+#'@description Fit Bayesian zero-inflated Poisson regression models using the Gaussian Variational
+#'						 appropximation.
 #'@name zipvb
 #'
 #'@useDynLib zipvb
