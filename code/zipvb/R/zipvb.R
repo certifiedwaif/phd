@@ -1,6 +1,6 @@
 #'@title Package-level documentation
 #'@description Mark, you know this bit, not me.
-#' @name zipvb
+#'@name zipvb
 #'
 #'@useDynLib zipvb
 #'@import RcppEigen
