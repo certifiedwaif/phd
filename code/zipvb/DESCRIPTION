@@ -7,4 +7,4 @@ Depends: R (>= 3.2.2)
 License: What license is it under?
 LazyData: true
 LinkingTo: Rcpp, RcppEigen
-Imports: Rcpp, RcppEigen
+Imports: Rcpp, RcppEigen, Matrix, limma

@@ -1,5 +1,4 @@
 # zero_inflated_model.R
-library(limma)
 
 create_mult <- function(vy, mX, mZ, sigma2.beta, m=ncol(mZ), blocksize=1, spline_dim=0, v=0)
 {
@@ -15,7 +14,7 @@ create_mult <- function(vy, mX, mZ, sigma2.beta, m=ncol(mZ), blocksize=1, spline
     mC <- cbind(mX, mZ)
   }
   vmu <- rep(0, ncol(mC))
-  
+
   if (!is.null(ncol(mX))) {
     p <- ncol(mX)
     mSigma.beta.inv <- diag(1 / sigma2.beta, ncol(mX))
@@ -27,16 +26,16 @@ create_mult <- function(vy, mX, mZ, sigma2.beta, m=ncol(mZ), blocksize=1, spline
   mLambda <- diag(rep(1, ncol(mC)))
   a_rho <- 1 + sum(vp)
   b_rho <- n - sum(vp) + 1
-  
+
   # Set prior parameters for Inverse Wishart distribution
   #mPsi=diag(1, rep(blocksize))
   mPsi <- 1e-5 * diag(1, d)
-  
+
   prior <- list(v=v, mPsi=mPsi,
                 a_rho=1, b_rho=1,
                 sigma2.beta=sigma2.beta)
   v <- prior$v
-  
+
   if (!is.null(ncol(mZ))) {
     # TODO: We don't yet handle the case where there are splines and random intecepts/
     # slopes.
@@ -56,7 +55,7 @@ create_mult <- function(vy, mX, mZ, sigma2.beta, m=ncol(mZ), blocksize=1, spline
   } else {
     mSigma.inv <- blockDiag(mSigma.beta.inv, mSigma.u.inv)
   }
-  
+
   mult <- list(vy=vy, vp=vp, vmu=vmu,
                 mX=mX, mZ=mZ, mC=mC,
                 m=m, blocksize=blocksize, spline_dim=spline_dim,
@@ -90,7 +89,7 @@ calculate_lower_bound <- function(mult, verbose=FALSE)
 	if (!is.null(mX)) {
   	beta_idx <- 1:p
   }
-  
+
 	zero.set <- which(vy == 0)
 
 	# Terms for (beta, u)
@@ -117,7 +116,7 @@ calculate_lower_bound <- function(mult, verbose=FALSE)
 	if (verbose) {
 	  	cat("calculate_lower_bound: T1", T1, "T2", T2, "T3", T3, "\n")
 	}
-  
+
 	return(T1 + T2 + T3)
 }
 
@@ -125,7 +124,7 @@ zipvb <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE, glm
 {
   # browser()
   MAXITER <- 10
-  
+
   # Initialise variables from mult
   N <- length(mult$vy)
   p <- mult$p
@@ -175,9 +174,9 @@ zipvb <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE, glm
       }
       break
     }
-    
+
     i <- i + 1
-    
+
     if (is.null(mSigma.u.inv)) {
       mSigma.inv <- mSigma.beta.inv
     } else if (is.null(mSigma.beta.inv)) {
@@ -185,12 +184,12 @@ zipvb <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE, glm
     } else {
       mSigma.inv <- blockDiag(mSigma.beta.inv, mSigma.u.inv)
     }
-    
+
     # Update parameter for q_vnu by maximising using the Gaussian Variational Approximation from Dr Ormerod's Poisson mixed model code
     old_vmu <- vmu
     if (method == "laplace") {
       fit1 <- fit.Lap(vmu, vy, vp, mC, mSigma.inv, mLambda)
-    } else if (method == "gva") {	
+    } else if (method == "gva") {
       if (i <= 1) {
         fit1 <- fit.Lap(vmu, vy, vp, mC, mSigma.inv, mLambda)
         eig <- eigen(fit1$mLambda)
@@ -207,17 +206,17 @@ zipvb <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE, glm
       # fit1 <- fit.GVA(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B")
     } else if (method == "gva2") {
       if (i <= 5) {
-        fit1 <- fit.GVA_nr(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B", p=p, m=m, 
+        fit1 <- fit.GVA_nr(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B", p=p, m=m,
                           blocksize=blocksize, spline_dim=spline_dim)
         eig <- eigen(fit1$mLambda)
         # Very occasionally, fit.Lap will return a non-invertible mLambda. In that case,
         # fall back to L-BFGS.
         if (any(is.complex(eig$values)) || any(eig$values < 1e-8)) {
-          fit1 <- fit.GVA_new(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B", p=p, m=m, 
+          fit1 <- fit.GVA_new(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B", p=p, m=m,
                         blocksize=blocksize, spline_dim=spline_dim)
         }
       } else {
-        fit1 <- fit.GVA_new(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B", p=p, m=m, 
+        fit1 <- fit.GVA_new(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B", p=p, m=m,
                         blocksize=blocksize, spline_dim=spline_dim)
         # If you use L-BFGS-B, this code will overflow frequently - about one time in ten.
         # If you use BFGS or CG, you'll get strange errors about one time in a thousand.
@@ -225,28 +224,28 @@ zipvb <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE, glm
         # fit1 <- fit.GVA_new(vmu, mLambda, vy, vp, mC, mSigma.inv, "BFGS")
       }
     } else if (method == "gva_nr") {
-      fit1 <- fit.GVA_nr(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B", p=p, m=m, 
+      fit1 <- fit.GVA_nr(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B", p=p, m=m,
                         blocksize=blocksize, spline_dim=spline_dim)
     } else {
       stop("method must be either laplace, gva, gva2 or gva_nr")
     }
-    
+
     vmu <- fit1$vmu
     mLambda <- fit1$mLambda
     f <- fit1$res$value
-    
+
     # Update parameters for q_vr
     if (length(zero.set) != 0) {
       # cat("zero.set", zero.set, "\n")
-      vp[zero.set] <- expit((vy[zero.set] * mC[zero.set,]) %*% vmu - exp(mC[zero.set,] %*% vmu + 
-                            0.5 * diag(mC[zero.set,] %*% mLambda %*% t(mC[zero.set,])) + 
+      vp[zero.set] <- expit((vy[zero.set] * mC[zero.set,]) %*% vmu - exp(mC[zero.set,] %*% vmu +
+                            0.5 * diag(mC[zero.set,] %*% mLambda %*% t(mC[zero.set,])) +
                             digamma(a_rho) - digamma(b_rho)))
     }
-    
+
     # Update parameters for q_rho
     a_rho <- prior$a_rho + sum(vp)
     b_rho <- prior$b_rho + N - sum(vp)
-    
+
     # Update parameters for q_sigma_u^2 if we need to
     if (!is.null(mZ)) {
       u_dim <- (m - 1) * blocksize + spline_dim
@@ -258,8 +257,8 @@ zipvb <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE, glm
       #tr_mSigma <- ncol(mZ) * prior$a_sigma/prior$b_sigma
 
       # Extract right elements of mLambda
-      #b_sigma <- prior$b_sigma + sum(vmu[u_idx]^2)/2 + tr(mLambda[u_idx, u_idx])/2    
-      
+      #b_sigma <- prior$b_sigma + sum(vmu[u_idx]^2)/2 + tr(mLambda[u_idx, u_idx])/2
+
       if (spline_dim == 0) {
         acc <- matrix(0, blocksize, blocksize)
         for (j in 1:(m - 1)) {
@@ -272,7 +271,7 @@ zipvb <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE, glm
         acc <- vmu[spline_idx] %*% t(vmu[spline_idx]) + mLambda[spline_idx, spline_idx]
       }
       mPsi <- prior$mPsi + acc
-      
+
       #tau_sigma <- a_sigma/b_sigma
       #mSigma.u.inv <- diag(tau_sigma, u_dim)
       # TODO: This doesn't handle the case where you have splines and random intercepts
@@ -284,7 +283,7 @@ zipvb <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE, glm
       }
       #mSigma.u.inv <- solve(mPsi) # What multiplicative factor for psi?
     }
-    
+
     # Update all variables in mult so that we can calculate the lower
     # bound.
     mult$mSigma.beta.inv <- mSigma.beta.inv
@@ -311,10 +310,10 @@ zipvb <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE, glm
       cat("\n")
     }
   }
-  
+
   if (plot_lower_bound)
     plot(vlower_bound, type="l")
-  
+
   mult$mSigma <- solve(mSigma.inv + diag(1e-8, ncol(mSigma.inv)))
   mult$vlower_bound <- vlower_bound
   mult$iterations <- i
