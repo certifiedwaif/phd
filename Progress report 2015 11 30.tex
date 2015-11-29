@@ -1,0 +1,93 @@
+\documentclass{beamer}
+
+\usetheme{Warsaw}
+\usepackage{graphicx}
+\usepackage{ulem}
+\input{include.tex}
+\input{Definitions.tex}
+
+\usefonttheme{serif}
+
+\title{Progress report - 30/11/2015}
+\author{Mark Greenaway\\PhD candidate\\markg@maths.usyd.edu.au}
+
+\mode<presentation>
+{ \usetheme{boxes} }
+
+\begin{document}
+\begin{frame}
+\maketitle
+\end{frame}
+
+\begin{frame}{Writing continues on our first paper}
+\begin{itemize}
+\item Writing a discussion section
+\item Finding more and better references
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Packaging R code}
+\begin{itemize}
+\item Packaging R code is very easy, if you use devtools and read Hadley Wickham's ``R Packages''
+\item If you have some C++ code, there are a few more details to consider
+\item I made a friend on Twitter a few months ago. @quominus - Oliver Keyes, works for Wikipedia. Author of
+			over ten R packages.
+\item I helped him debug some memory leaks in his C code
+\item He returned the favour by fixing all of my build problems. He did this in under half an hour flat
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Next project - Logistic regression}
+\begin{itemize}
+\item We want to be able to fit these models fast, so that we can fit lots and keep the best ones
+\item John wrote some prototype code which could fit 500 models a second
+\item Using Bohning's bound, he was able to get this up to 5,000 models a second
+\item He turned the code over to me and asked me to rewrite it in C++. We were able to get it up to ~50,000
+			models a second using OpenMP. And it wasn't that hard
+\item Andrew Stefan has submitted his PhD, and is going into the private sector to earn lots of money. Before
+			he goes, I'm going to leech the OpenMP knowledge out of his brain
+\item GPUs next - how hard can it be? Famous last words \ldots
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Idea}
+\begin{itemize}
+\item Our current approach is brute force $O(n 2^p)$, treating the model space as if it has absolutely
+			no structure
+\item I think we can do better, and avoid having to examine all of the model space if the model space
+			has any usable structure at all
+			$$\text{RSS}(V_1) \geq \text{RSS}(V_2) \text{ if } V_1 \subseteq V_2$$
+\item John has some ideas about this as well
+\item John has cautioned me that the model space is very ``flat'', and that if we don't search exhaustively,
+			we may miss the best models
+\item Branch and bound is well studied for linear models. Implemented in the leaps package, which Samuel
+			and Garth used for their latest work
+\item Is there any equivalent algorithm generalised linear models?
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Literature search so far}
+\begin{itemize}
+\item Iteratively reweighted least squares is the most well-known method for fitting logistic regression
+			models
+\item It's certainly not the only method. Other methods include Bohning's bound
+\item Best Subsets Logistic Regression, Hosmer, Jovanovic and Lemeshow 1989 and Pregibon (1981) points to an 					approximate method for fitting sub-models once a full model has been fit
+\item Basic idea: Re-use the weights
+$$\hat{\vbeta} = (\mX^\top \mV \mX)^{-1} \mX^\top \mV \vz$$
+where $\mV = \text{diag}(\vv_1, \ldots, \vv_n), \vv_i = \hat{\pi_i} (1 - \hat{\pi_i}),
+\hat{\pi_i} \text{ is the estimated logistic probability at } \vx_i$,
+$\vz = \mX \hat{\vbeta} + \mV^{-1} (\vy - \hat{\pi})$
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Questions?}
+\begin{itemize}
+\item First and foremost, Is this a really stupid idea? It's the first half-decent idea I've had since I
+			came back, so I rather hope not
+\item I expect the reason this hasn't been done before is because from model fit to model fit, the weights
+			will change. The key question is: by how much?
+\item Does the branch and bound algorithm still work if you recalculate the weights occasionally? How often
+			do you need to recalculate them, if so?
+\end{itemize}
+\end{frame}
+\end{document}
