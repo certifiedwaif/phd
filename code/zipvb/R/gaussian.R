@@ -4,7 +4,6 @@
 
 f.lap <- function(vmu, vy, vr, mC, mSigma.inv, mLambda)
 {
-  d <- length(vmu)
   veta <- mC %*% vmu
   mSigma <- solve(mSigma.inv)
   mDiag <- fastdiag(mLambda, mC)
