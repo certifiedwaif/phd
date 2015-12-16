@@ -4,7 +4,6 @@
 
 f.lap <- function(vmu, vy, vr, mC, mSigma.inv, mLambda)
 {
-  d <- length(vmu)
   veta <- mC %*% vmu
   mSigma <- solve(mSigma.inv)
   mDiag <- fastdiag(mLambda, mC)
@@ -13,7 +12,10 @@ f.lap <- function(vmu, vy, vr, mC, mSigma.inv, mLambda)
   return(f)
 }
 
-norm <- function(v) sqrt(sum(v ^ 2))
+norm <- function(v)
+{
+  return(sqrt(sum(v ^ 2)))
+}
 
 vg.lap <- function(vmu, vy, vr, mC, mSigma.inv, mLambda)
 {
@@ -32,9 +34,9 @@ mH.lap <- function(vmu, vy, vr, mC, mSigma.inv, mLambda)
 
 fit.Lap <- function(vmu, vy, vr, mC, mSigma.inv, mLambda)
 {
-  MAXITER <- 100
+  max_iter <- 100
 
-  for (ITER in 1:MAXITER) {
+  for (iter in 1:max_iter) {
     f  <- f.lap(vmu, vy, vr, mC, mSigma.inv, mLambda)
     vg <- vg.lap(vmu, vy, vr, mC, mSigma.inv, mLambda)
     mH <- mH.lap(vmu, vy, vr, mC, mSigma.inv, mLambda)
@@ -66,7 +68,7 @@ fit.Lap <- function(vmu, vy, vr, mC, mSigma.inv, mLambda)
     }
 
     if (max(abs(vg)) < 1.0E-8) {
-        break
+      break
     }
   }
 
@@ -78,7 +80,7 @@ vtheta_enc <- function(vmu, mR)
 {
   diag(mR) <- log(diag(mR))
   Rinds <- which(lower.tri(mR, diag=TRUE))
-  c(vmu, mR[Rinds])
+  return(c(vmu, mR[Rinds]))
 }
 
 vtheta_dec <- function(vtheta, d)
@@ -283,7 +285,7 @@ fit.GVA <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e-12
 vtheta_enc_new <- function(vmu, mR, Rinds)
 {
   diag(mR) <- -log(diag(mR))
-  c(vmu, mR[Rinds])
+  return(c(vmu, mR[Rinds]))
 }
 
 vtheta_dec_new <- function(vtheta, d, Rinds)
