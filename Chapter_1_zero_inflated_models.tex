@@ -142,8 +142,7 @@ Variational approximations are well-suited to accelerating the fit of Bayesian z
 Typically zero-inflated models arise in applications where we wish to build multivariate regression models. To
 be able to construct multivariate models with as much generality as possible, we specify the full model as a
 General Design Bayesian Generalized Linear Mixed Model, as in \citep{zhao06}. This allows us to incorporate
-within-subject correlation, measurement error, missing data and smoothing splines (as in \cite{Wand2008}) in
-our models.
+within-subject correlation, and smoothing splines (as in \cite{Wand2008}) in our models.
 
 % Idea: We can use an approximation of the from q(\beta, \u, \Sigma) q(\rho) \Product q(r_i)
 % and use GVA on q(\beta, \u, \Sigma) and mean field updates on \rho and r_i
@@ -151,7 +150,7 @@ our models.
 \subsection{Model and data}
 
 The $j$th predictor/response pair for the $i$th group is denoted by $(\vx_{ij}, \vy_{ij}), 1 \leq j \leq n_i,
-1 \leq i \leq m$, where the $\vx_{ij}$ are unrestricted, while the $\vy_{ij}$ are nonnegative integers.
+1 \leq i \leq m$, where the $\vx_{ij}$ are real, while the $\vy_{ij}$ are nonnegative integers.
 
 For each $1 \leq i \leq m$, define the $n_i \times 1$ vectors $\vy_{ij} = [\vy_{i 1}, \ldots, \vy_{i
 n_i}]^\top$ and $\vone_i = [1, \ldots, 1]^\top$, where the first of these vectors is the response. It is
@@ -169,8 +168,9 @@ with priors
 
 \begin{align*}
 \log{p(\mSigma_{\vu \vu})} &= \text{Inverse Wishart}(\mPsi, v),\\
-p(\rho) &\propto 1 \\
-\mbox{ and } \vnu|\sigma_\vu^2 &\sim \mbox{N}(\vzero, \sigma_\vu^2 \mI)
+\rho \sim \mbox{Uniform}(0, 1),\\
+\vbeta|\sigma^2_\vbeta \sim \mbox{N}(\vzero, \sigma^2_\vbeta \mI)\\
+\mbox{ and } \vu \sim \mbox{N}(\vzero, \mSigma_{\vu \vu})
 \end{align*}
 
 where $\mX$ is $n \times p$, $\mZ$ is $n \times mb$ and $\mSigma_{\vu \vu}$ and $\mPsi$ are $b \times b$.
