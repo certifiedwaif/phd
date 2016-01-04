@@ -62,8 +62,10 @@ closed form solutions and hence present a greater computational challenge to fit
 
 Fitting these models is typically done with Monte Carlo Markov Chain techniques, but these can be slow and
 prone to convergence problems. We build upon a latent variable representation of these models to allow a
-tractable Variational Bayes approximation to be derived. This allows us to fit close approximations to these
-models using a deterministic algorithm which converges much more quickly.
+tractable semiparametric mean field Variational Bayes approximation to be derived. Semiparametric mean field
+Variational Bayes is an approximate Bayesian inference method as detailed in \cite{ormerod10} and
+\cite{RohdeWand2015}, which allows us to fit close approximations to these models using a deterministic
+algorithm which converges much more quickly.
 
 We allow a flexible regression modelling approach by using a Gaussian Variational Approximation as defined in
 \cite{ormerod09} on the regression parameters to allow a non-conjugate Gaussian prior to be used, making the
@@ -82,7 +84,7 @@ uniqueness and positive definiteness. This parameterisation can lead to numeric 
 by thresholding the values of the  diagonals. Overflow can lead to singular matrices when attempting to invert
 $\mLambda$. This problem was mitigated by  instead working with the Cholesky factorisation of $\mLambda^{-1}$,
 allowing us to solve rather than invert and multiply, which is also faster and more numerically stable. We use
-knowledge of the regression model we are fitting to specify a sparse matrix structure, greatly  reducing the
+knowledge of the regression model we are fitting to specify a sparse matrix structure, greatly reducing the
 dimension of the problem and thus improving both computational speed and numeric accuracy.
 
 The focus of this paper is on developing a method of fitting flexible ZIP regression models accurately, and
@@ -101,13 +103,21 @@ derivation of the variational lower bound for our model.
 \label{sec:methodology}
 
 In this section we present a VB approach to a Bayesian zero-inflated Poisson model for count data with extra
-zeroes. After introducing Bayesian zero-inflated models and VB methodology we derive the VB factorised
-approximation to the full Bayesian model.
+zeroes. After introducing the representation of Bayesian zero-inflated models we consider and a short summary
+of VB methodology we derive several variational approxiamtions for the model.
 
 \subsection{Variational Bayesian inference}
 
-Semiparametric mean field Variational Bayes is an approximate Bayesian inference method as detailed in
-\cite{ormerod10} and \cite{RohdeWand2015}.
+\subsubsection{Definitions}
+
+The density function of a random vector $\vu$ is denoted by $p(\vu)$.  The conditional density function of a
+random vector $\vu$ given $\vv$ is denoted by $p(\vu|\vv)$. Consider a generic Bayesian model with parameter
+vector $\vtheta \in \Theta$. Throughout this section we assume that $\vy$ and $\vtheta$ are continuous random
+vectors. The KL divergence between the probability distributions $p$ and $q$ is defined as
+
+$$
+KL(q || p) \equiv \int q(\vtheta) \log \{ \frac{q(\vtheta)}{p(\vtheta | \vy)} \} d \vtheta.
+$$
 
 The approximation is fit by iteratively minimising the Kullback-Leibler divergence between the true posterior
 and an approximating distribution. Thus the optimal approximation $q^*(\vtheta)$ is
