@@ -555,10 +555,10 @@ $\rho$ & 0.71 & 0.67 & 0.75 & 88\% \\
 	\centering
 	% \includepdf[width=75mm,height=75mm,pages={1,2,3,16},nup=2x2]{code/results/accuracy_plots_application_GVA2.pdf}
 	\begin{tabular}{@{}c@{\hspace{.5cm}}c@{}}
-		\includegraphics[page=1,width=.45\textwidth]{code/results/accuracy_plots_application_GVA NP.pdf} & 
-		\includegraphics[page=2,width=.45\textwidth]{code/results/accuracy_plots_application_GVA NP.pdf} \\[.5cm]
-		\includegraphics[page=3,width=.45\textwidth]{code/results/accuracy_plots_application_GVA NP.pdf} &
-		\includegraphics[page=16,width=.45\textwidth]{code/results/accuracy_plots_application_GVA NP.pdf} \\[.5cm]
+		\includegraphics[page=1,width=.45\textwidth]{code/results/accuracy_plots_application_GVA_NP.pdf} & 
+		\includegraphics[page=2,width=.45\textwidth]{code/results/accuracy_plots_application_GVA_NP.pdf} \\[.5cm]
+		\includegraphics[page=3,width=.45\textwidth]{code/results/accuracy_plots_application_GVA_NP.pdf} &
+		\includegraphics[page=16,width=.45\textwidth]{code/results/accuracy_plots_application_GVA_NP.pdf} \\[.5cm]
 	\end{tabular}
 \end{figure}
 
@@ -607,18 +607,15 @@ algorithm for fitting these models leads to an optimisation problem of significa
 allows the model to be fit more quickly, and with greatly improved numerical stability and with no loss of
 accuracy.
 
-Using the exponential function to parameterise the main diagonal coupled with L-BFGS-B's unconstrained line
-search and optim()'s lack of robustness to infinities lead to many overflow problems which may have been
-lessened or dealt with entirely by using a function with a less aggressive growth rate, such as an appropriate
-piecewise quadratic.
+The implementation of these algorithms was not without its' challenges, chiefly numerical issues encountered
+during testing and verification of the accuracy of the model fitting. Using the exponential function to
+parameterise the main diagonal coupled with L-BFGS-B's unconstrained line search and optim()'s lack of
+robustness to infinities lead to many overflow problems which may have been lessened or dealt with entirely by
+using a function with a less aggressive growth rate, such as an appropriate piecewise quadratic.
 
 Some of the algorithms which we experimented with were found to be very sensitive to their starting points.
 While these algorithms are typically initialised with a starting point as close as possible to the final
 solution, this gives some sense of the stability of each algorithm.
-
-Our application of these ideas to Andrew Gelman's data showed that the new parameterisation very effectively
-speeds up fitting zero-inflated mixed models to real world data with a large number of groups, while still
-maintaining excellent accuracy versus an MCMC approach.
 
 This article presents the essential ideas necessary for a performant implementation implementing model fitting
 for ZIP regression models, but the performance would be even better if our algorithm was re-implemented in a
@@ -627,6 +624,11 @@ improvements over existing approaches come from avoiding unneccessary matrix inv
 computationally expensive $O(p^3)$ and numerically unstable process, and from constructing and calculating
 with sparse matrices. The gains of these approaches, particularly from sparse matrix techniques, can be
 difficult to fully realise in R without expert knowledge of the underlying implementation and libraries.
+
+Our application of these ideas to Andrew Gelman's data showed that the new parameterisation very effectively
+speeds up fitting zero-inflated mixed models to real world data with a large number of groups, while still
+maintaining excellent accuracy versus an MCMC approach. This demonstrates the applicability of the ideas
+presented within this paper to real world data sets.
 
 \newpage
 \section{Appendix} 
