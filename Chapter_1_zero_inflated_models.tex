@@ -106,28 +106,28 @@ approximation to the full Bayesian model.
 
 \subsection{Definitions}
 
-We use $\vone_p$ to denote the $p \times 1$ column vector with all entries equal to 1. Let $\vy$ by the $n
-\times 1$ vector. The norm of a column vector $\vv$, defined to be $\sqrt{\vv^\top \vv}$, is denoted by
-$\|\vv\|$. For a $p \times 1$ vector $\va$, we let $\diag{(\va)}$ denote the $p \times p$.
+We use $\vone_p$ and $\vzero_p$ to denote the $p \times 1$ column vector with all entries equal to 1 or 0,
+respectively. Let $\vy$ by the $n \times 1$ vector. The norm of a column vector $\vv$, defined to be
+$\sqrt{\vv^\top \vv}$, is denoted by $\|\vv\|$. For a $p \times 1$ vector $\va$, we let $\diag{(\va)}$ denote
+the $p \times p$.
+
+Let $\vtheta$ be the parameter vector in $\R^p$.
+
+Let $\mX$ be a matrix with dimensions $n \times p$.
+Let $\mZ$ be a matrix with dimensions $n \times m b$
+Let $\mC = [ \mX \mZ ]$.
+Let $\vbeta$ be the $p \times 1$ column vector representing the fixed effects.
+Let $\vu$ be the $m b \times 1$ column vector representing the random effects.
+Let $\vnu = [\vbeta^\top, \vu^\top]$.
+Let $\vp$ be the $n \times 1$ column vector of probabilities that each observation in $\vy$ is non-zero.
+Let $\mSigma$, $\mPsi$ and $\mLambda$ be $(p + m b + 1) \times (p + m b + 1)$ matrices.
 
 $$
-\theta
 \xi
 \Xi
-\mX
-\mZ
-\mC
-\vnu
-\vbeta
-\vu
 \vmu
-\vp
-\mSigma
-\mLambda
 \rho
 \sigma
-\mPsi
-\vzero
 \exp
 \expit
 Bernoulli
