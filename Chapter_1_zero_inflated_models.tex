@@ -108,37 +108,29 @@ of VB methodology we derive several variational approxiamtions for the model.
 
 \subsection{Definitions}
 
+Let $p$ be the dimension of the space of fixed effects, $m$ be the number of individuals in the random effects
+and $b$ be the block size for each of those individuals.
 We use $\vone_p$ and $\vzero_p$ to denote the $p \times 1$ column vector with all entries equal to 1 or 0,
-respectively. Let $\vy$ by the $n \times 1$ vector. The norm of a column vector $\vv$, defined to be
-$\sqrt{\vv^\top \vv}$, is denoted by $\|\vv\|$. For a $p \times 1$ vector $\va$, we let $\diag{(\va)}$ denote
-the $p \times p$.
-
-Let $\vtheta$ be the parameter vector in $\R^p$.
-
-Let $\mX$ be a matrix with dimensions $n \times p$.
-Let $\mZ$ be a matrix with dimensions $n \times m b$
-Let $\mC = [ \mX \mZ ]$.
-Let $\vbeta$ be the $p \times 1$ column vector representing the fixed effects.
-Let $\vu$ be the $m b \times 1$ column vector representing the random effects.
-Let $\vnu = [\vbeta^\top, \vu^\top]$.
-Let $\vp$ be the $n \times 1$ column vector of probabilities that each observation in $\vy$ is non-zero.
+respectively.
+Let $\vy$ by the $n \times 1$ vector.
+The norm of a column vector $\vv$, defined to be $\sqrt{\vv^\top \vv}$, is denoted by $\|\vv\|$.
+For a $p \times 1$ vector $\va$, we let $\diag{(\va)}$ denote the $p \times p$.
+Let $\vtheta$ be the parameter vector in $\R^p$,
+$\mX$ be a matrix with dimensions $n \times p$,
+$\mZ$ be a matrix with dimensions $n \times m b$
+and $\mC = [ \mX \mZ ]$.
+Let $\vbeta$ be the $p \times 1$ column vector representing the fixed effects,
+$\vu$ be the $m b \times 1$ column vector representing the random effects
+and $\vnu = [\vbeta^\top, \vu^\top]$.
 Let $\mSigma$, $\mPsi$ and $\mLambda$ be $(p + m b + 1) \times (p + m b + 1)$ matrices.
-
-$$
-\xi
-\Xi
-\vmu
-\rho
-\sigma
-\exp
-\expit
-Bernoulli
-Inverse Wishart
-N
-p
-q
-q^*
-$$
+Let $\vp$ be the $n \times 1$ column vector of probabilities that each observation in $\vy$ is non-zero.
+Let $\expit(x)$ denote the function $\tfrac{1}{1 + \exp(-x)}$, the inverse of the logit function.
+Let $p(x)$ be the full probability distribution, and $q(x)$ be the approximating probability distribution.
+Let $q^*(x)$ be the optimal approximating probability distribution.
+Let $\text{Bernoulli}(\pi)$  denote the probability distribution $\pi^k (1 - \pi)^{1-k}$
+and $\text{Inverse Wishart}(\mPsi, v)$ denote the probability distribution
+$\tfrac{|\mPsi|^\frac{v}{2}}{2^{\frac{vp}{2}} \Gamma_p{(\tfrac{v}{2})}} |\mX|^{-\tfrac{v + p + 1}{2}} \exp{(-\half \tr{\mPsi \mX^{-1}})}$ where $\Gamma_p{(x)}$ denotes the multivariate gamma function and
+$\tr$ is the trace function.
 
 \subsection{Variational Bayesian inference}
 
@@ -150,7 +142,7 @@ vector $\vtheta \in \Theta$. Throughout this section we assume that $\vy$ and $\
 vectors. The KL divergence between the probability distributions $p$ and $q$ is defined as
 
 $$
-KL(q || p) \equiv \int q(\vtheta) \log \{ \frac{q(\vtheta)}{p(\vtheta | \vy)} \} d \vtheta.
+\KL(q || p) \equiv \int q(\vtheta) \log \{ \frac{q(\vtheta)}{p(\vtheta | \vy)} \} d \vtheta.
 $$
 
 The approximation is fit by iteratively minimising the Kullback-Leibler divergence between the true posterior
