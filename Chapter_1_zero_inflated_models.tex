@@ -129,7 +129,7 @@ Let $p(x)$ be the full probability distribution, and $q(x)$ be the approximating
 Let $q^*(x)$ be the optimal approximating probability distribution.
 Let $\text{Bernoulli}(\pi)$  denote the probability distribution $\pi^k (1 - \pi)^{1-k}$
 and $\text{Inverse Wishart}(\mPsi, v)$ denote the probability distribution
-$\tfrac{|\mPsi|^\frac{v}{2}}{2^{\frac{vp}{2}} \Gamma_p{(\tfrac{v}{2})}} |\mX|^{-\tfrac{v + p + 1}{2}} \exp{(-\half \tr{\mPsi \mX^{-1}})}$ where $\Gamma_p{(x)}$ denotes the multivariate gamma function and
+$\tfrac{|\mPsi|^\frac{v}{2}}{2^{\frac{vp}{2}} \Gamma_p{(\tfrac{v}{2})}} |\mX|^{-\tfrac{v + p + 1}{2}} \exp{[-\half \tr{(\mPsi \mX^{-1})}]}$ where $\Gamma_p{(x)}$ denotes the multivariate gamma function and
 $\tr$ is the trace function.
 
 \subsection{Variational Bayesian inference}
