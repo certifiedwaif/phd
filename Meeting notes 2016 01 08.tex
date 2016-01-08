@@ -1,0 +1,93 @@
+\documentclass{amsart}
+\title{Meeting with Dr John Ormerod - 08/01/2016}
+
+\input{Definitions.tex}
+
+\begin{document}
+
+\maketitle
+
+$R^2 = \frac{\vy^\top \mX (\mX^top \mX)^{-1} \mX^\top \vy}{\vy^\top \vy}$
+
+$\hat{\vy} = \mH \vy$
+
+$q = 20 - 30$
+|Model space| $\approx 2^30, 10^9$
+
+C++ $10^5$ models/second per core
+
+$\mX$ fixed
+$\mZ$ All combinations
+
+Prototype R code
+
+$R^2 = \frac{\vy^\top [\mX \mZ_\gamma]
+\begin{pmatrix}
+\mX^\top \mX & \mX^\top \mZ_\gamma \\
+\mZ_\gamma ^\top \mX & \mZ_\gamma^\top \mZ_\gamma
+\end{pmatrix}^{-1}
+\begin{bmatrix}
+\mX^\top \vy \\
+\mZ_\gamma^\top \vy
+\end{bmatrix}}{\vy^\top \vy}
+$
+
+Gray code for $\gamma$, other alternatives
+CPU/GPU
+CVB.fast
+
+Keep working on definitions
+CSDA
+Collapsed Variational Bayes
+
+$\gamma \to \mA \text{ row of $\mA$, same number of columns as $\mZ$}$
+
+Null model contains $\mX$ only
+
+Eventually, network models
+$\gamma \in \bR^p$, search strategy, first model toggle first element, second model toggle second element etc.
+
+Ask Jean for HPC
+
+Good prognosis and bad prognosis - QDA classifier
+Using DLDA now, assumes $\mSigma$ diagonal, unlikely to be true in practice.
+
+
+Stepwise constant survival function, incomplete gamma functions.
+Linear model - closed form.
+Piecewise constant hazard models have closed forms for their marginal likelihoods - or so John believes.
+VB over some indicators.
+Then VB over the gammas.
+
+$$
+\vy =
+\begin{cases}
+1 & \text{poor prognosis group} \\
+0 & \text{good prognosis group} \\
+\text{unobserved} & \text{for the middle group}
+\end{cases}
+$$
+
+LDA - fitting two normals.
+
+Differential distribution? Ask Dario, ask John again.
+Skew normals? Didn't help with Dario's problem, as $n=47$, kernel density estimation i.e. non-parametric with
+a high number of parameters.
+Asymptotics $O(n^{-1/5}$ for KDE nonparametrics, $O(n^{-1/2}$ for parametric estimators.
+Model averaging.
+Lass, Hastie, add to Mendeley. glasso, sparse PCA, sparse CCA.
+Lasso is a straw man, everyone beats it, something to compete against.
+
+John will send me the presentation with th details of the rank 1 updates, and his grant proposal when it's
+finished.
+I should do the third assignment from John's Bayesian course, to master the relevant algebra.
+
+24 hours, GLASSO, $p=10^6$, 30 cores
+semidefinite programming
+QIC CRAN
+Big \& QUIC multicore version, unreleased, source code released to us
+
+Paper 2: CVB for linear models.
+Paper 3: Networks, differential networks, sparse QDA.
+
+\end{document}
