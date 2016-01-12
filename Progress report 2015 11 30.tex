@@ -23,17 +23,22 @@
 \begin{itemize}
 \item Writing a discussion section
 \item Finding more and better references
+\item John is editing
+\item I hope to finish very soon - by the end of the year or early next year I'd like for the paper to be
+			submitted
+\item All's well that ends well
 \end{itemize}
 \end{frame}
 
 \begin{frame}{Packaging R code}
 \begin{itemize}
 \item Packaging R code is very easy, if you use devtools and read Hadley Wickham's ``R Packages''
-\item If you have some C++ code, there are a few more details to consider
+\item If you have some C++ code, there are a few more details to consider. You can run into build problems
 \item I made a friend on Twitter a few months ago. @quominus - Oliver Keyes, works for Wikipedia. Author of
-			over ten R packages.
-\item I helped him debug some memory leaks in his C code
-\item He returned the favour by fixing all of my build problems. He did this in under half an hour flat
+			over ten R packages, well-respected in the R community
+\item I helped him debug some memory leaks in his C code some time ago
+\item He returned the favour by fixing all of my build problems. He did this in under half an hour flat. Then
+			he cleaned up all my syntax and variable naming
 \end{itemize}
 \end{frame}
 
@@ -55,14 +60,16 @@
 \item Our current approach is brute force $O(n 2^p)$, treating the model space as if it has absolutely
 			no structure
 \item I think we can do better, and avoid having to examine all of the model space if the model space
-			has any usable structure at all
+			has any usable structure at all e.g.
 			$$\text{RSS}(V_1) \geq \text{RSS}(V_2) \text{ if } V_1 \subseteq V_2$$
-\item John has some ideas about this as well
+\item John has some ideas about this as well. Maybe a compromise between the two approaches is
+			best
 \item John has cautioned me that the model space is very ``flat'', and that if we don't search exhaustively,
 			we may miss the best models
 \item Branch and bound is well studied for linear models. Implemented in the leaps package, which Samuel
-			and Garth used for their latest work
-\item Is there any equivalent algorithm generalised linear models?
+			and Garth used for their latest work. Maintained by Thomas Lumley, based on Fortran code originally
+			written by Alan Miller of CSIRO
+\item Is there any equivalent algorithm for generalised linear models?
 \end{itemize}
 \end{frame}
 
@@ -80,14 +87,16 @@ $\vz = \mX \hat{\vbeta} + \mV^{-1} (\vy - \hat{\pi})$
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Questions?}
+\begin{frame}{Questions}
 \begin{itemize}
-\item First and foremost, Is this a really stupid idea? It's the first half-decent idea I've had since I
+\item First and foremost: ``Is this a really stupid idea?'' It's the first half-decent idea I've had since I
 			came back, so I rather hope not
 \item I expect the reason this hasn't been done before is because from model fit to model fit, the weights
 			will change. The key question is: by how much?
 \item Does the branch and bound algorithm still work if you recalculate the weights occasionally? How often
 			do you need to recalculate them, if so?
+\item Even if this entire line of inquiry is a non-starter, I expect I'll learn something along the way
+\item And we'll compare against the exhaustive search and John's ideas which most likely \emph{will} work
 \end{itemize}
 \end{frame}
 \end{document}
