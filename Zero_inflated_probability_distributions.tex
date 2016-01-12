@@ -3,6 +3,8 @@
 
 \input{Definitions.tex}
 
+\def\Var{\text{Var}}
+
 \begin{document}
 
 \maketitle
@@ -43,6 +45,41 @@ E Y^2 &= \sum_{i=0}^{\infty} y^2 P(Y=i) & \\
 &= y^2 P(Y=i) &= \sum_{i=1}^{\infty} y^2 \left( \frac{1 - p}{1 - e^{-\lambda}} \right) \frac{\lambda^{y_i} e^{-\lambda}}{y_i !} \\
 &&= \left( \frac{1 - p}{1 - e^{-\lambda}} \right) \sum_{i=1}^{\infty}  y^2 \frac{\lambda^{y_i} e^{-\lambda}}{y_i !} \\
 &&= \left( \frac{1 - p}{1 - e^{-\lambda}} \right) (\lambda + \lambda^2 - e^{-\lambda})
+\end{array}
+\end{equation*}
+
+(2)
+
+\begin{equation*}
+\begin{array}{lll}
+P(Y_i = 0) &= p + (1 - p) e^{-\lambda} & \\
+P(Y_i = y_i) &= (1 - p) \frac{\lambda^{y_i} e^{-\lambda}}{y_i !}, & y_i \geq 1
+\end{array}
+\end{equation*}
+
+(i) rtp: $\sum_{i=0}^{\infty} P(Y_i = i) = 1$
+\begin{equation*}
+\begin{array}{lll}
+\sum_{i=0}^{\infty} P(Y_i = i) &= p + (1 - p) e^{-\lambda} + \sum_{i=1}^{\infty} (1 - p) \frac{\lambda^{y_i} e^{-\lambda}}{y_i !} \\
+&= p + (1 - p) e^{-\lambda} + (1 - p) (1 - e^{-\lambda}) &= 1.
+\end{array}
+\end{equation*}
+
+(ii)
+
+\begin{equation*}
+\begin{array}{lll}
+E Y_i &= \sum_{i=0}^{\infty} i P(Y_i = i) &= \sum_{i=1}^{\infty} (1 - p) \frac{i \lambda^{y_i} e^{-\lambda}}{y_i !} \\
+&&= (1 - p) \lambda
+\end{array}
+\end{equation*}
+
+$\Var Y = E Y^2 - (E Y)^2 \Leftrightarrow E Y^2 = \Var Y + (E Y)^2$
+
+\begin{equation*}
+\begin{array}{lll}
+E Y^2 &= \sum_{i=0}^\infty i^2 P(Y_i = i) &= \sum_{i=1}^\infty i^2 (1 - p) \frac{\lambda^{y_i} e^{-\lambda}}{y_i !} \\
+&&= (1 - p) (\lambda + \lambda^2)
 \end{array}
 \end{equation*}
 
