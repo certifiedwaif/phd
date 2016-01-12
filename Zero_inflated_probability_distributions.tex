@@ -1,0 +1,49 @@
+\documentclass{amsart}
+\title{Zero-inflated probability distributions}
+
+\input{Definitions.tex}
+
+\begin{document}
+
+\maketitle
+
+(1)
+
+\begin{equation*}
+\begin{array}{ll}
+P(Y_i = 0) = p & \\
+P(Y_j = y_i) = \left (\frac{1 - p}{1 - e^{-\lambda}}\right ) \frac{\lambda^{y_i} e^{-\lambda}}{y_i !} &, y_i \geq 1
+\end{array}
+\end{equation*}
+
+rtp: $\sum_{i=0}^{\infty} P(Y_i = i) = 1$
+
+\begin{equation*}
+\begin{array}{lll}
+\sum_{i=0}^{\infty} P(Y_i = i) &= p + \frac{1-p}{1 - e^{-\lambda}} \sum_{i=1}^{\infty} \frac{\lambda^{y_i} e^{-\lambda}}{y_i !} & \\
+&= p + \frac{1 - p}{1 - e^{-\lambda}} (1 - e^{-\lambda}) &= 1
+\end{array}
+\end{equation*}
+
+Expectation and variance
+\begin{equation*}
+\begin{array}{ll}
+E(Y) &= \sum_{i=0}^{\infty} y_i P(Y_i = y_i) \\
+&= 0 \times p + \sum_{i=1}^{\infty} i \left( \frac{1 - p}{1 - e^{-\lambda}} \right) \frac{\lambda^{y_i} e^{-\lambda}}{y_i !} \\
+&= \left( \frac{1 - p}{1 - e^{-\lambda}} \right) \sum_{i=1}^{\infty} i \frac{\lambda^{y_i} e^{-\lambda}}{y_i !} \\
+&= \left( \frac{1 - p}{1 - e^{-\lambda}} \right) (\lambda - e^{-\lambda})
+\end{array}
+\end{equation*}
+
+$\Var(Y) = Y^2 - (EY)^2 \therefore E Y^2 = \Var Y + (E Y)^2$
+
+\begin{equation*}
+\begin{array}{lll}
+E Y^2 &= \sum_{i=0}^{\infty} y^2 P(Y=i) & \\
+&= y^2 P(Y=i) &= \sum_{i=1}^{\infty} y^2 \left( \frac{1 - p}{1 - e^{-\lambda}} \right) \frac{\lambda^{y_i} e^{-\lambda}}{y_i !} \\
+&&= \left( \frac{1 - p}{1 - e^{-\lambda}} \right) \sum_{i=1}^{\infty}  y^2 \frac{\lambda^{y_i} e^{-\lambda}}{y_i !} \\
+&&= \left( \frac{1 - p}{1 - e^{-\lambda}} \right) (\lambda + \lambda^2 - e^{-\lambda})
+\end{array}
+\end{equation*}
+
+\end{document}
