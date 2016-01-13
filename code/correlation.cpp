@@ -122,22 +122,18 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, MatrixXd mZ)
 {
 	const unsigned int n = mX.rows();
 	const unsigned int p = mX.cols();
-	const unsigned int m = mZ.cols();
+  const unsigned int m = mZ.cols();
 
-	MatrixXd mC(n, p + m);
-	mC << mX, mZ;
-	
-	MatrixXd m1(p + m, p + m); // Symmetric
-	VectorXd m2(p + m);
 
 	// Generate greycode matrix
 	MatrixXd mGrey = greycode(m);
 	VectorXd vR2_all(mGrey.rows());
 	
 	// Loop through models, updating and downdating m1_inverse as necessary
-	for (unsigned int row = 0; row < mGrey.rows(); row++) {
+	for (unsigned int row = 1; row < mGrey.rows(); row++) {
 		// Construct mZ_gamma
 		RowVectorXd vGreycodeRow = mGrey.row(row);
+    // cout << vGreycodeRow << endl;
 		unsigned int one_count = vGreycodeRow.sum();
 
 		MatrixXd mZ_gamma(n, one_count);
@@ -149,6 +145,9 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, MatrixXd mZ)
 			}
 		}
 		
+    const unsigned int m_gamma = mZ_gamma.cols();
+    MatrixXd m1(p + m_gamma, p + m_gamma); // Symmetric
+    VectorXd m2(p + m_gamma);
 		m1 << mX.transpose() * mX, mX.transpose() * mZ_gamma,
 					mZ_gamma.transpose() * mX, mZ_gamma.transpose() * mZ_gamma;
 		MatrixXd m1_inv = m1.inverse();
@@ -156,6 +155,8 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, MatrixXd mZ)
 		m2 << mX.transpose() * vy,
 					mZ_gamma.transpose() * vy;
 	
+    MatrixXd mC(n, p + m_gamma);
+    mC << mX, mZ_gamma;
 		VectorXd vR2 = (vy.transpose() * mC * m1_inv * m2) / vy.squaredNorm();
 		vR2_all(row) = vR2(0);
 	}
@@ -186,8 +187,8 @@ VectorXd one_correlation(VectorXd vy, MatrixXd mX, MatrixXd mZ)
 int main(int argc, char **argv)
 {
 	VectorXd vy = parseCSVfile_double("vy.csv");
-	MatrixXd mX = parseCSVfile_double("mX.csv");
-	MatrixXd mZ = MatrixXd::Ones(263, 1); // Sparse
+	MatrixXd mX = MatrixXd::Ones(263, 1); // Sparse
+  MatrixXd mZ = parseCSVfile_double("mX.csv");
 
 	VectorXd R2_one = one_correlation(vy, mX, mZ);
 	VectorXd R2_all = all_correlations(vy, mX, mZ);
