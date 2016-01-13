@@ -139,11 +139,12 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, MatrixXd mZ)
 		// Construct mZ_gamma
 		RowVectorXd vGreycodeRow = mGrey.row(row);
 		unsigned int one_count = vGreycodeRow.sum();
+
 		MatrixXd mZ_gamma(n, one_count);
 		unsigned int mZ_gamma_col = 0;
-		for (unsigned int mZ_col = 0; mZ_col < ; mZ_col++) {
+		for (unsigned int mZ_col = 0; mZ_col < m; mZ_col++) {
 			if (vGreycodeRow(mZ_col) == 1) {
-				mZ_gamma.col(mZ_gamma_col) = mZ.col(mZ_col)
+				mZ_gamma.col(mZ_gamma_col) = mZ.col(mZ_col);
 				mZ_gamma_col++;
 			}
 		}
