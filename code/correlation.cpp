@@ -10,6 +10,9 @@ using namespace boost;
 using Eigen::VectorXd;
 using Eigen::RowVectorXd;
 using Eigen::MatrixXd;
+using Eigen::VectorXi;
+using Eigen::RowVectorXi;
+using Eigen::MatrixXi;
 using namespace std;
 
 // Code copied from here: https://gist.github.com/stephenjbarr/2266900
@@ -124,11 +127,10 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, MatrixXd mZ)
 	const unsigned int p = mX.cols();
   const unsigned int m = mZ.cols();
 
-
 	// Generate greycode matrix
 	MatrixXd mGrey = greycode(m);
 	VectorXd vR2_all(mGrey.rows());
-	
+	MatrixXd mA;
 	// Loop through models, updating and downdating m1_inverse as necessary
 	for (unsigned int row = 1; row < mGrey.rows(); row++) {
 		// Construct mZ_gamma
@@ -150,7 +152,30 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, MatrixXd mZ)
     VectorXd m2(p + m_gamma);
 		m1 << mX.transpose() * mX, mX.transpose() * mZ_gamma,
 					mZ_gamma.transpose() * mX, mZ_gamma.transpose() * mZ_gamma;
-		MatrixXd m1_inv = m1.inverse();
+		
+		// Idea: Allocate matrices and so on outside of the loop. Then resize them inside.
+		// MatrixXd m1_inv = m1.inverse();
+		// TODO: Rank one updates and downdates
+		// By properties of greycode, only one element can be different. And it's either one higher or
+		// one lower.
+		// Check if update or downdate, and for which variable
+		RowVectorXd vDiff = mGrey.row(row) - mGrey.row(row - 1);
+		unsigned int diffIdx;
+		for (diffIdx = 0; vDiff(diffIdx) == 0; diffIdx++);
+		MatrixXd m1_inv(p + m_gamma, p + m_gamma);
+		VectorXd vx = mZ.col(diffIdx);
+		mA = (mX.transpose() * mX).inverse(); // Re-use from last time
+		if (vDiff(diffIdx) == 1) {
+			// Update
+			const double b = 1 / (vx.transpose() * vx - vx.transpose() * mX * mA * mX.transpose() * vx)(0);
+			m1_inv << mA + b * mA * mX * vx * vx.transpose() * mX * mA, -mA * mX.transpose() * vx * b,
+								-b * vx.transpose() * mX * mA, b;
+		} else {
+			// Downdate
+			const double c = 1 / vx.squaredNorm();
+			VectorXd vb = -mX.transpose() * vx; // FIXME: I don't think this expression is right
+			m1_inv = mA - vb * vb.transpose() / c;
+		}
 	
 		m2 << mX.transpose() * vy,
 					mZ_gamma.transpose() * vy;
@@ -159,6 +184,7 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, MatrixXd mZ)
     mC << mX, mZ_gamma;
 		VectorXd vR2 = (vy.transpose() * mC * m1_inv * m2) / vy.squaredNorm();
 		vR2_all(row) = vR2(0);
+		mA = m1_inv;
 	}
 
 	return vR2_all;
@@ -187,13 +213,14 @@ VectorXd one_correlation(VectorXd vy, MatrixXd mX, MatrixXd mZ)
 int main(int argc, char **argv)
 {
 	VectorXd vy = parseCSVfile_double("vy.csv");
-	MatrixXd mX = MatrixXd::Ones(263, 1); // Sparse
+	MatrixXd mX = MatrixXd::Ones(263, 1);
   MatrixXd mZ = parseCSVfile_double("mX.csv");
 
 	VectorXd R2_one = one_correlation(vy, mX, mZ);
-	VectorXd R2_all = all_correlations(vy, mX, mZ);
-
 	cout << R2_one << endl;
+
+	VectorXd R2_all = all_correlations(vy, mX, mZ);
+	cout << R2_all.head(10) << endl;
 	
 	return 0;
 }
