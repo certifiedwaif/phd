@@ -1,0 +1,72 @@
+\documentclass{amsart}
+\title{Meeting with Dr John Ormerod - 15/01/2016}
+
+\input{Definitions.tex}
+
+\begin{document}
+
+\maketitle
+
+\begin{equation*}
+R_q^2 = \frac{\vy^\top \mX \bE_q(\vgamma) [\mX^\top \mX \odot \bE_q(\vgamma \vgamma^\top)] \bE_q(\vgamma) \mX^\top \vy}{\vy^\top \vy}
+\end{equation*}
+
+where $\odot$ denotes element by element multiplication.
+
+Suppose that $q(\vgamma = \Pi_{i=1}^p \vw_i^{\vgamma_i} (1 - \vw_i)^{1 - \vgamma_i}$.
+Then
+\begin{equation*}
+\begin{array}{ll}
+R_q^2 &= \frac{\vy^\top \mX \mW [\mW \mX^\top \mX \mW + \mW \odot (1 - \mW)]^{-1} \mW \mX^\top \vy}{\vy^\top \vy} \\
+&= \frac{\vy^\top \mX [\mX^\top \mX + \diag{(\mW^{-1} - 1)}]^{-1} \mX^\top \vy}{\vy^\top\vy}
+\end{array}
+\end{equation*}
+
+We need to show when elements of $\mW$ are small they have negligible contribution to $R^2$. This has not yet
+been proven, but has been tested numerically.
+
+Let $\alpha = \{ i : \vw_i > \epsilon \}$.
+
+\begin{equation*}
+R^2_\alpha = \frac{\vy^\top \mX_\alpha [\mX_\alpha^\top \mX_\alpha + \diag{(\mW_{\alpha}^{-1} - 1)}]^{-1} \mX_\alpha^\top \vy}{\vy^\top\vy}
+\end{equation*}
+
+We wish to bound the error between $R_q^2$ and $R_\alpha^2$. John thinks we'll use Taylor series expansions.
+
+Say
+\begin{equation*}
+[\bE(\vgamma \vgamma^\top)]_{ij} = \begin{cases}
+\bE(\vgamma_j) &\text{ if } j = k\\
+\bE(\vgamma_j \vgamma_k) &\text{ if } j \ne k
+\end{cases}
+\end{equation*}
+
+Under the full factorisation approximation $\bE[\vgamma_i \vgamma_j] = \bE(\vgamma_j) \bE(\vgamma_k)$.
+
+Let $\underline{p}(\vy; \vw_j^{(1)})$ denote the lower bound, where $\vw_j^{(k)} \in \bR^p$, jth element is
+replaced by k and all other elements $w_i, i \ne j$ are taken from $w$.
+
+On the Brain project, $p$=17,000, $n$=140. John used CVB to fit networks, with model fits taking 2 to 3
+seconds each. Across all 17,000 variables, this takes 9 hours for one subject. So across all subjects, it
+would take ~900 hours, which is just infeasible.
+
+The order in which we should work on things is:
+\begin{enumerate}
+\item CPU
+\item GPU
+\end{enumerate}
+
+It might make sense to just buy a desktop PC with a large case, and install a graphics card in that.
+
+\section{Applications of this package}
+\begin{itemize}
+\item Linear model selection
+\item Regression splines
+\item Changepoint detection
+\item Additive spline models
+\end{itemize}
+
+These all use the same mathematical framework, and simply require that we put different numbers in the $mX$
+matrix. And that should be our second paper.
+
+\end{document}
