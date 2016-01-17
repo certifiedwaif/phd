@@ -1,0 +1,73 @@
+\documentclass{beamer}
+
+\usetheme{Warsaw}
+\usepackage{graphicx}
+\usepackage{ulem}
+\input{include.tex}
+\input{Definitions.tex}
+
+\usefonttheme{serif}
+
+\title{Progress report - 18/01/2016}
+\author{Mark Greenaway\\PhD candidate\\markg@maths.usyd.edu.au}
+
+\mode<presentation>
+{ \usetheme{boxes} }
+
+\begin{document}
+\begin{frame}
+\maketitle
+\end{frame}
+
+\begin{frame}{Third year}
+John used to think I was incompetent. Now he just thinks I'm lazy. That's \emph{progress}!
+\begin{itemize}
+\item Six months to do the work for the second paper
+\item Begin third paper
+\item Write thesis
+\item OMG
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Work at the right level}
+
+With time running out, I have to alter my strategy. I don't have the luxury of
+playing around with different ways of calculating things anymore. Computers
+are a means to an end.
+
+\begin{enumerate}
+\item Statisticians / applied mathematicians
+\item Numerical analysts
+\item Computer scientists
+\end{enumerate}
+
+It's fine for everyone to work at level one, and for people like John or
+myself to work at level two. But we shouldn't spend too much time at level
+three. We should let computer scientists do their jobs, and we should do ours.
+
+\end{frame}
+
+\begin{frame}{Correlation}
+Rank one updates
+$O(p^3)$ to $O(p^2)$
+I have C++ that can fit 50,000 models per second on a single core, doing $O(p^3)$ inversions. I should
+be able to improve substantially on this by using rank one updates and basic parallelisation 
+techniques.
+\end{frame}
+
+\begin{frame}{R and C++}
+\begin{itemize}
+\item I'm getting much better at writing C++.
+\item People typically design their algorithms to minimise the number of floating point operations. 
+	  They should also pay attention to how memory is used.
+\item Good numerical linear algebra textbooks
+	  e.g. Numerical Linear Algebra by Trefethen and Bau make this point early and forcefully.
+\item I'm using the Eigen library for linear algebra. I'm in good company. Douglas Bates (lme4) and
+      Dirk Eddelbuettel (Rcpp) recommend this approach in ``Fast and Elegant Numerical Linear Algebra Using the RcppEigen Package''.
+\item CPUs single core first, then multi core, then GPUs.
+\item OpenMP/RcppParallel for parallelisation.
+\item Everything will be released in an R package that runs on all platforms and that everyone can 		  use.
+\end{itemize}
+\end{frame}
+
+\end{document}
