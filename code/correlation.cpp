@@ -160,12 +160,13 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, MatrixXd mZ)
 		// one lower.
 		// Check if update or downdate, and for which variable
 		RowVectorXd vDiff = mGrey.row(row) - mGrey.row(row - 1);
-		unsigned int diffIdx;
-		for (diffIdx = 0; vDiff(diffIdx) == 0; diffIdx++);
+		unsigned int diff_idx;
+		for (diff_idx = 0; vDiff(diff_idx) == 0; diff_idx++);
 		MatrixXd m1_inv(p + m_gamma, p + m_gamma);
-		VectorXd vx = mZ.col(diffIdx);
+		VectorXd vx = mZ.col(diff_idx);
 		mA = (mX.transpose() * mX).inverse(); // Re-use from last time
-		if (vDiff(diffIdx) == 1) {
+    
+		if (vDiff(diff_idx) == 1) {
 			// Update
 			const double b = 1 / (vx.transpose() * vx - vx.transpose() * mX * mA * mX.transpose() * vx)(0);
 			m1_inv << mA + b * mA * mX * vx * vx.transpose() * mX * mA, -mA * mX.transpose() * vx * b,
