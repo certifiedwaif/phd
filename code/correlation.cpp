@@ -82,7 +82,7 @@ MatrixXd parseCSVfile_double(string infilename)
 
         The operator >> is shift right. The operator ^ is exclusive or.
 */
-unsigned int binaryToGrey(unsigned int num)
+unsigned int binary_to_grey(unsigned int num)
 {
   return (num >> 1) ^ num;
 }
@@ -91,7 +91,7 @@ unsigned int binaryToGrey(unsigned int num)
         The purpose of this function is to convert a reflected binary
         Gray code number to a binary number.
 */
-unsigned int greyToBinary(unsigned int num)
+unsigned int grey_to_binary(unsigned int num)
 {
   unsigned int mask;
   for (mask = num >> 1; mask != 0; mask = mask >> 1)
@@ -101,7 +101,7 @@ unsigned int greyToBinary(unsigned int num)
   return num;
 }
 
-VectorXd binaryToVec(unsigned int num, unsigned int p)
+VectorXd binary_to_vec(unsigned int num, unsigned int p)
 {
   VectorXd result(p);
   for (unsigned int i = 0; i < p; i++) {
@@ -116,7 +116,7 @@ MatrixXd greycode(unsigned int p)
   unsigned int rows = 1 << p;
   MatrixXd result(rows, p);
   for (unsigned int i = 0; i < rows; i++) {
-    result.row(i) = binaryToVec(binaryToGrey(i), p).transpose();
+    result.row(i) = binary_to_vec(binary_to_grey(i), p).transpose();
   }
   return(result);
 }
@@ -131,6 +131,7 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, MatrixXd mZ)
 	MatrixXd mGrey = greycode(m);
 	VectorXd vR2_all(mGrey.rows());
 	MatrixXd mA;
+	
 	// Loop through models, updating and downdating m1_inverse as necessary
 	for (unsigned int row = 1; row < mGrey.rows(); row++) {
 		// Construct mZ_gamma
@@ -160,12 +161,12 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, MatrixXd mZ)
 		// one lower.
 		// Check if update or downdate, and for which variable
 		RowVectorXd vDiff = mGrey.row(row) - mGrey.row(row - 1);
-		unsigned int diffIdx;
-		for (diffIdx = 0; vDiff(diffIdx) == 0; diffIdx++);
+		unsigned int diff_idx;
+		for (diff_idx = 0; vDiff(diff_idx) == 0; diff_idx++);
 		MatrixXd m1_inv(p + m_gamma, p + m_gamma);
-		VectorXd vx = mZ.col(diffIdx);
+		VectorXd vx = mZ.col(diff_idx);
 		mA = (mX.transpose() * mX).inverse(); // Re-use from last time
-		if (vDiff(diffIdx) == 1) {
+		if (vDiff(diff_idx) == 1) {
 			// Update
 			const double b = 1 / (vx.transpose() * vx - vx.transpose() * mX * mA * mX.transpose() * vx)(0);
 			m1_inv << mA + b * mA * mX * vx * vx.transpose() * mX * mA, -mA * mX.transpose() * vx * b,
