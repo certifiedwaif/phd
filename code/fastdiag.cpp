@@ -18,7 +18,7 @@ using Eigen::VectorXd;
 typedef Eigen::Map<Eigen::MatrixXd> MapMatd;
 
 // [[Rcpp::export]]
-VectorXd fastdiag(MapMatd lambda, MapMatd C)
+VectorXd fastdiag(const MapMatd lambda, const MapMatd C)
 {
   VectorXd result(C.rows());
 
@@ -34,7 +34,7 @@ VectorXd fastdiag(MapMatd lambda, MapMatd C)
 }
 
 // [[Rcpp::export]]
-VectorXd fastdiag2(MapMatd R, MapMatd C)
+VectorXd fastdiag2(const MapMatd R, const MapMatd C)
 {
   VectorXd result(C.rows());
 
@@ -52,7 +52,7 @@ VectorXd fastdiag2(MapMatd R, MapMatd C)
 }
 
 // [[Rcpp::export]]
-VectorXd fastsolve(MapMatd R, MapMatd C)
+VectorXd fastsolve(const MapMatd R, const MapMatd C)
 {
   VectorXd result(C.rows());
 

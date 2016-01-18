@@ -62,7 +62,7 @@ MatrixXd greycode(unsigned int p)
 }
 
 // [[Rcpp::export]]
-VectorXd all_correlations(MapVecd vy, MapMatd mX, MapMatd mZ)
+VectorXd all_correlations(const MapVecd vy, const MapMatd mX, const MapMatd mZ)
 {
   const unsigned int n = mX.rows();
   const unsigned int p = mX.cols();
@@ -108,7 +108,7 @@ VectorXd all_correlations(MapVecd vy, MapMatd mX, MapMatd mZ)
 }
 
 // [[Rcpp::export]]
-VectorXd one_correlation(MapVecd vy, MapMatd mX, MapMatd mZ)
+VectorXd one_correlation(const MapVecd vy, const MapMatd mX, const MapMatd mZ)
 {
   const unsigned int n = mX.rows();
   const unsigned int p = mX.cols();
