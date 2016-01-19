@@ -152,7 +152,7 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, MatrixXd mZ)
 		MatrixXd mZ_gamma(n, one_count);
 		unsigned int mZ_gamma_col = 0;
 		for (unsigned int mZ_col = 0; mZ_col < m; mZ_col++) {
-			if (vGreycodeRow(mZ_col) == 1) {
+			if (vGreycodeRow(mZ_col) == 1.) {
 				mZ_gamma.col(mZ_gamma_col) = mZ.col(mZ_col);
 				mZ_gamma_col++;
 			}
@@ -176,16 +176,18 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, MatrixXd mZ)
 		MatrixXd m1_inv(p + m_gamma, p + m_gamma);
 		VectorXd vx = mZ.col(diff_idx);
 		mA = (mX.transpose() * mX).inverse(); // Re-use from last time
-		if (vDiff(diff_idx) == 1) {
+		if (vDiff(diff_idx) == 1.) {
 			// Update
 			// const double b = 1 / (vx.transpose() * vx - vx.transpose() * mX * mA * mX.transpose() * vx)(0);
 			// m1_inv << mA + b * mA * mX * vx * vx.transpose() * mX * mA, -mA * mX.transpose() * vx * b,
 			// 					-b * vx.transpose() * mX * mA, b;
 			m1_inv << mA, VectorXd::Zero(mA.rows()),
-								VectorXd::Zero(mA.rows()).transpose(), 1;
+								VectorXd::Zero(mA.rows()).transpose(), 1.;
 			VectorXd vv(p + m_gamma); // Form the vector [X^Tx, 0]^T
 			vv << mX.transpose() * vx,
-						0;
+						0.;
+			// Ideas: * Make this vector sparse.
+			//        * Make ve() a function.
 			VectorXd ve(p + m_gamma);
 			ve.setZero(p + m_gamma);
 			ve(p+1) = 1;
