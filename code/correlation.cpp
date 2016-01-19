@@ -121,6 +121,16 @@ MatrixXd greycode(unsigned int p)
   return(result);
 }
 
+inline MatrixXd& sherman_morrison(MatrixXd& mA_inv, const VectorXd vu, const VectorXd vv)
+{
+	// MatrixXd mA_inv_tilde(mA_inv.rows(), mA_inv.cols());
+	const double lambda = (vv * mA_inv * vu).value();
+
+	mA_inv += -((mA_inv * vu) * (vv * mA_inv)) / (1 + lambda);
+
+	return mA_inv;
+}
+
 VectorXd all_correlations(VectorXd vy, MatrixXd mX, MatrixXd mZ)
 {
 	const unsigned int n = mX.rows();
@@ -168,9 +178,22 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, MatrixXd mZ)
 		mA = (mX.transpose() * mX).inverse(); // Re-use from last time
 		if (vDiff(diff_idx) == 1) {
 			// Update
-			const double b = 1 / (vx.transpose() * vx - vx.transpose() * mX * mA * mX.transpose() * vx)(0);
-			m1_inv << mA + b * mA * mX * vx * vx.transpose() * mX * mA, -mA * mX.transpose() * vx * b,
-								-b * vx.transpose() * mX * mA, b;
+			// const double b = 1 / (vx.transpose() * vx - vx.transpose() * mX * mA * mX.transpose() * vx)(0);
+			// m1_inv << mA + b * mA * mX * vx * vx.transpose() * mX * mA, -mA * mX.transpose() * vx * b,
+			// 					-b * vx.transpose() * mX * mA, b;
+			m1_inv << mA, VectorXd::Zero(mA.rows()),
+								VectorXd::Zero(mA.rows()).transpose(), 1;
+			VectorXd vv(p + m_gamma); // Form the vector [X^Tx, 0]^T
+			vv << mX.transpose() * vx,
+						0;
+			VectorXd ve(p + m_gamma);
+			ve.setZero(p + m_gamma);
+			ve(p+1) = 1;
+			// Idea: Make m1_inv symmetric. Then just do one Sherman-Morrison update.
+			m1_inv = sherman_morrison(m1_inv, vv, ve);
+			RowVectorXd vv2(p + m_gamma); // Form the vector [X^T x, x^T x]
+			vv2 << mX * vx, vx.squaredNorm();
+			m1_inv = sherman_morrison(m1_inv, ve, vv2);
 		} else {
 			// Downdate
 			const double c = 1 / vx.squaredNorm();
@@ -213,6 +236,9 @@ VectorXd one_correlation(VectorXd vy, MatrixXd mX, MatrixXd mZ)
 
 int main(int argc, char **argv)
 {
+	Eigen::initParallel();
+	Eigen::setNbThreads(4);
+
 	VectorXd vy = parseCSVfile_double("vy.csv");
 	MatrixXd mX = MatrixXd::Ones(263, 1);
   MatrixXd mZ = parseCSVfile_double("mX.csv");
