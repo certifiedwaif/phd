@@ -74,11 +74,14 @@ and subtract outer products to get
 
 \begin{equation*}
 \begin{pmatrix}
-\mX_{1:p-1} & \vzero \\
+\mX_{1:p-1}^\top \mX_{1:p-1} & \vzero \\
 \vzero^\top & 1
 \end{pmatrix}
 \end{equation*}
 
 then take the upper left block as the new inverse.
+
+\section{Idea}
+Make $\tilde{\mX}$ symmetric, then just do one Sherman-Woodbury update.
 
 \end{document}
