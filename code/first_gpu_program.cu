@@ -1,9 +1,10 @@
 // first_gpu_program.cu
+// Armadillo linked to NVBlas
 
 #include <stdio.h>
 #include <cuda_runtime.h>
 
-#define N 65000
+#define N 65000L
 
 static void HandleError( cudaError_t err,
                          const char *file,
@@ -45,7 +46,8 @@ int main(int argc, char **argv)
 	HANDLE_ERROR(cudaMemcpy(dev_b, b, N * sizeof(int),
 					cudaMemcpyHostToDevice));
 
-	add<<<N, 1>>>(dev_a, dev_b, dev_c);
+	for (int i = 0; i < 1e5; i++)
+		add<<<N, 1>>>(dev_a, dev_b, dev_c);
 
 	// Copy array 'c' back from the GPU to the CPU
 	HANDLE_ERROR(cudaMemcpy(c, dev_c, N * sizeof(int),

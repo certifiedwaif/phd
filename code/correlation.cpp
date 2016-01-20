@@ -121,71 +121,113 @@ MatrixXd greycode(unsigned int p)
   return(result);
 }
 
+inline MatrixXd& sherman_morrison(MatrixXd& mA_inv, const VectorXd vu, const VectorXd vv)
+{
+	// MatrixXd mA_inv_tilde(mA_inv.rows(), mA_inv.cols());
+	const double lambda = (vv.transpose() * mA_inv * vu).value();
+
+	mA_inv += -((mA_inv * vu) * (vv.transpose() * mA_inv)) / (1 + lambda);
+
+	return mA_inv;
+}
+
 VectorXd all_correlations(VectorXd vy, MatrixXd mX, MatrixXd mZ)
 {
 	const unsigned int n = mX.rows();
 	const unsigned int p = mX.cols();
-  const unsigned int m = mZ.cols();
+	const unsigned int m = mZ.cols();
+	const unsigned int greycode_rows = (1 << m);
 
 	// Generate greycode matrix
-	MatrixXd mGrey = greycode(m);
-	VectorXd vR2_all(mGrey.rows());
+	// MatrixXd mGrey = greycode(m);
+	VectorXd vR2_all(greycode_rows);
 	MatrixXd mA;
+	MatrixXd mC_last;
 	
+	bool bmA_set = false;
 	// Loop through models, updating and downdating m1_inverse as necessary
-	for (unsigned int row = 1; row < mGrey.rows(); row++) {
+	for (unsigned int row = 1; row < greycode_rows; row++) {
 		// Construct mZ_gamma
-		RowVectorXd vGreycodeRow = mGrey.row(row);
-    // cout << vGreycodeRow << endl;
-		unsigned int one_count = vGreycodeRow.sum();
-
+		RowVectorXd v_greycode_row = binary_to_vec(binary_to_grey(row), m);
+		unsigned int one_count = v_greycode_row.sum();
 		MatrixXd mZ_gamma(n, one_count);
-		unsigned int mZ_gamma_col = 0;
-		for (unsigned int mZ_col = 0; mZ_col < m; mZ_col++) {
-			if (vGreycodeRow(mZ_col) == 1) {
-				mZ_gamma.col(mZ_gamma_col) = mZ.col(mZ_col);
-				mZ_gamma_col++;
-			}
-		}
+    // cout << v_greycode_row << endl;
 		
-    const unsigned int m_gamma = mZ_gamma.cols();
-    MatrixXd m1(p + m_gamma, p + m_gamma); // Symmetric
-    VectorXd m2(p + m_gamma);
-		m1 << mX.transpose() * mX, mX.transpose() * mZ_gamma,
-					mZ_gamma.transpose() * mX, mZ_gamma.transpose() * mZ_gamma;
-		
-		// Idea: Allocate matrices and so on outside of the loop. Then resize them inside.
 		// MatrixXd m1_inv = m1.inverse();
 		// TODO: Rank one updates and downdates
 		// By properties of greycode, only one element can be different. And it's either one higher or
 		// one lower.
 		// Check if update or downdate, and for which variable
-		RowVectorXd vDiff = mGrey.row(row) - mGrey.row(row - 1);
+		RowVectorXd v_diff = binary_to_vec(binary_to_grey(row), m) - binary_to_vec(binary_to_grey(row - 1), m);
 		unsigned int diff_idx;
-		for (diff_idx = 0; vDiff(diff_idx) == 0; diff_idx++);
-		MatrixXd m1_inv(p + m_gamma, p + m_gamma);
-		VectorXd vx = mZ.col(diff_idx);
-		mA = (mX.transpose() * mX).inverse(); // Re-use from last time
-		if (vDiff(diff_idx) == 1) {
-			// Update
-			const double b = 1 / (vx.transpose() * vx - vx.transpose() * mX * mA * mX.transpose() * vx)(0);
-			m1_inv << mA + b * mA * mX * vx * vx.transpose() * mX * mA, -mA * mX.transpose() * vx * b,
-								-b * vx.transpose() * mX * mA, b;
-		} else {
-			// Downdate
-			const double c = 1 / vx.squaredNorm();
-			VectorXd vb = -mX.transpose() * vx; // FIXME: I don't think this expression is right
-			m1_inv = mA - vb * vb.transpose() / c;
+		for (diff_idx = 0; v_diff(diff_idx) == 0; diff_idx++);
+		VectorXd vz = mZ.col(diff_idx);
+		unsigned int mZ_gamma_col = 0;
+		for (unsigned int mZ_col_idx = 0; mZ_col_idx < m; mZ_col_idx++) {
+			if (v_greycode_row(mZ_col_idx) == 1.) {
+				mZ_gamma.col(mZ_gamma_col) = mZ.col(mZ_col_idx);
+				mZ_gamma_col++;
+			}
 		}
-	
+
+    const unsigned int m_gamma = mZ_gamma.cols();
+    MatrixXd m1(p + m_gamma, p + m_gamma); // Symmetric
+    VectorXd m2(p + m_gamma);
+		m1 << mX.transpose() * mX, mX.transpose() * mZ_gamma,
+					mZ_gamma.transpose() * mX, mZ_gamma.transpose() * mZ_gamma;
+
 		m2 << mX.transpose() * vy,
 					mZ_gamma.transpose() * vy;
 	
     MatrixXd mC(n, p + m_gamma);
     mC << mX, mZ_gamma;
-		VectorXd vR2 = (vy.transpose() * mC * m1_inv * m2) / vy.squaredNorm();
-		vR2_all(row) = vR2(0);
-		mA = m1_inv;
+    VectorXd vR2;
+		// If we haven't previously calculated this inverse, calculate it the first time.
+		if (!bmA_set) {
+			mA = m1.inverse();
+			vR2 = (vy.transpose() * mC * mA * m2) / vy.squaredNorm();
+			vR2_all(row) = vR2.value();
+			bmA_set = true;
+		} else {
+			if (v_diff(diff_idx) == 1.) {
+				MatrixXd m1_inv(mA.rows() + 1, mA.cols() + 1);
+				cout << "Updating " << diff_idx << endl;
+				cout << "mA.cols() " << mA.cols() << endl;
+				cout << "mC_last.cols() " << mC_last.cols() << endl;
+				cout << "mC.cols() " << mC.cols() << endl;
+				// Update
+				// const double b = 1 / (vx.transpose() * vx - vx.transpose() * mX * mA * mX.transpose() * vx)(0);
+				// m1_inv << mA + b * mA * mX * vx * vx.transpose() * mX * mA, -mA * mX.transpose() * vx * b,
+				// 					-b * vx.transpose() * mX * mA, b;
+				m1_inv << mA, VectorXd::Zero(mA.rows()),
+									VectorXd::Zero(mA.rows()).transpose(), 1.;
+				VectorXd vv(m1_inv.rows()); // Form the vector [C^T z, 0]^T
+				vv << mC_last.transpose() * vz,
+							0.;
+				// Ideas: * Make this vector sparse.
+				//        * Make ve() a function.
+				VectorXd ve(m1_inv.rows());
+				ve.setZero(m1_inv.rows());
+				ve(m1_inv.rows() - 1) = 1.; // ve_{p+1}
+				// Idea: Make m1_inv symmetric. Then just do one Sherman-Morrison update.
+				m1_inv = sherman_morrison(m1_inv, vv, ve);
+				RowVectorXd vv2(m1_inv.rows()); // Form the vector [C^T z, z^T z]
+				vv2 << (mC_last.transpose() * vz).transpose(), vz.squaredNorm();
+				m1_inv = sherman_morrison(m1_inv, ve, vv2);
+				
+				vR2 = (vy.transpose() * mC * m1_inv * m2) / vy.squaredNorm();
+				vR2_all(row) = vR2.value();
+				mA = m1_inv;
+			} else {
+				// Downdate
+				cout << "Downdating " << diff_idx << endl;
+				// const double c = 1 / vx.squaredNorm();
+				// VectorXd vb = -mX.transpose() * vx; // FIXME: I don't think this expression is right
+				// m1_inv = mA - vb * vb.transpose() / c;
+				vR2_all(row) = 0.;
+			}
+		}
+		mC_last = mC;
 	}
 
 	return vR2_all;
@@ -213,9 +255,12 @@ VectorXd one_correlation(VectorXd vy, MatrixXd mX, MatrixXd mZ)
 
 int main(int argc, char **argv)
 {
+	// Eigen::initParallel();
+	// Eigen::setNbThreads(4);
+
 	VectorXd vy = parseCSVfile_double("vy.csv");
 	MatrixXd mX = MatrixXd::Ones(263, 1);
-  MatrixXd mZ = parseCSVfile_double("mX.csv");
+	MatrixXd mZ = parseCSVfile_double("mX.csv");
 
 	VectorXd R2_one = one_correlation(vy, mX, mZ);
 	cout << R2_one << endl;

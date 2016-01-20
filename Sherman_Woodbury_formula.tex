@@ -1,0 +1,87 @@
+\documentclass{amsart}
+\title{Thinking about using the Sherman-Woodbury formula for rank 1 updates and downdates}
+
+\input{Definitions.tex}
+
+\begin{document}
+
+\maketitle
+
+How to apply the Sherman-Morrison formula to perform rank one updates and downdates of inverses.
+
+\section{Sherman-Morrison formula}
+\begin{equation}
+(\mA + \vu \otimes \vv)^{-1} = \mA^{-1} - \frac{(\mA^{-1}.\vu) \otimes (\vv.\mA^{-1})}{1 + \lambda}
+\end{equation}
+where $\lambda = \vv. \mA^{-1}. \vu$
+
+\section{Rank one updates and downdates}
+
+\subsection{Rank one update}
+
+\begin{equation*}
+\begin{pmatrix}
+\mX^\top \mX & \vzero \\
+\vzero^\top & 1
+\end{pmatrix}^{-1}
+=
+\begin{pmatrix}
+(\mX^\top \mX)^{-1} & \vzero \\
+\vzero^\top & 1
+\end{pmatrix}
+\end{equation*}
+
+Form the new matrix
+\begin{equation*}
+\begin{array}{ll}
+\tilde{\mX}&= 
+\begin{pmatrix}
+\mX^\top \mX & \vzero \\
+\vzero^\top & 1
+\end{pmatrix}^{-1}
++
+\begin{pmatrix}
+\mX^\top \vx \\
+\vzero
+\end{pmatrix} \otimes \ve_{p+1}^\top
++
+\ve_{p+1} \otimes [\mX^\top\vx, \vx^\top \vx]^\top \\
+&= \begin{pmatrix}
+\mX^\top \mX & \mX^\top \vx \\
+\vzero^\top & 0
+\end{pmatrix}
++
+\ve_{p+1} \otimes [\mX^\top\vx, \vx^\top \vx]^\top \\
+&=
+\begin{pmatrix}
+\mX^\top \mX & \mX^\top \vx \\
+\vx^\top \mX & \vx^\top \vx
+\end{pmatrix}
+\end{array}
+\end{equation*}
+
+\subsection{Rank one downdate}
+Similiarly, form the matrix
+
+\begin{equation*}
+\begin{pmatrix}
+\mX_{1:p-1} & \mX_p \\
+\mX_p^\top & \mX_p^\top \mX_p
+\end{pmatrix}
+\end{equation*}
+
+and subtract outer products to get
+
+\begin{equation*}
+\begin{pmatrix}
+\mX_{1:p-1}^\top \mX_{1:p-1} & \vzero \\
+\vzero^\top & 1
+\end{pmatrix}
+\end{equation*}
+
+then take the upper left block as the new inverse.
+
+\section{Idea}
+Make $\tilde{\mX}$ symmetric, then just do one Sherman-Woodbury update.
+
+\end{document}
