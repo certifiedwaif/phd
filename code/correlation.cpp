@@ -124,9 +124,9 @@ MatrixXd greycode(unsigned int p)
 inline MatrixXd& sherman_morrison(MatrixXd& mA_inv, const VectorXd vu, const VectorXd vv)
 {
 	// MatrixXd mA_inv_tilde(mA_inv.rows(), mA_inv.cols());
-	const double lambda = (vv * mA_inv * vu).value();
+	const double lambda = (vv.transpose() * mA_inv * vu).value();
 
-	mA_inv += -((mA_inv * vu) * (vv * mA_inv)) / (1 + lambda);
+	mA_inv += -((mA_inv * vu) * (vv.transpose() * mA_inv)) / (1 + lambda);
 
 	return mA_inv;
 }
@@ -135,13 +135,14 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, MatrixXd mZ)
 {
 	const unsigned int n = mX.rows();
 	const unsigned int p = mX.cols();
-  const unsigned int m = mZ.cols();
+	const unsigned int m = mZ.cols();
 
 	// Generate greycode matrix
 	MatrixXd mGrey = greycode(m);
 	VectorXd vR2_all(mGrey.rows());
 	MatrixXd mA;
 	
+	bool bmA_set = false;
 	// Loop through models, updating and downdating m1_inverse as necessary
 	for (unsigned int row = 1; row < mGrey.rows(); row++) {
 		// Construct mZ_gamma
@@ -175,7 +176,12 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, MatrixXd mZ)
 		for (diff_idx = 0; vDiff(diff_idx) == 0; diff_idx++);
 		MatrixXd m1_inv(p + m_gamma, p + m_gamma);
 		VectorXd vx = mZ.col(diff_idx);
-		mA = (mX.transpose() * mX).inverse(); // Re-use from last time
+
+		// If we haven't previously calculated this inverse, calculate it the first time.
+		if (!bmA_set) {
+			mA = (mX.transpose() * mX).inverse();
+		}
+		
 		if (vDiff(diff_idx) == 1.) {
 			// Update
 			// const double b = 1 / (vx.transpose() * vx - vx.transpose() * mX * mA * mX.transpose() * vx)(0);
@@ -190,17 +196,17 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, MatrixXd mZ)
 			//        * Make ve() a function.
 			VectorXd ve(p + m_gamma);
 			ve.setZero(p + m_gamma);
-			ve(p+1) = 1;
+			ve(p) = 1; // ve_{p+1}
 			// Idea: Make m1_inv symmetric. Then just do one Sherman-Morrison update.
 			m1_inv = sherman_morrison(m1_inv, vv, ve);
 			RowVectorXd vv2(p + m_gamma); // Form the vector [X^T x, x^T x]
-			vv2 << mX * vx, vx.squaredNorm();
+			vv2 << mX.transpose() * vx, vx.squaredNorm();
 			m1_inv = sherman_morrison(m1_inv, ve, vv2);
 		} else {
 			// Downdate
-			const double c = 1 / vx.squaredNorm();
-			VectorXd vb = -mX.transpose() * vx; // FIXME: I don't think this expression is right
-			m1_inv = mA - vb * vb.transpose() / c;
+			// const double c = 1 / vx.squaredNorm();
+			// VectorXd vb = -mX.transpose() * vx; // FIXME: I don't think this expression is right
+			// m1_inv = mA - vb * vb.transpose() / c;
 		}
 	
 		m2 << mX.transpose() * vy,
@@ -209,7 +215,7 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, MatrixXd mZ)
     MatrixXd mC(n, p + m_gamma);
     mC << mX, mZ_gamma;
 		VectorXd vR2 = (vy.transpose() * mC * m1_inv * m2) / vy.squaredNorm();
-		vR2_all(row) = vR2(0);
+		vR2_all(row) = vR2.value();
 		mA = m1_inv;
 	}
 
@@ -238,12 +244,12 @@ VectorXd one_correlation(VectorXd vy, MatrixXd mX, MatrixXd mZ)
 
 int main(int argc, char **argv)
 {
-	Eigen::initParallel();
-	Eigen::setNbThreads(4);
+//	Eigen::initParallel();
+//	Eigen::setNbThreads(4);
 
 	VectorXd vy = parseCSVfile_double("vy.csv");
 	MatrixXd mX = MatrixXd::Ones(263, 1);
-  MatrixXd mZ = parseCSVfile_double("mX.csv");
+	MatrixXd mZ = parseCSVfile_double("mX.csv");
 
 	VectorXd R2_one = one_correlation(vy, mX, mZ);
 	cout << R2_one << endl;
