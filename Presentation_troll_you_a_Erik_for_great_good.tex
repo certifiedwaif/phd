@@ -19,5 +19,63 @@
 \maketitle
 \end{frame}
 
+\begin{frame}
+
+I want to cover how numbers are constructed, starting from the natural numbers up to the integers, the
+rationals and then the real and complex numbers.
+
+Because mathematics is \emph{not} a spectator sport, I will be doing this with proofs, live, on the
+whiteboard.
+
+I'm willing to spend a little bit of time on foundational issues, but not a lot. I'm a mathematical
+analysis/mathematical statistician. There are certain things we accept without question. For instance, most
+mathematicians accept that
+
+\begin{equation*}
+\mathbb{N} \subset \mathbb{Z} \subset \mathbb{R} \subset \mathbb{C}
+\end{equation*}
+
+but Liam, Tran's boyfriend, doesn't. He claims that the statement doesn't type check, and hence is
+meaningless. I suspect he's trolling/showing off his superior type theory knowledge, but have been unable to
+pin him down on the issue. Virtually no practicing mathematician would accept this argument. But I'm not a
+type theorist or a Haskell programmer, so my perspective is different. I don't give a flying fuck whether
+things type check, or are even computable. And neither do most pure mathematicians. We work with non-
+computable things all the time. It doesn't trouble us.
+
+Like the reals. I'm going to present one proof that the reals are uncountable, my favorite one which I learned
+in my third year measure theory course. It's relatively elementary. I'm introducing it because it shows that
+you can't possibly compute with the reals on a computer with finite memory in finite time.
+
+I'm also going to include a proof that you need the irrational numbers to complete the reals, using the
+square root of 2, although $\pi$ would work just as well.
+
+The reals not being computable mean that we must adopt some finite approximation of the reals, and compute
+with that. The dominant choice that most people will work with is the floating point numbers. They're
+ubiquitous, and implemented in hardware (CPUs and GPUs). There's a strong body of research work from the
+numerical analysis community on how to compute with them well i.e. to minimise the error. That doesn't make
+them ideal for all purposes. There are many alternative choices which one could make e.g. fixed point, unums,
+arbitrary precision, http://math.andrej.com/2007/09/18/the-role-of-the-interval-domain-in-modern-exact-real-
+airthmetic/, that exact real number computing PhD thesis that Edward Kmett implemented in Haskell etc. I want
+to briefly touch on some of these things, with reference to Amdahl's Law ``the fast drove out the slow, even
+though the fast was slightly wrong'', the Wrath of Kahan (the inventor of floating point is good at showing
+that competing schemes suffer from the same or even worse problems, and generally publishes the results) and
+simple practicality (upon hearing of unums, one of Intel's VPs simply said ``You can't boil the ocean.'' by
+which he meant that expecting people to change every CPU and piece of software in existence to suit your new
+idea is just too large a task, and unrealistic).
+
+I'm going to talk primarily about floating point, because that's the representation I work with and the one I
+know the most about. It's also the one that most people will encounter and try first. Usually, people swear
+and give up and use something else only when they've tried the floating point numbers and had them not work.
+
+I want to give a flavour for what numerical analysis is about, why we need it and what we can learn from it.
+I'm particularly looking forward to showing that the floating point numbers do not form a monoid under
+addition, or any other binary operation. I'll then talk about what to do about that i.e. which ordering is
+the optimal ordering to minimise the error in your calculations. There will always be \emph{some} error, but
+we do our best.
+
+I'll also throw in a couple of jokes that I hope people will like. And I'll talk about myself just a little,
+and how I came to be interested in these things.
+
+\end{frame}
 
 \end{document}
