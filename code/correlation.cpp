@@ -190,6 +190,7 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, MatrixXd mZ)
 			bmA_set = true;
 		} else {
 			if (v_diff(diff_idx) == 1.) {
+				// Construct m1_inv
 				MatrixXd m1_inv(mA.rows() + 1, mA.cols() + 1);
 				cout << "Updating " << diff_idx << endl;
 				cout << "mA.cols() " << mA.cols() << endl;
@@ -201,6 +202,8 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, MatrixXd mZ)
 				// 					-b * vx.transpose() * mX * mA, b;
 				m1_inv << mA, VectorXd::Zero(mA.rows()),
 									VectorXd::Zero(mA.rows()).transpose(), 1.;
+
+				// Figure out update outer products
 				VectorXd vv(m1_inv.rows()); // Form the vector [C^T z, 0]^T
 				vv << mC_last.transpose() * vz,
 							0.;
@@ -210,13 +213,17 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, MatrixXd mZ)
 				ve.setZero(m1_inv.rows());
 				ve(m1_inv.rows() - 1) = 1.; // ve_{p+1}
 				// Idea: Make m1_inv symmetric. Then just do one Sherman-Morrison update.
+				// Sherman-Morrison
 				m1_inv = sherman_morrison(m1_inv, vv, ve);
 				RowVectorXd vv2(m1_inv.rows()); // Form the vector [C^T z, z^T z]
 				vv2 << (mC_last.transpose() * vz).transpose(), vz.squaredNorm();
 				m1_inv = sherman_morrison(m1_inv, ve, vv2);
 				
+				// Calculate correlation
 				vR2 = (vy.transpose() * mC * m1_inv * m2) / vy.squaredNorm();
 				vR2_all(row) = vR2.value();
+
+				// Save m1_inv
 				mA = m1_inv;
 			} else {
 				// Downdate
@@ -224,6 +231,12 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, MatrixXd mZ)
 				// const double c = 1 / vx.squaredNorm();
 				// VectorXd vb = -mX.transpose() * vx; // FIXME: I don't think this expression is right
 				// m1_inv = mA - vb * vb.transpose() / c;
+				// Construct m1_inv
+				// Figure out downdate outer products
+				// Sherman-Morrison
+				// Calculate correlation
+				// Save m1_inv
+				mA = m1_inv;
 				vR2_all(row) = 0.;
 			}
 		}
