@@ -3,6 +3,7 @@
 # Variational approximation
 # Check that lower bounds are monotonically increasing
 # Compare accuracy against MCMC
+library(zipvb)
 source("zero_inflated_model.R")
 # source("rwmh.R")
 require(testthat)
