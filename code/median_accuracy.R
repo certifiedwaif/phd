@@ -4,7 +4,6 @@ library(optparse)
 library(parallel)
 source("generate.R")
 library(zipvb)
-source("zero_inflated_model.R")
 source("accuracy.R")
 
 # Repeatedly run trials and compare accuracy. Plot boxplots.

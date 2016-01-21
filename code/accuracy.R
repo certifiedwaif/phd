@@ -1,13 +1,13 @@
 #!/usr/bin/env Rscript
 # accuracy.R
 library(zipvb)
-source("zero_inflated_model.R")
-source("generate.R")
 library(rstan)
 library(optparse)
 library(mvtnorm)
 library(limma)
 library(latex2exp)
+
+source("generate.R")
 
 # Andrew Gelman says that this magical line of code automatically makes Stan
 # run in parallel and cache compiled models.

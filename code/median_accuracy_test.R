@@ -1,8 +1,7 @@
 library(optparse)
 library(parallel)
-source("generate.R")
 library(zipvb)
-source("zero_inflated_model.R")
+source("generate.R")
 source("accuracy.R")
 source("median_accuracy.R")
 
