@@ -131,7 +131,7 @@ MatrixXd& sherman_morrison(MatrixXd& mA_inv, const VectorXd vu, const VectorXd v
 	return mA_inv;
 }
 
-VectorXd make_ve(const unsigned int size, const unsigned p)
+VectorXd make_ve(const unsigned int size, const unsigned int p)
 {
 	VectorXd ve(size);
 	ve.setZero(size);
