@@ -131,6 +131,15 @@ MatrixXd& sherman_morrison(MatrixXd& mA_inv, const VectorXd vu, const VectorXd v
 	return mA_inv;
 }
 
+VectorXd make_ve(const unsigned int size, const unsigned p)
+{
+	VectorXd ve(size);
+	ve.setZero(size);
+	ve(p - 1) = 1.; // ve_{p}
+	
+	return ve;
+}
+
 VectorXd all_correlations(VectorXd vy, MatrixXd mX, MatrixXd mZ)
 {
 	const unsigned int n = mX.rows();
@@ -205,20 +214,18 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, MatrixXd mZ)
 									VectorXd::Zero(m1_inv_last.rows()).transpose(), 1.;
 
 				// Figure out update outer products
+				VectorXd ve = make_ve(m1_inv.rows(), m1_inv.rows());
+
 				VectorXd vv(m1_inv.rows()); // Form the vector [C^T z, 0]^T
 				vv << mC_last.transpose() * vz,
 							0.;
-				// Ideas: * Make this vector sparse.
-				//        * Make ve() a function.
-				VectorXd ve(m1_inv.rows());
-				ve.setZero(m1_inv.rows());
-				ve(m1_inv.rows() - 1) = 1.; // ve_{p+1}
+
+				RowVectorXd vv2(m1_inv.rows()); // Form the vector [C^T z, z^T z]
+				vv2 << (mC_last.transpose() * vz).transpose(), vz.squaredNorm();
 				
 				// Idea: Make m1_inv symmetric. Then just do one Sherman-Morrison update.
 				// Sherman-Morrison
 				m1_inv = sherman_morrison(m1_inv, vv, ve);
-				RowVectorXd vv2(m1_inv.rows()); // Form the vector [C^T z, z^T z]
-				vv2 << (mC_last.transpose() * vz).transpose(), vz.squaredNorm();
 				m1_inv = sherman_morrison(m1_inv, ve, vv2);
 				
 				// Calculate correlation
@@ -237,19 +244,17 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, MatrixXd mZ)
 				MatrixXd m1_inv = m1_inv_last;
 				
 				// Figure out downdate outer products
-				VectorXd ve(m1_inv.rows());
-				ve.setZero(m1_inv.rows());
-				ve(m1_inv.rows() - 1) = 1.; // ve_{p+1}
+				VectorXd ve = make_ve(m1_inv.rows(), m1_inv.rows());
 				
 				VectorXd vv(m1_inv.rows()); // Form the vector [C^T z, 0]^T
 				vv << mC_last.transpose() * vz,
+							0.;
 
-				m1_inv = sherman_morrison(m1_inv, -vv, ve);
-
-				// Sherman-Morrison
 				RowVectorXd vv2(m1_inv.rows()); // Form the vector [C^T z, z^T z]
 				vv2 << (mC_last.transpose() * vz).transpose(), vz.squaredNorm();
 
+				// Sherman-Morrison
+				m1_inv = sherman_morrison(m1_inv, -vv, ve);
 				m1_inv = sherman_morrison(m1_inv, ve, -vv2);
 
 				// Take the upper left block of the resulting m1_inv to be our new inverse.
