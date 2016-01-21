@@ -141,10 +141,10 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, MatrixXd mZ)
 	// Generate greycode matrix
 	// MatrixXd mGrey = greycode(m);
 	VectorXd vR2_all(greycode_rows);
-	MatrixXd mA;
+	MatrixXd m1_inv_last;
 	MatrixXd mC_last;
 	
-	bool bmA_set = false;
+	bool bm1_inv_last_set = false;
 	// Loop through models, updating and downdating m1_inverse as necessary
 	for (unsigned int row = 1; row < greycode_rows; row++) {
 		// Construct mZ_gamma
@@ -183,25 +183,26 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, MatrixXd mZ)
     mC << mX, mZ_gamma;
     VectorXd vR2;
 		// If we haven't previously calculated this inverse, calculate it the first time.
-		if (!bmA_set) {
-			mA = m1.inverse();
-			vR2 = (vy.transpose() * mC * mA * m2) / vy.squaredNorm();
+		if (!bm1_inv_last_set) {
+			m1_inv_last = m1.inverse();
+			vR2 = (vy.transpose() * mC * m1_inv_last * m2) / vy.squaredNorm();
 			vR2_all(row) = vR2.value();
-			bmA_set = true;
+			bm1_inv_last_set = true;
 		} else {
 			if (v_diff(diff_idx) == 1.) {
+				// Update
 				// Construct m1_inv
-				MatrixXd m1_inv(mA.rows() + 1, mA.cols() + 1);
+				MatrixXd m1_inv(m1_inv_last.rows() + 1, m1_inv_last.cols() + 1);
 				cout << "Updating " << diff_idx << endl;
-				cout << "mA.cols() " << mA.cols() << endl;
+				cout << "m1_inv_last.cols() " << m1_inv_last.cols() << endl;
 				cout << "mC_last.cols() " << mC_last.cols() << endl;
 				cout << "mC.cols() " << mC.cols() << endl;
-				// Update
-				// const double b = 1 / (vx.transpose() * vx - vx.transpose() * mX * mA * mX.transpose() * vx)(0);
-				// m1_inv << mA + b * mA * mX * vx * vx.transpose() * mX * mA, -mA * mX.transpose() * vx * b,
-				// 					-b * vx.transpose() * mX * mA, b;
-				m1_inv << mA, VectorXd::Zero(mA.rows()),
-									VectorXd::Zero(mA.rows()).transpose(), 1.;
+
+				// const double b = 1 / (vx.transpose() * vx - vx.transpose() * mX * m1_inv_last * mX.transpose() * vx)(0);
+				// m1_inv << m1_inv_last + b * m1_inv_last * mX * vx * vx.transpose() * mX * m1_inv_last, -m1_inv_last * mX.transpose() * vx * b,
+				// 					-b * vx.transpose() * mX * m1_inv_last, b;
+				m1_inv << m1_inv_last, VectorXd::Zero(m1_inv_last.rows()),
+									VectorXd::Zero(m1_inv_last.rows()).transpose(), 1.;
 
 				// Figure out update outer products
 				VectorXd vv(m1_inv.rows()); // Form the vector [C^T z, 0]^T
@@ -212,6 +213,7 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, MatrixXd mZ)
 				VectorXd ve(m1_inv.rows());
 				ve.setZero(m1_inv.rows());
 				ve(m1_inv.rows() - 1) = 1.; // ve_{p+1}
+				
 				// Idea: Make m1_inv symmetric. Then just do one Sherman-Morrison update.
 				// Sherman-Morrison
 				m1_inv = sherman_morrison(m1_inv, vv, ve);
@@ -224,20 +226,41 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, MatrixXd mZ)
 				vR2_all(row) = vR2.value();
 
 				// Save m1_inv
-				mA = m1_inv;
+				m1_inv_last = m1_inv;
 			} else {
 				// Downdate
 				cout << "Downdating " << diff_idx << endl;
 				// const double c = 1 / vx.squaredNorm();
 				// VectorXd vb = -mX.transpose() * vx; // FIXME: I don't think this expression is right
-				// m1_inv = mA - vb * vb.transpose() / c;
+				// m1_inv = m1_inv_last - vb * vb.transpose() / c;
 				// Construct m1_inv
+				m1_inv = m1_inv_last;
+				
 				// Figure out downdate outer products
+				VectorXd ve(m1_inv.rows());
+				ve.setZero(m1_inv.rows());
+				ve(m1_inv.rows() - 1) = 1.; // ve_{p+1}
+				
+				VectorXd vv(m1_inv.rows()); // Form the vector [C^T z, 0]^T
+				vv << mC_last.transpose() * vz,
+
+				m1_inv = sherman_morrison(m1_inv, -vv, ve);
+
 				// Sherman-Morrison
+				RowVectorXd vv2(m1_inv.rows()); // Form the vector [C^T z, z^T z]
+				vv2 << (mC_last.transpose() * vz).transpose(), vz.squaredNorm();
+
+				m1_inv = sherman_morrison(m1_inv, ve, -vv2);
+
+				// Take the upper left block of the resulting m1_inv to be our new inverse.
+				m1_inv = m1_inv.upperLeftCorner(m1_inv.rows() - 1, m1_inv.cols() - 1);
+
 				// Calculate correlation
+				vR2 = (vy.transpose() * mC * m1_inv * m2) / vy.squaredNorm();
+				vR2_all(row) = vR2.value();
+
 				// Save m1_inv
-				mA = m1_inv;
-				vR2_all(row) = 0.;
+				m1_inv_last = m1_inv;
 			}
 		}
 		mC_last = mC;
