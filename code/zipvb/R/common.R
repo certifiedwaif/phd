@@ -1,18 +1,7 @@
 
-logit <- function(p)
-{
-  log(p/(1-p))
-}
-
-expit <- function(eta)
-{
-  1/(1+exp(-eta))
-}
-
-tr <- function(mX)
-{
-  sum(diag(mX))
-}
+logit <- function(p) log(p/(1-p))
+expit <- function(eta) 1/(1+exp(-eta))
+tr <- function(mX) sum(diag(mX))
 
 gamma_entropy <- function(alpha, beta)
 {
@@ -22,7 +11,7 @@ gamma_entropy <- function(alpha, beta)
 beta_entropy <- function(alpha, beta)
 {
   lbeta(alpha, beta) - (alpha - 1) * digamma(alpha) - (beta - 1) * digamma(beta) + (alpha + beta - 2) * digamma(alpha + beta)
-}
+} 
 
 lgammap <- function(a, p)
 {
