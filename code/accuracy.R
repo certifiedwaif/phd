@@ -1,5 +1,6 @@
 #!/usr/bin/env Rscript
 # accuracy.R
+library(zipvb)
 source("zero_inflated_model.R")
 source("generate.R")
 library(rstan)

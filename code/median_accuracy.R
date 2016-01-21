@@ -3,6 +3,7 @@
 library(optparse)
 library(parallel)
 source("generate.R")
+library(zipvb)
 source("zero_inflated_model.R")
 source("accuracy.R")
 
