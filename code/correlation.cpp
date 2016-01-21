@@ -121,7 +121,7 @@ MatrixXd greycode(unsigned int p)
   return(result);
 }
 
-inline MatrixXd& sherman_morrison(MatrixXd& mA_inv, const VectorXd vu, const VectorXd vv)
+MatrixXd& sherman_morrison(MatrixXd& mA_inv, const VectorXd vu, const VectorXd vv)
 {
 	// MatrixXd mA_inv_tilde(mA_inv.rows(), mA_inv.cols());
 	const double lambda = (vv.transpose() * mA_inv * vu).value();
