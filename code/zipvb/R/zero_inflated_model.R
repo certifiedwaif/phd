@@ -120,6 +120,7 @@ calculate_lower_bound <- function(mult, verbose=FALSE)
 	return(T1 + T2 + T3)
 }
 
+#'@export
 zipvb <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE, glm_init=TRUE)
 {
   # browser()
