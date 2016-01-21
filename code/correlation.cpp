@@ -234,7 +234,7 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, MatrixXd mZ)
 				// VectorXd vb = -mX.transpose() * vx; // FIXME: I don't think this expression is right
 				// m1_inv = m1_inv_last - vb * vb.transpose() / c;
 				// Construct m1_inv
-				m1_inv = m1_inv_last;
+				MatrixXd m1_inv = m1_inv_last;
 				
 				// Figure out downdate outer products
 				VectorXd ve(m1_inv.rows());
@@ -253,7 +253,7 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, MatrixXd mZ)
 				m1_inv = sherman_morrison(m1_inv, ve, -vv2);
 
 				// Take the upper left block of the resulting m1_inv to be our new inverse.
-				m1_inv = m1_inv.upperLeftCorner(m1_inv.rows() - 1, m1_inv.cols() - 1);
+				m1_inv = m1_inv.topLeftCorner(m1_inv.rows() - 1, m1_inv.cols() - 1);
 
 				// Calculate correlation
 				vR2 = (vy.transpose() * mC * m1_inv * m2) / vy.squaredNorm();
