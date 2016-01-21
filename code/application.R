@@ -2,7 +2,6 @@
 # application.R
 
 # library(sqldf)
-# source("zero_inflated_model.R")
 # source("accuracy.R")
 
 # # Load the data set.
@@ -58,7 +57,7 @@
 # from ARM.
 # IPM_BASELINE_R2.csv        RoachCounts.csv
 # IPM_BASELINE_R2_032006.csv roachdata.csv
-source("zero_inflated_model.R")
+library(zipvb)
 source("accuracy.R")
 library(sqldf)
 

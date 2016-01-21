@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 # local_solutions.R
 library(optparse)
-source("zero_inflated_model.R")
+library(zipvb)
 
 local_solutions <- function(approximation)
 {
