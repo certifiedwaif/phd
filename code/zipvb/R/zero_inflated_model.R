@@ -1,8 +1,5 @@
 # zero_inflated_model.R
 library(limma)
-source("common.R")
-source("gaussian.R")
-
 
 create_mult <- function(vy, mX, mZ, sigma2.beta, m=ncol(mZ), blocksize=1, spline_dim=0, v=0)
 {

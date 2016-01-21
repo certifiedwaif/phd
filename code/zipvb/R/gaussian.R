@@ -6,9 +6,6 @@ library(Matrix)
 library(Rcpp)
 library(RcppEigen)
 
-source("CalculateB.R")
-sourceCpp(file="fastdiag.cpp")
-
 # Laplace's method of approxmation ----
 
 f.lap <- function(vmu, vy, vr, mC, mSigma.inv, mLambda) 

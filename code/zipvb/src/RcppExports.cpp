@@ -8,37 +8,37 @@
 using namespace Rcpp;
 
 // fastdiag
-VectorXd fastdiag(MapMatd lambda, MapMatd C);
+VectorXd fastdiag(const MapMatd lambda, const MapMatd C);
 RcppExport SEXP zipvb_fastdiag(SEXP lambdaSEXP, SEXP CSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
-    Rcpp::traits::input_parameter< MapMatd >::type lambda(lambdaSEXP);
-    Rcpp::traits::input_parameter< MapMatd >::type C(CSEXP);
+    Rcpp::traits::input_parameter< const MapMatd >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< const MapMatd >::type C(CSEXP);
     __result = Rcpp::wrap(fastdiag(lambda, C));
     return __result;
 END_RCPP
 }
 // fastdiag2
-VectorXd fastdiag2(MapMatd R, MapMatd C);
+VectorXd fastdiag2(const MapMatd R, const MapMatd C);
 RcppExport SEXP zipvb_fastdiag2(SEXP RSEXP, SEXP CSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
-    Rcpp::traits::input_parameter< MapMatd >::type R(RSEXP);
-    Rcpp::traits::input_parameter< MapMatd >::type C(CSEXP);
+    Rcpp::traits::input_parameter< const MapMatd >::type R(RSEXP);
+    Rcpp::traits::input_parameter< const MapMatd >::type C(CSEXP);
     __result = Rcpp::wrap(fastdiag2(R, C));
     return __result;
 END_RCPP
 }
 // fastsolve
-VectorXd fastsolve(MapMatd R, MapMatd C);
+VectorXd fastsolve(const MapMatd R, const MapMatd C);
 RcppExport SEXP zipvb_fastsolve(SEXP RSEXP, SEXP CSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
-    Rcpp::traits::input_parameter< MapMatd >::type R(RSEXP);
-    Rcpp::traits::input_parameter< MapMatd >::type C(CSEXP);
+    Rcpp::traits::input_parameter< const MapMatd >::type R(RSEXP);
+    Rcpp::traits::input_parameter< const MapMatd >::type C(CSEXP);
     __result = Rcpp::wrap(fastsolve(R, C));
     return __result;
 END_RCPP
