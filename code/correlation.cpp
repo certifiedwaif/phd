@@ -140,7 +140,7 @@ VectorXd make_ve(const unsigned int size, const unsigned int p)
 	return ve;
 }
 
-VectorXd all_correlations(VectorXd vy, MatrixXd mX, MatrixXd mZ)
+VectorXd all_correlations_sherman_morrison(VectorXd vy, MatrixXd mX, MatrixXd mZ)
 {
 	const unsigned int n = mX.rows();
 	const unsigned int p = mX.cols();
@@ -266,6 +266,61 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, MatrixXd mZ)
 
 				// Save m1_inv
 				m1_inv_last = m1_inv;
+			}
+		}
+		mC_last = mC;
+	}
+
+	return vR2_all;
+}
+
+VectorXd all_correlations_block_inverse(VectorXd vy, MatrixXd mX, MatrixXd mZ)
+{
+	const unsigned int n = mX.rows();
+	const unsigned int p = mX.cols();
+	const unsigned int m = mZ.cols();
+	const unsigned int greycode_rows = (1 << m);
+	VectorXd vR2_all(greycode_rows);
+	bool bmA_set = false;
+	
+	// Loop through models, updating and downdating m1_inverse as necessary
+	for (unsigned int row = 1; row < greycode_rows; row++) {
+		// By properties of Greycode, only one element can be different. And it's either one higher or
+		// one lower.
+		// Check if update or downdate, and for which variable
+		VectorXd v_diff(p + m);
+    VectorXd vR2;
+    unsigned int diff_idx; // The covariate which is changing
+    VectorXd vx = mX.col(diff_idx);
+
+		// If we haven't previously calculated this inverse, calculate it the first time.
+		if (!bmA_set) {
+			// Calculate full inverse
+			bmA_set = true;
+		} else {
+			if (v_diff(diff_idx) == 1.) {
+				// Rank one update
+				// Construct mA
+				cout << "Updating " << diff_idx << endl;
+
+				const double b = 1 / (vx.transpose() * vx - vx.transpose() * mX * m1_inv_last * mX.transpose() * vx).value();
+				vR2 = (vy.transpose() * mC * m1_inv * m2) / vy.squaredNorm();
+				vR2_all(row) = vR2.value();
+
+				// Save mA
+			} else {
+				// Rank one downdate
+				cout << "Downdating " << diff_idx << endl;
+				// Construct m1_inv
+				MatrixXd m1_inv = m1_inv_last;
+				
+
+				// Calculate correlation
+				vR2 = ;
+				vR2_all(row) = vR2.value();
+
+				// Save mA
+				
 			}
 		}
 		mC_last = mC;
