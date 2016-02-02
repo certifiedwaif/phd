@@ -5,6 +5,7 @@
 #include <vector>
 #include <Eigen/Dense>
 #include <boost/tokenizer.hpp>
+#include <boost/dynamic_bitset.hpp>
 
 using namespace boost;
 using Eigen::VectorXd;
@@ -274,50 +275,85 @@ VectorXd all_correlations_sherman_morrison(VectorXd vy, MatrixXd mX, MatrixXd mZ
 	return vR2_all;
 }
 
-VectorXd all_correlations_block_inverse(VectorXd vy, MatrixXd mX, MatrixXd mZ)
+dynamic_bitset& greycode(const unsigned int idx, const unsigned int p, const dynamic_bitset& bs_ret)
 {
-	const unsigned int n = mX.rows();
-	const unsigned int p = mX.cols();
-	const unsigned int m = mZ.cols();
-	const unsigned int greycode_rows = (1 << m);
-	VectorXd vR2_all(greycode_rows);
-	bool bmA_set = false;
+	dynamic_bitset<> bs(p, idx);
+	bs = (bs >> 1) ^ bs;
+	bs_ret = bs;
+
+	return bs_ret;
+}
+
+void greycode_change(const unsigned int idx, const unsigned int p, bool& update, unsigned int& idx)
+{
+	dynamic_bitset<> bs_curr(p);
+	dynamic_bitset<> bs_prev(p);
+
+	bs_curr = greycode(idx, p, bs_curr);
+	bs_prev = greycode(idx, p, bs_prev);
+
+	// Find bit that has changed.
+	diff_idx = find_first(bs_curr ^ bs_prev);
+
+	// Has it been set, or unset?
+	update = bs_curr[diff_idx];
+}
+
+//' Calculate the correlations for every subset of the covariates in mX
+//'
+//' @param vy A vector of responses of length n
+//' @param mX A matrix of covariates of size n x p
+//' @return A vector of length 2^p of the correlations
+//' @export
+// [[Rcpp::export]]
+VectorXd all_correlations_block_inverse(VectorXd vy, MatrixXd mX)
+{
+	const unsigned int n = mX.rows();            // The number of observations
+	const unsigned int p = mX.cols();            // The number of covariates
+	const unsigned int greycode_rows = (1 << p); // The number of greycode combinations, 2^p
+	VectorXd vR2_all(greycode_rows);             // Vector of correlations for all models
+  MatrixXd mA;                                 // The inverse of (X^T X)
+	bool bmA_set = false;                        // Whether mA has been set yet
+	bool bUpdate;																 // True for an update, false for a downdate
+  unsigned int diff_idx;                       // The covariate which is changing
+	VectorXd vR2;                                // Correlation
+	dynamic_bitset<> gamma;											 // The model gamma
+	MatrixXd mX_gamma;													 // The matrix of covariates for the current gamma
+  VectorXd vx;                                 // The column vector for the current covariate
 	
-	// Loop through models, updating and downdating m1_inverse as necessary
-	for (unsigned int row = 1; row < greycode_rows; row++) {
+	// Loop through models, updating and downdating mA as necessary
+	for (unsigned int idx = 1; idx < greycode_rows; idx++) {
 		// By properties of Greycode, only one element can be different. And it's either one higher or
 		// one lower.
 		// Check if update or downdate, and for which variable
-		VectorXd v_diff(p + m);
-    VectorXd vR2;
-    unsigned int diff_idx; // The covariate which is changing
-    VectorXd vx = mX.col(diff_idx);
-
+		gamma = greycode(idx, p, gamma);
+		greycode_change(idx, p, bUpdate, diff_idx);
+		mX_gamma = get_mX_gamma(mX, gamma);
+		vx = mX.col(diff_idx);
 		// If we haven't previously calculated this inverse, calculate it the first time.
 		if (!bmA_set) {
-			// Calculate full inverse
+			// Calculate full inverse mA, O(p^3)
+			mA = (mX.transpose() * mX).inverse();
 			bmA_set = true;
 		} else {
-			if (v_diff(diff_idx) == 1.) {
+			if (bUpdate) {
 				// Rank one update
 				// Construct mA
 				cout << "Updating " << diff_idx << endl;
 
-				const double b = 1 / (vx.transpose() * vx - vx.transpose() * mX * m1_inv_last * mX.transpose() * vx).value();
-				vR2 = (vy.transpose() * mC * m1_inv * m2) / vy.squaredNorm();
-				vR2_all(row) = vR2.value();
+				const double b = 1 / (vx.transpose() * vx - vx.transpose() * mX_gamma * mA * mX_gamma.transpose() * vx).value();
+				VectorXd v1; // [y^T X, y^T x]^T
+				vR2 =  / vy.squaredNorm();
+				vR2_all(idx) = vR2.value();
 
 				// Save mA
 			} else {
 				// Rank one downdate
 				cout << "Downdating " << diff_idx << endl;
-				// Construct m1_inv
-				MatrixXd m1_inv = m1_inv_last;
-				
 
 				// Calculate correlation
 				vR2 = ;
-				vR2_all(row) = vR2.value();
+				vR2_all(idx) = vR2.value();
 
 				// Save mA
 				
