@@ -133,4 +133,40 @@ Let $\alpha = -\frac{n}{2}, \beta = \half [\| \vy \|^2 \{ \frac{1}{1 + g} [1 + g
 as required, modulo the $\frac{1}{\sigma^2}$ above which should be $\sigma^2$ somehow, sign error in the
 exponent.
 
+\subsection{Question 5}
+
+Assume $b = (\frac{n - p}{2}) - 2 - a$.
+
+rtp: $p(\vy) = \frac{\Gamma(\frac{n}{2})}{\pi^{n/2} \| \vy \|^n} \frac{\text{Beta}(\frac{p}{2} + a + 1, b + 1)}{\text{Beta}(a + 1, b + 1)} (1 - R^2)^{-(b + 1)}$
+
+\begin{equation*}
+\begin{array}{ll}
+p(y) &= \int_0^\infty p(y|g) p(g) dg \\
+&= \int_0^\infty \frac{\Gamma(\frac{n}{2})}{\pi^{n/2} \| y \|^n} (1 + g)^{\frac{n - p}{2}}[1 + g(1 - R^2)]^{-\frac{n}{2}} \frac{g^b (1 + g)^{-a - b - 2}}{\text{Beta}(a + 1, b + 1)} I(g > 0) dg \\
+&= \frac{\Gamma(\frac{n}{2})}{\text{Beta}(a + 1, b + 1) \pi^{n/2} \| y \|^n}
+\int_0^\infty \frac{g^b (1 + g)^{(n - p)/2}}{(1 + g)^{a - b - 2}} \frac{1}{[1 + g(1 - R^2)]^{n/2}} dg
+\end{array}
+\end{equation*}
+
+Let $\mu = b + 1$. Then
+
+\begin{equation*}
+\begin{array}{ll}
+&=\frac{\Gamma(\frac{n}{2})}{\text{Beta}(a + 1,  b + 1) \pi^(n/2) \| y \|^n}
+\int_0^\infty \frac{g^b(1 + g)^{(n - p)/2}}{(1 + g)^{(a - b - 2)}} \frac{1}{[1 + g(1 - R^2)]} dg \\
+&= \frac{\Gamma(\frac{n}{2})}{\text{Beta(a + 1, b + 1)} \pi^{n/2) \| y \|^n}}
+\int_0^\infty \frac{g^{\mu - 1}}{[1 + g (1 - R^2)]^{n/2}} dg
+\end{array}
+\end{equation*}
+
+Now, $\int_0^\infty \frac{g^{\mu - 1}}{(1 + \beta g)^\nu} dg = \beta^{-\mu} \text{Beta}(\mu, \nu - \mu), \text{ for } \mu > 0, \nu > 0, \nu > \mu$.
+\begin{equation*}
+\begin{array}{ll}
+&= \frac{\Gamma(\frac{n}{2})}{\text{Beta}(a + 1, b + 1) \pi^{n / 2} \| y \|^n} (1 - R^2)^{-(b + 1)} \text{Beta}(b + 1, \frac{n}{2} - b + 1) \\
+&= \frac{\Gamma(\frac{n}{2})}{\text{Beta}(a + 1, b + 1) \pi^{n / 2} \| y \|^n} (1 - R^2)^{-(b + 1)} \text{Beta}(\frac{p}{2} + a + 1, b + 1)
+\end{array}
+\end{equation*}
+
+by the symmetry of beta functions and the definitions of $a$ and $b$.
+
 \end{document}
