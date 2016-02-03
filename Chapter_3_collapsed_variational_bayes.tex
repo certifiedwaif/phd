@@ -12,6 +12,7 @@
 \usepackage[authoryear]{natbib}
 \usepackage{graphicx}
 \usepackage{algorithm,algorithmic}
+\usepackage{cancel}
 
 \title{Chapter 3 Collapsed Variational Bayes}
 \author{Mark Greenaway, John T. Ormerod}
@@ -63,6 +64,56 @@ Let $\vmu = -\vy^\top \mX$, $\mA = \mX^\top \mX$. Then the above becomes
 \end{array}
 \end{equation*}
 
+\subsection{Question 3}
 
+rtp: $R^2 = \frac{\vy^\top \mX (\mX^\top \mX)^{-1} \mX^\top \vy}{\| \vy \|^2}$
+
+\begin{equation*}
+\begin{array}{ll}
+R^2 &= 1 - \frac{(\vy - \hat{\vy})^\top (\vy - \hat{\vy})}{\vy^\top \vy} \\
+&= \frac{\vy^\top \vy - (\vy - \hat{\vy})^\top (\vy - \hat{\vy})}{\vy^\top \vy} \\
+&= \frac{\cancel{\vy^\top \vy} - [\cancel{\vy^\top \vy} - 2 \vy^\top \hat{\vy} + \hat{\vy}^\top \hat{\vy}]}{\vy^\top \vy} \\
+&= \frac{2 \vy^\top \hat{\vy} - \hat{\vy}^\top \hat{\vy}}{\vy^\top \vy}
+\end{array}
+\end{equation*}
+
+Now $\hat{\vy} = \mX (\mX^\top \mX)^{-1} \mX^\top \vy$ and
+\begin{equation*}
+\begin{array}{ll}
+\vy &= \vy - \hat{\vy} + \hat{\vy} \\
+&= [\mI - \mX \mX(\mX^\top \mX)^{-1} \mX^\top] \vy + \mX (\mX^\top \mX)^{-1} \mX^\top \vy.
+\end{array}
+\end{equation*}
+
+So the above becomes
+
+\begin{equation*}
+\begin{array}{ll}
+&= \frac{2[(\mI - \mH) \vy + \mH \vy]^\top \mH \vy - \mH \vy^\top \mH \vy}{\vy^\top \vy} \\
+&= \frac{\mH \vy^\top \mH \vy}{\vy^\top \vy} \\
+&= \frac{\vy^\top \mX (\mX^\top \mX)^{-1} \mX^\top \vy}{\| \vy \|^2} \text{ as required. } (\text{as } \mH^2 = \mH).
+\end{array}
+\end{equation*}
+
+\subsection{Question 4}
+\begin{equation*}
+\begin{array}{ll}
+p(\vy | g) &= \int_0^\infty p(\vy | \sigma^2, g) p(\sigma^2) d \sigma^2 \\
+&= \int_0^\infty \exp{\{ -\frac{n}{2} \log (2 \pi \sigma^2) - \frac{p}{2} \log(1 + g)
+	 - \frac{1}{2 \sigma^2} \| \vy \|^2
+	 + \frac{g}{2 \sigma^2 (1 + g)} \vy^\top \mX (\mX^\top \mX)^{-1} \mX^\top \vy \}}
+	 (\sigma^2)^{-1} I(\sigma^2 > 0) d \sigma^2.
+\end{array}
+\end{equation*}
+
+Recall that $\vy^\top \mX(\mX^\top \mX)^{-1} \mX^\top \vy = \| \vy \|^2 R^2$. So
+\begin{equation*}
+\begin{array}{ll}
+& \| \vy \|^2 -\frac{g}{1 + g} \vy^\top \mX (\mX^\top \mX)^{-1} \mX^\top \vy \\
+&= \| \vy \|^2 \left(1 - \frac{g}{1 + g}R^2 \right) \\
+&= \| \vy \|^2 \left(\frac{1 + g - g}{1 + g} R^2 \right) \\
+&= \| \vy \|^2 \left\{ \frac{1}{1 + g} [ 1 + g(1 - R^2) ] \right\}
+\end{array}
+\end{equation*}
 
 \end{document}
