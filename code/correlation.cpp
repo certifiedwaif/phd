@@ -1,5 +1,6 @@
 // correlation.cpp
 
+#include <stdexcept>
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -275,7 +276,7 @@ VectorXd all_correlations_sherman_morrison(VectorXd vy, MatrixXd mX, MatrixXd mZ
 	return vR2_all;
 }
 
-dynamic_bitset& greycode(const unsigned int idx, const unsigned int p, const dynamic_bitset& bs_ret)
+dynamic_bitset<>& greycode(const unsigned int idx, const unsigned int p, dynamic_bitset<>& bs_ret)
 {
 	dynamic_bitset<> bs(p, idx);
 	bs = (bs >> 1) ^ bs;
@@ -284,7 +285,7 @@ dynamic_bitset& greycode(const unsigned int idx, const unsigned int p, const dyn
 	return bs_ret;
 }
 
-void greycode_change(const unsigned int idx, const unsigned int p, bool& update, unsigned int& idx)
+void greycode_change(const unsigned int idx, const unsigned int p, bool& update, unsigned int& diff_idx)
 {
 	dynamic_bitset<> bs_curr(p);
 	dynamic_bitset<> bs_prev(p);
@@ -293,10 +294,17 @@ void greycode_change(const unsigned int idx, const unsigned int p, bool& update,
 	bs_prev = greycode(idx, p, bs_prev);
 
 	// Find bit that has changed.
-	diff_idx = find_first(bs_curr ^ bs_prev);
+	diff_idx = (bs_curr ^ bs_prev).find_first();
 
 	// Has it been set, or unset?
 	update = bs_curr[diff_idx];
+}
+
+MatrixXd& get_mX_gamma(MatrixXd mX, dynamic_bitset<> gamma, MatrixXd& mX_gamma)
+{
+	throw std::runtime_error("get_mX_gamma not implemented yet");
+
+	return mX_gamma;
 }
 
 //' Calculate the correlations for every subset of the covariates in mX
@@ -328,7 +336,7 @@ VectorXd all_correlations_block_inverse(VectorXd vy, MatrixXd mX)
 		// Check if update or downdate, and for which variable
 		gamma = greycode(idx, p, gamma);
 		greycode_change(idx, p, bUpdate, diff_idx);
-		mX_gamma = get_mX_gamma(mX, gamma);
+		mX_gamma = get_mX_gamma(mX, gamma, mX_gamma);
 		vx = mX.col(diff_idx);
 		// If we haven't previously calculated this inverse, calculate it the first time.
 		if (!bmA_set) {
@@ -343,7 +351,9 @@ VectorXd all_correlations_block_inverse(VectorXd vy, MatrixXd mX)
 
 				const double b = 1 / (vx.transpose() * vx - vx.transpose() * mX_gamma * mA * mX_gamma.transpose() * vx).value();
 				VectorXd v1; // [y^T X, y^T x]^T
-				vR2 =  / vy.squaredNorm();
+				VectorXd numerator;
+				throw runtime_error("numerator calculation not implemented yet");
+				vR2 = numerator / vy.squaredNorm();
 				vR2_all(idx) = vR2.value();
 
 				// Save mA
@@ -352,14 +362,15 @@ VectorXd all_correlations_block_inverse(VectorXd vy, MatrixXd mX)
 				cout << "Downdating " << diff_idx << endl;
 
 				// Calculate correlation
-				vR2 = ;
+				VectorXd numerator;
+				vR2 = numerator / vy.squaredNorm();
 				vR2_all(idx) = vR2.value();
 
 				// Save mA
 				
 			}
 		}
-		mC_last = mC;
+		// Save last mX?
 	}
 
 	return vR2_all;
@@ -397,7 +408,10 @@ int main(int argc, char **argv)
 	VectorXd R2_one = one_correlation(vy, mX, mZ);
 	cout << R2_one << endl;
 
-	VectorXd R2_all = all_correlations(vy, mX, mZ);
+	MatrixXd mC(263, mZ.cols() + 1);
+	mC << mX, mZ;
+
+	VectorXd R2_all = all_correlations_block_inverse(vy, mC);
 	cout << R2_all.head(10) << endl;
 	
 	return 0;
