@@ -116,4 +116,21 @@ Recall that $\vy^\top \mX(\mX^\top \mX)^{-1} \mX^\top \vy = \| \vy \|^2 R^2$. So
 \end{array}
 \end{equation*}
 
+\begin{equation*}
+\begin{array}{ll}
+&= \int_0^\infty 2^{-\frac{n}{2}} (\pi)^{-\frac{n}{2}} (1 + g)^{-\frac{p}{2}} \exp{\{ \| \vy \|^2 \{ \frac{1}{1 + g} [1 + g(1 - R^2)] \}} ] \}
+\end{array}
+\end{equation*}
+
+Let $\alpha = -\frac{n}{2}, \beta = \half [\| \vy \|^2 \{ \frac{1}{1 + g} [1 + g(1 - R^2)] \}]$.
+\begin{equation*}
+\begin{array}{ll}
+&= \cancel{2^{- \frac{n}{2}}} (\pi)^{-\frac{n}{2}} (1 + g)^{-\frac{p}{2}} \frac{1}{\cancel{2^{-n/2}}} \frac{1}{(1 + g)^{-\frac{n}{2}}} \frac{1}{\| \vy \|^n} [1 + g(1 - R^2)]^{-\frac{n}{2}} \\
+&= \frac{\gamma(\frac{n}{2})}{\pi^{\frac{n}{2}} \| \vy \|^n} (1 + g)^{\frac{n - p}{2}} [1 + g(1 - R^2)]^{-\frac{n}{2}}
+\end{array}
+\end{equation*}
+
+as required, modulo the $\frac{1}{\sigma^2}$ above which should be $\sigma^2$ somehow, sign error in the
+exponent.
+
 \end{document}
