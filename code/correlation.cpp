@@ -17,10 +17,11 @@ using Eigen::RowVectorXi;
 using Eigen::MatrixXi;
 using namespace std;
 
+typedef dynamic_bitset<> bitset;
+
 // Code copied from here: https://gist.github.com/stephenjbarr/2266900
 MatrixXd parseCSVfile_double(string infilename)
 {
-
   ifstream in(infilename.c_str());
   if (!in.is_open()) return MatrixXd(1,1);
 
@@ -276,9 +277,9 @@ VectorXd all_correlations_sherman_morrison(VectorXd vy, MatrixXd mX, MatrixXd mZ
 	return vR2_all;
 }
 
-dynamic_bitset<>& greycode(const unsigned int idx, const unsigned int p, dynamic_bitset<>& bs_ret)
+bitset& greycode(const unsigned int idx, const unsigned int p, bitset& bs_ret)
 {
-	dynamic_bitset<> bs(p, idx);
+	bitset bs(p, idx);
 	bs = (bs >> 1) ^ bs;
 	bs_ret = bs;
 
@@ -287,20 +288,23 @@ dynamic_bitset<>& greycode(const unsigned int idx, const unsigned int p, dynamic
 
 void greycode_change(const unsigned int idx, const unsigned int p, bool& update, unsigned int& diff_idx)
 {
-	dynamic_bitset<> bs_curr(p);
-	dynamic_bitset<> bs_prev(p);
+	bitset bs_curr(p);
+	bitset bs_prev(p);
 
 	bs_curr = greycode(idx, p, bs_curr);
-	bs_prev = greycode(idx, p, bs_prev);
+	cout << bs_curr << endl;
+	bs_prev = greycode(idx - 1, p, bs_prev);
+	cout << bs_prev << endl;
 
 	// Find bit that has changed.
 	diff_idx = (bs_curr ^ bs_prev).find_first();
+	cout << diff_idx << endl;
 
 	// Has it been set, or unset?
 	update = bs_curr[diff_idx];
 }
 
-MatrixXd& get_mX_gamma(MatrixXd mX, dynamic_bitset<> gamma, MatrixXd& mX_gamma)
+MatrixXd& get_mX_gamma(MatrixXd mX, bitset gamma, MatrixXd& mX_gamma)
 {
 	vector<unsigned int> gamma_columns;
 	unsigned int p_gamma = 0;
@@ -339,13 +343,14 @@ VectorXd all_correlations_block_inverse(VectorXd vy, MatrixXd mX)
 	const unsigned int p = mX.cols();            // The number of covariates
 	const unsigned int greycode_rows = (1 << p); // The number of greycode combinations, 2^p
 	VectorXd vR2_all(greycode_rows);             // Vector of correlations for all models
-  MatrixXd mA;                                 // The inverse of (X^T X)
+  MatrixXd mA;                                 // The inverse of (X^T X) for the previous iteration
 	bool bmA_set = false;                        // Whether mA has been set yet
 	bool bUpdate;																 // True for an update, false for a downdate
   unsigned int diff_idx;                       // The covariate which is changing
 	VectorXd vR2;                                // Correlation
-	dynamic_bitset<> gamma;											 // The model gamma
-	MatrixXd mX_gamma;													 // The matrix of covariates for the current gamma
+	bitset gamma;											 // The model gamma
+	MatrixXd mX_gamma;													 // The matrix of covariates for the previous gamma
+	MatrixXd mX_gamma_prime;									 	 // The matrix of covariates for the current gamma
 	unsigned int p_gamma;												 // The number of columns in the matrix mX_gamma
   VectorXd vx;                                 // The column vector for the current covariate
 	
@@ -358,14 +363,25 @@ VectorXd all_correlations_block_inverse(VectorXd vy, MatrixXd mX)
 		greycode_change(idx, p, bUpdate, diff_idx);
 
 		// Get mX matrix for gamma
-		mX_gamma = get_mX_gamma(mX, gamma, mX_gamma);
+		mX_gamma_prime = get_mX_gamma(mX, gamma, mX_gamma);
 		p_gamma = mX_gamma.cols();
 		vx = mX.col(diff_idx);
 		
 		// If we haven't previously calculated this inverse, calculate it the first time.
 		if (!bmA_set) {
 			// Calculate full inverse mA, O(p^3)
-			mA = (mX.transpose() * mX).inverse();
+			MatrixXd mA_prime(p_gamma, p_gamma);
+			mA_prime = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
+			VectorXd v1(p_gamma); // [y^T X, y^T x]^T
+			v1 << vy.transpose() * mX_gamma_prime;
+			VectorXd numerator;
+			cout << v1.size() << endl;
+			cout << mA_prime.cols() << endl;
+			numerator = v1 * mA_prime * v1.transpose();
+			vR2 = numerator / vy.squaredNorm();
+			vR2_all(idx) = vR2.value();
+			mA = mA_prime;
+
 			bmA_set = true;
 		} else {
 			if (bUpdate) {
@@ -373,13 +389,20 @@ VectorXd all_correlations_block_inverse(VectorXd vy, MatrixXd mX)
 				// Construct mA
 				cout << "Updating " << diff_idx << endl;
 
-				const double b = 1 / (vx.transpose() * vx - vx.transpose() * mX_gamma * mA * mX_gamma.transpose() * vx).value();
+				cout << "vy.size()" << vy.size() << endl;
+				cout << "vx.size()" << vx.size() << endl;
+				cout << "mX_gamma.cols()" << mX_gamma.cols() << endl;
+				cout << "mX_gamma_prime.cols()" << mX_gamma_prime.cols() << endl;
+				cout << "mA.cols()" << mA.cols() << endl;
+
 				VectorXd v1(p_gamma); // [y^T X, y^T x]^T
 				v1 << vy.transpose() * mX_gamma, vy.transpose() * vx;
 				MatrixXd mA_prime(p_gamma, p_gamma);
 				VectorXd numerator;
+				const double b = 1 / (vx.transpose() * vx - vx.transpose() * mX_gamma * mA * mX_gamma.transpose() * vx).value();
 				mA_prime << mA + b * mA * mX_gamma.transpose() * vx * vx.transpose() * mX_gamma * mA, -mA * mX_gamma.transpose() * vx * b,
-							-b * vx.transpose() * mX_gamma * mA, b;
+										-b * vx.transpose() * mX_gamma * mA, b;
+				cout << mA_prime.cols() << endl;
 				numerator = v1 * mA_prime * v1.transpose();
 				vR2 = numerator / vy.squaredNorm();
 				vR2_all(idx) = vR2.value();
@@ -394,6 +417,7 @@ VectorXd all_correlations_block_inverse(VectorXd vy, MatrixXd mX)
 				MatrixXd mA_11 = mA.topLeftCorner(p_gamma, p_gamma);
 				VectorXd va_12, va_21;
 				const double a_22 = mA(p_gamma, p_gamma);
+				
 				// Remember that Eigen's indexing is zero-based i.e. from 0 to n - 1, so mA.col(p_gamma) is actually
 				// accessing the p_gamma + 1 th column.
 				va_12 = mA.col(p_gamma);
@@ -410,6 +434,9 @@ VectorXd all_correlations_block_inverse(VectorXd vy, MatrixXd mX)
 				mA = mA_prime;
 			}
 		}
+
+		// Save mX_gamma
+		mX_gamma = mX_gamma_prime;
 	}
 
 	return vR2_all;
