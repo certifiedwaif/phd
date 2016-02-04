@@ -302,7 +302,25 @@ void greycode_change(const unsigned int idx, const unsigned int p, bool& update,
 
 MatrixXd& get_mX_gamma(MatrixXd mX, dynamic_bitset<> gamma, MatrixXd& mX_gamma)
 {
-	throw std::runtime_error("get_mX_gamma not implemented yet");
+	vector<unsigned int> gamma_columns;
+	unsigned int p_gamma = 0;
+
+	// Find which columns are set in gamma, and how many
+	for (int i = 0; i < gamma.size(); i++) {
+		if (gamma[i]) {
+			gamma_columns.push_back(i);
+			p_gamma++;
+		}
+	}
+
+	// Construct a matrix of size n by p_gamma, where p_gamma is the number of columns set in gamma
+	MatrixXd mX_gamma_prime(n, p_gamma);
+	mX_gamma = mX_gamma_prime;
+
+	// Extract columns from mX, put into mX_gamma
+	for (int i = 0; i < p_gamma; i++) {
+		mX_gamma.col(i) = mX.col(gamma_columns[i]);
+	}
 
 	return mX_gamma;
 }
