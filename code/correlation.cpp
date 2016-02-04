@@ -304,6 +304,7 @@ MatrixXd& get_mX_gamma(MatrixXd mX, dynamic_bitset<> gamma, MatrixXd& mX_gamma)
 {
 	vector<unsigned int> gamma_columns;
 	unsigned int p_gamma = 0;
+	const unsigned int n = mX.rows();
 
 	// Find which columns are set in gamma, and how many
 	for (int i = 0; i < gamma.size(); i++) {
