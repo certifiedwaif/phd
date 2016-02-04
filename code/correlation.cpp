@@ -378,27 +378,26 @@ VectorXd all_correlations_block_inverse(VectorXd vy, MatrixXd mX)
 				v1 << vy.transpose() * mX_gamma, vy.transpose() * vx;
 				MatrixXd mA_prime(p_gamma, p_gamma);
 				VectorXd numerator;
-				mA_prime << mA + b * mA * mX_gamma.transpose() * vx * vx.transpose() * mX_gamma * mA, -mA * mX_gamma.transpose() vx b,
+				mA_prime << mA + b * mA * mX_gamma.transpose() * vx * vx.transpose() * mX_gamma * mA, -mA * mX_gamma.transpose() * vx * b,
 							-b * vx.transpose() * mX_gamma * mA, b;
 				numerator = v1 * mA_prime * v1.transpose();
 				vR2 = numerator / vy.squaredNorm();
 				vR2_all(idx) = vR2.value();
 
 				// Save mA
-				mA = mA_prime
+				mA = mA_prime;
 			} else {
 				// Rank one downdate
 				cout << "Downdating " << diff_idx << endl;
 
 				// Calculate correlation
-				MatrixXd mA_11 = mA.topLeft(p_gamma, p_gamma);
+				MatrixXd mA_11 = mA.topLeftCorner(p_gamma, p_gamma);
 				VectorXd va_12, va_21;
-				double va_22;
+				const double a_22 = mA(p_gamma, p_gamma);
 				// Remember that Eigen's indexing is zero-based i.e. from 0 to n - 1, so mA.col(p_gamma) is actually
 				// accessing the p_gamma + 1 th column.
 				va_12 = mA.col(p_gamma);
-				va_21 = va12.transpose();
-				va_22 = mA(p_gamma, p_gamma);
+				va_21 = va_12.transpose();
 				MatrixXd mA_prime(p_gamma, p_gamma);
 				mA_prime = mA_11 - (1 / a_22) * va_12 * va_21;
 
