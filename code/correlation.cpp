@@ -346,6 +346,7 @@ VectorXd all_correlations_block_inverse(VectorXd vy, MatrixXd mX)
 	VectorXd vR2;                                // Correlation
 	dynamic_bitset<> gamma;											 // The model gamma
 	MatrixXd mX_gamma;													 // The matrix of covariates for the current gamma
+	unsigned int p_gamma;												 // The number of columns in the matrix mX_gamma
   VectorXd vx;                                 // The column vector for the current covariate
 	
 	// Loop through models, updating and downdating mA as necessary
@@ -355,8 +356,12 @@ VectorXd all_correlations_block_inverse(VectorXd vy, MatrixXd mX)
 		// Check if update or downdate, and for which variable
 		gamma = greycode(idx, p, gamma);
 		greycode_change(idx, p, bUpdate, diff_idx);
+
+		// Get mX matrix for gamma
 		mX_gamma = get_mX_gamma(mX, gamma, mX_gamma);
+		p_gamma = mX_gamma.cols();
 		vx = mX.col(diff_idx);
+		
 		// If we haven't previously calculated this inverse, calculate it the first time.
 		if (!bmA_set) {
 			// Calculate full inverse mA, O(p^3)
@@ -369,27 +374,43 @@ VectorXd all_correlations_block_inverse(VectorXd vy, MatrixXd mX)
 				cout << "Updating " << diff_idx << endl;
 
 				const double b = 1 / (vx.transpose() * vx - vx.transpose() * mX_gamma * mA * mX_gamma.transpose() * vx).value();
-				VectorXd v1; // [y^T X, y^T x]^T
+				VectorXd v1(p_gamma); // [y^T X, y^T x]^T
+				v1 << vy.transpose() * mX_gamma, vy.transpose() * vx;
+				MatrixXd mA_prime(p_gamma, p_gamma);
 				VectorXd numerator;
-				throw runtime_error("numerator calculation not implemented yet");
+				mA_prime << mA + b * mA * mX_gamma.transpose() * vx * vx.transpose() * mX_gamma * mA, -mA * mX_gamma.transpose() vx b,
+							-b * vx.transpose() * mX_gamma * mA, b;
+				numerator = v1 * mA_prime * v1.transpose();
 				vR2 = numerator / vy.squaredNorm();
 				vR2_all(idx) = vR2.value();
 
 				// Save mA
+				mA = mA_prime
 			} else {
 				// Rank one downdate
 				cout << "Downdating " << diff_idx << endl;
 
 				// Calculate correlation
+				MatrixXd mA_11 = mA.topLeft(p_gamma, p_gamma);
+				VectorXd va_12, va_21;
+				double va_22;
+				// Remember that Eigen's indexing is zero-based i.e. from 0 to n - 1, so mA.col(p_gamma) is actually
+				// accessing the p_gamma + 1 th column.
+				va_12 = mA.col(p_gamma);
+				va_21 = va12.transpose();
+				va_22 = mA(p_gamma, p_gamma);
+				MatrixXd mA_prime(p_gamma, p_gamma);
+				mA_prime = mA_11 - (1 / a_22) * va_12 * va_21;
+
 				VectorXd numerator;
+				numerator = vy.transpose() * mX_gamma * mA_prime * mX_gamma.transpose() * vy;;
 				vR2 = numerator / vy.squaredNorm();
 				vR2_all(idx) = vR2.value();
 
 				// Save mA
-				
+				mA = mA_prime;
 			}
 		}
-		// Save last mX?
 	}
 
 	return vR2_all;
