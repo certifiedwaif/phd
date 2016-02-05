@@ -134,149 +134,6 @@ MatrixXd& sherman_morrison(MatrixXd& mA_inv, const VectorXd vu, const VectorXd v
 	return mA_inv;
 }
 
-VectorXd make_ve(const unsigned int size, const unsigned int p)
-{
-	VectorXd ve(size);
-	ve.setZero(size);
-	ve(p - 1) = 1.; // ve_{p}
-	
-	return ve;
-}
-
-VectorXd all_correlations_sherman_morrison(VectorXd vy, MatrixXd mX, MatrixXd mZ)
-{
-	const unsigned int n = mX.rows();
-	const unsigned int p = mX.cols();
-	const unsigned int m = mZ.cols();
-	const unsigned int greycode_rows = (1 << m);
-
-	// Generate greycode matrix
-	// MatrixXd mGrey = greycode(m);
-	VectorXd vR2_all(greycode_rows);
-	MatrixXd m1_inv_last;
-	MatrixXd mC_last;
-	
-	bool bm1_inv_last_set = false;
-	// Loop through models, updating and downdating m1_inverse as necessary
-	for (unsigned int row = 1; row < greycode_rows; row++) {
-		// Construct mZ_gamma
-		RowVectorXd v_greycode_row = binary_to_vec(binary_to_grey(row), m);
-		unsigned int one_count = v_greycode_row.sum();
-		MatrixXd mZ_gamma(n, one_count);
-    // cout << v_greycode_row << endl;
-		
-		// MatrixXd m1_inv = m1.inverse();
-		// TODO: Rank one updates and downdates
-		// By properties of greycode, only one element can be different. And it's either one higher or
-		// one lower.
-		// Check if update or downdate, and for which variable
-		RowVectorXd v_diff = binary_to_vec(binary_to_grey(row), m) - binary_to_vec(binary_to_grey(row - 1), m);
-		unsigned int diff_idx;
-		for (diff_idx = 0; v_diff(diff_idx) == 0; diff_idx++);
-		VectorXd vz = mZ.col(diff_idx);
-		unsigned int mZ_gamma_col = 0;
-		for (unsigned int mZ_col_idx = 0; mZ_col_idx < m; mZ_col_idx++) {
-			if (v_greycode_row(mZ_col_idx) == 1.) {
-				mZ_gamma.col(mZ_gamma_col) = mZ.col(mZ_col_idx);
-				mZ_gamma_col++;
-			}
-		}
-
-    const unsigned int m_gamma = mZ_gamma.cols();
-    MatrixXd m1(p + m_gamma, p + m_gamma); // Symmetric
-    VectorXd m2(p + m_gamma);
-		m1 << mX.transpose() * mX, mX.transpose() * mZ_gamma,
-					mZ_gamma.transpose() * mX, mZ_gamma.transpose() * mZ_gamma;
-
-		m2 << mX.transpose() * vy,
-					mZ_gamma.transpose() * vy;
-	
-    MatrixXd mC(n, p + m_gamma);
-    mC << mX, mZ_gamma;
-    VectorXd vR2;
-		// If we haven't previously calculated this inverse, calculate it the first time.
-		if (!bm1_inv_last_set) {
-			m1_inv_last = m1.inverse();
-			vR2 = (vy.transpose() * mC * m1_inv_last * m2) / vy.squaredNorm();
-			vR2_all(row) = vR2.value();
-			bm1_inv_last_set = true;
-		} else {
-			if (v_diff(diff_idx) == 1.) {
-				// Update
-				// Construct m1_inv
-				MatrixXd m1_inv(m1_inv_last.rows() + 1, m1_inv_last.cols() + 1);
-				cout << "Updating " << diff_idx << endl;
-				cout << "m1_inv_last.cols() " << m1_inv_last.cols() << endl;
-				cout << "mC_last.cols() " << mC_last.cols() << endl;
-				cout << "mC.cols() " << mC.cols() << endl;
-
-				// const double b = 1 / (vx.transpose() * vx - vx.transpose() * mX * m1_inv_last * mX.transpose() * vx)(0);
-				// m1_inv << m1_inv_last + b * m1_inv_last * mX * vx * vx.transpose() * mX * m1_inv_last, -m1_inv_last * mX.transpose() * vx * b,
-				// 					-b * vx.transpose() * mX * m1_inv_last, b;
-				m1_inv << m1_inv_last, VectorXd::Zero(m1_inv_last.rows()),
-									VectorXd::Zero(m1_inv_last.rows()).transpose(), 1.;
-
-				// Figure out update outer products
-				VectorXd ve = make_ve(m1_inv.rows(), m1_inv.rows());
-
-				VectorXd vv(m1_inv.rows()); // Form the vector [C^T z, 0]^T
-				vv << mC_last.transpose() * vz,
-							0.;
-
-				RowVectorXd vv2(m1_inv.rows()); // Form the vector [C^T z, z^T z]
-				vv2 << (mC_last.transpose() * vz).transpose(), vz.squaredNorm();
-				
-				// Idea: Make m1_inv symmetric. Then just do one Sherman-Morrison update.
-				// Sherman-Morrison
-				m1_inv = sherman_morrison(m1_inv, vv, ve);
-				m1_inv = sherman_morrison(m1_inv, ve, vv2);
-				
-				// Calculate correlation
-				vR2 = (vy.transpose() * mC * m1_inv * m2) / vy.squaredNorm();
-				vR2_all(row) = vR2.value();
-
-				// Save m1_inv
-				m1_inv_last = m1_inv;
-			} else {
-				// Downdate
-				cout << "Downdating " << diff_idx << endl;
-				// const double c = 1 / vx.squaredNorm();
-				// VectorXd vb = -mX.transpose() * vx; // FIXME: I don't think this expression is right
-				// m1_inv = m1_inv_last - vb * vb.transpose() / c;
-				// Construct m1_inv
-				MatrixXd m1_inv = m1_inv_last;
-				
-				// Figure out downdate outer products
-				VectorXd ve = make_ve(m1_inv.rows(), m1_inv.rows());
-				
-				VectorXd vv(m1_inv.rows()); // Form the vector [C^T z, 0]^T
-				vv << mC_last.transpose() * vz,
-							0.;
-
-				RowVectorXd vv2(m1_inv.rows()); // Form the vector [C^T z, z^T z]
-				vv2 << (mC_last.transpose() * vz).transpose(), vz.squaredNorm();
-
-				// Sherman-Morrison
-				m1_inv = sherman_morrison(m1_inv, -vv, ve);
-				m1_inv = sherman_morrison(m1_inv, ve, -vv2);
-
-				// Take the upper left block of the resulting m1_inv to be our new inverse.
-				m1_inv = m1_inv.topLeftCorner(m1_inv.rows() - 1, m1_inv.cols() - 1);
-
-				// Calculate correlation
-				vR2 = (vy.transpose() * mC * m1_inv * m2) / vy.squaredNorm();
-				vR2_all(row) = vR2.value();
-
-				// Save m1_inv
-				m1_inv_last = m1_inv;
-			}
-		}
-		mC_last = mC;
-	}
-
-	return vR2_all;
-}
-
 bitset& greycode(const unsigned int idx, const unsigned int p, bitset& bs_ret)
 {
 	bitset bs(p, idx);
@@ -337,7 +194,7 @@ MatrixXd& get_mX_gamma(MatrixXd mX, bitset gamma, MatrixXd& mX_gamma)
 //' @return A vector of length 2^p of the correlations
 //' @export
 // [[Rcpp::export]]
-VectorXd all_correlations_block_inverse(VectorXd vy, MatrixXd mX)
+VectorXd all_correlations(VectorXd vy, MatrixXd mX)
 {
 	const unsigned int n = mX.rows();            // The number of observations
 	const unsigned int p = mX.cols();            // The number of covariates
@@ -348,7 +205,7 @@ VectorXd all_correlations_block_inverse(VectorXd vy, MatrixXd mX)
 	bool bUpdate;																 // True for an update, false for a downdate
   unsigned int diff_idx;                       // The covariate which is changing
 	VectorXd vR2;                                // Correlation
-	bitset gamma;											 // The model gamma
+	bitset gamma;											 					 // The model gamma
 	MatrixXd mX_gamma;													 // The matrix of covariates for the previous gamma
 	MatrixXd mX_gamma_prime;									 	 // The matrix of covariates for the current gamma
 	unsigned int p_gamma;												 // The number of columns in the matrix mX_gamma
@@ -363,8 +220,8 @@ VectorXd all_correlations_block_inverse(VectorXd vy, MatrixXd mX)
 		greycode_change(idx, p, bUpdate, diff_idx);
 
 		// Get mX matrix for gamma
-		mX_gamma_prime = get_mX_gamma(mX, gamma, mX_gamma);
-		p_gamma = mX_gamma.cols();
+		mX_gamma_prime = get_mX_gamma(mX, gamma, mX_gamma_prime);
+		p_gamma = mX_gamma_prime.cols();
 		vx = mX.col(diff_idx);
 		
 		// If we haven't previously calculated this inverse, calculate it the first time.
@@ -389,21 +246,22 @@ VectorXd all_correlations_block_inverse(VectorXd vy, MatrixXd mX)
 				// Construct mA
 				cout << "Updating " << diff_idx << endl;
 
-				cout << "vy.size()" << vy.size() << endl;
-				cout << "vx.size()" << vx.size() << endl;
-				cout << "mX_gamma.cols()" << mX_gamma.cols() << endl;
-				cout << "mX_gamma_prime.cols()" << mX_gamma_prime.cols() << endl;
-				cout << "mA.cols()" << mA.cols() << endl;
+				cout << "vy.size() " << vy.size() << endl;
+				cout << "vx.size() " << vx.size() << endl;
+				cout << "mX_gamma.cols() " << mX_gamma.cols() << endl;
+				cout << "mX_gamma_prime.cols() " << mX_gamma_prime.cols() << endl;
+				cout << "mA.cols() " << mA.cols() << endl;
 
 				VectorXd v1(p_gamma); // [y^T X, y^T x]^T
 				v1 << vy.transpose() * mX_gamma, vy.transpose() * vx;
+				cout << "v1.size() " << v1.size() << endl;
 				MatrixXd mA_prime(p_gamma, p_gamma);
 				VectorXd numerator;
 				const double b = 1 / (vx.transpose() * vx - vx.transpose() * mX_gamma * mA * mX_gamma.transpose() * vx).value();
 				mA_prime << mA + b * mA * mX_gamma.transpose() * vx * vx.transpose() * mX_gamma * mA, -mA * mX_gamma.transpose() * vx * b,
 										-b * vx.transpose() * mX_gamma * mA, b;
 				cout << mA_prime.cols() << endl;
-				numerator = v1 * mA_prime * v1.transpose();
+				numerator = v1.transpose() * mA_prime * v1;
 				vR2 = numerator / vy.squaredNorm();
 				vR2_all(idx) = vR2.value();
 
@@ -415,18 +273,22 @@ VectorXd all_correlations_block_inverse(VectorXd vy, MatrixXd mX)
 
 				// Calculate correlation
 				MatrixXd mA_11 = mA.topLeftCorner(p_gamma, p_gamma);
-				VectorXd va_12, va_21;
+				VectorXd va_12;
+				RowVectorXd va_21;
 				const double a_22 = mA(p_gamma, p_gamma);
 				
 				// Remember that Eigen's indexing is zero-based i.e. from 0 to n - 1, so mA.col(p_gamma) is actually
 				// accessing the p_gamma + 1 th column.
-				va_12 = mA.col(p_gamma);
+				va_12 = mA.col(p_gamma).head(p_gamma);
 				va_21 = va_12.transpose();
+				cout << "mA_11.cols() " << mA_11.cols() << endl;
+				cout << "va_12.size() " << va_12.size() << endl;
+				cout << "va_12.size() " << va_12.size() << endl;
 				MatrixXd mA_prime(p_gamma, p_gamma);
 				mA_prime = mA_11 - (1 / a_22) * va_12 * va_21;
 
 				VectorXd numerator;
-				numerator = vy.transpose() * mX_gamma * mA_prime * mX_gamma.transpose() * vy;;
+				numerator = vy.transpose() * mX_gamma_prime * mA_prime * mX_gamma_prime.transpose() * vy;;
 				vR2 = numerator / vy.squaredNorm();
 				vR2_all(idx) = vR2.value();
 
@@ -477,7 +339,7 @@ int main(int argc, char **argv)
 	MatrixXd mC(263, mZ.cols() + 1);
 	mC << mX, mZ;
 
-	VectorXd R2_all = all_correlations_block_inverse(vy, mC);
+	VectorXd R2_all = all_correlations(vy, mC);
 	cout << R2_all.head(10) << endl;
 	
 	return 0;
