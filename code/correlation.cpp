@@ -149,16 +149,20 @@ void greycode_change(const unsigned int idx, const unsigned int p, bool& update,
 	bitset bs_prev(p);
 
 	bs_curr = greycode(idx, p, bs_curr);
-	cout << bs_curr << endl;
+	cout << "Current gamma:  " << bs_curr << endl;
 	bs_prev = greycode(idx - 1, p, bs_prev);
-	cout << bs_prev << endl;
+	cout << "Previous gamma: " << bs_prev << endl;
 
 	// Find bit that has changed.
 	diff_idx = (bs_curr ^ bs_prev).find_first();
-	cout << diff_idx << endl;
 
 	// Has it been set, or unset?
 	update = bs_curr[diff_idx];
+	if (update) {
+		cout << "Updating " << diff_idx << endl;
+	} else {
+		cout << "Downdating " << diff_idx << endl;
+	}
 }
 
 MatrixXd& get_mX_gamma(MatrixXd mX, bitset gamma, MatrixXd& mX_gamma)
@@ -213,6 +217,7 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX)
 	
 	// Loop through models, updating and downdating mA as necessary
 	for (unsigned int idx = 1; idx < greycode_rows; idx++) {
+		cout << "Iteration " << idx << endl;
 		// By properties of Greycode, only one element can be different. And it's either one higher or
 		// one lower.
 		// Check if update or downdate, and for which variable
@@ -250,6 +255,7 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX)
 				cout << "vx.size() " << vx.size() << endl;
 				cout << "mX_gamma.cols() " << mX_gamma.cols() << endl;
 				cout << "mX_gamma_prime.cols() " << mX_gamma_prime.cols() << endl;
+				cout << "p_gamma " << p_gamma << endl;
 				cout << "mA.cols() " << mA.cols() << endl;
 
 				VectorXd v1(p_gamma); // [y^T X, y^T x]^T
