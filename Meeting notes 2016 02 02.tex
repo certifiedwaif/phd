@@ -9,18 +9,42 @@
 
 Get access to Dropxbox.
 
-Block inverse formula.
+\section{Block inverse formula}
+Let $\mA$ be a matrix partitioned into blocks,
 
-$R^2 = \frac{\vy^\top \mX_\gamma (\mX_\gamma^\top \mX_\gamma)^{-1} \mX_\gamma^\top \vy}{\vy^\top \vy}$
+\begin{equation*}
+\mA = \begin{pmatrix}
+\mP & \mQ \\
+\mR & \mS
+\end{pmatrix}
+\end{equation*}.
 
-$O(np^2 + p^3)$
+Then
+
+\begin{equation*}
+\mA^{-1} = \begin{pmatrix}
+\mP^{-1} + (\mP^{-1}.\mQ).(\mS - \mR.\mP^{-1}.\mQ)^{-1}.(\mR.\mP^{-1}) & -(\mP^{-1}.\mQ).(\mS - \mR.\mP^{-1}.\mQ)^{-1} \\
+-(\mS - \mR.\mP^{-1}.\mQ)^{-1}.(\mR.\mP^{-1}) & (\mS - \mR.\mP{^{-1}.\mQ}))^{-1}
+\end{pmatrix}
+\end{equation*}
+
+If $\mS$ is a scalar, then the inversions involving $\mS$ become divisions, which can be calculated in $O(1)$,
+and thus if the inverse of $\mP$, $\mP^{-1}$ is available, we can calculate the inverse of $\mA$ using matrix
+multiplications in $O(p^2)$ time rather than $O(p^3)$, saving us a factor of $p$ in time complexity.
+
+\section{Calculating the correlation}
+$R^2 = \underset{O(np^2 + p^3)}{\frac{\vy^\top \mX_\gamma (\mX_\gamma^\top \mX_\gamma)^{-1} \mX_\gamma^\top \vy}{\vy^\top \vy}}$
+
 
 \section{Rank one update}
 
-Let $\mA = (\mX_\gamma^\top \mX_\gamma)^{-1}$, $O(p^3)$
+Let $\gamma$ be the vector of indicators of inclusion of the model currently under consideration. Furthermore,
+let $\mX'_\gamma$ be the new covariate matrix for $\gamma$ and $\mX_\gamma$ be the covariate matrix for the
+previous $\gamma$.
 
-$\mX_\gamma \to [\mX_\gamma, \vx]$
-$n \times p, n \times 1$
+Let $\mA = (\underset{O(p^3)}{\mX_\gamma^\top \mX_\gamma})^{-1}$
+
+$\mX_\gamma' \leftarrow [\underset{n \times p, n \times 1}{\mX_\gamma, \vx}]$
 
 \begin{equation*}
 \begin{array}{lll}
@@ -57,6 +81,28 @@ R^2_{new} &= \frac{
 
 where $b = 1/(\vx^\top \vx - \vx^\top \mX_\gamma \mA \mX_\gamma^\top \vx)$. $O(np + p^2)$
 
+\section{Rank one downdate}
+
+Let
+\begin{equation*}
+\begin{array}{ll}
+\mA &= \begin{bmatrix}
+\mA_{11} & \va_{12} \\
+\va_{21} & \va_{22}
+\end{bmatrix} \\
+&= \begin{bmatrix}
+\mX_\gamma^\top \mX_\gamma & \mX_\gamma^\top \vx \\
+\vx^\top & \vx^\top \vx
+\end{bmatrix}^{-1}
+\end{array}
+\end{equation*}
+
+We want $\mA_{\text{new}} = (\mX_\gamma^\top \mX_\gamma)^{-1} = \mA_{11} - \va_{22}^{-1} \va_{12} \va_{21}$.
+
+\section{Computational concerns}
+We should put all of this useful code into an R package.
+
+\subsection{Speed and memory allocation}
 If n large, big data case.
 
 This calculation can be sped up by pre-calculating every possible b for all covariates.
@@ -76,44 +122,28 @@ p(\vy) &= \sum_{\text{models}} p(\vy | \text{model}) p(\text{model})
 \end{equation*}
 
 Pre-allocate matrices of all sizes.
-Can be numerically stable provided $\vx^\top \vx - \vx^\top \mX_\gamma \mA \mX_\gamma^\top \vx$ doesn't get small.
-$b$ is guaranteed to be positive definite.
-If $b > \text{threshold}$, then calculate the full inverse.
-Numerical inaccuracies accumulate, so calculate full inverse occasionally.
 
-\section{Rank one downdate}
-
-Let
-\begin{equation*}
-\begin{array}{ll}
-\mA &= \begin{bmatrix}
-\mA_{11} & \va_{12} \\
-\va_{21} & \va_{22}
-\end{bmatrix} \\
-&= \begin{bmatrix}
-\mX_\gamma^\top \mX_\gamma & \mX_\gamma^\top \vx \\
-\vx^\top & \vx^\top \vx
-\end{bmatrix}^{-1}
-\end{array}
-\end{equation*}
-
-We want $\mA_{\text{new}} = (\mX_\gamma^\top \mX_\gamma)^{-1} = \mA_{11} - \va_{22}^{-1} \va_{12} \va_{21}$.
-
-Greycode
+\subsection{Greycode}
 
 $G \in R^{2^r \times r}$. No need to store the entire matrix, generate as you need them. Can you get which
 variables are set? q variables, what if q really large? Correct representation, integer flow if indexing. Bit
 vector.
 
-We should put all of this useful code into an R package.
+\subsection{Numerical stability}
+
+Can be numerically stable provided $\vx^\top \vx - \vx^\top \mX_\gamma \mA \mX_\gamma^\top \vx$ doesn't get
+small, leading to its' reciprocal becoming large and potentially numerically overflowing. $b$ is guaranteed to
+be positive definite. If $b > \text{threshold}$, then calculate the full inverse. Numerical inaccuracies
+accumulate, so calculate full inverse occasionally.
+
 
 \section{A cunning plan \ldots}
 \begin{itemize}
 \item Fully Bayesian
-\item Combinatorial search, soe subset fixed
+\item Combinatorial search, some subset fixed
 \item Collapsed VB next, integrates out subsets of parameters, just left with model indicators, some number 
 			between $[0, 1]$. Fully factorised VB, same sort of algebra, but changing bits of $\mA$.
 \item Initialisation strategies.
-\item Branch and bound if there's time, lowest priority. It's just Mark's idea.
+\item Branch and bound if there's time, lowest priority.
 \end{itemize}
 \end{document}
