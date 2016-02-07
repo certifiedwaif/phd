@@ -19,39 +19,89 @@
 \titlepage
 \end{frame}
 
-\begin{frame}{Block inverse formula}
-% Copy from meeting notes
-% Re-writing meeting notes to use in the paper and thesis
-% Discarded old code, writing better, cleaner code
+\begin{frame}{Progress this week}
+\begin{itemize}
+\item Mathematical statistics + Working code + Writing = Progress
+\item I need to be working on all of these things, at the same time
+\item With a laptop and a smartphone, you can work anywhere!
+\item Focus: Clearing the decks
+\end{itemize}
 \end{frame}
 
 \begin{frame}{Tools I'm using}
 \begin{itemize}
-\item GitHub http://github.com
-\item Slack http://slack.com
-\item Trello http://trello.com
-\item Mendeley http://mendeley.com
-\item These tools all integrate with one another, and have web, Windows, Mac and iOS/Android apps.
-\item A text editor. I like Sublime Text (http://www.sublimetext.com/)
+\item \begin{tabular}{|l|l|}
+\hline
+Tool & URL \\
+\hline
+GitHub & http://github.com \\
+Slack & http://slack.com \\
+Trello & http://trello.com \\
+Mendeley & http://mendeley.com \\
+\hline
+\end{tabular}
+\item These tools are all multi-user, all integrate with one another, and have web, Windows, Mac and
+			iOS/Android apps.
+\item They also help me account for my \emph{time}.
+\item A text editor. I like Sublime Text (http://www.sublimetext.com/), but you can use whatever you want
 \end{itemize}
+\end{frame}
+
+\begin{frame}{Block inverse formula}
+% Copy from meeting notes
+% Re-writing meeting notes to use in the paper and thesis
+% Discarded old code, writing better, cleaner code
+Let $\mA$ be a matrix partitioned into blocks,
+
+\small
+\begin{equation*}
+\mA = \begin{pmatrix}
+\mP & \mQ \\
+\mR & \mS
+\end{pmatrix}.
+\end{equation*}
+\normalsize
+
+Then $\mA^{-1}$ is
+
+\small
+\begin{equation*}
+\begin{pmatrix}
+\mP^{-1} + (\mP^{-1}.\mQ).(\mS - \mR.\mP^{-1}.\mQ)^{-1}.(\mR.\mP^{-1}) & -(\mP^{-1}.\mQ).(\mS - \mR.\mP^{-1}.\mQ)^{-1} \\
+-(\mS - \mR.\mP^{-1}.\mQ)^{-1}.(\mR.\mP^{-1}) & (\mS - \mR.\mP{^{-1}.\mQ}))^{-1}
+\end{pmatrix}
+\end{equation*}
+\normalsize
+
+If $\mS$ is a scalar, then the inversions involving $\mS$ become divisions, which can be calculated in $O(1)$,
+and thus if the inverse of $\mP$, $\mP^{-1}$ is available, we can calculate the inverse of $\mA$ using matrix
+multiplications in $O(p^2)$ time rather than $O(p^3)$, saving us a factor of $p$ in time complexity.
+
 \end{frame}
 
 \begin{frame}{Debugging correlations code}
 \begin{itemize}
-\item Make it build, then make it run. Finally, make it first
+\item Writing correlation code in C++
+\item Make it build, then make it run, then make it right. Finally, make it fast
 \item Initialisation works
 \item Rank 1 update and downdate works a couple of times
 \item Up to 5 iterations as of last week
-\item I have a tricky state bug
+\item I have a tricky state bug, which I hope to track down this week
 \end{itemize}
+\end{frame}
+
+\begin{frame}{Hadley Wickham is coming to town!}
+Well, Melbourne. Close enough, right?
+Book now, to avoid disappointment. Places are going fast. http://www.meetup.com/Data-Science-Melbourne/events/227234228/
 \end{frame}
 
 \begin{frame}
 \frametitle{Functional programming comes to the Hadleyverse \ldots}
 \begin{itemize}
-\item Hadley Wickham started a GitHub project for monads this week
-\item We already have pipes in magrittr
-\item There goes the neighbourhood
+\item Hadley Wickham started a GitHub project for monads last week (https://github.com/hadley/monads)
+\item We already have pipes in magrittr (https://github.com/smbache/magrittr)
+\item These libraries make R more like Haskell
+\item There goes the neighbourhood \ldots
 \end{itemize}
 \end{frame}
 
