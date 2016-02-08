@@ -22,106 +22,106 @@ typedef dynamic_bitset<> dbitset;
 // Code copied from here: https://gist.github.com/stephenjbarr/2266900
 MatrixXd parseCSVfile_double(string infilename)
 {
-  ifstream in(infilename.c_str());
-  if (!in.is_open()) return MatrixXd(1,1);
+	ifstream in(infilename.c_str());
+	if (!in.is_open()) return MatrixXd(1,1);
 
-  typedef tokenizer< escaped_list_separator<char> > Tokenizer;
+	typedef tokenizer< escaped_list_separator<char> > Tokenizer;
 
-  vector< string > vec;
-  string line;
-  vector< vector< string > > matrows;
+	vector< string > vec;
+	string line;
+	vector< vector< string > > matrows;
 
-  while (getline(in, line)) {
-    Tokenizer tok(line);
-    vec.assign(tok.begin(),tok.end());
+	while (getline(in, line)) {
+		Tokenizer tok(line);
+		vec.assign(tok.begin(),tok.end());
 
 		// // Print each row
-    // copy(vec.begin(), vec.end(),
-    //      ostream_iterator<string>(cout, "|"));
-    // cout << "\n----------------------" << endl;
+		// copy(vec.begin(), vec.end(),
+		//      ostream_iterator<string>(cout, "|"));
+		// cout << "\n----------------------" << endl;
 
 		matrows.push_back(vec);
-  }
-  in.close();
+	}
+	in.close();
 
-  // FIGURE OUT HOW MANY OF THE ROWS HAVE THE RIGHT NUMBER
-  // OF COLUMNS
-  int Nrows = matrows.size();
-  int Ncols = matrows[0].size();
-  int Ngoodrows = 0;
-  for(int i = 0; i < Nrows; i++) {
-    if(matrows[i].size() == Ncols) {
+	// FIGURE OUT HOW MANY OF THE ROWS HAVE THE RIGHT NUMBER
+	// OF COLUMNS
+	int Nrows = matrows.size();
+	int Ncols = matrows[0].size();
+	int Ngoodrows = 0;
+	for(int i = 0; i < Nrows; i++) {
+		if(matrows[i].size() == Ncols) {
 			Ngoodrows++;
-    }
-  }
+		}
+	}
 
-  // TRANSFORM THE VECTOR OF ROWS INTO AN EIGEN INTEGER MATRIX
-  MatrixXd xmat = MatrixXd(Ngoodrows, Ncols);
-  // cout << "INPUT MATRIX: " << Nrows << "x" << Ncols << endl;
+	// TRANSFORM THE VECTOR OF ROWS INTO AN EIGEN INTEGER MATRIX
+	MatrixXd xmat = MatrixXd(Ngoodrows, Ncols);
+	// cout << "INPUT MATRIX: " << Nrows << "x" << Ncols << endl;
 
-  int rc = 0;
+	int rc = 0;
 
-  for(int i = 0; i < Nrows; i++) {
-    int rowsize = matrows[i].size();
+	for(int i = 0; i < Nrows; i++) {
+		int rowsize = matrows[i].size();
 
-    if(rowsize != Ncols) {
+		if(rowsize != Ncols) {
 			// cout << "Row " << i << " has bad column count" << endl;
 			continue;
-    } 
+		} 
 
-    for(int j = 0; j < Ncols; j++) {
+		for(int j = 0; j < Ncols; j++) {
 			xmat(rc,j) = int(round(strtod(matrows[i][j].c_str(), NULL)));
-    }
-    rc++;
-  }
+		}
+		rc++;
+	}
 
-  return(xmat);
+	return(xmat);
 }
 
 // From the Wikipedia page on Gray code
 /*
-        The purpose of this function is to convert an unsigned
-        binary number to reflected binary Gray code.
+				The purpose of this function is to convert an unsigned
+				binary number to reflected binary Gray code.
 
-        The operator >> is shift right. The operator ^ is exclusive or.
+				The operator >> is shift right. The operator ^ is exclusive or.
 */
 unsigned int binary_to_grey(unsigned int num)
 {
-  return (num >> 1) ^ num;
+	return (num >> 1) ^ num;
 }
 
 /*
-        The purpose of this function is to convert a reflected binary
-        Gray code number to a binary number.
+				The purpose of this function is to convert a reflected binary
+				Gray code number to a binary number.
 */
 unsigned int grey_to_binary(unsigned int num)
 {
-  unsigned int mask;
-  for (mask = num >> 1; mask != 0; mask = mask >> 1)
-  {
-    num = num ^ mask;
-  }
-  return num;
+	unsigned int mask;
+	for (mask = num >> 1; mask != 0; mask = mask >> 1)
+	{
+		num = num ^ mask;
+	}
+	return num;
 }
 
 VectorXd binary_to_vec(unsigned int num, unsigned int p)
 {
-  VectorXd result(p);
-  for (unsigned int i = 0; i < p; i++) {
-    result[(p - 1) - i] = num & 1;
-    num >>= 1;
-  }
-  return(result);
+	VectorXd result(p);
+	for (unsigned int i = 0; i < p; i++) {
+		result[(p - 1) - i] = num & 1;
+		num >>= 1;
+	}
+	return(result);
 }
 
 MatrixXd greycode(unsigned int p)
 {
-  unsigned int rows = 1 << p;
-  MatrixXd result(rows, p);
-  for (unsigned int i = 0; i < rows; i++) {
-    result.row(i) = binary_to_vec(binary_to_grey(i), p).transpose();
-  }
-  return(result);
+	unsigned int rows = 1 << p;
+	MatrixXd result(rows, p);
+	for (unsigned int i = 0; i < rows; i++) {
+		result.row(i) = binary_to_vec(binary_to_grey(i), p).transpose();
+	}
+	return(result);
 }
 
 MatrixXd& sherman_morrison(MatrixXd& mA_inv, const VectorXd vu, const VectorXd vv)
@@ -202,16 +202,16 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, bool bDebug = false)
 	const unsigned int p = mX.cols();            // The number of covariates
 	const unsigned int greycode_rows = (1 << p); // The number of greycode combinations, 2^p
 	VectorXd vR2_all(greycode_rows);             // Vector of correlations for all models
-  MatrixXd mA;                                 // The inverse of (X^T X) for the previous iteration
+	MatrixXd mA;                                 // The inverse of (X^T X) for the previous iteration
 	bool bmA_set = false;                        // Whether mA has been set yet
 	bool bUpdate;																 // True for an update, false for a downdate
-  unsigned int diff_idx;                       // The covariate which is changing
+	unsigned int diff_idx;                       // The covariate which is changing
 	double R2;                                	 // Correlation
 	dbitset gamma;											 				 // The model gamma
 	MatrixXd mX_gamma;													 // The matrix of covariates for the previous gamma
 	MatrixXd mX_gamma_prime;									 	 // The matrix of covariates for the current gamma
 	unsigned int p_gamma;												 // The number of columns in the matrix mX_gamma
-  VectorXd vx;                                 // The column vector for the current covariate
+	VectorXd vx;                                 // The column vector for the current covariate
 	
 	// Loop through models, updating and downdating mA as necessary
 	for (unsigned int idx = 1; idx < greycode_rows; idx++) {
