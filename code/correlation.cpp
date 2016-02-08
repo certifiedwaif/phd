@@ -57,7 +57,7 @@ MatrixXd parseCSVfile_double(string infilename)
 
   // TRANSFORM THE VECTOR OF ROWS INTO AN EIGEN INTEGER MATRIX
   MatrixXd xmat = MatrixXd(Ngoodrows, Ncols);
-  cout << "INPUT MATRIX: " << Nrows << "x" << Ncols << endl;
+  // cout << "INPUT MATRIX: " << Nrows << "x" << Ncols << endl;
 
   int rc = 0;
 
@@ -65,7 +65,7 @@ MatrixXd parseCSVfile_double(string infilename)
     int rowsize = matrows[i].size();
 
     if(rowsize != Ncols) {
-			cout << "Row " << i << " has bad column count" << endl;
+			// cout << "Row " << i << " has bad column count" << endl;
 			continue;
     } 
 
@@ -206,8 +206,8 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, bool bDebug = false)
 	bool bmA_set = false;                        // Whether mA has been set yet
 	bool bUpdate;																 // True for an update, false for a downdate
   unsigned int diff_idx;                       // The covariate which is changing
-	VectorXd vR2;                                // Correlation
-	dbitset gamma;											 					 // The model gamma
+	double R2;                                	 // Correlation
+	dbitset gamma;											 				 // The model gamma
 	MatrixXd mX_gamma;													 // The matrix of covariates for the previous gamma
 	MatrixXd mX_gamma_prime;									 	 // The matrix of covariates for the current gamma
 	unsigned int p_gamma;												 // The number of columns in the matrix mX_gamma
@@ -240,8 +240,8 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, bool bDebug = false)
 				cout << mA_prime.cols() << endl;
 			}
 			numerator = v1 * mA_prime * v1.transpose();
-			vR2 = numerator / vy.squaredNorm();
-			vR2_all(idx) = vR2.value();
+			R2 = (numerator / vy.squaredNorm()).value();
+			vR2_all(idx) = R2;
 			mA = mA_prime;
 
 			bmA_set = true;
@@ -277,14 +277,27 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, bool bDebug = false)
 				const double b = 1 / (vx.transpose() * vx - vx.transpose() * mX_gamma * mA * mX_gamma.transpose() * vx).value();
 				// b is supposed to be positive definite.
 				if (bDebug) {
-					cout << idx << " b " << b << endl
-				};
-				mA_prime << mA + b * mA * mX_gamma.transpose() * vx * vx.transpose() * mX_gamma * mA, -mA * mX_gamma.transpose() * vx * b,
-										-b * vx.transpose() * mX_gamma * mA, b;
-				if (bDebug)	cout << mA_prime.cols() << endl;
+					cout << idx << " b " << b << endl;
+				}
+				const double epsilon = 1e-4;
+				if (b > epsilon) {
+					// Do rank one update
+					mA_prime << mA + b * mA * mX_gamma.transpose() * vx * vx.transpose() * mX_gamma * mA, -mA * mX_gamma.transpose() * vx * b,
+											-b * vx.transpose() * mX_gamma * mA, b;
+					if (bDebug)	cout << mA_prime.cols() << endl;
+				} else {
+					// Perform full inverse
+					mA_prime = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
+				}
 				numerator = v1.transpose() * mA_prime * v1;
-				vR2 = numerator / vy.squaredNorm();
-				vR2_all(idx) = vR2.value();
+				R2 = (numerator / vy.squaredNorm()).value();
+				if (R2 > 1.0) {
+					// Perform full inversion
+					mA_prime = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();					
+					numerator = v1.transpose() * mA_prime * v1;
+					R2 = (numerator / vy.squaredNorm()).value();
+				}
+				vR2_all(idx) = R2;
 
 				// Save mA
 				mA = mA_prime;
@@ -308,12 +321,25 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, bool bDebug = false)
 					cout << "va_12.size() " << va_12.size() << endl;
 				}
 				MatrixXd mA_prime(p_gamma, p_gamma);
-				mA_prime = mA_11 - (1 / a_22) * va_12 * va_21;
+				mA_prime = mA_11 - (va_12 * va_21) / a_22;
 
 				VectorXd numerator;
 				numerator = vy.transpose() * mX_gamma_prime * mA_prime * mX_gamma_prime.transpose() * vy;;
-				vR2 = numerator / vy.squaredNorm();
-				vR2_all(idx) = vR2.value();
+				R2 = (numerator / vy.squaredNorm()).value();
+				if (R2 > 1.0) {
+					// Perform full inversion
+					mA_prime = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
+					VectorXd v1(p_gamma); // [y^T X, y^T x]^T
+					v1 << vy.transpose() * mX_gamma_prime;
+					VectorXd numerator;
+					if (bDebug) {
+						cout << "v1.size() " << v1.size() << endl;
+						cout << "mA_prime.cols() " << mA_prime.cols() << endl;
+					}
+					numerator = v1 * mA_prime * v1.transpose();
+					R2 = (numerator / vy.squaredNorm()).value();
+				}
+				vR2_all(idx) = R2;
 
 				// Save mA
 				mA = mA_prime;
@@ -357,7 +383,7 @@ int main(int argc, char **argv)
 	MatrixXd mZ = parseCSVfile_double("mX.csv");
 
 	VectorXd R2_one = one_correlation(vy, mX, mZ);
-	cout << R2_one << endl;
+	// cout << R2_one << endl;
 
 	MatrixXd mC(263, mZ.cols() + 1);
 	mC << mX, mZ;
@@ -366,7 +392,9 @@ int main(int argc, char **argv)
 
 	cout << "i,R2" << endl;
 	for (int i = 0; i < vR2_all.size(); i++) {
-		cout << i << ", " << vR2_all(i) << endl;
+		if (vR2_all(i) > 1.0 || vR2_all(i) < 0.0) {
+			cout << i << ", " << vR2_all(i) << endl;
+		}
 	}
 	
 	return 0;
