@@ -158,11 +158,6 @@ void greycode_change(const unsigned int idx, const unsigned int p, bool& update,
 
 	// Has it been set, or unset?
 	update = bs_curr[diff_idx];
-	if (update) {
-		cout << "Updating " << diff_idx << endl;
-	} else {
-		cout << "Downdating " << diff_idx << endl;
-	}
 }
 
 MatrixXd& get_mX_gamma(MatrixXd mX, dbitset gamma, MatrixXd& mX_gamma)
@@ -254,12 +249,20 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX)
 				cout << "vy.size() " << vy.size() << endl;
 				cout << "vx.size() " << vx.size() << endl;
 				cout << "mX_gamma.cols() " << mX_gamma.cols() << endl;
+				cout << "mX_gamma.rows() " << mX_gamma.rows() << endl;
 				cout << "mX_gamma_prime.cols() " << mX_gamma_prime.cols() << endl;
+				cout << "mX_gamma_prime.rows() " << mX_gamma_prime.rows() << endl;
 				cout << "p_gamma " << p_gamma << endl;
 				cout << "mA.cols() " << mA.cols() << endl;
+				cout << "mA.rows() " << mA.rows() << endl;
 
 				VectorXd v1(p_gamma); // [y^T X, y^T x]^T
-				v1 << vy.transpose() * mX_gamma, vy.transpose() * vx;
+				VectorXd v2, v3;
+				v2 = vy.transpose() * mX_gamma;
+				v3 = vy.transpose() * vx;
+				cout << "v2.size() " << v2.size() << endl;
+				cout << "v3.size() " << v3.size() << endl;
+				v1 << v2, v3;
 				cout << "v1.size() " << v1.size() << endl;
 				MatrixXd mA_prime(p_gamma, p_gamma);
 				VectorXd numerator;
