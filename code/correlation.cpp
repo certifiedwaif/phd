@@ -17,7 +17,7 @@ using Eigen::RowVectorXi;
 using Eigen::MatrixXi;
 using namespace std;
 
-typedef dynamic_bitset<> bitset;
+typedef dynamic_bitset<> dbitset;
 
 // Code copied from here: https://gist.github.com/stephenjbarr/2266900
 MatrixXd parseCSVfile_double(string infilename)
@@ -134,9 +134,9 @@ MatrixXd& sherman_morrison(MatrixXd& mA_inv, const VectorXd vu, const VectorXd v
 	return mA_inv;
 }
 
-bitset& greycode(const unsigned int idx, const unsigned int p, bitset& bs_ret)
+dbitset& greycode(const unsigned int idx, const unsigned int p, dbitset& bs_ret)
 {
-	bitset bs(p, idx);
+	dbitset bs(p, idx);
 	bs = (bs >> 1) ^ bs;
 	bs_ret = bs;
 
@@ -145,8 +145,8 @@ bitset& greycode(const unsigned int idx, const unsigned int p, bitset& bs_ret)
 
 void greycode_change(const unsigned int idx, const unsigned int p, bool& update, unsigned int& diff_idx)
 {
-	bitset bs_curr(p);
-	bitset bs_prev(p);
+	dbitset bs_curr(p);
+	dbitset bs_prev(p);
 
 	bs_curr = greycode(idx, p, bs_curr);
 	cout << "Current gamma:  " << bs_curr << endl;
@@ -165,7 +165,7 @@ void greycode_change(const unsigned int idx, const unsigned int p, bool& update,
 	}
 }
 
-MatrixXd& get_mX_gamma(MatrixXd mX, bitset gamma, MatrixXd& mX_gamma)
+MatrixXd& get_mX_gamma(MatrixXd mX, dbitset gamma, MatrixXd& mX_gamma)
 {
 	vector<unsigned int> gamma_columns;
 	unsigned int p_gamma = 0;
@@ -209,7 +209,7 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX)
 	bool bUpdate;																 // True for an update, false for a downdate
   unsigned int diff_idx;                       // The covariate which is changing
 	VectorXd vR2;                                // Correlation
-	bitset gamma;											 					 // The model gamma
+	dbitset gamma;											 					 // The model gamma
 	MatrixXd mX_gamma;													 // The matrix of covariates for the previous gamma
 	MatrixXd mX_gamma_prime;									 	 // The matrix of covariates for the current gamma
 	unsigned int p_gamma;												 // The number of columns in the matrix mX_gamma
