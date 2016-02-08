@@ -275,6 +275,10 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, bool bDebug = false)
 				MatrixXd mA_prime(p_gamma, p_gamma);
 				VectorXd numerator;
 				const double b = 1 / (vx.transpose() * vx - vx.transpose() * mX_gamma * mA * mX_gamma.transpose() * vx).value();
+				// b is supposed to be positive definite.
+				if (bDebug) {
+					cout << idx << " b " << b << endl
+				};
 				mA_prime << mA + b * mA * mX_gamma.transpose() * vx * vx.transpose() * mX_gamma * mA, -mA * mX_gamma.transpose() * vx * b,
 										-b * vx.transpose() * mX_gamma * mA, b;
 				if (bDebug)	cout << mA_prime.cols() << endl;
