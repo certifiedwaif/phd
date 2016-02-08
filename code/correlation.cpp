@@ -143,15 +143,18 @@ dbitset& greycode(const unsigned int idx, const unsigned int p, dbitset& bs_ret)
 	return bs_ret;
 }
 
-void greycode_change(const unsigned int idx, const unsigned int p, bool& update, unsigned int& diff_idx)
+void greycode_change(const unsigned int idx, const unsigned int p, bool& update, unsigned int& diff_idx,
+										 bool bDebug)
 {
 	dbitset bs_curr(p);
 	dbitset bs_prev(p);
 
 	bs_curr = greycode(idx, p, bs_curr);
-	cout << "Current gamma:  " << bs_curr << endl;
 	bs_prev = greycode(idx - 1, p, bs_prev);
-	cout << "Previous gamma: " << bs_prev << endl;
+	if (bDebug) {
+		cout << "Current gamma:  " << bs_curr << endl;
+		cout << "Previous gamma: " << bs_prev << endl;
+	}
 
 	// Find bit that has changed.
 	diff_idx = (bs_curr ^ bs_prev).find_first();
@@ -193,7 +196,7 @@ MatrixXd& get_mX_gamma(MatrixXd mX, dbitset gamma, MatrixXd& mX_gamma)
 //' @return A vector of length 2^p of the correlations
 //' @export
 // [[Rcpp::export]]
-VectorXd all_correlations(VectorXd vy, MatrixXd mX)
+VectorXd all_correlations(VectorXd vy, MatrixXd mX, bool bDebug = false)
 {
 	const unsigned int n = mX.rows();            // The number of observations
 	const unsigned int p = mX.cols();            // The number of covariates
@@ -212,12 +215,12 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX)
 	
 	// Loop through models, updating and downdating mA as necessary
 	for (unsigned int idx = 1; idx < greycode_rows; idx++) {
-		cout << "Iteration " << idx << endl;
+		if (bDebug) cout << "Iteration " << idx << endl;
 		// By properties of Greycode, only one element can be different. And it's either one higher or
 		// one lower.
 		// Check if update or downdate, and for which variable
 		gamma = greycode(idx, p, gamma);
-		greycode_change(idx, p, bUpdate, diff_idx);
+		greycode_change(idx, p, bUpdate, diff_idx, bDebug);
 
 		// Get mX matrix for gamma
 		mX_gamma_prime = get_mX_gamma(mX, gamma, mX_gamma_prime);
@@ -232,8 +235,10 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX)
 			VectorXd v1(p_gamma); // [y^T X, y^T x]^T
 			v1 << vy.transpose() * mX_gamma_prime;
 			VectorXd numerator;
-			cout << v1.size() << endl;
-			cout << mA_prime.cols() << endl;
+			if (bDebug) {
+				cout << v1.size() << endl;
+				cout << mA_prime.cols() << endl;
+			}
 			numerator = v1 * mA_prime * v1.transpose();
 			vR2 = numerator / vy.squaredNorm();
 			vR2_all(idx) = vR2.value();
@@ -244,32 +249,35 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX)
 			if (bUpdate) {
 				// Rank one update
 				// Construct mA
-				cout << "Updating " << diff_idx << endl;
-
-				cout << "vy.size() " << vy.size() << endl;
-				cout << "vx.size() " << vx.size() << endl;
-				cout << "mX_gamma.cols() " << mX_gamma.cols() << endl;
-				cout << "mX_gamma.rows() " << mX_gamma.rows() << endl;
-				cout << "mX_gamma_prime.cols() " << mX_gamma_prime.cols() << endl;
-				cout << "mX_gamma_prime.rows() " << mX_gamma_prime.rows() << endl;
-				cout << "p_gamma " << p_gamma << endl;
-				cout << "mA.cols() " << mA.cols() << endl;
-				cout << "mA.rows() " << mA.rows() << endl;
-
+				if (bDebug) {
+					cout << "Updating " << diff_idx << endl;
+	
+					cout << "vy.size() " << vy.size() << endl;
+					cout << "vx.size() " << vx.size() << endl;
+					cout << "mX_gamma.cols() " << mX_gamma.cols() << endl;
+					cout << "mX_gamma.rows() " << mX_gamma.rows() << endl;
+					cout << "mX_gamma_prime.cols() " << mX_gamma_prime.cols() << endl;
+					cout << "mX_gamma_prime.rows() " << mX_gamma_prime.rows() << endl;
+					cout << "p_gamma " << p_gamma << endl;
+					cout << "mA.cols() " << mA.cols() << endl;
+					cout << "mA.rows() " << mA.rows() << endl;
+				}
 				VectorXd v1(p_gamma); // [y^T X, y^T x]^T
 				VectorXd v2, v3;
 				v2 = vy.transpose() * mX_gamma;
 				v3 = vy.transpose() * vx;
-				cout << "v2.size() " << v2.size() << endl;
-				cout << "v3.size() " << v3.size() << endl;
+				if (bDebug) {
+					cout << "v1.size() " << v1.size() << endl;
+					cout << "v2.size() " << v2.size() << endl;
+					cout << "v3.size() " << v3.size() << endl;
+				}
 				v1 << v2, v3;
-				cout << "v1.size() " << v1.size() << endl;
 				MatrixXd mA_prime(p_gamma, p_gamma);
 				VectorXd numerator;
 				const double b = 1 / (vx.transpose() * vx - vx.transpose() * mX_gamma * mA * mX_gamma.transpose() * vx).value();
 				mA_prime << mA + b * mA * mX_gamma.transpose() * vx * vx.transpose() * mX_gamma * mA, -mA * mX_gamma.transpose() * vx * b,
 										-b * vx.transpose() * mX_gamma * mA, b;
-				cout << mA_prime.cols() << endl;
+				if (bDebug)	cout << mA_prime.cols() << endl;
 				numerator = v1.transpose() * mA_prime * v1;
 				vR2 = numerator / vy.squaredNorm();
 				vR2_all(idx) = vR2.value();
@@ -278,7 +286,7 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX)
 				mA = mA_prime;
 			} else {
 				// Rank one downdate
-				cout << "Downdating " << diff_idx << endl;
+				if (bDebug) cout << "Downdating " << diff_idx << endl;
 
 				// Calculate correlation
 				MatrixXd mA_11 = mA.topLeftCorner(p_gamma, p_gamma);
@@ -290,9 +298,11 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX)
 				// accessing the p_gamma + 1 th column.
 				va_12 = mA.col(p_gamma).head(p_gamma);
 				va_21 = va_12.transpose();
-				cout << "mA_11.cols() " << mA_11.cols() << endl;
-				cout << "va_12.size() " << va_12.size() << endl;
-				cout << "va_12.size() " << va_12.size() << endl;
+				if (bDebug) {
+					cout << "mA_11.cols() " << mA_11.cols() << endl;
+					cout << "va_12.size() " << va_12.size() << endl;
+					cout << "va_12.size() " << va_12.size() << endl;
+				}
 				MatrixXd mA_prime(p_gamma, p_gamma);
 				mA_prime = mA_11 - (1 / a_22) * va_12 * va_21;
 
@@ -335,8 +345,8 @@ VectorXd one_correlation(VectorXd vy, MatrixXd mX, MatrixXd mZ)
 
 int main(int argc, char **argv)
 {
-	// Eigen::initParallel();
-	// Eigen::setNbThreads(4);
+	Eigen::initParallel();
+	Eigen::setNbThreads(8);
 
 	VectorXd vy = parseCSVfile_double("vy.csv");
 	MatrixXd mX = MatrixXd::Ones(263, 1);
@@ -348,8 +358,12 @@ int main(int argc, char **argv)
 	MatrixXd mC(263, mZ.cols() + 1);
 	mC << mX, mZ;
 
-	VectorXd R2_all = all_correlations(vy, mC);
-	cout << R2_all.head(10) << endl;
+	VectorXd vR2_all = all_correlations(vy, mC, false);
+
+	cout << "i,R2" << endl;
+	for (int i = 0; i < vR2_all.size(); i++) {
+		cout << i << ", " << vR2_all(i) << endl;
+	}
 	
 	return 0;
 }
