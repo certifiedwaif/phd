@@ -206,6 +206,7 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, bool bDebug = false)
 	bool bmA_set = false;                        // Whether mA has been set yet
 	bool bUpdate;																 // True for an update, false for a downdate
 	unsigned int diff_idx;                       // The covariate which is changing
+	double numerator;														 // The numerator in the correlation calculation
 	double R2;                                	 // Correlation
 	dbitset gamma;											 				 // The model gamma
 	MatrixXd mX_gamma;													 // The matrix of covariates for the previous gamma
@@ -234,13 +235,12 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, bool bDebug = false)
 			mA_prime = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
 			VectorXd v1(p_gamma); // [y^T X, y^T x]^T
 			v1 << vy.transpose() * mX_gamma_prime;
-			VectorXd numerator;
 			if (bDebug) {
 				cout << v1.size() << endl;
 				cout << mA_prime.cols() << endl;
 			}
-			numerator = v1 * mA_prime * v1.transpose();
-			R2 = (numerator / vy.squaredNorm()).value();
+			numerator = (v1 * mA_prime * v1.transpose()).value();
+			R2 = numerator / vy.squaredNorm();
 			vR2_all(idx) = R2;
 			mA = mA_prime;
 
@@ -273,7 +273,6 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, bool bDebug = false)
 				}
 				v1 << v2, v3;
 				MatrixXd mA_prime(p_gamma, p_gamma);
-				VectorXd numerator;
 				const double b = 1 / (vx.transpose() * vx - vx.transpose() * mX_gamma * mA * mX_gamma.transpose() * vx).value();
 				// b is supposed to be positive definite.
 				if (bDebug) {
@@ -289,13 +288,13 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, bool bDebug = false)
 					// Perform full inverse
 					mA_prime = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
 				}
-				numerator = v1.transpose() * mA_prime * v1;
-				R2 = (numerator / vy.squaredNorm()).value();
+				numerator = (v1.transpose() * mA_prime * v1).value();
+				R2 = numerator / vy.squaredNorm();
 				if (R2 > 1.0) {
 					// Perform full inversion
 					mA_prime = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();					
-					numerator = v1.transpose() * mA_prime * v1;
-					R2 = (numerator / vy.squaredNorm()).value();
+					numerator = (v1.transpose() * mA_prime * v1).value();
+					R2 = numerator / vy.squaredNorm();
 				}
 				vR2_all(idx) = R2;
 
