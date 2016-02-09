@@ -329,14 +329,13 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, bool bDebug = false)
 				if (R2 > 1.0) {
 					// Perform full inversion
 					mA_prime = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
-					VectorXd v1(p_gamma); // [y^T X, y^T x]^T
-					v1 << vy.transpose() * mX_gamma_prime;
-					VectorXd numerator;
+					VectorXd v1; // [y^T X, y^T x]^T
+					v1 = vy.transpose() * mX_gamma_prime;
 					if (bDebug) {
 						cout << "v1.size() " << v1.size() << endl;
 						cout << "mA_prime.cols() " << mA_prime.cols() << endl;
 					}
-					numerator = v1 * mA_prime * v1.transpose();
+					numerator = v1.transpose() * mA_prime * v1;
 					R2 = (numerator / vy.squaredNorm()).value();
 				}
 				vR2_all(idx) = R2;
