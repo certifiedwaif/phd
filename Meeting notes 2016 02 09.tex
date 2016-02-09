@@ -1,0 +1,144 @@
+\documentclass{amsart}
+\title{Meeting with Dr John Ormerod - 09/02/2016}
+
+\input{Definitions.tex}
+
+\begin{document}
+
+\maketitle
+
+Time: 10:30am to 11:30am
+Attendees: Dr John Ormerod, Mark Greenaway
+
+I raised the issue with John of my lack of progress, and the possibility of my PhD being discontinued if I
+don't show substantial progress within six months. Senior people in the department are expressing concern at
+my lack of progress, and he is acting on this. John understands that there are mitigating factors relating to
+my personal life, but standards must be  enforced.
+
+I said ``Currently, we're in trouble. Where do we need to be in six months to be out of trouble?''. He
+responsed that we should have two papers submitted by July 2016. We currently have one paper almost ready for
+submission. It's on John's desk, waiting for him to have some time to edit it.
+
+\section{Paper 2}
+
+First paper
+Numerically difficult
+unhealthy obsession with speed
+A lot of time spent worrying about R performance. C++ is more suitable for performance-critical work.
+Putting off learning things, particularly theoretical things. This never saved any time - I just ended up 
+needing to learn the thing later anyway.
+
+John mentioned that I was his second PhD student, and that he'd never been a primary supervisor before.
+
+Need to be more efficient for second paper.
+GPU? Maybe we need to drop that at this stage, due to lack of time.
+Collapsed VB for linear models.
+
+GitHub
+Trello
+Slack
+
+Paper 3 - Network models,. brain network
+
+\section{Six month plan}
+Fully Bayes Code - Theory done, code half done, writing half done
+CVB
+VB - which John doesn't like. CVB no iterations, even on the $\vbeta$ co-efficients. For VB, iteration over
+the co-efficients has to occur
+Dependencies - $D_{jk}$
+Refined CVB
+MCMC - Stan not suitable because of the discrete random variables involved
+
+\subsection{Examples}
+p approx 30 to 40
+p approx 10,000 (full search clearly computationally infeasible)
+Changepoint
+Additive models
+
+\subsection{Competitors}
+Lasso
+SCAD
+MCP
+MCMC
+Boosting
+Perhaps EMVS
+
+\subsection{Structure of the paper}
+Section 1 - Introduction
+Section 2 - VB and Collapsed VB, will ask for a VB solution.
+Section 3 - Refined VB
+Section 4 - Examples
+Section 5 - Conclusion
+
+For CVB, need $\vbeta | \vy$. Have been able to calculate $p(\vy | \vgamma)$.
+
+Maths and algebra to do: $\bE[\vbeta | \vy]$ and $\text{Cov}(\vbeta | \vy)$. We discussed how one might
+calculate this.
+
+\begin{equation*}
+p(\vy | \vgamma)
+p(\vy | g) \text{ by } \int p(\vy, \sigma^2, g) p(\sigma^2) d \sigma^2
+p(\vy)
+p(\vy, \vbeta, \sigma^2, g)
+p(\vbeta | \vy, \sigma^2, g) \sim N() \text{ for some normal.}
+\end{equation*}
+
+The final calculation is hard, because we're moving away from normality. John suggested that we use the
+conditional expectation and variance expressions in All of Statistics, Larry Wasserman, Theorem 3.24 The Rule
+of Iterated Expectation and Definition 3.26 for variance. p 55.
+
+\begin{equation*}
+\begin{array}{ll}
+\bE(\vbeta | \vy, g, \sigma^2) &= \bE[f(g, \sigma^2)] \text{ for some } f \\
+&= \underset{\text{The expression will be something like}}{\hat{\vbeta}_{LS} \times f(g, \sigma^2)}
+\end{array}
+\end{equation*}
+
+Hopefully this will be an integral we can simply look up from Table of Products, Sums and Integrals by
+I. S. Gradshteyn and I. M. Ryzhik. We might be able to use the transformation $u = \frac{g}{g + 1}$,
+performing the integration in terms of $u$ rather than $g$.
+
+Calculating the VB approximation.
+Running numerics while calculating, if possible.
+Allow time for debugging.
+
+In terms of algebra, fully Bayes
+\begin{equation*}
+p(\vy | \sigma^2, g, \vgamma)
+p(\vy | g, \vgamma)
+p(\vy | \vgamma)
+p(\vbeta | \vy) \
+\bE[\vbeta | \vy]
+\bV[\vbeta | \vy]
+\end{equation*}
+
+Intuition tells John that there is no closed form. Might be some results on elliptically contoured PDFs.
+
+Priors?
+$p(\vgamma)$ Flat on the model space
+Flat on variable inclusion
+
+$p(\vgamma) \propto 1$ flat on $\vgamma$ John believes better when p < n
+\begin{equation*}
+\begin{array}{ll}
+p(\vgamma) &= p(\vgamma | \rho) p(\rho) \\
+\rho &\sim \text{Uniform}(0, 1) \text{ flat on $\rho$ John believes better when $p > n$}
+\end{array}
+\end{equation*}
+
+VB Got model, know VB, go for it!
+\begin{equation*}
+\begin{array}{ll}
+&q(\vbeta, \vgamma, \sigma^2, g) \\
+= &q(\vbeta) q(\vgamma) q(\sigma^2) q(g) p(\vy | \vgamma)
+\end{array}
+\end{equation*}
+q(g) will have no closed form, and need to be evaluated using numerical quadrature. Why? John seemed to think
+it was obvious.
+
+Should be able to do the algebra myself, or learn, by this stage in my candidature.
+
+CVB $q(\vgamma)$
+Algebra \emph{almost} the same as for fuly Bayes case above.
+
+\end{document}
