@@ -240,18 +240,20 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, unsigned int intercept_col, 
 	unsigned int p_gamma;												 // The number of columns in the matrix mX_gamma
 	VectorXd vx;                                 // The column vector for the current covariate
 	
-	// Centre vy
-	centre(vy);
-
-	// Centre non-intercept columns of mX
-	for (int i = 0; i < mX.cols(); i++) {
-		// Skip intercept column if there is one.
-		if (bIntercept && i == intercept_col)
-			continue;
-		
-		vx = mX.col(i);
-		centre(vx);
-		mX.col(i) = vx;
+	if (bCentre) {
+		// Centre vy
+		centre(vy);
+	
+		// Centre non-intercept columns of mX
+		for (int i = 0; i < mX.cols(); i++) {
+			// Skip intercept column if there is one.
+			if (bIntercept && i == intercept_col)
+				continue;
+			
+			vx = mX.col(i);
+			centre(vx);
+			mX.col(i) = vx;
+		}
 	}
 
 	// Loop through models, updating and downdating mA as necessary
@@ -323,14 +325,19 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, unsigned int intercept_col, 
 					// Do rank one update
 					mA_prime << mA + b * mA * mX_gamma.transpose() * vx * vx.transpose() * mX_gamma * mA, -mA * mX_gamma.transpose() * vx * b,
 											-b * vx.transpose() * mX_gamma * mA, b;
-					if (bDebug)	cout << mA_prime.cols() << endl;
+					if (bDebug) {
+						cout << "mA_prime.cols() " << mA_prime.cols() << endl;
+						// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
+						MatrixXd identity = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime;
+						cout << "(mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime " << identity << endl;
+					}
 				} else {
 					// Perform full inverse
 					mA_prime = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
 				}
-				// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
-				MatrixXd identity = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime;
 				if (bDebug) {
+					// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
+					MatrixXd identity = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime;
 					cout << "(mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime " << identity << endl;
 				}
 
@@ -419,20 +426,20 @@ VectorXd one_correlation(VectorXd vy, MatrixXd mX, MatrixXd mZ)
 
 int main(int argc, char **argv)
 {
-	Eigen::initParallel();
-	Eigen::setNbThreads(8);
-
 	VectorXd vy = parseCSVfile_double("vy.csv");
 	MatrixXd mX = MatrixXd::Ones(263, 1);
 	MatrixXd mZ = parseCSVfile_double("mX.csv");
-
-	VectorXd R2_one = one_correlation(vy, mX, mZ);
-	// cout << R2_one << endl;
-
 	MatrixXd mC(263, mZ.cols() + 1);
 	mC << mX, mZ;
 
-	VectorXd vR2_all = all_correlations(vy, mC, false);
+	Eigen::initParallel();
+	Eigen::setNbThreads(1);
+
+	//VectorXd R2_one = one_correlation(vy, mX, mZ);
+	// cout << R2_one << endl;
+
+	const bool intercept = true, centre = true, debug = true;
+	VectorXd vR2_all = all_correlations(vy, mC, 0, intercept, centre, debug);
 
 	cout << "i,R2" << endl;
 	for (int i = 0; i < vR2_all.size(); i++) {
