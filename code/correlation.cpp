@@ -210,7 +210,7 @@ void centre(VectorXd& v)
 	}
 }
 
-void show_matrix_difference(ostream& os, MatrixXd m1, MatrixXd m2)
+void show_matrix_difference(ostream& os, const MatrixXd m1, const MatrixXd m2, const double epsilon = 1e-8)
 {
 	// Check that m1 and m2 have the same dimensions.
 	if (!(m1.rows() == m2.rows() && m1.cols() == m2.cols())) {
@@ -221,8 +221,9 @@ void show_matrix_difference(ostream& os, MatrixXd m1, MatrixXd m2)
 	// Iterate through the elements of m1 and m2, looking for and reporting differences
 	for (unsigned int i = 0; i < m1.rows(); i++) {
 		for (unsigned int j = 0; j < m1.cols(); j++) {
-			if (abs(m1(i, j) - m2(i, j))) {
-				os << m1(i, j) << m2(i, j) << m1(i, j) - m2(i, j) << (m1(i, j) - m2(i, j)) / m1(i, j) << endl;
+			if (abs(m1(i, j) - m2(i, j)) > epsilon) {
+				os << "Row " << i << ", column " << j << " " << m1(i, j) << " " << m2(i, j) << " ";
+				os << m1(i, j) - m2(i, j) << " " << (m1(i, j) - m2(i, j)) / m1(i, j) << endl;
 			}
 		}
 	}
@@ -348,7 +349,7 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, unsigned int intercept_col, 
 						// This inverse is nonsense. Do a full inversion.
 						MatrixXd mA_prime_full = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
 						// TODO: Find the differences between mA_prime_full and mA_prime
-						show_matrix_difference(cout, mA_prime, mA_prime_full);
+						if (bDebug) show_matrix_difference(cout, mA_prime, mA_prime_full);
 						mA_prime = mA_prime_full;					
 					}
 					if (bDebug) {
@@ -361,17 +362,16 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, unsigned int intercept_col, 
 				}
 				if (bDebug) {
 					// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
-					MatrixXd identity = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime;
-					cout << "(mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime " << identity << endl;
+					MatrixXd identity_prime = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime;
+					cout << "(mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime" << endl;
+					cout << identity_prime << endl;
 				}
 
 				numerator = (v1.transpose() * mA_prime * v1).value();
 				R2 = numerator / vy.squaredNorm();
-				if (R2 > 1.0) {
-					// Perform full inversion
-					mA_prime = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();					
-					numerator = (v1.transpose() * mA_prime * v1).value();
-					R2 = numerator / vy.squaredNorm();
+				if (bDebug) {
+					cout << "Numerator " << numerator << " denominator " << vy.squaredNorm();
+					cout << " R2 " << R2 << endl;
 				}
 				vR2_all(idx) = R2;
 
@@ -404,29 +404,25 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, unsigned int intercept_col, 
 				if (!identity_prime.isApprox(MatrixXd::Identity(p_gamma, p_gamma))) {
 					// This inverse is nonsense. Do a full inversion.
 					MatrixXd mA_prime_full = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
-					show_matrix_difference(cout, mA_prime, mA_prime_full);
+					if (bDebug) show_matrix_difference(cout, mA_prime, mA_prime_full);
 					// TODO: Find the differences between mA_prime_full and mA_prime
 					mA_prime = mA_prime_full;					
 				}
+
 				if (bDebug) {
 					cout << "mA_prime.cols() " << mA_prime.cols() << endl;
-					// cout << "(mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime " << identity_prime << endl;
+					// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
+					MatrixXd identity_prime = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime;
+					cout << "(mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime" << endl;
+					cout << identity_prime << endl;
 				}
 
 				VectorXd numerator;
 				numerator = vy.transpose() * mX_gamma_prime * mA_prime * mX_gamma_prime.transpose() * vy;;
 				R2 = (numerator / vy.squaredNorm()).value();
-				if (R2 > 1.0) {
-					// Perform full inversion
-					mA_prime = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
-					VectorXd v1; // [y^T X, y^T x]^T
-					v1 = vy.transpose() * mX_gamma_prime;
-					if (bDebug) {
-						cout << "v1.size() " << v1.size() << endl;
-						cout << "mA_prime.cols() " << mA_prime.cols() << endl;
-					}
-					numerator = v1.transpose() * mA_prime * v1;
-					R2 = (numerator / vy.squaredNorm()).value();
+				if (bDebug) {
+					cout << "Numerator " << numerator << " denominator " << vy.squaredNorm();
+					cout << " R2 " << R2 << endl;
 				}
 				vR2_all(idx) = R2;
 
@@ -476,7 +472,7 @@ int main()
 	//VectorXd R2_one = one_correlation(vy, mX, mZ);
 	// cout << R2_one << endl;
 
-	const bool intercept = true, centre = true, debug = false;
+	const bool intercept = true, centre = true, debug = true;
 	VectorXd vR2_all = all_correlations(vy, mC, 0, intercept, centre, debug);
 
 	cout << "i,R2" << endl;
