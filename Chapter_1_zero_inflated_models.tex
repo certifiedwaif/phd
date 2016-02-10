@@ -30,11 +30,12 @@
 
 \maketitle
 
-%Abstract: A Variational Bayes approach using Gaussian Variational Approximation to zero-inflated Poisson
-%regression models using the latent variable representation from \cite{Ghosh20061360} is presented. We
-%demonstrate on simulated and real datasets that our approach is flexible enough to handle random effects and
-%smoothing splines while remaining computationally efficient.
-
+Abstract: A Variational Bayes approach using Gaussian Variational Approximation to zero-inflated Poisson
+regression models using the latent variable representation from \cite{Ghosh20061360} is presented. We
+demonstrate on simulated and real datasets that our approach is flexible enough to handle random effects and
+smoothing splines while remaining computationally efficient. We also present a new parameterisation for the
+Gaussian Variational Approximation which provides increased speed and numerical stability while preserving
+accuracy.
 
 \begin{abstract}
 \noindent
@@ -79,13 +80,30 @@ closed form solutions and hence present a greater computational challenge to fit
 
 Fitting these models is typically done with Monte Carlo Markov Chain techniques, but these can be slow and
 prone to convergence problems. We build upon a latent variable representation of these models to allow a
-tractable Variational Bayes approximation to be derived. This allows us to fit close approximations to these
-models using a deterministic algorithm which converges much more quickly.
+tractable semiparametric mean field Variational Bayes approximation to be derived. Semiparametric mean field
+Variational Bayes is an approximate Bayesian inference method as detailed in \cite{ormerod10} and
+\cite{RohdeWand2015}, which allows us to fit close approximations to these models using a deterministic
+algorithm which converges much more quickly.
 
 We allow a flexible regression modelling approach by using a Gaussian Variational Approximation as defined in
 \cite{ormerod09} on the regression parameters to allow a non-conjugate Gaussian prior to be used, making the
 resulting Gaussian posterior of the regression parameters easy to interpret. We adopt a Mean Field Variational
 Bayes (VB) approach on the other parameters in the model to derive the rest of the approximation.
+
+We fit the Gaussian part of our approximation $q(\vbeta, \vu) \sim \N(\vmu, \mLambda)$ by maximising the
+variational lower bound with respect to $\vmu, \mLambda$, keeping $\vp, \mSigma, \rho$ fixed. The most
+challenging part of this process computationally is in the maximisation of the variational lower bound with
+respective to the covariance matrix $\mLambda$ as the dimension of the covariance matrix is $p^2$, and the
+space of covariance matrices is constrained to be positive semi-definite. We deal with this difficulty by
+optimising the variational lower bound with respect to the Cholesky factor $\mR$ of $\mLambda$ or of the
+inverse $\mLambda^{-1}$, parameterising the diagonals with $\exp{(d_{ii})}$ in the case of the normal
+parameterisation and $\exp{(-d_{ii})}$ in the case of the inverse parameterisation to ensure symmetry,
+uniqueness and positive definiteness. This parameterisation can lead to numeric overflow, which we dealt with
+by thresholding the values of the  diagonals. Overflow can lead to singular matrices when attempting to invert
+$\mLambda$. This problem was mitigated by  instead working with the Cholesky factorisation of $\mLambda^{-1}$,
+allowing us to solve rather than invert and multiply, which is also faster and more numerically stable. We use
+knowledge of the regression model we are fitting to specify a sparse matrix structure, greatly reducing the
+dimension of the problem and thus improving both computational speed and numeric accuracy.
 
 The focus of this paper is on developing a method of fitting flexible ZIP regression models accurately, and
 showing the advantages of our method to previously presented methods. In Section \ref{sec:methodology} we
@@ -106,10 +124,48 @@ In this section we present a VB approach to a Bayesian zero-inflated Poisson mod
 zeroes. After introducing the \joc{representation of Bayesian zero-inflated models we consider and a short summary 
 of VB methodology we derive several variational approxiamtions for the model.}
 
+\subsection{Definitions}
+
+Let $p$ be the dimension of the space of fixed effects, $m$ be the number of individuals in the random effects
+and $b$ be the block size for each of those individuals.
+We use $\vone_p$ and $\vzero_p$ to denote the $p \times 1$ column vector with all entries equal to 1 or 0,
+respectively.
+Let $\vy$ by the $n \times 1$ vector.
+The norm of a column vector $\vv$, defined to be $\sqrt{\vv^\top \vv}$, is denoted by $\|\vv\|$.
+For a $p \times 1$ vector $\va$, we let $\diag{(\va)}$ denote the $p \times p$.
+Let $\vtheta$ be the parameter vector in $\R^p$,
+$\mX$ be a matrix with dimensions $n \times p$,
+$\mZ$ be a matrix with dimensions $n \times m b$
+and $\mC = [ \mX \mZ ]$.
+Let $\vbeta$ be the $p \times 1$ column vector representing the fixed effects,
+$\vu$ be the $m b \times 1$ column vector representing the random effects
+and $\vnu = [\vbeta^\top, \vu^\top]$.
+Let $\mSigma$, $\mPsi$ and $\mLambda$ be $(p + m b + 1) \times (p + m b + 1)$ matrices.
+Let $\vp$ be the $n \times 1$ column vector of probabilities that each observation in $\vy$ is non-zero.
+Let $\expit(x)$ denote the function $\tfrac{1}{1 + \exp(-x)}$, the inverse of the logit function.
+Let $p(x)$ be the full probability distribution, and $q(x)$ be the approximating probability distribution.
+Let $q^*(x)$ be the optimal approximating probability distribution.
+Let $\text{Bernoulli}(\pi)$  denote the probability distribution $\pi^k (1 - \pi)^{1-k}$
+and $\text{Inverse Wishart}(\mPsi, v)$ denote the probability distribution
+$\tfrac{|\mPsi|^\frac{v}{2}}{2^{\frac{vp}{2}} \Gamma_p{(\tfrac{v}{2})}} |\mX|^{-\tfrac{v + p + 1}{2}} \exp{[-\half \tr{(\mPsi \mX^{-1})}]}$ where $\Gamma_p{(x)}$ denotes the multivariate gamma function and
+$\tr$ is the trace function.
+>>>>>>> f39f780f7603b1002422e14d6d33ab7aede5b3ea
+
 \subsection{\joc{Variational Approximate Bayesian Inference (perhaps Semiparametric mean field Variational Bayes)}}
 
 Semiparametric mean field Variational Bayes is an approximate Bayesian inference method as detailed in
 \cite{ormerod10} and \cite{RohdeWand2015}.  
+
+\subsubsection{Definitions}
+
+The density function of a random vector $\vu$ is denoted by $p(\vu)$.  The conditional density function of a
+random vector $\vu$ given $\vv$ is denoted by $p(\vu|\vv)$. Consider a generic Bayesian model with parameter
+vector $\vtheta \in \Theta$. Throughout this section we assume that $\vy$ and $\vtheta$ are continuous random
+vectors. The KL divergence between the probability distributions $p$ and $q$ is defined as
+
+$$
+\KL(q || p) \equiv \int q(\vtheta) \log \{ \frac{q(\vtheta)}{p(\vtheta | \vy)} \} d \vtheta.
+$$
 
 The approximation is fit by iteratively minimising the Kullback-Leibler divergence between the true posterior
 and an approximating distribution. Thus the optimal approximation $q^*(\vtheta)$ is
@@ -225,6 +281,7 @@ $\text{KL}(q(\vtheta;\vxi)||p(\vtheta|\vy))$.
 Variational approximations are well-suited to accelerating the fit of Bayesian zero-inflated models to data.
 Typically zero-inflated models arise in applications where we wish to build multivariate regression models. To
 be able to construct multivariate models with as much generality as possible, we specify the full model as a
+
 General Design Bayesian Generalized Linear Mixed Model, as in \citep{zhao06}. \joc{Something is srone with this 
 	citation. The initial should not appear.}
 
@@ -234,6 +291,10 @@ within-subject correlation, measurement error, missing data and smoothing spline
 our models. \joc{No it does not! The general design allows for simple random effects, random slopes, crossed
 	random effects, penalized splines and spatial spline structures. Measurement error and missing data
 	fall outside the scope of these models.}
+
+General Design Bayesian Generalized Linear Mixed Model, as in \citep{zhao06}. This allows us to incorporate
+within-subject correlation, and smoothing splines (as in \cite{Wand2008}) in our models.
+
 
 % Idea: We can use an approximation of the from q(\beta, \u, \Sigma) q(\rho) \Product q(r_i)
 % and use GVA on q(\beta, \u, \Sigma) and mean field updates on \rho and r_i
@@ -295,7 +356,11 @@ r_i &\sim \text{Bernoulli}(1-\rho), \quad 1 \leq i \leq n \\
 
 
 The $j$th predictor/response pair for the $i$th group is denoted by $(\vx_{ij}, \vy_{ij}), 1 \leq j \leq n_i,
+
 1 \leq i \leq m$, where the $\vx_{ij}$ are unrestricted \joc{(what do you mean by this??)}, while the $\vy_{ij}$ are nonnegative integers.
+
+1 \leq i \leq m$, where the $\vx_{ij}$ are real, while the $\vy_{ij}$ are nonnegative integers.
+
 
 For each $1 \leq i \leq m$, define the $n_i \times 1$ vectors $\vy_{ij} = [\vy_{i 1}, \ldots, \vy_{i
 n_i}]^\top$ and let $\vone$ define a vector of ones of appropriate length, where the first of these vectors is the response. It is
@@ -306,6 +371,7 @@ Start with a single observation before using matrix/vector notation.}
 
 Let $\mR = \diag{(\vr)}$, $\mC = [\mX, \mZ]$ and $\vnu = [\vbeta^\top, \vu^\top]^\top$. Consider the model
 
+
 \begin{equation}\label{eq:main}
 \begin{array}{rl}
 \log{p(\vy|\vr, \vbeta, \vu)} &= \vy^\top \mR (\mC\vnu) - \vr^\top \exp{(\mC\vnu)} - \vone^\top \log{\Gamma{(\vy + \vone)}}, \quad \mbox{ and }\\ [1ex]
@@ -313,8 +379,16 @@ r_i &\sim \text{Bernoulli}(\rho), 1 \leq i \leq n \\
 \end{array}
 \end{equation}
 
+\begin{align*}
+\log{p(\vy|\vr, \vbeta, \vu)} &= \vy^\top \mR (\mC\vnu) - \vr^\top \exp{(\mC\vnu)} - \vone^\top \log{\Gamma{(\vy + \vone)}}, \\
+\mbox{ and }
+r_i &\sim \text{Bernoulli}(\rho), 1 \leq i \leq n
+\end{align*}
+
+
 \noindent \joc{(The prior structure will depend on the structure of the rrandom effects model)}
 with priors
+
 $$ 
 \begin{array}{rl}
 \log{p(\mSigma_{\vu \vu})} &= \text{Inverse Wishart}(\mPsi, v),\\
@@ -322,6 +396,15 @@ p(\rho) &\propto 1 \\
 \mbox{ and } \vnu|\sigma_\vu^2 &\sim \mbox{N}(\vzero, \sigma_\vu^2 \mI)\\
 \end{array}
 $$
+
+
+\begin{align*}
+\log{p(\mSigma_{\vu \vu})} &= \text{Inverse Wishart}(\mPsi, v),\\
+\rho \sim \mbox{Uniform}(0, 1),\\
+\vbeta|\sigma^2_\vbeta \sim \mbox{N}(\vzero, \sigma^2_\vbeta \mI)\\
+\mbox{ and } \vu \sim \mbox{N}(\vzero, \mSigma_{\vu \vu})
+\end{align*}
+
 
 \noindent 
 where $\mX$ is $n \times p$, $\mZ$ is $n \times mb$ and $\mSigma_{\vu \vu}$ and $\mPsi$ are $b \times b$.
@@ -721,10 +804,10 @@ $\rho$ & 0.71 & 0.67 & 0.75 & 88\% \\
 	\centering
 	% \includepdf[width=75mm,height=75mm,pages={1,2,3,16},nup=2x2]{code/results/accuracy_plots_application_GVA2.pdf}
 	\begin{tabular}{@{}c@{\hspace{.5cm}}c@{}}
-		\includegraphics[page=1,width=.45\textwidth]{code/results/accuracy_plots_application_GVA2.pdf} & 
-		\includegraphics[page=2,width=.45\textwidth]{code/results/accuracy_plots_application_GVA2.pdf} \\[.5cm]
-		\includegraphics[page=3,width=.45\textwidth]{code/results/accuracy_plots_application_GVA2.pdf} &
-		\includegraphics[page=16,width=.45\textwidth]{code/results/accuracy_plots_application_GVA2.pdf} \\[.5cm]
+		\includegraphics[page=1,width=.45\textwidth]{code/results/accuracy_plots_application_GVA_NP.pdf} & 
+		\includegraphics[page=2,width=.45\textwidth]{code/results/accuracy_plots_application_GVA_NP.pdf} \\[.5cm]
+		\includegraphics[page=3,width=.45\textwidth]{code/results/accuracy_plots_application_GVA_NP.pdf} &
+		\includegraphics[page=16,width=.45\textwidth]{code/results/accuracy_plots_application_GVA_NP.pdf} \\[.5cm]
 	\end{tabular}
 \end{figure}
 
@@ -753,11 +836,48 @@ GVA FP & 4.83 s & 0.07 s \\
 
 \section{Discussion}
 \label{sec:discussion}
-\begin{itemize}
-\item Numerical issues
-\item What worked well
-\item What didn't
-\end{itemize}
+
+We have described a Variational Bayes approximation to Zero-Inflated Poisson regression models which allows
+such models to be fit with considerable generality. We have also devised and extensively tested a number of
+alternative approaches for fitting such models, and extended one of these alternative approaches with a new
+parameterisation. Using MCMC methods as the gold standard to test against, we have assessed the accuracy and
+computational speed of these algoritms.
+
+The use of Mean Field Variational Bayes allows estimation of Bayesian ZIP models in a fraction of the time
+taken to fit the same model using even the best MCMC methods available, with only a small loss of accuracy.
+This is of great utility in applications where speed matters, such as model selection or when applied
+statisticians are experimenting with many models, as is typical in practice.
+
+The new parameterisation of Gaussian Variational Approximation using the Cholesky factorisation of the inverse
+of $\mLambda$ presented in Section \ref{sec:algorithms} provides significant advantages.  It is well known
+that the inverse of a sparse matrix need not be sparse. Fitting mixed models generally leads to covariance
+matrices with an arrow head structure. Due to the sparsity of our parameterisation of $\mLambda^{-1}$,  our
+algorithm for fitting these models leads to an optimisation problem of significantly lower dimension. This
+allows the model to be fit more quickly, and with greatly improved numerical stability and with no loss of
+accuracy.
+
+The implementation of these algorithms was not without its' challenges, chiefly numerical issues encountered
+during testing and verification of the accuracy of the model fitting. Using the exponential function to
+parameterise the main diagonal coupled with L-BFGS-B's unconstrained line search and optim()'s lack of
+robustness to infinities lead to many overflow problems which may have been lessened or dealt with entirely by
+using a function with a less aggressive growth rate, such as an appropriate piecewise quadratic.
+
+Some of the algorithms which we experimented with were found to be very sensitive to their starting points.
+While these algorithms are typically initialised with a starting point as close as possible to the final
+solution, this gives some sense of the stability of each algorithm.
+
+This article presents the essential ideas necessary for a performant implementation implementing model fitting
+for ZIP regression models, but the performance would be even better if our algorithm was re-implemented in a
+compiled language with good numeric libraries such as C++ with Eigen. The majority of the performance
+improvements over existing approaches come from avoiding unneccessary matrix inversion, which is a
+computationally expensive $O(p^3)$ and numerically unstable process, and from constructing and calculating
+with sparse matrices. The gains of these approaches, particularly from sparse matrix techniques, can be
+difficult to fully realise in R without expert knowledge of the underlying implementation and libraries.
+
+Our application of these ideas to Andrew Gelman's data showed that the new parameterisation very effectively
+speeds up fitting zero-inflated mixed models to real world data with a large number of groups, while still
+maintaining excellent accuracy versus an MCMC approach. This demonstrates the applicability of the ideas
+presented within this paper to real world data sets.
 
 \newpage
 \section{Appendix} 

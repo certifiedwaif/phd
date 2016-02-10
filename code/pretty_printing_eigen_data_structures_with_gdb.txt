@@ -1,0 +1,2 @@
+Follow the instructions in
+https://bitbucket.org/eigen/eigen/src/8b18ff2c70289b47928ae75fdb89a6ac3d018e08/debug/gdb/printers.py?at=default&fileviewer=file-view-default

@@ -1,12 +1,13 @@
 #!/usr/bin/env Rscript
 # accuracy.R
-source("zero_inflated_model.R")
-source("generate.R")
+library(zipvb)
 library(rstan)
 library(optparse)
 library(mvtnorm)
 library(limma)
 library(latex2exp)
+
+source("generate.R")
 
 # Andrew Gelman says that this magical line of code automatically makes Stan
 # run in parallel and cache compiled models.
@@ -184,7 +185,7 @@ calculate_accuracies <- function(test, mult, mcmc_samples, var_result, approxima
       vbeta_accuracy[i] <- calculate_accuracy(mcmc_samples$vbeta[,i], dnorm,
                                               var_result$vmu[i], sqrt(var_result$mLambda[i,i]))
       vbeta_means[i] <- mean(mcmc_samples$vbeta[, i])
-      title <- latex2exp(sprintf("%s $\\vectorfonttwo{ \\beta_%d}$ accuracy: %2.0f%%", approximation, i, vbeta_accuracy[i]))
+      title <- latex2exp(sprintf("%s $\\textbf{\\beta_%d}$ accuracy: %2.0f%%", approximation, i, vbeta_accuracy[i]))
       if (print_flag) print(title)
       if (plot_flag) accuracy_plot(title, mcmc_samples$vbeta[,i], dnorm,
                                    var_result$vmu[i], sqrt(var_result$mLambda[i,i]))

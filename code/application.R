@@ -2,7 +2,6 @@
 # application.R
 
 # library(sqldf)
-# source("zero_inflated_model.R")
 # source("accuracy.R")
 
 # # Load the data set.
@@ -58,7 +57,7 @@
 # from ARM.
 # IPM_BASELINE_R2.csv        RoachCounts.csv
 # IPM_BASELINE_R2_032006.csv roachdata.csv
-source("zero_inflated_model.R")
+library(zipvb)
 source("accuracy.R")
 library(sqldf)
 
@@ -130,6 +129,19 @@ cat("GVA2", Sys.time() - now, "\n")
 # cat("GVA_NR", Sys.time() - now, "\n")
 
 # Check accuracy
-stan_fit <- mcmc(mult, p=3, iterations=1e5, warmup=1e4, mc.cores = 1)
-var_accuracy <- calculate_accuracies("application", mult, stan_fit$mcmc_samples, fit3, "gva2", plot_flag=TRUE)
+# save <- TRUE
+save <- FALSE
+if (save) {
+  mcmc_result <- mcmc(mult, p=3, iterations=1e5, warmup=1e4, mc.cores = 1)
+  mcmc_samples <- mcmc_result$mcmc_samples
+  fit <- mcmc_result$fit
+  print(fit)
+  save(mult, mcmc_samples, fit, file="data/accuracy_application_2015_11_20.RData")
+  # save(mult, mcmc_samples, fit, allKnots, file="/tmp/accuracy_spline_2015_05_19.RData")
+} else {
+  load(file="data/accuracy_application_2015_11_20.RData")
+  # load(file="/tmp/accuracy_spline_2015_05_19.RData")
+}
+
+var_accuracy <- calculate_accuracies("application", mult, mcmc_samples, fit3, "GVA NP", plot_flag=TRUE)
 print(var_accuracy)

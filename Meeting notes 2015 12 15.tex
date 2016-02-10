@@ -1,0 +1,45 @@
+\documentclass{amsart}
+\title{Meeting with Dr John Ormerod - 15/12/2015}
+
+\input{Definitions.tex}
+
+\begin{document}
+
+\maketitle
+
+\begin{itemize}
+\item Speed things up
+\item Reviewers? INLA, Integrated Nested Laplace Approximation - discrete latent random variables? Zero-inflated models?
+\item Teach Sarah to write fast code? John thinks I should focus on this, and she should do something else.
+\item Fixed point approach can fall over.
+\item Journal: CSDA
+\item Mail Florian re: GPUs
+\item VB compartmentalising sub-models
+\end{itemize}
+
+Linear models
+Logistic models
+- model selection
+- latent class
+
+Direct extension of Linear models - Network models - Project \# 3
+ - Nodal regression
+$$X_{ij} = \vbeta_{0, j} + \sum_{k \ne j} \vbeta_{k, j} X_{i, k} + \epsilon_j$$
+If $\vbeta_{k, j} \ne 0$ then $\vbeta_{j, k} \ne 0$ (Symmetry constraint)
+Differential networks
+Classification using these networks - LDA
+
+Samuel Mueller mentioned:
+\begin{itemize}
+\item Sure
+\item Screening methods
+\item Dimension reduction
+\end{itemize}
+
+John had some other ideas. In particular, he liked a different type of model selection which doesn't depend
+on a tuning parameter.
+It relies on random matrix theory
+``No penalty, no tears'' - matrix theory
+Detecting non-linear dependencies
+
+\end{document}

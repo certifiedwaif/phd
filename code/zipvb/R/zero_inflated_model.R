@@ -1,9 +1,7 @@
 # zero_inflated_model.R
 library(limma)
-source("common.R")
-source("gaussian.R")
 
-
+#'@export
 create_mult <- function(vy, mX, mZ, sigma2.beta, m=ncol(mZ), blocksize=1, spline_dim=0, v=0)
 {
   # Initialise
@@ -124,6 +122,7 @@ calculate_lower_bound <- function(mult, verbose=FALSE)
 	return(T1 + T2 + T3)
 }
 
+#'@export
 zipvb <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE, glm_init=TRUE)
 {
   # browser()

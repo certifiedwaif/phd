@@ -1,0 +1,121 @@
+\documentclass{beamer}
+
+\usetheme{Warsaw}
+\usepackage{graphicx}
+\usepackage{ulem}
+\input{include.tex}
+\input{Definitions.tex}
+
+\usefonttheme{serif}
+
+\title{Progress report - 18/01/2016}
+\author{Mark Greenaway\\PhD candidate\\markg@maths.usyd.edu.au}
+
+\mode<presentation>
+{ \usetheme{boxes} }
+
+\begin{document}
+\begin{frame}
+\maketitle
+\end{frame}
+
+\begin{frame}{Third year -- time crunch}
+\begin{itemize}
+\item John used to think I was incompetent.
+\item Now he just thinks I'm lazy.
+\item That's \emph{progress}! Now I just need to be less lazy \ldots
+\item I'm good at computers, and okay at mathematical statistics. I need to get better at mathematical statistics.
+\item Six months to do the work for the second paper.
+\item Begin third paper.
+\item Write thesis.
+\item OMG.
+\item OMFG.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Work at the right level -- Computational Statistics}
+
+\begin{itemize}
+\item With time running out, I have to alter my strategy.
+\item The problems that we work on are motivated by mathematical and statistical concerns.
+\item Computers are a means to an end.
+
+\item \begin{enumerate}
+\item Statisticians / applied mathematicians.
+\item Numerical analysts.
+\item Computer scientists.
+\end{enumerate}
+
+\item It's fine for everyone to work at level one, and for people like John or
+myself to work at level two. 
+\item We shouldn't spend too much time at level
+three. We should let computer scientists do their jobs, and we should do ours.
+
+\end{itemize}
+\end{frame}
+
+\begin{frame}{R and C++}
+\begin{itemize}
+\item I'm getting much better at writing C++, and integrating C++ with R.
+\item That's good, because R is hard to optimise.
+			\begin{quote}
+			``The only way to reliably speed up R code is to re-write it in another language.'' - John D. Cook
+			\end{quote}
+\item People typically design their numerical algorithms to minimise the number of floating point operations. 
+	  	They should also pay attention to how memory is used.
+\item Good numerical linear algebra textbooks e.g. Numerical Linear Algebra by Trefethen and Bau make this
+			point early and forcefully.
+\item I'm using the Eigen library for linear algebra.
+\item I'm in good company. Douglas Bates (lme4) and Dirk Eddelbuettel (Rcpp) recommend this approach in
+			``Fast and Elegant Numerical Linear Algebra Using the RcppEigen Package''.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{R and C++: Parallelisation}
+\begin{itemize}
+\item Make it run. Make it right. Make it fast. Always in that order.
+\item CPUs single core first, then multi core, then GPUs.
+\item For technical reasons, I don't think R's parallelisation i.e. \texttt{mclapply()} and friends is ideal,
+			although I'm open to being convinced otherwise.
+\item OpenMP/RcppParallel for multi core parallelisation.
+\item Andrew Stefan has been helping me learn how to use OpenMP for multi core.
+\item Florian has been helping me begin to understand GPUs.
+\item Everything will be released in an R package that runs on all platforms and that everyone can use.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Correlation}
+
+\begin{itemize}
+\item Let $\vgamma$ be the vector of indicators in $\R^p$. Then
+
+\begin{equation*}
+R^2_\vgamma = \frac{\vy^\top [\mX \mZ_\gamma]
+\begin{pmatrix}
+\mX^\top \mX & \mX^\top \mZ_\gamma \\
+\mZ_\gamma ^\top \mX & \mZ_\gamma^\top \mZ_\gamma
+\end{pmatrix}^{-1}
+\begin{bmatrix}
+\mX^\top \vy \\
+\mZ_\gamma^\top \vy
+\end{bmatrix}}{\vy^\top \vy}
+\end{equation*}
+
+\item I have C++ that can fit 50,000 models per second on a single core, doing $O(p^3)$ inversions. 
+\item Rank one updates and downdates allow us to update the inverse in the above expression in $O(p^2)$.
+\item $O(p^3) \to O(p^2)$ is a $p$-fold speedup. For large $p$, this is a massive win.
+\item The model fits are all independent of one another, so with $m$ cores, I should theoretically be able
+			to get a further $m$-fold speed-up.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Windows}
+\begin{itemize}
+\item I own a PC now.
+\item I decided to stop being an operating system hipster and try Windows 10.
+\item *cough* It's not that bad. *cough*
+\item Mmmm, this humble pie is delicious \ldots
+\end{itemize}
+\end{frame}
+
+\end{document}
