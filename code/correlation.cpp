@@ -46,10 +46,10 @@ MatrixXd parseCSVfile_double(string infilename)
 
 	// FIGURE OUT HOW MANY OF THE ROWS HAVE THE RIGHT NUMBER
 	// OF COLUMNS
-	int Nrows = matrows.size();
-	int Ncols = matrows[0].size();
-	int Ngoodrows = 0;
-	for(int i = 0; i < Nrows; i++) {
+	unsigned int Nrows = matrows.size();
+	unsigned int Ncols = matrows[0].size();
+	unsigned int Ngoodrows = 0;
+	for(unsigned int i = 0; i < Nrows; i++) {
 		if(matrows[i].size() == Ncols) {
 			Ngoodrows++;
 		}
@@ -61,15 +61,15 @@ MatrixXd parseCSVfile_double(string infilename)
 
 	int rc = 0;
 
-	for(int i = 0; i < Nrows; i++) {
-		int rowsize = matrows[i].size();
+	for(unsigned int i = 0; i < Nrows; i++) {
+		unsigned int rowsize = matrows[i].size();
 
 		if(rowsize != Ncols) {
 			// cout << "Row " << i << " has bad column count" << endl;
 			continue;
 		} 
 
-		for(int j = 0; j < Ncols; j++) {
+		for(unsigned int j = 0; j < Ncols; j++) {
 			xmat(rc,j) = int(round(strtod(matrows[i][j].c_str(), NULL)));
 		}
 		rc++;
@@ -170,7 +170,7 @@ MatrixXd& get_mX_gamma(MatrixXd mX, dbitset gamma, MatrixXd& mX_gamma)
 	const unsigned int n = mX.rows();
 
 	// Find which columns are set in gamma, and how many
-	for (int i = 0; i < gamma.size(); i++) {
+	for (unsigned int i = 0; i < gamma.size(); i++) {
 		if (gamma[i]) {
 			gamma_columns.push_back(i);
 			p_gamma++;
@@ -182,7 +182,7 @@ MatrixXd& get_mX_gamma(MatrixXd mX, dbitset gamma, MatrixXd& mX_gamma)
 	mX_gamma = mX_gamma_prime;
 
 	// Extract columns from mX, put into mX_gamma
-	for (int i = 0; i < p_gamma; i++) {
+	for (unsigned int i = 0; i < p_gamma; i++) {
 		mX_gamma.col(i) = mX.col(gamma_columns[i]);
 	}
 
@@ -224,7 +224,6 @@ void centre(VectorXd& v)
 VectorXd all_correlations(VectorXd vy, MatrixXd mX, unsigned int intercept_col, bool bIntercept = false, 
 													bool bCentre = true, bool bDebug = false)
 {
-	const unsigned int n = mX.rows();            // The number of observations
 	const unsigned int p = mX.cols();            // The number of covariates
 	const unsigned int greycode_rows = (1 << p); // The number of greycode combinations, 2^p
 	VectorXd vR2_all(greycode_rows);             // Vector of correlations for all models
@@ -245,7 +244,7 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, unsigned int intercept_col, 
 		centre(vy);
 	
 		// Centre non-intercept columns of mX
-		for (int i = 0; i < mX.cols(); i++) {
+		for (unsigned int i = 0; i < mX.cols(); i++) {
 			// Skip intercept column if there is one.
 			if (bIntercept && i == intercept_col)
 				continue;
@@ -318,18 +317,22 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, unsigned int intercept_col, 
 				const double b = 1 / (vx.transpose() * vx - vx.transpose() * mX_gamma * mA * mX_gamma.transpose() * vx).value();
 				// b is supposed to be positive definite.
 				if (bDebug) {
-					cout << idx << " b " << b << endl;
+					cout << "b " << b << endl;
 				}
 				const double epsilon = 1e-4;
 				if (b > epsilon) {
 					// Do rank one update
 					mA_prime << mA + b * mA * mX_gamma.transpose() * vx * vx.transpose() * mX_gamma * mA, -mA * mX_gamma.transpose() * vx * b,
 											-b * vx.transpose() * mX_gamma * mA, b;
+					// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
+					// MatrixXd identity_prime = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime;
+					// if (!identity_prime.isApprox(MatrixXd::Identity(p_gamma, p_gamma))) {
+					// 	// This inverse is nonsense. Do a full inversion.
+					// 	mA_prime = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();					
+					// }
 					if (bDebug) {
 						cout << "mA_prime.cols() " << mA_prime.cols() << endl;
-						// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
-						MatrixXd identity = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime;
-						cout << "(mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime " << identity << endl;
+						// cout << "(mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime " << identity_prime << endl;
 					}
 				} else {
 					// Perform full inverse
@@ -374,6 +377,17 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, unsigned int intercept_col, 
 				}
 				MatrixXd mA_prime(p_gamma, p_gamma);
 				mA_prime = mA_11 - (va_12 * va_21) / a_22;
+
+				// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
+				// MatrixXd identity_prime = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime;
+				// if (!identity_prime.isApprox(MatrixXd::Identity(p_gamma, p_gamma))) {
+				// 	// This inverse is nonsense. Do a full inversion.
+				// 	mA_prime = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();					
+				// }
+				if (bDebug) {
+					cout << "mA_prime.cols() " << mA_prime.cols() << endl;
+					// cout << "(mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime " << identity_prime << endl;
+				}
 
 				VectorXd numerator;
 				numerator = vy.transpose() * mX_gamma_prime * mA_prime * mX_gamma_prime.transpose() * vy;;
@@ -424,7 +438,7 @@ VectorXd one_correlation(VectorXd vy, MatrixXd mX, MatrixXd mZ)
 	return R2;
 }
 
-int main(int argc, char **argv)
+int main()
 {
 	VectorXd vy = parseCSVfile_double("vy.csv");
 	MatrixXd mX = MatrixXd::Ones(263, 1);
@@ -438,7 +452,7 @@ int main(int argc, char **argv)
 	//VectorXd R2_one = one_correlation(vy, mX, mZ);
 	// cout << R2_one << endl;
 
-	const bool intercept = true, centre = true, debug = true;
+	const bool intercept = true, centre = true, debug = false;
 	VectorXd vR2_all = all_correlations(vy, mC, 0, intercept, centre, debug);
 
 	cout << "i,R2" << endl;
