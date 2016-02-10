@@ -13,23 +13,42 @@
 \usepackage{graphicx}
 \usepackage{algorithm,algorithmic}
 
-\title{Variational approximations for zero-inflated Semiparametric Regression models}
-\author{Mark Greenaway, John T. Ormerod}
+\usepackage{graphicx,verbatim,subfigure,amsfonts,color}
+
+\title{Variational Approximation for Zero-Inflated Semiparametric Regression Models}
+\author{Mark Greenaway and John T. Ormerod}
 
 \input{include.tex}
 \input{Definitions.tex}
+
+
+\newcommand{\mgc}[1]{{\color{blue}#1}}
+\newcommand{\joc}[1]{{\color{red}#1}}
+ 
 
 \begin{document}
 
 \maketitle
 
-Abstract: A Variational Bayes approach using Gaussian Variational Approximation to zero-inflated Poisson
-regression models using the latent variable representation from \cite{Ghosh20061360} is presented. We
-demonstrate on simulated and real datasets that our approach is flexible enough to handle random effects and
-smoothing splines while remaining computationally efficient.
+%Abstract: A Variational Bayes approach using Gaussian Variational Approximation to zero-inflated Poisson
+%regression models using the latent variable representation from \cite{Ghosh20061360} is presented. We
+%demonstrate on simulated and real datasets that our approach is flexible enough to handle random effects and
+%smoothing splines while remaining computationally efficient.
 
-Keywords: Approximate Bayesian inference ; mixed model ; Markov chain Monte Carlo ; Stan ; 
-					penalized splines .
+
+\begin{abstract}
+\noindent
+\joc{ We consider variational inference for zero-inflated Poisson regression models using a latent variable representation.
+The model is extended to include random effects which allow simple incorporation of spline and other modelling 
+structures. Several variational approximations to the resulting set of models, including a novel approach involving
+a parameterization based on the inverse covariance matrix (rather than the covariance matrix itself) of the 
+approximate posterior density for the random effects. This parameterization improves upon the computational
+cost and numerical stability of previous methods. We demonstrate on simulated and real datasets.
+}
+\end{abstract}
+ 
+
+Keywords: Approximate Bayesian inference ; mixed model ; Markov chain Monte Carlo ; Stan ; penalized splines.
 
 \section{Introduction}
 \label{sec:introduction}
@@ -84,13 +103,13 @@ derivation of the variational lower bound for our model.
 \label{sec:methodology}
 
 In this section we present a VB approach to a Bayesian zero-inflated Poisson model for count data with extra
-zeroes. After introducing Bayesian zero-inflated models and VB methodology we derive the VB factorised
-approximation to the full Bayesian model.
+zeroes. After introducing the \joc{representation of Bayesian zero-inflated models we consider and a short summary 
+of VB methodology we derive several variational approxiamtions for the model.}
 
-\subsection{Variational Bayesian inference}
+\subsection{\joc{Variational Approximate Bayesian Inference (perhaps Semiparametric mean field Variational Bayes)}}
 
 Semiparametric mean field Variational Bayes is an approximate Bayesian inference method as detailed in
-\cite{ormerod10} and \cite{RohdeWand2015}.
+\cite{ormerod10} and \cite{RohdeWand2015}.  
 
 The approximation is fit by iteratively minimising the Kullback-Leibler divergence between the true posterior
 and an approximating distribution. Thus the optimal approximation $q^*(\vtheta)$ is
@@ -118,71 +137,229 @@ methods must be used, as for the Gaussian Variational Approximation (see \cite{o
 These methods are generally difficult to apply in practice, as the problems can involve the optimisation of
 many parameters over high-dimensional, constrained spaces whose constraints cannot be simply expressed.
 
-\section{The zero-inflated Poisson regression model}
+\newpage 
+
+\joc{
+Comments: 
+\begin{itemize}
+\item First sentence is background. Should appear somewhere in introduction.
+
+\item Need to organize in terms of a flow of ideas. What are we approximating?
+
+\item I believe that we are using a semiparametric mean field variational Bayes approach discussed by Rohde \& Wand (2015).
+However, I am not sure that we are using the their formalisms. (see page 3-6 of Rohde and Wand 2015).
+
+\item Whenever a new symbol is introduced it needs to be defined. Define $\vtheta$, what is $q$.
+Define KL. What is $\vy$? 
+\end{itemize}	
+}
+
+\noindent 
+Much of Bayesian inference is based on the posterior distribution of a model's parameters given observed data 
+defined by $p(\vtheta|\vy) = p(\vy|\vtheta)p(\vtheta)/p(\vy)$ where $\vy$ is a vector of observed data,
+$\vtheta$ are the model parameters $p(\vy|\vtheta)$ is the model distribution, $p(\vtheta)$ is a prior 
+distribution on $\vtheta$ and $p(\vy)=\int p(\vy|\vtheta)p(\vtheta)d\vtheta$. Here the integral is performed
+over the domain of $\vtheta$. If a subset of $\vtheta$ are discrete random variables then the integral over
+these parameters is replaced with a combinatorial sum over all possible values of these discrete random 
+variables.
+
+The calculation of the posterior distribution is usually either computationally intractable or no closed
+from exists for the posterior distribution and approximation is required. Variational approximation is a 
+class of methods for dealing with this problem by transforming the problem into an optimization problem.
+Most, but not all variational approximations are bsed on minimising the Kullback-Leibler divergence between 
+the true posterior $p(\vtheta|\vy)$ and an approximating distribution $q(\vtheta)$, sometimes called a 
+$q$-density. Suppose that $q(\vtheta)$ is parameterised by $\vxi$ and write $q(\vtheta)\equiv q(\vtheta;\vxi)$.
+We attempt to solve
+$$
+\ds q^*(\vtheta) = \argmin_{\vxi \in \Xi} \text{KL} \{ {q(\vtheta;\vxi) || p(\vtheta|\vy)} \}.
+$$
+
+\noindent Noting that the Kullback-Leibler divergence between two distributions is zero if and only if
+the two distributions are equal almost everywhere the above problem is no easier than the original problem
+of finding $p(\vtheta|\vy)$. This problem is mitigated by imposing structure on the form of $q$. Two
+strategies for doing this are:
+\begin{enumerate}
+\item[(A)] Specifying the parametric form of $q$; or 
+\item[(B)] choosing $q$ to be of the form $q(\vtheta) = \prod_{i=1}^M q(\theta_i)$,
+\end{enumerate}
+
+\noindent where it can be shown (see Ormerod \& Wand, 2010, for example) that the optimal form of the
+$q_i$'s are of the form
+\begin{equation}\label{eq:consistency}
+q_i^*(\theta_i) \propto \exp{\{ \bE_{-q(\theta_i)} \log p(\vy, \vtheta) \}},  \quad 1\le i\le M,
+\end{equation}
+
+\noindent where the above set of equations, sometimes called consistency conditions, need to be 
+satisfied simultaneously. It can be shown that by calculating $q_i^*(\theta_i)$ for a particular
+$i$ with the remaining $q_j^*(\theta_j)$, $j\ne i$ fixed, results in a monotonic decrease in the 
+Kullback-Leibler divergence. Note that a combination of (A) and (B) can be used which has recently
+been formalized by Rohde \& Wand (2015). 
+
+Note that it can easily be shown that
+$$
+\ds \log p(\vy) = \int q(\vtheta;\vxi)\frac{p(\vy|\vtheta)p(\vtheta)}{q(\vtheta;\vxi)} d\vtheta + \text{KL}(q(\vtheta;\vxi)||p(\vtheta|\vy)).
+$$
+
+\noindent Noting the Kullback-Leibler divergence is strictly positive the first term on the right hand side
+defined a lower bound on the marginal log-likelihood which we will denfine by
+$$
+\ds \log \underline{p}(\vy;\vxi) \equiv \int q(\vtheta;\vxi)\frac{p(\vy|\vtheta)p(\vtheta)}{q(\vtheta;\vxi)} d\vtheta
+$$
+
+\noindent and maximizing $\log \underline{p}(\vy;\vxi)$ with respect to $\vxi$ is eqivalent to minimizing
+$\text{KL}(q(\vtheta;\vxi)||p(\vtheta|\vy))$.
+
+%This approach works well for classes of models where all of the parameters are conjugate. For more general
+%classes of models, mean field updates are not analytically tractable and general gradient-based optimisation
+%methods must be used, as for the Gaussian Variational Approximation (see \cite{ormerod09}) used in this paper.
+%These methods are generally difficult to apply in practice, as the problems can involve the optimisation of
+%many parameters over high-dimensional, constrained spaces whose constraints cannot be simply expressed.
+
+
+
+
+
+\section{The model}
 \label{sec:model_and_data}
 
 Variational approximations are well-suited to accelerating the fit of Bayesian zero-inflated models to data.
 Typically zero-inflated models arise in applications where we wish to build multivariate regression models. To
 be able to construct multivariate models with as much generality as possible, we specify the full model as a
-General Design Bayesian Generalized Linear Mixed Model, as in \citep{zhao06}. This allows us to incorporate
+General Design Bayesian Generalized Linear Mixed Model, as in \citep{zhao06}. \joc{Something is srone with this 
+	citation. The initial should not appear.}
+
+
+This allows us to incorporate
 within-subject correlation, measurement error, missing data and smoothing splines (as in \cite{Wand2008}) in
-our models.
+our models. \joc{No it does not! The general design allows for simple random effects, random slopes, crossed
+	random effects, penalized splines and spatial spline structures. Measurement error and missing data
+	fall outside the scope of these models.}
 
 % Idea: We can use an approximation of the from q(\beta, \u, \Sigma) q(\rho) \Product q(r_i)
 % and use GVA on q(\beta, \u, \Sigma) and mean field updates on \rho and r_i
 
-\subsection{Model and data}
+\subsection{Modeling zero-inflated Poisson}
+
+Suppose we have a sample of counts $y_i$, $1\le i\le n$, where there are excessive number of zeros 
+for a Poisson model, but the sample otherwise behaves like a Poisson sample. There are two main 
+parameterizations for modelling such data. The first approach models the probability of a zero
+by $\rho$ and adjusts for counts greater than zero. This model uses
+$$
+P(Y_i = 0) = \rho, 
+\quad \mbox{and} \quad 
+P(Y_j = y_i) = \left( \frac{1 - \rho}{1 - e^{-\lambda}} \right) \frac{\lambda^{y_i} e^{-\lambda}} {y_i!},\qquad y_i \ge 1,
+$$
+
+\noindent where $\lambda>0$ models the size of the counts. Here, $\bE(y_i) = ???$ 
+and $\mbox{Var}(y_i) = ???$.
+
+A second approach considers the data as the product of two processes, a binary process
+that generates structural zeros, and a second process governed by a Poisson distribution. This leads to the model
+\begin{equation}\label{eq:modelTwo}
+P(Y_i = 0) = \rho + (1 - \rho) e^{-\lambda}, 
+\quad \mbox{and} \quad 
+P(Y_i = y_i) = (1 - \rho) \frac{\lambda^{y_i} e^{-\lambda}} {y_i!},\qquad y_i \ge 1,
+\end{equation}
+
+\noindent where $\bE(y_i) = (1 - \rho)\lambda$ 
+and $\mbox{Var}(y_i) =  \lambda(1 - \rho)(1 + \rho\lambda)$.
+
+An auxiliary variable representation of the second parameterization introduces the auxiliary
+variables $r_i$ which equals $1$ when $y_i>0$ and is unobserved otherwise. This leads to the
+specification 
+$$
+P(Y_i=y_i|r_i) = \frac{\exp(-\lambda r_i)(\lambda r_i)^{y_i}}{y_i!} \quad \mbox{and} \quad r_i \sim \mbox{Bernoulli}(1-\rho)
+$$
+
+\noindent Marginalization over $r_i$ leads to (\ref{eq:modelTwo}).
+
+We can add covariates using a log-link where we replace $\lambda$ with $\vx_i^T\vbeta$ where
+$\vx_i,\vbeta\in\bR^p$ with $\vx_i$ being a vector of observed predictors and $\vbeta$ is 
+a vector of regression coefficients. Let $\vr = (r_1,\ldots,r_n)$
+ 
+\begin{equation}\label{eq:main}
+\begin{array}{rl}
+\log p(\vy|\vr, \vbeta) 
+	& = \vy^T \mR (\mX\vbeta) 
+	  - \vr^T \exp{(\mX\vbeta)} 
+	  - \vone^T \log{\Gamma{(\vy + \vone)}}, \quad \mbox{ and }\\ [1ex]
+r_i &\sim \text{Bernoulli}(1-\rho), \quad 1 \leq i \leq n \\
+\end{array}
+\end{equation} 
+
+\noindent where $\mX$ is the $n\times p$ matrix whose $i$th rows equal $\vx_i$.
+
+
+\subsection{Mixed model architecture}
+
+
 
 The $j$th predictor/response pair for the $i$th group is denoted by $(\vx_{ij}, \vy_{ij}), 1 \leq j \leq n_i,
-1 \leq i \leq m$, where the $\vx_{ij}$ are unrestricted, while the $\vy_{ij}$ are nonnegative integers.
+1 \leq i \leq m$, where the $\vx_{ij}$ are unrestricted \joc{(what do you mean by this??)}, while the $\vy_{ij}$ are nonnegative integers.
 
 For each $1 \leq i \leq m$, define the $n_i \times 1$ vectors $\vy_{ij} = [\vy_{i 1}, \ldots, \vy_{i
-n_i}]^\top$ and $\vone_i = [1, \ldots, 1]^\top$, where the first of these vectors is the response. It is
+n_i}]^\top$ and let $\vone$ define a vector of ones of appropriate length, where the first of these vectors is the response. It is
 reasonable to assume that the vectors $\vy_1, \ldots, \vy_m$ are independent of each other.
+
+\joc{The next paragraph is too abrupt. How did this model come about? Where is the Poisson component? How is this combined with the zero-inflation?
+Start with a single observation before using matrix/vector notation.}
 
 Let $\mR = \diag{(\vr)}$, $\mC = [\mX, \mZ]$ and $\vnu = [\vbeta^\top, \vu^\top]^\top$. Consider the model
 
-$$
+\begin{equation}\label{eq:main}
 \begin{array}{rl}
-\log{p(\vy|\vr, \vbeta, \vu)} &= \vy^\top \mR (\mC\vnu) - \vr^\top \exp{(\mC\vnu)} - \vone^\top \log{\Gamma{(\vy + \vone)}}, \\
-\mbox{ and }
+\log{p(\vy|\vr, \vbeta, \vu)} &= \vy^\top \mR (\mC\vnu) - \vr^\top \exp{(\mC\vnu)} - \vone^\top \log{\Gamma{(\vy + \vone)}}, \quad \mbox{ and }\\ [1ex]
 r_i &\sim \text{Bernoulli}(\rho), 1 \leq i \leq n \\
 \end{array}
-$$
+\end{equation}
 
+\noindent \joc{(The prior structure will depend on the structure of the rrandom effects model)}
 with priors
-
 $$ 
 \begin{array}{rl}
 \log{p(\mSigma_{\vu \vu})} &= \text{Inverse Wishart}(\mPsi, v),\\
-p(\rho) &\propto 1 \\
+p(\rho) &\propto 1 \\ 
 \mbox{ and } \vnu|\sigma_\vu^2 &\sim \mbox{N}(\vzero, \sigma_\vu^2 \mI)\\
 \end{array}
 $$
 
+\noindent 
 where $\mX$ is $n \times p$, $\mZ$ is $n \times mb$ and $\mSigma_{\vu \vu}$ and $\mPsi$ are $b \times b$.
 
+\joc{$p(\rho) \propto 1$ is too vague. What is the domain of $\rho$? Why not speficy $\rho\sim \mbox{Uniform}(0,1)$? 
+	Should it be $\vbeta|\sigma_\beta^2 \sim \mbox{N}(\vzero, \sigma_\beta^2 \mI)$ and 
+	$\vu\sim N(\vzero,\mSigma_{\vu \vu})$? Shouldn't we specify the structure of $\mSigma_{\vu \vu})$ later
+	which is different for the random intercept, slope and spline cases?}
+
+
+\joc{(Perhaps it is wroth spelling out all of the various random effects structures that we will be using. Consider templating from Zhao \etal (2006).))}
+
 \subsection{Approximation}
-Let $\vr_0 = \{ r_i : y_i = 0 \}$.
-We assume an approximation of the form
+
+Our variational approximation for models of the form 
 $$
-q(\vr_0, \vnu, \sigma_{\vu}^2, \rho) = q(\vnu) q(\mSigma_{\vu \vu}) q(\rho) q(\vr_0) \\
+q(\vr_0, \vnu, \sigma_{\vu}^2, \rho) = q(\vnu)q(\rho) q(\vr_0)q(\mSigma_{\vu \vu})  \\
 $$
 
-where 
+\noindent 
+where we define $\vr_0 = \{ r_i : y_i = 0 \}$,
 $q(\sigma_{\vu}^2) = \mbox{Inverse Wishart}\left(\mPsi + \sum_{i=1}^m \vmu_i \vmu_i^\top + \mLambda_{\vu_i \vu_i}, v + m + 
 p\right)$ \mbox{and } $q(r_i) = \Bernoulli{(p_i)}$
 
+\noindent 
 with
 $$
 p_i = \expit\left[ \psi{(\alpha_{q(\rho)})} - \psi{(\beta_{q(\rho)})} - \exp{(c_i^\top\vmu + \half c_i^\top \mLambda c_i)} \right]
 $$
 
+\noindent 
 \text{when} $\vy_i = 0$.
 
 %$\propto \exp{\left \{-r_i \bE_{-r_i} [\exp{(c_i^\top\vnu)}] + r_i [\psi(\alpha_\rho) - \psi(\beta_\rho)] \right \} }.\\$
 
-The optimal approximation for $\vr$ is
+The optimal approximation \joc{(reword: the ``optimal approximation'' might be called the true posterior)} for $\vr$ is
+
+
 $$
 \begin{array}{rl}
 q(\vr) &\propto \exp \left [ \bE_{-q(\vr)}\vy^\top\mR(\mC\vmu) - \vr^\top\exp{(\mC\vnu)}-\half \vnu^\top \mSigma_{\vu \vu} \vnu \right ] \\ [1ex]
@@ -381,9 +558,11 @@ results are presented in Figure \ref{fig:median_accuracy_intercept} and Figure
 
 % Figure: Median accuracy graph intercept
 \begin{figure}
+\begin{center}
+\includegraphics[width=0.7\textwidth, height=100mm]{code/results/median_accuracy_combined_intercept.pdf}
 \caption{Median accuracy of random intercept}
 \label{fig:median_accuracy_intercept}
-\includegraphics[width=100mm, height=100mm]{code/results/median_accuracy_combined_intercept.pdf}
+\end{center}
 \end{figure}
 
 % Figure: Median accuracy graph slope
