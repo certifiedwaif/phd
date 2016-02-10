@@ -210,6 +210,23 @@ void centre(VectorXd& v)
 	}
 }
 
+void show_matrix_difference(ostream& os, MatrixXd m1, MatrixXd m2)
+{
+	// Check that m1 and m2 have the same dimensions.
+	if (!(m1.rows() == m2.rows() && m1.cols() == m2.cols())) {
+		os << "Dimensions of m1 and m2 do not match, cannot display difference." << endl;
+	}
+
+	// Iterate through the elements of m1 and m2, looking for and reporting differences
+	for (unsigned int i = 0; i < m1.rows(); i++) {
+		for (unsigned int j = 0; j < m1.cols(); j++) {
+			if (abs(m1(i, j) - m2(i, j))) {
+				os << m1(i, j) << m2(i, j) << m1(i, j) - m2(i, j) << (m1(i, j) - m2(i, j)) / m1(i, j) << endl;
+			}
+		}
+	}
+}
+
 //' Calculate the correlations for every subset of the covariates in mX
 //'
 //' @param vy            A vector of responses of length n
@@ -325,11 +342,14 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, unsigned int intercept_col, 
 					mA_prime << mA + b * mA * mX_gamma.transpose() * vx * vx.transpose() * mX_gamma * mA, -mA * mX_gamma.transpose() * vx * b,
 											-b * vx.transpose() * mX_gamma * mA, b;
 					// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
-					// MatrixXd identity_prime = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime;
-					// if (!identity_prime.isApprox(MatrixXd::Identity(p_gamma, p_gamma))) {
-					// 	// This inverse is nonsense. Do a full inversion.
-					// 	mA_prime = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();					
-					// }
+					MatrixXd identity_prime = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime;
+					if (!identity_prime.isApprox(MatrixXd::Identity(p_gamma, p_gamma))) {
+						// This inverse is nonsense. Do a full inversion.
+						MatrixXd mA_prime_full = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
+						// TODO: Find the differences between mA_prime_full and mA_prime
+						show_matrix_difference(cout, mA_prime, mA_prime_full);
+						mA_prime = mA_prime_full;					
+					}
 					if (bDebug) {
 						cout << "mA_prime.cols() " << mA_prime.cols() << endl;
 						// cout << "(mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime " << identity_prime << endl;
@@ -379,11 +399,14 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, unsigned int intercept_col, 
 				mA_prime = mA_11 - (va_12 * va_21) / a_22;
 
 				// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
-				// MatrixXd identity_prime = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime;
-				// if (!identity_prime.isApprox(MatrixXd::Identity(p_gamma, p_gamma))) {
-				// 	// This inverse is nonsense. Do a full inversion.
-				// 	mA_prime = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();					
-				// }
+				MatrixXd identity_prime = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime;
+				if (!identity_prime.isApprox(MatrixXd::Identity(p_gamma, p_gamma))) {
+					// This inverse is nonsense. Do a full inversion.
+					MatrixXd mA_prime_full = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
+					show_matrix_difference(cout, mA_prime, mA_prime_full);
+					// TODO: Find the differences between mA_prime_full and mA_prime
+					mA_prime = mA_prime_full;					
+				}
 				if (bDebug) {
 					cout << "mA_prime.cols() " << mA_prime.cols() << endl;
 					// cout << "(mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime " << identity_prime << endl;
