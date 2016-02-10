@@ -189,14 +189,40 @@ MatrixXd& get_mX_gamma(MatrixXd mX, dbitset gamma, MatrixXd& mX_gamma)
 	return mX_gamma;
 }
 
+double sd(VectorXd x)
+{
+	const unsigned int n = x.size();
+	return (x.array() - x.mean()).square().sum() / (n - 1);
+}
+
+void centre(VectorXd& v)
+{
+	const unsigned int n = v.size();
+	VectorXd v_bar(n);
+	v_bar.fill(v.mean());
+	double sd_v = sd(v);
+
+	if (sd_v > 0.0) {
+		VectorXd centred_v = v - v_bar;
+		v = centred_v / sd_v;
+	} else {
+		// If sd_v is zero, the data is constant. So leave it alone.
+	}
+}
+
 //' Calculate the correlations for every subset of the covariates in mX
 //'
-//' @param vy A vector of responses of length n
-//' @param mX A matrix of covariates of size n x p
-//' @return A vector of length 2^p of the correlations
+//' @param vy            A vector of responses of length n
+//' @param mX            A matrix of covariates of size n x p
+//' @param intercept_col The column index of the intercept column, if there is one.
+//' @param bIntercept    Boolean whether there's an intercept or not
+//' @param bCentre       Boolean whether to centre vy and mX or not
+//' @param bDebug        Boolean whether to issue debugging prints or not
+//' @return              A vector of length 2^p of the correlations
 //' @export
 // [[Rcpp::export]]
-VectorXd all_correlations(VectorXd vy, MatrixXd mX, bool bDebug = false)
+VectorXd all_correlations(VectorXd vy, MatrixXd mX, unsigned int intercept_col, bool bIntercept = false, 
+													bool bCentre = true, bool bDebug = false)
 {
 	const unsigned int n = mX.rows();            // The number of observations
 	const unsigned int p = mX.cols();            // The number of covariates
@@ -214,6 +240,20 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, bool bDebug = false)
 	unsigned int p_gamma;												 // The number of columns in the matrix mX_gamma
 	VectorXd vx;                                 // The column vector for the current covariate
 	
+	// Centre vy
+	centre(vy);
+
+	// Centre non-intercept columns of mX
+	for (int i = 0; i < mX.cols(); i++) {
+		// Skip intercept column if there is one.
+		if (bIntercept && i == intercept_col)
+			continue;
+		
+		vx = mX.col(i);
+		centre(vx);
+		mX.col(i) = vx;
+	}
+
 	// Loop through models, updating and downdating mA as necessary
 	for (unsigned int idx = 1; idx < greycode_rows; idx++) {
 		if (bDebug) cout << "Iteration " << idx << endl;
@@ -288,6 +328,12 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, bool bDebug = false)
 					// Perform full inverse
 					mA_prime = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
 				}
+				// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
+				MatrixXd identity = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime;
+				if (bDebug) {
+					cout << "(mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime " << identity << endl;
+				}
+
 				numerator = (v1.transpose() * mA_prime * v1).value();
 				R2 = numerator / vy.squaredNorm();
 				if (R2 > 1.0) {
