@@ -215,6 +215,7 @@ void show_matrix_difference(ostream& os, MatrixXd m1, MatrixXd m2)
 	// Check that m1 and m2 have the same dimensions.
 	if (!(m1.rows() == m2.rows() && m1.cols() == m2.cols())) {
 		os << "Dimensions of m1 and m2 do not match, cannot display difference." << endl;
+		return;
 	}
 
 	// Iterate through the elements of m1 and m2, looking for and reporting differences
