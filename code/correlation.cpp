@@ -294,6 +294,54 @@ MatrixXd& rank_one_update(VectorXd vy, MatrixXd mX_gamma, VectorXd vx, MatrixXd 
 	return mA_prime;
 }
 
+//' Perform the rank one downdate on (X_gamma^T X_gamma)^{-1}
+//'
+//' @param[in]  mX_gamma_prime The current iteration's matrix of covariates
+//' @param[in]  mA             The previous iteration's inverse i.e. (X_gamma^T X_gamma)^{-1}
+//' @param[out] mA_prime       The current iteration's inverse i.e. (X_gamma_prime^T X_gamma_prime)^{-1}
+//' @param[in]  bDebug         Boolean whether to issue debugging prints or not
+//' @return                    The new inverse (mX_gamma_prime^T mX_gamma_prime)^{-1}
+MatrixXd& rank_one_downdate(MatrixXd mX_gamma_prime, MatrixXd mA, MatrixXd& mA_prime, bool bDebug)
+{
+	const unsigned int p_gamma = mX_gamma_prime.cols();
+	
+	MatrixXd mA_11 = mA.topLeftCorner(p_gamma, p_gamma);
+	VectorXd va_12;
+	RowVectorXd va_21;
+	const double a_22 = mA(p_gamma, p_gamma);
+	
+	// Remember that Eigen's indexing is zero-based i.e. from 0 to n - 1, so mA.col(p_gamma) is actually
+	// accessing the p_gamma + 1 th column.
+	va_12 = mA.col(p_gamma).head(p_gamma);
+	va_21 = va_12.transpose();
+	if (bDebug) {
+		cout << "mA_11.cols() " << mA_11.cols() << endl;
+		cout << "va_12.size() " << va_12.size() << endl;
+		cout << "va_12.size() " << va_12.size() << endl;
+	}
+	mA_prime = mA_11 - (va_12 * va_21) / a_22;
+
+	// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
+	MatrixXd identity_prime = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime;
+	if (!identity_prime.isApprox(MatrixXd::Identity(p_gamma, p_gamma))) {
+		// This inverse is nonsense. Do a full inversion.
+		MatrixXd mA_prime_full = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
+		if (bDebug) show_matrix_difference(cout, mA_prime, mA_prime_full);
+		// TODO: Find the differences between mA_prime_full and mA_prime
+		mA_prime = mA_prime_full;					
+	}
+
+	if (bDebug) {
+		cout << "mA_prime.cols() " << mA_prime.cols() << endl;
+		// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
+		MatrixXd identity_prime = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime;
+		cout << "(mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime" << endl;
+		cout << identity_prime << endl;
+	}
+
+	return mA_prime;
+}
+
 //' Calculate the correlations for every subset of the covariates in mX
 //'
 //' @param[in] vy            A vector of responses of length n
@@ -406,43 +454,11 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, unsigned int intercept_col, 
 			} else {
 				// Rank one downdate
 				if (bDebug) cout << "Downdating " << diff_idx << endl;
+				MatrixXd mA_prime(p_gamma, p_gamma);
+
+				mA_prime = rank_one_downdate(mX_gamma_prime, mA, mA_prime, bDebug);
 
 				// Calculate correlation
-				MatrixXd mA_11 = mA.topLeftCorner(p_gamma, p_gamma);
-				VectorXd va_12;
-				RowVectorXd va_21;
-				const double a_22 = mA(p_gamma, p_gamma);
-				
-				// Remember that Eigen's indexing is zero-based i.e. from 0 to n - 1, so mA.col(p_gamma) is actually
-				// accessing the p_gamma + 1 th column.
-				va_12 = mA.col(p_gamma).head(p_gamma);
-				va_21 = va_12.transpose();
-				if (bDebug) {
-					cout << "mA_11.cols() " << mA_11.cols() << endl;
-					cout << "va_12.size() " << va_12.size() << endl;
-					cout << "va_12.size() " << va_12.size() << endl;
-				}
-				MatrixXd mA_prime(p_gamma, p_gamma);
-				mA_prime = mA_11 - (va_12 * va_21) / a_22;
-
-				// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
-				MatrixXd identity_prime = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime;
-				if (!identity_prime.isApprox(MatrixXd::Identity(p_gamma, p_gamma))) {
-					// This inverse is nonsense. Do a full inversion.
-					MatrixXd mA_prime_full = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
-					if (bDebug) show_matrix_difference(cout, mA_prime, mA_prime_full);
-					// TODO: Find the differences between mA_prime_full and mA_prime
-					mA_prime = mA_prime_full;					
-				}
-
-				if (bDebug) {
-					cout << "mA_prime.cols() " << mA_prime.cols() << endl;
-					// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
-					MatrixXd identity_prime = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime;
-					cout << "(mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime" << endl;
-					cout << identity_prime << endl;
-				}
-
 				VectorXd numerator;
 				numerator = vy.transpose() * mX_gamma_prime * mA_prime * mX_gamma_prime.transpose() * vy;;
 				R2 = (numerator / vy.squaredNorm()).value();
