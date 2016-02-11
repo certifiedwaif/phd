@@ -70,7 +70,7 @@ MatrixXd parseCSVfile_double(string infilename)
 		} 
 
 		for(unsigned int j = 0; j < Ncols; j++) {
-			xmat(rc,j) = int(round(strtod(matrows[i][j].c_str(), NULL)));
+			xmat(rc,j) = strtod(matrows[i][j].c_str(), NULL);
 		}
 		rc++;
 	}
@@ -502,25 +502,30 @@ VectorXd one_correlation(VectorXd vy, MatrixXd mX, MatrixXd mZ)
 
 int main()
 {
-	VectorXd vy = parseCSVfile_double("vy.csv");
-	MatrixXd mX = MatrixXd::Ones(263, 1);
-	MatrixXd mZ = parseCSVfile_double("mX.csv");
-	MatrixXd mC(263, mZ.cols() + 1);
-	mC << mX, mZ;
+	// VectorXd vy = parseCSVfile_double("vy.csv");
+	// MatrixXd mX = MatrixXd::Ones(263, 1);
+	// MatrixXd mZ = parseCSVfile_double("mX.csv");
+	// MatrixXd mC(263, mZ.cols() + 1);
+	// mC << mX, mZ;
 
-	Eigen::initParallel();
-	Eigen::setNbThreads(1);
+	// Eigen::initParallel();
+	// Eigen::setNbThreads(1);
 
 	//VectorXd R2_one = one_correlation(vy, mX, mZ);
 	// cout << R2_one << endl;
 
-	const bool intercept = true, centre = true, debug = true;
-	VectorXd vR2_all = all_correlations(vy, mC, 0, intercept, centre, debug);
+	// Simpler test case - Anscombe's quartet
+	MatrixXd mAnscombe = parseCSVfile_double("anscombes_quartet.csv");
+	cout << mAnscombe << endl;
+	return 0;
 
-	cout << "i,R2" << endl;
-	for (int i = 0; i < vR2_all.size(); i++) {
-		cout << i << ", " << vR2_all(i) << endl;
-	}
+	// const bool intercept = false, centre = true, debug = true;
+	// VectorXd vR2_all = all_correlations(vy, mC, 0, intercept, centre, debug);
+
+	// cout << "i,R2" << endl;
+	// for (int i = 0; i < vR2_all.size(); i++) {
+	// 	cout << i << ", " << vR2_all(i) << endl;
+	// }
 	
 	return 0;
 }
