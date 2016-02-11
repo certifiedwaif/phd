@@ -414,6 +414,10 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, unsigned int intercept_col, 
 			}
 			numerator = (v1 * mA_prime * v1.transpose()).value();
 			R2 = numerator / vy.squaredNorm();
+			if (bDebug) {
+				cout << "Numerator " << numerator << " denominator " << vy.squaredNorm();
+				cout << " R2 " << R2 << endl;
+			}
 			vR2_all(idx) = R2;
 			mA = mA_prime;
 
@@ -517,15 +521,18 @@ int main()
 	// Simpler test case - Anscombe's quartet
 	MatrixXd mAnscombe = parseCSVfile_double("anscombes_quartet.csv");
 	cout << mAnscombe << endl;
-	return 0;
+	VectorXd vy = mAnscombe.col(0);
+	cout << vy << endl;
+	MatrixXd mX = mAnscombe.middleCols(1, 3);
+	cout << mX << endl;
 
-	// const bool intercept = false, centre = true, debug = true;
-	// VectorXd vR2_all = all_correlations(vy, mC, 0, intercept, centre, debug);
+	const bool intercept = false, centre = true, debug = true;
+	VectorXd vR2_all = all_correlations(vy, mX, 0, intercept, centre, debug);
 
-	// cout << "i,R2" << endl;
-	// for (int i = 0; i < vR2_all.size(); i++) {
-	// 	cout << i << ", " << vR2_all(i) << endl;
-	// }
+	cout << "i,R2" << endl;
+	for (int i = 0; i < vR2_all.size(); i++) {
+		cout << i << ", " << vR2_all(i) << endl;
+	}
 	
 	return 0;
 }
