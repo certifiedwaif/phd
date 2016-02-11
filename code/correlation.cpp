@@ -143,18 +143,17 @@ dbitset& greycode(const unsigned int idx, const unsigned int p, dbitset& bs_ret)
 	return bs_ret;
 }
 
-void greycode_change(const unsigned int idx, const unsigned int p, bool& update, unsigned int& diff_idx,
-										 bool bDebug)
+void greycode_change(const unsigned int idx, const unsigned int p, bool& update, unsigned int& diff_idx)
 {
 	dbitset bs_curr(p);
 	dbitset bs_prev(p);
 
 	bs_curr = greycode(idx, p, bs_curr);
 	bs_prev = greycode(idx - 1, p, bs_prev);
-	if (bDebug) {
+	#ifdef DEBUG
 		cout << "Current gamma:  " << bs_curr << endl;
 		cout << "Previous gamma: " << bs_prev << endl;
-	}
+	#endif
 
 	// Find bit that has changed.
 	diff_idx = (bs_curr ^ bs_prev).find_first();
@@ -231,21 +230,19 @@ void show_matrix_difference(ostream& os, const MatrixXd m1, const MatrixXd m2, c
 
 //' Perform the rank one update on (X_gamma^T X_gamma)^{-1}
 //'
-//' @param[in]  vy             A vector of responses of length n
 //' @param[in]  mX_gamma       The previous iteration's matrix of covariates
 //' @param[in]  vx             The new column vector to be added to mX_gamma
 //' @param[in]  mX_gamma_prime The current iteration's matrix of covariates
 //' @param[in]  mA             The previous iteration's inverse i.e. (X_gamma^T X_gamma)^{-1}
 //' @param[out] mA_prime       The current iteration's inverse i.e. (X_gamma_prime^T X_gamma_prime)^{-1}
-//' @param[in]  bDebug         Boolean whether to issue debugging prints or not
 //' @return                    The new inverse (mX_gamma_prime^T mX_gamma_prime)^{-1}
-MatrixXd& rank_one_update(VectorXd vy, MatrixXd mX_gamma, VectorXd vx, MatrixXd mX_gamma_prime,
-													MatrixXd mA, MatrixXd& mA_prime, bool bDebug)
+MatrixXd& rank_one_update(MatrixXd mX_gamma, VectorXd vx, MatrixXd mX_gamma_prime,
+													MatrixXd mA, MatrixXd& mA_prime)
 {
 	const unsigned int p_gamma = mX_gamma_prime.cols();
 	
 	// Construct mA_prime
-	if (bDebug) {
+	#ifdef DEBUG
 		cout << "vy.size() " << vy.size() << endl;
 		cout << "vx.size() " << vx.size() << endl;
 		cout << "mX_gamma.cols() " << mX_gamma.cols() << endl;
@@ -254,13 +251,13 @@ MatrixXd& rank_one_update(VectorXd vy, MatrixXd mX_gamma, VectorXd vx, MatrixXd 
 		cout << "mX_gamma_prime.rows() " << mX_gamma_prime.rows() << endl;
 		cout << "mA.cols() " << mA.cols() << endl;
 		cout << "mA.rows() " << mA.rows() << endl;
-	}
+	#endif
 
 	const double b = 1 / (vx.transpose() * vx - vx.transpose() * mX_gamma * mA * mX_gamma.transpose() * vx).value();
 	// b is supposed to be positive definite.
-	if (bDebug) {
+	#ifdef DEBUG
 		cout << "b " << b << endl;
-	}
+	#endif
 	const double epsilon = 1e-4;
 	if (b > epsilon) {
 		// Do rank one update
@@ -271,25 +268,27 @@ MatrixXd& rank_one_update(VectorXd vy, MatrixXd mX_gamma, VectorXd vx, MatrixXd 
 		if (!identity_prime.isApprox(MatrixXd::Identity(p_gamma, p_gamma))) {
 			// This inverse is nonsense. Do a full inversion.
 			MatrixXd mA_prime_full = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
-			// TODO: Find the differences between mA_prime_full and mA_prime
-			if (bDebug) show_matrix_difference(cout, mA_prime, mA_prime_full);
+
+			#ifdef DEBUG
+				show_matrix_difference(cout, mA_prime, mA_prime_full);
+			#endif
 			mA_prime = mA_prime_full;					
 		}
-		if (bDebug) {
+		#ifdef DEBUG
 			cout << "mA_prime.cols() " << mA_prime.cols() << endl;
 			// cout << "(mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime " << identity_prime << endl;
-		}
+		#endif
 	} else {
 		// Perform full inverse
 		mA_prime = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
 	}
 	
-	if (bDebug) {
+	#ifdef DEBUG
 		// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
 		MatrixXd identity_prime = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime;
 		cout << "(mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime" << endl;
 		cout << identity_prime << endl;
-	}
+	#endif
 
 	return mA_prime;
 }
@@ -299,9 +298,8 @@ MatrixXd& rank_one_update(VectorXd vy, MatrixXd mX_gamma, VectorXd vx, MatrixXd 
 //' @param[in]  mX_gamma_prime The current iteration's matrix of covariates
 //' @param[in]  mA             The previous iteration's inverse i.e. (X_gamma^T X_gamma)^{-1}
 //' @param[out] mA_prime       The current iteration's inverse i.e. (X_gamma_prime^T X_gamma_prime)^{-1}
-//' @param[in]  bDebug         Boolean whether to issue debugging prints or not
 //' @return                    The new inverse (mX_gamma_prime^T mX_gamma_prime)^{-1}
-MatrixXd& rank_one_downdate(MatrixXd mX_gamma_prime, MatrixXd mA, MatrixXd& mA_prime, bool bDebug)
+MatrixXd& rank_one_downdate(MatrixXd mX_gamma_prime, MatrixXd mA, MatrixXd& mA_prime)
 {
 	const unsigned int p_gamma = mX_gamma_prime.cols();
 	
@@ -314,11 +312,11 @@ MatrixXd& rank_one_downdate(MatrixXd mX_gamma_prime, MatrixXd mA, MatrixXd& mA_p
 	// accessing the p_gamma + 1 th column.
 	va_12 = mA.col(p_gamma).head(p_gamma);
 	va_21 = va_12.transpose();
-	if (bDebug) {
+	#ifdef DEBUG
 		cout << "mA_11.cols() " << mA_11.cols() << endl;
 		cout << "va_12.size() " << va_12.size() << endl;
 		cout << "va_12.size() " << va_12.size() << endl;
-	}
+	#endif
 	mA_prime = mA_11 - (va_12 * va_21) / a_22;
 
 	// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
@@ -326,18 +324,20 @@ MatrixXd& rank_one_downdate(MatrixXd mX_gamma_prime, MatrixXd mA, MatrixXd& mA_p
 	if (!identity_prime.isApprox(MatrixXd::Identity(p_gamma, p_gamma))) {
 		// This inverse is nonsense. Do a full inversion.
 		MatrixXd mA_prime_full = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
-		if (bDebug) show_matrix_difference(cout, mA_prime, mA_prime_full);
+		#ifdef DEBUG
+			show_matrix_difference(cout, mA_prime, mA_prime_full);
+		#endif
 		// TODO: Find the differences between mA_prime_full and mA_prime
 		mA_prime = mA_prime_full;					
 	}
 
-	if (bDebug) {
+	#ifdef DEBUG
 		cout << "mA_prime.cols() " << mA_prime.cols() << endl;
 		// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
 		MatrixXd identity_prime = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime;
 		cout << "(mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime" << endl;
 		cout << identity_prime << endl;
-	}
+	#endif
 
 	return mA_prime;
 }
@@ -349,12 +349,11 @@ MatrixXd& rank_one_downdate(MatrixXd mX_gamma_prime, MatrixXd mA, MatrixXd& mA_p
 //' @param[in] intercept_col The column index of the intercept column, if there is one.
 //' @param[in] bIntercept    Boolean whether there's an intercept or not
 //' @param[in] bCentre       Boolean whether to centre vy and mX or not
-//' @param[in] bDebug        Boolean whether to issue debugging prints or not
 //' @return              		 A vector of length 2^p of the correlations
 //' @export
 // [[Rcpp::export]]
 VectorXd all_correlations(VectorXd vy, MatrixXd mX, unsigned int intercept_col, bool bIntercept = false, 
-													bool bCentre = true, bool bDebug = false)
+													bool bCentre = true)
 {
 	const unsigned int p = mX.cols();            // The number of covariates
 	const unsigned int greycode_rows = (1 << p); // The number of greycode combinations, 2^p
@@ -389,12 +388,14 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, unsigned int intercept_col, 
 
 	// Loop through models, updating and downdating mA as necessary
 	for (unsigned int idx = 1; idx < greycode_rows; idx++) {
-		if (bDebug) cout << "Iteration " << idx << endl;
+		#ifdef DEBUG
+			cout << "Iteration " << idx << endl;
+		#endif
 		// By properties of Greycode, only one element can be different. And it's either one higher or
 		// one lower.
 		// Check if update or downdate, and for which variable
 		gamma = greycode(idx, p, gamma);
-		greycode_change(idx, p, bUpdate, diff_idx, bDebug);
+		greycode_change(idx, p, bUpdate, diff_idx);
 
 		// Get mX matrix for gamma
 		mX_gamma_prime = get_mX_gamma(mX, gamma, mX_gamma_prime);
@@ -408,16 +409,16 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, unsigned int intercept_col, 
 			mA_prime = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
 			VectorXd v1(p_gamma); // [y^T X, y^T x]^T
 			v1 << vy.transpose() * mX_gamma_prime;
-			if (bDebug) {
+			#ifdef DEBUG
 				cout << v1.size() << endl;
 				cout << mA_prime.cols() << endl;
-			}
+			#endif
 			numerator = (v1 * mA_prime * v1.transpose()).value();
 			R2 = numerator / vy.squaredNorm();
-			if (bDebug) {
+			#ifdef DEBUG
 				cout << "Numerator " << numerator << " denominator " << vy.squaredNorm();
 				cout << " R2 " << R2 << endl;
-			}
+			#endif
 			vR2_all(idx) = R2;
 			mA = mA_prime;
 
@@ -425,51 +426,53 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, unsigned int intercept_col, 
 		} else {
 			if (bUpdate) {
 				// Rank one update of mA_prime from mA
-				if (bDebug) {
+				#ifdef DEBUG
 					cout << "Updating " << diff_idx << endl;
 					cout << "p_gamma " << p_gamma << endl;
-				}
+				#endif
 
 				// Calculate [y^T X, y^T x]^T
 				VectorXd v1(p_gamma); 
 				VectorXd v2, v3;
 				v2 = vy.transpose() * mX_gamma;
 				v3 = vy.transpose() * vx;
-				if (bDebug) {
+				#ifdef DEBUG
 					cout << "v1.size() " << v1.size() << endl;
 					cout << "v2.size() " << v2.size() << endl;
 					cout << "v3.size() " << v3.size() << endl;
-				}
+				#endif
 				v1 << v2, v3;
 
 				MatrixXd mA_prime(p_gamma, p_gamma);
-				mA_prime = rank_one_update(vy, mX_gamma, vx, mX_gamma_prime, mA, mA_prime, bDebug);
+				mA_prime = rank_one_update(mX_gamma, vx, mX_gamma_prime, mA, mA_prime);
 
 				numerator = (v1.transpose() * mA_prime * v1).value();
 				R2 = numerator / vy.squaredNorm();
-				if (bDebug) {
+				#ifdef DEBUG
 					cout << "Numerator " << numerator << " denominator " << vy.squaredNorm();
 					cout << " R2 " << R2 << endl;
-				}
+				#endif
 				vR2_all(idx) = R2;
 
 				// Save mA
 				mA = mA_prime;
 			} else {
 				// Rank one downdate
-				if (bDebug) cout << "Downdating " << diff_idx << endl;
+				#ifdef DEBUG
+					cout << "Downdating " << diff_idx << endl;
+				#endif
 				MatrixXd mA_prime(p_gamma, p_gamma);
 
-				mA_prime = rank_one_downdate(mX_gamma_prime, mA, mA_prime, bDebug);
+				mA_prime = rank_one_downdate(mX_gamma_prime, mA, mA_prime);
 
 				// Calculate correlation
 				VectorXd numerator;
 				numerator = vy.transpose() * mX_gamma_prime * mA_prime * mX_gamma_prime.transpose() * vy;;
 				R2 = (numerator / vy.squaredNorm()).value();
-				if (bDebug) {
+				#ifdef DEBUG
 					cout << "Numerator " << numerator << " denominator " << vy.squaredNorm();
 					cout << " R2 " << R2 << endl;
-				}
+				#endif
 				vR2_all(idx) = R2;
 
 				// Save mA
@@ -520,14 +523,16 @@ int main()
 
 	// Simpler test case - Anscombe's quartet
 	MatrixXd mAnscombe = parseCSVfile_double("anscombes_quartet.csv");
-	cout << mAnscombe << endl;
 	VectorXd vy = mAnscombe.col(0);
-	cout << vy << endl;
 	MatrixXd mX = mAnscombe.middleCols(1, 3);
-	cout << mX << endl;
+	#ifdef DEBUG
+		cout << mAnscombe << endl;
+		cout << vy << endl;
+		cout << mX << endl;
+	#endif
 
-	const bool intercept = false, centre = true, debug = true;
-	VectorXd vR2_all = all_correlations(vy, mX, 0, intercept, centre, debug);
+	const bool intercept = false, centre = true;
+	VectorXd vR2_all = all_correlations(vy, mX, 0, intercept, centre);
 
 	cout << "i,R2" << endl;
 	for (int i = 0; i < vR2_all.size(); i++) {
