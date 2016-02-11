@@ -1,6 +1,6 @@
 # correlation.R
 
-# Anscombe's quartet
+# Construct and scale Anscombe's quartet
 x1 <- c(10.0, 8.0, 13.0, 9.0, 11.0, 14.0, 6.0, 4.0, 12.0, 7.0, 5.0)
 y1 <- c(8.04, 6.95, 7.58, 8.81, 8.33, 9.96, 7.24, 4.26, 10.84, 4.82, 5.68)
 y2 <- c(9.14, 8.14, 8.74, 8.77, 9.26, 8.1, 6.13, 3.1, 9.13, 7.26, 4.74)
@@ -12,6 +12,9 @@ anscombe_df <- data.frame(x1=x1, y1=y1, y2=y2, y3=y3, x2=x2, y4=y4)
 mat <- scale(anscombe_df)
 anscombe_df <- data.frame(x1=mat[, 1], y1=mat[, 2], y2=mat[, 3], y3=mat[, 4], x2=mat[, 5], y4=mat[, 6])
 
+write.table(file="anscombes_quartet.csv", anscombe_df, row.names=FALSE, col.names=FALSE, quote=FALSE, sep=",")
+
+# Plot Anscombe's quartet
 par(mfrow=c(2, 2))
 plot(anscombe_df$x1, anscombe_df$y1)
 fit <- lm(anscombe_df$y1~anscombe_df$x1)
@@ -29,6 +32,33 @@ plot(x2, anscombe_df$y4)
 fit <- lm(anscombe_df$y4~x2)
 abline(fit)
 
+# Check values
+fit2 <- lm(x1~y1-1)
+summary(fit2)
+vy <- anscombe_df$x1
+mX <- as.matrix(anscombe_df[, c("y1")])
+vbeta <- coef(fit2)
+cor(vy, mX %*% vbeta)
+cor(vy, mX %*% vbeta)^2
+(vy %*% mX %*% solve(t(mX) %*% mX) %*% t(mX) %*% vy) / (t(vy) %*% vy)
+
+fit2 <- lm(x1~y1+y2-1)
+summary(fit2)
+vy <- anscombe_df$x1
+mX <- as.matrix(anscombe_df[, c("y1", "y2")])
+vbeta <- coef(fit2)
+cor(vy, mX %*% vbeta)
+cor(vy, mX %*% vbeta)^2
+(vy %*% mX %*% solve(t(mX) %*% mX) %*% t(mX) %*% vy) / (t(vy) %*% vy)
+
+fit2 <- lm(x1~y1+y2-1)
+summary(fit2)
+vy <- anscombe_df$x1
+mX <- as.matrix(anscombe_df[, c("y1", "y2")])
+vbeta <- coef(fit2)
+cor(vy, mX %*% vbeta)
+cor(vy, mX %*% vbeta)^2
+(vy %*% mX %*% solve(t(mX) %*% mX) %*% t(mX) %*% vy) / (t(vy) %*% vy)
 
 fit2 <- lm(x1~y2+y3-1)
 summary(fit2)
@@ -37,5 +67,31 @@ mX <- as.matrix(anscombe_df[, c("y2", "y3")])
 vbeta <- coef(fit2)
 cor(vy, mX %*% vbeta)
 cor(vy, mX %*% vbeta)^2
+(vy %*% mX %*% solve(t(mX) %*% mX) %*% t(mX) %*% vy) / (t(vy) %*% vy)
 
-write.table(file="anscombes_quartet.csv", anscombe_df, row.names=FALSE, col.names=FALSE, quote=FALSE, sep=",")
+fit2 <- lm(x1~y1+y2+y3-1)
+summary(fit2)
+vy <- anscombe_df$x1
+mX <- as.matrix(anscombe_df[, c("y1", "y2", "y3")])
+vbeta <- coef(fit2)
+cor(vy, mX %*% vbeta)
+cor(vy, mX %*% vbeta)^2
+(vy %*% mX %*% solve(t(mX) %*% mX) %*% t(mX) %*% vy) / (t(vy) %*% vy)
+
+fit2 <- lm(x1~y1+y3-1)
+summary(fit2)
+vy <- anscombe_df$x1
+mX <- as.matrix(anscombe_df[, c("y1", "y3")])
+vbeta <- coef(fit2)
+cor(vy, mX %*% vbeta)
+cor(vy, mX %*% vbeta)^2
+(vy %*% mX %*% solve(t(mX) %*% mX) %*% t(mX) %*% vy) / (t(vy) %*% vy)
+
+fit2 <- lm(x1~y3-1)
+summary(fit2)
+vy <- anscombe_df$x1
+mX <- as.matrix(anscombe_df[, c("y3")])
+vbeta <- coef(fit2)
+cor(vy, mX %*% vbeta)
+cor(vy, mX %*% vbeta)^2
+(vy %*% mX %*% solve(t(mX) %*% mX) %*% t(mX) %*% vy) / (t(vy) %*% vy)
