@@ -191,9 +191,18 @@ q_i^*(\vtheta_i) \propto \exp{ \bE_{-\vtheta_i} \log{p(\vy, \vtheta)} }, 1 \leq 
 
 \begin{equation*}
 \begin{array}{ll}
-p(y, theta) &= p(y | beta, sigma2) p(beta | sigma2, g) p(sigma2) p(g) \\
-\log{p(y, theta)} &= \log{p(y | beta, sigma2)} + \log{p(beta | sigma2, g)} + \log{p(sigma2)} + \log{p(g)} \\
-&= \half{2}
+p(\vy, \vtheta) &= p(\vy | \vbeta, \sigma^2) p(\vbeta | \sigma^2, g) p(\sigma^2) p(g) \\
+\log{p(\vy, \vtheta)} &= \log{p(\vy | \vbeta, \sigma^2)} + \log{p(\vbeta | \sigma^2, g)} + \log{p(\sigma^2)} + \log{p(g)} \\
+&= -\frac{n}{2} \log{2 \pi} + -\half \log |\sigma^2 I_n| - \half (\vy - \mX \vbeta)^\top \sigma^{-2} \mI_n (\vy - \mX \vbeta) \\
+& \quad -\frac{p}{2} \log{2 \pi} - \half \log |g \sigma^2 (\mX^\top \mX)^{-1}| -
+	\half \vbeta^\top (g \sigma^2)^{-1} (\mX^\top \mX) \vbeta \\
+& \quad - \log{(\sigma^2)} + \log \bI (\sigma^2 > 0) \\
+& = -\frac{n + p}{2} \log(2 \pi) - \half \log{\sigma^{2n}} |I_n| 
+		-\half \log{g^n \sigma^{2n}} |(\mX^\top \mX)^{-1}| \\
+&\quad		-\half (y - X \vbeta)^\top \sigma^{-2} I_n (y - X \vbeta)\\
+&\quad		-\half \vbeta^\top (g \sigma^2)^{-1} (X^\top X) \vbeta [= -\half (g \sigma^2)^{-1} (X \vbeta)^\top (X \vbeta)]\\
+&\quad		- \log(\sigma^2) + \cancel{\log \bI(\sigma^2 > 0)} \\
+&\qquad b \log g + (-a - b - 2) \log(1 + g) - \log \text{Beta}(a + 1,  b + 1) + \log \bI(g > 0)
 \end{array}
 \end{equation*}
 
