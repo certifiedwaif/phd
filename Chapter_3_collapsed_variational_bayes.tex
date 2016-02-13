@@ -169,4 +169,32 @@ Now, $\int_0^\infty \frac{g^{\mu - 1}}{(1 + \beta g)^\nu} dg = \beta^{-\mu} \tex
 
 by the symmetry of beta functions and the definitions of $a$ and $b$.
 
+\section{Variational Bayes approximation}
+
+Assume an approximation of the form
+
+\begin{equation*}
+q(\vtheta) = q(\vbeta) q(\sigma^2) q(g)
+\end{equation*}
+where
+\begin{equation*}
+\begin{array}{ll}
+q^*(\vbeta) &= N(\vmu_{q(\vbeta), \mSigma_{q(\vbeta)}}), \\
+q^*(\sigma^2) &= IG(\alpha_{q(\sigma^2)}, \beta_{q(\sigma^2)}) \text{ and } \\
+q^*(g) &= \text{Beta Prime}(\alpha_{q(g)}, \beta_{q(g)})). \\
+\end{array}
+\end{equation*}
+
+\begin{equation*}
+q_i^*(\vtheta_i) \propto \exp{ \bE_{-\vtheta_i} \log{p(\vy, \vtheta)} }, 1 \leq i \leq M
+\end{equation*}
+
+\begin{equation*}
+\begin{array}{ll}
+p(y, theta) &= p(y | beta, sigma2) p(beta | sigma2, g) p(sigma2) p(g) \\
+\log{p(y, theta)} &= \log{p(y | beta, sigma2)} + \log{p(beta | sigma2, g)} + \log{p(sigma2)} + \log{p(g)} \\
+&= \half{2}
+\end{array}
+\end{equation*}
+
 \end{document}
