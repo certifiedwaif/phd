@@ -1,0 +1,104 @@
+\documentclass{beamer}
+
+\usetheme{Warsaw}
+\usepackage{graphicx}
+\usepackage{ulem}
+\input{include.tex}
+\input{Definitions.tex}
+
+\usefonttheme{serif}
+
+\title{Progress update}
+\author{Mark Greenaway\\PhD candidate\\markg@maths.usyd.edu.au}
+
+\mode<presentation>
+{ \usetheme{boxes} }
+
+\begin{document}
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}{Project plan}
+\begin{itemize}
+\item We're aiming to submit our second paper by July. \\
+\item This is an aggressive timeframe, but I think an achievable one. \\
+\item Writing a paper is a project. Standard project planning techniques will work. \\
+\item John and I have drawn up a preliminary list of tasks, which we will continue to refine. \\
+\item I much prefer working this way, because I know how to apportion my time, what's still left to do and what's on the horizon. \\ 
+\item Getting Things Done (GTD) works for me. \\
+\item Triage, triage, triage \ldots no GPUS at this stage. \\
+\item If things go well, there's some interesting things to do in John's research grant
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Play to our strengths \ldots}
+\emph{What are my strengths?}
+\begin{itemize}
+\item Degree in Computer Science (HD average in CS subjects) from 1995-1997, back when compiled languages like C and manual memory management was the norm. Code optimisation was a required skill.
+\item A decade of software engineering experience. A book written on C++. Sadly, out of print \ldots
+\item UNIX upbringing. Black belt in search and replace/text editor tricks. If it takes more than three keystrokes you're working too hard. Automate all the things!
+\item Tech industry way of working - GitHub, Slack, Trello.
+\item Pure mathematical upbringing - pedantry in the service of good.
+\item Applied statistical experience - an idea of what's actually useful to applied statisticians in the field, with a public health focus.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Writing and algebra}
+\begin{itemize}
+\item Writing \\
+John shared this lovely poem with me. In honour of Valentine's Day yesterday, I'm sharing it with you too.
+\begin{quote}
+Roses are red. \\
+Violets are blue. \\
+I should be writing \\
+And so should you. \\
+\end{quote} \\
+And they say romance is dead \ldots
+\item Algebra \\
+Deriving the VB approximation for the linear model with model selection. \\
+Collapsed Variational Bayes.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Major achievement of the last two weeks: correlations calculated by iterative updates}
+\begin{itemize}
+\item I work faster in C++, mostly due to the static typing / type checking. This alone is worth the price of 
+			admission for me.
+\item The C++ ecosystem has other advantages for a person like me: excellent numerical linear algebra 
+			and other libraries, HPC, optimising vectorising compilers, build systems, debuggers, profilers.
+\item Once John and I were on the same page with using the block inverse approach, we were able to go from 
+			idea to working implementation in 10 days.
+\item For a representative test case, our results match those produced by R to 4 decimal places. It might be 
+			more, but I haven't changed the formatting of the results to check yet.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Testing -- there's always room for improvement.}
+
+\begin{itemize}
+\item John admonished me for my somewhat slapdash black box testing.
+\item Paraphrasing John: ``If the results of your program aren't numerically accurate, they're worthless.''
+\item Together, we drew up a test plan. I thought I was staunch about testing, but it turns out that John is
+\emph{even more} staunch. This is a good lesson for me to learn.
+\item Test data based on the well-known Anscombe's quartet data set.
+\item Refactored rank one update and downdate code into functions which we could test individually.
+\item These functions will allow us to write the other programs we need to write much more quickly!
+\end{itemize}
+\end{frame}
+
+\begin{frame}{What's next: coding?}
+\begin{itemize}
+\item Next step: more testing, unit tests, automated regression testing, test-driven development. No 
+			back--sliding!
+\item Hadley Wickham wrote a package for unit testing, called \texttt{testthat}.
+\item Write other programs we need, for partitioned model selection etc.
+\item Once the code is correct, optimise if necessary.
+\item Parallelise using OpenMP.
+\item Code to calculate the dependency matrix $D_{ij}$.
+\item MCMC. Stan's not going to work, because of the discrete random variables involved. So we're going to 
+			have to code it ourselves.
+\end{itemize}
+\end{frame}
+
+\end{document}
