@@ -9,7 +9,7 @@
 \usefonttheme{serif}
 
 \title{Troll you a Erik for great good OR How I learned to stop worrying and love floating point numbers}
-\author{Mark Greenaway\\PhD candidate\\markg@maths.usyd.edu.au}
+\author{Mark Greenaway PhD candidate markg@maths.usyd.edu.au}
 
 \mode<presentation>
 { \usetheme{boxes} }
@@ -19,154 +19,250 @@
 \maketitle
 \end{frame}
 
-\begin{frame}
+% I want to cover how numbers are constructed, starting from the natural numbers up to the integers, the
+% rationals and then the real and complex numbers.
 
-I want to cover how numbers are constructed, starting from the natural numbers up to the integers, the
-rationals and then the real and complex numbers.
+% Because mathematics is \emph{not} a spectator sport, I will be doing this with proofs, live, on the
+% whiteboard.
 
-Because mathematics is \emph{not} a spectator sport, I will be doing this with proofs, live, on the
-whiteboard.
+% I'm willing to spend a little bit of time on foundational issues, but not a lot. I'm a mathematical
+% analysis/mathematical statistician. There are certain things we accept without question. For instance, most
+% mathematicians accept that
 
-I'm willing to spend a little bit of time on foundational issues, but not a lot. I'm a mathematical
-analysis/mathematical statistician. There are certain things we accept without question. For instance, most
-mathematicians accept that
+% \begin{equation*}
+% \mathbb{N} \subset \mathbb{Z} \subset \mathbb{R} \subset \mathbb{C}
+% \end{equation*}
 
-\begin{equation*}
-\mathbb{N} \subset \mathbb{Z} \subset \mathbb{R} \subset \mathbb{C}
-\end{equation*}
+% but Liam, Tran's boyfriend, doesn't. He claims that the statement doesn't type check, and hence is
+% meaningless. I suspect he's trolling/showing off his superior type theory knowledge, but have been unable to
+% pin him down on the issue. Virtually no practicing mathematician would accept this argument. But I'm not a
+% type theorist or a Haskell programmer, so my perspective is different. I don't give a flying fuck whether
+% things type check, or are even computable. And neither do most pure mathematicians. We work with non-
+% computable things all the time. It doesn't trouble us.
 
-but Liam, Tran's boyfriend, doesn't. He claims that the statement doesn't type check, and hence is
-meaningless. I suspect he's trolling/showing off his superior type theory knowledge, but have been unable to
-pin him down on the issue. Virtually no practicing mathematician would accept this argument. But I'm not a
-type theorist or a Haskell programmer, so my perspective is different. I don't give a flying fuck whether
-things type check, or are even computable. And neither do most pure mathematicians. We work with non-
-computable things all the time. It doesn't trouble us.
+% Like the reals. I'm going to present one proof that the reals are uncountable, my favorite one which I learned
+% in my third year measure theory course. It's relatively elementary. I'm introducing it because it shows that
+% you can't possibly compute with the reals on a computer with finite memory in finite time.
 
-Like the reals. I'm going to present one proof that the reals are uncountable, my favorite one which I learned
-in my third year measure theory course. It's relatively elementary. I'm introducing it because it shows that
-you can't possibly compute with the reals on a computer with finite memory in finite time.
+% I'm also going to include a proof that you need the irrational numbers to complete the reals, using the
+% square root of 2, although $\pi$ would work just as well.
 
-I'm also going to include a proof that you need the irrational numbers to complete the reals, using the
-square root of 2, although $\pi$ would work just as well.
+\begin{frame}{Constructing the natural numbers, the integers and the rationals}
+There are many possible constructions of the natural numbers. This is the standard one.\\
+We assume set theory. In particular, we assume Zermelo-Fraenkel set theory (ZFC).\\
+Let $0 = \{\}$. \\
+Define a successor function $\text{succ}{(x)} = x \cup \{ x \}$. 
+Then $1 = \{\}, 2 = \{\{\}\}$ and so on.\\
+The integers can then be defined as ordered pairs of the form $(s, x)$ where $s \in \{-, +\}$ and
+$x \in \mathbb{N}$. \\
+The rational numbers are ratios of integers $a / b$ where the $gcd(a, b) = 1$ i.e. that $a$ and $b$ are
+co-prime, or a multiple of that i.e. $(k a) / (k b)$ which is equivalent to $a / b$.
+\end{frame}
 
-The reals not being computable mean that we must adopt some finite approximation of the reals, and compute
-with that. The dominant choice that most people will work with is the floating point numbers. They're
-ubiquitous, and implemented in hardware (CPUs and GPUs). There's a strong body of research work from the
-numerical analysis community on how to compute with them well i.e. to minimise the error. That doesn't make
-them ideal for all purposes. There are many alternative choices which one could make e.g. fixed point, unums,
-arbitrary precision, http://math.andrej.com/2007/09/18/the-role-of-the-interval-domain-in-modern-exact-real-
-airthmetic/, that exact real number computing PhD thesis that Edward Kmett implemented in Haskell etc. I want
-to briefly touch on some of these things, with reference to Amdahl's Law ``the fast drove out the slow, even
-though the fast was slightly wrong'', the Wrath of Kahan (the inventor of floating point is good at showing
-that competing schemes suffer from the same or even worse problems, and generally publishes the results) and
-simple practicality (upon hearing of unums, one of Intel's VPs simply said ``You can't boil the ocean.'' by
-which he meant that expecting people to change every CPU and piece of software in existence to suit your new
-idea is just too large a task, and unrealistic).
+\begin{frame}{The reals are a bit trickier \ldots}
+There exist many irrational numbers e.g. $\sqrt{2}, \pi, e$. \\
+Proof:
+We proceed by contradiction. Assume that $\sqrt{2} \in \mathbb{Q}$. Then $p / q = \sqrt{2}$, for $p, q \in \mathbb{N}$. \\
+So $(p^2 / q^2) = 2$ and $p^2 = 2 q^2$. Thus $p^2$ must be even. An even number squared gives
+another even number, and an odd number squared gives an odd number. So $q^2$ must be even too, and
+hence $p^2$ is divisible by 4, which means that $p$ is divisible by 2. But by the definition of the 
+rational numbers, $gcd(p, q) = 1$. Contradiction. Hence $\sqrt{2}$ is irrational.\\
+Similiar proofs can be constructed for $\sqrt{n}$, $\sqrt{n} \ne \mathbb{N}$. \\
+Thus the rational numbers are full of holes. \\
+The real numbers form a complete, totally ordered field and can be formally defined as equivalence classes of
+Cauchy sequences. The rational numbers are dense in the reals.
+\end{frame}
 
-I'm going to talk primarily about floating point, because that's the representation I work with and the one I
-know the most about. It's also the one that most people will encounter and try first. Usually, people swear
-and give up and use something else only when they've tried the floating point numbers and had them not work.
+\begin{frame}{The rational numbers are countable}
+Proof
+Construct a list of all the rational numbers
+1/1
+1/2,
+1/3, 2/3,
+1/4, 2/4, 3/4,
+\ldots
+Then you can see that by going row by row, we can enumerate all of them. Thus we have a bijection between the
+natural numbers and the rationals.
+\end{frame}
 
-I want to give a flavour for what numerical analysis is about, why we need it and what we can learn from it.
-I'm particularly looking forward to showing that the floating point numbers do not form a monoid under
-addition, or any other binary operation. I'll then talk about what to do about that i.e. which ordering is
-the optimal ordering to minimise the error in your calculations. There will always be \emph{some} error, but
-we do our best.
+\begin{frame}{But the real numbers aren't}
+The unit interval $[0, 1]$ is uncountable. \\
+Proof:
+We proceed by contradiction. Assume that the real numbers were countable. That means we have an enumerated list of numbers in $[0, 1]$ i.e. a bijection $f: \mathbb{N} \to [0, 1]$.
+Enumerate the numbers $a_n$. Furthermore, denote the $m-th$ digit of the $n-th$ number $a_{n, m}.$
+All of these numbers are of the form $a_n = 0.a_{n, 1} a_{n, 2} \ldots a_{n, m} \ldots$.
+Then construct a number $d = 0.d_1 d_2 d_3 \ldots$ where $d_1 \ne a_{1, 1}$, $d_2 \ne a_{2, 2}$ and
+so on. Then this number differs at the $n$-th digit from the $n$-th number on  the list for all $n$, and so 
+cannot appear anywhere in your list!
+\end{frame}
 
-I'll also throw in a couple of jokes that I hope people will like. And I'll talk about myself just a little,
-and how I came to be interested in these things.
+% The reals not being computable mean that we must adopt some finite approximation of the reals, and compute
+% with that. The dominant choice that most people will work with is the floating point numbers. They're
+% ubiquitous, and implemented in hardware (CPUs and GPUs). There's a strong body of research work from the
+% numerical analysis community on how to compute with them well i.e. to minimise the error. That doesn't make
+% them ideal for all purposes. There are many alternative choices which one could make e.g. fixed point, unums,
+% arbitrary precision, http://math.andrej.com/2007/09/18/the-role-of-the-interval-domain-in-modern-exact-real-
+% airthmetic/, that exact real number computing PhD thesis that Edward Kmett implemented in Haskell etc. I want
+% to briefly touch on some of these things, with reference to Amdahl's Law ``the fast drove out the slow, even
+% though the fast was slightly wrong'', the Wrath of Kahan (the inventor of floating point is good at showing
+% that competing schemes suffer from the same or even worse problems, and generally publishes the results) and
+% simple practicality (upon hearing of unums, one of Intel's VPs simply said ``You can't boil the ocean.'' by
+% which he meant that expecting people to change every CPU and piece of software in existence to suit your new
+% idea is just too large a task, and unrealistic).
+
+% I'm going to talk primarily about floating point, because that's the representation I work with and the one I
+% know the most about. It's also the one that most people will encounter and try first. Usually, people swear
+% and give up and use something else only when they've tried the floating point numbers and had them not work.
+
+% I want to give a flavour for what numerical analysis is about, why we need it and what we can learn from it.
+% I'm particularly looking forward to showing that the floating point numbers do not form a monoid under
+% addition, or any other binary operation. I'll then talk about what to do about that i.e. which ordering is
+% the optimal ordering to minimise the error in your calculations. There will always be \emph{some} error, but
+% we do our best.
+
+% I'll also throw in a couple of jokes that I hope people will like. And I'll talk about myself just a little,
+% and how I came to be interested in these things.
+
+\begin{frame}{What to do?}
+We want to be able to compute with the real numbers or something like them on finite memory computers and 
+have our calculations complete in finite time. This forces us to approximate. That is, we must introduce
+some \emph{error}. \\
+There are many ways that one might choose to do this. Typically we use a subset of
+the rational numbers. \\
+The dominant choice is the floating point numbers, in particular IEEE 754. \\
+Other choices are fixed point, and arbitrary precision.
+\end{frame}
+
+\begin{frame}{Floating point}
+$\text{sign} \text{mantissa} \times \text{base}^\text{exponent}$ Inf NaN
+Ubiquitous, implemented in hardware you can actually buy off the shelf.
+Numerical analysis
+\end{frame}
+
+\begin{frame}{The floating point numbers do not form a field!}
+In particular, floating point addition is not associative i.e. $(a + b) + c \ne a + (b + c)$. 
+Proof: Add a large number to a small number, then add that to another small number.
+Compare to adding two small numbers on the right hand side, then adding the result to the large number.
+You'll lose less precision the second time around.
+The functional programming community is interested in algebraic structure. Unfortunately, the floating
+point numbers do not form a monoid under addition, or any other binary arithmetic operation.
+This has important consequences. If you add a large number to a small number, the large number tends to win
+and the small number loses precision in the sum.
+This upsets some people. A lot of things about floating point numbers upset some people. Occasionally, they
+upset me, but the prospect of unemployment or, even worse, having to spend the rest of my life surrounded by
+the sort of person who doesn't believe in real numbers upset me more.
+Numerical analysis showing the best way to add numbers. Sort first, then add from smallest to largest.
+\end{frame}
+
+\begin{frame}{Alternatives to floating point}
+The easy answer is more precision. Rather than single precision floating point, why not double? Or
+quadruple aka double double? Or double double double? Or, you get the idea \ldots
+The main alternative from a conceptual standpoint is arbitrary precision, where numbers don't have to be
+stored in a fixed amount of memory
 
 \end{frame}
 
-[2:34pm] mvr_: back in the 70's Bill Gosper figured out how to do arithmetic on continued fractions
-[2:35pm] mvr_: what ed and I were doing was basically variations on the theme
-[2:35pm] StyxAlso: That’s pretty interesting.
-[2:37pm] mvr_: also, listening to dibblego talk can be almost unbearable; he seems to not understand that people don't have infinite time to build a whole ecosystem in his favourite language whenever they want to do something simple
-[2:38pm] mvr_: I just hope you don't get the wrong impression about the haskell community from him
-[2:39pm] StyxAlso: Thanks 
-[2:39pm] StyxAlso: I do get that impression from some people in the Haskell community, but certainly not all of them.
-[2:39pm] StyxAlso: And having worked as a computer programmer for nearly a decade, and been pretty unbearable myself at times, I’m used to dealing with unbearable people
-[2:40pm] StyxAlso: Thanks for the validation, though. I was finding that conversation pretty difficult.
-[2:48pm] StyxAlso: My email is certifiedwaif@gmail.com. I’m snowed under today, but could we tee up another time? You sound very clued in about this area 
-[2:49pm] mvr_: I'm actually just a masters student with almost no industry experience
-[2:49pm] mvr_: but my email is mitchell.v.riley@gmail.com if you'd like to know a bit about the CF stuff
-[2:51pm] StyxAlso: ta
+\begin{frame}{Alternatives}
+You can't boil the ocean. Floating point arithmetic is ubiquitous, like QWERTY, or imperative programming
+languages.
+The Wrath of Kahan: alternatives often end up suffering from the same shortcomings. One of the inventors of
+floating point, William Kahan aka the Father of floating point arithmetic, enjoys pointing this out. He often gets a publication out of it.
+Do you really want to re-do all of that numerical analysis again? Better the devil you know.
+A good answer today is worth more than a great answer after the universe collapses back into a monobloc. Or
+as I like to put it, as $t \to \infty$, you are dead.
+The fast drove out the slow, even though the fast was slightly wrong.
+Just shut up and do some real work!
+\end{frame}
 
-[2:10pm] mvr_: StyxAlso: you may be interested in http://herbie.uwplse.org/ , and the associated GHC plugin
-[2:10pm] HEGX64 joined the chat room.
-[2:11pm] StyxAlso: mvr_: That looks like really nice work.
-[2:11pm] StyxAlso: The blog posts look ideal for improving my presentation. Thank you very much, mvr_.
-[2:11pm] StyxAlso: The person writing that web page seems pro-floating point, which is refreshing.
-[2:12pm] StyxAlso: People often have their own favorite alternative representation e.g. unums, arbitrary precision, that thing that Edward Kmett implemented
-[2:12pm] mankyKitty: haha, I'm not anti-floating point, I'm just floating point averse because I'm an idiot and would rather avoid the pain
-[2:12pm] StyxAlso: They’re usually quick to discuss the advantages, but less willing to discuss the disadvantages
-[2:12pm] mankyKitty:
-[2:13pm] StyxAlso: mankyKitty: Haha, I can’t avoid that pain. I’d have to leave the field 
-[2:14pm] mankyKitty: Then I will defer to your expertise on the matter and look forward to using your library so i can gloat about getting it right without trying. *ahem* 
-[2:14pm] beckyconning_ left the chat room. (Quit: Connection closed for inactivity)
-[2:16pm] mvr_: argh, I swear I beat ed by a week or two on that stuff
-[2:22pm] carter_cloud: StyxAlso: Haskell has a sweet impl of double double precision numbers.  A friend and I are working on getting some of the trig / exp / log funs implemented on it.
-[2:23pm] StyxAlso: carter_cloud: That sounds good. I’d be interested to know about the trade-offs, from a numerical analysis point of view.
-[2:23pm] StyxAlso: mvr_: Maybe you could tell me about it some time? I’d like to include it in my talk.
-[2:24pm] carter_cloud: It has more bits of precision within the representable dynamic range.
-[2:25pm] carter_cloud: Ie every number you rep as the sum of two doubles is exact
-[2:25pm] carter_cloud: Which is a lotta numbers.
-[2:25pm] carter_cloud: So for things that are neither too big not too small you get effectively twice as many bits of precision
-[2:27pm] StyxAlso: That sounds great. Double precision tops out at ~2.2*10^308.
-[2:27pm] StyxAlso: I hit that upper limit all the time working with some functions.
-[2:28pm] carter_cloud: Same dynamic range.  Sorry
-[2:29pm] carter_cloud: You want mpfr if you want both 
-[2:29pm] carter_cloud: Or the numbers package.  Which I now allegedly maintain.
-[2:31pm] StyxAlso:
-[2:31pm] StyxAlso: carter_cloud: Are you in Australia? Or contactable?
-[2:31pm] StyxAlso: as in, via voice.
-[2:31pm] carter_cloud: I'm in NYC.
-[2:32pm] carter_cloud: And yes I can use vid chat stuff.
-[2:32pm] StyxAlso: Great! It’d be interesting to chat to someone about this stuff.
-[2:32pm] carter_cloud: But I'm on the toilet atm. So wait a bit
-[2:32pm] StyxAlso: And you’re still on IRC. How’s that for parallelism?
-[2:34pm] carter_cloud: Async obv
-[2:36pm] carter_cloud: I can chat in 15 I guess
-[2:40pm] StyxAlso: I’m at Uni atm. Would another day be okay for you?
-[2:49pm] carter_cloud: Sure
-[2:50pm] carter_cloud: Or lurk on numerical Haskell
-[2:51pm] StyxAlso: #numerical-haskell on FreeNode?
-[2:52pm] carter_cloud: Mineeee
-[2:52pm] carter_cloud: there can be only one
-[2:53pm] edwardk: StyxAlso: i concede priority to mvr_ with regards to continued fractions. -- afterwards, i had a few novel ideas about weird operadic encodings of linear fractional transformations, but again mvr_ beat me to turning them into actual code.
-[2:54pm] mvr_: edwardk: we never did get that working properly
-[2:54pm] StyxAlso: edwardk: Any advantages/disadvantages of that representation of the reals versus floating point?
-[2:55pm] edwardk: StyxAlso: arbitrary precision that you pay for as you go
-[2:55pm] edwardk: rather than have to start all over again when you find you didn't have enough
-[2:55pm] StyxAlso: So the same caveats as for, say, arbitrary precision with a decimal representation?
-[2:55pm] edwardk: while demanding the optimal amount from each input
-[2:55pm] edwardk: no
-[2:55pm] StyxAlso: Okay. Could you explain the difference to me?
-[2:56pm] edwardk: you might have a representation that says give me n decimal places of precision
-[2:56pm] edwardk: and computes it
-[2:56pm] StyxAlso: Bear in mind, I don’t know continued fractions very well.
-[2:56pm] edwardk: but to do that, you'll usually have to ask for _more_ than n decimal places of precision from your arguments
-[2:56pm] edwardk: so you have to take super-conservative bounds
-[2:57pm] carter_cloud: Where's this code by mvr?
-[2:58pm] mvr_: my attempt at making it runnable is at https://github.com/mvr/fractions
-[2:59pm] erikd: i did a continued fractions thing in ocaml about 10 years ago.
-[2:59pm] StyxAlso: edwardk: So you have to do more computation for the same precision?
-[3:00pm] edwardk: erikd: the code we have isn't about fractions but rather nested linear fractional transformations
-[3:00pm] mvr_: carter_cloud: it was a good experiment, but not pretty so I'd be fine with throwing most of my changes away
-[3:00pm] erikd: ah ok
-[3:00pm] edwardk: StyxAlso: neither side really has a clear advantage on that front, the constants may be worse
-[3:00pm] StyxAlso: Okay. But it’s another option.
-[3:00pm] edwardk: yeah
-[3:00pm] edwardk: its an experiment
-[3:01pm] StyxAlso: And the numerical analysis has been done? i.e. people know how to get the error bounds for various things they may want to compute.
-[3:01pm] mvr_: oh, I meant the stuff I added wasn't pretty
-[3:01pm] edwardk: and there are classes of equations where this form may be a big win over everything i know
-[3:02pm] StyxAlso: Okay.
-[3:02pm] jedws left the chat room. (Read error: Connection reset by peer)
-[3:02pm] edwardk: the numerical analysis of this stuff is based on the same analysis that gave the first serious world record computation of pi to ~17 million digits or so
-[3:02pm] edwardk: so yeah it can handle precision
-[3:02pm] jedws joined the chat room.
-[3:02pm] edwardk: and it can back up the precision of the answer rigorously
-[3:03pm] edwardk: my trick is mostly about trying to avoid having the performance of that degrade so much as the computation gets bigger
-[3:05pm] StyxAlso: Right. Performance is key. The fast tends to drive out the slow, even if the fast is slightly wrong.
+% [2:34pm] mvr_: back in the 70's Bill Gosper figured out how to do arithmetic on continued fractions
+% [2:35pm] mvr_: what ed and I were doing was basically variations on the theme
+% [2:35pm] StyxAlso: That’s pretty interesting.
+% [2:37pm] mvr_: also, listening to dibblego talk can be almost unbearable; he seems to not understand that people don't have infinite time to build a whole ecosystem in his favourite language whenever they want to do something simple
+% [2:38pm] mvr_: I just hope you don't get the wrong impression about the haskell community from him
+% [2:39pm] StyxAlso: Thanks 
+% [2:39pm] StyxAlso: I do get that impression from some people in the Haskell community, but certainly not all of them.
+% [2:39pm] StyxAlso: And having worked as a computer programmer for nearly a decade, and been pretty unbearable myself at times, I’m used to dealing with unbearable people
+% [2:40pm] StyxAlso: Thanks for the validation, though. I was finding that conversation pretty difficult.
+% [2:48pm] StyxAlso: My email is certifiedwaif@gmail.com. I’m snowed under today, but could we tee up another time? You sound very clued in about this area 
+% [2:49pm] mvr_: I'm actually just a masters student with almost no industry experience
+% [2:49pm] mvr_: but my email is mitchell.v.riley@gmail.com if you'd like to know a bit about the CF stuff
+% [2:51pm] StyxAlso: ta
+
+% [2:10pm] mvr_: StyxAlso: you may be interested in http://herbie.uwplse.org/ , and the associated GHC plugin
+% [2:10pm] HEGX64 joined the chat room.
+% [2:11pm] StyxAlso: mvr_: That looks like really nice work.
+% [2:11pm] StyxAlso: The blog posts look ideal for improving my presentation. Thank you very much, mvr_.
+% [2:11pm] StyxAlso: The person writing that web page seems pro-floating point, which is refreshing.
+% [2:12pm] StyxAlso: People often have their own favorite alternative representation e.g. unums, arbitrary precision, that thing that Edward Kmett implemented
+% [2:12pm] mankyKitty: haha, I'm not anti-floating point, I'm just floating point averse because I'm an idiot and would rather avoid the pain
+% [2:12pm] StyxAlso: They’re usually quick to discuss the advantages, but less willing to discuss the disadvantages
+% [2:12pm] mankyKitty:
+% [2:13pm] StyxAlso: mankyKitty: Haha, I can’t avoid that pain. I’d have to leave the field 
+% [2:14pm] mankyKitty: Then I will defer to your expertise on the matter and look forward to using your library so i can gloat about getting it right without trying. *ahem* 
+% [2:14pm] beckyconning_ left the chat room. (Quit: Connection closed for inactivity)
+% [2:16pm] mvr_: argh, I swear I beat ed by a week or two on that stuff
+% [2:22pm] carter_cloud: StyxAlso: Haskell has a sweet impl of double double precision numbers.  A friend and I are working on getting some of the trig / exp / log funs implemented on it.
+% [2:23pm] StyxAlso: carter_cloud: That sounds good. I’d be interested to know about the trade-offs, from a numerical analysis point of view.
+% [2:23pm] StyxAlso: mvr_: Maybe you could tell me about it some time? I’d like to include it in my talk.
+% [2:24pm] carter_cloud: It has more bits of precision within the representable dynamic range.
+% [2:25pm] carter_cloud: Ie every number you rep as the sum of two doubles is exact
+% [2:25pm] carter_cloud: Which is a lotta numbers.
+% [2:25pm] carter_cloud: So for things that are neither too big not too small you get effectively twice as many bits of precision
+% [2:27pm] StyxAlso: That sounds great. Double precision tops out at ~2.2*10^308.
+% [2:27pm] StyxAlso: I hit that upper limit all the time working with some functions.
+% [2:28pm] carter_cloud: Same dynamic range.  Sorry
+% [2:29pm] carter_cloud: You want mpfr if you want both 
+% [2:29pm] carter_cloud: Or the numbers package.  Which I now allegedly maintain.
+% [2:31pm] StyxAlso:
+% [2:31pm] StyxAlso: carter_cloud: Are you in Australia? Or contactable?
+% [2:31pm] StyxAlso: as in, via voice.
+% [2:31pm] carter_cloud: I'm in NYC.
+% [2:32pm] carter_cloud: And yes I can use vid chat stuff.
+% [2:32pm] StyxAlso: Great! It’d be interesting to chat to someone about this stuff.
+% [2:32pm] carter_cloud: But I'm on the toilet atm. So wait a bit
+% [2:32pm] StyxAlso: And you’re still on IRC. How’s that for parallelism?
+% [2:34pm] carter_cloud: Async obv
+% [2:36pm] carter_cloud: I can chat in 15 I guess
+% [2:40pm] StyxAlso: I’m at Uni atm. Would another day be okay for you?
+% [2:49pm] carter_cloud: Sure
+% [2:50pm] carter_cloud: Or lurk on numerical Haskell
+% [2:51pm] StyxAlso: #numerical-haskell on FreeNode?
+% [2:52pm] carter_cloud: Mineeee
+% [2:52pm] carter_cloud: there can be only one
+% [2:53pm] edwardk: StyxAlso: i concede priority to mvr_ with regards to continued fractions. -- afterwards, i had a few novel ideas about weird operadic encodings of linear fractional transformations, but again mvr_ beat me to turning them into actual code.
+% [2:54pm] mvr_: edwardk: we never did get that working properly
+% [2:54pm] StyxAlso: edwardk: Any advantages/disadvantages of that representation of the reals versus floating point?
+% [2:55pm] edwardk: StyxAlso: arbitrary precision that you pay for as you go
+% [2:55pm] edwardk: rather than have to start all over again when you find you didn't have enough
+% [2:55pm] StyxAlso: So the same caveats as for, say, arbitrary precision with a decimal representation?
+% [2:55pm] edwardk: while demanding the optimal amount from each input
+% [2:55pm] edwardk: no
+% [2:55pm] StyxAlso: Okay. Could you explain the difference to me?
+% [2:56pm] edwardk: you might have a representation that says give me n decimal places of precision
+% [2:56pm] edwardk: and computes it
+% [2:56pm] StyxAlso: Bear in mind, I don’t know continued fractions very well.
+% [2:56pm] edwardk: but to do that, you'll usually have to ask for _more_ than n decimal places of precision from your arguments
+% [2:56pm] edwardk: so you have to take super-conservative bounds
+% [2:57pm] carter_cloud: Where's this code by mvr?
+% [2:58pm] mvr_: my attempt at making it runnable is at https://github.com/mvr/fractions
+% [2:59pm] erikd: i did a continued fractions thing in ocaml about 10 years ago.
+% [2:59pm] StyxAlso: edwardk: So you have to do more computation for the same precision?
+% [3:00pm] edwardk: erikd: the code we have isn't about fractions but rather nested linear fractional transformations
+% [3:00pm] mvr_: carter_cloud: it was a good experiment, but not pretty so I'd be fine with throwing most of my changes away
+% [3:00pm] erikd: ah ok
+% [3:00pm] edwardk: StyxAlso: neither side really has a clear advantage on that front, the constants may be worse
+% [3:00pm] StyxAlso: Okay. But it’s another option.
+% [3:00pm] edwardk: yeah
+% [3:00pm] edwardk: its an experiment
+% [3:01pm] StyxAlso: And the numerical analysis has been done? i.e. people know how to get the error bounds for various things they may want to compute.
+% [3:01pm] mvr_: oh, I meant the stuff I added wasn't pretty
+% [3:01pm] edwardk: and there are classes of equations where this form may be a big win over everything i know
+% [3:02pm] StyxAlso: Okay.
+% [3:02pm] jedws left the chat room. (Read error: Connection reset by peer)
+% [3:02pm] edwardk: the numerical analysis of this stuff is based on the same analysis that gave the first serious world record computation of pi to ~17 million digits or so
+% [3:02pm] edwardk: so yeah it can handle precision
+% [3:02pm] jedws joined the chat room.
+% [3:02pm] edwardk: and it can back up the precision of the answer rigorously
+% [3:03pm] edwardk: my trick is mostly about trying to avoid having the performance of that degrade so much as the computation gets bigger
+% [3:05pm] StyxAlso: Right. Performance is key. The fast tends to drive out the slow, even if the fast is slightly wrong.
 \end{document}
