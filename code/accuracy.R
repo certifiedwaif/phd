@@ -431,7 +431,7 @@ test_accuracies_slope <- function(save=FALSE)
 
   now <- Sys.time()
   var3_result <- zipvb(mult, method="gva2", verbose=TRUE)
-  cat("GVA2", Sys.time() - now, "\n")
+  cat("GVA NP", Sys.time() - now, "\n")
   var3_accuracy <- calculate_accuracies("slope", mult, mcmc_samples, var3_result, "gva2", print_flag=FALSE, plot_flag=TRUE)
   print(var3_accuracy$vbeta_accuracy)
   print(mean(var3_accuracy$vu_accuracy))
