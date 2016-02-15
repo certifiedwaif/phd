@@ -174,13 +174,14 @@ by the symmetry of beta functions and the definitions of $a$ and $b$.
 Assume an approximation of the form
 
 \begin{equation*}
-q(\vtheta) = q(\vbeta) q(\sigma^2) q(g)
+q(\vtheta) = q(\vbeta) q(\vgamma) q(\sigma^2) q(g)
 \end{equation*}
 where
 \begin{equation*}
 \begin{array}{ll}
 q^*(\vbeta) &= N(\vmu_{q(\vbeta), \mSigma_{q(\vbeta)}}), \\
-q^*(\sigma^2) &= IG(\alpha_{q(\sigma^2)}, \beta_{q(\sigma^2)}) \text{ and } \\
+q^*(\vgamma) &= \text{Binomial}(n, p_{q(\vgamma)}), \\
+q^*(\sigma^2) &= \text{IG}(\alpha_{q(\sigma^2)}, \beta_{q(\sigma^2)}) \text{ and } \\
 q^*(g) &= \text{Beta Prime}(\alpha_{q(g)}, \beta_{q(g)})). \\
 \end{array}
 \end{equation*}
@@ -191,7 +192,7 @@ q_i^*(\vtheta_i) \propto \exp{ \bE_{-\vtheta_i} \log{p(\vy, \vtheta)} }, 1 \leq 
 
 \begin{equation*}
 \begin{array}{ll}
-p(\vy, \vtheta) &= p(\vy | \vbeta, \sigma^2) p(\vbeta | \sigma^2, g) p(\sigma^2) p(g) \\
+p(\vy, \vtheta) &= p(\vy | \vbeta, \sigma^2) p(\vbeta | \sigma^2, g) p(\vgamma) p(\sigma^2) p(g) \\
 \log{p(\vy, \vtheta)} &= \log{p(\vy | \vbeta, \sigma^2)} + \log{p(\vbeta | \sigma^2, g)} + \log{p(\sigma^2)} + \log{p(g)} \\
 &= -\frac{n}{2} \log{2 \pi} + -\half \log |\sigma^2 I_n| - \half (\vy - \mX \vbeta)^\top \sigma^{-2} \mI_n (\vy - \mX \vbeta) \\
 & \quad -\frac{p}{2} \log{2 \pi} - \half \log |g \sigma^2 (\mX^\top \mX)^{-1}| -
