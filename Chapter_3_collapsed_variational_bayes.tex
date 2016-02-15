@@ -171,6 +171,20 @@ by the symmetry of beta functions and the definitions of $a$ and $b$.
 
 \section{Variational Bayes approximation}
 
+Consider the model $\vy | \vbeta, \sigma^2 \sim N_n(\mX \text{diag}(\vgamma) \vbeta, \sigma^2 \mI)$ with
+priors
+\begin{equation*}
+\begin{array}{ll}
+\vbeta | \sigma^2, g &\sim N_p(\vzero, g \sigma^2(\mX^\top \text{diag}(\vgamma) \mX)^{-1}), \\
+\vgamma_i &\sim \text{Bernoulli}(\rho), 1 \leq i \leq n, 0 \leq \rho \leq 1, \\
+p(\sigma^2) &= (\sigma^2)^{-1} I(\sigma^2 > 0) \text{ and }\\
+p(g) &= \frac{g^b (1 + g)^{-a - b - 2}}{\text{Beta}(a + 1, b + 1)} I(g > 0).
+\end{array}
+\end{equation*}
+
+Assume $\vx_j^\top\vone = \vzero$, and $\vx_j^\top \vx_j / n = 1$, $1 \leq j \leq p$.
+Furthermore, assume $\vy^\top \vone = \vzero, \vy^\top \vy / n  = 1, n > p, (\mX^\top \mX)^{-1}$ exists.
+
 Assume an approximation of the form
 
 \begin{equation*}
@@ -179,8 +193,8 @@ q(\vtheta) = q(\vbeta) q(\vgamma) q(\sigma^2) q(g)
 where
 \begin{equation*}
 \begin{array}{ll}
-q^*(\vbeta) &= N(\vmu_{q(\vbeta), \mSigma_{q(\vbeta)}}), \\
-q^*(\vgamma) &= \text{Binomial}(n, p_{q(\vgamma)}), \\
+q^*(\vbeta) &= \text{N}(\vmu_{q(\vbeta), \mSigma_{q(\vbeta)}}), \\
+q^*(\vgamma) &= \text{Bernoulli}(p_{q(\vgamma)}), \\
 q^*(\sigma^2) &= \text{IG}(\alpha_{q(\sigma^2)}, \beta_{q(\sigma^2)}) \text{ and } \\
 q^*(g) &= \text{Beta Prime}(\alpha_{q(g)}, \beta_{q(g)})). \\
 \end{array}
@@ -192,18 +206,19 @@ q_i^*(\vtheta_i) \propto \exp{ \bE_{-\vtheta_i} \log{p(\vy, \vtheta)} }, 1 \leq 
 
 \begin{equation*}
 \begin{array}{ll}
-p(\vy, \vtheta) &= p(\vy | \vbeta, \sigma^2) p(\vbeta | \sigma^2, g) p(\vgamma) p(\sigma^2) p(g) \\
-\log{p(\vy, \vtheta)} &= \log{p(\vy | \vbeta, \sigma^2)} + \log{p(\vbeta | \sigma^2, g)} + \log{p(\sigma^2)} + \log{p(g)} \\
-&= -\frac{n}{2} \log{2 \pi} + -\half \log |\sigma^2 I_n| - \half (\vy - \mX \vbeta)^\top \sigma^{-2} \mI_n (\vy - \mX \vbeta) \\
-& \quad -\frac{p}{2} \log{2 \pi} - \half \log |g \sigma^2 (\mX^\top \mX)^{-1}| -
+p(\vy, \vtheta) &= \quad p(\vy | \vbeta, \vgamma, \sigma^2) p(\vbeta | \vgamma, \sigma^2, g) p(\sigma^2) p(g) \\
+\log{p(\vy, \vtheta)} &= \quad \log{p(\vy | \vbeta, \vgamma, \sigma^2)} + \log{p(\vbeta | \vgamma, \sigma^2, g)} + \log{p(\sigma^2)} + \log{p(g)} \\
+&= -\frac{n}{2} \log{2 \pi} -\half \log |\sigma^2 \mI_n| - \half (\vy - \mX \text{diag}(\vgamma) \vbeta)^\top \sigma^{-2} \mI_n (\vy - \mX \text{diag}(\vgamma) \vbeta) \\
+& \quad -\frac{p}{2} \log{2 \pi} - \half \log |g \sigma^2 (\mX^\top \text{diag}(\vgamma) \mX)^{-1}| -
 	\half \vbeta^\top (g \sigma^2)^{-1} (\mX^\top \mX) \vbeta \\
+& \quad + \vone^\top \vgamma \log(\rho) + \vone^\top (\vone - \vgamma) \log(1 - \rho)\\
 & \quad - \log{(\sigma^2)} + \log \bI (\sigma^2 > 0) \\
-& = -\frac{n + p}{2} \log(2 \pi) - \half \log{\sigma^{2n}} |I_n| 
-		-\half \log{g^n \sigma^{2n}} |(\mX^\top \mX)^{-1}| \\
-&\quad		-\half (y - X \vbeta)^\top \sigma^{-2} I_n (y - X \vbeta)\\
-&\quad		-\half \vbeta^\top (g \sigma^2)^{-1} (X^\top X) \vbeta [= -\half (g \sigma^2)^{-1} (X \vbeta)^\top (X \vbeta)]\\
-&\quad		- \log(\sigma^2) + \cancel{\log \bI(\sigma^2 > 0)} \\
-&\qquad b \log g + (-a - b - 2) \log(1 + g) - \log \text{Beta}(a + 1,  b + 1) + \log \bI(g > 0)
+& = -\frac{n + p}{2} \log(2 \pi) - \half \log{\sigma^{2n}} \cancel{|\mI_n|} 
+		+\half \log{g^n \sigma^{2n}} |(\mX^\top \text{diag}(\vgamma) \mX)| \\
+&\quad		-\half (y - \mX \text{diag}(\vgamma) \vbeta)^\top \sigma^{-2} \mI_n (y - \mX \text{diag}(\vgamma) \vbeta)\\
+&\quad		-\half \vbeta^\top (g \sigma^2)^{-1} (\mX^\top \text{diag}(\vgamma)^{-1} \mX) \vbeta [= -\half (g \sigma^2)^{-1} (\mX \vbeta)^\top \text{diag}(\vgamma)^{-1} (X \vbeta)]\\
+&\quad - \log(\sigma^2) + \cancel{\log \bI(\sigma^2 > 0)} \\
+&\quad + b \log g + (-a - b - 2) \log(1 + g) - \log \text{Beta}(a + 1,  b + 1) + \log \bI(g > 0)
 \end{array}
 \end{equation*}
 
