@@ -1,0 +1,4240 @@
+\documentclass[11pt]{article}
+\usepackage[authoryear]{natbib}
+\input{Definitions}
+
+\addtolength{\oddsidemargin}{-.75in}%
+\addtolength{\evensidemargin}{-.75in}%
+\addtolength{\textwidth}{1.5in}%
+\addtolength{\textheight}{1.3in}%
+\addtolength{\topmargin}{-.8in}%
+\addtolength{\marginparpush}{-.75in}%
+%\setlength\parindent{0pt}
+\setlength{\bibsep}{0pt plus 0.3ex}
+
+\usepackage{setspace}
+
+\doublespacing
+
+
+\usepackage{graphicx,verbatim,subfigure,amsfonts,color}
+\usepackage{algorithm}
+\newtheorem{Definition}{Definition}
+\newtheorem{Theorem}{Theorem}
+\newtheorem{Proposition}{Proposition}
+\newtheorem{Lemma}{Lemma}
+\newtheorem{Result}{Result}
+\newtheorem{Main Result}{Main Result}
+
+%\include{GrandMacros}
+%\include{BibMacros}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\def\approxdist{\stackrel{{\tiny \mbox{approx.}}}{\sim}}
+\def\smhalf{\textstyle{\frac{1}{2}}}
+\def\vxnew{\vx_{\mbox{{\tiny new}}}}
+\def\bib{\vskip12pt\par\noindent\hangindent=1 true cm\hangafter=1}
+\def\jump{\vskip3mm\noindent}
+\def\etal{{\em et al.}}
+\def\etahat{{\widehat\eta}}
+\def\thick#1{\hbox{\rlap{$#1$}\kern0.25pt\rlap{$#1$}\kern0.25pt$#1$}}
+\def\smbbeta{{\thick{\scriptstyle{\beta}}}}
+\def\smbtheta{{\thick{\scriptstyle{\theta}}}}
+\def\smbu{{\thick{\scriptstyle{\rm u}}}}
+\def\smbzero{{\thick{\scriptstyle{0}}}}
+\def\boxit#1{\begin{center}\fbox{#1}\end{center}}
+\def\lboxit#1{\vbox{\hrule\hbox{\vrule\kern6pt
+      \vbox{\kern6pt#1\kern6pt}\kern6pt\vrule}\hrule}}
+\def\thickboxit#1{\vbox{{\hrule height 1mm}\hbox{{\vrule width 1mm}\kern6pt
+          \vbox{\kern6pt#1\kern6pt}\kern6pt{\vrule width 1mm}}
+               {\hrule height 1mm}}}
+
+
+\def\sI{{\mathcal I}}                            % Current Index set
+\def\sJ{{\mathcal J}}                            % Select Index set
+\def\sL{{\mathcal L}}                            % Likelihood
+\def\sl{{\ell}}                                  % Log-likelihood
+\def\sN{{\mathcal N}}
+\def\sS{{\mathcal S}}
+\def\sP{{\mathcal P}}
+\def\sQ{{\mathcal Q}}
+\def\sB{{\mathcal B}}
+\def\sD{{\mathcal D}}
+\def\sT{{\mathcal T}}
+\def\sE{{\mathcal E}}
+\def\sF{{\mathcal F}}
+\def\sC{{\mathcal C}}
+\def\sO{{\mathcal O}}
+\def\sH{{\mathcal H}}
+\def\sR{{\mathcal R}}
+\def\sJ{{\mathcal J}}
+\def\sCP{{\mathcal CP}}
+\def\sX{{\mathcal X}}
+\def\sA{{\mathcal A}}
+\def\sZ{{\mathcal Z}}
+\def\sM{{\mathcal M}}
+\def\sK{{\mathcal K}}
+\def\sG{{\mathcal G}}
+\def\sY{{\mathcal Y}}
+\def\sU{{\mathcal U}}
+
+
+\def\sIG{{\mathcal IG}}
+
+
+\def\cD{{\sf D}}
+\def\cH{{\sf H}}
+\def\cI{{\sf I}}
+
+% Vectors
+\def\vectorfontone{\bf}
+\def\vectorfonttwo{\boldsymbol}
+\def\va{{\vectorfontone a}}                      %
+\def\vb{{\vectorfontone b}}                      %
+\def\vc{{\vectorfontone c}}                      %
+\def\vd{{\vectorfontone d}}                      %
+\def\ve{{\vectorfontone e}}                      %
+\def\vf{{\vectorfontone f}}                      %
+\def\vg{{\vectorfontone g}}                      %
+\def\vh{{\vectorfontone h}}                      %
+\def\vi{{\vectorfontone i}}                      %
+\def\vj{{\vectorfontone j}}                      %
+\def\vk{{\vectorfontone k}}                      %
+\def\vl{{\vectorfontone l}}                      %
+\def\vm{{\vectorfontone m}}                      % number of basis functions
+\def\vn{{\vectorfontone n}}                      % number of training samples
+\def\vo{{\vectorfontone o}}                      %
+\def\vp{{\vectorfontone p}}                      % number of unpenalized coefficients
+\def\vq{{\vectorfontone q}}                      % number of penalized coefficients
+\def\vr{{\vectorfontone r}}                      %
+\def\vs{{\vectorfontone s}}                      %
+\def\vt{{\vectorfontone t}}                      %
+\def\vu{{\vectorfontone u}}                      % Penalized coefficients
+\def\vv{{\vectorfontone v}}                      %
+\def\vw{{\vectorfontone w}}                      %
+\def\vx{{\vectorfontone x}}                      % Covariates/Predictors
+\def\vy{{\vectorfontone y}}                      % Targets/Labels
+\def\vz{{\vectorfontone z}}                      %
+
+\def\vone{{\vectorfontone 1}}
+\def\vzero{{\vectorfontone 0}}
+
+\def\valpha{{\vectorfonttwo \alpha}}             %
+\def\vbeta{{\vectorfonttwo \beta}}               % Unpenalized coefficients
+\def\vgamma{{\vectorfonttwo \gamma}}             %
+\def\vdelta{{\vectorfonttwo \delta}}             %
+\def\vepsilon{{\vectorfonttwo \epsilon}}         %
+\def\vvarepsilon{{\vectorfonttwo \varepsilon}}   % Vector of errors
+\def\vzeta{{\vectorfonttwo \zeta}}               %
+\def\veta{{\vectorfonttwo \eta}}                 % Vector of natural parameters
+\def\vtheta{{\vectorfonttwo \theta}}             % Vector of combined coefficients
+\def\vvartheta{{\vectorfonttwo \vartheta}}       %
+\def\viota{{\vectorfonttwo \iota}}               %
+\def\vkappa{{\vectorfonttwo \kappa}}             %
+\def\vlambda{{\vectorfonttwo \lambda}}           % Vector of smoothing parameters
+\def\vmu{{\vectorfonttwo \mu}}                   % Vector of means
+\def\vnu{{\vectorfonttwo \nu}}                   %
+\def\vxi{{\vectorfonttwo \xi}}                   %
+\def\vpi{{\vectorfonttwo \pi}}                   %
+\def\vvarpi{{\vectorfonttwo \varpi}}             %
+\def\vrho{{\vectorfonttwo \rho}}                 %
+\def\vvarrho{{\vectorfonttwo \varrho}}           %
+\def\vsigma{{\vectorfonttwo \sigma}}             %
+\def\vvarsigma{{\vectorfonttwo \varsigma}}       %
+\def\vtau{{\vectorfonttwo \tau}}                 %
+\def\vupsilon{{\vectorfonttwo \upsilon}}         %
+\def\vphi{{\vectorfonttwo \phi}}                 %
+\def\vvarphi{{\vectorfonttwo \varphi}}           %
+\def\vchi{{\vectorfonttwo \chi}}                 %
+\def\vpsi{{\vectorfonttwo \psi}}                 %
+\def\vomega{{\vectorfonttwo \omega}}             %
+
+
+% Matrices
+%\def\matrixfontone{\sf}
+%\def\matrixfonttwo{\sf}
+\def\matrixfontone{\bf}
+\def\matrixfonttwo{\boldsymbol}
+\def\mA{{\matrixfontone A}}                      %
+\def\mB{{\matrixfontone B}}                      %
+\def\mC{{\matrixfontone C}}                      % Combined Design Matrix
+\def\mD{{\matrixfontone D}}                      % Penalty Matrix for \vu_J
+\def\mE{{\matrixfontone E}}                      %
+\def\mF{{\matrixfontone F}}                      %
+\def\mG{{\matrixfontone G}}                      % Penalty Matrix for \vu
+\def\mH{{\matrixfontone H}}                      %
+\def\mI{{\matrixfontone I}}                      % Identity Matrix
+\def\mJ{{\matrixfontone J}}                      %
+\def\mK{{\matrixfontone K}}                      %
+\def\mL{{\matrixfontone L}}                      % Lower bound
+\def\mM{{\matrixfontone M}}                      %
+\def\mN{{\matrixfontone N}}                      %
+\def\mO{{\matrixfontone O}}                      %
+\def\mo{{\matrixfontone o}}                      %
+\def\mP{{\matrixfontone P}}                      %
+\def\mQ{{\matrixfontone Q}}                      %
+\def\mR{{\matrixfontone R}}                      %
+\def\mS{{\matrixfontone S}}                      %
+\def\mT{{\matrixfontone T}}                      %
+\def\mU{{\matrixfontone U}}                      % Upper bound
+\def\mV{{\matrixfontone V}}                      %
+\def\mW{{\matrixfontone W}}                      % Variance Matrix i.e. diag(b'')
+\def\mX{{\matrixfontone X}}                      % Unpenalized Design Matrix/Nullspace Matrix
+\def\mY{{\matrixfontone Y}}                      %
+\def\mZ{{\matrixfontone Z}}                      % Penalized Design Matrix/Kernel Space Matrix
+
+\def\mGamma{{\matrixfonttwo \Gamma}}             %
+\def\mDelta{{\matrixfonttwo \Delta}}             %
+\def\mTheta{{\matrixfonttwo \Theta}}             %
+\def\mLambda{{\matrixfonttwo \Lambda}}           % Penalty Matrix for \vnu
+\def\mXi{{\matrixfonttwo \Xi}}                   %
+\def\mPi{{\matrixfonttwo \Pi}}                   %
+\def\mSigma{{\matrixfonttwo \Sigma}}             %
+\def\mUpsilon{{\matrixfonttwo \Upsilon}}         %
+\def\mPhi{{\matrixfonttwo \Phi}}                 %
+\def\mOmega{{\matrixfonttwo \Omega}}             %
+\def\mPsi{{\matrixfonttwo \Psi}}                 %
+%
+\def\simind{\stackrel{{\tiny \mbox{ind.}}}{\sim}}
+\newcommand{\bdsl}{\boldsymbol}
+\def\myand{{\& }}
+
+\def\vmuq{{\vmu}}
+\def\muqi{{\mu_i}}
+\def\mSigmaq{{\mSigma}}
+\def\Sigmaq{{\Sigma}}
+\def\Aq{{A+n/2}}
+\def\Bq{{s}}
+\def\wqi{{w_i}}
+\def\vwq{{\vw}}
+
+\def\mone{{\matrixfontone 1}}
+\def\mzero{{\matrixfontone 0}}
+
+% Fields or If $\sigma_\beta^2$ is large enoughStatistical
+\def\bE{{\mathbb E}}                             % Expectation
+\def\bP{{\mathbb P}}                             % Probability
+\def\bR{{\mathbb R}}                             % Reals
+\def\bI{{\mathbb I}}                             % Reals
+\def\bV{{\mathbb V}}                             % Reals
+
+\def\vX{{\vectorfontone X}}                      % Targets/Labels
+\def\vY{{\vectorfontone Y}}                      % Targets/Labels
+\def\vZ{{\vectorfontone Z}}                      %
+
+% Other
+\def\etal{{\em et al.}}
+\def\ds{\displaystyle}
+\def\d{\partial}
+\def\dd{\mbox{d}}
+\def\diag{\text{diag}}
+\def\span{\text{span}}
+\def\blockdiag{\text{blockdiag}}
+\def\tr{\text{tr}}
+\def\RSS{\text{RSS}}
+\def\df{\text{df}}
+\def\GCV{\text{GCV}}
+\def\AIC{\text{AIC}}
+\def\MLC{\text{MLC}}
+\def\mAIC{\text{mAIC}}
+\def\cAIC{\text{cAIC}}
+\def\rank{\text{rank}}
+\def\MASE{\text{MASE}}
+\def\SMSE{\text{SASE}}
+\def\sign{\text{sign}}
+\def\card{\text{card}}
+\def\notexp{\text{notexp}}
+\def\ASE{\text{ASE}}
+\def\ML{\text{ML}}
+\def\nullity{\text{nullity}}
+
+\def\logexpit{\text{logexpit}}
+\def\logit{\mbox{logit}}
+\def\dg{\mbox{dg}}
+
+\def\Bern{\mbox{Bernoulli}}
+\def\sBernoulli{\mbox{Bernoulli}}
+\def\sGamma{\mbox{Gamma}}
+\def\sInvN{\mbox{Inv}\sN}
+\def\sNegBin{\sN\sB}
+
+\def\dGamma{\mbox{Gamma}}
+\def\dInvGam{\mbox{Inv}\Gamma}
+
+\def\Cov{\mbox{Cov}}
+\def\Var{\mbox{Var}}
+\def\Mgf{\mbox{Mgf}}
+
+
+\def\argmax{\operatornamewithlimits{\text{argmax}}}
+\def\argmin{\operatornamewithlimits{\text{argmin}}}
+\def\argsup{\operatornamewithlimits{\text{argsup}}}
+\def\arginf{\operatornamewithlimits{\text{arginf}}}
+
+
+\def\minimize{\operatornamewithlimits{\text{minimize}}}
+\def\maximize{\operatornamewithlimits{\text{maximize}}}
+\def\suchthat{\text{such that}}
+%\newtheorem{Definition}{Definition}
+%\newtheorem{Theorem}{Theorem}
+%\newtheorem{Proposition}{Proposition}
+%\newtheorem{Lemma}{Lemma}
+%\newtheorem{Corollary}{Corollary}
+
+% This removes the italics
+%\theoremstyle{remark}
+%\newtheorem{Remark}{Remark}
+%\newtheorem{Example}{Example}
+
+
+\DeclareMathOperator{\expit}{expit}
+
+\def\relstack#1#2{\mathop{#1}\limits_{#2}}
+\def\sfrac#1#2{{\textstyle{\frac{#1}{#2}}}}
+
+
+\def\comment#1{
+\vspace{0.5cm}
+\noindent \begin{tabular}{|p{14cm}|}
+\hline #1 \\
+\hline
+\end{tabular}
+\vspace{0.5cm}
+}
+
+
+\def\mytext#1{\begin{tabular}{p{13cm}}#1\end{tabular}}
+\def\mytextB#1{\begin{tabular}{p{7.5cm}}#1\end{tabular}}
+\def\mytextC#1{\begin{tabular}{p{12cm}}#1\end{tabular}}
+
+\def\jump{\vskip3mm\noindent}
+
+
+%%%%%%%%%%%%%
+% Begin Samuel's definitions
+%%%%%%%%%%%%%%%
+\def\smcomment#1{\vskip 2mm\boxit{\vskip 2mm{\color{black}\bf#1} {\color{blue}\bf -- SM\vskip 2mm}}\vskip 2mm}
+\newcommand{\com}[1]{{\color{magenta}#1}}
+%%%%%%%%%%%%%
+% End Samuel's definitions
+%%%%%%%%%%%%%%%
+\newcommand{\cyc}[1]{{\color{black}#1}}
+\newcommand{\cycrev}[1]{{\color{black}#1}}
+\newcommand{\joc}[1]{{\color{black}#1}}
+
+
+
+
+
+
+\begin{document}
+
+
+
+\centerline{\sf\Large A variational Bayes approach to variable selection}
+\medskip
+
+\medskip
+\centerline{20th of October 2015}
+ 
+
+\begin{abstract}
+\noindent 
+We develop methodology and theory for a mean field
+variational Bayes approximation to a linear model with a spike and slab prior on
+the regression coefficients. In particular we show how our method forces a
+subset of regression coefficients to be numerically indistinguishable from zero;
+under mild regularity conditions estimators based on our method consistently
+estimate the model parameters with easily obtainable and \joc{(asymptotically)} 
+appropriately sized
+standard error estimates; and, most strikingly, select the true model at \joc{an}
+exponential rate in the sample size. We also develop a practical method for
+simultaneously choosing reasonable initial parameter values and tuning the
+main tuning parameter of our algorithms which is both computationally efficient
+and empirically performs as well or better than some popular variable selection
+approaches. Our method is also faster and highly accurate when compared to MCMC.
+\end{abstract}
+
+
+
+\medskip
+\noindent {\bf Keywords:}  Mean field variational Bayes; \joc{Bernoulli-Gaussian model};  Markov \joc{C}hain Monte Carlo.
+\medskip
+\hrule
+
+
+
+%\begin{keyword}[class=MSC]
+%\kwd[Primary ]{}
+%\kwd{}
+%\kwd[; secondary ]{}
+%\end{keyword}
+
+%\begin{keyword}
+%\kwd{}
+%\kwd{}
+%\end{keyword}
+
+
+\section{Introduction}
+
+
+
+Variable selection is one of the key problems in statistics as evidenced by
+papers too numerous to mention all but a small subset. Major classes of model
+selection approaches include criteria based procedures
+\citep{Akaike1973,Mallows1973,Schwarz1978}, penalized regression
+\citep{Tibshirani1996,Fan2001,Fan2004} and Bayesian modeling approaches
+\citep{Bottolo2010,Hans2007,Li2010,Stingo2011}. Despite the amount of
+research in the area there is yet no consensus on how to perform model
+selection even in the simplest case of linear regression with
+more observations than predictors.
+One of the key forces driving
+this research is model selection for large scale problems where the number of
+candidate variables is large or where the model is nonstandard in some way.
+Good overviews of the latest approaches to model selection are
+\cite{JohnstoneTitterington2009,FanLv2010,Muller2010,BuhlmannVanDeGeer2011,JohnsonRossell2013}.
+
+
+
+Bayesian model selection approaches have the advantage of being able to easily
+incorporate simultaneously many sources of variation, including prior knowledge.
+\joc{
+However, care needs to be taken in specification of the priors. From a computational
+perspective a careful choice of priors leads to closed form expressions for the marginal
+likelihood for a given model. Zellner's $g$-prior for the regression coefficients is usually
+used for this purpose \citep{Zellner1986}. How to specify the hyperparameter $g$ 
+for Zellner's $g$-prior also needs to be carefully specified in order to avoid Bartlett's 
+paradox \citep{Bartlett1957} 
+%where if non-informative priors are used, under some circumstances, the null model dominates 
+or the information paradox \citep{Liang2008}.
+For careful choices of prior on $g$, closed form expressions are available for the 
+marginal likelihood for a given model (see for example \citealp{Liang2008}; or 
+\citealp{Maruyama2011}). If the size of the model space is small then all models
+can be enumerated and exact Bayesian inference can be performed, otherwise 
+Markov \joc{C}hain Monte Carlo (MCMC) methods are employed. MCMC} for moderate to large
+scale problems   \joc{can be computationally} inefficient. For this reason an enormous 
+amount of effort has been put into developing MCMC and similar stochastic search based 
+methods which can be used to explore the model space \joc{in a computationally efficient 
+manner} \citep{Nott2005,Hans2007,OHara2009,Bottolo2010,Li2010,Stingo2011}. 
+
+Despite this research MCMC can still be deemed to be too slow to be used in practice
+sufficiently large scale problems. Further drawbacks to these methods include sensitivity 
+to prior choices, and \joc{for models with discrete random variables} there are no 
+available diagnostics to determine whether the MCMC chain has either converged or explored 
+a sufficient proportion of models in the model space.
+
+\joc{
+Recently Bayesian-like methods such as the empirical Bayes approach of 
+\cite{MartinEtal2014}
+and generalized fiducial inference \cite{LaiEtal2015} have also been proposed.
+The empirical Bayes approach of \cite{MartinEtal2014} explores the space of models using MCMC 
+and so can still suffer the same aforementioned drawbacks. The approach of \cite{LaiEtal2015} uses a combination of the sure independence screening (SIS) procedure of \cite{FanLv2008} and the Lasso \citep{Tibshirani1996}. However, this 
+can fail in situations when  SIS fails (if the predictors are sufficiently correlated) or 
+the Lasso path does not contain the true model.
+}
+
+
+
+
+
+
+
+
+
+
+
+Mean field variational Bayes (VB) is \joc{a computationally efficient} but 
+approximate alternative to MCMC for Bayesian inference 
+\citep{Bishop2006,Ormerod2010}. While fair comparison between MCMC and VB is 
+difficult (for reasons discussed in Section \ref{sec:Comparison}), in general VB 
+is typically a much faster, deterministic alternative to stochastic search 
+algorithms. However, unlike MCMC, methods based on VB cannot achieve an arbitrary 
+accuracy \joc{in its estimation of the posterior distribution}. Nevertheless, VB 
+has shown to be an effective approach to several practical problems including 
+document retrieval \citep{Jordan2004}, functional magnetic resonance imaging 
+\citep{FlandinPenny2007,NathooEtal2014}, and cluster analysis for 
+gene-expression data \citep{TeschendorffEtal2005}. Furthermore, the speed of VB 
+in such settings gives it an advantage for exploratory data analysis where many 
+models are typically fit to gain some understanding of the data.
+
+
+A criticism often leveled at VB methods is that they often fail to provide 
+reliable estimates of various \joc{inferential quantities, particularly 
+posterior variances}. Such criticism can be made on empirical \citep{WandEtal2011,Carbonetto2011}, or theoretical grounds 
+\citep{WangTitterington:2006,rue2009}. However, as previously shown in 
+\cite{You2014} such criticism does not hold for VB methods in general, at least 
+in an asymptotic sense. Furthermore, variational approximation has been shown 
+to be useful in frequentist settings \citep{HallEtal2011a,HallEtal2011b}.
+
+
+
+%We consider this paper to be an extension of the earlier work of \cite{You2014}.
+%In \cite{You2014} we considered the theoretical properties of VB estimators for
+%linear models with simple conjugate priors including variational information
+%criteria for such models.
+
+In this paper we consider a Bernoulli-Gaussian model to select regression coefficients 
+\citep[see][]{Soussen2011}. This entails using VB to approximate the posterior distribution of indicator variables to select which variables are to be included in the model. We consider this modification to be amongst the simplest such modifications
+to the standard Bayesian linear model (using conjugate priors) leading
+to variable selection. Our main new contributions are as follows:
+\begin{itemize}
+\item[(i)] We show how VB, \joc{for our chosen model}, induces sparsity upon the regression
+coefficients;
+
+\item[(ii)] We show, under mild assumptions, that our estimators for the model
+parameters are consistent with easily obtainable and \joc{asymptotically} appropriately sized
+standard error estimates;  
+
+\item [(iii)] Under these same assumptions we prove that 
+our VB method selects the true model
+at an {\it exponential rate in $n$}; and
+
+\item[(iv)] We develop a practical method for simultaneously choosing reasonable
+initial parameter values and tuning the main tuning parameter of our algorithms.
+\end{itemize}
+
+
+
+
+\noindent Contributions (i), (ii) and (iii) are the first results of their
+kind for VB approaches to model selection and suggest that our approach is
+both promising and that extensions to more complicated settings should
+enjoy similar properties. \joc{The VB method used in (i) is standard}.
+Result (ii) is in keeping with consistency results
+of Bayesian inferential procedures \citep{CasellaEtal2009}.
+However, as VB methods are inexact these results are not applicable to VB-type 
+approximations. Contribution (iii) is a \joc{strong} result given the
+rate of convergence, but only holds for
+the case where $n>p$ and $p$ is fixed (but still possibly very large). 
+\joc{Considering situations where $p>n$, empirically using (iv) our method is competitive to the methods and simulations settings we considered.
+We believe that our approach will have the greatest impact for cases where
+$n>p$, but where it is not computationally feasible to enumerate all possible
+models using exact Bayesian approaches.
+Our empirical results also suggest that this translates to at least
+some problems when  $p>n$. 
+
+
+Most papers in the literature do not consider analysis of the rates of convergence
+of model inclusion indicator variables, but instead consider the rate of
+convergence for the probability that the true model dominates a given
+model selection criteria. One exception includes \cite{NarisettyHe2014} who
+also showed that model inclusion indicator variables approach their true values
+at an exponential rate with the sample size $n$ and where the number of variables
+$p$ is allowed to grow exponentially in $n$. However, their method relies on
+a MCMC search over the parameter space and may suffer from the drawbacks
+of MCMC, particularly for large problems.}
+
+ 
+We are by no means the first to consider model selection via the use of model
+indicator variables within the context of variational approximation. Earlier
+papers which use either expectation maximization 
+\joc{(which shares similarities with VB)} 
+ or VB include \cite{Huang2007}, \cite{Rattray2009},
+\cite{Logsdon2010}, \cite{Carbonetto2011}, \cite{wandormerod2011} and
+\cite{Rockova2014}. However, apart from \cite{Rockova2014}, there
+was no contributions to understanding 
+how sparsity was achieved and the later reference
+did not analyze the rates of convergence for their estimators.
+Furthermore, each of these papers considered slightly different models and
+tuning parameter selection approaches to those here.
+
+
+
+%The spike and slab prior is a ``sparsity inducing prior'' since it has a
+%discontinuous derivative at the origin (owing to the spike at zero). We could
+%also employ other such priors on our regression coefficients. A deluge of such
+%papers have recently considered such priors including \cite{Polson2010},
+%\cite{Carvalho2010}, \cite{Griffin2011}, \cite{Armagan2013} and
+%\cite{Neville2014}. Such priors entail at least some shrinkage on the regression
+%coefficients. We believe that some coefficient shrinkage is highly likely to be
+%beneficial in practice. However, we have not pursued such priors here but focus
+%on developing theory for what we believe is the simplest model deviating from
+%the linear model which incorporates a sparsity inducing prior. Adapting the
+%theory we develop for the spike and slab prior here to other sparsity inducing
+%priors is beyond the scope of this paper.
+
+
+Perhaps the most promising practical aspect of VB methodology in practice
+is the potential to handle non-standard complications. Examples of the flexibility
+of VB methods to handle such complications are contained in
+\cite{LutsOrmerod2014}. For example, it is not difficult to extend the
+methodology developed here to handle elaborate responses
+\citep{WandEtal2011}, missing data \citep{FaesEtal2011} or measurement error
+\citep{PhamEtal2013}. This contrasts with criteria based procedures, penalized
+regression and some Bayesian procedures \citep[for example][where the models
+are chosen carefully so that an exact expression for the marginal likelihood is
+obtainable]{Liang2008,Maruyama2011}. For these approaches their handling of 
+such  complications will have a large computational overhead. \joc{Here we will
+consider the simple extension of our VB method from using Gaussian errors to 
+Laplace distributed errors to demonstrate the flexibility of the approach.}
+
+
+
+The paper is organized as follows. Section \ref{sec:Bayesian linear model selection}
+considers model selection for a linear model using a spike and slab prior on the
+regression coefficients and provides a motivating example from real data. Section
+\ref{sec:Main Results} summarizes our main results which are proved in
+Appendix A.
+Section \ref{sec:Parameter Selection and Initialization}
+discusses initialization and hyperparameter selection. Numerical examples are shown
+in Section \ref{sec:Numerical Examples}  and illustrate the good empirical properties of
+our methods. We discuss our results and conclude in Section \ref{sec:Conclusion}.
+
+ 
+\section{Bayesian linear model selection}
+\label{sec:Bayesian linear model selection}
+
+Suppose that we have observed data $(y_i,\vx_i)$, $1\le i\le n$, and hypothesize
+that $y_i \stackrel{\mbox{\tiny ind.}}{\sim} N(\vx_i^{T}\vbeta,\sigma^2)$,
+$1\le i\le n$ for some coefficients $\vbeta$ and noise variance $\sigma^2$
+where $\vx_i$ is $p$-vector of predictors. 
+Using a binary mask, a Bayesian version of the linear regression
+model with conjugate prior on $\sigma^2$ may be written as,
+\begin{equation}\label{eq:binaryMask}
+\begin{array}{c}
+\vy|\vbeta,\sigma^2,\vgamma \sim N(\mX\mGamma\vbeta,\sigma^2\mI), \quad
+\ds \sigma^2 \ds \sim \mbox{Inverse-Gamma}(A,B), \\ [1ex]
+\beta_j \sim N(0,\sigma_\beta^2)
+\quad \mbox{and} \quad
+\gamma_j \sim \mbox{Bernoulli}(\rho), \ j=1,\ldots,p,
+\end{array}
+\end{equation}
+
+\noindent where $\mX$ is a $n\times p$ design matrix whose $i$th row is $\vx_i^{T}$
+(possibly including an intercept), $\vbeta=(\vbeta_1,\ldots,\vbeta_p)^T$ is a $p$-vector of regression
+coefficients, $\mGamma=\diag(\gamma_1,\ldots,\gamma_p)$, and\\
+$\mbox{Inverse-Gamma}(A,B)$ is the inverse Gamma distribution with shape
+parameter $A$ and scale parameter $B$. The parameters $\sigma^2_\beta$, $A$ and $B$ are fixed prior hyperparameters, and
+$\rho\in(0,1)$ is also a hyperparameter which controls sparsity. Contrasting with \cite{Rockova2014}
+we use $\rho$ rather than $\sigma_\beta^2$ as a tuning parameter to control sparsity. The selection
+of $\rho$ (or $\sigma_\beta^2$ for that matter) is particularly important and is a point which we
+will discuss later. 
+
+In the signal processing literature this is sometimes called
+the Bernoulli-Gaussian \citep{Soussen2011}  and is closely
+related to $\ell_0$ regularization (see \citealp[Section 13.2.2]{Murphy2012})
+\joc{
+and the spike and slab prior \citep{wandormerod2011}.}
+\cite{wandormerod2011} also considered what they call the Laplace-zero model where the
+normal distributed slab in the spike and slab is replaced with a Laplace
+distribution. Using their naming convention this model might also be called a
+normal-zero or Gaussian-zero model. 
+
+\joc{
+Note that the Bernoulli-Gaussian model 
+is slightly different than the linear model with spike and slab prior. The
+key difference is that if $\gamma_j = 0$
+for the Bernoulli-Gaussian model then 
+$\beta_j|\vy,\gamma_j \sim N(0,\sigma_\beta^2)$. In contrast for the spike
+and slab prior if $\gamma_j = 0$ then $\beta_j|\vy$ is a point mass
+at zero.}
+
+ 
+
+%The VB approach is summarized in many places including
+%\cite{Bishop2006,rue2009,
+%Ormerod2010,Carbonetto2011,FaesEtal2011,WandEtal2011,Murphy2012,PhamEtal2013,LutsOrmerod2014,Neville2014,You2014}.
+%We refer the interested reader\joc{s} to these papers rather than summarize the approach
+%again here. 
+
+
+
+\joc{ 
+VB methodology is based on minimizing the Kullback-Leibler distance between
+the true posterior distribution and a factorized approximation to the posterior.
+Let $\vtheta$ be the set of all model parameters and $\vd$ be a vector of data
+then $p(\vtheta|\vd)$ is approximated by $q(\vtheta) = \prod_{k=1}^K q_k(\vtheta_k)$
+where $(\vtheta_1,\ldots,\vtheta_K)$ is a partition of $\vtheta$. Then it can
+be shown that the optimal $q_k$ densities, called $q$-densities, satisfy
+\begin{equation}\label{eq:optimal_q}
+\ds q_k(\vtheta_k) \propto \exp[ \bE_{-q_k(\vtheta_k)} \{ \log p(\vd,\vtheta) \}],
+\end{equation}
+
+\noindent where
+$\bE_{-q_k(\vtheta_k)}$ is the expectation with respect to all densities except 
+$q_k(\vtheta_k)$. For any choice of the $q$-densities a lower bound for the 
+marginal likelihood for $\vd$ can be obtained by 
+$$
+\ds \log \underline{p}(\vd) = \bE_q\left[ \log \left\{ \frac{p(\vd,\vtheta)}{q(\vtheta)} \right\} \right],
+$$ 
+
+\noindent where the
+underline is used to indicate the quantity is a lower bound. It can be shown
+that updating $q_k$ via (\ref{eq:optimal_q}) for fixed values of the remaining
+$q_k$ results in an increase in the lower bound $\log \underline{p}(\vd)$. Cycling 
+through the update 
+for each $k$ results in a monotonic increase in $\log \underline{p}(\vd)$.
+The resulting scheme can be interpreted as a coordinate ascent method which, under
+mild regularity conditions,  will converge to a local maximizer of the lower bound
+\citep{LuenbergerYe2008}.
+
+Thus the VB approximation depends on the choice of factorization which
+we will now discuss. A non-exhaustive
+list of choices for the factorization of $q(\vbeta,\sigma^2,\vgamma)$ include:
+\begin{enumerate}
+\item[(A)] $\ds q(\vbeta,\sigma^2,\vgamma) = q(\vbeta,\vgamma)q(\sigma^2)$;
+
+\item[(B)] $\ds q(\vbeta,\sigma^2,\vgamma) = q(\sigma^2) \prod_{j=1}^p q(\beta_j,\gamma_j)$; and
+
+\item[(C)] $\ds q(\vbeta,\sigma^2,\vgamma) = q(\vbeta)q(\sigma^2) \prod_{j=1}^p q(\gamma_j)$.
+\end{enumerate}
+
+\noindent \joc{We have dropped subscripts from the $q$'s for ease of reading.}
+
+Choice (A) leads to
+$$
+q(\vbeta,\vgamma) \propto \exp\left[ 
+\lambda \vone^T\vgamma - \tfrac{1}{2} \vbeta^T \left(\tau\mGamma\mX^T\mX\mGamma\vbeta  + \sigma_\beta^{-2}\mI \right)\vbeta
++ \tau \vbeta^T\mGamma\mX^T\vy  
+\right],
+$$
+
+\noindent where $\lambda = \mbox{logit}(\rho) = \log(\rho/(1-\rho))$ and
+$\tau = \bE_q(1/\sigma^2)$. Then
+$$
+\begin{array}{rl}
+\ds q(\vbeta|\vgamma) 
+    & \mbox{ is a } \ N(\vmu(\vgamma), \mSigma(\vgamma))   \ \mbox{ density and }
+    \\
+\ds q(\vgamma) 
+    & \ds \propto \int q(\vbeta,\vgamma) d\vbeta = |\mSigma(\vgamma)|^{1/2}\exp\left[ 
+\lambda \vone^T\vgamma + \tfrac{1}{2} \vmu(\vgamma)^T\mSigma(\vgamma)^{-1}\vmu(\vgamma)  \right] = f(\vgamma),
+\end{array}
+$$
+
+\noindent where 
+$\mSigma(\vgamma) = (\tau\mGamma\mX^T\mX\mGamma\vbeta  + \sigma_\beta^{-2}\mI)^{-1}$
+and $\vmu(\vgamma) = \mSigma(\vgamma) \mGamma\mX^T\vy$. Then 
+$q(\vgamma) = f(\vgamma)/\sum_{\widetilde{\vgamma} \in \{0,1\}^p} f(\widetilde{\vgamma})$,
+where $\sum_{\widetilde{\vgamma} \in \{0,1\}^p}$ is a combinatorial sum over all $2^p$ possible
+values of $\widetilde{\vgamma}$. Then $q(\vbeta)$ is a mixture of normals with $2^p$
+components given by
+$$
+q(\vbeta) = \sum_{\vgamma \in \{0,1\}^p} q(\vgamma) \ \phi(\vbeta;\vmu(\vgamma), \mSigma(\vgamma)),
+$$ 
+
+\noindent where $\phi(\vbeta; \vmu, \mSigma)$ is a multivariate Gaussian
+density with mean $\vmu$ and covariance $\mSigma$. Calculating a
+combinatorial sum over $2^p$  terms is not computationally feasible for large $p$.
+If the sum were computationally feasible, exact
+Bayesian methods such as those proposed by \cite{Liang2008} or 
+\cite{Maruyama2011} would be feasible and there would be no point in using VB. 
+For this reason we do not pursue choice (A) here.
+
+Choice (B) has been used by \cite{Carbonetto2011} who used spike and
+slab priors for the regression coefficients. This choice is computationally
+feasible for large $p$ but underestimates the posterior variances for the 
+regression coefficients. For this reason we will not pursue this choice of
+approximation here.
+
+Choice (C) does not involve a computational sum over $2^p$ terms but will do 
+better job at estimating the posterior variances of the regression coefficients
+by keeping all of the regression coefficients in the same factor. The remainder
+of the paper will explore this choice. For choice (C)}
+the optimal $q$-densities are of the form
+$$
+\begin{array}{c}
+q^{\ast}(\vbeta) \ \mbox{ is a } \ N(\vmuq,\mSigmaq) \ \mbox{ density}, \quad
+q^{\ast}(\sigma^2) \ \mbox{ is a } \ \mbox{Inverse-Gamma}(\Aq,\Bq) \ \mbox{ density} \\ [1ex]
+\mbox{and} \quad
+q^{\ast}(\gamma_j)  \ \mbox{ is a } \  \mbox{Bernoulli}(w_j) \ \mbox{ density for} \ j=1,\ldots,p,
+\end{array}
+$$
+
+\noindent where a necessary (but  not sufficient) condition
+for optimality is that the following system of equations hold:
+\begin{eqnarray}
+\mSigma &=&
+\left[\tau (\mX^{T}\mX)\odot\mOmega + \sigma_\beta^{-2}\mI \right]^{-1}= \left( \tau\mW\mX^T\mX\mW + \mD \right)^{-1},\label{eq:mSigma}\\ [1ex]
+\vmu
+&=& \tau\left( \tau\mW\mX^T\mX\mW + \mD \right)^{-1}\mW\mX^{T}\vy,\label{eq:vmu}\\ [1ex]
+\tau
+&=& \frac{A+n/2}{s}= \frac{2A+n}{2B +
+	\|\vy\|^2 - 2\vy^{T}\mX\mW\vmu
+	+\tr\left[ \{(\mX^{T}\mX)\odot\mOmega\}(\vmu\vmu^{T} + \mSigma) \right]},\label{eq:tau}\\ [1ex]
+\eta_j
+&=&  \lambda
+- \tfrac{\tau}{2} (\mu_j^2 + \Sigma_{j,j})\| \mX_j \|^2 + \tau\left[
+\mu_j\mX_j^{T}\vy - \mX_j^{T}\mX_{-j}\mW_{-j}(\vmu_{-j}\mu_j + \mSigma_{-j,j})\right] \quad \mbox{and} \label{eq:etaj}\\ [1ex]
+w_j
+&=& \expit(\eta_j) \label{eq:wj}
+\end{eqnarray}
+
+\noindent where $1\le j\le p$, \joc{$\mbox{expit}(x) = \mbox{logit}^{-1}(x) = \exp(x)/(1+\exp(x))$,} 
+$\vw=(w_1 \ldots w_p)^{T}$, $\mW=\mbox{diag}(\vw)$,
+$\mOmega = \vw\vw^{T} + \mW\odot(\mI - \mW)$,
+the symbol $\odot$ denotes the Hadamard product between two matrices
+and
+$\mD=\tau(\mX^T\mX)\odot\mW\odot(\mI-\mW)+\sigma_\beta^{-2}\mI$. Note that $\mD$ is
+a diagonal matrix. Algorithm \ref{alg:Algorithm1} below describes an iterative process for finding
+parameters satisfying this system of equations via a coordinate ascent scheme
+\joc{whose derivation can be found in Appendix A.}
+
+
+
+
+Note that we use the
+notation that for a general matrix $\mA$, $\mA_j$ is the $j$th column of
+$\mA$, $\mA_{-j}$ is $\mA$ with the $j$th column removed. Later we will
+write $A_{i,j}$ to be the value \joc{of} the component corresponding to the $i$th row and
+$j$th column of $\mA$ and $\mA_{i,-j}$ is the vector corresponding to the $i$th row of
+$\mA$ with the $j$th component removed. The $w_j$'s can be interpreted as an
+approximation to the posterior probability of $\gamma_j=1$ given $\vy$, that is,
+$p(\gamma_j=1|\vy)$. \joc{Using this, our data based decision for} including the $j$th 
+covariate is $w_j$ and if $w_j>0.5$, say, we include the $j$th covariate in the 
+model.
+
+
+The VB approach gives rise to the lower bound
+$$
+\begin{array}{rl}
+\log p(\vy;\rho)
+    & \ds \ge \sum_{\vgamma} \int q(\vbeta,\sigma^2,\vgamma) \log\left\{ \frac{p(\vy,\vbeta,\sigma^2,\vgamma)}{q(\vbeta,\sigma^2,\vgamma)} \right\} d\vbeta d\sigma^2
+    \equiv \log \underline{p}(\vy;\rho)
+\end{array}
+$$
+
+
+
+\noindent where the summation is interpreted
+as a combinatorial sum over all possible binary configurations of $\vgamma$.
+At the bottom of Algorithm \ref{alg:Algorithm1} the lower bound of
+$\log p(\vy;\rho)$ simplifies to
+$$
+\begin{array}{rl}
+\log \underline{p}(\vy;\rho)
+    & \ds = \tfrac{p}{2}
+          -  \tfrac{n}{2}\log(2\pi)
+          -\tfrac{p}{2}\log(\sigma^2_\beta)
+          + A\log(B)
+          - \log\Gamma(A) + \log\Gamma\left( A+\tfrac{n}{2} \right)- \left( A+\tfrac{n}{2}  \right)\log(\Bq) \\
+    & \ds \quad
+
++ \tfrac{1}{2}\log|\mSigmaq|
+-\tfrac{1}{2\sigma^2_\beta}\mbox{tr}\left(\vmuq\vmuq^T + \mSigmaq \right) + \sum_{j=1}^p \left[
+  w_j\log\left( \tfrac{\rho}{w_j} \right)
++ (1 - w_j)\log\left( \tfrac{1-\rho}{1-w_j} \right)
+\right].
+\end{array}
+$$
+
+\noindent Let $\log\underline{p}^{(t)}(\vy;\rho)$ denote the value of the lower
+bound at iteration $t$. Algorithm \ref{alg:Algorithm1} is terminated when the increase of the
+lower bound log-likelihood is negligible,
+that is,
+\begin{equation}\label{eq:convergence}
+|\log\underline{p}^{(t)}(\vy;\rho)-\log\underline{p}^{(t-1)}(\vy;\rho)|<\epsilon
+\end{equation}
+
+\noindent where $\epsilon$ is a small number. In our implementation we
+chose $\epsilon = 10^{-6}$. Note that Algorithm \ref{alg:Algorithm1}
+is only guaranteed to converge to a local maximizer of this lower bound.
+For the $n<p$ case Algorithm \ref{alg:Algorithm1} is efficiently implemented by
+calculating $\|\vy\|^2$, $\mX^T\vy$ and $\mX^T\mX$ only once outside the main
+loop of the algorithm. Then each iteration of the algorithm can be implemented
+with cost $O(p^3)$ and storage $O(p^2)$.
+ 
+ 
+ To illustrate the effect of $\rho$ on the sparsity of the VB method we consider
+the {\it prostate cancer} dataset originating from a study by \cite{Stamey1989}. The data consists of $n=97$ samples with variables {\tt lcavol},
+{\tt lweight} (log prostate weight),
+{\tt age},
+{\tt lbph} (log pf the amount of benign prostate hyperplasia),
+{\tt svi} (seminal vesicle invasion),
+{\tt lcp} (log of capsular penetration),
+{\tt gleason} (Gleason score),
+{\tt pgg45} (percent of Gleason scores 4 or 5), and
+{\tt lpsa} (log of prostate specific antigen). \cite{Hastie2001} illustrate the
+effect of tuning parameter selection for ridge regression and Lasso for a linear
+response model using {\tt lpsa} as the response variable and the remaining variables as
+predictors. We also consider the regularization paths produced by the SCAD
+penalty as implemented by the {\tt R} package {\tt ncvreg}
+\citep{Breheny2011}.
+These regularization paths as a function of $\lambda$ are illustrated in
+Figure \ref{fig:01} where for our VB method the values of $\vmu$ (which
+serve as point estimates for $\vbeta$) .
+
+From Figure \ref{fig:01} we make several observations about the VB estimates:
+\begin{enumerate}
+\item[(A)] the estimated components of $\vbeta$ appear to be stepwise functions
+of $\lambda$ with components being either zero or constant for various ranges of
+$\lambda$; and
+
+\item[(B)] large negative values of $\lambda$ tend to give rise to simpler
+models and positive values tend to give rise to more complex models.
+\end{enumerate}
+
+\noindent Note (A) holds only approximately but illustrates empirically the model selection properties of
+estimators obtained through
+Algorithm \ref{alg:Algorithm1}. This contrasts with the Lasso
+and other penalized regression methods where the analogous
+penalty parameter enforces shrinkage, and, possibly bias for the estimates of
+the model coefficients. \joc{(Note, we use the words `possibly bias' for the
+case where the Lasso estimate of a particular coefficient is zero and that 
+the true value of that coefficient is zero).} Observation (B) highlights that care is required for selecting
+$\rho$ (or equivalently $\lambda$).
+
+\section{Theory}\label{sec:Main Results}
+
+\joc{
+We will start this section by distinguishing between what we call ``correct models''
+and the ``true model'' defined below. Let $\vbeta_0$ be the true value of $\vbeta$.
+ 
+\noindent {\bf Definition 1:} A {\it correct model} $\vgamma$ is a $p$-vector with elements
+such that $\gamma_{j}\in \{0,1\}$ if $\beta_{0j}= 0$ and $\gamma_{j}=1$ if $\beta_{0j}\ne 0$.
+	
+\medskip
+\noindent {\bf Definition 2:} The {\it true model} $\vgamma_0$ is the $p$-vector with elements
+such that $\gamma_{j}=0$ if $\beta_{0j}= 0$ and $\gamma_{j}=1$ if $\beta_{0j}\ne 0$.
+	
+\smallskip
+\noindent
+Hence, for example, the true model $\vgamma_0$ and the full model
+$\vgamma=\mathbf{1}$ are both correct models.}
+
+
+\joc{The properties of $\vmu$, $\mSigma$, $\tau$ and $\{w_j\}_{1\le j\le p}$ when the system of equations (\ref{eq:mSigma})--(\ref{eq:wj}) hold simultaneously are difficult to analyze. 
+Instead we will analyze Algorithm \ref{alg:Algorithm1} by examining the limiting properties
+of the estimators from one iteration to the next.
+%	
+%Algorithm 1 allows us to decouple the equations (\ref{eq:mSigma}), (\ref{eq:vmu}) and (\ref{eq:tau}) with equations (\ref{eq:etaj}) and (\ref{eq:wj}) over the iterations of the algorithm. 
+%
+%Based on Algorithm \ref{alg:Algorithm1} our analysis of the theoretical properties assumes that (\ref{eq:mSigma}), (\ref{eq:vmu}) and (\ref{eq:tau}) hold exactly in each iteration in %Algorithm \ref{alg:Algorithm1} (namely at the completion of Algorithm \ref{alg:InnerLoop}), and
+%both (\ref{eq:etaj}) and (\ref{eq:wj}) for $1\le j\le p$
+%hold exactly at the completion of Algorithm \ref{alg:Algorithm1}.
+%
+In Appendix B we will show, under certain assumptions,
+the following two main results. The first result concerns the behavior of
+VB estimates when particular $w_j$'s are small.}
+
+
+
+
+\cyc{
+	\begin{Main Result}[Proof in Appendix B.1]\label{mres:1}
+		Suppose that $w_j^{(t)}\ll 1$, $1\le j,k\le p$, for observed $\vy$ and $\mX$ the updates in Algorithm \ref{alg:Algorithm1} satisfy
+		$$
+		\ds \tau^{(t)} = O(1), \qquad
+		\ds \mu_j^{(t)} = O(w_j^{(t)}),
+		\qquad
+		\ds \Sigma_{j,k}^{(t)} = \left\{ \begin{array}{ll}
+		\sigma_\beta^2 + O(w_j^{(t)}) & \mbox{if $j=k$} \\
+		O(w_jw_k)=O(w_j^{(t)})               & \mbox{if $j\ne k$},
+		\end{array} \right.
+		\qquad \mbox{\it and}
+		$$
+		$$
+		w_j^{(t+1)} \leftarrow \expit\left[ \lambda
+		- \tfrac{1}{2}\tau^{(t)} \|\mX_j \|^2\sigma_\beta^2 + O(w_j^{(t-1)})
+		\right].
+		$$
+	\end{Main Result}
+}
+
+
+
+\begin{Lemma}[Proof in Appendix B]\label{lem:1}
+	Let $a$ be a real positive number,
+	then the quantities $\expit(-a) = \exp(-a)+O(\exp(-2a))$ and $\expit(a)=1-\exp(-a)+O(\exp(-2a))$ as $a\rightarrow\infty$.
+\end{Lemma}
+
+
+\noindent {\bf Remark:}
+As a consequence of Main Result \ref{mres:1} and Lemma \ref{lem:1} we have that
+in Algorithm \ref{alg:Algorithm1}, if $w_j^{\cyc{(t)}}$ is small, updated value $w_j^{\cyc{(t+1)}}$ is
+approximately equal to
+$\exp(\lambda - \tau^{(t)} \|\mX_j \|^2\sigma_\beta^2/2)$. Thus,
+when $\sigma_\beta^2$ is sufficiently large, when implemented
+on a computer, numerical underflow occurs and $w_j^{\cyc{(t+1)}}$
+is represented on the computer as 0. This explains why Algorithm \ref{alg:Algorithm1} provides sparse estimates of $\vw$ and $\vbeta$.
+Furthermore, all successive values of \cyc{$w_j^{(T)}, T>t$} remain either small or
+numerically zero and may be removed safely from the algorithm, reducing the
+computational cost of the algorithm.
+
+
+
+\medskip
+\noindent
+In order to establish various asymptotic properties in Main Result 2, we use the following
+assumptions \cite[which are similar to those used in][]{You2014} and treat $y_i$ and $\vx_i$ as random quantities (only) in Main Result 2 and the proof of Main Result 2 in Section \ref{sec:proof2}:
+\begin{enumerate}
+	\item[(A1)] for $1\le i\le n$ the $y_i|\vx_i = \vx_i^T\vbeta_0 + \varepsilon_i$ where
+	$\varepsilon_i$ and $\varepsilon_j$ are independent if $i\neq j$, $\bE(\varepsilon_i)=0$, $\Var(\varepsilon_i)=\sigma_0^2$ and $0<\sigma_0^2<\infty$, $\vbeta_0$ are the true
+	values of $\vbeta$ and $\sigma^2$ with $\vbeta_0$ being element-wise finite;
+	
+	\item [(A2)] for $1\le i\le n$ the random variables $\vx_i\in\bR^p$ are
+	independent and identically distributed with $p$ fixed;
+	
+	\item [(A3)] the $p\times p$ matrix $\mS\equiv\bE(\vx_i\vx_i^T)$ is element-wise
+	finite and $\mX = [\mX_1,\ldots,\mX_p ]$ where $\text{rank} (\mX) = p$; and
+	%$$
+	%P(\mathbf{a}^T \mX = 0) < 1\; \forall\; \mathbf{a} \neq \mathbf{0}
+	%\;\Rightarrow\; P\left(\text{rank} (\mX) = p\right) \rightarrow 1
+	%\;\text{ as }\; n\rightarrow \infty\quad \mbox{and};
+	%$$
+	
+	\item [(A4)] for $1\le i\le n$ the random variables $\vx_i$ and
+	$\varepsilon_i$ are independent.
+\end{enumerate}
+
+\noindent We view these as mild regularity conditions on the $y_i$'s,
+$\varepsilon_i$'s and the distribution of the covariates. Note that
+Assumption (A3) implicitly assumes that $n\ge p$.
+In addition to these we will assume:
+\begin{enumerate}
+	\item[(A5)] for $1\le j,k \le p$ the $\mbox{Var}(x_j x_k)<\infty$;
+	
+	
+	\item[\cyc{(A6})] $\lambda\equiv \lambda_n$ varies with $n$,
+	$\rho_n\equiv \expit(\lambda_n)$ and satisfies $\lambda_n/n\to 0$ and
+	$n\rho_n \to 0$ as $n\to\infty$.
+\end{enumerate}
+
+\noindent Assumption (A5) will simplify later arguments, whereas Assumption
+(A6) is necessary for our method to identify the true model which was introduced before.
+
+
+We now define some notation to simplify later proofs. For an indicator vector
+$\vgamma$ the square matrix $\mW_{\vgamma}$ ($\mW_{-\vgamma}$) is the principal
+submatrix of $\mW$ by distinguishing (removing) rows and columns specified in
+$\vgamma$. The matrix $\mD_{\vgamma}$ ($\mD_{-\vgamma}$) is defined in the same
+manner. The matrix $\mX_{\vgamma}$ ($\mX_{-\vgamma}$) is the submatrix of
+$\mX$ by distinguishing (removing) columns specified in $\vgamma$. For example,
+suppose the matrix $\mX$ has 4 columns, $\vgamma=(1,0,0,1)^T$ then
+$\mX_{\vgamma}$ is constructed using the first and forth
+columns of $\mX$ and $\mW_{\vgamma}$ is the submatrix of $\mW$ consisting
+first and forth rows, and first and forth columns of $\mW$. Similar
+notation, when indexing through a vector of indices $\vv$, for example, if ${\bf{v}}=(1,4)$,
+then $\mX_{\bf{v}}$ is constructed using the first and the forth column of $\mX$ and
+$\mW_{\bf{v}}$ is the submatrix of $\mW$ consisting of the first and forth rows,
+and the first and forth columns of $\mW$. We rely on context to specify which notation
+is used. We denote $\mO_p^v(\cdot)$ be a vector where each entry is $O_p(\cdot)$,
+$\mO_p^m(\cdot)$ to be a matrix where each entry is $O_p(\cdot)$ and $\mO_p^d(\cdot)$
+be a diagonal matrix where diagonal elements are $O_p(\cdot)$. We use similar
+notation for $o_p(\cdot)$ matrices and vectors.
+
+
+\begin{Main Result}[Proof in Appendix B.2]\label{mres:2}
+	If $\vw^{(1)}=\vone$  and assumptions (A1)-(A5) hold then
+	\begin{equation}\label{eq:final1}
+	\ds \vmu^{(1)}  = \vbeta_0 + \mO^v_p\big(n^{-1/2}\big),
+	\quad\mSigma^{(1)} =\cyc{\frac{1}{n\tau^{(0)}}}\Big[\bE\big(\vx_i\vx_i^T)\Big]^{-1}+\mO_p^m\big(n^{-3/2}\big),
+	\quad\tau^{(1)}=\sigma_0^{-2} + O_p\big(n^{-1/2}\big)
+	\end{equation}
+	
+	\noindent and for $1\le j\le p$ we have
+	\begin{equation}\label{eq:final2}
+	\ds\ds w_j^{(2)} = \expit\big(\eta_j^{(2)}\big)=\left\{ \begin{array}{ll}
+	\expit\left[\lambda_n+ \frac{n}{2\sigma^2_0}\bE (x_j^2)\beta_{0j}^2 + O_p\big(n^{1/2}\big)\right] & j\in\vgamma_0, \\ [1ex]
+	\expit\left[\lambda_n+O_p(1)\right]    & j\notin\vgamma_0.
+	\end{array}\right.
+	\end{equation}
+	
+	\noindent If, in addition to the aforementioned assumptions,
+	Assumption (A6) holds, then for $t=2$ we have
+	\begin{equation}\label{eq:final3}
+	\begin{array}{c}
+	\ds \vmu_{\vgamma_0}^{(2)}  = \vbeta_{0,\vgamma_0} + \mO_p^v(n^{-1/2}),
+	\quad
+	\cyc{\vmu_{-\vgamma_0}^{(2)} \leq \exp(\lambda_n\mathbf{1} + \mO_p^v(\log n) )},
+	\\ [1ex]
+	\mSigma_{\vgamma_0,\vgamma_0}^{(2)} =\frac{\sigma_0^2}{n}\Big[\bE\big(\vx_i\vx_i^T)\Big]_{\vgamma_0,\vgamma_0}^{-1}+\mO_p^m\big(n^{-3/2}\big),
+	\quad
+	\cyc{\mSigma_{-\vgamma_0,-\vgamma_0}^{(2)}  = \sigma_\beta^2\mI + \mE^{(2)}} \\ [1ex]
+	\mbox{and}\quad \cyc{\mSigma_{\vgamma_0,-\vgamma_0}^{(2)}  \leq \exp(\lambda_n\mathbf{1} + \mO_p^m(1))},
+	\end{array}
+	\end{equation}
+	
+	\noindent \cyc{where $\mE^{(2)}\leq  \exp(\lambda_n\mathbf{1} + \mO_p^m(\log n))$.} For $1\le j\le p$ we have
+	\begin{equation}\label{eq:final4}
+	\ds w_j^{(3)} = \expit\big(\eta_j^{(3)}\big)=\left\{ \begin{array}{ll}
+	\expit\left[\lambda_n+ \frac{n}{2\sigma^2_0}\bE (x_j^2)\beta_{0j}^2 + O_p\big(n^{1/2}\big)\right] & j\in\vgamma_0,
+	\\ [1ex]
+	\expit\left[ \lambda_n - \frac{n}{2\sigma^2_0}\bE (x_j^2)\sigma^2_\beta+O_p\big(n^{1/2}+n^2\expit(\lambda_n)) \right]  & j\notin\vgamma_0.
+	\end{array}\right.
+	\end{equation}
+	
+	
+	\noindent For $t>2$ we have
+	\begin{equation}\label{eq:final5}
+	\begin{array}{c}
+	\ds \vmu_{\vgamma_0}^{(t)}  = \vbeta_{0,\vgamma_0} + \mO_p^v(n^{-1/2}),
+	\qquad
+	\cyc{\vmu_{-\vgamma_0}^{(t)} \leq  \exp(- \tfrac{n}{2}\sigma_0^{-2}s_{\tiny\mbox{min}}\sigma^2_\beta\mathbf{1} + \mO_p^v(\lambda_n + n^{1/2}))}, \\
+	\ds
+	\mSigma_{\vgamma_0,\vgamma_0}^{(t)} =\frac{\sigma_0^2}{n}\Big[\bE\big(\vx_i\vx_i^T)\Big]_{\vgamma_0,\vgamma_0}^{-1}+\mO_p^m\big(n^{-3/2}\big),
+	
+	\\
+	\cyc{\mSigma_{-\vgamma_0,-\vgamma_0}^{(t)}  = \sigma_\beta^2\mI + \mE^{(t)} }\quad \mbox{and}\quad
+	\cyc{\mSigma_{\vgamma_0,-\vgamma_0}^{(t)}  \leq \exp(- \tfrac{n}{2} \sigma_0^{-2}s_{\tiny\mbox{min}}\sigma^2_\beta\mathbf{1}+ \mO_p^m(\lambda_n+n^{1/2}))}
+	\end{array}
+	\end{equation}
+	
+	\noindent \cyc{where $s_{\tiny\mbox{min}} = \min_{ j\in -\vgamma_0}\bE(x^2_j)$ and $\mE^{(t)} \leq \exp(- \tfrac{n}{2} \sigma_0^{-2}s_{\tiny\mbox{min}}\sigma^2_\beta\mathbf{1}+ \mO_p^m(\lambda_n+n^{1/2}))$. } For $1\le j\le p$ we have
+	\begin{equation}\label{eq:final6}
+	\ds w_j^{(t+1)} = \expit\big(\eta_j^{(t+1)}\big)=\left\{ \begin{array}{ll}
+	\expit\left[\lambda_n+ \frac{n}{2\sigma^2_0}\bE (x_j^2)\beta_{0j}^2 + O_p\big(n^{1/2}\big)\right] & j\in\vgamma_0, \\ [1ex]
+	\expit\left[ \lambda_n - \frac{n}{2\sigma^2_0}\bE (x_j^2)\sigma^2_\beta+O_p\big(n^{1/2}) \right]  & j\notin\vgamma_0.
+	\end{array}\right.
+	\end{equation}
+\end{Main Result}
+
+
+
+\noindent {\bf Remark:} This result suggests, under assumptions (A1)--(A6) and in light of Lemma \ref{lem:1},
+that the vector $\vw^{(t)}$ in Algorithm \ref{alg:Algorithm1} approaches $\vgamma_0$ at an exponential rate
+in $n$. For example, if $j\in \gamma_0$, then
+$$
+w_j = \mbox{expit} \left[
+n \left\{ 
+-\frac{\beta_{0j}^2}{2\sigma_0^2}E(x_j^2) + \frac{\lambda_n}{n} + O_p(n^{-1/2}) 
+\right\}
+\right]
+$$
+
+\noindent 
+Since $\lambda_n = o(n)$, the term inside the curly brackets is negative for 
+sufficiently large $n$. An application of Lemma 1 shows that $w_j \to 0$ at an
+exponential rate.
+
+\smallskip 
+\noindent {\bf Remark:} \joc{
+	To get some further intuition about the stepwise shape of the VB regularization path
+	consider (\ref{eq:vmu}) and (\ref{eq:etaj}) when $\vw = \vone$. In this case
+	we can rearrange (\ref{eq:vmu}) to obtain
+	$$
+	\tau \mX^T(\vy - \mX\vmu) = \sigma_\beta^{-2} \vmu.
+	$$
+	
+	\noindent Substituting this expression after rearranging (\ref{eq:etaj}) we obtain
+	$$
+	\begin{array}{rl}
+	\ds \eta_j 
+	& \ds = \lambda 
+	+ \tfrac{1}{2}\tau \mu_j^2 \|\mX_j\|^2 
+	+ \mu_j \tau\mX_j^T(\vy - \mX\vmu) 
+	- \tfrac{1}{2}\tau\mSigma_{jj}\|\mX_j\|^2
+	- \tau\mX_j^T\mX_{-j}\mSigma_{-j,j} \\
+	& \ds = \lambda 
+	+ \tfrac{1}{2}\tau \mu_j^2 \|\mX_j\|^2 
+	+ \tau\mu_j^2 /\sigma_\beta^2
+	- \tfrac{1}{2}\tau\Sigma_{j,j}\|\mX_j\|^2
+	- \tau\mX_j^T\mX_{-j}\mSigma_{-j,j}.
+	\end{array} 
+	$$
+	
+	\noindent For large $\sigma_\beta^2$ the third term is small and $\vmu$
+	will be approximately equal to the least squares estimate for $\vbeta$. 
+	For large $n$, $\|\mX_j\|^2$ and $\mX_j^T\mX_{-j}$ are $O_p(n)$, and $\mSigma=O_p(n^{-1})$. 
+	In such circumstances $\eta_j$ can be approximated by the dominant terms
+	$$
+	\ds \eta_j \approx \lambda + \tfrac{1}{2}\tau \mu_j^2 \|\mX_j\|^2.
+	$$
+	
+	\noindent When $\lambda$ is a sufficiently large negative constant the updated $w_j$ will be small.
+	Main Result 1 and Lemma 1 shows that for large $\sigma_\beta^2$ all successive
+	values of $w_j$ will be extremely small. If $\lambda$ is not sufficiently large
+	then the term $\tfrac{1}{2}\tau \mu_j^2 \|\mX_j^2\|^2$ is $O_p(n)$ and so
+	the updated value of the $w_j$s will be close to 1.
+}
+
+
+
+
+
+ 
+
+
+\section{Hyperparameter selection and initialization}
+\label{sec:Parameter Selection and Initialization}
+
+We will now briefly discuss selecting prior hyperparameters. We 
+use $A=B=0.01$, $\sigma_\beta^2 = 10$ and initially set $\tau=1000$.
+This leaves us to choose the parameter $\rho = \expit(\lambda)$
+and the initial values for $\vw$.
+The theory in Section 3 and 4 suggests
+that if we choose $\vw=\vone$ and say $\lambda \propto -\sqrt{n}$ and
+provided with enough data then Algorithm 1 will select the correct
+model. However, in practice this is not an effective strategy in general
+since Algorithm 1 may converge to a local minimum (which means $\vw$ should
+be carefully selected), all values of $\lambda$ satisfy Assumption (A7)
+when $n$ is fixed and we do not know how much data is sufficient for our
+asymptotic results to guide the choice of $\lambda$.
+
+\cite{Rockova2014} used a deterministic annealing variant of the EM
+algorithm proposed by \cite{UedaNakano1998} to avoid local maxima
+problems and proved to be successful in that context. We instead employ a
+simpler stepwise procedure which initially  ``adds'' that variable
+$j$ (by setting $w_j$ to 1 for some $j$) which maximizes the lower bound
+$\log\underline{p}(\vy;\rho)$ with $\rho = \expit(- 0.5\sqrt{n})$. We then,
+\begin{enumerate}
+\item[(I)] For fixed $\vw$ select the
+$\rho_j=\expit(\lambda_j)$ which maximizes the lower bound
+$\log\underline{p}(\vy;\rho_j)$
+where $\lambda_j$ is an equally spaced
+grid between $-15$ and $5$ of 50 points.
+
+\item[(II)] Next, for each $1\le j\le p$, calculate the lower bound
+$\log\underline{p}(\vy;\rho)$ when $w_j$ is set to both $0$ and $1$.
+The value $w_j$ is set to the value which maximizes
+$\log\underline{p}(\vy;\rho)$ if this value exceeds the current largest
+$\log\underline{p}(\vy;\rho)$.
+
+\item[(III)] Return to (I).
+\end{enumerate}
+
+\noindent This procedure is more specifically described in Algorithm
+\ref{alg:PathSearch}. Note that in Algorithm \joc{\ref{alg:PathSearch}} we
+use the notation
+$\vw_j^{(k)}$ to
+denote the vector $\vw$ with the $j$th
+element set to $k$.
+ 
+
+
+\section{Numerical examples}
+\label{sec:Numerical Examples}
+
+In the following numerical examples we only consider simulated, but
+hopefully sufficiently realistic, examples in order to reliably assess the empirical
+qualities of different methods where truth is known.
+We start with situations where $p=41$ and $n=80$ and with $p=99$ and $n=2118$. These
+examples have $n>p$, but where it is not compuationalyl feasible to enumerate all
+possible models. We then look at two $p>n$ examples with $n=500$ and $p=1000$ and
+with $n=600$ and $p=7381$. Our methods were implemented in {\tt R}
+and all code was run on the first author's laptop computer (64 bit Windows 8 Intel
+i7-4930MX central processing unit at 3GHz with 32GB of random access memory).
+
+We use the
+mean square error (MSE) to measure the quality of the prediction error,
+$\mbox{MSE} = \frac{1}{n}\sum_{i=1}^n (\mX\vbeta_0 - \mX\widehat{\vbeta})_i^2$.
+The $F_1$-score \joc{\citep[see][]{Van_Rijsbergen1979}}
+is used to assess the quality of model selection
+defined to be the harmonic mean between precision and recall
+$$
+F_1 = \frac{2 \times \mbox{precision} \times \mbox{recall}}{\mbox{precision} + \mbox{recall}}
+\quad \mbox{where} \quad
+\mbox{precision} = \frac{TP}{TP + FP} \quad \mbox{and} \quad
+\mbox{recall} = \frac{TP}{TP + FN},
+$$
+
+\noindent
+with $TP$, $FP$ and $FN$ being the number of true positives, false
+positives and false negatives respectively. Note that $F_1$ is a value between
+0 and 1 and higher values are being preferred. We use this measure 
+avoid preference of the two boundary models, that is selecting non or all
+of the variables. 
+\joc{The performance of our VB approach is based on Algorithm \ref{alg:PathSearch}.}
+We compare the
+performance of our VB method against the Lasso, SCAD
+and MCP penalized regression methods as implemented by the {\tt R} package
+{\tt ncvreg} \citep{Breheny2011}. We make use of the extended
+BIC \citep{ChenChen2008} to choose the tuning parameter $\lambda$ that 
+minimizes
+$$
+\mbox{EBIC}(\lambda) = \log(\mbox{RSS}_\lambda/n) + \frac{d_\lambda}{n}
+\left[ \log(n) + 2\log(p) \right],
+$$
+
+\noindent where $\mbox{RSS}_\lambda$ is the estimated residual sum of squares
+$\|\vy - \mX\widehat{\vbeta}_\lambda\|^2$, $\widehat{\vbeta}_\lambda$ is the
+estimated value of $\vbeta$ for a particular value of $\lambda$ and 
+$d_\lambda$ is the number of non-zero elements of $\widehat{\vbeta}_\lambda$.
+\cite{Wang2009} showed that this criterion performs well in several contexts.
+
+ 
+\joc{
+We also compared our method with the Expectation Maximization Variable Selection approach
+(EMVS) of \cite{Rockova2014}. We used the settings that the convergence parameter $\epsilon$ equals $10^{-4}$ and the initial value of $\sigma^2$ equals $1$. The default initial values for the regression parameters failed to converge when $p$ is large, in such a case we specified the initial values by screening down the non-zero coefficients using Lasso, SCAD and MCP solution paths.	
+	
+Finally, we conpared our method with the Bayesian Model Selection (BMS) method of \cite{FeldkircherZeugner2009,BMS}. We used the settings that $10^6$ samples were used for inference after discarding a burn-in of $10^3$, the hyper-g prior distribution was used with the hyperparameter equal to 3 and same initial values for the regression parameters as in the EMVS were used.
+
+ 
+ 
+Note that for all of the simulations we center the simulated values of the response
+and standardize the covariates for ease of comparison with EMVS and BMS.
+
+}
+
+ 
+
+ 
+\subsection{Comparison with MCMC for model (\ref{eq:binaryMask})}
+\label{sec:Comparison}
+
+Comparisons between VB and MCMC are fraught with difficulty. In terms of
+computational cost per iteration VB has a similar cost to an MCMC scheme based
+on Gibbs sampling. The later method has a slightly higher cost from drawing
+samples from a set of full conditional distributions rather than calculating
+approximations of them. The full conditionals corresponding to the model
+(\ref{eq:binaryMask}) are given by
+\begin{equation}\label{eq:Gibbs}
+\begin{array}{rl}
+\ds \vbeta|\mbox{rest}
+    & \ds \sim N\left[
+\left( \mGamma\mX^T\mX\mGamma + \sigma^2\sigma_b^{-2}\mI \right)^{-1}\mX^T\vy, \sigma^2\left( \mGamma\mX^T\mX\mGamma + \sigma^2\sigma_b^{-2}\mI \right)^{-1}
+\right]
+\\
+\ds \sigma^2|\mbox{rest}
+    & \ds \sim \mbox{Inverse-Gamma}\left[
+A + \tfrac{n}{2},
+B + \tfrac{1}{2}\| \vy - \mX\mGamma\vbeta \|^2
+\right]
+\\
+\ds \gamma_j|\mbox{rest}
+    & \ds \sim \mbox{Bernoulli}\left[
+\lambda
+- \tfrac{1}{2\sigma^2}\|\mX_j\|^2\beta_j^2
++ \sigma^{-2}\beta_j\mX_j^T\left(\vy -\mX_{-j}\mGamma_{-j}\vbeta_{-j}\right)
+\right], \quad 1\le j\le p,
+\end{array}
+\end{equation}
+
+\noindent from which Gibbs sampling can be easily implemented.
+
+
+Despite the
+similarity between Algorithm \ref{alg:Algorithm1} and (\ref{eq:Gibbs}) a fair
+comparison of these methods is difficult since choices for when each of these
+methods are stopped and what statistics are used to compare the outputs of each
+of the methods can unduly favor one method or the other. This MCMC scheme is
+appropriate when determining the quality of the VB method
+for performing Bayesian inference for model (\ref{eq:binaryMask}). \joc{We do this
+to compare
+the quality of the VB via Algorithm 1 with its Gibbs sampling counterpart (\ref{eq:Gibbs}).
+However,  
+to compare model selection performance we use BMS. }
+
+Firstly, comparison is hampered by the difficultly to determine whether a MCMC
+scheme has converged to its stationary distribution, or in the model selection
+context, whether the MCMC scheme has explored a sufficient portion of the model
+space. Furthermore, the number of samples required to make accurate inferences
+may depend on the data at hand and the choice of what inferences are to be made.
+For these reasons both an overly large number of burn-in and total samples drawn
+are commonly chosen. However, by making the number of burn-in samples
+sufficiently large MCMC methods can be made to be arbitrarily slower than VB.
+
+Similarly, convergence tolerances for VB trade accuracy against speed. We have
+chosen $\epsilon$ in (\ref{eq:convergence}) to be $10^{-6}$. Larger values of
+$\epsilon$ result in cruder approximations and smaller values of $\epsilon$
+are usually wasteful. Since each completion of Algorithm \ref{alg:VBourmodel}
+takes very little time we are able to tune the parameter $\rho$ via
+Algorithm \ref{alg:PathSearch}. In comparison, MCMC schemes can both be
+sensitive to the choice of hyperparameter values and prohibitively time
+consuming to tune in practice.
+
+With the above in mind we consider using (\ref{eq:Gibbs}) with identical
+hyperparameters and $\rho$ selected via Algorithm \ref{alg:PathSearch}. For
+each of the  examples we used $10^5$ MCMC samples for inference
+after discarding a burn-in of $10^3$. No thinning was applied.
+%We used $F_1$-score and MSE as.
+%, and the mean-square bias
+%$$
+%\mbox{MSB} = \frac{1}{p}\sum_{j=1}^p (\beta_{0j} - %\widehat{\beta}_j)^2
+%$$
+%
+%\noindent where $\widehat{\vbeta}$ is the posterior mean of $\vbeta$ for
+%MCMC and the converged value of $\vmu$ for VB.
+For the comparisons with MCMC in addition to
+$F_1$-score and MSE we also compare the
+posterior density accuracy,
+introduced in \cite{FaesEtal2011}, defined by
+$$
+\mbox{accuracy}(\theta_j) = 100 \times \left( 1 - \frac{1}{2}\int |p(\theta_j|\vy) - q(\theta_j)| d\theta_j \right)
+$$
+
+\noindent where $\theta_j$ is an arbitrary parameter and is expressed as a
+percentage and the mean parameter bias for the regression coefficients
+$$
+\mbox{BIAS} = \frac{1}{p}\sum_{j=1}^p (\beta_{0j} - \widehat{\beta}_j)^2.
+$$
+
+%Lastly we look at the error of approximation for the mean and
+%variance of $\mu_j$, $\Sigma_{jj}$ and $w_j$ compared to the MCMC estimates
+%of $\bE(\beta_j|\vy)$, %$\mbox{Var}(\beta_j|\vy)$ and %$\bE(\gamma_j|\vy)$ by
+%calculating
+%$$
+%\begin{array}{c}
+%\mbox{EOA}(\mu_j) = \frac{1}{p}\sum_{i=1}^p %(\mu_j - \bE(\beta_j|\vy))_0^2, \qquad
+%\mbox{EOA}(\Sigma_{jj}) = \frac{1}{p}\sum_{i=1}^p (\Sigma_{jj} - \mbox{Var}(\beta_j|\vy))_0^2, \\
+%\mbox{and} \qquad
+%\mbox{EOA}(w_j) = \frac{1}{p}\sum_{i=1}^p %(w_j - \bE(\gamma_j|\vy))_0^2.
+%\end{array}
+%$$
+%
+
+\noindent In our tables our observed MSE and BIAS are reported on negative
+log scale (where higher values are better) and bracketed values represent
+standard error estimates.
+
+
+
+
+
+
+\subsection{Example 1: Diets simulation}
+
+We use the following example modified from \cite{Garcia2013}.
+Let $m_1$ and $n$ be parameters of this simulation which are chosen to be
+integers.
+For this example we suppose that there are two groups of diets with $n/2$ subjects in each group.
+We generate $m_1 + 1$ explanatory variables as follows. First, we
+generate a binary diet
+indicator $z$ where, for each subject $i=1,\ldots, n$,
+$z_i = I(i > n/2) - I (i\le n/2)$.
+Next we generate $\vx_k = [x_{1,k},\ldots,x_{n,k}]^T$, $k=1,\ldots,m_1$, such
+that $x_{ik} = u_{ik} + z_i v_k$, where $u_{ik}$ are independent uniform $(0,1)$ random
+variables, $v_1,\ldots,v_{0.75m_1}$ are independent uniform $(0.25, 0.75)$ random variables,
+and $v_{0.75m_1+1},\ldots, v_{m_1}$ are identically zero. Thus,
+we have $m_1$ variables, $x_1,\ldots,x_{m_1}$ where the first 75\% of the $x$'s depend on
+$z$. Finally, we generate the response vector as
+$$
+\vy = \beta_1 z + \beta_2 \vx_1 + \beta_3 \vx_2 + \beta_4 \vx_3
+    + \sum_{k=5}^{m_1} \beta_k \vx_{k-1} + \beta_{m_1+1} \vx_{m_1} + \vvarepsilon,
+$$
+
+
+ 
+\noindent
+where $\vvarepsilon$ is normally distributed with mean $0$ and covariance $\sigma^2 \mI$.
+For this simulation we set $m_1=40$, $n=80$, $\sigma^2 =0.5$, and
+$\vbeta = (1 - (\kappa-1)/6) \times (4.5, 3,−3,−3, \vzero^T, 3)$ 
+where $\vzero^T$ is an $(m_1 - 4)$-dimensional
+vector of zeros and $\kappa$ is a simulation parameter.
+The data $\vx_1,\ldots,\vx_{m_1}$ are generated according to four
+distinct categories whose interpretations are summarized in
+\cite{Garcia2013}. \joc{Correlations for the first $0.75m_1$ variables
+	are around 0.8 in absolute magnitude. The remaining variables are independent
+	from each other and the first $0.75m_1$ variables.}
+
+%\newpage
+%In summary, $\vx_1,\ldots,\vx_{m_1}$ are generated according to four
+%distinct categories to have the interpretations
+%\begin{itemize}
+%\item Group 1: $\vx_1$, $\vx_2$ and $\vx_3$ depend on diet and act on $\vy$ even after
+%taking into account diet;
+
+%\item Group 2: $\vx_4,\ldots, \vx_{0.75m_1}$ depend on diet and do not act on $\vy$;
+%\item Group 3: $\vx_{0.75m_1+1},\ldots,\vx_{m_1-1}$ neither depend on diet, nor act on $\vy$;
+%\item Group 4: $\vx_{m_1}$ does not depend on diet, but acts on $\vy$.
+%\end{itemize}
+
+We generate 100 independent data sets for each value of $\kappa$ in the set
+$\{ 1,2,3,4\}$ and apply each of the variable selection procedures we consider.
+Note that larger values of $\kappa$ in the range $\kappa\in[1,7]$ correspond to a larger
+signal to noise ratio. \cite{Garcia2013} considered the case where $\kappa=1$
+and $n=40$. The results are summarized in the two panels of Figures \ref{fig:03}.
+
+In Figure \ref{fig:03} we see in the first panel that VB selects the correct model
+and in the second panel provides smaller prediction errors for almost every simulation 
+with the exception of $\kappa=4$ corresponding to the smallest signal to noise scenario. 
+The mean times per simulation for out VB method, and the Lasso, SCAD and MCP penalized 
+regression methods were 2.9, 0.4, 0.3 and 0.2 seconds respectively.
+
+
+
+
+ 
+
+The results for the comparisons between VB and MCMC
+based on 100 simulations are summarized in Table
+\ref{tab:dietSimulation}. \joc{The posterior density  accuracy
+is good for $\vbeta$, but less so for $\sigma^2$ where accuracy decreases
+as the signal to noise ratio decreases.} In particular
+we note that MSE and parameter biases are either similar to MCMC
+or better for some settings.
+Note that the MCMC approach took an average
+of 131.4 seconds per simulation setting. 
+
+ 
+\subsection{Example 2: Communities and crime data}
+
+  
+We use the {\tt Communities and Crime} dataset obtained from the
+UCI Machine Learning Repository   (\url{http://archive.ics.uci.edu/ml/datasets/Communities+and+Crime}). The data collected was part
+of a study by \cite{Redmond2002} combining socio-economic data
+from the 1990 United States Census, law enforcement data from the 1990 United States Law Enforcement Management and Administrative
+Statistics
+survey, and crime data from the 1995 Federal Bureau of Investigation's Uniform
+Crime Reports.
+
+The raw data consists of 2215 samples of 147 variables the first 5 of which
+we regard as non-predictive, the next 124 are regarded as potential
+covariates while the last 18 variables are regarded as potential response
+variables. Roughly 15\% of the data is missing. We proceed with a complete
+case analysis of the data.
+We first remove any potential covariates which contained missing values leaving
+101 covariates. We also remove the variables {\tt rentLowQ} and
+{\tt medGrossRent} since these variables appeared to be nearly linear
+combinations of the remaining variables (the matrix $\mX$ had two singular
+values approximately $10^{-9}$ when these variables were included).  We use the
+{\tt nonViolPerPop} variable as the response. We then remove any remaining
+samples where the response is missing. The remaining dataset consist of 2118
+samples and 99 covariates. Finally, the response and covariates are
+standardized to have mean 0 and standard deviation 1. \joc{Empirical correlations
+	between variables range from $3.3\times10^{-5}$ to $0.999$.}
+
+
+For this data we use the following procedure as the basis for simulations.
+\begin{itemize}
+\item Use the LARS algorithm to obtain the whole Lasso path and its
+solution vector $\vbeta$:
+$$
+\min_{\vbeta} \left\{ \|\vy - \mX\vbeta\|_2^2 + \lambda \| \vbeta\|_1 \right\}
+$$
+
+\noindent for all positive values of $\lambda$. The solution for $\vbeta$ is
+a piecewise function of $\lambda$ with a finite number of pieces, say $J$,
+which can be represented by the set $\{\lambda^{(j)},\vbeta^{(j)}\}_{1\le j\le J}$.
+
+\item For the $j$th element in this path:
+\begin{itemize}
+\item Let $\mX^{(j)}$ be the columns of $\mX$ corresponding to the non-zero
+elements of $\vbeta^{(j)}$.
+
+\item Find the least squares fit $(\widehat{\vbeta}_{\mbox{\tiny LS}}^{(j)},\widehat{\sigma}_j^2)$
+of the data $(\vy,\mX^{(j)})$.
+
+\item Simulate $S$ datasets from the model
+$\vy \sim N(\mX^{(j)}\widehat{\vbeta}_{\mbox{\tiny LS}}^{(j)},\sigma^2\mI)$
+for some value $\sigma^2$.
+\end{itemize}
+\end{itemize}
+
+\noindent For this data we use $\sigma^2=0.1$, the first $J=20$ elements of the
+LARS path and $S=50$. Such datasets are simulated for each of these $J=20$ elements.
+We use the {\tt R} package {\tt lars} \citep{LARS} in the above procedure.
+Results for the comparisons between VB, Lasso, SCAD and MCP
+are summarized in Figure \ref{fig:04} where we see again that VB has,
+except for a few model settings, the best model selection performance and
+smallest prediction error. The mean times per simulation for out VB method,
+and the Lasso, SCAD and MCP penalized regression methods were 7, 12, 8 and 6 seconds respectively.
+
+
+
+%\begin{figure}[ht]
+%\centering
+%\includegraphics[width=0.7\textwidth]{Crime.pdf}
+%\begin{minipage}[t]{0.8\textwidth}
+%\caption{Summaries of the model selection and prediction accuracies of VB, Lasso,
+%SCAD and MCP methods for the {\tt Communities and Crime} example.}
+%\label{fig:04}
+%\end{minipage}
+%\end{figure}
+
+
+%\begin{figure}[ht]
+%	\centering
+%	\includegraphics[width=0.9\textwidth]{Sim3.pdf}
+	%\begin{minipage}[t]{0.8\textwidth}
+	
+%	Old Figure 4: Summaries of the model selection and prediction accuracies of VB, Lasso,
+%		SCAD and MCP methods for the {\tt Communities and Crime} example. 
+ 
+	%\end{minipage}
+%\end{figure}
+ 
+
+
+The results for the comparisons between VB and MCMC
+based on 30 simulations are summarized in Table
+\ref{tab:communitiesAndCrime}. In this table we see that
+parameter posterior density accuracies are nearly perfect
+for all parameters for nearly every simulation setting. Similarly
+to the previous two examples we again see that MSEs and
+parameter biases are either similar or better for VB in
+comparison to MCMC.
+Note that the MCMC approach took an average
+of 339 seconds per simulation setting.  
+
+
+ \joc{ 
+\subsection{Example 3: Simulated SNP data}
+
+For our first $p>n$ example we take a simulation setting from \cite{Carbonetto2011} 
+that mimics some properties of single-nucleotide polymorphism (SNP) data. We used 
+the {\tt R} package  {\tt varbvs} \citep{varbvs} to generate the data. For all trials, 
+we set $n = 500$, $p = 1000$, the number of non-zero coefficients to $m = 20$ and 
+$\sigma = 3$. Note that for this example all covariates are uncorrelated.
+This process is repeated 50 times and the results are summarized in Figure \ref{fig:05}.
+For this example all methods, except for perhaps the Lasso had similar 
+model selection accuracy. However, VB and BMS were superior when compared to the
+other selected methods in terms of perdiction accuracy and bias. 
+The Lasso, SCAD, MCP, EMVS and BMS methods took 0.1, 0.1, 0.1, 45, 197 and 299 
+seconds respectively.
+ 
+
+
+\subsection{Example 4: Simulated QTL data}
+
+ 
+For our final $p>n$ simulation example we will use the design matrix based on an
+experiment on a backcross population of $n=600$ individuals for a single large 
+chromosome of 1800 cM. This giant chromosome was covered by 121 evenly 
+spaced markers from \cite{Xu2007}. Nine ofthe markers overlapped with QTL ofthe main effects 
+and 13 out of the ${121 \choose 2} = 7260$ possible marker pairs had interaction 
+effects. The $\mX$ matrix combines the main effects and interaction effects to
+make a $600\times 7381$ matrix. The values of the true coefficients are listed in 
+Table 1 of \cite{Xu2007} ranging from 0.77 to 4.77 in absolute magnitude and
+correlations range from 0 to 0.8 where most of the higher correlation occurs
+along the off-diagonal values of the correlation matrix of the covariates. Here
+we center the $\mX$ matrix and simulate new data from $\vy = \mX\vbeta_0 + \vvarepsilon$
+where $\vvarepsilon = (\varepsilon_1,\ldots,\varepsilon_n)^T$ and the $\vvarepsilon_i$
+are independently drawn with $\vvarepsilon_i \sim N(0,20)$. Similar simulation
+studies were conducted in \cite{Xu2007} and \cite{LiSillanpaa2012}. This
+process was repeated $50$ times and the results are summarized in Figure \ref{fig:04}.
+For this simulation setting VB has the best model selection accuracy,
+smallest MSEs and smallest parameter biases of all the methods compared.
+The Lasso, SCAD, MCP, EMVS and BMS methods took 1.5, 1.5, 1.8, 1229, 2011, 5327
+seconds respectively.
+
+
+
+
+
+
+  }
+
+\joc{
+\section{Extension to Bayesian robust linear regression}
+
+Here we will make the argument that variational Bayes allows relatively
+straightforward extensions to non-standard complications. We will further show that
+the above methodology can relatively easily be extended to model selection for
+robust fits of linear models. Here we do so by using the Laplace or double exponential
+distribution to model the response, i.e., we replace
+$\vy|\vbeta,\sigma^2,\vgamma \sim N(\mX\mGamma\vbeta,\sigma^2\mI)$ in 
+(\ref{eq:binaryMask}) by
+$$
+\vy|\vbeta,\sigma^2,\vgamma \sim \mbox{Laplace}(\mX\mGamma\vbeta,\sigma^2\mI).
+$$
+
+\noindent Following \cite{AndrewsMallows1974} we can represent the Laplace distribution
+by the normal scale-mixture
+$$
+y_i|\vbeta,\vgamma,\sigma^2,a_i\sim \mbox{N}(\vx_i^T\mGamma\vbeta,a_i^{-1}\sigma^2), \quad \mbox{with} \quad a_i\sim\mbox{Inverse-Gamma}(1,1/2),
+$$
+
+\noindent where the remaining elements of the model specification are identical to
+(\ref{eq:binaryMask}). Note that the above representation follows from the fact that
+$$
+\int_0^\infty p(y_i|\vbeta,\vgamma,\sigma^2,a_i)p(a_i)\mbox{d}a_i = p(y_i|\vbeta,\vgamma,\sigma^2),
+$$ 
+
+\noindent which can be shown using properties of the inverse Gaussian distribution. 
+Using a variational Bayes approximation of $p(\vbeta,\sigma^2,\vgamma,\va|\vy)$
+by
+$$
+q(\vbeta,\sigma^2,\vgamma,\va ) 
+= q(\vbeta)q(\sigma^2) \left[ \prod_{j=1}^p q(\gamma_j) \right] \left[ \prod_{i=1}^n q(a_i) \right]
+$$
+
+\noindent
+the optimal $q$-densities are of the form
+$$
+\begin{array}{c}
+q^{\ast}(\vbeta) \ \mbox{ is a } \ N(\vmuq,\mSigmaq) \ \mbox{ density}, \quad
+q^{\ast}(\sigma^2) \ \mbox{ is a } \ \mbox{Inverse-Gamma}(\Aq,\Bq) \ \mbox{ density}, \\ [1ex]
+q^{\ast}(\gamma_j)  \ \mbox{ is a } \  \mbox{Bernoulli}(w_j) \ \mbox{ density for} \ j=1,\ldots,p, \\ [1ex]
+\mbox{and} \quad
+q^{\ast}(a_j)  \ \mbox{ is a Inverse-Gaussian}(\widetilde{A}_j,1) \ \mbox{ density for} \ i=1,\ldots,n,
+\end{array}
+$$
+
+\noindent where the optimal values for the parameters are obtained via Algorithm 
+\ref{alg:VBourmodel} which is derived in Appendix C. If
+$x$ has an inverse Gaussian distribution, denoted  
+$x\sim \mbox{Inverse-Gaussian}(\mu,\lambda)$ with mean $\mu$ and variance 
+$\mu^3/\lambda$, then it has density 
+$$
+p(x) = \sqrt{\frac{\lambda}{2\pi x^3}}
+\exp\left\{ -\frac{\lambda(x - \mu)^2}{2x\mu^2}\right\}, 
+\quad x,\mu,\lambda>0. 
+$$
+
+\noindent 
+At the bottom of  Algorithm \ref{alg:VBourmodel} the lower bound on
+$\log p(\vy;\rho)$ simplifies to
+$$
+\begin{array}{rl}
+\ds \log \underline{p}_{\mbox{\tiny Laplace}}(\vy;\rho)
+= \log \underline{p}(\vy;\rho) 
++ \frac{n}{2}\log(2\pi) 
+- n\log(2) - \sum_{i=1}^n\frac{1}{2\widetilde{A}_i},
+\end{array}
+$$
+
+\noindent where $\log \underline{p}(\vy;\rho)$ is the expression for the lower bound 
+defined in Section \ref{sec:Bayesian linear model selection}. Note that the 
+$\widetilde{A}_i$ can be rewritten as
+$$
+\ds \widetilde{A}_i \leftarrow
+\tau^{-1/2}\left[
+(y_i- \vx^T_i\mW\vmu)^2 + \vx_i^T\mW\mSigma\mW\vx_i
+ + w_i(1 - w_i)((\vx_i^T\vmu)^2 + \vx_i^T\mSigma\vx_i)
+   \right]^{-1/2}.
+$$
+
+\noindent Note that the term $(y_i- \vx^T_i\mW\vmu)^2$ can be interpreted as an
+estimate of the error in prediction of the $i$th sample whereas $\vx_i^T\mW\mSigma\mW\vx_i$
+can be interpreted as a measure of the influence for the $i$th sample. Thus, the 
+procedure will down-weight both outliers and high influence points simultaneously.
+ 
+
+ 
+
+  
+
+\subsection{Example 5: Diets simulation with Laplace errors}
+
+We now revisit Example 1 with Laplace distributed errors, i.e., where
+$\vvarepsilon$ follows the Laplace distribution with scale parameter $\sigma^2 = 0.5$.
+The results are summarized in Figure \ref{fig:07}, which suggests that
+the performance of the other methods compared is impaired by the non-Gaussian distributed
+errors. The VB method based on the Laplace distribution has best model selection performance
+and prediction accuracy over whole range of $\kappa$, except for the case where
+$\kappa=4$ where BMS has comparable accuracy.
+}
+
+ 
+
+
+
+
+
+\section{Conclusion}
+\label{sec:Conclusion}
+
+
+In this paper we have provided theory for a new approach which induces sparsity
+on the estimates of the regression coefficients for a Bayesian linear model.
+We have shown that these estimates are consistent, can be used to obtain
+valid standard errors, and that the true model can be found at an exponential
+rate in $n$. Our method performs well empirically compared to the penalized
+regression approaches on the numerical examples we considered and is both much faster and highly accurate when comparing to MCMC.
+
+
+Our theory is limited to assuming that $p<n$. This 
+might be mitigated to a certain extent by the use of screening procedures such 
+as SIS \citep{FanLv2008} or the High-dimensional Ordinary Least-squares Projection
+(HOLP) method of \cite{WangChen2015} 
+which can be seen as searching for a correct model with high probability
+whereas extending the theory to $p>n$ is future research.
+
+
+Theoretical extensions include considering the case where both $p$ and
+$n$ diverge. Such theory would be important for understanding how the errors
+of our estimators behave as $p$ grows relative to $n$. Expansions along this
+line of research would require combining the theory developed here with
+a detailed understanding of how ridge regression estimators behave as $n$ and
+$p$ grow such as developed by \cite{HsuEtal2014} or \cite{WangChen2015}.
+
+
+A second important theoretical
+extension would be to analyze the effect of more elaborate \joc{sparisity inducing}
+priors on
+the regression coefficients, e.g., where the normal ``slab'' in the spike and
+slab is replaced by the Laplace, horseshoe, negative-exponential-gamma and 
+generalized double Pareto distributions \citep[see ][]{wandormerod2011}.
+Another theoretical extension includes adapting the theory presented here to
+non-Gaussian response.
+However, such methodological (as opposed to theoretical) extensions would
+be relatively straightforward, as would extensions which handle missing data
+or measurement error highlighting the strength and flexibility of our approach.
+
+
+
+
+ 
+
+
+%\section*{Acknowledgments}
+
+%This research was partially supported by an Australian Research Council
+%Early Career Award DE130101670 (Ormerod) an Australian Research Council
+%Discovery Project DP130100488 (M\"uller) and an Australian Postgraduate Award (You).
+%\joc{We would like to thank Veronika Ro\v{c}kov\'a for providing code corresponding to the EVMS
+%method and the four reviewers, their comments which lead to an improved manuscript.}
+
+
+
+
+
+
+\bibliographystyle{elsarticle-harv}
+
+
+\small{
+\bibliography{SpikeSlab}
+}
+
+\newpage
+
+\setcounter{page}{1}
+
+
+%\doublespacing
+
+\centerline{\sf\Large A variational Bayes approach to variable selection}
+\medskip
+\centerline{\sf\Large Appendices}
+\medskip
+ 
+\medskip
+\centerline{20th of October 2015}
+
+
+
+\section*{Appendix A: Derivation of Algorithm 1}
+
+\joc{
+\noindent The $q$-densities corresponding to Algorithm 1 are derived below.
+The density $q(\vbeta)$ is given by:
+$$
+\begin{array}{ll}
+q(\vbeta)
+&\propto\exp\left[\bE_{-q(\vbeta)}
+\left\{ -\frac{1}{2\sigma^2}\| \vy-\mX\mGamma\vbeta \|^2 
+-\frac{||\vbeta||^2}{2\sigma^2_\beta}\right\}\right]\\
+&\propto\exp\left[ 
+-\tfrac{1}{2}\vbeta^T\left( \tau  (\mX^T\mX)\odot \mOmega + \sigma_\beta^{-2}\mI \right)\vbeta 
++ \vbeta^T\mW\mX^T\vy \tau  \right] \\
+&=\mbox{N}(\vmu,\mSigma),
+\end{array}
+$$
+
+\noindent where $\mSigma=(\tau (\mX^T\mX)\odot\mOmega + \sigma_\beta^{-2}\mI)^{-1}$, 
+$\vmu=\tau\mSigma\mW\mX^T\vy$, $\vw=\bE_q\vgamma$, $\mW=\mbox{diag}(\vw)$, 
+$\mOmega = \vw\vw^{T} + \mW\odot(\mI - \mW)$ and $\tau=\bE_q(1/\sigma^2)$. 
+Note that in the above derivation we have used
+$$
+\begin{array}{rl}
+\ds \bE_q(\mGamma\mX^T\mX\mGamma) 
+    & \ds = \bE_q((\mX^T\mX) \odot(\vgamma\vgamma^T)) \\
+    & \ds = (\mX^T\mX) \odot \bE_q(\vgamma\vgamma^T) \\
+    & \ds = (\mX^T\mX) \odot \mOmega. \\
+\end{array}
+$$
+
+\noindent 
+The density $q(\sigma^2)$ is given by:
+\begin{eqnarray*}
+\ds q(\sigma^2)
+	& \propto 
+	& \exp\left[\bE_{-q(\sigma^2)}\left\{
+	-\frac{1}{2\sigma^2}\| \vy-\mX\mGamma\vbeta\|^2 -\frac{n}{2}\log(\sigma^2) - (A+1)\log(\sigma^2)
+	-\frac{B}{\sigma^2}\right\}\right].
+\end{eqnarray*}
+
+\noindent Hence,
+$q(\sigma^2) = \mbox{Inverse-Gamma}(A+\tfrac{n}{2},s)$, where
+$s = B + \frac{1}{2}\left[
+\|\vy\|^2 - 2\vy^T \mX\mW\vmu
++\tr\left( (\mX^T\mX\odot\mOmega)(\vmu\vmu^T + \mSigma) \right)\right]
+$.
+
+\noindent Next noting that $\gamma_j=\gamma_j^2$ as $\gamma_j\in\{0,1\}$, the optimal $q(\gamma_j)$, $1\le j\le p$, take  the form
+\begin{eqnarray*}
+q(\gamma_j)
+	& \propto 
+	& \exp\left[ \gamma_j\,\bE_{-q_{\gamma_j}}\left\{
+	\mbox{logit}(\rho)
+	+\frac{\beta_j}{\sigma^2}\sum_{i=1}^n X_{ij}\left(y_i-\sum_{k\neq j}\beta_k X_{ik}\gamma_k\right)
+	-\frac{\beta_j^2}{2\sigma^2}\sum_{i=1}^n  X_{ij}^2\right\}\right]\\
+	& \propto
+	& \exp\left[\gamma_j\,\bE_{-q_{\gamma_j}}\left\{
+	\mbox{logit}(\rho)
+	+\frac{\beta_j}{\sigma^2}\mX_j^T \big(\vy-\mX_{-j}\mW_{-j}\vbeta_{-j}\big)
+	-\frac{\beta_j^2}{2\sigma^2}\mX_j^T \mX_j\right\}\right].
+\end{eqnarray*}
+
+\noindent Hence, $q(\gamma_j)=\mbox{Bern}(w_j)$, where $w_i=\mbox{expit}(\eta_j)$ and 
+$$
+\eta_j=\lambda -\tfrac{1}{2}\tau\mX_j^T\mX_j(\mu_j^2+\Sigma_{jj})
++
+\tau\mX^T_j\left[\vy\mu_j-\mX_{-j}\mW_{-j}(\vmu_{-j}\mu_j + \mSigma_{-j,j})\right].
+$$
+
+%\noindent The lower bound of $\log p(\vy)$ 
+%NEEDS to be rederived because of the change of order of updates
+ 
+}
+
+\newpage
+
+\section*{Appendix B: Proofs}\label{sec:minor}
+
+
+\noindent
+{\bf Proof Lemma \ref{lem:1}:}
+Note that $|\expit(-a)-\exp(-a)|=\exp(-2a)/(1+\exp(-a))<\exp(-2a)$, and also
+note that $\expit(a)=1-\expit(-a)$. Hence the result is as stated.
+\vspace{-0.5cm}\begin{flushright}$\Box$\end{flushright}
+
+
+\begin{Result}\label{res:1}
+	If $w_j^{(t)}>0$, $1\le j\le p$, then $\mOmega$ is positive definite.
+\end{Result}
+
+\noindent {\bf Proof of Result \ref{res:1}:} A matrix is positive definite if and only if
+for all non-zero real vector $\va = [a_1,\ldots,a_p]^T$ the scalar $\va^T\mOmega\va$
+is strictly positive \citep[Section 7.1]{Horn2012}. By definition
+$\va^T\mOmega\va = \va^T\big[\vw\vw^T + \mW(\mI - \mW)\big]\va
+=(\sum_{j=1}^p a_j w_j)^2 + \sum_{j=1}^p a_j^2w_j(1 - w_j)$.
+As $ 0 < w_j^{(t)}\leq 1$, $1\le j\le p$, we have $w_j(1 - w_j)\geq 0$ and hence
+$\sum_{j=1}^p a_j^2w_j(1 - w_j)\geq0$. Again, as $w_j^{(t)}>0$, $1\le j\le p$, we have $(\sum_{j=1}^p a_j w_j)^2>0$ for any non-zero vector $\va$. Hence, the result is as stated.
+\vspace{-0.5cm}\begin{flushright}$\Box$\end{flushright}
+
+\noindent
+Let
+$$
+\mbox{dof}(\alpha,\vw) = \tr\left[(\mX^T\mX\odot\mOmega)\left\{(\mX^T\mX)\odot\mOmega + \alpha\mI\right\}^{-1} \right]
+$$
+
+\noindent and
+\begin{equation}\label{eq:eigenvalueDecomposition}
+\mU\mbox{diag}(\vnu)\mU^T \quad \mbox{be the eigenvalue
+	decomposition of} \quad (\mX^T\mX)\odot\mOmega,
+\end{equation}
+
+\noindent where $\mU$ is an orthonormal matrix
+and $\vnu = [\nu_1,\ldots,\nu_{p}]^T$ is a vector of eigenvalues
+of $(\mX^T\mX)\odot\mOmega$.
+\begin{Result}\label{res:2}
+	Suppose $\mX^T\mX$ is semi-positive definite and
+	$w_j\in(0,1]$, $1\le j\le p$ and $\alpha\ge 0$ then the function
+	$\mbox{dof}(\alpha,\vw)$ is monotonically decreasing in $\alpha$ and satisfies $0<\mbox{dof}(\alpha,\vw)\le \mbox{rank}(\mX^T\mX\odot\mOmega)\leq p$.
+\end{Result}
+
+\noindent {\bf Proof of Result \ref{res:2} :} Let the eigenvalue decomposition
+(\ref{eq:eigenvalueDecomposition}) hold. Since $w_j\in(0,1]$, $1\le j\le p$
+is positive, by Result \ref{res:1} the matrix $\mOmega$ is positive definite. By the
+Schur product theorem \citep[Theorem 7.5.2]{Horn2012}, the matrix
+$(\mX^T\mX)\odot\mOmega$ is also semi-positive definite. Hence,
+$\nu_i$, $i=1,\ldots,p$ defined in Equation (\ref{eq:eigenvalueDecomposition}) is non-negative and number of non-zero $\nu_i, i=1,\ldots,p$ equals rank($\mX^T\mX\odot\mOmega$). Then, using properties of the
+orthonormal matrix $\mU$, we have
+$$
+\mbox{dof}(\alpha,\vw) =
+\tr\left[ \mU\mbox{diag}(\vnu)\mU^T
+\left(\mU\mbox{diag}(\vnu)\mU^T + \alpha\mI\right)^{-1}\right] =
+\sum_{j=1}^{p} \frac{\nu_j}{\nu_j + \alpha}=
+\sum_{\nu_j\neq 0} \frac{\nu_j}{\nu_j + \alpha}\leq \mbox{rank}(\mX^T\mX\odot\mOmega).
+$$
+
+\noindent Note that $\mX^T\mX\odot\mOmega$ is a $p\times p$ matrix, hence $\mbox{rank}(\mX^T\mX\odot\mOmega)\leq p$. Clearly, $\mbox{dof}(\alpha,\vw)$ is monotonically decreasing in $\alpha$ and $\mbox{dof}(\alpha,\vw)$ only approaches zero
+as $\alpha\to \infty$.
+\vspace{-0.5cm}\begin{flushright}$\Box$\end{flushright}
+
+
+\noindent The next lemma follows from Horn and Johnson (2012, Section 0.7.3):
+%\cite[][Section 0.7.3]{Horn2012}.
+
+\begin{Lemma}\label{lem:2}
+	The inverse of a real symmetric matrix can be written as
+	\begin{eqnarray}
+	\ds \left[ \begin{array}{cc}
+	\mA   & \mB \\
+	\mB^T & \mC
+	\end{array} \right]^{-1}
+	&  = &
+	\ds \left[ \begin{array}{cc}
+	\mI & \vzero \\
+	-\mC^{-1}\mB^T &  \mI
+	\end{array} \right]
+	\left[ \begin{array}{cc}
+	\widetilde{\mA} & \vzero \\
+	\vzero & \mC^{-1}
+	\end{array} \right]
+	\left[ \begin{array}{cc}
+	\mI    & -\mB\mC^{-1}\\
+	\vzero & \mI
+	\end{array} \right] \label{eq:blockdiag1}\\
+	&  = &
+	\ds\left[
+	\begin{array}{cc}
+	\widetilde{\mA}
+	& - \widetilde{\mA}\mB\mC^{-1} \\
+	-\mC^{-1}\mB^T\widetilde{\mA}
+	& \mC^{-1} + \mC^{-1}\mB^T\widetilde{\mA}\mB\mC^{-1}
+	\end{array}\right]\label{eq:blockdiag2}
+	\end{eqnarray}
+	
+	\noindent where $\widetilde{\mA} = \left(\mA-\mB\mC^{-1}\mB^T\right)^{-1}$
+	provided all inverses in (\ref{eq:blockdiag1}) and
+	(\ref{eq:blockdiag2}) exist.
+\end{Lemma}
+
+
+\begin{Lemma}\label{lem:3}
+	Let $\mM$ be a real positive definite symmetric $p\times p$ matrix,
+	$\va = [a_1,\ldots,a_p]^T$ be a real vector, and let the elements of the vector
+	$\vb = [b_1,\ldots,b_p]^T$ be positive. Then the quantity
+	$\va^T\left[\mM + \diag(\vb)\right]^{-1}\va$ is a strictly decreasing function
+	of any element of $\vb$.
+\end{Lemma}
+
+
+\noindent {\bf Proof of Lemma \ref{lem:3}:} Let the matrix $\mM + \diag(\vb)$ be partitioned as
+$$
+\mM + \diag(\vb) =
+\begin{bmatrix}
+M_{11} + b_1 & \vm^T_{12} \\
+\vm_{12}   & \mM_{22} + \mB_2
+\end{bmatrix}
+$$
+
+\noindent where $\vm_{12}=[M_{12},\dots,M_{1p}]^T$,
+$\mB_2 = \diag(b_2,\ldots,b_p)$ and
+$$
+\mM_{22}=
+\begin{bmatrix}
+M_{22} & \cdots & M_{2p} \\
+\vdots & \ddots & \vdots \\
+M_{p2} & \cdots & M_{pp}
+\end{bmatrix}.
+$$
+
+\noindent Then, by Equation (\ref{eq:blockdiag1}) in Lemma \ref{lem:2},
+\begin{equation}\label{eq:decrease}
+\va^T\left[\mM + \diag(\vb)\right]^{-1}\va
+= \frac{c_1^2}{b_1 + M_{11} - \vm^T_{12}(\mM_{22} + \mB_2)^{-1}\vm_{12}}
++ \vc_2^T(\mM_{22} + \mB_2)^{-1}\vc_2
+\end{equation}
+
+\noindent where
+$$
+\vc =
+\begin{bmatrix}
+1      & -\vm^T_{12}(\mM_{22} + \mB_2)^{-1} \\
+\vzero &  \mI
+\end{bmatrix}
+\va
+\qquad
+\mbox{and}
+\qquad
+\vc_2 = [c_2,\dots,c_p]^T.
+$$
+
+\noindent Note any principal submatrix of a positive definite matrix is positive definite \citep[Chapter 7.1.2]{Horn2012}. Hence, the matrix $(\mM + \diag(\vb))^{-1}$ is positive definite and
+$(b_1 + M_{11} - \vm^T_{12}(\mM_{22} + \mB_2)^{-1}\vm_{12})^{-1}$ is a positive scalar. Clearly, (\ref{eq:decrease}) is strictly decreasing as $b_1$ increases. The
+result follows for $b_j, 2\leq j\leq p$ after a relabeling argument.
+\vspace{-0.5cm}\begin{flushright}$\Box$\end{flushright}
+
+
+
+\smallskip
+\noindent The following result bounds the values that $\tau$ can take and is
+useful because these bounds do not depend on $\vmu$, $\mSigma$ or $\vw$.
+\cyc{
+	\begin{Result}\label{res:3}
+		Suppose the updates in Algorithm \ref{alg:Algorithm1} hold, then $\tau_L \le \tau^{(t)} \le \tau_U$ for all $t$
+		where
+		$$
+		\tau_L = \frac{2A + n -p }{
+			2B + 2\|\vy\|^2 + 2\vy^T\mX(\mX^T\mX)^{-1}\mX^T\vy + p\frac{2A + n -p}{(2A + n)\tau^{(0)}}}
+		\quad\mbox{\it and} \quad
+		\tau_U = \frac{2A + n}{2B + \|\vy - \mX(\mX^T\mX)^{-1}\mX^T\vy\|^2}.
+		$$
+		
+	\end{Result}
+	
+	\noindent {\bf Proof of Result \ref{res:3}:} From Algorithm \ref{alg:Algorithm1} we can express $\tau^{(t)}$ as
+	$$
+	\tau^{(t)} = \frac{ 2A + n }{ 2B
+		+ \|\vy - \mX\mW^{(t)}\vmu^{(t)}\|^2
+		+ {\vmu^{(t)}}^T[(\mX^T\mX)\odot\mW^{(t)}\odot(\mI - \mW^{(t)})]\vmu^{(t)}
+		+ {\tau^{(t-1)}}^{-1}\mbox{dof}({\tau^{(t-1)}}^{-1}\sigma_\beta^{-2},\vw^{(t)})}.
+	$$
+	
+	\noindent The upper bound for $\tau^{(t)}$ where $t>0$ follows from the above equation and following these inequalities:
+	\begin{description}
+		\item[(a)] $\mbox{dof}({\tau^{(t-1)}}^{-1}\sigma_\beta^{-2},\vw)> 0$ for any $\tau^{(t-1)}$;
+		\item[(b)] $\|\vy - \mX\mW\vmu\|^2 \ge \|\vy - \mX(\mX^T\mX)^{-1}\mX^T\vy\|^2$
+		(from least squares results); and
+		\item[(c)] $\vmu^T[(\mX^T\mX)\odot\mW\odot(\mI - \mW)]\vmu\ge 0$ (as $(\mX^T\mX)\odot\mW\odot(\mI - \mW)$ is clearly at least positive semidefinite).
+	\end{description}
+	
+	To obtain a lower bound for $\tau^{(t)}$ first note that for any vector $\vu,\vv\in \mathbb{R}^p$, $\|\vu+\vv\|^2\leq 2\|\vu\|^2+2\|\vv\|^2$, as $\|\vu+\vv\|^2+\|\vu-\vv\|^2=2\|\vu\|^2+2\|\vv\|^2$ and $\|\vu-\vv\|^2$ is non-negative. Hence
+	$\|\vy - \mX\mW\vmu\|^2 \le 2\|\vy\|^2 + 2\|\mX\mW\vmu\|^2$. Using Result \ref{res:2} and the fact $\vmu^{T}[(\mX^{T}\mX)\odot\mW\odot(\mI - \mW)]\vmu\ge 0$ we have
+	\begin{eqnarray*}
+		\tau^{(t)} &\ge& \frac{2A + n }{
+			2B + 2\|\vy\|^2 + {\vmu^{(t)}}^T[2\mW^{(t)}\mX^T\mX\mW^{(t)}+(\mX^T\mX)\odot\mW^{(t)}\odot(\mI-\mW^{(t)})]\vmu^{(t)} + p/\tau^{(t-1)}}\\
+		&\ge&\frac{2A + n}{
+			2B + 2\|\vy\|^2 + {\vmu^{(t)}}^T[2\mW^{(t)}\mX^T\mX\mW^{(t)}+2(\mX^T\mX)\odot\mW^{(t)}\odot(\mI-\mW^{(t)})]\vmu^{(t)}
+			+ p/\tau^{(t-1)}}\\
+		&=&\frac{2A + n}{
+			2B + 2\|\vy\|^2 + 2{\vmu^{(t)}}^T[(\mX^T\mX)\odot\mOmega^{(t)}]\vmu^{(t)} + p/\tau^{(t-1)}}.
+	\end{eqnarray*}
+	
+	\noindent Let the eigenvalue decomposition (\ref{eq:eigenvalueDecomposition}) hold. Then
+	$$
+	\begin{array}{l}
+	\vmu^T[(\mX^T\mX)\odot\mOmega]\vmu\\ [1ex]
+	\ds \qquad =
+	\vy^T\mX\mW\big[\mU\diag(\vnu)\mU^T + \tau^{-1}\sigma_\beta^{-2}\mI\big]^{-1}
+	\mU\diag(\vnu)\mU^T
+	\big[\mU\diag(\vnu)\mU^T + \tau^{-1}\sigma_\beta^{-2}\mI\big]^{-1}\mW\mX^T\vy\\[1ex]
+	\ds \qquad = \sum_{j=1}^p
+	\frac{\nu_j(\mU^{T}\mW\mX^T\vy)_j^2}{
+		(\nu_j + \tau^{-1}\sigma_\beta^{-2})^2}
+	\\
+	\ds \qquad \le \vy^T\mX^T\mW\big[(\mX^T\mX)\odot\mOmega\big]^{-1}\mW\mX^T\vy
+	\\ [1ex]
+	\ds \qquad = \vy^T\mX
+	\big[\mX^T\mX + \mW^{-1}\big\{(\mX^T\mX)\odot\mW\odot(\mI - \mW)\big\}\mW^{-1}\big]^{-1}\mX^T\vy
+	\\ [1ex]
+	\ds \qquad \le \vy^T\mX(\mX^T\mX)^{-1}\mX^T\vy,
+	\end{array}
+	$$
+	
+	\noindent where the last line follows from Lemma \ref{lem:3}. Combining this inequality the lower bound for $\tau^{(t)}, t>0$ can be expressed as
+	\begin{equation}\label{eq:lowerTau^t}
+	\tau^{(t)}_L=\frac{2A + n }{2B + 2\|\vy\|^2 + 2\vy^T\mX(\mX^T\mX)^{-1}\mX^T\vy + p/\tau^{(t-1)}}.
+	\end{equation}
+	
+	\noindent Note that $\tau^{(t-1)}\ge \tau^{(t-1)}_L$ and expand the recursive inequality, we obtain
+	\begin{eqnarray*}
+		\tau^{(t)}&\ge&\frac{2A + n }{2B + 2\|\vy\|^2 + 2\vy^T\mX(\mX^T\mX)^{-1}\mX^T\vy + p/\tau^{(t-1)}_L}\\
+		&\ge&\frac{2A + n }{ \frac{p^t}{(2A + n)^{t-1}\tau^{(0)}}
+			+ (2B + 2\|\vy\|^2 + 2\vy^T\mX(\mX^T\mX)^{-1}\mX^T\vy)
+			\sum_{k=0}^{t-1}\frac{p^k}{(2A + n)^k }}.
+	\end{eqnarray*}
+	
+	\noindent Note that as $p < n$,
+	$$\sum_{k=0}^{t-1}\frac{p^k}{(2A + n)^k} \le \frac{2A + n}{2A + n - p}
+	\quad \mbox{and} \quad
+	\frac{p^t}{(2A + n)^{t-1}} < p.
+	$$
+	Hence
+	$$\tau^{(t)}_L \ge \frac{2A + n -p }{
+		2B + 2\|\vy\|^2 + 2\vy^T\mX(\mX^T\mX)^{-1}\mX^T\vy + p\frac{2A + n -p}{(2A + n)\tau^{(0)}}},
+	$$
+	which is independent to $t$. Hence the lower bound on $\tau^{(t)}$ is as stated.
+	\vspace{-0.5cm}\begin{flushright}$\Box$\end{flushright}
+}
+
+
+
+\subsection*{A.1 Proof of Main Result \ref{mres:1}}\label{sec:proof1}
+
+It is clear from the numerical example in Section 2 that sparsity in the vector
+$\vmu$ is achieved (at least approximately). In order to understand how sparsity
+is achieved we need to understand how the quantities $\vmu$, $\mSigma$ and
+$\veta$ behave when elements of the vector $\vw$ are small.
+Define the $n\times n$ matrix $\mP_j$ by
+\begin{equation}\label{eq:Pj}
+\mP_j \equiv
+\mX_{-j}\mW_{-j}
+\left(  \mW_{-j}\mX_{-j}^T\mX_{-j}\mW_{-j} + \tau^{-1} \mD_{-j} \right)^{-1}
+\mW_{-j}\mX_{-j}^T, \quad 1\le j\le p;
+\end{equation}
+
+\noindent for $j\ne k, 1\le j,k \le p$ we define
+$$
+\ds \mP_{(j,k)}
+\equiv \mX_{-(j,k)}\mW_{-(j,k)}
+\left(
+\mW_{-(j,k)}\mX_{-(j,k)}^T\mX_{-(j,k)}\mW_{-(j,k)} + \tau^{-1}\mD_{-(j,k)}
+\right)^{-1} \mW_{-(j,k)}\mX_{-(j,k)}^T,
+$$
+
+\noindent and for a indicator vector $\vgamma$ we define
+\begin{equation}\label{eq:Pgamma}
+\ds \mP_\vgamma
+\equiv \mX_{-\vgamma}\mW_{-\vgamma}
+\left(
+\mW_{-\vgamma}\mX_{-\vgamma}^T\mX_{-\vgamma}\mW_{-\vgamma} +\tau^{-1}\mD_{-\vgamma}
+\right)^{-1} \mW_{-\vgamma}\mX_{-\vgamma}^T.
+\end{equation}
+
+
+
+\begin{Result}\label{res:5}
+	If (\ref{eq:mSigma}) holds then
+	\begin{equation}\label{eq:SigmaRearrange0}
+	\mSigma_{\vgamma,\vgamma}
+	= \left(
+	\tau \mW_{\vgamma}\mX_{\vgamma}^T\mX_{\vgamma}\mW_{\vgamma}
+	+ \mD_{\vgamma}
+	- \tau\mW_{\vgamma}\mX_{\vgamma}^T\mP_{\vgamma}\mX_{\vgamma}\mW_{\vgamma}
+	\right)^{-1}
+	\end{equation}
+	\begin{equation}\label{eq:SigmaRearrange3}
+	\mbox{\it and}\quad\mSigma_{\vgamma,-\vgamma}
+	%    = -\left(
+	%\tau \mW_{\vgamma}\mX_{\vgamma}^T\mX_{\vgamma}\mW_{\vgamma}
+	%+ \mD_{\vgamma}\right)^{-1}\tau %\mW_{\vgamma}\mX_{\vgamma}^T\mX_{-\vgamma}\mW_{-\vgamma}\mSigma_{-\vgamma,-\vgamma};
+	= - \mSigma_{\vgamma,\vgamma}\mW_{\vgamma}\mX_{\vgamma}^T\mX_{-\vgamma}\mW_{-\vgamma}
+	\left( \mW_{-\vgamma}\mX_{-\vgamma}^T\mX_{-\vgamma}\mW_{-\vgamma}
+	+ \tau^{-1}\mD_{-\vgamma}\right)^{-1};
+	\end{equation}
+	
+	\noindent for $1\le j\le p$ we have
+	\begin{equation}\label{eq:SigmaRearrange1}
+	\begin{array}{rl}
+	\ds \Sigma_{j,j} & = \left(
+	\sigma_\beta^{-2}
+	+ \tau w_j\|\mX_j\|^2
+	- \tau w_j^2\mX_j^T\mP_j\mX_j
+	\right)^{-1},
+	\end{array}
+	\end{equation}
+	\begin{equation}\label{eq:SigmaRearrange4}
+	\begin{array}{rl}
+	\mbox{\it and}\quad\ds \mSigma_{-j,j} & \ds =
+	- \left( \tau \mW_{-j}\mX_{-j}^T\mX_{-j}\mW_{-j} + \mD_{-j} \right)^{-1}
+	\mW_{-j}\mX_{-j}^T\mX_j(\tau w_j \Sigma_{j,j});
+	\end{array}
+	\end{equation}
+	
+	\noindent and for $j\ne k$, $1\le j,k\le p$ we have
+	\begin{equation}\label{eq:SigmaRearrange2}
+	\begin{array}{rl}
+	\ds \Sigma_{j,k}
+	& \ds = -\tau w_j w_k\mX_j^T(\mI - \mP_{(j,k)})\mX_k
+	\Big/
+	\Big[ \left(
+	\sigma_\beta^{-2} + \tau w_j\|\mX_j\|^2 - \tau w_j^2\mX_j^T\mP_{(j,k)}\mX_j
+	\right)
+	\\ %[2ex]
+	& \ds \qquad
+	\times \left(
+	\sigma_\beta^{-2} + \tau w_k\|\mX_k\|^2 - \tau w_k^2\mX_k^T\mP_{(j,k)}\mX_k
+	\right) - \{\tau w_j w_k\mX_j^T(\mI - \mP_{(j,k)})\mX_k\}^2 \Big].
+	\end{array}
+	\end{equation}
+	
+	\noindent If (\ref{eq:mSigma}) and (\ref{eq:vmu}) hold then
+	\begin{equation}\label{eq:muRearrange2}
+	\begin{array}{rl}
+	\ds \vmu_{\vgamma}
+	& \ds =
+	\tau \mSigma_{\vgamma,\vgamma} \mW_{\vgamma} \mX_{\vgamma}^T\left( \mI - \mP_{\vgamma}\right)\vy;
+	\end{array}
+	\end{equation}
+	
+	\noindent and
+	\begin{equation}\label{eq:muRearrange}
+	\ds \mu_j = \frac{\tau w_j \mX_j^T(\mI - \mP_j)\vy
+	}{
+	\sigma_\beta^{-2} + \tau w_j\|\mX_j\|^2 - \tau w_j^2\mX_j^T\mP_j\mX_j
+}, \qquad  1\le j\le p.
+\end{equation}
+
+
+%\noindent and if (\ref{eq:mSigma}), (\ref{eq:vmu}) and (\ref{eq:tau}) hold
+%then
+%\begin{equation}\label{eq:etaRearrange}
+%\begin{array}{rl}
+%\ds \eta_j
+%    & \ds = \lambda
+%+ \left(
+%\tfrac{1}{2} \tau\|\mX_j \|^2
+%+ w_j^{-1} \sigma_\beta^{-2}
+%\right)\mu_j^2
+%- \Big(
+%\tfrac{1}{2}\tau \|\mX_j \|^2
+%- w_j\tau\mX_j^T\mP_j\mX_j
+%\Big)\Sigma_{j,j}, \qquad 1\le j\le p.
+%\end{array}
+%\end{equation}
+\end{Result}
+%
+
+\noindent {\bf Proof of Result \ref{res:5}:}
+For a given indicator vector $\vgamma$ we can rewrite
+(\ref{eq:mSigma}) as
+$$
+\begin{array}{rl}
+\ds \left[ \begin{array}{cc}
+\mSigma_{\vgamma,\vgamma}    & \mSigma_{\vgamma,-\vgamma} \\
+\mSigma_{-\vgamma,\vgamma}    & \mSigma_{-\vgamma,-\vgamma}
+\end{array}
+\right]
+& \ds =
+\left[ \begin{array}{cc}
+\tau\mW_{\vgamma}\mX_{\vgamma}^T\mX_{\vgamma}\mW_{\vgamma} + \mD_{\vgamma}
+& \tau \mW_{\vgamma}\mX_{\vgamma}^T\mX_{-\vgamma}\mW_{-\vgamma} \\
+\mW_{-\vgamma}\mX_{-\vgamma}^T\mX_1\mW_{\vgamma}\tau
+& \tau\mW_{-\vgamma}\mX_{-\vgamma}^T\mX_{-\vgamma}\mW_{-\vgamma} + \mD_{-\vgamma}
+\end{array}
+\right]^{-1}
+\end{array}.
+$$
+
+\noindent
+Equations (\ref{eq:SigmaRearrange0}) and (\ref{eq:SigmaRearrange3}) can be obtained by applying Equation (\ref{eq:blockdiag2}) in Lemma \ref{lem:2} and equations (\ref{eq:SigmaRearrange1}) and (\ref{eq:SigmaRearrange4}) can be obtained by letting $\vgamma=\ve_j$ (where $\ve_j$ is the zero vector except
+for the value 1 in the $j$th entry). Similarly,
+$$
+\begin{array}{rl}
+\ds \Sigma_{1,2}
+%    & \ds =
+%\ve_1^T\left[ \tau \mW\mX^T\mX\mW + \mD \right]^{-1}\ve_2
+%\\
+& \ds =
+\left[ \begin{array}{c} 1 \\ 0 \end{array} \right]
+\left[\mD_{(1,2)} + \tau\mW_{(1,2)}\mX_{(1,2)}^T
+(\mI - \mP_{(1,2)})\mX_{(1,2)}\mW_{(1,2)} \right]^{-1}
+\left[ \begin{array}{c} 0 \\ 1 \end{array} \right]
+\\ [2ex]
+& \ds =
+\frac{-\tau w_1 w_2\mX_1^T\big(\mI - \mP_{(1,2)}\big)\mX_2}{\left[
+	\tau w_1^2 \mX_1^T\big(\mI - \mP_{(1,2)}\big)\mX_1 + D_1
+	\right]\left[
+	\tau w_2^2 \mX_2^T\big(\mI - \mP_{(1,2)}\big)\mX_2 + D_2
+	\right] - \left[\tau w_1 w_2\mX_1^T\big(\mI - \mP_{(1,2)}\big)\mX_2\right]^2_{{{{}}}} }
+\\ [2ex]
+& \ds = -\tau w_1 w_2\mX_1^T\big(\mI - \mP_{(1,2)}\big)\mX_2
+\Big/
+\Big[ \left(
+\sigma_\beta^{-2} + \tau w_1\|\mX_1\|^2 - \tau w_1^2\mX_1^T\mP_{(1,2)}\mX_1
+\right)
+\\ [2ex]
+& \ds \qquad
+\times \left(
+\sigma_\beta^{-2} + \tau w_2\|\mX_2\|^2 - \tau w_2^2\mX_2^T\mP_{(1,2)}\mX_2
+\right) - \big\{\tau w_1 w_2\mX_1^T(\mI - \mP_{(1,2)})\mX_2\big\}^2 \Big]
+\end{array}
+$$
+
+\noindent and (\ref{eq:SigmaRearrange2}) follows after a relabeling argument. Equation (\ref{eq:muRearrange2}) follows by substituting $\mSigma_{\vgamma,\vgamma}$ and $\mSigma_{\vgamma,-\vgamma}$ into,
+$$
+\begin{array}{rl}
+\ds \vmu_{\vgamma}
+& \ds = \left[ \begin{array}{cc}
+\mSigma_{\vgamma,\vgamma}    & \mSigma_{\vgamma,-\vgamma}
+\end{array}
+\right]
+\left[ \begin{array}{c}
+\tau \mW_{\vgamma}\mX_{\vgamma}^T\vy \\
+\tau \mW_{-\vgamma}\mX_{-\vgamma}^T\vy
+\end{array} \right]
+\end{array}
+$$
+
+\noindent and (\ref{eq:muRearrange}) follows by letting $\vgamma=\ve_j$.
+%Lastly, rearranging (\ref{eq:vmu}) we find
+%\begin{equation*}%\label{eq:muRearrange5}
+%\begin{array}{rl}
+%\left[ \tau\mW\mX^{T}\mX\mW + \mD \right]\vmu &= \tau\mW\mX^{T}\vy \\
+% \Rightarrow \tau\mW\mX^{T}\mX\mW\vmu + \mD\vmu &= \tau\mW\mX^{T}\vy \\
+% \Rightarrow \mD\vmu &= \tau\mW\mX^{T}(\vy - \mX\mW\vmu) \\
+% \Rightarrow w_j^{-1}d_j\mu_j &= \tau \mX_j^{T}(\vy - \mX\mW\vmu), \quad \mbox{for $1\le j\le p$}.
+%\end{array}
+%\end{equation*}
+%
+%\noindent Hence, via a simple algebraic manipulation, $\eta_j$ may be written as
+%\begin{equation}\label{eq:eta3}
+%\begin{array}{rl}
+%\ds \eta_j
+%    & \ds =
+%\lambda
+%- \tfrac{1}{2}\tau(\mu_j^2 + \Sigma_{j,j})\|\mX_j\|^2
+%+ \mu_j\tau\mX_j^T(\vy - \mX_{-j}\mW_{-j}\vmu_{-j})
+%- \tau\mX_j^T\mX_{-j}\mW_{-j}\mSigma_{-j,j}
+%\\
+%    & \ds =
+%\lambda
+%- \tfrac{1}{2}\tau(\mu_j^2 + \Sigma_{j,j})\|\mX_j\|^2
+%- \tau\mX_j^T\mX_{-j}\mW_{-j}\mSigma_{-j,j}
+%\\ [1ex]
+%    & \ds \qquad \qquad
+%+ \mu_j\tau\mX_j^T(\vy - \mX_{-j}\mW_{-j}\vmu_{-j} - \mX_jw_j\mu_j)
+%+ \mu_j^2\tau w_j\|\mX_j\|^2
+%\\ [1ex]
+%   & \ds = \lambda
+%+ \left( w_j - \tfrac{1}{2} \right) \tau\|\mX_j \|_2^2 \mu_j^2
+%- \tfrac{1}{2}\tau \|\mX_j \|^2\Sigma_{j,j}
+%+ \tau\mX_j^T(\vy - \mX\mW\vmu)\mu_j
+%- \tau\mX_j^T\mX_{-j}\mW_{-j}\mSigma_{-j,j}
+%\\ [1ex]
+%    & \ds = \lambda
+%+ \left[ \left( w_j - \tfrac{1}{2} \right) \tau\|\mX_j \|_2^2 + w_j^{-1} D_j \right]\mu_j^2
+%- \tfrac{1}{2}\tau \|\mX_j \|^2\Sigma_{j,j}
+%- \tau\mX_j^T\mX_{-j}\mW_{-j}\mSigma_{-j,j}.
+%\end{array}
+%\end{equation}
+%
+%\noindent Substituting (\ref{eq:SigmaRearrange1}), %(\ref{eq:SigmaRearrange4}) and  (\ref{eq:muRearrange})
+%into (\ref{eq:eta3}) and simplifying gives (\ref{eq:etaRearrange}).
+\vspace{-0.5cm}\begin{flushright}$\Box$\end{flushright}
+
+\noindent
+\cyc{From Result \cyc{\ref{res:3}} we have
+	that $\tau^{(t)}$ is bounded for all $t$ as $(y_i,\vx_i)$ are observed
+	so that all quantities are deterministic.
+	From Equation (\ref{eq:muRearrange})
+	we see that $\mu_j^{(t)}$ is clearly $O(w_j^{(t)})$ as $\mP_j$ does not depend on $w_j$. Noting that
+	$\lim_{w_j\to 0} \Sigma^{(t)}_{j,j} = \sigma_\beta^2$ follows from Equation (\ref{eq:SigmaRearrange1})
+	and
+	the result for $\Sigma^{(t)}_{j,j}$ follows after a Taylor series argument.
+	The result $\Sigma^{(t)}_{j,k} = O(w_j^{(t)}w_k^{(t)})$, $j\ne k$ follows from
+	Equation (\ref{eq:SigmaRearrange2}).
+	We can see that the update for $w_j^{(t+1)}$ in Algorithm \ref{alg:Algorithm1} is as stated
+	by combining Equation (\ref{eq:etaj})
+	with the fact that $\mu_j^{(t)} = O(w_j^{(t)})$,
+	$\Sigma_{j,j}^{(t)} = \sigma_\beta^2 + O(w_j^{(t)})$
+	$\Sigma_{j,k}^{(t)} = O(w_j^{(t)}w_k^{(t)})$ and
+	from Result \ref{res:3} we have $\tau^{(t)} = O(1)$.
+	This completes the proof of Main Result 1.}
+
+
+
+
+
+\subsection*{A.2 Proof of Main Result \ref{mres:2}}\label{sec:proof2}
+
+For the remainder of this section we will assume that $\vy$ and
+$\mX$ (and consequently $\vmu^{(t)}$,$\mSigma^{(t)}$,$\tau^{(t)}$ and $\vw^{(t)}$ for $t=0,1,\ldots$) are random quantities. Note that Results \ref{res:1}--\ref{res:5} are still valid, when assuming random quantities $\vy$ and $\mX$. Define the following stochastic sequences:
+\begin{equation}\label{eq:seqDefs}
+\begin{array}{c}
+\mA_n = n^{-1}\mX^T\mX, \quad
+\vb_n = n^{-1}\mX^T\vy, \quad
+c_n = \mbox{dof}(\tau^{(t)}\sigma_\beta^{-2},\vone)
+\quad \mbox{and} \quad
+\vbeta_{\mbox{\tiny LS}} = (\mX^T\mX)^{-1}\mX^T\vy.
+\end{array}
+\end{equation}
+
+\noindent Assuming (A1)--(A4) \cite{You2014} proved
+consistency results for Bayesian linear models.
+We will need stronger results to prove consistency of the estimates
+corresponding to Algorithm 2. Lemma \ref{lem:6} will aid in obtaining
+these results.
+
+
+\begin{Lemma}[\citealp{Bishop2007}, Theorem 14.4.1]\label{lem:6}
+	If $\{ X_n \}$ is a
+	stochastic sequence with $\mu_n=\bE(X_n)$ and
+	$\sigma_n^2=\mbox{Var}(X_n)<\infty$, then $X_n - \mu_n = O_p(\sigma_n).$
+\end{Lemma}
+
+\noindent Hence, from Lemma \ref{lem:6} and assumptions (A1)--(A5) we have
+\begin{equation}\label{eq:Xlimits}
+\begin{array}{rlrl}
+\mA_n &= \mS + \mO^m_p\big(n^{-1/2}\big),
+&\mA_n^{-1} &= \mS^{-1} + \mO^m_p\big(n^{-1/2}\big),\\ [1ex]
+\|\mX_j\|^2 &= n\bE(x_j^2) + O_p\big(n^{1/2}\big),
+& \|\vepsilon\|^2 &= n\sigma_0^2 + O_p\big(n^{1/2}\big),\\ [1ex]
+n^{-1}\mX\vepsilon &= \mO_p^v\big(n^{-1/2}\big)\quad \mbox{and}
+& \vb_n&=n^{-1}\mX^{T}(\mX\vbeta_0+\vepsilon) = \mS\vbeta_0 + \mO_p^v\big(n^{-1/2}\big).
+\end{array}
+\end{equation}
+
+%\noindent For convenience, we denote
+%\begin{eqnarray}\label{eq:Mx}
+%\mM = \mA_n - \bE(\vx_i\vx_i^T) = \mO^m_p\big(n^{-1/2}\big).
+%\end{eqnarray}
+
+\noindent Before we improve upon the results of \cite{You2014} we need to show that $\tau^{(t)}$ is bounded for all $t$. In fact $\tau^{(t)}$ is bounded in
+probability for all $t$ as the following result shows.
+
+\begin{Result}\label{res:6}
+	Assume (A1)--(A5), then for $t>0$ we have
+	$\tau^{(t)} = O_p(1)$ and $1/\tau^{(t)} = O_p(1)$.
+\end{Result}
+
+\cyc{\noindent {\bf Proof of Result \ref{res:6}:} Using Result \ref{res:3}, we obtain
+	$\tau_L <  \tau^{(t)} < \tau_U$ and $\tau_U^{-1} <  1/\tau^{(t)} < \tau_L^{-1}$ for $t>1$ where
+	$$
+	\begin{array}{rl}
+	\ds \tau_U^{-1}
+	= \frac{2B + \|\vy - \mX(\mX^T\mX)^{-1}\mX^T\vy\|^2}{2A + n}
+	= \left(\frac{n}{2A + n}\right)
+	\frac{2B + \|\vy - \mX(\mX^T\mX)^{-1}\mX^T\vy\|^2}{n}
+	\end{array}
+	$$
+	
+	\noindent and
+	$\tfrac{1}{n}\|\vy - \mX(\mX^T\mX)^{-1}\mX^T\vy\|^2
+	= \tfrac{1}{n}\|\vy\|^2 - \tfrac{1}{n}\vy^T\mX(\mX^T\mX)^{-1}\mX^T\vy$.
+	By (A1)--(A4) and the strong law of large numbers
+	$$
+	\begin{array}{rl}
+	\ds \tfrac{1}{n}\|\vy\|^2
+	& \ds= \tfrac{1}{n}\|\mX\vbeta_0 + \vvarepsilon\|^2
+	= \tfrac{1}{n}
+	\vbeta_0^T\mX^T\mX\vbeta_0
+	+ \tfrac{1}{n}2\vvarepsilon^T\mX\vbeta_0
+	+ \tfrac{1}{n}\|\vvarepsilon\|^2\\ [1ex]
+	&\ds\stackrel{\mbox{\tiny a.s.}}{\to}
+	\vbeta_0^T\mS\vbeta_0 + 2\bE(\vvarepsilon_i)\bE(\vx_i^T)\vbeta_0+ \bE(\vvarepsilon^2_i)
+	=\vbeta_0^T\mS\vbeta_0 + \sigma_0^2.
+	\end{array}
+	$$
+	
+	\noindent Using (\ref{eq:Xlimits}), we have
+	$\tfrac{1}{n}\vy^T\mX(\mX^T\mX)^{-1}\mX^T\vy
+	= \vb_n^T\mA_n^{-1}\vb_n
+	\stackrel{\mbox{\tiny P}}{\to}  \vbeta_0^T\mS\vbeta_0$ and hence $\tau_U^{-1}
+	\stackrel{\mbox{\tiny P}}{\to} \sigma_0^2$. By the continuous mapping theorem
+	$\tau_U \stackrel{\mbox{\tiny P}}{\to} \sigma_0^{-2}$.
+	
+	In a similar manner to $\tau_U$ we have
+	\begin{eqnarray*}
+		\ds \tau_L^{-1}
+		&=& \frac{
+			2B + 2\|\vy\|^2 + 2\vy^T\mX(\mX^T\mX)^{-1}\mX^T\vy + p\frac{2A + n -p}{(2A + n)\tau^{(0)}}}{2A + n -p }\\
+		&=& \left( \frac{n}{2A + n - p} \right)
+		\frac{2B + 2\|\vy\|^2 + 2\vy^T\mX(\mX^T\mX)^{-1}\mX^T\vy +   p\frac{2A + n -p}{(2A + n)\tau^{(0)}}}{n}\stackrel{\mbox{\tiny P}}{\to}
+		2\sigma_0^2 + 4\vbeta_0^T\mS\vbeta_0.
+	\end{eqnarray*}
+	
+	\noindent By the continuous mapping theorem
+	$\tau_L \stackrel{\mbox{\tiny P}}{\to}
+	[4\vbeta_0^T\mS\vbeta_0 + 2\sigma_0^2]^{-1}
+	$. Hence $\tau^{(t)}, t>1$ is bounded in probability between two constants.
+	Similarly, $\tau^{(1)}$ is bounded as $\tau^{(0)}=1$ is $O_p(1)$.
+	\vspace{-0.5cm}\begin{flushright}$\Box$\end{flushright}
+}
+%\medskip
+%\noindent {\bf Result \ref{res:8}:} {\it Assume (A1)-(A4). Then for $t>0$ we have
+%$\mSigma^{(t)} = O_p\big(n^{-1}\big)$ and
+%$\mbox{dof}(1/(\sigma_\beta^2\tau^{(t)}),\vw^{(t)}) = p + O_p\big(n^{-1}\big)$}.
+
+%\medskip
+%\noindent {\bf Proof:} Using the definition of $\mSigma^{(t)}$
+%and the (\ref{eq:seqDefs}) we have
+%$$
+%\mSigma^{(t)} = \tfrac{1}{n}(\tau^{(t)})^{-1}
+%\left[ (\mA_n\odot\mOmega^{(t)}) + 1/(n\sigma_\beta^2\tau^{(t)})\mI\right]^{-1}
+%$$
+
+%\noindent where
+%\begin{equation}\label{eq:defOmegat}
+%\mOmega^{(t)}
+%= \vw^{(t)}(\vw^{(t)})^T + \mW^{(t)}\odot(\mI - \mW^{(t)}).
+%\end{equation}
+
+%\noindent Using a Taylor series expansion
+%\begin{equation}\label{eq:OmegaTaylor}
+%\mSigma^{(t)} = \tfrac{1}{n}(\tau^{(t)})^{-1}
+%\left( \mA_n\odot\mOmega^{(t)} \right)^{-1} -
+%\tfrac{1}{n}(\tau^{(t)})^{-1}\lambda^*
+%\left( \mA_n\odot\mOmega^{(t)} \right)^{-2}
+%\end{equation}
+
+%\noindent where $\lambda^* \in [0,1/(n\sigma_\beta^2\tau^{(t)})]$. Note from
+%Result \ref{res:8} that $\lambda^*=O_p\big(n^{-1}\big)$, since $\mOmega_{j,k}^{(t)}\le 1$ for
+%$1\le j,k\le p$ we have $\mOmega^{(t)} = O_p(1)$ and from Lemma \ref{lem:3} we have
+%$\mA_n = O_p(1)$. Hence, the result for $\mSigma^{(t)}$ follows.
+
+%Similarly, using the definitions stated before Lemma \ref{lem:3} we have
+%$$
+%\begin{array}{rl}
+%\ds \mbox{dof}(1/(\sigma_\beta^2\tau^{(t)}),\vw^{(t)})
+%%    & \ds = \mbox{tr}\left[
+%%(\mX^T\mX)\odot\mOmega^{(t)} \left( (\mX^T\mX)\odot\mOmega^{(t)} + %1/(\sigma_\beta^2\tau^{(t)})\mI %\right)^{-1}
+%%\right]
+%%\\
+%    & \ds = \mbox{tr}\left[
+%\left(\mA_n\odot\mOmega^{(t)}\right) \left( \left(\mA_n\odot\mOmega^{(t)} \right) + %1/(n\sigma_\beta^2\tau^{(t)})\mI \right)^{-1}
+%\right].
+%\end{array}
+%$$
+
+%\noindent Substituting (\ref{eq:OmegaTaylor}) into this expression and using
+%similar arguments the result for $\mbox{dof}$ follows.
+%%$$
+%%\ds \mbox{dof}(1/(\sigma_\beta^2\tau^{(t)}),\vw^{(t)})
+%%    = p -
+%%\lambda^* \mbox{tr}\left[ (\mA_n\odot\mOmega^{(t)})^{-1}\right]
+%%$$
+%\vspace{-0.5cm}\begin{flushright}$\Box$\end{flushright}
+
+
+%\medskip
+%\noindent Main Result \ref{res:4} uses similar arguments as \Cite{You2014} but
+%attains more precise rates of convergence.
+%
+%\medskip
+%\noindent {\bf Main Result \ref{res:4}:} {\it Let $\vw_0 = \vone$ then under assumptions
+%(A1)-(A5) we have}
+%$$
+%\ds \mSigma^{(1)}
+%    = \tfrac{\sigma_0^2}{n}[\bE(\vx_i\vx_i^T)]^{-1} + O_p(n^{-3/2}),
+%\quad
+%\vmu^{(1)} = \vbeta_0 + O_p\big(n^{-1/2}\big)
+%\quad \mbox{and} \quad
+%\tau^{(1)} = \sigma_0^{-2} + O_p\big(n^{-1/2}\big).
+%$$
+%
+%
+%\medskip
+%\noindent {\bf Proof:} Firstly, from Result \ref{res:8}, $\tau^{(1)}=O_p(1)$ and
+%$1/\tau^{(1)}=O_p(1)$. Secondly, via a Taylor series expansion
+%
+%\begin{equation}\label{eq:Sigma1}
+%\ds \mSigma^{(1)}
+%%= (\tau^{(1)})^{-1}
+%%\left[ \mX^T\mX + (\tau^{(1)})^{-1}\sigma_\beta^{-2}\mI \right]^{-1}
+%= \tfrac{1}{n}(\tau^{(1)})^{-1}
+%\left[ \mA_n + \tfrac{1}{n}(\tau^{(1)})^{-1}\sigma_\beta^{-2}\mI \right]^{-1}
+%= \tfrac{1}{n}(\tau^{(1)})^{-1}  \mA_n^{-1}
+%- \tfrac{1}{n}(\tau^{(1)})^{-1} \lambda^* \mA_n^{-2}
+%\end{equation}
+%
+%
+%\noindent where again
+%$\lambda^*\in [0,(n \tau^{(1)}\sigma_\beta^{2})^{-1}] = O_p\big(n^{-1}\big)$.
+%From assumption (A5) and Lemma \ref{lem:5} we have
+%$\mA_n = \bE(\vx_i\vx_i^T) + O_p\big(n^{-1/2}\big)$ and the result holds for
+%$\mSigma^{(1)}$. Next,
+%$$
+%\ds \vmu^{(1)}
+%= \left[ \mA_n + 1/(n\tau^{(1)}\sigma_\beta^2)\mI \right]^{-1} \vb_n
+%\\
+%= \vbeta_{\mbox{\tiny LS}}
+%- \lambda^* \mA_n^{-1}\vbeta_{\mbox{\tiny LS}}
+%= \vbeta_0 + O_p\big(n^{-1/2}\big)
+%$$
+%
+%\noindent using Lemma \ref{lem:6} and since $\lambda^*\mA_n^{-1}\vbeta_{\mbox{\tiny LS}}$
+%is clearly $O_p\big(n^{-1}\big)$. Finally, from Result \ref{res:4} $\tau^{(1)}$ simplifies to
+%the first line of
+%$$
+%\begin{array}{rl}
+%\ds \tau^{(1)}
+%    & \ds =
+%\frac{
+%2A + n - \mbox{dof}(1/(\tau^{(1)}\sigma_\beta^2),\vone)
+%}{
+%2B + \|\vy - \mX\vmu\|^2
+%}
+%\\
+%%    & \ds =
+%%\frac{
+%%2A + n - p + O_p\big(n^{-1}\big)
+%%}{
+%%2B + \|\vy - \mX(\vbeta_0 + O_p\big(n^{-1/2}\big))\|^2
+%%}
+%%\\
+%    & \ds =
+%\frac{
+%1 + O_p\big(n^{-1}\big)
+%}{
+%2B/n
+%+ n^{-1}\|\vy - \mX\vbeta_0\|^2
+%+ n^{-1}(\vy^T\mX)\vone O_p\big(n^{-1/2}\big)
+%+ \vone^T\mX^T\mX\vone  O_p\big(n^{-2}\big)
+%}.
+%\end{array}
+%$$
+%
+%\noindent Then $n^{-1}\|\vy - \mX\vbeta_0\|^2 = n^{-1}\|\vvarepsilon\|^2
+%= \sigma_0^2 + O_p\big(n^{-1/2}\big)$ follows from Lemma \ref{lem:6}. From Lemma \ref{lem:3} we have
+%$n^{-1}\vy^T\mX\vone = \vbeta_0^T\bE(\vx_i\vx_i^T)\vone + o_p(1)$ and
+%from (\ref{eq:Xlimits}) we have $\vone^T\mX^T\mX\vone =
+%n\vone^T\bE(\vx_i\vx_i^T)\vone  + O_p\big(n^{1/2}\big)$. After a Taylor series argument
+%we obtain the stated result for $\tau^{(1)}$. Substitute $\tau^{(1)}$ back to %(\ref{eq:Sigma1}), we obtain the stated result for $\mSigma^{(1)}$.
+%\vspace{-0.5cm}\begin{flushright}$\Box$\end{flushright}
+%
+
+\noindent
+We will next derive some properties for correct models.  %Let
+%%$p_{\vgamma}=\mathbf{1}^T\vgamma$ and
+%$\mX_{\vgamma}$ denote the columns of the full design matrix $\mX$ with columns corresponding to the nonzero elements %of $\vgamma$.
+%Without loss of generality let the elements of $\vbeta$ be ordered such that the
+%first $\vone^T\vgamma_0$ elements are nonzero and the remaining elements are
+%zero, that is,
+%$$
+%\vbeta_0 \equiv \left[ \begin{array}{c}
+%\vbeta_{0,\vgamma} \\
+%\vbeta_{0,-\vgamma}
+%\end{array} \right] = \left[ \begin{array}{c}
+%\vbeta_{0,\vgamma} \\
+%\vzero
+%\end{array} \right]
+%$$
+\noindent Note that, by definition, $\vbeta_{0,-\vgamma} = \vzero$ and we denote
+$j\in\vgamma$ if $\gamma_j=1$ and $j\not\in\vgamma$ if $\gamma_j=0$.
+
+
+\medskip
+\noindent {\bf Definition:} Let $\vgamma$ be a correct model. Then we
+say that $\vw^{(t)}$ is ``close'' to $\vgamma$ in probability if
+$$
+\ds w_j^{(t)} = \left\{ \begin{array}{ll}
+1 - d_{nj}   & j\in\vgamma \\
+d_{nj}     & j\notin\vgamma
+\end{array}\right., 1\leq j\leq p,
+$$
+
+\noindent where $d_{nj}$, $1\le j\le p$, is a sequences of
+positive random variables such that $nd_{nj}$ converges in probability
+to zero.
+
+\medskip
+\noindent
+In the main results we assume that $\vw^{(t)}$ is close to a correct model.
+Under this assumption we prove, in the following order, that:
+\begin{itemize}
+	\item $\vmu^{(t)}$ is a consistent estimator of $\vbeta$;
+	\item $\tau^{(t)}$ is a consistent estimator of $\sigma_0^{-2}$;
+	\item $\mSigma^{(t)} = \mbox{cov}(\vbeta_{\mbox{\tiny LS}}) + \mO_p^m(n^{-3/2})$; and
+	\item $\vw^{(t+1)}$ is also ``close'' to the true model in probability.
+\end{itemize}
+
+\noindent We can then use these results recursively to obtain similar
+results for the $T$th iteration of the Algorithm \ref{alg:Algorithm1}, where $T>t$.
+In the next few results we use the following quantities:
+\begin{equation}\label{eq:Tdefinitions}
+\begin{array}{c}
+\ds \mT_1 = \mT_2  - \mT_3\mT_4,
+\qquad
+\ds \mT_2 = (n^{-1}\mX_{\vgamma}^T\mX_{\vgamma}) \odot(\mOmega_{\vgamma}^{(t)} - \vone\vone^T) + (n\tau^{\cyc{(t-1)}}\sigma_\beta^2)^{-1}\mI, \\ [1ex]
+\ds \mT_3 = (n\tau^{\cyc{(t-1)}}\sigma^2_\beta)\mW_{\vgamma}^{(t)}(n^{-1}\mX_{\vgamma}^T\mX_{-\vgamma})\mW_{-\vgamma}^{(t)}\left[ \mI + \mT_5 \right]^{-1},
+\qquad
+\ds \mT_4 = \mW_{-\vgamma}^{(t)}(n^{-1}\mX_{-\vgamma}^T\mX_{\vgamma}) \mW_{\vgamma}^{(t)}, \\ [1ex]
+\ds \mT_5 = (n\tau^{\cyc{(t-1)}}\sigma^2_\beta)(n^{-1}\mX_{-\vgamma}^T\mX_{-\vgamma})\odot\mOmega_{-\vgamma}^{(t)}
+\quad
+\mbox{and}\quad
+\ds \vt_1 = (\mW_{\vgamma}^{(t)} - \mI)(n^{-1}\mX_{\vgamma}^T\vy)
+- \mT_3\mW_{-\vgamma}^{(t)}(n^{-1}\mX_{-\vgamma}^T\vy).
+\end{array}
+\end{equation}
+
+\begin{Result}\label{res:7}
+	Assume (A1)--(A5) hold. Let $\vgamma$ be a correct model. Suppose that
+	$\vw^{(t)}$ is close to $\vgamma$ then
+	$$
+	\begin{array}{c}
+	\mT_1 = \mO_p^m(n^{-1} + \|\vd_{n,\vgamma}\|_\infty + n\|\vd_{n,-\vgamma}\|_\infty^2 ),
+	\quad
+	\ds \mT_2= \mO_p^m( n^{-1} + \|\vd_{n,\vgamma}\|_\infty ),
+	\quad
+	\ds \mT_3 = \mO_p^m(n\|\vd_{n,-\vgamma}\|_\infty), \\ [1ex]
+	\quad
+	\mT_4 =  \mO_p^m(\|\vd_{n,-\vgamma}\|_\infty),
+	\quad
+	\ds \mT_5 =  \mO_p^m(n\|\vd_{n,-\vgamma}\|_\infty)
+	\quad \mbox{and} \quad
+	\ds \vt_1 = \mO_p^v(\|\vd_{n,\vgamma}\|_\infty).
+	\end{array}
+	$$
+\end{Result}
+
+
+\noindent {\bf Proof of Result \ref{res:7}:} Firstly,
+$$
+\begin{array}{rl}
+\ds \mOmega_\vgamma^{(t)} - \vone\vone^T
+& \ds = (\vw_{\vgamma}^{(t)})(\vw_{\vgamma}^{(t)})^T + \mW_{\vgamma}^{(t)}(\mI - \mW_{\vgamma}^{(t)}) - \vone\vone^T \\ [1ex]
+& \ds = (\vone - \vd_{n,\vgamma})(\vone - \vd_{n,\vgamma})^T + (\mI - \mD_{n,\vgamma})\mD_{n,\vgamma} - \vone\vone^T \\ [1ex]
+& \ds = \vd_{n,\vgamma}\vd_{n,\vgamma}^T - \vone\vd_{n,\vgamma}^T  - \vd_{n,\vgamma}\vone^T + (\mI - \mD_{n,\vgamma})\mD_{n,\vgamma} \\ [1ex]
+& \ds = \mO_p^m( \|\vd_{n,\vgamma}\|_\infty )
+\end{array}
+$$
+where $\mD_{n,\vgamma}=\mbox{diag}(\vd_{n,\vgamma})$. Similarly, $\mOmega_{-\vgamma}^{(t)}=\mO_p^d(\|\vd_{n,-\vgamma}\|_\infty)$.
+Again, using (\ref{eq:Xlimits}) and  Result \ref{res:6} we have
+$\mT_2= [\mS_{\vgamma,\vgamma} + \mO_p^m(n^{-1/2})]\odot\mO_p^d( \|\vd_{n,\vgamma}\|_\infty )
++ \mO_p^d(n^{-1})
+= \mO_p^m( n^{-1} + \|\vd_{n,\vgamma}\|_\infty )$.
+Next, using (\ref{eq:Xlimits}) and Result \ref{res:6} we have
+$$
+\begin{array}{rl}
+\ds \mT_5
+& \ds = (n\tau^{\cyc{(t-1)}}\sigma^2_\beta)(n^{-1}\mX_{-\vgamma}^T\mX_{-\vgamma})\odot\mOmega_{-\vgamma}^{(t)}
+\\ [1ex]
+& \ds
+= O_p(n)[\mS_{-\vgamma,-\vgamma} + \mO_p(n^{-1/2})]\odot\mO_p^m(\|\vd_{n,-\vgamma}\|_\infty) \\ [1ex]
+& \ds = \mO_p^m(n\|\vd_{n,-\vgamma}\|_\infty).
+\end{array}
+$$
+
+\noindent Expanding and simplifying the above equation obtains
+the result for $\mT_5$. Now since, using the
+assumption of $\vw^{(t)}$ being close to $\vgamma$
+we have
+$n\|\vd_{n,-\vgamma}\|_\infty = o_p(1)$ and so
+$\mT_5 = \mo_p^m(1)$. By the continuous mapping theorem, we have
+$(\mI + \mT_5)^{-1} = \mI + \mO_p^m(n\|\vd_{n,-\vgamma}\|_\infty)$. Next,
+$\mT_4 = \mD_{n,-\vgamma} [\mS_{-\vgamma,\vgamma} + \mO_p^m(n^{-1/2})]
+(\mI - \mD_{n,\vgamma}).
+$
+\noindent Expanding and simplifying the above expression
+obtains the result for $\mT_4$. Furthermore,
+$$
+\ds \mT_3
+= n\tau^{\cyc{(t-1)}}\sigma^2_\beta\mT_4^T(\mI + \mT_5)^{-1}
+=
+O_p(n)\mO_p^m(\|\vd_{n,-\vgamma}\|_\infty)[\mI + \mO_p^m(n\|\vd_{n,-\vgamma}\|_\infty)].
+%	= \mO_p^m(n\|\vd_{n,-\vgamma}\|_\infty)
+$$
+
+\noindent Expanding and simplifying the above expression obtains
+the result for $\mT_3$. Substituting the order
+expressions for $\mT_2$, $\mT_3$ and $\mT_4$ in the
+expression for $\mT_1$. Then expanding and simplifying
+obtains the result for $\mT_1$. Finally, using (\ref{eq:Xlimits}) we have
+$$
+\begin{array}{rl}
+\ds \vt_1
+& \ds = (\mW_{\vgamma}^{(t)} - \mI)(n^{-1}\mX_{\vgamma}^T\vy)
+- \mT_3\mW_{-\vgamma}^{(t)}(n^{-1}\mX_{-\vgamma}^T\vy)
+\\ [1ex]
+& \ds = \mO_p^m(\|\vd_{n,\vgamma}\|_\infty)[\mS_{\vgamma,\vgamma}\vbeta_{0,\vgamma} + \mO_p^v(n^{-1/2})]
+%\\ [1ex]
+%& \ds \qquad \qquad
+- \mO_p^m(n\|\vd_{n,-\vgamma}\|_\infty)\mO_p^m(\|\vd_{n-\vgamma}\|_\infty)
+[\mS_{-\vgamma,\vgamma}\vbeta_{0,\vgamma} + \mO_p^v(n^{-1/2})] \\ [1ex]
+& \ds
+= \mO_p^v(\|\vd_{n,\vgamma}\|_\infty + n\|\vd_{n,\vgamma}\|_\infty\|\vd_{n,-\vgamma}\|_\infty)
+)
+\end{array}
+$$
+\noindent which simplifies to the result for $\vt_1$ under the assumption that
+$d_{nj}=o_p(n^{-1})$.
+\vspace{-0.5cm}\begin{flushright}$\Box$\end{flushright}
+
+%\noindent
+%which under the assumption that $d_{nj}=o_p(n^{-1})$, %$1\le j\le p$, simplifies $\vt_1$
+%to $\vt_1 = \mo_p^v(n^{-1})$.
+%Hence the result for $\vmu_{\vgamma}^{(t)}$ follows.
+
+
+\begin{Result}\label{res:8}
+	Assume (A1)--(A5) hold. If $\vw^{(t)}$ is close to a correct model $\vgamma$ in probability then
+	$$
+	\begin{array}{c}
+	\ds \vmu_{\vgamma}^{(t)}  = \vbeta_{0,\vgamma} + \mO_p^v(n^{-1/2}),
+	\quad
+	\vmu_{-\vgamma}^{(t)} = \mO_p^v(n\|\vd_{n,-\vgamma}\|_\infty),\quad \cyc{\mSigma_{\vgamma,\vgamma}^{(t)}=
+		(n{\tau^{(t-1)}})^{-1}\mS_{\vgamma,\vgamma}^{-1} + \mO_p^m(n^{-3/2})
+	}
+	\end{array}
+	$$
+	$$
+	\mSigma_{-\vgamma,-\vgamma}^{(t)}  = \sigma_\beta^2\mI + \mO_p^m(n\|\vd_{n,-\vgamma}\|_\infty)\qquad \mbox{and}\qquad
+	\mSigma_{\vgamma,-\vgamma}^{(t)}  = \mO_p^m(\|\vd_{n,-\vgamma}\|_\infty).
+	$$
+\end{Result}
+
+
+\noindent {\bf Proof of Result \ref{res:8}:} Firstly, note that
+\begin{equation}\label{eq:mD}
+\tau (\mX^{T}\mX)\odot\mOmega + \sigma_\beta^{-2}\mI= \tau\mW\mX^T\mX\mW + \mD
+\end{equation}
+by definition. Using equations (\ref{eq:Pgamma}), (\ref{eq:SigmaRearrange0}), (\ref{eq:mD}) and Result \ref{res:6}
+we have
+\begin{eqnarray}
+\ds \mSigma_{\vgamma,\vgamma}^{(t)}
+& \ds =& \big(n\tau^{\cyc{(t-1)}}\big)^{-1}\Big[
+(n^{-1}\mX_{\vgamma}^{T}\mX_{\vgamma}) \odot\mOmega_{\vgamma}^{(t)} +
+(n\tau^{\cyc{(t-1)}}\sigma_\beta^2)^{-1}\mI
+- \mW_{\vgamma}^{(t)}(n^{-1}\mX_{\vgamma}^{T}\mX_{-\vgamma})\mW_{-\vgamma}^{(t)}\nonumber\\
+& \ds &\times
+\left\{
+(n^{-1}\mX_{-\vgamma}^{T}\mX_{-\vgamma})\odot\mOmega_{-\vgamma}^{(t)}
++ (n\tau^{\cyc{(t-1)}}\sigma^2_\beta)^{-1}\mI
+\right\}^{-1}
+\mW_{-\vgamma}^{(t)}(n^{-1}\mX_{-\vgamma}^{T}\mX_{\vgamma})\mW_{\vgamma}^{(t)}
+\Big]^{-1} \nonumber\\
+& \ds =&\big(n\tau^{\cyc{(t-1)}}\big)^{-1}\Big[
+(n^{-1}\mX_{\vgamma}^{T}\mX_{\vgamma}) + \mT_1
+\Big]^{-1}\nonumber\\
+& \ds =&\big(n\tau^{\cyc{(t-1)}}\big)^{-1}\Big[ \mS_{\vgamma,\vgamma} + \mO_p^m(n^{-1/2})  + \mO_p^m(n^{-1}
++ \|\vd_{n,-\vgamma}\|_\infty +  n\|\vd_{n,-\vgamma}\|^2_\infty )
+\Big]^{-1}\nonumber\\
+& \ds =&(n{\tau^{(t-1)}})^{-1}\mS_{\vgamma,\vgamma}^{-1} + \mO_p^m(n^{-3/2})=O_p(n^{-1})
+.\label{eq:mSigma2}
+\end{eqnarray}
+
+
+
+
+\noindent Using equations (\ref{eq:Pgamma}), (\ref{eq:muRearrange2}),
+(\ref{eq:Xlimits}) and (\ref{eq:mD}), Result \ref{res:7}, and the continuous
+mapping theorem we have
+$$
+\begin{array}{rl}
+\ds \vmu_{\vgamma}^{(t)}
+& \ds =  \tau^{\cyc{(t-1)}} \mSigma^{(t)}_{\vgamma,\vgamma} \mW^{(t)}_{\vgamma} \mX_{\vgamma}^{T}( \mI - \mP^{(t)}_{\vgamma})\vy\\ [1ex]
+& \ds =
+\Big[
+(n^{-1}\mX_{\vgamma}^{T}\mX_{\vgamma}) + \mT_1
+\Big]^{-1}
+\Big[ \mW_{\vgamma}^{(t)} (n^{-1}\mX_{\vgamma}^{T}\vY)
+- \mW_{\vgamma}^{(t)} (n^{-1}\mX_{\vgamma}^{T}\mX_{-\vgamma})\mW_{-\vgamma}^{(t)}\\ [1ex]
+& \ds \quad\times
+\left\{ (n^{-1}\mX_{-\vgamma}^{T}\mX_{-\vgamma})\odot\mOmega_{-\vgamma}^{(t)}  +(n\tau^{\cyc{(t-1)}}\sigma^2_\beta)^{-1}\mI \right\}^{-1} \mW_{-\vgamma}^{(t)}(n^{-1}\mX_{-\vgamma}^{T}\vY) \Big]
+\\ [1ex]
+& \ds =
+\Big[
+(n^{-1}\mX_{\vgamma}^{T}\mX_{\vgamma}) + \mT_1
+\Big]^{-1}
+\Big[ (n^{-1}\mX_{\vgamma}^{T}\vY) + \vt_1
+\Big]\\ [1ex]
+& \ds = \Big[
+\mS^{-1}_{\vgamma,\vgamma} + \mO_p^m(n^{-1/2} + \|\mT_1\|_\infty)
+\Big]
+\Big[ \mS_{\vgamma,\vgamma}\vbeta_{0,\vgamma} +  \mO_p^v(n^{-1/2} + \|\vt_1\|_\infty)
+\Big]
+\\ [1ex]
+& \ds = \vbeta_{0,\vgamma} + \mO_p^v(n^{-1/2}
+%+ n^{-1}
++ \|\vd_{n,\vgamma}\|_\infty
+%+ n\|\vd_{n,-\vgamma}\|_\infty^2
+%+ \|\vd_{n,-\vgamma}\|_\infty
++ n\|\vd_{n,-\vgamma}\|_\infty^2
+).
+\end{array}
+$$
+Since by assumption $\|\vd_{n}\|_\infty = o_p(n^{-1})$ we have
+$\vmu_{\vgamma}^{(t)}$ as stated. Using equations (\ref{eq:Pgamma}),
+(\ref{eq:SigmaRearrange0}) and (\ref{eq:mD}) we have
+$$
+\begin{array}{rl}
+\ds \mSigma_{-\vgamma,-\vgamma}^{(t)}
+& \ds =  \Big[ \sigma_\beta^{-2}\mI +
+\tau^{\cyc{(t-1)}} (n^{-1}\mX_{-\vgamma}^{T}\mX_{-\vgamma}) \odot (n\mOmega_{-\vgamma}^{(t)})
+- n \mT_4
+\left\{ (n^{-1}\mX_{\vgamma}^{T}\mX_{\vgamma}) + \mT_{2}
+\right\}^{-1} \mT_4^{T}
+\Big]^{-1}.
+\end{array}
+$$
+
+\noindent From Equation (\ref{eq:Xlimits}) and Result \ref{res:7}, we can show
+that
+$(n^{-1}\mX_{\vgamma}^{T}\mX_{\vgamma}) + \mT_2
+= \mS_{\vgamma,\vgamma} + \mO_p^m(n^{-1/2} %+ n^{-1}
++ \|\vd_{n,-\vgamma}\|_\infty)$ and
+$\mT_4 =  \mO_p^m(\|\vd_{n,-\vgamma}\|_\infty)$. Using the continuous mapping
+theorem we find that
+$$
+\begin{array}{l}
+\tau^{\cyc{(t-1)}} (n^{-1}\mX_{-\vgamma}^{T}\mX_{-\vgamma}) \odot (n\mOmega_{-\vgamma}^{(t)})
+- n \mT_4
+\left[ (n^{-1}\mX_{\vgamma}^{T}\mX_{\vgamma}) + \mT_{2}
+\right]^{-1} \mT_4^{T}\\ [1ex]
+\qquad =
+O_p(1) [\mS_{-\vgamma,-\vgamma} + \mO_p^m(n^{-1/2})] \odot \mO_p^m(n\|\vd_{n,-\vgamma}\|_\infty)
+\\
+\qquad\qquad - n \mO_p^m(\|\vd_{n,-\vgamma}\|_\infty)
+\left[ \mS_{\vgamma,\vgamma} + \mO_p^m(n^{-1/2} + \|\vd_{n,\vgamma}\|_\infty)
+\right] \mO_p^m(\|\vd_{n,-\vgamma}\|_\infty)\\ [1ex]
+
+\qquad    = \mO_p^m(n\|\vd_{n,-\vgamma}\|_\infty).
+\end{array}
+$$
+
+\noindent Noting that by assumption $d_{nj}=o_p(n^{-1})$ and applying the
+continuous mapping theorem, we obtain the result for
+$\mSigma_{-\vgamma,-\vgamma}^{(t)}$. Next, from equations (\ref{eq:Pgamma}),
+(\ref{eq:muRearrange2}), (\ref{eq:Xlimits}) and Result \ref{res:7} we obtain
+$$
+\begin{array}{rl}
+\ds \vmu_{-\vgamma}^{(t)}
+& \ds =  {\tau^{\cyc{(t-1)}}
+	\mSigma_{-\vgamma,-\vgamma}^{(t)}
+	\left[ (n\mW_{-\vgamma}^{(t)}) (n^{-1}\mX_{-\vgamma}^{T}\vY) -
+	n\mT_4
+	\left\{ (n^{-1}\mX_{\vgamma}^{T}\mX_{\vgamma}) + \mT_{2}
+	\right\}^{-1} \mW_{\vgamma}^{(t)}(n^{-1}\mX_{\vgamma}^{T}\vY) \right]}
+\\ [1ex]
+& \ds =  {O_p(1)
+	[\sigma_\beta^2\mI + \mO_p^m(n\|\vd_{n,-\vgamma}\|_\infty)]
+	\Big[
+	[\mO_p^m(n\|\vd_{n,-\vgamma}\|_\infty)]
+	[\mS_{-\vgamma,-\vgamma}\vbeta_{0,\vgamma} + \mO_p^v(n^{-1/2})] }\\ [1ex]
+& \ds \qquad -
+n[\mO_p^m(\|\vd_{n,-\vgamma}\|_\infty)]
+[\mS_{\vgamma,\vgamma} + \mO_p^m(n^{-1/2} + \|\vd_{n,\vgamma}\|_\infty )
+] [\mI - \mO_p^d(\|\vd_{n,\vgamma}\|_\infty)]\\ [1ex]
+&\ds\qquad\times
+[\mS_{\vgamma,\vgamma}\vbeta_{0,\vgamma} + \mO_p^v(n^{-1/2})] \Big]
+\\ [1ex]
+& \ds = \mO_p^v(n\|\vd_{n,-\vgamma}\|_\infty).
+\end{array}
+$$
+
+\noindent
+Lastly, using equations (\ref{eq:Pgamma}), (\ref{eq:SigmaRearrange3}),
+(\ref{eq:Xlimits}), Result \ref{res:7} and by the assumption that
+$d_{nj}=o_p(n^{-1}$) we obtain
+$$
+\begin{array}{rl}
+\ds \mSigma_{\vgamma,-\vgamma}^{(t)}
+& \ds = - \mSigma^{(t)}_{\vgamma,\vgamma}\mW^{(t)}_{\vgamma}\mX_{\vgamma}^{T}\mX_{-\vgamma}\mW^{(t)}_{-\vgamma}
+\left[
+\mX_{-\vgamma}^{T}\mX_{-\vgamma}\odot\mOmega_{-\vgamma}^{(t)} + (\tau^{\cyc{(t-1)}} \sigma^2_\beta)^{-1} \mI
+\right]^{-1}\\ [1ex]
+%    & \ds = \cycrev{- \big(n\tau^{\cyc{(t-1)}}\big)^{-1}\Big[
+%(n^{-1}\mX_{\vgamma}^{T}\mX_{\vgamma}) + \mT_1
+%\Big]^{-1}\mW_{\vgamma}^{(t)} \mX_{\vgamma}^{T}\mX_{-\vgamma} %\mW_{-\vgamma}^{(t)}
+%    \left[
+%    \mX_{-\vgamma}^{T}\mX_{-\vgamma}\odot\mOmega_{-\vgamma}^{(t)} + (\tau^{\cyc{(t-1)}} \sigma^2_\beta)^{-1} \mI
+%    \right]^{-1}}
+%    \\
+& \ds = -  \Big[
+(n^{-1}\mX_{\vgamma}^{T}\mX_{\vgamma}) + \mT_1 \Big]^{-1} \sigma^2_\beta\mT_4^T
+\left(
+\mI  + \mT_5
+\right)^{-1}
+\\ [1ex]
+& \ds =    \Big[
+\mS_{\vgamma,\vgamma} + \mO_p^m(n^{-1/2})  + \mO_p^m(n^{-1} + \|\vd_{n,-\vgamma}\|_\infty +  n\|\vd_{n,-\vgamma}\|^2_\infty ) \Big]^{-1}\mO_p^m(\|\vd_{n,-\vgamma}\|_\infty) \\ [1ex]
+& \ds \qquad \times
+\left[
+\mI + \mO_p^m(n\|\vd_{n,-\vgamma}\|_\infty)
+\right].\\
+%    & \ds = \mo_p^m(n^{-1}).
+\end{array}
+$$
+
+\noindent After expanding the above expression and
+dropping appropriate lower order terms the result is proved.
+\vspace{-0.5cm}\begin{flushright}$\Box$\end{flushright}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\begin{Result}\label{res:9}
+	Assume (A1)--(A5) hold. If $\vw^{(t)}$ is close to a correct model $\vgamma$ then $\tau^{(t)} = \sigma_0^{-2} +O_p(n^{-1/2})$.
+\end{Result}
+
+%\noindent {\bf Remark:} Something here.
+%Based on Result B, if all elements of
+%$\vd_n$ and $\ve_n$ are $o_p(1)$ then
+%$\tau^{(t)} = \sigma_0^{-2} + o_p(1)$ and if
+%all elements of $\vd_n$ and $\ve_n$ are $O_p(n^{-1/2})$ then
+%$\tau^{(t)} = \sigma_0^{-2} + O_p(n^{-1/2})$.
+
+
+\noindent {\bf Proof of Result \ref{res:9}:} \cyc{
+	In Algorithm \ref{alg:Algorithm1}
+	the value $\tau^{(t)}$ satisfies
+	\begin{eqnarray*}
+		\ds \tau^{(t)}
+		&  = &\frac{2A + n }{
+			2B + \|\vy - \mX\mW^{(t)}\vmu^{(t)}\|^2 + (\vmu^{(t)})^T[(\mX^T\mX)\odot\mW^{(t)}\odot(\mI - \mW^{(t)})]\vmu^{(t)} + \mbox{dof}((\tau^{(t-1)})^{-1}\sigma_\beta^{-2},\vw^{(t)})/{\tau^{(t-1)}}}
+		\\
+		& =& \frac{1 + 2A/n}{
+			2B/n + T_1 + T_2 + T_3},
+	\end{eqnarray*}
+}
+\noindent where
+$$
+\begin{array}{c}
+\cyc{
+	\ds T_1 = n^{-1}{\tau^{(t-1)}}^{-1}\mbox{dof}((\tau^{(t-1)})^{-1}\sigma_\beta^{-2},\vw^{(t)})},
+\quad
+\ds T_2 = n^{-1}\|\vy - \mX\mW^{(t)}\vmu^{(t)}\|^2
+\\ [1ex]
+\ds \mbox{and } \quad
+T_3 = (\vmu^{(t)})^T[ \mA_n\odot\mW^{(t)}\odot(\mI - \mW^{(t)})]\vmu^{(t)}.
+\end{array}
+$$
+
+\noindent \cyc{
+	Firstly, $T_1 = O_p(n^{-1})$ follows from results \ref{res:2} and \ref{res:6}.}
+Secondly, using $\vy = \mX\vbeta_0 + \vvarepsilon$ we have
+$$
+\begin{array}{rl}
+\ds T_2
+& \ds = n^{-1}\|\vvarepsilon + \mX(\mW^{(t)}\vmu^{(t)} - \vbeta_0) \|^2
+\\ [1ex]
+& \ds = n^{-1}\| \vvarepsilon \|^2 + 2(n^{-1}\vvarepsilon^T\mX)(\mW^{(t)}\vmu^{(t)} - \vbeta_0)
++ (\mW^{(t)}\vmu^{(t)} - \vbeta_0)^T (n^{-1}\mX^T\mX)(\mW^{(t)}\vmu^{(t)} - \vbeta_0).
+\end{array}
+$$
+
+
+\noindent Using Equation (\ref{eq:Xlimits}) we have
+$n^{-1}\| \vvarepsilon \|^2 = \sigma_0^2 + O_p(n^{-1/2})$ and
+$n^{-1}\vvarepsilon^T\mX = \mO_p^v(n^{-1/2})$
+and $n^{-1}\mX^T\mX = \mS + \mO_p^m(n^{-1/2})$.
+Note that from Result \ref{res:8} we have
+$\vmu_\vgamma^{(t)} = \vbeta_{0\vgamma} + \mO_p^v(n^{-1/2})$
+and $\vmu_{-\vgamma}^{(t)} = \mO_p^v(n\|\vd_{n,-\vgamma}\|_\infty)$.
+Then $\vmu^{(t)} = \vbeta_0 + \ve_n$ where
+$\ve_{n,\vgamma}=\mO_p^v(n^{-1/2})$ and $\ve_{n,-\vgamma}=\mO_p^v(n\|\vd_{n,-\vgamma}\|_\infty)$. Lastly, by assumption
+$$
+\begin{array}{rl}
+\mW^{(t)}\vmu^{(t)} - \vbeta_0
+%= \left[
+%\begin{array}{c}
+%(\mI - \diag(\vd_{n,\vgamma}))(\vbeta_{0,\vgamma} + \vb_{n,\vgamma}) - %\vbeta_{0,\vgamma} \\
+%\diag(\vd_{n,-\vgamma})\vb_{n,-\vgamma}
+%\end{array}
+%\right]
+& \ds = \left[
+\begin{array}{c}
+\ve_{n,\vgamma} - \vd_{n,\vgamma} \odot \vbeta_{0,\vgamma} - \vd_{n,\vgamma} \odot \ve_{n,\vgamma}  \\
+\vd_{n,-\vgamma}\odot\ve_{n,-\vgamma}
+\end{array}
+\right] =
+\left[
+\begin{array}{c}
+\mO_p^v(\|\vd_{n,\vgamma}\|_\infty + \|\ve_{n,\vgamma}\|_\infty) \\
+\mO_p^v(\|\vd_{n,-\vgamma}\ve_{n,-\vgamma}\|_\infty)
+\end{array}
+\right] \\ [2ex]
+& \ds =
+\left[
+\begin{array}{c}
+\mO_p^v(n^{-1/2} + \|\vd_{n,\vgamma}\|_\infty) \\
+\mO_p^v(n\|\vd_{n,-\vgamma}\|^2_\infty)
+\end{array}
+\right].
+\end{array}
+$$
+
+\noindent Hence,
+$T_2 = \sigma_0^2 + O_p(n^{-1/2} + \|\vd_{n,\vgamma}\|_\infty + n\|\vd_{n,-\vgamma}\|^2_\infty)$.
+By assumption $\|\vd_{n,\vgamma}\|_\infty$ and $n\|\vd_{n,-\vgamma}\|^2_\infty$ are of smaller order than
+$n^{-1/2}$ so $T_2 = \sigma_0^2 + O_p(n^{-1/2})$.
+Next,
+$$
+T_3 = \sum_{j=1}^p
+(n^{-1}\|\vx_j\|^2)(w_j^{(t)}(1 - w_j^{(t)}))(\mu_j^{(t)})^2.
+$$
+
+\noindent Using (\ref{eq:Xlimits}) we have
+$n^{-1}\|\vx_j\|^2 = \bE(x_j^2) + O_p(n^{-1/2})$.
+Using the assumption for $w_j^{(t)}$ we have
+$w_j^{(t)}(1 - w_j^{(t)}) = d_{nj}(1 - d_{nj}) = O_p(d_{nj})$
+and from Result \ref{res:8} we have
+$(\mu_j^{(t)})^2 = \beta^2_{0j} + O_p(e_{nj})$. Hence,
+$T_3 = O_p(\|\vd_n\|_\infty)$ and so
+$$
+\ds \tau^{(t)}
+= \frac{1 + O_p(n^{-1})}{
+	\sigma_0^2 + O_p(n^{-1/2})} =
+\sigma_0^{-2} + O_p(n^{-1/2}).
+$$
+\vspace{-1cm}\begin{flushright}$\Box$\end{flushright}
+
+
+
+%\joc{
+%\begin{Result}\label{res:10}
+%Assume (A1)--(A5) hold. If $\vw^{(t)}$ is close to a correct model $\vgamma$  then
+%$$
+%\mSigma_{\vgamma,\vgamma}^{(t)}  = \frac{\sigma_0^2}{n}\mS_{\vgamma,\vgamma}^{-1} + %\mO_p^m(n^{-3/2}).
+%$$
+%\end{Result}
+%
+%
+%\noindent {\bf Proof of Result \ref{res:10}:} Using Equation
+%(\ref{eq:mSigma2}), Results \ref{res:7} and \ref{res:9}, the matrix
+%$\mSigma_{\vgamma,\vgamma}^{(t)}$ may be written as
+%$$
+%\begin{array}{rl}
+%\ds \mSigma_{\vgamma,\vgamma}^{(t)}
+%    & \ds =  (n\tau^{\cyc{(t-1)}})^{-1} \Big[
+%  (n^{-1}\mX_{\vgamma}^T\mX_{\vgamma}) + \mT_1 \Big]^{-1}
+%\end{array}
+%$$
+%
+%\noindent where $\mT_1$, $\mT_4$, $\mT_5$ are as defined by
+%(\ref{eq:Tdefinitions}).
+%Using similar arguments to Result \ref{res:8} we have
+%$$
+%\begin{array}{rl}
+%\ds \mSigma_{\vgamma,\vgamma}^{(t)}
+%&\ds = n^{-1}[ \sigma_0^{2}
+% +O_p(n^{-1/2})]
+%% \\
+%%&\ds \qquad\times
+%\Big[ \mS_{\vgamma,\vgamma} + \mO_p^m(n^{-1/2})  + \mO_p^m(n^{-1}
+%  + \|\vd_{n,-\vgamma}\|_\infty +  n\|\vd_{n,-\vgamma}\|^2_\infty )
+%  \Big]^{-1}.
+%\end{array}
+%$$
+%
+%\noindent The result is proved after application of the continuous mapping
+%theorem, expanding and dropping appropriate lower order terms to the
+%above expression.
+%\vspace{-0.5cm}\begin{flushright}$\Box$\end{flushright}
+%}
+
+%Finally, let $\vbeta_{\mbox{\tiny LS},\vgamma}   = (\mX_{\vgamma}^T\mX_{\vgamma})^{-1}\mX_{\vgamma}^T\vy$.
+
+%\medskip
+%\noindent {\bf Result 9:} {\it Assuming (A1)-(A4) and that $\vgamma$ is a correct model, we have}
+%$$
+%\vbeta_{\mbox{\tiny LS},\vgamma}
+%    \equiv (\mX_{\vgamma}^T\mX_{\vgamma})^{-1}\mX_{\vgamma}^T\vy = \vbeta_{0,\vgamma} + \mO^v_p\big(n^{-1/2}\big)
+%\qquad \mbox{\it and} \qquad
+%\sigma_{\mbox{\tiny ML},\vgamma}^2
+%    \equiv \frac{\| \vy - \mX\vbeta_{\mbox{\tiny LS},\vgamma}\|^2}{n}
+%    = \sigma_0^2 + O_p\big(n^{-1/2}\big).
+%$$
+%
+%\medskip
+%\noindent {\bf Proof of Result 9:} %Let $\vbeta_n = \vbeta_{\mbox{\tiny LS}}$ then
+%Firstly,
+%$$
+%\begin{array}{rl}
+%\ds \bE(\vbeta_{\mbox{\tiny LS},\vgamma})
+%= \bE\left[(\mX_{\vgamma}^T\mX_{\vgamma})^{-1}\mX_{\vgamma}^T(\mX_{\vgamma}\vbeta_{0,\vgamma} + \vvarepsilon)\right]
+%= \vbeta_{0,\vgamma} + \bE\left[(\mX_{\vgamma}^T\mX_{\vgamma})^{-1}\mX_{\vgamma}^T\vvarepsilon\right]
+%= \vbeta_{0,\vgamma}
+%\end{array}
+%$$
+%
+%\noindent due to independence of $\vx_i$ and $\vvarepsilon$. Next,
+%$$
+%\begin{array}{rl}
+%\ds \mbox{Cov}(\vbeta_{\mbox{\tiny LS},\vgamma})
+%    & \ds =
+%\mbox{Cov}\left[(\mX_{\vgamma}^T\mX_{\vgamma})^{-1}\mX_{\vgamma}^T(\mX_{\vgamma}\vbeta_{0,\vgamma} + \vvarepsilon)\right]
+%\\
+%    & \ds = \bE\left[(\mX_{\vgamma}^T\mX_{\vgamma})^{-1}\mX_{\vgamma}^T(\mX_{\vgamma}\vbeta_{0,\vgamma} + \vvarepsilon)
+%(\mX_{\vgamma}\vbeta_{0,\vgamma} + \vvarepsilon)^T\mX_{\vgamma}(\mX_{\vgamma}^T\mX_{\vgamma})^{-1}\right]
+%- \vbeta_{0,\vgamma}\vbeta_{0,\vgamma}^T
+%\\
+%    & \ds =
+%\bE\left[(\mX_{\vgamma}^T\mX_{\vgamma})^{-1}\mX_{\vgamma}^T\vvarepsilon\vvarepsilon^T\mX_{\vgamma}(\mX_{\vgamma}^T\mX_{\vgamma})^{-1}\right]
+%= \sigma_0^2
+%\bE\left[(\mX_{\vgamma}^T\mX_{\vgamma})^{-1}\right]
+%\\
+%    & \ds = \sigma_0^2 n^{-1}\bE\big[ \{\bE(\vx_i\vx_i^T)_{\vgamma,\vgamma}\}^{-1} + \mO^m_p\big(n^{-1/2}\big)\big]
+%= \sigma_0^2 n^{-1}[\bE(\vx_i\vx_i^T)_{\vgamma,\vgamma}]^{-1} + \mO^m\big(n^{-3/2}\big)
+%\end{array}
+%$$
+%
+%
+%\noindent due to the independence of the $\vx_i$s with the $\varepsilon_i$s and Equation (\ref{eq:Xlimits1}).
+%Then, after applying Lemma \ref{lem:6}, the result for $\vbeta_{\mbox{\tiny LS},\vgamma}$ follows.
+%
+%Next, using $\vy = \mX_{\vgamma}\vbeta_{0,\vgamma} + \vvarepsilon$, we have
+%$$
+%%\begin{array}{rl}
+%\ds \sigma_{\mbox{\tiny ML},\vgamma}^2
+%%\\
+%%    & \ds = \tfrac{1}{n}\| \vvarepsilon + \mX\ve \|^2
+%%\\
+%%    &
+%\ds = \tfrac{1}{n}\| \vvarepsilon \|^2
+%          + \tfrac{2}{n}\vvarepsilon^T\mX_{\vgamma}\ve
+%          + \tfrac{1}{n}\ve^T\mX_{\vgamma}^T\mX_{\vgamma}\ve
+%%\end{array}
+%$$
+%
+%\noindent where $\ve=\vbeta_{0,\vgamma}-\vbeta_{\mbox{\tiny LS},\vgamma}$ is $\mO_p^v\big(n^{-1/2}\big)$. From Equation (\ref{eq:Xlimits2}), the first term is
+%$\sigma_0^2 + O_p\big(n^{-1/2}\big)$. From (\ref{eq:Xlimits3}), we have
+%$\mX_{\vgamma}^T\vvarepsilon/n = \mO^v_p\big(n^{-1/2}\big)$ so that the second term is $O_p\big(n^{-1}\big)$.
+%Finally, by (\ref{eq:Xlimits1}) the third term is
+%$O_p\big(n^{-1}\big)$. Hence, the result is as stated.
+%\vspace{-0.5cm}\begin{flushright}$\Box$\end{flushright}
+%
+%
+
+
+
+
+
+
+\joc{
+
+\noindent
+We will now examine the updates for $\eta_j$ and $w_j$, $1\le j\le p$ defined at Line 8--9 in Algorithm \ref{alg:Algorithm1}. Note that $\vw^*$ is updated one component, $w^*_j$, at a time iterating through $j=1,\ldots,p$ and in each iteration $w^*_j$ is updated using $w_j$. Also note that $\vw^{(t)}$ is updated after $\vw^*$ is completely updated.
+%and
+%assumed to be close to a correct model $\vgamma$.
+Here we will employ the notation
+$\vgamma^* \subseteq \vgamma$ to mean that
+$\gamma_j=\gamma_j^*$ for all $j\in \vgamma^*$.
+We will now show that, provided the $\vw^{(t)}$ is close to a correct model $\vgamma$
+and $\vw^{*}$ is close to a correct model
+$\vgamma^*$ such that $\gamma^*\subseteq \vgamma$
+then the next updated $\vw^{*}$ is close to a correct model
+$\widetilde{\vgamma}$ such
+that $\widetilde{\vgamma} \subseteq \vgamma$.
+
+
+\smallskip
+\begin{Result}\label{res:12}
+	Assume (A1)-(A6). If $\vw^{(t)}$ and $\vw^{*}$
+	are close to two correct models $\vgamma$ and $\vgamma^*$ respectively, such that $\vgamma^* \subseteq \vgamma$, i.e.,
+	$$
+	\ds w_{k}^{(t)} = \left\{ \begin{array}{ll}
+	1 - d_{nk}   & k\in\vgamma \\
+	d_{nk}     & k\notin\vgamma
+	\end{array}\right.
+	\qquad \mbox{and} \qquad
+	\ds w_{k}^{*} = \left\{ \begin{array}{ll}
+	1 - d_{nk}^*   & k\in\vgamma^* \\
+	d_{nk}^*     & k\notin\vgamma^*
+	\end{array}\right. \qquad  1\leq k\leq p,
+	$$
+	
+	\noindent where $\{ d_{nk}  \}_{1\le k\le p}$
+	and $\{ d_{nk}^*  \}_{1\le k\le p}$ by Definition 1 are
+	two sequences of positive random variables such that
+	$nd_{nk}$ and $nd_{nk}^*$ are converging in probability
+	to zero. Then if the next $\vw^*$ is to update $w^*_j$, we have
+	$$
+	\begin{array}{rl}
+	\ds \eta_j
+	& \ds = \left\{ \begin{array}{ll}
+	\ds \lambda_n + \tfrac{n}{2} \sigma^{-2}_0  \bE(x_j^2)\beta_{0j}^2
+	+ O_p(n^{1/2})
+	&  \mbox{$j\in \vgamma$ and $j\in\vgamma_0$}\\ %[1ex]
+	\ds \lambda_n + O_p(1)
+	&  \mbox{$j\in \vgamma$ and $j\notin\vgamma_0$} \\ %[1ex]
+	\ds \lambda_n -
+	\tfrac{n}{2} \sigma^{-2}_0 \bE(x_j^2)\sigma_\beta^2
+	+ O_p(n^{1/2} + n^2\|\vd_{n,-\vgamma}\|_\infty)
+	&  \mbox{$j\notin \vgamma$}
+	\end{array} \right.
+	\end{array}
+	$$
+	
+	\noindent and
+	after updating $\vw^*$ with $w_j^*=w_j=\expit(\eta_j)$ in
+	Algorithm \ref{alg:Algorithm1}
+	the $\vw^*$ is close to a correct model $\widetilde{\vgamma}$ where for $1\le k\le p$ we have
+	$$
+	w_k^{*} = \left\{ \begin{array}{ll}
+	1 - \widetilde{d}_{nk}   & j=k \mbox{ and } k\in\vgamma_0 \\
+	\widetilde{d}_{nk}     & j=k \mbox{ and } k\notin\vgamma_0\\
+	1 - d_{nk}^*   &  j\neq k \mbox{ and } k\in\vgamma^* \\
+	d_{nk}^*     & j\neq k \mbox{ and } k\notin\vgamma^*
+	\end{array} \right.
+	\qquad
+	\mbox{and}
+	\qquad
+	\widetilde{\gamma}_k = \left\{ \begin{array}{ll}
+	1    & \mbox{$j=k$ and $k\in\vgamma_0$} \\
+	0    & \mbox{$j=k$ and $k\notin\vgamma_0$} \\
+	\gamma_k^*   & \mbox{otherwise}
+	\end{array} \right.
+	$$
+	
+	\noindent where
+	$$
+	\begin{array}{rl}
+	\ds \widetilde{d}_{nj}
+	& \ds = \left\{ \begin{array}{ll}
+	\ds \exp\left[ - \tfrac{n}{2} \sigma^{-2}_0  \bE(x_j^2)\beta_{0j}^2 - \lambda_n
+	+ O_p(n^{1/2}) \right]
+	& \mbox{$j\in \vgamma$ and $j\in\vgamma_0$}\\[1ex]
+	\ds O_p(\exp(\lambda_n))
+	&  \mbox{$j\in \vgamma$ and $j\notin\vgamma_0$} \\ [1ex]
+	\ds \exp\left[ \lambda_n -
+	\tfrac{n}{2} \sigma^{-2}_0 \bE(x_j^2)\sigma_\beta^2
+	+ O_p(n^{1/2} + n^2\|\vd_{n,-\vgamma}\|_\infty) \right]
+	&  \mbox{$j\notin \vgamma$}
+	\end{array} \right.
+	\end{array}
+	$$
+\end{Result}
+
+\medskip
+\noindent {\bf Proof of Result \ref{res:12}:}
+Consider the update $\eta_j$ at Line 8 in Algorithm \ref{alg:Algorithm1}.
+%$$
+%\eta_j^*
+%\leftarrow
+%\lambda
+%- \tfrac{1}{2}\tau^{(t)}\Big[ \big(\mu_j^{(t)}\big)^2 + %\Sigma_{j,j}^{(t)}\Big]\|\mX_j\|^2
+%+ \tau^{(t)}\mX_j^T\Big[\vy\mu_j^{(t)} - \mX_{-j}\diag(\vw_{-j}^*)
+%\big(\vmu_{-j}^{(t)}\mu_j^{(t)} + \mSigma_{-j,j}^{(t)}\big)\Big]
+%$$
+%
+%\noindent
+From results \ref{res:8} and \ref{res:9} we have that
+if $\vw^{(t)}$ is close to a correct model $\vgamma$ then
+$$
+\begin{array}{c}
+\ds \vmu_{\vgamma}^{(t)}  = \vbeta_{0,\vgamma} + \mO_p^v(n^{-1/2}),
+\quad
+\vmu_{-\vgamma}^{(t)} = \mO_p^v(n\|\vd_{n,-\vgamma}\|_\infty),
+\quad
+\mSigma_{-\vgamma,-\vgamma}^{(t)}  = \sigma_\beta^2\mI + \mO_p^m(n\|\vd_{n,-\vgamma}\|_\infty)\qquad
+\\
+\mSigma_{\vgamma,-\vgamma}^{(t)}  = \mO_p^m(\|\vd_{n,-\vgamma}\|_\infty),
+\quad
+\ds \tau^{(t)} = \sigma_0^{-2}
++O_p(n^{-1/2}) \quad \mbox{and} \quad \mSigma_{\vgamma,\vgamma}^{(t)}=
+	O_p(n^{-1}).
+\end{array}
+$$
+
+\noindent We also have the fact that
+$\vy = \mX\vbeta_0 + \vvarepsilon$.
+Hence,
+$$
+\begin{array}{rl}
+\ds \eta_j
+& \ds =
+\lambda
+- \tfrac{1}{2}\tau^{(t)}\Big( (\mu_j^{(t)})^2 + \Sigma_{j,j}^{(t)}\Big)\|\mX_j\|^2
++ \tau^{(t)}\mX_j^T\Big[(\mX\vbeta_0 + \vvarepsilon)\mu_j^{(t)} - \mX_{-j}\diag(\vw_{-j}^{*})
+\big(\vmu_{-j}^{(t)}\mu_j^{(t)}  + \mSigma_{-j,j}^{(t)}\big)\Big]
+\\
+%    & \ds = \lambda
+%+ \tau \left( \beta_{0,j}\mu_j^{(t)}   - \tfrac{1}{2}(\mu_j^{(t)})^2 \right) %\|\mX_j\|^2
+%- \tfrac{1}{2}\tau^{(t)}    \Sigma_{j,j}^{(t)}  \|\mX_j\|^2 \\
+%    & \ds \qquad
+%+ \tau^{(t)}   \mu_j^{(t)}   \mX_j^T\mX_{-j}\left( \vbeta_{0,-j} - %\diag(\vw_{-j}^*)\vmu_{-j}^{(t)}   \right)
+%    - \tau \mX_j^T\mX_{-j}\diag(\vw_{-j}^*)\mSigma_{-j,j} \\
+& \ds = \lambda + T_6  - T_7 + T_8 - T_9 +T_{10}
+\end{array}
+$$
+
+\noindent where
+$$
+\begin{array}{c}
+\ds T_6 = \tau^{(t)}   \|\mX_j\|^2 \left( \beta_{0,j}\mu_j^{(t)}   - \tfrac{1}{2}(\mu_j^{(t)})^2 \right),
+\qquad
+\ds T_7 =  \tfrac{1}{2}\tau^{(t)}    \|\mX_j\|^2 \Sigma_{j,j}^{(t)}
+\\
+\ds T_8 = \tau^{(t)}   \mu_j^{(t)}   \sum_{k\ne j}  \mX_j^T\mX_k\left( \beta_{0,k} - w_k^{*} \mu_k^{(t)}   \right),\quad
+T_9 = \tau^{(t)}  \sum_{k\ne j} \mX_j^T\mX_k w_k^{*}\Sigma_{k,j}^{(t)} \quad
+\mbox{and} \quad
+T_{10} = \tau^{(t)}   \mu_j^{(t)} \mX_j^T\vepsilon.
+
+\end{array}
+$$
+
+\noindent Firstly,
+$$
+\begin{array}{rl}
+\ds T_6
+& \ds = \left\{ \begin{array}{ll}
+\ds \tfrac{n}{2}\left[\sigma^{-2}_0 + O_p(n^{-1/2})  \right]
+\left[ \bE(x_j^2) + O_p\big(n^{-1/2}\big)\right] \left[\beta_{0j}^2 + O_p(n^{-1/2}) \right]
+&  \mbox{$j\in \vgamma$ and $j\in\vgamma_0$},
+\\ [1ex]
+\ds \tfrac{n}{2}\left[\sigma^{-2}_0 + O_p(n^{-1/2}) \right]\left[\bE (x_j^2)+O_p\big(n^{-1/2}\big)\right]O_p(n^{-1}),
+&  \mbox{$j\in \vgamma$ and $j\notin\vgamma_0$},
+\\ [1ex]
+\ds \tfrac{n}{2}\left[\sigma^{-2}_0 + O_p(n^{-1/2})  \right]\left[\bE (x_j^2)+O_p\big(n^{-1/2}\big)\right]O_p(n^2\|\vd_{n,-\vgamma}\|_\infty^2),
+&  \mbox{$j\notin \vgamma$}
+\end{array} \right.
+\\ [1ex]
+& \ds = \left\{ \begin{array}{ll}
+\ds \tfrac{n}{2} \sigma^{-2}_0  \bE(x_j^2)\beta_{0j}^2
++ O_p(n^{1/2})
+&  \mbox{$j\in \vgamma$ and $j\in\vgamma_0$},\\ [1ex]
+\ds |O_p(1)|
+&  \mbox{$j\in \vgamma$ and $j\notin\vgamma_0$}, \\ [1ex]
+\ds |O_p(n^3\|\vd_{n,-\vgamma}\|_\infty^2)|
+&  \mbox{$j\notin \vgamma$}.
+\end{array} \right.
+\end{array}
+$$
+
+\noindent Secondly,
+$$
+\begin{array}{rl}
+\ds T_7
+& \ds = \left\{ \begin{array}{ll}
+\tfrac{n}{2}\left[\sigma^{-2}_0 + O_p(n^{-1/2})  \right]
+\left[ \bE(x_j^2) + O_p\big(n^{-1/2}\big)\right] O_p(n^{-1})
+&  \mbox{$j\in \vgamma$},
+\\ [1ex]
+\tfrac{n}{2}\left[\sigma^{-2}_0 + O_p(n^{-1/2})  \right]
+\left[ \bE(x_j^2) + O_p\big(n^{-1/2}\big)\right]
+\left[\sigma_\beta^2 + O_p(n\|\vd_{n,-\vgamma}\|_\infty)\right]
+&  \mbox{$j\notin \vgamma$},
+\end{array} \right.
+\\ [1ex]
+& \ds = \left\{ \begin{array}{ll}
+\ds |O_p(1)|
+&  \mbox{$j\in \vgamma$}, \\ [1ex]
+\ds \tfrac{n}{2} \sigma^{-2}_0  \bE(x_j^2)\sigma_\beta^2
++ O_p(n^{1/2} + n^2\|\vd_{n,-\vgamma}\|_\infty)
+&  \mbox{$j\notin \vgamma$}.
+\end{array} \right.
+\end{array}
+$$
+
+\noindent Next note that since
+$\vgamma^* \subseteq \vgamma$ we have
+$\gamma_k=\gamma_k^*=1$ for all $k\in \vgamma^*$ so
+that if $k\in \vgamma^*$ then $k\in \vgamma$
+and the consequently the combination
+$k\in \vgamma^*$ then $k\notin \vgamma$ is
+not possible.
+
+Next consider
+$$
+\begin{array}{rl}
+\beta_{0,k} - w_k^{*} \mu_k^{(t)}
+& \ds =
+\left\{ \begin{array}{ll}
+\beta_{0,k} - (1 - d_{nk}^*)(\beta_{0,k} + O_p(n^{-1/2})) = O_p(n^{-1/2})    & \mbox{$k \in \vgamma$ and $k\in\vgamma^*$} \\
+\beta_{0,k} - d_{nk}^*(\beta_{0,k} + O_p(n^{-1/2})) = O_p(d_{nk}^*n^{-1/2}) & \mbox{$k \in \vgamma$ and $k\notin\vgamma^*$} \\
+%\beta_{0,k} -(1 - d_{nk}^*) O_p(n\|\vd_{n,-\vgamma}\|_\infty) = O_p(n\|\vd_{n,-\vgamma}\|_\infty)    & \mbox{k \notin \vgamma$ and $k\in\vgamma^*$ \\
+\beta_{0,k} - d_{nk}^* O_p(n\|\vd_{n,-\vgamma}\|_\infty) = O_p(nd_{nk}^*\|\vd_{n,-\vgamma}\|_\infty)     & \mbox{$k \notin \vgamma$ and $k\notin\vgamma^*$},
+\end{array} \right.  \\
+& \ds =
+\left\{ \begin{array}{ll}
+O_p(n^{-1/2})    & k \in \vgamma, \\
+O_p(nd_{nk}^*\|\vd_{n,-\vgamma}\|_\infty)     & k \notin \vgamma,
+\end{array} \right. \\
+\end{array}
+$$
+
+\noindent noting that if $k\notin \vgamma$ or if $k\notin \vgamma^*$ then
+$\beta_{0,k} = 0$ (since both $\vgamma$ and $\vgamma^*$ are correct models).
+Hence,
+$$
+\begin{array}{rl}
+\ds \sum_{k\ne j}  \mX_j^T\mX_k\left( \beta_{0,k} - w_k^* \mu_k^{(t)} \right)
+& \ds =
+n \left[ \bE(x_jx_k) + O_p\big(n^{-1/2}\big)\right]\left[ O_p(n^{-1/2} + nd_{nk}^*\|\vd_{n,-\vgamma}\|_\infty) \right] \\
+& \ds =
+O_p(n^{1/2}) + O_p(n^2d_{nk}^*\|\vd_{n,-\vgamma}\|_\infty) \\
+& \ds =
+O_p(n^{1/2}).
+\end{array}
+$$
+
+\noindent The last line follows from the
+assumption that
+$d_{nj}=o_p(n^{-1})$
+and $d_{nj}^*=o_p(n^{-1})$ for all $j$ so that
+$O_p(n^2d_{nk}^*\|\vd_{n,-\vgamma}\|_\infty)=o_p(1)$.
+Hence,
+$$
+\begin{array}{rl}
+T_8
+& \ds =
+\left\{ \begin{array}{ll}
+O_p(n^{1/2})     & j\in\vgamma_0 \\
+O_p(1)    & j\notin\vgamma_0. \\
+\end{array} \right. \\
+\end{array}
+$$
+
+
+
+\noindent
+Next consider,
+$$
+\begin{array}{rl}
+w_k^{*} \Sigma_{k,j}
+& \ds =
+\left\{ \begin{array}{ll}
+(1 - d_{nk}^*)O_p(n^{-1}) = O_p(n^{-1})
+& \mbox{$j\in\vgamma, k \in \vgamma$ and $k\in\vgamma^*$} \\
+O_p(d_{nk}^*n^{-1}) = o_p(n^{-2})
+& \mbox{$j\in\vgamma, k \in \vgamma$ and $k\notin\vgamma^*$} \\
+%(1 - d_{nk}^*) O_p^m(\|\vd_{n,-\vgamma}\|_\infty)  & j\in\vgamma, k \notin \vgamma, k\in\vgamma^* \\
+O_p(d_{nk}^*\|\vd_{n,-\vgamma}\|_\infty)= o_p(n^{-2})
+& \mbox{$j\in\vgamma, k \notin \vgamma$ and $k\notin\vgamma^*$} \\
+(1 - d_{nk}^*)O_p(\|\vd_{n,-\vgamma}\|_\infty)
+= O_p(\|\vd_{n,-\vgamma}\|_\infty)
+& \mbox{$j\notin\vgamma, k \in \vgamma$ and $k\in\vgamma^*$} \\
+O_p(d_{nk}^*\|\vd_{n,-\vgamma}\|_\infty)
+& \mbox{$j\notin\vgamma, k\in \vgamma$ and $k\notin\vgamma^*$} \\
+%(1 - d_{nk}^*) (\sigma_\beta^2 + O_p(n\|\vd_{n,-\vgamma}\|_\infty))  & j\notin\vgamma, k \notin \vgamma, k\in\vgamma^* \\
+d_{nk}^*(\sigma_\beta^2 + O_p(n\|\vd_{n,-\vgamma}\|_\infty)) = O_p(d_{nk}^*)
+& \mbox{$j\notin\vgamma, k\notin \vgamma$ and $k\notin\vgamma^*$}.
+\end{array} \right.
+\end{array}
+$$
+
+\noindent Hence,
+$$
+T_9 \ds =
+\left\{ \begin{array}{ll}
+O_p(1)
+& j\in\vgamma \\
+o_p(1)
+& j\notin\vgamma.
+\end{array} \right.
+$$
+
+\noindent Finally by noting that $\vX_j$ is independent to $\vepsilon$, we have
+$$
+T_{10} =\left\{ \begin{array}{ll}
+\ds    (\beta_{0,k} + O_p(n^{-1/2}))O_p(n^{1/2})= O_p(n^{1/2})
+&  \mbox{$j\in \vgamma$ and $j\in\vgamma_0$},\\ %[1ex]
+\ds    O_p(n^{-1/2})O_p(n^{1/2})= O_p(1)
+&  \mbox{$j\in \vgamma$ and $j\notin\vgamma_0$}, \\ %[1ex]
+\ds    O_p(n\|\vd_{n,-\vgamma}\|_\infty)O_p(n^{1/2})=O_p(n^{3/2}\|\vd_{n,-\vgamma}\|_\infty)
+&  \mbox{$j\notin \vgamma$},
+\end{array} \right.
+$$
+
+
+\noindent From $T_6$, $T_7$, $T_8$, $T_9$ and $T_{10}$ 
+we obtain the expression for $\eta_j^*$ in the result.
+From Lemma \ref{lem:1} we have
+$$
+w_k^{*} = \left\{ \begin{array}{ll}
+1 - \widetilde{d}_{nk}   & \mbox{$k\in\vgamma_0$} \\
+\widetilde{d}_{nk}     & \mbox{$k\notin\vgamma_0$}, \\
+\end{array} \right.
+$$
+
+\noindent where all possible
+$\widetilde{d}_{nj}$ are specified in the result.
+
+
+
+\noindent Now note that
+\begin{itemize}
+	\item If $\lambda_n>0$ and $\lambda_n\to\infty$
+	as $n\to\infty$ then $w_j^*$ defined in Algorithm \ref{alg:Algorithm1} will converge in probability to 1.
+	
+	\item If $\lambda_n$ is $O_p(1)$ then $d_{nj}$ will converge
+	to zero at a faster rate than required for $j\in\vgamma_0$,
+	for $j\notin\vgamma_0$ the value $w_j^*$ will be $O_p(1)$.
+	
+	\item If $\lambda_n<0$ and $\lambda_n/n\to \kappa$
+	for some constant $\kappa$ then $w_j^*$ may not converge in probability to $1$ depending on the size of $\kappa$.
+	
+	\item If $\lambda_n<0$ and $\lambda_n$ grows at
+	a faster rate than $O_p(n)$ then $w_j^*$ will converge in probability
+	to $0$.
+	
+	\item If $\lambda_n \to -\infty$ and $\lambda_n/n\to 0$ then $d_{nj}$
+	will converge to 0, but for $j\notin\vgamma_0$
+	the sequence $n\widetilde{d}_{nj}$ may not converge in probability to zero.
+\end{itemize}
+
+\noindent Thus, we require $\lambda_n \to -\infty$, $\lambda_n/n\to 0$
+and $n\expit(\lambda_n) = n\rho_n \to 0$. These are the conditions
+specified by Assumption (A6). Thus, under Assumption (A6) the vector $\vw^*$
+will be close to the model $\widetilde{\vgamma}$.
+\vspace{-0.5cm}\begin{flushright}$\Box$\end{flushright}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\medskip
+\noindent {\bf Proof of Main Result \ref{mres:2}:}
+If $w_j^{(1)}=1$ for $1\leq j\leq p$ and assumptions (A1)--(A6) hold then $\vw^{(1)}=\vone$ corresponds to a correct model $\vgamma=\vone$ and results
+\ref{res:8}--\ref{res:9} hold with $d_{nj} = 0$ for $1\le j\le p$. Applying Result \ref{res:12} repeatedly
+over indexes $1\le j\le p$ obtains the result for $\vw^{(2)}$ with the
+sequence $d_{nj}=0$ for $1\le j\le p$ where the convergence
+rate of $nd_{nj}$ being satisfied.
+Hence, equations (\ref{eq:final1}) and (\ref{eq:final2}) are proved.
+We can then apply results
+\ref{res:8}--\ref{res:9} to prove Equation (\ref{eq:final3}).
+We now note that
+the term $n^2\expit(\lambda_n)$ is $o_p(n)$ or smaller by
+Assumption (A6). However, by Assumption (A6) this term and $\lambda_n$ in $w_j^{(3)}$ with $j\notin\vgamma_0$
+are dominated by
+$-n\bE (x_j^2)\sigma^2_\beta/2\sigma^2_0$.
+Thus, we have
+$w_{j}^{(3)} = 1 - d_{nj}$ for $j\in \vgamma_0$ and $w_{j}^{(3)}=d_{nj}$
+for $j\notin\vgamma_0$ where $d_{nj}$ are sequences of random variables
+with $n^2d_{nj}$ converging in probability to zero. Thus, after applying
+Results \ref{res:7}--\ref{res:9} repeatedly over indexes
+$1\le j\le p$
+the equations (\ref{eq:final5}) and (\ref{eq:final6})
+are proved for $t=3$. However, these results give rise to the same
+conditions for $t=4$ as those required for $t=3$. Thus, we can continue applying Results
+\ref{res:7}--\ref{res:9} recursively to prove the Main Result \ref{mres:2} for all $t$.
+\vspace{-0.5cm}\begin{flushright}$\Box$\end{flushright}
+
+
+}
+
+
+
+
+\joc{ 
+
+\section*{Appendix C: Deriviation of Algorithm 3}
+
+\noindent The $q$-densities corresponding to Algorithm 3 are:
+$$
+\begin{array}{ll}
+q(\vbeta)
+&\propto\exp\left[\bE_{-q(\vbeta)}
+\left\{ \sum_{i=1}^n-\frac{a_i}{2\sigma^2}||y_i-\vx_i^T\mGamma\vbeta||^2
+-\frac{||\vbeta||^2}{2\sigma^2_\beta}\right\}\right]\\
+&\propto\exp\left[\bE_{-q(\vbeta)}
+\left\{ -\frac{1}{2\sigma^2}(\vy-\mX\mGamma\vbeta)^T\mbox{diag}(\va)(\vy-\mX\mGamma\vbeta)
+-\frac{||\vbeta||^2}{2\sigma^2_\beta}\right\}\right]\\
+&=\mbox{N}(\vmu,\mSigma),
+\end{array}
+$$
+
+\noindent where $\mSigma=(\tau (\mX^T\widetilde{\mA}\mX)\odot\mOmega + \tau_\beta\mI)^{-1}$, $\vmu=\tau\mSigma\mW\mX^T\widetilde{\mA}\vy$, $\vw=\bE_q\vgamma$, $\mW=\mbox{diag}(\vw)$, $\mOmega = \vw\vw^{T} + \mW\odot(\mI - \mW)$, $\tau=\bE_q(1/\sigma^2)$, $\tau_\beta=\sigma^{-2}_\beta$ and $\widetilde{\mA}=\bE_q\mbox{diag}(\va)$. Similarly, we have
+\begin{eqnarray*}
+	q(\sigma^2)
+	&\propto&\exp\left[\bE_{-q(\sigma^2)}\left\{
+	-\frac{1}{2\sigma^2}(\vy-\mX\mGamma\vbeta)^T\mbox{diag}(\va)(\vy-\mX\mGamma\vbeta)-\frac{n}{2}\log\,\sigma^2-(A+1)\log\sigma^2
+	-\frac{B}{\sigma^2}\right\}\right].
+\end{eqnarray*}
+
+\noindent Hence,
+$q(\sigma^2) = \mbox{Inverse-Gamma}(A+\tfrac{n}{2},s)$, where
+$s = B + \frac{1}{2}\left[
+\cyc{\vy^T\widetilde{\mA}\vy} - 2\vy^T\widetilde{\mA}\mX\mW\vmu
++\tr\left( (\mX^T\widetilde{\mA}\mX\odot\mOmega)(\vmu\vmu^T + \mSigma) \right)\right]
+$.
+
+\noindent Next noting that $\gamma_j=\gamma_j^2$ as $\gamma_j\in\{0,1\}$, the optimal $q(\gamma_j)$, $1\le j\le p$, takes the form
+\begin{eqnarray*}
+	q(\gamma_j)
+	&\propto&\exp\left[\gamma_j\,\bE_{-q_{\gamma_j}}\left\{\mbox{logit}(\rho)
+	+\frac{\beta_j}{\sigma^2}\sum_{i=1}^n \widetilde{A}_i X_{ij}\left(y_i-\sum_{k\neq j}\beta_k X_{ik}\gamma_k\right)-\frac{\beta_j^2}{2\sigma^2}\sum_{i=1}^n\widetilde{A}_i X_{ij}^2\right\}\right]\\
+	&\propto&\exp\left[\gamma_j\,\bE_{-q_{3j}}\left\{\mbox{logit}(\rho)
+	+\frac{\beta_j}{\sigma^2}\mX_j^T\widetilde{\mA}\big(\vy-\mX_{-j}\mW_{-j}\vbeta_{-j}\big)
+	-\frac{\beta_j^2}{2\sigma^2}\mX_j^T\widetilde{\mA}\mX_j\right\}\right].
+\end{eqnarray*}
+
+\noindent Hence, $q(\gamma_j)=\mbox{Bern}(w_j)$, where $w_i=\mbox{expit}(\eta_j)$ and $$
+\eta_j=\lambda -\frac{1}{2}\tau\mX_j^T\widetilde{\mA}\mX_j(\mu_j^2+\Sigma_{jj})
++
+\tau\mX^T_j\widetilde{\mA}\left[\vy\mu_j-\mX_{-j}\mW_{-j}(\vmu_{-j}\mu_j + \mSigma_{-j,j})\right].
+$$
+
+\noindent Next, we have
+\begin{eqnarray*}
+	q(a_j)
+	&\propto&\exp\left[\bE_{-q({a_j})}\left\{
+	\frac{1}{2}\log a_j - \frac{a_j}{2\sigma^2}||y_j-\vx_j^T\mGamma\vbeta||^2
+	-2\log a_j - \frac{1}{2a_j}\right\}\right]\\
+	&\propto&\exp\left[
+	-\frac{3}{2}\log a_j - \frac{a_j}{2}\bE_q\frac{1}{\sigma^2}||y_j-\vx_j^T\mGamma\vbeta||^2
+	- \frac{1}{2a_j}\right]\\
+	&= &\mbox{Inverse-Gaussian}\left(\widetilde{A}_j,1\right),
+\end{eqnarray*}
+where $\widetilde{A}_j=\left(\bE_q\frac{1}{\sigma^2}||y_j-\vx_j^T\mGamma\vbeta||^2\right)^{-1/2}=\tau^{-1/2}\left[y_j^2-2y_j\vx^T_j\mW\vmu+\tr\left( (\vx_j\vx_j^T\odot\mOmega)(\vmu\vmu^{T} + \mSigma) \right)\right]^{-1/2}$.
+
+%\noindent The lower bound of $\log p(\vy)$ simplifies to
+%$$
+%\begin{array}{l}
+%\ds \log \underline{p}_{\mbox{\tiny Laplace}}(\vy;\rho) \\
+%\qquad \ds    = \bE_q\,\mbox{log}\Bigg[
+%\frac{\prod_{i=1}^n(2\pi\sigma^2a_i^{-1})^{-1/2} \exp\left[\frac{a_i}{2\sigma^2}
+%	||y_i-\vx_i^T\mGamma\vbeta||^2\right]a^{-2}_i/2\exp[-1/(2a_i)]
+%}
+%{q(\vbeta)(2\pi)^{-n/2}\prod_{i=1}^na_i^{-3/2}
+%	\exp\left[-1/(2a_i)+1/\widetilde{A_i}-a_i/(2\widetilde{A_i}^2)\right]}\\
+%\qquad\ds \quad \times %\frac{(2\pi\sigma^2_\beta)^{-p/2}\exp(-||\vbeta||^2/(2\sigma^2_\beta))\,B^A/\Gamma(A)
+%	(\sigma^2)^{-A-1}\exp(-B/\sigma^2)
+%	\prod_{i=1}^p %\rho^{\gamma_i}(1-\rho)^{1-\gamma_i}}{s^{A+n/2}/\Gamma(A+n/2)(\sigma^2)^{-A-n/2-1}\exp(-%s/\sigma^2)\prod_{i=1}^p w_i^{\gamma_i}(1-w_i)^{1-\gamma_i}}\Bigg]\\
+%\qquad\ds     = \frac{p}{2}
+%+ \sum_{i=1}^p \left[  w_i\log\left( \frac{\rho}{w_i} \right)+ (1 - w_i)\log\left( %\frac{1-\rho}{1-w_i} \right)\right]
+%+ \frac{1}{2}\log|\mSigma|
+%-\frac{1}{2\sigma^2_\beta}\mbox{tr}\left(\vmu\vmu^{T} + \mSigma \right)\\
+%\qquad\ds \quad - n\log(2) -\frac{p}{2}\log(\sigma^2_\beta)
+%+ A\log(B)-\log\Gamma(A) - \left( A+\frac{n}{2} \right)\log(s)+ \log\Gamma\left( %A+\frac{n}{2} \right)    \cyc{-} \sum_{i=1}^n\frac{1}{2\widetilde{A_i}}\\
+%\qquad\ds     = \log \underline{p}(\vy;\rho) + \frac{n}{2}\log(2\pi) - n\log(2) \cyc{-} %\sum_{i=1}^n\frac{1}{2\widetilde{A_i}}.
+%\end{array}
+%$$
+}
+
+
+
+\newpage 
+
+
+
+\setcounter{page}{30}
+
+
+\joc{ 
+	\begin{algorithm}
+		%\begin{center}
+		\begin{minipage}[h]{\textwidth}
+			\small{
+				1: Input: $(\vy,\mX,\sigma_\beta^2,A,B,\tau_0,\rho,\vw)$
+				
+				2: where $\vy\in\bR^n$, $\mX\in\bR^{n\times p}$, $\sigma_\beta^2>0$,
+				$A>0$, $B>0$, $\tau^{(0)}>0$, $\rho\in(0,1)$ and  \joc{$\vw^{(1)} \in [0,1]^p$}.
+				
+				\smallskip
+				3: $t\leftarrow 1 \qquad ; \qquad \lambda \leftarrow \mbox{logit}(\rho)$
+				%
+				
+				
+				
+				\smallskip
+				4: Cycle:
+				
+				\smallskip
+				5: \qquad$\mW^{(t)} \leftarrow \mbox{diag}(\vw^{(t)}) \quad ; \quad
+				\mOmega^{(t)} \leftarrow \vw^{(t)}{\vw^{(t)}}^T + \mW^{(t)}(\mI - \mW^{(t)})$
+				
+				6: \qquad $\mSigmaq^{(t)} \leftarrow \left[
+				\tau^{(t-1)}(\mX^T\mX)\odot\mOmega^{(t)} + \sigma_\beta^{-2}\mI \right]^{-1}
+				; \qquad
+				\vmuq^{(t)} \leftarrow \tau^{(t-1)}\mSigmaq^{(t)}\mW^{(t)}\mX^T\vy$
+				
+				
+				7: \qquad $s \leftarrow
+				B + \tfrac{1}{2}\left[
+				\|\vy\|^2
+				- 2\vy^T\mX\mW^{(t)}\vmuq^{(t)}
+				+ \tr\left\{ (\mX^T\mX\odot\mOmega^{(t)})(\vmuq^{(t)}{\vmuq^{(t)}}^T + \mSigmaq^{(t)})\right\}\right]
+				; \quad
+				\tau^{(t)} \leftarrow (\Aq)/s$
+				
+				
+				8: \qquad $\vw^{*}=[w^*_1,\ldots,w^*_p] \leftarrow \vw^{(t)}$
+				
+				
+				9: \qquad For $j=1,\ldots,p$
+				
+				
+				10: \qquad\qquad $\eta_j
+				\leftarrow
+				\lambda
+				- \tfrac{1}{2}\tau^{(t)}\Big[ \big(\mu_j^{(t)}\big)^2 + \Sigma_{j,j}^{(t)}\Big]\|\mX_j\|^2
+				+ \tau^{(t)}\mX_j^T\Big[\vy\mu_j^{(t)} - \mX_{-j}\mbox{diag}(\vw_{-j}^{*})
+				\big(\vmu_{-j}^{(t)}\mu_j^{(t)} + \mSigma_{-j,j}^{(t)}\big)\Big]$
+				
+				11: \qquad\qquad $w_j \leftarrow  \expit(\eta_j)$
+				
+				12: \qquad\qquad $w_j^* \leftarrow w_j$
+				
+				13: \quad\;\;$\vw^{(t+1)} \leftarrow \vw^{*}
+				\qquad ; \qquad
+				t\leftarrow t + 1$
+				%\end{itemize}
+				
+				14: until the increase of $\log\underline{p}(\vy;\rho)$ is negligible.
+			}
+		\end{minipage}
+		%\end{center}
+		\caption{\it Iterative scheme to obtain optimal $q^{\ast}(\vtheta)$ for our model.}
+		\label{alg:Algorithm1}
+	\end{algorithm}
+}
+
+
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.7\textwidth]{prostate-sig2-10.pdf}
+	%\begin{minipage}[t]{0.8\textwidth}
+	\caption{Top right panel: An illustration the final values of the components of $\vmu$ for
+		multiple runs of Algorithm \ref{alg:Algorithm1} over a grid of $\lambda=\mbox{logit}(\rho)$ values
+		where we have used $w_j=1$, $j=1,\ldots,p$, $\tau=1000$ and hyperparameters
+		selected as described in Section \ref{sec:Parameter Selection and Initialization}
+		on the {\it prostate cancer} dataset originating in \cite{Stamey1989}.
+		Remaining panels: The regularization paths for Ridge, Lasso
+		and SCAD penalized regression fits.}
+	%\end{minipage}
+	\label{fig:01}
+\end{figure}
+
+
+
+\begin{algorithm}
+	\begin{minipage}[h]{\textwidth}
+		1: Input: $(\vy,\mX,\sigma_\beta^2,A,B,\tau)$ where $\vy\in\bR^n$, $\mX\in\bR^{n\times p}$, $A>0$, $B>0$,
+		$\sigma_\beta^2>0$, $\vw_{\mbox{\scriptsize curr}}=\vzero$ and $\tau>0$
+		
+		2: Set $M = 100$; $P=50$; $\rho = \expit(-0.5\sqrt{n})$; $\sL = -\infty$
+		
+		3: For $i = 1,\ldots,\max(p,P)$
+		
+		4: $\quad$ For $j=1,\ldots,p$
+		
+		5: $\quad\quad$ $\sL_j \leftarrow \log \underline{p}(\vy;\rho)$
+		from
+		Algorithm 1 with input $\big(\vy,\mX,\sigma_\beta^2,A,B,\tau_0,\rho,\vw_j^{(1)}\big)$
+		
+		
+		6: $\quad$ $k \leftarrow \argmax_{1\le j\le p} \{\sL_j\}; \quad$
+		If $\sL_k > \sL$ then set $\sL$ to $\sL_k$ and $\vw$ to $\vw_k^{(1)}$
+		
+		7: For $i=1,\ldots,M$
+		
+		8: $\quad$  For  $j=1,\ldots,J$
+		
+		9: $\quad\quad$ $\sL_j \leftarrow \log\underline{p}(\vy;\rho_j)$
+		from
+		Algorithm 1 with input $\big(\vy,\mX,\sigma_\beta^2,A,B,\tau_0,\rho_j,\vw\big)$
+		
+		
+		10: $\quad k \leftarrow \argmax_{1\le j\le p} \{\sL_j\}; \quad$
+		If $\sL_k > \sL$ then set $\sL$ to $\sL_k$ and $\rho$ to $\rho_k$
+		
+		11: $\quad$ For $j=1,\ldots,p$
+		
+		12: $\quad\quad$ $\sL_0 \leftarrow \log \underline{p}(\vy;\rho)$
+		from
+		Algorithm 1 with input $\big(\vy,\mX,\sigma_\beta^2,A,B,\tau_0,\rho,\vw_j^{(0)}\big)$
+		
+		13: $\quad\quad$  $\sL_1 \leftarrow \log \underline{p}(\vy;\rho)$
+		from
+		Algorithm 1 with input $\big(\vy,\mX,\sigma_\beta^2,A,B,\tau_0,\rho,\vw_j^{(1)}\big)$
+		
+		14: $\quad\quad$  $k \leftarrow \argmax_{j\in\{0,1\}} \{\sL_j\}; \quad$
+		If $\sL_k > \sL$ then set $\sL$ to $\sL_k$ and $\vw$ to $\vw_j^{(k)}$
+		
+		
+		15: $\quad$  If $\sL$ does not improve return output of Algorithm 1 with input $\big(\vy,\mX,\sigma_\beta^2,A,B,\tau_0,\rho,\vw\big)$
+	\end{minipage}
+	\caption{\it Iterative scheme to
+		tune $\rho$ and select initial $\vw$ for Algorithm 1}
+	\label{alg:PathSearch}
+\end{algorithm}
+
+
+
+
+
+
+\begin{algorithm}
+	%\begin{center}
+	\begin{minipage}[h]{\textwidth}
+		\hrule
+		\vskip2mm\noindent
+		1: Input: $(\vy,\mX,\tau_{\beta},A,B,\tau,\rho,\vw,\widetilde{\mA})$ 
+		
+		2: where $\vy\in\bR^n$, $\mX\in\bR^{n\times p}$, $\sigma_{\beta}^2>0$,
+		$A>0$, $B>0$, $\tau>0$, $\rho\in(0,1)$, $\mbox{diag}(\widetilde{\mA})=\mathbf{1}$ and $\vw \in [0,1]^p$. 
+		%
+		
+		3: $\mW \leftarrow \mbox{diag}(\vw)
+		\quad ; \quad
+		\mOmega \leftarrow \vw\vw^{T} + \mW(\mI - \mW)
+		\quad ; \quad
+		\lambda \leftarrow \mbox{logit}(\rho)
+		$ 
+		
+		4: Cycle:
+		
+		\vspace{1mm}
+		5:\hspace{8mm} $\mSigma
+		\leftarrow
+		\left[\tau (\mX^T\widetilde{\mA}\mX)\odot\mOmega + \tau_\beta\mI\right]^{-1}
+		\quad ; \quad
+		\vmu \leftarrow \tau\mSigma\mW\mX^T\widetilde{\mA}\vy$
+		
+		\vspace{1mm}
+		6:\hspace{8mm} For $j=1,\ldots,p$
+		
+		\vspace{1mm}
+		7:\hspace{16mm} $w_j \leftarrow
+		\expit\Big[\lambda -\frac{1}{2}\tau\mX_j^T\widetilde{\mA}\mX_j(\mu_j^2+\Sigma_{jj})
+		+ \tau\mX^T_j\widetilde{\mA}\left[\vy\mu_j-\mX_{-j}\mW_{-j}(\vmu_{-j}\mu_j + \mSigma_{-j,j})\right]  $
+		
+		\vspace{1mm}
+		8:\hspace{16mm} $\vw \leftarrow [w_1,\ldots,w_p]^{T}
+		\quad ; \quad
+		\mW \leftarrow \mbox{diag}(\vw)$
+		
+		\vspace{1mm}
+		9:\hspace{8mm} $\mOmega \leftarrow \vw\vw^{T} + \mW(\mI - \mW)$
+		
+		\vspace{1mm}
+		10:\hspace{8mm}$s \leftarrow
+		B + \frac{1}{2}\left[
+		\|\vy\|^2 - 2\vy^T\widetilde{\mA}\mX\mW\vmu
+		+\tr\left( (\mX^T\widetilde{\mA}\mX\odot\mOmega)(\vmu\vmu^T + \mSigma) \right)\right]$
+		
+		\vspace{1mm}
+		11:\hspace{8mm}$\tau \leftarrow (A+n/2)/s$
+		
+		\vspace{1mm}
+		12:\hspace{8mm} For $i=1,\ldots,n$
+		
+		\vspace{1mm}
+		13:\hspace{16mm} $\widetilde{A}_i \leftarrow
+		\tau^{-1/2}\left[y_i^2-2y_i\vx^T_i\mW\vmu+\tr\left( (\vx_i\vx_i^T\odot\mOmega)(\vmu\vmu^{T} + \mSigma) \right)\right]^{-1/2}  $
+		
+		\vspace{1mm}
+		14:\hspace{8mm} $\widetilde{\mA} \leftarrow \mbox{diag}(\widetilde{A}_1,\ldots,\widetilde{A}_n)$
+		
+		
+		15:\hspace{1mm}Until the increase of $\log \underline{p}_{\mbox{\tiny Laplace}}(\vy;\rho)$ is negligible.
+	\end{minipage}
+	%\end{center}
+	\caption{\it Iterative scheme to obtain parameters in optimal
+		$q$-densities for our model.}
+	\label{alg:VBourmodel}
+\end{algorithm}
+
+
+
+
+
+
+
+\begin{table}[h]
+	\centering
+	\begin{tabular}{lrrrr}
+		& $\kappa=1$ & $\kappa=2$ & $\kappa=3$ & $\kappa=4$ \\
+		\hline
+		$-$log-MSE-VB          & 3.33 (0.06) & 3.30 (0.07) & 3.27 (0.08) & 2.63 (0.13) \\
+		$-$log-MSE-MCMC        & 2.79 (0.06) & 2.76 (0.06) & 2.77 (0.05) & 2.69 (0.06) \\
+		$-$log-BIAS-VB         & 4.63 (0.08) & 4.59 (0.09) & 4.55 (0.10) & 3.74 (0.16) \\
+		$-$log-BIAS-MCMC       & 4.15 (0.07) & 4.15 (0.06) & 4.15 (0.07) & 4.03 (0.07) \\
+		$F_1$-VB             & 1.00 (0.00) & 0.99 (0.00) & 0.99 (0.01) & 0.91 (0.02) \\
+		$F_1$-MCMC           & 0.98 (0.00) & 0.97 (0.00) & 0.98 (0.00) & 0.97 (0.01) \\
+		accuracy($\beta$)    & 93.5 (0.16) & 93.4 (0.20) & 93.3 (0.20) & 91.1 (0.41) \\
+		accuracy($\sigma^2$) & 86.4 (0.98) & 85.5 (1.31) & 84.5 (1.45) & 69.3 (2.99) \\  \hline
+	\end{tabular}
+	\caption{Performance measure comparisons between VB and MCMC
+		based on 100 simulations for the {\tt diet simulation} example.}
+	\label{tab:dietSimulation}
+\end{table}
+
+
+
+
+
+\begin{table}[h]
+	\centering
+	\small{
+		\begin{tabular}{l|rrrrr}
+			\hline
+			Model size & 1 & 2 & 3 & 4 & 5  \\
+			\hline
+			$-$log-MSE-VB & 11.2 (0.34) & 10.6 (0.19) & 10.5 (0.15) & 10.3 (0.13) & 9.8 (0.14) \\
+			$-$log-MSE-MCMC & 2.2  (0.08) & 2.5 (0.06) & 2.4 (0.09) & 2.5 (0.08) & 2.6 (0.08) \\
+			$-$log-BIAS-VB & 15.8 (0.33) & 15.2 (0.19) & 14.7 (0.19) & 14.3 (0.17) & 13.24 (0.31) \\
+			$-$log-BIAS-MCMC & 6.9 (0.03) & 6.9 (0.02) & 6.9 (0.03) & 6.9 (0.03) & 6.97 (0.03) \\
+			$F_1$-VB & 1.00 (0.00) & 1.00 (0.00) & 1.00 (0.00) & 1.00 (0.00) & 0.98 (0.01) \\
+			$F_1$-MCMC & 1.00 (0.00) & 1.00 (0.00) & 1.00 (0.00) & 1.00 (0.00) & 1.00 (0.00) \\
+			accuracy($\beta$)    & 99.5 (0.04) & 99.5 (0.04) & 99.4 (0.05) & 99.4 (0.04) & 99.0 (0.14) \\
+			accuracy($\sigma^2$) & 98.9 (0.19) & 99.1 (0.17) & 99.1 (0.24) & 99.3 (0.11) & 98.7 (0.37) \\
+			\hline
+			\hline
+			Model size & 6 & 7 & 8 & 9 & 10 \\
+			\hline
+			$-$log-MSE-VB    & 9.7 (0.18) & 9.9 (0.08) & 8.5 (0.03) & 8.9 (0.08) & 9.7 (0.14) \\
+			$-$log-MSE-MCMC  & 2.6 (0.07) & 2.4 (0.08) & 2.5 (0.09) & 2.5 (0.08) & 2.6 (0.09) \\
+			$-$log-BIAS-VB   & 12.8 (0.31) & 13.3 (0.11) & 11.5 (0.04) & 12.0 (0.07) & 12.2 (0.33) \\
+			$-$log-BIAS-MCMC & 7.0 (0.03) & 7.0 (0.03) & 7.0 (0.03) & 7.0 (0.02) & 7.0 (0.02) \\
+			$F_1$-VB         & 0.96 (0.01) & 0.92 (0.00) & 0.86 (0.01) & 0.89 (0.01) & 0.93 (0.01) \\
+			$F_1$-MCMC       & 0.96 (0.01) & 0.92 (0.00) & 0.88 (0.01) & 0.90 (0.01) & 0.96 (0.01) \\
+			accuracy($\beta$)     & 98.0 (0.17) & 99.2 (0.10) & 97.6 (0.23) & 97.7 (0.24) & 97.0 (0.23) \\
+			accuracy($\sigma^2$)  & 97.9 (0.51) & 99.2 (0.15) & 93.6 (1.05) & 95.2 (1.05) & 97.8 (0.43) \\
+			\hline
+			\hline
+			Model size & 11 & 12 & 13 & 14 & 15  \\
+			\hline
+			$-$log-MSE-VB    & 9.0   (0.08) & 9.0 (0.08)   & 9.8 (0.12) & 9.0 (0.10) & 9.0  (0.09) \\
+			$-$log-MSE-MCMC  & 2.4   (0.08) & 2.4 (0.08)   & 2.7 (0.06) & 2.5 (0.09) & 2.6  (0.07) \\
+			$-$log-BIAS-VB   & 10.0  (0.10) & 10.0 (0.10)  & 12.0 (0.41) & 10.1 (0.17) & 10.1 (0.07) \\
+			$-$log-BIAS-MCMC & 7.0   (0.03) & 7.0  (0.03)  & 7.0  (0.03) & 7.0  (0.04) & 7.0  (0.03) \\
+			$F_1$-VB         & 0.80  (0.01) & 0.80  (0.01) & 0.85  (0.01) & 0.78  (0.01) & 0.87   (0.01) \\
+			$F_1$-MCMC       & 0.85  (0.01) & 0.85  (0.01) & 0.87  (0.01) & 0.85  (0.01) & 0.94   (0.01) \\
+			accuracy($\beta$)     & 95.6  (0.38) & 95.6  (0.38) & 97.3  (0.29) & 94.6  (0.42) & 95.4  (0.34) \\
+			accuracy($\sigma^2$)  & 93.9  (0.94) & 93.9  (0.94) & 96.2  (0.93) & 92.3  (0.99) & 94.5  (0.75) \\
+			\hline
+			\hline
+			Model size & 16 & 17 & 18 & 19 & 20  \\
+			\hline
+			$-$log-MSE-VB    & 9.4   (0.12) & 9.4   (0.11) & 9.6  (0.11) & 9.9  (0.07) & 9.8  (0.06) \\
+			$-$log-MSE-MCMC  & 2.5   (0.09) & 2.6   (0.08) & 2.5  (0.06) & 2.6  (0.08) & 2.5  (0.09) \\
+			$-$log-BIAS-VB   & 11.6  (0.22) & 10.4  (0.07) & 10.5 (0.07) & 10.3 (0.16) & 11.2 (0.26) \\
+			$-$log-BIAS-MCMC & 7.1   (0.03) & 7.9   (0.03) & 7.1  (0.03) & 7.0  (0.03) & 7.1  (0.03) \\
+			$F_1$-VB         & 0.93  (0.01) & 0.90  (0.01) & 0.91   (0.00) & 0.91   (0.00) & 0.94   (0.01) \\
+			$F_1$-MCMC       & 0.94  (0.01) & 0.96  (0.01) & 0.96   (0.01) & 0.96   (0.01) & 0.96   (0.00) \\
+			accuracy($\beta$)     & 95.7  (0.26) & 94.9  (0.32) & 95.4  (0.27) & 96.1  (0.32) & 95.5  (0.56) \\
+			accuracy($\sigma^2$)  & 96.7  (0.46) & 95.9  (0.53) & 96.2  (0.54) & 97.7  (0.46) & 97.6  (0.36) \\
+			\hline
+		\end{tabular}
+		\caption{Performance measure comparisons between VB and MCMC
+			based on 30 simulations for the {\tt communities and crime} example.}
+		\label{tab:communitiesAndCrime}
+	}
+\end{table}
+
+
+
+
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.9\textwidth]{dietNewest.pdf}
+	\caption{Summaries of the model selection and prediction accuracies of VB, Lasso,
+		SCAD and MCP methods for the {\tt Diet Simulation} example.}
+	\label{fig:03}
+	%\end{minipage}
+\end{figure}
+
+
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.9\textwidth]{CrimeNewest.pdf}
+	%\begin{minipage}[t]{0.8\textwidth}
+	\caption{\joc{Summaries of the model selection and prediction accuracies of VB, Lasso,
+			SCAD and MCP methods for the {\tt Communities and Crime} example.}}
+	\label{fig:04}
+	%\end{minipage}
+\end{figure}
+
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.9\textwidth]{snp-p1000m20-biasNewest.pdf}
+	%\begin{minipage}[t]{0.8\textwidth}
+	\caption{Summaries of the model selection, prediction accuracies and coefficient
+		biases of the  VB, Lasso,
+		SCAD, MCP, EMVS and BMS methods for the{\tt Simulated SNP data} example.}
+	\label{fig:05}
+	%\end{minipage}
+\end{figure}
+
+
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.9\textwidth]{QTLbiasNewest.pdf}
+	%\begin{minipage}[t]{0.8\textwidth}
+	\caption{Summaries of the model selection, prediction accuracies and coefficient
+		biases of the  VB, Lasso,
+		SCAD, MCP, EMVS and BMS methods for the {\tt Simulated QTL data} example.}
+	\label{fig:06}
+	%\end{minipage}
+\end{figure}
+
+
+
+
+
+
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.9\textwidth]{dietlaplaceNewest.pdf}
+	%\begin{minipage}[t]{0.8\textwidth}
+	\caption{Summaries of the model selection and prediction accuracies of VB, Lasso,
+		SCAD and MCP methods for the {\tt Communities and Crime} example with Laplace
+		distribute errors.}
+	\label{fig:07}
+	%\end{minipage}
+\end{figure}
+
+
+
+
+
+
+
+
+
+\end{document}
+
+
+ 
