@@ -238,12 +238,13 @@ void show_matrix_difference(ostream& os, const MatrixXd m1, const MatrixXd m2, c
 //' Perform the rank one update on (X_gamma^T X_gamma)^{-1}
 //'
 //' @param[in]  mX_gamma       The previous iteration's matrix of covariates
+//' @param[in]  i              The column number of the column we're adding to mX_gamma_prime
 //' @param[in]  vx             The new column vector to be added to mX_gamma
 //' @param[in]  mX_gamma_prime The current iteration's matrix of covariates
 //' @param[in]  mA             The previous iteration's inverse i.e. (X_gamma^T X_gamma)^{-1}
 //' @param[out] mA_prime       The current iteration's inverse i.e. (X_gamma_prime^T X_gamma_prime)^{-1}
 //' @return                    The new inverse (mX_gamma_prime^T mX_gamma_prime)^{-1}
-MatrixXd& rank_one_update(MatrixXd mX_gamma, VectorXd vx, MatrixXd mX_gamma_prime,
+MatrixXd& rank_one_update(MatrixXd mX_gamma, unsigned int i, VectorXd vx, MatrixXd mX_gamma_prime,
 													MatrixXd mA, MatrixXd& mA_prime)
 {
 	const unsigned int p_gamma = mX_gamma_prime.cols();
@@ -269,6 +270,26 @@ MatrixXd& rank_one_update(MatrixXd mX_gamma, VectorXd vx, MatrixXd mX_gamma_prim
 		// Do rank one update
 		mA_prime << mA + b * mA * mX_gamma.transpose() * vx * vx.transpose() * mX_gamma * mA, -mA * mX_gamma.transpose() * vx * b,
 								-b * vx.transpose() * mX_gamma * mA, b;
+
+    if (i < p_gamma - 1) {
+      // Construct a permutation matrix mPerm which interchanges the p_gamma-th and i-th rows/columns,
+      // because at the moment, the p_gamma-th row/column of mA_prime contains the inverse row/column for
+      // the i-th row/column of mX_gamma_prime.transpose() * mX_gamma_prime.
+      Eigen::PermutationMatrix<Eigen::Dynamic, Eigen::Dynamic> mPerm(p_gamma);
+      mPerm.setIdentity();
+      // Get p_gamma index
+      int *ind = mPerm.indices().data();
+      int tmp = ind[p_gamma - 1];
+      // Move every index from idx-1 to idx
+      for (int idx = p_gamma - 1; idx > ((int) i) ; idx--) {
+        ind[idx] = ind[idx - 1];
+      }
+      // Set index i to previous p_gamma index
+      ind[i] = tmp;
+      // Permute the rows and columns of mA_prime.      
+      mA_prime = mA_prime * mPerm;
+      mA_prime = mPerm.transpose() * mA_prime;
+    }
 		// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
 		MatrixXd identity_prime = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime;
 		if (!identity_prime.isApprox(MatrixXd::Identity(p_gamma, p_gamma)) && NUMERIC_FIX) {
@@ -449,7 +470,7 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, unsigned int intercept_col, 
 				v1 << v2, v3;
 
 				MatrixXd mA_prime(p_gamma, p_gamma);
-				mA_prime = rank_one_update(mX_gamma, vx, mX_gamma_prime, mA, mA_prime);
+				mA_prime = rank_one_update(mX_gamma, diff_idx, vx, mX_gamma_prime, mA, mA_prime);
 
 				numerator = (v1.transpose() * mA_prime * v1).value();
 				R2 = numerator / vy.squaredNorm();
