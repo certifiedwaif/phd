@@ -280,7 +280,7 @@ median_accuracy_graph_all <- function(test) {
          at = 1:7 * 4 - 0.25,
          tick=TRUE)
   }
-  legend("bottomright", c("Laplace", "GVA", "GVA2", "GVA FP"), lty=1, col=1:4)
+  legend("bottomright", c("Laplace", "GVA", "GVA NP", "GVA FP"), lty=1, col=1:4)
   title(sprintf("Combined median accuracy graph - %s", test))
   dev.off()
   # TODO: Label the axes better
