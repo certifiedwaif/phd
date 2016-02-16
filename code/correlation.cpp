@@ -320,10 +320,11 @@ MatrixXd& rank_one_update(MatrixXd mX_gamma, unsigned int i, VectorXd vx, Matrix
 //' Perform the rank one downdate on (X_gamma^T X_gamma)^{-1}
 //'
 //' @param[in]  mX_gamma_prime The current iteration's matrix of covariates
+//' @param[in]  i              The index of the column we are downdating.
 //' @param[in]  mA             The previous iteration's inverse i.e. (X_gamma^T X_gamma)^{-1}
 //' @param[out] mA_prime       The current iteration's inverse i.e. (X_gamma_prime^T X_gamma_prime)^{-1}
 //' @return                    The new inverse (mX_gamma_prime^T mX_gamma_prime)^{-1}
-MatrixXd& rank_one_downdate(MatrixXd mX_gamma_prime, MatrixXd mA, MatrixXd& mA_prime)
+MatrixXd& rank_one_downdate(MatrixXd mX_gamma_prime, unsigned int i, MatrixXd mA, MatrixXd& mA_prime)
 {
 	const unsigned int p_gamma = mX_gamma_prime.cols();
 	
@@ -343,19 +344,17 @@ MatrixXd& rank_one_downdate(MatrixXd mX_gamma_prime, MatrixXd mA, MatrixXd& mA_p
 	#endif
 	mA_prime = mA_11 - (va_12 * va_21) / a_22;
 
-	// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
-	MatrixXd identity_prime = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime;
-	if (!identity_prime.isApprox(MatrixXd::Identity(p_gamma, p_gamma)) && NUMERIC_FIX) {
-		// This inverse is nonsense. Do a full inversion.
-		MatrixXd mA_prime_full = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
-		#ifdef DEBUG
-			show_matrix_difference(cout, mA_prime, mA_prime_full);
-		#endif
-		// TODO: Find the differences between mA_prime_full and mA_prime
-		mA_prime = mA_prime_full;					
-	}
+  #ifdef DEBUG
+  	// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
+  	MatrixXd identity_prime = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime;
+  	if (!identity_prime.isApprox(MatrixXd::Identity(p_gamma, p_gamma)) && NUMERIC_FIX) {
+  		// This inverse is nonsense. Do a full inversion.
+  		MatrixXd mA_prime_full = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
+  			show_matrix_difference(cout, mA_prime, mA_prime_full);
+  		// TODO: Find the differences between mA_prime_full and mA_prime
+  		mA_prime = mA_prime_full;					
+  	}
 
-	#ifdef DEBUG
 		cout << "mA_prime.cols() " << mA_prime.cols() << endl;
 		// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
 		cout << "(mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime" << endl;
@@ -486,7 +485,7 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, unsigned int intercept_col, 
 				#endif
 				MatrixXd mA_prime(p_gamma, p_gamma);
 
-				mA_prime = rank_one_downdate(mX_gamma_prime, mA, mA_prime);
+				mA_prime = rank_one_downdate(mX_gamma_prime, diff_idx, mA, mA_prime);
 
 				// Calculate correlation
 				VectorXd numerator;
