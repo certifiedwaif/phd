@@ -528,39 +528,36 @@ MatrixXd anscombe()
 
 int main()
 {
-	// VectorXd vy = parseCSVfile_double("vy.csv");
-	// MatrixXd mX = MatrixXd::Ones(263, 1);
-	// MatrixXd mZ = parseCSVfile_double("mX.csv");
-	// MatrixXd mC(263, mZ.cols() + 1);
-	// mC << mX, mZ;
-
-	// Eigen::initParallel();
-	// Eigen::setNbThreads(1);
-
+	const bool intercept = false, centre = true;
 	//VectorXd R2_one = one_correlation(vy, mX, mZ);
 	// cout << R2_one << endl;
 
 	// Simpler test case - Anscombe's quartet
 	MatrixXd mAnscombe = parseCSVfile_double("anscombes_quartet.csv");
-	VectorXd vy = mAnscombe.col(0);
-	MatrixXd mX = mAnscombe.middleCols(1, 3);
-	#ifdef DEBUG
-		cout << mAnscombe << endl;
-		cout << vy << endl;
-		cout << mX << endl;
-	#endif
-
+	{
+		VectorXd vy = mAnscombe.col(0);
+		MatrixXd mX = mAnscombe.middleCols(1, 3);
+		#ifdef DEBUG
+			cout << mAnscombe << endl;
+			cout << vy << endl;
+			cout << mX << endl;
+		#endif
+		VectorXd vR2_all = all_correlations(vy, mX, 0, intercept, centre);
+	}
 	// Test case
 	// mAnscombe = anscombe();
 	// VectorXd expected_correlations(8);
 	// expected_correlations << 0, 0.7615888, 0.83919, 0.9218939, 0.9075042, 0.666324;
 
-	const bool intercept = false, centre = true;
-	VectorXd vR2_all = all_correlations(vy, mX, 0, intercept, centre);
+	{
+		VectorXd vy = parseCSVfile_double("vy.csv");
+		MatrixXd mX = parseCSVfile_double("mX.csv");
+		VectorXd vR2_all = all_correlations(vy, mX, 0, intercept, centre);
 
-	cout << "i,R2" << endl;
-	for (int i = 0; i < vR2_all.size(); i++) {
-		cout << i << ", " << vR2_all(i) << endl;
+		cout << "i,R2" << endl;
+		for (int i = 0; i < vR2_all.size(); i++) {
+			cout << i << ", " << vR2_all(i) << endl;
+		}
 	}
 	
 	return 0;

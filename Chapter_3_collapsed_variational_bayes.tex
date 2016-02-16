@@ -171,11 +171,11 @@ by the symmetry of beta functions and the definitions of $a$ and $b$.
 
 \section{Variational Bayes approximation}
 
-Consider the model $\vy | \vbeta, \sigma^2 \sim N_n(\mX \text{diag}(\vgamma) \vbeta, \sigma^2 \mI)$ with
+Consider the model $\vy | \vbeta, \sigma^2 \sim \text{N}_n(\mX \text{diag}(\vgamma) \vbeta, \sigma^2 \mI)$ with
 priors
 \begin{equation*}
 \begin{array}{ll}
-\vbeta | \sigma^2, g &\sim N_p(\vzero, g \sigma^2(\mX^\top \text{diag}(\vgamma) \mX)^{-1}), \\
+\vbeta | \sigma^2, g &\sim \text{N}_p(\vzero, g \sigma^2(\mX^\top \text{diag}(\vgamma) \mX)^{-1}), \\
 \vgamma_i &\sim \text{Bernoulli}(\rho), 1 \leq i \leq n, 0 \leq \rho \leq 1, \\
 p(\sigma^2) &= (\sigma^2)^{-1} I(\sigma^2 > 0) \text{ and }\\
 p(g) &= \frac{g^b (1 + g)^{-a - b - 2}}{\text{Beta}(a + 1, b + 1)} I(g > 0).

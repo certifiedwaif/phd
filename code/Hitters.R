@@ -57,6 +57,7 @@ if (FALSE) {
 	res.exact1 <- ZE.exact.slow(y.n,X.n,FALSE)
 	b3 <- proc.time()[3]     
 	print(b3-a3)
+	write.table(res.exact1$vR2, sep=",", file="Hitters_exact1.csv", row.names = FALSE, col.names = FALSE)
 }
 
 if (TRUE) {
@@ -80,6 +81,7 @@ if (TRUE) {
 		cat(vprobs.temp[ord[i]],which(res.exact2$A[ord[i],]==1),"\n")
 	}
 	#shine(l1)
+	write.table(res.exact2$vR2, sep=",", file="Hitters_exact2.csv", row.names = FALSE, col.names = FALSE)
 }
  
 
