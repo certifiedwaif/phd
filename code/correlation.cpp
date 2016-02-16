@@ -115,12 +115,17 @@ VectorXd binary_to_vec(unsigned int num, unsigned int p)
 	return(result);
 }
 
+VectorXd grey_vec(unsigned int i, unsigned int p)
+{
+  return binary_to_vec(binary_to_grey(i), p).transpose();
+}
+
 MatrixXd greycode(unsigned int p)
 {
 	unsigned int rows = 1 << p;
 	MatrixXd result(rows, p);
 	for (unsigned int i = 0; i < rows; i++) {
-		result.row(i) = binary_to_vec(binary_to_grey(i), p).transpose();
+		result.row(i) = grey_vec(i, p);
 	}
 	return(result);
 }
@@ -138,7 +143,7 @@ MatrixXd& sherman_morrison(MatrixXd& mA_inv, const VectorXd vu, const VectorXd v
 dbitset& greycode(const unsigned int idx, const unsigned int p, dbitset& bs_ret)
 {
 	dbitset bs(p, idx);
-	bs = (bs >> 1) ^ bs;
+	bs =  bs ^ (bs >> 1);
 	bs_ret = bs;
 
 	return bs_ret;
@@ -152,8 +157,8 @@ void greycode_change(const unsigned int idx, const unsigned int p, bool& update,
 	bs_curr = greycode(idx, p, bs_curr);
 	bs_prev = greycode(idx - 1, p, bs_prev);
 	#ifdef DEBUG
+    cout << "Previous gamma: " << bs_prev << endl;
 		cout << "Current gamma:  " << bs_curr << endl;
-		cout << "Previous gamma: " << bs_prev << endl;
 	#endif
 
 	// Find bit that has changed.
@@ -222,8 +227,9 @@ void show_matrix_difference(ostream& os, const MatrixXd m1, const MatrixXd m2, c
 	for (unsigned int i = 0; i < m1.rows(); i++) {
 		for (unsigned int j = 0; j < m1.cols(); j++) {
 			if (abs(m1(i, j) - m2(i, j)) > epsilon) {
-				os << "Row " << i << ", column " << j << " " << m1(i, j) << " " << m2(i, j) << " ";
-				os << m1(i, j) - m2(i, j) << " " << (m1(i, j) - m2(i, j)) / m1(i, j) << endl;
+				os << "Row " << i << ", column " << j << " m1 " << m1(i, j) << " m2 " << m2(i, j);
+				os <<  " difference " << m1(i, j) - m2(i, j);
+        os << " relative difference " << (m1(i, j) - m2(i, j)) / m1(i, j) << endl;
 			}
 		}
 	}
@@ -525,37 +531,67 @@ MatrixXd anscombe()
 	return mAnscombe;
 }
 
+void check_greycode()
+{
+  cout << "Unflipped" << endl;
+  MatrixXd mGreycode_R = parseCSVfile_double("greycode.csv");
+  unsigned int n = mGreycode_R.rows();
+  unsigned int p = mGreycode_R.cols();
+  MatrixXd mGreycode_Cpp(n, p);
+  for (unsigned int i = 0; i < mGreycode_Cpp.rows(); i++) {
+    mGreycode_Cpp.row(i) = grey_vec(i, p);
+  }
+
+  for (unsigned int i = 0; i < 10; i++) {
+    cout << "R   " << i << ": " << mGreycode_R.row(i) << endl;
+    cout << "C++ " << i << ": " << mGreycode_Cpp.row(i) << endl;
+    cout << endl;
+  }
+  show_matrix_difference(cout, mGreycode_R, mGreycode_Cpp);
+}
+
+void check_anscombe()
+{
+  // Simpler test case - Anscombe's quartet
+  const bool intercept = false, centre = true;
+  MatrixXd mAnscombe = parseCSVfile_double("anscombes_quartet.csv");
+
+  VectorXd vy = mAnscombe.col(0);
+  MatrixXd mX = mAnscombe.middleCols(1, 3);
+  #ifdef DEBUG
+    cout << mAnscombe << endl;
+    cout << vy << endl;
+    cout << mX << endl;
+  #endif
+  VectorXd vR2_all = all_correlations(vy, mX, 0, intercept, centre);
+
+  // Test case
+  mAnscombe = anscombe();
+  VectorXd expected_correlations(8);
+  expected_correlations << 0, 0.7615888, 0.83919, 0.9218939, 0.9075042, 0.666324;
+}
+
 int main()
 {
 	const bool intercept = false, centre = true;
 	//VectorXd R2_one = one_correlation(vy, mX, mZ);
 	// cout << R2_one << endl;
 
-	// Simpler test case - Anscombe's quartet
-	// MatrixXd mAnscombe = parseCSVfile_double("anscombes_quartet.csv");
-	// {
-	// 	VectorXd vy = mAnscombe.col(0);
-	// 	MatrixXd mX = mAnscombe.middleCols(1, 3);
-	// 	#ifdef DEBUG
-	// 		cout << mAnscombe << endl;
-	// 		cout << vy << endl;
-	// 		cout << mX << endl;
-	// 	#endif
-	// 	VectorXd vR2_all = all_correlations(vy, mX, 0, intercept, centre);
-	// }
-	// Test case
-	// mAnscombe = anscombe();
-	// VectorXd expected_correlations(8);
-	// expected_correlations << 0, 0.7615888, 0.83919, 0.9218939, 0.9075042, 0.666324;
 	VectorXd vy = parseCSVfile_double("vy.csv");
 	MatrixXd mX = parseCSVfile_double("mX.csv");
+  unsigned int p = mX.cols();
 	VectorXd vR2_all = all_correlations(vy, mX, 0, intercept, centre);
 	VectorXd vExpected_correlations = parseCSVfile_double("Hitters_exact2.csv");
 
 	cout << "i,R2" << endl;
-	for (int i = 0; i < vR2_all.size(); i++) {
-		cout << i << ", C++ R2 " << vR2_all(i) << " R R2 " << vExpected_correlations(i);
-		cout << " difference " << vR2_all(i) - vExpected_correlations(i) << endl;
+	for (int i = 1; i < vR2_all.size(); i++) {
+    double diff = vR2_all(i) - vExpected_correlations(i);
+    const double epsilon = 1e-8;
+    if (abs(diff) > epsilon) {
+      cout << grey_vec(i - 1, p) << " to " << grey_vec(i, p) << endl;
+      cout << i << ", C++ R2 " << vR2_all(i) << " R R2 " << vExpected_correlations(i);
+      cout << " difference " << diff << endl;
+    }
 	}
 	
 	return 0;
