@@ -19,8 +19,10 @@ greycode <- function(p, standard_order=TRUE)
 	}
 	if (standard_order) {
 		A_standard_order <- matrix(0, nrow(A), ncol(A))
-		for (i in 1:nrow(A)){
-			A_standard_order[i, rev(1:P)] <- A[i, ]
+		for (i in 1:nrow(A)) {
+			for (j in 1:ncol(A)) {
+				A_standard_order[i, (ncol(A) + 1) - j] <- A[i, j]
+			}
 		}
 		return(A_standard_order)
 	} else
