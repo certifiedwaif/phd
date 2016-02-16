@@ -243,7 +243,6 @@ MatrixXd& rank_one_update(MatrixXd mX_gamma, VectorXd vx, MatrixXd mX_gamma_prim
 	
 	// Construct mA_prime
 	#ifdef DEBUG
-		cout << "vy.size() " << vy.size() << endl;
 		cout << "vx.size() " << vx.size() << endl;
 		cout << "mX_gamma.cols() " << mX_gamma.cols() << endl;
 		cout << "mX_gamma.rows() " << mX_gamma.rows() << endl;
@@ -334,7 +333,6 @@ MatrixXd& rank_one_downdate(MatrixXd mX_gamma_prime, MatrixXd mA, MatrixXd& mA_p
 	#ifdef DEBUG
 		cout << "mA_prime.cols() " << mA_prime.cols() << endl;
 		// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
-		MatrixXd identity_prime = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime;
 		cout << "(mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime" << endl;
 		cout << identity_prime << endl;
 	#endif
@@ -533,31 +531,32 @@ int main()
 	// cout << R2_one << endl;
 
 	// Simpler test case - Anscombe's quartet
-	MatrixXd mAnscombe = parseCSVfile_double("anscombes_quartet.csv");
-	{
-		VectorXd vy = mAnscombe.col(0);
-		MatrixXd mX = mAnscombe.middleCols(1, 3);
-		#ifdef DEBUG
-			cout << mAnscombe << endl;
-			cout << vy << endl;
-			cout << mX << endl;
-		#endif
-		VectorXd vR2_all = all_correlations(vy, mX, 0, intercept, centre);
-	}
+	// MatrixXd mAnscombe = parseCSVfile_double("anscombes_quartet.csv");
+	// {
+	// 	VectorXd vy = mAnscombe.col(0);
+	// 	MatrixXd mX = mAnscombe.middleCols(1, 3);
+	// 	#ifdef DEBUG
+	// 		cout << mAnscombe << endl;
+	// 		cout << vy << endl;
+	// 		cout << mX << endl;
+	// 	#endif
+	// 	VectorXd vR2_all = all_correlations(vy, mX, 0, intercept, centre);
+	// }
 	// Test case
 	// mAnscombe = anscombe();
 	// VectorXd expected_correlations(8);
 	// expected_correlations << 0, 0.7615888, 0.83919, 0.9218939, 0.9075042, 0.666324;
 
-	{
-		VectorXd vy = parseCSVfile_double("vy.csv");
-		MatrixXd mX = parseCSVfile_double("mX.csv");
-		VectorXd vR2_all = all_correlations(vy, mX, 0, intercept, centre);
+	#ifdef DEBUG
+		cout << "Good morning!" << endl;
+	#endif
+	VectorXd vy = parseCSVfile_double("vy.csv");
+	MatrixXd mX = parseCSVfile_double("mX.csv");
+	VectorXd vR2_all = all_correlations(vy, mX, 0, intercept, centre);
 
-		cout << "i,R2" << endl;
-		for (int i = 0; i < vR2_all.size(); i++) {
-			cout << i << ", " << vR2_all(i) << endl;
-		}
+	cout << "i,R2" << endl;
+	for (int i = 0; i < vR2_all.size(); i++) {
+		cout << i << ", " << vR2_all(i) << endl;
 	}
 	
 	return 0;
