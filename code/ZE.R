@@ -5,7 +5,7 @@ sourceCpp(file="ZE.cpp")
 
 ################################################################################
 
-greycode <- function(p) 
+greycode <- function(p, standard_order=TRUE) 
 {
 	A <- matrix(c(0,1),2,1)
 	if (p!=1) {
@@ -17,7 +17,16 @@ greycode <- function(p)
 			A <- cbind(A1,A2)
 		}
 	}
-	return(A)
+	if (standard_order) {
+		A_standard_order <- matrix(0, nrow(A), ncol(A))
+		for (i in 1:nrow(A)){
+			A_standard_order[i, rev(1:P)] <- A[i, ]
+		}
+		return(A_standard_order)
+	} else
+	{
+		return(A)
+	}
 }
 
 ################################################################################
