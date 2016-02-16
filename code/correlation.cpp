@@ -18,6 +18,7 @@ using Eigen::MatrixXi;
 using namespace std;
 
 typedef dynamic_bitset<> dbitset;
+const bool NUMERIC_FIX = false;
 
 // Code copied from here: https://gist.github.com/stephenjbarr/2266900
 MatrixXd parseCSVfile_double(string infilename)
@@ -264,7 +265,7 @@ MatrixXd& rank_one_update(MatrixXd mX_gamma, VectorXd vx, MatrixXd mX_gamma_prim
 								-b * vx.transpose() * mX_gamma * mA, b;
 		// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
 		MatrixXd identity_prime = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime;
-		if (!identity_prime.isApprox(MatrixXd::Identity(p_gamma, p_gamma))) {
+		if (!identity_prime.isApprox(MatrixXd::Identity(p_gamma, p_gamma)) && NUMERIC_FIX) {
 			// This inverse is nonsense. Do a full inversion.
 			MatrixXd mA_prime_full = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
 
@@ -320,7 +321,7 @@ MatrixXd& rank_one_downdate(MatrixXd mX_gamma_prime, MatrixXd mA, MatrixXd& mA_p
 
 	// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
 	MatrixXd identity_prime = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime;
-	if (!identity_prime.isApprox(MatrixXd::Identity(p_gamma, p_gamma))) {
+	if (!identity_prime.isApprox(MatrixXd::Identity(p_gamma, p_gamma)) && NUMERIC_FIX) {
 		// This inverse is nonsense. Do a full inversion.
 		MatrixXd mA_prime_full = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
 		#ifdef DEBUG
@@ -546,17 +547,15 @@ int main()
 	// mAnscombe = anscombe();
 	// VectorXd expected_correlations(8);
 	// expected_correlations << 0, 0.7615888, 0.83919, 0.9218939, 0.9075042, 0.666324;
-
-	#ifdef DEBUG
-		cout << "Good morning!" << endl;
-	#endif
 	VectorXd vy = parseCSVfile_double("vy.csv");
 	MatrixXd mX = parseCSVfile_double("mX.csv");
 	VectorXd vR2_all = all_correlations(vy, mX, 0, intercept, centre);
+	VectorXd vExpected_correlations = parseCSVfile_double("Hitters_exact2.csv");
 
 	cout << "i,R2" << endl;
 	for (int i = 0; i < vR2_all.size(); i++) {
-		cout << i << ", " << vR2_all(i) << endl;
+		cout << i << ", C++ R2 " << vR2_all(i) << " R R2 " << vExpected_correlations(i);
+		cout << " difference " << vR2_all(i) - vExpected_correlations(i) << endl;
 	}
 	
 	return 0;
