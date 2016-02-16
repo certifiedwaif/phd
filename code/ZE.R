@@ -51,14 +51,16 @@ ZE.exact.slow <- function(vy,mX,LARGEP)
  
 	vlog.ZE <- rep(0,nrow(A))
 	vlog.ZE[1] <- res.con$vpen[1]
+	vR2 <- rep(0, nrow(A))
 	for (j in 2:nrow(A))
 	{
 		inds <- which(A[j,]==1)
 		q <- length(inds)
 		R2 <- summary(lm(vy~-1+mX[,inds]))$r.squared
+		vR2[j] <- R2
 		vlog.ZE[j] <-  -res.con$vcon[q+1]*log(1 - R2) + res.con$vpen[q+1]
 	}
-	return(list(A=A,vlog.ZE=vlog.ZE))
+	return(list(A=A,vlog.ZE=vlog.ZE, vR2=vR2))
 }
 
 ################################################################################
@@ -97,7 +99,7 @@ ZE.exact <- function(vy,mX,LARGEP,STORE.XTX=TRUE)
 	}
 	vR2 <- vR2/yTy
 	vlog.ZE  <-  -res.con$vcon[vq+1]*log(1 - vR2) + res.con$vpen[vq+1]
-	return(list(A=A,vlog.ZE=vlog.ZE))
+	return(list(A=A,vlog.ZE=vlog.ZE, vR2=vR2))
 }
 
 ################################################################################

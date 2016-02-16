@@ -1,0 +1,16 @@
+This is BibTeX, Version 0.99dThe top-level auxiliary file: Chapter_1_zero_inflated_models_john_edits.aux
+The style file: elsarticle-harv.bst
+Database file #1: Chapter_1_zero_inflated_models.bib
+Warning--I'm ignoring Hall2000's extra "year" field
+--line 206 of file Chapter_1_zero_inflated_models.bib
+You're missing a field part---line 229 of file Chapter_1_zero_inflated_models.bib
+ :   author = 
+ :            ,
+I'm skipping whatever remains of this entry
+You're missing a field part---line 236 of file Chapter_1_zero_inflated_models.bib
+ :   author = 
+ :            ,
+I'm skipping whatever remains of this entry
+Warning--empty publisher in Gelman2007
+Warning--empty journal in RohdeWand2015
+(There were 2 error messages)
