@@ -290,28 +290,30 @@ MatrixXd& rank_one_update(MatrixXd mX_gamma, unsigned int i, VectorXd vx, Matrix
       mA_prime = mA_prime * mPerm;
       mA_prime = mPerm.transpose() * mA_prime;
     }
+	  	#ifdef DEBUG
+	  		// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
+	  		MatrixXd identity_prime = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime;
+	  		if (!identity_prime.isApprox(MatrixXd::Identity(p_gamma, p_gamma))) {
+	  			// This inverse is nonsense. Do a full inversion.
+	  			MatrixXd mA_prime_full = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
 
-    #ifdef DEBUG
-  		// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
-  		MatrixXd identity_prime = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime;
-  		if (!identity_prime.isApprox(MatrixXd::Identity(p_gamma, p_gamma))) {
-  			// This inverse is nonsense. Do a full inversion.
-  			MatrixXd mA_prime_full = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
+	  			show_matrix_difference(cout, mA_prime, mA_prime_full);
+	  			mA_prime = mA_prime_full;					
 
-  			show_matrix_difference(cout, mA_prime, mA_prime_full);
-  			mA_prime = mA_prime_full;					
-  		}
-  		cout << "mA_prime.cols() " << mA_prime.cols() << endl;
-    		// cout << "(mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime " << identity_prime << endl;
-    	} else {
-    		// Perform full inverse
-    		mA_prime = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
-    	}
+		  		cout << "mA_prime.cols() " << mA_prime.cols() << endl;
+	    		// cout << "(mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime " << identity_prime << endl;
+		  	}
+		  #endif
+  	} else {
+  		// Perform full inverse
+  		mA_prime = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
+  	}
   	
-  		// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
-  		MatrixXd identity_prime = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime;
-  		cout << "(mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime" << endl;
-  		cout << identity_prime << endl;
+  #ifdef DEBUG
+		// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
+		MatrixXd identity_prime = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime;
+		cout << "(mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime" << endl;
+		cout << identity_prime << endl;
   #endif
       
 	return mA_prime;
