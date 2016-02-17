@@ -329,6 +329,8 @@ MatrixXd& rank_one_update(MatrixXd mX_gamma, unsigned int i, VectorXd vx, Matrix
 MatrixXd& rank_one_downdate(MatrixXd mX_gamma_prime, unsigned int i, MatrixXd mA, MatrixXd& mA_prime)
 {
 	const unsigned int p_gamma = mX_gamma_prime.cols();
+
+	// TODO: Move i-th row/column to the end, and the (i+1)-th to p_gamma-th rows/columns up/left by one.
 	
 	MatrixXd mA_11 = mA.topLeftCorner(p_gamma, p_gamma);
 	VectorXd va_12;
@@ -376,9 +378,10 @@ MatrixXd& rank_one_downdate(MatrixXd mX_gamma_prime, unsigned int i, MatrixXd mA
 //' @return              		 A vector of length 2^p of the correlations
 //' @export
 // [[Rcpp::export]]
-VectorXd all_correlations(VectorXd vy, MatrixXd mX, unsigned int intercept_col, bool bIntercept = false, 
-													bool bCentre = true)
+VectorXd all_correlations(VectorXd vy, MatrixXd mX, const unsigned int intercept_col,
+													const bool bIntercept = false, const bool bCentre = true)
 {
+	unsigned int idx;														 // The main loop index
 	const unsigned int p = mX.cols();            // The number of covariates
 	const unsigned int greycode_rows = (1 << p); // The number of greycode combinations, 2^p
 	VectorXd vR2_all(greycode_rows);             // Vector of correlations for all models
@@ -410,8 +413,14 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, unsigned int intercept_col, 
 		}
 	}
 
+	// Private: mA, bMa_set, bUpdate, diff_idx, numerator, R2, gamma, mX_gamma, mX_gamma_prime, p_gamma, vx
+	// Shared: p, greycode_rows, vR2_all, vy, mX, intercept_col, bIntercept, bCentre
 	// Loop through models, updating and downdating mA as necessary
-	for (unsigned int idx = 1; idx < greycode_rows; idx++) {
+	#pragma omp parallel for firstprivate(bmA_set, mA, gamma, mX_gamma, mX_gamma_prime, vx)\
+														private(numerator, R2, diff_idx, p_gamma, bUpdate)\
+														shared(cout, vy, mX, vR2_all)\
+														default(none)
+	for (idx = 1; idx < greycode_rows; idx++) {
 		#ifdef DEBUG
 			cout << "Iteration " << idx << endl;
 		#endif
@@ -424,20 +433,20 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, unsigned int intercept_col, 
 		// Get mX matrix for gamma
 		mX_gamma_prime = get_mX_gamma(mX, gamma, mX_gamma_prime);
 		p_gamma = mX_gamma_prime.cols();
+		MatrixXd mA_prime(p_gamma, p_gamma);
 		vx = mX.col(diff_idx);
 		
 		// If we haven't previously calculated this inverse, calculate it the first time.
 		if (!bmA_set) {
 			// Calculate full inverse mA, O(p^3)
-			MatrixXd mA_prime(p_gamma, p_gamma);
 			mA_prime = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
 			VectorXd v1(p_gamma); // [y^T X, y^T x]^T
-			v1 << vy.transpose() * mX_gamma_prime;
+			v1 = vy.transpose() * mX_gamma_prime;
 			#ifdef DEBUG
 				cout << v1.size() << endl;
 				cout << mA_prime.cols() << endl;
 			#endif
-			numerator = (v1 * mA_prime * v1.transpose()).value();
+			numerator = (v1.transpose() * mA_prime * v1).value();
 			R2 = numerator / vy.squaredNorm();
 			#ifdef DEBUG
 				cout << "Numerator " << numerator << " denominator " << vy.squaredNorm();
@@ -467,7 +476,6 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, unsigned int intercept_col, 
 				#endif
 				v1 << v2, v3;
 
-				MatrixXd mA_prime(p_gamma, p_gamma);
 				mA_prime = rank_one_update(mX_gamma, diff_idx, vx, mX_gamma_prime, mA, mA_prime);
 
 				numerator = (v1.transpose() * mA_prime * v1).value();
@@ -485,8 +493,6 @@ VectorXd all_correlations(VectorXd vy, MatrixXd mX, unsigned int intercept_col, 
 				#ifdef DEBUG
 					cout << "Downdating " << diff_idx << endl;
 				#endif
-				MatrixXd mA_prime(p_gamma, p_gamma);
-
 				mA_prime = rank_one_downdate(mX_gamma_prime, diff_idx, mA, mA_prime);
 
 				// Calculate correlation
@@ -606,11 +612,11 @@ int main()
 	for (int i = 1; i < vR2_all.size(); i++) {
     double diff = vR2_all(i) - vExpected_correlations(i);
     const double epsilon = 1e-8;
-    if (abs(diff) > epsilon) {
-      cout << grey_vec(i - 1, p) << " to " << grey_vec(i, p) << endl;
+    // if (abs(diff) > epsilon) {
+      // cout << grey_vec(i - 1, p) << " to " << grey_vec(i, p) << endl;
       cout << i << ", C++ R2 " << vR2_all(i) << " R R2 " << vExpected_correlations(i);
       cout << " difference " << diff << endl;
-    }
+    // }
 	}
 	
 	return 0;
