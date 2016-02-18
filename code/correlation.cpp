@@ -18,7 +18,7 @@ using Eigen::MatrixXi;
 using namespace std;
 
 typedef dynamic_bitset<> dbitset;
-const bool NUMERIC_FIX = false;
+const bool NUMERIC_FIX = true;
 
 // Code copied from here: https://gist.github.com/stephenjbarr/2266900
 MatrixXd parseCSVfile_double(string infilename)
@@ -285,18 +285,15 @@ MatrixXd& rank_one_update(MatrixXd mX_gamma, unsigned int i, VectorXd vx, Matrix
 MatrixXd mA, MatrixXd& mA_prime)
 {
 	const unsigned int p_gamma = mX_gamma_prime.cols();
+  #ifdef DEBUG
+  cout << "mX_gamma " << mX_gamma.topRows(6) << endl;
+  cout << "p_gamma " << p_gamma << endl;
+  cout << "i " << i << endl;
+  cout << "vx " << vx.head(6) << endl;
+  cout << "mA " << mA << endl;
+  #endif
 
 	// Construct mA_prime
-	#ifdef DEBUG
-	cout << "vx.size() " << vx.size() << endl;
-	cout << "mX_gamma.cols() " << mX_gamma.cols() << endl;
-	cout << "mX_gamma.rows() " << mX_gamma.rows() << endl;
-	cout << "mX_gamma_prime.cols() " << mX_gamma_prime.cols() << endl;
-	cout << "mX_gamma_prime.rows() " << mX_gamma_prime.rows() << endl;
-	cout << "mA.cols() " << mA.cols() << endl;
-	cout << "mA.rows() " << mA.rows() << endl;
-	#endif
-
 	const double b = 1 / (vx.transpose() * vx - vx.transpose() * mX_gamma * mA * mX_gamma.transpose() * vx).value();
 	// b is supposed to be positive definite.
 	#ifdef DEBUG
@@ -323,8 +320,6 @@ MatrixXd mA, MatrixXd& mA_prime)
 
 			show_matrix_difference(cout, mA_prime, mA_prime_full);
 			mA_prime = mA_prime_full;
-
-			cout << "mA_prime.cols() " << mA_prime.cols() << endl;
 			// cout << "(mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime " << identity_prime << endl;
 		}
 		#endif
@@ -354,44 +349,42 @@ MatrixXd mA, MatrixXd& mA_prime)
 //' @return                    The new inverse (mX_gamma_prime^T mX_gamma_prime)^{-1}
 MatrixXd& rank_one_downdate(MatrixXd mX_gamma_prime, unsigned int i, MatrixXd mA, MatrixXd& mA_prime)
 {
-	const unsigned int p_gamma = mX_gamma_prime.cols();
+	const unsigned int p_gamma_prime = mX_gamma_prime.cols();
 
-	// Move i-th row/column to the end, and the (i+1)-th to p_gamma-th rows/columns up/left by one.
-	if (i < p_gamma - 1) {
-		// Construct a permutation matrix mPerm which interchanges the p_gamma-th and i-th rows/columns,
-		// because at the moment, the p_gamma-th row/column of mA_prime contains the inverse row/column for
+	// Move i-th row/column to the end, and the (i+1)-th to p_gamma_prime-th rows/columns up/left by one.
+	if (i < p_gamma_prime - 1) {
+		// Construct a permutation matrix mPerm which interchanges the p_gamma_prime-th and i-th rows/columns,
+		// because at the moment, the p_gamma_prime-th row/column of mA_prime contains the inverse row/column for
 		// the i-th row/column of mX_gamma_prime.transpose() * mX_gamma_prime.
-		mA_prime = reorder_ith_row_column_to_last(mA_prime, i, p_gamma);
+		mA = reorder_ith_row_column_to_last(mA, i, p_gamma_prime);
 	}
 
-	MatrixXd mA_11 = mA.topLeftCorner(p_gamma, p_gamma);
+	MatrixXd mA_11 = mA.topLeftCorner(p_gamma_prime, p_gamma_prime);
 	VectorXd va_12;
 	RowVectorXd va_21;
-	const double a_22 = mA(p_gamma, p_gamma);
+	const double a_22 = mA(p_gamma_prime, p_gamma_prime);
 
-	// Remember that Eigen's indexing is zero-based i.e. from 0 to n - 1, so mA.col(p_gamma) is actually
-	// accessing the p_gamma + 1 th column.
-	va_12 = mA.col(p_gamma).head(p_gamma);
+	// Remember that Eigen's indexing is zero-based i.e. from 0 to n - 1, so mA.col(p_gamma_prime) is actually
+	// accessing the p_gamma_prime + 1 th column.
+	va_12 = mA.col(p_gamma_prime).head(p_gamma_prime);
 	va_21 = va_12.transpose();
-	#ifdef DEBUG
-	cout << "mA_11.cols() " << mA_11.cols() << endl;
-	cout << "va_12.size() " << va_12.size() << endl;
-	cout << "va_12.size() " << va_12.size() << endl;
-	#endif
 	mA_prime = mA_11 - (va_12 * va_21) / a_22;
 
 	#ifdef DEBUG
 	// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
 	MatrixXd identity_prime = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime;
-	if (!identity_prime.isApprox(MatrixXd::Identity(p_gamma, p_gamma)) && NUMERIC_FIX) {
+	if (!identity_prime.isApprox(MatrixXd::Identity(p_gamma_prime, p_gamma_prime)) && NUMERIC_FIX) {
+    cout << "(mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime" << endl;
+    cout << identity_prime << endl;
+    cout << "Iterative calculation of inverse is wrong, recalculating ..." << endl;
 		// This inverse is nonsense. Do a full inversion.
 		MatrixXd mA_prime_full = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
 		show_matrix_difference(cout, mA_prime, mA_prime_full);
 		// TODO: Find the differences between mA_prime_full and mA_prime
+    identity_prime = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime_full;
 		mA_prime = mA_prime_full;
 	}
 
-	cout << "mA_prime.cols() " << mA_prime.cols() << endl;
 	// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
 	cout << "(mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime" << endl;
 	cout << identity_prime << endl;
@@ -421,17 +414,17 @@ const bool bIntercept = false, const bool bCentre = true)
 	const unsigned int greycode_rows = (1 << p);
 	// Vector of correlations for all models
 	VectorXd vR2_all(greycode_rows);
-	MatrixXd mA;				     // The inverse of (X^T X) for the previous iteration
-	bool bmA_set = false;		 // Whether mA has been set yet
-	bool bUpdate;				     // True for an update, false for a downdate
-	unsigned int diff_idx;	 // The covariate which is changing
-	double numerator;			   // The numerator in the correlation calculation
-	double R2;					     // Correlation
-	dbitset gamma;				   // The model gamma
-	MatrixXd mX_gamma;			 // The matrix of covariates for the previous gamma
-	MatrixXd mX_gamma_prime; // The matrix of covariates for the current gamma
-	unsigned int p_gamma;		 // The number of columns in the matrix mX_gamma
-	VectorXd vx;				     // The column vector for the current covariate
+	MatrixXd mA;				        // The inverse of (X^T X) for the previous iteration
+	bool bmA_set = false;		    // Whether mA has been set yet
+	bool bUpdate;				        // True for an update, false for a downdate
+	unsigned int diff_idx;	    // The covariate which is changing
+	double numerator;			      // The numerator in the correlation calculation
+	double R2;					        // Correlation
+	dbitset gamma;				      // The model gamma
+	MatrixXd mX_gamma;			    // The matrix of covariates for the previous gamma
+	MatrixXd mX_gamma_prime;    // The matrix of covariates for the current gamma
+  unsigned int p_gamma_prime; // The number of columns in the matrix mX_gamma
+	VectorXd vx;				        // The column vector for the current covariate
 
 	if (bCentre) {
 		// Centre vy
@@ -449,16 +442,16 @@ const bool bIntercept = false, const bool bCentre = true)
 		}
 	}
 
-	// Private: mA, bMa_set, bUpdate, diff_idx, numerator, R2, gamma, mX_gamma, mX_gamma_prime, p_gamma, vx
+	// Private: mA, bMa_set, bUpdate, diff_idx, numerator, R2, gamma, mX_gamma, mX_gamma_prime, p_gamma_prime, vx
 	// Shared: p, greycode_rows, vR2_all, vy, mX, intercept_col, bIntercept, bCentre
 	// Loop through models, updating and downdating mA as necessary
-	#pragma omp parallel for firstprivate(bmA_set, mA, gamma, mX_gamma, mX_gamma_prime, vx)\
-		private(numerator, R2, diff_idx, p_gamma, bUpdate)\
-			shared(cout, vy, mX, vR2_all)\
-			default(none)
+	// #pragma omp parallel for firstprivate(bmA_set, mA, gamma, mX_gamma, mX_gamma_prime, vx)\
+	// 	private(numerator, R2, diff_idx, p_gamma_prime, bUpdate)\
+	// 		shared(cout, vy, mX, vR2_all)\
+	// 		default(none)
 	for (idx = 1; idx < greycode_rows; idx++) {
 		#ifdef DEBUG
-		cout << "Iteration " << idx << endl;
+		cout << endl << "Iteration " << idx << endl;
 		#endif
 		// By properties of Greycode, only one element can be different. And it's either one higher or
 		// one lower.
@@ -468,20 +461,16 @@ const bool bIntercept = false, const bool bCentre = true)
 
 		// Get mX matrix for gamma
 		mX_gamma_prime = get_mX_gamma(mX, gamma, mX_gamma_prime);
-		p_gamma = mX_gamma_prime.cols();
-		MatrixXd mA_prime(p_gamma, p_gamma);
+		p_gamma_prime = mX_gamma_prime.cols();
+		MatrixXd mA_prime(p_gamma_prime, p_gamma_prime);
 		vx = mX.col(diff_idx);
 
 		// If we haven't previously calculated this inverse, calculate it the first time.
 		if (!bmA_set) {
 			// Calculate full inverse mA, O(p^3)
 			mA_prime = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
-			VectorXd v1(p_gamma);// [y^T X, y^T x]^T
+			VectorXd v1(p_gamma_prime);// [y^T X, y^T x]^T
 			v1 = vy.transpose() * mX_gamma_prime;
-			#ifdef DEBUG
-			cout << v1.size() << endl;
-			cout << mA_prime.cols() << endl;
-			#endif
 			numerator = (v1.transpose() * mA_prime * v1).value();
 			R2 = numerator / vy.squaredNorm();
 			#ifdef DEBUG
@@ -498,30 +487,29 @@ const bool bIntercept = false, const bool bCentre = true)
 				// Rank one update of mA_prime from mA
 				#ifdef DEBUG
 				cout << "Updating " << diff_idx << endl;
-				cout << "p_gamma " << p_gamma << endl;
+				cout << "p_gamma_prime " << p_gamma_prime << endl;
 				#endif
 
 				// Calculate [y^T X, y^T x]^T
-				VectorXd v1(p_gamma);
-				VectorXd v2, v3;
-				v2 = vy.transpose() * mX_gamma;
-				v3 = vy.transpose() * vx;
-				#ifdef DEBUG
-				cout << "v1.size() " << v1.size() << endl;
-				cout << "v2.size() " << v2.size() << endl;
-				cout << "v3.size() " << v3.size() << endl;
-				#endif
-				v1 << v2, v3;
+				VectorXd v1(p_gamma_prime);
+				// VectorXd v2, v3;
+				// v2 = vy.transpose() * vx;
+        // v3 = vy.transpose() * mX_gamma;
+				// v1 << v2, v3;
+				v1 = vy.transpose() * mX_gamma_prime;
 
 				mA_prime = rank_one_update(mX_gamma, diff_idx, vx, mX_gamma_prime, mA, mA_prime);
 
 				numerator = (v1.transpose() * mA_prime * v1).value();
 				R2 = numerator / vy.squaredNorm();
+        vR2_all(idx) = R2;
 				#ifdef DEBUG
+        cout << "v1 " << v1 << endl;
+        cout << "mA_prime " << mA_prime << endl;
 				cout << "Numerator " << numerator << " denominator " << vy.squaredNorm();
 				cout << " R2 " << R2 << endl;
+        cout << "vR2_all(" << idx << ") = " << R2 << endl;
 				#endif
-				vR2_all(idx) = R2;
 
 				// Save mA
 				mA = mA_prime;
@@ -534,14 +522,14 @@ const bool bIntercept = false, const bool bCentre = true)
 				mA_prime = rank_one_downdate(mX_gamma_prime, diff_idx, mA, mA_prime);
 
 				// Calculate correlation
-				VectorXd numerator;
-				numerator = vy.transpose() * mX_gamma_prime * mA_prime * mX_gamma_prime.transpose() * vy;;
-				R2 = (numerator / vy.squaredNorm()).value();
+				numerator = (vy.transpose() * mX_gamma_prime * mA_prime * mX_gamma_prime.transpose() * vy).value();
+				R2 = numerator / vy.squaredNorm();
+        vR2_all(idx) = R2;
 				#ifdef DEBUG
 				cout << "Numerator " << numerator << " denominator " << vy.squaredNorm();
 				cout << " R2 " << R2 << endl;
+        cout << "vR2_all(" << idx << ") = " << R2 << endl;
 				#endif
-				vR2_all(idx) = R2;
 
 				// Save mA
 				mA = mA_prime;
@@ -647,14 +635,14 @@ int main()
 
 	VectorXd vy = parseCSVfile_double("vy.csv");
 	MatrixXd mX = parseCSVfile_double("mX.csv");
-	unsigned int p = mX.cols();
+	// unsigned int p = mX.cols();
 	VectorXd vR2_all = all_correlations(vy, mX, 0, intercept, centre);
 	VectorXd vExpected_correlations = parseCSVfile_double("Hitters_exact2.csv");
 
 	cout << "i,R2" << endl;
 	for (int i = 1; i < vR2_all.size(); i++) {
 		double diff = vR2_all(i) - vExpected_correlations(i);
-		const double epsilon = 1e-8;
+		// const double epsilon = 1e-8;
 		// if (abs(diff) > epsilon) {
 		// cout << grey_vec(i - 1, p) << " to " << grey_vec(i, p) << endl;
 		cout << i << ", C++ R2 " << vR2_all(i) << " R R2 " << vExpected_correlations(i);
