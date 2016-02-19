@@ -1,6 +1,7 @@
 // correlation.cpp
 
 #include <cassert>
+#include <algorithm>
 #include <stdexcept>
 #include <iostream>
 #include <fstream>
@@ -328,12 +329,14 @@ MatrixXd& reorder_ith_row_column_to_last(MatrixXd& m, const unsigned int i, cons
 MatrixXd& rank_one_update(MatrixXd mX_gamma, unsigned int i, VectorXd vx, MatrixXd mX_gamma_prime,
 MatrixXd mA, MatrixXd& mA_prime)
 {
-	const unsigned int p_gamma = mX_gamma_prime.cols();
+	const unsigned int p_gamma = mX_gamma.cols();
+	const unsigned int p_gamma_prime = mX_gamma_prime.cols();
+	const unsigned int n = mX_gamma_prime.rows();
   #ifdef DEBUG
-  cout << "mX_gamma " << mX_gamma.topRows(6) << endl;
-  cout << "p_gamma " << p_gamma << endl;
+  cout << "mX_gamma " << mX_gamma.topRows(min(n, 6u)) << endl;
+  cout << "p_gamma_prime " << p_gamma_prime << endl;
   cout << "i " << i << endl;
-  cout << "vx " << vx.head(6) << endl;
+  cout << "vx " << vx.head(min(n, 6u)) << endl;
   cout << "mA " << mA << endl;
   #endif
 
@@ -349,16 +352,16 @@ MatrixXd mA, MatrixXd& mA_prime)
 		mA_prime << mA + b * mA * mX_gamma.transpose() * vx * vx.transpose() * mX_gamma * mA, -mA * mX_gamma.transpose() * vx * b,
 			-b * vx.transpose() * mX_gamma * mA, b;
 
-		if (i < p_gamma - 1) {
-			// Construct a permutation matrix mPerm which interchanges the p_gamma-th and i-th rows/columns,
-			// because at the moment, the p_gamma-th row/column of mA_prime contains the inverse row/column for
+		if (i < p_gamma_prime - 1) {
+			// Construct a permutation matrix mPerm which interchanges the p_gamma_prime-th and i-th rows/columns,
+			// because at the moment, the p_gamma_prime-th row/column of mA_prime contains the inverse row/column for
 			// the i-th row/column of mX_gamma_prime.transpose() * mX_gamma_prime.
-			mA_prime = reorder_last_row_column_to_ith(mA_prime, i, p_gamma);
+			mA_prime = reorder_last_row_column_to_ith(mA_prime, i, p_gamma_prime);
 		}
 		#ifdef DEBUG
 		// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
 		MatrixXd identity_prime = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime;
-		if (!identity_prime.isApprox(MatrixXd::Identity(p_gamma, p_gamma))) {
+		if (!identity_prime.isApprox(MatrixXd::Identity(p_gamma_prime, p_gamma_prime))) {
 			// This inverse is nonsense. Do a full inversion.
 			MatrixXd mA_prime_full = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
 
@@ -680,6 +683,44 @@ void check_anscombe()
 }
 
 
+void check_update()
+{
+	MatrixXd mX(5, 3);
+	mX << 7, 2, 3,
+				4, 5, 6,
+				7, 12, 9,
+				8, 11, 12,
+				17, 14, 15;
+
+	VectorXd vx(5);
+	vx << 12, -7, 6, 5, -9;
+	
+	MatrixXd mA = (mX.transpose() * mX).inverse();
+	MatrixXd expected_mA_prime, actual_mA_prime(4, 4);
+
+  // Check add last column
+	MatrixXd mX_last_col(5, 4);
+	mX_last_col << mX, vx;
+	actual_mA_prime = rank_one_update(mX, 3, vx, mX_last_col, mA, actual_mA_prime);
+	expected_mA_prime = (mX_last_col.transpose() * mX_last_col).inverse();
+	assert(expected_mA_prime.isApprox(actual_mA_prime));
+
+  // Check add first column
+  MatrixXd mX_first_col(5, 4);
+	mX_first_col << vx, mX;
+  actual_mA_prime = rank_one_update(mX, 0, vx, mX_first_col, mA, actual_mA_prime);
+  expected_mA_prime = (mX_first_col.transpose() * mX_first_col).inverse();
+  assert(expected_mA_prime.isApprox(actual_mA_prime));
+
+  // Check add the middle column
+  MatrixXd mX_middle_col(5, 4);
+  mX_middle_col << mX.leftCols(1), vx, mX.rightCols(2);
+  actual_mA_prime = rank_one_update(mX, 1, vx, mX_middle_col, mA, actual_mA_prime);
+  expected_mA_prime = (mX_middle_col.transpose() * mX_middle_col).inverse();
+  assert(expected_mA_prime.isApprox(actual_mA_prime));
+}
+
+
 void check_downdate()
 {
 	MatrixXd mX(5, 3);
@@ -711,22 +752,27 @@ void check_downdate()
   assert(expected_mA_prime.isApprox(actual_mA_prime));
 }
 
+
+int main_test()
+{
+	check_downdate();
+	check_update();
+
+	return 0;
+}
+
 int main()
 {
 	const bool intercept = false, centre = true;
 	//VectorXd R2_one = one_correlation(vy, mX, mZ);
 	// cout << R2_one << endl;
 
-	check_downdate();
-
-	return 0;
-
 	VectorXd vy = parseCSVfile_double("vy.csv");
 	MatrixXd mX = parseCSVfile_double("mX.csv");
 	// unsigned int p = mX.cols();
 	VectorXd vR2_all = all_correlations(vy, mX, 0, intercept, centre);
-	VectorXd vExpected_correlations = parseCSVfile_double("Hitters_exact2.csv");
 
+	VectorXd vExpected_correlations = parseCSVfile_double("Hitters_exact2.csv");
 	cout << "i,R2" << endl;
 	for (int i = 1; i < vR2_all.size(); i++) {
 		double diff = vR2_all(i) - vExpected_correlations(i);
