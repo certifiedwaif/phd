@@ -609,7 +609,7 @@ void check_anscombe()
 {
 	// Simpler test case - Anscombe's quartet
 	const bool intercept = false, centre = true;
-	MatrixXd mAnscombe = parseCSVfile_double("anscombes_quartet.csv");
+	MatrixXd mAnscombe = anscombe();
 
 	VectorXd vy = mAnscombe.col(0);
 	MatrixXd mX = mAnscombe.middleCols(1, 3);
@@ -620,18 +620,37 @@ void check_anscombe()
 	#endif
 	VectorXd vR2_all = all_correlations(vy, mX, 0, intercept, centre);
 
-	// Test case
-	mAnscombe = anscombe();
+	// Test case	
 	VectorXd expected_correlations(8);
 	expected_correlations << 0, 0.7615888, 0.83919, 0.9218939, 0.9075042, 0.666324;
 }
 
+
+void check_downdate()
+{
+	MatrixXd mX(5, 3);
+	mX << 7, 2, 3,
+				4, 5, 6,
+				7, 12, 9,
+				8, 11, 12,
+				17, 14, 15;
+	MatrixXd mA = (mX.transpose() * mX).inverse();
+	MatrixXd expected_mA_prime, actual_mA_prime;
+	MatrixXd mX_no_last_col = mX.leftCols(2);
+	actual_mA_prime = rank_one_downdate(mX_no_last_col, 2, mA, actual_mA_prime);
+	expected_mA_prime = (mX_no_last_col.transpose() * mX_no_last_col);
+	cout << expected_mA_prime.isApprox(actual_mA_prime) << endl;
+}
 
 int main()
 {
 	const bool intercept = false, centre = true;
 	//VectorXd R2_one = one_correlation(vy, mX, mZ);
 	// cout << R2_one << endl;
+
+	check_downdate();
+
+	return 0;
 
 	VectorXd vy = parseCSVfile_double("vy.csv");
 	MatrixXd mX = parseCSVfile_double("mX.csv");

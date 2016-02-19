@@ -55,3 +55,9 @@ Chapter_3_collapsed_variational_bayes.synctex.gz
 *.gz
 
 *.bin
+
+*.data
+
+*.gz
+
+code/Makefile
