@@ -249,7 +249,7 @@ void show_matrix_difference(ostream& os, const MatrixXd m1, const MatrixXd m2, c
 }
 
 
-MatrixXd& reorder_ith_row_column_to_last(MatrixXd& m, const unsigned int i, const unsigned int p_gamma)
+MatrixXd& reorder_last_row_column_to_ith(MatrixXd& m, const unsigned int i, const unsigned int p_gamma)
 {
 	// Construct a permutation matrix mPerm which interchanges the p_gamma-th and i-th rows/columns,
 	// because at the moment, the p_gamma-th row/column of mA_prime contains the inverse row/column for
@@ -267,7 +267,40 @@ MatrixXd& reorder_ith_row_column_to_last(MatrixXd& m, const unsigned int i, cons
 	ind[i] = tmp;
 
 	#ifdef DEBUG
-	cout << "mPerm " << mPerm.toDenseMatrix() << endl;
+	cout << endl << "mPerm " << mPerm.toDenseMatrix() << endl;
+	cout << "m before permutation " << endl << m << endl;
+	#endif
+
+	// Permute the rows and columns of m_prime.
+	m = m * mPerm;
+	m = mPerm.transpose() * m;
+
+	#ifdef DEBUG
+	cout << "m after permutation " << endl << m << endl;
+	#endif
+
+	return m;
+}
+
+MatrixXd& reorder_ith_row_column_to_last(MatrixXd& m, const unsigned int i, const unsigned int p_gamma)
+{
+	// Construct a permutation matrix mPerm which interchanges the p_gamma-th and i-th rows/columns,
+	// because at the moment, the p_gamma-th row/column of mA_prime contains the inverse row/column for
+	// the i-th row/column of mX_gamma_prime.transpose() * mX_gamma_prime.
+	Eigen::PermutationMatrix<Eigen::Dynamic, Eigen::Dynamic> mPerm(p_gamma);
+	mPerm.setIdentity();
+	// Get p_gamma index
+	int *ind = mPerm.indices().data();
+	int tmp = ind[i];
+	// Move every index from idx-1 to idx
+	for (int idx = i; idx < ((int)p_gamma - 1); idx++) {
+		ind[idx] = ind[idx + 1];
+	}
+	// Set index i to previous p_gamma index
+	ind[p_gamma - 1] = tmp;
+
+	#ifdef DEBUG
+	cout << "mPerm" << endl << mPerm.toDenseMatrix() << endl;
 	cout << "m before permutation " << endl << m << endl;
 	#endif
 
@@ -320,7 +353,7 @@ MatrixXd mA, MatrixXd& mA_prime)
 			// Construct a permutation matrix mPerm which interchanges the p_gamma-th and i-th rows/columns,
 			// because at the moment, the p_gamma-th row/column of mA_prime contains the inverse row/column for
 			// the i-th row/column of mX_gamma_prime.transpose() * mX_gamma_prime.
-			mA_prime = reorder_ith_row_column_to_last(mA_prime, i, p_gamma);
+			mA_prime = reorder_last_row_column_to_ith(mA_prime, i, p_gamma);
 		}
 		#ifdef DEBUG
 		// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
@@ -358,27 +391,36 @@ MatrixXd mA, MatrixXd& mA_prime)
 //' @param[in]  mA             The previous iteration's inverse i.e. (X_gamma^T X_gamma)^{-1}
 //' @param[out] mA_prime       The current iteration's inverse i.e. (X_gamma_prime^T X_gamma_prime)^{-1}
 //' @return                    The new inverse (mX_gamma_prime^T mX_gamma_prime)^{-1}
-MatrixXd& rank_one_downdate(MatrixXd mX_gamma_prime, unsigned int i, MatrixXd mA, MatrixXd& mA_prime)
+MatrixXd& rank_one_downdate(MatrixXd mX_gamma, MatrixXd mX_gamma_prime, unsigned int i, MatrixXd mA, MatrixXd& mA_prime)
 {
 	const unsigned int p_gamma_prime = mX_gamma_prime.cols();
 	const unsigned int p_gamma = p_gamma_prime + 1;
 
 	// Move i-th row/column to the end, and the (i+1)-th to p_gamma_prime-th rows/columns up/left by one.
-	if (i < p_gamma_prime - 1) {
+	if (i < p_gamma_prime) {
 		// Construct a permutation matrix mPerm which interchanges the p_gamma_prime-th and i-th rows/columns,
 		// because at the moment, the p_gamma_prime-th row/column of mA_prime contains the inverse row/column for
 		// the i-th row/column of mX_gamma_prime.transpose() * mX_gamma_prime.
 		mA = reorder_ith_row_column_to_last(mA, i, p_gamma);
+		#ifdef DEBUG
+		// Check that this is really an inverse for a re-ordered X_gamma^T X_gamma
+		MatrixXd mXTX = mX_gamma.transpose() * mX_gamma;
+		mXTX = reorder_ith_row_column_to_last(mXTX, i, p_gamma);
+		MatrixXd identity_mXTX = mXTX * mA;
+		// Assert identity_mXTX.isApprox(MatrixXd::Identity(p_gamma, p_gamma));
+		if (!identity_mXTX.isApprox(MatrixXd::Identity(p_gamma, p_gamma)) && NUMERIC_FIX) {
+	    cout << "mXTX * mA" << endl;
+	    cout << identity_mXTX << endl;
+	  }
+		#endif
 	}
 
 	MatrixXd mA_11 = mA.topLeftCorner(p_gamma_prime, p_gamma_prime);
 	VectorXd va_12;
 	RowVectorXd va_21;
-	const double a_22 = mA(p_gamma_prime, p_gamma_prime);
+	const double a_22 = mA(p_gamma - 1, p_gamma - 1);
 
-	// Remember that Eigen's indexing is zero-based i.e. from 0 to n - 1, so mA.col(p_gamma_prime) is actually
-	// accessing the p_gamma_prime + 1 th column.
-	va_12 = mA.col(p_gamma_prime).head(p_gamma_prime);
+	va_12 = mA.col(p_gamma - 1).head(p_gamma - 1);
 	va_21 = va_12.transpose();
 	mA_prime = mA_11 - (va_12 * va_21) / a_22;
 
@@ -531,7 +573,7 @@ const bool bIntercept = false, const bool bCentre = true)
 				#ifdef DEBUG
 				cout << "Downdating " << diff_idx << endl;
 				#endif
-				mA_prime = rank_one_downdate(mX_gamma_prime, diff_idx, mA, mA_prime);
+				mA_prime = rank_one_downdate(mX_gamma, mX_gamma_prime, diff_idx, mA, mA_prime);
 
 				// Calculate correlation
 				numerator = (vy.transpose() * mX_gamma_prime * mA_prime * mX_gamma_prime.transpose() * vy).value();
@@ -651,19 +693,20 @@ void check_downdate()
 
   // Check removing last column
 	MatrixXd mX_no_last_col = mX.leftCols(2);
-	actual_mA_prime = rank_one_downdate(mX_no_last_col, 2, mA, actual_mA_prime);
+	actual_mA_prime = rank_one_downdate(mX, mX_no_last_col, 2, mA, actual_mA_prime);
 	expected_mA_prime = (mX_no_last_col.transpose() * mX_no_last_col).inverse();
 	assert(expected_mA_prime.isApprox(actual_mA_prime));
 
   // Check removing first column
   MatrixXd mX_no_first_col = mX.rightCols(2);
-  actual_mA_prime = rank_one_downdate(mX_no_first_col, 0, mA, actual_mA_prime);
+  actual_mA_prime = rank_one_downdate(mX, mX_no_first_col, 0, mA, actual_mA_prime);
   expected_mA_prime = (mX_no_first_col.transpose() * mX_no_first_col).inverse();
   assert(expected_mA_prime.isApprox(actual_mA_prime));
 
+  // Check removing the middle column
   MatrixXd mX_no_middle_col(5, 2);
   mX_no_middle_col << mX.col(0), mX.col(2);
-  actual_mA_prime = rank_one_downdate(mX_no_middle_col, 1, mA, actual_mA_prime);
+  actual_mA_prime = rank_one_downdate(mX, mX_no_middle_col, 1, mA, actual_mA_prime);
   expected_mA_prime = (mX_no_middle_col.transpose() * mX_no_middle_col).inverse();
   assert(expected_mA_prime.isApprox(actual_mA_prime));
 }
