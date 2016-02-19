@@ -259,13 +259,15 @@ MatrixXd& reorder_last_row_column_to_ith(MatrixXd& m, const unsigned int i, cons
 	mPerm.setIdentity();
 	// Get p_gamma index
 	int *ind = mPerm.indices().data();
-	int tmp = ind[p_gamma - 1];
-	// Move every index from idx-1 to idx
-	for (int idx = p_gamma - 1; idx > ((int) i) ; idx--) {
-		ind[idx] = ind[idx - 1];
+	for (int idx = 0; idx < ((int)p_gamma); idx++) {
+		if (idx < i) {
+			ind[idx] = idx;
+		} else if (idx == i) {
+			ind[idx] = p_gamma - 1;
+		} else {
+			ind[idx] = idx - 1;
+		}
 	}
-	// Set index i to previous p_gamma index
-	ind[i] = tmp;
 
 	#ifdef DEBUG
 	cout << endl << "mPerm " << mPerm.toDenseMatrix() << endl;
@@ -290,15 +292,17 @@ MatrixXd& reorder_ith_row_column_to_last(MatrixXd& m, const unsigned int i, cons
 	// the i-th row/column of mX_gamma_prime.transpose() * mX_gamma_prime.
 	Eigen::PermutationMatrix<Eigen::Dynamic, Eigen::Dynamic> mPerm(p_gamma);
 	mPerm.setIdentity();
+
 	// Get p_gamma index
 	int *ind = mPerm.indices().data();
-	int tmp = ind[i];
-	// Move every index from idx-1 to idx
-	for (int idx = i; idx < ((int)p_gamma - 1); idx++) {
-		ind[idx] = ind[idx + 1];
+	for (int idx = 0; idx < ((int)p_gamma - 1); idx++) {
+		if (idx < i) {
+			ind[idx] = idx;
+		} else {
+			ind[idx] = idx + 1;
+		}
 	}
-	// Set index i to previous p_gamma index
-	ind[p_gamma - 1] = tmp;
+	ind[p_gamma - 1] = i;
 
 	#ifdef DEBUG
 	cout << "mPerm" << endl << mPerm.toDenseMatrix() << endl;
