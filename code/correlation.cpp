@@ -20,7 +20,7 @@ using Eigen::MatrixXi;
 using namespace std;
 
 typedef dynamic_bitset<> dbitset;
-const bool NUMERIC_FIX = true;
+const bool NUMERIC_FIX = false;
 
 // Code copied from here: https://gist.github.com/stephenjbarr/2266900
 MatrixXd parseCSVfile_double(string infilename)
@@ -172,7 +172,7 @@ void greycode_change(const unsigned int idx, const unsigned int p, bool& update,
 	#endif
 
 	// Find the LSB.
-	min_idx = bs_curr.find_first();
+	min_idx = min(bs_prev.find_first(), bs_curr.find_first());
 
 	// Find bit that has changed.
 	diff_idx = (bs_curr ^ bs_prev).find_first();
