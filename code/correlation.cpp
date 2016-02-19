@@ -416,7 +416,7 @@ MatrixXd& rank_one_downdate(MatrixXd mX_gamma, MatrixXd mX_gamma_prime, unsigned
 		#ifdef DEBUG
 		// Check that this is really an inverse for a re-ordered X_gamma^T X_gamma
 		MatrixXd mXTX = mX_gamma.transpose() * mX_gamma;
-		mXTX = reorder_ith_row_column_to_last(mXTX, i, p_gamma);
+		mXTX = reorder_ith_row_column_to_last(mXTX, (i - min_idx), p_gamma);
 		MatrixXd identity_mXTX = mXTX * mA;
 		// Assert identity_mXTX.isApprox(MatrixXd::Identity(p_gamma, p_gamma));
 		if (!identity_mXTX.isApprox(MatrixXd::Identity(p_gamma, p_gamma)) && NUMERIC_FIX) {
