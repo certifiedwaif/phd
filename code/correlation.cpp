@@ -20,7 +20,7 @@ using Eigen::MatrixXi;
 using namespace std;
 
 typedef dynamic_bitset<> dbitset;
-const bool NUMERIC_FIX = true;
+const bool NUMERIC_FIX = false;
 
 // Code copied from here: https://gist.github.com/stephenjbarr/2266900
 MatrixXd parseCSVfile_double(string infilename)
@@ -172,7 +172,7 @@ void greycode_change(const unsigned int idx, const unsigned int p, bool& update,
 	#endif
 
 	// Find the LSB.
-	min_idx = bs_curr.find_first();
+	min_idx = min(bs_prev.find_first(), bs_curr.find_first());
 
 	// Find bit that has changed.
 	diff_idx = (bs_curr ^ bs_prev).find_first();
@@ -512,13 +512,11 @@ const bool bIntercept = false, const bool bCentre = true)
 		}
 	}
 
-	// Private: mA, bMa_set, bUpdate, diff_idx, numerator, R2, gamma, mX_gamma, mX_gamma_prime, p_gamma_prime, vx
-	// Shared: p, greycode_rows, vR2_all, vy, mX, intercept_col, bIntercept, bCentre
 	// Loop through models, updating and downdating mA as necessary
-	// #pragma omp parallel for firstprivate(bmA_set, mA, gamma, mX_gamma, mX_gamma_prime, vx)\ 
-	// 	private(numerator, R2, diff_idx, p_gamma_prime, bUpdate)\ 
-	// 		shared(cout, vy, mX, vR2_all)\ 
-	// 		default(none)
+	#pragma omp parallel for firstprivate(bmA_set, mA, gamma, mX_gamma, mX_gamma_prime, vx)\ 
+		private(numerator, R2, min_idx, diff_idx, p_gamma_prime, bUpdate)\ 
+			shared(cout, vy, mX, vR2_all)\ 
+			default(none)
 	for (idx = 1; idx < greycode_rows; idx++) {
 		#ifdef DEBUG
 		cout << endl << "Iteration " << idx << endl;
