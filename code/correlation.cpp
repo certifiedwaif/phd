@@ -767,7 +767,7 @@ void check_downdate()
 	expected_mA_prime = (mX_no_middle_col.transpose() * mX_no_middle_col).inverse();
 	assert(expected_mA_prime.isApprox(actual_mA_prime));
 
-	// TODO: Add test cases for when min != 0
+	// TODO: Add test cases for when the minimum index of the bitset is greater than 0
 }
 
 

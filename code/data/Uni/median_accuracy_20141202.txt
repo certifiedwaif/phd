@@ -1,0 +1,3629 @@
+
+R version 3.0.3 (2014-03-06) -- "Warm Puppy"
+Copyright (C) 2014 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> # median_accuracy.R
+> source("test_zero_inflated_model.R")
+> 
+> # Graph of Var_q(theta) against Var(theta|y)
+> # How to get this?
+> # Run fits for a range of theta values?
+> compare_approximations = function(vbeta)
++ {
++   m = 20
++   ni = 10
++   n = rep(ni,m)
++   mX = matrix(as.vector(cbind(rep(1, sum(n)), runif(sum(n), -1, 1))), sum(n), 2)
++   mZ <- kronecker(diag(1,m),rep(1,ni))
++   
++   expected_rho = 0.5
++   expected_beta = vbeta
++   expected_sigma2_u = .5^2
++   a_sigma = 1e-2
++   b_sigma = 1e-2
++   
++   tau = 1.0E2
++   
++   sigma2.beta <- 1.0E3
++   
++   test_data = generate_multivariate_test_data(mX, mZ, m, n, expected_rho, expected_beta, expected_sigma2_u, verbose=FALSE)
++   vy = test_data$vy
++   
++   multivariate = create_multivariate(vy, mX, mZ, sigma2.beta, a_sigma, b_sigma, tau)
++   approximation = "gva2new"
++   result_var = zero_infl_var(multivariate, method=approximation, verbose=FALSE)
++   mcmc_samples = mcmc_approximation(multivariate, iterations=1e4, mc.cores = 32)
++   return(list(result_var=result_var, mcmc_samples=mcmc_samples))
++ }
+> 
+> mean_var = function(vbeta)
++ {
++   result = compare_approximations(vbeta)
++   return(with(result, {
++   var_approx_mean = result_var$vmu[2]
++   mcmc_approx_mean = mean(mcmc_samples$vbeta[,2])
++   var_approx_var = result_var$mLambda[2,2]
++   mcmc_approx_var = var(mcmc_samples$vbeta[,2])
++   list(var_approx_mean=var_approx_mean,
++ 		mcmc_approx_mean=mcmc_approx_mean,
++   		var_approx_var=var_approx_var,
++ 		mcmc_approx_var=mcmc_approx_var)
++   }))
++ }
+> 
+> # This is most definitely a verona job
+> for (theta in seq(1, 2, by=.01))
++ 	print(mean_var(c(1, theta)))
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 18.66 seconds (Warm-up)
+#                17.75 seconds (Sampling)
+#                36.41 seconds (Total)
+
+
+#  Elapsed Time: 18.78 seconds (Warm-up)
+#                19.4 seconds (Sampling)
+#                38.18 seconds (Total)
+
+
+#  Elapsed Time: 18.34 seconds (Warm-up)
+#                23.03 seconds (Sampling)
+#                41.37 seconds (Total)
+
+
+#  Elapsed Time: 19.03 seconds (Warm-up)
+#                28.09 seconds (Sampling)
+#                47.12 seconds (Total)
+
+$var_approx_mean
+[1] 0.8710528
+
+$mcmc_approx_mean
+[1] 0.8722962
+
+$var_approx_var
+[1] 0.009858155
+
+$mcmc_approx_var
+[1] 0.0122579
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 20.97 seconds (Warm-up)
+#                23.14 seconds (Sampling)
+#                44.11 seconds (Total)
+
+
+#  Elapsed Time: 21.13 seconds (Warm-up)
+#                25.71 seconds (Sampling)
+#                46.84 seconds (Total)
+
+
+#  Elapsed Time: 20.6 seconds (Warm-up)
+#                29.31 seconds (Sampling)
+#                49.91 seconds (Total)
+
+
+#  Elapsed Time: 20.47 seconds (Warm-up)
+#                30.28 seconds (Sampling)
+#                50.75 seconds (Total)
+
+$var_approx_mean
+[1] 1.002099
+
+$mcmc_approx_mean
+[1] 0.9805147
+
+$var_approx_var
+[1] 0.01447498
+
+$mcmc_approx_var
+[1] 0.01826639
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 18.07 seconds (Warm-up)
+#                17.51 seconds (Sampling)
+#                35.58 seconds (Total)
+
+
+#  Elapsed Time: 18.73 seconds (Warm-up)
+#                19.89 seconds (Sampling)
+#                38.62 seconds (Total)
+
+
+#  Elapsed Time: 18.31 seconds (Warm-up)
+#                21.17 seconds (Sampling)
+#                39.48 seconds (Total)
+
+
+#  Elapsed Time: 18.23 seconds (Warm-up)
+#                22.64 seconds (Sampling)
+#                40.87 seconds (Total)
+
+$var_approx_mean
+[1] 0.9313093
+
+$mcmc_approx_mean
+[1] 0.9724115
+
+$var_approx_var
+[1] 0.01127892
+
+$mcmc_approx_var
+[1] 0.01378088
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 19.53 seconds (Warm-up)
+#                21.72 seconds (Sampling)
+#                41.25 seconds (Total)
+
+
+#  Elapsed Time: 18.77 seconds (Warm-up)
+#                22.88 seconds (Sampling)
+#                41.65 seconds (Total)
+
+
+#  Elapsed Time: 19.15 seconds (Warm-up)
+#                24.27 seconds (Sampling)
+#                43.42 seconds (Total)
+
+
+#  Elapsed Time: 19.48 seconds (Warm-up)
+#                24.79 seconds (Sampling)
+#                44.27 seconds (Total)
+
+$var_approx_mean
+[1] 0.9314296
+
+$mcmc_approx_mean
+[1] 0.9510588
+
+$var_approx_var
+[1] 0.009401309
+
+$mcmc_approx_var
+[1] 0.01053363
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 20.64 seconds (Warm-up)
+#                24.96 seconds (Sampling)
+#                45.6 seconds (Total)
+
+
+#  Elapsed Time: 20.14 seconds (Warm-up)
+#                27.16 seconds (Sampling)
+#                47.3 seconds (Total)
+
+
+#  Elapsed Time: 19.47 seconds (Warm-up)
+#                28.3 seconds (Sampling)
+#                47.77 seconds (Total)
+
+
+#  Elapsed Time: 21.35 seconds (Warm-up)
+#                28.98 seconds (Sampling)
+#                50.33 seconds (Total)
+
+$var_approx_mean
+[1] 1.113311
+
+$mcmc_approx_mean
+[1] 1.120286
+
+$var_approx_var
+[1] 0.01063185
+
+$mcmc_approx_var
+[1] 0.01206578
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 24.75 seconds (Warm-up)
+#                30.15 seconds (Sampling)
+#                54.9 seconds (Total)
+
+
+#  Elapsed Time: 22.44 seconds (Warm-up)
+#                33.14 seconds (Sampling)
+#                55.58 seconds (Total)
+
+
+#  Elapsed Time: 24.5 seconds (Warm-up)
+#                32.47 seconds (Sampling)
+#                56.97 seconds (Total)
+
+
+#  Elapsed Time: 24.37 seconds (Warm-up)
+#                33.99 seconds (Sampling)
+#                58.36 seconds (Total)
+
+$var_approx_mean
+[1] 0.9928472
+
+$mcmc_approx_mean
+[1] 1.01111
+
+$var_approx_var
+[1] 0.009583835
+
+$mcmc_approx_var
+[1] 0.01217539
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 18.65 seconds (Warm-up)
+#                17.13 seconds (Sampling)
+#                35.78 seconds (Total)
+
+
+#  Elapsed Time: 18.86 seconds (Warm-up)
+#                17.82 seconds (Sampling)
+#                36.68 seconds (Total)
+
+
+#  Elapsed Time: 18.72 seconds (Warm-up)
+#                20.31 seconds (Sampling)
+#                39.03 seconds (Total)
+
+
+#  Elapsed Time: 18.51 seconds (Warm-up)
+#                24.8 seconds (Sampling)
+#                43.31 seconds (Total)
+
+$var_approx_mean
+[1] 0.9887361
+
+$mcmc_approx_mean
+[1] 0.9726344
+
+$var_approx_var
+[1] 0.01605269
+
+$mcmc_approx_var
+[1] 0.0214606
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 22.18 seconds (Warm-up)
+#                24.52 seconds (Sampling)
+#                46.7 seconds (Total)
+
+
+#  Elapsed Time: 21.65 seconds (Warm-up)
+#                27.05 seconds (Sampling)
+#                48.7 seconds (Total)
+
+
+#  Elapsed Time: 22.32 seconds (Warm-up)
+#                30.61 seconds (Sampling)
+#                52.93 seconds (Total)
+
+
+#  Elapsed Time: 23.29 seconds (Warm-up)
+#                33.89 seconds (Sampling)
+#                57.18 seconds (Total)
+
+$var_approx_mean
+[1] 1.13182
+
+$mcmc_approx_mean
+[1] 1.1119
+
+$var_approx_var
+[1] 0.01582985
+
+$mcmc_approx_var
+[1] 0.01879207
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 13.32 seconds (Warm-up)
+#                16.41 seconds (Sampling)
+#                29.73 seconds (Total)
+
+
+#  Elapsed Time: 20.43 seconds (Warm-up)
+#                20.77 seconds (Sampling)
+#                41.2 seconds (Total)
+
+
+#  Elapsed Time: 20.03 seconds (Warm-up)
+#                22.46 seconds (Sampling)
+#                42.49 seconds (Total)
+
+
+#  Elapsed Time: 19.77 seconds (Warm-up)
+#                26.29 seconds (Sampling)
+#                46.06 seconds (Total)
+
+$var_approx_mean
+[1] 0.9626908
+
+$mcmc_approx_mean
+[1] 0.8699627
+
+$var_approx_var
+[1] 0.01364743
+
+$mcmc_approx_var
+[1] 0.01754845
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 21.08 seconds (Warm-up)
+#                22.98 seconds (Sampling)
+#                44.06 seconds (Total)
+
+
+#  Elapsed Time: 23.34 seconds (Warm-up)
+#                32.18 seconds (Sampling)
+#                55.52 seconds (Total)
+
+
+#  Elapsed Time: 24.31 seconds (Warm-up)
+#                32.62 seconds (Sampling)
+#                56.93 seconds (Total)
+
+
+#  Elapsed Time: 23.95 seconds (Warm-up)
+#                33.74 seconds (Sampling)
+#                57.69 seconds (Total)
+
+$var_approx_mean
+[1] 1.084202
+
+$mcmc_approx_mean
+[1] 1.089739
+
+$var_approx_var
+[1] 0.01510863
+
+$mcmc_approx_var
+[1] 0.01897204
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 19.04 seconds (Warm-up)
+#                21.37 seconds (Sampling)
+#                40.41 seconds (Total)
+
+
+#  Elapsed Time: 19.35 seconds (Warm-up)
+#                22.72 seconds (Sampling)
+#                42.07 seconds (Total)
+
+
+#  Elapsed Time: 19.64 seconds (Warm-up)
+#                22.88 seconds (Sampling)
+#                42.52 seconds (Total)
+
+
+#  Elapsed Time: 19.34 seconds (Warm-up)
+#                28.56 seconds (Sampling)
+#                47.9 seconds (Total)
+
+$var_approx_mean
+[1] 1.054739
+
+$mcmc_approx_mean
+[1] 1.057779
+
+$var_approx_var
+[1] 0.01229037
+
+$mcmc_approx_var
+[1] 0.01501585
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 19.53 seconds (Warm-up)
+#                18.42 seconds (Sampling)
+#                37.95 seconds (Total)
+
+
+#  Elapsed Time: 19.62 seconds (Warm-up)
+#                19.63 seconds (Sampling)
+#                39.25 seconds (Total)
+
+
+#  Elapsed Time: 19.61 seconds (Warm-up)
+#                22.55 seconds (Sampling)
+#                42.16 seconds (Total)
+
+
+#  Elapsed Time: 19.3 seconds (Warm-up)
+#                25.81 seconds (Sampling)
+#                45.11 seconds (Total)
+
+$var_approx_mean
+[1] 1.043884
+
+$mcmc_approx_mean
+[1] 1.095782
+
+$var_approx_var
+[1] 0.01431185
+
+$mcmc_approx_var
+[1] 0.02027812
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 21.42 seconds (Warm-up)
+#                25.65 seconds (Sampling)
+#                47.07 seconds (Total)
+
+
+#  Elapsed Time: 21.15 seconds (Warm-up)
+#                25.92 seconds (Sampling)
+#                47.07 seconds (Total)
+
+
+#  Elapsed Time: 21.92 seconds (Warm-up)
+#                26.67 seconds (Sampling)
+#                48.59 seconds (Total)
+
+
+#  Elapsed Time: 21.6 seconds (Warm-up)
+#                29.78 seconds (Sampling)
+#                51.38 seconds (Total)
+
+$var_approx_mean
+[1] 1.156769
+
+$mcmc_approx_mean
+[1] 1.177262
+
+$var_approx_var
+[1] 0.008655561
+
+$mcmc_approx_var
+[1] 0.009802106
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 20.04 seconds (Warm-up)
+#                24.82 seconds (Sampling)
+#                44.86 seconds (Total)
+
+
+#  Elapsed Time: 19.92 seconds (Warm-up)
+#                26.87 seconds (Sampling)
+#                46.79 seconds (Total)
+
+
+#  Elapsed Time: 20.17 seconds (Warm-up)
+#                28.43 seconds (Sampling)
+#                48.6 seconds (Total)
+
+
+#  Elapsed Time: 20.16 seconds (Warm-up)
+#                31.59 seconds (Sampling)
+#                51.75 seconds (Total)
+
+$var_approx_mean
+[1] 0.9870182
+
+$mcmc_approx_mean
+[1] 1.015197
+
+$var_approx_var
+[1] 0.009552857
+
+$mcmc_approx_var
+[1] 0.01240334
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 20.96 seconds (Warm-up)
+#                21.74 seconds (Sampling)
+#                42.7 seconds (Total)
+
+
+#  Elapsed Time: 22.04 seconds (Warm-up)
+#                26.74 seconds (Sampling)
+#                48.78 seconds (Total)
+
+
+#  Elapsed Time: 20.51 seconds (Warm-up)
+#                28.98 seconds (Sampling)
+#                49.49 seconds (Total)
+
+
+#  Elapsed Time: 21.55 seconds (Warm-up)
+#                30.9 seconds (Sampling)
+#                52.45 seconds (Total)
+
+$var_approx_mean
+[1] 1.291129
+
+$mcmc_approx_mean
+[1] 1.308322
+
+$var_approx_var
+[1] 0.01297748
+
+$mcmc_approx_var
+[1] 0.0167025
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 20.09 seconds (Warm-up)
+#                18.96 seconds (Sampling)
+#                39.05 seconds (Total)
+
+
+#  Elapsed Time: 18.4 seconds (Warm-up)
+#                23.81 seconds (Sampling)
+#                42.21 seconds (Total)
+
+
+#  Elapsed Time: 18.56 seconds (Warm-up)
+#                23.77 seconds (Sampling)
+#                42.33 seconds (Total)
+
+
+#  Elapsed Time: 18.65 seconds (Warm-up)
+#                26.61 seconds (Sampling)
+#                45.26 seconds (Total)
+
+$var_approx_mean
+[1] 1.267781
+
+$mcmc_approx_mean
+[1] 1.256674
+
+$var_approx_var
+[1] 0.0143705
+
+$mcmc_approx_var
+[1] 0.01784545
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 18.82 seconds (Warm-up)
+#                18.3 seconds (Sampling)
+#                37.12 seconds (Total)
+
+
+#  Elapsed Time: 19.21 seconds (Warm-up)
+#                22.37 seconds (Sampling)
+#                41.58 seconds (Total)
+
+
+#  Elapsed Time: 18.71 seconds (Warm-up)
+#                23.3 seconds (Sampling)
+#                42.01 seconds (Total)
+
+
+#  Elapsed Time: 19.02 seconds (Warm-up)
+#                24.75 seconds (Sampling)
+#                43.77 seconds (Total)
+
+$var_approx_mean
+[1] 1.25302
+
+$mcmc_approx_mean
+[1] 1.198909
+
+$var_approx_var
+[1] 0.01464633
+
+$mcmc_approx_var
+[1] 0.01942057
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 18.39 seconds (Warm-up)
+#                17.96 seconds (Sampling)
+#                36.35 seconds (Total)
+
+
+#  Elapsed Time: 18.49 seconds (Warm-up)
+#                17.96 seconds (Sampling)
+#                36.45 seconds (Total)
+
+
+#  Elapsed Time: 18.47 seconds (Warm-up)
+#                18.98 seconds (Sampling)
+#                37.45 seconds (Total)
+
+
+#  Elapsed Time: 18.58 seconds (Warm-up)
+#                27.5 seconds (Sampling)
+#                46.08 seconds (Total)
+
+$var_approx_mean
+[1] 1.011241
+
+$mcmc_approx_mean
+[1] 0.9904329
+
+$var_approx_var
+[1] 0.01371627
+
+$mcmc_approx_var
+[1] 0.01772031
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 20.72 seconds (Warm-up)
+#                19.79 seconds (Sampling)
+#                40.51 seconds (Total)
+
+
+#  Elapsed Time: 21.4 seconds (Warm-up)
+#                22.74 seconds (Sampling)
+#                44.14 seconds (Total)
+
+
+#  Elapsed Time: 21.02 seconds (Warm-up)
+#                25.14 seconds (Sampling)
+#                46.16 seconds (Total)
+
+
+#  Elapsed Time: 20.43 seconds (Warm-up)
+#                31.03 seconds (Sampling)
+#                51.46 seconds (Total)
+
+$var_approx_mean
+[1] 1.204862
+
+$mcmc_approx_mean
+[1] 1.181361
+
+$var_approx_var
+[1] 0.01488753
+
+$mcmc_approx_var
+[1] 0.0207696
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 20.45 seconds (Warm-up)
+#                23.16 seconds (Sampling)
+#                43.61 seconds (Total)
+
+
+#  Elapsed Time: 21.46 seconds (Warm-up)
+#                24.7 seconds (Sampling)
+#                46.16 seconds (Total)
+
+
+#  Elapsed Time: 20.7 seconds (Warm-up)
+#                26.14 seconds (Sampling)
+#                46.84 seconds (Total)
+
+
+#  Elapsed Time: 20.96 seconds (Warm-up)
+#                29.17 seconds (Sampling)
+#                50.13 seconds (Total)
+
+$var_approx_mean
+[1] 1.200428
+
+$mcmc_approx_mean
+[1] 1.103151
+
+$var_approx_var
+[1] 0.01227312
+
+$mcmc_approx_var
+[1] 0.01604592
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 19.66 seconds (Warm-up)
+#                21.03 seconds (Sampling)
+#                40.69 seconds (Total)
+
+
+#  Elapsed Time: 19.57 seconds (Warm-up)
+#                25.74 seconds (Sampling)
+#                45.31 seconds (Total)
+
+
+#  Elapsed Time: 19.46 seconds (Warm-up)
+#                25.97 seconds (Sampling)
+#                45.43 seconds (Total)
+
+
+#  Elapsed Time: 19.97 seconds (Warm-up)
+#                26.82 seconds (Sampling)
+#                46.79 seconds (Total)
+
+$var_approx_mean
+[1] 1.184265
+
+$mcmc_approx_mean
+[1] 1.201129
+
+$var_approx_var
+[1] 0.01153132
+
+$mcmc_approx_var
+[1] 0.01483751
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 20.35 seconds (Warm-up)
+#                22.76 seconds (Sampling)
+#                43.11 seconds (Total)
+
+
+#  Elapsed Time: 20.56 seconds (Warm-up)
+#                26.64 seconds (Sampling)
+#                47.2 seconds (Total)
+
+
+#  Elapsed Time: 20.91 seconds (Warm-up)
+#                27.67 seconds (Sampling)
+#                48.58 seconds (Total)
+
+
+#  Elapsed Time: 20.22 seconds (Warm-up)
+#                32.11 seconds (Sampling)
+#                52.33 seconds (Total)
+
+$var_approx_mean
+[1] 1.417442
+
+$mcmc_approx_mean
+[1] 1.361935
+
+$var_approx_var
+[1] 0.01668131
+
+$mcmc_approx_var
+[1] 0.02004182
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 19.93 seconds (Warm-up)
+#                26.06 seconds (Sampling)
+#                45.99 seconds (Total)
+
+
+#  Elapsed Time: 20.1 seconds (Warm-up)
+#                26.99 seconds (Sampling)
+#                47.09 seconds (Total)
+
+
+#  Elapsed Time: 19.33 seconds (Warm-up)
+#                28.49 seconds (Sampling)
+#                47.82 seconds (Total)
+
+
+#  Elapsed Time: 19.42 seconds (Warm-up)
+#                30.5 seconds (Sampling)
+#                49.92 seconds (Total)
+
+$var_approx_mean
+[1] 1.235482
+
+$mcmc_approx_mean
+[1] 1.19779
+
+$var_approx_var
+[1] 0.00993066
+
+$mcmc_approx_var
+[1] 0.01162774
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 26.08 seconds (Warm-up)
+#                32.1 seconds (Sampling)
+#                58.18 seconds (Total)
+
+
+#  Elapsed Time: 27.29 seconds (Warm-up)
+#                30.95 seconds (Sampling)
+#                58.24 seconds (Total)
+
+
+#  Elapsed Time: 26.96 seconds (Warm-up)
+#                33.72 seconds (Sampling)
+#                60.68 seconds (Total)
+
+
+#  Elapsed Time: 27.89 seconds (Warm-up)
+#                33.61 seconds (Sampling)
+#                61.5 seconds (Total)
+
+$var_approx_mean
+[1] 1.156825
+
+$mcmc_approx_mean
+[1] 1.133961
+
+$var_approx_var
+[1] 0.009486774
+
+$mcmc_approx_var
+[1] 0.01167231
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 25.6 seconds (Warm-up)
+#                30.21 seconds (Sampling)
+#                55.81 seconds (Total)
+
+
+#  Elapsed Time: 23.17 seconds (Warm-up)
+#                32.73 seconds (Sampling)
+#                55.9 seconds (Total)
+
+
+#  Elapsed Time: 25.06 seconds (Warm-up)
+#                33.77 seconds (Sampling)
+#                58.83 seconds (Total)
+
+
+#  Elapsed Time: 26.13 seconds (Warm-up)
+#                34.18 seconds (Sampling)
+#                60.31 seconds (Total)
+
+$var_approx_mean
+[1] 1.193108
+
+$mcmc_approx_mean
+[1] 1.154668
+
+$var_approx_var
+[1] 0.009905734
+
+$mcmc_approx_var
+[1] 0.01154976
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 20.11 seconds (Warm-up)
+#                25.89 seconds (Sampling)
+#                46 seconds (Total)
+
+
+#  Elapsed Time: 20.95 seconds (Warm-up)
+#                25.08 seconds (Sampling)
+#                46.03 seconds (Total)
+
+
+#  Elapsed Time: 20.99 seconds (Warm-up)
+#                26.63 seconds (Sampling)
+#                47.62 seconds (Total)
+
+
+#  Elapsed Time: 20.26 seconds (Warm-up)
+#                30.94 seconds (Sampling)
+#                51.2 seconds (Total)
+
+$var_approx_mean
+[1] 1.26308
+
+$mcmc_approx_mean
+[1] 1.242657
+
+$var_approx_var
+[1] 0.01388417
+
+$mcmc_approx_var
+[1] 0.01941519
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 20.19 seconds (Warm-up)
+#                25.51 seconds (Sampling)
+#                45.7 seconds (Total)
+
+
+#  Elapsed Time: 20.02 seconds (Warm-up)
+#                27.05 seconds (Sampling)
+#                47.07 seconds (Total)
+
+
+#  Elapsed Time: 19.8 seconds (Warm-up)
+#                29.16 seconds (Sampling)
+#                48.96 seconds (Total)
+
+
+#  Elapsed Time: 20.16 seconds (Warm-up)
+#                31.05 seconds (Sampling)
+#                51.21 seconds (Total)
+
+$var_approx_mean
+[1] 1.165998
+
+$mcmc_approx_mean
+[1] 1.164797
+
+$var_approx_var
+[1] 0.01478157
+
+$mcmc_approx_var
+[1] 0.01959728
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 22.03 seconds (Warm-up)
+#                25.95 seconds (Sampling)
+#                47.98 seconds (Total)
+
+
+#  Elapsed Time: 21.32 seconds (Warm-up)
+#                27.7 seconds (Sampling)
+#                49.02 seconds (Total)
+
+
+#  Elapsed Time: 20.2 seconds (Warm-up)
+#                29.74 seconds (Sampling)
+#                49.94 seconds (Total)
+
+
+#  Elapsed Time: 26.74 seconds (Warm-up)
+#                40.52 seconds (Sampling)
+#                67.26 seconds (Total)
+
+$var_approx_mean
+[1] 1.105151
+
+$mcmc_approx_mean
+[1] 1.082899
+
+$var_approx_var
+[1] 0.01419659
+
+$mcmc_approx_var
+[1] 0.02174919
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 23.75 seconds (Warm-up)
+#                27.66 seconds (Sampling)
+#                51.41 seconds (Total)
+
+
+#  Elapsed Time: 29.25 seconds (Warm-up)
+#                25.72 seconds (Sampling)
+#                54.97 seconds (Total)
+
+
+#  Elapsed Time: 27.4 seconds (Warm-up)
+#                31.15 seconds (Sampling)
+#                58.55 seconds (Total)
+
+
+#  Elapsed Time: 32.79 seconds (Warm-up)
+#                44.63 seconds (Sampling)
+#                77.42 seconds (Total)
+
+$var_approx_mean
+[1] 1.400528
+
+$mcmc_approx_mean
+[1] 1.43756
+
+$var_approx_var
+[1] 0.01691215
+
+$mcmc_approx_var
+[1] 0.02171916
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 25.4 seconds (Warm-up)
+#                31.6 seconds (Sampling)
+#                57 seconds (Total)
+
+
+#  Elapsed Time: 25.09 seconds (Warm-up)
+#                32.43 seconds (Sampling)
+#                57.52 seconds (Total)
+
+
+#  Elapsed Time: 24.3 seconds (Warm-up)
+#                33.33 seconds (Sampling)
+#                57.63 seconds (Total)
+
+
+#  Elapsed Time: 24.8 seconds (Warm-up)
+#                32.85 seconds (Sampling)
+#                57.65 seconds (Total)
+
+$var_approx_mean
+[1] 1.416299
+
+$mcmc_approx_mean
+[1] 1.435172
+
+$var_approx_var
+[1] 0.007246102
+
+$mcmc_approx_var
+[1] 0.01003939
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 19.48 seconds (Warm-up)
+#                22.68 seconds (Sampling)
+#                42.16 seconds (Total)
+
+
+#  Elapsed Time: 19.66 seconds (Warm-up)
+#                22.89 seconds (Sampling)
+#                42.55 seconds (Total)
+
+
+#  Elapsed Time: 19.31 seconds (Warm-up)
+#                23.37 seconds (Sampling)
+#                42.68 seconds (Total)
+
+
+#  Elapsed Time: 19.72 seconds (Warm-up)
+#                24.67 seconds (Sampling)
+#                44.39 seconds (Total)
+
+$var_approx_mean
+[1] 1.32259
+
+$mcmc_approx_mean
+[1] 1.330495
+
+$var_approx_var
+[1] 0.01213662
+
+$mcmc_approx_var
+[1] 0.01516489
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 19.86 seconds (Warm-up)
+#                19.25 seconds (Sampling)
+#                39.11 seconds (Total)
+
+
+#  Elapsed Time: 19.63 seconds (Warm-up)
+#                20.52 seconds (Sampling)
+#                40.15 seconds (Total)
+
+
+#  Elapsed Time: 19.59 seconds (Warm-up)
+#                24.07 seconds (Sampling)
+#                43.66 seconds (Total)
+
+
+#  Elapsed Time: 19.33 seconds (Warm-up)
+#                26.07 seconds (Sampling)
+#                45.4 seconds (Total)
+
+$var_approx_mean
+[1] 1.43018
+
+$mcmc_approx_mean
+[1] 1.472226
+
+$var_approx_var
+[1] 0.01674016
+
+$mcmc_approx_var
+[1] 0.02053685
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 21.08 seconds (Warm-up)
+#                28.4 seconds (Sampling)
+#                49.48 seconds (Total)
+
+
+#  Elapsed Time: 23.47 seconds (Warm-up)
+#                28.46 seconds (Sampling)
+#                51.93 seconds (Total)
+
+
+#  Elapsed Time: 22.38 seconds (Warm-up)
+#                31.42 seconds (Sampling)
+#                53.8 seconds (Total)
+
+
+#  Elapsed Time: 21.77 seconds (Warm-up)
+#                32.25 seconds (Sampling)
+#                54.02 seconds (Total)
+
+$var_approx_mean
+[1] 1.262724
+
+$mcmc_approx_mean
+[1] 1.275218
+
+$var_approx_var
+[1] 0.01140695
+
+$mcmc_approx_var
+[1] 0.01402255
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 20.71 seconds (Warm-up)
+#                23.84 seconds (Sampling)
+#                44.55 seconds (Total)
+
+
+#  Elapsed Time: 21.31 seconds (Warm-up)
+#                24.92 seconds (Sampling)
+#                46.23 seconds (Total)
+
+
+#  Elapsed Time: 21.32 seconds (Warm-up)
+#                28.8 seconds (Sampling)
+#                50.12 seconds (Total)
+
+
+#  Elapsed Time: 21.51 seconds (Warm-up)
+#                29.29 seconds (Sampling)
+#                50.8 seconds (Total)
+
+$var_approx_mean
+[1] 1.46444
+
+$mcmc_approx_mean
+[1] 1.422561
+
+$var_approx_var
+[1] 0.01103929
+
+$mcmc_approx_var
+[1] 0.01323767
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 24.05 seconds (Warm-up)
+#                30.26 seconds (Sampling)
+#                54.31 seconds (Total)
+
+
+#  Elapsed Time: 25.1 seconds (Warm-up)
+#                32.72 seconds (Sampling)
+#                57.82 seconds (Total)
+
+
+#  Elapsed Time: 25.64 seconds (Warm-up)
+#                33.3 seconds (Sampling)
+#                58.94 seconds (Total)
+
+
+#  Elapsed Time: 25.4 seconds (Warm-up)
+#                34.5 seconds (Sampling)
+#                59.9 seconds (Total)
+
+$var_approx_mean
+[1] 1.543949
+
+$mcmc_approx_mean
+[1] 1.570987
+
+$var_approx_var
+[1] 0.01148158
+
+$mcmc_approx_var
+[1] 0.01461606
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 21.71 seconds (Warm-up)
+#                20.66 seconds (Sampling)
+#                42.37 seconds (Total)
+
+
+#  Elapsed Time: 21.39 seconds (Warm-up)
+#                26.56 seconds (Sampling)
+#                47.95 seconds (Total)
+
+
+#  Elapsed Time: 21.73 seconds (Warm-up)
+#                31.81 seconds (Sampling)
+#                53.54 seconds (Total)
+
+
+#  Elapsed Time: 21.45 seconds (Warm-up)
+#                31.96 seconds (Sampling)
+#                53.41 seconds (Total)
+
+$var_approx_mean
+[1] 1.3232
+
+$mcmc_approx_mean
+[1] 1.253054
+
+$var_approx_var
+[1] 0.01466321
+
+$mcmc_approx_var
+[1] 0.01816778
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 24.84 seconds (Warm-up)
+#                32.98 seconds (Sampling)
+#                57.82 seconds (Total)
+
+
+#  Elapsed Time: 25.33 seconds (Warm-up)
+#                32.25 seconds (Sampling)
+#                57.58 seconds (Total)
+
+
+#  Elapsed Time: 25.1 seconds (Warm-up)
+#                33.37 seconds (Sampling)
+#                58.47 seconds (Total)
+
+
+#  Elapsed Time: 26.95 seconds (Warm-up)
+#                34.21 seconds (Sampling)
+#                61.16 seconds (Total)
+
+$var_approx_mean
+[1] 1.226037
+
+$mcmc_approx_mean
+[1] 1.199567
+
+$var_approx_var
+[1] 0.009441381
+
+$mcmc_approx_var
+[1] 0.01063187
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 17.23 seconds (Warm-up)
+#                18.39 seconds (Sampling)
+#                35.62 seconds (Total)
+
+
+#  Elapsed Time: 19.63 seconds (Warm-up)
+#                29.51 seconds (Sampling)
+#                49.14 seconds (Total)
+
+
+#  Elapsed Time: 19.31 seconds (Warm-up)
+#                29.9 seconds (Sampling)
+#                49.21 seconds (Total)
+
+
+#  Elapsed Time: 19.74 seconds (Warm-up)
+#                29.97 seconds (Sampling)
+#                49.71 seconds (Total)
+
+$var_approx_mean
+[1] 1.267051
+
+$mcmc_approx_mean
+[1] 1.265628
+
+$var_approx_var
+[1] 0.01181819
+
+$mcmc_approx_var
+[1] 0.01417569
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 18.8 seconds (Warm-up)
+#                28.48 seconds (Sampling)
+#                47.28 seconds (Total)
+
+
+#  Elapsed Time: 23.51 seconds (Warm-up)
+#                26.32 seconds (Sampling)
+#                49.83 seconds (Total)
+
+
+#  Elapsed Time: 22.88 seconds (Warm-up)
+#                28.45 seconds (Sampling)
+#                51.33 seconds (Total)
+
+
+#  Elapsed Time: 23.15 seconds (Warm-up)
+#                30.26 seconds (Sampling)
+#                53.41 seconds (Total)
+
+$var_approx_mean
+[1] 1.469135
+
+$mcmc_approx_mean
+[1] 1.455271
+
+$var_approx_var
+[1] 0.01083121
+
+$mcmc_approx_var
+[1] 0.0136749
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 15.5 seconds (Warm-up)
+#                25.14 seconds (Sampling)
+#                40.64 seconds (Total)
+
+
+#  Elapsed Time: 21.66 seconds (Warm-up)
+#                22.97 seconds (Sampling)
+#                44.63 seconds (Total)
+
+
+#  Elapsed Time: 21.96 seconds (Warm-up)
+#                30.42 seconds (Sampling)
+#                52.38 seconds (Total)
+
+
+#  Elapsed Time: 22.35 seconds (Warm-up)
+#                31.37 seconds (Sampling)
+#                53.72 seconds (Total)
+
+$var_approx_mean
+[1] 1.329136
+
+$mcmc_approx_mean
+[1] 1.316875
+
+$var_approx_var
+[1] 0.01330301
+
+$mcmc_approx_var
+[1] 0.01899568
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 21.24 seconds (Warm-up)
+#                24.23 seconds (Sampling)
+#                45.47 seconds (Total)
+
+
+#  Elapsed Time: 21.12 seconds (Warm-up)
+#                24.66 seconds (Sampling)
+#                45.78 seconds (Total)
+
+
+#  Elapsed Time: 20.28 seconds (Warm-up)
+#                26.78 seconds (Sampling)
+#                47.06 seconds (Total)
+
+
+#  Elapsed Time: 21.31 seconds (Warm-up)
+#                30.92 seconds (Sampling)
+#                52.23 seconds (Total)
+
+$var_approx_mean
+[1] 1.539281
+
+$mcmc_approx_mean
+[1] 1.547128
+
+$var_approx_var
+[1] 0.01276372
+
+$mcmc_approx_var
+[1] 0.01614853
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 22.81 seconds (Warm-up)
+#                33.22 seconds (Sampling)
+#                56.03 seconds (Total)
+
+
+#  Elapsed Time: 23.06 seconds (Warm-up)
+#                32.74 seconds (Sampling)
+#                55.8 seconds (Total)
+
+
+#  Elapsed Time: 23.78 seconds (Warm-up)
+#                33.69 seconds (Sampling)
+#                57.47 seconds (Total)
+
+
+#  Elapsed Time: 24.03 seconds (Warm-up)
+#                33.21 seconds (Sampling)
+#                57.24 seconds (Total)
+
+$var_approx_mean
+[1] 1.514186
+
+$mcmc_approx_mean
+[1] 1.545198
+
+$var_approx_var
+[1] 0.0142938
+
+$mcmc_approx_var
+[1] 0.02030521
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 21.77 seconds (Warm-up)
+#                21.45 seconds (Sampling)
+#                43.22 seconds (Total)
+
+
+#  Elapsed Time: 22.16 seconds (Warm-up)
+#                26.32 seconds (Sampling)
+#                48.48 seconds (Total)
+
+
+#  Elapsed Time: 22.25 seconds (Warm-up)
+#                26.48 seconds (Sampling)
+#                48.73 seconds (Total)
+
+
+#  Elapsed Time: 21.86 seconds (Warm-up)
+#                30.31 seconds (Sampling)
+#                52.17 seconds (Total)
+
+$var_approx_mean
+[1] 1.398599
+
+$mcmc_approx_mean
+[1] 1.385732
+
+$var_approx_var
+[1] 0.01244126
+
+$mcmc_approx_var
+[1] 0.0154013
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 27.32 seconds (Warm-up)
+#                33.32 seconds (Sampling)
+#                60.64 seconds (Total)
+
+
+#  Elapsed Time: 28.47 seconds (Warm-up)
+#                32.81 seconds (Sampling)
+#                61.28 seconds (Total)
+
+
+#  Elapsed Time: 27.19 seconds (Warm-up)
+#                36.62 seconds (Sampling)
+#                63.81 seconds (Total)
+
+
+#  Elapsed Time: 29.67 seconds (Warm-up)
+#                34.24 seconds (Sampling)
+#                63.91 seconds (Total)
+
+$var_approx_mean
+[1] 1.203376
+
+$mcmc_approx_mean
+[1] 1.276815
+
+$var_approx_var
+[1] 0.008914224
+
+$mcmc_approx_var
+[1] 0.01206057
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 23.94 seconds (Warm-up)
+#                32.75 seconds (Sampling)
+#                56.69 seconds (Total)
+
+
+#  Elapsed Time: 24.78 seconds (Warm-up)
+#                32.09 seconds (Sampling)
+#                56.87 seconds (Total)
+
+
+#  Elapsed Time: 22.9 seconds (Warm-up)
+#                33.85 seconds (Sampling)
+#                56.75 seconds (Total)
+
+
+#  Elapsed Time: 23.52 seconds (Warm-up)
+#                34.07 seconds (Sampling)
+#                57.59 seconds (Total)
+
+$var_approx_mean
+[1] 1.347323
+
+$mcmc_approx_mean
+[1] 1.319171
+
+$var_approx_var
+[1] 0.01182675
+
+$mcmc_approx_var
+[1] 0.01625668
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 27.19 seconds (Warm-up)
+#                31.72 seconds (Sampling)
+#                58.91 seconds (Total)
+
+
+#  Elapsed Time: 26.34 seconds (Warm-up)
+#                34.58 seconds (Sampling)
+#                60.92 seconds (Total)
+
+
+#  Elapsed Time: 26.84 seconds (Warm-up)
+#                34.9 seconds (Sampling)
+#                61.74 seconds (Total)
+
+
+#  Elapsed Time: 28.14 seconds (Warm-up)
+#                35.98 seconds (Sampling)
+#                64.12 seconds (Total)
+
+$var_approx_mean
+[1] 1.47849
+
+$mcmc_approx_mean
+[1] 1.434888
+
+$var_approx_var
+[1] 0.01420707
+
+$mcmc_approx_var
+[1] 0.02138233
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 24.05 seconds (Warm-up)
+#                32.47 seconds (Sampling)
+#                56.52 seconds (Total)
+
+
+#  Elapsed Time: 23.75 seconds (Warm-up)
+#                33.26 seconds (Sampling)
+#                57.01 seconds (Total)
+
+
+#  Elapsed Time: 23.57 seconds (Warm-up)
+#                34.78 seconds (Sampling)
+#                58.35 seconds (Total)
+
+
+#  Elapsed Time: 23.72 seconds (Warm-up)
+#                35.85 seconds (Sampling)
+#                59.57 seconds (Total)
+
+$var_approx_mean
+[1] 1.335674
+
+$mcmc_approx_mean
+[1] 1.280697
+
+$var_approx_var
+[1] 0.01161279
+
+$mcmc_approx_var
+[1] 0.01642345
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 28.17 seconds (Warm-up)
+#                35.33 seconds (Sampling)
+#                63.5 seconds (Total)
+
+
+#  Elapsed Time: 28.05 seconds (Warm-up)
+#                35.76 seconds (Sampling)
+#                63.81 seconds (Total)
+
+
+#  Elapsed Time: 28.65 seconds (Warm-up)
+#                35.54 seconds (Sampling)
+#                64.19 seconds (Total)
+
+
+#  Elapsed Time: 28.04 seconds (Warm-up)
+#                36.65 seconds (Sampling)
+#                64.69 seconds (Total)
+
+$var_approx_mean
+[1] 1.637774
+
+$mcmc_approx_mean
+[1] 1.650366
+
+$var_approx_var
+[1] 0.009159436
+
+$mcmc_approx_var
+[1] 0.01436059
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 22.14 seconds (Warm-up)
+#                24.57 seconds (Sampling)
+#                46.71 seconds (Total)
+
+
+#  Elapsed Time: 21.7 seconds (Warm-up)
+#                28.05 seconds (Sampling)
+#                49.75 seconds (Total)
+
+
+#  Elapsed Time: 22.18 seconds (Warm-up)
+#                32.42 seconds (Sampling)
+#                54.6 seconds (Total)
+
+
+#  Elapsed Time: 21.74 seconds (Warm-up)
+#                32.95 seconds (Sampling)
+#                54.69 seconds (Total)
+
+$var_approx_mean
+[1] 1.300378
+
+$mcmc_approx_mean
+[1] 1.255757
+
+$var_approx_var
+[1] 0.01328451
+
+$mcmc_approx_var
+[1] 0.02019293
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 21.37 seconds (Warm-up)
+#                21.6 seconds (Sampling)
+#                42.97 seconds (Total)
+
+
+#  Elapsed Time: 20.83 seconds (Warm-up)
+#                23.7 seconds (Sampling)
+#                44.53 seconds (Total)
+
+
+#  Elapsed Time: 20.78 seconds (Warm-up)
+#                32.74 seconds (Sampling)
+#                53.52 seconds (Total)
+
+
+#  Elapsed Time: 21.5 seconds (Warm-up)
+#                32.47 seconds (Sampling)
+#                53.97 seconds (Total)
+
+$var_approx_mean
+[1] 1.505962
+
+$mcmc_approx_mean
+[1] 1.509209
+
+$var_approx_var
+[1] 0.008837207
+
+$mcmc_approx_var
+[1] 0.01131114
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 23.29 seconds (Warm-up)
+#                32.01 seconds (Sampling)
+#                55.3 seconds (Total)
+
+
+#  Elapsed Time: 24.19 seconds (Warm-up)
+#                31.44 seconds (Sampling)
+#                55.63 seconds (Total)
+
+
+#  Elapsed Time: 23.06 seconds (Warm-up)
+#                33.09 seconds (Sampling)
+#                56.15 seconds (Total)
+
+
+#  Elapsed Time: 22.88 seconds (Warm-up)
+#                33.78 seconds (Sampling)
+#                56.66 seconds (Total)
+
+$var_approx_mean
+[1] 1.5355
+
+$mcmc_approx_mean
+[1] 1.522978
+
+$var_approx_var
+[1] 0.01552895
+
+$mcmc_approx_var
+[1] 0.02150485
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 31.53 seconds (Warm-up)
+#                37.48 seconds (Sampling)
+#                69.01 seconds (Total)
+
+
+#  Elapsed Time: 34.09 seconds (Warm-up)
+#                36.28 seconds (Sampling)
+#                70.37 seconds (Total)
+
+
+#  Elapsed Time: 32.89 seconds (Warm-up)
+#                37.71 seconds (Sampling)
+#                70.6 seconds (Total)
+
+
+#  Elapsed Time: 32.64 seconds (Warm-up)
+#                38.44 seconds (Sampling)
+#                71.08 seconds (Total)
+
+$var_approx_mean
+[1] 1.812396
+
+$mcmc_approx_mean
+[1] 1.799259
+
+$var_approx_var
+[1] 0.01286792
+
+$mcmc_approx_var
+[1] 0.01951876
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 24.71 seconds (Warm-up)
+#                30.65 seconds (Sampling)
+#                55.36 seconds (Total)
+
+
+#  Elapsed Time: 23.62 seconds (Warm-up)
+#                33.79 seconds (Sampling)
+#                57.41 seconds (Total)
+
+
+#  Elapsed Time: 23.84 seconds (Warm-up)
+#                34.13 seconds (Sampling)
+#                57.97 seconds (Total)
+
+
+#  Elapsed Time: 24 seconds (Warm-up)
+#                35.11 seconds (Sampling)
+#                59.11 seconds (Total)
+
+$var_approx_mean
+[1] 1.301122
+
+$mcmc_approx_mean
+[1] 1.367225
+
+$var_approx_var
+[1] 0.01062532
+
+$mcmc_approx_var
+[1] 0.01363168
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 22.13 seconds (Warm-up)
+#                26.55 seconds (Sampling)
+#                48.68 seconds (Total)
+
+
+#  Elapsed Time: 21.89 seconds (Warm-up)
+#                28.59 seconds (Sampling)
+#                50.48 seconds (Total)
+
+
+#  Elapsed Time: 22.31 seconds (Warm-up)
+#                30.21 seconds (Sampling)
+#                52.52 seconds (Total)
+
+
+#  Elapsed Time: 21.91 seconds (Warm-up)
+#                32.59 seconds (Sampling)
+#                54.5 seconds (Total)
+
+$var_approx_mean
+[1] 1.552591
+
+$mcmc_approx_mean
+[1] 1.558222
+
+$var_approx_var
+[1] 0.01149188
+
+$mcmc_approx_var
+[1] 0.01554962
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 24.9 seconds (Warm-up)
+#                32.27 seconds (Sampling)
+#                57.17 seconds (Total)
+
+
+#  Elapsed Time: 24.31 seconds (Warm-up)
+#                33.08 seconds (Sampling)
+#                57.39 seconds (Total)
+
+
+#  Elapsed Time: 24.28 seconds (Warm-up)
+#                35.02 seconds (Sampling)
+#                59.3 seconds (Total)
+
+
+#  Elapsed Time: 25.99 seconds (Warm-up)
+#                33.77 seconds (Sampling)
+#                59.76 seconds (Total)
+
+$var_approx_mean
+[1] 1.31698
+
+$mcmc_approx_mean
+[1] 1.288408
+
+$var_approx_var
+[1] 0.01432652
+
+$mcmc_approx_var
+[1] 0.01616786
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 24.51 seconds (Warm-up)
+#                29.9 seconds (Sampling)
+#                54.41 seconds (Total)
+
+
+#  Elapsed Time: 24.56 seconds (Warm-up)
+#                32.37 seconds (Sampling)
+#                56.93 seconds (Total)
+
+
+#  Elapsed Time: 24.54 seconds (Warm-up)
+#                33.57 seconds (Sampling)
+#                58.11 seconds (Total)
+
+
+#  Elapsed Time: 24.77 seconds (Warm-up)
+#                34.94 seconds (Sampling)
+#                59.71 seconds (Total)
+
+$var_approx_mean
+[1] 1.557897
+
+$mcmc_approx_mean
+[1] 1.598035
+
+$var_approx_var
+[1] 0.008167422
+
+$mcmc_approx_var
+[1] 0.01046981
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 19 seconds (Warm-up)
+#                24.33 seconds (Sampling)
+#                43.33 seconds (Total)
+
+
+#  Elapsed Time: 20.42 seconds (Warm-up)
+#                23.41 seconds (Sampling)
+#                43.83 seconds (Total)
+
+
+#  Elapsed Time: 20.97 seconds (Warm-up)
+#                28.71 seconds (Sampling)
+#                49.68 seconds (Total)
+
+
+#  Elapsed Time: 20.34 seconds (Warm-up)
+#                31.44 seconds (Sampling)
+#                51.78 seconds (Total)
+
+$var_approx_mean
+[1] 1.603142
+
+$mcmc_approx_mean
+[1] 1.600012
+
+$var_approx_var
+[1] 0.01321391
+
+$mcmc_approx_var
+[1] 0.01637688
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 22.72 seconds (Warm-up)
+#                30.05 seconds (Sampling)
+#                52.77 seconds (Total)
+
+
+#  Elapsed Time: 22.26 seconds (Warm-up)
+#                30.58 seconds (Sampling)
+#                52.84 seconds (Total)
+
+
+#  Elapsed Time: 22.01 seconds (Warm-up)
+#                30.81 seconds (Sampling)
+#                52.82 seconds (Total)
+
+
+#  Elapsed Time: 23.06 seconds (Warm-up)
+#                30.67 seconds (Sampling)
+#                53.73 seconds (Total)
+
+$var_approx_mean
+[1] 1.62363
+
+$mcmc_approx_mean
+[1] 1.653074
+
+$var_approx_var
+[1] 0.01191391
+
+$mcmc_approx_var
+[1] 0.01476246
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 24.34 seconds (Warm-up)
+#                31.66 seconds (Sampling)
+#                56 seconds (Total)
+
+
+#  Elapsed Time: 24.25 seconds (Warm-up)
+#                33 seconds (Sampling)
+#                57.25 seconds (Total)
+
+
+#  Elapsed Time: 25.55 seconds (Warm-up)
+#                32.86 seconds (Sampling)
+#                58.41 seconds (Total)
+
+
+#  Elapsed Time: 24.32 seconds (Warm-up)
+#                34.79 seconds (Sampling)
+#                59.11 seconds (Total)
+
+$var_approx_mean
+[1] 1.553136
+
+$mcmc_approx_mean
+[1] 1.624137
+
+$var_approx_var
+[1] 0.01336175
+
+$mcmc_approx_var
+[1] 0.01712478
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 21.25 seconds (Warm-up)
+#                26.04 seconds (Sampling)
+#                47.29 seconds (Total)
+
+
+#  Elapsed Time: 20.67 seconds (Warm-up)
+#                27.74 seconds (Sampling)
+#                48.41 seconds (Total)
+
+
+#  Elapsed Time: 21.13 seconds (Warm-up)
+#                30.19 seconds (Sampling)
+#                51.32 seconds (Total)
+
+
+#  Elapsed Time: 21.42 seconds (Warm-up)
+#                30.8 seconds (Sampling)
+#                52.22 seconds (Total)
+
+$var_approx_mean
+[1] 1.666878
+
+$mcmc_approx_mean
+[1] 1.641956
+
+$var_approx_var
+[1] 0.01780465
+
+$mcmc_approx_var
+[1] 0.02238763
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 24.05 seconds (Warm-up)
+#                33.28 seconds (Sampling)
+#                57.33 seconds (Total)
+
+
+#  Elapsed Time: 24.57 seconds (Warm-up)
+#                32.77 seconds (Sampling)
+#                57.34 seconds (Total)
+
+
+#  Elapsed Time: 24.41 seconds (Warm-up)
+#                33.16 seconds (Sampling)
+#                57.57 seconds (Total)
+
+
+#  Elapsed Time: 24.87 seconds (Warm-up)
+#                32.99 seconds (Sampling)
+#                57.86 seconds (Total)
+
+$var_approx_mean
+[1] 1.811348
+
+$mcmc_approx_mean
+[1] 1.792311
+
+$var_approx_var
+[1] 0.01253678
+
+$mcmc_approx_var
+[1] 0.01826671
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 20.18 seconds (Warm-up)
+#                22.97 seconds (Sampling)
+#                43.15 seconds (Total)
+
+
+#  Elapsed Time: 20.77 seconds (Warm-up)
+#                22.84 seconds (Sampling)
+#                43.61 seconds (Total)
+
+
+#  Elapsed Time: 21.9 seconds (Warm-up)
+#                26.84 seconds (Sampling)
+#                48.74 seconds (Total)
+
+
+#  Elapsed Time: 20.03 seconds (Warm-up)
+#                30.06 seconds (Sampling)
+#                50.09 seconds (Total)
+
+$var_approx_mean
+[1] 1.551457
+
+$mcmc_approx_mean
+[1] 1.55549
+
+$var_approx_var
+[1] 0.01438883
+
+$mcmc_approx_var
+[1] 0.019074
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 21.81 seconds (Warm-up)
+#                33.28 seconds (Sampling)
+#                55.09 seconds (Total)
+
+
+#  Elapsed Time: 26.07 seconds (Warm-up)
+#                33.17 seconds (Sampling)
+#                59.24 seconds (Total)
+
+
+#  Elapsed Time: 26.03 seconds (Warm-up)
+#                35.65 seconds (Sampling)
+#                61.68 seconds (Total)
+
+
+#  Elapsed Time: 26.72 seconds (Warm-up)
+#                36.1 seconds (Sampling)
+#                62.82 seconds (Total)
+
+$var_approx_mean
+[1] 1.690403
+
+$mcmc_approx_mean
+[1] 1.738043
+
+$var_approx_var
+[1] 0.009356024
+
+$mcmc_approx_var
+[1] 0.01296538
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 20.89 seconds (Warm-up)
+#                21.69 seconds (Sampling)
+#                42.58 seconds (Total)
+
+
+#  Elapsed Time: 21.71 seconds (Warm-up)
+#                23.04 seconds (Sampling)
+#                44.75 seconds (Total)
+
+
+#  Elapsed Time: 21.62 seconds (Warm-up)
+#                30.96 seconds (Sampling)
+#                52.58 seconds (Total)
+
+
+#  Elapsed Time: 20.8 seconds (Warm-up)
+#                34.18 seconds (Sampling)
+#                54.98 seconds (Total)
+
+$var_approx_mean
+[1] 1.764981
+
+$mcmc_approx_mean
+[1] 1.735818
+
+$var_approx_var
+[1] 0.01237208
+
+$mcmc_approx_var
+[1] 0.01678135
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 25.24 seconds (Warm-up)
+#                32.3 seconds (Sampling)
+#                57.54 seconds (Total)
+
+
+#  Elapsed Time: 26.79 seconds (Warm-up)
+#                30.73 seconds (Sampling)
+#                57.52 seconds (Total)
+
+
+#  Elapsed Time: 25.15 seconds (Warm-up)
+#                36.8 seconds (Sampling)
+#                61.95 seconds (Total)
+
+
+#  Elapsed Time: 25.95 seconds (Warm-up)
+#                36.95 seconds (Sampling)
+#                62.9 seconds (Total)
+
+$var_approx_mean
+[1] 1.786104
+
+$mcmc_approx_mean
+[1] 1.650241
+
+$var_approx_var
+[1] 0.01268868
+
+$mcmc_approx_var
+[1] 0.01947754
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 30.51 seconds (Warm-up)
+#                35.08 seconds (Sampling)
+#                65.59 seconds (Total)
+
+
+#  Elapsed Time: 29.74 seconds (Warm-up)
+#                36 seconds (Sampling)
+#                65.74 seconds (Total)
+
+
+#  Elapsed Time: 29.54 seconds (Warm-up)
+#                36.5 seconds (Sampling)
+#                66.04 seconds (Total)
+
+
+#  Elapsed Time: 31.74 seconds (Warm-up)
+#                34.65 seconds (Sampling)
+#                66.39 seconds (Total)
+
+$var_approx_mean
+[1] 1.554267
+
+$mcmc_approx_mean
+[1] 1.524297
+
+$var_approx_var
+[1] 0.009384295
+
+$mcmc_approx_var
+[1] 0.01365234
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 25.64 seconds (Warm-up)
+#                23.98 seconds (Sampling)
+#                49.62 seconds (Total)
+
+
+#  Elapsed Time: 29.88 seconds (Warm-up)
+#                34.74 seconds (Sampling)
+#                64.62 seconds (Total)
+
+
+#  Elapsed Time: 31.71 seconds (Warm-up)
+#                34.82 seconds (Sampling)
+#                66.53 seconds (Total)
+
+
+#  Elapsed Time: 32.47 seconds (Warm-up)
+#                38.62 seconds (Sampling)
+#                71.09 seconds (Total)
+
+$var_approx_mean
+[1] 1.624623
+
+$mcmc_approx_mean
+[1] 1.62287
+
+$var_approx_var
+[1] 0.00818775
+
+$mcmc_approx_var
+[1] 0.01102867
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 22.54 seconds (Warm-up)
+#                24.47 seconds (Sampling)
+#                47.01 seconds (Total)
+
+
+#  Elapsed Time: 22.16 seconds (Warm-up)
+#                29.75 seconds (Sampling)
+#                51.91 seconds (Total)
+
+
+#  Elapsed Time: 20.03 seconds (Warm-up)
+#                32.32 seconds (Sampling)
+#                52.35 seconds (Total)
+
+
+#  Elapsed Time: 22.54 seconds (Warm-up)
+#                30.13 seconds (Sampling)
+#                52.67 seconds (Total)
+
+$var_approx_mean
+[1] 1.759302
+
+$mcmc_approx_mean
+[1] 1.743851
+
+$var_approx_var
+[1] 0.01203138
+
+$mcmc_approx_var
+[1] 0.01496335
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 22.59 seconds (Warm-up)
+#                28.51 seconds (Sampling)
+#                51.1 seconds (Total)
+
+
+#  Elapsed Time: 22.49 seconds (Warm-up)
+#                31.44 seconds (Sampling)
+#                53.93 seconds (Total)
+
+
+#  Elapsed Time: 23.69 seconds (Warm-up)
+#                31.98 seconds (Sampling)
+#                55.67 seconds (Total)
+
+
+#  Elapsed Time: 22.92 seconds (Warm-up)
+#                32.43 seconds (Sampling)
+#                55.35 seconds (Total)
+
+$var_approx_mean
+[1] 1.661547
+
+$mcmc_approx_mean
+[1] 1.627743
+
+$var_approx_var
+[1] 0.009177283
+
+$mcmc_approx_var
+[1] 0.01234539
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 22.94 seconds (Warm-up)
+#                32.88 seconds (Sampling)
+#                55.82 seconds (Total)
+
+
+#  Elapsed Time: 24.28 seconds (Warm-up)
+#                31.71 seconds (Sampling)
+#                55.99 seconds (Total)
+
+
+#  Elapsed Time: 25.01 seconds (Warm-up)
+#                32.03 seconds (Sampling)
+#                57.04 seconds (Total)
+
+
+#  Elapsed Time: 25.24 seconds (Warm-up)
+#                33.25 seconds (Sampling)
+#                58.49 seconds (Total)
+
+$var_approx_mean
+[1] 1.863528
+
+$mcmc_approx_mean
+[1] 1.836615
+
+$var_approx_var
+[1] 0.01362969
+
+$mcmc_approx_var
+[1] 0.01792889
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 23.32 seconds (Warm-up)
+#                28.67 seconds (Sampling)
+#                51.99 seconds (Total)
+
+
+#  Elapsed Time: 21.77 seconds (Warm-up)
+#                31.58 seconds (Sampling)
+#                53.35 seconds (Total)
+
+
+#  Elapsed Time: 21.69 seconds (Warm-up)
+#                31.78 seconds (Sampling)
+#                53.47 seconds (Total)
+
+
+#  Elapsed Time: 22.83 seconds (Warm-up)
+#                30.65 seconds (Sampling)
+#                53.48 seconds (Total)
+
+$var_approx_mean
+[1] 1.577844
+
+$mcmc_approx_mean
+[1] 1.570261
+
+$var_approx_var
+[1] 0.01094715
+
+$mcmc_approx_var
+[1] 0.01411467
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 26.07 seconds (Warm-up)
+#                35.68 seconds (Sampling)
+#                61.75 seconds (Total)
+
+
+#  Elapsed Time: 27.27 seconds (Warm-up)
+#                34.67 seconds (Sampling)
+#                61.94 seconds (Total)
+
+
+#  Elapsed Time: 27.3 seconds (Warm-up)
+#                36.23 seconds (Sampling)
+#                63.53 seconds (Total)
+
+
+#  Elapsed Time: 27.73 seconds (Warm-up)
+#                36.24 seconds (Sampling)
+#                63.97 seconds (Total)
+
+$var_approx_mean
+[1] 1.62312
+
+$mcmc_approx_mean
+[1] 1.604224
+
+$var_approx_var
+[1] 0.01380073
+
+$mcmc_approx_var
+[1] 0.01805655
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 22.66 seconds (Warm-up)
+#                29.65 seconds (Sampling)
+#                52.31 seconds (Total)
+
+
+#  Elapsed Time: 21.89 seconds (Warm-up)
+#                30.66 seconds (Sampling)
+#                52.55 seconds (Total)
+
+
+#  Elapsed Time: 22.49 seconds (Warm-up)
+#                32 seconds (Sampling)
+#                54.49 seconds (Total)
+
+
+#  Elapsed Time: 22.78 seconds (Warm-up)
+#                32.88 seconds (Sampling)
+#                55.66 seconds (Total)
+
+$var_approx_mean
+[1] 1.801872
+
+$mcmc_approx_mean
+[1] 1.788358
+
+$var_approx_var
+[1] 0.01155609
+
+$mcmc_approx_var
+[1] 0.01444001
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 25.9 seconds (Warm-up)
+#                32.43 seconds (Sampling)
+#                58.33 seconds (Total)
+
+
+#  Elapsed Time: 26.09 seconds (Warm-up)
+#                33.87 seconds (Sampling)
+#                59.96 seconds (Total)
+
+
+#  Elapsed Time: 27.26 seconds (Warm-up)
+#                33.39 seconds (Sampling)
+#                60.65 seconds (Total)
+
+
+#  Elapsed Time: 26.53 seconds (Warm-up)
+#                34.69 seconds (Sampling)
+#                61.22 seconds (Total)
+
+$var_approx_mean
+[1] 1.713373
+
+$mcmc_approx_mean
+[1] 1.702246
+
+$var_approx_var
+[1] 0.01475817
+
+$mcmc_approx_var
+[1] 0.02066941
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 24.81 seconds (Warm-up)
+#                30.69 seconds (Sampling)
+#                55.5 seconds (Total)
+
+
+#  Elapsed Time: 24.14 seconds (Warm-up)
+#                33.04 seconds (Sampling)
+#                57.18 seconds (Total)
+
+
+#  Elapsed Time: 23.9 seconds (Warm-up)
+#                33.44 seconds (Sampling)
+#                57.34 seconds (Total)
+
+
+#  Elapsed Time: 24.63 seconds (Warm-up)
+#                33.75 seconds (Sampling)
+#                58.38 seconds (Total)
+
+$var_approx_mean
+[1] 1.689616
+
+$mcmc_approx_mean
+[1] 1.704174
+
+$var_approx_var
+[1] 0.00997898
+
+$mcmc_approx_var
+[1] 0.01378378
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 23.23 seconds (Warm-up)
+#                24.54 seconds (Sampling)
+#                47.77 seconds (Total)
+
+
+#  Elapsed Time: 22.68 seconds (Warm-up)
+#                30.34 seconds (Sampling)
+#                53.02 seconds (Total)
+
+
+#  Elapsed Time: 22.73 seconds (Warm-up)
+#                30.76 seconds (Sampling)
+#                53.49 seconds (Total)
+
+
+#  Elapsed Time: 22.56 seconds (Warm-up)
+#                33.41 seconds (Sampling)
+#                55.97 seconds (Total)
+
+$var_approx_mean
+[1] 1.769737
+
+$mcmc_approx_mean
+[1] 1.822647
+
+$var_approx_var
+[1] 0.01326003
+
+$mcmc_approx_var
+[1] 0.0170132
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 20.56 seconds (Warm-up)
+#                23.21 seconds (Sampling)
+#                43.77 seconds (Total)
+
+
+#  Elapsed Time: 20.9 seconds (Warm-up)
+#                26.77 seconds (Sampling)
+#                47.67 seconds (Total)
+
+
+#  Elapsed Time: 21.12 seconds (Warm-up)
+#                29.73 seconds (Sampling)
+#                50.85 seconds (Total)
+
+
+#  Elapsed Time: 20.96 seconds (Warm-up)
+#                31.17 seconds (Sampling)
+#                52.13 seconds (Total)
+
+$var_approx_mean
+[1] 1.981602
+
+$mcmc_approx_mean
+[1] 1.948935
+
+$var_approx_var
+[1] 0.01779989
+
+$mcmc_approx_var
+[1] 0.02279858
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 23.69 seconds (Warm-up)
+#                30.45 seconds (Sampling)
+#                54.14 seconds (Total)
+
+
+#  Elapsed Time: 26.59 seconds (Warm-up)
+#                34.54 seconds (Sampling)
+#                61.13 seconds (Total)
+
+
+#  Elapsed Time: 26.25 seconds (Warm-up)
+#                35.29 seconds (Sampling)
+#                61.54 seconds (Total)
+
+
+#  Elapsed Time: 27.45 seconds (Warm-up)
+#                35.12 seconds (Sampling)
+#                62.57 seconds (Total)
+
+$var_approx_mean
+[1] 1.662047
+
+$mcmc_approx_mean
+[1] 1.674128
+
+$var_approx_var
+[1] 0.007365446
+
+$mcmc_approx_var
+[1] 0.009558983
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 24.74 seconds (Warm-up)
+#                33.21 seconds (Sampling)
+#                57.95 seconds (Total)
+
+
+#  Elapsed Time: 25.12 seconds (Warm-up)
+#                33.75 seconds (Sampling)
+#                58.87 seconds (Total)
+
+
+#  Elapsed Time: 24.73 seconds (Warm-up)
+#                35.51 seconds (Sampling)
+#                60.24 seconds (Total)
+
+
+#  Elapsed Time: 25.59 seconds (Warm-up)
+#                34.57 seconds (Sampling)
+#                60.16 seconds (Total)
+
+$var_approx_mean
+[1] 1.857813
+
+$mcmc_approx_mean
+[1] 1.848904
+
+$var_approx_var
+[1] 0.009334193
+
+$mcmc_approx_var
+[1] 0.01214407
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 21.49 seconds (Warm-up)
+#                26.33 seconds (Sampling)
+#                47.82 seconds (Total)
+
+
+#  Elapsed Time: 22.13 seconds (Warm-up)
+#                31.54 seconds (Sampling)
+#                53.67 seconds (Total)
+
+
+#  Elapsed Time: 22.03 seconds (Warm-up)
+#                31.7 seconds (Sampling)
+#                53.73 seconds (Total)
+
+
+#  Elapsed Time: 21.54 seconds (Warm-up)
+#                32.34 seconds (Sampling)
+#                53.88 seconds (Total)
+
+$var_approx_mean
+[1] 1.755601
+
+$mcmc_approx_mean
+[1] 1.740493
+
+$var_approx_var
+[1] 0.01066675
+
+$mcmc_approx_var
+[1] 0.01282454
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 23.17 seconds (Warm-up)
+#                26.96 seconds (Sampling)
+#                50.13 seconds (Total)
+
+
+#  Elapsed Time: 23.61 seconds (Warm-up)
+#                30.88 seconds (Sampling)
+#                54.49 seconds (Total)
+
+
+#  Elapsed Time: 23.5 seconds (Warm-up)
+#                31.56 seconds (Sampling)
+#                55.06 seconds (Total)
+
+
+#  Elapsed Time: 23.39 seconds (Warm-up)
+#                35.15 seconds (Sampling)
+#                58.54 seconds (Total)
+
+$var_approx_mean
+[1] 1.7746
+
+$mcmc_approx_mean
+[1] 1.789202
+
+$var_approx_var
+[1] 0.01056365
+
+$mcmc_approx_var
+[1] 0.01407415
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 27.01 seconds (Warm-up)
+#                37.55 seconds (Sampling)
+#                64.56 seconds (Total)
+
+
+#  Elapsed Time: 27.36 seconds (Warm-up)
+#                38.02 seconds (Sampling)
+#                65.38 seconds (Total)
+
+
+#  Elapsed Time: 27.68 seconds (Warm-up)
+#                37.78 seconds (Sampling)
+#                65.46 seconds (Total)
+
+
+#  Elapsed Time: 28.21 seconds (Warm-up)
+#                38.27 seconds (Sampling)
+#                66.48 seconds (Total)
+
+$var_approx_mean
+[1] 1.660647
+
+$mcmc_approx_mean
+[1] 1.685295
+
+$var_approx_var
+[1] 0.01188601
+
+$mcmc_approx_var
+[1] 0.01674533
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 18.98 seconds (Warm-up)
+#                24.73 seconds (Sampling)
+#                43.71 seconds (Total)
+
+
+#  Elapsed Time: 25.66 seconds (Warm-up)
+#                32.26 seconds (Sampling)
+#                57.92 seconds (Total)
+
+
+#  Elapsed Time: 25.09 seconds (Warm-up)
+#                33.37 seconds (Sampling)
+#                58.46 seconds (Total)
+
+
+#  Elapsed Time: 26.02 seconds (Warm-up)
+#                33.2 seconds (Sampling)
+#                59.22 seconds (Total)
+
+$var_approx_mean
+[1] 1.691917
+
+$mcmc_approx_mean
+[1] 1.665867
+
+$var_approx_var
+[1] 0.009631459
+
+$mcmc_approx_var
+[1] 0.01180641
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 21.71 seconds (Warm-up)
+#                27.44 seconds (Sampling)
+#                49.15 seconds (Total)
+
+
+#  Elapsed Time: 22.61 seconds (Warm-up)
+#                30.28 seconds (Sampling)
+#                52.89 seconds (Total)
+
+
+#  Elapsed Time: 23.05 seconds (Warm-up)
+#                32.37 seconds (Sampling)
+#                55.42 seconds (Total)
+
+
+#  Elapsed Time: 22.46 seconds (Warm-up)
+#                33.44 seconds (Sampling)
+#                55.9 seconds (Total)
+
+$var_approx_mean
+[1] 1.830851
+
+$mcmc_approx_mean
+[1] 1.806006
+
+$var_approx_var
+[1] 0.009527905
+
+$mcmc_approx_var
+[1] 0.01308378
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 21.75 seconds (Warm-up)
+#                28.63 seconds (Sampling)
+#                50.38 seconds (Total)
+
+
+#  Elapsed Time: 21.72 seconds (Warm-up)
+#                30.13 seconds (Sampling)
+#                51.85 seconds (Total)
+
+
+#  Elapsed Time: 21.85 seconds (Warm-up)
+#                32.28 seconds (Sampling)
+#                54.13 seconds (Total)
+
+
+#  Elapsed Time: 22.35 seconds (Warm-up)
+#                32.99 seconds (Sampling)
+#                55.34 seconds (Total)
+
+$var_approx_mean
+[1] 1.582833
+
+$mcmc_approx_mean
+[1] 1.547537
+
+$var_approx_var
+[1] 0.01442462
+
+$mcmc_approx_var
+[1] 0.01948105
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 21.52 seconds (Warm-up)
+#                28.1 seconds (Sampling)
+#                49.62 seconds (Total)
+
+
+#  Elapsed Time: 21.21 seconds (Warm-up)
+#                29.23 seconds (Sampling)
+#                50.44 seconds (Total)
+
+
+#  Elapsed Time: 21.58 seconds (Warm-up)
+#                30.04 seconds (Sampling)
+#                51.62 seconds (Total)
+
+
+#  Elapsed Time: 21.13 seconds (Warm-up)
+#                31.55 seconds (Sampling)
+#                52.68 seconds (Total)
+
+$var_approx_mean
+[1] 1.573243
+
+$mcmc_approx_mean
+[1] 1.548255
+
+$var_approx_var
+[1] 0.01239045
+
+$mcmc_approx_var
+[1] 0.01639173
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 27.19 seconds (Warm-up)
+#                32.27 seconds (Sampling)
+#                59.46 seconds (Total)
+
+
+#  Elapsed Time: 28.12 seconds (Warm-up)
+#                31.66 seconds (Sampling)
+#                59.78 seconds (Total)
+
+
+#  Elapsed Time: 26.9 seconds (Warm-up)
+#                33.07 seconds (Sampling)
+#                59.97 seconds (Total)
+
+
+#  Elapsed Time: 27.82 seconds (Warm-up)
+#                35.36 seconds (Sampling)
+#                63.18 seconds (Total)
+
+$var_approx_mean
+[1] 2.054098
+
+$mcmc_approx_mean
+[1] 2.018882
+
+$var_approx_var
+[1] 0.01452642
+
+$mcmc_approx_var
+[1] 0.02139505
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 25.22 seconds (Warm-up)
+#                33.8 seconds (Sampling)
+#                59.02 seconds (Total)
+
+
+#  Elapsed Time: 25.42 seconds (Warm-up)
+#                34.28 seconds (Sampling)
+#                59.7 seconds (Total)
+
+
+#  Elapsed Time: 26.17 seconds (Warm-up)
+#                34.33 seconds (Sampling)
+#                60.5 seconds (Total)
+
+
+#  Elapsed Time: 26.46 seconds (Warm-up)
+#                34.02 seconds (Sampling)
+#                60.48 seconds (Total)
+
+$var_approx_mean
+[1] 1.934016
+
+$mcmc_approx_mean
+[1] 1.85315
+
+$var_approx_var
+[1] 0.012138
+
+$mcmc_approx_var
+[1] 0.01831083
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 24.02 seconds (Warm-up)
+#                24.89 seconds (Sampling)
+#                48.91 seconds (Total)
+
+
+#  Elapsed Time: 24.94 seconds (Warm-up)
+#                34.71 seconds (Sampling)
+#                59.65 seconds (Total)
+
+
+#  Elapsed Time: 25.45 seconds (Warm-up)
+#                35.02 seconds (Sampling)
+#                60.47 seconds (Total)
+
+
+#  Elapsed Time: 25.53 seconds (Warm-up)
+#                35.03 seconds (Sampling)
+#                60.56 seconds (Total)
+
+$var_approx_mean
+[1] 1.887052
+
+$mcmc_approx_mean
+[1] 1.918763
+
+$var_approx_var
+[1] 0.01097154
+
+$mcmc_approx_var
+[1] 0.01438205
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 21.99 seconds (Warm-up)
+#                33.26 seconds (Sampling)
+#                55.25 seconds (Total)
+
+
+#  Elapsed Time: 27.62 seconds (Warm-up)
+#                35.87 seconds (Sampling)
+#                63.49 seconds (Total)
+
+
+#  Elapsed Time: 27.68 seconds (Warm-up)
+#                36.25 seconds (Sampling)
+#                63.93 seconds (Total)
+
+
+#  Elapsed Time: 28.02 seconds (Warm-up)
+#                35.89 seconds (Sampling)
+#                63.91 seconds (Total)
+
+$var_approx_mean
+[1] 1.944789
+
+$mcmc_approx_mean
+[1] 1.87101
+
+$var_approx_var
+[1] 0.01113618
+
+$mcmc_approx_var
+[1] 0.01600747
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 18.11 seconds (Warm-up)
+#                26.93 seconds (Sampling)
+#                45.04 seconds (Total)
+
+
+#  Elapsed Time: 23.48 seconds (Warm-up)
+#                29.01 seconds (Sampling)
+#                52.49 seconds (Total)
+
+
+#  Elapsed Time: 22.09 seconds (Warm-up)
+#                32.56 seconds (Sampling)
+#                54.65 seconds (Total)
+
+
+#  Elapsed Time: 23.47 seconds (Warm-up)
+#                32.93 seconds (Sampling)
+#                56.4 seconds (Total)
+
+$var_approx_mean
+[1] 1.88624
+
+$mcmc_approx_mean
+[1] 1.901881
+
+$var_approx_var
+[1] 0.01596647
+
+$mcmc_approx_var
+[1] 0.01946287
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 27.34 seconds (Warm-up)
+#                33.03 seconds (Sampling)
+#                60.37 seconds (Total)
+
+
+#  Elapsed Time: 26.61 seconds (Warm-up)
+#                34.47 seconds (Sampling)
+#                61.08 seconds (Total)
+
+
+#  Elapsed Time: 27.76 seconds (Warm-up)
+#                34.49 seconds (Sampling)
+#                62.25 seconds (Total)
+
+
+#  Elapsed Time: 28.08 seconds (Warm-up)
+#                34.61 seconds (Sampling)
+#                62.69 seconds (Total)
+
+$var_approx_mean
+[1] 2.021579
+
+$mcmc_approx_mean
+[1] 1.949388
+
+$var_approx_var
+[1] 0.01353817
+
+$mcmc_approx_var
+[1] 0.02140484
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 17.39 seconds (Warm-up)
+#                23.96 seconds (Sampling)
+#                41.35 seconds (Total)
+
+
+#  Elapsed Time: 27.48 seconds (Warm-up)
+#                28.2 seconds (Sampling)
+#                55.68 seconds (Total)
+
+
+#  Elapsed Time: 25.78 seconds (Warm-up)
+#                37.46 seconds (Sampling)
+#                63.24 seconds (Total)
+
+
+#  Elapsed Time: 26.67 seconds (Warm-up)
+#                37.32 seconds (Sampling)
+#                63.99 seconds (Total)
+
+$var_approx_mean
+[1] 1.957912
+
+$mcmc_approx_mean
+[1] 1.952556
+
+$var_approx_var
+[1] 0.01138543
+
+$mcmc_approx_var
+[1] 0.01624052
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 23.22 seconds (Warm-up)
+#                31.71 seconds (Sampling)
+#                54.93 seconds (Total)
+
+
+#  Elapsed Time: 23.03 seconds (Warm-up)
+#                33.51 seconds (Sampling)
+#                56.54 seconds (Total)
+
+
+#  Elapsed Time: 24.43 seconds (Warm-up)
+#                33.97 seconds (Sampling)
+#                58.4 seconds (Total)
+
+
+#  Elapsed Time: 24.23 seconds (Warm-up)
+#                34.94 seconds (Sampling)
+#                59.17 seconds (Total)
+
+$var_approx_mean
+[1] 1.84416
+
+$mcmc_approx_mean
+[1] 1.815375
+
+$var_approx_var
+[1] 0.009844506
+
+$mcmc_approx_var
+[1] 0.01185491
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 30.5 seconds (Warm-up)
+#                36.56 seconds (Sampling)
+#                67.06 seconds (Total)
+
+
+#  Elapsed Time: 29.93 seconds (Warm-up)
+#                37.12 seconds (Sampling)
+#                67.05 seconds (Total)
+
+
+#  Elapsed Time: 30.93 seconds (Warm-up)
+#                37.19 seconds (Sampling)
+#                68.12 seconds (Total)
+
+
+#  Elapsed Time: 31.49 seconds (Warm-up)
+#                37 seconds (Sampling)
+#                68.49 seconds (Total)
+
+$var_approx_mean
+[1] 1.938267
+
+$mcmc_approx_mean
+[1] 1.96533
+
+$var_approx_var
+[1] 0.01038767
+
+$mcmc_approx_var
+[1] 0.01492979
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 22.62 seconds (Warm-up)
+#                28.96 seconds (Sampling)
+#                51.58 seconds (Total)
+
+
+#  Elapsed Time: 23.36 seconds (Warm-up)
+#                31.39 seconds (Sampling)
+#                54.75 seconds (Total)
+
+
+#  Elapsed Time: 22.91 seconds (Warm-up)
+#                32.65 seconds (Sampling)
+#                55.56 seconds (Total)
+
+
+#  Elapsed Time: 23.87 seconds (Warm-up)
+#                32.15 seconds (Sampling)
+#                56.02 seconds (Total)
+
+$var_approx_mean
+[1] 1.862347
+
+$mcmc_approx_mean
+[1] 1.752553
+
+$var_approx_var
+[1] 0.0124574
+
+$mcmc_approx_var
+[1] 0.01784639
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 24.76 seconds (Warm-up)
+#                33.43 seconds (Sampling)
+#                58.19 seconds (Total)
+
+
+#  Elapsed Time: 27.83 seconds (Warm-up)
+#                33.34 seconds (Sampling)
+#                61.17 seconds (Total)
+
+
+#  Elapsed Time: 27.94 seconds (Warm-up)
+#                34.82 seconds (Sampling)
+#                62.76 seconds (Total)
+
+
+#  Elapsed Time: 28.22 seconds (Warm-up)
+#                35.64 seconds (Sampling)
+#                63.86 seconds (Total)
+
+$var_approx_mean
+[1] 2.320164
+
+$mcmc_approx_mean
+[1] 2.283032
+
+$var_approx_var
+[1] 0.01826264
+
+$mcmc_approx_var
+[1] 0.02556115
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 24.37 seconds (Warm-up)
+#                30.92 seconds (Sampling)
+#                55.29 seconds (Total)
+
+
+#  Elapsed Time: 25.2 seconds (Warm-up)
+#                32.04 seconds (Sampling)
+#                57.24 seconds (Total)
+
+
+#  Elapsed Time: 24.62 seconds (Warm-up)
+#                34.13 seconds (Sampling)
+#                58.75 seconds (Total)
+
+
+#  Elapsed Time: 24.72 seconds (Warm-up)
+#                34.17 seconds (Sampling)
+#                58.89 seconds (Total)
+
+$var_approx_mean
+[1] 2.094875
+
+$mcmc_approx_mean
+[1] 2.176354
+
+$var_approx_var
+[1] 0.01132048
+
+$mcmc_approx_var
+[1] 0.01500104
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 26.79 seconds (Warm-up)
+#                35.92 seconds (Sampling)
+#                62.71 seconds (Total)
+
+
+#  Elapsed Time: 27.92 seconds (Warm-up)
+#                36 seconds (Sampling)
+#                63.92 seconds (Total)
+
+
+#  Elapsed Time: 27.97 seconds (Warm-up)
+#                36.63 seconds (Sampling)
+#                64.6 seconds (Total)
+
+
+#  Elapsed Time: 28.39 seconds (Warm-up)
+#                37.52 seconds (Sampling)
+#                65.91 seconds (Total)
+
+$var_approx_mean
+[1] 2.360335
+
+$mcmc_approx_mean
+[1] 2.32509
+
+$var_approx_var
+[1] 0.01237549
+
+$mcmc_approx_var
+[1] 0.01731189
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 21.69 seconds (Warm-up)
+#                26.41 seconds (Sampling)
+#                48.1 seconds (Total)
+
+
+#  Elapsed Time: 21.81 seconds (Warm-up)
+#                27.32 seconds (Sampling)
+#                49.13 seconds (Total)
+
+
+#  Elapsed Time: 21.96 seconds (Warm-up)
+#                27.9 seconds (Sampling)
+#                49.86 seconds (Total)
+
+
+#  Elapsed Time: 21.77 seconds (Warm-up)
+#                30.28 seconds (Sampling)
+#                52.05 seconds (Total)
+
+$var_approx_mean
+[1] 1.953383
+
+$mcmc_approx_mean
+[1] 1.920341
+
+$var_approx_var
+[1] 0.01206156
+
+$mcmc_approx_var
+[1] 0.01521636
+
+
+TRANSLATING MODEL 'multivariate_zip' FROM Stan CODE TO C++ CODE NOW.
+COMPILING THE C++ CODE FOR MODEL 'multivariate_zip' NOW.
+
+#  Elapsed Time: 37.18 seconds (Warm-up)
+#                38.95 seconds (Sampling)
+#                76.13 seconds (Total)
+
+
+#  Elapsed Time: 37.23 seconds (Warm-up)
+#                39.11 seconds (Sampling)
+#                76.34 seconds (Total)
+
+
+#  Elapsed Time: 35.51 seconds (Warm-up)
+#                43.82 seconds (Sampling)
+#                79.33 seconds (Total)
+
+
+#  Elapsed Time: 38.3 seconds (Warm-up)
+#                42.17 seconds (Sampling)
+#                80.47 seconds (Total)
+
+$var_approx_mean
+[1] 2.166463
+
+$mcmc_approx_mean
+[1] 2.17396
+
+$var_approx_var
+[1] 0.01042705
+
+$mcmc_approx_var
+[1] 0.01479555
+
+> 
+> # Graph of E_q(theta) against E(theta|y)
+> 
+> # For most important parameters: beta_1, beta_2
+> 
+> # Read files, plot graphs
+> # require(stringr)
+> # fn = function(fname)
+> # {
+> #   lines = readLines(fname)
+> #   num_str = str_match(lines, "[0-9]*\\.[0-9]*")
+> #   return(as.numeric(num_str))
+> # }
+> # 
+> # var_mean = fn("var_approx_mean.txt")
+> # var_var = fn("var_approx_var.txt")
+> # mcmc_mean = fn("mcmc_approx_mean.txt")
+> # mcmc_var = fn("mcmc_approx_var.txt")
+> # 
+> # plot(mcmc_mean)
+> # points(var_mean, col=2)
+> # 
+> # plot(mcmc_var)
+> # points(var_var, col=2)
+> 
