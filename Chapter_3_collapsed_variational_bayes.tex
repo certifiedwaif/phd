@@ -42,8 +42,42 @@ Furthermore, assume $\vy^\top \vone = \vzero, \vy^\top \vy / n  = 1, n > p, (\mX
 
 Show that $\int \exp{(-\half \vx^\top \mA \vx + \vb^\top \vx)} = |2 \pi \mSigma|^{\half} \exp{\{ -\half \vmu^\top \mSigma^{-1} \vmu \}}$ where $\vmu = \mA^{-1} \vb$ and $\mSigma = \mA^{-1}$.
 
-Complete the square!
+Idea: Complete the square of the argument, then integrate the resulting normal to 1.
 
+\begin{equation*}
+\begin{array}{ll}
+-\half \vx^\top \mA \vx + \vb^\top \vx &= -\half (\vx^\top \mA \vx - 2 \vb^\top \vx) \\
+&= -\half (\vx^\top - 2 \vb^\top \mA^{-1})^\top \mA \vx
+\end{array}
+\end{equation*}
+
+Now, to remind ourselves how to complete the square, let's look at the univariate case.
+
+\begin{equation*}
+\begin{array}{rcl}
+& ax^2 \mp bx &= 0 \\
+& a(x^2 \mp bx) &= 0 \\
+& a(x \mp \frac{b}{2a})^2 + k &= 0 \\
+& a(x^2 \pm \frac{b}{a} x + \frac{b^2}{4a^2}) + k &= 0 \\
+\therefore & k &= \pm \frac{b^2}{4a}
+\end{array}
+\end{equation*}
+
+Similiarly,
+
+\begin{equation*}
+\begin{array}{ll}
+-\half \vx^\top \mA \vx + \vb^\top \vx &= -\half(\vx^\top -2\vb^\top \mA^{-1})^\top \mA \vx \\
+&= -\half [(\vx^\top - \vb \mA^{-1})^\top \mA (\vx - \vb \mA^{-1}) + \vb^\top \mA^{-1} \mA \mA^{-1} \vb] \\
+&= -\half [(\vx - \vmu)^\top \mSigma^{-1} (\vx - \vmu) + \vmu^\top \mSigma^{-1} \vmu]
+\end{array}
+\end{equation*}
+
+So
+\begin{equation*}
+\int \exp{(-\half \vx^\top \mA \vx + \vb^\top \vx)} d\vx = |2 \pi \mSigma|^{\half} \exp{(-\half \vmu^\top \mSigma^{-1} \vmu)}
+\end{equation*}
+as required.
 \subsection{Question 2}
 
 rtp: $p(\vy | \sigma^2, g) = \exp{\{ - \frac{n}{2} \log (2 \pi \sigma^2) - \frac{p}{2} \log(1 + g) - \frac{1}{2 \sigma^2} \| \vy \|^2  + \frac{g}{2 \sigma^2 (1 + g)} \vy^\top \mX (\mX^\top \mX)^{-1} \mX^\top \vy \}}$
