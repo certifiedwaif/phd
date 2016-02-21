@@ -252,7 +252,7 @@ p(\vy, \vtheta) &= \quad p(\vy | \vbeta, \vgamma, \sigma^2) p(\vbeta | \vgamma, 
 &\quad		-\half (y - \mX \text{diag}(\vgamma) \vbeta)^\top \sigma^{-2} \mI_n (y - \mX \text{diag}(\vgamma) \vbeta)\\
 &\quad		-\half \vbeta^\top (g \sigma^2)^{-1} (\mX^\top \text{diag}(\vgamma)^{-1} \mX) \vbeta [= -\half (g \sigma^2)^{-1} (\mX \vbeta)^\top \text{diag}(\vgamma)^{-1} (X \vbeta)]\\
 &\quad - \log(\sigma^2) + \cancel{\log \bI(\sigma^2 > 0)} \\
-&\quad + b \log g + (-a - b - 2) \log(1 + g) - \log \text{Beta}(a + 1,  b + 1) + \cancel{\log \bI(g > 0)}
+&\quad + b \log g + (-a - b - 2) \log(1 + g) - \log \text{Beta}(a + 1,  b + 1) + \log \bI(g > 0)
 \end{array}
 \end{equation*}
 
