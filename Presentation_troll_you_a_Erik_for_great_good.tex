@@ -232,7 +232,7 @@ Numerical analysis
 
 \begin{frame}{The floating point numbers do not form a field!}
 In particular, floating point addition is not associative i.e. $(a + b) + c \ne a + (b + c)$. \\
-Proof: Add a large number to a small number, then add that to another small number.
+\note{Proof: Add a large number to a small number, then add that to another small number.
 Compare to adding two small numbers on the right hand side, then adding the result to the large number.
 You'll lose less precision the second time around. \\
 The functional programming community is interested in algebraic structure. Unfortunately, the floating
@@ -244,30 +244,31 @@ upset me, but the prospect of unemployment or, even worse, having to spend the r
 the sort of person who doesn't believe in real numbers upset me more. \\
 To Do: Proof of numerical analysis showing the best way to add numbers. Sort first, then add from smallest to
 largest.
+}
 \end{frame}
 
-\begin{frame}{Alternatives to floating point}
-The easy answer is more precision. Rather than single precision floating point, why not double? Or
+\begin{frame}{Alternatives to floating point: more precision or arbtitrary precision}
+\begin{itemize}
+\item The easy answer is more precision. Rather than single precision floating point, why not double? Or
 quadruple aka double double? Or double double double? Or, you get the idea \ldots
-The main alternative from a conceptual standpoint is arbitrary precision, where numbers don't have to be
+\item One alternative from a conceptual standpoint is arbitrary precision, where numbers don't have to be
 stored in a fixed amount of memory.
-Just keep computing with more digits until you reach the desired level of accuracy. You could do this with
+\item Just keep computing with more digits until you reach the desired level of accuracy. You could do this with
 streaming.
-Examples from the Haskell community: and Ed Kmett.
+\item Examples from the Haskell community: Ed Kmett's work.
+\end{itemize}
 \end{frame}
 
-\begin{frame}{Why I'm not fond of the alternatives \ldots}
-You can't boil the ocean. Floating point arithmetic is ubiquitous, like QWERTY, or imperative programming
+\begin{frame}{But \ldots}
+\begin{itemize}
+\item Floating point arithmetic is ubiquitous, like QWERTY, or imperative programming
 languages.
-The Wrath of Kahan: alternatives often end up suffering from the same shortcomings. One of the inventors of
-floating point, William Kahan aka the Father of floating point arithmetic, enjoys pointing this out. He often gets a publication out of it.
-Do you really want to re-do all of that numerical analysis again? Better the devil you know.
-A good answer today is often worth more than a great answer shortly after the universe collapses back into a 
-monobloc. Or as I like to put it, as $t \to \infty$, you are dead.
-The fast drove out the slow, even though the fast was slightly wrong.
-One clock cycle is about as long as I care to wait.
-Serious answer: Use the right representation in the right situation. But know what price you're paying, and
+\item The Wrath of Kahan: alternatives often end up suffering from the same shortcomings. One of the inventors of
+floating point, William Kahan aka the Father of floating point arithmetic, enjoys pointing this out.
+\item One clock cycle is about as long as I care to wait.
+\item Serious answer: Use the right representation in the right situation. But know what price you're paying, and
 how much precision you're really getting.
+\end{itemize}
 \end{frame}
 
 % [2:34pm] mvr_: back in the 70's Bill Gosper figured out how to do arithmetic on continued fractions
