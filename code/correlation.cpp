@@ -263,10 +263,10 @@ MatrixXd& reorder_last_row_column_to_ith(MatrixXd& m, const unsigned int i, cons
 	// because at the moment, the p_gamma-th row/column of mA_prime contains the inverse row/column for
 	// the i-th row/column of mX_gamma_prime.transpose() * mX_gamma_prime.
 	Eigen::PermutationMatrix<Eigen::Dynamic, Eigen::Dynamic> mPerm(p_gamma);
-	mPerm.setIdentity();
+	// mPerm.setIdentity();
 	// Get p_gamma index
 	int *ind = mPerm.indices().data();
-	for (int idx = 0; idx < ((int)p_gamma); idx++) {
+	for (unsigned int idx = 0; idx < p_gamma; idx++) {
 		if (idx < i) {
 			ind[idx] = idx;
 		} else if (idx == i) {
@@ -299,11 +299,11 @@ MatrixXd& reorder_ith_row_column_to_last(MatrixXd& m, const unsigned int i, cons
 	// because at the moment, the p_gamma-th row/column of mA_prime contains the inverse row/column for
 	// the i-th row/column of mX_gamma_prime.transpose() * mX_gamma_prime.
 	Eigen::PermutationMatrix<Eigen::Dynamic, Eigen::Dynamic> mPerm(p_gamma);
-	mPerm.setIdentity();
+	// mPerm.setIdentity();
 
 	// Get p_gamma index
 	int *ind = mPerm.indices().data();
-	for (int idx = 0; idx < ((int)p_gamma - 1); idx++) {
+	for (unsigned int idx = 0; idx < (p_gamma - 1); idx++) {
 		if (idx < i) {
 			ind[idx] = idx;
 		} else {
@@ -338,13 +338,14 @@ MatrixXd& reorder_ith_row_column_to_last(MatrixXd& m, const unsigned int i, cons
 //' @param[in]  mX_gamma_prime The current iteration's matrix of covariates
 //' @param[in]  mA             The previous iteration's inverse i.e. (X_gamma^T X_gamma)^{-1}
 //' @param[out] mA_prime       The current iteration's inverse i.e. (X_gamma_prime^T X_gamma_prime)^{-1}
+//'                            which we are calculating using this function.
 //' @return                    The new inverse (mX_gamma_prime^T mX_gamma_prime)^{-1}
 MatrixXd& rank_one_update(MatrixXd mX_gamma, unsigned int min_idx, unsigned int i, VectorXd vx,
 													MatrixXd mX_gamma_prime, MatrixXd mA, MatrixXd& mA_prime)
 {
-	const unsigned int p_gamma = mX_gamma.cols();
 	const unsigned int p_gamma_prime = mX_gamma_prime.cols();
 	const unsigned int n = mX_gamma_prime.rows();
+
 	#ifdef DEBUG
 	cout << "mX_gamma " << mX_gamma.topRows(min(n, 6u)) << endl;
 	cout << "p_gamma_prime " << p_gamma_prime << endl;
@@ -516,9 +517,9 @@ const bool bIntercept = false, const bool bCentre = true)
 	}
 
 	// Loop through models, updating and downdating mA as necessary
-	#pragma omp parallel for firstprivate(bmA_set, mA, gamma, mX_gamma, mX_gamma_prime, vx)\ 
-		private(numerator, R2, min_idx, diff_idx, p_gamma_prime, bUpdate)\ 
-			shared(cout, vy, mX, vR2_all)\ 
+	#pragma omp parallel for firstprivate(bmA_set, mA, gamma, mX_gamma, mX_gamma_prime, vx)\
+		private(numerator, R2, min_idx, diff_idx, p_gamma_prime, bUpdate)\
+			shared(cout, vy, mX, vR2_all)\
 			default(none)
 	for (idx = 1; idx < greycode_rows; idx++) {
 		#ifdef DEBUG
