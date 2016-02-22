@@ -38,20 +38,22 @@
 % talk will be accessible to anyone with a basic knowledge of high school mathematics and an inquiring mind.
 
 \begin{frame}{Who am I, and why am I here?}
-Who am I?
-Did computer science first, then worked as a programmer for a while.
-After I got bored, I went back to Uni to study pure mathematics and statistics. I wanted to get away from
-computers. Oops.
+\begin{itemize}
+
+\item Who am I?\\
+Did computer science first, then worked as a programmer for a while.\\
+\note{After I got bored, I went back to Uni to study pure mathematics and statistics. I wanted to get away from computers. Oops.}
 Third year PhD student in mathematical statistics with Dr John Ormerod, working in the field of variational
 approximations. My work is heavily computational.
 I could be described as one of those data scientist people.
 
-Why am I here?
-A few years ago, Erik got really into Haskell.
-Like a good friend, I trolled him about it.
+\item Why am I here?\\
+A few years ago, Erik got really into Haskell.\\
+Like a good friend, I trolled him about it.\\
 He responded very reasonably with ``Well, if you haven't seriously tried it, how can you know whether it's
-any good or not?''.
+any good or not?''.\\
 So I did. And here I am.
+\end{itemize}
 \end{frame}
 
 \begin{frame}{Maths}
@@ -91,53 +93,96 @@ We will prove every major result this evening. \\
 % I'm also going to include a proof that you need the irrational numbers to complete the reals, using the
 % square root of 2, although $\pi$ would work just as well.
 
-\begin{frame}{Constructing the natural numbers, the integers and the rationals}
-There are many possible constructions of the natural numbers. This is the standard one.\\
-We assume set theory. In particular, we assume Zermelo-Fraenkel set theory (ZFC).\\
-Let $0 = \{\}$. \\
-Define a successor function $\text{succ}{(x)} = x \cup \{ x \}$. 
-Then $1 = \{\}, 2 = \{\{\}\}$ and so on.\\
-The integers can then be defined as ordered pairs of the form $(s, x)$ where $s \in \{-, +\}$ and
-$x \in \mathbb{N}$. \\
-The rational numbers are ratios of integers $a / b$ where the $gcd(a, b) = 1$ i.e. that $a$ and $b$ are
-co-prime, or a multiple of that i.e. $(k a) / (k b)$ which is equivalent to $a / b$.
+\begin{frame}{Set theory}
+$\forall x$ means for all $x$.\\
+Let $A$ and $B$ be sets. To avoid set paradoxes, a set can contain anything except itself.\\
+In particular, sets can contain numbers, and other sets.\\
+$a \in A$ means the element $a$ is in the set A.\\
+$a \notin A$ means the element $a$ is not in the set A.\\
+$A \subset B \Leftrightarrow \forall a \in A, a \in B$\\
+$A = B \Leftrightarrow A \subset B \text{ and } B \subset A$\\
+$A \subseteq B \Leftrightarrow A \subset B \text{ or } A = B$
 \end{frame}
 
-\begin{frame}{The reals are a bit trickier \ldots}
-There exist many irrational numbers e.g. $\sqrt{2}, \pi, e$. \\
+\begin{frame}{Constructing the natural numbers, the integers and the rationals}
+There are many possible constructions of the natural numbers. This is the standard one.\\
+We assume Zermelo-Fraenkel set theory (ZFC).\\
+Let $0 = \emptyset$. \\
+Define a successor function $\text{succ}{(x)} = x \cup \{ x \}$.\\
+Then\\
+$1 = s(0) = s(\emptyset) = \emptyset \cup \{ \emptyset \} = \{\emptyset\} = \{ 0 \}$.\\
+$2 = s(1) = s(\{ 0 \}) = \{ 0 \} \cup \{ \{ 0 \} \} = \{ 0, \{ 0 \} \} = \{0, 1\}$ and so on.
+The integers can then be defined as ordered pairs of the form $(s, x)$ where $s \in \{-, +\}$ and
+$x \in \mathbb{N}$. \\
+The rational numbers are ratios of integers $a / b$ where $\text{gcd}(a, b) = 1$ i.e. that $a$ and $b$ are
+co-prime. Integer multiples i.e. $(k a) / (k b)$ are considered to be equivalent to $a / b$.
+\end{frame}
+
+
+\begin{frame}{The rational numbers are countable}
+Proof\\
+Construct a list of all the rational numbers
+\begin{equation*}
+\begin{array}{llll}
+1/1,\\
+1/2,\\
+1/3,& 2/3,\\
+1/4,& 2/4,& 3/4,\\
+\vdots & \vdots & \vdots & \ddots
+\end{array}
+\end{equation*}
+Then you can see that by going row by row, we can enumerate all of them. Thus we have a bijection between the
+natural numbers and the rationals.\\
+To do the same for the positive and negative rationals is quite straightforward, and is left as an exercise
+for the reader.
+\end{frame}
+
+\begin{frame}{But they're full of holes\ldots}
+There exist many irrational numbers e.g. $\sqrt{2} \notin \mathbb{Q}$. \\
 Proof:
 We proceed by contradiction. Assume that $\sqrt{2} \in \mathbb{Q}$. Then $p / q = \sqrt{2}$, for $p, q \in \mathbb{N}$. \\
 So $(p^2 / q^2) = 2$ and $p^2 = 2 q^2$. Thus $p^2$ must be even. An even number squared gives
 another even number, and an odd number squared gives an odd number. So $q^2$ must be even too, and
 hence $p^2$ is divisible by 4, which means that $p$ is divisible by 2. But by the definition of the 
-rational numbers, $gcd(p, q) = 1$. Contradiction. Hence $\sqrt{2}$ is irrational.\\
-Similiar proofs can be constructed for $\sqrt{n}$, $\sqrt{n} \ne \mathbb{N}$. \\
-Thus the rational numbers are full of holes. \\
-The real numbers form a complete, totally ordered field and can be formally defined as equivalence classes of
-Cauchy sequences. The rational numbers are dense in the reals.
+rational numbers, $gcd(p, q) = 1$. Contradiction. Hence $\sqrt{2}$ is irrational.$\Box$\\
+Consider the set\\
+$S = \{ x \in \mathbb{Q} | x^2 \leq 2 \} = \mathbb{Q} \cap (-\sqrt{2}, \sqrt{2})$.\\
+This set clearly includes all of the rational numbers below $\sqrt{2}$. But as we showed above, $\sqrt{2}$
+is irrational, so the upper bound $\sqrt{2}$ is not within this set.\\
+Thus the rational numbers are full of holes like this.
 \end{frame}
 
-\begin{frame}{The rational numbers are countable}
-Proof
-Construct a list of all the rational numbers
-1/1
-1/2,
-1/3, 2/3,
-1/4, 2/4, 3/4,
-\ldots
-Then you can see that by going row by row, we can enumerate all of them. Thus we have a bijection between the
-natural numbers and the rationals.
+\begin{frame}{The reals are trickier to construct}
+\begin{itemize}
+\item A real number x is called an upper bound for $S$ if $x \geq s$ for all $s \in S$. \\
+\item A real number $x$ is the least upper bound (or supremum) for $S$ if $x$ is an upper bound for $S$ and $x \leq y$ for every upper bound $y$ of $S$.\\
+\item The least-upper-bound property of the reals states that any non-empty set of real numbers that has an upper bound must have a least upper bound in real numbers.
+\end{itemize}
+The supremum of $S$ above is $\sqrt{2}$, which is in the reals by the least upper bound property.\\
+This can be shown to be equivalent to every convergent sequence of real numbers converging within the
+real numbers. Thus the real numbers form a complete, ordered field. There are no holes!
 \end{frame}
 
-\begin{frame}{But the real numbers aren't}
+\begin{frame}{But the real numbers aren't countable}
 The unit interval $[0, 1]$ is uncountable. \\
 Proof:
-We proceed by contradiction. Assume that the real numbers were countable. That means we have an enumerated list of numbers in $[0, 1]$ i.e. a bijection $f: \mathbb{N} \to [0, 1]$.
+We proceed by contradiction. Assume that the real numbers were countable.
 Enumerate the numbers $a_n$. Furthermore, denote the $m-th$ digit of the $n-th$ number $a_{n, m}.$
 All of these numbers are of the form $a_n = 0.a_{n, 1} a_{n, 2} \ldots a_{n, m} \ldots$.
 Then construct a number $d = 0.d_1 d_2 d_3 \ldots$ where $d_1 \ne a_{1, 1}$, $d_2 \ne a_{2, 2}$ and
-so on. Then this number differs at the $n$-th digit from the $n$-th number on  the list for all $n$, and so 
-cannot appear anywhere in your list!
+so on.\\
+i.e.
+\begin{equation*}
+\begin{array}{llllll}
+a_{1} &= 0.\emph{a_{11}} &a_{12} &a_{13} &a_{14} \ldots \\
+a_{2} &= 0.a_{21} &\emph{a_{22}} &a_{23} &a_{24} \ldots \\
+a_{2} &= 0.a_{21} &a_{22} &\emph{a_{23}} &a_{24} \ldots \\
+a_{2} &= 0.a_{21} &a_{22} &a_{23} &\emph{a_{24}} \ldots \\
+\vdots
+\end{array}
+\end{equation*}
+Choose $d$ with the $n-th$ digits not equal to $a_{n n}$ so that it differs from every number on your
+list by one digit. Thus $d$ cannot be in your list! Contradiction.
 \end{frame}
 
 % The reals not being computable mean that we must adopt some finite approximation of the reals, and compute
@@ -168,13 +213,15 @@ cannot appear anywhere in your list!
 % and how I came to be interested in these things.
 
 \begin{frame}{What to do?}
-We want to be able to compute with the real numbers or something like them on finite memory computers and 
+\begin{itemize}
+\item We want to be able to compute with the real numbers or something like them on finite memory computers and 
 have our calculations complete in finite time. This forces us to approximate. That is, we must introduce
 some \emph{error}. \\
-There are many ways that one might choose to do this. Typically we use a subset of
+\item There are many ways that one might choose to do this. Typically we use a subset of
 the rational numbers. \\
-The dominant choice is the floating point numbers, in particular IEEE 754. \\
-Other choices are fixed point, and arbitrary precision.
+\item The dominant choice is the floating point numbers, in particular IEEE 754. \\
+\item Other choices include fixed point, arbitrary precision and exotic choices like Unums.
+\end{itemize}
 \end{frame}
 
 \begin{frame}{Floating point}
