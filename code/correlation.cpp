@@ -1,5 +1,8 @@
 // correlation.cpp
 
+// "If you want to do numerics, you should use C++ with Eigen or Armadillo. It's pretty fast." - Hadley Wickham,
+// completely unprompted.
+
 #include <cassert>
 #include <algorithm>
 #include <stdexcept>
