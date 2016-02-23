@@ -3,6 +3,7 @@
 \usetheme{Warsaw}
 \usepackage{graphicx}
 \usepackage{ulem}
+\usepackage{tikz}
 \input{include.tex}
 \input{Definitions.tex}
 
@@ -116,13 +117,14 @@ $A \cap B = \{x | x \in A \text{ and } x \in B\}$\\
 Foundational issues are left to logicians and type theorists. Ask Liam O'Connor!
 \end{frame}
 
+\def \succ {\text{succ}}
 \begin{frame}{Constructing the natural numbers, the integers and the rationals}
 There are many possible constructions of the natural numbers. This is the standard one.\\
 Let $0 = \emptyset$. \\
-Define a successor function $\text{succ}{(x)} = x \cup \{ x \}$.\\
+Define a successor function $\succ{(x)} = x \cup \{ x \}$.\\
 Then\\
-$1 = s(0) = s(\emptyset) = \emptyset \cup \{ \emptyset \} = \{\emptyset\} = \{ 0 \}$.\\
-$2 = s(1) = s(\{ 0 \}) = \{ 0 \} \cup \{ \{ 0 \} \} = \{ 0, \{ 0 \} \} = \{0, 1\}$ and so on.
+$1 = \succ(0) = \succ(\emptyset) = \emptyset \cup \{ \emptyset \} = \{\emptyset\} = \{ 0 \}$.\\
+$2 = \succ(1) = \succ(\{ 0 \}) = \{ 0 \} \cup \{ \{ 0 \} \} = \{ 0, \{ 0 \} \} = \{0, 1\}$ and so on.
 The integers can then be defined as ordered pairs of the form $(s, x)$ where $s \in \{-, +\}$ and
 $x \in \mathbb{N}$. \\
 The rational numbers are ratios of integers $a / b$ where $\text{gcd}(a, b) = 1$ i.e. that $a$ and $b$ are
@@ -376,6 +378,14 @@ computer.
 \end{itemize}
 \end{frame}
 
+\begin{frame}{Looks like this \ldots}
+\begin{tikzpicture}
+\foreach \x in {-4, -2, -1, 0, 1, 2, 4}
+	{\node[circle, minimum size=0.1 cm, fill=red, label = below : {$\x$}] at (\x, 0) {};};
+\draw[->] (-5, 0) -- (5, 0);
+\end{tikzpicture}
+\end{frame}
+
 \begin{frame}{Alternatives to floating point: more precision or arbtitrary precision}
 \begin{itemize}
 \item The easy answer is to throw more bits at the problem for more precision. Rather than single precision floating point, why not double? Or
@@ -397,6 +407,16 @@ streaming.
 \begin{equation*}
 \text{Let }f(x) = \frac{x}{1 + |x|}.
 \end{equation*}
+\begin{tikzpicture}
+\node (0) at (0, 1) {};
+\node (1) at (0, 0) {};
+% \draw[->] (B) to [out=0, in = 270] (A);
+\path[<-, operation]
+(0) edge [bend left] node[below left] {$f$} (1);
+\path[<-] (0) edge [bend left] (1);
+\path[<-, operation]
+(0) edge [bend right] node[below left] {$f$} (1);
+\end{tikzpicture}
 Clearly $f: (-\infty, \infty) \to (-1, 1)$ and is a bijection from the real line to the open unit interval.\\
 % TODO: This would be a nice place for a TikZ diagram of the situation, don't you think?
 \item Very new, presented at Multicore World 2016. No proofs in the Powerpoint presentation!\\
