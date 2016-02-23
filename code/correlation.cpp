@@ -364,10 +364,10 @@ MatrixXd& rank_one_update(MatrixXd mX_gamma, unsigned int min_idx, unsigned int 
 	const double epsilon = 1e-4;
 	if (b > epsilon) {
 		// Do rank one update
-		VectorXd v2 = vx.transpose() * mX_gamma * mA;
-		VectorXd v3 = -mA * mX_gamma.transpose() * vx * b;
-		mA_prime << mA + b * v2.transpose() * v2, v3,
-			v3.transpose(), b;
+		MatrixXd m1 = vx.transpose() * mX_gamma * mA;
+		VectorXd v2 = -mA * mX_gamma.transpose() * vx * b;
+		mA_prime << mA + b * m1.transpose() * m1, v2,
+			v2.transpose(), b;
 
 		if ((i - min_idx) < p_gamma_prime) {
 			// Construct a permutation matrix mPerm which interchanges the p_gamma_prime-th and i-th rows/columns,
