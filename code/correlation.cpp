@@ -517,10 +517,10 @@ const bool bIntercept = false, const bool bCentre = true)
 	}
 
 	// Loop through models, updating and downdating mA as necessary
-	#pragma omp parallel for firstprivate(bmA_set, mA, gamma, mX_gamma, mX_gamma_prime, vx)\
-		private(numerator, R2, min_idx, diff_idx, p_gamma_prime, bUpdate)\
-			shared(cout, vy, mX, vR2_all)\
-			default(none)
+	//#pragma omp parallel for firstprivate(bmA_set, mA, gamma, mX_gamma, mX_gamma_prime, vx)\
+		//private(numerator, R2, min_idx, diff_idx, p_gamma_prime, bUpdate)\
+			//shared(cout, vy, mX, vR2_all)\
+			//default(none)
 	for (idx = 1; idx < greycode_rows; idx++) {
 		#ifdef DEBUG
 		cout << endl << "Iteration " << idx << endl;
