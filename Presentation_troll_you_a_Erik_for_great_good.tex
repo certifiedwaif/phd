@@ -39,30 +39,38 @@
 
 \begin{frame}{Who am I, and why am I here?}
 \begin{itemize}
-
-\item Who am I?\\
-Did computer science first, then worked as a programmer for a while.\\
+\item Who am I?
+\begin{itemize}
+\item Did computer science first, then worked as a programmer for a while. Got bored.\\
 \note{After I got bored, I went back to Uni to study pure mathematics and statistics. I wanted to get away from computers. Oops.}
-Third year PhD student in mathematical statistics with Dr John Ormerod, working in the field of variational
-approximations. My work is heavily computational.
-I could be described as one of those data scientist people.
+\item Third year PhD student in mathematical statistics at the University of Sydney with Dr John Ormerod, working 
+in the field of variational approximations to Bayesian models. I'm a computational statistician.\\
+\item I could be described as one of those data scientist people. What does that mean? You tell me and we'll
+\emph{both} know \ldots
+\end{itemize}
 
-\item Why am I here?\\
-A few years ago, Erik got really into Haskell.\\
-Like a good friend, I trolled him about it.\\
-He responded very reasonably with ``Well, if you haven't seriously tried it, how can you know whether it's
+\item Why am I here?
+\begin{itemize}
+\item A few years ago, Erik got really into Haskell.\\
+\item Like a good friend, I trolled him about it.\\
+\item He said ``Well, if you haven't seriously tried it, how can you know whether it's
 any good or not?''.\\
-So I did. And here I am.
+\item So I did. And here I am.
+\end{itemize}
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Maths}
-A lot of people here like algebra and category theory. \\
-My heart beats for mathematical analysis and statistics, which has a different mathematical flavour. \\
-Mathematics is not a spectator sport. \\
-I live by the maxim that too much maths is barely enough. \\
-Mathematics rests on proof. \\
-We will prove every major result this evening. \\
+\begin{frame}{Mathematics}
+\begin{itemize}
+\item A lot of people in the functional programming community like algebra, discrete maths, number theory and 
+category theory. You draw lots of arrows and form equations.
+\item My heart beats for mathematical analysis, statistics and numerical analysis, which have a very different mathematical flavour.
+We form inequalities, take limits and approximate when we have no other choice.
+\item Mathematicians do not restrict themselves to thinking about things which are computable! \note{That would take all the fun out of life.}
+\item Mathematics is not a spectator sport and rests on proof. We will prove every major result this evening for which proofs are available.
+\item I assume nothing beyond Year 10 mathematics, but the definitions will come
+thick and fast. I hope you've got your thinking caps on!\\
+\end{itemize}
 \end{frame}
 
 % I want to cover how numbers are constructed, starting from the natural numbers up to the integers, the
@@ -93,20 +101,23 @@ We will prove every major result this evening. \\
 % I'm also going to include a proof that you need the irrational numbers to complete the reals, using the
 % square root of 2, although $\pi$ would work just as well.
 
-\begin{frame}{Set theory}
+\begin{frame}{A whirlwind introduction to set theory}
 $\forall x$ means for all $x$.\\
-Let $A$ and $B$ be sets. To avoid set paradoxes, a set can contain anything except itself.\\
+Let $A$ and $B$ be sets.\\
+To avoid set paradoxes, a set can contain anything except itself.\\
 In particular, sets can contain numbers, and other sets.\\
 $a \in A$ means the element $a$ is in the set A.\\
 $a \notin A$ means the element $a$ is not in the set A.\\
 $A \subset B \Leftrightarrow \forall a \in A, a \in B$\\
 $A = B \Leftrightarrow A \subset B \text{ and } B \subset A$\\
-$A \subseteq B \Leftrightarrow A \subset B \text{ or } A = B$
+$A \subseteq B \Leftrightarrow A \subset B \text{ or } A = B$\\
+$A \cup B = \{x | x \in A \text{ or } x \in B\}$\\
+$A \cap B = \{x | x \in A \text{ and } x \in B\}$\\
+Foundational issues are left to logicians and type theorists. Ask Liam O'Connor!
 \end{frame}
 
 \begin{frame}{Constructing the natural numbers, the integers and the rationals}
 There are many possible constructions of the natural numbers. This is the standard one.\\
-We assume Zermelo-Fraenkel set theory (ZFC).\\
 Let $0 = \emptyset$. \\
 Define a successor function $\text{succ}{(x)} = x \cup \{ x \}$.\\
 Then\\
@@ -131,7 +142,7 @@ Construct a list of all the rational numbers
 \vdots & \vdots & \vdots & \ddots
 \end{array}
 \end{equation*}
-Then you can see that by going row by row, we can enumerate all of them. Thus we have a bijection between the
+Then you can see that by going across each row, we can enumerate all of them. Thus we have a bijection between the
 natural numbers and the rationals.\\
 To do the same for the positive and negative rationals is quite straightforward, and is left as an exercise
 for the reader.
@@ -152,10 +163,10 @@ is irrational, so the upper bound $\sqrt{2}$ is not within this set.\\
 Thus the rational numbers are full of holes like this.
 \end{frame}
 
-\begin{frame}{The reals are trickier to construct}
+\begin{frame}{The reals are trickier to construct. But they're continuous/have no holes}
 \begin{itemize}
 \item A real number x is called an upper bound for $S$ if $x \geq s$ for all $s \in S$. \\
-\item A real number $x$ is the least upper bound (or supremum) for $S$ if $x$ is an upper bound for $S$ and $x \leq y$ for every upper bound $y$ of $S$.\\
+\item A real number $x$ is the least upper bound (or \emph{supremum}) for $S$ if $x$ is an upper bound for $S$ and $x \leq y$ for every upper bound $y$ of $S$.\\
 \item The least-upper-bound property of the reals states that any non-empty set of real numbers that has an upper bound must have a least upper bound in real numbers.
 \end{itemize}
 The supremum of $S$ above is $\sqrt{2}$, which is in the reals by the least upper bound property.\\
@@ -212,7 +223,8 @@ list by one digit. Thus $d$ cannot be in your list! Contradiction.
 % I'll also throw in a couple of jokes that I hope people will like. And I'll talk about myself just a little,
 % and how I came to be interested in these things.
 
-\begin{frame}{What to do?}
+\begin{frame}{How do we compute with reals on a finite memory computer in finite time?}
+Blunt answer: You don't.
 \begin{itemize}
 \item We want to be able to compute with the real numbers or something like them on finite memory computers and 
 have our calculations complete in finite time. This forces us to approximate. That is, we must introduce
@@ -224,50 +236,184 @@ the rational numbers. \\
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Floating point}
-$\text{sign} \text{mantissa} \times \text{base}^\text{exponent}$ Inf NaN
-Ubiquitous, implemented in hardware you can actually buy off the shelf.
-Numerical analysis
+% \begin{frame}{Floating point}
+% $\text{sign} \text{mantissa} \times \text{base}^\text{exponent}$ Inf NaN
+% Ubiquitous, implemented in hardware you can actually buy off the shelf.
+% Numerical analysis
+% \end{frame}
+
+% \begin{frame}{The floating point numbers do not form a field!}
+% In particular, floating point addition is not associative i.e. $(a + b) + c \ne a + (b + c)$. \\
+% \note{Proof: Add a large number to a small number, then add that to another small number.
+% Compare to adding two small numbers on the right hand side, then adding the result to the large number.
+% You'll lose less precision the second time around. \\
+% The functional programming community is interested in algebraic structure. Unfortunately, the floating
+% point numbers do not form a monoid under addition, or any other binary arithmetic operation. \
+% This has important consequences. If you add a large number to a small number, the large number tends to win
+% and the small number loses precision in the sum. \\
+% This upsets some people. A lot of things about floating point numbers upset some people. Occasionally, they
+% upset me, but the prospect of unemployment or, even worse, having to spend the rest of my life surrounded by
+% the sort of person who doesn't believe in real numbers upset me more. \\
+% To Do: Proof of numerical analysis showing the best way to add numbers. Sort first, then add from smallest to
+% largest.
+% }
+% \end{frame}
+
+\begin{frame}{The floating point numbers}
+Let $\beta=\text{a positive integer}$, the base of our number system. Typically $\beta=2$ or $\beta=16$.
+Suppose a number $x$ has exact base representation
+\begin{equation*}
+x = (\pm 0.\alpha_1 \alpha_2 \alpha_3 \ldots \alpha_t \alpha_{t+1} \ldots) \beta^m = \pm q \beta^m,
+\end{equation*}
+where $q$ is the \emph{mantissa}, $\beta$ is the \emph{base}, $m$ is the \emph{exponent}, $1 \leq \alpha_1 \leq \beta - 1$
+and $0 \leq \alpha_i \leq \beta - 1$ for $i > 1$.
+
+On a computer, we are restricted to a finite set of \emph{floating point numbers}
+$F = F(\beta, t, L, U)$ of the form $x^* = (\pm0.a_1 a_2 \ldots a_t) \beta^m$, where $1 \leq a_1 \beta-1$,
+$0 \leq a_i \leq \beta - 1$ for $2 \leq i \leq t$, $L \leq m \leq U$ and $t$ is the number of digits.
 \end{frame}
 
-\begin{frame}{The floating point numbers do not form a field!}
-In particular, floating point addition is not associative i.e. $(a + b) + c \ne a + (b + c)$. \\
-\note{Proof: Add a large number to a small number, then add that to another small number.
-Compare to adding two small numbers on the right hand side, then adding the result to the large number.
-You'll lose less precision the second time around. \\
-The functional programming community is interested in algebraic structure. Unfortunately, the floating
-point numbers do not form a monoid under addition, or any other binary arithmetic operation. \
-This has important consequences. If you add a large number to a small number, the large number tends to win
-and the small number loses precision in the sum. \\
-This upsets some people. A lot of things about floating point numbers upset some people. Occasionally, they
-upset me, but the prospect of unemployment or, even worse, having to spend the rest of my life surrounded by
-the sort of person who doesn't believe in real numbers upset me more. \\
-To Do: Proof of numerical analysis showing the best way to add numbers. Sort first, then add from smallest to
-largest.
-}
+\def\fl{\text{fl}}
+
+\begin{frame}
+We define a function $\fl: \mathbb{R} \to F$. We have two choices for how to do this:
+\begin{itemize}
+\item[Chop] If $|x| = 0.a_1 a_2 a_3 \ldots a_t a_{t+1} \ldots \times \beta^m$ then simply drop all digits
+after the $t$-th digits
+\begin{equation*}
+\fl(x) = \text{sign}(x) (0.a_1 a_2 \ldots a_t) \beta^m
+\end{equation*}
+\item[Round] $\fl(x)$ is the element of $F$ closest to $x$. If $x$ is equidistant to two elements
+of $F$, take element of $F$ which is larger in magnitude. Thus, for rounding, if $|x|$ has base $\beta$
+expansion then let
+\begin{equation*}
+|x| + \half \beta^{-t} \beta^m = (0.a_1^* a_2^* \ldots a_t^* a_{t+1}^*\ldots) \beta^m.
+\end{equation*}
+Then $\fl(x) = \text{sign}(x) (0.a_1^* a_2^* \ldots a_t^*) \beta^m$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Error bounds on floating point numbers}
+Theorem: $|x - \fl(x)| \leq \half |x| \beta^{1-t} p$
+where $p=1$ for rounding and $p=2$ for chopping.
+
+Proof: Since $x = (\pm 0.\alpha_1 \alpha_2 \ldots \alpha_t \ldots) \beta^m$, we have
+$\beta^{m-1} \leq |x| \leq \beta^m$. In the interval $[\beta^{m-1}, \beta^m]$, the floating point numbers
+are evenly spaced with spacing $\beta^{m - t}$. Thus, for chopping,
+\begin{equation*}
+|x - \fl(x)| \leq \beta^{m - t} = \frac{p}{2} \beta^{m-t}, \text{ (with $p = 2$)}
+\end{equation*}
+and for rounding
+\begin{equation*}
+|x - \fl(x)| \leq \beta^{m - t} = \frac{p}{2} \beta^{m-t}, \text{ (with $p = 1$)}.
+\end{equation*}
+Hence
+\begin{equation*}
+|x - \fl(x) \leq \frac{p}{2} \beta^{m - t} \leq \frac{p}{2} \beta^{1-t} \beta^{m-1} \leq \half |x| \beta^{1-t} p.
+\end{equation*}
+\end{frame}
+
+\begin{frame}{Error bounds on floating point arithmetic}
+Remark: $\delta = \frac{p}{2} \beta^{1-t}$ is called the \emph{unit roundoff error}.\\
+Let $\epsilon = \frac{\fl(x) - x}{x}$. Then $\fl(x) = (1 + \epsilon) x$, where $|\epsilon| \leq \delta$.\\
+Theorem: Let $\odot$ denote the operation $+, -, \times \text{ or } \div$, and let $x$ and $y$ be
+floating point numbers. Then
+\begin{equation*}
+\fl(x \odot y) = (x \odot y)(1 + \epsilon), \text{ where } |\epsilon| \leq \delta = \frac{p}{2} \beta^{1-t}.
+\end{equation*}
+Proof: By the previous theorem,
+\begin{equation*}
+|x \odot y - \fl(x \odot y)| \leq |x \odot y| \frac{p}{2} \beta^{1-t}.
+\end{equation*}
+Thus, $-|x \odot y| \frac{p}{2} \beta^{1 - t} \leq x \odot y + \fl(x \odot y) \leq \frac{p}{2} \beta^{1 - t} |x \odot y|$.
+Hence
+\begin{equation*}
+(x \odot y)(1 - \frac{|x \odot y|}{x \odot y} \beta^{1-t}) \leq \fl(x \odot y) \leq (x \odot y)(1 + \frac{|x \odot y|}{x \odot y} \beta^{1-t}).
+\end{equation*}
+It follows that $\fl(x \odot y) = (1 + \epsilon) (x \odot y)$ where
+$|\epsilon| \leq \frac{p}{2} \beta^{1-t} = \delta$.
+\end{frame}
+
+\begin{frame}{Floating point addition for two or three summands}
+\begin{equation*}
+\begin{array}{rl}
+\fl(x_1 + x_2) &= \fl(\fl(x_1) + \fl(x_2)) = \fl[x_1(1 + \hat{\epsilon_1)}) + x_2(1 + \hat{\epsilon_2})] \\
+&= [x_1 (1 + \hat{\epsilon_1}) + x_2 (1 + \hat{\epsilon_1})] (1 + \epsilon),
+\end{array}
+\end{equation*}
+where
+$|\hat{\epsilon_1}| \leq \delta$, $|\hat{\epsilon_2}| \leq \delta$ and $|\epsilon_1| \leq \delta$. Similiarly,
+\begin{equation*}
+\begin{array}{rl}
+\fl(x_1 + x_2 + x_3) &= ((x_1 (1 + \hat{\epsilon_1}) + x_2 (1 + \hat{\epsilon_2}))(1 + \epsilon_1) + \\
+& \quad x_3 (1 + \hat{\epsilon_3})(1 + \epsilon_2) \\
+& = (\quad x_1 (1 + \hat{\epsilon_1}) (1 + \epsilon_1) (1 + \epsilon_2) \\
+	&\qquad + x_2 (1 + \hat{\epsilon_2}) (1 + \epsilon_1) (1 + \epsilon_2)) \\
+	&\quad + x_3 (1 + \hat{\epsilon_3}) (1 + \epsilon_2)
+\end{array}
+\end{equation*}
+\end{frame}
+
+\begin{frame}{Generalising to n terms}
+Continuing this procedure,
+\begin{equation*}
+\begin{array}{rl}
+\fl(\sum_{i=1}^n x_i) &= \quad x_1 (1 + \hat{\epsilon_1}) \prod_{i=1}^{n-1} (1 + \epsilon_i) \\
+&\quad + x_2 (1 + \hat{\epsilon_2}) \prod_{i=1}^{n-1} (1 + \epsilon_i) \\
+&\quad + x_3 (1 + \hat{\epsilon_3}) \prod_{i=2}^{n-1} (1 + \epsilon_i) \\
+&\quad + x_4 (1 + \hat{\epsilon_4}) \prod_{i=3}^{n-1} (1 + \epsilon_i) \\
+&\quad + \ldots + x_n (1 + \hat{\epsilon_n}) (1 + \epsilon_{n-1}) \\
+&= \sum_{i=1}^n [x_i (1 + \hat{\epsilon_i}) \prod_{j=1}^{n-1} (1 + \epsilon_j)].
+\end{array}
+\end{equation*}
+Conclusion: 
+\begin{itemize}
+\item Floating point addition \emph{does not commute}. Neither does any other floating point
+operation.
+\item Hence the floating point numbers do not form a monoid under addition.\\
+\item To reduce rounding error, a sequence should be summed from small numbers to large numbers on a
+computer.
+\end{itemize}
 \end{frame}
 
 \begin{frame}{Alternatives to floating point: more precision or arbtitrary precision}
 \begin{itemize}
-\item The easy answer is more precision. Rather than single precision floating point, why not double? Or
-quadruple aka double double? Or double double double? Or, you get the idea \ldots
+\item The easy answer is to throw more bits at the problem for more precision. Rather than single precision floating point, why not double? Or
+quadruple aka double double? Or double double double? Or, well, you get the idea \ldots
 \item One alternative from a conceptual standpoint is arbitrary precision, where numbers don't have to be
 stored in a fixed amount of memory.
 \item Just keep computing with more digits until you reach the desired level of accuracy. You could do this with
 streaming.
-\item Examples from the Haskell community: Ed Kmett's work.
+\item Examples from the Haskell community: Ed Kmett's work, \texttt{mvr}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{More exotic alternatives: UNums 2.0}
+\begin{itemize}
+\item Professor Gustaffson, ex-Intel\\
+\item Author of ``The End of Error: Unum Computing'', already superceded.\\
+\item Abandons previous ideas of floating point representation completely.
+\item Key idea:
+\begin{equation*}
+\text{Let }f(x) = \frac{x}{1 + |x|}.
+\end{equation*}
+Clearly $f: (-\infty, \infty) \to (-1, 1)$ and is a bijection from the real line to the open unit interval.\\
+% TODO: This would be a nice place for a TikZ diagram of the situation, don't you think?
+\item Very new, presented at Multicore World 2016. No proofs in the Powerpoint presentation!\\
+\item Lose precision gradually and gracefully, rather than in sudden bursts like floating point.\\
+\item A little bird tells me that Intel finds this interesting, and ``may look at implementing this in
+six year's time.''. They refused to be quoted!
 \end{itemize}
 \end{frame}
 
 \begin{frame}{But \ldots}
 \begin{itemize}
 \item Floating point arithmetic is ubiquitous, like QWERTY, or imperative programming
-languages.
+or \ldots.
 \item The Wrath of Kahan: alternatives often end up suffering from the same shortcomings. One of the inventors of
 floating point, William Kahan aka the Father of floating point arithmetic, enjoys pointing this out.
 \item One clock cycle is about as long as I care to wait.
-\item Serious answer: Use the right representation in the right situation. But know what price you're paying, and
-how much precision you're really getting.
+\item Serious answer: Use the right representation in the right situation. But know what price you're paying 				in terms of both memory and time, and how much precision you're really getting.
 \end{itemize}
 \end{frame}
 
