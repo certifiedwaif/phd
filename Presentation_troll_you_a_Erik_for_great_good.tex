@@ -4,6 +4,7 @@
 \usepackage{graphicx}
 \usepackage{ulem}
 \usepackage{tikz}
+\usepackage{cancel}
 \input{include.tex}
 \input{Definitions.tex}
 
@@ -127,26 +128,32 @@ $1 = \succ(0) = \succ(\emptyset) = \emptyset \cup \{ \emptyset \} = \{\emptyset\
 $2 = \succ(1) = \succ(\{ 0 \}) = \{ 0 \} \cup \{ \{ 0 \} \} = \{ 0, \{ 0 \} \} = \{0, 1\}$ and so on.
 The integers can then be defined as ordered pairs of the form $(s, x)$ where $s \in \{-, +\}$ and
 $x \in \mathbb{N}$. \\
-The rational numbers are ratios of integers $a / b$ where $\text{gcd}(a, b) = 1$ i.e. that $a$ and $b$ are
-co-prime. Integer multiples i.e. $(k a) / (k b)$ are considered to be equivalent to $a / b$.
+The rational numbers are ratios of integers $a / b$ where $b \ne 0$.
+$(k c) / (k d)$ are considered to be equivalent to $c / d$ where $\text{gcd}(c, d) = 1$ i.e. that $c$ and $d$
+are co-prime.
 \end{frame}
 
 
 \begin{frame}{The rational numbers are countable}
 Proof\\
-Construct a list of all the rational numbers
-\begin{equation*}
-\begin{array}{llll}
-1/1,\\
-1/2,\\
-1/3,& 2/3,\\
-1/4,& 2/4,& 3/4,\\
-\vdots & \vdots & \vdots & \ddots
-\end{array}
-\end{equation*}
-Then you can see that by going across each row, we can enumerate all of them. Thus we have a bijection between the
+Construct a list of all the positive rational numbers\\
+\begin{tabular}{rc|ccccccccccc}
+&a& 0&& 1&& 2&& 3&&\cdots\\
+b&&\\
+\hline
+&& \\
+1 && 0/1 & \rightarrow & 1/1 && 2/1 & \rightarrow & 3/1 && \cdots \\
+&& &\swarrow&&\nearrow&&\swarrow&&&&\\
+2 && \cancel{0/2} & & 1/2 && \cancel{2/2} && 3/2 && \cdots\\
+&&\downarrow & \nearrow &&\swarrow&&&&&&\\
+3 && \cancel{0/3} &&1/3 &&2/3 && \cancel{3/3} && \cdots \\
+\vdots && \vdots && \vdots && \vdots && \vdots && \ddots\\
+\end{tabular}
+
+See that by following the arrows and cancelling duplicates, we can enumerate all of them.
+Thus we have a bijection between the
 natural numbers and the rationals.\\
-To do the same for the positive and negative rationals is quite straightforward, and is left as an exercise
+To do the same for the positive and negative rationals is straightforward, and is left as an exercise
 for the reader.
 \end{frame}
 
@@ -158,32 +165,32 @@ So $(p^2 / q^2) = 2$ and $p^2 = 2 q^2$. Thus $p^2$ must be even. An even number 
 another even number, and an odd number squared gives an odd number. So $q^2$ must be even too, and
 hence $p^2$ is divisible by 4, which means that $p$ is divisible by 2. But by the definition of the 
 rational numbers, $gcd(p, q) = 1$. Contradiction. Hence $\sqrt{2}$ is irrational.$\Box$\\
+
 Consider the set\\
-$S = \{ x \in \mathbb{Q} | x^2 \leq 2 \} = \mathbb{Q} \cap (-\sqrt{2}, \sqrt{2})$.\\
+$A = \{ x \in \mathbb{Q} | x^2 \leq 2 \} = \mathbb{Q} \cap (-\sqrt{2}, \sqrt{2})$.\\
 This set clearly includes all of the rational numbers below $\sqrt{2}$. But as we showed above, $\sqrt{2}$
 is irrational, so the upper bound $\sqrt{2}$ is not within this set.\\
 Thus the rational numbers are full of holes like this.
 \end{frame}
 
-\begin{frame}{The reals are trickier to construct. But they're continuous/have no holes}
+\begin{frame}{The reals are trickier to construct; they're continuous/have no holes}
+Let $S$ be a set of real numbers.
 \begin{itemize}
 \item A real number x is called an upper bound for $S$ if $x \geq s$ for all $s \in S$. \\
 \item A real number $x$ is the least upper bound (or \emph{supremum}) for $S$ if $x$ is an upper bound for $S$ and $x \leq y$ for every upper bound $y$ of $S$.\\
 \item The least-upper-bound property of the reals states that any non-empty set of real numbers that has an upper bound must have a least upper bound in real numbers.
 \end{itemize}
-The supremum of $S$ above is $\sqrt{2}$, which is in the reals by the least upper bound property.\\
-This can be shown to be equivalent to every convergent sequence of real numbers converging within the
-real numbers. Thus the real numbers form a complete, ordered field. There are no holes!
+The supremum of $A$ above is $\sqrt{2}$, which is in the reals by the least upper bound property.\\
+Thus the real numbers form a complete, ordered field. There are no holes!
 \end{frame}
 
 \begin{frame}{But the real numbers aren't countable}
 The unit interval $[0, 1]$ is uncountable. \\
 Proof:
 We proceed by contradiction. Assume that the real numbers were countable.
-Enumerate the numbers $a_n$. Furthermore, denote the $m-th$ digit of the $n-th$ number $a_{n, m}.$
-All of these numbers are of the form $a_n = 0.a_{n, 1} a_{n, 2} \ldots a_{n, m} \ldots$.
-Then construct a number $d = 0.d_1 d_2 d_3 \ldots$ where $d_1 \ne a_{1, 1}$, $d_2 \ne a_{2, 2}$ and
-so on.\\
+Enumerate the numbers $a_n$. Furthermore, denote the $m$-th digit of the $n$-th number $a_{nm}.$
+All of these numbers are of the form $a_n = 0.a_{n1} a_{n2} \ldots a_{nm} \ldots$.
+\\
 i.e.
 \begin{equation*}
 \begin{array}{llllll}
@@ -194,8 +201,9 @@ a_{2} &= 0.a_{21} &a_{22} &a_{23} &\emph{a_{24}} \ldots \\
 \vdots
 \end{array}
 \end{equation*}
-Choose $d$ with the $n-th$ digits not equal to $a_{n n}$ so that it differs from every number on your
-list by one digit. Thus $d$ cannot be in your list! Contradiction.
+Then construct a number $d = 0.d_1 d_2 d_3 \ldots$ where $d_1 \ne a_{11}$, $d_2 \ne a_{22}$ and
+so on. By construction, $d$ differs from the $n$-th number at the $n$-th digits. Thus $d$ cannot be in your
+list! Contradiction.
 \end{frame}
 
 % The reals not being computable mean that we must adopt some finite approximation of the reals, and compute
@@ -407,16 +415,16 @@ streaming.
 \begin{equation*}
 \text{Let }f(x) = \frac{x}{1 + |x|}.
 \end{equation*}
-\begin{tikzpicture}
-\node (0) at (0, 1) {};
-\node (1) at (0, 0) {};
-% \draw[->] (B) to [out=0, in = 270] (A);
-\path[<-, operation]
-(0) edge [bend left] node[below left] {$f$} (1);
-\path[<-] (0) edge [bend left] (1);
-\path[<-, operation]
-(0) edge [bend right] node[below left] {$f$} (1);
-\end{tikzpicture}
+% \begin{tikzpicture}
+% \node (0) at (0, 1) {};
+% \node (1) at (0, 0) {};
+% % \draw[->] (B) to [out=0, in = 270] (A);
+% \path[<-, operation]
+% (0) edge [bend left] node[below left] {$f$} (1);
+% \path[<-] (0) edge [bend left] (1);
+% \path[<-, operation]
+% (0) edge [bend right] node[below left] {$f$} (1);
+% \end{tikzpicture}
 Clearly $f: (-\infty, \infty) \to (-1, 1)$ and is a bijection from the real line to the open unit interval.\\
 % TODO: This would be a nice place for a TikZ diagram of the situation, don't you think?
 \item Very new, presented at Multicore World 2016. No proofs in the Powerpoint presentation!\\
