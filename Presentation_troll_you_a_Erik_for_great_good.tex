@@ -12,6 +12,18 @@
 \title{Troll you a Erik for great good OR How I learned to stop worrying and love floating point numbers}
 \author{Mark Greenaway \\ PhD candidate \\ markg@maths.usyd.edu.au}
 
+% \usetikzlibrary{arrows.meta}
+% \directlua{
+% function f(x) 
+%   return x / (1 + abs(x))
+% end
+% }
+% \pgfmathdeclarefunction{Unum_function}{1}{%
+%   \edef\pgfmathresult{%
+%      \directlua{tex.print("" .. f(#1))}%
+%    }%  
+% }
+
 \mode<presentation>
 { \usetheme{boxes} }
 
@@ -42,20 +54,21 @@
 \begin{itemize}
 \item Who am I?
 \begin{itemize}
-\item Did computer science first, then worked as a programmer for a while. Got bored.\\
-\note{After I got bored, I went back to Uni to study pure mathematics and statistics. I wanted to get away from computers. Oops.}
-\item Third year PhD student in mathematical statistics at the University of Sydney with Dr John Ormerod, working 
-in the field of variational approximations to Bayesian models. I'm a computational statistician.\\
+\item Did computer science first, then worked as a programmer for a while. Got bored.
+\note{After I got bored, I went back to Uni to study pure mathematics and statistics. I wanted to get always
+			from computers. As you're about to discover, that worked out great.}
+\item Third year PhD student in mathematical statistics at the University of Sydney with Dr John Ormerod, 
+			working in the field of variational approximations to Bayesian models. I'm a computational statistician.
 \item I could be described as one of those data scientist people. What does that mean? You tell me and we'll
-\emph{both} know \ldots
+			\emph{both} know \ldots
 \end{itemize}
 
 \item Why am I here?
 \begin{itemize}
-\item A few years ago, Erik got really into Haskell.\\
+\item In 2008, Erik got really into Haskell.\\
 \item Like a good friend, I trolled him about it.\\
 \item He said ``Well, if you haven't seriously tried it, how can you know whether it's
-any good or not?''.\\
+			any good or not?''.\\
 \item So I did. And here I am.
 \end{itemize}
 \end{itemize}
@@ -64,13 +77,17 @@ any good or not?''.\\
 \begin{frame}{Mathematics}
 \begin{itemize}
 \item A lot of people in the functional programming community like algebra, discrete maths, number theory and 
-category theory. You draw lots of arrows and form equations.
-\item My heart beats for mathematical analysis, statistics and numerical analysis, which have a very different mathematical flavour.
-We form inequalities, take limits and approximate when we have no other choice.
-\item Mathematicians do not restrict themselves to thinking about things which are computable! \note{That would take all the fun out of life.}
-\item Mathematics is not a spectator sport and rests on proof. We will prove every major result this evening for which proofs are available.
-\item I assume nothing beyond Year 10 mathematics, but the definitions will come
-thick and fast. I hope you've got your thinking caps on!\\
+			category theory. You draw lots of arrows and form equations.
+\item My heart beats for mathematical analysis, statistics and numerical analysis, which have a very 
+			different mathematical flavour. We form inequalities, take limits and approximate when we have no other choice.
+\item Mathematicians do not restrict themselves to thinking about things which are computable!
+			\note{That would take all the fun out of life.}
+\item Mathematics is not a spectator sport and rests on proof. We will prove every major result this evening 
+			for which proofs are available.
+\item If you like proofs, I hope you'll follow along. If not, and you're happy enough that there
+			\emph{are} rigorous proofs, you can just accept the results.
+\item I've attempted to make this talk accessible, and assume nothing beyond Year 10 mathematics, but the
+			definitions will come thick and fast.
 \end{itemize}
 \end{frame}
 
@@ -104,9 +121,11 @@ thick and fast. I hope you've got your thinking caps on!\\
 
 \begin{frame}{A whirlwind introduction to set theory}
 $\forall x$ means for all $x$.\\
-Let $A$ and $B$ be sets.\\
 To avoid set paradoxes, a set can contain anything except itself.\\
-In particular, sets can contain numbers, and other sets.\\
+In particular, sets can contain numbers, and other sets. Infinite sets are fine, whether countably
+or uncountably infinite.\\
+Let $\emptyset$ denote the empty set.
+Let $A$ and $B$ be sets.\\
 $a \in A$ means the element $a$ is in the set A.\\
 $a \notin A$ means the element $a$ is not in the set A.\\
 $A \subset B \Leftrightarrow \forall a \in A, a \in B$\\
@@ -114,7 +133,7 @@ $A = B \Leftrightarrow A \subset B \text{ and } B \subset A$\\
 $A \subseteq B \Leftrightarrow A \subset B \text{ or } A = B$\\
 $A \cup B = \{x | x \in A \text{ or } x \in B\}$\\
 $A \cap B = \{x | x \in A \text{ and } x \in B\}$\\
-Foundational issues are left to logicians and type theorists. Ask Liam O'Connor!
+Foundational issues are left to logicians and type theorists. Ask Liam O'Connor! We assume ZFC and move on.
 \end{frame}
 
 \def \succ {\text{succ}}
@@ -388,52 +407,75 @@ computer.
 
 \begin{frame}{Alternatives to floating point: more precision or arbtitrary precision}
 \begin{itemize}
-\item The easy answer is to throw more bits at the problem for more precision. Rather than single precision floating point, why not double? Or
-quadruple aka double double? Or double double double? Or, well, you get the idea \ldots
-\item One alternative from a conceptual standpoint is arbitrary precision, where numbers don't have to be
-stored in a fixed amount of memory.
-\item Just keep computing with more digits until you reach the desired level of accuracy. You could do this with
-streaming.
+\item The easy answer is to throw more bits at the problem for more precision. Rather than single precision 				floating point, why not double? Or quadruple aka double double? Or double double double? Or, well, you 				get the idea \ldots
+\item Another alternative from a conceptual standpoint is arbitrary precision, where numbers don't have to be
+			stored in a fixed amount of memory.
+\item Just keep computing with more digits until you reach the desired level of accuracy.
+			\note{You could do this with streaming.}
 \item Examples from the Haskell community: Ed Kmett's work, \texttt{mvr}
+\item Questions: If we can vary the number of digits we use, how many digits should we use? How many are 
+			enough? When should our computations stop?
+\note{From a numerical point of view, these are hard questions.}
 \end{itemize}
 \end{frame}
 
 \begin{frame}{More exotic alternatives: UNums 2.0}
 \begin{itemize}
-\item Professor Gustaffson, ex-Intel\\
-\item Author of ``The End of Error: Unum Computing'', already superceded.\\
+\item Professor Gustaffson, ex-Intel, author of ``The End of Error: Unum Computing'', already superceded.
 \item Abandons previous ideas of floating point representation completely.
 \item Key idea:
 \begin{equation*}
 \text{Let }f(x) = \frac{x}{1 + |x|}.
 \end{equation*}
-\begin{tikzpicture}
-\node (0) at (0, 1) {};
-\node (1) at (0, 0) {};
-% \draw[->] (B) to [out=0, in = 270] (A);
-\path[<-, operation]
-(0) edge [bend left] node[below left] {$f$} (1);
-\path[<-] (0) edge [bend left] (1);
-\path[<-, operation]
-(0) edge [bend right] node[below left] {$f$} (1);
-\end{tikzpicture}
-Clearly $f: (-\infty, \infty) \to (-1, 1)$ and is a bijection from the real line to the open unit interval.\\
+% \begin{tikzpicture}[
+%     x                = 2cm/10,
+%     scale            = 3,
+%     axis/.style      = {help lines, -{Stealth[length = 1.5ex]}},
+%     brillouin/.style = {domain = -5:10, samples = 100}
+%   ]
+%   \draw [axis] (-5,0) -- (10,0);
+%   \draw [axis] (0,-1) -- (0,1.5);
+%   \draw [densely dotted] (0,{ Unum_fun(100)} ) -- ++(10,0);
+%   \draw [red]   plot [Unum] (\x, { Brillouin(\x)});
+%   \draw [green] plot [brillouin] (\x, { Brillouin(5,  \x)});
+%   \draw [blue]  plot [brillouin] (\x, { Brillouin(50, \x)});
+%   \node [align = center, anchor = west] at (1,1.3) {%
+%     $\begin{alignedat}{2}
+%       B_J(x) &= \tfrac{2J + 1}{2J}
+%                 &&\coth \left ( \tfrac{2J + 1}{2J} x \right ) \\
+%              &\quad - \tfrac{1}{2J}
+%                 &&\coth \left ( \tfrac{1}{2J} x \right )
+%      \end{alignedat}$};
+% \end{tikzpicture}
+% TODO: Prepare this picture.
+% \begin{tikzpicture}
+% \node (0) at (0, 1) {};
+% \node (1) at (0, 0) {};
+% % \draw[->] (B) to [out=0, in = 270] (A);
+% \path[<-, operation]
+% (0) edge [bend left] node[below left] {$f$} (1);
+% \path[<-] (0) edge [bend left] (1);
+% \path[<-, operation]
+% (0) edge [bend right] node[below left] {$f$} (1);
+% \end{tikzpicture}
+\item Clearly $f: (-\infty, \infty) \to (-1, 1)$ and is a bijection from the real line to the open interval
+between $-1$ and $1$.
 % TODO: This would be a nice place for a TikZ diagram of the situation, don't you think?
-\item Very new, presented at Multicore World 2016. No proofs in the Powerpoint presentation!\\
-\item Lose precision gradually and gracefully, rather than in sudden bursts like floating point.\\
+\item Very new, presented at Multicore World 2016. No proofs yet?
+\item Lose precision gradually and gracefully, rather than suddenly like floating point.
 \item A little bird tells me that Intel finds this interesting, and ``may look at implementing this in
-six year's time.''. They refused to be quoted!
+			six year's time.''. They refused to be quoted!
 \end{itemize}
 \end{frame}
 
 \begin{frame}{But \ldots}
 \begin{itemize}
-\item Floating point arithmetic is ubiquitous, like QWERTY, or imperative programming
-or \ldots.
-\item The Wrath of Kahan: alternatives often end up suffering from the same shortcomings. One of the inventors of
-floating point, William Kahan aka the Father of floating point arithmetic, enjoys pointing this out.
-\item One clock cycle is about as long as I care to wait.
-\item Serious answer: Use the right representation in the right situation. But know what price you're paying 				in terms of both memory and time, and how much precision you're really getting.
+\item Floating point arithmetic is ubiquitous, like QWERTY, or imperative programming or (insert thing
+			you don't like here).
+\item Beware the Wrath of Kahan: alternatives often end up suffering from the same shortcomings. 
+			William Kahan aka the Father of floating point arithmetic, enjoys pointing this out.
+\item One clock cycle is about as long as I care to wait in numerics.
+\item Serious answer: Use the right representation in the right situation. But know what price you're paying 				in terms of both memory and computer time, and how much precision you're really getting.
 \end{itemize}
 \end{frame}
 
