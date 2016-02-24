@@ -176,15 +176,28 @@ To do the same for the positive and negative rationals is straightforward, and i
 for the reader.
 \end{frame}
 
-\begin{frame}{But they're full of holes\ldots}
-There exist many irrational numbers e.g. $\sqrt{2} \notin \mathbb{Q}$. \\
+\begin{frame}{But not all numbers are rational}
+Example: $\sqrt{2} \notin \mathbb{Q}$. \\
 Proof:
-We proceed by contradiction. Assume that $\sqrt{2} \in \mathbb{Q}$. Then $p / q = \sqrt{2}$, for $p, q \in \mathbb{N}$. \\
-So $(p^2 / q^2) = 2$ and $p^2 = 2 q^2$. Thus $p^2$ must be even. An even number squared gives
-another even number, and an odd number squared gives an odd number. So $q^2$ must be even too, and
-hence $p^2$ is divisible by 4, which means that $p$ is divisible by 2. But by the definition of the 
-rational numbers, $gcd(p, q) = 1$. Contradiction. Hence $\sqrt{2}$ is irrational.$\Box$\\
+We proceed by contradiction.\\
+Assume $\sqrt{2} \in \mathbb{Q}$.\\
+Then let $\frac{p}{q} = \sqrt{2}$, with $p$, $q$ co-prime integers.\\
+Then $\frac{p^2}{q^2} = 2 \Leftrightarrow p^2 = 2 q^2$.\\
+Thus $p^2$ is even. Hence $p$ is even, as the product of even numbers is again even. So let $p = 2k$.
+\begin{equation*}
+\begin{array}{rl}
+$4 k^2 &= 2 q^2\\
+\cancel{2}.2 k^2 &= \cancel{2} q^2\\
+2 k^2 &= q^2$
+\end{array}
+\end{equation*}
+$4 k^2 = 2 q^2 \Leftrightarrow \cancel{2}.2 k^2 = \cancel{2} q^2 \Leftrightarrow 2 k^2 = q^2$ and hence
+q is even by the same reasoning that $p$ is.\\
+But by assumption, $gcd(p, q) = 1$!\\
+Contradiction. Hence $\sqrt{2}$ is irrational.$\Box$\\
+\end{frame}
 
+\begin{frame}{Conclusion: The rational numbers are full of holes \ldots}
 Consider the set\\
 $A = \{ x \in \mathbb{Q} | x^2 \leq 2 \} = \mathbb{Q} \cap (-\sqrt{2}, \sqrt{2})$.\\
 This set clearly includes all of the rational numbers below $\sqrt{2}$. But as we showed above, $\sqrt{2}$
@@ -430,9 +443,7 @@ computer.
 
 \begin{frame}{More exotic alternatives: UNums 2.0}
 \begin{itemize}
-\item Professor Gustaffson, ex-Intel, author of ``The End of Error: Unum Computing'', already superceded.
-\item Abandons previous ideas of floating point representation completely.
-\item Key idea:
+\item Abandons previous ideas of floating point representation completely. Key idea:
 \begin{equation*}
 \text{Let }f(x) = \frac{x}{1 + |x|}.
 \end{equation*}
@@ -459,7 +470,26 @@ computer.
 % TODO: Prepare this picture.
 \item Clearly $f: (-\infty, \infty) \to (-1, 1)$ and is a bijection from the real line to the open interval
 between $-1$ and $1$.
+\item Then apply the map $x \mapsto e^{i \pi x} + i$.
+
+\begin{minipage}{\textwidth}\centering
+\begin{tikzpicture}
+\draw[thick] (0cm,0cm) circle(1cm);
+\draw[fill=black] (0cm, -1cm) node[below] {$\underset{00}{0}$} circle(2pt);
+\draw[fill=black] (1cm, 0cm) node[right] {$01$} circle(2pt);
+\draw[fill=black] (-1cm, 0cm) node[left] {$10$} circle(2pt);
+\draw[fill=white] (0cm, 1cm) node[above] {$\overset{11}{\pm \infty}$} circle(2pt);
+\end{tikzpicture}
+\end{minipage}
+
 % TODO: This would be a nice place for a TikZ diagram of the situation, don't you think?
+\item Real part is x, imaginary part is y.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Fingers crossed we might see this in hardware one day!}
+\begin{itemize}
+\item Professor Gustaffson, ex-Intel, author of ``The End of Error: Unum Computing'', already superceded.
 \item Very new, presented at Multicore World 2016. No proofs yet?
 \item Lose precision gradually and gracefully, rather than suddenly like floating point.
 \item A little bird tells me that Intel finds this interesting, and ``may look at implementing this in
@@ -569,4 +599,18 @@ between $-1$ and $1$.
 % [3:02pm] edwardk: and it can back up the precision of the answer rigorously
 % [3:03pm] edwardk: my trick is mostly about trying to avoid having the performance of that degrade so much as the computation gets bigger
 % [3:05pm] StyxAlso: Right. Performance is key. The fast tends to drive out the slow, even if the fast is slightly wrong.
+
+\begin{frame}{Acknowledgements/Questions}
+\begin{itemize}
+\item My PhD supervisor Dr John Ormerod, for setting me a problem with made me become obsessed with these
+			issues.
+\item My Honours supervisor Dr Daniel Daners for inspiring my love of mathematical analysis.
+\item Charles Gray for TikZ help and presentation advice.
+\item Dr Danya Rose for suggestions on how the proofs could be made more clear, and TikZ help.
+\item Liam O'Connor, for stimulating conversations on foundational issues.
+\item Erik de Casto Lopo, for being such a fine intellectual sparring partner all these years.
+\item Any questions?
+\end{itemize}
+\end{frame}
+
 \end{document}
