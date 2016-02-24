@@ -83,12 +83,12 @@
 			different mathematical flavour. We form inequalities, take limits and approximate when we have no other choice.
 \item Mathematicians do not restrict themselves to thinking about things which are computable!
 			\note{That would take all the fun out of life.}
-\item Mathematics is not a spectator sport and rests on proof. We will prove every major result this evening 
-			for which proofs are available.
+\item Mathematics is not a spectator sport and rests on proof. We will prove every major result this evening. 
+			% for which proofs are available.
 \item If you like proofs, I hope you'll follow along. If not, and you're happy enough that there
 			\emph{are} rigorous proofs, you can just accept the results.
-\item I've attempted to make this talk accessible, and assume nothing beyond Year 10 mathematics, but the
-			definitions will come thick and fast.
+% \item I've attempted to make this talk accessible, and assume nothing beyond Year 10 mathematics, but the
+% 			definitions will come thick and fast.
 \end{itemize}
 \end{frame}
 
@@ -356,7 +356,7 @@ Hence
 \end{frame}
 
 \begin{frame}{Error bounds on floating point arithmetic}
-Remark: $\delta = \frac{p}{2} \beta^{1-t}$ is called the \emph{unit roundoff error}.\\
+Remark: $\delta = \frac{p}{2} \beta^{1-t}$ is called the unit roundoff error.\\
 Let $\epsilon = \frac{\fl(x) - x}{x}$. Then $\fl(x) = (1 + \epsilon) x$, where $|\epsilon| \leq \delta$.\\
 Theorem: Let $\odot$ denote the operation $+, -, \times \text{ or } \div$, and let $x$ and $y$ be
 floating point numbers. Then
@@ -410,19 +410,23 @@ Continuing this procedure,
 \end{equation*}
 Conclusion: 
 \begin{itemize}
-\item Floating point addition \emph{does not commute}. Neither does any other floating point
-operation.
-\item Hence the floating point numbers do not form a monoid under addition.\\
+\item Floating point addition does not commute. Neither does any other floating point
+			operation.
+\item Hence the floating point numbers do not form a field.
 \item To reduce rounding error, a sequence should be summed from small numbers to large numbers on a
 computer.
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Looks like this \ldots}
-\begin{tikzpicture}
-\foreach \x in {-4, -2, -1, 0, 1, 2, 4}
-	{\node[circle, minimum size=0.1 cm, fill=red, label = below : {$\x$}] at (\x, 0) {};};
-\draw[->] (-5, 0) -- (5, 0);
+\begin{frame}{Looks like this for $\beta=10, t=1$}
+
+\begin{tikzpicture}[scale=0.5]
+\foreach \x in {-10.0, -9.0, -8.0, -7.0, -6.0, -5.0, -4.0, -3.0, -2.0,
+                -1.0, -.9, -.8, -.7, -.6, -.5, -.4, -.3, -.2, -.1, 0,
+                .1, .2, .3, .4, .5, .6, .7, .8, .9, .10,
+                2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0}
+	{\draw[fill=red] (\x, 0) node[below] {} circle(1pt);};
+\draw[->] (-10.0, 0) -- (10.0, 0);
 \end{tikzpicture}
 \end{frame}
 
@@ -600,7 +604,7 @@ between $-1$ and $1$.
 % [3:03pm] edwardk: my trick is mostly about trying to avoid having the performance of that degrade so much as the computation gets bigger
 % [3:05pm] StyxAlso: Right. Performance is key. The fast tends to drive out the slow, even if the fast is slightly wrong.
 
-\begin{frame}{Acknowledgements/Questions}
+\begin{frame}{Acknowledgements/Questions?}
 \begin{itemize}
 \item My PhD supervisor Dr John Ormerod, for setting me a problem with made me become obsessed with these
 			issues.
