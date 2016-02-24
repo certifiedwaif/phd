@@ -55,13 +55,16 @@
 \begin{itemize}
 \item Who am I?
 \begin{itemize}
-\item Did computer science first, then worked as a programmer for a while. Got bored.
+\item Bachelor of Computer Science from UWS, 1995-1997, imperative upbringing. New to functional programming.
 \note{After I got bored, I went back to Uni to study pure mathematics and statistics. I wanted to get always
 			from computers. As you're about to discover, that worked out great.}
+\item Bachelor of Science(Pure Mathematics/Mathematics Statistics), 2006-2009, Honours First Class.
+\item Masters of Biostatistics, Trainee Biostatistician with the NSW Ministry of Health, 2011-2013.
 \item Third year PhD student in mathematical statistics at the University of Sydney with Dr John Ormerod, 
-			working in the field of variational approximations to Bayesian models. I'm a computational statistician.
-\item I could be described as one of those data scientist people. What does that mean? You tell me and we'll
-			\emph{both} know \ldots
+			working in the field of variational approximations to Bayesian models.
+\item Computational statistician - HPC, numerics.
+% \item I could be described as one of those data scientist people. What does that mean? You tell me and we'll
+% 			\emph{both} know \ldots
 \end{itemize}
 
 \item Why am I here?
@@ -83,7 +86,7 @@
 			different mathematical flavour. We form inequalities, take limits and approximate when we have no other choice.
 \item Mathematicians do not restrict themselves to thinking about things which are computable!
 			\note{That would take all the fun out of life.}
-\item Mathematics is not a spectator sport and rests on proof. We will prove every major result this evening. 
+\item Mathematics rests on proof. We will prove every major result this evening. 
 			% for which proofs are available.
 \item If you like proofs, I hope you'll follow along. If not, and you're happy enough that there
 			\emph{are} rigorous proofs, you can just accept the results.
@@ -123,8 +126,8 @@
 \begin{frame}{A whirlwind introduction to set theory}
 $\forall x$ means for all $x$.\\
 To avoid set paradoxes, a set can contain anything except itself.\\
-In particular, sets can contain numbers, and other sets. Infinite sets are fine, whether countably
-or uncountably infinite.\\
+% In particular, sets can contain numbers, and other sets.
+Infinite sets are fine, whether countably or uncountably infinite.\\
 Let $\emptyset$ denote the empty set.
 Let $A$ and $B$ be sets.\\
 $a \in A$ means the element $a$ is in the set A.\\
@@ -134,19 +137,20 @@ $A = B \Leftrightarrow A \subset B \text{ and } B \subset A$\\
 $A \subseteq B \Leftrightarrow A \subset B \text{ or } A = B$\\
 $A \cup B = \{x | x \in A \text{ or } x \in B\}$\\
 $A \cap B = \{x | x \in A \text{ and } x \in B\}$\\
-Foundational issues are left to logicians and type theorists. Ask Liam O'Connor! We assume ZFC and move on.
+Foundational issues are left to logicians and type theorists. Ask Liam O'Connor!\\
+We assume ZFC and move on.
 \end{frame}
+
 
 \def \succ {\text{succ}}
 \begin{frame}{Constructing the natural numbers, the integers and the rationals}
-There are many possible constructions of the natural numbers. This is the standard one.\\
+There are many possible constructions of the natural numbers $\mathbb{N}$. This is the standard one.\\
 Let $0 = \emptyset$. \\
 Define a successor function $\succ{(x)} = x \cup \{ x \}$.\\
 Then\\
 $1 = \succ(0) = \succ(\emptyset) = \emptyset \cup \{ \emptyset \} = \{\emptyset\} = \{ 0 \}$.\\
-$2 = \succ(1) = \succ(\{ 0 \}) = \{ 0 \} \cup \{ \{ 0 \} \} = \{ 0, \{ 0 \} \} = \{0, 1\}$ and so on.
-The integers can then be defined as ordered pairs of the form $(s, x)$ where $s \in \{-, +\}$ and
-$x \in \mathbb{N}$. \\
+$2 = \succ(1) = \succ(\{ 0 \}) = \{ 0 \} \cup \{ \{ 0 \} \} = \{ 0, \{ 0 \} \} = \{0, 1\}$ and so on.\\
+The integers $\mathbb{Z}$ can then be defined as ordered pairs of the form $(a, b) = a - b$ where $a, b \in \mathbb{N}$. Ordered pairs $(a, b)$ and $(c, d)$ are considered equivalent if $a - b = c -d$.\\
 The rational numbers are ratios of integers $a / b$ where $b \ne 0$.
 $(k c) / (k d)$ are considered to be equivalent to $c / d$ where $\text{gcd}(c, d) = 1$ i.e. that $c$ and $d$
 are co-prime.
@@ -200,8 +204,8 @@ Contradiction. Hence $\sqrt{2}$ is irrational.$\Box$\\
 \begin{frame}{Conclusion: The rational numbers are full of holes \ldots}
 Consider the set\\
 $A = \{ x \in \mathbb{Q} | x^2 \leq 2 \} = \mathbb{Q} \cap (-\sqrt{2}, \sqrt{2})$.\\
-This set clearly includes all of the rational numbers below $\sqrt{2}$. But as we showed above, $\sqrt{2}$
-is irrational, so the upper bound $\sqrt{2}$ is not within this set.\\
+This set clearly includes all of the rational numbers between $-\sqrt{2}$ and $\sqrt{2}$. But as we showed above, $\sqrt{2}$
+is irrational, so the lower and upper bounds $\pm\sqrt{2}$ are not within this set.\\
 Thus the rational numbers are full of holes like this.
 \end{frame}
 
@@ -370,7 +374,7 @@ and for rounding
 \end{equation*}
 Hence
 \begin{equation*}
-|x - \fl(x) \leq \frac{p}{2} \beta^{m - t} \leq \frac{p}{2} \beta^{1-t} \beta^{m-1} \leq \half |x| \beta^{1-t} p.
+|x - \fl(x)| \leq \frac{p}{2} \beta^{m - t} \leq \frac{p}{2} \beta^{1-t} \beta^{m-1} \leq \half |x| \beta^{1-t} p,\text{ independent of $m$}.
 \end{equation*}
 \end{frame}
 
@@ -386,10 +390,11 @@ Proof: By the previous theorem,
 \begin{equation*}
 |x \odot y - \fl(x \odot y)| \leq |x \odot y| \frac{p}{2} \beta^{1-t}.
 \end{equation*}
-Thus, $-|x \odot y| \frac{p}{2} \beta^{1 - t} \leq x \odot y + \fl(x \odot y) \leq \frac{p}{2} \beta^{1 - t} |x \odot y|$.
+Thus, $-|x \odot y| \frac{p}{2} \beta^{1 - t} \leq -x \odot y + \fl(x \odot y) \leq \frac{p}{2} \beta^{1 - t} |x \odot y|$.
 Hence
 \begin{equation*}
-(x \odot y)(1 - \frac{|x \odot y|}{x \odot y} \beta^{1-t}) \leq \fl(x \odot y) \leq (x \odot y)(1 + \frac{|x \odot y|}{x \odot y} \beta^{1-t}).
+(x \odot y)\left(1 - \frac{|x \odot y|}{x \odot y} \beta^{1-t} \right) \leq \fl(x \odot y) \leq 
+(x \odot y)\left(1 + \frac{|x \odot y|}{x \odot y} \beta^{1-t}\right).
 \end{equation*}
 It follows that $\fl(x \odot y) = (1 + \epsilon) (x \odot y)$ where
 $|\epsilon| \leq \frac{p}{2} \beta^{1-t} = \delta$.
@@ -445,7 +450,7 @@ computer.
 \item Or just use rational numbers. $\mathbb{Q}$ is dense in $\mathbb{R}$.
 \item Just keep computing with more digits until you reach the desired level of accuracy.
 			\note{You could do this with streaming.}
-\item Examples from the Haskell community: Ed Kmett's work, \texttt{mvr}
+\item Examples from the Haskell community: Ed Kmett's work, \texttt{mvr}, continued fractions etc.
 \item Questions: If we can vary the number of digits we use, how many digits should we use? How many are 
 			enough? When should our computations stop?
 \note{From a numerical point of view, these are hard questions.}
@@ -454,10 +459,8 @@ computer.
 
 \begin{frame}{More exotic alternatives: UNums 2.0}
 \begin{itemize}
-\item Abandons previous ideas of floating point representation completely. Key idea:
-\begin{equation*}
-\text{Let }f(x) = \frac{x}{1 + |x|}.
-\end{equation*}
+\item Abandons previous ideas of floating point representation completely. 
+\item Key idea: Lose precision gradually and gracefully, rather than suddenly like floating point.
 % \begin{tikzpicture}[
 %     x                = 2cm/10,
 %     scale            = 3,
@@ -479,30 +482,30 @@ computer.
 %      \end{alignedat}$};
 % \end{tikzpicture}
 % TODO: Prepare this picture.
-\item Clearly $f: (-\infty, \infty) \to (-1, 1)$ and is a bijection from the real line to the open interval
-between $-1$ and $1$.
+\item Let $f(x) = \frac{x}{1 + |x|}$. Clearly $f: (-\infty, \infty) \to (-1, 1)$ and is a bijection.
 \item Then apply the map $x \mapsto e^{i \pi x} + i$.
 
 \begin{minipage}{\textwidth}\centering
 \begin{tikzpicture}
 \draw[thick] (0cm,0cm) circle(1cm);
 \draw[fill=black] (0cm, -1cm) node[below] {$\underset{00}{0}$} circle(2pt);
-\draw[fill=black] (1cm, 0cm) node[right] {$01$} circle(2pt);
-\draw[fill=black] (-1cm, 0cm) node[left] {$10$} circle(2pt);
+\draw[fill=black] (1cm, 0cm) node[right] {\tiny $01$} circle(2pt);
+\draw[fill=black] (-1cm, 0cm) node[left] {\tiny $10$} circle(2pt);
 \draw[fill=white] (0cm, 1cm) node[above] {$\overset{11}{\pm \infty}$} circle(2pt);
 \end{tikzpicture}
 \end{minipage}
 
-% TODO: This would be a nice place for a TikZ diagram of the situation, don't you think?
 \item Real part is x, imaginary part is y.
 \end{itemize}
 \end{frame}
 
 \begin{frame}{Fingers crossed we might see this in hardware one day!}
 \begin{itemize}
-\item Professor Gustaffson, ex-Intel, author of ``The End of Error: Unum Computing'', already superceded.
+\item Professor John Gustaffson, ex-Intel, author of ``The End of Error: Unum Computing'',
+			already superceded (!).
 \item Very new, presented at Multicore World 2016. No proofs yet?
-\item Lose precision gradually and gracefully, rather than suddenly like floating point.
+\item He has a plan for how to get this into hardware.
+\item Check out his Powerpoint presentation.
 \item A little bird tells me that Intel finds this interesting, and ``may look at implementing this in
 			six year's time.''. They refused to be quoted!
 \end{itemize}
@@ -514,7 +517,7 @@ between $-1$ and $1$.
 			you don't like here).
 \item Beware the Wrath of Kahan: alternatives often end up suffering from the same shortcomings. 
 			William Kahan aka the Father of floating point arithmetic, enjoys pointing this out.
-\item One clock cycle is about as long as I care to wait in numerics.
+\item A few clock cycles is about as long as I care to wait in numerics.
 \item Serious answer: Use the right representation in the right situation. But know what price you're paying 				in terms of both memory and computer time, and how much precision you're really getting.
 \end{itemize}
 \end{frame}
@@ -613,12 +616,14 @@ between $-1$ and $1$.
 
 \begin{frame}{Acknowledgements/Questions?}
 \begin{itemize}
-\item My PhD supervisor Dr John Ormerod, for setting me a problem with made me become obsessed with these
+\item My PhD supervisor Dr John Ormerod, for setting me a problem which made me become obsessed with these
 			issues.
-\item My Honours supervisor Dr Daniel Daners for inspiring my love of mathematical analysis.
+\item My Honours supervisor Dr Daniel Daners for inspiring my love of mathematical analysis and teaching
+			me how to write proofs.
 \item Charles Gray for TikZ help and presentation advice.
 \item Dr Danya Rose for suggestions on how the proofs could be made more clear, and TikZ help.
 \item Liam O'Connor, for stimulating conversations on foundational issues.
+\item Thomas Sutton for proof reading, and making helpful suggestions.
 \item Erik de Casto Lopo, for being such a fine intellectual sparring partner all these years.
 \item Any questions?
 \end{itemize}
