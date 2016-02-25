@@ -1,0 +1,115 @@
+\documentclass{amsart}
+\usepackage{tikz}
+\title{Meeting with Dr John Ormerod - 16/02/2016}
+
+\input{Definitions.tex}
+
+\begin{document}
+
+\maketitle
+
+Time: 10:30am to 11:30am \\
+Attendees: Dr John Ormerod, Mark Greenaway \\
+
+We need an MCMC sampler. There are two major approaches we could take:
+
+\begin{itemize}
+	\item Gibbs sampling
+	\item Population-based MCMC
+\end{itemize}
+
+\section{Gibbs sampling}
+
+\def \Bernoulli {\text{Bernoulli}}
+\[
+	\vgamma_j | \text{rest} \sim \Bernoulli(\rho_j)
+\]
+
+where
+
+\[
+	\rho_j = \frac{p(y, \vgamma_{j1})}{p(y, \vgamma_{j0}) + p(y, \vgamma_{j1})}
+\]
+
+with
+
+\[
+	\vgamma_{jk} = (\vgamma_1, \ldots, \vgamma_{j-1}, k, \vgamma_{j+1}, \ldots, \vgamma_p).
+\]
+
+Let $\vgamma^{(i)}$ denote the $i$-th sample.
+
+\begin{tikzpicture}
+	\draw (0.5, 4.5) node {$\vgamma^{(0)}$};
+	\draw (0, 0) rectangle (1, 4);
+	\draw (0.5, 3.5) node {$0/1$};
+	\draw [->] (1.05, 3.55) to[bend left] (1.05, 2.55);
+\end{tikzpicture}
+
+Do this element by element for $M$ iterations to produce your $M$ MCMC samples. Each element of the vector
+$\vgamma$ is dependent on all of the others before it - it is an inherently sequential process.
+
+$(\mX^\top \mX)^{-1}$
+
+The advantage of this approach is that you don't have to estimate the best model. This approach is 
+asymptotically \emph{consistent}.
+
+\[
+	p(\vgamma | \vy) = \frac{1}{M} \sum_{i=1}^M \vgamma^{(i)}
+\]
+
+The disadvantage of this approach is that as you have to generate each element of the vector for each
+sample, it's very computationally intensive. But you are testing a different \emph{model} every time.
+
+\section{Population based MCMC}
+
+\[
+\begin{array}{rl}
+		&\{ p(\vy, \vgamma^{(i)}) \}_{i=1}^M \\
+	p(\vgamma | \vy) &\approx \sum_{j=1}^M \vgamma^{(i)} \frac{p(\vy, \vgamma^{(i)})}{\sum_{j=1}^{M_p} p(\vy, \vgamma^{(i)})}
+\end{array}
+\]
+
+For this approach to work well, you need to find the best model. You can never know for sure whether you have
+or not. You're searching for a locally high posterior model (heuristic) or a local maxima $p(\vy, \vgamma^{(\text{Max})})$.
+
+\section{The VB approximation of the model}
+
+\def \vGamma {\vectorfontone{\Gamma}}
+\def \N {\text{N}}
+``Mixtures of g priors for Bayesian variable selection'' by F. Liang, R. Paulo, G. Molina et al. uses a model
+of the form
+\[
+	y = \alpha + \mX_\vgamma \vbeta + \epsilon \\
+	p(y | \vbeta, \sigma^2, \vgamma) \sim \N(X \vGamma \vbeta, \sigma^2 I)
+\]
+where $\vGamma = \diag(\vgamma).$
+
+The difficult part of the approximation is that
+\[
+\begin{array}{rl}
+	p(\vbeta_\vgamma | \sigma^2, g) &\sim \N(\vzero, g \sigma^2 (\mX_\vgamma^T \mX_\vgamma)^{-1}) \\
+	p(\vbeta_{-\vgamma)}) &\propto 1 \\
+	p(\sigma^2) &\propto \sigma^{-2} \text{ (Jeffery's Prior)} \\
+	p(g) &\propto g^{b-1} (1 + g)^{a-1} \\
+\end{array}
+\]
+
+A consequence of this definition is that $g \to 0$ as $p \to \infty$, which is known as Bartlett's paradox.
+
+\subsection{Derivation of BIC}
+
+\[
+	\log [ p(\vy | \vbeta) p(\vbeta) ] \approx \underset{O(n)}{\underbrace{\log p(\vy | \hat{\vbeta})}}
+												+ \underset{O_p(1)}{\underbrace{\log p(\hat{\vbeta})}}
+												-  \frac{1}{2} p \log (n) + O(1)
+\]
+
+which seems fine but
+\[
+	\underset{\text{depends on $p$}}{\underbrace{-\frac{p}{2}}} + \log (2 \pi \sigma^2_\vbeta) - \frac{1}{2 \sigma_\vbeta^2} \hat{\vbeta}^\top \hat{\vbeta}
+\]
+
+
+
+\end{document}
