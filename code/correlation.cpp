@@ -497,12 +497,13 @@ const unsigned int max_iterations, const bool bIntercept = false, const bool bCe
 	// MatrixXd mA;				 // The inverse of (X^T X) for the previous iteration
 	bool bmA_set = false;		 // Whether mA has been set yet
 	bool bUpdate;				 // True for an update, false for a downdate
-	unsigned int min_idx;		   // The minimum index of covariate that's included in the model
+	unsigned int min_idx;		 // The minimum index of covariate that's included in the model
 	unsigned int diff_idx;		 // The covariate which is changing
 	double numerator;			 // The numerator in the correlation calculation
 	double R2;					 // Correlation
-	dbitset gamma(p);				 // The model gamma
-	unsigned int p_gamma_prime;	 // The number of columns in the matrix mX_gamma
+	dbitset gamma(p);			 // The model gamma
+	unsigned int p_gamma_prime;	 // The number of columns in the matrix mX_gamma_prime
+	unsigned int p_gamma;	 	 // The number of columns in the matrix mX_gamma
 	VectorXd vx;				 // The column vector for the current covariate
 	vector< MatrixXd > vec_mA(p);
 	vector< MatrixXd > vec_mX_gamma(p);
@@ -530,110 +531,98 @@ const unsigned int max_iterations, const bool bIntercept = false, const bool bCe
 	}
 
 	// Loop through models, updating and downdating mA as necessary
-	#pragma omp parallel\
+	#pragma omp parallel for\
 		firstprivate(bmA_set, gamma, vx, vec_mX_gamma, vec_mA)\
-		private(numerator, R2, min_idx, diff_idx, p_gamma_prime, bUpdate)\
+		private(numerator, R2, min_idx, diff_idx, p_gamma_prime, p_gamma, bUpdate)\
 			shared(cout, vy, mX, vR2_all)\
 			default(none)
-	{
-		MatrixXd& mA = vec_mA[0];
-		MatrixXd& mX_gamma = vec_mX_gamma[0];
+	for (unsigned int idx = 1; idx < max_iterations; idx++) {
+		#ifdef DEBUG
+		cout << endl << "Iteration " << idx << endl;
+		#endif
+		// By properties of Greycode, only one element can be different. And it's either one higher or
+		// one lower.
+		// Check if update or downdate, and for which variable
+		// gamma = greycode(idx, p, gamma);
+		gamma = greycode_change(idx, p, gamma, bUpdate, min_idx, diff_idx, p_gamma_prime);
 
-		for (unsigned int idx = 1; idx < max_iterations; idx++) {
+		MatrixXd& mA = vec_mA[p_gamma - 1];
+		MatrixXd& mX_gamma = vec_mX_gamma[p_gamma - 1];
+		// Get mX matrix for gamma
+		// MatrixXd mX_gamma_prime(n, p_gamma_prime);
+		MatrixXd& mX_gamma_prime = vec_mX_gamma[p_gamma_prime - 1];
+		mX_gamma_prime = get_mX_gamma(mX, gamma, mX_gamma_prime);
+		// MatrixXd mA_prime(p_gamma_prime, p_gamma_prime);
+		MatrixXd& mA_prime = vec_mA[p_gamma_prime - 1];
+		vx = mX.col(diff_idx);
+
+		// If we haven't previously calculated this inverse, calculate it the first time.
+		if (!bmA_set) {
+			// Calculate full inverse mA, O(p^3)
+			mA_prime = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
+								 // [y^T X, y^T x]^T
+			VectorXd v1(p_gamma_prime);
+			v1 = vy.transpose() * mX_gamma_prime;
+			numerator = (v1.transpose() * mA_prime * v1).value();
+			R2 = numerator / vy.squaredNorm();
 			#ifdef DEBUG
-			cout << endl << "Iteration " << idx << endl;
+			cout << "Numerator " << numerator << " denominator " << vy.squaredNorm();
+			cout << " R2 " << R2 << endl;
 			#endif
-			// By properties of Greycode, only one element can be different. And it's either one higher or
-			// one lower.
-			// Check if update or downdate, and for which variable
-			// gamma = greycode(idx, p, gamma);
-			gamma = greycode_change(idx, p, gamma, bUpdate, min_idx, diff_idx, p_gamma_prime);
+			vR2_all(idx) = R2;
 
-			// Get mX matrix for gamma
-			// MatrixXd mX_gamma_prime(n, p_gamma_prime);
-			MatrixXd& mX_gamma_prime = vec_mX_gamma[p_gamma_prime - 1];
-			mX_gamma_prime = get_mX_gamma(mX, gamma, mX_gamma_prime);
-			// MatrixXd mA_prime(p_gamma_prime, p_gamma_prime);
-			MatrixXd& mA_prime = vec_mA[p_gamma_prime - 1];
-			vx = mX.col(diff_idx);
+			bmA_set = true;
+		}
+		else {
+			if (bUpdate) {
+				// Rank one update of mA_prime from mA
+				#ifdef DEBUG
+				cout << "Updating " << diff_idx << endl;
+				cout << "p_gamma_prime " << p_gamma_prime << endl;
+				#endif
 
-			// If we haven't previously calculated this inverse, calculate it the first time.
-			if (!bmA_set) {
-				// Calculate full inverse mA, O(p^3)
-				mA_prime = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
-									 // [y^T X, y^T x]^T
+				// Calculate [y^T X, y^T x]^T
 				VectorXd v1(p_gamma_prime);
+				// VectorXd v2, v3;
+				// v2 = vy.transpose() * vx;
+				// v3 = vy.transpose() * mX_gamma;
+				// v1 << v2, v3;
 				v1 = vy.transpose() * mX_gamma_prime;
+
+				mA_prime = rank_one_update(mX_gamma, min_idx, diff_idx, vx, mX_gamma_prime, mA, mA_prime);
+
 				numerator = (v1.transpose() * mA_prime * v1).value();
 				R2 = numerator / vy.squaredNorm();
+				vR2_all(idx) = R2;
+				#ifdef DEBUG
+				cout << "v1 " << v1 << endl;
+				cout << "mA_prime " << mA_prime << endl;
+				cout << "Numerator " << numerator << " denominator " << vy.squaredNorm();
+				cout << " R2 " << R2 << endl;
+				cout << "vR2_all(" << idx << ") = " << R2 << endl;
+				#endif
+			}
+			else {
+				// Rank one downdate
+				#ifdef DEBUG
+				cout << "Downdating " << diff_idx << endl;
+				#endif
+				MatrixXd& mA_prime = vec_mA[p_gamma_prime - 1];
+				mA_prime = rank_one_downdate(mX_gamma, mX_gamma_prime, min_idx, diff_idx, mA, mA_prime);
+
+				// Calculate correlation
+				numerator = (vy.transpose() * mX_gamma_prime * mA_prime * mX_gamma_prime.transpose() * vy).value();
+				R2 = numerator / vy.squaredNorm();
+				vR2_all(idx) = R2;
 				#ifdef DEBUG
 				cout << "Numerator " << numerator << " denominator " << vy.squaredNorm();
 				cout << " R2 " << R2 << endl;
+				cout << "vR2_all(" << idx << ") = " << R2 << endl;
 				#endif
-				vR2_all(idx) = R2;
-				mA = mA_prime;
-
-				bmA_set = true;
 			}
-			else {
-				if (bUpdate) {
-					// Rank one update of mA_prime from mA
-					#ifdef DEBUG
-					cout << "Updating " << diff_idx << endl;
-					cout << "p_gamma_prime " << p_gamma_prime << endl;
-					#endif
-
-					// Calculate [y^T X, y^T x]^T
-					VectorXd v1(p_gamma_prime);
-					// VectorXd v2, v3;
-					// v2 = vy.transpose() * vx;
-					// v3 = vy.transpose() * mX_gamma;
-					// v1 << v2, v3;
-					v1 = vy.transpose() * mX_gamma_prime;
-
-					mA_prime = rank_one_update(mX_gamma, min_idx, diff_idx, vx, mX_gamma_prime, mA, mA_prime);
-
-					numerator = (v1.transpose() * mA_prime * v1).value();
-					R2 = numerator / vy.squaredNorm();
-					vR2_all(idx) = R2;
-					#ifdef DEBUG
-					cout << "v1 " << v1 << endl;
-					cout << "mA_prime " << mA_prime << endl;
-					cout << "Numerator " << numerator << " denominator " << vy.squaredNorm();
-					cout << " R2 " << R2 << endl;
-					cout << "vR2_all(" << idx << ") = " << R2 << endl;
-					#endif
-
-					// Save mA
-					mA = mA_prime;
-				}
-				else {
-					// Rank one downdate
-					#ifdef DEBUG
-					cout << "Downdating " << diff_idx << endl;
-					#endif
-					MatrixXd& mA_prime = vec_mA[p_gamma_prime - 1];
-					mA_prime = rank_one_downdate(mX_gamma, mX_gamma_prime, min_idx, diff_idx, mA, mA_prime);
-
-					// Calculate correlation
-					numerator = (vy.transpose() * mX_gamma_prime * mA_prime * mX_gamma_prime.transpose() * vy).value();
-					R2 = numerator / vy.squaredNorm();
-					vR2_all(idx) = R2;
-					#ifdef DEBUG
-					cout << "Numerator " << numerator << " denominator " << vy.squaredNorm();
-					cout << " R2 " << R2 << endl;
-					cout << "vR2_all(" << idx << ") = " << R2 << endl;
-					#endif
-
-					// Save mA
-					mA = mA_prime;
-				}
-			}
-
-			// Save mX_gamma
-			mX_gamma = vec_mX_gamma[p_gamma_prime - 1];
-			mX_gamma = mX_gamma_prime;
 		}
+
+		p_gamma = p_gamma_prime;
 	}
 	return vR2_all;
 }
