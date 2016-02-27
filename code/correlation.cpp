@@ -3,6 +3,8 @@
 // "If you want to do numerics, you should use C++ with Eigen or Armadillo. It's pretty fast." - Hadley Wickham,
 // completely unprompted.
 
+#include <sys/time.h>
+#include <unistd.h>
 #include <cassert>
 #include <algorithm>
 #include <stdexcept>
@@ -481,15 +483,13 @@ MatrixXd& rank_one_downdate(MatrixXd mX_gamma, MatrixXd mX_gamma_prime, unsigned
 //' @export
 // [[Rcpp::export]]
 VectorXd all_correlations(VectorXd vy, MatrixXd mX, const unsigned int intercept_col,
-const bool bIntercept = false, const bool bCentre = true)
+const unsigned int max_iterations, const bool bIntercept = false, const bool bCentre = true)
 {
 	unsigned int idx;			 // The main loop index
 	// The number of covariates
 	const unsigned int p = mX.cols();
-	// The number of greycode combinations, 2^p
-	const unsigned int greycode_rows = (1 << p);
 	// Vector of correlations for all models
-	VectorXd vR2_all(greycode_rows);
+	VectorXd vR2_all(max_iterations);
 	MatrixXd mA;				 // The inverse of (X^T X) for the previous iteration
 	bool bmA_set = false;		 // Whether mA has been set yet
 	bool bUpdate;				 // True for an update, false for a downdate
@@ -505,7 +505,7 @@ const bool bIntercept = false, const bool bCentre = true)
 
 	if (bCentre) {
 		// Centre vy
-		centre(vy);
+		// centre(vy);
 
 		// Centre non-intercept columns of mX
 		for (unsigned int i = 0; i < mX.cols(); i++) {
@@ -520,11 +520,11 @@ const bool bIntercept = false, const bool bCentre = true)
 	}
 
 	// Loop through models, updating and downdating mA as necessary
-	//#pragma omp parallel for firstprivate(bmA_set, mA, gamma, mX_gamma, mX_gamma_prime, vx)\
-		//private(numerator, R2, min_idx, diff_idx, p_gamma_prime, bUpdate)\
-			//shared(cout, vy, mX, vR2_all)\
-			//default(none)
-	for (idx = 1; idx < greycode_rows; idx++) {
+	#pragma omp parallel for firstprivate(bmA_set, mA, gamma, mX_gamma, mX_gamma_prime, vx)\
+		private(numerator, R2, min_idx, diff_idx, p_gamma_prime, bUpdate)\
+			shared(cout, vy, mX, vR2_all)\
+			default(none)
+	for (idx = 1; idx < max_iterations; idx++) {
 		#ifdef DEBUG
 		cout << endl << "Iteration " << idx << endl;
 		#endif
@@ -793,8 +793,23 @@ int main()
 
 	VectorXd vy = parseCSVfile_double("vy.csv");
 	MatrixXd mX = parseCSVfile_double("mX.csv");
+	const unsigned int p = mX.cols();
+	// The number of greycode combinations, 2^p
+	const unsigned int greycode_rows = (1 << p);
+	const unsigned int max_iterations = greycode_rows;
 	// unsigned int p = mX.cols();
-	VectorXd vR2_all = all_correlations(vy, mX, 0, intercept, centre);
+
+	struct timeval start, end;
+	long mtime, seconds, useconds;
+	gettimeofday(&start, NULL);
+	VectorXd vR2_all = all_correlations(vy, mX, 0, max_iterations, intercept, centre);
+	gettimeofday(&end, NULL);
+
+	seconds  = end.tv_sec  - start.tv_sec;
+    useconds = end.tv_usec - start.tv_usec;
+
+    mtime = ((seconds) * 1000 + useconds/1000.0) + 0.5;
+    cout << "Elapsed time in milliseconds: " << mtime << endl;
 
 	VectorXd vExpected_correlations = parseCSVfile_double("Hitters_exact2.csv");
 	cout << "i,R2" << endl;
