@@ -1,0 +1,161 @@
+\documentclass{beamer}
+
+\usetheme{Warsaw}
+\usepackage{graphicx}
+\usepackage{ulem}
+\usepackage{tikz}
+\input{include.tex}
+\input{Definitions.tex}
+
+\usefonttheme{serif}
+
+\title{Progress update}
+\author{Mark Greenaway\\PhD candidate\\markg@maths.usyd.edu.au}
+
+\mode<presentation>
+{ \usetheme{boxes} }
+
+\begin{document}
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}{Melbourne trip}
+\begin{itemize}
+\item Met Hadley Wickham. The future of R is in good hands. \\
+	When I told him what I was doing, he responded ``I don't care about matrices.''. He only really cares 
+	about data frames. \\
+	A talk similiar to the talk he gave is available here \url{https://www.youtube.com/watch?v=hRNUgwAFZtQ}.
+\item Hung out with Charles Gray, PhD candidate at Latrobe working with Agus. I taught her some UNIX and Git.
+	She taught me some TikZ and LaTeX.\\
+	\begin{tikzpicture}[scale=0.5]
+	\draw (-0.75, 0.5) circle(10pt);
+	\draw (0.75, 0.5) circle(10pt);
+	\draw (-1, -0.75) to[out=-90, in=-90] (1, -0.75);
+	\end{tikzpicture}
+\item Met with Lev Lafayette. Sys admin. Set up USyd HPC (1,500 cores), now working with NeCTAR (4,000 cores). 
+	He's a nice guy, and we had a productive chat.
+\end{itemize}
+\end{frame}
+
+\def\vGamma{{\boldsymbol{\Gamma}}}
+\begin{frame}{Focus this week: VB approximation for linear model selection}
+
+Consider the model $\vy | \vbeta, \sigma^2 \sim \text{N}_n(\mX \vGamma \vbeta, \sigma^2 \mI)$ 
+with priors
+\begin{equation*}
+\begin{array}{ll}
+\vbeta | \sigma^2, g &\sim \text{N}_p(\vzero, g \sigma^2(\mX^\top \vGamma \mX)^{-1}), \\
+\vgamma_i &\sim \text{Bernoulli}(\rho), 1 \leq i \leq n, 0 \leq \rho \leq 1, \\
+p(\sigma^2) &= (\sigma^2)^{-1} I(\sigma^2 > 0) \text{ and }\\
+p(g) &= \frac{g^b (1 + g)^{-a - b - 2}}{\text{Beta}(a + 1, b + 1)} I(g > 0)
+\end{array}
+\end{equation*}
+
+where $\vGamma = \diag (\vgamma)$. Assume an approximation of the form
+
+\begin{equation*}
+q(\vtheta) = q(\vbeta) q(\vgamma) q(\sigma^2) q(g)
+\end{equation*}
+where
+\begin{equation*}
+\begin{array}{ll}
+q^*(\vbeta) &= \text{N}(\vmu_{q(\vbeta), \mSigma_{q(\vbeta)}}), \\
+q^*(\vgamma) &= \text{Bernoulli}(p_{q(\vgamma)}), \\
+q^*(\sigma^2) &= \text{IG}(\alpha_{q(\sigma^2)}, \beta_{q(\sigma^2)}) \text{ and } \\
+q^*(g) &= \text{Beta Prime}(\alpha_{q(g)}, \beta_{q(g)})). \\
+\end{array}
+\end{equation*}
+\end{frame}
+
+\begin{frame}{Mean field updates are coming}
+\begin{equation*}
+\begin{array}{rl}
+&\quad \log{p(\vy, \vtheta)} \\
+=& \quad \log{p(\vy | \vbeta, \vgamma, \sigma^2)} + \log{p(\vbeta | \vgamma, \sigma^2, g)} + \log{p(\sigma^2)} + \log{p(g)} \\
+=& -\frac{n}{2} \log{2 \pi} -\half \log |\sigma^2 \mI_n| - \half (\vy - \mX \vGamma \vbeta)^\top \sigma^{-2} \mI_n (\vy - \mX \vGamma \vbeta) \\
+& -\frac{p}{2} \log{2 \pi} - \half \log |g \sigma^2 (\mX^\top \vGamma \mX)^{-1}| -
+	\half \vbeta^\top (g \sigma^2)^{-1} (\mX^\top \mX) \vbeta \\
+& + \vone^\top \vgamma \log(\rho) + \vone^\top (\vone - \vgamma) \log(1 - \rho)\\
+& - \log{(\sigma^2)} + \log \bI (\sigma^2 > 0) \\
+
+\end{array}
+\end{equation*}
+
+Find the optimal mean field updates with
+\[
+q_{\vtheta_i} \propto \bE_{-\theta_i} [\log p(\vy, \vtheta)].
+\]
+
+\end{frame}
+
+\begin{frame}{Algebra montage}
+
+\begin{itemize}
+\item I'm rusty on some things, and need to get my skills back up to scratch, particularly some linear 
+algebra and multivariate distribution theory, as used in a Bayesian/VB context.
+\item The only way to get better is to practice!
+\begin{quote}
+\tiny
+The day's approaching to give it your best, \\
+and you've got to reach your prime \\
+That's when you need to put yourself to the test, \\
+and show us a passage of time \\
+We're gonna need a montage! (MONTAGE !) \\
+A sports training montage! (MONTAGE !) \\
+Show a lot of things happening at once, \\
+remind everyone of what's going on! (WHAT'S GOING ON!) \\
+And with every shot show a little improvement, \\
+to show it all would take too long! \\
+That's called a montage! (MONTAGE !) \\
+Even Rocky had a montage! (MONTAGE !) \\
+In any sport if you want to go, \\
+from just a beginner to a pro \\
+You need a montage! (MONTAGE !) \\
+A simple little montage! (MONTAGE !) \\
+Always fade out in a montage \\
+If you fade out it seems like more time has a passed in a montage
+\end{quote}
+
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Optimisation: Making numerical software run faster}
+\begin{itemize}
+\item The game is: 
+\begin{enumerate}
+\item Make sure your results are correct first
+\item Measure/profile (don't guess!) to find out where time is being spent in your program
+\item Make a change
+\item Check your software still produces correct results and measure performance again. If it's slower, or the result is wrong, revert the change
+\item Stop when your software is fast enough
+\end{enumerate}
+\item Don't skip steps!
+\item I used \texttt{valgrind}.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{So let's play \ldots}
+\begin{tabular}{|p{9cm}l|}
+\hline
+Change & Time (s) \\
+\hline
+Unoptimised code which produces correct results & 30 \\
+Save common sub-expressions in rank-1 update & 18 \\
+Use references to avoid copying & 16 \\
+Pre-allocate memory for $\mX_\vgamma$ and $(\mX_\vgamma^\top \mX_\vgamma)^{-1}$ & 9 \\
+\hline
+\end{tabular}
+\begin{itemize}
+\item 0.472 seconds on verona using all cores. Over a million models a second
+\item Other tricks I could try, but for now, that's fast enough!
+\item I parallelised the code using OpenMP. Five lines.
+\item I can recommend ``Using OpenMP'' by Barbara Chapman \note{MIT}, Gabrielle Jost, and Ruud Van der Pas.
+\begin{figure}
+\includegraphics[scale=0.3]{Using_OpenMP.jpeg}
+\end{figure}
+\note{The talks on Youtube by Tim Mattson (Intel) are also excellent.}
+\end{itemize}
+\end{frame}
+
+\end{document}
