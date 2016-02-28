@@ -23,6 +23,7 @@
 \begin{frame}{Melbourne trip}
 \begin{itemize}
 \item Met Hadley Wickham. The future of R is in good hands. \\
+	Key insight: Deep work \\
 	When I told him what I was doing, he responded ``I don't care about matrices.''. He only really cares 
 	about data frames. \\
 	A talk similiar to the talk he gave is available here \url{https://www.youtube.com/watch?v=hRNUgwAFZtQ}.
@@ -52,8 +53,12 @@ p(g) &= \frac{g^b (1 + g)^{-a - b - 2}}{\text{Beta}(a + 1, b + 1)} I(g > 0)
 \end{array}
 \end{equation*}
 
-where $\vGamma = \diag (\vgamma)$. Assume an approximation of the form
+where $\vGamma = \diag (\vgamma)$.
 
+\end{frame}
+
+\begin{frame}{Mean field updates are coming}
+Assume an approximation of the form
 \begin{equation*}
 q(\vtheta) = q(\vbeta) q(\vgamma) q(\sigma^2) q(g)
 \end{equation*}
@@ -66,9 +71,7 @@ q^*(\sigma^2) &= \text{IG}(\alpha_{q(\sigma^2)}, \beta_{q(\sigma^2)}) \text{ and
 q^*(g) &= \text{Beta Prime}(\alpha_{q(g)}, \beta_{q(g)})). \\
 \end{array}
 \end{equation*}
-\end{frame}
-
-\begin{frame}{Mean field updates are coming}
+Then
 \begin{equation*}
 \begin{array}{rl}
 &\quad \log{p(\vy, \vtheta)} \\
@@ -77,52 +80,53 @@ q^*(g) &= \text{Beta Prime}(\alpha_{q(g)}, \beta_{q(g)})). \\
 & -\frac{p}{2} \log{2 \pi} - \half \log |g \sigma^2 (\mX^\top \vGamma \mX)^{-1}| -
 	\half \vbeta^\top (g \sigma^2)^{-1} (\mX^\top \mX) \vbeta \\
 & + \vone^\top \vgamma \log(\rho) + \vone^\top (\vone - \vgamma) \log(1 - \rho)\\
-& - \log{(\sigma^2)} + \log \bI (\sigma^2 > 0) \\
+& - \log{(\sigma^2)} + \log \bI (\sigma^2 > 0). \\
 
 \end{array}
 \end{equation*}
-
-Find the optimal mean field updates with
-\[
-q_{\vtheta_i} \propto \bE_{-\theta_i} [\log p(\vy, \vtheta)].
-\]
+Find the optimal mean field updates with $q_{\vtheta_i} \propto \bE_{-\theta_i} [\log p(\vy, \vtheta)]$. I
+know how to do this.
 
 \end{frame}
 
-\begin{frame}{Algebra and literature montage}
+\begin{frame}{Algebra and literature \ldots}
 
 \begin{itemize}
 \item I'm rusty on some things, and need to get my skills back up to scratch, particularly some linear 
-algebra and multivariate distribution theory, as used in a Bayesian/VB context.
+algebra and multivariate distribution theory.
+\item Need to focus on these things as used in a Bayesian/VB context.
 \item The only way to get better is to practice!
+\item I'm tutoring third and second year subjects this year, which will also help.
 \item I also need to read way more literature.
-\item \begin{quote}
-\tiny
-The day's approaching to give it your best, \\
-and you've got to reach your prime \\
-That's when you need to put yourself to the test, \\
-and show us a passage of time \\
-We're gonna need a montage! (MONTAGE !) \\
-A sports training montage! (MONTAGE !) \\
-Show a lot of things happening at once, \\
-remind everyone of what's going on! (WHAT'S GOING ON!) \\
-And with every shot show a little improvement, \\
-to show it all would take too long! \\
-That's called a montage! (MONTAGE !) \\
-Even Rocky had a montage! (MONTAGE !) \\
-In any sport if you want to go, \\
-from just a beginner to a pro \\
-You need a montage! (MONTAGE !) \\
-A simple little montage! (MONTAGE !) \\
-Always fade out in a montage \\
-If you fade out it seems like more time has a passed in a montage
-\end{quote}
+% \item \begin{quote}
+% \tiny
+% The day's approaching to give it your best, \\
+% and you've got to reach your prime \\
+% That's when you need to put yourself to the test, \\
+% and show us a passage of time \\
+% We're gonna need a montage! (MONTAGE !) \\
+% A sports training montage! (MONTAGE !) \\
+% Show a lot of things happening at once, \\
+% remind everyone of what's going on! (WHAT'S GOING ON!) \\
+% And with every shot show a little improvement, \\
+% to show it all would take too long! \\
+% That's called a montage! (MONTAGE !) \\
+% Even Rocky had a montage! (MONTAGE !) \\
+% In any sport if you want to go, \\
+% from just a beginner to a pro \\
+% You need a montage! (MONTAGE !) \\
+% A simple little montage! (MONTAGE !) \\
+% Always fade out in a montage \\
+% If you fade out it seems like more time has a passed in a montage
+% \end{quote}
 
 \end{itemize}
 \end{frame}
 
 \begin{frame}{Optimisation: Making numerical software run faster}
 \begin{itemize}
+\item Getting numerical software right is harder. Focus there. Optimisation is the icing on the cake, but
+			you need to have a cake.
 \item The game is: 
 \begin{enumerate}
 \item Make sure your results are correct first
@@ -139,11 +143,13 @@ If you fade out it seems like more time has a passed in a montage
 \end{frame}
 
 \begin{frame}{So let's play \ldots}
-\begin{tabular}{|p{9cm}l|}
+I combined some of John's ideas with some of my own.
+\begin{tabular}{|p{9cm}|r|}
 \hline
 Change & Time (s) \\
+& (1 core) \\
 \hline
-Unoptimised code which produces correct results & 30 \\
+Unoptimised code which produces correct results & 33 \\
 Save common sub-expressions in rank-1 update & 18 \\
 Use references to avoid copying & 16 \\
 Pre-allocate memory for $\mX_\vgamma$ and $(\mX_\vgamma^\top \mX_\vgamma)^{-1}$ & 9 \\
@@ -156,7 +162,7 @@ Pre-allocate memory for $\mX_\vgamma$ and $(\mX_\vgamma^\top \mX_\vgamma)^{-1}$ 
 \item If you want to learn OpenMP, I can recommend ``Using OpenMP'' by Barbara Chapman \note{MIT},
 		Gabrielle Jost, and Ruud Van der Pas.
 \begin{figure}
-\includegraphics[scale=0.3]{Using_OpenMP.jpeg}
+\includegraphics[scale=0.1]{Using_OpenMP.jpeg}
 \end{figure}
 \note{The talks on Youtube by Tim Mattson (Intel) are also excellent.}
 \end{itemize}
