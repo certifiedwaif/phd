@@ -89,13 +89,14 @@ q_{\vtheta_i} \propto \bE_{-\theta_i} [\log p(\vy, \vtheta)].
 
 \end{frame}
 
-\begin{frame}{Algebra montage}
+\begin{frame}{Algebra and literature montage}
 
 \begin{itemize}
 \item I'm rusty on some things, and need to get my skills back up to scratch, particularly some linear 
 algebra and multivariate distribution theory, as used in a Bayesian/VB context.
 \item The only way to get better is to practice!
-\begin{quote}
+\item I also need to read way more literature.
+\item \begin{quote}
 \tiny
 The day's approaching to give it your best, \\
 and you've got to reach your prime \\
@@ -130,9 +131,11 @@ If you fade out it seems like more time has a passed in a montage
 \item Check your software still produces correct results and measure performance again. If it's slower, or the result is wrong, revert the change
 \item Stop when your software is fast enough
 \end{enumerate}
-\item Don't skip steps!
-\item I used \texttt{valgrind}.
-\end{itemize}
+\item It's very tempting to skip steps, but this will end up costing you more time in the long run e.g.
+		my first project.
+\item I used \texttt{valgrind}, which simulates the CPU and counts the number of instructions spent in each
+	  line of code. \note{It also simulates the cache, but I didn't go that far.
+}\end{itemize}
 \end{frame}
 
 \begin{frame}{So let's play \ldots}
@@ -149,12 +152,29 @@ Pre-allocate memory for $\mX_\vgamma$ and $(\mX_\vgamma^\top \mX_\vgamma)^{-1}$ 
 \begin{itemize}
 \item 0.472 seconds on verona using all cores. Over a million models a second
 \item Other tricks I could try, but for now, that's fast enough!
-\item I parallelised the code using OpenMP. Five lines.
-\item I can recommend ``Using OpenMP'' by Barbara Chapman \note{MIT}, Gabrielle Jost, and Ruud Van der Pas.
+\item OpenMP for parallelisation. \texttt{\#pragma omp parallel for}
+\item If you want to learn OpenMP, I can recommend ``Using OpenMP'' by Barbara Chapman \note{MIT},
+		Gabrielle Jost, and Ruud Van der Pas.
 \begin{figure}
 \includegraphics[scale=0.3]{Using_OpenMP.jpeg}
 \end{figure}
 \note{The talks on Youtube by Tim Mattson (Intel) are also excellent.}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Next \ldots}
+So I've got some useful code, and I'm getting better at C++ and OpenMP. That's going to come in handy, 
+because there's a lot to do.
+\begin{itemize}
+\item R package
+\item Support model selection where some covariates are fixed, and some are allowed to be included or excluded
+i.e. $\mC = [\mX, \mZ_\vgamma]$
+\item MCMC. $\vgamma$ is discrete, so we can't use Stan
+\item Variational Bayes
+\item Collapsed Variational Bayes
+\item Some examples
+\item So much reading \ldots
+\item So much writing \ldots
 \end{itemize}
 \end{frame}
 
