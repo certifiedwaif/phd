@@ -247,7 +247,7 @@ p(\vy, \vtheta) &= \quad p(\vy | \vbeta, \vgamma, \sigma^2) p(\vbeta | \vgamma, 
 	\half \vbeta^\top (g \sigma^2)^{-1} (\mX^\top \mX) \vbeta \\
 & \quad + \vone^\top \vgamma \log(\rho) + \vone^\top (\vone - \vgamma) \log(1 - \rho)\\
 & \quad - \log{(\sigma^2)} + \log \bI (\sigma^2 > 0) \\
-& \quad + b \log g + (-a - b - 2) \log(1 + g) - \log \text{Beta}(a + 1,  b + 1) + \log \bI(g > 0)
+& \quad + b \log g + (-a - b - 2) \log(1 + g) - \log \text{Beta}(a + 1,  b + 1) + \log \bI(g > 0)\\
 & = -\frac{n + p}{2} \log(2 \pi) - \half \log{\sigma^{2n}} \cancel{|\mI_n|} 
 		+\half \log{g^n \sigma^{2n}} |(\mX^\top \text{diag}(\vgamma) \mX)| \\
 &\quad		-\half (y - \mX \text{diag}(\vgamma) \vbeta)^\top \sigma^{-2} \mI_n (y - \mX \text{diag}(\vgamma) \vbeta)\\
