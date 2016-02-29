@@ -20,22 +20,21 @@
 \titlepage
 \end{frame}
 
-\begin{frame}{Melbourne trip}
+\begin{frame}{Melbourne trip/Early last week}
 \begin{itemize}
 \item Met Hadley Wickham. The future of R is in good hands. \\
 	Key insight: Deep work \\
-	When I told him what I was doing, he responded ``I don't care about matrices.''. He only really cares 
-	about data frames. \\
-	A talk similiar to the talk he gave is available here \url{https://www.youtube.com/watch?v=hRNUgwAFZtQ}.
+	When I told him what I was doing, he responded ``I don't care about matrices.''. He cares 
+	about data frames/functional programming. \\
+\item A talk similiar to the talk he gave is available here \url{https://www.youtube.com/watch?v=hRNUgwAFZtQ}.
 \item Hung out with Charles Gray, PhD candidate at Latrobe working with Agus. I taught her some UNIX and Git.
-	She taught me some TikZ and LaTeX.\\
-	\begin{tikzpicture}[scale=0.5]
-	\draw (-0.75, 0.5) circle(10pt);
-	\draw (0.75, 0.5) circle(10pt);
-	\draw (-1, -0.75) to[out=-90, in=-90] (1, -0.75);
-	\end{tikzpicture}
+	She taught me some TikZ and LaTeX.
+	\tikz[scale=0.1]	{\draw (-0.75, 0.5) circle(10pt);	\draw (0.75, 0.5) circle(10pt);	\draw (-1, -0.75) to[out=-90, in=-90] (1, -0.75);}
+	
 \item Met with Lev Lafayette. Sys admin. Set up USyd HPC (1,500 cores), now working with NeCTAR (4,000 cores). 
-	He's a nice guy, and we had a productive chat.
+	\note{He's a nice guy, and we had a productive chat.}
+\item Gave a talk on floating point numbers at Functional Programming Special Interest Group Sydney.
+			Computer science/Haskell guys \ldots
 \end{itemize}
 \end{frame}
 
@@ -55,10 +54,24 @@ p(g) &= \frac{g^b (1 + g)^{-a - b - 2}}{\text{Beta}(a + 1, b + 1)} I(g > 0)
 
 where $\vGamma = \diag (\vgamma)$.
 
+\begin{figure}
+\caption{Graphical model}
+\begin{tikzpicture}
+\node[draw, circle, double] (y) {$\vy$};
+\node[draw, circle, below left of=y] (beta) {$\vbeta$};
+\node[draw, circle, below of=y] (gamma) {$\vgamma$};
+\node[draw, circle, below right of=y] (sigma2) {$\sigma^2$};
+\node[draw, circle, below of=beta] (g) {$g$};
+\draw[<-] (y) -- (beta);
+\draw[<-] (y) -- (gamma);
+\draw[<-] (y) -- (sigma2);
+\draw[<-] (beta) -- (g);
+\end{tikzpicture}
+\end{figure}
 \end{frame}
 
-\begin{frame}{Mean field updates are coming}
-Assume an approximation of the form
+\begin{frame}{Variational Bayes approximation}
+Assume a factored approximation of the form
 \begin{equation*}
 q(\vtheta) = q(\vbeta) q(\vgamma) q(\sigma^2) q(g)
 \end{equation*}
@@ -80,24 +93,25 @@ Then
 & -\frac{p}{2} \log{2 \pi} - \half \log |g \sigma^2 (\mX^\top \vGamma \mX)^{-1}| -
 	\half \vbeta^\top (g \sigma^2)^{-1} (\mX^\top \mX) \vbeta \\
 & + \vone^\top \vgamma \log(\rho) + \vone^\top (\vone - \vgamma) \log(1 - \rho)\\
-& - \log{(\sigma^2)} + \log \bI (\sigma^2 > 0). \\
-
+& - \log{(\sigma^2)} + \log \bI (\sigma^2 > 0).
 \end{array}
 \end{equation*}
-Find the optimal mean field updates with $q_{\vtheta_i} \propto \bE_{-\theta_i} [\log p(\vy, \vtheta)]$. I
-know how to do this.
+
+Find the optimal mean field updates with $q_{\vtheta_i} \propto \bE_{-\theta_i} [\log p(\vy, \vtheta)]$.
 
 \end{frame}
 
 \begin{frame}{Algebra and literature \ldots}
 
 \begin{itemize}
-\item I'm rusty on some things, and need to get my skills back up to scratch, particularly some linear 
-algebra and multivariate distribution theory.
-\item Need to focus on these things as used in a Bayesian/VB context.
+\item It's been a while since undergrad/Honours, and I'm \emph{very} rusty on some things.
+\item I need to get my skills back up to scratch, particularly some linear algebra, vector calculus and
+			multivariate distribution theory.
+\item Need to focus on these things as used in a Bayesian/Variational Bayes context.
 \item The only way to get better is to practice!
 \item I'm tutoring third and second year subjects this year, which will also help.
-\item I also need to read way more literature.
+\item I need to read way more literature.
+\item The literature is very interesting.
 % \item \begin{quote}
 % \tiny
 % The day's approaching to give it your best, \\
@@ -125,21 +139,20 @@ algebra and multivariate distribution theory.
 
 \begin{frame}{Optimisation: Making numerical software run faster}
 \begin{itemize}
-\item Getting numerical software right is harder. Focus there. Optimisation is the icing on the cake, but
-			you need to have a cake.
-\item The game is: 
+\item Getting numerical software right is much harder than making it run fast. Focus there. Numerical software
+			which	produces incorrect answers is \emph{worthless}!
+\item Once you have a program that produces the correct results, the game is: 
 \begin{enumerate}
-\item Make sure your results are correct first
 \item Measure/profile (don't guess!) to find out where time is being spent in your program
 \item Make a change
-\item Check your software still produces correct results and measure performance again. If it's slower, or the result is wrong, revert the change
-\item Stop when your software is fast enough
+\item Check your software still produces correct results and measure performance again. If it's slower, or the result is now wrong, revert the change
+\item Stop when your software is fast enough, or you reach a point of diminishing returns. Whichever comes first
 \end{enumerate}
 \item It's very tempting to skip steps, but this will end up costing you more time in the long run e.g.
-		my first project.
+		my first project
 \item I used \texttt{valgrind}, which simulates the CPU and counts the number of instructions spent in each
-	  line of code. \note{It also simulates the cache, but I didn't go that far.
-}\end{itemize}
+	  line of code. \note{It also simulates the cache, but I didn't go that far}
+\end{itemize}
 \end{frame}
 
 \begin{frame}{So let's play \ldots}
@@ -156,21 +169,23 @@ Pre-allocate memory for $\mX_\vgamma$ and $(\mX_\vgamma^\top \mX_\vgamma)^{-1}$ 
 \hline
 \end{tabular}
 \begin{itemize}
-\item 0.472 seconds on verona using all cores. Over a million models a second
-\item Other tricks I could try, but for now, that's fast enough!
-\item OpenMP for parallelisation. \texttt{\#pragma omp parallel for}
-\item If you want to learn OpenMP, I can recommend ``Using OpenMP'' by Barbara Chapman \note{MIT},
-		Gabrielle Jost, and Ruud Van der Pas.
+\item $0.472$ seconds for $p=13$ and $n=263$ on verona using all cores. Over a million models a second. Fast
+			enough for now!
+% \item Other tricks I could try, but for now, that's fast enough!
+\item OpenMP for parallelisation \\
+			\texttt{\#pragma omp parallel for}
+\item If you want to learn OpenMP more deeply, I can recommend ``Using OpenMP'' by Barbara Chapman \note{MIT},
+			Gabrielle Jost, and Ruud Van der Pas
 \begin{figure}
 \includegraphics[scale=0.1]{Using_OpenMP.jpeg}
 \end{figure}
-\note{The talks on Youtube by Tim Mattson (Intel) are also excellent.}
+\note{The talks on Youtube by Tim Mattson (Intel) are also excellent. And you could talk to Andrew Stefan}
 \end{itemize}
 \end{frame}
 
 \begin{frame}{Next \ldots}
 So I've got some useful code, and I'm getting better at C++ and OpenMP. That's going to come in handy, 
-because there's a lot to do.
+because it's nearly March, and there's a lot to do.
 \begin{itemize}
 \item R package
 \item Support model selection where some covariates are fixed, and some are allowed to be included or excluded
