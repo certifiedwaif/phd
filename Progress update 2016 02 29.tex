@@ -93,11 +93,12 @@ Then
 & -\frac{p}{2} \log{2 \pi} - \half \log |g \sigma^2 (\mX^\top \vGamma \mX)^{-1}| -
 	\half \vbeta^\top (g \sigma^2)^{-1} (\mX^\top \mX) \vbeta \\
 & + \vone^\top \vgamma \log(\rho) + \vone^\top (\vone - \vgamma) \log(1 - \rho)\\
-& - \log{(\sigma^2)} + \log \bI (\sigma^2 > 0).
+& - \log{(\sigma^2)} + \log \bI (\sigma^2 > 0) \\
+& + b \log g + (-a - b - 2) \log(1 + g) - \log \text{Beta}(a + 1,  b + 1) + \log \bI(g > 0).
 \end{array}
 \end{equation*}
 
-Find the optimal mean field updates with $q_{\vtheta_i} \propto \bE_{-\theta_i} [\log p(\vy, \vtheta)]$.
+\small Find the optimal mean field updates with $q_{\vtheta_i} \propto \bE_{-\theta_i} [\log p(\vy, \vtheta)]$.
 
 \end{frame}
 
