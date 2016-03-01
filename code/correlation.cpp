@@ -1,6 +1,6 @@
 // correlation.cpp
 
-// "If you want to do numerics, you should use C++ with Eigen or Armadillo. It's pretty fast." - Hadley Wickham,
+// "If you want work with matrices, you should use C++ with Eigen or Armadillo. It's pretty fast." - Hadley Wickham,
 // completely unprompted.
 
 #include <sys/time.h>
@@ -163,9 +163,9 @@ dbitset& greycode(const unsigned int idx, const unsigned int p, dbitset& bs_ret)
 }
 
 
-dbitset& greycode_change(const unsigned int idx, const unsigned int p, dbitset& gamma, bool& update, 
-											unsigned int& min_idx, unsigned int& diff_idx,
-											unsigned int& bits_set)
+dbitset& greycode_change(const unsigned int idx, const unsigned int p, dbitset& gamma, bool& update,
+unsigned int& min_idx, unsigned int& diff_idx,
+unsigned int& bits_set)
 {
 	dbitset bs_curr(p);
 	dbitset bs_prev(p);
@@ -272,9 +272,11 @@ MatrixXd& reorder_last_row_column_to_ith(MatrixXd& m, const unsigned int i, cons
 	for (unsigned int idx = 0; idx < p_gamma; idx++) {
 		if (idx < i) {
 			ind[idx] = idx;
-		} else if (idx == i) {
+		}
+		else if (idx == i) {
 			ind[idx] = p_gamma - 1;
-		} else {
+		}
+		else {
 			ind[idx] = idx - 1;
 		}
 	}
@@ -309,7 +311,8 @@ MatrixXd& reorder_ith_row_column_to_last(MatrixXd& m, const unsigned int i, cons
 	for (unsigned int idx = 0; idx < (p_gamma - 1); idx++) {
 		if (idx < i) {
 			ind[idx] = idx;
-		} else {
+		}
+		else {
 			ind[idx] = idx + 1;
 		}
 	}
@@ -344,7 +347,7 @@ MatrixXd& reorder_ith_row_column_to_last(MatrixXd& m, const unsigned int i, cons
 //'                            which we are calculating using this function.
 //' @return                    The new inverse (mX_gamma_prime^T mX_gamma_prime)^{-1}
 MatrixXd& rank_one_update(const MatrixXd& mX_gamma, unsigned int min_idx, unsigned int i, const VectorXd& vx,
-													const MatrixXd& mX_gamma_prime, const MatrixXd& mA, MatrixXd& mA_prime)
+const MatrixXd& mX_gamma_prime, const MatrixXd& mA, MatrixXd& mA_prime)
 {
 	const unsigned int p_gamma_prime = mX_gamma_prime.cols();
 
@@ -416,8 +419,8 @@ MatrixXd& rank_one_update(const MatrixXd& mX_gamma, unsigned int min_idx, unsign
 //' @param[out] mA_prime       The current iteration's inverse i.e. (X_gamma_prime^T X_gamma_prime)^{-1}
 //' @return                    The new inverse (mX_gamma_prime^T mX_gamma_prime)^{-1}
 MatrixXd& rank_one_downdate(const MatrixXd& mX_gamma, const MatrixXd& mX_gamma_prime,
-							const unsigned int min_idx, const unsigned int i,
-							MatrixXd& mA, MatrixXd& mA_prime)
+const unsigned int min_idx, const unsigned int i,
+MatrixXd& mA, MatrixXd& mA_prime)
 {
 	const unsigned int p_gamma_prime = mX_gamma_prime.cols();
 	const unsigned int p_gamma = mX_gamma.cols();
@@ -474,6 +477,35 @@ MatrixXd& rank_one_downdate(const MatrixXd& mX_gamma, const MatrixXd& mX_gamma_p
 }
 
 
+void update_mA_prime(bool& bmA_set, bool bUpdate, MatrixXd& mA, MatrixXd& mA_prime,
+					MatrixXd& mX_gamma, MatrixXd& mX_gamma_prime,
+					VectorXd& vx, 
+					const int diff_idx, const int min_idx)
+{
+	// If we haven't previously calculated this inverse, calculate it the first time.
+	if (!bmA_set) {
+		// Calculate full inverse mA, O(p^3)
+		mA_prime = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
+		bmA_set = true;
+	}
+	else {
+		if (bUpdate) {
+			// Rank one update of mA_prime from mA
+			#ifdef DEBUG
+			cout << "Updating " << diff_idx << endl;
+			#endif
+			mA_prime = rank_one_update(mX_gamma, min_idx, diff_idx, vx, mX_gamma_prime, mA, mA_prime);
+		}
+		else {
+			// Rank one downdate
+			#ifdef DEBUG
+			cout << "Downdating " << diff_idx << endl;
+			#endif
+			mA_prime = rank_one_downdate(mX_gamma, mX_gamma_prime, min_idx, diff_idx, mA, mA_prime);
+		}
+	}
+}
+
 //' Calculate the correlations for every subset of the covariates in mX
 //'
 //' @param[in] vy            A vector of responses of length n
@@ -499,11 +531,9 @@ const unsigned int max_iterations, const bool bIntercept = false, const bool bCe
 	bool bUpdate;				 // True for an update, false for a downdate
 	unsigned int min_idx;		 // The minimum index of covariate that's included in the model
 	unsigned int diff_idx;		 // The covariate which is changing
-	double numerator;			 // The numerator in the correlation calculation
-	double R2;					 // Correlation
 	dbitset gamma(p);			 // The model gamma
 	unsigned int p_gamma_prime;	 // The number of columns in the matrix mX_gamma_prime
-	unsigned int p_gamma;	 	 // The number of columns in the matrix mX_gamma
+	unsigned int p_gamma;		 // The number of columns in the matrix mX_gamma
 	VectorXd vx;				 // The column vector for the current covariate
 	vector< MatrixXd > vec_mA(p);
 	vector< MatrixXd > vec_mX_gamma(p);
@@ -533,7 +563,7 @@ const unsigned int max_iterations, const bool bIntercept = false, const bool bCe
 	// Loop through models, updating and downdating mA as necessary
 	#pragma omp parallel for\
 		firstprivate(bmA_set, gamma, vx, vec_mX_gamma, vec_mA)\
-		private(numerator, R2, min_idx, diff_idx, p_gamma_prime, p_gamma, bUpdate)\
+		private(min_idx, diff_idx, p_gamma_prime, p_gamma, bUpdate)\
 			shared(cout, vy, mX, vR2_all)\
 			default(none)
 	for (unsigned int idx = 1; idx < max_iterations; idx++) {
@@ -556,71 +586,27 @@ const unsigned int max_iterations, const bool bIntercept = false, const bool bCe
 		MatrixXd& mA_prime = vec_mA[p_gamma_prime - 1];
 		vx = mX.col(diff_idx);
 
-		// If we haven't previously calculated this inverse, calculate it the first time.
-		if (!bmA_set) {
-			// Calculate full inverse mA, O(p^3)
-			mA_prime = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
-								 // [y^T X, y^T x]^T
-			VectorXd v1(p_gamma_prime);
-			v1 = vy.transpose() * mX_gamma_prime;
-			numerator = (v1.transpose() * mA_prime * v1).value();
-			R2 = numerator / vy.squaredNorm();
-			#ifdef DEBUG
-			cout << "Numerator " << numerator << " denominator " << vy.squaredNorm();
-			cout << " R2 " << R2 << endl;
-			#endif
-			vR2_all(idx) = R2;
-
-			bmA_set = true;
-		}
-		else {
-			if (bUpdate) {
-				// Rank one update of mA_prime from mA
-				#ifdef DEBUG
-				cout << "Updating " << diff_idx << endl;
-				cout << "p_gamma_prime " << p_gamma_prime << endl;
-				#endif
-
-				// Calculate [y^T X, y^T x]^T
-				VectorXd v1(p_gamma_prime);
-				// VectorXd v2, v3;
-				// v2 = vy.transpose() * vx;
-				// v3 = vy.transpose() * mX_gamma;
-				// v1 << v2, v3;
-				v1 = vy.transpose() * mX_gamma_prime;
-
-				mA_prime = rank_one_update(mX_gamma, min_idx, diff_idx, vx, mX_gamma_prime, mA, mA_prime);
-
-				numerator = (v1.transpose() * mA_prime * v1).value();
-				R2 = numerator / vy.squaredNorm();
-				vR2_all(idx) = R2;
-				#ifdef DEBUG
-				cout << "v1 " << v1 << endl;
-				cout << "mA_prime " << mA_prime << endl;
-				cout << "Numerator " << numerator << " denominator " << vy.squaredNorm();
-				cout << " R2 " << R2 << endl;
-				cout << "vR2_all(" << idx << ") = " << R2 << endl;
-				#endif
-			}
-			else {
-				// Rank one downdate
-				#ifdef DEBUG
-				cout << "Downdating " << diff_idx << endl;
-				#endif
-				MatrixXd& mA_prime = vec_mA[p_gamma_prime - 1];
-				mA_prime = rank_one_downdate(mX_gamma, mX_gamma_prime, min_idx, diff_idx, mA, mA_prime);
-
-				// Calculate correlation
-				numerator = (vy.transpose() * mX_gamma_prime * mA_prime * mX_gamma_prime.transpose() * vy).value();
-				R2 = numerator / vy.squaredNorm();
-				vR2_all(idx) = R2;
-				#ifdef DEBUG
-				cout << "Numerator " << numerator << " denominator " << vy.squaredNorm();
-				cout << " R2 " << R2 << endl;
-				cout << "vR2_all(" << idx << ") = " << R2 << endl;
-				#endif
-			}
-		}
+		double R2;
+		double numerator;
+		VectorXd v1(p_gamma_prime);
+		// VectorXd v2, v3;
+		// v2 = vy.transpose() * vx;
+		// v3 = vy.transpose() * mX_gamma;
+		// v1 << v2, v3;
+		v1 = vy.transpose() * mX_gamma_prime;
+		update_mA_prime(bmA_set, bUpdate, mA, mA_prime,
+										mX_gamma, mX_gamma_prime,
+										vx, 
+										diff_idx, min_idx);
+		numerator = (v1.transpose() * mA_prime * v1).value();
+		R2 = numerator / vy.squaredNorm();
+		#ifdef DEBUG
+		cout << "v1 " << v1 << endl;
+		cout << "mA_prime " << mA_prime << endl;
+		cout << "Numerator " << numerator << " denominator " << vy.squaredNorm();
+		cout << " R2 " << R2 << endl;
+		#endif
+		vR2_all(idx) = R2;	// Calculate correlation
 
 		p_gamma = p_gamma_prime;
 	}
@@ -815,10 +801,10 @@ int main()
 	gettimeofday(&end, NULL);
 
 	seconds  = end.tv_sec  - start.tv_sec;
-    useconds = end.tv_usec - start.tv_usec;
+	useconds = end.tv_usec - start.tv_usec;
 
-    mtime = ((seconds) * 1000 + useconds/1000.0) + 0.5;
-    cout << "Elapsed time in milliseconds: " << mtime << endl;
+	mtime = ((seconds) * 1000 + useconds/1000.0) + 0.5;
+	cout << "Elapsed time in milliseconds: " << mtime << endl;
 
 	VectorXd vExpected_correlations = parseCSVfile_double("Hitters_exact2.csv");
 	cout << "i,R2" << endl;
