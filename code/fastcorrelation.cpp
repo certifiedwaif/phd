@@ -577,9 +577,11 @@ const unsigned int max_iterations, const bool bIntercept = false, const bool bCe
 
 // [[Rcpp::export]]
 VectorXd all_correlations(MapVecd vy, MapMatd mX, unsigned int intercept_col,
-                          unsigned int max_iterations, bool bIntercept, bool bCentre)
+                          bool bIntercept, bool bCentre)
 {
   VectorXd vR2_all(max_iterations);
+  const unsigned int p = mX.cols();
+  const unsigned int max_iterations = 1 << p;
 
   vR2_all = all_correlations_cpp(vy, mX, intercept_col, max_iterations, bIntercept, bCentre);
 
