@@ -6,12 +6,13 @@
  */
 
 // [[Rcpp::depends(RcppArmadillo)]]
-#include <RcppArmadillo.h>
+// #include <RcppArmadillo.h>
 #include <iostream>
 #include <list>
 #include <utility>
+#include <armadillo>
 
-using namespace Rcpp;
+// using namespace Rcpp;
 using namespace std;
 using namespace arma;
 
@@ -22,7 +23,7 @@ using namespace arma;
 
         The operator >> is shift right. The operator ^ is exclusive or.
 */
-unsigned int binaryToGray(unsigned int num)
+unsigned int binary_to_gray(unsigned int num)
 {
   return (num >> 1) ^ num;
 }
@@ -31,7 +32,7 @@ unsigned int binaryToGray(unsigned int num)
         The purpose of this function is to convert a reflected binary
         Gray code number to a binary number.
 */
-unsigned int grayToBinary(unsigned int num)
+unsigned int gray_to_binary(unsigned int num)
 {
   unsigned int mask;
   for (mask = num >> 1; mask != 0; mask = mask >> 1)
@@ -41,7 +42,7 @@ unsigned int grayToBinary(unsigned int num)
   return num;
 }
 
-vec binaryToVec(unsigned int num, unsigned int p)
+vec binary_to_vec(unsigned int num, unsigned int p)
 {
   vec result(p);
   for (unsigned int i = 0; i < p; i++) {
@@ -56,7 +57,7 @@ mat greycode(int p)
   unsigned int rows = 1 << p;
   mat result(rows, p);
   for (unsigned int i = 0; i < rows; i++) {
-    result.row(i) = binaryToVec(binaryToGray(i), p).t();
+    result.row(i) = binary_to_vec(binary_to_gray(i), p).t();
   }
   return(result);
 }
@@ -302,7 +303,7 @@ vec ZE_exact_fast_cpp(vec vy, mat mX, bool LARGEP)
     inds = indsNew;
   }
   // vR2 <- vR2/yTy
-  vR2 = vR2/yTy(0, 0);
+  vR2 = vR2 / yTy(0, 0);
   // cout << "First ten elements of vR2" << vR2.submat(0, 0, 9, 0);
   // Do this in the calling code, where it's easier.
   // vlog.ZE  <-  -res.con$vcon[vq+1]*log(1 - vR2) + res.con$vpen[vq+1]
@@ -312,31 +313,38 @@ vec ZE_exact_fast_cpp(vec vy, mat mX, bool LARGEP)
 }
 
 // [[Rcpp::export]]
-List ZE_exact_fast(NumericVector vy_R, NumericMatrix mX_R)
-{
-	vec vy = Rcpp::as<vec>(vy_R);
-	mat mX = Rcpp::as<mat>(mX_R);
-	vec vR2 = ZE_exact_fast_cpp(vy, mX, false);
-	return Rcpp::List::create(Rcpp::Named("vR2")=vR2);
-}
-
-// int main(int argc, char **argv)
+// List ZE_exact_fast(NumericVector vy_R, NumericMatrix mX_R)
 // {
-//   vec vy;
-//   mat mX;
-//   vy.load("vy.csv", csv_ascii);
-//   cout << "vy" << vy.submat(0, 0, 9, 0);
-//   mX.load("mX.csv", csv_ascii);
-//   cout << "mX" << mX.submat(0, 0, 9, 18);
-//   //vy << 10 << 20 << endr;
-//   //mX << 10 << 20 << endr
-//   //   << 30 << 40 << endr;
-//   // Load vy
-//   // Load mX
-//   vec result = ZE_exact_fast(vy, mX, 19);
-
-//   return 0;
+// 	vec vy = Rcpp::as<vec>(vy_R);
+// 	mat mX = Rcpp::as<mat>(mX_R);
+// 	vec vR2 = ZE_exact_fast_cpp(vy, mX, false);
+// 	return Rcpp::List::create(Rcpp::Named("vR2")=vR2);
 // }
+
+int main(int argc, char **argv)
+{
+  vec vy;
+  mat mX;
+  vy.load("vy.csv", csv_ascii);
+  // cout << "vy" << vy.submat(0, 0, 9, 0);
+  mX.load("mX.csv", csv_ascii);
+  // cout << "mX" << mX.submat(0, 0, 9, 18);
+  //vy << 10 << 20 << endr;
+  //mX << 10 << 20 << endr
+  //   << 30 << 40 << endr;
+  // Load vy
+  // Load mX
+  vec result = ZE_exact_fast_cpp(vy, mX, false);
+
+  vec expected;
+  expected.load("Hitters_exact2.csv", csv_ascii);
+  cout << "C++ result, expected result, difference" << endl;
+  for (unsigned int i = 0; i < 10; i++) {
+    cout << result(i) << " " << expected(i) << " " << result(i) - expected(i) << endl;
+  }
+
+  return 0;
+}
 
 
 
