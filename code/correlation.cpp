@@ -240,8 +240,10 @@ MatrixXd& get_rows_and_cols(const MatrixXd& m1, const dbitset& rows_bs, const db
 	vector<unsigned int> col_indices;
 	col_indices = get_indices_from_dbitset(cols_bs, col_indices);
 
-	for (unsigned int i = 0; i < row_indices.size(); i++) {
-		for (unsigned int j = 0; j < col_indices.size(); j++) {
+	// Matrices are stored in column major order, so the intent is to access contiguous memory in
+	// sequence by looping down each row in the inner loop.
+	for (unsigned int j = 0; j < col_indices.size(); j++) {
+		for (unsigned int i = 0; i < row_indices.size(); i++) {
 			m2(i, j) = m1(row_indices[i], col_indices[j]);
 		}
 	}
@@ -381,9 +383,8 @@ MatrixXd& reorder_ith_row_column_to_last(MatrixXd& m, const unsigned int i, cons
 //' @param[out] mA_prime       The current iteration's inverse i.e. (X_gamma_prime^T X_gamma_prime)^{-1}
 //'                            which we are calculating using this function.
 //' @return                    The new inverse (mX_gamma_prime^T mX_gamma_prime)^{-1}
-MatrixXd& rank_one_update(const dbitset& gamma, const MatrixXd& mX_gamma, const MatrixXd& mX_gamma_prime,
-MatrixXd& mA, MatrixXd& mA_prime, const MatrixXd& vx, const MatrixXd& mXTX,
-const unsigned int min_idx, const unsigned int i)
+MatrixXd& rank_one_update(const dbitset& gamma, const unsigned int col, const MatrixXd& mXTX,
+MatrixXd& mA, MatrixXd& mA_prime)
 {
 	const unsigned int p = mXTX.cols();
 	const unsigned int p_gamma_prime = mX_gamma_prime.cols();
@@ -398,9 +399,15 @@ const unsigned int min_idx, const unsigned int i)
 	#endif
 
 	// Construct mA_prime
-	// Can pre-compute
-	VectorXd v1 = mX_gamma.transpose() * vx;
-	const double b = 1 / (vx.transpose() * vx - v1.transpose() * mA * v1).value();
+	// b = 1 / (x^T x - x^T X_gamma A X_gamma^T x)
+	double xTx = mXTX(col, col);
+	dbitset col_bs(p);
+	col_bs[i] = true;
+	MatrixXd X_gammaTx(p_gamma, 1);
+	X_gammaT_x = get_rows_and_cols(mXTX, gamma, col_bs, X_gammaTx);
+
+	// const double b = 1 / (x^T x - x^T X_gamma A X_gamma^T x).value();
+	const double b = 1 / (xTx - x_gammaT_x.transpose() * X_gammaT_x).value();
 	// b is supposed to be positive definite.
 	#ifdef DEBUG
 	cout << "b " << b << endl;
@@ -408,17 +415,23 @@ const unsigned int min_idx, const unsigned int i)
 	const double epsilon = 1e-8;
 	if (b > epsilon) {
 		// Do rank one update
-		// MatrixXd m1 = vx.transpose() * mX_gamma * mA;
-		MatrixXd m1_tmp(p_gamma_prime, 1);
-		MatrixXd& m1_tmpr = m1_tmp;
-		dbitset cols(p);
-		cols[i] = true;
-		m1_tmpr = get_rows_and_cols(mXTX, gamma, cols, m1_tmpr);
-		MatrixXd m1 = m1_tmpr * mA;
-		VectorXd v2 = -mA * mX_gamma.transpose() * vx * b;
-		// MatrixXd v2 = ;
-		mA_prime << mA + b * m1.transpose() * m1, v2,
-			v2.transpose(), b;
+		// Matrix m1 = A + b A X_gamma^T x x^T X_gamma A
+		MatrixXd X_gamma_x(p_gamma, p_gamma);
+		MatrixXd A_X_gamma_T_x = A * X_gamma_T_x;
+		// Re-arrange.
+		MatrixXd b_X_gamma_T_x_A = b * X_gamma_T_x * A;
+		if (col == 0) {
+			mA_prime << b, -b_X_gamma_T_x_A,
+			            -b_X_gamma_T_x_A.transpose(), A + b * A_X_gammaT_x * A_X_gamma_x.transpose();
+		} else if (col <= 1 && col < p - 1) {
+			mA_prime << 1, 2, 3,
+									4, 5, 6,
+									7, 8, 9;
+		} else // col == p
+		{
+			mA_prime << A + A + b * A_X_gammaT_x * A_X_gamma_x.transpose(), -b_X_gamma_T_x_A,
+			            -b_X_gamma_T_x_A.transpose(), b;
+		}
 
 		if ((i - min_idx) < p_gamma_prime) {
 			// Construct a permutation matrix mPerm which interchanges the p_gamma_prime-th and i-th rows/columns,
