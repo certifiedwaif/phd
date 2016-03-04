@@ -80,7 +80,7 @@ ZE.exact <- function(vy,mX,LARGEP,STORE.XTX=TRUE)
 {
 	n <- length(vy)
 	p <- ncol(mX)
-	A <- greycode(p)
+	# A <- greycode(p)
 	vq <- A%*%matrix(1,p,1)
 	linds <- apply(A==1, 1, which) 
 	res.con <- ZE.constants(n,p,LARGEP) 
@@ -90,8 +90,10 @@ ZE.exact <- function(vy,mX,LARGEP,STORE.XTX=TRUE)
 	XTy <- t(mX)%*%vy
 	yTy <- t(vy)%*%vy
 	vR2 <- rep(0,nrow(A))
-	for (j in 2:nrow(A))
+	# for (j in 2:nrow(A))
+	for (j in 2:7)
 	{
+		cat("Iteration ", j, "\n")
 		inds <- linds[[j]]
 		b <- XTy[inds]
 		bbT <- b%*%t(b)
@@ -106,7 +108,14 @@ ZE.exact <- function(vy,mX,LARGEP,STORE.XTX=TRUE)
 		} else {
 			Z <- solve(Q)
 		}
+		cat("inds ", inds, "\n")
+		cat("b ", b, "\n")
+		cat("bbT ", bbT, "\n")
+		cat("Q ", Q, "\n")
+		cat("Z ", Z, "\n")
+
 		vR2[j] <- sum(bbT*Z) 
+		cat("vR2[j] ", vR2[j], "\n")
 	}
 	vR2 <- vR2/yTy
 	vlog.ZE  <-  -res.con$vcon[vq+1]*log(1 - vR2) + res.con$vpen[vq+1]
