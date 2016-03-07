@@ -391,6 +391,7 @@ MatrixXd& rank_one_update(const dbitset& gamma, const unsigned int col, const Ma
 MatrixXd& mA, MatrixXd& mA_prime, bool& bLow)
 {
 	const unsigned int p = mXTX.cols();
+	const unsigned int p_gamma_prime = mA_prime.cols();
 	const unsigned int p_gamma = mA.cols();
 
 
@@ -407,7 +408,7 @@ MatrixXd& mA, MatrixXd& mA_prime, bool& bLow)
 	X_gamma_T_x = get_rows_and_cols(mXTX, gamma, col_bs, X_gamma_T_x);
 
 	// const double b = 1 / (x^T x - x^T X_gamma A X_gamma^T x).value();
-	const double b = 1 / (xTx - (X_gamma_T_x.transpose() * X_gamma_T_x).value());
+	const double b = 1 / (xTx - (X_gamma_T_x.transpose() * mA * X_gamma_T_x).value());
 	// b is supposed to be positive definite.
 	#ifdef DEBUG
 	cout << "b " << b << endl;
@@ -419,24 +420,24 @@ MatrixXd& mA, MatrixXd& mA_prime, bool& bLow)
 		MatrixXd X_gamma_x(p_gamma, p_gamma);
 		MatrixXd A_X_gamma_T_x = mA * X_gamma_T_x;
 		// Re-arrange.
-		MatrixXd b_X_gamma_T_x_A = b * X_gamma_T_x * mA;
+		MatrixXd b_X_gamma_T_x_A = b * X_gamma_T_x.transpose() * mA;
 		if (col == 0) {
 			mA_prime << b, -b_X_gamma_T_x_A,
 				-b_X_gamma_T_x_A.transpose(), mA + b * A_X_gamma_T_x * A_X_gamma_T_x.transpose();
 		}
-		else if (col <= 1 && col < p_gamma - 1) {
+		else if (0 < col && col < p_gamma_prime - 1) {
 			MatrixXd m1(p_gamma, p_gamma);
 			m1 = mA + b * A_X_gamma_T_x * A_X_gamma_T_x.transpose();
 			// mA_prime << 1, 2, 3,
 			// 						4, 5, 6,
 			// 						7, 8, 9;
+			mA_prime.topLeftCorner(col, col) = m1.topLeftCorner(col, col);
+			mA_prime.row(col).leftCols(col) = -b_X_gamma_T_x_A.topRows(col).transpose();
+			mA_prime.col(col).bottomRows(col) = -b_X_gamma_T_x_A.topRows(col);
 			mA_prime(col, col) = b;
-			mA_prime.block(0, col - 1 - 1, 0, col - 1 - 1) = m1.block(0, col - 1 - 1, 0 , col - 1 - 1);
-			mA_prime.block(col, 0, 0, col - 1 - 1) = -b_X_gamma_T_x_A.bottomRightCorner(col - 1, 0);
-			mA_prime.block(col + 1, p_gamma - (col + 1) - 1, col + 1, p_gamma - (col + 1) - 1) = m1.block(col, p_gamma - (col + 1) - 1, 0 , p_gamma - (col + 1) - 1);
-			mA_prime.block(col, 1, 0, col - 1) = -b_X_gamma_T_x_A.bottomRightCorner(col - 1, 0).transpose();
-			mA_prime.block(col + 1, p_gamma - (col + 1), col, 1) = b_X_gamma_T_x_A.bottomRightCorner(col - 1, 0).transpose();
-		} else					 // col == p
+			mA_prime.bottomLeftCorner(p_gamma_prime - col, p_gamma_prime - col) = m1.bottomLeftCorner(p_gamma_prime - col, p_gamma_prime - col);
+			mA_prime.bottomRightCorner(p_gamma_prime - col, p_gamma_prime - col) = m1.bottomRightCorner(p_gamma_prime - col, p_gamma_prime - col);
+		} else					 // col == p_gamma_prime
 		{
 			mA_prime << mA + b * A_X_gamma_T_x * A_X_gamma_T_x.transpose(), -b_X_gamma_T_x_A,
 				-b_X_gamma_T_x_A.transpose(), b;
@@ -454,6 +455,13 @@ MatrixXd& mA, MatrixXd& mA_prime, bool& bLow)
 		// mA_prime = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
 		// Signal that a rank one update was impossible so that the calling code can perform a full inversion.
 		bLow = true;
+	}
+
+	// Should take advantage of the symmetry of mA_prime. For now, just fill in upper triangular entries.
+	for (unsigned int j = 0; j < p_gamma_prime; j++) {
+		for (unsigned int i = 0; i < j; i++) {
+			mA_prime(i, j) = mA_prime(j, i);
+		}
 	}
 
 	return mA_prime;
@@ -517,6 +525,13 @@ MatrixXd& rank_one_downdate(unsigned int col, MatrixXd& mA, MatrixXd& mA_prime)
 		a_22 = mA(p_gamma - 1, p_gamma - 1);
 	}
 	mA_prime = mA_11 - (va_12 * va_12.transpose()) / a_22;
+
+	// Should take advantage of the symmetry of mA_prime. For now, just fill in upper triangular entries.
+	for (unsigned int j = 0; j < p_gamma_prime; j++) {
+		for (unsigned int i = 0; i < j; i++) {
+			mA_prime(i, j) = mA_prime(j, i);
+		}
+	}
 
 	return mA_prime;
 }
