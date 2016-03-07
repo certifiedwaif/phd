@@ -25,7 +25,7 @@ using Eigen::MatrixXi;
 using namespace std;
 
 typedef dynamic_bitset<> dbitset;
-const bool NUMERIC_FIX = true;
+const bool NUMERIC_FIX = false;
 
 // Code copied from here: https://gist.github.com/stephenjbarr/2266900
 MatrixXd parseCSVfile_double(string infilename)
@@ -163,15 +163,11 @@ inline dbitset& greycode(const unsigned int idx, const unsigned int p, dbitset& 
 }
 
 
-dbitset& greycode_change(const unsigned int idx, const unsigned int p, dbitset& gamma, bool& update,
+dbitset& greycode_change(const unsigned int idx, const unsigned int p, dbitset& gamma_prime, const dbitset& gamma, bool& update,
 unsigned int& diff_idx,
 unsigned int& bits_set)
 {
-	dbitset bs_curr(p);
-	dbitset bs_prev(p);
-
-	bs_curr = greycode(idx, p, bs_curr);
-	bs_prev = greycode(idx - 1, p, bs_prev);
+	gamma_prime = greycode(idx, p, gamma_prime);
 	#ifdef DEBUG
 	cout << "Previous gamma: " << bs_prev << endl;
 	cout << "Current gamma:  " << bs_curr << endl;
@@ -181,15 +177,14 @@ unsigned int& bits_set)
 	// min_idx = min(bs_prev.find_first(), bs_curr.find_first());
 
 	// Find bit that has changed.
-	diff_idx = (bs_curr ^ bs_prev).find_first();
+	diff_idx = (gamma_prime ^ gamma).find_first();
 
 	// Has it been set, or unset?
-	update = bs_curr[diff_idx];
+	update = gamma_prime[diff_idx];
 
-	bits_set = bs_curr.count();
+	bits_set = gamma_prime.count();
 
-	gamma = bs_curr;
-	return gamma;
+	return gamma_prime;
 }
 
 
@@ -467,7 +462,8 @@ MatrixXd& mA, MatrixXd& mA_prime, bool& bLow)
 		// Perform full inverse
 		// mA_prime = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
 		// Signal that a rank one update was impossible so that the calling code can perform a full inversion.
-		bLow = true;
+		// bLow = true;
+		bLow = false;
 	}
 
 	return mA_prime;
@@ -638,7 +634,7 @@ const unsigned int max_iterations, const bool bIntercept = false, const bool bCe
 		// one lower.
 		// Check if update or downdate, and for which variable
 		gamma = gamma_prime;
-		gamma_prime = greycode_change(idx, p, gamma_prime, bUpdate, diff_idx, p_gamma_prime);
+		gamma_prime = greycode_change(idx, p, gamma_prime, gamma, bUpdate, diff_idx, p_gamma_prime);
 
 		// Get mX matrix for gamma
 		MatrixXd& mA = vec_mA[p_gamma - 1];
@@ -881,7 +877,10 @@ int main()
 	// cout << R2_one << endl;
 
 	#ifdef EIGEN_VECTORISE
-	cout << "We should be vectorised." << endl;
+	cout << "We are vectorised." << endl;
+	#endif
+	#ifndef EIGEN_VECTORISE
+	cout << "We are not vectorised." << endl;
 	#endif
 
 	VectorXd vy = parseCSVfile_double("vy.csv");
