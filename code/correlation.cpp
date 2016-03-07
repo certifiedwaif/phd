@@ -433,17 +433,23 @@ MatrixXd& mA, MatrixXd& mA_prime, bool& bLow)
 			// 						7, 8, 9;
 			mA_prime.topLeftCorner(col, col) = m1.topLeftCorner(col, col);
 			mA_prime.row(col).leftCols(col) = -b_X_gamma_T_x_A.topRows(col).transpose();
-			mA_prime.col(col).bottomRows(col) = -b_X_gamma_T_x_A.topRows(col);
+			mA_prime.col(col).bottomRows(p_gamma_prime - col) = -b_X_gamma_T_x_A.bottomRows(p_gamma_prime - col);
 			mA_prime(col, col) = b;
-			mA_prime.bottomLeftCorner(p_gamma_prime - col, p_gamma_prime - col) = m1.bottomLeftCorner(p_gamma_prime - col, p_gamma_prime - col);
+			mA_prime.bottomLeftCorner(p_gamma_prime - col, col) = m1.bottomLeftCorner(p_gamma_prime - col, col);
 			mA_prime.bottomRightCorner(p_gamma_prime - col, p_gamma_prime - col) = m1.bottomRightCorner(p_gamma_prime - col, p_gamma_prime - col);
 
 			// Should take advantage of the symmetry of mA_prime. For now, just fill in upper triangular entries.
+			#ifdef DEBUG
+			cout << "mA_prime " << mA_prime << endl;
+			#endif
 			for (unsigned int j = 0; j < p_gamma_prime; j++) {
 				for (unsigned int i = 0; i < j; i++) {
 					mA_prime(i, j) = mA_prime(j, i);
 				}
 			}
+			#ifdef DEBUG
+			cout << "mA_prime " << mA_prime << endl;
+			#endif
 		} else					 // col == p_gamma_prime
 		{
 			mA_prime << mA + b * A_X_gamma_T_x * A_X_gamma_T_x.transpose(), -b_X_gamma_T_x_A,
@@ -519,12 +525,6 @@ MatrixXd& rank_one_downdate(unsigned int col, MatrixXd& mA, MatrixXd& mA_prime)
 		va_12.tail(p_gamma_prime - col) = mA.col(col).tail(p_gamma_prime - col);
 		a_22 = mA(col, col);
 
-		// Should take advantage of the symmetry of mA_prime. For now, just fill in upper triangular entries.
-		for (unsigned int j = 0; j < p_gamma_prime; j++) {
-			for (unsigned int i = 0; i < j; i++) {
-				mA_prime(i, j) = mA_prime(j, i);
-			}
-		}
 	} else						 // col == p_gamma
 	{
 		mA_11 = mA.topLeftCorner(p_gamma_prime, p_gamma_prime);
@@ -533,6 +533,12 @@ MatrixXd& rank_one_downdate(unsigned int col, MatrixXd& mA, MatrixXd& mA_prime)
 	}
 	mA_prime = mA_11 - (va_12 * va_12.transpose()) / a_22;
 
+	// Should take advantage of the symmetry of mA_prime. For now, just fill in upper triangular entries.
+	for (unsigned int j = 0; j < p_gamma_prime; j++) {
+		for (unsigned int i = 0; i < j; i++) {
+			mA_prime(i, j) = mA_prime(j, i);
+		}
+	}
 
 	return mA_prime;
 }
