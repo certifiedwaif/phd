@@ -423,10 +423,18 @@ MatrixXd& mA, MatrixXd& mA_prime)
 		if (col == 0) {
 			mA_prime << b, -b_X_gamma_T_x_A,
 			            -b_X_gamma_T_x_A.transpose(), mA + b * A_X_gamma_T_x * A_X_gamma_T_x.transpose();
-		} else if (col <= 1 && col < p - 1) {
-			mA_prime << 1, 2, 3,
-									4, 5, 6,
-									7, 8, 9;
+		} else if (col <= 1 && col < p_gamma - 1) {
+			MatrixXd m1(p_gamma, p_gamma);
+			m1 = mA + b * A_X_gamma_T_x * A_X_gamma_T_x.transpose();
+			// mA_prime << 1, 2, 3,
+			// 						4, 5, 6,
+			// 						7, 8, 9;
+			mA_prime(col, col) = b;
+			mA_prime.block(0, col - 1, 0, col - 1) = m1.block(0, col - 1, 0 , col - 1);
+			mA_prime.block(col, 1, 0, col - 1) = -b_X_gamma_T_x_A.bottomRightCorner(col - 1, 1);
+			mA_prime.block(col + 1, p_gamma - (col + 1), col + 1, p_gamma - (col + 1)) = m1.block(col, p_gamma - (col + 1), 0 , p_gamma - (col + 1));
+			mA_prime.block(col, 1, 0, col - 1) = -b_X_gamma_T_x_A.bottomRightCorner(col - 1, 1).transpose();
+			mA_prime.block(col + 1, p_gamma - (col + 1), col, 1) = b_X_gamma_T_x_A.bottomRightCorner(col - 1, 1).transpose();
 		} else // col == p
 		{
 			mA_prime << mA + b * A_X_gamma_T_x * A_X_gamma_T_x.transpose(), -b_X_gamma_T_x_A,
@@ -487,21 +495,30 @@ MatrixXd& rank_one_downdate(unsigned int col, MatrixXd& mA, MatrixXd& mA_prime)
 	// 	}
 	// 	#endif
 	// }
-
+	MatrixXd mA_11(p_gamma_prime, p_gamma_prime);
+	VectorXd va_12(p_gamma_prime);
+	double a_22;
 	// Need to deal with three cases
 	if (col == 0) {
-
+		mA_11 = mA.bottomRightCorner(p_gamma_prime, p_gamma_prime);
+		va_12 = mA.col(p_gamma - 1).tail(p_gamma - 1);
+		a_22 = mA(0, 0);
 	} else if (1 <= col && col <= p_gamma - 1) {
-
+		// 1 2 3
+		// 4 5 6
+		// 7 8 9
+		mA_11.block(0, col - 1, 0, col - 1) = mA.block(0, col - 1, 0, col - 1);
+		mA_11.block(col, p_gamma - (col + 1), col, p_gamma - (col + 1)) = mA.block(col + 1, p_gamma - (col + 1), col + 1, p_gamma - (col + 1));
+		mA_11.block(col, p_gamma - (col + 1), col, p_gamma - (col + 1)) = mA.block(col + 1, p_gamma - (col + 1), col + 1, p_gamma - (col + 1));
+		va_12.head(col - 1) = mA.col(col).head(p_gamma - 1);
+		va_12.tail(p_gamma_prime - (col - 1)) = mA.col(col).tail(p_gamma_prime - (col - 1));
+		a_22 = mA(col, col);
 	} else // col == p_gamma
 	{
-
+		mA_11 = mA.topLeftCorner(p_gamma_prime, p_gamma_prime);
+		va_12 = mA.col(p_gamma - 1).head(p_gamma - 1);
+		a_22 = mA(p_gamma - 1, p_gamma - 1);
 	}
-	MatrixXd mA_11 = mA.topLeftCorner(p_gamma_prime, p_gamma_prime);
-	VectorXd va_12;
-	const double a_22 = mA(p_gamma - 1, p_gamma - 1);
-
-	va_12 = mA.col(p_gamma - 1).head(p_gamma - 1);
 	mA_prime = mA_11 - (va_12 * va_12.transpose()) / a_22;
 
 	return mA_prime;
@@ -618,10 +635,9 @@ const unsigned int max_iterations, const bool bIntercept = false, const bool bCe
 		}
 		else {
 
-			update_mA_prime(bmA_set, bUpdate, gamma_prime,
+			update_mA_prime(bUpdate, gamma_prime,
 											diff_idx, mXTX,
-											mA, mA_prime,
-											mX_gamma_prime);
+											mA, mA_prime);
 			#ifdef DEBUG
 			// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
 			MatrixXd identity_prime = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime;
