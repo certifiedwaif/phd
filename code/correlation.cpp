@@ -25,7 +25,7 @@ using Eigen::MatrixXi;
 using namespace std;
 
 typedef dynamic_bitset<> dbitset;
-const bool NUMERIC_FIX = false;
+const bool NUMERIC_FIX = true;
 
 // Code copied from here: https://gist.github.com/stephenjbarr/2266900
 MatrixXd parseCSVfile_double(string infilename)
@@ -420,10 +420,10 @@ MatrixXd& mA, MatrixXd& mA_prime, bool& bLow)
 		MatrixXd X_gamma_x(p_gamma, p_gamma);
 		MatrixXd A_X_gamma_T_x = mA * X_gamma_T_x;
 		// Re-arrange.
-		MatrixXd b_X_gamma_T_x_A = b * X_gamma_T_x.transpose() * mA;
+		MatrixXd b_X_gamma_T_x_A = mA * X_gamma_T_x * b;
 		if (col == 0) {
-			mA_prime << b, -b_X_gamma_T_x_A,
-				-b_X_gamma_T_x_A.transpose(), mA + b * A_X_gamma_T_x * A_X_gamma_T_x.transpose();
+			mA_prime << b, -b_X_gamma_T_x_A.transpose(),
+				-b_X_gamma_T_x_A, mA + b * A_X_gamma_T_x * A_X_gamma_T_x.transpose();
 		}
 		else if (0 < col && col < p_gamma_prime - 1) {
 			MatrixXd m1(p_gamma, p_gamma);
@@ -437,6 +437,13 @@ MatrixXd& mA, MatrixXd& mA_prime, bool& bLow)
 			mA_prime(col, col) = b;
 			mA_prime.bottomLeftCorner(p_gamma_prime - col, p_gamma_prime - col) = m1.bottomLeftCorner(p_gamma_prime - col, p_gamma_prime - col);
 			mA_prime.bottomRightCorner(p_gamma_prime - col, p_gamma_prime - col) = m1.bottomRightCorner(p_gamma_prime - col, p_gamma_prime - col);
+
+			// Should take advantage of the symmetry of mA_prime. For now, just fill in upper triangular entries.
+			for (unsigned int j = 0; j < p_gamma_prime; j++) {
+				for (unsigned int i = 0; i < j; i++) {
+					mA_prime(i, j) = mA_prime(j, i);
+				}
+			}
 		} else					 // col == p_gamma_prime
 		{
 			mA_prime << mA + b * A_X_gamma_T_x * A_X_gamma_T_x.transpose(), -b_X_gamma_T_x_A,
@@ -455,13 +462,6 @@ MatrixXd& mA, MatrixXd& mA_prime, bool& bLow)
 		// mA_prime = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
 		// Signal that a rank one update was impossible so that the calling code can perform a full inversion.
 		bLow = true;
-	}
-
-	// Should take advantage of the symmetry of mA_prime. For now, just fill in upper triangular entries.
-	for (unsigned int j = 0; j < p_gamma_prime; j++) {
-		for (unsigned int i = 0; i < j; i++) {
-			mA_prime(i, j) = mA_prime(j, i);
-		}
 	}
 
 	return mA_prime;
@@ -505,7 +505,7 @@ MatrixXd& rank_one_downdate(unsigned int col, MatrixXd& mA, MatrixXd& mA_prime)
 	// Need to deal with three cases
 	if (col == 0) {
 		mA_11 = mA.bottomRightCorner(p_gamma_prime, p_gamma_prime);
-		va_12 = mA.col(p_gamma - 1).tail(p_gamma - 1);
+		va_12 = mA.col(0).tail(p_gamma_prime);
 		a_22 = mA(0, 0);
 	}
 	else if (1 <= col && col <= p_gamma - 1) {
@@ -518,6 +518,13 @@ MatrixXd& rank_one_downdate(unsigned int col, MatrixXd& mA, MatrixXd& mA_prime)
 		va_12.head(col) = mA.col(col).head(col);
 		va_12.tail(p_gamma_prime - col) = mA.col(col).tail(p_gamma_prime - col);
 		a_22 = mA(col, col);
+
+		// Should take advantage of the symmetry of mA_prime. For now, just fill in upper triangular entries.
+		for (unsigned int j = 0; j < p_gamma_prime; j++) {
+			for (unsigned int i = 0; i < j; i++) {
+				mA_prime(i, j) = mA_prime(j, i);
+			}
+		}
 	} else						 // col == p_gamma
 	{
 		mA_11 = mA.topLeftCorner(p_gamma_prime, p_gamma_prime);
@@ -526,12 +533,6 @@ MatrixXd& rank_one_downdate(unsigned int col, MatrixXd& mA, MatrixXd& mA_prime)
 	}
 	mA_prime = mA_11 - (va_12 * va_12.transpose()) / a_22;
 
-	// Should take advantage of the symmetry of mA_prime. For now, just fill in upper triangular entries.
-	for (unsigned int j = 0; j < p_gamma_prime; j++) {
-		for (unsigned int i = 0; i < j; i++) {
-			mA_prime(i, j) = mA_prime(j, i);
-		}
-	}
 
 	return mA_prime;
 }
@@ -658,6 +659,7 @@ const unsigned int max_iterations, const bool bIntercept = false, const bool bCe
 
 			#ifdef DEBUG
 			// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
+			mX_gamma_prime = get_cols(mX, gamma_prime, mX_gamma_prime);
 			MatrixXd identity_prime = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime;
 			if (!identity_prime.isApprox(MatrixXd::Identity(p_gamma_prime, p_gamma_prime)) && NUMERIC_FIX) {
 				cout << "(mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime" << endl;
