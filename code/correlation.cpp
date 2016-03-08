@@ -169,8 +169,8 @@ unsigned int& bits_set)
 {
 	gamma_prime = greycode(idx, p, gamma_prime);
 	#ifdef DEBUG
-	cout << "Previous gamma: " << bs_prev << endl;
-	cout << "Current gamma:  " << bs_curr << endl;
+	cout << "Previous gamma: " << gamma << endl;
+	cout << "Current gamma:  " << gamma_prime << endl;
 	#endif
 
 	// Find the LSB.
@@ -408,7 +408,7 @@ MatrixXd& mA, MatrixXd& mA_prime, bool& bLow)
 	#ifdef DEBUG
 	cout << "b " << b << endl;
 	#endif
-	const double epsilon = 1e-8;
+	const double epsilon = 1e-12;
 	if (b > epsilon) {
 		// Do rank one update
 		// Matrix m1 = A + b A X_gamma^T x x^T X_gamma A
@@ -428,14 +428,14 @@ MatrixXd& mA, MatrixXd& mA_prime, bool& bLow)
 			// 						7, 8, 9;
 			mA_prime.topLeftCorner(col, col) = m1.topLeftCorner(col, col);
 			mA_prime.row(col).leftCols(col) = -b_X_gamma_T_x_A.topRows(col).transpose();
-			mA_prime.col(col).bottomRows(p_gamma_prime - col) = -b_X_gamma_T_x_A.bottomRows(p_gamma_prime - col);
+			mA_prime.col(col).bottomRows(p_gamma_prime - (col + 1)) = -b_X_gamma_T_x_A.bottomRows(p_gamma_prime - (col + 1));
 			mA_prime(col, col) = b;
-			mA_prime.bottomLeftCorner(p_gamma_prime - col, col) = m1.bottomLeftCorner(p_gamma_prime - col, col);
-			mA_prime.bottomRightCorner(p_gamma_prime - col, p_gamma_prime - col) = m1.bottomRightCorner(p_gamma_prime - col, p_gamma_prime - col);
+			mA_prime.bottomLeftCorner(p_gamma_prime - (col + 1), col) = m1.bottomLeftCorner(p_gamma_prime - (col + 1), col);
+			mA_prime.bottomRightCorner(p_gamma_prime - (col + 1), p_gamma_prime - (col + 1)) = m1.bottomRightCorner(p_gamma_prime - (col + 1), p_gamma_prime - (col + 1));
 
 			// Should take advantage of the symmetry of mA_prime. For now, just fill in upper triangular entries.
 			#ifdef DEBUG
-			cout << "mA_prime " << mA_prime << endl;
+			cout << "mA_prime " << endl << mA_prime << endl;
 			#endif
 			for (unsigned int j = 0; j < p_gamma_prime; j++) {
 				for (unsigned int i = 0; i < j; i++) {
@@ -462,8 +462,8 @@ MatrixXd& mA, MatrixXd& mA_prime, bool& bLow)
 		// Perform full inverse
 		// mA_prime = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
 		// Signal that a rank one update was impossible so that the calling code can perform a full inversion.
-		// bLow = true;
-		bLow = false;
+		bLow = true;
+		// bLow = false;
 	}
 
 	return mA_prime;
