@@ -164,7 +164,7 @@ inline dbitset& greycode(const unsigned int idx, const unsigned int p, dbitset& 
 
 
 dbitset& greycode_change(const unsigned int idx, const unsigned int p, dbitset& gamma_prime, const dbitset& gamma, bool& update,
-unsigned int& diff_idx,
+unsigned int& diff_idx, unsigned int& min_idx,
 unsigned int& bits_set)
 {
 	gamma_prime = greycode(idx, p, gamma_prime);
@@ -174,7 +174,7 @@ unsigned int& bits_set)
 	#endif
 
 	// Find the LSB.
-	// min_idx = min(bs_prev.find_first(), bs_curr.find_first());
+	min_idx = min(gamma.find_first(), gamma_prime.find_first());
 
 	// Find bit that has changed.
 	diff_idx = (gamma_prime ^ gamma).find_first();
@@ -382,8 +382,8 @@ MatrixXd& reorder_ith_row_column_to_last(MatrixXd& m, const unsigned int i, cons
 //' @param[out] mA_prime       The current iteration's inverse i.e. (X_gamma_prime^T X_gamma_prime)^{-1}
 //'                            which we are calculating using this function.
 //' @return                    The new inverse (mX_gamma_prime^T mX_gamma_prime)^{-1}
-MatrixXd& rank_one_update(const dbitset& gamma, const unsigned int col, const MatrixXd& mXTX,
-MatrixXd& mA, MatrixXd& mA_prime, bool& bLow)
+MatrixXd& rank_one_update(const dbitset& gamma, const unsigned int col_abs, const unsigned int min_idx,
+const MatrixXd& mXTX, MatrixXd& mA, MatrixXd& mA_prime, bool& bLow)
 {
 	const unsigned int p = mXTX.cols();
 	const unsigned int p_gamma_prime = mA_prime.cols();
@@ -392,9 +392,9 @@ MatrixXd& mA, MatrixXd& mA_prime, bool& bLow)
 
 	// Construct mA_prime
 	// b = 1 / (x^T x - x^T X_gamma A X_gamma^T x)
-	double xTx = mXTX(col, col);
+	double xTx = mXTX(col_abs, col_abs);
 	dbitset col_bs(p);
-	col_bs[col] = true;
+	col_bs[col_abs] = true;
 	MatrixXd X_gamma_T_x(p_gamma, 1);
 	#ifdef DEBUG
 	cout << "gamma " << gamma << endl;
@@ -412,6 +412,7 @@ MatrixXd& mA, MatrixXd& mA_prime, bool& bLow)
 	if (b > epsilon) {
 		// Do rank one update
 		// Matrix m1 = A + b A X_gamma^T x x^T X_gamma A
+		const unsigned int col = col_abs - min_idx; // The relative column index
 		MatrixXd X_gamma_x(p_gamma, p_gamma);
 		MatrixXd A_X_gamma_T_x = mA * X_gamma_T_x;
 		// Re-arrange.
@@ -478,10 +479,11 @@ MatrixXd& mA, MatrixXd& mA_prime, bool& bLow)
 //' @param[in/out]  mA         The previous iteration's inverse i.e. (X_gamma^T X_gamma)^{-1}
 //' @param[out] mA_prime       The current iteration's inverse i.e. (X_gamma_prime^T X_gamma_prime)^{-1}
 //' @return                    The new inverse (mX_gamma_prime^T mX_gamma_prime)^{-1}
-MatrixXd& rank_one_downdate(unsigned int col, MatrixXd& mA, MatrixXd& mA_prime)
+MatrixXd& rank_one_downdate(const unsigned int col_abs, const unsigned int min_idx, MatrixXd& mA, MatrixXd& mA_prime)
 {
 	const unsigned int p_gamma_prime = mA_prime.cols();
 	const unsigned int p_gamma = mA.cols();
+	const unsigned int col = col_abs - min_idx;  // The relative column index
 
 	// Move i-th row/column to the end, and the (i+1)-th to p_gamma_prime-th rows/columns up/left by one.
 	// if ((col - min_idx) < p_gamma_prime) {
@@ -541,22 +543,23 @@ MatrixXd& rank_one_downdate(unsigned int col, MatrixXd& mA, MatrixXd& mA_prime)
 
 
 void update_mA_prime(bool bUpdate, const dbitset& gamma,
-const int col, const MatrixXd& mXTX,
-MatrixXd& mA, MatrixXd& mA_prime, bool& bLow)
+const unsigned int col, const unsigned int min_idx,
+const MatrixXd& mXTX, MatrixXd& mA, MatrixXd& mA_prime,
+bool& bLow)
 {
 	if (bUpdate) {
 		// Rank one update of mA_prime from mA
 		#ifdef DEBUG
 		cout << "Updating " << col << endl;
 		#endif
-		mA_prime = rank_one_update(gamma, col, mXTX, mA, mA_prime, bLow);
+		mA_prime = rank_one_update(gamma, col, min_idx, mXTX, mA, mA_prime, bLow);
 	}
 	else {
 		// Rank one downdate
 		#ifdef DEBUG
 		cout << "Downdating " << col << endl;
 		#endif
-		mA_prime = rank_one_downdate(col, mA, mA_prime);
+		mA_prime = rank_one_downdate(col, min_idx, mA, mA_prime);
 	}
 }
 
@@ -585,6 +588,7 @@ const unsigned int max_iterations, const bool bIntercept = false, const bool bCe
 	bool bmA_set = false;		 // Whether mA has been set yet
 	bool bUpdate;				 // True for an update, false for a downdate
 	unsigned int diff_idx;		 // The covariate which is changing
+	unsigned int min_idx;		 // The minimum bit which is set in gamma_prime
 	dbitset gamma(p);		 // The model gamma
 	dbitset gamma_prime(p);		 // The model gamma
 	unsigned int p_gamma_prime;	 // The number of columns in the matrix mX_gamma_prime
@@ -623,7 +627,7 @@ const unsigned int max_iterations, const bool bIntercept = false, const bool bCe
 	// Loop through models, updating and downdating mA as necessary
 	#pragma omp parallel for\
 		firstprivate(bmA_set, gamma, gamma_prime, vec_mX_gamma, vec_mA, vec_m1)\
-		private(diff_idx, p_gamma_prime, p_gamma, bUpdate)\
+		private(diff_idx, min_idx, p_gamma_prime, p_gamma, bUpdate)\
 			shared(cout, mX, vR2_all)\
 			default(none)
 	for (unsigned int idx = 1; idx < max_iterations; idx++) {
@@ -634,7 +638,7 @@ const unsigned int max_iterations, const bool bIntercept = false, const bool bCe
 		// one lower.
 		// Check if update or downdate, and for which variable
 		gamma = gamma_prime;
-		gamma_prime = greycode_change(idx, p, gamma_prime, gamma, bUpdate, diff_idx, p_gamma_prime);
+		gamma_prime = greycode_change(idx, p, gamma_prime, gamma, bUpdate, diff_idx, min_idx, p_gamma_prime);
 
 		// Get mX matrix for gamma
 		MatrixXd& mA = vec_mA[p_gamma - 1];
@@ -652,8 +656,9 @@ const unsigned int max_iterations, const bool bIntercept = false, const bool bCe
 		else {
 			bool bLow;
 			update_mA_prime(bUpdate, gamma,
-				diff_idx, mXTX,
-				mA, mA_prime, bLow);
+				diff_idx, min_idx,
+				mXTX,	mA, mA_prime,
+				bLow);
 			if (bLow) {
 				mX_gamma_prime = get_cols(mX, gamma_prime, mX_gamma_prime);
 				mA_prime = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
@@ -875,13 +880,6 @@ int main()
 	const bool intercept = false, centre = true;
 	//VectorXd R2_one = one_correlation(vy, mX, mZ);
 	// cout << R2_one << endl;
-
-	#ifdef EIGEN_VECTORISE
-	cout << "We are vectorised." << endl;
-	#endif
-	#ifndef EIGEN_VECTORISE
-	cout << "We are not vectorised." << endl;
-	#endif
 
 	VectorXd vy = parseCSVfile_double("vy.csv");
 	MatrixXd mX = parseCSVfile_double("mX.csv");
