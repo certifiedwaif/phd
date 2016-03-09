@@ -83,7 +83,7 @@ VectorXd Graycode::gray_vec(unsigned int i)
 
 MatrixXd Graycode::to_MatrixXd()
 {
-	unsigned int rows = 1 << size;
+	unsigned int rows = 1 << varying;
 	MatrixXd result(rows, size);
 	#pragma omp parallel for
 	for (unsigned int i = 0; i < rows; i++) {
