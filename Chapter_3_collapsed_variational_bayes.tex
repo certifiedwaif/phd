@@ -281,10 +281,17 @@ Optimal choices of $a$ and $b$ are $a = -\frac{3}{4}$ and $b=\frac{n-p}{2} - 2 -
 
 \begin{equation*}
 \begin{array}{rl}
-q^*_g(a, b) \propto \exp \{&(\frac{n}{2} + b) \log (g) + [-(a + 1) - (b + 1)] \log{(1 + g)} \\
-&\frac{1 + g}{g} \E [\frac{1}{1 \sigma^2}] \E[\vbeta^\top \Gamma^\top \mX^\top \mX \Gamma \vbeta - 2 \mX \Gamma \vbeta^\top \vy + \vy^\top \vy] \}
+q^*_g(a, b) &\propto \exp \{(\frac{n}{2} + b) \log (g) + [-(a + 1) - (b + 1)] \log{(1 + g)} \\
+&\qquad \quad \frac{1 + g}{g} \E [\frac{1}{1 \sigma^2}] \E[\vbeta^\top \Gamma^\top \mX^\top \mX \Gamma \vbeta - 2 \mX \Gamma \vbeta^\top \vy + \vy^\top \vy] \} \\
+&\propto \exp \{ (\frac{p}{2} + b) \log (g) - [(a + 1) + (b + 1)] \log (1 + g) - \frac{1}{g}[\tr(\mSigma_{q(\vbeta)} + \| \mX \vmu_{q(\vbeta)} \|^2)] \} \\
+&= g^{v-1} (\lambda + g)^{\mu - 1} \exp{\left (-\frac{\beta}{g}\right )}
 \end{array}
 \end{equation*}
+
+\def \Re {\text{Re}}
+
+which is the special function ET II 234 (13) a when $\Re(1 - \mu) > \Re(\nu) > 0, | \arg \lambda | < \pi$. Here
+$v = \frac{p}{2} + b + 1, 1 - \mu = (a + b + 2)$. Choose $a = \frac{3}{4}, b = \frac{n - p}{2} - 2 - a$.
 
 \begin{equation*}
 \begin{array}{rl}
@@ -299,11 +306,15 @@ q^*_\gamma (p) &\propto \exp \{ \frac{n}{2} \log |\mX^\top \mGamma \mX|
 We will use the logit trick $\frac{\exp(\eta)}{1 + \exp(\eta)}$ to turn this into a likelihood.
 
 \begin{equation*}
-q^*_\vbeta(\vmu_{q(\vbeta)}, \mSigma_{q(\vbeta)}) =
+\begin{array}{rl}
+q^*_\vbeta(\vmu_{q(\vbeta)}, \mSigma_{q(\vbeta)}) &\propto \exp \{ -\half \E [\frac{1}{\sigma^2}] \vbeta^\top \E[ \mGamma^\top \mX^\top \mX \mGamma ] \vbeta - 2 \mX \E \mGamma \vbeta^\top \vy \} \\
+&= \exp\{ -\half \frac{\alpha_{q(\sigma^2)}}{\beta_{q(\sigma^2)}} [\vbeta^\top \mX^\top \mX \odot \E[\vgamma \vgamma^\top] \vbeta - 2 \mX \E \mGamma \vbeta^\top \vy] \} \\
+&= \exp\{ -\half \frac{\alpha_{q(\sigma^2)}}{\beta_{q(\sigma^2)}} [\vbeta^\top \mX^\top \mX \odot \diag{(\vp (\vone - \vp))} \vbeta - 2 \mX \E \mGamma \vbeta^\top \vy] \}
+\end{array}
 \end{equation*}
 
 \begin{equation*}
-q^*_\sigma^2(\alpha_{q(\sigma^2)}, \beta_{q(\sigma^2)}) =
+q^*_{\sigma^2}(\alpha_{q(\sigma^2)}, \beta_{q(\sigma^2)}) &= 
 \end{equation*}
 
 \end{document}
