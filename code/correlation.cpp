@@ -14,6 +14,7 @@
 #include <Eigen/Dense>
 #include <boost/tokenizer.hpp>
 #include <boost/dynamic_bitset.hpp>
+#include "graycode.hpp"
 
 using namespace boost;
 using Eigen::VectorXd;
@@ -24,7 +25,6 @@ using Eigen::RowVectorXi;
 using Eigen::MatrixXi;
 using namespace std;
 
-typedef dynamic_bitset<> dbitset;
 const bool NUMERIC_FIX = false;
 
 // Code copied from here: https://gist.github.com/stephenjbarr/2266900
@@ -84,96 +84,6 @@ MatrixXd parseCSVfile_double(string infilename)
 	}
 
 	return(xmat);
-}
-
-
-// From the Wikipedia page on Gray code
-/*
-	The purpose of this function is to convert an unsigned
-	binary number to reflected binary Gray code.
-
-	The operator >> is shift right. The operator ^ is exclusive or.
-*/
-unsigned int binary_to_grey(unsigned int num)
-{
-	return (num >> 1) ^ num;
-}
-
-
-/*
-	The purpose of this function is to convert a reflected binary
-	Gray code number to a binary number.
-*/
-unsigned int grey_to_binary(unsigned int num)
-{
-	unsigned int mask;
-	for (mask = num >> 1; mask != 0; mask = mask >> 1) {
-		num = num ^ mask;
-	}
-	return num;
-}
-
-
-VectorXd binary_to_vec(unsigned int num, unsigned int p)
-{
-	VectorXd result(p);
-	for (unsigned int i = 0; i < p; i++) {
-		result[(p - 1) - i] = num & 1;
-		num >>= 1;
-	}
-	return(result);
-}
-
-
-VectorXd grey_vec(unsigned int i, unsigned int p)
-{
-	return binary_to_vec(binary_to_grey(i), p).transpose();
-}
-
-
-MatrixXd greycode(unsigned int p)
-{
-	unsigned int rows = 1 << p;
-	MatrixXd result(rows, p);
-	for (unsigned int i = 0; i < rows; i++) {
-		result.row(i) = grey_vec(i, p);
-	}
-	return(result);
-}
-
-
-dbitset& greycode(const unsigned int idx, const unsigned int p, dbitset& bs_ret)
-{
-	dbitset bs(p, idx);
-	bs =  bs ^ (bs >> 1);
-	bs_ret = bs;
-
-	return bs_ret;
-}
-
-
-dbitset& greycode_change(const unsigned int idx, const unsigned int p, dbitset& gamma_prime, const dbitset& gamma, bool& update,
-unsigned int& diff_idx, unsigned int& min_idx,
-unsigned int& bits_set)
-{
-	gamma_prime = greycode(idx, p, gamma_prime);
-	#ifdef DEBUG
-	cout << "Previous gamma: " << gamma << endl;
-	cout << "Current gamma:  " << gamma_prime << endl;
-	#endif
-
-	// Find the LSB.
-	min_idx = min(gamma.find_first(), gamma_prime.find_first());
-
-	// Find bit that has changed.
-	diff_idx = (gamma_prime ^ gamma).find_first();
-
-	// Has it been set, or unset?
-	update = gamma_prime[diff_idx];
-
-	bits_set = gamma_prime.count();
-
-	return gamma_prime;
 }
 
 
@@ -466,133 +376,10 @@ bool& bLow)
 VectorXd all_correlations_mX_mZ(VectorXd vy, MatrixXd mX, MatrixXd mZ, const unsigned int intercept_col,
 const unsigned int max_iterations, const bool bIntercept = false, const bool bCentre = true)
 {
-	// unsigned int idx;			 // The main loop index
-	// The number of observations
-	const unsigned int n = mZ.rows();
-	// The number of covariates
-	const unsigned int p = mZ.cols();
-	// Vector of correlations for all models
 	VectorXd vR2_all(max_iterations);
-	// MatrixXd mA;				 // The inverse of (X^T X) for the previous iteration
-	bool bmA_set = false;											 // Whether mA has been set yet
-	bool bUpdate;															 // True for an update, false for a downdate
-	unsigned int diff_idx;										 // The covariate which is changing
-	unsigned int min_idx;											 // The minimum bit which is set in gamma_prime
-	dbitset gamma(p);													 // The model gamma, the previous model
-	dbitset gamma_prime(p);										 // The model gamma_prime, the current model
-	unsigned int p_gamma_prime;								 // The number of columns in the matrix mZ_gamma_prime
-	unsigned int p_gamma;											 // The number of columns in the matrix mZ_gamma
-	vector< MatrixXd > vec_mA(p);
-	vector< MatrixXd > vec_mZ_gamma(p);
-	vector< MatrixXd > vec_m1(p);
-	const MatrixXd mZTZ = mZ.transpose() * mZ;
-	const MatrixXd mZTy = mZ.transpose() * vy;
-	const double yTy = vy.squaredNorm();
 
-	// Pre-allocate memory
-	for (unsigned int i = 0; i < p; i++) {
-		vec_mA[i].resize(i + 1, i + 1);
-		vec_mZ_gamma[i].resize(n, i + 1);
-		vec_m1[i].resize(i + 1, 1);
-	}
+	// Use existing code, different graycode.
 
-	if (bCentre) {
-		// Centre vy
-		// centre(vy);
-
-		// Centre non-intercept columns of mX
-		for (unsigned int i = 0; i < mZ.cols(); i++) {
-			// Skip intercept column if there is one.
-			if (bIntercept && i == intercept_col)
-				continue;
-
-			VectorXd vcol = mZ.col(i);
-			centre(vcol);
-			mZ.col(i) = vcol;
-		}
-	}
-
-	// Loop through models, updating and downdating mA as necessary
-	#pragma omp parallel for\
-		firstprivate(bmA_set, gamma, gamma_prime, vec_mZ_gamma, vec_mA, vec_m1)\
-		private(diff_idx, min_idx, p_gamma_prime, p_gamma, bUpdate)\
-			shared(cout, mZ, vR2_all)\
-			default(none)
-	for (unsigned int idx = 1; idx < max_iterations; idx++) {
-		#ifdef DEBUG
-		cout << endl << "Iteration " << idx << endl;
-		#endif
-		// By properties of Greycode, only one element can be different. And it's either one higher or
-		// one lower.
-		// Check if update or downdate, and for which variable
-		gamma = gamma_prime;
-		gamma_prime = greycode_change(idx, p, gamma_prime, gamma, bUpdate, diff_idx, min_idx, p_gamma_prime);
-
-		// Get mX matrix for gamma
-		MatrixXd& mA = vec_mA[p_gamma - 1];
-		MatrixXd& mA_prime = vec_mA[p_gamma_prime - 1];
-		MatrixXd& mZ_gamma_prime = vec_mZ_gamma[p_gamma_prime - 1];
-
-		// Only needed when bmA_set is false.
-		// If we haven't previously calculated this inverse, calculate it the first time.
-		if (!bmA_set) {
-			// Calculate full inverse mA, O(p^3)
-			mZ_gamma_prime = get_cols(mZ, gamma_prime, mZ_gamma_prime);
-			mA_prime = (mZ_gamma_prime.transpose() * mZ_gamma_prime).inverse();
-			bmA_set = true;
-		}
-		else {
-			bool bLow;
-			update_mA_prime(bUpdate, gamma,
-				diff_idx, min_idx,
-				mZTZ,   mA, mA_prime,
-				bLow);
-			if (bLow) {
-				mZ_gamma_prime = get_cols(mZ, gamma_prime, mZ_gamma_prime);
-				mA_prime = (mZ_gamma_prime.transpose() * mZ_gamma_prime).inverse();
-			}
-
-			#ifdef DEBUG
-			// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
-			mZ_gamma_prime = get_cols(mZ, gamma_prime, mZ_gamma_prime);
-			MatrixXd identity_prime = (mZ_gamma_prime.transpose() * mZ_gamma_prime) * mA_prime;
-			if (!identity_prime.isApprox(MatrixXd::Identity(p_gamma_prime, p_gamma_prime)) && NUMERIC_FIX) {
-				cout << "(mZ_gamma_prime.transpose() * mZ_gamma_prime) * mA_prime" << endl;
-				cout << identity_prime << endl;
-				cout << "Iterative calculation of inverse is wrong, recalculating ..." << endl;
-				// This inverse is nonsense. Do a full inversion.
-				MatrixXd mA_prime_full = (mZ_gamma_prime.transpose() * mZ_gamma_prime).inverse();
-				show_matrix_difference(cout, mA_prime, mA_prime_full);
-				// TODO: Find the differences between mA_prime_full and mA_prime
-				identity_prime = (mZ_gamma_prime.transpose() * mZ_gamma_prime) * mA_prime_full;
-				mA_prime = mA_prime_full;
-			}
-
-			// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
-			cout << "(mZ_gamma_prime.transpose() * mZ_gamma_prime) * mA_prime" << endl;
-			cout << identity_prime << endl;
-			#endif
-		}
-
-		double R2;
-		double numerator;
-		// Can pre-compute, using vXTy
-		// VectorXd v1(p_gamma_prime);
-		// v1 = vy.transpose() * mX_gamma_prime;
-		MatrixXd& m1 = vec_m1[p_gamma_prime - 1];
-		m1 = get_rows(mZTy, gamma_prime, m1);
-		numerator = (m1.transpose() * mA_prime * m1).value();
-		R2 = numerator / yTy;
-		#ifdef DEBUG
-		cout << "m1 " << m1 << endl;
-		cout << "mA_prime " << mA_prime << endl;
-		cout << "Numerator " << numerator << " denominator " << yTy;
-		cout << " R2 " << R2 << endl;
-		#endif
-		vR2_all(idx) = R2;											 // Calculate correlation
-
-		p_gamma = p_gamma_prime;
-	}
 	return vR2_all;
 }
 
@@ -610,14 +397,9 @@ const unsigned int max_iterations, const bool bIntercept = false, const bool bCe
 VectorXd all_correlations_mX(VectorXd vy, MatrixXd mX, const unsigned int intercept_col,
 const unsigned int max_iterations, const bool bIntercept = false, const bool bCentre = true)
 {
-	// unsigned int idx;			 // The main loop index
-	// The number of observations
-	const unsigned int n = mX.rows();
-	// The number of covariates
-	const unsigned int p = mX.cols();
-	// Vector of correlations for all models
-	VectorXd vR2_all(max_iterations);
-	// MatrixXd mA;				 // The inverse of (X^T X) for the previous iteration
+	const unsigned int n = mX.rows();					 // The number of observations
+	const unsigned int p = mX.cols();					 // The number of covariates
+	VectorXd vR2_all(max_iterations);					 // Vector of correlations for all models
 	bool bmA_set = false;											 // Whether mA has been set yet
 	bool bUpdate;															 // True for an update, false for a downdate
 	unsigned int diff_idx;										 // The covariate which is changing
@@ -626,7 +408,6 @@ const unsigned int max_iterations, const bool bIntercept = false, const bool bCe
 	dbitset gamma_prime(p);										 // The model gamma
 	unsigned int p_gamma_prime;								 // The number of columns in the matrix mX_gamma_prime
 	unsigned int p_gamma;											 // The number of columns in the matrix mX_gamma
-	// VectorXd& vx;				 // The column vector for the current covariate
 	vector< MatrixXd > vec_mA(p);
 	vector< MatrixXd > vec_mX_gamma(p);
 	vector< MatrixXd > vec_m1(p);
@@ -657,9 +438,10 @@ const unsigned int max_iterations, const bool bIntercept = false, const bool bCe
 		}
 	}
 
+	Graycode graycode(p);
 	// Loop through models, updating and downdating mA as necessary
 	#pragma omp parallel for\
-		firstprivate(bmA_set, gamma, gamma_prime, vec_mX_gamma, vec_mA, vec_m1)\
+		firstprivate(bmA_set, gamma, gamma_prime, vec_mX_gamma, vec_mA, vec_m1, graycode)\
 		private(diff_idx, min_idx, p_gamma_prime, p_gamma, bUpdate)\
 			shared(cout, mX, vR2_all)\
 			default(none)
@@ -671,7 +453,8 @@ const unsigned int max_iterations, const bool bIntercept = false, const bool bCe
 		// one lower.
 		// Check if update or downdate, and for which variable
 		gamma = gamma_prime;
-		gamma_prime = greycode_change(idx, p, gamma_prime, gamma, bUpdate, diff_idx, min_idx, p_gamma_prime);
+		gamma_prime = graycode[idx];
+		graycode.change(gamma_prime, gamma, bUpdate, diff_idx, min_idx, p_gamma_prime);
 
 		// Get mX matrix for gamma
 		MatrixXd& mA = vec_mA[p_gamma - 1];
@@ -784,24 +567,24 @@ MatrixXd anscombe()
 }
 
 
-void check_greycode()
-{
-	cout << "Unflipped" << endl;
-	MatrixXd mGreycode_R = parseCSVfile_double("greycode.csv");
-	unsigned int n = mGreycode_R.rows();
-	unsigned int p = mGreycode_R.cols();
-	MatrixXd mGreycode_Cpp(n, p);
-	for (unsigned int i = 0; i < mGreycode_Cpp.rows(); i++) {
-		mGreycode_Cpp.row(i) = grey_vec(i, p);
-	}
+// void check_graycode()
+// {
+// 	cout << "Unflipped" << endl;
+// 	MatrixXd mGreycode_R = parseCSVfile_double("graycode.csv");
+// 	unsigned int n = mGreycode_R.rows();
+// 	unsigned int p = mGreycode_R.cols();
+// 	MatrixXd mGreycode_Cpp(n, p);
+// 	for (unsigned int i = 0; i < mGreycode_Cpp.rows(); i++) {
+// 		mGreycode_Cpp.row(i) = gray_vec(i, p);
+// 	}
 
-	for (unsigned int i = 0; i < 10; i++) {
-		cout << "R   " << i << ": " << mGreycode_R.row(i) << endl;
-		cout << "C++ " << i << ": " << mGreycode_Cpp.row(i) << endl;
-		cout << endl;
-	}
-	show_matrix_difference(cout, mGreycode_R, mGreycode_Cpp);
-}
+// 	for (unsigned int i = 0; i < 10; i++) {
+// 		cout << "R   " << i << ": " << mGreycode_R.row(i) << endl;
+// 		cout << "C++ " << i << ": " << mGreycode_Cpp.row(i) << endl;
+// 		cout << endl;
+// 	}
+// 	show_matrix_difference(cout, mGreycode_R, mGreycode_Cpp);
+// }
 
 
 void check_anscombe()
@@ -855,7 +638,7 @@ int main()
 	//VectorXd R2_one = one_correlation(vy, mX, mZ);
 	// cout << R2_one << endl;
 
-	// cout << greycode(19) << endl;
+	// cout << graycode(19) << endl;
 
 	// return 0;
 
@@ -864,9 +647,9 @@ int main()
 	VectorXd vy = parseCSVfile_double("vy.csv");
 	MatrixXd mX = parseCSVfile_double("mX.csv");
 	const unsigned int p = mX.cols();
-	// The number of greycode combinations, 2^p
-	const unsigned int greycode_rows = (1 << p);
-	const unsigned int max_iterations = greycode_rows;
+	// The number of graycode combinations, 2^p
+	const unsigned int graycode_rows = (1 << p);
+	const unsigned int max_iterations = graycode_rows;
 	// const unsigned int max_iterations = 100000;
 	// unsigned int p = mX.cols();
 
