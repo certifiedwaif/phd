@@ -65,7 +65,7 @@ void check_anscombe()
 	cout << vy << endl;
 	cout << mX << endl;
 	#endif
-	VectorXd vR2_all = all_correlations_mX(vy, mX, 0, intercept, centre);
+	VectorXd vR2_all = all_correlations_mX_cpp(vy, mX, 0, intercept, centre);
 
 	// Test case
 	VectorXd expected_correlations(8);
@@ -106,7 +106,7 @@ int main()
 	
 	MatrixXd mX = mC.leftCols(10);
 	MatrixXd mZ = mC.rightCols(9);
-	VectorXd vR2_all_mX_mZ = all_correlations_mX_mZ(vy, mX, mZ, 0, intercept, centre);
+	VectorXd vR2_all_mX_mZ = all_correlations_mX_mZ_cpp(vy, mX, mZ, 0, intercept, centre);
 	cout << "i,R2" << endl;
 	for (int i = 1; i < vR2_all_mX_mZ.size(); i++) {
 		// const double epsilon = 1e-8;
@@ -119,7 +119,7 @@ int main()
 	struct timeval start, end;
 	long mtime, seconds, useconds;
 	gettimeofday(&start, NULL);
-	VectorXd vR2_all_mX = all_correlations_mX(vy, mC, 0, intercept, centre);
+	VectorXd vR2_all_mX = all_correlations_mX_cpp(vy, mC, 0, intercept, centre);
 	gettimeofday(&end, NULL);
 
 	seconds  = end.tv_sec  - start.tv_sec;
