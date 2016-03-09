@@ -27,11 +27,11 @@ struct Graycode {
 	unsigned int gray_to_binary(const unsigned int num);
 	VectorXd binary_to_vec(const unsigned int num);
 	VectorXd gray_vec(const unsigned int i);
-	// operator MatrixXd();
-	dbitset operator[](const unsigned int idx);
+	MatrixXd to_MatrixXd();
+	dbitset operator[](const unsigned int idx) const;
 	void change(const dbitset& gamma_prime, const dbitset& gamma,
 						 	bool& update, unsigned int& diff_idx, unsigned int& min_idx,
-							unsigned int& bits_set);
+							unsigned int& bits_set) const;
 };
 
 
@@ -81,28 +81,41 @@ VectorXd Graycode::gray_vec(unsigned int i)
 }
 
 
-// Graycode::MatrixXd operator()
-// {
-// 	unsigned int rows = 1 << size;
-// 	MatrixXd result(rows, size);
-// 	for (unsigned int i = 0; i < rows; i++) {
-// 		result.row(i) = gray_vec(i);
-// 	}
-// 	return(result);
-// }
-
-
-dbitset Graycode::operator[](const unsigned int idx)
+MatrixXd Graycode::to_MatrixXd()
 {
-	dbitset bs(size, idx);
-	bs =  bs ^ (bs >> 1);
+	unsigned int rows = 1 << size;
+	MatrixXd result(rows, size);
+	for (unsigned int i = 0; i < rows; i++) {
+		result.row(i) = gray_vec(i);
+	}
+	return(result);
+}
 
-	return bs;
+
+dbitset Graycode::operator[](const unsigned int idx) const
+{
+	dbitset bs_varying(varying, idx);
+	bs_varying =  bs_varying ^ (bs_varying >> 1);
+	if (fixed != 0) {
+		dbitset bs(size);
+
+		for (unsigned int i = 0; i < fixed; i++) {
+			bs[i] = true;
+		}
+
+		for (unsigned int i = 0; i < varying; i++) {
+			bs[i + fixed] = bs_varying[i];
+		}
+
+		return bs;
+	} else {
+		return bs_varying;
+	}
 }
 
 
 void Graycode::change(const dbitset& gamma_prime, const dbitset& gamma,
-													bool& update, unsigned int& diff_idx, unsigned int& min_idx, unsigned int& bits_set)
+													bool& update, unsigned int& diff_idx, unsigned int& min_idx, unsigned int& bits_set) const
 {
 	#ifdef DEBUG
 	cout << "Previous gamma: " << gamma << endl;
