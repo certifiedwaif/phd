@@ -87,7 +87,10 @@ MatrixXd Graycode::to_MatrixXd()
 	MatrixXd result(rows, size);
 	#pragma omp parallel for
 	for (unsigned int i = 0; i < rows; i++) {
-		result.row(i) = gray_vec(i).reverse();
+		dbitset bs = (*this)[i];
+		for (unsigned int j = 0; j < size; j++) {
+			result(i, j) = bs[j] ? 1 : 0;
+		}
 	}
 	return(result);
 }
