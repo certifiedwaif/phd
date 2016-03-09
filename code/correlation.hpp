@@ -377,8 +377,7 @@ bool& bLow)
 //' @param[in] bCentre       Boolean whether to centre vy and mX or not
 //' @return                  A vector of length 2^p of the correlations
 //' @export
-// [[Rcpp::export]]
-VectorXd all_correlations(const Graycode& graycode, VectorXd vy, MatrixXd mX, const unsigned int intercept_col,
+VectorXd all_correlations_main(const Graycode& graycode, VectorXd vy, MatrixXd mX, const unsigned int intercept_col,
 const unsigned int max_iterations, const bool bIntercept = false, const bool bCentre = true)
 {
 	const unsigned int n = mX.rows();					 // The number of observations
@@ -508,14 +507,14 @@ const unsigned int max_iterations, const bool bIntercept = false, const bool bCe
 }
 
 
-VectorXd all_correlations_mX(VectorXd vy, MatrixXd mX, const unsigned int intercept_col,
+VectorXd all_correlations_mX_cpp(VectorXd vy, MatrixXd mX, const unsigned int intercept_col,
 														 const bool bIntercept = false, const bool bCentre = true)
 {
 	const unsigned int p = mX.cols();
 	const unsigned int max_iterations = 1 << p;
 
 	Graycode graycode(p);
-	return all_correlations(graycode, vy, mX, intercept_col, max_iterations, bIntercept, bCentre);
+	return all_correlations_main(graycode, vy, mX, intercept_col, max_iterations, bIntercept, bCentre);
 }
 
 //' Calculate the correlations for every subset of the covariates in mX
@@ -527,8 +526,7 @@ VectorXd all_correlations_mX(VectorXd vy, MatrixXd mX, const unsigned int interc
 //' @param[in] bCentre       Boolean whether to centre vy and mX or not
 //' @return                  A vector of length 2^p of the correlations
 //' @export
-// [[Rcpp::export]]
-VectorXd all_correlations_mX_mZ(VectorXd vy, MatrixXd mX, MatrixXd mZ, const unsigned int intercept_col,
+VectorXd all_correlations_mX_mZ_cpp(VectorXd vy, MatrixXd mX, MatrixXd mZ, const unsigned int intercept_col,
 const bool bIntercept = false, const bool bCentre = true)
 {
 	const unsigned int n = mX.rows();
@@ -539,7 +537,7 @@ const bool bIntercept = false, const bool bCentre = true)
 
 	mC << mX, mZ;
 	Graycode graycode(p1, p2);
-	return all_correlations(graycode, vy, mC, intercept_col, max_iterations, bIntercept, bCentre);
+	return all_correlations_main(graycode, vy, mC, intercept_col, max_iterations, bIntercept, bCentre);
 }
 
 
