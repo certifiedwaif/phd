@@ -19,9 +19,9 @@ typedef dynamic_bitset<> dbitset;
 struct Graycode {
 	Graycode(unsigned int _p);
 	Graycode(unsigned int _fixed, unsigned int _varying);
-	unsigned int fixed;
-	unsigned int varying;
-	unsigned int size;
+	const unsigned int fixed;
+	const unsigned int varying;
+	const unsigned int size;
 
 	unsigned int binary_to_gray(const unsigned int num);
 	unsigned int gray_to_binary(const unsigned int num);
@@ -35,18 +35,12 @@ struct Graycode {
 };
 
 
-Graycode::Graycode(unsigned int _p)
+Graycode::Graycode(unsigned int _p) : fixed(0), varying(_p), size(fixed + varying)
 { 
-	fixed = 0; 
-	varying = _p; 
-	size = fixed + varying;
 }
 
-Graycode::Graycode(unsigned int _fixed, unsigned int _varying)
+Graycode::Graycode(unsigned int _fixed, unsigned int _varying) : fixed(_fixed), varying(_varying), size(fixed + varying)
 {
-	fixed = _fixed; 
-	varying = _varying; 
-	size = fixed + varying;
 }
 
 
