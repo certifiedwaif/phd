@@ -57,10 +57,10 @@ MatrixXd parseCSVfile_double(string infilename)
 
 	// FIGURE OUT HOW MANY OF THE ROWS HAVE THE RIGHT NUMBER
 	// OF COLUMNS
-	unsigned int Nrows = matrows.size();
-	unsigned int Ncols = matrows[0].size();
-	unsigned int Ngoodrows = 0;
-	for(unsigned int i = 0; i < Nrows; i++) {
+	uint Nrows = matrows.size();
+	uint Ncols = matrows[0].size();
+	uint Ngoodrows = 0;
+	for(uint i = 0; i < Nrows; i++) {
 		if(matrows[i].size() == Ncols) {
 			Ngoodrows++;
 		}
@@ -72,15 +72,15 @@ MatrixXd parseCSVfile_double(string infilename)
 
 	int rc = 0;
 
-	for(unsigned int i = 0; i < Nrows; i++) {
-		unsigned int rowsize = matrows[i].size();
+	for(uint i = 0; i < Nrows; i++) {
+		uint rowsize = matrows[i].size();
 
 		if(rowsize != Ncols) {
 			// cout << "Row " << i << " has bad column count" << endl;
 			continue;
 		}
 
-		for(unsigned int j = 0; j < Ncols; j++) {
+		for(uint j = 0; j < Ncols; j++) {
 			xmat(rc,j) = strtod(matrows[i][j].c_str(), NULL);
 		}
 		rc++;
@@ -90,9 +90,9 @@ MatrixXd parseCSVfile_double(string infilename)
 }
 
 
-vector<unsigned int>& get_indices_from_dbitset(const dbitset& gamma, vector<unsigned int>& v)
+vector<uint>& get_indices_from_dbitset(const dbitset& gamma, vector<uint>& v)
 {
-	for (unsigned int i = 0; i < gamma.size(); i++) {
+	for (uint i = 0; i < gamma.size(); i++) {
 		if (gamma[i]) {
 			v.push_back(i);
 		}
@@ -108,10 +108,10 @@ vector<unsigned int>& get_indices_from_dbitset(const dbitset& gamma, vector<unsi
 MatrixXd& get_cols(const MatrixXd& m1, const dbitset& gamma, MatrixXd& m2)
 {
 	// Special case of get_rows_and_cols
-	vector<unsigned int> columns;
+	vector<uint> columns;
 	columns = get_indices_from_dbitset(gamma, columns);
 
-	for (unsigned int i = 0; i < columns.size(); i++) {
+	for (uint i = 0; i < columns.size(); i++) {
 		m2.col(i) = m1.col(columns[i]);
 	}
 
@@ -122,11 +122,11 @@ MatrixXd& get_cols(const MatrixXd& m1, const dbitset& gamma, MatrixXd& m2)
 MatrixXd& get_rows(const MatrixXd& m1, const dbitset& gamma, MatrixXd& m2)
 {
 	// Special case of get_rows_and_cols
-	vector<unsigned int> rows;
+	vector<uint> rows;
 	rows = get_indices_from_dbitset(gamma, rows);
 	// MatrixXd m2(rows.size(), m1.cols());
 
-	for (unsigned int i = 0; i < rows.size(); i++) {
+	for (uint i = 0; i < rows.size(); i++) {
 		m2.row(i) = m1.row(rows[i]);
 	}
 
@@ -136,15 +136,15 @@ MatrixXd& get_rows(const MatrixXd& m1, const dbitset& gamma, MatrixXd& m2)
 
 MatrixXd& get_rows_and_cols(const MatrixXd& m1, const dbitset& rows_bs, const dbitset& cols_bs, MatrixXd& m2)
 {
-	vector<unsigned int> row_indices;
+	vector<uint> row_indices;
 	row_indices = get_indices_from_dbitset(rows_bs, row_indices);
-	vector<unsigned int> col_indices;
+	vector<uint> col_indices;
 	col_indices = get_indices_from_dbitset(cols_bs, col_indices);
 
 	// Matrices are stored in column major order, so the intent is to access contiguous memory in
 	// sequence by looping down each row in the inner loop.
-	for (unsigned int j = 0; j < col_indices.size(); j++) {
-		for (unsigned int i = 0; i < row_indices.size(); i++) {
+	for (uint j = 0; j < col_indices.size(); j++) {
+		for (uint i = 0; i < row_indices.size(); i++) {
 			m2(i, j) = m1(row_indices[i], col_indices[j]);
 		}
 	}
@@ -155,14 +155,14 @@ MatrixXd& get_rows_and_cols(const MatrixXd& m1, const dbitset& rows_bs, const db
 
 double sd(const VectorXd& x)
 {
-	const unsigned int n = x.size();
+	const uint n = x.size();
 	return (x.array() - x.mean()).square().sum() / (n - 1);
 }
 
 
 void centre(VectorXd& v)
 {
-	const unsigned int n = v.size();
+	const uint n = v.size();
 	VectorXd v_bar(n);
 	v_bar.fill(v.mean());
 	double sd_v = sd(v);
@@ -186,8 +186,8 @@ void show_matrix_difference(ostream& os, const MatrixXd& m1, const MatrixXd& m2,
 	}
 
 	// Iterate through the elements of m1 and m2, looking for and reporting differences
-	for (unsigned int i = 0; i < m1.rows(); i++) {
-		for (unsigned int j = 0; j < m1.cols(); j++) {
+	for (uint i = 0; i < m1.rows(); i++) {
+		for (uint j = 0; j < m1.cols(); j++) {
 			if (abs(m1(i, j) - m2(i, j)) > epsilon) {
 				os << "Row " << i << ", column " << j << " m1 " << m1(i, j) << " m2 " << m2(i, j);
 				os <<  " difference " << m1(i, j) - m2(i, j);
@@ -209,12 +209,12 @@ void show_matrix_difference(ostream& os, const MatrixXd& m1, const MatrixXd& m2,
 //'                            which we are calculating using this function.
 //' @param[out] bLow       The current iteration's inverse i.e. (X_gamma_prime^T X_gamma_prime)^{-1}
 //' @return                    The new inverse (mX_gamma_prime^T mX_gamma_prime)^{-1}
-MatrixXd& rank_one_update(const dbitset& gamma, const unsigned int col_abs, const unsigned int min_idx,
+MatrixXd& rank_one_update(const dbitset& gamma, const uint col_abs, const uint min_idx,
 const MatrixXd& mXTX, MatrixXd& mA, MatrixXd& mA_prime, bool& bLow)
 {
-	const unsigned int p = mXTX.cols();
-	const unsigned int p_gamma_prime = mA_prime.cols();
-	const unsigned int p_gamma = mA.cols();
+	const uint p = mXTX.cols();
+	const uint p_gamma_prime = mA_prime.cols();
+	const uint p_gamma = mA.cols();
 
 	// Construct mA_prime
 	// b = 1 / (x^T x - x^T X_gamma A X_gamma^T x)
@@ -239,7 +239,7 @@ const MatrixXd& mXTX, MatrixXd& mA, MatrixXd& mA_prime, bool& bLow)
 		// Do rank one update
 		// Matrix m1 = A + b A X_gamma^T x x^T X_gamma A
 		// The relative column index
-		const unsigned int col = col_abs - min_idx;
+		const uint col = col_abs - min_idx;
 		MatrixXd X_gamma_x(p_gamma, p_gamma);
 		MatrixXd A_X_gamma_T_x = mA * X_gamma_T_x;
 		// Re-arrange.
@@ -265,8 +265,8 @@ const MatrixXd& mXTX, MatrixXd& mA, MatrixXd& mA_prime, bool& bLow)
 			#ifdef DEBUG
 			cout << "mA_prime " << endl << mA_prime << endl;
 			#endif
-			for (unsigned int j = 0; j < p_gamma_prime; j++) {
-				for (unsigned int i = 0; i < j; i++) {
+			for (uint j = 0; j < p_gamma_prime; j++) {
+				for (uint i = 0; i < j; i++) {
 					mA_prime(i, j) = mA_prime(j, i);
 				}
 			}
@@ -298,12 +298,12 @@ const MatrixXd& mXTX, MatrixXd& mA, MatrixXd& mA_prime, bool& bLow)
 //' @param[in/out]  mA         The previous iteration's inverse i.e. (X_gamma^T X_gamma)^{-1}
 //' @param[out] mA_prime       The current iteration's inverse i.e. (X_gamma_prime^T X_gamma_prime)^{-1}
 //' @return                    The new inverse (mX_gamma_prime^T mX_gamma_prime)^{-1}
-MatrixXd& rank_one_downdate(const unsigned int col_abs, const unsigned int min_idx, MatrixXd& mA, MatrixXd& mA_prime)
+MatrixXd& rank_one_downdate(const uint col_abs, const uint min_idx, MatrixXd& mA, MatrixXd& mA_prime)
 {
-	const unsigned int p_gamma_prime = mA_prime.cols();
-	const unsigned int p_gamma = mA.cols();
+	const uint p_gamma_prime = mA_prime.cols();
+	const uint p_gamma = mA.cols();
 	// The relative column index
-	const unsigned int col = col_abs - min_idx;
+	const uint col = col_abs - min_idx;
 
 	MatrixXd mA_11(p_gamma_prime, p_gamma_prime);
 	VectorXd va_12(p_gamma_prime);
@@ -334,8 +334,8 @@ MatrixXd& rank_one_downdate(const unsigned int col_abs, const unsigned int min_i
 	mA_prime = mA_11 - (va_12 * va_12.transpose()) / a_22;
 
 	// Should take advantage of the symmetry of mA_prime. For now, just fill in upper triangular entries.
-	for (unsigned int j = 0; j < p_gamma_prime; j++) {
-		for (unsigned int i = 0; i < j; i++) {
+	for (uint j = 0; j < p_gamma_prime; j++) {
+		for (uint i = 0; i < j; i++) {
 			mA_prime(i, j) = mA_prime(j, i);
 		}
 	}
@@ -345,7 +345,7 @@ MatrixXd& rank_one_downdate(const unsigned int col_abs, const unsigned int min_i
 
 
 void update_mA_prime(bool bUpdate, const dbitset& gamma,
-const unsigned int col, const unsigned int min_idx,
+const uint col, const uint min_idx,
 const MatrixXd& mXTX, MatrixXd& mA, MatrixXd& mA_prime,
 bool& bLow)
 {
@@ -377,20 +377,20 @@ bool& bLow)
 //' @param[in] bCentre       Boolean whether to centre vy and mX or not
 //' @return                  A vector of length 2^p of the correlations
 //' @export
-VectorXd all_correlations_main(const Graycode& graycode, VectorXd vy, MatrixXd mX, const unsigned int intercept_col,
-const unsigned int max_iterations, const bool bIntercept = false, const bool bCentre = true)
+VectorXd all_correlations_main(const Graycode& graycode, VectorXd vy, MatrixXd mX, const uint intercept_col,
+const uint max_iterations, const bool bIntercept = false, const bool bCentre = true)
 {
-	const unsigned int n = mX.rows();					 // The number of observations
-	const unsigned int p = mX.cols();					 // The number of covariates
+	const uint n = mX.rows();					 // The number of observations
+	const uint p = mX.cols();					 // The number of covariates
 	VectorXd vR2_all(max_iterations);					 // Vector of correlations for all models
 	bool bmA_set = false;											 // Whether mA has been set yet
 	bool bUpdate;															 // True for an update, false for a downdate
-	unsigned int diff_idx;										 // The covariate which is changing
-	unsigned int min_idx;											 // The minimum bit which is set in gamma_prime
+	uint diff_idx;										 // The covariate which is changing
+	uint min_idx;											 // The minimum bit which is set in gamma_prime
 	dbitset gamma(p);													 // The model gamma
 	dbitset gamma_prime(p);										 // The model gamma
-	unsigned int p_gamma_prime;								 // The number of columns in the matrix mX_gamma_prime
-	unsigned int p_gamma;											 // The number of columns in the matrix mX_gamma
+	uint p_gamma_prime;								 // The number of columns in the matrix mX_gamma_prime
+	uint p_gamma;											 // The number of columns in the matrix mX_gamma
 	vector< MatrixXd > vec_mA(p);
 	vector< MatrixXd > vec_mX_gamma(p);
 	vector< MatrixXd > vec_m1(p);
@@ -399,7 +399,7 @@ const unsigned int max_iterations, const bool bIntercept = false, const bool bCe
 	const double yTy = vy.squaredNorm();
 
 	// Pre-allocate memory
-	for (unsigned int i = 0; i < p; i++) {
+	for (uint i = 0; i < p; i++) {
 		vec_mA[i].resize(i + 1, i + 1);
 		vec_mX_gamma[i].resize(n, i + 1);
 		vec_m1[i].resize(i + 1, 1);
@@ -410,7 +410,7 @@ const unsigned int max_iterations, const bool bIntercept = false, const bool bCe
 		// centre(vy);
 
 		// Centre non-intercept columns of mX
-		for (unsigned int i = 0; i < mX.cols(); i++) {
+		for (uint i = 0; i < mX.cols(); i++) {
 			// Skip intercept column if there is one.
 			if (bIntercept && i == intercept_col)
 				continue;
@@ -427,7 +427,7 @@ const unsigned int max_iterations, const bool bIntercept = false, const bool bCe
 		private(diff_idx, min_idx, p_gamma_prime, p_gamma, bUpdate)\
 			shared(cout, mX, vR2_all, graycode)\
 			default(none)
-	for (unsigned int idx = 1; idx < max_iterations; idx++) {
+	for (uint idx = 1; idx < max_iterations; idx++) {
 		#ifdef DEBUG
 		cout << endl << "Iteration " << idx << endl;
 		#endif
@@ -507,11 +507,11 @@ const unsigned int max_iterations, const bool bIntercept = false, const bool bCe
 }
 
 
-VectorXd all_correlations_mX_cpp(VectorXd vy, MatrixXd mX, const unsigned int intercept_col,
+VectorXd all_correlations_mX_cpp(VectorXd vy, MatrixXd mX, const uint intercept_col,
 														 const bool bIntercept = false, const bool bCentre = true)
 {
-	const unsigned int p = mX.cols();
-	const unsigned int max_iterations = 1 << p;
+	const uint p = mX.cols();
+	const uint max_iterations = 1 << p;
 
 	Graycode graycode(p);
 	return all_correlations_main(graycode, vy, mX, intercept_col, max_iterations, bIntercept, bCentre);
@@ -526,14 +526,14 @@ VectorXd all_correlations_mX_cpp(VectorXd vy, MatrixXd mX, const unsigned int in
 //' @param[in] bCentre       Boolean whether to centre vy and mX or not
 //' @return                  A vector of length 2^p of the correlations
 //' @export
-VectorXd all_correlations_mX_mZ_cpp(VectorXd vy, MatrixXd mX, MatrixXd mZ, const unsigned int intercept_col,
+VectorXd all_correlations_mX_mZ_cpp(VectorXd vy, MatrixXd mX, MatrixXd mZ, const uint intercept_col,
 const bool bIntercept = false, const bool bCentre = true)
 {
-	const unsigned int n = mX.rows();
-	const unsigned int p1 = mX.cols();
-	const unsigned int p2 = mZ.cols();
+	const uint n = mX.rows();
+	const uint p1 = mX.cols();
+	const uint p2 = mZ.cols();
 	MatrixXd mC(n, p1 + p2);
-	const unsigned int max_iterations = 1 << p2;
+	const uint max_iterations = 1 << p2;
 
 	mC << mX, mZ;
 	Graycode graycode(p1, p2);
@@ -543,9 +543,9 @@ const bool bIntercept = false, const bool bCentre = true)
 
 VectorXd one_correlation(VectorXd vy, MatrixXd mX, MatrixXd mZ)
 {
-	const unsigned int n = mX.rows();
-	const unsigned int p = mX.cols();
-	const unsigned int m = mZ.cols();
+	const uint n = mX.rows();
+	const uint p = mX.cols();
+	const uint m = mZ.cols();
 
 	MatrixXd mC(n, p + m);
 	mC << mX, mZ;

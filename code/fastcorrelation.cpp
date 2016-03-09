@@ -48,3 +48,11 @@ VectorXd all_correlations_mX_mZ(MapVecd vy, MapMatd mX, MapMatd mZ, unsigned int
   omp_set_num_threads(num_threads);
   return all_correlations_mX_mZ_cpp(vy, mX, mZ, intercept_col, bIntercept, bCentre);
 }
+
+// [[Rcpp::export]]
+MatrixXi graycode(unsigned int varying, unsigned int fixed, unsigned int num_threads=1)
+{
+  omp_set_num_threads(num_threads);
+  Graycode graycode(fixed, varying);
+  return graycode.to_MatrixXi();
+}

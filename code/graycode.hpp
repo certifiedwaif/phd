@@ -15,36 +15,37 @@ using Eigen::MatrixXi;
 using namespace std;
 
 typedef dynamic_bitset<> dbitset;
+typedef unsigned int uint;
 
 struct Graycode {
-	Graycode(unsigned int _p);
-	Graycode(unsigned int _fixed, unsigned int _varying);
-	const unsigned int fixed;
-	const unsigned int varying;
-	const unsigned int size;
+	Graycode(uint _p);
+	Graycode(uint _fixed, uint _varying);
+	const uint fixed;
+	const uint varying;
+	const uint size;
 
-	unsigned int binary_to_gray(const unsigned int num);
-	unsigned int gray_to_binary(const unsigned int num);
-	VectorXd binary_to_vec(const unsigned int num);
-	VectorXd gray_vec(const unsigned int i);
-	MatrixXd to_MatrixXd();
-	dbitset operator[](const unsigned int idx) const;
+	uint binary_to_gray(const uint num);
+	uint gray_to_binary(const uint num);
+	VectorXd binary_to_vec(const uint num);
+	VectorXd gray_vec(const uint i);
+	MatrixXi to_MatrixXi();
+	dbitset operator[](const uint idx) const;
 	void change(const dbitset& gamma_prime, const dbitset& gamma,
-						 	bool& update, unsigned int& diff_idx, unsigned int& min_idx,
-							unsigned int& bits_set) const;
+						 	bool& update, uint& diff_idx, uint& min_idx,
+							uint& bits_set) const;
 };
 
 
-Graycode::Graycode(unsigned int _p) : fixed(0), varying(_p), size(fixed + varying)
+Graycode::Graycode(uint _p) : fixed(0), varying(_p), size(fixed + varying)
 { 
 }
 
-Graycode::Graycode(unsigned int _fixed, unsigned int _varying) : fixed(_fixed), varying(_varying), size(fixed + varying)
+Graycode::Graycode(uint _fixed, uint _varying) : fixed(_fixed), varying(_varying), size(fixed + varying)
 {
 }
 
 
-unsigned int Graycode::binary_to_gray(unsigned int num)
+uint Graycode::binary_to_gray(uint num)
 {
 	return (num >> 1) ^ num;
 }
@@ -54,9 +55,9 @@ unsigned int Graycode::binary_to_gray(unsigned int num)
 	The purpose of this function is to convert a reflected binary
 	Gray code number to a binary number.
 */
-unsigned int Graycode::gray_to_binary(unsigned int num)
+uint Graycode::gray_to_binary(uint num)
 {
-	unsigned int mask;
+	uint mask;
 	for (mask = num >> 1; mask != 0; mask = mask >> 1) {
 		num = num ^ mask;
 	}
@@ -64,10 +65,10 @@ unsigned int Graycode::gray_to_binary(unsigned int num)
 }
 
 
-VectorXd Graycode::binary_to_vec(unsigned int num)
+VectorXd Graycode::binary_to_vec(uint num)
 {
 	VectorXd result(size);
-	for (unsigned int i = 0; i < size; i++) {
+	for (uint i = 0; i < size; i++) {
 		result[(size - 1) - i] = num & 1;
 		num >>= 1;
 	}
@@ -75,35 +76,39 @@ VectorXd Graycode::binary_to_vec(unsigned int num)
 }
 
 
-VectorXd Graycode::gray_vec(unsigned int i)
+VectorXd Graycode::gray_vec(uint i)
 {
 	return binary_to_vec(binary_to_gray(i)).transpose();
 }
 
 
-MatrixXd Graycode::to_MatrixXd()
+MatrixXi Graycode::to_MatrixXi()
 {
-	unsigned int rows = 1 << size;
-	MatrixXd result(rows, size);
-	for (unsigned int i = 0; i < rows; i++) {
-		result.row(i) = gray_vec(i);
+	uint rows = 1 << varying;
+	MatrixXi result(rows, size);
+	#pragma omp parallel for
+	for (uint i = 0; i < rows; i++) {
+		dbitset bs = (*this)[i];
+		for (uint j = 0; j < size; j++) {
+			result(i, j) = bs[j] ? 1 : 0;
+		}
 	}
 	return(result);
 }
 
 
-dbitset Graycode::operator[](const unsigned int idx) const
+dbitset Graycode::operator[](const uint idx) const
 {
 	dbitset bs_varying(varying, idx);
 	bs_varying =  bs_varying ^ (bs_varying >> 1);
 	if (fixed != 0) {
 		dbitset bs(size);
 
-		for (unsigned int i = 0; i < fixed; i++) {
+		for (uint i = 0; i < fixed; i++) {
 			bs[i] = true;
 		}
 
-		for (unsigned int i = 0; i < varying; i++) {
+		for (uint i = 0; i < varying; i++) {
 			bs[i + fixed] = bs_varying[i];
 		}
 
@@ -115,7 +120,7 @@ dbitset Graycode::operator[](const unsigned int idx) const
 
 
 void Graycode::change(const dbitset& gamma_prime, const dbitset& gamma,
-													bool& update, unsigned int& diff_idx, unsigned int& min_idx, unsigned int& bits_set) const
+													bool& update, uint& diff_idx, uint& min_idx, uint& bits_set) const
 {
 	#ifdef DEBUG
 	cout << "Previous gamma: " << gamma << endl;
