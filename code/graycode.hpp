@@ -27,7 +27,7 @@ struct Graycode {
 	unsigned int gray_to_binary(const unsigned int num);
 	VectorXd binary_to_vec(const unsigned int num);
 	VectorXd gray_vec(const unsigned int i);
-	MatrixXd to_MatrixXd();
+	MatrixXi to_MatrixXi();
 	dbitset operator[](const unsigned int idx) const;
 	void change(const dbitset& gamma_prime, const dbitset& gamma,
 						 	bool& update, unsigned int& diff_idx, unsigned int& min_idx,
@@ -81,10 +81,10 @@ VectorXd Graycode::gray_vec(unsigned int i)
 }
 
 
-MatrixXd Graycode::to_MatrixXd()
+MatrixXi Graycode::to_MatrixXi()
 {
 	unsigned int rows = 1 << varying;
-	MatrixXd result(rows, size);
+	MatrixXi result(rows, size);
 	#pragma omp parallel for
 	for (unsigned int i = 0; i < rows; i++) {
 		dbitset bs = (*this)[i];

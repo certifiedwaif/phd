@@ -50,9 +50,9 @@ VectorXd all_correlations_mX_mZ(MapVecd vy, MapMatd mX, MapMatd mZ, unsigned int
 }
 
 // [[Rcpp::export]]
-MatrixXd graycode(unsigned int varying, unsigned int fixed = 0, unsigned int num_threads=1)
+MatrixXi graycode(unsigned int varying, unsigned int fixed, unsigned int num_threads=1)
 {
   omp_set_num_threads(num_threads);
   Graycode graycode(fixed, varying);
-  return graycode.to_MatrixXd();
+  return graycode.to_MatrixXi();
 }
