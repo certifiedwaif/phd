@@ -90,8 +90,7 @@ ZE.exact <- function(vy,mX,LARGEP,STORE.XTX=TRUE)
 	XTy <- t(mX)%*%vy
 	yTy <- t(vy)%*%vy
 	vR2 <- rep(0,nrow(A))
-	# for (j in 2:nrow(A))
-	for (j in 2:7)
+	for (j in 2:nrow(A))
 	{
 		cat("Iteration ", j, "\n")
 		inds <- linds[[j]]
