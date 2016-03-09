@@ -85,8 +85,9 @@ MatrixXd Graycode::to_MatrixXd()
 {
 	unsigned int rows = 1 << size;
 	MatrixXd result(rows, size);
+	#pragma omp parallel for
 	for (unsigned int i = 0; i < rows; i++) {
-		result.row(i) = gray_vec(i);
+		result.row(i) = gray_vec(i).reverse();
 	}
 	return(result);
 }
