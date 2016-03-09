@@ -108,7 +108,7 @@ int main()
 	MatrixXd mZ = mC.rightCols(9);
 	VectorXd vR2_all_mX_mZ = all_correlations_mX_mZ_cpp(vy, mX, mZ, 0, intercept, centre);
 	cout << "i,R2" << endl;
-	for (int i = 1; i < vR2_all_mX_mZ.size(); i++) {
+	for (uint i = 1; i < vR2_all_mX_mZ.size(); i++) {
 		// const double epsilon = 1e-8;
 		// if (abs(diff) > epsilon) {
 		// cout << grey_vec(i - 1, p) << " to " << grey_vec(i, p) << endl;
@@ -130,7 +130,7 @@ int main()
 
 	VectorXd vExpected_correlations = parseCSVfile_double("Hitters_exact2.csv");
 	cout << "i,R2" << endl;
-	for (int i = 1; i < vR2_all_mX.size(); i++) {
+	for (uint i = 1; i < vR2_all_mX.size(); i++) {
 		double diff = vR2_all_mX(i) - vExpected_correlations(i);
 		// const double epsilon = 1e-8;
 		// if (abs(diff) > epsilon) {
