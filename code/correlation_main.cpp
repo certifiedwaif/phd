@@ -104,17 +104,17 @@ int main()
 	VectorXd vy = parseCSVfile_double("vy.csv");
 	MatrixXd mC = parseCSVfile_double("mX.csv");
 	
-	MatrixXd mX = mC.leftCols(10);
-	MatrixXd mZ = mC.rightCols(9);
-	VectorXd vR2_all_mX_mZ = all_correlations_mX_mZ_cpp(vy, mX, mZ, 0, intercept, centre);
-	cout << "i,R2" << endl;
-	for (uint i = 1; i < vR2_all_mX_mZ.size(); i++) {
-		// const double epsilon = 1e-8;
-		// if (abs(diff) > epsilon) {
-		// cout << grey_vec(i - 1, p) << " to " << grey_vec(i, p) << endl;
-		cout << i << ", C++ R2 " << vR2_all_mX_mZ(i) << endl;
-		// }
-	}
+	// MatrixXd mX = mC.leftCols(10);
+	// MatrixXd mZ = mC.rightCols(9);
+	// VectorXd vR2_all_mX_mZ = all_correlations_mX_mZ_cpp(vy, mX, mZ, 0, intercept, centre);
+	// cout << "i,R2" << endl;
+	// for (uint i = 1; i < vR2_all_mX_mZ.size(); i++) {
+	// 	// const double epsilon = 1e-8;
+	// 	// if (abs(diff) > epsilon) {
+	// 	// cout << grey_vec(i - 1, p) << " to " << grey_vec(i, p) << endl;
+	// 	cout << i << ", C++ R2 " << vR2_all_mX_mZ(i) << endl;
+	// 	// }
+	// }
 
 	struct timeval start, end;
 	long mtime, seconds, useconds;
