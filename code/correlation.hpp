@@ -139,7 +139,7 @@ MatrixBase<Derived>& get_rows(const MatrixBase<Derived>& m1, const dbitset& gamm
 
 template <typename Derived>
 MatrixBase<Derived>& get_rows_and_cols(const MatrixBase<Derived>& m1, const dbitset& rows_bs,
-																				const dbitset& cols_bs, MatrixBase<Derived>& m2)
+const dbitset& cols_bs, MatrixBase<Derived>& m2)
 {
 	vector<uint> row_indices;
 	row_indices = get_indices_from_dbitset(rows_bs, row_indices);
@@ -306,7 +306,7 @@ const MatrixBase<Derived>& mXTX, const MatrixBase<Derived>& mA, MatrixBase<Deriv
 //' @return                    The new inverse (mX_gamma_prime^T mX_gamma_prime)^{-1}
 template <typename Derived>
 MatrixBase<Derived>& rank_one_downdate(const uint col_abs, const uint min_idx,
-																				const MatrixBase<Derived>& mA, MatrixBase<Derived>& mA_prime)
+const MatrixBase<Derived>& mA, MatrixBase<Derived>& mA_prime)
 {
 	const uint p_gamma_prime = mA_prime.cols();
 	const uint p_gamma = mA.cols();
@@ -376,8 +376,6 @@ bool& bLow)
 }
 
 
-
-
 //' Calculate the correlations for every subset of the covariates in mX
 //'
 //' @param[in] vy            A vector of responses of length n
@@ -390,17 +388,17 @@ bool& bLow)
 VectorXd all_correlations_main(const Graycode& graycode, VectorXd vy, MatrixXd mX, const uint intercept_col,
 const uint max_iterations, const bool bIntercept = false, const bool bCentre = true)
 {
-	const uint n = mX.rows();					 // The number of observations
-	const uint p = mX.cols();					 // The number of covariates
+	const uint n = mX.rows();									 // The number of observations
+	const uint p = mX.cols();									 // The number of covariates
 	VectorXd vR2_all(max_iterations);					 // Vector of correlations for all models
 	bool bmA_set = false;											 // Whether mA has been set yet
 	bool bUpdate;															 // True for an update, false for a downdate
-	uint diff_idx;										 // The covariate which is changing
-	uint min_idx;											 // The minimum bit which is set in gamma_prime
+	uint diff_idx;														 // The covariate which is changing
+	uint min_idx;															 // The minimum bit which is set in gamma_prime
 	dbitset gamma(p);													 // The model gamma
 	dbitset gamma_prime(p);										 // The model gamma
-	uint p_gamma_prime;								 // The number of columns in the matrix mX_gamma_prime
-	uint p_gamma;											 // The number of columns in the matrix mX_gamma
+	uint p_gamma_prime;												 // The number of columns in the matrix mX_gamma_prime
+	uint p_gamma;															 // The number of columns in the matrix mX_gamma
 	vector< MatrixXd > vec_mA(p);
 	vector< MatrixXd > vec_mX_gamma(p);
 	vector< MatrixXd > vec_m1(p);
@@ -518,7 +516,7 @@ const uint max_iterations, const bool bIntercept = false, const bool bCentre = t
 
 
 VectorXd all_correlations_mX_cpp(VectorXd vy, MatrixXd mX, const uint intercept_col,
-														 const bool bIntercept = false, const bool bCentre = true)
+const bool bIntercept = false, const bool bCentre = true)
 {
 	const uint p = mX.cols();
 	const uint max_iterations = 1 << p;
@@ -526,6 +524,7 @@ VectorXd all_correlations_mX_cpp(VectorXd vy, MatrixXd mX, const uint intercept_
 	Graycode graycode(p);
 	return all_correlations_main(graycode, vy, mX, intercept_col, max_iterations, bIntercept, bCentre);
 }
+
 
 //' Calculate the correlations for every subset of the covariates in mX
 //'
@@ -570,5 +569,4 @@ VectorXd one_correlation(VectorXd vy, MatrixXd mX, MatrixXd mZ)
 
 	return R2;
 }
-
 #endif
