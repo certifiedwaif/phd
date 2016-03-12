@@ -54,14 +54,33 @@ $0.472$ s for $p=13$ and $n=263$ on verona using all 48 cores.
 \begin{frame}{topserver, and servers \ldots}
 \begin{itemize}
 \item The software is now properly packaged. Good practice for packaging the correlations code.
-\small
-\begin{verbatim}
-devtools::install\_github("certifiedwaif/topserver")
-\end{verbatim}
+\small \texttt{devtools::install\_github("certifiedwaif/topserver")}
 \item \texttt{get\_topserver()} now returns a data frame, so it's easy to see which servers are loaded and 
-			which servers are free. That turned out to be handy, because \ldots
-\item Our old friend Andrew Stefan is back! On Friday night he was hitting every server in the school with
-			32 cores or more.
+			which servers are free. 
+
+{\tiny
+\begin{verbatim}
+
+> library(topserveR) \\
+> get\_topserver()
+\end{verbatim}
+\begin{tabular}{|l|rrrrrrrr|}
+\hline
+   &hostnames &Idle.time &CPUs  &days  &load &numerator &denominator &mystery \\
+\hline
+1&     anaona&     53.50&   40& 60.64& 40.14&        41&         385&   39740 \\
+2&     anbona&     26.28&   40& 60.64& 49.97&        51&         430&    7054 \\
+3&     ancona&     75.20&   40& 60.64& 39.14&        40&         387&   35428 \\
+4&     andona&     40.94&   40& 60.64& 38.05&        39&         367&   33184 \\
+5&     bivona&     87.84&   32& 60.64& 31.09&        32&         318&    3135 \\
+6&     briona&     95.32&   24& 60.64&  8.05&         9&         256&    7208 \\
+% \vdots&\vdots&\vdots&\vdots&\vdots&\vdots&\vdots&\vdots&\vdots\\
+\hline
+\end{tabular}
+}
+
+\item That turned out to be handy, because our old friend Andrew Stefan is back! On Friday night he was 
+			hitting every server in the school with	32 cores or more.
 \item I calmly explained to him that my software, which took 1,900 ms to run on my home machine on one core 
 			was now taking ~6,700 ms to run on one core on verona, due to caching effects.
 \item He graciously backed off from using 40 cores on verona to only using 20.
