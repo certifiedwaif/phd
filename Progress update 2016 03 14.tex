@@ -51,7 +51,19 @@ $0.472$ s for $p=13$ and $n=263$ on verona using all 48 cores.
 \end{itemize}
 \end{frame}
 
-\begin{frame}{topserver, and servers \ldots}
+\begin{frame}{Graycode}
+\begin{itemize}
+\item John asked me to generalise the correlation software so that some variables could remain fixed
+			while others were allowed to vary.
+\item Only the graycode needed to change. Everything else stayed exactly the same.
+\item The resulting graycode looks like this:
+\begin{figure}
+\includegraphics[scale=.2]{Graycode_fixed.png}
+\end{figure}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{topserver, and an old friend \ldots}
 \begin{itemize}
 \item The software is now properly packaged. Good practice for packaging the correlations code.
 \small \texttt{devtools::install\_github("certifiedwaif/topserver")}
@@ -87,18 +99,6 @@ $0.472$ s for $p=13$ and $n=263$ on verona using all 48 cores.
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Graycode}
-\begin{itemize}
-\item John asked me to generalise the correlation software so that some variables could remain fixed
-			while others were allowed to vary.
-\item Only the graycode needed to change. Everything else stayed exactly the same.
-\item The resulting graycode looks like this:
-\begin{figure}
-\includegraphics[scale=.2]{Graycode_fixed.png}
-\end{figure}
-\end{itemize}
-\end{frame}
-
 \begin{frame}{Theoretical problems}
 \begin{itemize}
 \item Time to take a break from computers for a few weeks.
@@ -116,6 +116,7 @@ $0.472$ s for $p=13$ and $n=263$ on verona using all 48 cores.
 \end{pmatrix}
 }{\vy^\top \vy}$
 \item We wish to show that $R^2_{\mX, \mZ} = R^2_\mX + O(w^*)$
+\item Nearly there \ldots
 \end{itemize}
 \end{frame}
 
