@@ -51,52 +51,26 @@
 % As mathematics is not a spectator sport, all major results will be proven, assuming only the ZFC axioms. This
 % talk will be accessible to anyone with a basic knowledge of high school mathematics and an inquiring mind.
 
-\begin{frame}{Who am I, and why am I here?}
+\begin{frame}{Who am I?}
 \begin{itemize}
-\item Who am I?
-\begin{itemize}
-\item Bachelor of Computer Science from UWS, 1995-1997, imperative upbringing. New to functional programming.
-\note{After I got bored, I went back to Uni to study pure mathematics and statistics. I wanted to get always
-			from computers. As you're about to discover, that worked out great.}
-\item Bachelor of Science(Pure Mathematics/Mathematics Statistics), 2006-2009, Honours First Class.
-\item Masters of Biostatistics, Trainee Biostatistician with the NSW Ministry of Health, 2011-2013.
-\item Third year PhD student in mathematical statistics at the University of Sydney with Dr John Ormerod, 
-			working in the field of variational approximations to Bayesian models.
-\item Computational statistician - HPC, numerics.
-% \item I could be described as one of those data scientist people. What does that mean? You tell me and we'll
-% 			\emph{both} know \ldots
-\end{itemize}
-
-\item Why am I here?
-\begin{itemize}
-\item In 2008, Erik got really into Haskell.\\
-\item Like a good friend, I trolled him about it.\\
-\item He said ``Well, if you haven't seriously tried it, how can you know whether it's
-			any good or not?''.\\
-\item So I did. And here I am.
-\end{itemize}
-\end{itemize}
-\end{frame}
-
-
-\begin{frame}{Mathematics}
-\begin{itemize}
-\item This talk is programming language agnostic.
-\note{If you're using a finite memory computer, and you want your computations to complete in a finite amount
-			of time, you have this problem.}
-\item A lot of people in the functional programming community like algebra, discrete maths, number theory and 
-			category theory. You draw lots of arrows and form equations.
-\item My heart beats for mathematical analysis, mathematical statistics and numerical analysis, which have a 
-			very different flavour. We form inequalities, take limits and approximate when we have to.
-\item Mathematicians do not restrict themselves to thinking about things which are computable!
-			\note{That would take all the fun out of life.}
-\item Mathematics rests on proof. We will prove every major result this evening. 
-			% for which proofs are available.
-\item If you like proofs, I hope you'll follow along. If not, you can just accept the results.
-\note{, and you're happy enough that there \emph{are} rigorous proofs}
-
-% \item I've attempted to make this talk accessible, and assume nothing beyond Year 10 mathematics, but the
-% 			definitions will come thick and fast.
+\item Third year PhD student working with Dr John Ormerod on variational approximations to Bayesian models.
+\item Bachelor Computer Science undergrad at University of Western Sydney.
+\item Bachelor of Science in Pure Mathematics and Statistics, First Class Honours, at University of Sydney.
+\item Computational statistician.
+\item I developed a deep interest in numerical analysis largely out of necessity, because of this darling 
+creature
+\def \Inf {\text{Inf}}
+\def \NaN {\text{NaN}}
+\begin{equation*}
+\begin{pmatrix}
+\Inf & \NaN & \ldots & \NaN\\
+\NaN & \Inf & \NaN & \vdots \\
+\vdots & \NaN & \ddots & \vdots \\
+\NaN & \ldots & \ldots & \Inf
+\end{pmatrix}
+\end{equation*}
+\item He arises when you try to invert a nearly singular matrix. I hope not to meet him again too often in 
+			the	near future!
 \end{itemize}
 \end{frame}
 
@@ -131,7 +105,7 @@
 \begin{frame}{A whirlwind introduction to set theory}
 $\forall x$ means for all $x$.\\
 To avoid set paradoxes, a set can contain anything except itself.\\
-% In particular, sets can contain numbers, and other sets.
+In particular, sets can contain numbers, and other sets.
 Infinite sets are fine, whether countably or uncountably infinite.\\
 Let $\emptyset$ denote the empty set.
 Let $A$ and $B$ be sets.\\
@@ -142,7 +116,8 @@ $A = B \Leftrightarrow A \subset B \text{ and } B \subset A$\\
 $A \subseteq B \Leftrightarrow A \subset B \text{ or } A = B$\\
 $A \cup B = \{x | x \in A \text{ or } x \in B\}$\\
 $A \cap B = \{x | x \in A \text{ and } x \in B\}$\\
-Foundational issues are left to logicians and type theorists. Ask Liam O'Connor!\\
+We believe that $\mathbb{N} \subset \mathbb{Z} \subset \mathbb{R} \subset \mathbb{C}$.\\
+Foundational issues are left to logicians and type theorists.\\
 We assume ZFC and move on.
 \end{frame}
 
@@ -280,18 +255,19 @@ list! Contradiction.
 
 \begin{frame}{What is a computer?}
 \begin{itemize}
-\item Simplified model: has a CPU, memory and input/output devices
+\item Answer: A Turing machine, a state machine with an infinite tape it can read and write to.
+\item Simplified model: has a CPU, memory and input/output devices.
 \item Can do
 \begin{itemize}
 \item arithmetic
 \item logic
 \item conditional or non-conditional branching
 \item read to and write from memory
-\item Perform input/output to interact with the outside world e.g. to read your keyboard input and display 
+\item perform input/output to interact with the outside world e.g. to read your keyboard input and display 
 			the result of your computation to you
 \end{itemize}
-\item Finite memory, a 1 dimensional array of bytes
-\item All operations take time to complete
+\item Finite memory.
+\item All operations take time to complete, however small.
 \end{itemize}
 \end{frame}
 
@@ -304,7 +280,8 @@ some \emph{error}. \\
 \item There are many ways that one might choose to do this. Typically we use a subset of
 the rational numbers. \\
 \item The dominant choice is the floating point numbers, in particular IEEE 754. \\
-\item Other choices include fixed point, arbitrary precision and exotic choices like Unums.
+\item Other choices include fixed point, arbitrary precision and more exotic choices like continued
+			fractions and Unums.
 \end{itemize}
 \end{frame}
 
@@ -526,23 +503,26 @@ So $x = 1 + \frac{1}{2 + \frac{1}{2 + \ldots}}$
 \begin{frame}{Continued fractions continued}
 \small
 \begin{itemize}
-\item Bill Gosper came up with algorithms to perform ``exact'' arithmetic on continued fractions in 1972.
-\item Continued fraction representations exist for all real numbers.
+\item Bill Gosper of MIT came up with algorithms to perform ``exact'' arithmetic on continued fractions in 
+			1972.
 \item You can move between continued fraction, power series and rational function representations of 
 			functions.
-\item There are big advantages to using this representation for some things. The continued fraction 
-			representation of a function or real number can converge more quickly than the power series 
+\item The continued fraction 
+			representation of a function can converge more quickly than the power series 
 			representation. And you only need to supply terms as they are needed.
-\item Calculating the square root of two is all very well. The problem comes when you try to go the other
-			way. What is $[1; 2, 2, 2, \ldots] \times [1; 2, 2, 2, \ldots]$?
-\item Gosper'’s mul­ti­plica­tion scheme will run for­ever with­out ever return­ing even a sin­gle number, because 				whether the first number is a 2 or a 1 depends on all of the infi­nite preci­sion in the operands.
+\item \emph{Problem}: Calculating the square root of two is all very well. What happens when you try to go
+			the other way? What is $[1; 2, 2, 2, \ldots] \times [1; 2, 2, 2, \ldots]$?
+\item Gosper'’s mul­ti­plica­tion scheme will run for­ever with­out return­ing a sin­gle number, because 				whether the first number is 2 or 1 depends on all of the infi­nite preci­sion in the operands.
+\item People like Peter Potts propose fixes for this like nested linear fractional transformations and
+			redundant binary digit encoding. I thought this approach was supposed to be \emph{simpler}?
+\item Not likely to be implemented in silicon any time soon \ldots
 \end{itemize}
 \end{frame}
 
 \begin{frame}{More exotic alternatives: UNums 2.0}
 \begin{itemize}
-\item Abandons previous ideas of floating point representation completely. 
 \item Key idea: Lose precision gradually and gracefully, rather than suddenly like floating point.
+\item Based on the stereographic projection of the real line to the unit circle. 
 % \begin{tikzpicture}[
 %     x                = 2cm/10,
 %     scale            = 3,
@@ -588,7 +568,7 @@ So $x = 1 + \frac{1}{2 + \frac{1}{2 + \ldots}}$
 			already superceded (!).
 \item Very new, presented at Multicore World 2016. No proofs yet?
 \item He has a plan for how to get this into hardware.
-\item Check out his Powerpoint presentation.
+\item Check out his PowerPoint presentation.
 \item A little bird tells me that Intel finds this interesting, and ``may look at implementing this in
 			six year's time.''. They refused to be quoted!
 \end{itemize}
@@ -597,12 +577,15 @@ So $x = 1 + \frac{1}{2 + \frac{1}{2 + \ldots}}$
 
 \begin{frame}{But \ldots}
 \begin{itemize}
-\item Floating point arithmetic is ubiquitous, like QWERTY, or imperative programming or (insert thing
-			you don't like here).
+\item Floating point arithmetic is ubiquitous, like QWERTY or (insert thing
+			you don't like here). It's implemented in hardware you can buy today and it is well understood.
+\item We have centuries of numerical analysis from which to draw when analysing the error in our algorithms.
+			Changing representations means at least partially abandoning that.
 \item Beware the Wrath of Kahan: alternatives often end up suffering from the same shortcomings. 
 			William Kahan aka the Father of floating point arithmetic, enjoys pointing this out.
 \item A few clock cycles is about as long as I care to wait in numerics.
-\item Serious answer: Use the right representation in the right situation. But know what price you're paying 				in terms of both memory and computer time, and how much precision you're really getting.
+\item Serious answer: Use the right representation in the right situation. But know what price you're 
+			paying, and how much precision you're really getting.
 \end{itemize}
 \end{frame}
 
