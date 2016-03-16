@@ -253,7 +253,7 @@ list! Contradiction.
 % I'll also throw in a couple of jokes that I hope people will like. And I'll talk about myself just a little,
 % and how I came to be interested in these things.
 
-\begin{frame}{What is a computer?}
+\begin{frame}{A brief aside: What is a computer?}
 \begin{itemize}
 \item Answer: A Turing machine, a state machine with an infinite tape it can read and write to.
 \item Simplified model: has a CPU, memory and input/output devices.
@@ -483,7 +483,7 @@ computer.
 {\tiny
 \text{Let }$x^2 &= 2$. Then
 \begin{equation*}
-\begin{align*}
+\begin{array}{ll}
 x^2 - 2 &= 0  \\
 x^2 - 1 &= 1 \\
 (x - 1)(x + 1) &= 1 \\
@@ -491,14 +491,15 @@ x^2 - 1 &= 1 \\
 x - 1 &= \frac{1}{2 + (x - 1)} \\
 &= \frac{1}{2 + \frac{1}{2 + (x - 1)}} \\
 &= \frac{1}{2 + \frac{1}{2 + \frac{1}{2 + \ldots}}}
-\end{align*}
+\end{array}
 \end{equation*}
 So $x = 1 + \frac{1}{2 + \frac{1}{2 + \ldots}}$
 }
 \item For brevity, the ones are omitted except for the leading one and only the two's are notated.
-			The above infinite continued fraction would be written $[1; 2, 2, 2, \ldots]$
+			The above infinite continued fraction would be written $[1; 2, 2, 2, \ldots]$.
 \end{itemize}
 \end{frame}
+
 
 \begin{frame}{Continued fractions continued}
 \small
@@ -507,12 +508,12 @@ So $x = 1 + \frac{1}{2 + \frac{1}{2 + \ldots}}$
 			1972.
 \item You can move between continued fraction, power series and rational function representations of 
 			functions.
-\item The continued fraction 
-			representation of a function can converge more quickly than the power series 
+\item The continued fraction representation of a function can converge more quickly than the power series 
 			representation. And you only need to supply terms as they are needed.
 \item \emph{Problem}: Calculating the square root of two is all very well. What happens when you try to go
-			the other way? What is $[1; 2, 2, 2, \ldots] \times [1; 2, 2, 2, \ldots]$?
-\item Gosper'’s mul­ti­plica­tion scheme will run for­ever with­out return­ing a sin­gle number, because 				whether the first number is 2 or 1 depends on all of the infi­nite preci­sion in the operands.
+			the other way? What is $\sqrt{2} \times \sqrt{2} = [1; 2, 2, 2, \ldots] \times [1; 2, 2, 2, \ldots]$?
+\item Gosper'’s mul­ti­plica­tion scheme will run for­ever with­out return­ing a sin­gle number, because whether the
+			first number is 2 or 1 depends on all of the infi­nite preci­sion in the operands.
 \item People like Peter Potts propose fixes for this like nested linear fractional transformations and
 			redundant binary digit encoding. I thought this approach was supposed to be \emph{simpler}?
 \item Not likely to be implemented in silicon any time soon \ldots
