@@ -519,6 +519,41 @@ So $x = 1 + \frac{1}{2 + \frac{1}{2 + \ldots}}$
 \end{itemize}
 \end{frame}
 
+% <StyxAlso> edwardk, Possibly dumb question about continued fractions.
+% <StyxAlso> http://www.cs.virginia.edu/~lat7h/blog/posts/7.html makes the point that multiplication need not terminate e.g. sqrt(2) * sqrt(2)
+% <StyxAlso> edwardk, How do you get around this?
+% <spacekitteh> laziness, presumably?
+% <StyxAlso> I don't think so in this case
+% <StyxAlso> The problem is that sqrt(2) has an infinite continued fraction representation
+% <erikd> StyxAlso: edwardk is on the east coast of the US, where its currently 5 am
+% <StyxAlso> Until you get to the "last" digit, you don't know whether you have the square root of two or not
+% <StyxAlso> So you don't know whether to output the first digit of your result as a 1 or a 2. And can't know.
+% <StyxAlso> erikd, Okay. An answer tomorrow is fine by me.
+% <StyxAlso> This is using Bill Gosper's algorithms unmodified. If there's a way out of this trap, I'd like to know about it.
+% <StyxAlso> Even if continued fractions aren't the right solution for everything, they're very interesting and useful for some things.
+% <StyxAlso> My supervisor wrote a paper on using them to evaluate special functions.
+% <pjdelport> StyxAlso: One approach that gets used is narrowing intervals, I think.
+% <StyxAlso> Yes. Which is quite different. Closer in spirit to floating point.
+% <pjdelport> http://www.tweedledum.com/rwg/cfup.htm also talks about it in the context of using continued logarithms (search down for ".999... problem")
+% <StyxAlso> I expected the problem was known. I was hoping that it was also solved.
+% <pjdelport> Jean Vuillem­in's "Exact Real Com­puter Arithmetic with Con­tin­ued Frac­tions" paper also addresses it, I think.
+% * erikd has quit (Read error: Connection timed out)
+% * erikd (~erikd@hendrix.mega-nerd.net) has joined #haskell.au
+% * brenton (uid39276@gateway/web/irccloud.com/x-tkavmaszyslgmbgh) has joined #haskell.au
+% * michaelneale has quit (Quit: Back later)
+% <edwardk> erikd: he also doesn't sleep much
+% <edwardk> StyxAlso: this is why continued fractions break down and you need nested linear fractional transformations
+% <StyxAlso> Right.
+% <StyxAlso> Do you have a reference? Perhaps you've already provided me with one.
+% <edwardk> StyxAlso: then you can do things like switch to a different 'digit' matrix representation that can make progress
+% <edwardk> e.g. redundant binary
+% <edwardk> peter potts' thesis uses a redundant binary digit encoding
+% <erikd> edwardk: wow! if i don't get 6-7 solid hours, i'm completely useless!!!
+% <StyxAlso> edwardk, I take it this isn't going to be implemented in silicon any time soon.
+% <StyxAlso> Sounds complicated.
+% <edwardk> unlikely =)
+% * StyxAlso chuckles.
+
 \begin{frame}{More exotic alternatives: UNums 2.0}
 \begin{itemize}
 \item Key idea: Lose precision gradually and gracefully, rather than suddenly like floating point.
