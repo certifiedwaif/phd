@@ -611,7 +611,7 @@ So $x = 1 + \frac{1}{2 + \frac{1}{2 + \ldots}}$
 \end{frame}
 
 
-\begin{frame}{But \ldots}
+\begin{frame}{There's no silver bullet. Better the devil you know?}
 \begin{itemize}
 \item Floating point arithmetic is ubiquitous, like QWERTY or (insert thing
 			you don't like here). It's implemented in hardware you can buy today and it is well understood.
@@ -619,7 +619,7 @@ So $x = 1 + \frac{1}{2 + \frac{1}{2 + \ldots}}$
 			Changing representations means at least partially abandoning that.
 \item Beware the Wrath of Kahan: alternatives often end up suffering from the same shortcomings. 
 			William Kahan aka the Father of floating point arithmetic, enjoys pointing this out.
-\item A few clock cycles is about as long as I care to wait in numerics.
+\item A few clock cycles is about as long as I care to wait for numerics. Or anything, really \ldots
 \item Serious answer: Use the right representation in the right situation. But know what price you're 
 			paying, and how much precision you're really getting.
 \end{itemize}
