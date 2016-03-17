@@ -10,7 +10,7 @@
 
 \usefonttheme{serif}
 
-\title{Troll You a Erik for Great Good!\\OR\\How I learned to stop worrying and love floating point numbers.}
+\title{How I learned to stop worrying and love floating point numbers.}
 \author{Mark Greenaway \\ PhD candidate \\ markg@maths.usyd.edu.au}
 
 % \usetikzlibrary{arrows.meta}
@@ -427,12 +427,13 @@ $|\epsilon| \leq \frac{p}{2} \beta^{1-t} = \delta$.
 where
 $|\hat{\epsilon_1}| \leq \delta$, $|\hat{\epsilon_2}| \leq \delta$ and $|\epsilon_1| \leq \delta$. Similiarly,
 \begin{equation*}
-\begin{array}{rl}
-\fl(x_1 + x_2 + x_3) &= ((x_1 (1 + \hat{\epsilon_1}) + x_2 (1 + \hat{\epsilon_2}))(1 + \epsilon_1) + \\
-& \quad x_3 (1 + \hat{\epsilon_3})(1 + \epsilon_2) \\
-& = (\quad x_1 (1 + \hat{\epsilon_1}) (1 + \epsilon_1) (1 + \epsilon_2) \\
-	&\qquad + x_2 (1 + \hat{\epsilon_2}) (1 + \epsilon_1) (1 + \epsilon_2)) \\
-	&\quad + x_3 (1 + \hat{\epsilon_3}) (1 + \epsilon_2)
+\begin{array}{rll}
+\fl(x_1 + x_2 + x_3) &= ((&x_1 (1 + \hat{\epsilon_1})\\
+&\qquad + &x_2 (1 + \hat{\epsilon_2}))(1 + \epsilon_1)\\
+&\qquad +  &x_3 (1 + \hat{\epsilon_3})(1 + \epsilon_2) \\
+& = (&x_1 (1 + \hat{\epsilon_1}) (1 + \epsilon_1) (1 + \epsilon_2) \\
+	&\qquad + &x_2 (1 + \hat{\epsilon_2}) (1 + \epsilon_1) (1 + \epsilon_2)) \\
+	&\qquad + &x_3 (1 + \hat{\epsilon_3}) (1 + \epsilon_2)
 \end{array}
 \end{equation*}
 \end{frame}
@@ -441,13 +442,13 @@ $|\hat{\epsilon_1}| \leq \delta$, $|\hat{\epsilon_2}| \leq \delta$ and $|\epsilo
 \begin{frame}{Generalising to n terms}
 Continuing this procedure,
 \begin{equation*}
-\begin{array}{rl}
-\fl(\sum_{i=1}^n x_i) &= \quad x_1 (1 + \hat{\epsilon_1}) \prod_{i=1}^{n-1} (1 + \epsilon_i) \\
-&\quad + x_2 (1 + \hat{\epsilon_2}) \prod_{i=1}^{n-1} (1 + \epsilon_i) \\
-&\quad + x_3 (1 + \hat{\epsilon_3}) \prod_{i=2}^{n-1} (1 + \epsilon_i) \\
-&\quad + x_4 (1 + \hat{\epsilon_4}) \prod_{i=3}^{n-1} (1 + \epsilon_i) \\
-&\quad + \ldots + x_n (1 + \hat{\epsilon_n}) (1 + \epsilon_{n-1}) \\
-&= \sum_{i=1}^n [x_i (1 + \hat{\epsilon_i}) \prod_{j=1}^{n-1} (1 + \epsilon_j)].
+\begin{array}{rll}
+\fl(\sum_{i=1}^n x_i) =& &x_1 (1 + \hat{\epsilon_1}) \prod_{i=1}^{n-1} (1 + \epsilon_i) \\
+& + &x_2 (1 + \hat{\epsilon_2}) \prod_{i=1}^{n-1} (1 + \epsilon_i) \\
+& + &x_3 (1 + \hat{\epsilon_3}) \prod_{i=2}^{n-1} (1 + \epsilon_i) \\
+& + &x_4 (1 + \hat{\epsilon_4}) \prod_{i=3}^{n-1} (1 + \epsilon_i) \\
+& + &\ldots + x_n (1 + \hat{\epsilon_n}) (1 + \epsilon_{n-1}) \\
+&=& \sum_{i=1}^n [x_i (1 + \hat{\epsilon_i}) \prod_{j=1}^{n-1} (1 + \epsilon_j)].
 \end{array}
 \end{equation*}
 Conclusion: 
@@ -460,6 +461,14 @@ computer.
 \end{itemize}
 \end{frame}
 
+
+\begin{frame}{Here's what happens when you don't pay attention to such issues}
+\begin{figure}
+\caption{Would you like noise with that? Good luck finding the minimum.}
+\includegraphics[scale=0.3, angle=91]{polynomial_evaluation.pdf}
+\end{figure}
+
+\end{frame}
 
 \begin{frame}{Alternatives to floating point: more precision or arbtitrary precision}
 \begin{itemize}
@@ -602,7 +611,7 @@ So $x = 1 + \frac{1}{2 + \frac{1}{2 + \ldots}}$
 \begin{itemize}
 \item Professor John Gustaffson, ex-Intel, author of ``The End of Error: Unum Computing'',
 			already superceded (!).
-\item Very new, presented at Multicore World 2016. No proofs yet?
+\item Very new, presented at Multicore World 2016.
 \item He has a plan for how to get this into hardware.
 \item Check out his PowerPoint presentation.
 \item A little bird tells me that Intel finds this interesting, and ``may look at implementing this in
