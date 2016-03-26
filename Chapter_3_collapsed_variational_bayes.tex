@@ -335,7 +335,7 @@ R^2_{\mX, \mZ} =
 \end{equation*}
 
 \def \BigO {\text{O}}
-rtp: $R_{X, Z} = R^2_{X} + \BigO(w^*)$ where $w^* = \max{\vw}$.
+rtp: $R^2_{\mX, \mZ} = R^2_{\mX} + \BigO(w_*)$ where $w_* = \max{\vw}$.
 
 Proof:
 
@@ -417,8 +417,8 @@ $\mP_{\mX^\perp}$ and $\mP_{\mZ^\perp}$.
 =& \vy^\top \mP_{\mZ^\perp} \mX (\mX^\top \mP_{\mZ^\perp} \mX))^{-1} \mX^\top \mP_{\mZ^\perp} \vy
 + \vy^\top \mP_{\mX^\perp} \mZ (\mZ^\top \mP_{\mX^\perp} \mZ)^{-1} \mZ^\top \mP_{\mX^\perp} \vy
 - \frac{\diag{(\vw^{-1} - 1)}}{1 + \diag{(\vw^{-1} - 1})} \vy^\top \mP_{\mX^\perp} \mZ (\mZ^\top \mP_{\mX^\perp} \mZ)^{-1} \mZ^\top \mP_{\mX^\perp} \vy \\
-\leq & \| \vy\top \vy \| (p_\mX + p_\mZ + p_\mZ \frac{w_*^{-1} - 1}{\cancel{1} + w_*^{-1} - \cancel{1}}) \\
-=& p_\mX + 2 p_\mZ - p_\mZ (1 - w_*) \text{ Linear function of } w_*
+\leq & \vy^\top \vy R^2_{\mX} + \| \vy\top \vy \|(p_\mZ + p_\mZ \frac{w_*^{-1} - 1}{\cancel{1} + w_*^{-1} - \cancel{1}}) \\
+=& \vy^\top \vy R^2_{\mX} + 2 p_\mZ - p_\mZ (1 - w_*) \text{ Linear function of } w_*
 \end{array}
 \end{equation*}
 
