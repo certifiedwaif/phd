@@ -295,7 +295,7 @@ $v = \frac{p}{2} + b + 1, 1 - \mu = (a + b + 2)$. Choose $a = \frac{3}{4}, b = \
 
 \begin{equation*}
 \begin{array}{rl}
-q^*_\gamma (p) &\propto \exp \{ \frac{n}{2} \log |\mX^\top \mGamma \mX|
+q^*_\gamma (p) &\propto \exp \{ \quad \frac{n}{2} \log |\mX^\top \mGamma \mX|
 															+ \half \E[\frac{1}{\sigma^2}] \E[\frac{1 + g}{g}] 
 																\E[\vbeta^\top \mGamma^\top \mX^\top \mX \mGamma \vbeta - 2 \mX \mGamma \vbeta^\top y]\} \\
 &= \exp \{\quad \frac{n}{2} \log{|\mX^\top \mX|} \vone^\top \log \vgamma - \half [\log (\beta_{q(\sigma^2)}) - \phi(\alpha_{q(\sigma^2)})] \\
@@ -315,6 +315,111 @@ q^*_\vbeta(\vmu_{q(\vbeta)}, \mSigma_{q(\vbeta)}) &\propto \exp \{ -\half \E [\f
 
 \begin{equation*}
 q^*_{\sigma^2}(\alpha_{q(\sigma^2)}, \beta_{q(\sigma^2)}) = 
+\end{equation*}
+
+\section{Theorem}
+Let
+\begin{equation*}
+R^2_{\mX, \mZ} = 
+\begin{pmatrix}
+\vy^\top \mX & \vy^\top \mZ
+\end{pmatrix}
+\begin{pmatrix}
+\mX^\top \mX & \mX^\top \mZ \\
+\mZ^\top \mX & \mZ^\top \mZ + \mZ^\top \mZ \odot (\mI - \mW^{-1})
+\end{pmatrix}^{-1}
+\begin{pmatrix}
+\mX^\top \vy\\
+\mZ^\top \vy
+\end{pmatrix}.
+\end{equation*}
+
+\def \BigO {\text{O}}
+rtp: $R_{X, Z} = R^2_{X} + \BigO(w^*)$ where $w^* = \max{\vw}$.
+
+Proof:
+
+Let $n$ be the number of rows of both $\mX$ and $\mZ$, $p_\mX$ be the number of columns of $\mX$, and $p_\mZ$
+be the number of columns of $\mZ$. Denote the projections onto the subspaces spanned by the columns of $\mX$
+and $\mZ$ by $\mP_\mX$ and $\mP_\mZ$, and the projections onto the complementary subspaces by
+$\mP_{\mX^\perp}$ and $\mP_{\mZ^\perp}$.
+
+\small
+\begin{equation*}
+\begin{array}{ll}
+&\vy^\top \vy R^2_{\mX, \mZ} \\
+=&
+\begin{pmatrix}
+\vy^\top \mX & \vy^\top \mZ
+\end{pmatrix}
+\begin{pmatrix}
+\mX^\top \mX & \mX^\top \mZ \\
+\mZ^\top \mX & \mZ^\top \mZ + \mZ^\top \mZ \odot (\mI - \mW^{-1})
+\end{pmatrix}^{-1}
+\begin{pmatrix}
+\mX^\top \vy\\
+\mZ^\top \vy
+\end{pmatrix} \\
+=&
+\begin{pmatrix}
+\vy^\top \mX & \vy^\top \mZ
+\end{pmatrix}
+\begin{bmatrix}
+\begin{pmatrix}
+\mX^\top \mX & \mX^\top \mZ \\
+\mZ^\top \mX & \mZ^\top \mZ
+\end{pmatrix}
+\odot
+\begin{pmatrix}
+\vone & \vone \\
+\vone & \vone + (\mI - \mW^{-1})
+\end{pmatrix}
+\end{bmatrix}
+^{-1}
+\begin{pmatrix}
+\mX^\top \vy\\
+\mZ^\top \vy
+\end{pmatrix} \\
+=&
+\begin{pmatrix}
+\vy^\top \mX & \vy^\top \mZ
+\end{pmatrix}
+\begin{pmatrix}
+(\mX^\top \mP_{\mZ^\perp} \mX)^{-1} & -(\mX^\top \mX)^{-1} \mX^\top \mZ (\mZ^\top \mP_{\mX^\perp} \mZ)^{-1} \\
+-(\mZ^\top \mZ)^{-1} \mZ^\top \mX (\mX^\top \mP_{\mZ^\perp}) \mX)^{-1} & (\mZ^\top \mP_{\mX^\perp} \mZ)^{-1}
+\end{pmatrix}
+\odot
+\begin{pmatrix}
+\vone & \vone \\
+\vone & \vone + (\mI - \mW^{-1})
+\end{pmatrix}
+^{-1}
+\begin{pmatrix}
+\mX^\top \vy\\
+\mZ^\top \vy
+\end{pmatrix} \\
+=&
+\begin{pmatrix}
+\vy^\top \mX(\mX^\top \mP_{\mZ^\perp} \mX)^{-1} - \vy^\top \mZ(\mZ^\top \mZ)^{-1} \mZ^\top \mX (\mX^\top \mP_{\mZ^\perp} \mX)^{-1}\\
+-\vy^\top \mX(\mX^\top \mX)^{-1} (\mZ^\top \mP_{\mX^\perp} \mZ)^{-1} + \vy^\top \mZ(\mZ^\top \mP_{\mX^\perp} \mZ)^{-1}
+\end{pmatrix}^\top
+\begin{pmatrix}
+\vone & \vone \\
+\vone & \vone + (\mI - \mW^{-1})
+\end{pmatrix}
+^{-1}
+\begin{pmatrix}
+\mX^\top \vy \\
+\mZ^\top \vy
+\end{pmatrix} \\
+=&\quad\vy^\top \mX (\mX^\top \mP_{\mZ^\perp} \mX)^{-1} \mX^\top \vy - \vy^\top \mZ(\mZ^\top \mZ)^{-1} \mZ^\top \mX (\mX^\top \mP_{\mZ^\perp}) \mX)^{-1} \mX^\top \vy \\
+&-\vy^\top \mX (\mX^\top \mX)^{-1} \mX^\top \mZ (\mZ^\top \mP_{\mX^\perp} \mZ)^{-1} \mZ^\top \vy + \frac{1}{1 + \diag{(w^{-1} - 1)}} \odot \vy^\top \mZ (\mZ^\top \mP_{\mX^\perp} \mZ)^{-1} \mZ^\top \vy \\
+=& \vy^\top \mP_{\mZ^\perp} \mX (\mX^\top \mP_{\mZ^\perp} \mX))^{-1} \mX^\top \mP_{\mZ^\perp} \vy
++ \vy^\top \mP_{\mX^\perp} \mZ (\mZ^\top \mP_{\mX^\perp} \mZ)^{-1} \mZ^\top \mP_{\mX^\perp} \vy
+- \frac{\diag{(\vw^{-1} - 1)}}{1 + \diag{(\vw^{-1} - 1})} \vy^\top \mP_{\mX^\perp} \mZ (\mZ^\top \mP_{\mX^\perp} \mZ)^{-1} \mZ^\top \mP_{\mX^\perp} \vy \\
+\leq & \| \vy\top \vy \| (p_\mX + p_\mZ + p_\mZ \frac{w_*^{-1} - 1}{\cancel{1} + w_*^{-1} - \cancel{1}}) \\
+=& p_\mX + 2 p_\mZ - p_\mZ (1 - w_*) \text{ Linear function of } w_*
+\end{array}
 \end{equation*}
 
 \end{document}
