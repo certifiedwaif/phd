@@ -417,8 +417,9 @@ $\mP_{\mX^\perp}$ and $\mP_{\mZ^\perp}$.
 =& \vy^\top \mP_{\mZ^\perp} \mX (\mX^\top \mP_{\mZ^\perp} \mX))^{-1} \mX^\top \mP_{\mZ^\perp} \vy
 + \vy^\top \mP_{\mX^\perp} \mZ (\mZ^\top \mP_{\mX^\perp} \mZ)^{-1} \mZ^\top \mP_{\mX^\perp} \vy
 - \frac{\diag{(\vw^{-1} - 1)}}{1 + \diag{(\vw^{-1} - 1})} \vy^\top \mP_{\mX^\perp} \mZ (\mZ^\top \mP_{\mX^\perp} \mZ)^{-1} \mZ^\top \mP_{\mX^\perp} \vy \\
-\leq & \vy^\top \vy R^2_{\mX} + \| \vy\top \vy \|(p_\mZ + p_\mZ \frac{w_*^{-1} - 1}{\cancel{1} + w_*^{-1} - \cancel{1}}) \\
-=& \vy^\top \vy R^2_{\mX} + 2 p_\mZ - p_\mZ (1 - w_*) \text{ Linear function of } w_*
+\leq & \vy^\top \vy R^2_{\mX} + \| \vy \|^2 (p_\mZ + p_\mZ \frac{w_*^{-1} - 1}{\cancel{1} + w_*^{-1} - \cancel{1}}) \\
+=& \vy^\top \vy R^2_{\mX} + \| \vy \|^2 [ 2 p_\mZ - p_\mZ (1 - w_*) ] \\
+=& \vy^\top \vy R^2_{\mX} + \| \vy \|^2 ( p_\mZ - p_\mZ w_* ) \text{ Linear function of } w_*
 \end{array}
 \end{equation*}
 
