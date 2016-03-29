@@ -1,4 +1,4 @@
-\documentclass{article}[12pt]
+\documentclass{amsart}[12pt]
 
 \addtolength{\oddsidemargin}{-.75in}%
 \addtolength{\evensidemargin}{-.75in}%
@@ -13,12 +13,16 @@
 \usepackage{graphicx}
 \usepackage{algorithm,algorithmic}
 \usepackage{cancel}
+\usepackage{amsthm}
+
+\newtheorem{theorem}{Theorem}[section]
 
 \title{Chapter 3 Collapsed Variational Bayes}
 \author{Mark Greenaway, John T. Ormerod}
 
 \input{include.tex}
 \input{Definitions.tex}
+
 
 \begin{document}
 
@@ -317,7 +321,7 @@ q^*_\vbeta(\vmu_{q(\vbeta)}, \mSigma_{q(\vbeta)}) &\propto \exp \{ -\half \E [\f
 q^*_{\sigma^2}(\alpha_{q(\sigma^2)}, \beta_{q(\sigma^2)}) = 
 \end{equation*}
 
-\section{Theorem}
+\newpage
 Let
 \begin{equation*}
 R^2_{\mX, \mZ} = 
@@ -335,10 +339,46 @@ R^2_{\mX, \mZ} =
 \end{equation*}
 
 \def \BigO {\text{O}}
-rtp: $R^2_{\mX, \mZ} = R^2_{\mX} + \BigO(w_*)$ where $w_* = \max{\vw}$.
 
-Proof:
+Definition:
+$f(x) = \BigO(g(x)) \text{ as } x \to a$
 
+if and only if there exist positive numbers $\delta$ and $M$ such that
+
+$|f(x)| \leq M |g(x)| \text{ for } |x - a| < \delta$.
+
+Definition:
+The Frobenius norm of a matrix $\mA$ is defined as
+\begin{align*}
+\| \mA \| = \tr{(\mA^\top \mA)}^{\frac{1}{2}}
+\end{align*}
+
+The trace of a projection matrix is equal to the dimension of the subspace that it projects onto, and thus
+the Frobenius norm of a projection matrix is equal to the square root of the dimension of that subspace.
+
+Lemma:
+If $\mA$ and $\mB$ are symmetric, and their product $\mA \mB$ is symmetric, then $\mA$ and $\mB$ commute.
+\begin{proof}
+\mA \mB = (\mA \mB)^T = \mB^T \mA^T = \mB \mA
+\end{proof}
+
+Lemma:
+If $\mB$ is symmetric, then
+\[
+(\mA \odot \mB)^{-1} = \mA^{-1} \odot \frac{1}{\mB}.
+\]
+\begin{proof}
+
+\end{proof}
+
+% \begin{theorem}
+Theorem:
+\[
+R^2_{\mX, \mZ} = R^2_{\mX} + \BigO(w_*) \text{ where } w_* = \max{\vw}.
+\]
+% \end{theorem}
+
+\begin{proof}
 Let $n$ be the number of rows of both $\mX$ and $\mZ$, $p_\mX$ be the number of columns of $\mX$, and $p_\mZ$
 be the number of columns of $\mZ$. Denote the projections onto the subspaces spanned by the columns of $\mX$
 and $\mZ$ by $\mP_\mX$ and $\mP_\mZ$, and the projections onto the complementary subspaces by
@@ -354,7 +394,7 @@ $\mP_{\mX^\perp}$ and $\mP_{\mZ^\perp}$.
 \end{pmatrix}
 \begin{pmatrix}
 \mX^\top \mX & \mX^\top \mZ \\
-\mZ^\top \mX & \mZ^\top \mZ + \mZ^\top \mZ \odot (\mI - \mW^{-1})
+\mZ^\top \mX & \mZ^\top \mZ - \mZ^\top \mZ \odot (\mI - \mW^{-1})
 \end{pmatrix}^{-1}
 \begin{pmatrix}
 \mX^\top \vy\\
@@ -372,7 +412,7 @@ $\mP_{\mX^\perp}$ and $\mP_{\mZ^\perp}$.
 \odot
 \begin{pmatrix}
 \vone & \vone \\
-\vone & \vone + (\mI - \mW^{-1})
+\vone & \vone - (\mI - \mW^{-1})
 \end{pmatrix}
 \end{bmatrix}
 ^{-1}
@@ -391,9 +431,8 @@ $\mP_{\mX^\perp}$ and $\mP_{\mZ^\perp}$.
 \odot
 \begin{pmatrix}
 \vone & \vone \\
-\vone & \vone + (\mI - \mW^{-1})
+\vone & \frac{1}{\vone - (\mI - \mW^{-1})}
 \end{pmatrix}
-^{-1}
 \begin{pmatrix}
 \mX^\top \vy\\
 \mZ^\top \vy
@@ -402,25 +441,27 @@ $\mP_{\mX^\perp}$ and $\mP_{\mZ^\perp}$.
 \begin{pmatrix}
 \vy^\top \mX(\mX^\top \mP_{\mZ^\perp} \mX)^{-1} - \vy^\top \mZ(\mZ^\top \mZ)^{-1} \mZ^\top \mX (\mX^\top \mP_{\mZ^\perp} \mX)^{-1}\\
 -\vy^\top \mX(\mX^\top \mX)^{-1} (\mZ^\top \mP_{\mX^\perp} \mZ)^{-1} + \vy^\top \mZ(\mZ^\top \mP_{\mX^\perp} \mZ)^{-1}
-\end{pmatrix}^\top
+\end{pmatrix}
+\odot
 \begin{pmatrix}
 \vone & \vone \\
-\vone & \vone + (\mI - \mW^{-1})
+\vone & \frac{1}{\vone - (\mI - \mW^{-1})}
 \end{pmatrix}
-^{-1}
+^\top
 \begin{pmatrix}
 \mX^\top \vy \\
 \mZ^\top \vy
 \end{pmatrix} \\
 =&\quad\vy^\top \mX (\mX^\top \mP_{\mZ^\perp} \mX)^{-1} \mX^\top \vy - \vy^\top \mZ(\mZ^\top \mZ)^{-1} \mZ^\top \mX (\mX^\top \mP_{\mZ^\perp}) \mX)^{-1} \mX^\top \vy \\
 &-\vy^\top \mX (\mX^\top \mX)^{-1} \mX^\top \mZ (\mZ^\top \mP_{\mX^\perp} \mZ)^{-1} \mZ^\top \vy + \frac{1}{1 + \diag{(w^{-1} - 1)}} \odot \vy^\top \mZ (\mZ^\top \mP_{\mX^\perp} \mZ)^{-1} \mZ^\top \vy \\
-=& \vy^\top \mP_{\mZ^\perp} \mX (\mX^\top \mP_{\mZ^\perp} \mX))^{-1} \mX^\top \mP_{\mZ^\perp} \vy
-+ \vy^\top \mP_{\mX^\perp} \mZ (\mZ^\top \mP_{\mX^\perp} \mZ)^{-1} \mZ^\top \mP_{\mX^\perp} \vy
-- \frac{\diag{(\vw^{-1} - 1)}}{1 + \diag{(\vw^{-1} - 1})} \vy^\top \mP_{\mX^\perp} \mZ (\mZ^\top \mP_{\mX^\perp} \mZ)^{-1} \mZ^\top \mP_{\mX^\perp} \vy \\
-\leq & \vy^\top \vy R^2_{\mX} + \| \vy \|^2 (p_\mZ + p_\mZ \frac{w_*^{-1} - 1}{\cancel{1} + w_*^{-1} - \cancel{1}}) \\
-=& \vy^\top \vy R^2_{\mX} + \| \vy \|^2 [ 2 p_\mZ - p_\mZ (1 - w_*) ] \\
-=& \vy^\top \vy R^2_{\mX} + \| \vy \|^2 ( p_\mZ - p_\mZ w_* ) \text{ Linear function of } w_*
+\leq& \vy^\top \mP_{\mZ^\perp} \mX (\mX^\top \mP_{\mZ^\perp} \mX))^{-1} \mX^\top \mP_{\mZ^\perp} \vy
++ (\vone + \mW - \mI) \vy^\top \mP_{\mX^\perp} \mZ (\mZ^\top \mP_{\mX^\perp} \mZ)^{-1} \mZ^\top \mP_{\mX^\perp} \vy \\
+\leq& \| \vy \|^2 [\sqrt{p_\mZ} + (w_* - 1) \sqrt{p_\mZ}] \\
+=& \| \vy \|^2 \sqrt{p_\mZ} w_* \\
+\leq& M w_* \text{ as required}.
 \end{array}
 \end{equation*}
+ 
+\end{proof}
 
 \end{document}
