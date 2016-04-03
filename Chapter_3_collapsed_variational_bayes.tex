@@ -368,7 +368,8 @@ If $\mB$ is symmetric, then
 (\mA \odot \mB)^{-1} = \mA^{-1} \odot \frac{1}{\mB}.
 \]
 \begin{proof}
-
+I've done it on paper. I'll type it up tomorrow. Note that $\mA$ need not be symmetric, although $\mB$
+must be.
 \end{proof}
 
 % \begin{theorem}
@@ -454,7 +455,7 @@ $\mP_{\mX^\perp}$ and $\mP_{\mZ^\perp}$.
 \end{pmatrix} \\
 =&\quad\vy^\top \mX (\mX^\top \mP_{\mZ^\perp} \mX)^{-1} \mX^\top \vy - \vy^\top \mZ(\mZ^\top \mZ)^{-1} \mZ^\top \mX (\mX^\top \mP_{\mZ^\perp}) \mX)^{-1} \mX^\top \vy \\
 &-\vy^\top \mX (\mX^\top \mX)^{-1} \mX^\top \mZ (\mZ^\top \mP_{\mX^\perp} \mZ)^{-1} \mZ^\top \vy + \frac{1}{1 + \diag{(w^{-1} - 1)}} \odot \vy^\top \mZ (\mZ^\top \mP_{\mX^\perp} \mZ)^{-1} \mZ^\top \vy \\
-\leq& \vy^\top \mP_{\mZ^\perp} \mX (\mX^\top \mP_{\mZ^\perp} \mX))^{-1} \mX^\top \mP_{\mZ^\perp} \vy
+=& \vy^\top \mP_{\mZ^\perp} \mX (\mX^\top \mP_{\mZ^\perp} \mX))^{-1} \mX^\top \mP_{\mZ^\perp} \vy
 + (\vone + \mW - \mI) \vy^\top \mP_{\mX^\perp} \mZ (\mZ^\top \mP_{\mX^\perp} \mZ)^{-1} \mZ^\top \mP_{\mX^\perp} \vy \\
 \leq& \| \vy \|^2 [\sqrt{p_\mZ} + (w_* - 1) \sqrt{p_\mZ}] \\
 =& \| \vy \|^2 \sqrt{p_\mZ} w_* \\
