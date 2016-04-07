@@ -369,26 +369,25 @@ If $\mB$ is symmetric, then
 (\mA \odot \mB)^{-1} = \mA^{-1} \odot \frac{1}{\mB}.
 \]
 \begin{proof}
-% I've done it on paper. I'll type it up tomorrow. Note that $\mA$ need not be symmetric, although $\mB$
-% must be.
-
 \begin{equation*}
 \begin{align*}
-(A \odot B)(A^{-1} \odot \frac{1}{B})_{ij} &= \sum_{k=1}^n A_{ik} B_{ik} A^{-1}_{kj} \frac{1}{B_{kj}} \\
-&= \begin{cases}
-1 B_{ik} \frac{1}{B_{kj}} \text{ when i=j, for B symmetric} \\
-0 \text{ otherwise}
-\end{cases} \\
-&= \sum_{i=1}^n A_{ik} B_{ik} A^{-1}_{kj} \frac{1}{B_{kj}} \\
-&= \sum_{k=1}^n \cancel{B_{ik}} \frac{1}{\cancel{B_{ik}}} A_{ik} A^{-1}_{kj}, i = j \\
-&=\sum_{k=1}^n A_{ik} A^{-1}_{kj} B_{ik} \frac{1}{B_{kj}} \\
+(\mA \odot \mB)(\mA^{-1} \odot \frac{1}{\mB})_{ij} &= \sum_{k=1}^n \mA_{ik} \mB_{ik} \mA^{-1}_{kj} \frac{1}{\mB_{kj}} \\
+% &= \begin{cases}
+% 1 \mB_{ik} \frac{1}{\mB_{kj}} \text{ when i=j, for \mB symmetric} \\
+% 0 \text{ otherwise}
+% \end{cases} \\
+% &= \sum_{i=1}^n \mA_{ik} \mB_{ik} \mA^{-1}_{kj} \frac{1}{\mB_{kj}} \\
+% &= \sum_{k=1}^n \cancel{\mB_{ik}} \frac{1}{\cancel{\mB_{ik}}} \mA_{ik} \mA^{-1}_{kj}, i = j \\
+% &=\sum_{k=1}^n \mA_{ik} \mA^{-1}_{kj} \mB_{ik} \frac{1}{\mB_{kj}} \\
 &=
 \begin{cases}
-\sum_{k=1}^n \cancel{B_{ik}} \frac{1}{\cancel{B_{ik}}} A_{ik} A^{-1}_{kj}, i = j \\
-\sum_{i=1}^n A_{ik} A^{-1}_{kj} B_{ik} \frac{1}{B_{kj}}
-= B_{i.} \odot (A^T_{i.} A^{-1}_{.j}) \odot \frac{1}{B_{.j}}
-= B_{i.} \odot (0) \odot \frac{1}{B_{.j}}, i \ne j
-\end{cases}
+\sum_{k=1}^n \cancel{\mB_{ik}} \frac{1}{\cancel{\mB_{ik}}} \mA_{ik} \mA^{-1}_{kj} = 1, \text{when $\mB$ is symmetric and $i = j$} \\
+\sum_{i=1}^n \mA_{ik} \mA^{-1}_{kj} \mB_{ik} \frac{1}{\mB_{kj}}
+= \mB_{i.} \odot (\mA^T_{i.} \mA^{-1}_{.j}) \odot \frac{1}{\mB_{.j}}
+= \mB_{i.} \odot (0) \odot \frac{1}{\mB_{.j}}
+= 0, \text{ when $i \ne j$}
+\end{cases}\\
+&= \mI
 \end{align*}
 \end{equation*}
 \end{proof}
