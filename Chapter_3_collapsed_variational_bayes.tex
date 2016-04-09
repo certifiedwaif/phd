@@ -322,7 +322,44 @@ q^*_\vbeta(\vmu_{q(\vbeta)}, \mSigma_{q(\vbeta)}) &\propto \exp \{ -\half \E [\f
 q^*_{\sigma^2}(\alpha_{q(\sigma^2)}, \beta_{q(\sigma^2)}) = 
 \end{equation*}
 
-\newpage
+\section{Variational Bayes with a different prior}
+
+The log likelihood of the full model is
+
+\begin{align*}
+\log p(\vy, \theta) &= \quad\log p(\vy|\vbeta, \sigma^2, \vgamma) + \log p(\vbeta_\vgamma | \sigma^2, g) + \log(\vbeta_{-\vgamma}) + \log p(g) \\
+&= -\half \log(|2 \pi \sigma^2 I_n|) - \half (\vy - X \mGamma \vbeta)^\top \sigma^{-2} (\vy - \mX \mGamma \vbeta) \\
+&\quad -\half \log(|2 \pi g \sigma^2 (\mX^\top \mX)^{-1}|) -\half \vbeta^\top \sigma^{-2} (\mX^T \mX) \vbeta \\
+&\quad - \log (\sigma^2) \\
+&\quad + b \log g - [(a + 1) + (b + 1)] \log (1 + g) - \log \Beta(a + 1, b + 1)
+\end{align*}
+
+\begin{align*}
+q_\vbeta^*(\vmu_{q(\vbeta)}, \mSigma_{q(\vbeta)}) &\propto \E[-\half (\mX \Gamma \vbeta - \vy)^\top \sigma^{-2} I (\mX \Gamma \vbeta) - \half \vbeta^\top \sigma^{-2} (\mX^\top \mX) \vbeta] \\
+&= \E[-\frac{1}{2 \sigma^2} (\mX \Gamma \vbeta)^\top (\mX \Gamma \vbeta) - 2 \mX \Gamma \vbeta^\top \vy + (\mX \vbeta)^\top (\mX \vbeta)] \\
+&= \E[-\frac{1}{2 \sigma^2} (\mX \vbeta)^\top (\mX \vbeta) \odot \Gamma \Gamma^\top + (\mX \vbeta)^\top (\mX \vbeta) - 2 \mX \Gamma \vbeta^\top \vy] \\
+&= \E[-\frac{1}{2 \sigma^2} (\mX \vbeta)^\top (\mX \vbeta) \odot (\vone + \Gamma \Gamma^\top) - 2 \mX \Gamma \vbeta^\top \vy] \\
+&= -\half \E[\frac{1}{\sigma^2}] [(\mX \vbeta)^\top (\mX \vbeta) \odot (\vone + \E \Gamma \Gamma^\top) - 2 \E \Gamma \mX \vbeta^\top \vy]
+\end{align*}
+
+\begin{align*}
+q_\sigma^2() &\propto \E_{-\sigma^2} [-\half \log |2 \pi \sigma^2 \mI_n| - \half (\vy - \mX \Gamma \vbeta)^T \sigma^{-2} \mI_n (\vy - \mX \Gamma \vbeta) - \half \log |2 \pi g \sigma^2 (\mX^T \mX)^{-1}| - \half \vbeta^T \sigma^{-2} (\mX^T \mX) \vbeta] \\
+&= \E_{-\sigma^2} [- \frac{n}{2} \log \sigma^2 - \frac{1}{2 \sigma^2}(\vy - \mX \Gamma \vbeta)^T(\vy - \mX \Gamma \vbeta) - \frac{p}{2} \log \sigma^2 - \frac{1}{2 \sigma^2} \vbeta^T (\mX^T \mX) \vbeta - \log \sigma^2] \\
+&= \E_{-\sigma^2} {-\frac{n + p + 1}{2} \log \sigma^2 - \frac{1}{\sigma^2} \E_{\vbeta, \Gamma} [(\mX \Gamma \vbeta)^T (\mX \Gamma \vbeta) + (\mX \vbeta)^T (\mX \vbeta) - 2 (\mX \Gamma \vbeta)^T \vy]} \\
+&= -\frac{n + p + 1}{2} \log \sigma^2 - \frac{1}{2 \sigma^2} [(\mX \vbeta)^T (\mX \vbeta) \odot (\E \Gamma \Gamma^T + \vone) - \vy^T X \E \Gamma \vbeta]
+\end{align*}
+
+\begin{align*}
+q(g) &\propto \E_{-g} [-\half \log g - \frac{1}{g} \frac{1}{2 \sigma^2} \vbeta^T \mX^T \mX \vbeta + b \log g - [(a + 1) + (b + 1)] \log(1 + g) - \log \Beta(a + 1, b + 1)]] \\
+&= -\half \log g - \frac{1}{g} \half \E \frac{1}{\sigma^2} \E \vbeta^T \mX^T \mX \vbeta + b \log g - [(a + 1) + (b + 1)] \log(1 + g) - \log \Beta(a + 1, b + 1)] \\
+\end{align*}
+
+\begin{align*}
+q(\gamma) &\propto \E_{-\gamma} -\half (\vy - \mX \Gamma \vbeta)^T \sigma^{-2} I_n (\vy - \mX \Gamma \vbeta) \\
+&= -\half \E \frac{1}{\sigma^2} [\mX^T (\vmu_{q(\vbeta)} \vmu_{q(\vbeta)}^T + \mSigma_{q(\vbeta)}) \mX \odot \Gamma \Gamma^T - 2 \mX \vmu_{q(\vbeta)} \Gamma^T \vy]
+\end{align*}
+
+\section{A nice theorem.}
 Let
 \begin{equation*}
 R^2_{\mX, \mZ} = 
@@ -369,7 +406,6 @@ If $\mB$ is symmetric, then
 (\mA \odot \mB)^{-1} = \mA^{-1} \odot \frac{1}{\mB}.
 \]
 \begin{proof}
-\begin{equation*}
 \begin{align*}
 (\mA \odot \mB)(\mA^{-1} \odot \frac{1}{\mB})_{ij} &= \sum_{k=1}^n \mA_{ik} \mB_{ik} \mA^{-1}_{kj} \frac{1}{\mB_{kj}} \\
 % &= \begin{cases}
@@ -389,7 +425,6 @@ If $\mB$ is symmetric, then
 \end{cases}\\
 &= \mI
 \end{align*}
-\end{equation*}
 \end{proof}
 
 % \begin{theorem}
