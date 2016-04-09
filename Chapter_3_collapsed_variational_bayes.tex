@@ -343,10 +343,11 @@ q_\vbeta^*(\vmu_{q(\vbeta)}, \mSigma_{q(\vbeta)}) &\propto \E[-\half (\mX \Gamma
 \end{align*}
 
 \begin{align*}
-q_\sigma^2() &\propto \E_{-\sigma^2} [-\half \log |2 \pi \sigma^2 \mI_n| - \half (\vy - \mX \Gamma \vbeta)^T \sigma^{-2} \mI_n (\vy - \mX \Gamma \vbeta) - \half \log |2 \pi g \sigma^2 (\mX^T \mX)^{-1}| - \half \vbeta^T \sigma^{-2} (\mX^T \mX) \vbeta] \\
-&= \E_{-\sigma^2} [- \frac{n}{2} \log \sigma^2 - \frac{1}{2 \sigma^2}(\vy - \mX \Gamma \vbeta)^T(\vy - \mX \Gamma \vbeta) - \frac{p}{2} \log \sigma^2 - \frac{1}{2 \sigma^2} \vbeta^T (\mX^T \mX) \vbeta - \log \sigma^2] \\
-&= \E_{-\sigma^2} {-\frac{n + p + 1}{2} \log \sigma^2 - \frac{1}{\sigma^2} \E_{\vbeta, \Gamma} [(\mX \Gamma \vbeta)^T (\mX \Gamma \vbeta) + (\mX \vbeta)^T (\mX \vbeta) - 2 (\mX \Gamma \vbeta)^T \vy]} \\
-&= -\frac{n + p + 1}{2} \log \sigma^2 - \frac{1}{2 \sigma^2} [(\mX \vbeta)^T (\mX \vbeta) \odot (\E \Gamma \Gamma^T + \vone) - \vy^T X \E \Gamma \vbeta]
+q_\sigma^2(\alpha_{q(\sigma^2)}, \beta_{q(\sigma^2)}) &\propto \E_{-\sigma^2} [-\half \log |2 \pi \sigma^2 \mI_n| - \half (\vy - \mX \Gamma \vbeta)^\top \sigma^{-2} \mI_n (\vy - \mX \Gamma \vbeta) - \half \log |2 \pi g \sigma^2 (\mX^\top \mX)^{-1}| - \half \vbeta^\top \sigma^{-2} (\mX^\top \mX) \vbeta] \\
+&= \E_{-\sigma^2} [- \frac{n}{2} \log \sigma^2 - \frac{1}{2 \sigma^2}(\vy - \mX \Gamma \vbeta)^\top(\vy - \mX \Gamma \vbeta) - \frac{p}{2} \log \sigma^2 - \frac{1}{2 \sigma^2} \vbeta^\top (\mX^\top \mX) \vbeta - \log \sigma^2] \\
+&= \E_{-\sigma^2} {-\frac{n + p + 1}{2} \log \sigma^2 - \frac{1}{2\sigma^2} \E_{\vbeta, \Gamma} [(\mX \Gamma \vbeta)^\top (\mX \Gamma \vbeta) + (\mX \vbeta)^\top (\mX \vbeta) - 2 (\mX \Gamma \vbeta)^\top \vy]} \\
+&= -\frac{n + p + 1}{2} \log \sigma^2 - \frac{1}{2 \sigma^2} \{\E [(\mX \vbeta)^\top (\mX \vbeta)] \odot (\E \Gamma \Gamma^\top + \vone) - 2\vy^\top \mX \E \Gamma \E \vbeta\}\\
+&= -\frac{n + p + 1}{2} \log \sigma^2 - \frac{1}{2 \sigma^2} \{ \tr [\mX^T (\vmu \vmu^\top + \mSigma) \mX] \odot (\E \Gamma \Gamma^\top + \vone) - 2\vy^\top \mX \E \Gamma \vmu \}
 \end{align*}
 
 \begin{align*}
@@ -355,9 +356,12 @@ q(g) &\propto \E_{-g} [-\half \log g - \frac{1}{g} \frac{1}{2 \sigma^2} \vbeta^T
 \end{align*}
 
 \begin{align*}
-q(\gamma) &\propto \E_{-\gamma} -\half (\vy - \mX \Gamma \vbeta)^T \sigma^{-2} I_n (\vy - \mX \Gamma \vbeta) \\
+q(\gamma) &\propto \E_{-\gamma} -\half (\vy - \mX \Gamma \vbeta)^T \sigma^{-2} \mI_n (\vy - \mX \Gamma \vbeta) \\
 &= -\half \E \frac{1}{\sigma^2} [\mX^T (\vmu_{q(\vbeta)} \vmu_{q(\vbeta)}^T + \mSigma_{q(\vbeta)}) \mX \odot \Gamma \Gamma^T - 2 \mX \vmu_{q(\vbeta)} \Gamma^T \vy]
 \end{align*}
+
+\section{Collapsed Variational Bayes}
+
 
 \section{A nice theorem.}
 Let
@@ -407,7 +411,7 @@ If $\mB$ is symmetric, then
 \]
 \begin{proof}
 \begin{align*}
-(\mA \odot \mB)(\mA^{-1} \odot \frac{1}{\mB})_{ij} &= \sum_{k=1}^n \mA_{ik} \mB_{ik} \mA^{-1}_{kj} \frac{1}{\mB_{kj}} \\
+(\mA \odot \mB)\left(\mA^{-1} \odot \frac{1}{\mB}\right)_{ij} &= \sum_{k=1}^n \mA_{ik} \mB_{ik} \mA^{-1}_{kj} \frac{1}{\mB_{kj}} \\
 % &= \begin{cases}
 % 1 \mB_{ik} \frac{1}{\mB_{kj}} \text{ when i=j, for \mB symmetric} \\
 % 0 \text{ otherwise}
