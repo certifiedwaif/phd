@@ -347,17 +347,17 @@ q_\sigma^2(\alpha_{q(\sigma^2)}, \beta_{q(\sigma^2)}) &\propto \E_{-\sigma^2} [-
 &= \E_{-\sigma^2} [- \frac{n}{2} \log \sigma^2 - \frac{1}{2 \sigma^2}(\vy - \mX \Gamma \vbeta)^\top(\vy - \mX \Gamma \vbeta) - \frac{p}{2} \log \sigma^2 - \frac{1}{2 \sigma^2} \vbeta^\top (\mX^\top \mX) \vbeta - \log \sigma^2] \\
 &= \E_{-\sigma^2} {-\frac{n + p + 1}{2} \log \sigma^2 - \frac{1}{2\sigma^2} \E_{\vbeta, \Gamma} [(\mX \Gamma \vbeta)^\top (\mX \Gamma \vbeta) + (\mX \vbeta)^\top (\mX \vbeta) - 2 (\mX \Gamma \vbeta)^\top \vy]} \\
 &= -\frac{n + p + 1}{2} \log \sigma^2 - \frac{1}{2 \sigma^2} \{\E [(\mX \vbeta)^\top (\mX \vbeta)] \odot (\E \Gamma \Gamma^\top + \vone) - 2\vy^\top \mX \E \Gamma \E \vbeta\}\\
-&= -\frac{n + p + 1}{2} \log \sigma^2 - \frac{1}{2 \sigma^2} \{ \tr [\mX^T (\vmu \vmu^\top + \mSigma) \mX] \odot (\E \Gamma \Gamma^\top + \vone) - 2\vy^\top \mX \E \Gamma \vmu \}
+&= -\frac{n + p + 1}{2} \log \sigma^2 - \frac{1}{2 \sigma^2} \{\tr[(\mSigma + \vmu \vmu^T) \mX^\top \mX] \odot (\E \Gamma \Gamma^\top + \vone) - 2\vy^\top \mX \mP \vmu\}\\
 \end{align*}
 
 \begin{align*}
 q(g) &\propto \E_{-g} [-\half \log g - \frac{1}{g} \frac{1}{2 \sigma^2} \vbeta^\top \mX^\top \mX \vbeta + b \log g - [(a + 1) + (b + 1)] \log(1 + g) - \log \Beta(a + 1, b + 1)]] \\
 &= -\half \log g - \frac{1}{g} \half \E \frac{1}{\sigma^2} \E (\mX \vbeta)^\top (\mX \vbeta) + b \log g - [(a + 1) + (b + 1)] \log(1 + g) - \log \Beta(a + 1, b + 1)] \\
+&= -\half \log g - \frac{1}{g} \half \E \frac{1}{\sigma^2} \tr[(\mSigma + \vmu \vmu^T) \mX^\top \mX] + b \log g - [(a + 1) + (b + 1)] \log(1 + g) - \log \Beta(a + 1, b + 1)] \\
 \end{align*}
 
 \begin{align*}
-q(\gamma) &\propto \E_{-\gamma} -\half (\vy - \mX \Gamma \vbeta)^T \sigma^{-2} \mI_n (\vy - \mX \Gamma \vbeta) \\
-&= -\half \E \frac{1}{\sigma^2} [\mX^T (\vmu_{q(\vbeta)} \vmu_{q(\vbeta)}^T + \mSigma_{q(\vbeta)}) \mX \odot \Gamma \Gamma^T - 2 \mX \vmu_{q(\vbeta)} \Gamma^T \vy]
+q(\gamma) &\propto \E_{-\gamma} -\half (\vy - \mX \Gamma \vbeta)^T \sigma^{-2} \mI_n (\vy - \mX \Gamma \vbeta)
 \end{align*}
 
 \section{Collapsed Variational Bayes}
