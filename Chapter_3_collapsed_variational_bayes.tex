@@ -324,7 +324,76 @@ q^*_{\sigma^2}(\alpha_{q(\sigma^2)}, \beta_{q(\sigma^2)}) =
 
 \section{Variational Bayes with a different prior}
 
-The log likelihood of the full model is
+Consider the linear model
+
+\begin{align*}
+\vy | \vbeta, \sigma^2 \sim \N_n(\mX \vbeta, \sigma^2 \mI)
+\end{align*}
+
+with priors
+
+\begin{align*}
+\vbeta | \sigma^2, g &\sim \N_p(\vzero, g \sigma^2 (\mX^T \mX)^{-1}) \\
+p(\sigma^2) &= (\sigma^2)^{-1} \I(\sigma^2 > 0) \\
+p(g) &= \frac{g^b (1 + g)^{-[(a + 1) + (b + 1)]}}{\Beta(a + 1, b + 1)} \I(g > 0)
+\end{align*}
+
+The log likelihood of the full model is then
+
+\begin{align*}
+\log p(\vy, \theta) &= \quad\log p(\vy|\vbeta, \sigma^2, \vgamma) + \log p(\vbeta | \sigma^2, g) +  \log p(g) \\
+&= -\half \log(|2 \pi \sigma^2 I_n|) - \half (\vy - X \vbeta)^\top \sigma^{-2} (\vy - \mX \vbeta) \\
+&\quad -\half \log(|2 \pi g \sigma^2 (\mX^\top \mX)^{-1}|) -\half \vbeta^\top \sigma^{-2} (\mX^T \mX) \vbeta \\
+&\quad - \log (\sigma^2) \\
+&\quad + b \log g - [(a + 1) + (b + 1)] \log (1 + g) - \log \Beta(a + 1, b + 1)
+\end{align*}
+
+\subsection{$q(\vbeta)$}
+\begin{align*}
+\log q_\vbeta^*(\vmu_{q(\vbeta)}, \mSigma_{q(\vbeta)}) &\propto \E[-\half (\mX \vbeta - \vy)^\top \sigma^{-2} I (\mX \vbeta) - \half \vbeta^\top \sigma^{-2} (\mX^\top \mX) \vbeta] \\
+&= \E[-\frac{1}{2 \sigma^2} (\mX \vbeta)^\top (\mX \vbeta) - 2 \mX \vbeta^\top \vy + (\mX \vbeta)^\top (\mX \vbeta)] \\
+&= \E[-\frac{1}{2 \sigma^2} (\mX \vbeta)^\top (\mX \vbeta) \odot \Gamma \Gamma^\top + (\mX \vbeta)^\top (\mX \vbeta) - 2 \mX \Gamma \vbeta^\top \vy] \\
+&= \E[-\frac{1}{2 \sigma^2} (\mX \vbeta)^\top (\mX \vbeta) \odot (\vone + \Gamma \Gamma^\top) - 2 \mX \Gamma \vbeta^\top \vy] \\
+&= -\half \E[\frac{1}{\sigma^2}] [(\mX \vbeta)^\top (\mX \vbeta) \odot (\vone + \E \Gamma \Gamma^\top) - 2 \E \Gamma \mX \vbeta^\top \vy]
+\end{align*}
+
+\subsection{$q(\sigma^2)$}
+\begin{align*}
+=\log q_\sigma^2(\alpha_{q(\sigma^2)}, \beta_{q(\sigma^2)}) &\propto \E_{-\sigma^2} [-\half \log |2 \pi \sigma^2 \mI_n| - \half (\vy - \mX \vbeta)^\top \sigma^{-2} \mI_n (\vy - \mX \vbeta) - \half \log |2 \pi g \sigma^2 (\mX^\top \mX)^{-1}| - \half \vbeta^\top \sigma^{-2} (\mX^\top \mX) \vbeta] \\
+&= \E_{-\sigma^2} [- \frac{n}{2} \log \sigma^2 - \frac{1}{2 \sigma^2}(\vy - \mX \vbeta)^\top(\vy - \mX \vbeta) - \frac{p}{2} \log \sigma^2 - \frac{1}{2 \sigma^2} \vbeta^\top (\mX^\top \mX) \vbeta - \log \sigma^2] \\
+&= \E_{-\sigma^2} {-\frac{n + p + 1}{2} \log \sigma^2 - \frac{1}{2\sigma^2} \E_{\vbeta} [(\mX \vbeta)^\top (\mX \vbeta) + (\mX \vbeta)^\top (\mX \vbeta) - 2 (\mX \vbeta)^\top \vy]} \\
+&= -\frac{n + p + 1}{2} \log \sigma^2 - \frac{1}{2 \sigma^2} \{\E [(\mX \vbeta)^\top (\mX \vbeta)] \odot (\E \Gamma \Gamma^\top + \vone) - 2\vy^\top \mX \E \vbeta\}\\
+&= -\frac{n + p + 1}{2} \log \sigma^2 - \frac{1}{2 \sigma^2} \{\tr[(\mSigma + \vmu \vmu^T) \mX^\top \mX] \odot (\E \Gamma \Gamma^\top + \vone) - 2\vy^\top \mX \vmu\}\\
+\end{align*}
+
+\subsection{$q(g)$}
+\begin{align*}
+\log q(g) &\propto \E_{-g} [-\half \log g - \frac{1}{g} \frac{1}{2 \sigma^2} \vbeta^\top \mX^\top \mX \vbeta + b \log g - [(a + 1) + (b + 1)] \log(1 + g) - \log \Beta(a + 1, b + 1)]] \\
+&= -\half \log g - \frac{1}{g} \half \E \frac{1}{\sigma^2} \E (\mX \vbeta)^\top (\mX \vbeta) + b \log g - [(a + 1) + (b + 1)] \log(1 + g) - \log \Beta(a + 1, b + 1)] \\
+&= -\half \log g - \frac{1}{g} \half \E \frac{1}{\sigma^2} \tr[(\mSigma + \vmu \vmu^T) \mX^\top \mX] + b \log g - [(a + 1) + (b + 1)] \log(1 + g) - \log \Beta(a + 1, b + 1)] \\
+\end{align*}
+
+\section{Collapsed Variational Bayes}
+
+
+\section{Variational Bayes with a different prior, with model selection}
+
+Consider the linear model
+
+\begin{align*}
+\vy | \vbeta, \sigma^2 \sim \N_n(\mX \vbeta, \sigma^2 \mI)
+\end{align*}
+
+with priors
+
+\begin{align*}
+\vbeta | \sigma^2, g &\sim \N_p(\vzero, g \sigma^2 (\mX^T \mX)^{-1}) \\
+p(\sigma^2) &= (\sigma^2)^{-1} \I(\sigma^2 > 0) \\
+p(g) &= \frac{g^b (1 + g)^{-[(a + 1) + (b + 1)]}}{\Beta(a + 1, b + 1)} \I(g > 0)
+p(\gamma) &= \text{???}
+\end{align*}
+
+The log likelihood of the full model is then
 
 \begin{align*}
 \log p(\vy, \theta) &= \quad\log p(\vy|\vbeta, \sigma^2, \vgamma) + \log p(\vbeta_\vgamma | \sigma^2, g) + \log(\vbeta_{-\vgamma}) + \log p(g) \\
@@ -334,30 +403,34 @@ The log likelihood of the full model is
 &\quad + b \log g - [(a + 1) + (b + 1)] \log (1 + g) - \log \Beta(a + 1, b + 1)
 \end{align*}
 
+\subsection{$q(\vbeta)$}
 \begin{align*}
-q_\vbeta^*(\vmu_{q(\vbeta)}, \mSigma_{q(\vbeta)}) &\propto \E[-\half (\mX \Gamma \vbeta - \vy)^\top \sigma^{-2} I (\mX \Gamma \vbeta) - \half \vbeta^\top \sigma^{-2} (\mX^\top \mX) \vbeta] \\
+\log q_\vbeta^*(\vmu_{q(\vbeta)}, \mSigma_{q(\vbeta)}) &\propto \E[-\half (\mX \Gamma \vbeta - \vy)^\top \sigma^{-2} I (\mX \Gamma \vbeta) - \half \vbeta^\top \sigma^{-2} (\mX^\top \mX) \vbeta] \\
 &= \E[-\frac{1}{2 \sigma^2} (\mX \Gamma \vbeta)^\top (\mX \Gamma \vbeta) - 2 \mX \Gamma \vbeta^\top \vy + (\mX \vbeta)^\top (\mX \vbeta)] \\
 &= \E[-\frac{1}{2 \sigma^2} (\mX \vbeta)^\top (\mX \vbeta) \odot \Gamma \Gamma^\top + (\mX \vbeta)^\top (\mX \vbeta) - 2 \mX \Gamma \vbeta^\top \vy] \\
 &= \E[-\frac{1}{2 \sigma^2} (\mX \vbeta)^\top (\mX \vbeta) \odot (\vone + \Gamma \Gamma^\top) - 2 \mX \Gamma \vbeta^\top \vy] \\
 &= -\half \E[\frac{1}{\sigma^2}] [(\mX \vbeta)^\top (\mX \vbeta) \odot (\vone + \E \Gamma \Gamma^\top) - 2 \E \Gamma \mX \vbeta^\top \vy]
 \end{align*}
 
+\subsection{$q(\sigma^2)$}
 \begin{align*}
-q_\sigma^2(\alpha_{q(\sigma^2)}, \beta_{q(\sigma^2)}) &\propto \E_{-\sigma^2} [-\half \log |2 \pi \sigma^2 \mI_n| - \half (\vy - \mX \Gamma \vbeta)^\top \sigma^{-2} \mI_n (\vy - \mX \Gamma \vbeta) - \half \log |2 \pi g \sigma^2 (\mX^\top \mX)^{-1}| - \half \vbeta^\top \sigma^{-2} (\mX^\top \mX) \vbeta] \\
+\log q_\sigma^2(\alpha_{q(\sigma^2)}, \beta_{q(\sigma^2)}) &\propto \E_{-\sigma^2} [-\half \log |2 \pi \sigma^2 \mI_n| - \half (\vy - \mX \Gamma \vbeta)^\top \sigma^{-2} \mI_n (\vy - \mX \Gamma \vbeta) - \half \log |2 \pi g \sigma^2 (\mX^\top \mX)^{-1}| - \half \vbeta^\top \sigma^{-2} (\mX^\top \mX) \vbeta] \\
 &= \E_{-\sigma^2} [- \frac{n}{2} \log \sigma^2 - \frac{1}{2 \sigma^2}(\vy - \mX \Gamma \vbeta)^\top(\vy - \mX \Gamma \vbeta) - \frac{p}{2} \log \sigma^2 - \frac{1}{2 \sigma^2} \vbeta^\top (\mX^\top \mX) \vbeta - \log \sigma^2] \\
 &= \E_{-\sigma^2} {-\frac{n + p + 1}{2} \log \sigma^2 - \frac{1}{2\sigma^2} \E_{\vbeta, \Gamma} [(\mX \Gamma \vbeta)^\top (\mX \Gamma \vbeta) + (\mX \vbeta)^\top (\mX \vbeta) - 2 (\mX \Gamma \vbeta)^\top \vy]} \\
 &= -\frac{n + p + 1}{2} \log \sigma^2 - \frac{1}{2 \sigma^2} \{\E [(\mX \vbeta)^\top (\mX \vbeta)] \odot (\E \Gamma \Gamma^\top + \vone) - 2\vy^\top \mX \E \Gamma \E \vbeta\}\\
 &= -\frac{n + p + 1}{2} \log \sigma^2 - \frac{1}{2 \sigma^2} \{\tr[(\mSigma + \vmu \vmu^T) \mX^\top \mX] \odot (\E \Gamma \Gamma^\top + \vone) - 2\vy^\top \mX \mP \vmu\}\\
 \end{align*}
 
+\subsection{$q(g)$}
 \begin{align*}
-q(g) &\propto \E_{-g} [-\half \log g - \frac{1}{g} \frac{1}{2 \sigma^2} \vbeta^\top \mX^\top \mX \vbeta + b \log g - [(a + 1) + (b + 1)] \log(1 + g) - \log \Beta(a + 1, b + 1)]] \\
+\log q(g) &\propto \E_{-g} [-\half \log g - \frac{1}{g} \frac{1}{2 \sigma^2} \vbeta^\top \mX^\top \mX \vbeta + b \log g - [(a + 1) + (b + 1)] \log(1 + g) - \log \Beta(a + 1, b + 1)]] \\
 &= -\half \log g - \frac{1}{g} \half \E \frac{1}{\sigma^2} \E (\mX \vbeta)^\top (\mX \vbeta) + b \log g - [(a + 1) + (b + 1)] \log(1 + g) - \log \Beta(a + 1, b + 1)] \\
 &= -\half \log g - \frac{1}{g} \half \E \frac{1}{\sigma^2} \tr[(\mSigma + \vmu \vmu^T) \mX^\top \mX] + b \log g - [(a + 1) + (b + 1)] \log(1 + g) - \log \Beta(a + 1, b + 1)] \\
 \end{align*}
 
+\subsection{$q(\gamma)$}
 \begin{align*}
-q(\gamma) &\propto \E_{-\gamma} -\half (\vy - \mX \Gamma \vbeta)^T \sigma^{-2} \mI_n (\vy - \mX \Gamma \vbeta)
+\log q(\gamma) &\propto \E_{-\gamma} -\half (\vy - \mX \Gamma \vbeta)^T \sigma^{-2} \mI_n (\vy - \mX \Gamma \vbeta)
 \end{align*}
 
 \section{Collapsed Variational Bayes}
