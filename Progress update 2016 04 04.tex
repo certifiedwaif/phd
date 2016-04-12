@@ -1,0 +1,75 @@
+\documentclass{beamer}
+
+\usetheme{Warsaw}
+\usepackage{graphicx}
+\usepackage{ulem}
+\usepackage{tikz}
+\input{include.tex}
+\input{Definitions.tex}
+
+\usefonttheme{serif}
+
+\title{Progress update}
+\author{Mark Greenaway\\PhD candidate\\markg@maths.usyd.edu.au}
+
+\mode<presentation>
+{ \usetheme{boxes} }
+
+\begin{document}
+\begin{frame}
+\titlepage
+\end{frame}
+
+
+\begin{frame}{Recent progress}
+\begin{itemize}
+\def \O { \text{O} }
+\item Theorem: $R^2_{\mX, \mZ} = R^2_\mX + \O(w_*)$
+\item I believe that this theorem has been successfully proved. John has yet to tell me any different.
+\item The proof is largely original work. John set the problem, but I solved it in my own way. So that's a
+			major milestone passed - the first truly original thing I've ever done in mathematics.
+\item We've decided on the final model for the fully Bayesian model, and the VB and Collapsed VB
+			approximations.
+\item Numeric problems solved for the cases that we care about.
+\item Deriving mean field update equations as fast as possible.
+\item I hope to begin coding so that I can start performing numerical experiments within the next few
+			weeks. It is April, after all \ldots
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{IT Committee Meeting -- 01/04/2016}
+\small
+\begin{itemize}
+\item[Budget] \begin{itemize}
+\item The new computer budget for new PhD students has been increased to $\$2,700$.
+\item Paul will support any desktop	machine from Dell.
+\item Sarah, Chang and Kevin - you are all eligible. Get on it!!!
+\end{itemize}
+\item[Upgrades]
+\begin{itemize}
+\item The issue of how often we should upgrade R was raised. How often should we upgrade?
+\end{itemize}
+\item[Shiny] \begin{itemize}
+\item Paul agreed to administrate the R Shiny Server if Jean buys the machine.
+\item I argued that it was not the job of PhD students or academic staff to administrate machines, but the job 
+			of our systems administrators. We already have more than enough work to do.
+\item For some reason he wants us to install Shiny server?!? I want him to do it. I suggested a compromise:
+			He sets us up a \texttt{shiny} user and we install our software under that.
+\end{itemize}
+\item[Fonts]
+\begin{itemize}
+\item Fonts were not discussed, unfortunately.
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Colin Furze built a cannon that launches thermite grenades!}
+\begin{figure}
+\caption{This is awesome!}
+\includegraphics[scale=.5]{thermite1-720x720.png}
+\end{figure}
+\end{frame}
+
+
+\end{document}

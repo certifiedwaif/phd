@@ -1,4 +1,4 @@
-\documentclass{article}[12pt]
+\documentclass{amsart}[12pt]
 
 \addtolength{\oddsidemargin}{-.75in}%
 \addtolength{\evensidemargin}{-.75in}%
@@ -13,12 +13,17 @@
 \usepackage{graphicx}
 \usepackage{algorithm,algorithmic}
 \usepackage{cancel}
+\usepackage{amsthm}
+\usepackage{mathtools}
+
+\newtheorem{theorem}{Theorem}[section]
 
 \title{Chapter 3 Collapsed Variational Bayes}
 \author{Mark Greenaway, John T. Ormerod}
 
 \input{include.tex}
 \input{Definitions.tex}
+
 
 \begin{document}
 
@@ -295,7 +300,7 @@ $v = \frac{p}{2} + b + 1, 1 - \mu = (a + b + 2)$. Choose $a = \frac{3}{4}, b = \
 
 \begin{equation*}
 \begin{array}{rl}
-q^*_\gamma (p) &\propto \exp \{ \frac{n}{2} \log |\mX^\top \mGamma \mX|
+q^*_\gamma (p) &\propto \exp \{ \quad \frac{n}{2} \log |\mX^\top \mGamma \mX|
 															+ \half \E[\frac{1}{\sigma^2}] \E[\frac{1 + g}{g}] 
 																\E[\vbeta^\top \mGamma^\top \mX^\top \mX \mGamma \vbeta - 2 \mX \mGamma \vbeta^\top y]\} \\
 &= \exp \{\quad \frac{n}{2} \log{|\mX^\top \mX|} \vone^\top \log \vgamma - \half [\log (\beta_{q(\sigma^2)}) - \phi(\alpha_{q(\sigma^2)})] \\
@@ -316,5 +321,280 @@ q^*_\vbeta(\vmu_{q(\vbeta)}, \mSigma_{q(\vbeta)}) &\propto \exp \{ -\half \E [\f
 \begin{equation*}
 q^*_{\sigma^2}(\alpha_{q(\sigma^2)}, \beta_{q(\sigma^2)}) = 
 \end{equation*}
+
+\section{Variational Bayes with a different prior}
+
+Consider the linear model
+
+\begin{align*}
+\vy | \vbeta, \sigma^2 \sim \N_n(\mX \vbeta, \sigma^2 \mI)
+\end{align*}
+
+with priors
+
+\begin{align*}
+\vbeta | \sigma^2, g &\sim \N_p(\vzero, g \sigma^2 (\mX^T \mX)^{-1}) \\
+p(\sigma^2) &= (\sigma^2)^{-1} \I(\sigma^2 > 0) \\
+p(g) &= \frac{g^b (1 + g)^{-[(a + 1) + (b + 1)]}}{\Beta(a + 1, b + 1)} \I(g > 0)
+\end{align*}
+
+The log likelihood of the full model is then
+
+\begin{align*}
+\log p(\vy, \theta) &= \quad\log p(\vy|\vbeta, \sigma^2, \vgamma) + \log p(\vbeta | \sigma^2, g) +  \log p(g) \\
+&= -\half \log(|2 \pi \sigma^2 I_n|) - \half (\vy - X \vbeta)^\top \sigma^{-2} (\vy - \mX \vbeta) \\
+&\quad -\half \log(|2 \pi g \sigma^2 (\mX^\top \mX)^{-1}|) -\half \vbeta^\top \sigma^{-2} (\mX^T \mX) \vbeta \\
+&\quad - \log (\sigma^2) \\
+&\quad + b \log g - [(a + 1) + (b + 1)] \log (1 + g) - \log \Beta(a + 1, b + 1)
+\end{align*}
+
+\subsection{$q(\vbeta)$}
+\begin{align*}
+\log q_\vbeta^*(\vmu_{q(\vbeta)}, \mSigma_{q(\vbeta)}) &\propto \E[-\half (\mX \vbeta - \vy)^\top \sigma^{-2} I (\mX \vbeta) - \half \vbeta^\top \sigma^{-2} (\mX^\top \mX) \vbeta] \\
+&= \E[-\frac{1}{2 \sigma^2} (\mX \vbeta)^\top (\mX \vbeta) - 2 \mX \vbeta^\top \vy + (\mX \vbeta)^\top (\mX \vbeta)] \\
+&= \E[-\frac{1}{2 \sigma^2} (\mX \vbeta)^\top (\mX \vbeta) \odot \Gamma \Gamma^\top + (\mX \vbeta)^\top (\mX \vbeta) - 2 \mX \Gamma \vbeta^\top \vy] \\
+&= \E[-\frac{1}{2 \sigma^2} (\mX \vbeta)^\top (\mX \vbeta) \odot (\vone + \Gamma \Gamma^\top) - 2 \mX \Gamma \vbeta^\top \vy] \\
+&= -\half \E[\frac{1}{\sigma^2}] [(\mX \vbeta)^\top (\mX \vbeta) \odot (\vone + \E \Gamma \Gamma^\top) - 2 \E \Gamma \mX \vbeta^\top \vy]
+\end{align*}
+
+\subsection{$q(\sigma^2)$}
+\begin{align*}
+=\log q_\sigma^2(\alpha_{q(\sigma^2)}, \beta_{q(\sigma^2)}) &\propto \E_{-\sigma^2} [-\half \log |2 \pi \sigma^2 \mI_n| - \half (\vy - \mX \vbeta)^\top \sigma^{-2} \mI_n (\vy - \mX \vbeta) - \half \log |2 \pi g \sigma^2 (\mX^\top \mX)^{-1}| - \half \vbeta^\top \sigma^{-2} (\mX^\top \mX) \vbeta] \\
+&= \E_{-\sigma^2} [- \frac{n}{2} \log \sigma^2 - \frac{1}{2 \sigma^2}(\vy - \mX \vbeta)^\top(\vy - \mX \vbeta) - \frac{p}{2} \log \sigma^2 - \frac{1}{2 \sigma^2} \vbeta^\top (\mX^\top \mX) \vbeta - \log \sigma^2] \\
+&= \E_{-\sigma^2} {-\frac{n + p + 1}{2} \log \sigma^2 - \frac{1}{2\sigma^2} \E_{\vbeta} [(\mX \vbeta)^\top (\mX \vbeta) + (\mX \vbeta)^\top (\mX \vbeta) - 2 (\mX \vbeta)^\top \vy]} \\
+&= -\frac{n + p + 1}{2} \log \sigma^2 - \frac{1}{2 \sigma^2} \{\E [(\mX \vbeta)^\top (\mX \vbeta)] \odot (\E \Gamma \Gamma^\top + \vone) - 2\vy^\top \mX \E \vbeta\}\\
+&= -\frac{n + p + 1}{2} \log \sigma^2 - \frac{1}{2 \sigma^2} \{\tr[(\mSigma + \vmu \vmu^T) \mX^\top \mX] \odot (\E \Gamma \Gamma^\top + \vone) - 2\vy^\top \mX \vmu\}\\
+\end{align*}
+
+\subsection{$q(g)$}
+\begin{align*}
+\log q(g) &\propto \E_{-g} [-\half \log g - \frac{1}{g} \frac{1}{2 \sigma^2} \vbeta^\top \mX^\top \mX \vbeta + b \log g - [(a + 1) + (b + 1)] \log(1 + g) - \log \Beta(a + 1, b + 1)]] \\
+&= -\half \log g - \frac{1}{g} \half \E \frac{1}{\sigma^2} \E (\mX \vbeta)^\top (\mX \vbeta) + b \log g - [(a + 1) + (b + 1)] \log(1 + g) - \log \Beta(a + 1, b + 1)] \\
+&= -\half \log g - \frac{1}{g} \half \E \frac{1}{\sigma^2} \tr[(\mSigma + \vmu \vmu^T) \mX^\top \mX] + b \log g - [(a + 1) + (b + 1)] \log(1 + g) - \log \Beta(a + 1, b + 1)] \\
+\end{align*}
+
+\section{Collapsed Variational Bayes}
+
+
+\section{Variational Bayes with a different prior, with model selection}
+
+Consider the linear model
+
+\begin{align*}
+\vy | \vbeta, \sigma^2 \sim \N_n(\mX \vbeta, \sigma^2 \mI)
+\end{align*}
+
+with priors
+
+\begin{align*}
+\vbeta | \sigma^2, g &\sim \N_p(\vzero, g \sigma^2 (\mX^T \mX)^{-1}) \\
+p(\sigma^2) &= (\sigma^2)^{-1} \I(\sigma^2 > 0) \\
+p(g) &= \frac{g^b (1 + g)^{-[(a + 1) + (b + 1)]}}{\Beta(a + 1, b + 1)} \I(g > 0)
+p(\gamma) &= \text{???}
+\end{align*}
+
+The log likelihood of the full model is then
+
+\begin{align*}
+\log p(\vy, \theta) &= \quad\log p(\vy|\vbeta, \sigma^2, \vgamma) + \log p(\vbeta_\vgamma | \sigma^2, g) + \log(\vbeta_{-\vgamma}) + \log p(g) \\
+&= -\half \log(|2 \pi \sigma^2 I_n|) - \half (\vy - X \mGamma \vbeta)^\top \sigma^{-2} (\vy - \mX \mGamma \vbeta) \\
+&\quad -\half \log(|2 \pi g \sigma^2 (\mX^\top \mX)^{-1}|) -\half \vbeta^\top \sigma^{-2} (\mX^T \mX) \vbeta \\
+&\quad - \log (\sigma^2) \\
+&\quad + b \log g - [(a + 1) + (b + 1)] \log (1 + g) - \log \Beta(a + 1, b + 1)
+\end{align*}
+
+\subsection{$q(\vbeta)$}
+\begin{align*}
+\log q_\vbeta^*(\vmu_{q(\vbeta)}, \mSigma_{q(\vbeta)}) &\propto \E[-\half (\mX \Gamma \vbeta - \vy)^\top \sigma^{-2} I (\mX \Gamma \vbeta) - \half \vbeta^\top \sigma^{-2} (\mX^\top \mX) \vbeta] \\
+&= \E[-\frac{1}{2 \sigma^2} (\mX \Gamma \vbeta)^\top (\mX \Gamma \vbeta) - 2 \mX \Gamma \vbeta^\top \vy + (\mX \vbeta)^\top (\mX \vbeta)] \\
+&= \E[-\frac{1}{2 \sigma^2} (\mX \vbeta)^\top (\mX \vbeta) \odot \Gamma \Gamma^\top + (\mX \vbeta)^\top (\mX \vbeta) - 2 \mX \Gamma \vbeta^\top \vy] \\
+&= \E[-\frac{1}{2 \sigma^2} (\mX \vbeta)^\top (\mX \vbeta) \odot (\vone + \Gamma \Gamma^\top) - 2 \mX \Gamma \vbeta^\top \vy] \\
+&= -\half \E[\frac{1}{\sigma^2}] [(\mX \vbeta)^\top (\mX \vbeta) \odot (\vone + \E \Gamma \Gamma^\top) - 2 \E \Gamma \mX \vbeta^\top \vy]
+\end{align*}
+
+\subsection{$q(\sigma^2)$}
+\begin{align*}
+\log q_\sigma^2(\alpha_{q(\sigma^2)}, \beta_{q(\sigma^2)}) &\propto \E_{-\sigma^2} [-\half \log |2 \pi \sigma^2 \mI_n| - \half (\vy - \mX \Gamma \vbeta)^\top \sigma^{-2} \mI_n (\vy - \mX \Gamma \vbeta) - \half \log |2 \pi g \sigma^2 (\mX^\top \mX)^{-1}| - \half \vbeta^\top \sigma^{-2} (\mX^\top \mX) \vbeta] \\
+&= \E_{-\sigma^2} [- \frac{n}{2} \log \sigma^2 - \frac{1}{2 \sigma^2}(\vy - \mX \Gamma \vbeta)^\top(\vy - \mX \Gamma \vbeta) - \frac{p}{2} \log \sigma^2 - \frac{1}{2 \sigma^2} \vbeta^\top (\mX^\top \mX) \vbeta - \log \sigma^2] \\
+&= \E_{-\sigma^2} {-\frac{n + p + 1}{2} \log \sigma^2 - \frac{1}{2\sigma^2} \E_{\vbeta, \Gamma} [(\mX \Gamma \vbeta)^\top (\mX \Gamma \vbeta) + (\mX \vbeta)^\top (\mX \vbeta) - 2 (\mX \Gamma \vbeta)^\top \vy]} \\
+&= -\frac{n + p + 1}{2} \log \sigma^2 - \frac{1}{2 \sigma^2} \{\E [(\mX \vbeta)^\top (\mX \vbeta)] \odot (\E \Gamma \Gamma^\top + \vone) - 2\vy^\top \mX \E \Gamma \E \vbeta\}\\
+&= -\frac{n + p + 1}{2} \log \sigma^2 - \frac{1}{2 \sigma^2} \{\tr[(\mSigma + \vmu \vmu^T) \mX^\top \mX] \odot (\E \Gamma \Gamma^\top + \vone) - 2\vy^\top \mX \mP \vmu\}\\
+\end{align*}
+
+\subsection{$q(g)$}
+\begin{align*}
+\log q(g) &\propto \E_{-g} [-\half \log g - \frac{1}{g} \frac{1}{2 \sigma^2} \vbeta^\top \mX^\top \mX \vbeta + b \log g - [(a + 1) + (b + 1)] \log(1 + g) - \log \Beta(a + 1, b + 1)]] \\
+&= -\half \log g - \frac{1}{g} \half \E \frac{1}{\sigma^2} \E (\mX \vbeta)^\top (\mX \vbeta) + b \log g - [(a + 1) + (b + 1)] \log(1 + g) - \log \Beta(a + 1, b + 1)] \\
+&= -\half \log g - \frac{1}{g} \half \E \frac{1}{\sigma^2} \tr[(\mSigma + \vmu \vmu^T) \mX^\top \mX] + b \log g - [(a + 1) + (b + 1)] \log(1 + g) - \log \Beta(a + 1, b + 1)] \\
+\end{align*}
+
+\subsection{$q(\gamma)$}
+\begin{align*}
+\log q(\gamma) &\propto \E_{-\gamma} -\half (\vy - \mX \Gamma \vbeta)^T \sigma^{-2} \mI_n (\vy - \mX \Gamma \vbeta)
+\end{align*}
+
+\section{Collapsed Variational Bayes}
+
+
+\section{A nice theorem.}
+Let
+\begin{equation*}
+R^2_{\mX, \mZ} = 
+\begin{pmatrix}
+\vy^\top \mX & \vy^\top \mZ
+\end{pmatrix}
+\begin{pmatrix}
+\mX^\top \mX & \mX^\top \mZ \\
+\mZ^\top \mX & \mZ^\top \mZ + \mZ^\top \mZ \odot (\mI - \mW^{-1})
+\end{pmatrix}^{-1}
+\begin{pmatrix}
+\mX^\top \vy\\
+\mZ^\top \vy
+\end{pmatrix}.
+\end{equation*}
+
+\def \BigO {\text{O}}
+
+Definition:
+$f(x) = \BigO(g(x)) \text{ as } x \to a$
+
+if and only if there exist positive numbers $\delta$ and $M$ such that
+
+$|f(x)| \leq M |g(x)| \text{ for } |x - a| < \delta$.
+
+Definition:
+The Frobenius norm of a matrix $\mA$ is defined as
+\begin{align*}
+\| \mA \| = \tr{(\mA^\top \mA)}^{\frac{1}{2}}
+\end{align*}
+
+The trace of a projection matrix is equal to the dimension of the subspace that it projects onto, and thus
+the Frobenius norm of a projection matrix is equal to the square root of the dimension of that subspace.
+
+Lemma:
+If $\mA$ and $\mB$ are symmetric, and their product $\mA \mB$ is symmetric, then $\mA$ and $\mB$ commute.
+\begin{proof}
+$\mA \mB = (\mA \mB)^T = \mB^T \mA^T = \mB \mA$
+\end{proof}
+
+Lemma:
+If $\mB$ is symmetric, then
+\[
+(\mA \odot \mB)^{-1} = \mA^{-1} \odot \frac{1}{\mB}.
+\]
+\begin{proof}
+\begin{align*}
+(\mA \odot \mB)\left(\mA^{-1} \odot \frac{1}{\mB}\right)_{ij} &= \sum_{k=1}^n \mA_{ik} \mB_{ik} \mA^{-1}_{kj} \frac{1}{\mB_{kj}} \\
+% &= \begin{cases}
+% 1 \mB_{ik} \frac{1}{\mB_{kj}} \text{ when i=j, for \mB symmetric} \\
+% 0 \text{ otherwise}
+% \end{cases} \\
+% &= \sum_{i=1}^n \mA_{ik} \mB_{ik} \mA^{-1}_{kj} \frac{1}{\mB_{kj}} \\
+% &= \sum_{k=1}^n \cancel{\mB_{ik}} \frac{1}{\cancel{\mB_{ik}}} \mA_{ik} \mA^{-1}_{kj}, i = j \\
+% &=\sum_{k=1}^n \mA_{ik} \mA^{-1}_{kj} \mB_{ik} \frac{1}{\mB_{kj}} \\
+&=
+\begin{cases}
+\sum_{k=1}^n \cancel{\mB_{ik}} \frac{1}{\cancel{\mB_{ik}}} \mA_{ik} \mA^{-1}_{kj} = 1, \text{when $\mB$ is symmetric and $i = j$} \\
+\sum_{i=1}^n \mA_{ik} \mA^{-1}_{kj} \mB_{ik} \frac{1}{\mB_{kj}}
+= \mB_{i.} \odot (\mA^T_{i.} \mA^{-1}_{.j}) \odot \frac{1}{\mB_{.j}}
+= \mB_{i.} \odot (0) \odot \frac{1}{\mB_{.j}}
+= 0, \text{ when $i \ne j$}
+\end{cases}\\
+&= \mI
+\end{align*}
+\end{proof}
+
+% \begin{theorem}
+Theorem:
+\[
+R^2_{\mX, \mZ} = R^2_{\mX} + \BigO(w_*) \text{ where } w_* = \max{\vw}.
+\]
+% \end{theorem}
+
+\begin{proof}
+Let $n$ be the number of rows of both $\mX$ and $\mZ$, $p_\mX$ be the number of columns of $\mX$, and $p_\mZ$
+be the number of columns of $\mZ$. Denote the projections onto the subspaces spanned by the columns of $\mX$
+and $\mZ$ by $\mP_\mX$ and $\mP_\mZ$, and the projections onto the complementary subspaces by
+$\mP_{\mX^\perp}$ and $\mP_{\mZ^\perp}$.
+
+\small
+\begin{equation*}
+\begin{array}{ll}
+&\vy^\top \vy R^2_{\mX, \mZ} \\
+=&
+\begin{pmatrix}
+\vy^\top \mX & \vy^\top \mZ
+\end{pmatrix}
+\begin{pmatrix}
+\mX^\top \mX & \mX^\top \mZ \\
+\mZ^\top \mX & \mZ^\top \mZ - \mZ^\top \mZ \odot (\mI - \mW^{-1})
+\end{pmatrix}^{-1}
+\begin{pmatrix}
+\mX^\top \vy\\
+\mZ^\top \vy
+\end{pmatrix} \\
+=&
+\begin{pmatrix}
+\vy^\top \mX & \vy^\top \mZ
+\end{pmatrix}
+\begin{bmatrix}
+\begin{pmatrix}
+\mX^\top \mX & \mX^\top \mZ \\
+\mZ^\top \mX & \mZ^\top \mZ
+\end{pmatrix}
+\odot
+\begin{pmatrix}
+\vone & \vone \\
+\vone & \vone - (\mI - \mW^{-1})
+\end{pmatrix}
+\end{bmatrix}
+^{-1}
+\begin{pmatrix}
+\mX^\top \vy\\
+\mZ^\top \vy
+\end{pmatrix} \\
+=&
+\begin{pmatrix}
+\vy^\top \mX & \vy^\top \mZ
+\end{pmatrix}
+\begin{pmatrix}
+(\mX^\top \mP_{\mZ^\perp} \mX)^{-1} & -(\mX^\top \mX)^{-1} \mX^\top \mZ (\mZ^\top \mP_{\mX^\perp} \mZ)^{-1} \\
+-(\mZ^\top \mZ)^{-1} \mZ^\top \mX (\mX^\top \mP_{\mZ^\perp}) \mX)^{-1} & (\mZ^\top \mP_{\mX^\perp} \mZ)^{-1}
+\end{pmatrix}
+\odot
+\begin{pmatrix}
+\vone & \vone \\
+\vone & \frac{1}{\vone - (\mI - \mW^{-1})}
+\end{pmatrix}
+\begin{pmatrix}
+\mX^\top \vy\\
+\mZ^\top \vy
+\end{pmatrix} \\
+=&
+\begin{pmatrix}
+\vy^\top \mX(\mX^\top \mP_{\mZ^\perp} \mX)^{-1} - \vy^\top \mZ(\mZ^\top \mZ)^{-1} \mZ^\top \mX (\mX^\top \mP_{\mZ^\perp} \mX)^{-1}\\
+-\vy^\top \mX(\mX^\top \mX)^{-1} (\mZ^\top \mP_{\mX^\perp} \mZ)^{-1} + \vy^\top \mZ(\mZ^\top \mP_{\mX^\perp} \mZ)^{-1}
+\end{pmatrix}
+\odot
+\begin{pmatrix}
+\vone & \vone \\
+\vone & \frac{1}{\vone - (\mI - \mW^{-1})}
+\end{pmatrix}
+^\top
+\begin{pmatrix}
+\mX^\top \vy \\
+\mZ^\top \vy
+\end{pmatrix} \\
+=&\quad\vy^\top \mX (\mX^\top \mP_{\mZ^\perp} \mX)^{-1} \mX^\top \vy - \vy^\top \mZ(\mZ^\top \mZ)^{-1} \mZ^\top \mX (\mX^\top \mP_{\mZ^\perp}) \mX)^{-1} \mX^\top \vy \\
+&-\vy^\top \mX (\mX^\top \mX)^{-1} \mX^\top \mZ (\mZ^\top \mP_{\mX^\perp} \mZ)^{-1} \mZ^\top \vy + \frac{1}{1 + \diag{(w^{-1} - 1)}} \odot \vy^\top \mZ (\mZ^\top \mP_{\mX^\perp} \mZ)^{-1} \mZ^\top \vy \\
+=& \vy^\top \mP_{\mZ^\perp} \mX (\mX^\top \mP_{\mZ^\perp} \mX))^{-1} \mX^\top \mP_{\mZ^\perp} \vy
++ (\vone + \mW - \mI) \vy^\top \mP_{\mX^\perp} \mZ (\mZ^\top \mP_{\mX^\perp} \mZ)^{-1} \mZ^\top \mP_{\mX^\perp} \vy \\
+\leq& \| \vy \|^2 [\sqrt{p_\mZ} + (w_* - 1) \sqrt{p_\mZ}] \\
+=& \| \vy \|^2 \sqrt{p_\mZ} w_* \\
+\leq& M w_* \text{ as required}.
+\end{array}
+\end{equation*}
+ 
+\end{proof}
 
 \end{document}
