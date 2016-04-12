@@ -363,10 +363,10 @@ $\tau_{g} = \E_q \left[ \frac{1}{g} \right]$.
 \subsection{$q(\sigma^2)$}
 \begin{align*}
 \log q_\sigma^2(\alpha_{q(\sigma^2)}, \beta_{q(\sigma^2)}) &\propto \E_{-\sigma^2} [-\half \log |2 \pi \sigma^2 \mI_n| - \half (\vy - \mX \vbeta)^\top \sigma^{-2} \mI_n (\vy - \mX \vbeta) - \half \log |2 \pi g \sigma^2 (\mX^\top \mX)^{-1}| - \half \vbeta^\top \sigma^{-2} (\mX^\top \mX) \vbeta] \\
-&= \E_{-\sigma^2} [- \frac{n}{2} \log \sigma^2 - \frac{1}{2 \sigma^2}(\vy - \mX \vbeta)^\top(\vy - \mX \vbeta) - \frac{p}{2} \log \sigma^2 - \frac{1}{2 \sigma^2} \vbeta^\top (\mX^\top \mX) \vbeta - \log \sigma^2] \\
-&= \E_{-\sigma^2} {-[\frac{n + p}{2} + 1] \log \sigma^2 - \frac{1}{2\sigma^2} \E_{\vbeta} [(\mX \vbeta)^\top (\mX \vbeta) + (\mX \vbeta)^\top (\mX \vbeta) - 2 (\mX \vbeta)^\top \vy]} \\
-&= -[\frac{n + p}{2} + 1] \log \sigma^2 - \frac{1}{2 \sigma^2} \{\E [(\mX \vbeta)^\top (\mX \vbeta)] \odot (\E \Gamma \Gamma^\top + \vone) - 2\vy^\top \mX \E \vbeta\}\\
-&= -[\frac{n + p}{2} + 1] \log \sigma^2 - \frac{1}{2 \sigma^2} \{\tr[(\mSigma + \vmu \vmu^T) \mX^\top \mX] \odot (\E \Gamma \Gamma^\top + \vone) - 2\vy^\top \mX \vmu\}\\
+&= \E_{-\sigma^2} \left[- \frac{n}{2} \log \sigma^2 - \frac{1}{2 \sigma^2}(\vy - \mX \vbeta)^\top(\vy - \mX \vbeta) - \frac{p}{2} \log \sigma^2 - \frac{1}{2 \sigma^2} \vbeta^\top (\mX^\top \mX) \vbeta - \log \sigma^2\right] \\
+&= \E_{-\sigma^2} {-left[\frac{n + p}{2} + 1\right] \log \sigma^2 - \frac{1}{2\sigma^2} \E_{\vbeta} [(\mX \vbeta)^\top (\mX \vbeta) + (\mX \vbeta)^\top (\mX \vbeta) - 2 (\mX \vbeta)^\top \vy]} \\
+&= -\left[\frac{n + p}{2} + 1\right] \log \sigma^2 - \frac{1}{2 \sigma^2} \{\E [(\mX \vbeta)^\top (\mX \vbeta)] \odot (\E \Gamma \Gamma^\top + \vone) - 2\vy^\top \mX \E \vbeta\}\\
+&= -\left[\frac{n + p}{2} + 1\right] \log \sigma^2 - \frac{1}{2 \sigma^2} \{\tr[(\mSigma + \vmu \vmu^T) \mX^\top \mX] \odot (\E \Gamma \Gamma^\top + \vone) - 2\vy^\top \mX \vmu\}\\
 \end{align*}
 
 \subsection{$q(g)$}
