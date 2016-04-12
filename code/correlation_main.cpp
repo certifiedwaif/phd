@@ -3,6 +3,7 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include <iostream>
+#include <stdexcept>
 #include <Eigen/Dense>
 #include "correlation.hpp"
 
@@ -101,43 +102,48 @@ int main_test()
 int main()
 {
 	const bool intercept = false, centre = true;
-	VectorXd vy = parseCSVfile_double("vy.csv");
-	MatrixXd mC = parseCSVfile_double("mX.csv");
+	try {
+		VectorXd vy = parseCSVfile_double("vy.csv");
+		MatrixXd mC = parseCSVfile_double("mX.csv");
 	
-	// MatrixXd mX = mC.leftCols(10);
-	// MatrixXd mZ = mC.rightCols(9);
-	// VectorXd vR2_all_mX_mZ = all_correlations_mX_mZ_cpp(vy, mX, mZ, 0, intercept, centre);
-	// cout << "i,R2" << endl;
-	// for (uint i = 1; i < vR2_all_mX_mZ.size(); i++) {
-	// 	// const double epsilon = 1e-8;
-	// 	// if (abs(diff) > epsilon) {
-	// 	// cout << grey_vec(i - 1, p) << " to " << grey_vec(i, p) << endl;
-	// 	cout << i << ", C++ R2 " << vR2_all_mX_mZ(i) << endl;
-	// 	// }
-	// }
-
-	struct timeval start, end;
-	long mtime, seconds, useconds;
-	gettimeofday(&start, NULL);
-	VectorXd vR2_all_mX = all_correlations_mX_cpp(vy, mC, 0, intercept, centre);
-	gettimeofday(&end, NULL);
-
-	seconds  = end.tv_sec  - start.tv_sec;
-	useconds = end.tv_usec - start.tv_usec;
-
-	mtime = ((seconds) * 1000 + useconds/1000.0) + 0.5;
-	cout << "Elapsed time in milliseconds: " << mtime << endl;
-
-	VectorXd vExpected_correlations = parseCSVfile_double("Hitters_exact2.csv");
-	cout << "i,R2" << endl;
-	for (uint i = 1; i < vR2_all_mX.size(); i++) {
-		double diff = vR2_all_mX(i) - vExpected_correlations(i);
-		// const double epsilon = 1e-8;
-		// if (abs(diff) > epsilon) {
-		// cout << grey_vec(i - 1, p) << " to " << grey_vec(i, p) << endl;
-		cout << i << ", C++ R2 " << vR2_all_mX(i) << " R R2 " << vExpected_correlations(i);
-		cout << " difference " << diff << endl;
+		// MatrixXd mX = mC.leftCols(10);
+		// MatrixXd mZ = mC.rightCols(9);
+		// VectorXd vR2_all_mX_mZ = all_correlations_mX_mZ_cpp(vy, mX, mZ, 0, intercept, centre);
+		// cout << "i,R2" << endl;
+		// for (uint i = 1; i < vR2_all_mX_mZ.size(); i++) {
+		// 	// const double epsilon = 1e-8;
+		// 	// if (abs(diff) > epsilon) {
+		// 	// cout << grey_vec(i - 1, p) << " to " << grey_vec(i, p) << endl;
+		// 	cout << i << ", C++ R2 " << vR2_all_mX_mZ(i) << endl;
+		// 	// }
 		// }
+
+		struct timeval start, end;
+		long mtime, seconds, useconds;
+		gettimeofday(&start, NULL);
+		VectorXd vR2_all_mX = all_correlations_mX_cpp(vy, mC, 0, intercept, centre);
+		gettimeofday(&end, NULL);
+
+		seconds  = end.tv_sec  - start.tv_sec;
+		useconds = end.tv_usec - start.tv_usec;
+
+		mtime = ((seconds) * 1000 + useconds/1000.0) + 0.5;
+		cout << "Elapsed time in milliseconds: " << mtime << endl;
+
+		VectorXd vExpected_correlations = parseCSVfile_double("Hitters_exact2.csv");
+		cout << "i,R2" << endl;
+		for (uint i = 1; i < vR2_all_mX.size(); i++) {
+			double diff = vR2_all_mX(i) - vExpected_correlations(i);
+			// const double epsilon = 1e-8;
+			// if (abs(diff) > epsilon) {
+			// cout << grey_vec(i - 1, p) << " to " << grey_vec(i, p) << endl;
+			cout << i << ", C++ R2 " << vR2_all_mX(i) << " R R2 " << vExpected_correlations(i);
+			cout << " difference " << diff << endl;
+			// }
+		}
+	} catch (std::runtime_error& e) {
+		cerr << "There was a problem loading the matrix files." << e.what() << endl;
+		return -1;
 	}
 
 	return 0;

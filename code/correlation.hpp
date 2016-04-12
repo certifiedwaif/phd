@@ -1,7 +1,6 @@
 // correlation.hpp
 
-#ifndef CORRELATION_HPP
-#define CORRELATION_HPP
+#pragma once
 
 // "If you want work with matrices, you should use C++ with Eigen or Armadillo. It's pretty fast." - Hadley Wickham,
 // completely unprompted.
@@ -35,7 +34,9 @@ const bool NUMERIC_FIX = false;
 MatrixXd parseCSVfile_double(string infilename)
 {
 	ifstream in(infilename.c_str());
-	if (!in.is_open()) return MatrixXd(1,1);
+	if (!in.is_open()) {
+		throw runtime_error("Could not open " + infilename);
+	}
 
 	typedef tokenizer< escaped_list_separator<char> > Tokenizer;
 
@@ -569,4 +570,3 @@ VectorXd one_correlation(VectorXd vy, MatrixXd mX, MatrixXd mZ)
 
 	return R2;
 }
-#endif
