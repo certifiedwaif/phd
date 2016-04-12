@@ -31,7 +31,7 @@
 
 \section{Assignment 3 - Bayesian Data Analysis}
 
-Consider the model $\vy | \vbeta, \sigma^2 \sim N_n(\mX \vbeta, \sigma^2 \mI)$ with priors
+=Consider the model $\vy | \vbeta, \sigma^2 \sim N_n(\mX \vbeta, \sigma^2 \mI)$ with priors
 \begin{equation*}
 \begin{array}{ll}
 \vbeta | \sigma^2, g &\sim N_p(\vzero, g \sigma^2(\mX^\top \mX)^{-1}) \\
@@ -340,28 +340,33 @@ The log likelihood of the full model is then
 
 \begin{align*}
 \log p(\vy, \theta) &= \quad\log p(\vy|\vbeta, \sigma^2, \vgamma) + \log p(\vbeta | \sigma^2, g) +  \log p(g) \\
-&= -\half \log(|2 \pi \sigma^2 I_n|) - \half (\vy - X \vbeta)^\top \sigma^{-2} (\vy - \mX \vbeta) \\
-&\quad -\half \log(|2 \pi g \sigma^2 (\mX^\top \mX)^{-1}|) -\half \vbeta^\top \sigma^{-2} (\mX^T \mX) \vbeta \\
+&= -\half \log(|2 \pi \sigma^2 I_n|) - \half (\vy - \mX \vbeta)^\top \sigma^{-2} (\vy - \mX \vbeta) \\
+&\quad -\half \log(|2 \pi g \sigma^2 (\mX^\top \mX)^{-1}|) -\half \vbeta^\top \sigma^{-2} g^{-1} (\mX^T \mX) \vbeta \\
 &\quad - \log (\sigma^2) \\
 &\quad + b \log g - [(a + 1) + (b + 1)] \log (1 + g) - \log \Beta(a + 1, b + 1)
 \end{align*}
 
 \subsection{$q(\vbeta)$}
+
 \begin{align*}
-\log q_\vbeta^*(\vmu_{q(\vbeta)}, \mSigma_{q(\vbeta)}) &\propto \E[-\half (\mX \vbeta - \vy)^\top \sigma^{-2} I (\mX \vbeta) - \half \vbeta^\top \sigma^{-2} (\mX^\top \mX) \vbeta] \\
-&= \E[-\frac{1}{2 \sigma^2} (\mX \vbeta)^\top (\mX \vbeta) - 2 \mX \vbeta^\top \vy + (\mX \vbeta)^\top (\mX \vbeta)] \\
-&= \E[-\frac{1}{2 \sigma^2} (\mX \vbeta)^\top (\mX \vbeta) \odot \Gamma \Gamma^\top + (\mX \vbeta)^\top (\mX \vbeta) - 2 \mX \Gamma \vbeta^\top \vy] \\
-&= \E[-\frac{1}{2 \sigma^2} (\mX \vbeta)^\top (\mX \vbeta) \odot (\vone + \Gamma \Gamma^\top) - 2 \mX \Gamma \vbeta^\top \vy] \\
-&= -\half \E[\frac{1}{\sigma^2}] [(\mX \vbeta)^\top (\mX \vbeta) \odot (\vone + \E \Gamma \Gamma^\top) - 2 \E \Gamma \mX \vbeta^\top \vy]
+\log q_\vbeta^*(\vmu_{q(\vbeta)}, \mSigma_{q(\vbeta)}) &\propto \E_q[-\half (\mX \vbeta - \vy)^\top \sigma^{-2} \mI_n (\mX \vbeta - \vy) - \half \vbeta^\top \sigma^{-2} g^{-1} \mI_p (\mX^\top \mX) \vbeta] \\
+&= \E_q \left[-\frac{1}{2} \frac{1}{\sigma^2} (1 + g^{-1})\vbeta^\top \mX^\top \mX \vbeta + \frac{1}{\sigma^2}\vbeta^\top \mX^\top \vy \right]
 \end{align*}
+
+and thus
+$q^*(\vbeta) \sim \N (\vmu_{q(\vbeta)}, \mSigma_{q(\vbeta)} )$
+where $\vmu_{q(\vbeta)} = (1 + \tau_g)^{-1} (\mX^\top \mX)^{-1} \mX^\top \vy$,
+$\mSigma_{q(\vbeta)} = [\tau_{\sigma^2}(1 + \tau_{g})]^{-1}(\mX^\top \mX)^{-1}$,
+$\tau_{\sigma^2} = \E_q \left[ \frac{1}{\sigma^2} \right]$ and
+$\tau_{g} = \E_q \left[ \frac{1}{g} \right]$.
 
 \subsection{$q(\sigma^2)$}
 \begin{align*}
-=\log q_\sigma^2(\alpha_{q(\sigma^2)}, \beta_{q(\sigma^2)}) &\propto \E_{-\sigma^2} [-\half \log |2 \pi \sigma^2 \mI_n| - \half (\vy - \mX \vbeta)^\top \sigma^{-2} \mI_n (\vy - \mX \vbeta) - \half \log |2 \pi g \sigma^2 (\mX^\top \mX)^{-1}| - \half \vbeta^\top \sigma^{-2} (\mX^\top \mX) \vbeta] \\
-&= \E_{-\sigma^2} [- \frac{n}{2} \log \sigma^2 - \frac{1}{2 \sigma^2}(\vy - \mX \vbeta)^\top(\vy - \mX \vbeta) - \frac{p}{2} \log \sigma^2 - \frac{1}{2 \sigma^2} \vbeta^\top (\mX^\top \mX) \vbeta - \log \sigma^2] \\
-&= \E_{-\sigma^2} {-\frac{n + p + 1}{2} \log \sigma^2 - \frac{1}{2\sigma^2} \E_{\vbeta} [(\mX \vbeta)^\top (\mX \vbeta) + (\mX \vbeta)^\top (\mX \vbeta) - 2 (\mX \vbeta)^\top \vy]} \\
-&= -\frac{n + p + 1}{2} \log \sigma^2 - \frac{1}{2 \sigma^2} \{\E [(\mX \vbeta)^\top (\mX \vbeta)] \odot (\E \Gamma \Gamma^\top + \vone) - 2\vy^\top \mX \E \vbeta\}\\
-&= -\frac{n + p + 1}{2} \log \sigma^2 - \frac{1}{2 \sigma^2} \{\tr[(\mSigma + \vmu \vmu^T) \mX^\top \mX] \odot (\E \Gamma \Gamma^\top + \vone) - 2\vy^\top \mX \vmu\}\\
+\log q_\sigma^2(\alpha_{q(\sigma^2)}, \beta_{q(\sigma^2)}) &\propto \E_{-\sigma^2} [-\half \log |2 \pi \sigma^2 \mI_n| - \half (\vy - \mX \vbeta)^\top \sigma^{-2} \mI_n (\vy - \mX \vbeta) - \half \log |2 \pi g \sigma^2 (\mX^\top \mX)^{-1}| - \half \vbeta^\top \sigma^{-2} (\mX^\top \mX) \vbeta] \\
+&= \E_{-\sigma^2} \left[- \frac{n}{2} \log \sigma^2 - \frac{1}{2 \sigma^2}(\vy - \mX \vbeta)^\top(\vy - \mX \vbeta) - \frac{p}{2} \log \sigma^2 - \frac{1}{2 \sigma^2} \vbeta^\top (\mX^\top \mX) \vbeta - \log \sigma^2\right] \\
+&= \E_{-\sigma^2} {-left[\frac{n + p}{2} + 1\right] \log \sigma^2 - \frac{1}{2\sigma^2} \E_{\vbeta} [(\mX \vbeta)^\top (\mX \vbeta) + (\mX \vbeta)^\top (\mX \vbeta) - 2 (\mX \vbeta)^\top \vy]} \\
+&= -\left[\frac{n + p}{2} + 1\right] \log \sigma^2 - \frac{1}{2 \sigma^2} \{\E [(\mX \vbeta)^\top (\mX \vbeta)] \odot (\E \Gamma \Gamma^\top + \vone) - 2\vy^\top \mX \E \vbeta\}\\
+&= -\left[\frac{n + p}{2} + 1\right] \log \sigma^2 - \frac{1}{2 \sigma^2} \{\tr[(\mSigma + \vmu \vmu^T) \mX^\top \mX] \odot (\E \Gamma \Gamma^\top + \vone) - 2\vy^\top \mX \vmu\}\\
 \end{align*}
 
 \subsection{$q(g)$}
