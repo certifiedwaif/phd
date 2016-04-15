@@ -370,7 +370,7 @@ $\mSigma_{q(\vbeta)} = [\tau_{\sigma^2}(1 + \tau_{g})]^{-1}(\mX^\top \mX)^{-1}$.
 &= -\left(\frac{n + p}{2} + 1 \right)\log \sigma^2 - \frac{1}{\sigma^2} \frac{1}{2} \left\{ \vy^\top\vy + \left( 1 + \tau_g \right) [\vmu_{q(\vbeta)}^\top \mX^\top \mX \vmu_{q(\vbeta)} - 2 \tr(\mX^\top \mX \mSigma_{q(\vbeta)})] + \vy^\top \mX \vmu_{q(\vbeta)} \right\} \\
 &= -\left(\frac{n + p}{2}\right) \log \sigma^2 - \frac{1}{\sigma^2} \frac{1}{2} \{ \vy^\top\vy +  \cancel{(1 + \tau_g)}[(1 + \tau_g)^{-1} \vy^\top \mX^\top \cancel{(\mX^\top \mX)^{-1}}  \cancel{\mX^\top \mX} \cancel{(1 + \tau_g)^{-1}} (\mX^\top \mX)^{-1} \mX^\top \vy \\
 &\quad+ \tr{(\tau_{\sigma^2} \cancel{\mX^\top \mX} \cancel{(\mX^\top \mX)^{-1}})}] - 2 (1 + \tau_g)^{-1} \vy^\top \mX (\mX^\top \mX)^{-1} \mX^\top \vy \} \\
-&= -\left(\frac{n + p}{2}\right) \log \sigma^2 - \frac{1}{\sigma^2} \{ [1 - (1 + \tau_g)^{-1}]\|\vy\|^2 R^2
+&= -\left(\frac{n + p}{2}\right) \log \sigma^2 - \frac{1}{\sigma^2} \frac{1}{2}\{ [1 - (1 + \tau_g)^{-1}]\|\vy\|^2 R^2
 		+ p \tau_{\sigma^2}^{-1} \}
 \end{align*}
 
@@ -381,20 +381,28 @@ $\mSigma_{q(\vbeta)} = [\tau_{\sigma^2}(1 + \tau_{g})]^{-1}(\mX^\top \mX)^{-1}$.
 &= -\half \log g - \frac{1}{g} \half \tau_{\sigma^2} \tr[(\mSigma_{q(\vbeta)} + \vmu_{q(\vbeta)} \vmu_{q(\vbeta)}^T) \mX^\top \mX] + b \log g - [(a + 1) + (b + 1)] \log(1 + g) - \log \Beta(a + 1, b + 1)] \\
 &= \left(b - \frac{1}{2}\right) \log g - \frac{1}{g} \frac{1}{2} \left[\tau_{\sigma^2} (1 + \tau_g)^{-1} \vy^\top \mX^\top \cancel{(\mX^\top \mX)^{-1}} \cancel{\mX^\top \mX} (\mX^\top \mX)^{-1} \mX \vy + \tr{[\tau_{\sigma^2}^{-1} (1 + \tau_g)^{-1} \mX^\top \mX (\mX^\top \mX)^{-1}]} \right] \\
 & \quad	- [(a + 1) + (b + 1)] \log(1 + g) - \log \Beta(a + 1, b + 1) \\
-&= \left(b - \frac{1}{2}\right) \log g - \frac{1}{g} \frac{1}{2} (1 + \tau_g)^{-1} (\tau_{\sigma^2} \|y\|^2 R^2 + p)
+&= \left(b - \frac{1}{2}\right) \log g - \frac{1}{g} \frac{1}{2} (1 + \tau_g)^{-1} (\tau_{\sigma^2} \|\vy\|^2 R^2 + p)
 	- [(a + 1) + (b + 1)] \log(1 + g) - \log \Beta(a + 1, b + 1)
 \end{align*}
 
 So setting
 \begin{align*}
 \nu - 1 &= b - \frac{1}{2} \\
-\beta &= \frac{1}{2} (1 + \tau_g)^{-1} (\tau_{\sigma^2} \|y\|^2 R^2 + p) \\
+\beta &= \frac{1}{2} (1 + \tau_g)^{-1} (\tau_{\sigma^2} \|\vy\|^2 R^2 + p) \\
 \mu - 1 &= [(a + 1) + (b + 1)] \\
 \gamma = 1
 \end{align*}
 
 and solving for $\nu, \beta, \mu$ and $\gamma$ we obtain an ET 234(13)a function (see Identity 7 on page 368
 of Russian book).
+
+Note that as
+
+\begin{align*}
+\tau_{\sigma^2} = \frac{n + p}{1 - (1 + \tau_g)^{-1}]\|\vy\|^2 R^2 + p \tau_{\sigma^2}^{-1}}
+\end{align*}
+
+solving for $\tau_{\sigma^2}$ \ldots
 
 \section{Collapsed Variational Bayes}
 
