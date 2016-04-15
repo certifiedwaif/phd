@@ -366,11 +366,11 @@ $\mSigma_{q(\vbeta)} = [\tau_{\sigma^2}(1 + \tau_{g})]^{-1}(\mX^\top \mX)^{-1}$.
 \begin{align*}
 \log q_\sigma^2(\alpha_{q(\sigma^2)}, \beta_{q(\sigma^2)}) &\propto \E_{-\sigma^2} [-\half \log |2 \pi \sigma^2 \mI_n| - \half (\vy - \mX \vbeta)^\top \sigma^{-2} \mI_n (\vy - \mX \vbeta) - \half \log |2 \pi g \sigma^2 (\mX^\top \mX)^{-1}| - \half \vbeta^\top \sigma^{-2} \frac{1}{g} (\mX^\top \mX) \vbeta] \\
 &= \E_{-\sigma^2} \left[- \frac{n}{2} \log \sigma^2 - \frac{1}{2 \sigma^2}(\vy - \mX \vbeta)^\top(\vy - \mX \vbeta) - \frac{p}{2} \log \sigma^2 - \frac{1}{2 \sigma^2} \frac{1}{g} \vbeta^\top (\mX^\top \mX) \vbeta - \log \sigma^2\right] \\
-&= {-\left(\frac{n + p}{2} + 1\right) \log \sigma^2 -  \frac{1}{\sigma^2} \frac{1}{2} \E_{q(\vbeta)} \left[  \left(1 + \frac{1}{g} \right) \vbeta^\top \mX^\top \mX \vbeta - \vbeta^\top \mX^\top \vy \right]} \\
-&= -\left(\frac{n + p}{2} + 1 \right)\log \sigma^2 - \frac{1}{\sigma^2} \frac{1}{2} \left\{ \left( 1 + \tau_g \right) [\vmu_{q(\vbeta)}^\top \mX^\top \mX \vmu_{q(\vbeta)} + \tr(\mX^\top \mX \mSigma_{q(\vbeta)})] + \vy^\top \mX \vmu_{q(\vbeta)} \right\} \\
-&= -\left(\frac{n + p}{2}\right) \log \sigma^2 - \frac{1}{\sigma^2} \frac{1}{2} \{ \cancel{(1 + \tau_g)}[(1 + \tau_g)^{-1} \vy^\top \mX^\top \cancel{(\mX^\top \mX)^{-1}}  \cancel{\mX^\top \mX} \cancel{(1 + \tau_g)^{-1}} (\mX^\top \mX)^{-1} \mX^\top \vy \\
-&\quad+ \tr{(\tau_{\sigma^2} \cancel{\mX^\top \mX} \cancel{(\mX^\top \mX)^{-1}})}] + (1 + \tau_g)^{-1} \vy^\top \mX (\mX^\top \mX)^{-1} \mX^\top \vy \} \\
-&= -\left(\frac{n + p}{2}\right) \log \sigma^2 - \frac{1}{\sigma^2} \{ [(1 + \tau_g)^{-1} + 1]\|\vy\|^2 R^2
+&= {-\left(\frac{n + p}{2} + 1\right) \log \sigma^2 -  \frac{1}{\sigma^2} \frac{1}{2} \E_{q(\vbeta)} \left[ \vy^\top \vy + \left(1 + \frac{1}{g} \right) \vbeta^\top \mX^\top \mX \vbeta - 2 \vbeta^\top \mX^\top \vy \right]} \\
+&= -\left(\frac{n + p}{2} + 1 \right)\log \sigma^2 - \frac{1}{\sigma^2} \frac{1}{2} \left\{ \vy^\top\vy + \left( 1 + \tau_g \right) [\vmu_{q(\vbeta)}^\top \mX^\top \mX \vmu_{q(\vbeta)} - 2 \tr(\mX^\top \mX \mSigma_{q(\vbeta)})] + \vy^\top \mX \vmu_{q(\vbeta)} \right\} \\
+&= -\left(\frac{n + p}{2}\right) \log \sigma^2 - \frac{1}{\sigma^2} \frac{1}{2} \{ \vy^\top\vy +  \cancel{(1 + \tau_g)}[(1 + \tau_g)^{-1} \vy^\top \mX^\top \cancel{(\mX^\top \mX)^{-1}}  \cancel{\mX^\top \mX} \cancel{(1 + \tau_g)^{-1}} (\mX^\top \mX)^{-1} \mX^\top \vy \\
+&\quad+ \tr{(\tau_{\sigma^2} \cancel{\mX^\top \mX} \cancel{(\mX^\top \mX)^{-1}})}] - 2 (1 + \tau_g)^{-1} \vy^\top \mX (\mX^\top \mX)^{-1} \mX^\top \vy \} \\
+&= -\left(\frac{n + p}{2}\right) \log \sigma^2 - \frac{1}{\sigma^2} \{ [1 - (1 + \tau_g)^{-1}]\|\vy\|^2 R^2
 		+ p \tau_{\sigma^2}^{-1} \}
 \end{align*}
 
@@ -378,8 +378,23 @@ $\mSigma_{q(\vbeta)} = [\tau_{\sigma^2}(1 + \tau_{g})]^{-1}(\mX^\top \mX)^{-1}$.
 \begin{align*}
 \log q(g) &\propto \E_{-g} [-\half \log g - \frac{1}{g} \frac{1}{2 \sigma^2} \vbeta^\top \mX^\top \mX \vbeta + b \log g - [(a + 1) + (b + 1)] \log(1 + g) - \log \Beta(a + 1, b + 1)]] \\
 &= -\half \log g - \frac{1}{g} \half \E \frac{1}{\sigma^2} \E (\mX \vbeta)^\top (\mX \vbeta) + b \log g - [(a + 1) + (b + 1)] \log(1 + g) - \log \Beta(a + 1, b + 1)] \\
-&= -\half \log g - \frac{1}{g} \half \E \frac{1}{\sigma^2} \tr[(\mSigma_{q(\vbeta)} + \vmu_{q(\vbeta)} \vmu_{q(\vbeta)}^T) \mX^\top \mX] + b \log g - [(a + 1) + (b + 1)] \log(1 + g) - \log \Beta(a + 1, b + 1)] \\
+&= -\half \log g - \frac{1}{g} \half \tau_{\sigma^2} \tr[(\mSigma_{q(\vbeta)} + \vmu_{q(\vbeta)} \vmu_{q(\vbeta)}^T) \mX^\top \mX] + b \log g - [(a + 1) + (b + 1)] \log(1 + g) - \log \Beta(a + 1, b + 1)] \\
+&= \left(b - \frac{1}{2}\right) \log g - \frac{1}{g} \frac{1}{2} \left[\tau_{\sigma^2} (1 + \tau_g)^{-1} \vy^\top \mX^\top \cancel{(\mX^\top \mX)^{-1}} \cancel{\mX^\top \mX} (\mX^\top \mX)^{-1} \mX \vy + \tr{[\tau_{\sigma^2}^{-1} (1 + \tau_g)^{-1} \mX^\top \mX (\mX^\top \mX)^{-1}]} \right] \\
+& \quad	- [(a + 1) + (b + 1)] \log(1 + g) - \log \Beta(a + 1, b + 1) \\
+&= \left(b - \frac{1}{2}\right) \log g - \frac{1}{g} \frac{1}{2} (1 + \tau_g)^{-1} (\tau_{\sigma^2} \|y\|^2 R^2 + p)
+	- [(a + 1) + (b + 1)] \log(1 + g) - \log \Beta(a + 1, b + 1)
 \end{align*}
+
+So setting
+\begin{align*}
+\nu - 1 &= b - \frac{1}{2} \\
+\beta &= \frac{1}{2} (1 + \tau_g)^{-1} (\tau_{\sigma^2} \|y\|^2 R^2 + p) \\
+\mu - 1 &= [(a + 1) + (b + 1)] \\
+\gamma = 1
+\end{align*}
+
+and solving for $\nu, \beta, \mu$ and $\gamma$ we obtain an ET 234(13)a function (see Identity 7 on page 368
+of Russian book).
 
 \section{Collapsed Variational Bayes}
 
