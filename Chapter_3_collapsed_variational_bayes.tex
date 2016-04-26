@@ -436,11 +436,19 @@ T_1 &= -\half \E_q [\log \sigma^2] -\half \tau_{\sigma^2} \E_q \tr (\vy - \mX \v
 where k does not depend on $\vbeta$.
 
 \begin{align*}
-T_2 =
+T_2 &= \E_q [\log p(\sigma^2) - \log q(\sigma^2)] \\
+&= \tau_{\sigma^2} - \log(\beta_{q(\sigma^2)}) + \psi(\alpha_{q(\sigma^2)})
 \end{align*}
 
 \begin{align*}
-T_3 =
+T_3 &= \E_q [\log p(g) - \log q(g)] \\
+&= \E_q \log \left [ \frac{g^b (1 + g)^{-[(a + 1) + (b + 1)]}}{\Beta(a + 1, b + 1)} \right ] -
+	\E_q \log \left [ g^{\nu - 1} (g + \gamma)^{\mu - 1} e^{-\frac{\beta}{g}} \right ] \\
+&= \E_q [b - (\nu - 1)] \log g - [(a + 1) + (b + 1) - (\mu - 1)] \log (1 + g) - \beta \tau_g
+   - \E_q \log \Beta(a + 1,  b + 1) \\
+&= \quad \E_q [\cancel{b} - \cancel{b} + \half] \log g - [\cancel{(a + 1) + (b + 1)} - \cancel{(a + 1) - (b + 1)}] \log (1 + g)
+    - \frac{\tau_g}{1 + \tau_g} (\tau_{\sigma^2} \|\vy\|^2 R^2 + p)\\
+&   \quad - \E_q \log \Beta(a + 1,  b + 1) \\
 \end{align*}
 
 \section{Collapsed Variational Bayes}
