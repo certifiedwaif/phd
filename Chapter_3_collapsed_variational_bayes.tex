@@ -410,6 +410,39 @@ solving for $\tau_{\sigma^2}$, we obtain
 \tau_{\sigma^2} = \frac{n}{[1 - (1 + \tau_g)^{-1}]\|\vy\|^2 R^2}.
 \end{align*}
 
+\subsection{Variational lower bound}
+
+\begin{align*}
+\log \underline{p(\vy; q)} \equiv& \E_q [\log p(\vy | \vbeta, \sigma^2) + \log p(\vbeta | \sigma^2, g)
+																					+ \log p(\sigma^2) + \log p(g) - \log q(\vbeta)
+																					- \log q(\sigma^2) - \log p(g)] \\
+=& \quad \E_q [\log p(\vy| \vbeta, \sigma^2) + \log p(\vbeta | \sigma^2, g) - \log q(\vbeta)] \\
+	&+ \E_q [\log p(\sigma^2) - \log q(\sigma^2)] \\
+	&+ \E_q [\log p(g) - \log q(g)] \\
+=& T_1 + T_2 + T_3
+\end{align*}
+
+\begin{align*}
+T_1 &= -\half \E_q [\log \sigma^2] -\half \tau_{\sigma^2} \E_q \tr (\vy - \mX \vbeta)^T (\vy - \mX \vbeta)
+- \frac{p}{2} \E_q \log [\sigma^2] - \half \tau_{\sigma^2} \tau_g \E_q \tr \vbeta^T (\mX^T \mX) \vbeta
++ \half \log |\mSigma_{q(\vbeta)}| + k \\
+&= -\frac{p + 1}{2} \E_q [\log \sigma^2]
+-\half \tau_{\sigma^2} [\E_q \tr (\vy - \mX \vbeta)^T (\vy - \mX \vbeta) + \tau_g \E_q \tr \vbeta^T (\mX^T \mX) \vbeta]
++ \half \log |\mSigma_{q(\vbeta)}| + k \\
+&= -\frac{p + 1}{2} \left (\log (\beta_{q(\sigma^2)}) - \psi(\alpha_{q(\sigma^2)}) \right )
+- \half \tau_{\sigma^2} \left \{ \| \vy\|^2 - 2 \vy^\top \mX \vmu_{q(\vbeta)} + (1 + \tau_g) \tr[(\vmu_{q(\vbeta)} \vmu_{q(\vbeta)}^\top + \mSigma_{q(\vbeta)}) \mX^\top \mX] \right \}
++ \half \log |\mSigma_{q(\vbeta)}| + k \\
+\end{align*}
+where k does not depend on $\vbeta$.
+
+\begin{align*}
+T_2 =
+\end{align*}
+
+\begin{align*}
+T_3 =
+\end{align*}
+
 \section{Collapsed Variational Bayes}
 
 
