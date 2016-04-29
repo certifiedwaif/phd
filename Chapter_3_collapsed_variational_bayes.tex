@@ -339,7 +339,7 @@ p(g) &= \frac{g^b (1 + g)^{-[(a + 1) + (b + 1)]}}{\Beta(a + 1, b + 1)} \I(g > 0)
 The log likelihood of the full model is then
 
 \begin{align*}
-\log p(\vy, \theta) &= \quad\log p(\vy|\vbeta, \sigma^2, \vgamma) + \log p(\vbeta | \sigma^2, g) +  \log p(g) \\
+\log p(\vy, \theta) &= \quad\log p(\vy|\vbeta, \sigma^2, \vgamma) + \log p(\vbeta | \sigma^2, g) +  \log p(g) + \log p(\sigma^2)\\
 &= -\half \log(|2 \pi \sigma^2 \mI_n|) - \half (\vy - \mX \vbeta)^\top \sigma^{-2} (\vy - \mX \vbeta) \\
 &\quad -\half \log(|2 \pi g \sigma^2 (\mX^\top \mX)^{-1}|) -\half \vbeta^\top \sigma^{-2} g^{-1} (\mX^T \mX) \vbeta \\
 &\quad - \log (\sigma^2) \\
@@ -423,15 +423,15 @@ solving for $\tau_{\sigma^2}$, we obtain
 \end{align*}
 
 \begin{align*}
-T_1 &= -\half \E_q [\log \sigma^2] -\half \tau_{\sigma^2} \E_q \tr (\vy - \mX \vbeta)^T (\vy - \mX \vbeta)
-- \frac{p}{2} \E_q \log [\sigma^2] - \half \tau_{\sigma^2} \tau_g \E_q \tr \vbeta^T (\mX^T \mX) \vbeta
+T_1 &= -\half \E_q [\log \sigma^2] -\half \E_q [\sigma^{-2}]] \E_q \tr (\vy - \mX \vbeta)^T (\vy - \mX \vbeta)
+- \frac{p}{2} \E_q \log [\sigma^2] - \half \E_q [\sigma^{-2}]] \E_q g^{-1} \E_q \tr \vbeta^T (\mX^T \mX) \vbeta
 + \half \log |\mSigma_{q(\vbeta)}| + k \\
 &= -\frac{p + 1}{2} \E_q [\log \sigma^2]
--\half \tau_{\sigma^2} [\E_q \tr (\vy - \mX \vbeta)^T (\vy - \mX \vbeta) + \tau_g \E_q \tr \vbeta^T (\mX^T \mX) \vbeta]
+-\half \E_q [\sigma^{-2}]] [\E_q \tr (\vy - \mX \vbeta)^T (\vy - \mX \vbeta) + \E_q g^{-1} \E_q \tr \vbeta^T (\mX^T \mX) \vbeta]
 + \half \log |\mSigma_{q(\vbeta)}| + k \\
 &= -\frac{p + 1}{2} \left (\log (\beta_{q(\sigma^2)}) - \psi(\alpha_{q(\sigma^2)}) \right )
-- \half \tau_{\sigma^2} \left \{ \| \vy\|^2 - 2 \vy^\top \mX \vmu_{q(\vbeta)} + (1 + \tau_g) \tr[(\vmu_{q(\vbeta)} \vmu_{q(\vbeta)}^\top + \mSigma_{q(\vbeta)}) \mX^\top \mX] \right \}
-+ \half \log |\mSigma_{q(\vbeta)}| + k \\
+- \half \E_q [\sigma^{-2}]] \left \{ \| \vy\|^2 - 2 \vy^\top \mX \vmu_{q(\vbeta)} + (1 + \E_q g^{-1}) \tr[(\vmu_{q(\vbeta)} \vmu_{q(\vbeta)}^\top + \mSigma_{q(\vbeta)}) \mX^\top \mX] \right \}  \\
+& \quad + \half \log |\mSigma_{q(\vbeta)}| + k
 \end{align*}
 where k does not depend on $\vbeta$.
 
