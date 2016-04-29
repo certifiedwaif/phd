@@ -378,21 +378,21 @@ $\alpha_{q(\sigma^2)} = \frac{n + p}{2}$ and $\beta_{q(\sigma^2)} = \frac{1}{2}\
 
 \subsection{$q(g)$}
 \begin{align*}
-q(g) &\propto \exp \E_{-g} [-\half \log g - \frac{1}{g} \frac{1}{2 \sigma^2} \vbeta^\top \mX^\top \mX \vbeta + b \log g - [(a + 1) + (b + 1)] \log(1 + g) - \log \Beta(a + 1, b + 1)]] \\
-&= \exp \left \{ -\half \log g - \frac{1}{g} \half \E \frac{1}{\sigma^2} \E (\mX \vbeta)^\top (\mX \vbeta) + b \log g - [(a + 1) + (b + 1)] \log(1 + g) - \log \Beta(a + 1, b + 1)] \right \} \\
-&= \exp \left \{ -\half \log g - \frac{1}{g} \half \tau_{\sigma^2} \tr[(\mSigma_{q(\vbeta)} + \vmu_{q(\vbeta)} \vmu_{q(\vbeta)}^T) \mX^\top \mX] + b \log g - [(a + 1) + (b + 1)] \log(1 + g) - \log \Beta(a + 1, b + 1)] \right \} \\
-&= \exp \left \{ \left(b - \frac{1}{2}\right) \log g - \frac{1}{g} \frac{1}{2} \left[\tau_{\sigma^2} (1 + \tau_g)^{-1} \vy^\top \mX^\top \cancel{(\mX^\top \mX)^{-1}} \cancel{\mX^\top \mX} (\mX^\top \mX)^{-1} \mX \vy + \tr{[\tau_{\sigma^2}^{-1} (1 + \tau_g)^{-1} \mX^\top \mX (\mX^\top \mX)^{-1}]} \right] \right \} \\
+q(g) &\propto \exp \E_{-g} [-\frac{p}{2} \log g - \frac{1}{g} \frac{1}{2 \sigma^2} \vbeta^\top \mX^\top \mX \vbeta + b \log g - [(a + 1) + (b + 1)] \log(1 + g) - \log \Beta(a + 1, b + 1)]] \\
+&= \exp \left \{ -\frac{p}{2} \log g - \frac{1}{g} \half \E \frac{1}{\sigma^2} \E (\mX \vbeta)^\top (\mX \vbeta) + b \log g - [(a + 1) + (b + 1)] \log(1 + g) - \log \Beta(a + 1, b + 1)] \right \} \\
+&= \exp \left \{ -\frac{p}{2} \log g - \frac{1}{g} \half \tau_{\sigma^2} \tr[(\mSigma_{q(\vbeta)} + \vmu_{q(\vbeta)} \vmu_{q(\vbeta)}^T) \mX^\top \mX] + b \log g - [(a + 1) + (b + 1)] \log(1 + g) - \log \Beta(a + 1, b + 1)] \right \} \\
+&= \exp \left \{ \left(b - \frac{p}{2}\right) \log g - \frac{1}{g} \frac{1}{2} \left[\tau_{\sigma^2} (1 + \tau_g)^{-1} \vy^\top \mX^\top \cancel{(\mX^\top \mX)^{-1}} \cancel{\mX^\top \mX} (\mX^\top \mX)^{-1} \mX \vy + \tr{[\tau_{\sigma^2}^{-1} (1 + \tau_g)^{-1} \mX^\top \mX (\mX^\top \mX)^{-1}]} \right] \right \} \\
 & \quad \quad \qquad	- [(a + 1) + (b + 1)] \log(1 + g) - \log \Beta(a + 1, b + 1) \biggl \} \\
-&= \exp \left \{ \left(b - \frac{1}{2}\right) \log g - \frac{1}{g} \frac{1}{2} (1 + \tau_g)^{-1} (\tau_{\sigma^2} \|\vy\|^2 R^2 + p)
+&= \exp \left \{ \left(b - \frac{p}{2}\right) \log g - \frac{1}{g} \frac{1}{2} (1 + \tau_g)^{-1} (\tau_{\sigma^2} \|\vy\|^2 R^2 + p)
 	- [(a + 1) + (b + 1)] \log(1 + g) - \log \Beta(a + 1, b + 1) \right \}
 \end{align*}
 
 So setting
 \begin{align*}
-\nu - 1 &= b - \frac{1}{2} \\
+\nu - 1 &= b - \frac{p}{2} \\
 \beta &= \frac{1}{2} (1 + \tau_g)^{-1} (\tau_{\sigma^2} \|\vy\|^2 R^2 + p) \\
 \mu - 1 &= [(a + 1) + (b + 1)] \\
-\gamma = 1
+\gamma &= 1
 \end{align*}
 
 and solving for $\nu, \beta, \mu$ and $\gamma$ we obtain an ET 234(13)a function (see Identity 7 on page 368
@@ -446,7 +446,7 @@ T_3 &= \E_q [\log p(g) - \log q(g)] \\
 	\E_q \log \left [ g^{\nu - 1} (g + \gamma)^{\mu - 1} e^{-\frac{\beta}{g}} \right ] \\
 &= \E_q [b - (\nu - 1)] \log g - [(a + 1) + (b + 1) - (\mu - 1)] \log (1 + g) - \beta \tau_g
    - \E_q \log \Beta(a + 1,  b + 1) \\
-&= \quad \E_q [\cancel{b} - \cancel{b} + \half] \log g - [\cancel{(a + 1) + (b + 1)} - \cancel{(a + 1) - (b + 1)}] \log (1 + g)
+&= \quad \E_q \left [\cancel{b} - \cancel{b} + \frac{p}{2} \right ] \log g - [\cancel{(a + 1) + (b + 1)} - \cancel{(a + 1) - (b + 1)}] \log (1 + g)
     - \frac{\tau_g}{1 + \tau_g} (\tau_{\sigma^2} \|\vy\|^2 R^2 + p)\\
 &   \quad - \E_q \log \Beta(a + 1,  b + 1) \\
 \end{align*}
@@ -476,7 +476,7 @@ The log likelihood of the full model is then
 \begin{align*}
 \log p(\vy, \theta) &= \quad\log p(\vy|\vbeta, \sigma^2, \vgamma) + \log p(\vbeta_\vgamma | \sigma^2, g) + \log(\vbeta_{-\vgamma}) + \log p(g) \\
 &= -\half \log(|2 \pi \sigma^2 I_n|) - \half (\vy - X \mGamma \vbeta)^\top \sigma^{-2} (\vy - \mX \mGamma \vbeta) \\
-&\quad -\half \log(|2 \pi g \sigma^2 (\mX^\top \mX)^{-1}|) -\half \vbeta^\top \sigma^{-2} (\mX^T \mX) \vbeta \\
+&\quad -\half \log(|2 \pi g \sigma^2 (\mX^\top \mX)^{-1}|) -\half \vbeta^\top \sigma^{-2} g^{-1} (\mX^T \mX) \vbeta \\
 &\quad - \log (\sigma^2) \\
 &\quad + b \log g - [(a + 1) + (b + 1)] \log (1 + g) - \log \Beta(a + 1, b + 1)
 \end{align*}
