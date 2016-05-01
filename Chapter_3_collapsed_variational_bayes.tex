@@ -24,7 +24,6 @@
 \input{include.tex}
 \input{Definitions.tex}
 
-
 \begin{document}
 
 \maketitle
@@ -424,12 +423,12 @@ solving for $\tau_{\sigma^2}$, we obtain
 
 \begin{align*}
 T_1 &= -\half \E_q [\log \sigma^2] -\half \E_q [\sigma^{-2}]] \E_q \tr (\vy - \mX \vbeta)^T (\vy - \mX \vbeta)
-- \frac{p}{2} \E_q \log [\sigma^2] - \half \E_q [\sigma^{-2}]] \E_q g^{-1} \E_q \tr \vbeta^T (\mX^T \mX) \vbeta
-+ \half \log |\mSigma_{q(\vbeta)}| + k \\
-&= -\frac{p + 1}{2} \E_q [\log \sigma^2]
+- \frac{p}{2} \E_q \log [\sigma^2] - \frac{p}{2} \E_q \log [g] - \half \E_q [\sigma^{-2}]] \E_q g^{-1} \E_q \tr \vbeta^T (\mX^T \mX) \vbeta \\
+& \quad + \half \log |\mSigma_{q(\vbeta)}| + k \\
+&= -\frac{p + 1}{2} \E_q [\log \sigma^2] - \frac{p}{2} \E_q \log g
 -\half \E_q [\sigma^{-2}]] [\E_q \tr (\vy - \mX \vbeta)^T (\vy - \mX \vbeta) + \E_q g^{-1} \E_q \tr \vbeta^T (\mX^T \mX) \vbeta]
 + \half \log |\mSigma_{q(\vbeta)}| + k \\
-&= -\frac{p + 1}{2} \left (\log (\beta_{q(\sigma^2)}) - \psi(\alpha_{q(\sigma^2)}) \right )
+&= -\frac{p + 1}{2} \left (\log (\beta_{q(\sigma^2)}) - \frac{p}{2} \E_q \log g - \psi(\alpha_{q(\sigma^2)}) \right )
 - \half \E_q [\sigma^{-2}]] \left \{ \| \vy\|^2 - 2 \vy^\top \mX \vmu_{q(\vbeta)} + (1 + \E_q g^{-1}) \tr[(\vmu_{q(\vbeta)} \vmu_{q(\vbeta)}^\top + \mSigma_{q(\vbeta)}) \mX^\top \mX] \right \}  \\
 & \quad + \half \log |\mSigma_{q(\vbeta)}| + k
 \end{align*}
