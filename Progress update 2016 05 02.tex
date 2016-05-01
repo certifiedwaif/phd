@@ -28,9 +28,10 @@
 \item We already have parallel code	to calculate $R^2$
 \item This allows us to do Variational Bayes by optimising one variational parameter. So we can do them all 
 			at once!
-\item Variational lower bound in progress -- just looking for errors
+\item Variational lower bound is pretty much done
 \item I'm writing, \textbf{then} coding -- I have a thesis to produce
 \item John is admonishing me on my writing style, which is probably for the best
+\item He also complimented me on reading some papers of my own volition, so that was nice
 \item Structured Variational Bayes
 \end{itemize}
 \end{frame}
@@ -47,7 +48,8 @@
 			guaranteed ``safe move''. So you get stuck in local optima
 \item No silver bullet -- to my knowledge there is \textbf{no} polynomial time algorithm known which
 			will perform this task
-\item So I'm going to stop worrying about it for now
+\item So I might think about this more later
+\item Whatever algorithm we use, we're going to need a lot of computational resources for large problems
 \end{itemize}
 \end{frame}
 
@@ -60,24 +62,39 @@
 			and just re-run it
 \item This is now over, as the physical limits of silicon are being reached -- particularly the power wall. 
 			The semiconductor industry has abandoned Moore's Law as a target
-\item So now what?!?
-\item No, really, I'm asking \textbf{you}
+\item So now what?!? No, really, I'm asking \textbf{you}
+\item Multi-core, GPUs and distributed computing are partial answers. These are great for
+			linear algebra/vectorisable algorithms
+\item But many algorithms aren't like that e.g. iterative algorithms where every step depends on the 
+			result of the previous step
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Multi-core, GPUs, distributed computing}
+\begin{frame}{Parallelism in R -- not there yet}
 \begin{itemize}
-\item Multi-core, GPUs and distributed computing are partial answers. But these don't help for every
-			algorithm
-\item R was developed in a single-core world, with a single-core design. You might be waiting a long time for
-			these things to be supported fully in R
-\item I'm not waiting. I'm using languages that support these things which can be called by R. Multi-core, 
-			distributed computing, GPUs -- bring it on
-\item About a quarter of our research servers are currently down due to air conditioner failure. Dr
-			Mathas is aware
-\item HPC typically has 15 to 20 nodes free at any one time -- 24 cores each
-\item GPU nodes are also available -- no need to wait for hardware
-\item OpenMP supported on GPUs in Clang already, and in will be in GCC in 6.x. Don't need to change much code
+\item R was developed in a single-core world, with a single-core design
+\item In particular, R manages memory using a reference counting garbage collector. This is inherently
+			not thread safe
+\item This garbage collection design is in nearly every R package. To change this, they would all have to
+			be rewritten
+\item R's support for parallelism are based on hacks -- \texttt{mclapply} and \texttt{\%dopar\%}. No true 
+			shared memory concurrency
+\item Much of this	support is experimental, and as Dario has found some of it doesn't work at all
+\item The bad news is you might be waiting a long time for parallelism to be supported fully in R
+\item I'm not waiting. I'm using languages that support parallelism and can be called from R
+\item For most of us, the future belongs to something like Julia. Maybe a version of R that incorporates
+			those ideas?
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Research servers and HPC}
+\begin{itemize}
+\item About a quarter of our research servers are currently down due to air conditioner failure.
+			Paul Szabo and Dr	Mathas are aware of this
+\item HPC typically has 15 to 20 nodes free at any one time -- 24 cores each, so I'll just use that
+\item GPU nodes are also available -- no need to wait for hardware to be installed. It's ready now
+\item OpenACC is already supported in GCC. Only minor changes to my code would be needed to support this
+\item OpenMP supported on GPUs in Clang already, and in will be in GCC in 6.x. Even less code changes
 \end{itemize}
 \end{frame}
 
