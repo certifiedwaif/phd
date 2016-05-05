@@ -28,7 +28,45 @@
 
 \maketitle
 
-\section{Assignment 3 - Bayesian Data Analysis}
+\section{Abstract}
+
+% What is done in general
+We develop mean field and structured variational Bayes approximations for Bayesian model selection on linear
+models using Zellner's g prior. Our mean field updates only depend ona single variational parameter $\tau_g$
+and other values which are fixed for each model considered. Using rank-1 updates, we are able to exhaustively
+search the model space in $\BigO(2^p np^2)$ rather than $\BigO(2^p np^3)$. Applications to \ldots are
+presented, showing empirically that our method performs well on real-world data. Our method is
+computationally more efficient than the exact Bayesian model.
+
+\section{Introduction}
+
+% Problem in general
+The problem of model selection is one of the most important statistical problems encountered in practice by
+applied statistical practitoners. There are many approaches to model selection including approaches based on
+functions of the residual sum of squares, lasso and L1 regression and Bayesian modelling approaches. A major
+motivation for this field of research is the need for a computationally feasible approach to performing model 
+selection on large scale problems where the number of covariates is large.
+
+% Bayesian
+The Bayesian approach to model selection has the advantage of not relying on a fixed choice of tuning
+parameter, instead allowing the specification of a prior distribution on that parameter.
+
+% Background
+
+% VB in general
+
+% Application
+
+% VB theory
+
+% Our main contribution
+In this paper, we develop variational Bayes approximations to model selection of linear models using
+Zellner's g prior as in \cite{Liang2008}.
+
+\section{Bayesian linear model selection}
+
+
+\section{Appendix -- Assignment 3 -- Bayesian Data Analysis}
 
 Consider the model $\vy | \vbeta, \sigma^2 \sim N_n(\mX \vbeta, \sigma^2 \mI)$ with priors
 \begin{equation*}
@@ -207,7 +245,7 @@ Now, $\int_0^\infty \frac{g^{\mu - 1}}{(1 + \beta g)^\nu} dg = \beta^{-\mu} \tex
 
 by the symmetry of beta functions and the definitions of $a$ and $b$.
 
-\section{Variational Bayes approximation}
+\section{Appendix -- Variational Bayes approximation}
 
 \def \I {\text{I}}
 
@@ -453,7 +491,7 @@ T_3 &= \E_q [\log p(g) - \log q(g)] \\
 \section{Collapsed Variational Bayes}
 
 
-\section{Variational Bayes with a different prior, with model selection}
+\section{Appendix -- Variational Bayes with a different prior, with model selection}
 
 Consider the linear model
 
@@ -513,7 +551,7 @@ q(g) &\propto \exp \left\{ \E_{-g} [-\half \log g - \frac{1}{g} \frac{1}{2 \sigm
 \section{Collapsed Variational Bayes}
 
 
-\section{A nice theorem.}
+\section{Appendix -- A nice theorem.}
 Let
 \begin{equation*}
 R^2_{\mX, \mZ} = 
@@ -671,5 +709,8 @@ $\mP_{\mX^\perp}$ and $\mP_{\mZ^\perp}$.
 \end{equation*}
  
 \end{proof}
+
+\bibliographystyle{elsarticle-harv}
+\bibliography{references_mendeley}
 
 \end{document}
