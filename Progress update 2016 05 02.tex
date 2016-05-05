@@ -66,7 +66,7 @@
 \item Multi-core, GPUs and distributed computing are partial answers. These are great for
 			linear algebra/vectorisable algorithms
 \item But many algorithms aren't like that e.g. iterative algorithms where every step depends on the 
-			result of the previous step
+			result of the previous step -- Newton-Raphson, step selection, tree searches, MCMC
 \end{itemize}
 \end{frame}
 
@@ -81,14 +81,14 @@
 			shared memory concurrency
 \item Much of this	support is experimental, and as Dario has found some of it doesn't work at all
 \item The bad news is you might be waiting a long time for parallelism to be supported fully in R
-\item I'm not waiting. I'm using languages that support parallelism and can be called from R
-\item For most of us, the future belongs to something like Julia. Maybe a version of R that incorporates
-			those ideas?
 \end{itemize}
 \end{frame}
 
-\begin{frame}{Research servers and HPC}
+\begin{frame}{I'm not waiting \ldots}
 \begin{itemize}
+\item I'm not waiting. I'm using languages that support parallelism and can be called from R
+\item For most of us, the future belongs to something like Julia, which has a more modern design
+\item There's a BioJulia project for bioinformatics. It's early days, but I expect things to move very quickly
 \item About a quarter of our research servers are currently down due to air conditioner failure.
 			Paul Szabo and Dr	Mathas are aware of this
 \item HPC typically has 15 to 20 nodes free at any one time -- 24 cores each, so I'll just use that
