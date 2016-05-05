@@ -1,1 +1,1 @@
-/usr/bin/c++    -Wall -pedantic -Wextra -g -Wl,-search_paths_first -Wl,-headerpad_max_install_names   CMakeFiles/correlation.dir/correlation.cpp.o  -o correlation  
+/usr/bin/c++    -fopenmp -Wall -pedantic -Wextra -msse4.2 -ffast-math -ftree-vectorize -funroll-loops -O3 -DNDEBUG   CMakeFiles/correlation.dir/correlation_main.cpp.o  -o correlation -rdynamic 

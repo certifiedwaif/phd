@@ -4,6 +4,8 @@
 \usepackage{graphicx}
 \usepackage{ulem}
 \usepackage{tikz}
+\usepackage{wasysym}
+\usepackage{marvosym}
 \input{include.tex}
 \input{Definitions.tex}
 
@@ -20,19 +22,38 @@
 \titlepage
 \end{frame}
 
+\begin{frame}{About myself \ldots hey, everybody else did it :-P}
+\begin{itemize}
+\item I \Heart \hspace{0.01cm} music. My favorite musical styles are thrash, death metal, grindcore, industrial and hardcore techno
+% \item When trying to relax, I like trip hop like Massive Attack
+\item I play guitar -- mostly electric, some acoustic
+\item I like and drink too much coffee. I argue too much on Facebook. I'm trying to cut down on both of
+			these
+\item I like learning martial arts -- especially judo/Brazillian jujitsu/submission grappling
+\item My favorite sport is Mixed Martial Arts. Ronda Rousey for the win
+\item I play StarCraft 2, Borderlands and Elite: Dangerous % , when I have time
+\item I really like computers, electronics and technology in general. But I don't like \textbf{waiting}
+			for computers
+\begin{figure}
+\caption{\twonotes \hspace{0.16cm}I love technology \twonotes}
+\includegraphics[scale=.25]{i_love_technology.jpg}
+\end{figure}
+\end{itemize}
+\end{frame}
+
 \begin{frame}{Mean field updates and variational lower bound \ldots nearly done}
 \begin{itemize}
 \item The mean field updates are done
-\item These turn out to be really nice, everything is in terms of $\tau_g = \E [g^{-1}]$
-			and fixed constants $n$, $\|\vy\|^2$ and $R^2$
+\item These turn out to be really nice, everything is in terms of 
+			one variational parameter $\tau_g = \E [g^{-1}]$ and fixed constants $n$, $\|\vy\|^2$ and $R^2$
 \item We already have parallel code	to calculate $R^2$
-\item This allows us to do Variational Bayes by optimising one variational parameter. So we can do them all 
-			at once!
+\item This allows us to do Variational Bayes by optimising one variational parameter. So I hope we can do 
+			them all at once!
 \item Variational lower bound is pretty much done
 \item I'm writing, \textbf{then} coding -- I have a thesis to produce
-\item John is admonishing me on my writing style, which is probably for the best
+\item John is admonishing me for my writing style, which is probably for the best
 \item He also complimented me on reading some papers of my own volition, so that was nice
-\item Structured Variational Bayes
+% \item Structured Variational Bayes next
 \end{itemize}
 \end{frame}
 
@@ -41,14 +62,14 @@
 \item We're performing all $2^p$ model fits, so our algorithm is $\BigO(2^p n p^2)$ - which is to say,
 			exponential time complexity
 \item That sounded terrible to me. So what are the alternatives?
-\item Branch and bound, as implemented in \texttt{leaps}. Worst case is still $\BigO(2^p n p^2)$. Pushing it
-			to do $p = 30$
+\item Branch and bound uses a tree search, as implemented in \texttt{leaps}. Worst case is still
+			$\BigO(2^p n p^2)$. Pushing it to do $p = 30$
 \item Mixed Integer Optimisation - still NP hard
 \item Step selection uses a greedy algorithm -- but this doesn't select optimal models because there is no
 			guaranteed ``safe move''. So you get stuck in local optima
 \item No silver bullet -- to my knowledge there is \textbf{no} polynomial time algorithm known which
 			will perform this task
-\item So I might think about this more later
+\item I might think about this more later
 \item Whatever algorithm we use, we're going to need a lot of computational resources for large problems
 \end{itemize}
 \end{frame}
@@ -57,44 +78,78 @@
 \begin{itemize}
 \item For a long time, computers have been getting faster and faster, the famous
 			Moore's Law -- ``the number of components per integrated circuit doubled roughly every 18 months'' -- 
-			has held from 1965 to just about now
-\item This used to be great. If something was too slow, you'd just wait for the next fastest CPU to come out
+			has held from 1965 till just about now
+\item This used to be great. If something was too slow, you'd just wait for the next faster CPU to come out
 			and just re-run it
 \item This is now over, as the physical limits of silicon are being reached -- particularly the power wall. 
 			The semiconductor industry has abandoned Moore's Law as a target
 \item So now what?!? No, really, I'm asking \textbf{you}
-\item Multi-core, GPUs and distributed computing are partial answers. These are great for
+\item Multi-core, GPUs and distributed computing are partial answers. Great for
 			linear algebra/vectorisable algorithms
 \item But many algorithms aren't like that e.g. iterative algorithms where every step depends on the 
+<<<<<<< HEAD
 			result of the previous step -- Newton-Raphson, step selection, tree searches, MCMC
+=======
+			result of the previous step -- Newton-Raphson, step selection, tree search, MCMC
+>>>>>>> 4f53146b3cf51edf107462efa5b7954535ea9ad7
 \end{itemize}
 \end{frame}
 
 \begin{frame}{Parallelism in R -- not there yet}
 \begin{itemize}
 \item R was developed in a single-core world, with a single-core design
-\item In particular, R manages memory using a reference counting garbage collector. This is inherently
+\item R manages memory using a reference counting garbage collector -- inherently
 			not thread safe
-\item This garbage collection design is in nearly every R package. To change this, they would all have to
-			be rewritten
-\item R's support for parallelism are based on hacks -- \texttt{mclapply} and \texttt{\%dopar\%}. No true 
-			shared memory concurrency
-\item Much of this	support is experimental, and as Dario has found some of it doesn't work at all
+\item This garbage collection design is in nearly every R package via
+			\texttt{PROTECT()}/\texttt{UNPROTECT()}. 5,608 calls in the R source code alone
+\item To change this, all that code would have to be partially rewritten
+\item R's support for parallelism is based on hacks -- \texttt{mclapply} and \texttt{\%dopar\%}.
+			Non-portable. No true shared memory concurrency
+\item Much of this support in R is experimental, and as Dario has found some of it doesn't work at all
 \item The bad news is you might be waiting a long time for parallelism to be supported fully in R
 \end{itemize}
 \end{frame}
 
+<<<<<<< HEAD
 \begin{frame}{I'm not waiting \ldots}
+=======
+\begin{frame}{Alternatives while we wait. Or jump ship \ldots}
+\begin{itemize}
+\item I'm not waiting, I'm using the best tools available -- compiled languages that support parallelism
+			and can be called from R
+\item If you like to work interactively like we do in R, the future belongs to something like 
+			Julia
+\begin{itemize}
+\item Modern design incorporating the best ideas from the programming language community
+\item Just In Time compilation -- write code like you do in R, which runs as fast as C
+\item Parallel and distributed from the outset
+\item Interactive data analysis/plotting/web apps -- data frames, Grammar of Graphics, something like
+			\texttt{shiny}
+\item Some prominent R developers have already jumped ship e.g. Don Bates who wrote \texttt{lme4},
+			John Myles-White -- prominent Bayesian, works at Facebook now
+\end{itemize}
+\item There's already a BioJulia project for bioinformaticists through Google's Summer of Code
+			\url{https://github.com/BioJulia/Bio.jl}
+% \item Maybe a subsequent version of R will incorporate these ideas? Ross Ihaka was talking about this
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Research servers and HPC}
+>>>>>>> 4f53146b3cf51edf107462efa5b7954535ea9ad7
 \begin{itemize}
 \item I'm not waiting. I'm using languages that support parallelism and can be called from R
 \item For most of us, the future belongs to something like Julia, which has a more modern design
 \item There's a BioJulia project for bioinformatics. It's early days, but I expect things to move very quickly
 \item About a quarter of our research servers are currently down due to air conditioner failure.
 			Paul Szabo and Dr	Mathas are aware of this
+\item This could take months to fix. It did last time. Apparently, the university is currently negotiating
+			a better air conditioning supplier, which could delay the repairs
 \item HPC typically has 15 to 20 nodes free at any one time -- 24 cores each, so I'll just use that
 \item GPU nodes are also available -- no need to wait for hardware to be installed. It's ready now
-\item OpenACC is already supported in GCC. Only minor changes to my code would be needed to support this
-\item OpenMP supported on GPUs in Clang already, and in will be in GCC in 6.x. Even less code changes
+\item GPU acceleration via OpenACC is already supported in GCC. Only minor changes to my code would be needed 
+			to support this
+\item OpenMP is supported on GPUs in Clang already, and will be in GCC in 6.x. Even less code changes
 \end{itemize}
 \end{frame}
 
