@@ -34,9 +34,10 @@
 We develop mean field and structured variational Bayes approximations for Bayesian model selection on linear
 models using Zellner's g prior. Our mean field updates only depend ona single variational parameter $\tau_g$
 and other values which are fixed for each model considered. Using rank-1 updates, we are able to exhaustively
-search the model space in $\BigO(2^p np^2)$ rather than $\BigO(2^p np^3)$. Applications to \ldots are
-presented, showing empirically that our method performs well on real-world data. Our method is
-computationally more efficient than the exact Bayesian model.
+search the model space in $\BigO(2^p np^2)$ rather than $\BigO(2^p np^3)$. An algorithm is developed which
+allows these models to be fit in parallel. Applications to  \ldots are presented, showing empirically that 
+our method performs well on real-world data. Our method is computationally more efficient than the exact 
+Bayesian model.
 
 \section{Introduction}
 
@@ -49,11 +50,15 @@ selection on large scale problems where the number of covariates is large.
 
 % Bayesian
 The Bayesian approach to model selection has the advantage of not relying on a fixed choice of tuning
-parameter, instead allowing the specification of a prior distribution on that parameter.
+parameter, instead allowing the specification of a prior distribution on that parameter. In this sense, the 
+choice of covariates for the optimal model selected can be considered to be automatic. This choice can be
+made while inducing sparsity.
 
 % Background
 
 % VB in general
+Variational Bayes minimises the KL divergence between the true posterior $p(\vy, \vtheta)$ and the 
+approximating distribution $q(\vtheta)$. See \cite{Ormerod2010}.
 
 % Application
 
