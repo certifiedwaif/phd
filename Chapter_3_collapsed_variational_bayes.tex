@@ -42,7 +42,7 @@ Bayesian model.
 \section{Introduction}
 
 % Problem in general
-The problem of model selection is one of the most important statistical problems encountered in practice by
+The problem of model selection is one of the most important problems encountered in practice by
 applied statistical practitoners. There are many approaches to model selection including approaches based on
 functions of the residual sum of squares, lasso and L1 regression and Bayesian modelling approaches. A major
 motivation for this field of research is the need for a computationally feasible approach to performing model 
@@ -56,9 +56,11 @@ made while inducing sparsity.
 
 % Background
 
+
 % VB in general
-Variational Bayes minimises the KL divergence between the true posterior $p(\vy, \vtheta)$ and the 
-approximating distribution $q(\vtheta)$. See \cite{Ormerod2010}.
+Variational Bayes \cite{Ormerod2010} is a computationally efficient, deterministic method of fitting Bayesian
+models to data. Variational Bayes  approximates the true posterior $p(\vy, \vtheta)$ by minimising the KL
+divergence between the posterior and the  approximating distribution $q(\vtheta)$.
 
 % Application
 
@@ -73,23 +75,48 @@ approaches to model selection. In Section \ref{sec:methodology} we develop our a
 \ref{sec:num_exp} we perform a series of numerical experiments to show the accuracy of our approach. Finally,
 in Section \ref{sec:conclusion}, we provide a Conclusion and Discussion.
 
-\section{Bayesian linear model selection}\label{sec:model_selection}
+\section{Bayesian linear model selection}
+\label{sec:model_selection}
 
-\section{Methodology}\label{sec:methodology}
+\section{Methodology}
+\label{sec:methodology}
 
-Variational Bayes
+% Definitions
+Let $n > 0$ be the number of observations and $p > 0$ be the number of covariates. Let $\vy \in \R^n$ be the
+vector of responses, $\vtheta \in \R^p$ be the vector of parameters and $\mX \in \R^{n \times p}$ be the
+matrix of covariates. Let $p(\vtheta)$ be the prior distribution of $\vtheta$, $p(\vy, \vtheta)$ be the full
+probability distribution of $\vy$, $p(\vtheta | \vy)$ the posterior distribution and $q(\vtheta)$ be the
+approximating probability distribution.
+
+Let $\KL(q||p) = \int q(\vtheta) \log{\left( \frac{q(\vtheta)}{p(\vtheta|\vy)} \right)} d \vtheta$ be the
+Kuhlback-Leibner divergence between $q$ and $p$, a measure of the distance between the probability
+distributions $p$ and $q$.
+
+\subsection{Variational Bayes}
+\begin{align*}
+\log p(\vy) &= \log p(\vy) \int q(\vtheta) d \vtheta = \int q(\vtheta) \log p(\vy) d \vtheta \\
+&= \int q(\vtheta) \log \left\{ \frac{p(\vy, \vtheta) / q(\vtheta)}{p(\vy|\vtheta) / q(\vtheta)} \right\} d \vtheta \\
+&= \int q(\vtheta) \log\left\{ \frac{p(\vy, \vtheta)}{q(\vtheta)} \right\} +
+		\int q(\vtheta) \log\left\{ \frac{q(\vtheta)}{p(\vtheta|\vy)} \right\} \\
+&= \int q(\vtheta) \log\left\{ \frac{p(\vy, \vtheta)}{q(\vtheta)} \right\} +
+		\KL(q||p) \\
+&\geq \int q(\vtheta) \log\left\{ \frac{p(\vy, \vtheta)}{q(\vtheta)} \right\}.
+\end{align*}
+
+as $\KL(q||p) \geq 0$ for all probability densities $p$ and $q$.
 
 Mean field updates
 
 Structured Variational Bayes
 
-
 \subsection{Numerical issues}
 Numerical difficulties, and how we circumvented them.
 
-\section{Numerical experiments}\label{sec:num_exp}
+\section{Numerical experiments}
+\label{sec:num_exp}
 
-\section{Conclusion and Discussion}\label{sec:conclusion}
+\section{Conclusion and Discussion}
+\label{sec:conclusion}
 
 \newpage
 \section{Appendix -- Assignment 3 -- Bayesian Data Analysis}
