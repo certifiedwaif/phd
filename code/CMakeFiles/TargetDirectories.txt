@@ -1,3 +1,0 @@
-/home/markg/phd/code/CMakeFiles/edit_cache.dir
-/home/markg/phd/code/CMakeFiles/rebuild_cache.dir
-/home/markg/phd/code/CMakeFiles/correlation.dir
