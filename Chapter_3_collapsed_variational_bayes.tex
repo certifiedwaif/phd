@@ -15,6 +15,7 @@
 \usepackage{cancel}
 \usepackage{amsthm}
 \usepackage{mathtools}
+\usepackage{algorithm,algorithmic}
 
 \newtheorem{theorem}{Theorem}[section]
 
@@ -105,9 +106,36 @@ distributions $p$ and $q$.
 
 as $\KL(q||p) \geq 0$ for all probability densities $p$ and $q$.
 
-Mean field updates
+\subsection{Mean field updates}
 
-Structured Variational Bayes
+\begin{algorithm}
+\label{alg:algorithm_one}
+\caption{Fit VB approximation of linear model}
+\begin{algorithmic}
+\REQUIRE $\nu_{q(g)} - 1 \leftarrow b - \frac{p}{2}$, $\mu_{q(g)} - 1 \leftarrow [(a + 1) + (b + 1)]$,
+$\gamma_{q(g)} \leftarrow 1$ \\
+\WHILE{the increase in $\log{\underline{p}}(\vy;q)$ is significant}
+\STATE Maximise $\tau_{g}$ \\
+\STATE $\beta_{q(g)} \leftarrow \frac{1}{2}  \left(\frac{n(1 + \tau_g)^{-1}}{[1 - (1 + \tau_g)^{-1}]}   + p\right)$
+\ENDWHILE
+\STATE $\tau_{\sigma^2} \leftarrow \frac{n}{[1 - (1 + \tau_g)^{-1}]\|\vy\|^2 R^2}$
+\STATE $\vmu_{q(\vbeta)} \leftarrow (1 + \tau_g)^{-1} (\mX^\top \mX)^{-1} \mX^\top \vy$
+\STATE $\mSigma_{q(\vbeta)} \leftarrow [\tau_{\sigma^2}(1 + \tau_{g})]^{-1}(\mX^\top \mX)^{-1}$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Structured Variational Bayes}
+
+Let $\vgamma \in \{0, 1\}^p$ be the vector of indicators of whether each of the $p$ covariates in our
+covariate matrix $\mX$ is included in the model $\gamma$. We perform model selection by using the above
+Variational Bayes approximation to each  candidate linear model and averaging over the space of available
+models.
+
+\begin{align*}
+\underline{p}(\vy) &= \sum_\vgamma \underline{p}(\vy|\vgamma) p(\vgamma) \\
+p(\vgamma|\vy) &\approx \frac{\underline{p}(\vy|\vgamma) p(\vgamma)}{\underline{p}(\vy)} \\
+p(\vbeta|\vy) &\approx \sum_\vgamma q(\vbeta|\vgamma) p(\vgamma|\vy) \\
+\end{align*}
 
 \subsection{Numerical issues}
 Numerical difficulties, and how we circumvented them.
@@ -118,7 +146,6 @@ Numerical difficulties, and how we circumvented them.
 \section{Conclusion and Discussion}
 \label{sec:conclusion}
 
-\newpage
 \section{Appendix -- Assignment 3 -- Bayesian Data Analysis}
 
 Consider the model $\vy | \vbeta, \sigma^2 \sim N_n(\mX \vbeta, \sigma^2 \mI)$ with priors
@@ -549,7 +576,7 @@ T_3 &= \E_q [\log p(g) - \log q(g)] \\
 Consider the linear model
 
 \begin{align*}
-\vy | \vbeta, \sigma^2 \sim \N_n(\mX \vbeta, \sigma^2 \mI)
+\vy | \vbeta, \sigma^2 \sim \N_n(\mX \mGamma \vbeta, \sigma^2 \mI)
 \end{align*}
 
 with priors
