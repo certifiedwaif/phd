@@ -53,7 +53,7 @@ Integrating out $\vbeta_\vgamma$
 where
 
 \begin{align*}
-R_{\vgamma, g}^2 &= \frac{\vyT \mX_\vgamma [\mX_\vgamma^\top \mX_\vgamma + g^{-1} I] \mX_\vgamma^\top \vy}{\|\vy\|_2^2} \\
+R_{\vgamma, g}^2 &= \frac{\vy^\top \mX_\vgamma [\mX_\vgamma^\top \mX_\vgamma + g^{-1} \mI] \mX_\vgamma^\top \vy}{\|\vy\|_2^2} \\
 &\approx R_\vgamma^2 - \frac{g^{-1}}{n} \vy^\top [\mX_\vgamma \mX_\vgamma^\top \mX_\vgamma + g^{-1}] I [\mX_\vgamma^\top \mX_\vgamma]^{-1} \mX_\vgamma^\top \vy \\
 \leq R_\vgamma^2 - \frac{g^{-1}}{n} \| \hat{\vbeta_{LS, \vgamma}} \|_2^2
 \end{align*}
