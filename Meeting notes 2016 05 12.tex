@@ -68,4 +68,30 @@ Taylor series expansion in g.
 
 $\vbeta_0$ has $p_0$ non-zero elements where $p_0$ is the dimension of the true model.
 
+Integrate out $\sigma^2$
+
+\begin{align*}
+p(\vy | \gamma, g) &= \exp \left \{ -\frac{n}{2} \log(2 \pi) - \frac{\vone^\top \gamma}{2} \log(g)
+															-\frac{1}{2} \log|\mX_\gamma^\top \mX_\gamma + g^{-1} \mI| \right \}
+											\frac{\gamma(\frac{n}{2})}{\frac{\|\vy\|_2^2}{2}(1 - R_{\gamma, g}^2)}
+\end{align*}
+
+Note that
+\begin{equation*}
+\underbrace{-\frac{1}{2} \log\left |\frac{\mX_\gamma^\top \mX_\gamma}{n} + \frac{g^{-1}}{n} \mI \right |}_{\BigO_p(1)}
+\underbrace{- \frac{\vone^\top \vgamma}{2} \log(n)}_{\text{BIC penality}}
+\end{equation*}
+
+$b + 1 = \frac{n}{2} - \frac{p}{2} - a$
+
+Bartlett paradox, null model -- you choose the null model as $g \to \infty$
+
+If $p(g) = \delta(g; a)$ then $\E_g[f(g)] = f(a)$. So
+
+\begin{align*}
+p(\vy; \gamma) = \frac{\gamma(\frac{n}{2})}{\frac{\|\vy\|_2^2}{2}(1 - R_{\gamma, g}^2)}
+									\exp\left \{ -\frac{\vone^\top \gamma}{2} \log \left ( h^{\frac{1}{\vone^\top \vgamma}} \right )
+													- \frac{1}{2} \log\left |\mX_\gamma^\top \mX_\gamma + \frac{1}{h^{\frac{1}{\vone^\top \vgamma}}} \mI \right | \right \} \left (1 - R_{\gamma, \frac{1}{h^{\frac{1}{\vone^\top \vgamma}}}^2} \right )
+\end{align*}
+
 \end{document}
