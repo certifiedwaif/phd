@@ -13,61 +13,59 @@ One and a half to double space, wider margins, thinner text.
 \subsection{Collapsed VB}
 
 \begin{align*}
-p(\vy|\vbeta, \vgamma, \sigma^2) = N(\mX \mGamma \vbeta, \sigma^2 I) \\
-p(\vbeta|g, \sigma^2) = N(0, g \sigma^2 I) \\
-p(\sigma^2) = (\sigma^2)^{-1} I(\sigma^2 > 0) \\
-p(g) = delta(g ;h^{\frac{1}{vone^T \vgamma}}) \\
+p(\vy|\vbeta, \vgamma, \sigma^2) = \N(\mX \mGamma \vbeta, \sigma^2 \mI) \\
+p(\vbeta|g, \sigma^2) = \N(0, g \sigma^2 \mI) \\
+p(\sigma^2) = (\sigma^2)^{-1} \I(\sigma^2 > 0) \\
+p(g) = \delta \left ( g ;h^{\frac{1}{\vone^\top \vgamma}} \right ) \\
 \end{align*}
 
 \begin{align*}
 &p(\vy, \vbeta | \vgamma, g, \sigma^2) \\
-=& \exp{-\frac{n}{2} \log(2 \pi \sigma^2) - \frac{1}{2 \sigma^2}\|\vy\|_2^2 + \sigma^{-2} \vbeta^T \mGamma \mX^T \vy
-			- \frac{1}{2 \sigma^2} \vbeta^T \mGamma \mX^T \mX \mGamma \vbeta -\frac{p}{2} \log(2 \pi \sigma^2 g)
-			- \frac{1}{2 \sigma^2 g} \vbeta^T \vbeta} \\
-=& \exp{-\frac{n}{2} \\log(2 \pi \sigma^2) - \frac{1}{2 \sigma^2} \|\vy\|_2^2 + \sigma^{-2} \vbeta_\vgamma^T \mX^T \vy
-			-\frac{1}{2 \sigma^2} \vbeta_\vgamma^T \mX_\vgamma^T \mX_\vgamma \vbeta_\vgamma
-			-\frac{1}{2 \sigma^2} \vbeta_-\vgamma^T \mX_-\vgamma^T \mX_-\vgamma \vbeta_-\vgamma}
+=& \exp\{-\frac{n}{2} \log(2 \pi \sigma^2) - \frac{1}{2 \sigma^2}\|\vy\|_2^2 + \sigma^{-2} \vbeta^\top \mGamma \mX^\top \vy
+			- \frac{1}{2 \sigma^2} \vbeta^\top \mGamma \mX^\top \mX \mGamma \vbeta -\frac{p}{2} \log(2 \pi \sigma^2 g)
+			- \frac{1}{2 \sigma^2 g} \vbeta^\top \vbeta\} \\
+=& \exp\{-\frac{n}{2} \log(2 \pi \sigma^2) - \frac{1}{2 \sigma^2} \|\vy\|_2^2 + \sigma^{-2} \vbeta_\vgamma^\top \mX^\top \vy
+			-\frac{1}{2 \sigma^2} \vbeta_\vgamma^\top \mX_\vgamma^\top \mX_\vgamma \vbeta_\vgamma
+			-\frac{1}{2 \sigma^2} \vbeta_-\vgamma^\top \mX_-\vgamma^\top \mX_-\vgamma \vbeta_-\vgamma\}
 \end{align*}
 
 Integrating out $\vbeta_-\vgamma$
 
 \begin{align*}
-&p(\vy, \vbeta_\vgamma | \vgamma, g, \sigma^2)
-=& \exp{-\frac{n}{2} \log(2 \pi \sigma^2) -\frac{1}{2 \sigma^2} \|\vy\|_2^2 + \sigma^{-2} \vbeta_\vgamma^T \mX_\vgamma^T \vy
-			+ \frac{1}{2 \sigma^2} \vbeta_\vgamma^T \mX_\vgamma^T \mX_\vgamma \vbeta_\vgamma
-			- \frac{\vone^T \vgamma}{2} \log(2 \pi \sigma^2 g) - \frac{1}{2 \sigma^2 g} \vbeta_\vgamma^T \vbeta_\vgamma}
+&p(\vy, \vbeta_\vgamma | \vgamma, g, \sigma^2) \\
+=& \exp\{-\frac{n}{2} \log(2 \pi \sigma^2) -\frac{1}{2 \sigma^2} \|\vy\|_2^2 + \sigma^{-2} \vbeta_\vgamma^\top \mX_\vgamma^\top \vy
+			+ \frac{1}{2 \sigma^2} \vbeta_\vgamma^\top \mX_\vgamma^\top \mX_\vgamma \vbeta_\vgamma
+			- \frac{\vone^\top \vgamma}{2} \log(2 \pi \sigma^2 g) - \frac{1}{2 \sigma^2 g} \vbeta_\vgamma^\top \vbeta_\vgamma\}
 \end{align*}
 
 Integrating out $\vbeta_\vgamma$
 
 \begin{align*}
 &p(\vy | \vgamma, g, \sigma^2) \\
-=& \exp{-\frac{n}{2} \log(2 \pi \sigma^2) - \frac{1}{2 \sigma^2} - \frac{1}{2 \sigma^2} \|\vy\|_2^2
-				-\frac{\vone^T \vgamma}{2} \log(2 \pi \sigma^2 g)
-				+ \frac{1}{2} \log |2 \pi [sigma^{-2} \mX_\vgamma^T \mX_\vgamma + \sigma^{-2} g^{-1} I]^{-1}|
-				+ \frac{1}{2 \sigma^2} \vy^T \mX_\vgamma [\mX_\vgamma^T \mX_\vgamma + g^{-1} I]^{-1} \mX_\vgamma^T \vy} \\
-=& \exp{-\frac{n}{2} \log(2 \pi \sigma^2) - \frac{1}{2 \sigma^2} \|\vy\|_2^2 - \frac{\vone^T \vgamma}{2} \log(g)
-				-\frac{1}{2} \log|\mX_\vgamma^T \mX_\vgamma + g^{-1}I| + \frac{1}{2 \sigma^2} \|\vy\|_2^2 R_{\vgamma, g}^2}
+=& \exp\{-\frac{n}{2} \log(2 \pi \sigma^2) - \frac{1}{2 \sigma^2} - \frac{1}{2 \sigma^2} \|\vy\|_2^2
+				-\frac{\vone^\top \vgamma}{2} \log(2 \pi \sigma^2 g)
+				+ \frac{1}{2} \log |2 \pi [sigma^{-2} \mX_\vgamma^\top \mX_\vgamma + \sigma^{-2} g^{-1} I]^{-1}|
+				+ \frac{1}{2 \sigma^2} \vy^\top \mX_\vgamma [\mX_\vgamma^\top \mX_\vgamma + g^{-1} I]^{-1} \mX_\vgamma^\top \vy\} \\
+=& \exp\{-\frac{n}{2} \log(2 \pi \sigma^2) - \frac{1}{2 \sigma^2} \|\vy\|_2^2 - \frac{\vone^\top \vgamma}{2} \log(g)
+				-\frac{1}{2} \log|\mX_\vgamma^\top \mX_\vgamma + g^{-1}I| + \frac{1}{2 \sigma^2} \|\vy\|_2^2 R_{\vgamma, g}^2\}
 \end{align*}
 
 where
 
 \begin{align*}
-R_{\vgamma, g}^2 &= \frac{\vyT \mX_\vgamma [\mX_\vgamma^T \mX_\vgamma + g^{-1} I] \mX_\vgamma^T \vy}{\|\vy\|_2^2} \\
-&\approx R_\vgamma^2 - \frac{g^{-1}}{n} \vy^T [\mX_\vgamma \mX_\vgamma^T \mX_\vgamma + g^{-1}] I [\mX_\vgamma^T \mX_\vgamma]^{-1} \mX_\vgamma^T \vy \\
+R_{\vgamma, g}^2 &= \frac{\vyT \mX_\vgamma [\mX_\vgamma^\top \mX_\vgamma + g^{-1} I] \mX_\vgamma^\top \vy}{\|\vy\|_2^2} \\
+&\approx R_\vgamma^2 - \frac{g^{-1}}{n} \vy^\top [\mX_\vgamma \mX_\vgamma^\top \mX_\vgamma + g^{-1}] I [\mX_\vgamma^\top \mX_\vgamma]^{-1} \mX_\vgamma^\top \vy \\
 \leq R_\vgamma^2 - \frac{g^{-1}}{n} \| \hat{\vbeta_{LS, \vgamma}} \|_2^2
 \end{align*}
 
 which is monotonic in g.
 
-Taylor series \expansion in g.
+Taylor series expansion in g.
 
 \begin{equation*}
-\vbeta_{LS, \vgamma} = \vbeta_0 + O_p(n^{-\frac{1}{2}})
+\vbeta_{LS, \vgamma} = \vbeta_0 + O_p\left(n^{-\frac{1}{2}}\right)
 \end{equation*}
 
 $\vbeta_0$ has $p_0$ non-zero elements where $p_0$ is the dimension of the true model.
-
-
 
 \end{document}
