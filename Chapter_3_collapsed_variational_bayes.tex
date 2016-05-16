@@ -93,6 +93,22 @@ Let $\KL(q||p) = \int q(\vtheta) \log{\left( \frac{q(\vtheta)}{p(\vtheta|\vy)} \
 Kuhlback-Leibner divergence between $q$ and $p$, a measure of the distance between the probability
 distributions $p$ and $q$.
 
+\subsection{Model}
+
+Consider the linear model
+
+\begin{align*}
+\vy | \vbeta, \sigma^2 \sim \N_n(\mX \vbeta, \sigma^2 \mI)
+\end{align*}
+
+with priors
+
+\begin{align*}
+\vbeta | \sigma^2, g &\sim \N_p(\vzero, g \sigma^2 (\mX^T \mX)^{-1}) \\
+p(\sigma^2) &= (\sigma^2)^{-1} \I(\sigma^2 > 0) \\
+p(g) &= \frac{g^b (1 + g)^{-[(a + 1) + (b + 1)]}}{\Beta(a + 1, b + 1)} \I(g > 0)
+\end{align*}
+
 \subsection{Variational Bayes}
 \begin{align*}
 \log p(\vy) &= \log p(\vy) \int q(\vtheta) d \vtheta = \int q(\vtheta) \log p(\vy) d \vtheta \\
@@ -115,14 +131,32 @@ as $\KL(q||p) \geq 0$ for all probability densities $p$ and $q$.
 \REQUIRE $\nu_{q(g)} - 1 \leftarrow b - \frac{p}{2}$, $\mu_{q(g)} - 1 \leftarrow [(a + 1) + (b + 1)]$,
 $\gamma_{q(g)} \leftarrow 1$ \\
 \WHILE{the increase in $\log{\underline{p}}(\vy;q)$ is significant}
-\STATE Maximise $\tau_{g}$ \\
-\STATE $\beta_{q(g)} \leftarrow \frac{1}{2}  \left(\frac{n(1 + \tau_g)^{-1}}{[1 - (1 + \tau_g)^{-1}]}   + p\right)$
+\STATE Calculate $\tau_{g}$ using numerical integration \\
+\STATE $\beta_{q(g)} \leftarrow \left(\frac{n (1 + \tau_g)^{-1}}{[1 - (1 + \tau_g)^{-1}]} + p \right)$
 \ENDWHILE
 \STATE $\tau_{\sigma^2} \leftarrow \frac{n}{[1 - (1 + \tau_g)^{-1}]\|\vy\|^2 R^2}$
 \STATE $\vmu_{q(\vbeta)} \leftarrow (1 + \tau_g)^{-1} (\mX^\top \mX)^{-1} \mX^\top \vy$
 \STATE $\mSigma_{q(\vbeta)} \leftarrow [\tau_{\sigma^2}(1 + \tau_{g})]^{-1}(\mX^\top \mX)^{-1}$
 \end{algorithmic}
 \end{algorithm}
+
+\subsection{Numerical integration of $\tau_g$}
+
+Calculation of $\tau_g$ requires performing the numerical integration
+
+\begin{align*}
+\int_0^\infty \frac{1}{g} \exp \left \{ \left(b - \frac{p}{2}\right) \log g - \frac{1}{g} \frac{1}{2} (1 + \tau_g)^{-1} (\tau_{\sigma^2} \|\vy\|^2 R^2 + p)
+	- [(a + 1) + (b + 1)] \log(1 + g)  \right \}
+\end{align*}
+
+where
+
+\begin{align*}
+\nu - 1 &= b - \frac{p}{2}, \\
+\beta &= \frac{1}{2} (1 + \tau_g)^{-1} (\tau_{\sigma^2} \|\vy\|^2 R^2 + p), \\
+\mu - 1 &= [(a + 1) + (b + 1)] \text{ and } \\
+\gamma &= 1
+\end{align*}
 
 \subsection{Structured Variational Bayes}
 
