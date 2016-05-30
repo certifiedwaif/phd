@@ -400,9 +400,9 @@ const uint max_iterations, const bool bIntercept = false, const bool bCentre = t
 	dbitset gamma_prime(p);										 // The model gamma
 	uint p_gamma_prime;												 // The number of columns in the matrix mX_gamma_prime
 	uint p_gamma;															 // The number of columns in the matrix mX_gamma
-	vector< MatrixXd > vec_mA(p);
-	vector< MatrixXd > vec_mX_gamma(p);
-	vector< MatrixXd > vec_m1(p);
+	vector<MatrixXd> vec_mA(p);
+	vector<MatrixXd> vec_mX_gamma(p);
+	vector<MatrixXd> vec_m1(p);
 	const MatrixXd mXTX = mX.transpose() * mX;
 	const MatrixXd mXTy = mX.transpose() * vy;
 	const double yTy = vy.squaredNorm();

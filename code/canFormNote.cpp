@@ -6,7 +6,7 @@
 
 using namespace std;
 
-const bool canFormNote(const string& poster, const string& note)
+bool canFormNote(string& poster, string& note)
 {
 	int letter_counts[26] = {};
 	
@@ -30,19 +30,19 @@ string showBool(bool b)
 
 int main()
 {
-	const vector< pair< pair<string, string>, bool > > v = {
+	vector< pair< pair<string, string>, bool > > v = {
 		{{"AB", "A"}, true},
 		{{"A", "AB"}, false},
 		{{"", "A"}, false},
 		{{"A", ""}, true},
 	};
 
-	for (const auto& p : v) {
-		const auto& arg_pair = p.first;
-		const string& poster = arg_pair.first;
-		const string& note = arg_pair.second;
-		const bool actual = canFormNote(poster, note);
-		const bool expected = p.second;
+	for (auto& p : v) {
+		auto& arg_pair = p.first;
+		string& poster = arg_pair.first;
+		string& note = arg_pair.second;
+		bool actual = canFormNote(poster, note);
+		bool expected = p.second;
 
 		cout << showBool(actual) << " " << showBool(expected) << endl;
 	}
