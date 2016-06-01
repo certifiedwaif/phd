@@ -79,6 +79,19 @@ in Section \ref{sec:conclusion}, we provide a Conclusion and Discussion.
 \section{Bayesian linear model selection}
 \label{sec:model_selection}
 
+Model selection attempts to balance goodness of fit against model complexity, neither overfitting nor
+underfitting. Several model selection criteria have been proposed to balance these competing concerns, such
+as AIC (Akaike 197something), BIC (), Mallow's $C_p$ and DIC. As (Breiman 1996) and (Efron ?) showed, while 
+the standard formulation of a linear model is unbiased, the goodness of fit of these models is numerically 
+unstable. Breiman showed that by introducing a penalty on the size of the regression co-efficients such as 
+in ridge regression, this numerical stability can be avoided. This reduces the variances of the co-efficient
+estimates, at the expense of introducing some bias --- the bias--variance trade--off.
+
+Consider a normal linear model on $\vy$ with conjugate normal prior on \vbeta with mean centred at \vzero,
+and covariance $g \sigma^2 \mX^\top \mX)^{-1}$ where the prior on $g$ is Zellner's g-prior on the covariance
+matrices (Zellner 1986), as this yields a tractable posterior for $\vbeta$ (Liang et al. 2008). We choose $a$ 
+and $b$ to be $-3/4$ and $(n - p)/2 - a$ as in (Murayama and George 2011).
+
 \section{Methodology}
 \label{sec:methodology}
 
