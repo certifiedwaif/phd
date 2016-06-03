@@ -32,6 +32,7 @@
 \section*{Abstract}
 
 % What is done in general
+
 We develop mean field and structured variational Bayes approximations for Bayesian model selection on linear
 models using Zellner's g prior. Our mean field updates only depend ona single variational parameter $\tau_g$
 and other values which are fixed for each model considered. Using rank-1 updates, we are able to exhaustively
@@ -59,9 +60,10 @@ made while inducing sparsity.
 
 
 % VB in general
-Variational Bayes \cite{Ormerod2010} is a computationally efficient, deterministic method of fitting Bayesian
-models to data. Variational Bayes approximates the true posterior $p(\vy, \vtheta)$ by minimising the KL
-divergence between the posterior and the  approximating distribution $q(\vtheta)$.
+
+Variational Bayes (see \cite{Ormerod2010}) is a computationally efficient, deterministic method of fitting
+Bayesian models to data. Variational Bayes approximates the true posterior $p(\vy, \vtheta)$ by minimising the
+KL divergence between the posterior and the  approximating distribution $q(\vtheta)$.
 
 % Application
 
@@ -81,15 +83,14 @@ in Section \ref{sec:conclusion}, we provide a Conclusion and Discussion.
 
 Model selection attempts to balance goodness of fit against model complexity, neither overfitting nor
 underfitting. Several model selection criteria have been proposed to balance these competing concerns, such as
-AIC (Akaike \cite{DeLeeuw1992}), BIC (), Mallow's $C_p$ and DIC. As Breiman \cite{Breiman1996} and Efron
-\cite{Efron2013} showed, while  the standard formulation of a linear model is unbiased, the goodness of fit of
-these models is numerically  unstable. Breiman showed that by introducing a penalty on the size of the
-regression co-efficients such as  in ridge regression, this numerical stability can be avoided. This reduces
-the variances of the co-efficient estimates, at the expense of introducing some bias --- the bias--variance
-trade--off.
+AIC (\cite{DeLeeuw1992}), BIC (), Mallow's $C_p$ and DIC. As \cite{Breiman1996} and \cite{Efron2013} showed,
+while  the standard formulation of a linear model is unbiased, the goodness of fit of these models is
+numerically  unstable. Breiman showed that by introducing a penalty on the size of the regression co-
+efficients such as  in ridge regression, this numerical stability can be avoided. This reduces the variances
+of the co-efficient estimates, at the expense of introducing some bias --- the bias--variance trade--off.
 
-Consider a normal linear model on $\vy$ with conjugate normal prior on \vbeta with mean centred at \vzero, and
-covariance $g \sigma^2 \mX^\top \mX)^{-1}$ where the prior on $g$ is Zellner's g-prior on the covariance
+Consider a normal linear model on $\vy$ with conjugate normal prior on $\vbeta$ with mean centred at $\vzero$,
+and covariance $g \sigma^2 \mX^\top \mX)^{-1}$ where the prior on $g$ is Zellner's g-prior on the covariance
 matrices (Zellner 1986), as this yields a tractable posterior for $\vbeta$ as shown by Liang et al.
 (\cite{Liang2008}). We choose $a$  and $b$ to be $-3/4$ and $(n - p)/2 - a$ as in \cite{Maruyama2011}.
 
