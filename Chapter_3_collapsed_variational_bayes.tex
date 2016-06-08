@@ -154,23 +154,7 @@ p(g) &= \frac{g^b (1 + g)^{-[(a + 1) + (b + 1)]}}{\Beta(a + 1, b + 1)} \I(g > 0)
 
 \subsection{Mean field updates}
 
-\begin{algorithm}
-\label{alg:algorithm_one}
-\caption{Fit VB approximation of linear model}
-\begin{algorithmic}
-\REQUIRE $\nu_{q(g)} - 1 \leftarrow b - \frac{p}{2}$, $\mu_{q(g)} - 1 \leftarrow [(a + 1) + (b + 1)]$,
-$\gamma_{q(g)} \leftarrow 1$ \\
-\WHILE{the increase in $\log{\underline{p}}(\vy;q)$ is significant}
-\STATE Calculate $\tau_{g}$ using numerical integration \\
-\ENDWHILE
-\STATE $\tau_{\sigma^2} \leftarrow \frac{n}{[1 - (1 + \tau_g)^{-1}]\|\vy\|^2 R^2}$
-\STATE $\beta_{q(g)} \leftarrow \left(\frac{n (1 + \tau_g)^{-1}}{[1 - (1 + \tau_g)^{-1}]} + p \right)$
-\STATE $\vmu_{q(\vbeta)} \leftarrow (1 + \tau_g)^{-1} (\mX^\top \mX)^{-1} \mX^\top \vy$
-\STATE $\mSigma_{q(\vbeta)} \leftarrow [\tau_{\sigma^2}(1 + \tau_{g})]^{-1}(\mX^\top \mX)^{-1}$
-\end{algorithmic}
-\end{algorithm}
-
-\subsection{Numerical integration of $\tau_g$}
+\subsubsection{Numerical integration of $\tau_g$}\label{sec:num_int}
 
 Define $\tau_g \equiv \E_q \left[ \frac{1}{g} \right]$. Then calculation of $\tau_g$ requires performing the 
 numerical integration
@@ -185,10 +169,26 @@ $\beta = \frac{1}{2} (1 + \tau_g)^{-1} (\tau_{\sigma^2} \|\vy\|^2 R^2 + p)$,
 $\mu - 1 = [(a + 1) + (b + 1)]$ and $\gamma = 1$. Note that $\tau_g'$ is the updated value of $\tau_g$. This
 process continues until convergence.
 
+\begin{algorithm}
+\label{alg:algorithm_one}
+\caption{Fit VB approximation of linear model}
+\begin{algorithmic}
+\REQUIRE $\nu_{q(g)} - 1 \leftarrow b - \frac{p}{2}$, $\mu_{q(g)} - 1 \leftarrow [(a + 1) + (b + 1)]$,
+$\gamma_{q(g)} \leftarrow 1$ \\
+\WHILE{the increase in $\log{\underline{p}}(\vy;q)$ is significant}
+\STATE Calculate $\tau_{g}$ using numerical integration in Section \ref{sec:num_int}
+\ENDWHILE
+\STATE $\tau_{\sigma^2} \leftarrow \frac{n}{[1 - (1 + \tau_g)^{-1}]\|\vy\|^2 R^2}$
+\STATE $\beta_{q(g)} \leftarrow \left(\frac{n (1 + \tau_g)^{-1}}{[1 - (1 + \tau_g)^{-1}]} + p \right)$
+\STATE $\vmu_{q(\vbeta)} \leftarrow (1 + \tau_g)^{-1} (\mX^\top \mX)^{-1} \mX^\top \vy$
+\STATE $\mSigma_{q(\vbeta)} \leftarrow [\tau_{\sigma^2}(1 + \tau_{g})]^{-1}(\mX^\top \mX)^{-1}$
+\end{algorithmic}
+\end{algorithm}
+
 \subsection{Structured Variational Bayes}
 
 Let $\vgamma \in \{0, 1\}^p$ be the vector of indicators of whether each of the $p$ covariates in our
-covariate matrix $\mX$ is included in the model $\gamma$. We perform model selection by using the above
+covariate matrix $\mX$ is included in the model $\vgamma$. We perform model selection by using the above
 Variational Bayes approximation to each  candidate linear model and averaging over the space of available
 models.
 
