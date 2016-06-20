@@ -1,0 +1,65 @@
+\documentclass{beamer}
+
+\usetheme{Warsaw}
+\usepackage{graphicx}
+\usepackage{ulem}
+\input{include.tex}
+\input{Definitions.tex}
+
+\usefonttheme{serif}
+
+\title{Progress report - 16/11/2015}
+\author{Mark Greenaway\\PhD candidate\\markg@maths.usyd.edu.au}
+
+\mode<presentation>
+{ \usetheme{boxes} }
+
+\begin{document}
+\begin{frame}
+	\maketitle
+\end{frame}
+
+\begin{frame}{What I've been up to}
+	\begin{itemize}
+		\item Integral for the exact posterior $p(\vbeta|\vy)$
+		\item More integrals for checking John's calculations for the variational approximation
+		\item Marking assignments and exams
+	\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Integral for the exact posterior $p(\vbeta|\vy)$}
+	\begin{itemize}
+		\item Numeric integration is often computationally expensive, and an analytic solution is preferable.
+		\item I tried using the substition $h=\frac{g}{1 + g}$, using geometric series for $\frac{1}{1 + g}$
+					and using a Taylor series expansion for $\frac{g}{1 + g}$. Unfortunately, these didn't help me
+					to do the integral.
+		\item I discovered Computer Algebra Systems. In particular, I discovered Sage, based on python, and
+					Mathematica. That was a lot of fun, and I'm sure I'll use those more in the future.
+		\item But Mathematica couldn't do the integral either. So it's back to the drawing board -- maybe John
+					and I can combine our ideas?
+		\item I'm open to any suggestion -- numeric approaches, approximations, weird integrals I've never even
+					heard of etc.
+	\end{itemize}
+\end{frame}
+
+
+\begin{frame}{More integrals for checking John's calculations for the variational approximation}
+	\begin{itemize}
+		\item All the practice I got trying to do the previous integral really helped with these integrals
+		\item So far, everything checks out for $p(y)$, $p(g|y)$, $p(sigma2|y, g)$
+		\item I should get through the rest of the integrals in the next few days
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Marking}
+	\begin{itemize}
+		\item I'm snowed under with marking for the next couple of weeks, but it's coming to an end
+		\item STAT3011 computer practical exam for Ray
+		\item STAT3012 exam marking for Samuel
+		\item MATH3076/MATH3976 marking for Sheehan, although I think I can hand that over to Matt
+		\item I'm getting mild RSI, so will try to do more work on paper this week
+	\end{itemize}
+\end{frame}
+
+\end{document}
