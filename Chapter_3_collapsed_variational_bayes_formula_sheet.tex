@@ -684,4 +684,16 @@ p(\vy|\sigma^2, g) =& \int \exp \left \{ -\frac{n}{2} \log(2 \pi \sigma^2)
     				\exp{\frac{1}{2 \sigma^2} \vy^\top \mX [(1 + g^{-1})] \mX^\top \vy} \right | \\
 =& \exp \left \{ -\frac{n+p}{2} \log(2 \pi \sigma^2) - \frac{n}{2 \sigma^2} n R^2 \frac{g}{1 + g} - \frac{p}{2} \log(1 + g) \right \}
 \end{align*}
+
+Integrate out $\sigma^2$
+
+\begin{align*}
+p(\vy | g) &= \exp \left \{ -\frac{n}{2} \log 2 \pi - \frac{p}{2} (1 + g) - \frac{1}{2 \sigma^2} n  \right \} 
+							\int (\sigma^{-2})^{-(\frac{n}{2} + 1)} \exp \left \{- \sigma^{-2} \left[ \frac{n}{2} - \frac{g}{2(1 + g)} n R^2 \right]\right \} d \sigma^2 \\
+&= \exp \left \{ -\frac{n}{2} \log 2 \pi - \frac{p}{2} (1 + g) \right \}
+	\times \frac{\Gamma(n/2)}{\frac{1}{2}[\|y\|^2 - \frac{g}{2(1 + g)} n R^2]^{n/2}} \\
+&= \frac{\Gamma(n/2)}{(n \pi)^{n/2}} (1 + g)^{-\frac{p}{2}} \frac{1}{(\frac{1 + g}{1 + g} - {g}{1 + g} n R^2)^{n/2}} \\
+&= \frac{\Gamma(n/2)}{(n \pi)^{n/2}} (1 + g)^{-\frac{n - p}{2}} [1 + g(1 - R^2)]^{-n/2} \\
+\end{align*}
+
 \end{document}
