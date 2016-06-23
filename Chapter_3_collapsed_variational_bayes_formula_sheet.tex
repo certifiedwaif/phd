@@ -696,4 +696,21 @@ p(\vy | g) &= \exp \left \{ -\frac{n}{2} \log 2 \pi - \frac{p}{2} (1 + g) - \fra
 &= \frac{\Gamma(n/2)}{(n \pi)^{n/2}} (1 + g)^{-\frac{n - p}{2}} [1 + g(1 - R^2)]^{-n/2} \\
 \end{align*}
 
+Consider the multivariate t-distribution
+
+\begin{equation}
+	p_{t_\nu}(\vmu, \mSigma) = \frac{\Gamma[(\nu + p)/2]}{\Gamma(v/2) v^{p/2} \pi^{p/2} |\mSigma|^{1/2} [1 + \frac{1}{v}(\vx - \vmu)^\top \mSigma^{-1} (\vx - \vmu)]^{(\nu + p)/2}}
+\end{equation}
+
+\begin{align*}
+p(\vy | g) &= \frac{\Gamma(n/2)}{(n \pi)^{n/2}} (1 + g)^{-\frac{n - p}{2}} [1 + g(1 - R^2)]^{-n/2} \\
+\vbeta | \vy, g \sim t_n(\frac{g}{1 + g} \hat{\vbeta}_{LS}, \frac{g}{1 + g} (1 - \frac{g}{1 + g} R^2) (\mX^\top \mX)^{-1}) \\
+\end{align*}
+
+Then
+
+\begin{align*}
+
+\end{align*}
+
 \end{document}
