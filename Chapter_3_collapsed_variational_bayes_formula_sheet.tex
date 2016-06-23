@@ -672,4 +672,16 @@ $\mP_{\mX^\perp}$ and $\mP_{\mZ^\perp}$.
  
 \end{proof}
 
+\section{Derivation of the marginal likelihood}
+\begin{align*}
+p(\vy|\sigma^2, g) =& \int \exp \left \{ -\frac{n}{2} \log(2 \pi \sigma^2)
+                      - \frac{1}{2 \sigma^2} \|\vy - \mX \vbeta\|^2
+									    - \frac{p}{2} \log(2 \pi g \sigma^2) + \frac{1}{2} \log |\mX^\top \mX| \right \} d \vbeta \\
+=& \exp \left \{ -\frac{n}{2} \log(2 \pi \sigma^2)  - \frac{1}{2 \sigma^2} \|\vy\|^2 - \frac{p}{2} \log(2 \pi g \sigma^2) + \frac{1}{2} \log |\mX^\top \mX| \right \}
+    \times \int \left \{ -\frac{1}{2} \vbeta^\top [\sigma^{-2} (1 + g^{-1}) \mX^\top \mX] \vbeta \right \} d \vbeta \\
+=& \exp \left \{ -\frac{n}{2} \log(2 \pi \sigma^2)  - \frac{1}{2 \sigma^2} \|\vy\|^2 - \frac{p}{2} \log(2 \pi g \sigma^2) + \frac{1}{2} \log |\mX^\top \mX| \right \} \\
+    &\times \left |2 \pi [\sigma^{-2}(1 + g^{-1}) \mX^\top \mX]^{1/2}
+    				\exp{\frac{1}{2 \sigma^2} \vy^\top \mX [(1 + g^{-1})] \mX^\top \vy} \right | \\
+=& \exp \left \{ -\frac{n+p}{2} \log(2 \pi \sigma^2) - \frac{n}{2 \sigma^2} n R^2 \frac{g}{1 + g} - \frac{p}{2} \log(1 + g) \right \}
+\end{align*}
 \end{document}
