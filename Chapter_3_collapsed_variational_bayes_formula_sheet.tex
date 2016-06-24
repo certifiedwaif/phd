@@ -704,13 +704,25 @@ Consider the multivariate t-distribution
 
 \begin{align*}
 p(\vy | g) &= \frac{\Gamma(n/2)}{(n \pi)^{n/2}} (1 + g)^{-\frac{n - p}{2}} [1 + g(1 - R^2)]^{-n/2} \\
-\vbeta | \vy, g \sim t_n(\frac{g}{1 + g} \hat{\vbeta}_{LS}, \frac{g}{1 + g} (1 - \frac{g}{1 + g} R^2) (\mX^\top \mX)^{-1}) \\
+\vbeta | \vy, g &\sim t_n(\frac{g}{1 + g} \hat{\vbeta}_{LS}, \frac{g}{1 + g} (1 - \frac{g}{1 + g} R^2) (\mX^\top \mX)^{-1}) \\
 \end{align*}
 
 Then
+\small
+\begin{align*}
+p(\vbeta | \vy) &= \int p(\vbeta | \vy, g) p(\vy | g) dg \\
+&= \int_0^\infty \frac{\Gamma(n/2)}{(n \pi)^{n/2}} (1 + g)^{-\frac{n - p}{2}} [1 + g(1 - R^2)]^{-n/2} \\
+&\quad \frac{\Gamma[(n + p)/2]}{\Gamma(v/2) v^{p/2} \pi^{p/2} |\frac{g}{1 + g} (1 - \frac{g}{1 + g} R^2) (\mX^\top \mX)^{-1})|^{1/2} [1 + \frac{1}{v}(\vbeta - \frac{g}{1 + g} \hat{\vbeta}_{LS})^\top [\frac{g}{1 + g} (1 - \frac{g}{1 + g} R^2) (\mX^\top \mX)^{-1})]^{-1} (\vbeta - \frac{g}{1 + g} \hat{\vbeta}_{LS})]^{(n + p)/2}} dg \\
+&= \int_0^\infty \frac{\Gamma(n/2)}{(n \pi)^{n/2}} (1 + g)^{-\frac{n - p}{2}} [1 + g(1 - R^2)]^{-n/2} \\
+&\quad \frac{\Gamma[(n + p)/2]}{\Gamma(v/2) v^{p/2} \pi^{p/2} (\frac{g}{1 + g} (1 - \frac{g}{1 + g} R^2))^{(p/2)} |(\mX^\top \mX)^{-1})|^{1/2} [1 + \frac{1}{v} [\frac{g}{1 + g} (1 - \frac{g}{1 + g} R^2)]^{-1}(\vbeta - \frac{g}{1 + g} \hat{\vbeta}_{LS})^\top \mX^\top \mX (\vbeta - \frac{g}{1 + g} \hat{\vbeta}_{LS})]^{(n + p)/2}} dg \\
+\end{align*}
+
+Let $h = \frac{g}{1 + g}$, $dh = \frac{1}{(1 + g)^2} dg = \frac{1}{\left(1 + \frac{h}{1 - h}\right)^2} dg$
+
+Then the above integral becomes
 
 \begin{align*}
-
+\int_0^1 \frac{h^{b - p/2} [1 + (\frac{h}{1 - h})(1 - R^2)]^{-n/2}}{(1 - h)^b (1 - h R^2)^{p/2} \{ 1 + \frac{1}{n}[h(1 - h R^2)]^{-1} (\vbeta - h \hat{\vbeta}_{LS})^\top \mX^\top \mX (\vbeta - h \hat{\vbeta}_{LS}) \}} \left(1 + \frac{h}{1 - h}\right)^2 dh
 \end{align*}
 
 \end{document}
