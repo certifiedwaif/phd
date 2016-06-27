@@ -364,12 +364,12 @@ $\mSigma_{q(\vbeta)} = [\tau_{\sigma^2}(1 + \tau_{g})]^{-1}(\mX^\top \mX)^{-1}$.
 \subsection{$q(\sigma^2)$}
 \begin{align*}
 q_\sigma^2(\alpha_{q(\sigma^2)}, \beta_{q(\sigma^2)}) &\propto \exp \left \{ \E_{-\sigma^2} [-\half \log |2 \pi \sigma^2 \mI_n| - \half (\vy - \mX \vbeta)^\top \sigma^{-2} \mI_n (\vy - \mX \vbeta) - \half \log |2 \pi g \sigma^2 (\mX^\top \mX)^{-1}| - \half \vbeta^\top \sigma^{-2} \frac{1}{g} (\mX^\top \mX) \vbeta] \right \} \\
-&=  \exp \left \{ \E_{-\sigma^2} \left[- \frac{n}{2} \log \sigma^2 - \frac{1}{2 \sigma^2}(\vy - \mX \vbeta)^\top(\vy - \mX \vbeta) - \frac{p}{2} \log \sigma^2 - \frac{1}{2 \sigma^2} \frac{1}{g} \vbeta^\top (\mX^\top \mX) \vbeta - \log \sigma^2\right] \right \} \\
-&=  \exp \left \{ {-\left(\frac{n + p}{2} + 1\right) \log \sigma^2 -  \frac{1}{2 \sigma^2} \E_{q(\vbeta)} \left[ \vy^\top \vy + \left(1 + \frac{1}{g} \right) \vbeta^\top \mX^\top \mX \vbeta - 2 \vbeta^\top \mX^\top \vy \right]}  \right \}\\
-&=  \exp \left \{ -\left(\frac{n + p}{2} + 1 \right)\log \sigma^2 - \frac{1}{2 \sigma^2} \vy^\top\vy + \left( 1 + \tau_g \right) [\vmu_{q(\vbeta)}^\top \mX^\top \mX \vmu_{q(\vbeta)} - 2 \tr(\mX^\top \mX \mSigma_{q(\vbeta)})] + \vy^\top \mX \vmu_{q(\vbeta)} \right \} \\
-&=  \exp \biggl \{ -\left(\frac{n + p}{2} + 1\right) \log \sigma^2 - \frac{1}{2 \sigma^2} [ \vy^\top\vy +  \cancel{(1 + \tau_g)}[(1 + \tau_g)^{-1} \vy^\top \mX^\top \cancel{(\mX^\top \mX)^{-1}}  \cancel{\mX^\top \mX} \cancel{(1 + \tau_g)^{-1}} (\mX^\top \mX)^{-1} \mX^\top \vy \\
+&\propto  \exp \left \{ \E_{-\sigma^2} \left[- \frac{n}{2} \log \sigma^2 - \frac{1}{2 \sigma^2}(\vy - \mX \vbeta)^\top(\vy - \mX \vbeta) - \frac{p}{2} \log \sigma^2 - \frac{1}{2 \sigma^2} \frac{1}{g} \vbeta^\top (\mX^\top \mX) \vbeta - \log \sigma^2\right] \right \} \\
+&=  \exp \left \{ {-\left(\frac{n + p}{2} + 1\right) \log \sigma^2 - \frac{1}{2 \sigma^2} \E_{q(\vbeta)} \left[ \vy^\top \vy + \left(1 + \frac{1}{g} \right) \vbeta^\top \mX^\top \mX \vbeta - 2 \vbeta^\top \mX^\top \vy \right]}  \right \}\\
+&=  \exp \left \{ -\left(\frac{n + p}{2} + 1 \right)\log \sigma^2  - \frac{1}{2 \sigma^2} \vy^\top\vy + \left( 1 + \tau_g \right) [\vmu_{q(\vbeta)}^\top \mX^\top \mX \vmu_{q(\vbeta)} - 2 \tr(\mX^\top \mX \mSigma_{q(\vbeta)})] + \vy^\top \mX \vmu_{q(\vbeta)} \right \} \\
+&=  \exp \biggl \{ -\left(\frac{n + p}{2} + 1\right) \log \sigma^2  - \frac{1}{2 \sigma^2} [ \vy^\top\vy +  \cancel{(1 + \tau_g)}[(1 + \tau_g)^{-1} \vy^\top \mX^\top \cancel{(\mX^\top \mX)^{-1}}  \cancel{\mX^\top \mX} \cancel{(1 + \tau_g)^{-1}} (\mX^\top \mX)^{-1} \mX^\top \vy \\
 &\quad \quad \qquad + \tr{(\tau_{\sigma^2} \cancel{\mX^\top \mX} \cancel{(\mX^\top \mX)^{-1}})}] - 2 (1 + \tau_g)^{-1} \vy^\top \mX (\mX^\top \mX)^{-1} \mX^\top \vy \biggl \} \\
-&=  \exp \left \{ -\left(\frac{n + p}{2} + 1\right) \log \sigma^2 - \frac{1}{2 \sigma^2}\{ [1 - (1 + \tau_g)^{-1}]\|\vy\|^2 R^2	+ p \tau_{\sigma^2}^{-1} \right \} 
+&=  \exp \left \{ -\left(\frac{n + p}{2} + 1\right) \log \sigma^2  - \frac{1}{2 \sigma^2}\{ [1 - (1 + \tau_g)^{-1}]\|\vy\|^2 R^2	+ p \tau_{\sigma^2}^{-1} \right \} 
 \end{align*}
 
 and thus $q^*(\sigma^2) \sim \IG(\alpha_{q(\sigma^2)}, \beta_{q(\sigma^2)})$ where
@@ -377,7 +377,7 @@ $\alpha_{q(\sigma^2)} = \frac{n + p}{2}$ and $\beta_{q(\sigma^2)} = \frac{1}{2}\
 
 \subsection{$q(g)$}
 \begin{align*}
-q(g) &\propto \exp \E_{-g} [-\frac{p}{2} \log g - \frac{1}{g} \frac{1}{2 \sigma^2} \vbeta^\top \mX^\top \mX \vbeta + b \log g - [(a + 1) + (b + 1)] \log(1 + g) ]] \\
+q(g) &\propto \exp \E_{-g} \left\{-\frac{p}{2} \log g - \frac{1}{g} \frac{1}{2 \sigma^2} \vbeta^\top \mX^\top \mX \vbeta + b \log g - [(a + 1) + (b + 1)] \log(1 + g) \right\} \\
 &= \exp \left \{ -\frac{p}{2} \log g - \frac{1}{g} \half \E \frac{1}{\sigma^2} \E (\mX \vbeta)^\top (\mX \vbeta) + b \log g - [(a + 1) + (b + 1)] \log(1 + g) ] \right \} \\
 &= \exp \left \{ -\frac{p}{2} \log g - \frac{1}{g} \half \tau_{\sigma^2} \tr[(\mSigma_{q(\vbeta)} + \vmu_{q(\vbeta)} \vmu_{q(\vbeta)}^T) \mX^\top \mX] + b \log g - [(a + 1) + (b + 1)] \log(1 + g) ] \right \} \\
 &= \exp \left \{ \left(b - \frac{p}{2}\right) \log g - \frac{1}{g} \frac{1}{2} \left[\tau_{\sigma^2} (1 + \tau_g)^{-1} \vy^\top \mX^\top \cancel{(\mX^\top \mX)^{-1}} \cancel{\mX^\top \mX} (\mX^\top \mX)^{-1} \mX \vy + \tr{[\tau_{\sigma^2}^{-1} (1 + \tau_g)^{-1} \mX^\top \mX (\mX^\top \mX)^{-1}]} \right] \right \} \\
@@ -394,8 +394,9 @@ So setting
 \gamma &= 1
 \end{align*}
 
-and solving for $\nu, \beta, \mu$ and $\gamma$ we obtain an ET 234(13)a function (see Identity 7 on page 368
-of Russian book).
+and solving for $\nu, \beta, \mu$ and $\gamma$ we obtain an ET 234(13)a function (see Identity 7 on 
+3.471 of \cite{Gradshteyn1988},
+$\beta^{\frac{\nu - 1}{2} \gamma^{\frac{\nu - 1}{2}}} \Gamma(1 - \mu - \nu) e^{\frac{\beta}{2 \gamma}} W_{\frac{\nu - 1}{2} + \mu, \frac{\nu}{2}}\left(\frac{\beta}{\gamma}\right)$.
 
 Note that as
 
@@ -724,5 +725,8 @@ Then the above integral becomes
 \begin{align*}
 \int_0^1 \frac{h^{b - p/2} [1 + (\frac{h}{1 - h})(1 - R^2)]^{-n/2}}{(1 - h)^b (1 - h R^2)^{p/2} \{ 1 + \frac{1}{n}[h(1 - h R^2)]^{-1} (\vbeta - h \hat{\vbeta}_{LS})^\top \mX^\top \mX (\vbeta - h \hat{\vbeta}_{LS}) \}} \left(1 + \frac{h}{1 - h}\right)^2 dh
 \end{align*}
+
+\bibliographystyle{elsarticle-harv}
+\bibliography{references_mendeley}
 
 \end{document}
