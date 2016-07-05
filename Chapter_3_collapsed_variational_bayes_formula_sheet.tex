@@ -361,19 +361,20 @@ $q^*(\vbeta) \sim \N (\vmu_{q(\vbeta)}, \mSigma_{q(\vbeta)} )$
 where $\vmu_{q(\vbeta)} = (1 + \tau_g)^{-1} (\mX^\top \mX)^{-1} \mX^\top \vy$,
 $\mSigma_{q(\vbeta)} = [\tau_{\sigma^2}(1 + \tau_{g})]^{-1}(\mX^\top \mX)^{-1}$.
 
+\small
 \subsection{$q(\sigma^2)$}
 \begin{align*}
-q_\sigma^2(\alpha_{q(\sigma^2)}, \beta_{q(\sigma^2)}) &\propto \exp \left \{ \E_{-\sigma^2} [-\half \log |2 \pi \sigma^2 \mI_n| - \half (\vy - \mX \vbeta)^\top \sigma^{-2} \mI_n (\vy - \mX \vbeta) - \half \log |2 \pi g \sigma^2 (\mX^\top \mX)^{-1}| - \half \vbeta^\top \sigma^{-2} \frac{1}{g} (\mX^\top \mX) \vbeta] \right \} \\
+q(\sigma^2; \alpha_{q(\sigma^2)}, \beta_{q(\sigma^2)}) &\propto \exp \left \{ \E_{-\sigma^2} [-\half \log |2 \pi \sigma^2 \mI_n| - \half (\vy - \mX \vbeta)^\top \sigma^{-2} \mI_n (\vy - \mX \vbeta) - \half \log |2 \pi g \sigma^2 (\mX^\top \mX)^{-1}| - \half \vbeta^\top \sigma^{-2} \frac{1}{g} (\mX^\top \mX) \vbeta] \right \} \\
 &\propto  \exp \left \{ \E_{-\sigma^2} \left[- \frac{n}{2} \log \sigma^2 - \frac{1}{2 \sigma^2}(\vy - \mX \vbeta)^\top(\vy - \mX \vbeta) - \frac{p}{2} \log \sigma^2 - \frac{1}{2 \sigma^2} \frac{1}{g} \vbeta^\top (\mX^\top \mX) \vbeta - \log \sigma^2\right] \right \} \\
 &=  \exp \left \{ {-\left(\frac{n + p}{2} + 1\right) \log \sigma^2 - \frac{1}{2 \sigma^2} \E_{q(\vbeta)} \left[ \vy^\top \vy + \left(1 + \frac{1}{g} \right) \vbeta^\top \mX^\top \mX \vbeta - 2 \vbeta^\top \mX^\top \vy \right]}  \right \}\\
-&=  \exp \left \{ -\left(\frac{n + p}{2} + 1 \right)\log \sigma^2  - \frac{1}{2 \sigma^2} \vy^\top\vy + \left( 1 + \tau_g \right) [\vmu_{q(\vbeta)}^\top \mX^\top \mX \vmu_{q(\vbeta)} - 2 \tr(\mX^\top \mX \mSigma_{q(\vbeta)})] + \vy^\top \mX \vmu_{q(\vbeta)} \right \} \\
-&=  \exp \biggl \{ -\left(\frac{n + p}{2} + 1\right) \log \sigma^2  - \frac{1}{2 \sigma^2} [ \vy^\top\vy +  \cancel{(1 + \tau_g)}[(1 + \tau_g)^{-1} \vy^\top \mX^\top \cancel{(\mX^\top \mX)^{-1}}  \cancel{\mX^\top \mX} \cancel{(1 + \tau_g)^{-1}} (\mX^\top \mX)^{-1} \mX^\top \vy \\
-&\quad \quad \qquad + \tr{(\tau_{\sigma^2} \cancel{\mX^\top \mX} \cancel{(\mX^\top \mX)^{-1}})}] - 2 (1 + \tau_g)^{-1} \vy^\top \mX (\mX^\top \mX)^{-1} \mX^\top \vy \biggl \} \\
-&=  \exp \left \{ -\left(\frac{n + p}{2} + 1\right) \log \sigma^2  - \frac{1}{2 \sigma^2}\{ [1 - (1 + \tau_g)^{-1}]\|\vy\|^2 R^2	+ p \tau_{\sigma^2}^{-1} \right \} 
+&=  \exp \left \{ -\left(\frac{n + p}{2} + 1 \right)\log \sigma^2  - \frac{1}{2 \sigma^2} [\vy^\top\vy + \left( 1 + \tau_g \right) \vmu_{q(\vbeta)}^\top \mX^\top \mX \vmu_{q(\vbeta)} + \left( 1 + \tau_g \right) \tr(\mX^\top \mX \mSigma_{q(\vbeta)}) - 2 \vy^\top \mX \vmu_{q(\vbeta)} ] \right \} \\
+&=  \exp \Bigg \{ -\left(\frac{n + p}{2} + 1 \right)\log \sigma^2  - \frac{1}{2 \sigma^2} [\|\vy\|^2 + \cancel{\left( 1 + \tau_g \right)} (1 + \tau_g)^{\cancel{-2}} \vy^\top \mX^\top \cancel{(\mX^\top \mX)^{-1}} \cancel{\mX^\top \mX} (\mX^\top \mX)^{-1} \mX^\top \vy + \\
+&\quad \quad \quad \quad \tau_{\sigma^2} \cancel{\left( 1 + \tau_g \right)} \cancel{\left( 1 + \tau_g \right)^{-1}} \tr(\cancel{\mX^\top \mX} \cancel{(\mX^\top \mX)^{-1}}) - 2 (1 + \tau_g)^{-1} \vy^\top \mX (\mX^\top \mX)^{-1} \mX^\top \vy ] \Bigg \} \\
+&= \exp \left \{ -\left(\frac{n + p}{2} + 1 \right)\log \sigma^2 - \frac{1}{2 \sigma^2} \{n[1 - (1 + \tau_g)^{-1}  R^2] + \tau_{\sigma^2} p \} \right \}
 \end{align*}
 
 and thus $q^*(\sigma^2) \sim \IG(\alpha_{q(\sigma^2)}, \beta_{q(\sigma^2)})$ where
-$\alpha_{q(\sigma^2)} = \frac{n + p}{2}$ and $\beta_{q(\sigma^2)} = \frac{1}{2}\{ [1 - (1 + \tau_g)^{-1}]\|\vy\|^2 R^2	+ p \tau_{\sigma^2}^{-1} \}$.
+$\alpha_{q(\sigma^2)} = \frac{n + p}{2}$ and $\beta_{q(\sigma^2)} = \frac{1}{2} \{n[1 - (1 + \tau_g)^{-1}  R^2] + \tau_{\sigma^2} p \}$.
 
 \subsection{$q(g)$}
 \begin{align*}
@@ -414,7 +415,7 @@ solving for $\tau_{\sigma^2}$, we obtain
 \subsection{Variational lower bound}
 
 \begin{align*}
-\log \underline{p(\vy; q)} \equiv& \E_q [\log p(\vy | \vbeta, \sigma^2) + \log p(\vbeta | \sigma^2, g)
+\log \underline{p}(\vy; q) \equiv& \E_q [\log p(\vy | \vbeta, \sigma^2) + \log p(\vbeta | \sigma^2, g)
 																					+ \log p(\sigma^2) + \log p(g) - \log q(\vbeta)
 																					- \log q(\sigma^2) - \log p(g)] \\
 =& \quad \E_q [\log p(\vy| \vbeta, \sigma^2) + \log p(\vbeta | \sigma^2, g) - \log q(\vbeta)] \\
