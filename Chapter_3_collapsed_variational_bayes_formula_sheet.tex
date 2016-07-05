@@ -207,118 +207,6 @@ Now, $\int_0^\infty \frac{g^{\mu - 1}}{(1 + \beta g)^\nu} dg = \beta^{-\mu} \tex
 
 by the symmetry of beta functions and the definitions of $a$ and $b$.
 
-\section{Appendix -- Variational Bayes approximation}
-
-\def \I {\text{I}}
-
-Consider the model $\vy | \vbeta, \sigma^2 \sim \text{N}_n(\mX \mGamma \vbeta, \sigma^2 \mI)$ with
-priors
-\begin{equation*}
-\begin{array}{ll}
-\vbeta | \sigma^2, g &\sim \text{N}_p(\vzero, g \sigma^2(\mX^\top \mGamma \mX)^{-1}), \\
-\vgamma_i &\sim \text{Bernoulli}(\rho), 1 \leq i \leq n, 0 \leq \rho \leq 1, \\
-p(\sigma^2) &= (\sigma^2)^{-1} \I(\sigma^2 > 0) \text{ and }\\
-p(g) &= \frac{g^b (1 + g)^{-a - b - 2}}{\text{Beta}(a + 1, b + 1)} I(g > 0).
-\end{array}
-\end{equation*}
-
-Assume $\vx_j^\top\vone = \vzero$, and $\vx_j^\top \vx_j / n = 1$, $1 \leq j \leq p$.
-Furthermore, assume $\vy^\top \vone = \vzero, \vy^\top \vy / n  = 1, n > p, (\mX^\top \mX)^{-1}$ exists.
-
-Assume an approximation of the form
-
-\begin{equation*}
-q(\vtheta) = q(\vbeta) q(\vgamma) q(\sigma^2) q(g)
-\end{equation*}
-where
-\begin{equation*}
-\begin{array}{ll}
-q^*(\vbeta) &= \text{N}(\vmu_{q(\vbeta), \mSigma_{q(\vbeta)}}), \\
-q^*(\vgamma) &= \text{Bernoulli}(p_{q(\vgamma)}), \\
-q^*(\sigma^2) &= \text{IG}(\alpha_{q(\sigma^2)}, \beta_{q(\sigma^2)}) \text{ and } \\
-q^*(g) &= \text{Beta Prime}(\alpha_{q(g)}, \beta_{q(g)})). \\
-\end{array}
-\end{equation*}
-
-\begin{equation*}
-q_i^*(\vtheta_i) \propto \exp{ \bE_{-\vtheta_i} \log{p(\vy, \vtheta)} }, 1 \leq i \leq M
-\end{equation*}
-
-\begin{equation*}
-\begin{array}{ll}
-p(\vy, \vtheta) &= \quad p(\vy | \vbeta, \vgamma, \sigma^2) p(\vbeta | \vgamma, \sigma^2, g) p(\sigma^2) p(g) \\
-\log{p(\vy, \vtheta)} &= \quad \log{p(\vy | \vbeta, \vgamma, \sigma^2)} + \log{p(\vbeta | \vgamma, \sigma^2, g)} + \log{p(\sigma^2)} + \log{p(g)} \\
-&= -\frac{n}{2} \log{2 \pi} -\half \log |\sigma^2 \mI_n| - \half (\vy - \mX \text{diag}(\vgamma) \vbeta)^\top \sigma^{-2} \mI_n (\vy - \mX \text{diag}(\vgamma) \vbeta) \\
-& \quad -\frac{p}{2} \log{2 \pi} - \half \log |g \sigma^2 (\mX^\top \text{diag}(\vgamma) \mX)^{-1}| -
-	\half \vbeta^\top (g \sigma^2)^{-1} (\mX^\top \mX) \vbeta \\
-& \quad + \vone^\top \vgamma \log(\rho) + \vone^\top (\vone - \vgamma) \log(1 - \rho)\\
-& \quad - \log{(\sigma^2)} + \log \bI (\sigma^2 > 0) \\
-& \quad + b \log g + (-a - b - 2) \log(1 + g) - \log \text{Beta}(a + 1,  b + 1) + \log \bI(g > 0)\\
-& = -\frac{n + p}{2} \log(2 \pi) - \cancel{\half \log{\sigma^{2n}}} \cancel{|\mI_n|} 
-		+\half \log{g^n \cancel{\sigma^{2n}}} |(\mX^\top \text{diag}(\vgamma) \mX)| \\
-&\quad		-\half (\vy - \mX \text{diag}(\vgamma) \vbeta)^\top \sigma^{-2} \mI_n (\vy - \mX \text{diag}(\vgamma) \vbeta)\\
-&\quad		-\half \vbeta^\top (g \sigma^2)^{-1} (\mX^\top \text{diag}(\vgamma)^{-1} \mX) \vbeta [= -\half (g \sigma^2)^{-1} (\mX \vbeta)^\top \text{diag}(\vgamma)^{-1} (X \vbeta)]\\
-&\quad - \log(\sigma^2) + \cancel{\log \bI(\sigma^2 > 0)} \\
-&\quad + b \log g + (-a - b - 2) \log(1 + g) - \log \text{Beta}(a + 1,  b + 1) + \cancel{\log \bI(g > 0)}
-\end{array}
-\end{equation*}
-
-\[
-	\E[\vbeta | \sigma^2, g, \vy] = \frac{g}{1 + g} \hat{\vbeta}_{\text{LS}}
-\]
-
-\begin{equation*}
-\begin{array}{rl}
-\E[\frac{g}{1 + g}] &= \frac{1}{\Beta(a +1, b + 1)} \int g^{b+1} (1 + g)^{-(a + b + 3)} dg \\
-&= \frac{\Beta(a + 2, b + 2)}{\Beta(a + 1, b + 1)} \\
-&= \frac{\Gamma(a + 2) \Gamma(b + 2)}{\Gamma(a + b + 4)} \frac{\Gamma(a + b + 2)}{\Gamma(a + 1) \Gamma(b + 1)} \\
-&=  \frac{(a + 1) \cancel{\Gamma(a + 1)} (b + 2) \cancel{\Gamma(b + 1)}}{(a + b + 3) (a + b + 2) \cancel{\Gamma(a + b + 2)}} \frac{\cancel{\Gamma(a + b + 2)}}{\cancel{\Gamma(a + 1)} \cancel{\Gamma(b + 1)}} \\
-&= \frac{(a + 1) (b + 1)}{(a + b + 3) (a + b + 2)}
-\end{array}
-\end{equation*}
-
-using the well-known property of gamma functions that $\Gamma(n + 1) = n \Gamma(n)$.
-
-Optimal choices of $a$ and $b$ are $a = -\frac{3}{4}$ and $b=\frac{n-p}{2} - 2 - a$.
-
-\begin{equation*}
-\begin{array}{rl}
-q^*_g(a, b) &\propto \exp \{(\frac{n}{2} + b) \log (g) + [-(a + 1) - (b + 1)] \log{(1 + g)} \\
-&\qquad \quad \frac{1 + g}{g} \E [\frac{1}{1 \sigma^2}] \E[\vbeta^\top \Gamma^\top \mX^\top \mX \Gamma \vbeta - 2 \mX \Gamma \vbeta^\top \vy + \vy^\top \vy] \} \\
-&\propto \exp \{ (\frac{p}{2} + b) \log (g) - [(a + 1) + (b + 1)] \log (1 + g) - \frac{1}{g}[\tr(\mSigma_{q(\vbeta)} + \| \mX \vmu_{q(\vbeta)} \|^2)] \} \\
-&= g^{v-1} (\lambda + g)^{\mu - 1} \exp{\left (-\frac{\beta}{g}\right )}
-\end{array}
-\end{equation*}
-
-\def \Re {\text{Re}}
-
-which is the special function ET II 234 (13) a when $\Re(1 - \mu) > \Re(\nu) > 0, | \arg \lambda | < \pi$. Here
-$v = \frac{p}{2} + b + 1, 1 - \mu = (a + b + 2)$. Choose $a = \frac{3}{4}, b = \frac{n - p}{2} - 2 - a$.
-
-\begin{equation*}
-\begin{array}{rl}
-q^*_\gamma (p) &\propto \exp \{ \quad \frac{n}{2} \log |\mX^\top \mGamma \mX|
-															+ \half \E[\frac{1}{\sigma^2}] \E[\frac{1 + g}{g}] 
-																\E[\vbeta^\top \mGamma^\top \mX^\top \mX \mGamma \vbeta - 2 \mX \mGamma \vbeta^\top y]\} \\
-&= \exp \{\quad \frac{n}{2} \log{|\mX^\top \mX|} \vone^\top \log \vgamma - \half [\log (\beta_{q(\sigma^2)}) - \phi(\alpha_{q(\sigma^2)})] \\
-&\qquad \quad + |2 \pi (\mX^\top \Gamma \mX)^{-1}|^{1/2} \exp(-\half \vy^\top \mGamma \mX^\top (\mX^\top \mGamma \mX)^{-1} \mX \mGamma \vy) \}
-\end{array}
-\end{equation*}
-
-We will use the logit trick $\frac{\exp(\eta)}{1 + \exp(\eta)}$ to turn this into a likelihood.
-
-\begin{equation*}
-\begin{array}{rl}
-q^*_\vbeta(\vmu_{q(\vbeta)}, \mSigma_{q(\vbeta)}) &\propto \exp \{ -\half \E [\frac{1}{\sigma^2}] \vbeta^\top \E[ \mGamma^\top \mX^\top \mX \mGamma ] \vbeta - 2 \mX \E \mGamma \vbeta^\top \vy \} \\
-&= \exp\{ -\half \frac{\alpha_{q(\sigma^2)}}{\beta_{q(\sigma^2)}} [\vbeta^\top \mX^\top \mX \odot \E[\vgamma \vgamma^\top] \vbeta - 2 \mX \E \mGamma \vbeta^\top \vy] \} \\
-&= \exp\{ -\half \frac{\alpha_{q(\sigma^2)}}{\beta_{q(\sigma^2)}} [\vbeta^\top \mX^\top \mX \odot \diag{(\vp (\vone - \vp))} \vbeta - 2 \mX \E \mGamma \vbeta^\top \vy] \}
-\end{array}
-\end{equation*}
-
-\begin{equation*}
-q^*_{\sigma^2}(\alpha_{q(\sigma^2)}, \beta_{q(\sigma^2)}) = 
-\end{equation*}
-
 \section{Variational Bayes with a different prior}
 
 Consider the linear model
@@ -368,8 +256,8 @@ q(\sigma^2; \alpha_{q(\sigma^2)}, \beta_{q(\sigma^2)}) &\propto \exp \left \{ \E
 &\propto  \exp \left \{ \E_{-\sigma^2} \left[- \frac{n}{2} \log \sigma^2 - \frac{1}{2 \sigma^2}(\vy - \mX \vbeta)^\top(\vy - \mX \vbeta) - \frac{p}{2} \log \sigma^2 - \frac{1}{2 \sigma^2} \frac{1}{g} \vbeta^\top (\mX^\top \mX) \vbeta - \log \sigma^2\right] \right \} \\
 &=  \exp \left \{ {-\left(\frac{n + p}{2} + 1\right) \log \sigma^2 - \frac{1}{2 \sigma^2} \E_{q(\vbeta)} \left[ \vy^\top \vy + \left(1 + \frac{1}{g} \right) \vbeta^\top \mX^\top \mX \vbeta - 2 \vbeta^\top \mX^\top \vy \right]}  \right \}\\
 &=  \exp \left \{ -\left(\frac{n + p}{2} + 1 \right)\log \sigma^2  - \frac{1}{2 \sigma^2} [\vy^\top\vy + \left( 1 + \tau_g \right) \vmu_{q(\vbeta)}^\top \mX^\top \mX \vmu_{q(\vbeta)} + \left( 1 + \tau_g \right) \tr(\mX^\top \mX \mSigma_{q(\vbeta)}) - 2 \vy^\top \mX \vmu_{q(\vbeta)} ] \right \} \\
-&=  \exp \Bigg \{ -\left(\frac{n + p}{2} + 1 \right)\log \sigma^2  - \frac{1}{2 \sigma^2} [\|\vy\|^2 + \cancel{\left( 1 + \tau_g \right)} (1 + \tau_g)^{\cancel{-2}} \vy^\top \mX^\top \cancel{(\mX^\top \mX)^{-1}} \cancel{\mX^\top \mX} (\mX^\top \mX)^{-1} \mX^\top \vy + \\
-&\quad \quad \quad \quad \tau_{\sigma^2} \cancel{\left( 1 + \tau_g \right)} \cancel{\left( 1 + \tau_g \right)^{-1}} \tr(\cancel{\mX^\top \mX} \cancel{(\mX^\top \mX)^{-1}}) - 2 (1 + \tau_g)^{-1} \vy^\top \mX (\mX^\top \mX)^{-1} \mX^\top \vy ] \Bigg \} \\
+&=  \exp \Bigg \{ -\left(\frac{n + p}{2} + 1 \right)\log \sigma^2  - \frac{1}{2 \sigma^2} [\|\vy\|^2 + \cancel{\left( 1 + \tau_g \right)} (1 + \tau_g)^{\cancel{-2}} \vy^\top \mX^\top \cancel{(\mX^\top \mX)^{-1}} \cancel{\mX^\top \mX} (\mX^\top \mX)^{-1} \mX^\top \vy\\
+&\quad \quad \quad \quad + \tau_{\sigma^2} \cancel{\left( 1 + \tau_g \right)} \cancel{\left( 1 + \tau_g \right)^{-1}} \tr(\cancel{\mX^\top \mX} \cancel{(\mX^\top \mX)^{-1}}) - 2 (1 + \tau_g)^{-1} \vy^\top \mX (\mX^\top \mX)^{-1} \mX^\top \vy ] \Bigg \} \\
 &= \exp \left \{ -\left(\frac{n + p}{2} + 1 \right)\log \sigma^2 - \frac{1}{2 \sigma^2} \{n[1 - (1 + \tau_g)^{-1}  R^2] + \tau_{\sigma^2} p \} \right \}
 \end{align*}
 
@@ -455,6 +343,113 @@ T_3 &= \E_q [\log p(g) - \log q(g)] \\
 
 \section{Collapsed Variational Bayes}
 
+\section{Appendix -- Variational Bayes approximation}
+
+Consider the model $\vy | \vbeta, \sigma^2 \sim \text{N}_n(\mX \mGamma \vbeta, \sigma^2 \mI)$ with
+priors
+\begin{equation*}
+\begin{array}{ll}
+\vbeta | \sigma^2, g &\sim \text{N}_p(\vzero, g \sigma^2(\mX^\top \mGamma \mX)^{-1}), \\
+\vgamma_i &\sim \text{Bernoulli}(\rho), 1 \leq i \leq n, 0 \leq \rho \leq 1, \\
+p(\sigma^2) &= (\sigma^2)^{-1} \I(\sigma^2 > 0) \text{ and }\\
+p(g) &= \frac{g^b (1 + g)^{-a - b - 2}}{\text{Beta}(a + 1, b + 1)} I(g > 0).
+\end{array}
+\end{equation*}
+
+Assume $\vx_j^\top\vone = \vzero$, and $\vx_j^\top \vx_j / n = 1$, $1 \leq j \leq p$.
+Furthermore, assume $\vy^\top \vone = \vzero, \vy^\top \vy / n  = 1, n > p, (\mX^\top \mX)^{-1}$ exists.
+
+Assume an approximation of the form
+
+\begin{equation*}
+q(\vtheta) = q(\vbeta) q(\vgamma) q(\sigma^2) q(g)
+\end{equation*}
+where
+\begin{equation*}
+\begin{array}{ll}
+q^*(\vbeta) &= \text{N}(\vmu_{q(\vbeta), \mSigma_{q(\vbeta)}}), \\
+q^*(\vgamma) &= \text{Bernoulli}(p_{q(\vgamma)}), \\
+q^*(\sigma^2) &= \text{IG}(\alpha_{q(\sigma^2)}, \beta_{q(\sigma^2)}) \text{ and } \\
+q^*(g) &= \text{Beta Prime}(\alpha_{q(g)}, \beta_{q(g)})). \\
+\end{array}
+\end{equation*}
+
+\begin{equation*}
+q_i^*(\vtheta_i) \propto \exp{ \bE_{-\vtheta_i} \log{p(\vy, \vtheta)} }, 1 \leq i \leq M
+\end{equation*}
+
+\begin{equation*}
+\begin{array}{ll}
+p(\vy, \vtheta) &= \quad p(\vy | \vbeta, \vgamma, \sigma^2) p(\vbeta | \vgamma, \sigma^2, g) p(\sigma^2) p(g) \\
+\log{p(\vy, \vtheta)} &= \quad \log{p(\vy | \vbeta, \vgamma, \sigma^2)} + \log{p(\vbeta | \vgamma, \sigma^2, g)} + \log{p(\sigma^2)} + \log{p(g)} \\
+&= -\frac{n}{2} \log{2 \pi} -\half \log |\sigma^2 \mI_n| - \half (\vy - \mX \text{diag}(\vgamma) \vbeta)^\top \sigma^{-2} \mI_n (\vy - \mX \text{diag}(\vgamma) \vbeta) \\
+& \quad -\frac{p}{2} \log{2 \pi} - \half \log |g \sigma^2 (\mX^\top \text{diag}(\vgamma) \mX)^{-1}| -
+	\half \vbeta^\top (g \sigma^2)^{-1} (\mX^\top \mX) \vbeta \\
+& \quad + \vone^\top \vgamma \log(\rho) + \vone^\top (\vone - \vgamma) \log(1 - \rho)\\
+& \quad - \log{(\sigma^2)} + \log \bI (\sigma^2 > 0) \\
+& \quad + b \log g + (-a - b - 2) \log(1 + g) - \log \text{Beta}(a + 1,  b + 1) + \log \bI(g > 0)\\
+& = -\frac{n + p}{2} \log(2 \pi) - \cancel{\half \log{\sigma^{2n}}} \cancel{|\mI_n|} 
+		+\half \log{g^n \cancel{\sigma^{2n}}} |(\mX^\top \text{diag}(\vgamma) \mX)| \\
+&\quad		-\half (\vy - \mX \text{diag}(\vgamma) \vbeta)^\top \sigma^{-2} \mI_n (\vy - \mX \text{diag}(\vgamma) \vbeta)\\
+&\quad		-\half \vbeta^\top (g \sigma^2)^{-1} (\mX^\top \text{diag}(\vgamma)^{-1} \mX) \vbeta [= -\half (g \sigma^2)^{-1} (\mX \vbeta)^\top \text{diag}(\vgamma)^{-1} (X \vbeta)]\\
+&\quad - \log(\sigma^2) + \cancel{\log \bI(\sigma^2 > 0)} \\
+&\quad + b \log g + (-a - b - 2) \log(1 + g) - \log \text{Beta}(a + 1,  b + 1) + \cancel{\log \bI(g > 0)}
+\end{array}
+\end{equation*}
+
+\[
+	\E[\vbeta | \sigma^2, g, \vy] = \frac{g}{1 + g} \hat{\vbeta}_{\text{LS}}
+\]
+
+\begin{equation*}
+\begin{array}{rl}
+\E[\frac{g}{1 + g}] &= \frac{1}{\Beta(a +1, b + 1)} \int g^{b+1} (1 + g)^{-(a + b + 3)} dg \\
+&= \frac{\Beta(a + 2, b + 2)}{\Beta(a + 1, b + 1)} \\
+&= \frac{\Gamma(a + 2) \Gamma(b + 2)}{\Gamma(a + b + 4)} \frac{\Gamma(a + b + 2)}{\Gamma(a + 1) \Gamma(b + 1)} \\
+&=  \frac{(a + 1) \cancel{\Gamma(a + 1)} (b + 2) \cancel{\Gamma(b + 1)}}{(a + b + 3) (a + b + 2) \cancel{\Gamma(a + b + 2)}} \frac{\cancel{\Gamma(a + b + 2)}}{\cancel{\Gamma(a + 1)} \cancel{\Gamma(b + 1)}} \\
+&= \frac{(a + 1) (b + 1)}{(a + b + 3) (a + b + 2)}
+\end{array}
+\end{equation*}
+
+using the well-known property of gamma functions that $\Gamma(n + 1) = n \Gamma(n)$.
+
+Optimal choices of $a$ and $b$ are $a = -\frac{3}{4}$ and $b=\frac{n-p}{2} - 2 - a$.
+
+\begin{equation*}
+\begin{array}{rl}
+q^*_g(a, b) &\propto \exp \{(\frac{n}{2} + b) \log (g) + [-(a + 1) - (b + 1)] \log{(1 + g)} \\
+&\qquad \quad \frac{1 + g}{g} \E [\frac{1}{1 \sigma^2}] \E[\vbeta^\top \Gamma^\top \mX^\top \mX \Gamma \vbeta - 2 \mX \Gamma \vbeta^\top \vy + \vy^\top \vy] \} \\
+&\propto \exp \{ (\frac{p}{2} + b) \log (g) - [(a + 1) + (b + 1)] \log (1 + g) - \frac{1}{g}[\tr(\mSigma_{q(\vbeta)} + \| \mX \vmu_{q(\vbeta)} \|^2)] \} \\
+&= g^{v-1} (\lambda + g)^{\mu - 1} \exp{\left (-\frac{\beta}{g}\right )}
+\end{array}
+\end{equation*}
+
+which is the special function ET II 234 (13) a when $\Re(1 - \mu) > \Re(\nu) > 0, | \arg \lambda | < \pi$. Here
+$v = \frac{p}{2} + b + 1, 1 - \mu = (a + b + 2)$. Choose $a = \frac{3}{4}, b = \frac{n - p}{2} - 2 - a$.
+
+\begin{equation*}
+\begin{array}{rl}
+q^*_\gamma (p) &\propto \exp \{ \quad \frac{n}{2} \log |\mX^\top \mGamma \mX|
+															+ \half \E[\frac{1}{\sigma^2}] \E[\frac{1 + g}{g}] 
+																\E[\vbeta^\top \mGamma^\top \mX^\top \mX \mGamma \vbeta - 2 \mX \mGamma \vbeta^\top y]\} \\
+&= \exp \{\quad \frac{n}{2} \log{|\mX^\top \mX|} \vone^\top \log \vgamma - \half [\log (\beta_{q(\sigma^2)}) - \phi(\alpha_{q(\sigma^2)})] \\
+&\qquad \quad + |2 \pi (\mX^\top \Gamma \mX)^{-1}|^{1/2} \exp(-\half \vy^\top \mGamma \mX^\top (\mX^\top \mGamma \mX)^{-1} \mX \mGamma \vy) \}
+\end{array}
+\end{equation*}
+
+We will use the logit trick $\frac{\exp(\eta)}{1 + \exp(\eta)}$ to turn this into a likelihood.
+
+\begin{equation*}
+\begin{array}{rl}
+q^*_\vbeta(\vmu_{q(\vbeta)}, \mSigma_{q(\vbeta)}) &\propto \exp \{ -\half \E [\frac{1}{\sigma^2}] \vbeta^\top \E[ \mGamma^\top \mX^\top \mX \mGamma ] \vbeta - 2 \mX \E \mGamma \vbeta^\top \vy \} \\
+&= \exp\{ -\half \frac{\alpha_{q(\sigma^2)}}{\beta_{q(\sigma^2)}} [\vbeta^\top \mX^\top \mX \odot \E[\vgamma \vgamma^\top] \vbeta - 2 \mX \E \mGamma \vbeta^\top \vy] \} \\
+&= \exp\{ -\half \frac{\alpha_{q(\sigma^2)}}{\beta_{q(\sigma^2)}} [\vbeta^\top \mX^\top \mX \odot \diag{(\vp (\vone - \vp))} \vbeta - 2 \mX \E \mGamma \vbeta^\top \vy] \}
+\end{array}
+\end{equation*}
+
+\begin{equation*}
+q^*_{\sigma^2}(\alpha_{q(\sigma^2)}, \beta_{q(\sigma^2)}) = 
+\end{equation*}
 
 \section{Appendix -- Variational Bayes with a different prior, with model selection}
 
