@@ -28,185 +28,6 @@
 
 \begin{document}
 
-\section{Appendix -- Assignment 3 -- Bayesian Data Analysis}
-
-Consider the model $\vy | \vbeta, \sigma^2 \sim N_n(\mX \vbeta, \sigma^2 \mI)$ with priors
-\begin{equation*}
-\begin{array}{ll}
-\vbeta | \sigma^2, g &\sim N_p(\vzero, g \sigma^2(\mX^\top \mX)^{-1}) \\
-p(\sigma^2) &= (\sigma^2)^{-1} I(\sigma^2 > 0) \\
-p(g) &= \frac{g^b (1 + g)^{-a - b - 2}}{\text{Beta}(a + 1, b + 1)} I(g > 0)
-\end{array}
-\end{equation*}
-
-Assume $\vx_j^\top\vone = \vzero$, and $\vx_j^\top \vx_j / n = 1$, $1 \leq j \leq p$.
-Furthermore, assume $\vy^\top \vone = \vzero, \vy^\top \vy / n  = 1, n > p, (\mX^\top \mX)^{-1}$ exists.
-
-\subsection{Question 1}
-
-Show that $\int \exp{(-\half \vx^\top \mA \vx + \vb^\top \vx)} = |2 \pi \mSigma|^{\half} \exp{\{ -\half \vmu^\top \mSigma^{-1} \vmu \}}$ where $\vmu = \mA^{-1} \vb$ and $\mSigma = \mA^{-1}$.
-
-Idea: Complete the square of the argument, then integrate the resulting normal to 1.
-
-\begin{equation*}
-\begin{array}{ll}
--\half \vx^\top \mA \vx + \vb^\top \vx &= -\half (\vx^\top \mA \vx - 2 \vb^\top \vx) \\
-&= -\half (\vx^\top - 2 \vb^\top \mA^{-1})^\top \mA \vx
-\end{array}
-\end{equation*}
-
-Now, to remind ourselves how to complete the square, let's look at the univariate case.
-
-\begin{equation*}
-\begin{array}{rcl}
-& ax^2 \mp bx &= 0 \\
-& a(x^2 \mp bx) &= 0 \\
-& a(x \mp \frac{b}{2a})^2 + k &= 0 \\
-& a(x^2 \pm \frac{b}{a} x + \frac{b^2}{4a^2}) + k &= 0 \\
-\therefore & k &= \pm \frac{b^2}{4a}
-\end{array}
-\end{equation*}
-
-Similiarly,
-
-\begin{equation*}
-\begin{array}{ll}
--\half \vx^\top \mA \vx + \vb^\top \vx &= -\half(\vx^\top -2\vb^\top \mA^{-1})^\top \mA \vx \\
-&= -\half [(\vx^\top - \vb \mA^{-1})^\top \mA (\vx - \vb \mA^{-1}) + \vb^\top \mA^{-1} \mA \mA^{-1} \vb] \\
-&= -\half [(\vx - \vmu)^\top \mSigma^{-1} (\vx - \vmu) + \vmu^\top \mSigma^{-1} \vmu]
-\end{array}
-\end{equation*}
-
-So
-\begin{equation*}
-\int \exp{(-\half \vx^\top \mA \vx + \vb^\top \vx)} d\vx = |2 \pi \mSigma|^{\half} \exp{(-\half \vmu^\top \mSigma^{-1} \vmu)}
-\end{equation*}
-as required.
-\subsection{Question 2}
-
-rtp: $p(\vy | \sigma^2, g) = \exp{\{ - \frac{n}{2} \log (2 \pi \sigma^2) - \frac{p}{2} \log(1 + g) - \frac{1}{2 \sigma^2} \| \vy \|^2  + \frac{g}{2 \sigma^2 (1 + g)} \vy^\top \mX (\mX^\top \mX)^{-1} \mX^\top \vy \}}$
-
-\begin{equation*}
-\begin{array}{ll}
-p(\vy | \sigma^2, g) &= \int_{\bR^p} p(\vy | \vbeta, \sigma^2) p(\vbeta | \sigma^2, g) d \vbeta \\
-&= \int k \exp{\{ -\half (\vy - \mX \vbeta)^\top \sigma^{-2} \mI (\vy - \mX \vbeta) - \half \vbeta^\top \vbeta \}} d \vbeta - \frac{1}{2 \sigma^2} (\vy - \mX \vbeta)^\top (\vy - \mX \vbeta) -\half \vbeta^\top \vbeta d \vbeta \\
-&= -[\frac{1}{2 \sigma^2} \vy^\top \vy - \frac{\vy^\top \mX \vbeta}{\sigma^2} + \mX \vbeta^\top \mX \vbeta] - \half \vbeta^\top \vbeta
-\end{array}
-\end{equation*}
-
-Let $\vmu = -\vy^\top \mX$, $\mA = \mX^\top \mX$. Then the above becomes
-
-\begin{equation*}
-\begin{array}{ll}
-&= k \exp{ \{ \frac{1}{2 \sigma^2} \| \vy \|^2 - \frac{1}{2 \sigma^2} \vy^\top \mX (\mX^\top \mX)^{-1} \mX^\top \vy \} }
-\end{array}
-\end{equation*}
-
-\subsection{Question 3}
-
-rtp: $R^2 = \frac{\vy^\top \mX (\mX^\top \mX)^{-1} \mX^\top \vy}{\| \vy \|^2}$
-
-\begin{equation*}
-\begin{array}{ll}
-R^2 &= 1 - \frac{(\vy - \hat{\vy})^\top (\vy - \hat{\vy})}{\vy^\top \vy} \\
-&= \frac{\vy^\top \vy - (\vy - \hat{\vy})^\top (\vy - \hat{\vy})}{\vy^\top \vy} \\
-&= \frac{\cancel{\vy^\top \vy} - [\cancel{\vy^\top \vy} - 2 \vy^\top \hat{\vy} + \hat{\vy}^\top \hat{\vy}]}{\vy^\top \vy} \\
-&= \frac{2 \vy^\top \hat{\vy} - \hat{\vy}^\top \hat{\vy}}{\vy^\top \vy}
-\end{array}
-\end{equation*}
-
-Now $\hat{\vy} = \mX (\mX^\top \mX)^{-1} \mX^\top \vy$ and
-\begin{equation*}
-\begin{array}{ll}
-\vy &= \vy - \hat{\vy} + \hat{\vy} \\
-&= [\mI - \mX (\mX^\top \mX)^{-1} \mX^\top] \vy + \mX (\mX^\top \mX)^{-1} \mX^\top \vy.
-\end{array}
-\end{equation*}
-
-So the above becomes
-
-\begin{equation*}
-\begin{array}{ll}
-&= \frac{2[(\mI - \mH) \vy + \mH \vy]^\top \mH \vy - \mH \vy^\top \mH \vy}{\vy^\top \vy} \\
-&= \frac{\mH \vy^\top \mH \vy}{\vy^\top \vy} \\
-&= \frac{\vy^\top \mX (\mX^\top \mX)^{-1} \mX^\top \vy}{\| \vy \|^2} \text{ as required. } (\text{as } \mH^2 = \mH).
-\end{array}
-\end{equation*}
-
-\subsection{Question 4}
-\begin{equation*}
-\begin{array}{ll}
-p(\vy | g) &= \int_0^\infty p(\vy | \sigma^2, g) p(\sigma^2) d \sigma^2 \\
-&= \int_0^\infty \exp{\{ -\frac{n}{2} \log (2 \pi \sigma^2) - \frac{p}{2} \log(1 + g)
-	 - \frac{1}{2 \sigma^2} \| \vy \|^2
-	 + \frac{g}{2 \sigma^2 (1 + g)} \vy^\top \mX (\mX^\top \mX)^{-1} \mX^\top \vy \}}
-	 (\sigma^2)^{-1} I(\sigma^2 > 0) d \sigma^2.
-\end{array}
-\end{equation*}
-
-Recall that $\vy^\top \mX(\mX^\top \mX)^{-1} \mX^\top \vy = \| \vy \|^2 R^2$. So
-\begin{equation*}
-\begin{array}{ll}
-& \| \vy \|^2 -\frac{g}{1 + g} \vy^\top \mX (\mX^\top \mX)^{-1} \mX^\top \vy \\
-&= \| \vy \|^2 \left(1 - \frac{g}{1 + g}R^2 \right) \\
-&= \| \vy \|^2 \left(\frac{1 + g - g}{1 + g} R^2 \right) \\
-&= \| \vy \|^2 \left\{ \frac{1}{1 + g} [ 1 + g(1 - R^2) ] \right\}
-\end{array}
-\end{equation*}
-
-\begin{equation*}
-\begin{array}{ll}
-&= \int_0^\infty 2^{-\frac{n}{2}} (\pi)^{-\frac{n}{2}} (1 + g)^{-\frac{p}{2}} \exp{\{ \| \vy \|^2 \{ \frac{1}{1 + g} [1 + g(1 - R^2)] \}} ] \}
-\end{array}
-\end{equation*}
-
-Let $\alpha = -\frac{n}{2}, \beta = \half [\| \vy \|^2 \{ \frac{1}{1 + g} [1 + g(1 - R^2)] \}]$.
-\begin{equation*}
-\begin{array}{ll}
-&= \cancel{2^{- \frac{n}{2}}} (\pi)^{-\frac{n}{2}} (1 + g)^{-\frac{p}{2}} \frac{1}{\cancel{2^{-n/2}}} \frac{1}{(1 + g)^{-\frac{n}{2}}} \frac{1}{\| \vy \|^n} [1 + g(1 - R^2)]^{-\frac{n}{2}} \\
-&= \frac{\gamma(\frac{n}{2})}{\pi^{\frac{n}{2}} \| \vy \|^n} (1 + g)^{\frac{n - p}{2}} [1 + g(1 - R^2)]^{-\frac{n}{2}}
-\end{array}
-\end{equation*}
-
-as required, modulo the $\frac{1}{\sigma^2}$ above which should be $\sigma^2$ somehow, sign error in the
-exponent.
-
-\subsection{Question 5}
-
-Assume $b = (\frac{n - p}{2}) - 2 - a$.
-
-rtp: $p(\vy) = \frac{\Gamma(\frac{n}{2})}{\pi^{n/2} \| \vy \|^n} \frac{\text{Beta}(\frac{p}{2} + a + 1, b + 1)}{\text{Beta}(a + 1, b + 1)} (1 - R^2)^{-(b + 1)}$
-
-\begin{equation*}
-\begin{array}{ll}
-p(y) &= \int_0^\infty p(y|g) p(g) dg \\
-&= \int_0^\infty \frac{\Gamma(\frac{n}{2})}{\pi^{n/2} \| y \|^n} (1 + g)^{\frac{n - p}{2}}[1 + g(1 - R^2)]^{-\frac{n}{2}} \frac{g^b (1 + g)^{-a - b - 2}}{\text{Beta}(a + 1, b + 1)} I(g > 0) dg \\
-&= \frac{\Gamma(\frac{n}{2})}{\text{Beta}(a + 1, b + 1) \pi^{n/2} \| y \|^n}
-\int_0^\infty \frac{g^b (1 + g)^{(n - p)/2}}{(1 + g)^{a - b - 2}} \frac{1}{[1 + g(1 - R^2)]^{n/2}} dg
-\end{array}
-\end{equation*}
-
-Let $\mu = b + 1$. Then
-
-\begin{equation*}
-\begin{array}{ll}
-&=\frac{\Gamma(\frac{n}{2})}{\text{Beta}(a + 1,  b + 1) \pi^(n/2) \| y \|^n}
-\int_0^\infty \frac{g^b(1 + g)^{(n - p)/2}}{(1 + g)^{(a - b - 2)}} \frac{1}{[1 + g(1 - R^2)]} dg \\
-&= \frac{\Gamma(\frac{n}{2})}{\text{Beta(a + 1, b + 1)} \pi^{n/2) \| y \|^n}}
-\int_0^\infty \frac{g^{\mu - 1}}{[1 + g (1 - R^2)]^{n/2}} dg
-\end{array}
-\end{equation*}
-
-Now, $\int_0^\infty \frac{g^{\mu - 1}}{(1 + \beta g)^\nu} dg = \beta^{-\mu} \text{Beta}(\mu, \nu - \mu), \text{ for } \mu > 0, \nu > 0, \nu > \mu$.
-\begin{equation*}
-\begin{array}{ll}
-&= \frac{\Gamma(\frac{n}{2})}{\text{Beta}(a + 1, b + 1) \pi^{n / 2} \| y \|^n} (1 - R^2)^{-(b + 1)} \text{Beta}(b + 1, \frac{n}{2} - b + 1) \\
-&= \frac{\Gamma(\frac{n}{2})}{\text{Beta}(a + 1, b + 1) \pi^{n / 2} \| y \|^n} (1 - R^2)^{-(b + 1)} \text{Beta}(\frac{p}{2} + a + 1, b + 1)
-\end{array}
-\end{equation*}
-
-by the symmetry of beta functions and the definitions of $a$ and $b$.
-
 \section{Variational Bayes with a different prior}
 
 Consider the linear model
@@ -266,13 +87,12 @@ $\alpha_{q(\sigma^2)} = \frac{n + p}{2}$ and $\beta_{q(\sigma^2)} = \frac{1}{2} 
 
 \subsection{$q(g)$}
 \begin{align*}
-q(g) &\propto \exp \E_{-g} \left\{-\frac{p}{2} \log g - \frac{1}{g} \frac{1}{2 \sigma^2} \vbeta^\top \mX^\top \mX \vbeta + b \log g - (a + b + 2) \log(1 + g) \right\} \\
-&= \exp \left \{ -\frac{p}{2} \log g - \frac{1}{2} \frac{1}{g} \E \left[ \frac{1}{\sigma^2} \right] \E (\mX \vbeta)^\top (\mX \vbeta) + b \log g - (a + b + 2) \log(1 + g) ] \right \} \\
-&= \exp \left \{ -\frac{p}{2} \log g - \frac{1}{2} \frac{1}{g} \tau_{\sigma^2} \tr[(\mSigma_{q(\vbeta)} + \vmu_{q(\vbeta)} \vmu_{q(\vbeta)}^T) \mX^\top \mX] + b \log g - (a + b + 2) \log(1 + g) ] \right \} \\
-&= \exp \left \{ \left(b - \frac{p}{2}\right) \log g - \frac{1}{g} \frac{1}{2} \left[\tau_{\sigma^2} (1 + \tau_g)^{-1} \vy^\top \mX^\top \cancel{(\mX^\top \mX)^{-1}} \cancel{\mX^\top \mX} (\mX^\top \mX)^{-1} \mX \vy + \tr{[\tau_{\sigma^2}^{-1} (1 + \tau_g)^{-1} \cancel{\mX^\top \mX} \cancel{(\mX^\top \mX)^{-1}}]} \right] \right \} \\
-& \quad \quad \qquad	- (a + b + 2) \log(1 + g)  \biggl \} \\
-&= \exp \left \{ \left(b - \frac{p}{2}\right) \log g - \frac{1}{g} \frac{1}{2} (1 + \tau_g)^{-1} (\tau_{\sigma^2} \|\vy\|^2 R^2 + p)
-	- (a + b + 2) \log(1 + g)  \right \}
+q(g) &\propto \exp \left\{ \E_{-g} \left[-\frac{p}{2} \log g - \frac{1}{g} \frac{1}{2 \sigma^2} \vbeta^\top \mX^\top \mX \vbeta + b \log g - (a + b + 2) \log(1 + g) \right] \right\} \\
+&= \exp \left \{ \left(b - \frac{p}{2}\right) \log g  - (a + b + 2) \log(1 + g) - \frac{1}{g} \frac{1}{2} \tau_{\sigma^2} \tr[(\mSigma_{q(\vbeta)} + \vmu_{q(\vbeta)} \vmu_{q(\vbeta)}^T) \mX^\top \mX] \right \} \\
+&= \exp \Biggl \{ \left(b - \frac{p}{2}\right) \log g - (a + b + 2) \log(1 + g) \\
+& \quad \quad \qquad  - \frac{1}{g} \frac{1}{2} \left[\tau_{\sigma^2} (1 + \tau_g)^{-2} \vy^\top \mX^\top \cancel{(\mX^\top \mX)^{-1}} \cancel{\mX^\top \mX} (\mX^\top \mX)^{-1} \mX \vy + \cancel{\tau_{\sigma^2}} \tr{[\cancel{\tau_{\sigma^2}^{-1}} (1 + \tau_g)^{-1} \cancel{\mX^\top \mX} \cancel{(\mX^\top \mX)^{-1}}]} \right]	\biggl \} \\
+&= \exp \left \{ \left(b - \frac{p}{2}\right) \log g - (a + b + 2) \log(1 + g) - \frac{1}{g} \frac{1}{2} (1 + \tau_g)^{-1} [\tau_{\sigma^2} (1 + \tau_g)^{-1} n R^2 + p]
+	  \right \}
 \end{align*}
 
 So setting
@@ -510,6 +330,184 @@ q(g) &\propto \exp \left\{ \E_{-g} [-\half \log g - \frac{1}{g} \frac{1}{2 \sigm
 
 \section{Collapsed Variational Bayes}
 
+\section{Appendix -- Assignment 3 -- Bayesian Data Analysis}
+
+Consider the model $\vy | \vbeta, \sigma^2 \sim N_n(\mX \vbeta, \sigma^2 \mI)$ with priors
+\begin{equation*}
+\begin{array}{ll}
+\vbeta | \sigma^2, g &\sim N_p(\vzero, g \sigma^2(\mX^\top \mX)^{-1}) \\
+p(\sigma^2) &= (\sigma^2)^{-1} I(\sigma^2 > 0) \\
+p(g) &= \frac{g^b (1 + g)^{-a - b - 2}}{\text{Beta}(a + 1, b + 1)} I(g > 0)
+\end{array}
+\end{equation*}
+
+Assume $\vx_j^\top\vone = \vzero$, and $\vx_j^\top \vx_j / n = 1$, $1 \leq j \leq p$.
+Furthermore, assume $\vy^\top \vone = \vzero, \vy^\top \vy / n  = 1, n > p, (\mX^\top \mX)^{-1}$ exists.
+
+\subsection{Question 1}
+
+Show that $\int \exp{(-\half \vx^\top \mA \vx + \vb^\top \vx)} d \vx = |2 \pi \mSigma|^{\half} \exp{\{ -\half \vmu^\top \mSigma^{-1} \vmu \}}$ where $\vmu = \mA^{-1} \vb$ and $\mSigma = \mA^{-1}$.
+
+Idea: Complete the square of the argument, then integrate the resulting normal to 1.
+
+\begin{equation*}
+\begin{array}{ll}
+-\half \vx^\top \mA \vx + \vb^\top \vx &= -\half (\vx^\top \mA \vx - 2 \vb^\top \vx) \\
+&= -\half (\vx^\top - 2 \vb^\top \mA^{-1})^\top \mA \vx
+\end{array}
+\end{equation*}
+
+Now, to remind ourselves how to complete the square, let's look at the univariate case.
+
+\begin{equation*}
+\begin{array}{rcl}
+& ax^2 \mp bx &= 0 \\
+& a(x^2 \mp bx) &= 0 \\
+& a(x \mp \frac{b}{2a})^2 + k &= 0 \\
+& a(x^2 \pm \frac{b}{a} x + \frac{b^2}{4a^2}) + k &= 0 \\
+\therefore & k &= \pm \frac{b^2}{4a}
+\end{array}
+\end{equation*}
+
+Similiarly,
+
+\begin{equation*}
+\begin{array}{ll}
+-\half \vx^\top \mA \vx + \vb^\top \vx &= -\half(\vx^\top -2\vb^\top \mA^{-1})^\top \mA \vx \\
+&= -\half [(\vx^\top - \vb \mA^{-1})^\top \mA (\vx - \vb \mA^{-1}) + \vb^\top \mA^{-1} \mA \mA^{-1} \vb] \\
+&= -\half [(\vx - \vmu)^\top \mSigma^{-1} (\vx - \vmu) + \vmu^\top \mSigma^{-1} \vmu]
+\end{array}
+\end{equation*}
+
+So
+\begin{equation*}
+\int \exp{(-\half \vx^\top \mA \vx + \vb^\top \vx)} d\vx = |2 \pi \mSigma|^{\half} \exp{(-\half \vmu^\top \mSigma^{-1} \vmu)}
+\end{equation*}
+as required.
+\subsection{Question 2}
+
+rtp: $p(\vy | \sigma^2, g) = \exp{\{ - \frac{n}{2} \log (2 \pi \sigma^2) - \frac{p}{2} \log(1 + g) - \frac{1}{2 \sigma^2} \| \vy \|^2  + \frac{g}{2 \sigma^2 (1 + g)} \vy^\top \mX (\mX^\top \mX)^{-1} \mX^\top \vy \}}$
+
+\begin{equation*}
+\begin{array}{ll}
+p(\vy | \sigma^2, g) &= \int_{\bR^p} p(\vy | \vbeta, \sigma^2) p(\vbeta | \sigma^2, g) d \vbeta \\
+&= \int k \exp{\{ -\half (\vy - \mX \vbeta)^\top \sigma^{-2} \mI (\vy - \mX \vbeta) - \half \vbeta^\top \vbeta \}} d \vbeta - \frac{1}{2 \sigma^2} (\vy - \mX \vbeta)^\top (\vy - \mX \vbeta) -\half \vbeta^\top \vbeta d \vbeta \\
+&= -[\frac{1}{2 \sigma^2} \vy^\top \vy - \frac{\vy^\top \mX \vbeta}{\sigma^2} + \mX \vbeta^\top \mX \vbeta] - \half \vbeta^\top \vbeta
+\end{array}
+\end{equation*}
+
+Let $\vmu = -\vy^\top \mX$, $\mA = \mX^\top \mX$. Then the above becomes
+
+\begin{equation*}
+\begin{array}{ll}
+&= k \exp{ \{ \frac{1}{2 \sigma^2} \| \vy \|^2 - \frac{1}{2 \sigma^2} \vy^\top \mX (\mX^\top \mX)^{-1} \mX^\top \vy \} }
+\end{array}
+\end{equation*}
+
+\subsection{Question 3}
+
+rtp: $R^2 = \frac{\vy^\top \mX (\mX^\top \mX)^{-1} \mX^\top \vy}{\| \vy \|^2}$
+
+\begin{equation*}
+\begin{array}{ll}
+R^2 &= 1 - \frac{(\vy - \hat{\vy})^\top (\vy - \hat{\vy})}{\vy^\top \vy} \\
+&= \frac{\vy^\top \vy - (\vy - \hat{\vy})^\top (\vy - \hat{\vy})}{\vy^\top \vy} \\
+&= \frac{\cancel{\vy^\top \vy} - [\cancel{\vy^\top \vy} - 2 \vy^\top \hat{\vy} + \hat{\vy}^\top \hat{\vy}]}{\vy^\top \vy} \\
+&= \frac{2 \vy^\top \hat{\vy} - \hat{\vy}^\top \hat{\vy}}{\vy^\top \vy}
+\end{array}
+\end{equation*}
+
+Now $\hat{\vy} = \mX (\mX^\top \mX)^{-1} \mX^\top \vy$ and
+\begin{equation*}
+\begin{array}{ll}
+\vy &= \vy - \hat{\vy} + \hat{\vy} \\
+&= [\mI - \mX (\mX^\top \mX)^{-1} \mX^\top] \vy + \mX (\mX^\top \mX)^{-1} \mX^\top \vy.
+\end{array}
+\end{equation*}
+
+So the above becomes
+
+\begin{equation*}
+\begin{array}{ll}
+&= \frac{2[(\mI - \mH) \vy + \mH \vy]^\top \mH \vy - \mH \vy^\top \mH \vy}{\vy^\top \vy} \\
+&= \frac{\mH \vy^\top \mH \vy}{\vy^\top \vy} \\
+&= \frac{\vy^\top \mX (\mX^\top \mX)^{-1} \mX^\top \vy}{\| \vy \|^2} \text{ as required. } (\text{as } \mH^2 = \mH).
+\end{array}
+\end{equation*}
+
+\subsection{Question 4}
+\begin{equation*}
+\begin{array}{ll}
+p(\vy | g) &= \int_0^\infty p(\vy | \sigma^2, g) p(\sigma^2) d \sigma^2 \\
+&= \int_0^\infty \exp{\{ -\frac{n}{2} \log (2 \pi \sigma^2) - \frac{p}{2} \log(1 + g)
+	 - \frac{1}{2 \sigma^2} \| \vy \|^2
+	 + \frac{g}{2 \sigma^2 (1 + g)} \vy^\top \mX (\mX^\top \mX)^{-1} \mX^\top \vy \}}
+	 (\sigma^2)^{-1} I(\sigma^2 > 0) d \sigma^2.
+\end{array}
+\end{equation*}
+
+Recall that $\vy^\top \mX(\mX^\top \mX)^{-1} \mX^\top \vy = \| \vy \|^2 R^2$. So
+\begin{equation*}
+\begin{array}{ll}
+& \| \vy \|^2 -\frac{g}{1 + g} \vy^\top \mX (\mX^\top \mX)^{-1} \mX^\top \vy \\
+&= \| \vy \|^2 \left(1 - \frac{g}{1 + g}R^2 \right) \\
+&= \| \vy \|^2 \left(\frac{1 + g - g}{1 + g} R^2 \right) \\
+&= \| \vy \|^2 \left\{ \frac{1}{1 + g} [ 1 + g(1 - R^2) ] \right\}
+\end{array}
+\end{equation*}
+
+\begin{equation*}
+\begin{array}{ll}
+&= \int_0^\infty 2^{-\frac{n}{2}} (\pi)^{-\frac{n}{2}} (1 + g)^{-\frac{p}{2}} \exp{\{ \| \vy \|^2 \{ \frac{1}{1 + g} [1 + g(1 - R^2)] \}} ] \}
+\end{array}
+\end{equation*}
+
+Let $\alpha = -\frac{n}{2}, \beta = \half [\| \vy \|^2 \{ \frac{1}{1 + g} [1 + g(1 - R^2)] \}]$.
+\begin{equation*}
+\begin{array}{ll}
+&= \cancel{2^{- \frac{n}{2}}} (\pi)^{-\frac{n}{2}} (1 + g)^{-\frac{p}{2}} \frac{1}{\cancel{2^{-n/2}}} \frac{1}{(1 + g)^{-\frac{n}{2}}} \frac{1}{\| \vy \|^n} [1 + g(1 - R^2)]^{-\frac{n}{2}} \\
+&= \frac{\gamma(\frac{n}{2})}{\pi^{\frac{n}{2}} \| \vy \|^n} (1 + g)^{\frac{n - p}{2}} [1 + g(1 - R^2)]^{-\frac{n}{2}}
+\end{array}
+\end{equation*}
+
+as required, modulo the $\frac{1}{\sigma^2}$ above which should be $\sigma^2$ somehow, sign error in the
+exponent.
+
+\subsection{Question 5}
+
+Assume $b = (\frac{n - p}{2}) - 2 - a$.
+
+rtp: $p(\vy) = \frac{\Gamma(\frac{n}{2})}{\pi^{n/2} \| \vy \|^n} \frac{\text{Beta}(\frac{p}{2} + a + 1, b + 1)}{\text{Beta}(a + 1, b + 1)} (1 - R^2)^{-(b + 1)}$
+
+\begin{equation*}
+\begin{array}{ll}
+p(y) &= \int_0^\infty p(y|g) p(g) dg \\
+&= \int_0^\infty \frac{\Gamma(\frac{n}{2})}{\pi^{n/2} \| y \|^n} (1 + g)^{\frac{n - p}{2}}[1 + g(1 - R^2)]^{-\frac{n}{2}} \frac{g^b (1 + g)^{-a - b - 2}}{\text{Beta}(a + 1, b + 1)} I(g > 0) dg \\
+&= \frac{\Gamma(\frac{n}{2})}{\text{Beta}(a + 1, b + 1) \pi^{n/2} \| y \|^n}
+\int_0^\infty \frac{g^b (1 + g)^{(n - p)/2}}{(1 + g)^{a - b - 2}} \frac{1}{[1 + g(1 - R^2)]^{n/2}} dg
+\end{array}
+\end{equation*}
+
+Let $\mu = b + 1$. Then
+
+\begin{equation*}
+\begin{array}{ll}
+&=\frac{\Gamma(\frac{n}{2})}{\text{Beta}(a + 1,  b + 1) \pi^(n/2) \| y \|^n}
+\int_0^\infty \frac{g^b(1 + g)^{(n - p)/2}}{(1 + g)^{(a - b - 2)}} \frac{1}{[1 + g(1 - R^2)]} dg \\
+&= \frac{\Gamma(\frac{n}{2})}{\text{Beta(a + 1, b + 1)} \pi^{n/2) \| y \|^n}}
+\int_0^\infty \frac{g^{\mu - 1}}{[1 + g (1 - R^2)]^{n/2}} dg
+\end{array}
+\end{equation*}
+
+Now, $\int_0^\infty \frac{g^{\mu - 1}}{(1 + \beta g)^\nu} dg = \beta^{-\mu} \text{Beta}(\mu, \nu - \mu), \text{ for } \mu > 0, \nu > 0, \nu > \mu$.
+\begin{equation*}
+\begin{array}{ll}
+&= \frac{\Gamma(\frac{n}{2})}{\text{Beta}(a + 1, b + 1) \pi^{n / 2} \| y \|^n} (1 - R^2)^{-(b + 1)} \text{Beta}(b + 1, \frac{n}{2} - b + 1) \\
+&= \frac{\Gamma(\frac{n}{2})}{\text{Beta}(a + 1, b + 1) \pi^{n / 2} \| y \|^n} (1 - R^2)^{-(b + 1)} \text{Beta}(\frac{p}{2} + a + 1, b + 1)
+\end{array}
+\end{equation*}
+
+by the symmetry of beta functions and the definitions of $a$ and $b$.
 
 \section{Appendix -- A nice theorem.}
 Let
