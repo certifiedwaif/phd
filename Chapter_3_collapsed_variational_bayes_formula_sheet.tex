@@ -78,12 +78,12 @@ q(\sigma^2; \alpha_{q(\sigma^2)}, \beta_{q(\sigma^2)}) &\propto \exp \left \{ \E
 &=  \exp \left \{ {-\left(\frac{n + p}{2} + 1\right) \log \sigma^2 - \frac{1}{2 \sigma^2} \E_{q(\vbeta)} \left[ \vy^\top \vy + \left(1 + \frac{1}{g} \right) \vbeta^\top \mX^\top \mX \vbeta - 2 \vbeta^\top \mX^\top \vy \right]}  \right \}\\
 &=  \exp \left \{ -\left(\frac{n + p}{2} + 1 \right)\log \sigma^2  - \frac{1}{2 \sigma^2} [\vy^\top\vy + \left( 1 + \tau_g \right) \vmu_{q(\vbeta)}^\top \mX^\top \mX \vmu_{q(\vbeta)} + \left( 1 + \tau_g \right) \tr(\mX^\top \mX \mSigma_{q(\vbeta)}) - 2 \vy^\top \mX \vmu_{q(\vbeta)} ] \right \} \\
 &=  \exp \Bigg \{ -\left(\frac{n + p}{2} + 1 \right)\log \sigma^2  - \frac{1}{2 \sigma^2} [\|\vy\|^2 + \cancel{\left( 1 + \tau_g \right)} (1 + \tau_g)^{\cancel{-2}} \vy^\top \mX^\top \cancel{(\mX^\top \mX)^{-1}} \cancel{\mX^\top \mX} (\mX^\top \mX)^{-1} \mX^\top \vy\\
-&\quad \quad \quad \quad + \tau_{\sigma^2} \cancel{\left( 1 + \tau_g \right)} \cancel{\left( 1 + \tau_g \right)^{-1}} \tr(\cancel{\mX^\top \mX} \cancel{(\mX^\top \mX)^{-1}}) - 2 (1 + \tau_g)^{-1} \vy^\top \mX (\mX^\top \mX)^{-1} \mX^\top \vy ] \Bigg \} \\
-&= \exp \left \{ -\left(\frac{n + p}{2} + 1 \right)\log \sigma^2 - \frac{1}{2 \sigma^2} \{n[1 - (1 + \tau_g)^{-1}  R^2] + \tau_{\sigma^2} p \} \right \}
+&\quad \quad \quad \quad + \tau_{\sigma^2}^{-1} \cancel{\left( 1 + \tau_g \right)} \cancel{\left( 1 + \tau_g \right)^{-1}} \tr(\cancel{\mX^\top \mX} \cancel{(\mX^\top \mX)^{-1}}) - 2 (1 + \tau_g)^{-1} \vy^\top \mX (\mX^\top \mX)^{-1} \mX^\top \vy ] \Bigg \} \\
+&= \exp \left \{ -\left(\frac{n + p}{2} + 1 \right)\log \sigma^2 - \frac{1}{2 \sigma^2} \{n[1 - (1 + \tau_g)^{-1}  R^2] + \tau_{\sigma^2}^{-1} p \} \right \}
 \end{align*}
 
 and thus $q^*(\sigma^2) \sim \IG(\alpha_{q(\sigma^2)}, \beta_{q(\sigma^2)})$ where
-$\alpha_{q(\sigma^2)} = \frac{n + p}{2}$ and $\beta_{q(\sigma^2)} = \frac{1}{2} \{n[1 - (1 + \tau_g)^{-1}  R^2] + \tau_{\sigma^2} p \}$.
+$\alpha_{q(\sigma^2)} = \frac{n + p}{2}$ and $\beta_{q(\sigma^2)} = \frac{1}{2} \{n[1 - (1 + \tau_g)^{-1}  R^2] + \tau_{\sigma^2}^{-1} p \}$.
 
 \subsection{$q(g)$}
 \begin{align*}
@@ -98,26 +98,26 @@ q(g) &\propto \exp \left\{ \E_{-g} \left[-\frac{p}{2} \log g - \frac{1}{g} \frac
 So setting
 \begin{align*}
 \nu - 1 &= b - \frac{p}{2} \\
-\beta &= \frac{1}{2} (1 + \tau_g)^{-1} (\tau_{\sigma^2} \|\vy\|^2 R^2 + p) \\
-\mu - 1 &= [(a + 1) + (b + 1)] \\
+\beta &= \frac{1}{2} (1 + \tau_g)^{-1} [\tau_{\sigma^2} (1 + \tau_g)^{-1} n R^2 + p] \\
+\mu - 1 &= (a + b + 2) \\
 \gamma &= 1
 \end{align*}
 
 and solving for $\nu, \beta, \mu$ and $\gamma$ we obtain an ET 234(13)a function (see Identity 7 on 
-3.471 of \cite{Gradshteyn1988},
+page 3.471 of \cite{Gradshteyn1988},
 $\beta^{\frac{\nu - 1}{2} \gamma^{\frac{\nu - 1}{2}}} \Gamma(1 - \mu - \nu) e^{\frac{\beta}{2 \gamma}} W_{\frac{\nu - 1}{2} + \mu, \frac{\nu}{2}}\left(\frac{\beta}{\gamma}\right)$, where $W_{a, b}(x)$ is the
 Whittaker function.
 
 Note that as
 
 \begin{align*}
-\tau_{\sigma^2} = \frac{n + p}{[1 - (1 + \tau_g)^{-1}]\|\vy\|^2 R^2 + p \tau_{\sigma^2}^{-1}}
+\tau_{\sigma^2} = \frac{n + p}{n[1 - (1 + \tau_g)^{-1} R^2] + p \tau_{\sigma^2}^{-1}}
 \end{align*}
 
 solving for $\tau_{\sigma^2}$, we obtain
 
 \begin{align*}
-\tau_{\sigma^2} = \frac{n}{[1 - (1 + \tau_g)^{-1}]\|\vy\|^2 R^2}.
+\tau_{\sigma^2} = \frac{1}{1 - (1 + \tau_g)^{-1} R^2}.
 \end{align*}
 
 \subsection{Variational lower bound}
