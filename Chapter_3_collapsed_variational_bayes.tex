@@ -83,11 +83,12 @@ in Section \ref{sec:conclusion}, we provide a Conclusion and Discussion.
 
 Model selection attempts to balance goodness of fit against model complexity, neither overfitting nor
 underfitting. Several model selection criteria have been proposed to balance these competing concerns, such as
-AIC (\cite{DeLeeuw1992}), BIC (), Mallow's $C_p$ and DIC. As \cite{Breiman1996} and \cite{Efron2013} showed,
-while  the standard formulation of a linear model is unbiased, the goodness of fit of these models is
-numerically  unstable. Breiman showed that by introducing a penalty on the size of the regression co-
-efficients such as  in ridge regression, this numerical stability can be avoided. This reduces the variances
-of the co-efficient estimates, at the expense of introducing some bias --- the bias--variance trade--off.
+AIC (\cite{DeLeeuw1992}), BIC (\cite{Schwarz1978}), Mallow's $C_p$ and DIC. As \cite{Breiman1996} and
+\cite{Efron2013} showed, while  the standard formulation of a linear model is unbiased, the goodness of fit of
+these models is numerically  unstable. Breiman showed that by introducing a penalty on the size of the
+regression co- efficients such as  in ridge regression, this numerical stability can be avoided. This reduces
+the variances of the co-efficient estimates, at the expense of introducing some bias --- the bias--variance
+trade--off.
 
 Consider a normal linear model on $\vy$ with conjugate normal prior on $\vbeta$ with mean centred at $\vzero$,
 and covariance $g \sigma^2 \mX^\top \mX)^{-1}$ where the prior on $g$ is Zellner's g-prior on the covariance
@@ -152,7 +153,7 @@ q_i^*(\vtheta_i) \propto \exp \left \{ \E_{-\vtheta_i} \log p(\vy, \vtheta) \rig
 
 \subsection{Model}
 
-Consider the linear model
+We consider a linear model with a g-prior, as in \cite{Liang2008}. Consider the linear model
 
 \begin{align*}
 \vy | \vbeta, \sigma^2 \sim \N_n(\mX \vbeta, \sigma^2 \mI)
@@ -166,25 +167,15 @@ p(\sigma^2) &= (\sigma^2)^{-1} \I(\sigma^2 > 0) \\
 p(g) &= \frac{g^b (1 + g)^{-(a + b + 2)}}{\Beta(a + 1, b + 1)} \I(g > 0)
 \end{align*}
 
-\subsection{Mean field updates}
-
-\subsubsection{Numerical integration of $\tau_g$}\label{sec:num_int}
-
-Define $\tau_{\sigma^2} \equiv \E_q \left[ \frac{1}{\sigma^2} \right]$ and
-$\tau_g \equiv \E_q \left[ \frac{1}{g} \right]$. Then we calculate $\tau_g$ numerically using an iterative 
-scheme. First, we choose an initial guess $\tau_g = 1$. Then we use this initial guess to generate a new,
-improved guess $\tau_g'$ by performing the numerical integration
+We choose a factored Variational Bayes approximation of the form
 
 \begin{align*}
-\tau_g' \leftarrow \int_0^\infty \frac{1}{g} \exp \left \{ \left(b - \frac{p}{2}\right) \log g
-- (a + b + 2) \log(1 + g)
-- \frac{1}{g} \frac{1}{2} (1 + \tau_g)^{-1} [\tau_{\sigma^2} (1 + \tau_g)^{-1} n R^2 + p]
-	  \right \} dg
+q(\vtheta) = q(\vbeta) q(\sigma^2) q(g).
 \end{align*}
 
-where $\nu - 1 = b - \frac{p}{2}$, 
-$\beta = \frac{1}{2} (1 + \tau_g)^{-1} (\tau_{\sigma^2} n R^2 + p)$, 
-$\mu - 1 = (a + b + 2)$ and $\gamma = 1$. This process continues until convergence.
+Then $q(\vbeta) = \N(\vmu_{q(\vbeta)}, \mSigma_{q(\vbeta)})$, $q(\sigma^2) = \IG(\alpha_{q(\vbeta)}, \beta_{q(\vbeta)})$ and $q(g) = \ldots$
+
+\subsection{Mean field updates}
 
 \begin{algorithm}
 \label{alg:algorithm_one}
@@ -200,6 +191,27 @@ $\mu - 1 = (a + b + 2)$ and $\gamma = 1$. This process continues until convergen
 \STATE $\mSigma_{q(\vbeta)} \leftarrow \tau_{\sigma^2}^{-1} (1 + \tau_{g})^{-1}(\mX^\top \mX)^{-1}$
 \end{algorithmic}
 \end{algorithm}
+
+\subsubsection{Numerical integration of $\tau_g$}\label{sec:num_int}
+
+Define $\tau_{\sigma^2} \equiv \E_q \left[ \frac{1}{\sigma^2} \right]$ and
+$\tau_g \equiv \E_q \left[ \frac{1}{g} \right]$. Then we calculate $\tau_g$ numerically using an iterative 
+scheme. First, we choose an initial guess $\tau_g = 1$. Then we use this initial guess to generate a new,
+improved guess $\tau_g'$ by performing the numerical integration
+
+\begin{align*}
+\tau_g' \leftarrow \int_0^\infty \frac{1}{g} \exp \left \{ \left(b - \frac{p}{2}\right) \log g
+- (a + b + 2) \log(1 + g)
+- \frac{1}{g} \frac{1}{2} (1 + \tau_g)^{-1} [\tau_{\sigma^2} (1 + \tau_g)^{-1} n R^2 + p]
+	  \right \} dg
+\end{align*}
+
+where $\tau_{\sigma^2} = \frac{1}{1 - (1 + \tau_g)^{-1} R^2}$, $\nu - 1 = b - \frac{p}{2}$, 
+$\beta = \frac{1}{2} (1 + \tau_g)^{-1} (\tau_{\sigma^2} n R^2 + p)$, 
+$\mu - 1 = (a + b + 2)$ and $\gamma = 1$. 
+
+
+This process continues until convergence.
 
 \subsection{Structured Variational Bayes}
 
