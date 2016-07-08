@@ -3,6 +3,7 @@
 #include <iostream>
 #include <limits>
 #include <Eigen/Dense>
+#include <gsl/gsl_sf_hyperg.h>
 
 using Eigen::VectorXd;
 using namespace std;
