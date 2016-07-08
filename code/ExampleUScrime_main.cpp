@@ -559,8 +559,88 @@ double moment_h_trapint(double m, double U, double B, double C, size_t N=1000000
 	return val1/val2;
 }
 
-// TODO: Can't implement Z.g.exact or moment.g.exact yet as I'm not sure where to get the whittakerW
-// function from.
+double whittakerW(double z, double kappa, double mu)
+{
+	return exp(-.5*z) * pow(z, mu + .5) * gsl_sf_hyperg_U(mu - kappa + .5, 1 + 2 * mu, z);
+}
+
+// # Calculate the normalizing constant using the exact result
+
+// Z.g.exact <- function(A,B,C) 
+// {
+// 	nu <- A + 1
+// 	mu <- B + 1
+// 	beta <- C
+	
+// 	# Check the conditions under which the result holds
+// 	if ( ((1-mu)>nu)&(nu>0) ) {
+// 		#print("fine")
+// 	} else {
+// 		#print("not fine")
+// 	}
+	
+// 	val1 <- 0.5*(nu-1)*log(beta) + lgamma(1 - mu - nu) + 0.5*beta
+// 	val2 <- Re( whittakerW(beta, 0.5*(nu-1) + mu, -0.5*nu) )
+	
+// 	return( list(val=exp(val1)*val2,val1=val1,val2=val2) )
+// }
+
+// Calculate the normalizing constant using the exact result
+
+struct Z_g_exact_result {
+	double val;
+	double val1;
+	double val2;
+};
+
+Z_g_exact_result Z_g_exact(double A, double B, double C) 
+{
+	auto nu = A + 1;
+	auto mu = B + 1;
+	auto beta = C;
+	
+	// Check the conditions under which the result holds
+	if ( ((1-mu)>nu)&(nu>0) ) {
+		cout << "fine" << endl;
+	} else {
+		cout << "not fine" << endl;
+	}
+	
+	auto val1 = 0.5*(nu-1)*log(beta) + lgamma(1 - mu - nu) + 0.5*beta;
+	auto val2 = whittakerW(beta, 0.5*(nu-1) + mu, -0.5*nu);
+	
+	Z_g_exact_result result = {exp(val1)*val2,val1,val2};
+	return result;
+}
+
+// ################################################################################
+
+// # Calculate the mth moment of q(g) using the exact result
+
+// moment.g.exact <- function(m,A,B,C)
+// {
+// 	res1 <- Z.g.exact(A+m,B,C)
+// 	res2 <- Z.g.exact(A,B,C)
+// 	return(list(val=res1$val/res2$val,res1=res1,res2=res2))
+// }
+
+
+// Calculate the mth moment of q(g) using the exact result
+
+struct moment_g_exact_result {
+	double val;
+	Z_g_exact_result res1;
+	Z_g_exact_result res2;
+};
+
+moment_g_exact_result moment_g_exact(double m, double A, double B, double C)
+{
+	auto res1 = Z_g_exact(A+m,B,C);
+	auto res2 = Z_g_exact(A,B,C);
+	moment_g_exact_result result = {res1.val/res2.val,res1,res2};
+	return result;
+}
+
 
 // ################################################################################
 
@@ -578,7 +658,7 @@ double moment_h_trapint(double m, double U, double B, double C, size_t N=1000000
 
 // Use the plug in approximation for tau
 
-double tau_pluginfunction(uint a, uint n, uint p, double R2)
+double tau_plugin(uint a, uint n, uint p, double R2)
 {
 	auto b = (n-p)/2 - a - 2;
 	auto A = b - p/2;
@@ -587,6 +667,167 @@ double tau_pluginfunction(uint a, uint n, uint p, double R2)
 	auto tau = (1 - R2)*(1 + (0.5*p + a + 1)/b) ;
 	return tau;
 }
+
+// ################################################################################
+
+// # Apply the update for tau_g using trapezoidal integration for ITER iterations
+
+// tau.g.trapint <- function(a,n,p,R2,ITER,N=1000)
+// {
+// 	tau <- tau.plugin(a,n,p,R2)
+	
+// 	b <- (n-p)/2 - a - 2
+// 	A <- b - p/2
+// 	B <- -(n-p)/2
+	
+// 	for (i in 1:ITER) {
+// 		C <- 0.5*n*R2/((1 + tau)*(1 - R2 + tau)) + 0.5*p/(1 + tau)
+// 		tau <- moment.g.trapint(m=-1,A,B,C,N)
+// 	}
+	
+// 	return(tau)		
+// }
+
+
+// Apply the update for tau_g using trapezoidal integration for ITER iterations
+
+double tau_g_trapint(double a, uint n, uint p, double R2, uint ITER, uint N=1000)
+{
+	auto tau = tau_plugin(a,n,p,R2);
+	
+	auto b = (n-p)/2 - a - 2;
+	auto A = b - p/2;
+	auto B = -(n-p)/2;
+	
+	for (auto i = 0; i < ITER; i++) {
+		auto C = 0.5*n*R2/((1 + tau)*(1 - R2 + tau)) + 0.5*p/(1 + tau);
+		tau = moment_g_trapint(-1,A,B,C,N);
+	}
+	
+	return tau;
+}
+
+// ################################################################################
+
+// # Use the Laplace approximation for tau_g
+
+// tau.g.Laplace <- function(a,n,p,R2)
+// {
+// 	A <- 2*a + p
+// 	res <- A*(1 - R2)/(n - A) 
+// 	return(res)
+// }
+
+// Use the Laplace approximation for tau_g
+
+double tau_g_Laplace(double a, uint n, uint p, double R2)
+{
+	auto A = 2*a + p;
+	auto res = A*(1 - R2)/(n - A);
+	return res;
+}
+
+// ################################################################################
+
+// # Apply the update for tau_g using FEL for ITER iterations
+
+// tau.g.FullyExponentialLaplace <- function(a,n,p,R2,ITER)
+// {
+// 	tau <- tau.g.Laplace(a,n,p,R2)
+	
+// 	b <- (n-p)/2 - a - 2
+// 	A <- b - p/2
+// 	B <- -(n-p)/2
+	
+// 	U <-  -(A+B+2)
+	
+// 	for (i in 1:ITER) {
+// 		C <- 0.5*n*R2/((1 + tau)*(1 - R2 + tau)) + 0.5*p/(1 + tau)
+// 		#cat(i,tau,C,"\n")
+// 		tau <- moment.h.FullyExponentialLaplace(m=1,U,B,C)
+// 		#cat(i,tau,C,"\n")
+// 		if (is.na(tau)) {
+// 			tau <- tau.plugin(a,n,p,R2)
+// 			break;
+// 		}
+// 	}
+	
+// 	return(tau)		
+// }
+
+// Apply the update for tau_g using FEL for ITER iterations
+
+double tau_g_FullyExponentialLaplace(double a, uint n, uint p, double R2, uint ITER)
+{
+	auto tau = tau_g_Laplace(a,n,p,R2);
+	
+	auto b = (n-p)/2 - a - 2;
+	auto A = b - p/2;
+	auto B = -(n-p)/2;
+	
+	auto U =  -(A+B+2);
+	
+	for (auto i = 0; i < ITER; i++) {
+		auto C = 0.5*n*R2/((1 + tau)*(1 - R2 + tau)) + 0.5*p/(1 + tau);
+		// #cat(i,tau,C,"\n")
+		cout << i << tau << C << endl;
+		tau = moment_h_FullyExponentialLaplace(1,U,B,C);
+		//  #cat(i,tau,C,"\n")
+		cout << i << tau << C << endl;
+		// TODO: How to signal and cope with failure here?
+		#ifdef FALSE
+		if (is_na(tau)) {
+			tau = tau_plugin(a,n,p,R2);
+			break;
+		}
+		#endif
+	}
+	
+	return tau;
+}
+
+// ################################################################################
+
+// # Apply the update for tau_g using Laplace's method for ITER iterations
+
+// tau.g.IterativeLaplace  <- function(a,n,p,R2,ITER) {
+
+// 	tau <- tau.plugin(a,n,p,R2)
+	
+// 	b <- (n-p)/2 - a - 2
+// 	A <- b - p/2
+// 	B <- -(n-p)/2
+	
+// 	U <-  -(A+B+2)
+	
+// 	for (i in 1:ITER) {
+// 	C <- 0.5*n*R2/((1 + tau)*(1 - R2 + tau)) + 0.5*p/(1 + tau)
+// 	tau <- E.h.Laplace(U,B,C)
+// 	}
+	
+// 	return(tau)	
+// }	
+
+// Apply the update for tau_g using Laplace's method for ITER iterations
+
+double tau_g_IterativeLaplace(double a, uint n, uint p, double R2, uint ITER) {
+
+	auto tau = tau_plugin(a,n,p,R2);
+	
+	auto b = (n-p)/2 - a - 2;
+	auto A = b - p/2;
+	auto B = -(n-p)/2;
+	
+	auto U =  -(A+B+2);
+	
+	for (auto i = 0; i < ITER; i++) {
+		auto C = 0.5*n*R2/((1 + tau)*(1 - R2 + tau)) + 0.5*p/(1 + tau);
+		tau = E_h_Laplace(U,B,C);
+	}
+	
+	return tau;
+}	
+
 
 int main()
 {
