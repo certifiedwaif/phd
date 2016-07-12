@@ -76,7 +76,7 @@ mat diff(mat x)
   return(d);
 }
 
-uvec get_rows(vector<pair<int, int> > pairs)
+uvec get_rows(vector<pair<uint, uint> > pairs)
 {
   uvec row_idx(pairs.size());
   for (uint i = 0; i < pairs.size(); i++) {
@@ -87,7 +87,7 @@ uvec get_rows(vector<pair<int, int> > pairs)
   return(row_idx);
 }
 
-uvec get_cols(vector<pair<int, int> > pairs)
+uvec get_cols(vector<pair<uint, uint> > pairs)
 {
   uvec col_idx(pairs.size());
   for (uint i = 0; i < pairs.size(); i++) {
