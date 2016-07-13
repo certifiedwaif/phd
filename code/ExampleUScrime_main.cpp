@@ -18,8 +18,7 @@ double trapint(VectorXd xgrid, VectorXd fgrid)
 {
 	auto sum = 0.0;
 
-	for (auto i = 0; i < xgrid.size(); i++)
-	{
+	for (auto i = 0; i < xgrid.size(); i++) {
 		sum += 0.5 * (xgrid(i + 1) - xgrid(i)) * (fgrid(i + 1) - fgrid(i));
 	}
 
@@ -32,14 +31,12 @@ double trapint(VectorXd xgrid, VectorXd fgrid)
 VectorXd solveQuad(double a, double b, double c)
 {
 	VectorXd val(2);
-	auto disc = b*b - 4*a*c;
-	if (disc < 0)
-	{
+	auto disc = b*b - 4.*a*c;
+	if (disc < 0) {
 		val << NEGATIVE_INFINITY, NEGATIVE_INFINITY;
 	}
-	else
-	{
-		val << -(-b + sqrt(disc))/(2*a), -(-b - sqrt(disc))/(2*a);
+	else {
+		val << -(-b + sqrt(disc))/(2.*a), -(-b - sqrt(disc))/(2.*a);
 	}
 	return val;
 }
@@ -192,10 +189,10 @@ struct Trapint
 
 VectorXd seq(double L, double R, size_t N)
 {
+	return VectorXd::LinSpaced(L, R, N);
 	VectorXd result(N);
 	auto delta = (R - L) / N;
-	for (uint i = 0; i < N; i++)
-	{
+	for (uint i = 0; i < N; i++) {
 		result(i) = L + delta * i;
 	}
 	return result;
@@ -227,8 +224,7 @@ Trapint Z_g_trapint(double A, double B, double C, size_t N=10000)
 	auto log_qg_curr = log_qg(g_curr,A,B,C);
 	//count = 0
 	//cat(count,g_hat,g_curr,log_qg_curr,log_qg_max,log_qg_curr - log_qg_max,log(TOL),"\n")
-	while ( (log_qg_curr - log_qg_max) > log(TOR) )
-	{
+	while ( (log_qg_curr - log_qg_max) > log(TOR) ) {
 		//cat(count,g_hat,g_curr,log_qg_curr,log_qg_max,log_qg_curr - log_qg_max,log(TOL),"\n")
 		//count = count + 1
 		g_curr = g_curr + delta_1;
@@ -239,15 +235,13 @@ Trapint Z_g_trapint(double A, double B, double C, size_t N=10000)
 	// Loop using steps of size delta to the left until the difference in the
 	// log-densities between the maximum and the current location is smaller
 	// than TOL
-	auto delta_2 = g_hat/4;
-	g_curr  = g_hat/2;
+	auto delta_2 = g_hat/4.;
+	g_curr  = g_hat/2.;
 	log_qg_curr = log_qg(g_curr,A,B,C);
-	while ( (log_qg_curr - log_qg_max) > log(TOL) )
-	{
-		while ((g_curr - delta_2)<=0)
-		{
+	while ( (log_qg_curr - log_qg_max) > log(TOL) ) {
+		while ((g_curr - delta_2)<=0.) {
 			// Reduce the step size if necessary
-			delta_2 = delta_2/5;
+			delta_2 = delta_2/5.;
 		}
 		g_curr = g_curr - delta_2;
 		log_qg_curr = log_qg(g_curr,A,B,C);
@@ -282,8 +276,7 @@ double Z_h_trapint(double U, double B, double C, size_t N=10000)
 	auto h_curr  = h_hat;
 	auto log_qh_curr = log_qh(h_curr,U,B,C);
 
-	while ( (log_qh_curr - log_qh_max)>log(TOL) )
-	{
+	while ( (log_qh_curr - log_qh_max)>log(TOL) ) {
 		h_curr = h_curr + delta;
 		log_qh_curr = log_qh(h_curr,U,B,C);
 	}
@@ -319,7 +312,7 @@ double moment_h_trapint(double m, double U, double B, double C, size_t N=1000000
 
 double whittakerW(double z, double kappa, double mu)
 {
-	return exp(-.5*z) * pow(z, mu + .5) * gsl_sf_hyperg_U(mu - kappa + .5, 1 + 2 * mu, z);
+	return exp(-.5*z) * pow(z, mu + .5) * gsl_sf_hyperg_U(mu - kappa + .5, 1. + 2. * mu, z);
 }
 
 
@@ -339,16 +332,14 @@ Z_g_exact_result Z_g_exact(double A, double B, double C)
 	auto beta = C;
 
 	// Check the conditions under which the result holds
-	if ( ((1-mu)>nu)&(nu>0) )
-	{
+	if ( ((1.-mu)>nu)&(nu>0.) ) {
 		cout << "fine" << endl;
 	}
-	else
-	{
+	else {
 		cout << "not fine" << endl;
 	}
 
-	auto val1 = 0.5*(nu-1)*log(beta) + lgamma(1 - mu - nu) + 0.5*beta;
+	auto val1 = 0.5*(nu-1)*log(beta) + lgamma(1. - mu - nu) + 0.5*beta;
 	auto val2 = whittakerW(beta, 0.5*(nu-1) + mu, -0.5*nu);
 
 	Z_g_exact_result result = {exp(val1)*val2,val1,val2};
@@ -376,31 +367,30 @@ moment_g_exact_result moment_g_exact(double m, double A, double B, double C)
 
 // Use the plug in approximation for tau
 
-double tau_plugin(uint a, uint n, uint p, double R2)
+double tau_plugin(int a, int n, int p, double R2)
 {
-	auto b = (n-p)/2 - a - 2;
-	auto A = b - p/2;
-	auto B = -(n-p)/2;
+	double b = (n-p)/2. - a - 2.;
+	double A = b - p/2.;
+	double B = -(n-p)/2.;
 
-	auto tau = (1 - R2)*(1 + (0.5*p + a + 1)/b) ;
+	double tau = (1. - R2)*(1. + (0.5*p + a + 1.)/b) ;
 	return tau;
 }
 
 
 // Apply the update for tau_g using trapezoidal integration for ITER iterations
 
-double tau_g_trapint(double a, uint n, uint p, double R2, uint ITER, uint N=1000)
+double tau_g_trapint(double a, int n, int p, double R2, uint ITER, uint N=1000)
 {
-	auto tau = tau_plugin(a,n,p,R2);
+	double tau = tau_plugin(a,n,p,R2);
 
-	auto b = (n-p)/2 - a - 2;
-	auto A = b - p/2;
-	auto B = -(n-p)/2;
+	double b = (n-p)/2. - a - 2.;
+	double A = b - p/2.;
+	double B = -(n-p)/2.;
 
-	for (uint i = 0; i < ITER; i++)
-	{
-		auto C = 0.5*n*R2/((1 + tau)*(1 - R2 + tau)) + 0.5*p/(1 + tau);
-		tau = moment_g_trapint(-1,A,B,C,N);
+	for (uint i = 0; i < ITER; i++) {
+		double C = 0.5*n*R2/((1. + tau)*(1. - R2 + tau)) + 0.5*p/(1. + tau);
+		tau = moment_g_trapint(-1.,A,B,C,N);
 	}
 
 	return tau;
@@ -409,29 +399,28 @@ double tau_g_trapint(double a, uint n, uint p, double R2, uint ITER, uint N=1000
 
 // Use the Laplace approximation for tau_g
 
-double tau_g_Laplace(double a, uint n, uint p, double R2)
+double tau_g_Laplace(double a, int n, int p, double R2)
 {
-	auto A = 2*a + p;
-	auto res = A*(1 - R2)/(n - A);
+	double A = 2.*a + p;
+	double res = A*(1. - R2)/(n - A);
 	return res;
 }
 
 
 // Apply the update for tau_g using FEL for ITER iterations
 
-double tau_g_FullyExponentialLaplace(double a, uint n, uint p, double R2, uint ITER)
+double tau_g_FullyExponentialLaplace(double a, int n, int p, double R2, uint ITER)
 {
-	auto tau = tau_g_Laplace(a,n,p,R2);
+	double tau = tau_g_Laplace(a,n,p,R2);
 
-	auto b = (n-p)/2 - a - 2;
-	auto A = b - p/2;
-	auto B = -(n-p)/2;
+	double b = (n-p)/2. - a - 2.;
+	double A = b - p/2.;
+	double B = -(n-p)/2.;
 
-	auto U =  -(A+B+2);
+	double U =  -(A+B+2.);
 
-	for (uint i = 0; i < ITER; i++)
-	{
-		auto C = 0.5*n*R2/((1 + tau)*(1 - R2 + tau)) + 0.5*p/(1 + tau);
+	for (uint i = 0; i < ITER; i++) {
+		double C = 0.5*n*R2/((1. + tau)*(1. - R2 + tau)) + 0.5*p/(1. + tau);
 		// #cat(i,tau,C,"\n")
 		cout << i << tau << C << endl;
 		tau = moment_h_FullyExponentialLaplace(1,U,B,C);
@@ -439,8 +428,7 @@ double tau_g_FullyExponentialLaplace(double a, uint n, uint p, double R2, uint I
 		cout << i << tau << C << endl;
 		// TODO: How to signal and cope with failure here?
 		#ifdef FALSE
-		if (is_na(tau))
-		{
+		if (is_na(tau)) {
 			tau = tau_plugin(a,n,p,R2);
 			break;
 		}
@@ -453,20 +441,19 @@ double tau_g_FullyExponentialLaplace(double a, uint n, uint p, double R2, uint I
 
 // Apply the update for tau_g using Laplace's method for ITER iterations
 
-double tau_g_IterativeLaplace(double a, uint n, uint p, double R2, uint ITER)
+double tau_g_IterativeLaplace(double a, int n, int p, double R2, uint ITER)
 {
 
-	auto tau = tau_plugin(a,n,p,R2);
+	double tau = tau_plugin(a,n,p,R2);
 
-	auto b = (n-p)/2 - a - 2;
-	auto A = b - p/2;
-	auto B = -(n-p)/2;
+	double b = (n-p)/2. - a - 2.;
+	double A = b - p/2.;
+	double B = -(n-p)/2.;
 
-	auto U =  -(A+B+2);
+	double U =  -(A+B+2.);
 
-	for (uint i = 0; i < ITER; i++)
-	{
-		auto C = 0.5*n*R2/((1 + tau)*(1 - R2 + tau)) + 0.5*p/(1 + tau);
+	for (uint i = 0; i < ITER; i++) {
+		double C = 0.5*n*R2/((1. + tau)*(1. - R2 + tau)) + 0.5*p/(1. + tau);
 		tau = E_h_Laplace(U,B,C);
 	}
 
@@ -480,19 +467,18 @@ struct ZE_constants_result
 	VectorXd vpen;
 };
 
-ZE_constants_result ZE_constants(uint n, uint pmax, bool LARGEP = false)
+ZE_constants_result ZE_constants(int n, int pmax, bool LARGEP = false)
 {
-	VectorXd vcon(pmax);
-	VectorXd vpen(pmax);
+	VectorXd vcon(pmax + 1);
+	VectorXd vpen(pmax + 1);
 	ZE_constants_result result;
 
-	for (auto q = 0; q < pmax; q++)
-	{
-		auto con = .5 * (n - q) - 0.75;
+	for (auto q = 0; q < pmax + 1; q++) {
+		double con = .5 * (n - q) - 0.75;
 		auto dof = q;
-		auto pen = gsl_sf_lnbeta(0.5*q + 0.25,con) - gsl_sf_lnbeta(0.25,con);
-		vcon[q] = con;
-		vpen[q] = pen;
+		double pen = gsl_sf_lnbeta(0.5*q + 0.25,con) - gsl_sf_lnbeta(0.25,con);
+		vcon(q) = con;
+		vpen(q) = pen;
 	}
 
 	result.vcon = vcon;
@@ -517,8 +503,12 @@ ZE_exact_result ZE_exact(VectorXd vy, MatrixXd mX)
 	auto mGraycode = graycode.to_MatrixXi();
 	auto vR2 = all_correlations_mX_cpp(vy, mX, 0);
 	VectorXi vq = mGraycode * MatrixXi::Ones(p, 1);
-	// TODO: What type is vq?
-	auto vlog_ZE = -res_con.vcon(vq + 1) * (1.0 - vR2).array().log() + res_con.vpen(vq + 1);
+	VectorXd vlog_ZE(vq.size());
+	for (auto i = 0; i < vlog_ZE.size(); i++) {
+		auto p_gamma = vq(i);
+		// cout << "i " << i << " p_gamma " << p_gamma << endl;
+		vlog_ZE(i) = -res_con.vcon(p_gamma) * log(1.0 - vR2(i)) + res_con.vpen(p_gamma);
+	}
 	ZE_exact_result result = {mGraycode, vR2, vlog_ZE};
 	return result;
 }
@@ -526,66 +516,74 @@ ZE_exact_result ZE_exact(VectorXd vy, MatrixXd mX)
 
 int main()
 {
-	VectorXd vy = parseCSVfile_double("vy.csv");
-	MatrixXd mX = parseCSVfile_double("mX.csv");
-	auto n = mX.rows();
-
-	// Perform the fully Bayesian analysis
-	auto res = ZE_exact(vy, mX);
-	auto logpy = res.vlog_ZE;
-	auto logpy_til = logpy.array() - logpy.maxCoeff();
-
-	// Calculate the marginal variable inclusion probability
-	VectorXd vp = logpy_til.array().exp() / logpy_til.array().exp().sum();
-	auto a = -0.75;
-	VectorXd velbo(res.vR2.size());
-
-	for (auto i = 0; i < res.vR2.size(); i++)
+	try
 	{
-		// Note res$mA contains the gray-code
-		auto p = res.mGraycode.row(i).sum();
-		auto b = (n - p)/2 - a - 2 ;
+		VectorXd vy = parseCSVfile_double("vy.csv");
+		MatrixXd mX = parseCSVfile_double("mX.csv");
+		auto n = mX.rows();
 
-		// Calculate
-		auto A =  n/2 - p - a - 2;
-		auto B = -(n-p)/2;
-		auto U = -(A+B+2);
+		// Perform the fully Bayesian analysis
+		auto res = ZE_exact(vy, mX);
+		auto logpy = res.vlog_ZE;
+		auto logpy_til = logpy.array() - logpy.maxCoeff();
 
-		// Calculate tau_g
-		auto tau_g = tau_g_FullyExponentialLaplace(a,n,p,res.vR2[i],20);
+		// Calculate the marginal variable inclusion probability
+		VectorXd vp = logpy_til.array().exp() / logpy_til.array().exp().sum();
+		auto a = -0.75;
+		VectorXd velbo(res.vR2.size());
 
-		// Calculate the constant C (needed to calculate the normalizing constant for q(g)
-		auto C = 0.5*n*res.vR2[i]/((1 + tau_g)*(1 - res.vR2[i] + tau_g)) + 0.5*p/(1 + tau_g);
+		for (auto i = 0; i < res.vR2.size(); i++) {
+			// Note res$mA contains the gray-code
+			uint p = res.mGraycode.row(i).sum();
+			if (p == 0) continue;
+			double b = (n - p)/2. - a - 2. ;
 
-		// Calculate the
+			// Calculate
+			double A =  n/2. - p - a - 2.;
+			double B = -(n-p)/2.;
+			double U = -(A+B+2.);
+
+			// Calculate tau_g
+			double tau_g = tau_g_FullyExponentialLaplace(a,n,p,res.vR2[i],20);
+
+			// Calculate the constant C (needed to calculate the normalizing constant for q(g)
+			double C = 0.5*n*res.vR2[i]/((1 + tau_g)*(1 - res.vR2[i] + tau_g)) + 0.5*p/(1 + tau_g);
+
+			// Calculate the
 								 // Z.h.Laplace(U,B,C)
-		auto Z = Z_g_trapint(A,B,C,1000).intVal;
+			double Z = Z_g_trapint(A,B,C,1000).intVal;
 
-		// Calculate the lower bound on the log-likelihood
-		velbo[i] = 0.5*p - 0.5*n*log(2*PI) - gsl_sf_lnbeta(a+1,b+1)  - 0.5*n*log(1 + tau_g - res.vR2[i]) ;
-		velbo[i] = velbo[i] - 0.5*(n+p)*log(0.5*(n+p))+ gsl_sf_lngamma(0.5*(n+p)) + C*tau_g + log(Z)  + 0.5*(n-p)*log(1 + tau_g);
+			// Calculate the lower bound on the log-likelihood
+			velbo[i] = 0.5*p - 0.5*n*log(2*PI) - gsl_sf_lnbeta(a+1,b+1)  - 0.5*n*log(1 + tau_g - res.vR2[i]) ;
+			velbo[i] = velbo[i] - 0.5*(n+p)*log(0.5*(n+p))+ gsl_sf_lngamma(0.5*(n+p)) + C*tau_g + log(Z)  + 0.5*(n-p)*log(1 + tau_g);
 
-		cout << i << velbo[i] << tau_g << C << Z << "\n";
+			cout << i << velbo[i] << tau_g << C << Z << "\n";
 
-		// How are failures from Z_g_trapint signalled?
-		// If there is an error stop here and have a look
-		// if (Z.failed) {
-		// 	print("error! press escape and have a look")
-		// 	string ans;
-		// 	cin >> ans;
-		// }
+			// How are failures from Z_g_trapint signalled?
+			// If there is an error stop here and have a look
+			// if (Z.failed) {
+			// 	print("error! press escape and have a look")
+			// 	string ans;
+			// 	cin >> ans;
+			// }
 
+		}
+
+		auto logqy_til = velbo.array() - velbo.maxCoeff();
+		VectorXd vq = logqy_til.array().exp() / logqy_til.array().exp().sum();
+
+		// Calculate the variable inclusion probabilities
+		MatrixXd mGraycode = res.mGraycode.cast<double>();
+		auto vw1 = mGraycode * vp;
+		auto vw2 = mGraycode * vq;
+
+		cout << vw1 << endl;
+		cout << vw2 << endl;
 	}
-
-	auto logqy_til = velbo.array() - velbo.maxCoeff();
-	VectorXd vq = logqy_til.array().exp() / logqy_til.array().exp().sum();
-
-	// Calculate the variable inclusion probabilities
-	auto vw1 = vp.transpose() * res.mGraycode;
-	auto vw2 = vq.transpose() * res.mGraycode;
-
-	cout << vw1 << endl;
-	cout << vw2 << endl;
+	catch (std::runtime_error& e) {
+		cerr << "There was a problem loading the matrix files." << e.what() << endl;
+		return -1;
+	}
 
 	return 0;
 }
