@@ -21,6 +21,7 @@ double trapint(const DenseBase<Derived1>& xgrid, const DenseBase<Derived2>& fgri
 {
 	auto sum = 0.0;
 
+	#pragma omp parallel for simd reduction(+:sum)
 	for (auto i = 0; i < xgrid.size() - 1; i++) {
 		sum += 0.5 * (xgrid(i + 1) - xgrid(i)) * (fgrid(i) + fgrid(i + 1));
 	}
@@ -56,6 +57,7 @@ template <typename Derived>
 VectorXd log_qg(const DenseBase<Derived>& x, double A, double B, double C)
 {
 	VectorXd result(x.size());
+	#pragma omp parallel for simd
 	for (auto i = 0; i < x.size(); i++)
 		result(i) = A*log(x(i)) + B*log(1. + x(i)) - C/x(i);
 	return result;
@@ -73,6 +75,7 @@ template <typename Derived>
 VectorXd log_qh(const DenseBase<Derived>& x, double U, double B, double C)
 {
 	VectorXd result(x.size());
+	#pragma omp parallel for simd
 	for (auto i = 0; i < x.size(); i++)
 		result(i) = U*log(x(i)) + B*log(1. + x(i)) - C*x(i);
 	return result;
@@ -464,6 +467,7 @@ ZE_constants_result ZE_constants(int n, int pmax, bool LARGEP = false)
 	VectorXd vpen(pmax + 1);
 	ZE_constants_result result;
 
+	#pragma omp parallel for simd
 	for (auto q = 0; q < pmax + 1; q++) {
 		double con = .5 * (n - q) - 0.75;
 		auto dof = q;
@@ -495,6 +499,7 @@ ZE_exact_result ZE_exact(VectorXd vy, MatrixXd mX)
 	auto vR2 = all_correlations_mX_cpp(vy, mX, 0, true, true);
 	VectorXi vq = mGraycode * MatrixXi::Ones(p, 1);
 	VectorXd vlog_ZE(vq.size());
+	#pragma omp parallel for simd
 	for (auto i = 0; i < vlog_ZE.size(); i++) {
 		auto p_gamma = vq(i);
 		// cout << "i " << i << " p_gamma " << p_gamma << endl;
@@ -531,10 +536,16 @@ int main()
 			mX = parseCSVfile_double("mX_wage.csv");
 		}
 
+		cout << "vy sum " << vy.sum() << endl;
+		for (auto col_idx = 0; col_idx < mX.cols(); col_idx++)
+			cout << mX.col(col_idx).sum() << " ";
+		cout << endl;
+
 		auto n = mX.rows();
 
 		// Perform the fully Bayesian analysis
 		auto res = ZE_exact(vy, mX);
+		cout << "vR2 sum " << res.vR2.sum() << endl;
 		auto logpy = res.vlog_ZE;
 		auto logpy_til = logpy.array() - logpy.maxCoeff();
 
@@ -543,6 +554,7 @@ int main()
 		auto a = -0.75;
 		VectorXd velbo(res.vR2.size());
 
+		#pragma omp parallel for
 		for (auto i = 0; i < res.vR2.size(); i++) {
 			// Note res$mA contains the gray-code
 			uint p = res.mGraycode.row(i).sum();
