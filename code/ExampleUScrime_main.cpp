@@ -1,5 +1,6 @@
 // ExampleUScrime_main.cpp
 
+#include <ctgmath>
 #include <iostream>
 #include <limits>
 #include <Eigen/Dense>
@@ -9,17 +10,19 @@
 #include "correlation.hpp"
 
 using namespace std;
+using Eigen::DenseBase;
 
 const auto PI  =3.141592653589793238463;
 const auto NEGATIVE_INFINITY = -numeric_limits<double>::infinity();
 
 // Trapezoidal integration over a potentially irregular grid
-double trapint(VectorXd xgrid, VectorXd fgrid)
+template <typename Derived1, typename Derived2>
+double trapint(const DenseBase<Derived1>& xgrid, const DenseBase<Derived2>& fgrid)
 {
 	auto sum = 0.0;
 
-	for (auto i = 0; i < xgrid.size(); i++) {
-		sum += 0.5 * (xgrid(i + 1) - xgrid(i)) * (fgrid(i + 1) - fgrid(i));
+	for (auto i = 0; i < xgrid.size() - 1; i++) {
+		sum += 0.5 * (xgrid(i + 1) - xgrid(i)) * (fgrid(i) + fgrid(i + 1));
 	}
 
 	return sum;
@@ -36,7 +39,7 @@ VectorXd solveQuad(double a, double b, double c)
 		val << NEGATIVE_INFINITY, NEGATIVE_INFINITY;
 	}
 	else {
-		val << -(-b + sqrt(disc))/(2.*a), -(-b - sqrt(disc))/(2.*a);
+		val << (-b + sqrt(disc))/(2.*a), (-b - sqrt(disc))/(2.*a);
 	}
 	return val;
 }
@@ -45,15 +48,16 @@ VectorXd solveQuad(double a, double b, double c)
 // The log the q-density for g
 double log_qg(double x, double A, double B, double C)
 {
-	return A*log(x) + B*log(1 + x) - C/x;
+	return A*log(x) + B*log(1. + x) - C/x;
 }
 
 
-VectorXd log_qg(VectorXd x, double A, double B, double C)
+template <typename Derived>
+VectorXd log_qg(const DenseBase<Derived>& x, double A, double B, double C)
 {
 	VectorXd result(x.size());
 	for (auto i = 0; i < x.size(); i++)
-		result(i) = A*log(x(i)) + B*log(1 + x(i)) - C/x(i);
+		result(i) = A*log(x(i)) + B*log(1. + x(i)) - C/x(i);
 	return result;
 }
 
@@ -61,15 +65,16 @@ VectorXd log_qg(VectorXd x, double A, double B, double C)
 // The log the q-density for h (where h is the inverse of g)
 double log_qh(double x, double U, double B, double C)
 {
-	return U*log(x) + B*log(1 + x) - C*x;
+	return U*log(x) + B*log(1. + x) - C*x;
 }
 
 
-VectorXd log_qh(VectorXd x, double U, double B, double C)
+template <typename Derived>
+VectorXd log_qh(const DenseBase<Derived>& x, double U, double B, double C)
 {
 	VectorXd result(x.size());
 	for (auto i = 0; i < x.size(); i++)
-		result(i) = U*log(x(i)) + B*log(1 + x(i)) - C*x(i);
+		result(i) = U*log(x(i)) + B*log(1. + x(i)) - C*x(i);
 	return result;
 }
 
@@ -79,8 +84,7 @@ double mode_qg(double A, double B, double C)
 {
 	auto result = solveQuad(A+B, A+C, C);
 	if (result(0) > 0.0) return result(0);
-	if (result(1) > 0.0) return result(1);
-	return result(1);
+	else return result(1);
 }
 
 
@@ -89,8 +93,7 @@ double mode_qh(double U, double B, double C)
 {
 	auto result = solveQuad(C, C-B-U, -U);
 	if (result(0) > 0.0) return result(0);
-	if (result(1) > 0.0) return result(1);
-	return result(1);
+	else return result(1);
 }
 
 
@@ -187,18 +190,6 @@ struct Trapint
 	VectorXd log_qg_vg;
 };
 
-VectorXd seq(double L, double R, size_t N)
-{
-	return VectorXd::LinSpaced(L, R, N);
-	VectorXd result(N);
-	auto delta = (R - L) / N;
-	for (uint i = 0; i < N; i++) {
-		result(i) = L + delta * i;
-	}
-	return result;
-}
-
-
 Trapint Z_g_trapint(double A, double B, double C, size_t N=10000)
 {
 	auto TOL = 1.0E-14;
@@ -252,14 +243,17 @@ Trapint Z_g_trapint(double A, double B, double C, size_t N=10000)
 
 	// Calculate a grid between L and R with N points
 	// vg = seq(L,R,,N)
-	VectorXd vg = seq(L, R, N);
+	const VectorXd vg = VectorXd::LinSpaced(N, L, R);
 	auto log_qg_vg = log_qg(vg,A,B,C);
 
 	// Use trapezoidal integration
 	double intVal = trapint(vg,log_qg_vg.array().exp());
 
 	// return(list(intVal=intVal,vg=vg,log_qg_vg=log_qg_vg))
-	Trapint result = {intVal, vg, log_qg_vg};
+	Trapint result;
+	result.intVal = intVal;
+	result.vg = vg;
+	result.log_qg_vg = log_qg_vg;
 	return result;
 }
 
@@ -282,7 +276,7 @@ double Z_h_trapint(double U, double B, double C, size_t N=10000)
 	}
 
 	// vh = seq(L,h_curr,,N)
-	VectorXd vh = seq(L, h_curr, N);
+	const VectorXd vh = VectorXd::LinSpaced(N, L, h_curr);
 	auto log_qh_vh = log_qh(vh,U,B,C);
 	auto intVal = trapint(vh,log_qh_vh.array().exp());
 
@@ -422,17 +416,14 @@ double tau_g_FullyExponentialLaplace(double a, int n, int p, double R2, uint ITE
 	for (uint i = 0; i < ITER; i++) {
 		double C = 0.5*n*R2/((1. + tau)*(1. - R2 + tau)) + 0.5*p/(1. + tau);
 		// #cat(i,tau,C,"\n")
-		cout << i << tau << C << endl;
+		// cout << i << " " << tau << " " << C << endl;
 		tau = moment_h_FullyExponentialLaplace(1,U,B,C);
 		//  #cat(i,tau,C,"\n")
-		cout << i << tau << C << endl;
-		// TODO: How to signal and cope with failure here?
-		#ifdef FALSE
-		if (is_na(tau)) {
+		// cout << i << tau << C << endl;
+		if (isnan(tau) || fabs(tau) == 0.0) {
 			tau = tau_plugin(a,n,p,R2);
 			break;
 		}
-		#endif
 	}
 
 	return tau;
@@ -501,7 +492,7 @@ ZE_exact_result ZE_exact(VectorXd vy, MatrixXd mX)
 	ZE_constants_result res_con = ZE_constants(n, p);
 	Graycode graycode(p);
 	auto mGraycode = graycode.to_MatrixXi();
-	auto vR2 = all_correlations_mX_cpp(vy, mX, 0);
+	auto vR2 = all_correlations_mX_cpp(vy, mX, 0, true, true);
 	VectorXi vq = mGraycode * MatrixXi::Ones(p, 1);
 	VectorXd vlog_ZE(vq.size());
 	for (auto i = 0; i < vlog_ZE.size(); i++) {
@@ -509,7 +500,10 @@ ZE_exact_result ZE_exact(VectorXd vy, MatrixXd mX)
 		// cout << "i " << i << " p_gamma " << p_gamma << endl;
 		vlog_ZE(i) = -res_con.vcon(p_gamma) * log(1.0 - vR2(i)) + res_con.vpen(p_gamma);
 	}
-	ZE_exact_result result = {mGraycode, vR2, vlog_ZE};
+	ZE_exact_result result;
+	result.mGraycode = mGraycode;
+	result.vR2 = vR2;
+	result.vlog_ZE = vlog_ZE;
 	return result;
 }
 
@@ -518,8 +512,25 @@ int main()
 {
 	try
 	{
-		VectorXd vy = parseCSVfile_double("vy.csv");
-		MatrixXd mX = parseCSVfile_double("mX.csv");
+		VectorXd vy;
+		MatrixXd mX;
+
+		const auto SETTING = 2;
+		if (SETTING == 1) {
+			vy = parseCSVfile_double("vy.csv");
+			mX = parseCSVfile_double("mX.csv");
+		}
+
+		if (SETTING == 2) {
+			vy = parseCSVfile_double("vy_bodyfat.csv");
+			mX = parseCSVfile_double("mX_bodyfat.csv");
+		}
+
+		if (SETTING == 3) {
+			vy = parseCSVfile_double("vy_wage.csv");
+			mX = parseCSVfile_double("mX_wage.csv");
+		}
+
 		auto n = mX.rows();
 
 		// Perform the fully Bayesian analysis
@@ -535,7 +546,6 @@ int main()
 		for (auto i = 0; i < res.vR2.size(); i++) {
 			// Note res$mA contains the gray-code
 			uint p = res.mGraycode.row(i).sum();
-			if (p == 0) continue;
 			double b = (n - p)/2. - a - 2. ;
 
 			// Calculate
@@ -557,7 +567,7 @@ int main()
 			velbo[i] = 0.5*p - 0.5*n*log(2*PI) - gsl_sf_lnbeta(a+1,b+1)  - 0.5*n*log(1 + tau_g - res.vR2[i]) ;
 			velbo[i] = velbo[i] - 0.5*(n+p)*log(0.5*(n+p))+ gsl_sf_lngamma(0.5*(n+p)) + C*tau_g + log(Z)  + 0.5*(n-p)*log(1 + tau_g);
 
-			cout << i << velbo[i] << tau_g << C << Z << "\n";
+			// cout << " " << i << " " << velbo[i] << " " << tau_g << " " << C << " " << Z << "\n";
 
 			// How are failures from Z_g_trapint signalled?
 			// If there is an error stop here and have a look
@@ -574,8 +584,8 @@ int main()
 
 		// Calculate the variable inclusion probabilities
 		MatrixXd mGraycode = res.mGraycode.cast<double>();
-		auto vw1 = mGraycode * vp;
-		auto vw2 = mGraycode * vq;
+		auto vw1 = vp.transpose() * mGraycode;
+		auto vw2 = vq.transpose() * mGraycode;
 
 		cout << vw1 << endl;
 		cout << vw2 << endl;
