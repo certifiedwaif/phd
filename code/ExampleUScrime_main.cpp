@@ -21,7 +21,7 @@ double trapint(const DenseBase<Derived1>& xgrid, const DenseBase<Derived2>& fgri
 {
 	auto sum = 0.0;
 
-	#pragma omp parallel for simd reduction(+:sum)
+	#pragma omp parallel for reduction(+:sum)
 	for (auto i = 0; i < xgrid.size() - 1; i++) {
 		sum += 0.5 * (xgrid(i + 1) - xgrid(i)) * (fgrid(i) + fgrid(i + 1));
 	}
@@ -467,7 +467,7 @@ ZE_constants_result ZE_constants(int n, int pmax, bool LARGEP = false)
 	VectorXd vpen(pmax + 1);
 	ZE_constants_result result;
 
-	#pragma omp parallel for simd
+	#pragma omp parallel for
 	for (auto q = 0; q < pmax + 1; q++) {
 		double con = .5 * (n - q) - 0.75;
 		auto dof = q;
@@ -499,7 +499,7 @@ ZE_exact_result ZE_exact(VectorXd vy, MatrixXd mX)
 	auto vR2 = all_correlations_mX_cpp(vy, mX, 0, true, true);
 	VectorXi vq = mGraycode * MatrixXi::Ones(p, 1);
 	VectorXd vlog_ZE(vq.size());
-	#pragma omp parallel for simd
+	#pragma omp parallel for
 	for (auto i = 0; i < vlog_ZE.size(); i++) {
 		auto p_gamma = vq(i);
 		// cout << "i " << i << " p_gamma " << p_gamma << endl;
@@ -517,47 +517,69 @@ int main()
 {
 	try
 	{
-		VectorXd vy;
-		MatrixXd mX;
+		string mX_fname, vy_fname, vR2_fname, vlog_ZE_fname, mGraycode_fname;
 
-		const auto SETTING = 2;
+		const auto SETTING = 5;
 		if (SETTING == 1) {
-			vy = parseCSVfile_double("vy.csv");
-			mX = parseCSVfile_double("mX.csv");
+			mX_fname = "Hitters_mX.csv";
+			vy_fname = "Hitters_vy.csv";
+			vR2_fname = "Hitters_vR2.csv";;
+			vlog_ZE_fname = "Hitters_vlog_ZE.csv";
+			mGraycode_fname = "Hitters_mGraycode.csv";
 		}
 
 		if (SETTING == 2) {
-			vy = parseCSVfile_double("vy_bodyfat.csv");
-			mX = parseCSVfile_double("mX_bodyfat.csv");
+			mX_fname = "bodyfat_mX.csv";
+			vy_fname = "bodyfat_vy.csv";
+			vR2_fname = "bodyfat_vR2.csv";
+			vlog_ZE_fname = "bodyfat_vlog_ZE.csv";
+			mGraycode_fname = "bodyfat_mGraycode.csv";
 		}
 
 		if (SETTING == 3) {
-			vy = parseCSVfile_double("vy_wage.csv");
-			mX = parseCSVfile_double("mX_wage.csv");
+			mX_fname = "Wage_mX.csv";
+			vy_fname = "Wage_vy.csv";
+			vR2_fname = "Wage_vR2.csv";
+			vlog_ZE_fname = "Wage_vlog_ZE.csv";
+			mGraycode_fname = "Wage_mGraycode.csv";
 		}
 
-		cout << "vy sum " << vy.sum() << endl;
-		for (auto col_idx = 0; col_idx < mX.cols(); col_idx++)
-			cout << mX.col(col_idx).sum() << " ";
-		cout << endl;
+		if (SETTING == 4) {
+			mX_fname = "GradRate_mX.csv";
+			vy_fname = "GradRate_vy.csv";
+			vR2_fname = "GradRate_vR2.csv";
+			vlog_ZE_fname = "GradRate_vlog_ZE.csv";
+			mGraycode_fname = "GradRate_mGraycode.csv";
+		}
+
+		if (SETTING == 5) {
+			mX_fname = "USCrime_mX.csv";
+			vy_fname = "USCrime_vy.csv";
+			vR2_fname = "USCrime_vR2.csv";
+			vlog_ZE_fname = "USCrime_vlog_ZE.csv";
+			mGraycode_fname = "USCrime_mGraycode.csv";
+		}
+
+		MatrixXd mX = parseCSVfile_double(mX_fname);
+		VectorXd vy = parseCSVfile_double(vy_fname);
+		VectorXd vR2 = parseCSVfile_double(vR2_fname);
+		VectorXd vlog_ZE = parseCSVfile_double(vlog_ZE_fname);
+		MatrixXd mGraycode = parseCSVfile_double(mGraycode_fname);
 
 		auto n = mX.rows();
-
-		// Perform the fully Bayesian analysis
-		auto res = ZE_exact(vy, mX);
-		cout << "vR2 sum " << res.vR2.sum() << endl;
-		auto logpy = res.vlog_ZE;
+		auto p = mX.cols();
+		auto logpy = vlog_ZE;
 		auto logpy_til = logpy.array() - logpy.maxCoeff();
 
 		// Calculate the marginal variable inclusion probability
 		VectorXd vp = logpy_til.array().exp() / logpy_til.array().exp().sum();
 		auto a = -0.75;
-		VectorXd velbo(res.vR2.size());
+		VectorXd velbo(vR2.size());
 
 		#pragma omp parallel for
-		for (auto i = 0; i < res.vR2.size(); i++) {
+		for (auto i = 0; i < vR2.size(); i++) {
 			// Note res$mA contains the gray-code
-			uint p = res.mGraycode.row(i).sum();
+			uint p = mGraycode.row(i).sum();
 			double b = (n - p)/2. - a - 2. ;
 
 			// Calculate
@@ -566,17 +588,17 @@ int main()
 			double U = -(A+B+2.);
 
 			// Calculate tau_g
-			double tau_g = tau_g_FullyExponentialLaplace(a,n,p,res.vR2[i],20);
+			double tau_g = tau_g_FullyExponentialLaplace(a,n,p,vR2[i],20);
 
 			// Calculate the constant C (needed to calculate the normalizing constant for q(g)
-			double C = 0.5*n*res.vR2[i]/((1 + tau_g)*(1 - res.vR2[i] + tau_g)) + 0.5*p/(1 + tau_g);
+			double C = 0.5*n*vR2[i]/((1 + tau_g)*(1 - vR2[i] + tau_g)) + 0.5*p/(1 + tau_g);
 
 			// Calculate the
 								 // Z.h.Laplace(U,B,C)
 			double Z = Z_g_trapint(A,B,C,1000).intVal;
 
 			// Calculate the lower bound on the log-likelihood
-			velbo[i] = 0.5*p - 0.5*n*log(2*PI) - gsl_sf_lnbeta(a+1,b+1)  - 0.5*n*log(1 + tau_g - res.vR2[i]) ;
+			velbo[i] = 0.5*p - 0.5*n*log(2*PI) - gsl_sf_lnbeta(a+1,b+1)  - 0.5*n*log(1 + tau_g - vR2[i]) ;
 			velbo[i] = velbo[i] - 0.5*(n+p)*log(0.5*(n+p))+ gsl_sf_lngamma(0.5*(n+p)) + C*tau_g + log(Z)  + 0.5*(n-p)*log(1 + tau_g);
 
 			// cout << " " << i << " " << velbo[i] << " " << tau_g << " " << C << " " << Z << "\n";
@@ -595,9 +617,8 @@ int main()
 		VectorXd vq = logqy_til.array().exp() / logqy_til.array().exp().sum();
 
 		// Calculate the variable inclusion probabilities
-		MatrixXd mGraycode = res.mGraycode.cast<double>();
-		auto vw1 = vp.transpose() * mGraycode;
-		auto vw2 = vq.transpose() * mGraycode;
+		auto vw1 = vp.transpose() * mGraycode.cast<double>();
+		auto vw2 = vq.transpose() * mGraycode.cast<double>();
 
 		cout << vw1 << endl;
 		cout << vw2 << endl;
