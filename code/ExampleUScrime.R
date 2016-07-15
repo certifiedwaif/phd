@@ -6,7 +6,7 @@
 
 # Choose a simulation setting
 
-SETTING <- 2
+SETTING <- 1
 
 if (SETTING==1) 
 {
@@ -32,7 +32,7 @@ if (SETTING==2)
 	# Get y vector and X matrix
 	y.t <- matrix(dat2$Bodyfat)
 	X.f <- as.matrix(dat2[,-1]) # note: includes intercept
- 
+
 	varnames <- colnames(X.f)
 }
 
@@ -166,6 +166,7 @@ log.qg <- function(x,A,B,C) {
 # The log the q-density for h (where h is the inverse of g)
 
 log.qh <- function(x,U,B,C) {
+	# cat(x, U, B, C, "\n")
 	return( U*log(x) + B*log(1 + x) - C*x )	
 }
 
@@ -190,6 +191,7 @@ mode.qh <- function(U,B,C) {
 	if (length(res)>1) {
 		res <- res[res>0]
 	}
+	# cat("res ", res, "\n")
 	return(res)
 }
 
@@ -507,9 +509,9 @@ tau.g.FullyExponentialLaplace <- function(a,n,p,R2,ITER)
 	
 	for (i in 1:ITER) {
 		C <- 0.5*n*R2/((1 + tau)*(1 - R2 + tau)) + 0.5*p/(1 + tau)
-		#cat(i,tau,C,"\n")
+		# cat(i,tau,C,"\n")
 		tau <- moment.h.FullyExponentialLaplace(m=1,U,B,C)
-		#cat(i,tau,C,"\n")
+		# cat(i,tau,C,"\n")
 		if (is.na(tau)) {
 			tau <- tau.plugin(a,n,p,R2)
 			break;
@@ -548,6 +550,55 @@ source("ZE.R")
 
 # Perform the fully Bayesian analysis
 res <- ZE.exact.Rcpp(vy,mX,LARGEP=FALSE) 
+
+if (SETTING == 1) {
+	write.table(vy, file = "Hitters_vy.csv", col.names=FALSE, row.names = FALSE, sep=",")
+	write.table(mX, file = "Hitters_mX.csv", col.names=FALSE, row.names = FALSE, sep=",")
+	write.table(res$vR2, file = "Hitters_vR2.csv", col.names=FALSE, row.names = FALSE, sep=",")
+	write.table(res$vlog.ZE, file = "Hitters_vlog_ZE.csv", col.names=FALSE, row.names = FALSE, sep=",")
+	write.table(res$mA, file = "Hitters_mGraycode.csv", col.names=FALSE, row.names = FALSE, sep=",")
+}
+
+if (SETTING == 2) {
+	write.table(vy, file = "bodyfat_vy.csv", col.names=FALSE, row.names = FALSE, sep=",")
+	write.table(mX, file = "bodyfat_mX.csv", col.names=FALSE, row.names = FALSE, sep=",")
+	write.table(res$vR2, file = "bodyfat_vR2.csv", col.names=FALSE, row.names = FALSE, sep=",")
+	write.table(res$vlog.ZE, file = "bodyfat_vlog_ZE.csv", col.names=FALSE, row.names = FALSE, sep=",")
+	write.table(res$mA, file = "bodyfat_mGraycode.csv", col.names=FALSE, row.names = FALSE, sep=",")
+}
+
+if (SETTING == 3) {
+	write.table(vy, file = "Wage_vy.csv", col.names=FALSE, row.names = FALSE, sep=",")
+	write.table(mX, file = "Wage_mX.csv", col.names=FALSE, row.names = FALSE, sep=",")
+	write.table(res$vR2, file = "Wage_vR2.csv", col.names=FALSE, row.names = FALSE, sep=",")
+	write.table(res$vlog.ZE, file = "Wage_vlog_ZE.csv", col.names=FALSE, row.names = FALSE, sep=",")
+	write.table(res$mA, file = "Wage_mGraycode.csv", col.names=FALSE, row.names = FALSE, sep=",")
+}
+
+if (SETTING == 4) {
+	write.table(vy, file = "GradRate_vy.csv", col.names=FALSE, row.names = FALSE, sep=",")
+	write.table(mX, file = "GradRate_mX.csv", col.names=FALSE, row.names = FALSE, sep=",")
+	write.table(res$vR2, file = "GradRate_vR2.csv", col.names=FALSE, row.names = FALSE, sep=",")
+	write.table(res$vlog.ZE, file = "GradRate_vlog_ZE.csv", col.names=FALSE, row.names = FALSE, sep=",")
+	write.table(res$mA, file = "GradRate_mGraycode.csv", col.names=FALSE, row.names = FALSE, sep=",")
+}
+
+if (SETTING == 5) {
+	write.table(vy, file = "USCrime_vy.csv", col.names=FALSE, row.names = FALSE, sep=",")
+	write.table(mX, file = "USCrime_mX.csv", col.names=FALSE, row.names = FALSE, sep=",")
+	write.table(res$vR2, file = "USCrime_vR2.csv", col.names=FALSE, row.names = FALSE, sep=",")
+	write.table(res$vlog.ZE, file = "USCrime_vlog_ZE.csv", col.names=FALSE, row.names = FALSE, sep=",")
+	write.table(res$mA, file = "USCrime_mGraycode.csv", col.names=FALSE, row.names = FALSE, sep=",")
+}
+
+
+cat("vy sum", sum(vy), "\n")
+cat("vR2 sum", sum(res$vR2), "\n")
+for (col_idx in 1:ncol(mX)) {
+	col <- mX[, col_idx]
+	cat(sum(mX[, col_idx]), " ")
+}
+cat("\n")
 logpy <- res$vlog.ZE
 logpy.til <- logpy - max(logpy)
 
@@ -581,7 +632,7 @@ for (i in 1:length(res$vR2))
 	velbo[i] <- 0.5*p - 0.5*n*log(2*pi) - lbeta(a+1,b+1)  - 0.5*n*log(1 + tau.g - res$vR2[i]) 
 	velbo[i] <- velbo[i] - 0.5*(n+p)*log(0.5*(n+p))+ lgamma(0.5*(n+p)) + C*tau.g + log(Z)  + 0.5*(n-p)*log(1 + tau.g)
 	
-	cat(i,velbo[i],tau.g,C,Z,"\n")
+	# cat(i,velbo[i],tau.g,C,Z,"\n")
 		
 	# If there is an error stop here and have a look
 	if (is.na(Z)) {
@@ -599,6 +650,9 @@ vq <- exp(logqy.til)/sum(exp(logqy.til))
 # Calculate the variable inclusion probabilities
 vw1 <- round( t(vp)%*%res$mA, 3)
 vw2 <- round( t(vq)%*%res$mA, 3)
+cat(vw1)
+cat(vw2)
+
 mW <- rbind(vw1,vw2)
 colnames(mW) <- varnames
 
