@@ -513,6 +513,59 @@ ZE_exact_result ZE_exact(VectorXd vy, MatrixXd mX)
 }
 
 
+void tau_g(int n, const MatrixXd& mGraycode, const VectorXd& vR2, const VectorXd& vlog_ZE,
+						VectorXd& vp, VectorXd& vq)
+{
+	auto logpy = vlog_ZE;
+	auto logpy_til = logpy.array() - logpy.maxCoeff();
+
+	// Calculate the marginal variable inclusion probability
+	vp = logpy_til.array().exp() / logpy_til.array().exp().sum();
+	auto a = -0.75;
+	VectorXd velbo(vR2.size());
+
+	#pragma omp parallel for
+	for (auto i = 0; i < vR2.size(); i++) {
+		// Note res$mA contains the gray-code
+		uint p = mGraycode.row(i).sum();
+		double b = (n - p)/2. - a - 2. ;
+
+		// Calculate
+		double A =  n/2. - p - a - 2.;
+		double B = -static_cast<double>(n-p)/2.;
+		double U = -(A+B+2.);
+
+		// Calculate tau_g
+		double tau_g = tau_g_FullyExponentialLaplace(a,n,p,vR2(i),20);
+
+		// Calculate the constant C (needed to calculate the normalizing constant for q(g)
+		double C = 0.5*n*vR2(i)/((1 + tau_g)*(1 - vR2(i) + tau_g)) + 0.5*p/(1 + tau_g);
+
+		// Calculate the
+							 // Z.h.Laplace(U,B,C)
+		double Z = Z_g_trapint(A,B,C,1000).intVal;
+
+		// Calculate the lower bound on the log-likelihood
+		velbo(i) = 0.5*p - 0.5*n*log(2*PI) - gsl_sf_lnbeta(a+1,b+1)  - 0.5*n*log(1 + tau_g - vR2(i)) ;
+		velbo(i) = velbo(i) - 0.5*(n+p)*log(0.5*(n+p))+ gsl_sf_lngamma(0.5*(n+p)) + C*tau_g + log(Z)  + 0.5*(n-p)*log(1 + tau_g);
+
+		// cout << " " << i << " " << velbo[i] << " " << tau_g << " " << C << " " << Z << "\n";
+
+		// How are failures from Z_g_trapint signalled?
+		// If there is an error stop here and have a look
+		// if (Z.failed) {
+		// 	print("error! press escape and have a look")
+		// 	string ans;
+		// 	cin >> ans;
+		// }
+
+	}
+
+	auto logqy_til = velbo.array() - velbo.maxCoeff();
+	vq = logqy_til.array().exp() / logqy_til.array().exp().sum();
+
+}
+
 int main()
 {
 	try
@@ -568,53 +621,9 @@ int main()
 
 		auto n = mX.rows();
 		auto p = mX.cols();
-		auto logpy = vlog_ZE;
-		auto logpy_til = logpy.array() - logpy.maxCoeff();
 
-		// Calculate the marginal variable inclusion probability
-		VectorXd vp = logpy_til.array().exp() / logpy_til.array().exp().sum();
-		auto a = -0.75;
-		VectorXd velbo(vR2.size());
-
-		#pragma omp parallel for
-		for (auto i = 0; i < vR2.size(); i++) {
-			// Note res$mA contains the gray-code
-			uint p = mGraycode.row(i).sum();
-			double b = (n - p)/2. - a - 2. ;
-
-			// Calculate
-			double A =  n/2. - p - a - 2.;
-			double B = -(n-p)/2.;
-			double U = -(A+B+2.);
-
-			// Calculate tau_g
-			double tau_g = tau_g_FullyExponentialLaplace(a,n,p,vR2[i],20);
-
-			// Calculate the constant C (needed to calculate the normalizing constant for q(g)
-			double C = 0.5*n*vR2[i]/((1 + tau_g)*(1 - vR2[i] + tau_g)) + 0.5*p/(1 + tau_g);
-
-			// Calculate the
-								 // Z.h.Laplace(U,B,C)
-			double Z = Z_g_trapint(A,B,C,1000).intVal;
-
-			// Calculate the lower bound on the log-likelihood
-			velbo[i] = 0.5*p - 0.5*n*log(2*PI) - gsl_sf_lnbeta(a+1,b+1)  - 0.5*n*log(1 + tau_g - vR2[i]) ;
-			velbo[i] = velbo[i] - 0.5*(n+p)*log(0.5*(n+p))+ gsl_sf_lngamma(0.5*(n+p)) + C*tau_g + log(Z)  + 0.5*(n-p)*log(1 + tau_g);
-
-			// cout << " " << i << " " << velbo[i] << " " << tau_g << " " << C << " " << Z << "\n";
-
-			// How are failures from Z_g_trapint signalled?
-			// If there is an error stop here and have a look
-			// if (Z.failed) {
-			// 	print("error! press escape and have a look")
-			// 	string ans;
-			// 	cin >> ans;
-			// }
-
-		}
-
-		auto logqy_til = velbo.array() - velbo.maxCoeff();
-		VectorXd vq = logqy_til.array().exp() / logqy_til.array().exp().sum();
+		VectorXd vp, vq;
+		tau_g(n, mGraycode, vR2, vlog_ZE, vp, vq);
 
 		// Calculate the variable inclusion probabilities
 		auto vw1 = vp.transpose() * mGraycode.cast<double>();
