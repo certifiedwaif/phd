@@ -1,0 +1,105 @@
+\documentclass{beamer}
+
+\usetheme{Warsaw}
+\usepackage{graphicx}
+\usepackage{ulem}
+\usepackage{tikz}
+\usepackage{listings}
+\input{include.tex}
+\input{Definitions.tex}
+
+\usefonttheme{serif}
+
+\title{Progress update}
+\author{Mark Greenaway}
+
+\mode<presentation>
+{ \usetheme{boxes} }
+
+\begin{document}
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}{Recap}
+We consider a linear model with a g-prior, as in Liang 2008. Consider the linear model
+\begin{align*}
+\vy | \vbeta, \sigma^2 \sim \N_n(\mX \vbeta, \sigma^2 \mI)
+\end{align*}
+
+with priors
+\begin{align*}
+\vbeta | \sigma^2, g &\sim \N_p(\vzero, g \sigma^2 (\mX^T \mX)^{-1}) \\
+p(\sigma^2) &= (\sigma^2)^{-1} \I(\sigma^2 > 0) \\
+p(g) &= \frac{g^b (1 + g)^{-(a + b + 2)}}{\Beta(a + 1, b + 1)} \I(g > 0)
+\end{align*}
+
+\end{frame}
+
+\begin{frame}{How to think about g}
+
+\begin{itemize}
+\item It's a penalty on dimension of your model.
+
+\item This is most easily seen in the Bayes factor between the model $\gamma$ and the null model:
+\begin{equation*}
+\text{BF}[M_\gamma:M_N] = (1 + g)^{(n - p_\gamma - 1)/2} [1 + g(1 - R_\gamma^2)]^{-(n-1)/2}
+\end{equation*}
+
+\item Terms involving one plus a multiple of $g$ appear in both the numerator and the denominator, but the
+exponent in the numerator will be lower when the dimension of $\gamma$ is higher.
+\item Higher $R^2_\gamma$ i.e. better model fit compensates for this in the numerator to an extent.
+\item So we're trading off between model fit and model complexity
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Porting John's $\tau_g$ approximation code from R to C++ 11}
+\begin{itemize}
+\item Short version: it worked! 4 days' work -- straightforward translation
+\item Accuracy numbers match John's
+\item
+\includegraphics[scale=.5]{trapint_R.png}
+\item
+\includegraphics[scale=.5]{trapint_cpp.png}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Performance numbers -- Threads versus CPU utilisation}
+\begin{figure}
+\includegraphics[scale=0.45]{code/threads_versus_time.pdf}
+\end{figure}
+
+\end{frame}
+
+\begin{frame}{Performance numbers -- Threads versus wall time}
+\begin{figure}
+\includegraphics[scale=0.45]{code/threads_versus_utilisation.pdf}
+\end{figure}
+
+\end{frame}
+
+\begin{frame}{Next steps}
+\begin{itemize}
+\item John asked me to add some features
+\item I haven't really optimised the $\tau_g$ software yet
+\item John and I would both like to know how much further we can push this
+\item We can exhaustively search 19 or 20 variables comfortably. Can do we 30, or 40?
+\item The next obvious thing to try is GPU acceleration
+\item gcc supports OpenACC acceleration on NVidia GPUs. Similiar to the OpenMP extensions
+that I'm already using
+\item I've never done it before. But last year, I hadn't done any multicore. How hard can it be? ;-)
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Writing/Reading}
+\begin{itemize}
+\item I'm working on the introduction to my paper
+\item I've been reading Liang, Jordan's STAT260 notes and Teh to get a sense of what's important and the
+structure that's expected
+\item I had a chat with Lamiae about Bayesian nonparametrics. That sounded really cool, so I've been reading
+about that
+\item Draft of my abstract for ASC 2016 is done, will submit in the next day or two
+\end{itemize}
+\end{frame}
+
+\end{document}
