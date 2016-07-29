@@ -57,8 +57,15 @@ choice of covariates for the optimal model selected can be considered to be auto
 made while inducing sparsity.
 
 % Background
-
-
+\begin{itemize}
+\item Reference other work on model selection, in a Bayesian context.
+\item Zellner's g prior Zellner 1986
+\item Hyper g prior Liang 2008
+\item Paradoxes, reasons not to choose a fixed g. Reference Jeffrey's work 1961.
+\item Variational Bayes, Explaining Variational Approximations 2010
+\item Structured Variational Bayes for model selection, Wand and Ormerod Variational Bayes for Elaborate 
+Distributions
+\end{itemize}
 % VB in general
 
 Variational Bayes (see \cite{Ormerod2010}) is a computationally efficient, deterministic method of fitting
@@ -107,7 +114,7 @@ approximating probability distribution.
 We index the space of models by a $p$-dimensional vector of indicator variables for each variable considered 
 for inclusion, $\vgamma$. For each model $\mathcal{M}_\vgamma$, the response vector $\vy$ is modelled by
 \begin{equation*}
-\mathcal{M}_\vgamma: \vmu = \vone_n \alpha + \mX_\vgamma \vbeta_\vgamma.
+\mathcal{M}_\vgamma: \vmu_\vgamma = \vone_n \alpha + \mX_\vgamma \vbeta_\vgamma.
 \end{equation*}
 
 Let $\KL(q||p) = \int q(\vtheta) \log{\left( \frac{q(\vtheta)}{p(\vtheta|\vy)} \right)} d \vtheta$ be the

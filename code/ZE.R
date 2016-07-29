@@ -3,6 +3,36 @@ library(RcppArmadillo)
 
 sourceCpp(file="ZE.cpp")
 
+
+CalcSelectionScores <- function(vgamma,vgamma.hat) 
+{
+	pos <- which(vgamma==1)
+	neg <- which(vgamma==0)
+	
+	TP <- sum(vgamma.hat[pos])
+	TN <- sum(1 - vgamma.hat[neg])
+	FP <- sum(vgamma.hat[neg])
+	FN <- sum(1 - vgamma.hat[pos])
+	
+	sensitivity <- TP/length(pos)
+	specificity <- TN/length(neg)
+	precision <- TP/sum(vgamma.hat)
+	recall <- TP/(TP + FN)
+	accuracy <- (TP + TN)/(TP + TN + FP + FN)
+	
+	F1 <- 2*precision*recall/(precision+recall)		
+	BER <- 0.5*(FP/(FP+TN) + FN/(FN+TP))
+	
+	return(list(TP=TP,TN=TN,FP=FP,FN=FN,
+	sensitivity=sensitivity,
+	specificity=specificity,
+	precision=precision,
+	recall=recall,
+	accuracy=accuracy,
+	F1=F1,
+	BER=BER))
+}
+
 ################################################################################
 
 greycode <- function(p, standard_order=TRUE) 
@@ -25,15 +55,13 @@ greycode <- function(p, standard_order=TRUE)
 			}
 		}
 		return(A_standard_order)
-	} else
-	{
+	} else {
 		return(A)
 	}
 }
-
 ################################################################################
 
-ZE.constants <- function(n,pmax,LARGEP) 
+ZE.constants <- function(n,p,pmax,LARGEP) 
 {
 	vcon <- c()
 	vpen <- c()
@@ -42,9 +70,10 @@ ZE.constants <- function(n,pmax,LARGEP)
 		con <- 0.5*(n-q) - 0.75
 		dof <- q
 		pen <- lbeta(0.5*q + 0.25,con) - lbeta(0.25,con)  
-	if (LARGEP) {
-		pen <- pen + lbeta(1+q,1+p-q)
-	}
+		if (LARGEP) {
+			#cat(p,q,"\n")
+			pen <- pen + lbeta(1+q,1+p-q)
+		}
 		vcon[q+1] <- con
 		vpen[q+1] <- pen
 	}
@@ -58,20 +87,36 @@ ZE.exact.slow <- function(vy,mX,LARGEP)
 	n <- length(vy)
 	p <- ncol(mX)
 	A <- greycode(p) 
-	res.con <- ZE.constants(n,p,LARGEP) 
+	res.con <- ZE.constants(n,p,p,LARGEP) 
  
 	vlog.ZE <- rep(0,nrow(A))
 	vlog.ZE[1] <- res.con$vpen[1]
-	vR2 <- rep(0, nrow(A))
+	for (j in 2:nrow(A))
+	{
+		inds <- which(A[j,]==1)
+		q <- length(inds)
+		R2 <- summary(lm(vy~-1+mX[,inds]))$r.squared
+		vlog.ZE[j] <-  -res.con$vcon[q+1]*log(1 - R2) + res.con$vpen[q+1]
+	}
+	return(list(A=A,vlog.ZE=vlog.ZE))
+}
+
+
+R2.exact.slow <- function(vy,mX,LARGEP) 
+	{
+	n <- length(vy)
+	p <- ncol(mX)
+	A <- greycode(p) 
+
+	vR2 <- rep(0,nrow(A))
 	for (j in 2:nrow(A))
 	{
 		inds <- which(A[j,]==1)
 		q <- length(inds)
 		R2 <- summary(lm(vy~-1+mX[,inds]))$r.squared
 		vR2[j] <- R2
-		vlog.ZE[j] <-  -res.con$vcon[q+1]*log(1 - R2) + res.con$vpen[q+1]
 	}
-	return(list(A=A,vlog.ZE=vlog.ZE, vR2=vR2))
+	return(list(vR2=vR2))
 }
 
 ################################################################################
@@ -80,10 +125,10 @@ ZE.exact <- function(vy,mX,LARGEP,STORE.XTX=TRUE)
 {
 	n <- length(vy)
 	p <- ncol(mX)
-	# A <- greycode(p)
+	A <- greycode(p)
 	vq <- A%*%matrix(1,p,1)
 	linds <- apply(A==1, 1, which) 
-	res.con <- ZE.constants(n,p,LARGEP) 
+	res.con <- ZE.constants(n,p,p,LARGEP) 
 	if (STORE.XTX) {
 		XTX <- t(mX)%*%mX
 	}
@@ -92,7 +137,6 @@ ZE.exact <- function(vy,mX,LARGEP,STORE.XTX=TRUE)
 	vR2 <- rep(0,nrow(A))
 	for (j in 2:nrow(A))
 	{
-		cat("Iteration ", j, "\n")
 		inds <- linds[[j]]
 		b <- XTy[inds]
 		bbT <- b%*%t(b)
@@ -107,18 +151,11 @@ ZE.exact <- function(vy,mX,LARGEP,STORE.XTX=TRUE)
 		} else {
 			Z <- solve(Q)
 		}
-		cat("inds ", inds, "\n")
-		cat("b ", b, "\n")
-		cat("bbT ", bbT, "\n")
-		cat("Q ", Q, "\n")
-		cat("Z ", Z, "\n")
-
 		vR2[j] <- sum(bbT*Z) 
-		cat("vR2[j] ", vR2[j], "\n")
 	}
 	vR2 <- vR2/yTy
 	vlog.ZE  <-  -res.con$vcon[vq+1]*log(1 - vR2) + res.con$vpen[vq+1]
-	return(list(A=A,vlog.ZE=vlog.ZE, vR2=vR2))
+	return(list(A=A,vlog.ZE=vlog.ZE))
 }
 
 ################################################################################
@@ -134,7 +171,7 @@ ZE.exact.fast <- function(vy,mX,LARGEP)
 	vs <- (mD%*%vonep)==1
 	vq <- mA%*%vonep
 	vw <- abs(mD%*%matrix(1:p,p,1))
-	res.con <- ZE.constants(n,p,LARGEP) 
+	res.con <- ZE.constants(n,p,p,LARGEP) 
 	
 	lmZ <- list()
 	linds11 <- list()
@@ -161,18 +198,18 @@ ZE.exact.fast <- function(vy,mX,LARGEP)
 	inds <- c()
 	for (j in 2:nrow(mA)) 
 	{
-		cat("Iteration", j, "\n")
+		#cat("Iteration", j, "\n")
 		if (vs[j-1]) {
 			# Adding variable
-			cat("Adding", vw[j-1], "\n")
+			#cat("Adding", vw[j-1], "\n")
 			indsNew <- c(inds,vw[j-1])
-			cat("indsNew", indsNew, "\n")
+			#cat("indsNew", indsNew, "\n")
 		} else {
 			# Removing varable
-			cat("Removing", vw[j-1], "\n")
+			#cat("Removing", vw[j-1], "\n")
 			k <- which(inds==vw[j-1])
 			indsNew <- inds[-k]
-			cat("indsNew", indsNew, "\n")
+			#cat("indsNew", indsNew, "\n")
 		}
 		b <- XTy[indsNew]
 		q <- vq[j]
@@ -184,9 +221,9 @@ ZE.exact.fast <- function(vy,mX,LARGEP)
 				v <- XTX[inds,vw[j-1]]
 				Zv <- lmZ[[q-1]]%*%v
 				d <- 1/(XTX[vw[j-1],vw[j-1]] - sum(v*Zv))
-				cat("v", v, "\n")
-				cat("Zv", Zv, "\n")
-				cat("d", d, "\n")
+				#cat("v", v, "\n")
+				#cat("Zv", Zv, "\n")
+				#cat("d", d, "\n")
 				lmZ[[q]][linds11[[q]]] <- lmZ[[q-1]] + d*Zv%*%t(Zv)
 				lmZ[[q]][linds12[[q]]] <- -d*Zv
 				lmZ[[q]][linds21[[q]]] <- -d*Zv
@@ -207,3 +244,98 @@ ZE.exact.fast <- function(vy,mX,LARGEP)
 }
 
 ################################################################################
+
+
+ZE.exact.Rcpp <- function(vy,mX,LARGEP) 
+{	
+	n <- length(vy)
+	p <- ncol(mX)
+	mA <- greycode(p) 
+	vonep <- matrix(1,p,1)
+	vq <- mA%*%vonep
+	res.con <- ZE.constants(n,p,p,LARGEP) 
+	result <- ZE_exact_fast(vy,mX);
+	vR2 <- result[[1]]
+	vlog.ZE  <-  -res.con$vcon[vq+1]*log(1 - vR2) + res.con$vpen[vq+1]
+	return(list(mA=mA,vlog.ZE=vlog.ZE, vR2=vR2))
+}
+
+################################################################################
+
+
+R2.fast <- function(vy,mX,mZ) 
+{
+	n <- length(vy)
+	p <- ncol(mX)
+	q <- ncol(mZ)
+	
+	XTy <- t(mX)%*%vy
+	XTX <- t(mX)%*%mX
+	yTy <- t(vy)%*%vy
+	
+	mA <- greycode(q)
+	mD <- diff(mA)
+	voneq <- matrix(1,q,1)
+	vs <- (mD%*%voneq)==1
+	vq <- mA%*%voneq
+	vw <- abs(mD%*%matrix(1:q,q,1))
+	
+	
+	vR2  <- rep(0,nrow(mA))
+	
+ 
+	mC <- solve(XTX,tol=1.0E-99)
+	
+	R2[1] <- t(XTy)%*%mC%*%XTy
+	
+	inds <- c()
+	for (j in 2:nrow(mA)) 
+	{
+		#cat("Iteration", j, "\n")
+		if (vs[j-1]) {
+			# Adding variable
+			#cat("Adding", vw[j-1], "\n")
+			indsNew <- c(inds,vw[j-1])
+			#cat("indsNew", indsNew, "\n")
+		} else {
+			# Removing varable
+			#cat("Removing", vw[j-1], "\n")
+			k <- which(inds==vw[j-1])
+			indsNew <- inds[-k]
+			#cat("indsNew", indsNew, "\n")
+		}
+		b <- XTy[indsNew]
+		q <- vq[j]
+
+		if (vs[j-1]) {
+		
+			# Adding a variable
+		
+			v <- XTX[inds,vw[j-1]]
+			Zv <- lmZ[[q-1]]%*%v
+			d <- 1/(XTX[vw[j-1],vw[j-1]] - sum(v*Zv))
+			#cat("v", v, "\n")
+			#cat("Zv", Zv, "\n")
+			#cat("d", d, "\n")
+			lmZ[[q]][linds11[[q]]] <- lmZ[[q-1]] + d*Zv%*%t(Zv)
+			lmZ[[q]][linds12[[q]]] <- -d*Zv
+			lmZ[[q]][linds21[[q]]] <- -d*Zv
+			lmZ[[q]][linds22[[q]]] <- d
+		} else {
+		
+			# Removing a variable
+		
+			Z12 <- lmZ[[q+1]][-k,k]
+			ZO <- Z12%*%t(Z12)
+			lmZ[[q]] <- lmZ[[q+1]][-k,-k] -  ZO/lmZ[[q+1]][k,k]
+		}
+		Zb <- lmZ[[q]]%*%b
+
+		vR2[j]  <- sum(b*Zb) 
+		inds <- indsNew
+	}
+	
+	vR2 <- vR2/yTy 
+ 
+	return(list(vR2=vR2))
+}

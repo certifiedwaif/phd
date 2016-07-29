@@ -51,7 +51,7 @@ The log likelihood of the full model is then
 &= -\half \log(|2 \pi \sigma^2 \mI_n|) - \half (\vy - \mX \vbeta)^\top \sigma^{-2} (\vy - \mX \vbeta) \\
 &\quad -\half \log(|2 \pi g \sigma^2 (\mX^\top \mX)^{-1}|) -\half \vbeta^\top \sigma^{-2} g^{-1} (\mX^T \mX) \vbeta \\
 &\quad - \log (\sigma^2) \\
-&\quad + b \log g - [(a + 1) + (b + 1)] \log (1 + g) - \log \Beta(a + 1, b + 1)
+&\quad + b \log g - (a + b + 2) \log (1 + g) - \log \Beta(a + 1, b + 1)
 \end{align*}
 
 For convenience, we will denote $\tau_{\sigma^2} = \E_q \left[ \frac{1}{\sigma^2} \right]$ and $\tau_{g} =
