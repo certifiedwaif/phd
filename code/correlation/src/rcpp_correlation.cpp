@@ -5,13 +5,22 @@ using namespace Eigen;
 using namespace Rcpp;
 
 // [[Rcpp::export]]
-NumericVector rcpp_all_correlations_mX(NumericVector vy, NumericMatrix mX, int intercept_col,
+NumericVector rcpp_all_correlations_mX(NumericVector vy, NumericVector mX, int intercept_col,
 										bool bIntercept, bool bCentre) {
-	return all_correlations_mX_cpp(vy, mX, intercept_col, bIntercept, bCentre);
+	Map<VectorXd> vy_m = as< Map<VectorXd> >(vy);
+	Map<MatrixXd> mX_m = as< Map<MatrixXd> >(mX);
+	VectorXd result = all_correlations_mX_cpp(vy_m, mX_m, intercept_col, bIntercept, bCentre);
+	NumericVector xx(wrap(result));
+	return xx;
 }
 
 // [[Rcpp::export]]
 NumericVector rcpp_all_correlations_mX_mZ(NumericVector vy, NumericMatrix mX, NumericMatrix mZ,
 					  int intercept_col, bool bIntercept, bool bCentre) {
-	return all_correlations_mX_mZ_cpp(vy, mX, mZ, intercept_col, bIntercept, bCentre);
+	Map<VectorXd> vy_m = as< Map<VectorXd> >(vy);
+	Map<MatrixXd> mX_m = as< Map<MatrixXd> >(mX);
+	Map<MatrixXd> mZ_m = as< Map<MatrixXd> >(mZ);
+	VectorXd result = all_correlations_mX_mZ_cpp(vy_m, mX_m, mZ_m, intercept_col, bIntercept, bCentre);
+	NumericVector xx(wrap(result));
+	return xx;
 }
