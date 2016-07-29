@@ -1,9 +1,5 @@
-
 #include <Rcpp.h>
-#include <RcppEigen.h>
-#include "correlations.hpp"
-
-// [[Rcpp::Depends(RcppEigen)]]
+#include "correlation.hpp"
 
 using namespace Eigen;
 using namespace Rcpp;
