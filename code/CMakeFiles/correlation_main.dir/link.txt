@@ -1,0 +1,1 @@
+/usr/bin/g++-5    -fopenmp -Wall -pedantic -Wextra -msse4.2 -ffast-math -ftree-vectorize -funroll-loops -O3 -DNDEBUG   CMakeFiles/correlation_main.dir/correlation_main.cpp.o  -o correlation_main -rdynamic libcorrelation.a -lgsl -lgslcblas 

@@ -1,0 +1,71 @@
+\documentclass{beamer}
+
+\usetheme{Warsaw}
+\usepackage{graphicx}
+\usepackage{ulem}
+\input{include.tex}
+\input{Definitions.tex}
+
+\usefonttheme{serif}
+
+\title{Progress report - 29/06/2015}
+\author{Mark Greenaway\\PhD candidate\\markg@maths.usyd.edu.au}
+
+\mode<presentation>
+{ \usetheme{boxes} }
+
+\begin{document}
+\begin{frame}
+\maketitle
+\end{frame}
+
+\begin{frame}{Application of my work}
+\begin{itemize}
+\item To submit to some journals, I need to use a data set that I can release
+\item Waiting for permission from PRC to use physical activity data for an application
+			of my work
+\item People in public health care deeply about people's privacy, and also restrict access
+			to data sets sometimes
+\item I might not get permission to use the data set that I wanted to use, so I need a backup
+			plan
+\end{itemize}
+\end{frame}
+
+\begin{frame}{My data matrices are sparse, so the covariance matrix is too}
+The covariance matrices for random effects models are sparse.
+On the left is my $\mC$ matrix, and on the right is the resulting sparsity pattern in the covariance
+matrix.
+\includegraphics[width=50mm, height=50mm]{mC.pdf}
+\includegraphics[width=50mm, height=50mm]{ones.pdf}
+\end{frame}
+
+\begin{frame}{Fully exploiting sparsity of the $\mLambda = (\mR \mR^\top)^{-1}$ parameterisation}
+\begin{itemize}
+\item As my software is currently written, we are optimising a Gaussian with parameters
+			$\vmu$ and $\mLambda$, with $\vmu$ a $p + q$ vector and $\mLambda$ a dense
+			$(p + q) \cross (p + q)$ matrix
+\item We optimise over the Cholesky factorisations of $\mLambda$ or $\mLambda^{-1}$
+\item  The inverse parameterisation is faster than the non-inverse parameterisation
+\item We may be able to do better by exploiting the sparsity of $\mLambda = (\mR \mR^\top)^{-1}$, so
+			that we're optimising over a space of dimension ~$(pq + q)$ rather than
+			~$(p + q) \cross (p + q)$
+\end{itemize}
+\end{frame}
+
+\begin{frame}{R performance}
+\begin{itemize}
+\item Fully realising these gains would require using sparse matrix techniques for the function and
+			derivative evaluations
+\item I've tried twice to use sparse matrices to speed things up. In both cases it made things slower.
+			Sparse matrices are expensive to construct in R
+\item Instead, we're going to try the easier route of passing optim() a lower dimensional vector
+			including only the non-zero entries of $\mR$. As $\mR$ is sparse in the
+			$\mLambda = (\mR \mR^\top)^{-1}$ parameterisation, there should be only a few of these
+\item The gains may be small if the code only spends a small proportion of time in optim(). Still
+			worth a try
+\item Whether I'm able to realise these gains will come down to my skills as an R programmer, and
+			what proportion of time executing the code in optim() takes
+\end{itemize}
+\end{frame}
+
+\end{document}

@@ -1,0 +1,409 @@
+% This file was created with JabRef 2.10.
+% Encoding: UTF-8
+
+
+@Article{Atkins2007,
+  Title                    = {Rethinking How Family Researchers Model Infrequent Outcomes: A Tutorial on Count Regression and Zero-Inflated Models.},
+  Author                   = {Atkins, David C.; Gallop, Robert J.},
+  Journal                  = {Journal of Family Psychology},
+  Year                     = {2007},
+  Pages                    = {726--735},
+  Volume                   = {21},
+  Doi                      = {10.1037/0893-3200.21.4.726},
+  Issue                    = {4},
+  Keywords                 = {count models, Poisson regression, zero-inflated models},
+  Owner                    = {markg},
+  Publisher                = {American Psychological Association},
+  Timestamp                = {2015.11.04}
+}
+
+@Book{Boyd2004,
+  Title                    = {Convex optimization},
+  Author                   = {Boyd, Stephen and Vandenberghe, Lieven},
+  Publisher                = {Cambridge university press},
+  Year                     = {2004},
+
+  __markedentry            = {[markg:6]},
+  Owner                    = {markg},
+  Timestamp                = {2015.11.05}
+}
+
+@Article{Broydon1970,
+  Title                    = {The convergence of a class of double rank minimisation algorithms: 1. General considerations},
+  Author                   = {Broydon, CG},
+  Journal                  = {Journal of the Institute of Mathematics and its Applications},
+  Year                     = {1970},
+  Volume                   = {6},
+  Owner                    = {markg},
+  Timestamp                = {2015.11.04}
+}
+
+@Article{Byrd1995,
+  Title                    = {A limited memory algorithm for bound constrained optimization},
+  Author                   = {Byrd, Richard H and Lu, Peihuang and Nocedal, Jorge and Zhu, Ciyou},
+  Journal                  = {SIAM Journal on Scientific Computing},
+  Year                     = {1995},
+  Number                   = {5},
+  Pages                    = {1190--1208},
+  Volume                   = {16},
+  Owner                    = {markg},
+  Publisher                = {SIAM},
+  Timestamp                = {2015.11.05}
+}
+
+@Article{Byrd1995a,
+  Title                    = {A limited memory algorithm for bound constrained optimization},
+  Author                   = {Byrd, Richard H and Lu, Peihuang and Nocedal, Jorge and Zhu, Ciyou},
+  Journal                  = {SIAM Journal on Scientific Computing},
+  Year                     = {1995},
+  Number                   = {5},
+  Pages                    = {1190--1208},
+  Volume                   = {16},
+
+  __markedentry            = {[markg:]},
+  Owner                    = {markg},
+  Publisher                = {SIAM},
+  Timestamp                = {2015.11.05}
+}
+
+@Book{Demmel1997,
+  Title                    = {Applied numerical linear algebra},
+  Author                   = {Demmel, James W},
+  Publisher                = {Siam},
+  Year                     = {1997},
+  Owner                    = {markg},
+  Timestamp                = {2015.11.05}
+}
+
+@Article{Ghosh2006,
+  Title                    = {Bayesian analysis of zero-inflated regression models},
+  Author                   = {Sujit K. Ghosh and Pabak Mukhopadhyay and Jye-Chyi(JC) Lu},
+  Journal                  = {Journal of Statistical Planning and Inference },
+  Year                     = {2006},
+  Number                   = {4},
+  Pages                    = {1360 - 1375},
+  Volume                   = {136},
+  Doi                      = {http://dx.doi.org/10.1016/j.jspi.2004.10.008},
+  ISSN                     = {0378-3758},
+  Keywords                 = {Bayesian inference},
+  Owner                    = {markg},
+  Timestamp                = {2015.11.04},
+  Url                      = {http://www.sciencedirect.com/science/article/pii/S0378375804004008}
+}
+
+@Book{Gill1991,
+  Title                    = {Numerical linear algebra and optimization},
+  Author                   = {Gill, Philip E and Murray, Walter and Wright, Margaret H and others},
+  Publisher                = {Addison-Wesley Redwood City},
+  Year                     = {1991},
+  Volume                   = {5},
+  Owner                    = {markg},
+  Timestamp                = {2015.11.05}
+}
+
+@TechReport{Golub1981,
+  Title                    = {Numerical Linear Algebra.},
+  Author                   = {Golub, Gene H and Wilkinson, James H},
+  Institution              = {DTIC Document},
+  Year                     = {1981},
+  Owner                    = {markg},
+  Timestamp                = {2015.11.05}
+}
+
+@Article{Hall2000,
+  Title                    = {Zero-Inflated Poisson and Binomial Regression with Random Effects: A Case Study},
+  Author                   = {Hall, Daniel B.},
+  Journal                  = {Biometrics},
+  Year                     = {2000},
+  Number                   = {4},
+  Pages                    = {1030--1039},
+  Volume                   = {56},
+  Doi                      = {10.1111/j.0006-341X.2000.01030.x},
+  ISSN                     = {1541-0420},
+  Keywords                 = {Excess zeros, EM algorithm, Generalized linear mixed model, Heterogeneity, Mixed effects, Overdispersion, Repeated measures},
+  Owner                    = {markg},
+  Publisher                = {Blackwell Publishing Ltd},
+  Timestamp                = {2015.11.04},
+  Url                      = {http://dx.doi.org/10.1111/j.0006-341X.2000.01030.x}
+}
+
+@Article{Kahan1966,
+  Title                    = {Numerical linear algebra},
+  Author                   = {Kahan, William},
+  Journal                  = {Canadian Math. Bull},
+  Year                     = {1966},
+  Number                   = {6},
+  Pages                    = {757--801},
+  Volume                   = {9},
+  Owner                    = {markg},
+  Timestamp                = {2015.11.05}
+}
+
+@Article{Lambert1992,
+  Title                    = {Zero-Inflated Poisson Regression, with an Application to Defects in Manufacturing},
+  Author                   = {Lambert, Diane},
+  Journal                  = {Technometrics},
+  Year                     = {1992},
+  Number                   = {1},
+  Pages                    = {pp. 1-14},
+  Volume                   = {34},
+  Abstract                 = {Zero-inflated Poisson (ZIP) regression is a model for count data with excess zeros. It assumes that with probability p the only possible observation is 0, and with probability 1 - p, a Poisson(λ) random variable is observed. For example, when manufacturing equipment is properly aligned, defects may be nearly impossible. But when it is misaligned, defects may occur according to a Poisson(λ) distribution. Both the probability p of the perfect, zero defect state and the mean number of defects λ in the imperfect state may depend on covariates. Sometimes p and λ are unrelated; other times p is a simple function of λ such as p=1/(1+λ <sup>τ</sup>) for an unknown constant τ. In either case, ZIP regression models are easy to fit. The maximum likelihood estimates (MLE's) are approximately normal in large samples, and confidence intervals can be constructed by inverting likelihood ratio tests or using the approximate normality of the MLE's. Simulations suggest that the confidence intervals based on likelihood ratio tests are better, however. Finally, ZIP regression models are not only easy to interpret, but they can also lead to more refined data analyses. For example, in an experiment concerning soldering defects on printed wiring boards, two sets of conditions gave about the same mean number of defects, but the perfect state was more likely under one set of conditions and the mean number of defects in the imperfect state was smaller under the other set of conditions; that is, ZIP regression can show not only which conditions give lower mean number of defects but also why the means are lower.},
+  Copyright                = {Copyright © 1992 American Statistical Association and American Society for Quality},
+  ISSN                     = {00401706},
+  Jstor_articletype        = {research-article},
+  Jstor_formatteddate      = {Feb., 1992},
+  Language                 = {English},
+  Owner                    = {markg},
+  Publisher                = {Taylor and Francis, Ltd. on behalf of American Statistical Association and American Society for Quality},
+  Timestamp                = {2015.11.04},
+  Url                      = {http://www.jstor.org/stable/1269547}
+}
+
+@Article{Lee2006,
+  Title                    = {Multi-level zero-inflated Poisson regression modelling of correlated count data with excess zeros},
+  Author                   = {Lee,Andy H. and Wang,Kui and Scott,Jane A. and Kelvin K.W. Yau and McLachlan,Geoffrey J.},
+  Journal                  = {Statistical methods in medical research},
+  Year                     = {2006},
+
+  Month                    = {02},
+  Note                     = {Copyright - © 2006 Arnold; Last updated - 2014-04-29},
+  Number                   = {1},
+  Pages                    = {47-61},
+  Volume                   = {15},
+  Abstract                 = {Count data with excess zeros relative to a Poisson distribution are common in many biomedical applications. A popular approach to the analysis of such data is to use a zero-inflated Poisson (ZIP) regression model. Often, because of the hierarchical study design or the data collection procedure, zero-inflation and lack of independence may occur simultaneously, which render the standard ZIP model inadequate. To account for the preponderance of zero counts and the inherent correlation of observations, a class of multi-level ZIP regression model with random effects is presented. Model fitting is facilitated using an expectation-maximization algorithm, whereas variance components are estimated via residual maximum likelihood estimating equations. A score test for zero-inflation is also presented. The multi-level ZIP model is then generalized to cope with a more complex correlation structure. Application to the analysis of correlated count data from a longitudinal infant feeding study illustrates the usefulness of the approach.},
+  ISBN                     = {09622802},
+  Keywords                 = {Medical Sciences; Infant; Breast Feeding -- statistics and numerical data; Humans; Western Australia; Adult; Infant, Newborn; Models, Statistical; Longitudinal Studies; Male; Female; Regression Analysis; Poisson Distribution},
+  Language                 = {English},
+  Owner                    = {markg},
+  Timestamp                = {2015.11.04},
+  Url                      = {http://ezproxy.library.usyd.edu.au/login?url=http://search.proquest.com/docview/217677336?accountid=14757}
+}
+
+@Article{Liu1989,
+  Title                    = {On the limited memory BFGS method for large scale optimization},
+  Author                   = {Liu, Dong C and Nocedal, Jorge},
+  Journal                  = {Mathematical programming},
+  Year                     = {1989},
+  Number                   = {1-3},
+  Pages                    = {503--528},
+  Volume                   = {45},
+  Owner                    = {markg},
+  Publisher                = {Springer},
+  Timestamp                = {2015.11.05}
+}
+
+@Article{Lobo1998,
+  Title                    = {Applications of second-order cone programming},
+  Author                   = {Lobo, Miguel Sousa and Vandenberghe, Lieven and Boyd, Stephen and Lebret, Herv{\'e}},
+  Journal                  = {Linear algebra and its applications},
+  Year                     = {1998},
+  Number                   = {1},
+  Pages                    = {193--228},
+  Volume                   = {284},
+
+  __markedentry            = {[markg:6]},
+  Owner                    = {markg},
+  Publisher                = {Elsevier},
+  Timestamp                = {2015.11.05}
+}
+
+@Article{Min2005,
+  Title                    = {Random effect models for repeated measures of zero-inflated count data},
+  Author                   = {Min, Yongyi and Agresti, Alan},
+  Journal                  = {Statistical Modelling},
+  Year                     = {2005},
+  Number                   = {1},
+  Pages                    = {1-19},
+  Volume                   = {5},
+  Abstract                 = {For count responses, the situation of excess zeros (relative to what standard models
+ allow) often occurs in biomedical and sociological applications. Modeling repeated
+ measures of zero-inflated count data presents special challenges. This is because in
+ addition to the problem of extra zeros, the correlation between measurements upon
+ the same subject at different occasions needs to be taken into account. This article
+ discusses random effect models for repeated measurements on this type of response
+ variable. A useful model is the hurdle model with random effects, which separately
+ handles the zero observations and the positive counts. In maximum likelihood model
+ fitting, we consider both a normal distribution and a nonparametric approach for the
+ random effects. A special case of the hurdle model can be used to test for zero
+ inflation. Random effects can also be introduced in a zero-inflated Poisson or
+ negative binomial model, but such a model may encounter fitting problems if there is
+ zero deflation at any settings of the explanatory variables. A simple alternative
+ approach adapts the cumulative logit model with random effects, which has a single
+ set of parameters for describing effects. We illustrate the proposed methods with examples.},
+  Doi                      = {10.1191/1471082X05st084oa},
+  Eprint                   = {http://smj.sagepub.com/content/5/1/1.full.pdf+html},
+  Owner                    = {markg},
+  Timestamp                = {2015.11.04},
+  Url                      = {http://smj.sagepub.com/content/5/1/1.abstract}
+}
+
+@Article{Nocedal1980,
+  Title                    = {Updating quasi-Newton matrices with limited storage},
+  Author                   = {Nocedal, Jorge},
+  Journal                  = {Mathematics of computation},
+  Year                     = {1980},
+  Number                   = {151},
+  Pages                    = {773--782},
+  Volume                   = {35},
+  Owner                    = {markg},
+  Timestamp                = {2015.11.05}
+}
+
+@Book{Nocedal2006,
+  Title                    = {Numerical optimization},
+  Author                   = {Nocedal, Jorge and Wright, Stephen},
+  Publisher                = {Springer Science \& Business Media},
+  Year                     = {2006},
+  Owner                    = {markg},
+  Timestamp                = {2015.11.05}
+}
+
+@Article{Ormerod2012,
+  Title                    = {Gaussian Variational Approximate Inference for Generalized Linear Mixed Models},
+  Author                   = {J. T. Ormerod and M. P. Wand},
+  Journal                  = {Journal of Computational and Graphical Statistics},
+  Year                     = {2012},
+  Number                   = {1},
+  Volume                   = {21},
+  Owner                    = {markg},
+  Timestamp                = {2015.11.04}
+}
+
+@Article{Ormerod2010,
+  Title                    = {Explaining Variational Approximatons},
+  Author                   = {J. T. Ormerod and M. P. Wand},
+  Journal                  = {The American Statistician},
+  Year                     = {2010},
+  Number                   = {2},
+  Volume                   = {64},
+  Owner                    = {markg},
+  Timestamp                = {2015.11.04}
+}
+
+@Article{Rohde2015,
+  Title                    = {Semiparametric Mean Field Variational Bayes: General Principles and Numerical Issues},
+  Author                   = {D. Rohde and M. P. Wand},
+  Year                     = {2015},
+  Owner                    = {markg},
+  Timestamp                = {2015.11.04}
+}
+
+@Article{Shankar1997,
+  Title                    = {Modeling accident frequencies as zero-altered probability processes: An empirical inquiry },
+  Author                   = {V. Shankar and J. Milton and F. Mannering},
+  Journal                  = {Accident Analysis and Prevention },
+  Year                     = {1997},
+  Number                   = {6},
+  Pages                    = {829 - 837},
+  Volume                   = {29},
+  Abstract                 = {This paper presents an empirical inquiry into the applicability of zero-altered counting processes to roadway section accident frequencies. The intent of such a counting process is to distinguish sections of roadway that are truly safe (near zero-accident likelihood) from those that are unsafe but happen to have zero accidents observed during the period of observation (e.g. one year). Traditional applications of Poisson and negative binomial accident frequency models do not account for this distinction and thus can produce biased coefficient estimates because of the preponderance of zero-accident observations. Zero-altered probability processes such as the zero-inflated Poisson (ZIP) and zero-inflated negative binomial (ZINB) distributions are examined and proposed for accident frequencies by roadway functional class and geographic location. The findings show that the \{ZIP\} structure models are promising and have great flexibility in uncovering processes affecting accident frequencies on roadway sections observed with zero accidents and those with observed accident occurrences. This flexibility allows highway engineers to better isolate design factors that contribute to accident occurrence and also provides additional insight into variables that determine the relative accident likelihoods of safe versus unsafe roadways. The generic nature of the models and the relatively good power of the Vuong specification test used in the non-nested hypotheses of model specifications offers roadway designers the potential to develop a global family of models for accident frequency prediction that can be embedded in a larger safety management system. },
+  Doi                      = {http://dx.doi.org/10.1016/S0001-4575(97)00052-3},
+  ISSN                     = {0001-4575},
+  Keywords                 = {Accident frequency},
+  Owner                    = {markg},
+  Timestamp                = {2015.11.04},
+  Url                      = {http://www.sciencedirect.com/science/article/pii/S0001457597000523}
+}
+
+@Book{Trefethen1997,
+  Title                    = {Numerical linear algebra},
+  Author                   = {Trefethen, Lloyd N and Bau III, David},
+  Publisher                = {Siam},
+  Year                     = {1997},
+  Volume                   = {50},
+  Owner                    = {markg},
+  Timestamp                = {2015.11.05}
+}
+
+@Article{Vandenberghe1996,
+  Title                    = {Semidefinite programming},
+  Author                   = {Vandenberghe, Lieven and Boyd, Stephen},
+  Journal                  = {SIAM review},
+  Year                     = {1996},
+  Number                   = {1},
+  Pages                    = {49--95},
+  Volume                   = {38},
+
+  __markedentry            = {[markg:6]},
+  Owner                    = {markg},
+  Publisher                = {SIAM},
+  Timestamp                = {2015.11.05}
+}
+
+@Article{Vatsa2014,
+  Title                    = {Variational Bayes Approximation for Inverse Non-Linear Regression},
+  Author                   = {Richa Vatsa and Simon Wilson},
+  Journal                  = {Research and Reviews: Journal of Statistics},
+  Year                     = {2014},
+  Volume                   = {Special Issue on Recent Statistical Methodologies and Applications (Vol.1)},
+  ISSN                     = {2278-2273},
+  Keywords                 = {Inverse regression},
+  Owner                    = {markg},
+  Timestamp                = {2015.11.04}
+}
+
+@Article{W2002,
+  Title                    = {Vector Differential Calculus in Statistics},
+  Author                   = {Matt Wand},
+  Journal                  = {The American Statistician},
+  Year                     = {2002},
+  Number                   = {1},
+  Volume                   = {56},
+  Owner                    = {markg},
+  Timestamp                = {2015.11.04}
+}
+
+@Article{Wand2008,
+  Title                    = {On semiparametric regression with O'Sullivan penalized splines},
+  Author                   = {Wand, MP and Ormerod, JT},
+  Journal                  = {Australian \& New Zealand Journal of Statistics},
+  Year                     = {2008},
+  Number                   = {2},
+  Pages                    = {179--198},
+  Volume                   = {50},
+  Owner                    = {markg},
+  Publisher                = {Wiley Online Library},
+  Timestamp                = {2015.11.05}
+}
+
+@Article{Y.Zhao2006,
+  Title                    = {General Design Bayesian Generalized Linear Mixed Models},
+  Author                   = {Y. Zhao, J. Staudenmayer, B. A. Coull and M. P. Wand},
+  Journal                  = {Statistical Science},
+  Year                     = {2006},
+  Number                   = {1},
+  Volume                   = {21},
+  Owner                    = {markg},
+  Timestamp                = {2015.11.04}
+}
+
+@Article{Yau2003,
+  Title                    = {Zero-Inflated Negative Binomial Mixed Regression Modeling of Over-Dispersed Count Data with Extra Zeros},
+  Author                   = {Yau, Kelvin K. W. and Wang, Kui and Lee, Andy H.},
+  Journal                  = {Biometrical Journal},
+  Year                     = {2003},
+  Number                   = {4},
+  Pages                    = {437--452},
+  Volume                   = {45},
+  Doi                      = {10.1002/bimj.200390024},
+  ISSN                     = {1521-4036},
+  Keywords                 = {Count data, Generalised linear mixed models, Negative binomial, Poisson regression, Random effects, Zero-inflation},
+  Owner                    = {markg},
+  Publisher                = {WILEY-VCH Verlag},
+  Timestamp                = {2015.11.04},
+  Url                      = {http://dx.doi.org/10.1002/bimj.200390024}
+}
+
+@Article{Zhu1997,
+  Title                    = {Algorithm 778: L-BFGS-B: Fortran subroutines for large-scale bound-constrained optimization},
+  Author                   = {Zhu, Ciyou and Byrd, Richard H and Lu, Peihuang and Nocedal, Jorge},
+  Journal                  = {ACM Transactions on Mathematical Software (TOMS)},
+  Year                     = {1997},
+  Number                   = {4},
+  Pages                    = {550--560},
+  Volume                   = {23},
+  Owner                    = {markg},
+  Publisher                = {ACM},
+  Timestamp                = {2015.11.05}
+}
+

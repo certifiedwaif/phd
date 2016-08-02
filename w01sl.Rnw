@@ -1,0 +1,89 @@
+\documentclass[a4paper]{article}
+
+% you can copy and paste these page settings from here to the next % to make the pdf look a little nicer
+\usepackage{amsmath}
+\usepackage{amscd}
+\usepackage[tableposition=top]{caption}
+\usepackage{ifthen}
+\usepackage[utf8]{inputenc}
+
+\parskip=5pt
+\parindent=0pt
+\textwidth=6.25in
+\oddsidemargin=0pt
+\evensidemargin=0pt
+\textheight=10in
+\topmargin=-0.75in
+\baselineskip=11pt
+% end of page and other style settings
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+
+% the following four lines force that lines break after 80 characters in the R-output
+\SweaveOpts{keep.source=FALSE}
+<<echo=FALSE>>=
+options(width = 80)
+@
+
+\title{Sweave Report - Week 1}
+          \author{Samuel M\"uller (000000)}
+          \maketitle
+
+\medskip\noindent
+Copy and paste from the script file and from w01.pdf (note that the command \texttt{setwd()} does not work within a \texttt{.Rnw} document)
+
+<<one>>=
+rugby = read.table(file="/Users/mueller/Dropbox/usyd/teaching/S3012/data/rugby.txt",header=TRUE)
+@
+
+Only ask for the first couple of rows of large data frames \texttt{rugby} and this is also done by the command \texttt{head}:
+
+<<>>=
+rugby[1:3,]
+head(rugby)
+head(rugby,2)
+@
+
+<<>>=
+names(rugby)
+attach(rugby)
+table(Game)
+@
+
+For each figure start a new code chunk as follows:
+
+<<fig=TRUE>>=
+barplot(table(Game))
+@
+
+You can show such a figure within the LaTeX figure environment:
+
+\begin{figure}
+\begin{center}
+<<fig=TRUE>>=
+barplot(table(Game))
+@
+\caption{Barplot} \label{Barplot}
+\end{center}
+\end{figure}
+
+This allows to automatically refer to Figure \ref{Barplot}, without color, or to Figure \ref{Barplot 2} below, which has color and proper labels.
+
+\begin{figure}
+\begin{center}
+<<fig=TRUE>>=
+barplot(table(Game),col="cyan",xlab="Game",ylab="Frequency")
+@
+\caption{Barplot} \label{Barplot 2}
+\end{center}
+\end{figure}
+
+<<fig=TRUE>>=
+hist(Time)
+@
+
+As you can see, if you put everything into a LaTeX figure environment, then code and plot are shown close to each other, otherwise it can be rather far apart.
+
+
+\end{document}

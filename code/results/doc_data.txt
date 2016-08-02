@@ -1,0 +1,101 @@
+InfoBegin
+InfoKey: ModDate
+InfoValue: D:20151103152711
+InfoBegin
+InfoKey: CreationDate
+InfoValue: D:20151103152711
+InfoBegin
+InfoKey: Title
+InfoValue: R Graphics Output
+InfoBegin
+InfoKey: Creator
+InfoValue: R
+InfoBegin
+InfoKey: Producer
+InfoValue: R 3.2.2
+NumberOfPages: 17
+PageMediaBegin
+PageMediaNumber: 1
+PageMediaRotation: 0
+PageMediaRect: 0 0 504 504
+PageMediaDimensions: 504 504
+PageMediaBegin
+PageMediaNumber: 2
+PageMediaRotation: 0
+PageMediaRect: 0 0 504 504
+PageMediaDimensions: 504 504
+PageMediaBegin
+PageMediaNumber: 3
+PageMediaRotation: 0
+PageMediaRect: 0 0 504 504
+PageMediaDimensions: 504 504
+PageMediaBegin
+PageMediaNumber: 4
+PageMediaRotation: 0
+PageMediaRect: 0 0 504 504
+PageMediaDimensions: 504 504
+PageMediaBegin
+PageMediaNumber: 5
+PageMediaRotation: 0
+PageMediaRect: 0 0 504 504
+PageMediaDimensions: 504 504
+PageMediaBegin
+PageMediaNumber: 6
+PageMediaRotation: 0
+PageMediaRect: 0 0 504 504
+PageMediaDimensions: 504 504
+PageMediaBegin
+PageMediaNumber: 7
+PageMediaRotation: 0
+PageMediaRect: 0 0 504 504
+PageMediaDimensions: 504 504
+PageMediaBegin
+PageMediaNumber: 8
+PageMediaRotation: 0
+PageMediaRect: 0 0 504 504
+PageMediaDimensions: 504 504
+PageMediaBegin
+PageMediaNumber: 9
+PageMediaRotation: 0
+PageMediaRect: 0 0 504 504
+PageMediaDimensions: 504 504
+PageMediaBegin
+PageMediaNumber: 10
+PageMediaRotation: 0
+PageMediaRect: 0 0 504 504
+PageMediaDimensions: 504 504
+PageMediaBegin
+PageMediaNumber: 11
+PageMediaRotation: 0
+PageMediaRect: 0 0 504 504
+PageMediaDimensions: 504 504
+PageMediaBegin
+PageMediaNumber: 12
+PageMediaRotation: 0
+PageMediaRect: 0 0 504 504
+PageMediaDimensions: 504 504
+PageMediaBegin
+PageMediaNumber: 13
+PageMediaRotation: 0
+PageMediaRect: 0 0 504 504
+PageMediaDimensions: 504 504
+PageMediaBegin
+PageMediaNumber: 14
+PageMediaRotation: 0
+PageMediaRect: 0 0 504 504
+PageMediaDimensions: 504 504
+PageMediaBegin
+PageMediaNumber: 15
+PageMediaRotation: 0
+PageMediaRect: 0 0 504 504
+PageMediaDimensions: 504 504
+PageMediaBegin
+PageMediaNumber: 16
+PageMediaRotation: 0
+PageMediaRect: 0 0 504 504
+PageMediaDimensions: 504 504
+PageMediaBegin
+PageMediaNumber: 17
+PageMediaRotation: 0
+PageMediaRect: 0 0 504 504
+PageMediaDimensions: 504 504

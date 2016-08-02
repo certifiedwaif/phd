@@ -1,0 +1,50 @@
+\documentclass{beamer}
+
+\usetheme{Warsaw}
+\usepackage{graphicx}
+\usepackage{ulem}
+\input{include.tex}
+\input{Definitions.tex}
+
+\usefonttheme{serif}
+
+\title{Progress report - 29/06/2015}
+\author{Mark Greenaway\\PhD candidate\\markg@maths.usyd.edu.au}
+
+\mode<presentation>
+{ \usetheme{boxes} }
+
+\begin{document}
+\begin{frame}
+\maketitle
+\end{frame}
+
+\begin{frame}{Progress this week - still getting numerical results and fixing bugs}
+\begin{itemize}
+\item I'm gathering median accuracy results by generating 100 random data sets and then fitting
+			models to them
+\item Testing median accuracy was taking up for forty minutes for each run on a 32 core machine,
+			so I split the MCMC and variational approximation into seperate tasks and saved the MCMC 
+			output on verona to re-use each time. ~12 gigabytes of data.
+\item After feedback from last week, I've added titles and accuracy figures to the distribution
+			plots and labelled the axes on the median accuracy graphs
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Bugs I've found, and bugs yet to find}
+\begin{itemize}
+\item After generating median accuracy figures last week, I investigated some of the cases where 				the accuracy of the approximation was poor
+\item Bugs in data generation for the random intercepts case, now fixed
+\item I was trying to solve a problem which was too hard. I was fitting a random intercepts
+			model to 20 groups with 10 observations in each, with half zeroes.
+			I've decreased the zeroes from $\frac{1}{2}$ to $\frac{2}{5}$
+\item Early convergence of the optimiser in some cases. I've increased the maximum iterations
+			of L-BFGS-B from 100 to 1,000
+\item There are cases where the accuracy is still poor. From initial investigation, this appears to
+			be a property of the data, or bugs in the implementation, rather than a property of the
+			approximation itself. I'm tracking down and fixing these bugs as quickly as I can
+\end{itemize}
+\end{frame}
+\end{document}

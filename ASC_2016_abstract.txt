@@ -1,0 +1,19 @@
+Zero-inflated count data often occurs in practice in applied statistics, in fields as diverse as public health,
+manufacturing and insurance. A Bayesian approach to analysis allows flexibility in modelling, but Bayesian
+approaches to fitting such models typically use MCMC, which is computationally demanding and prone to
+convergence issues.
+
+Mean Field Variational Bayes approximations allow us to fit such models approximately using a deterministic
+algorithm which is much less computationally intensive. A Gaussian Variational Approximation allows us to
+incorporate random effects, missing data and splines into our regression model. We develop a Gaussian
+Variational Approximation to zero-inflated Poisson regression models using the latent variable representation
+from “Bayesian analysis of zero-inflated regression models” by Ghosh, Mukhopadhyay and Lu.
+
+Fitting a Gaussian Variational Approximation requires optimising the variational lower bound over the set of
+mean vectors and covariance matrices, which is often a constrained space of high dimension. A naive
+parameterisation of random intercept and random slope models requires optimisation over a space of dimension
+(m+1)^2 p^2 where m is the number of groups and p is the number of random effects parameters. We develop a
+sparse parameterisation based on the Cholesky factorisation of the covariance matrix which takes advantage of
+the independence between random effects components to reduce the dimension to O(m p^2). As p << m, this is a
+large gain in computational efficiency. We demonstrate on simulated and real datasets that our approach is is 
+computationally efficient while  remaining accurate and numerically stable.

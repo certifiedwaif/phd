@@ -1,0 +1,228 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage{amsbsy, graphics, amsmath, amssymb, color, mdwlist}
+
+
+\parskip=5pt
+\renewcommand{\baselinestretch}{1}
+\parindent=0pt
+\textwidth=6.25in
+\oddsidemargin=0pt
+\evensidemargin=0pt
+\textheight=10in
+\topmargin=-0.75in
+\baselineskip=11pt
+
+
+% coloring and subsectioning
+\definecolor{mycol}{rgb}{0.1, 0.1,0.4}
+\definecolor{mycolb}{rgb}{0.7, 0.2,0.4}
+\definecolor{mycolr}{rgb}{0.25, 0.25,0.25}
+\definecolor{mycolc}{rgb}{0.2, 0.4,0.65} % {1,1,1} to out-comment 
+\definecolor{mycold}{rgb}{0.3, 0.5,0.7} % {1,1,1} to out-comment 
+\newcommand{\structure}[1]{{\color{mycolb}#1}}
+\newcommand{\rcode}[1]{{\tt\color{mycolr}#1}}
+\newcommand{\phead}[1]{{\bf{\color{mycol}#1}}}
+
+
+\begin{document}
+
+
+
+\begin{center}
+\rule{\textwidth}{1pt}
+
+\vspace{10pt}
+{\Large STAT 3012 Applied Linear Models -- Semester 1, 2016\\ \bigskip
+ {\bf Tutorial \& Lab Sheet Week 01 }}
+
+\rule{\textwidth}{1pt}
+\end{center}
+
+
+\phead{Tutorial Problems for Week 01}
+
+There is no tutorial in week 01.
+
+\bigskip
+\phead{Computer Problems for Week 01}
+
+Problems 4 and 5 should be done during the lab. The following is some basic information to login, download datasets and to create reports using Sweave. Anyone who prefers to use R markdown, knitr are any other similar tool is encouraged to do so. Problems 1 to 3 are for self-study to refresh assumed knowledge and should be done before the computer lab.
+
+\vspace{-2mm}\begin{description}
+\item[Login] Use your unikey and unikey password.
+\item[Datasets] Store datasets in a folder of your choice (e.g. create a folder {data} in your home directory $\sim/$). Load datasets as a data frame in R by
+\begin{verbatim}
+DAT = read.table(file="~/data/filename.txt",header=TRUE)
+\end{verbatim}
+or point directly to the file using 
+\begin{verbatim}
+DAT = read.table(url("http://www.PATH/filename.txt"),header=TRUE)
+\end{verbatim}
+(This only works for files that are not behind a firewall).
+\item[Work with an R Script] Before starting to write reports, work with R Scripts (end in {.R}), through {File : New : R Script}. You can send single or multiple lines to the R Console.
+\item[Create OpenOffice reports] Copy and paste code chunk and output. For graphs export the figures or copy and paste it from the Clipboard.
+\item[Create pdf reports using knit as in STAT2x11 and STAT2x12] In case you learned how to create pdf reports using knitr you can of course continue using this over Sweave.
+
+The only significant difference between knitr and Sweave for the students are the code for graphics chunks. Sweave requires 
+\begin{verbatim}
+<<fig=TRUE>>= ....@
+\end{verbatim}
+and the graphic chunks for knitr are the same as non-graphics chunks  ie. 
+\begin{verbatim}
+ <<>>= .... @
+\end{verbatim}
+
+Attention: In this course there will be only one command that is not going
+to work when using Sweave, which is the R command \texttt{setwd}.
+
+\item[Create pdf reports using Sweave] Create a {.Rnw} file through {File : New : R Sweave} and store it in a folder of your choice. These files have the following basic structure:
+
+\begin{verbatim}
+
+Heading
+
+Text (using LaTeX) followed by code chunks (using R). 
+
+<<>>=
+z=rnorm(10)
+summary(z)
+@
+
+more text followed by graph chunks, one each for each figure:
+
+\begin{figure}
+\begin{center}
+<<fig=TRUE>>=
+hist(z)
+@
+\caption{Your caption, e.g. Histogram of $z$}
+\label{figure xyz}
+\end{center}
+\end{figure}
+
+This allows you to automatically refer to Figure \ref{figure xyz}
+\end{verbatim}
+
+To create a `nice' pdf click on {Compile PDF}
+
+Attention: In this course there will be only one command that is not going
+to work when using Sweave, which is the R command \texttt{setwd}.
+
+\end{description}
+
+\begin{enumerate}
+% New Question
+\item (Assumed knowledge) Use R to find the following probabilities
+\begin{enumerate}
+\item $P(Z > - 0.785), \ Z \sim N(0,1)$, with \texttt{pnorm(q, lower.tail = FALSE)}.
+\item $P(t_2 \geq -1.26)$, with \texttt{pt(q,df,lower.tail=FALSE)}.
+\item $P(\chi_4^2 < 4.7)$, with \texttt{pchisq(q,df)}. 
+\item $P(|t_{9}| > 1.85)$, with \texttt{pf(q**2,df1,df2,lower.tail=FALSE)} after thinking about how the $t$ and the $F$ distribution relate to each other.
+\end{enumerate}
+
+% New Question
+\bigskip
+\item (Assumed knowledge) Use {qnorm}, {qt}, {qchisq}, and {qf} to find \ $c$ \ in the following
+\begin{enumerate}
+\item $P(t_4 \geq c) = .995$ with \texttt{qt},
+\item $P(|Z| \leq c) = 1/11$ with both, \texttt{qnorm} and \texttt{qchisq},
+\item $P(F_{3,12} \leq c) = .90$ with \texttt{qf}.
+\end{enumerate}
+
+% New Question
+\bigskip
+\item (Assumed knowledge) A machine produces metal pieces that are cylindrical in shape.  A sample of 8 pieces
+is taken and the diameters are $$ 1.01, \ 0.97, \ 0.39 \ 1.03, \ 1.04, \ 0.99, \ 0.98, \ 0.99. $$
+\begin{enumerate}
+\item  Construct a box plot representation of this data set. (With \texttt{x=c(1.01,..., 0.99)} and 
+\texttt{boxplot()}).
+\item   Estimate the average diameter, $\mu$, produced by
+the machine. Estimate the standard error ($=s/\sqrt{n}$) of your estimate? (\texttt{mean(x)}, $s=$ \texttt{sd()}, and $n=$ \texttt{length(x)}). 
+\item  Assuming that the diameter can be modelled by a normal distribution,
+calculate a 98\% confidence interval for $\mu$. (With \texttt{t.test(x,mu=1,conf.level=0.98)}, gives you the solution for (d) as well).
+\item  Would you reject the hypothesis \ $H_0 : \mu = 1.00$ \ at significance level
+\ $\alpha = .02$ \ on the basis of these data?
+%\item Is there an outlier or error in the data? If yes, what can you do about it? Would the statistical conclusion change?
+\end{enumerate}
+
+% New Question
+\item Analyse lengths of time of passages of play data from ten international
+rugby matches involving the `All Blacks'. This as all other course data is available from\\ \texttt{http://www.maths.usyd.edu.au/u/mueller/stat3012/loc/datasets/a-index.html}. This exercise helps you to digest part of Lecture 2 and to revisit assumed knowledge on R and graphical displays.
+
+\begin{enumerate}
+\item Download the data and read it into R, storing them as a data frame \texttt{rugby}. A possible solution is to save the file in a \texttt{data} folder, followed by running
+{\color{mycolr}
+\begin{verbatim}
+rugby = read.table(file="~/data/rugby.txt",header=TRUE)
+\end{verbatim}}
+
+
+\item Look at the data frame by simply typing its name, \texttt{rugby}. You 
+should see that the data frame has two columns. Scroll up to see that these columns are headed \texttt{Game} and \texttt{Time}
+respectively. (These headings were read in from the text file, \texttt{rugby.txt};
+R was alerted to the presence of these headings by the \texttt{header=T} syntax in
+the \texttt{read.table} command.) The variable \texttt{Game} identifies the match 
+(labelled A, B, $\ldots$, K) and the variable \texttt{Time} contains the times of 
+passages of play, in seconds.
+
+\item In reports it is often preferable to only show the first couple of lines in a data frame. Try the following: \texttt{rugby[1:3,]}, \texttt{head(rugby)} or \texttt{head(rugby,2)}.
+
+\item Type in \texttt{Game}. You should get an error. Attach the data frame with 
+\begin{verbatim}
+attach(rugby)
+\end{verbatim}  
+then try typing \texttt{Game}. You should get some output now that the data frame
+is attached (so that R can `see' the variables inside).
+
+\item The variable type for \texttt{Game} is categorical (or factor as synonym). You get frequencies for each category by 
+\texttt{table(Game)}.
+Which game had the most separate passages of play? Which had the least?
+
+\item We can display the data using a bar plot. Type
+\texttt{barplot(table(Game))}
+
+There are various ways of beautifying this plot. 
+You can add axis names, 
+change colours and so on. (The flexibility and quality of graphical display
+in R is one of the attractions of the package.) 
+
+Try for example
+\begin{verbatim}
+barplot(table(Game),col="cyan",xlab="Game",ylab="Frequency")
+\end{verbatim} 
+
+You can use the help function to learn more -- try
+{help(barplot)}.
+
+\item The passage of play time is a continuous numerical variable. Try
+displaying it using a histogram: \texttt{hist(Time)}.
+Guess how you might add colour to the plot (try \texttt{help(hist)} if necessary.) Is 
+the distribution of \texttt{Time} normal? If not, have you seen any other data sets with similarly shaped histograms?
+
+\item Finally, we can look at the times broken down by individual match. Type
+\begin{verbatim}
+Time[Game=="A"]
+\end{verbatim}  
+That gives you just the passage times for match A. Try producing histograms
+of the passage times for both game A and game H.
+
+\item After the lab and as a preparation to handing in lab reports, produce a brief report using either OpenOffice or Sweave. Look at the files \texttt{w01s.R} and \texttt{w01s.Rnw} (once they are released) in case you have difficulties.
+\end{enumerate}
+
+% New Question
+\bigskip
+\item Produce a \texttt{list()} called \texttt{STAB}, consisting of two matrices reproducing Table 1 and Table 2 of 
+\begin{center}
+\texttt{http://www.maths.usyd.edu.au/u/mueller/stat3012/loc/tables.pdf}. \end{center}
+Relabel row and column names to give the value for $z$ and $p$. This exercise helps you to digest part of Lecture 2 and to revisit assumed knowledge on the generation of statistical tables.
+
+\end{enumerate}
+
+
+
+\rule{\textwidth}{1pt}
+\hfill last adjustments: \today \; by SM
+
+\end{document}
+
+

@@ -5,7 +5,7 @@ using namespace Eigen;
 using namespace Rcpp;
 
 // [[Rcpp::export]]
-NumericVector rcpp_all_correlations_mX(NumericVector vy, NumericVector mX, int intercept_col,
+NumericVector rcpp_all_correlations_mX(NumericVector vy, NumericMatrix mX, int intercept_col,
 										bool bIntercept, bool bCentre) {
 	Map<VectorXd> vy_m = as< Map<VectorXd> >(vy);
 	Map<MatrixXd> mX_m = as< Map<MatrixXd> >(mX);
