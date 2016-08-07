@@ -1,7 +1,7 @@
 // correlation.cpp
 
-#include "correlation.hpp"
-#include "graycode.hpp"
+#include "correlation.h"
+#include "graycode.h"
 
 #include <sys/time.h>
 #include <unistd.h>

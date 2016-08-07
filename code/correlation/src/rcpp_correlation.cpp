@@ -1,5 +1,5 @@
 #include <Rcpp.h>
-#include "correlation.hpp"
+#include "correlation.h"
 
 using namespace Eigen;
 using namespace Rcpp;
@@ -13,11 +13,11 @@ using namespace Rcpp;
 //' @param bCentre Logical value indicating whether to centre the response vector and covariance matrix or not
 //' @return The vector of correlations
 // [[Rcpp::export]]
-NumericVector rcpp_all_correlations_mX(NumericVector vy, NumericMatrix mX, int intercept_col,
-										bool bIntercept, bool bCentre) {
+NumericVector all_correlations_mX(NumericVector vy, NumericMatrix mX, int intercept_col = 1,
+										bool bIntercept = false, bool bCentre = false) {
 	Map<VectorXd> vy_m = as< Map<VectorXd> >(vy);
 	Map<MatrixXd> mX_m = as< Map<MatrixXd> >(mX);
-	VectorXd result = all_correlations_mX_cpp(vy_m, mX_m, intercept_col, bIntercept, bCentre);
+	VectorXd result = all_correlations_mX_cpp(vy_m, mX_m, intercept_col - 1, bIntercept, bCentre);
 	NumericVector wrap_result(wrap(result));
 	return wrap_result;
 }
@@ -32,12 +32,13 @@ NumericVector rcpp_all_correlations_mX(NumericVector vy, NumericMatrix mX, int i
 //' @param bCentre Logical value indicating whether to centre the response vector and covariance matrix or not
 //' @return The vector of correlations
 // [[Rcpp::export]]
-NumericVector rcpp_all_correlations_mX_mZ(NumericVector vy, NumericMatrix mX, NumericMatrix mZ,
-					  int intercept_col, bool bIntercept, bool bCentre) {
+NumericVector all_correlations_mX_mZ(NumericVector vy, NumericMatrix mX, NumericMatrix mZ,
+                                          int intercept_col = 1,
+                                          bool bIntercept = false, bool bCentre = false) {
 	Map<VectorXd> vy_m = as< Map<VectorXd> >(vy);
 	Map<MatrixXd> mX_m = as< Map<MatrixXd> >(mX);
 	Map<MatrixXd> mZ_m = as< Map<MatrixXd> >(mZ);
-	VectorXd result = all_correlations_mX_mZ_cpp(vy_m, mX_m, mZ_m, intercept_col, bIntercept, bCentre);
+	VectorXd result = all_correlations_mX_mZ_cpp(vy_m, mX_m, mZ_m, intercept_col - 1, bIntercept, bCentre);
 	NumericVector wrap_result(wrap(result));
 	return wrap_result;
 }

@@ -1,6 +1,6 @@
 // graycode.cpp
 
-#include "graycode.hpp"
+#include "graycode.h"
 
 Graycode::Graycode(uint _p) : fixed(0), varying(_p), size(fixed + varying)
 { 

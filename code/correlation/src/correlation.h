@@ -1,6 +1,7 @@
 // correlation.hpp
 
 // [[Rcpp::depends(RcppEigen)]]
+// [[Rcpp::depends(BH)]]
 
 #include <string>
 #include <Rcpp.h>

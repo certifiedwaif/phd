@@ -9,8 +9,8 @@
 #' @param bIntercept Logical value indicating whether there is an intercept column or not
 #' @param bCentre Logical value indicating whether to centre the response vector and covariance matrix or not
 #' @return The vector of correlations
-rcpp_all_correlations_mX <- function(vy, mX, intercept_col, bIntercept, bCentre) {
-    .Call('correlation_rcpp_all_correlations_mX', PACKAGE = 'correlation', vy, mX, intercept_col, bIntercept, bCentre)
+all_correlations_mX <- function(vy, mX, intercept_col = 1L, bIntercept = FALSE, bCentre = FALSE) {
+    .Call('correlation_all_correlations_mX', PACKAGE = 'correlation', vy, mX, intercept_col, bIntercept, bCentre)
 }
 
 #' Calculate the correlation of all the sub-models mX/mZ and vy, where mX is fixed in every model and the sub-models of mZ are included
@@ -22,7 +22,7 @@ rcpp_all_correlations_mX <- function(vy, mX, intercept_col, bIntercept, bCentre)
 #' @param bIntercept Logical value indicating whether there is an intercept column or not
 #' @param bCentre Logical value indicating whether to centre the response vector and covariance matrix or not
 #' @return The vector of correlations
-rcpp_all_correlations_mX_mZ <- function(vy, mX, mZ, intercept_col, bIntercept, bCentre) {
-    .Call('correlation_rcpp_all_correlations_mX_mZ', PACKAGE = 'correlation', vy, mX, mZ, intercept_col, bIntercept, bCentre)
+all_correlations_mX_mZ <- function(vy, mX, mZ, intercept_col = 1L, bIntercept = FALSE, bCentre = FALSE) {
+    .Call('correlation_all_correlations_mX_mZ', PACKAGE = 'correlation', vy, mX, mZ, intercept_col, bIntercept, bCentre)
 }
 
