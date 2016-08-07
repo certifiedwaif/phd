@@ -1,5 +1,8 @@
 // correlation.cpp
 
+// [[Rcpp::depends(BH)]]
+
+#include <Rcpp.h>
 #include "correlation.hpp"
 #include "graycode.hpp"
 

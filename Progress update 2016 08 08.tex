@@ -1,0 +1,53 @@
+\documentclass{beamer}
+
+\usetheme{Warsaw}
+\usepackage{graphicx}
+\usepackage{ulem}
+\usepackage{tikz}
+\usepackage{listings}
+\input{include.tex}
+\input{Definitions.tex}
+
+\usefonttheme{serif}
+
+\title{Progress update}
+\author{Mark Greenaway}
+
+\mode<presentation>
+{ \usetheme{boxes} }
+
+\begin{document}
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}{How to be impactful, and packaging my code}
+\begin{itemize}
+\item JSM 2016 was on last week.
+\item Skipper Seabold gave a talk called ``Having an Impact as a Modern Statistician'' \url{https://speakerdeck.com/jseabold/having-an-impact-as-a-modern-statistician}.
+\item So I was thinking ``How can I be more impactful?''.
+\item John also asked me last week for the latest version of my correlation code.
+\item So I thought ``I know, I'll put it in an R package''! Because the only impactful code is code people can
+actually use.
+\item That means it needs to build and run everywhere.
+\item I'm fixing some build problems on Windows. I hope to have the package ready by next week.
+\item I'm finding the \texttt{devtools} package really helpful.
+\item I've been reading ``Writing R Extensions'', which has information you can't find anywhere else.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Other stuff}
+\begin{itemize}
+\item Abstract submitted to ASC 2016 before the deadline. Which they've since extended.
+\item Andrew Stefan got a job at Boeing. He's leaving at the end of the month. So we'll have a lot more
+research server capacity.
+\item Checking through algebra that John gave me to look at, which will allow us to update the determinants
+of $\mX_\vgamma^\top \mX_\vgamma$ at the same time as we update $(\mX_\vgamma^\top \mX_\vgamma)^{-1}$.
+\item This is all based on the block inverse formula, which I now understand.
+\item No errors yet, touch wood. But I'm only a third of the way down the page he gave me. I got stuck after
+that.
+\item Writing, writing, writing \ldots.
+\end{itemize}
+\end{frame}
+
+\end{document}

@@ -1,7 +1,10 @@
 // graycode.h
 
+// [[Rcpp::depends(BH)]]
+
 #pragma once
 
+#include <Rcpp.h>
 #include <boost/dynamic_bitset.hpp>
 #include <Eigen/Dense>
 
