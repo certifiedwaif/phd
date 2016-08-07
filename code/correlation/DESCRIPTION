@@ -8,12 +8,12 @@ Maintainer: Mark Greenaway <markg@maths.usyd.edu.au>
 Description: Calculate correlations of a lot of linear models.
 License: GPL (>= 2)
 Imports:
-	Rcpp (>= 0.12.5),
-	RcppEigen,
-	BH,
-	RcppGSL
-LinkingTo:
-	Rcpp (>= 0.12.5),
-	RcppEigen,
-	BH,
-	RcppGSL
+    Rcpp (>= 0.12.5),
+    RcppEigen,
+    BH,
+    RcppGSL
+LinkingTo: Rcpp (>= 0.12.5),
+    RcppEigen,
+    BH,
+    RcppGSL
+RoxygenNote: 5.0.1
