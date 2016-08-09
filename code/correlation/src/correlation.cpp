@@ -1,4 +1,7 @@
 // correlation.cpp
+#include <Rcpp.h>
+
+// [[Rcpp::plugins(cpp11)]]
 
 #include "correlation.h"
 #include "graycode.h"
@@ -89,7 +92,7 @@ MatrixXd parseCSVfile_double(string infilename)
 
 vector<uint>& get_indices_from_dbitset(const dbitset& gamma, vector<uint>& v)
 {
-	for (uint i = 0; i < gamma.size(); i++) {
+	for (auto i = 0; i < gamma.size(); i++) {
 		if (gamma[i]) {
 			v.push_back(i);
 		}
@@ -109,7 +112,7 @@ MatrixBase<Derived>& get_cols(const MatrixBase<Derived>& m1, const dbitset& gamm
 	vector<uint> columns;
 	columns = get_indices_from_dbitset(gamma, columns);
 
-	for (uint i = 0; i < columns.size(); i++) {
+	for (auto i = 0; i < columns.size(); i++) {
 		m2.col(i) = m1.col(columns[i]);
 	}
 
@@ -125,7 +128,7 @@ MatrixBase<Derived>& get_rows(const MatrixBase<Derived>& m1, const dbitset& gamm
 	rows = get_indices_from_dbitset(gamma, rows);
 	// MatrixXd m2(rows.size(), m1.cols());
 
-	for (uint i = 0; i < rows.size(); i++) {
+	for (auto i = 0; i < rows.size(); i++) {
 		m2.row(i) = m1.row(rows[i]);
 	}
 
@@ -144,8 +147,8 @@ const dbitset& cols_bs, MatrixBase<Derived>& m2)
 
 	// Matrices are stored in column major order, so the intent is to access contiguous memory in
 	// sequence by looping down each row in the inner loop.
-	for (uint j = 0; j < col_indices.size(); j++) {
-		for (uint i = 0; i < row_indices.size(); i++) {
+	for (auto j = 0; j < col_indices.size(); j++) {
+		for (auto i = 0; i < row_indices.size(); i++) {
 			m2(i, j) = m1(row_indices[i], col_indices[j]);
 		}
 	}
@@ -156,17 +159,17 @@ const dbitset& cols_bs, MatrixBase<Derived>& m2)
 
 double sd(const VectorXd& x)
 {
-	const uint n = x.size();
+	const auto n = x.size();
 	return (x.array() - x.mean()).square().sum() / (n - 1);
 }
 
 
 void centre(VectorXd& v)
 {
-	const uint n = v.size();
+	const auto n = v.size();
 	VectorXd v_bar(n);
 	v_bar.fill(v.mean());
-	double sd_v = sd(v);
+	auto sd_v = sd(v);
 
 	if (sd_v > 0.0) {
 		VectorXd centred_v = v - v_bar;
@@ -187,8 +190,8 @@ void show_matrix_difference(ostream& os, const MatrixXd& m1, const MatrixXd& m2,
 	}
 
 	// Iterate through the elements of m1 and m2, looking for and reporting differences
-	for (uint i = 0; i < m1.rows(); i++) {
-		for (uint j = 0; j < m1.cols(); j++) {
+	for (auto i = 0; i < m1.rows(); i++) {
+		for (auto j = 0; j < m1.cols(); j++) {
 			if (abs(m1(i, j) - m2(i, j)) > epsilon) {
 				os << "Row " << i << ", column " << j << " m1 " << m1(i, j) << " m2 " << m2(i, j);
 				os <<  " difference " << m1(i, j) - m2(i, j);
@@ -199,34 +202,24 @@ void show_matrix_difference(ostream& os, const MatrixXd& m1, const MatrixXd& m2,
 }
 
 
-//' Perform the rank one update on (X_gamma^T X_gamma)^{-1}
-//'
-//' @param[in]  gamma    The previous iteration's matrix of covariates
-//' @param[in]  i              The column number of the column we're adding to mX_gamma_prime
-//' @param[in]  min_idx             The new column vector to be added to mX_gamma
-//' @param[in]  mXTX 		 The current iteration's matrix of covariates
-//' @param[in]  mA             The previous iteration's inverse i.e. (X_gamma^T X_gamma)^{-1}
-//' @param[out] mA_prime       The current iteration's inverse i.e. (X_gamma_prime^T X_gamma_prime)^{-1}
-//'                            which we are calculating using this function.
-//' @param[out] bLow       The current iteration's inverse i.e. (X_gamma_prime^T X_gamma_prime)^{-1}
-//' @return                    The new inverse (mX_gamma_prime^T mX_gamma_prime)^{-1}
-template <typename Derived>
-MatrixBase<Derived>& rank_one_update(const dbitset& gamma, const uint col_abs, const uint min_idx,
-const MatrixBase<Derived>& mXTX, const MatrixBase<Derived>& mA, MatrixBase<Derived>& mA_prime, bool& bLow)
+// Perform the rank one update on (X_gamma^T X_gamma)^{-1}
+template <typename Derived1, typename Derived2>
+MatrixBase<Derived2>& rank_one_update(const dbitset& gamma, const uint col_abs, const uint min_idx,
+const MatrixBase<Derived1>& mXTX, const MatrixBase<Derived1>& mA, MatrixBase<Derived2>& mA_prime, bool& bLow)
 {
-	const uint p = mXTX.cols();
-	const uint p_gamma_prime = mA_prime.cols();
-	const uint p_gamma = mA.cols();
+	auto p = mXTX.cols();
+	auto p_gamma_prime = mA_prime.cols();
+	auto p_gamma = mA.cols();
 
 	// Construct mA_prime
 	// b = 1 / (x^T x - x^T X_gamma A X_gamma^T x)
-	double xTx = mXTX(col_abs, col_abs);
+	auto xTx = mXTX(col_abs, col_abs);
 	dbitset col_bs(p);
 	col_bs[col_abs] = true;
 	MatrixXd X_gamma_T_x(p_gamma, 1);
 	#ifdef DEBUG
-	cout << "gamma " << gamma << endl;
-	cout << "col_bs " << col_bs << endl;
+	Rcout << "gamma " << gamma << endl;
+	Rcout << "col_bs " << col_bs << endl;
 	#endif
 	X_gamma_T_x = get_rows_and_cols(mXTX, gamma, col_bs, X_gamma_T_x);
 
@@ -234,18 +227,18 @@ const MatrixBase<Derived>& mXTX, const MatrixBase<Derived>& mA, MatrixBase<Deriv
 	const double b = 1 / (xTx - (X_gamma_T_x.transpose() * mA * X_gamma_T_x).value());
 	// b is supposed to be positive definite.
 	#ifdef DEBUG
-	cout << "b " << b << endl;
+	Rcout << "b " << b << endl;
 	#endif
 	const double epsilon = 1e-12;
 	if (b > epsilon) {
 		// Do rank one update
 		// Matrix m1 = A + b A X_gamma^T x x^T X_gamma A
 		// The relative column index
-		const uint col = col_abs - min_idx;
+		auto col = col_abs - min_idx;
 		MatrixXd X_gamma_x(p_gamma, p_gamma);
-		const MatrixXd A_X_gamma_T_x = mA * X_gamma_T_x;
+		MatrixXd A_X_gamma_T_x = mA * X_gamma_T_x;
 		// Re-arrange.
-		const MatrixXd b_X_gamma_T_x_A = b * A_X_gamma_T_x;
+		MatrixXd b_X_gamma_T_x_A = b * A_X_gamma_T_x;
 		if (col == 0) {
 			mA_prime << b, -b * A_X_gamma_T_x.transpose(),
 				-b * A_X_gamma_T_x, mA + b * A_X_gamma_T_x * A_X_gamma_T_x.transpose();
@@ -265,15 +258,15 @@ const MatrixBase<Derived>& mXTX, const MatrixBase<Derived>& mA, MatrixBase<Deriv
 
 			// Should take advantage of the symmetry of mA_prime. For now, just fill in upper triangular entries.
 			#ifdef DEBUG
-			cout << "mA_prime " << endl << mA_prime << endl;
+			Rcout << "mA_prime " << endl << mA_prime << endl;
 			#endif
-			for (uint j = 0; j < p_gamma_prime; j++) {
-				for (uint i = 0; i < j; i++) {
+			for (auto j = 0; j < p_gamma_prime; j++) {
+				for (auto i = 0; i < j; i++) {
 					mA_prime(i, j) = mA_prime(j, i);
 				}
 			}
 			#ifdef DEBUG
-			cout << "mA_prime " << mA_prime << endl;
+			Rcout << "mA_prime " << mA_prime << endl;
 			#endif
 		} else																	 // col == p_gamma_prime
 		{
@@ -292,29 +285,22 @@ const MatrixBase<Derived>& mXTX, const MatrixBase<Derived>& mA, MatrixBase<Deriv
 }
 
 
-//' Perform the rank one downdate on (X_gamma^T X_gamma)^{-1}
-//'
-//' @param[in]  mX_gamma_prime The current iteration's matrix of covariates
-//' @param[in]  min_idx        The minimum column number, relative to mX
-//' @param[in]  i              The index of the column we are downdating.
-//' @param[in/out]  mA         The previous iteration's inverse i.e. (X_gamma^T X_gamma)^{-1}
-//' @param[out] mA_prime       The current iteration's inverse i.e. (X_gamma_prime^T X_gamma_prime)^{-1}
-//' @return                    The new inverse (mX_gamma_prime^T mX_gamma_prime)^{-1}
-template <typename Derived>
-MatrixBase<Derived>& rank_one_downdate(const uint col_abs, const uint min_idx,
-const MatrixBase<Derived>& mA, MatrixBase<Derived>& mA_prime)
+// Perform the rank one downdate on (X_gamma^T X_gamma)^{-1}
+template <typename Derived1, typename Derived2>
+MatrixBase<Derived2>& rank_one_downdate(const uint col_abs, const uint min_idx,
+const MatrixBase<Derived1>& mA, MatrixBase<Derived2>& mA_prime)
 {
-	const uint p_gamma_prime = mA_prime.cols();
-	const uint p_gamma = mA.cols();
+	auto p_gamma_prime = mA_prime.cols();
+	auto p_gamma = mA.cols();
 	// The relative column index
-	const uint col = col_abs - min_idx;
+	auto col = col_abs - min_idx;
 
 	// Need to deal with three cases
 	if (col == 0) {
 		const MatrixXd mA_11 = mA.bottomRightCorner(p_gamma_prime, p_gamma_prime);
 		const VectorXd va_12 = mA.col(0).tail(p_gamma_prime);
 		// const MatrixXd va_12 = mA.block(0, 0, p_gamma_prime, 1);
-		double a_22 = mA(0, 0);
+		auto a_22 = mA(0, 0);
 		mA_prime = mA_11 - (va_12 * va_12.transpose()) / a_22;
 	}
 	else if (1 <= col && col <= p_gamma - 1) {
@@ -328,19 +314,19 @@ const MatrixBase<Derived>& mA, MatrixBase<Derived>& mA_prime)
 		mA_11.bottomRightCorner(p_gamma_prime - col, p_gamma_prime - col) = mA.bottomRightCorner(p_gamma_prime - col, p_gamma_prime - col);
 		va_12.head(col) = mA.col(col).head(col);
 		va_12.tail(p_gamma_prime - col) = mA.col(col).tail(p_gamma_prime - col);
-		double a_22 = mA(col, col);
+		auto a_22 = mA(col, col);
 		mA_prime = mA_11 - (va_12 * va_12.transpose()) / a_22;
 	} else																		 // col == p_gamma
 	{
 		const MatrixXd mA_11 = mA.topLeftCorner(p_gamma_prime, p_gamma_prime);
 		const VectorXd va_12 = mA.col(p_gamma - 1).head(p_gamma - 1);
-		double a_22 = mA(p_gamma - 1, p_gamma - 1);
+		auto a_22 = mA(p_gamma - 1, p_gamma - 1);
 		mA_prime = mA_11 - (va_12 * va_12.transpose()) / a_22;
 	}
 
 	// Should take advantage of the symmetry of mA_prime. For now, just fill in upper triangular entries.
-	for (uint j = 0; j < p_gamma_prime; j++) {
-		for (uint i = 0; i < j; i++) {
+	for (auto j = 0; j < p_gamma_prime; j++) {
+		for (auto i = 0; i < j; i++) {
 			mA_prime(i, j) = mA_prime(j, i);
 		}
 	}
@@ -349,38 +335,30 @@ const MatrixBase<Derived>& mA, MatrixBase<Derived>& mA_prime)
 }
 
 
-template <typename Derived>
+template <typename Derived1, typename Derived2>
 void update_mA_prime(bool bUpdate, const dbitset& gamma,
 const uint col, const uint min_idx,
-const MatrixBase<Derived>& mXTX, const MatrixBase<Derived>& mA, MatrixBase<Derived>& mA_prime,
+const MatrixBase<Derived1>& mXTX, const MatrixBase<Derived1>& mA, MatrixBase<Derived2>& mA_prime,
 bool& bLow)
 {
 	if (bUpdate) {
 		// Rank one update of mA_prime from mA
 		#ifdef DEBUG
-		cout << "Updating " << col << endl;
+		Rcout << "Updating " << col << endl;
 		#endif
 		mA_prime = rank_one_update(gamma, col, min_idx, mXTX, mA, mA_prime, bLow);
 	}
 	else {
 		// Rank one downdate
 		#ifdef DEBUG
-		cout << "Downdating " << col << endl;
+		Rcout << "Downdating " << col << endl;
 		#endif
 		mA_prime = rank_one_downdate(col, min_idx, mA, mA_prime);
 	}
 }
 
 
-//' Calculate the correlations for every subset of the covariates in mX
-//'
-//' @param[in] vy            A vector of responses of length n
-//' @param[in] mX            A matrix of covariates of size n x p
-//' @param[in] intercept_col The column index of the intercept column, if there is one.
-//' @param[in] bIntercept    Boolean whether there's an intercept or not
-//' @param[in] bCentre       Boolean whether to centre vy and mX or not
-//' @return                  A vector of length 2^p of the correlations
-//' @export
+// Calculate the correlations for every subset of the covariates in mX
 VectorXd all_correlations_main(const Graycode& graycode, VectorXd vy, MatrixXd mX, const uint intercept_col,
 const uint max_iterations, const bool bIntercept = false, const bool bCentre = true)
 {
@@ -433,7 +411,7 @@ const uint max_iterations, const bool bIntercept = false, const bool bCentre = t
 			default(none)
 	for (uint idx = 1; idx < max_iterations; idx++) {
 		#ifdef DEBUG
-		cout << endl << "Iteration " << idx << endl;
+		Rcout << endl << "Iteration " << idx << endl;
 		#endif
 		// By properties of Greycode, only one element can be different. And it's either one higher or
 		// one lower.
@@ -471,20 +449,20 @@ const uint max_iterations, const bool bIntercept = false, const bool bCentre = t
 			mX_gamma_prime = get_cols(mX, gamma_prime, mX_gamma_prime);
 			MatrixXd identity_prime = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime;
 			if (!identity_prime.isApprox(MatrixXd::Identity(p_gamma_prime, p_gamma_prime)) && NUMERIC_FIX) {
-				cout << "(mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime" << endl;
-				cout << identity_prime << endl;
-				cout << "Iterative calculation of inverse is wrong, recalculating ..." << endl;
+				Rcout << "(mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime" << endl;
+				Rcout << identity_prime << endl;
+				Rcout << "Iterative calculation of inverse is wrong, recalculating ..." << endl;
 				// This inverse is nonsense. Do a full inversion.
 				MatrixXd mA_prime_full = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
-				show_matrix_difference(cout, mA_prime, mA_prime_full);
+				show_matrix_difference(Rcout, mA_prime, mA_prime_full);
 				// TODO: Find the differences between mA_prime_full and mA_prime
 				identity_prime = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime_full;
 				mA_prime = mA_prime_full;
 			}
 
 			// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
-			cout << "(mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime" << endl;
-			cout << identity_prime << endl;
+			Rcout << "(mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime" << endl;
+			Rcout << identity_prime << endl;
 			#endif
 		}
 
@@ -498,10 +476,10 @@ const uint max_iterations, const bool bIntercept = false, const bool bCentre = t
 		numerator = (m1.transpose() * mA_prime * m1).value();
 		R2 = numerator / yTy;
 		#ifdef DEBUG
-		cout << "m1 " << m1 << endl;
-		cout << "mA_prime " << mA_prime << endl;
-		cout << "Numerator " << numerator << " denominator " << yTy;
-		cout << " R2 " << R2 << endl;
+		Rcout << "m1 " << m1 << endl;
+		Rcout << "mA_prime " << mA_prime << endl;
+		Rcout << "Numerator " << numerator << " denominator " << yTy;
+		Rcout << " R2 " << R2 << endl;
 		#endif
 		vR2_all(idx) = R2;											 // Calculate correlation
 
@@ -522,15 +500,7 @@ const bool bIntercept, const bool bCentre)
 }
 
 
-//' Calculate the correlations for every subset of the covariates in mX
-//'
-//' @param[in] vy            A vector of responses of length n
-//' @param[in] mX            A matrix of covariates of size n x p
-//' @param[in] intercept_col The column index of the intercept column, if there is one.
-//' @param[in] bIntercept    Boolean whether there's an intercept or not
-//' @param[in] bCentre       Boolean whether to centre vy and mX or not
-//' @return                  A vector of length 2^p of the correlations
-//' @export
+// Calculate the correlations for every subset of the covariates in mX
 VectorXd all_correlations_mX_mZ_cpp(VectorXd vy, MatrixXd mX, MatrixXd mZ, const uint intercept_col,
 const bool bIntercept, const bool bCentre)
 {
