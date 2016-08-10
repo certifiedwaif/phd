@@ -1,7 +1,7 @@
 Package: correlation
 Type: Package
 Title: Calculate correlations of a lot of linear models.
-Version: 1.0
+Version: 0.1
 Date: 2016-07-29
 Author: Mark Greenaway
 Maintainer: Mark Greenaway <markg@maths.usyd.edu.au>

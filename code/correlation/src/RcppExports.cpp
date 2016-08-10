@@ -8,8 +8,8 @@
 using namespace Rcpp;
 
 // all_correlations_mX
-NumericVector all_correlations_mX(NumericVector vy, NumericMatrix mX, int intercept_col, bool bIntercept, bool bCentre);
-RcppExport SEXP correlation_all_correlations_mX(SEXP vySEXP, SEXP mXSEXP, SEXP intercept_colSEXP, SEXP bInterceptSEXP, SEXP bCentreSEXP) {
+NumericVector all_correlations_mX(NumericVector vy, NumericMatrix mX, int intercept_col, bool bIntercept, bool bCentre, int cores);
+RcppExport SEXP correlation_all_correlations_mX(SEXP vySEXP, SEXP mXSEXP, SEXP intercept_colSEXP, SEXP bInterceptSEXP, SEXP bCentreSEXP, SEXP coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -18,13 +18,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type intercept_col(intercept_colSEXP);
     Rcpp::traits::input_parameter< bool >::type bIntercept(bInterceptSEXP);
     Rcpp::traits::input_parameter< bool >::type bCentre(bCentreSEXP);
-    __result = Rcpp::wrap(all_correlations_mX(vy, mX, intercept_col, bIntercept, bCentre));
+    Rcpp::traits::input_parameter< int >::type cores(coresSEXP);
+    __result = Rcpp::wrap(all_correlations_mX(vy, mX, intercept_col, bIntercept, bCentre, cores));
     return __result;
 END_RCPP
 }
 // all_correlations_mX_mZ
-NumericVector all_correlations_mX_mZ(NumericVector vy, NumericMatrix mX, NumericMatrix mZ, int intercept_col, bool bIntercept, bool bCentre);
-RcppExport SEXP correlation_all_correlations_mX_mZ(SEXP vySEXP, SEXP mXSEXP, SEXP mZSEXP, SEXP intercept_colSEXP, SEXP bInterceptSEXP, SEXP bCentreSEXP) {
+NumericVector all_correlations_mX_mZ(NumericVector vy, NumericMatrix mX, NumericMatrix mZ, int intercept_col, bool bIntercept, bool bCentre, int cores);
+RcppExport SEXP correlation_all_correlations_mX_mZ(SEXP vySEXP, SEXP mXSEXP, SEXP mZSEXP, SEXP intercept_colSEXP, SEXP bInterceptSEXP, SEXP bCentreSEXP, SEXP coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject __result;
     Rcpp::RNGScope __rngScope;
@@ -34,7 +35,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type intercept_col(intercept_colSEXP);
     Rcpp::traits::input_parameter< bool >::type bIntercept(bInterceptSEXP);
     Rcpp::traits::input_parameter< bool >::type bCentre(bCentreSEXP);
-    __result = Rcpp::wrap(all_correlations_mX_mZ(vy, mX, mZ, intercept_col, bIntercept, bCentre));
+    Rcpp::traits::input_parameter< int >::type cores(coresSEXP);
+    __result = Rcpp::wrap(all_correlations_mX_mZ(vy, mX, mZ, intercept_col, bIntercept, bCentre, cores));
     return __result;
 END_RCPP
 }
