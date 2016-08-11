@@ -428,86 +428,89 @@ const uint max_iterations, const bool bIntercept = false, const bool bCentre = t
 	}
 
 	// Loop through models, updating and downdating mA as necessary
-	#pragma omp parallel for\
+	#pragma omp parallel\
 		firstprivate(gamma, gamma_prime, bmA_set, vec_mX_gamma, vec_mA, vec_m1)\
 		private(diff_idx, min_idx, p_gamma_prime, p_gamma, bUpdate)\
-			shared(cout, mX, vR2_all, graycode)\
-			default(none)
-	for (uint idx = 1; idx < max_iterations; idx++) {
-		#ifdef DEBUG
-		cout << endl << "Iteration " << idx << endl;
-		#endif
-		// By properties of Greycode, only one element can be different. And it's either one higher or
-		// one lower.
-		// Check if update or downdate, and for which variable
-		gamma = gamma_prime;
-		gamma_prime = graycode[idx];
-		graycode.change(gamma_prime, gamma, bUpdate, diff_idx, min_idx, p_gamma_prime);
+		shared(cout, mX, vR2_all, graycode)\
+		default(none)
+	{
+		#pragma omp for
+		for (uint idx = 1; idx < max_iterations; idx++) {
+			#ifdef DEBUG
+			cout << endl << "Iteration " << idx << endl;
+			#endif
+			// By properties of Greycode, only one element can be different. And it's either one higher or
+			// one lower.
+			// Check if update or downdate, and for which variable
+			gamma = gamma_prime;
+			gamma_prime = graycode[idx];
+			graycode.change(gamma_prime, gamma, bUpdate, diff_idx, min_idx, p_gamma_prime);
 
-		// Get mX matrix for gamma
-		MatrixXd& mA = vec_mA[p_gamma - 1];
-		MatrixXd& mA_prime = vec_mA[p_gamma_prime - 1];
-		MatrixXd& mX_gamma_prime = vec_mX_gamma[p_gamma_prime - 1];
+			// Get mX matrix for gamma
+			MatrixXd& mA = vec_mA[p_gamma - 1];
+			MatrixXd& mA_prime = vec_mA[p_gamma_prime - 1];
+			MatrixXd& mX_gamma_prime = vec_mX_gamma[p_gamma_prime - 1];
 
-		// Only needed when bmA_set is false.
-		// If we haven't previously calculated this inverse, calculate it the first time.
-		if (!bmA_set) {
-			// Calculate full inverse mA, O(p^3)
-			mX_gamma_prime = get_cols(mX, gamma_prime, mX_gamma_prime);
-			mA_prime = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
-			bmA_set = true;
-		}
-		else {
-			bool bLow;
-			update_mA_prime(bUpdate, gamma,
-				diff_idx, min_idx,
-				mXTX,   mA, mA_prime,
-				bLow);
-			if (bLow) {
+			// Only needed when bmA_set is false.
+			// If we haven't previously calculated this inverse, calculate it the first time.
+			if (!bmA_set) {
+				// Calculate full inverse mA, O(p^3)
 				mX_gamma_prime = get_cols(mX, gamma_prime, mX_gamma_prime);
 				mA_prime = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
+				bmA_set = true;
 			}
+			else {
+				bool bLow;
+				update_mA_prime(bUpdate, gamma,
+					diff_idx, min_idx,
+					mXTX,   mA, mA_prime,
+					bLow);
+				if (bLow) {
+					mX_gamma_prime = get_cols(mX, gamma_prime, mX_gamma_prime);
+					mA_prime = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
+				}
 
-			#ifdef DEBUG
-			// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
-			mX_gamma_prime = get_cols(mX, gamma_prime, mX_gamma_prime);
-			MatrixXd identity_prime = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime;
-			if (!identity_prime.isApprox(MatrixXd::Identity(p_gamma_prime, p_gamma_prime)) && NUMERIC_FIX) {
+				#ifdef DEBUG
+				// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
+				mX_gamma_prime = get_cols(mX, gamma_prime, mX_gamma_prime);
+				MatrixXd identity_prime = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime;
+				if (!identity_prime.isApprox(MatrixXd::Identity(p_gamma_prime, p_gamma_prime)) && NUMERIC_FIX) {
+					cout << "(mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime" << endl;
+					cout << identity_prime << endl;
+					cout << "Iterative calculation of inverse is wrong, recalculating ..." << endl;
+					// This inverse is nonsense. Do a full inversion.
+					MatrixXd mA_prime_full = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
+					show_matrix_difference(cout, mA_prime, mA_prime_full);
+					// TODO: Find the differences between mA_prime_full and mA_prime
+					identity_prime = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime_full;
+					mA_prime = mA_prime_full;
+				}
+
+				// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
 				cout << "(mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime" << endl;
 				cout << identity_prime << endl;
-				cout << "Iterative calculation of inverse is wrong, recalculating ..." << endl;
-				// This inverse is nonsense. Do a full inversion.
-				MatrixXd mA_prime_full = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
-				show_matrix_difference(cout, mA_prime, mA_prime_full);
-				// TODO: Find the differences between mA_prime_full and mA_prime
-				identity_prime = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime_full;
-				mA_prime = mA_prime_full;
+				#endif
 			}
 
-			// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
-			cout << "(mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime" << endl;
-			cout << identity_prime << endl;
+			double R2;
+			double numerator;
+			// Can pre-compute, using vXTy
+			// VectorXd v1(p_gamma_prime);
+			// v1 = vy.transpose() * mX_gamma_prime;
+			MatrixXd& m1 = vec_m1[p_gamma_prime - 1];
+			m1 = get_rows(mXTy, gamma_prime, m1);
+			numerator = (m1.transpose() * mA_prime * m1).value();
+			R2 = numerator / yTy;
+			#ifdef DEBUG
+			cout << "m1 " << m1 << endl;
+			cout << "mA_prime " << mA_prime << endl;
+			cout << "Numerator " << numerator << " denominator " << yTy;
+			cout << " R2 " << R2 << endl;
 			#endif
+			vR2_all(idx) = R2;											 // Calculate correlation
+
+			p_gamma = p_gamma_prime;
 		}
-
-		double R2;
-		double numerator;
-		// Can pre-compute, using vXTy
-		// VectorXd v1(p_gamma_prime);
-		// v1 = vy.transpose() * mX_gamma_prime;
-		MatrixXd& m1 = vec_m1[p_gamma_prime - 1];
-		m1 = get_rows(mXTy, gamma_prime, m1);
-		numerator = (m1.transpose() * mA_prime * m1).value();
-		R2 = numerator / yTy;
-		#ifdef DEBUG
-		cout << "m1 " << m1 << endl;
-		cout << "mA_prime " << mA_prime << endl;
-		cout << "Numerator " << numerator << " denominator " << yTy;
-		cout << " R2 " << R2 << endl;
-		#endif
-		vR2_all(idx) = R2;											 // Calculate correlation
-
-		p_gamma = p_gamma_prime;
 	}
 	return vR2_all;
 }
