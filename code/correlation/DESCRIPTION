@@ -10,10 +10,8 @@ License: GPL (>= 2)
 Imports:
     Rcpp (>= 0.12.5),
     RcppEigen,
-    BH,
-    RcppGSL
+    BH
 LinkingTo: Rcpp (>= 0.12.5),
     RcppEigen,
-    BH,
-    RcppGSL
+    BH
 RoxygenNote: 5.0.1
