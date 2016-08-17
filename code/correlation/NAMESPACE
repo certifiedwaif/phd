@@ -2,4 +2,6 @@
 
 export(all_correlations_mX)
 export(all_correlations_mX_mZ)
+export(graycode)
+importFrom(Rcpp,evalCpp)
 useDynLib(correlation)

@@ -26,7 +26,8 @@ using Eigen::RowVectorXi;
 using Eigen::MatrixXi;
 using namespace std;
 
-const bool NUMERIC_FIX = false;
+const bool NUMERIC_FIX = true;
+#define DEBUG
 
 // Code copied from here: https://gist.github.com/stephenjbarr/2266900
 MatrixXd parseCSVfile_double(string infilename)
@@ -105,8 +106,8 @@ vector<uint>& get_indices_from_dbitset(const dbitset& gamma, vector<uint>& v)
 // Get columns
 // Need a corresponding get rows
 // And get rows and columns
-template <typename Derived>
-MatrixBase<Derived>& get_cols(const MatrixBase<Derived>& m1, const dbitset& gamma, MatrixBase<Derived>& m2)
+template <typename Derived1, typename Derived2>
+MatrixBase<Derived2>& get_cols(const MatrixBase<Derived1>& m1, const dbitset& gamma, MatrixBase<Derived2>& m2)
 {
 	// Special case of get_rows_and_cols
 	vector<uint> columns;
@@ -120,8 +121,8 @@ MatrixBase<Derived>& get_cols(const MatrixBase<Derived>& m1, const dbitset& gamm
 }
 
 
-template <typename Derived>
-MatrixBase<Derived>& get_rows(const MatrixBase<Derived>& m1, const dbitset& gamma, MatrixBase<Derived>& m2)
+template <typename Derived1, typename Derived2>
+MatrixBase<Derived2>& get_rows(const MatrixBase<Derived1>& m1, const dbitset& gamma, MatrixBase<Derived2>& m2)
 {
 	// Special case of get_rows_and_cols
 	vector<uint> rows;
@@ -136,9 +137,9 @@ MatrixBase<Derived>& get_rows(const MatrixBase<Derived>& m1, const dbitset& gamm
 }
 
 
-template <typename Derived>
-MatrixBase<Derived>& get_rows_and_cols(const MatrixBase<Derived>& m1, const dbitset& rows_bs,
-const dbitset& cols_bs, MatrixBase<Derived>& m2)
+template <typename Derived1, typename Derived2>
+MatrixBase<Derived2>& get_rows_and_cols(const MatrixBase<Derived1>& m1, const dbitset& rows_bs,
+const dbitset& cols_bs, MatrixBase<Derived2>& m2)
 {
 	vector<uint> row_indices;
 	row_indices = get_indices_from_dbitset(rows_bs, row_indices);
@@ -218,18 +219,18 @@ const MatrixBase<Derived1>& mXTX, const MatrixBase<Derived1>& mA, MatrixBase<Der
 	col_bs[col_abs] = true;
 	MatrixXd X_gamma_T_x(p_gamma, 1);
 	#ifdef DEBUG
-	Rcout << "gamma " << gamma << endl;
-	Rcout << "col_bs " << col_bs << endl;
+	Rcpp::Rcout << "gamma " << gamma << endl;
+	Rcpp::Rcout << "col_bs " << col_bs << endl;
 	#endif
 	X_gamma_T_x = get_rows_and_cols(mXTX, gamma, col_bs, X_gamma_T_x);
 
 	// const double b = 1 / (x^T x - x^T X_gamma A X_gamma^T x).value();
-	const double b = 1 / (xTx - (X_gamma_T_x.transpose() * mA * X_gamma_T_x).value());
+	const auto b = 1 / (xTx - (X_gamma_T_x.transpose() * mA * X_gamma_T_x).value());
 	// b is supposed to be positive definite.
 	#ifdef DEBUG
-	Rcout << "b " << b << endl;
+	Rcpp::Rcout << "b " << b << endl;
 	#endif
-	const double epsilon = 1e-12;
+	const auto epsilon = 1e-12;
 	if (b > epsilon) {
 		// Do rank one update
 		// Matrix m1 = A + b A X_gamma^T x x^T X_gamma A
@@ -258,7 +259,7 @@ const MatrixBase<Derived1>& mXTX, const MatrixBase<Derived1>& mA, MatrixBase<Der
 
 			// Should take advantage of the symmetry of mA_prime. For now, just fill in upper triangular entries.
 			#ifdef DEBUG
-			Rcout << "mA_prime " << endl << mA_prime << endl;
+			Rcpp::Rcout << "mA_prime " << endl << mA_prime << endl;
 			#endif
 			for (auto j = 0; j < p_gamma_prime; j++) {
 				for (auto i = 0; i < j; i++) {
@@ -266,7 +267,7 @@ const MatrixBase<Derived1>& mXTX, const MatrixBase<Derived1>& mA, MatrixBase<Der
 				}
 			}
 			#ifdef DEBUG
-			Rcout << "mA_prime " << mA_prime << endl;
+			Rcpp::Rcout << "mA_prime " << mA_prime << endl;
 			#endif
 		} else																	 // col == p_gamma_prime
 		{
@@ -344,14 +345,14 @@ bool& bLow)
 	if (bUpdate) {
 		// Rank one update of mA_prime from mA
 		#ifdef DEBUG
-		Rcout << "Updating " << col << endl;
+		Rcpp::Rcout << "Updating " << col << endl;
 		#endif
 		mA_prime = rank_one_update(gamma, col, min_idx, mXTX, mA, mA_prime, bLow);
 	}
 	else {
 		// Rank one downdate
 		#ifdef DEBUG
-		Rcout << "Downdating " << col << endl;
+		Rcpp::Rcout << "Downdating " << col << endl;
 		#endif
 		mA_prime = rank_one_downdate(col, min_idx, mA, mA_prime);
 	}
@@ -360,7 +361,7 @@ bool& bLow)
 
 // Calculate the correlations for every subset of the covariates in mX
 VectorXd all_correlations_main(const Graycode& graycode, VectorXd vy, MatrixXd mX, const uint intercept_col,
-const uint max_iterations, const bool bIntercept = false, const bool bCentre = true, int cores = 1)
+const uint max_iterations, const bool bIntercept = false, const bool bCentre = true)
 {
 	const uint n = mX.rows();									 // The number of observations
 	const uint p = mX.cols();									 // The number of covariates
@@ -405,21 +406,31 @@ const uint max_iterations, const bool bIntercept = false, const bool bCentre = t
 
 	// Loop through models, updating and downdating mA as necessary
 	#pragma omp parallel for\
-		num_threads(cores)\
 		firstprivate(gamma, gamma_prime, bmA_set, vec_mX_gamma, vec_mA, vec_m1)\
 		private(diff_idx, min_idx, p_gamma_prime, p_gamma, bUpdate)\
-			shared(cout, mX, vR2_all, graycode)\
+			shared(mX, vR2_all, graycode)\
 			default(none)
 	for (uint idx = 1; idx < max_iterations; idx++) {
 		#ifdef DEBUG
-		Rcout << endl << "Iteration " << idx << endl;
+		Rcpp::Rcout << endl << "Iteration " << idx << endl;
 		#endif
 		// By properties of Greycode, only one element can be different. And it's either one higher or
 		// one lower.
 		// Check if update or downdate, and for which variable
 		gamma = gamma_prime;
 		gamma_prime = graycode[idx];
+
+		#ifdef DEBUG
+		Rcpp::Rcout << "Previous gamma: " << gamma << endl;
+		Rcpp::Rcout << "Current gamma:  " << gamma_prime << endl;
+		#endif
+
 		graycode.change(gamma_prime, gamma, bUpdate, diff_idx, min_idx, p_gamma_prime);
+
+		#ifdef DEBUG
+		Rcpp::Rcout << "min_idx " << min_idx << " diff_idx " << diff_idx;
+		Rcpp::Rcout << " bUpdate " << (bUpdate ? "true" : "false") << endl;
+		#endif
 
 		// Get mX matrix for gamma
 		MatrixXd& mA = vec_mA[p_gamma - 1];
@@ -436,6 +447,9 @@ const uint max_iterations, const bool bIntercept = false, const bool bCentre = t
 		}
 		else {
 			bool bLow;
+			#ifdef DEBUG
+			Rcpp::Rcout << "mA_prime before update " << mA_prime << endl;
+			#endif
 			update_mA_prime(bUpdate, gamma,
 				diff_idx, min_idx,
 				mXTX,   mA, mA_prime,
@@ -444,26 +458,29 @@ const uint max_iterations, const bool bIntercept = false, const bool bCentre = t
 				mX_gamma_prime = get_cols(mX, gamma_prime, mX_gamma_prime);
 				mA_prime = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
 			}
+			#ifdef DEBUG
+			Rcpp::Rcout << "mA_prime after update " << mA_prime << endl;
+			#endif
 
 			#ifdef DEBUG
 			// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
 			mX_gamma_prime = get_cols(mX, gamma_prime, mX_gamma_prime);
 			MatrixXd identity_prime = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime;
 			if (!identity_prime.isApprox(MatrixXd::Identity(p_gamma_prime, p_gamma_prime)) && NUMERIC_FIX) {
-				Rcout << "(mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime" << endl;
-				Rcout << identity_prime << endl;
-				Rcout << "Iterative calculation of inverse is wrong, recalculating ..." << endl;
+				Rcpp::Rcout << "(mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime" << endl;
+				Rcpp::Rcout << identity_prime << endl;
+				Rcpp::Rcout << "Iterative calculation of inverse is wrong, recalculating ..." << endl;
 				// This inverse is nonsense. Do a full inversion.
 				MatrixXd mA_prime_full = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
-				show_matrix_difference(Rcout, mA_prime, mA_prime_full);
+				show_matrix_difference(Rcpp::Rcout, mA_prime, mA_prime_full);
 				// TODO: Find the differences between mA_prime_full and mA_prime
 				identity_prime = (mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime_full;
 				mA_prime = mA_prime_full;
 			}
 
 			// Check that mA_prime is really an inverse for mX_gamma_prime.transpose() * mX_gamma_prime
-			Rcout << "(mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime" << endl;
-			Rcout << identity_prime << endl;
+			Rcpp::Rcout << "(mX_gamma_prime.transpose() * mX_gamma_prime) * mA_prime" << endl;
+			Rcpp::Rcout << identity_prime << endl;
 			#endif
 		}
 
@@ -477,35 +494,36 @@ const uint max_iterations, const bool bIntercept = false, const bool bCentre = t
 		numerator = (m1.transpose() * mA_prime * m1).value();
 		R2 = numerator / yTy;
 		#ifdef DEBUG
-		Rcout << "m1 " << m1 << endl;
-		Rcout << "mA_prime " << mA_prime << endl;
-		Rcout << "Numerator " << numerator << " denominator " << yTy;
-		Rcout << " R2 " << R2 << endl;
+		Rcpp::Rcout << "m1 " << m1 << endl;
+		Rcpp::Rcout << "mA_prime " << mA_prime << endl;
+		Rcpp::Rcout << "Numerator " << numerator << " denominator " << yTy;
+		Rcpp::Rcout << " R2 " << R2 << endl;
 		#endif
 		vR2_all(idx) = R2;											 // Calculate correlation
 
 		p_gamma = p_gamma_prime;
+		// FIXME: How do you do this in a thread-safe way?
+		// Rcpp::checkUserInterrupt();
 	}
 	return vR2_all;
 }
 
 // [[Rcpp:export]]
 VectorXd all_correlations_mX_cpp(VectorXd vy, MatrixXd mX, const uint intercept_col,
-const bool bIntercept, const bool bCentre, int cores)
+const bool bIntercept, const bool bCentre)
 {
 	const uint p = mX.cols();
 	const uint max_iterations = 1 << p;
 
 	Graycode graycode(p);
-	return all_correlations_main(graycode, vy, mX, intercept_col, max_iterations, bIntercept, bCentre,
-																cores);
+	return all_correlations_main(graycode, vy, mX, intercept_col, max_iterations, bIntercept, bCentre);
 }
 
 
 // Calculate the correlations for every subset of the covariates in mX
 // [[Rcpp:export]]
 VectorXd all_correlations_mX_mZ_cpp(VectorXd vy, MatrixXd mX, MatrixXd mZ, const uint intercept_col,
-																		const bool bIntercept, const bool bCentre, int cores)
+																		const bool bIntercept, const bool bCentre)
 {
 	const uint n = mX.rows();
 	const uint p1 = mX.cols();
@@ -513,10 +531,11 @@ VectorXd all_correlations_mX_mZ_cpp(VectorXd vy, MatrixXd mX, MatrixXd mZ, const
 	MatrixXd mC(n, p1 + p2);
 	const uint max_iterations = 1 << p2;
 
-	mC << mX, mZ;
+	// mC << mX, mZ;
+	mC.leftCols(p1) = mX;
+	mC.rightCols(p2) = mZ;
 	Graycode graycode(p1, p2);
-	return all_correlations_main(graycode, vy, mC, intercept_col, max_iterations, bIntercept, bCentre,
-															 cores);
+	return all_correlations_main(graycode, vy, mC, intercept_col, max_iterations, bIntercept, bCentre);
 }
 
 

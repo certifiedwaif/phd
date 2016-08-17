@@ -85,16 +85,28 @@ dbitset Graycode::operator[](const uint idx) const
 }
 
 
+//' Given a new dbitset, find out whether we are updating or downdating, which bit has changed in the
+//' new dbitset, what the minimum bit is which is set and which bits are set.
+//'
+//' @param[in] gamma_prime dbitset The new bitset we are changing to
+//' @param[in] gamma dbiset The old bitset that we are changing from
+//' @param[out] update bool A flag which is true if we are updating, and false if we are downdating
+//' @param[out] diff_idx uint Which bit has changed from gamma to gamma_prime
+//' @param[out] min_idx The minimum index of bit which is set
+//' @param[out] bits_set A count of how many bits are set in gamma_prime
 void Graycode::change(const dbitset& gamma_prime, const dbitset& gamma,
 													bool& update, uint& diff_idx, uint& min_idx, uint& bits_set) const
 {
-	#ifdef DEBUG
-	cout << "Previous gamma: " << gamma << endl;
-	cout << "Current gamma:  " << gamma_prime << endl;
-	#endif
 
-	// Find the LSB.
-	min_idx = min(gamma.find_first(), gamma_prime.find_first());
+	// Find the LSB of the varying bitset.
+	// min_idx = min(gamma.find_first(), gamma_prime.find_first());
+	// min_idx = min(gamma.find_next(fixed), gamma_prime.find_next(fixed));
+	for (auto idx = fixed; idx < size; idx++) {
+		if (gamma[idx] || gamma_prime[idx]) {
+			min_idx == idx;
+			break;
+		}
+	}
 
 	// Find bit that has changed.
 	diff_idx = (gamma_prime ^ gamma).find_first();
@@ -103,4 +115,5 @@ void Graycode::change(const dbitset& gamma_prime, const dbitset& gamma,
 	update = gamma_prime[diff_idx];
 
 	bits_set = gamma_prime.count();
+
 }

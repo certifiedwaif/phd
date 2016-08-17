@@ -18,8 +18,6 @@ using std::string;
 
 MatrixXd parseCSVfile_double(string infilename);
 VectorXd all_correlations_mX_mZ_cpp(VectorXd vy, MatrixXd mX, MatrixXd mZ, const uint intercept_col,
-																		const bool bIntercept = false, const bool bCentre = true,
-																		int cores = 1);
+																		const bool bIntercept = false, const bool bCentre = true);
 VectorXd all_correlations_mX_cpp(VectorXd vy, MatrixXd mX, const uint intercept_col,
-																 const bool bIntercept = false, const bool bCentre = true,
-																 int cores = 1);
+																 const bool bIntercept = false, const bool bCentre = true);
