@@ -103,13 +103,22 @@ void Graycode::change(const dbitset& gamma_prime, const dbitset& gamma,
 	// min_idx = min(gamma.find_next(fixed), gamma_prime.find_next(fixed));
 	for (auto idx = fixed; idx < size; idx++) {
 		if (gamma[idx] || gamma_prime[idx]) {
-			min_idx == idx;
+			min_idx = idx;
 			break;
 		}
 	}
 
 	// Find bit that has changed.
-	diff_idx = (gamma_prime ^ gamma).find_first();
+	// #ifdef DEBUG
+	// Rcpp::Rcout << "gamma_prime ^ prime " << (gamma_prime ^ gamma) << endl;
+	// #endif
+	// diff_idx = (gamma_prime ^ gamma).find_next(fixed - 1);
+	for (auto idx = fixed; idx < size; idx++) {
+		if (gamma[idx] != gamma_prime[idx]) {
+			diff_idx = idx;
+			break;
+		}
+	}
 
 	// Has it been set, or unset?
 	update = gamma_prime[diff_idx];

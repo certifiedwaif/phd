@@ -206,6 +206,7 @@ void show_matrix_difference(ostream& os, const MatrixXd& m1, const MatrixXd& m2,
 // Perform the rank one update on (X_gamma^T X_gamma)^{-1}
 template <typename Derived1, typename Derived2>
 MatrixBase<Derived2>& rank_one_update(const dbitset& gamma, const uint col_abs, const uint min_idx,
+	const uint fixed,
 const MatrixBase<Derived1>& mXTX, const MatrixBase<Derived1>& mA, MatrixBase<Derived2>& mA_prime, bool& bLow)
 {
 	auto p = mXTX.cols();
@@ -235,7 +236,7 @@ const MatrixBase<Derived1>& mXTX, const MatrixBase<Derived1>& mA, MatrixBase<Der
 		// Do rank one update
 		// Matrix m1 = A + b A X_gamma^T x x^T X_gamma A
 		// The relative column index
-		auto col = col_abs - min_idx;
+		auto col = col_abs - min_idx + fixed;
 		MatrixXd X_gamma_x(p_gamma, p_gamma);
 		MatrixXd A_X_gamma_T_x = mA * X_gamma_T_x;
 		// Re-arrange.
@@ -288,13 +289,13 @@ const MatrixBase<Derived1>& mXTX, const MatrixBase<Derived1>& mA, MatrixBase<Der
 
 // Perform the rank one downdate on (X_gamma^T X_gamma)^{-1}
 template <typename Derived1, typename Derived2>
-MatrixBase<Derived2>& rank_one_downdate(const uint col_abs, const uint min_idx,
+MatrixBase<Derived2>& rank_one_downdate(const uint col_abs, const uint min_idx, const uint fixed,
 const MatrixBase<Derived1>& mA, MatrixBase<Derived2>& mA_prime)
 {
 	auto p_gamma_prime = mA_prime.cols();
 	auto p_gamma = mA.cols();
 	// The relative column index
-	auto col = col_abs - min_idx;
+	auto col = col_abs - min_idx + fixed;
 
 	// Need to deal with three cases
 	if (col == 0) {
@@ -338,7 +339,7 @@ const MatrixBase<Derived1>& mA, MatrixBase<Derived2>& mA_prime)
 
 template <typename Derived1, typename Derived2>
 void update_mA_prime(bool bUpdate, const dbitset& gamma,
-const uint col, const uint min_idx,
+const uint col, const uint min_idx, const uint fixed,
 const MatrixBase<Derived1>& mXTX, const MatrixBase<Derived1>& mA, MatrixBase<Derived2>& mA_prime,
 bool& bLow)
 {
@@ -347,21 +348,22 @@ bool& bLow)
 		#ifdef DEBUG
 		Rcpp::Rcout << "Updating " << col << endl;
 		#endif
-		mA_prime = rank_one_update(gamma, col, min_idx, mXTX, mA, mA_prime, bLow);
+		mA_prime = rank_one_update(gamma, col, min_idx, fixed, mXTX, mA, mA_prime, bLow);
 	}
 	else {
 		// Rank one downdate
 		#ifdef DEBUG
 		Rcpp::Rcout << "Downdating " << col << endl;
 		#endif
-		mA_prime = rank_one_downdate(col, min_idx, mA, mA_prime);
+		mA_prime = rank_one_downdate(col, min_idx, fixed, mA, mA_prime);
 	}
 }
 
 
 // Calculate the correlations for every subset of the covariates in mX
-VectorXd all_correlations_main(const Graycode& graycode, VectorXd vy, MatrixXd mX, const uint intercept_col,
-const uint max_iterations, const bool bIntercept = false, const bool bCentre = true)
+VectorXd all_correlations_main(const Graycode& graycode, VectorXd vy, MatrixXd mX, const uint fixed,
+	const uint intercept_col, const uint max_iterations, const bool bIntercept = false,
+	const bool bCentre = true)
 {
 	const uint n = mX.rows();									 // The number of observations
 	const uint p = mX.cols();									 // The number of covariates
@@ -451,7 +453,7 @@ const uint max_iterations, const bool bIntercept = false, const bool bCentre = t
 			Rcpp::Rcout << "mA_prime before update " << mA_prime << endl;
 			#endif
 			update_mA_prime(bUpdate, gamma,
-				diff_idx, min_idx,
+				diff_idx, min_idx, fixed,
 				mXTX,   mA, mA_prime,
 				bLow);
 			if (bLow) {
@@ -513,10 +515,11 @@ VectorXd all_correlations_mX_cpp(VectorXd vy, MatrixXd mX, const uint intercept_
 const bool bIntercept, const bool bCentre)
 {
 	const uint p = mX.cols();
+	const uint fixed = 0;
 	const uint max_iterations = 1 << p;
 
 	Graycode graycode(p);
-	return all_correlations_main(graycode, vy, mX, intercept_col, max_iterations, bIntercept, bCentre);
+	return all_correlations_main(graycode, vy, mX, fixed, intercept_col, max_iterations, bIntercept, bCentre);
 }
 
 
@@ -535,7 +538,7 @@ VectorXd all_correlations_mX_mZ_cpp(VectorXd vy, MatrixXd mX, MatrixXd mZ, const
 	mC.leftCols(p1) = mX;
 	mC.rightCols(p2) = mZ;
 	Graycode graycode(p1, p2);
-	return all_correlations_main(graycode, vy, mC, intercept_col, max_iterations, bIntercept, bCentre);
+	return all_correlations_main(graycode, vy, mC, p1, intercept_col, max_iterations, bIntercept, bCentre);
 }
 
 

@@ -1,5 +1,5 @@
 #include <Rcpp.h>
-// #include <omp.h>
+#include <omp.h>
 
 #include "graycode.h"
 #include "correlation.h"
