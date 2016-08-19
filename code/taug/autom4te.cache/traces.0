@@ -1,0 +1,3 @@
+m4trace:configure.ac:4: -1- AC_SUBST([GSL_CONFIG])
+m4trace:configure.ac:4: -1- AC_SUBST_TRACE([GSL_CONFIG])
+m4trace:configure.ac:4: -1- m4_pattern_allow([^GSL_CONFIG$])
