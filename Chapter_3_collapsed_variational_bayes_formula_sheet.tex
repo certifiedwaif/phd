@@ -721,6 +721,47 @@ Then the above integral becomes
 \int_0^1 \frac{h^{b - p/2} [1 + (\frac{h}{1 - h})(1 - R^2)]^{-n/2}}{(1 - h)^b (1 - h R^2)^{p/2} \{ 1 + \frac{1}{n}[h(1 - h R^2)]^{-1} (\vbeta - h \hat{\vbeta}_{LS})^\top \mX^\top \mX (\vbeta - h \hat{\vbeta}_{LS}) \}} \left(1 + \frac{h}{1 - h}\right)^2 dh
 \end{align*}
 
+\section{Proof that $q(\beta_s, \gamma_s) \Pi_{j \notin S} q(\beta_j, \gamma_j)$ is a good factored approximation}
+
+If we can show that the covariates which certainly are or certainly are not in the model do not depend on the
+covariates which may be in the model in the posterior distribution, then the factored approximation
+
+\[
+	q(\beta_s, \gamma_s) \Pi_{j \notin S} q(\beta_j, \gamma_j)
+\]
+
+remains accurate, while offering substantial computational advantages as the approximation involving variables
+which certainly are or are not in the model is simpler, due to the absence of weights in $(0, 1)$.
+
+If $p(\vgamma_j = 1|\vy)$ = 0
+then
+\begin{align*}
+&\sum_{\vgamma_{-j}} p(\vgamma_j=1, \vgamma_{-j}, \vy) = 0 \\
+\Rightarrow &p(\vgamma_j = 1, \vy_{-j}, \vy) = 0 \\
+\Rightarrow &p(\vgamma_j = 1| \vgamma_{-j}, \vy) = p(\vgamma_j=1|\vy) \\
+\end{align*}
+
+If $p(\vgamma_s|\vy)$ = 1 (*)
+then
+\begin{align*}
+\sum p(\vgamma_s, \vgamma_{-s}|\vy) = 1 \\
+\sum_{\vgamma_{-s}} p(\vgamma_s|\vgamma_{-s}, \vy) p(\vgamma_s|\vy) = 1 \\
+\sum_{\vgamma_{-s}} p(\vgamma_s|\vgamma_{-s}, \vy) / p(\vgamma_{-s}, \vy) p(\vgamma_{-s}, \vy) / p(\vgamma_s|\vy) = 1 \\
+\sum_{\vgamma_{-s}} p(\vgamma_s|\vgamma_{-s}, \vy) p(\vgamma_{-s}|\vy) = 1 \\
+\end{align*}
+
+Now
+\begin{align*}
+\va^T \vb = 1, 0 \leq a_j \leq 1 \\
+\vone^T \vb = 1 \\
+\therefore a_j = 1 \\
+\end{align*}
+
+as $\vb \ne \vzero$.
+
+$p(\vgamma_s|\vgamma_{-s}, \vy) = 1 \forall \vgamma_{-s}$
+
+as (*) = (**) the result follows. The opposite implication holds \ldots
 \bibliographystyle{elsarticle-harv}
 \bibliography{references_mendeley}
 
