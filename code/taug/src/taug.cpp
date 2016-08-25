@@ -484,7 +484,7 @@ ZE_constants_result ZE_constants(int n, int pmax, bool LARGEP = false)
 //' @param p The number of parameters
 //' @param R2 The correlation co-efficient
 //' @return The log-lower bound of tau_g
-
+//'
 //' @export
 // [[Rcpp::export]]
 double tau_g(int n, int p, double R2)
