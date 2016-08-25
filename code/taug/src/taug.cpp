@@ -326,11 +326,11 @@ Z_g_exact_result Z_g_exact(double A, double B, double C)
 	auto beta = C;
 
 	// Check the conditions under which the result holds
-	if ( ((1.-mu)>nu)&(nu>0.) ) {
-		cout << "fine" << endl;
+	if ( ((1.-mu)>nu)&&(nu>0.) ) {
+		Rcpp::Rcout << "fine" << endl;
 	}
 	else {
-		cout << "not fine" << endl;
+		Rcpp::Rcout << "not fine" << endl;
 	}
 
 	auto val1 = 0.5*(nu-1)*log(beta) + lgamma(1. - mu - nu) + 0.5*beta;
@@ -478,6 +478,55 @@ ZE_constants_result ZE_constants(int n, int pmax, bool LARGEP = false)
 	return result;
 }
 
+//' Calculate tau_g from n, p and R2
+//'
+//' @param n The number of observations
+//' @param p The number of parameters
+//' @param R2 The correlation co-efficient
+//' @return The log-lower bound of tau_g
+
+//' @export
+// [[Rcpp::export]]
+double tau_g(int n, int p, double R2)
+{
+	auto a = -0.75;
+
+	// Note res$mA contains the gray-code
+	double b = (n - p)/2. - a - 2. ;
+
+	// Calculate
+	double A =  n/2. - p - a - 2.;
+	double B = -static_cast<double>(n-p)/2.;
+	double U = -(A+B+2.);
+
+	// Calculate tau_g
+	double tau_g = tau_g_FullyExponentialLaplace(a,n,p,R2,20);
+
+	// Calculate the constant C (needed to calculate the normalizing constant for q(g)
+	double C = 0.5*n*R2/((1 + tau_g)*(1 - R2 + tau_g)) + 0.5*p/(1 + tau_g);
+
+	// Calculate the
+						 // Z.h.Laplace(U,B,C)
+	double Z = Z_g_trapint(A,B,C,1000).intVal;
+
+	// Calculate the lower bound on the log-likelihood
+	double result;
+	result = 0.5*p - 0.5*n*log(2*PI) - gsl_sf_lnbeta(a+1,b+1)  - 0.5*n*log(1 + tau_g - R2) ;
+	result = result - 0.5*(n+p)*log(0.5*(n+p))+ gsl_sf_lngamma(0.5*(n+p)) + C*tau_g + log(Z)  + 0.5*(n-p)*log(1 + tau_g);
+
+	// cout << " " << i << " " << velbo[i] << " " << tau_g << " " << C << " " << Z << "\n";
+
+	// How are failures from Z_g_trapint signalled?
+	// If there is an error stop here and have a look
+	// if (Z.failed) {
+	// 	print("error! press escape and have a look")
+	// 	string ans;
+	// 	cin >> ans;
+	// }
+
+	return result;
+}
+
 
 // struct ZE_exact_result
 // {
@@ -499,7 +548,7 @@ ZE_constants_result ZE_constants(int n, int pmax, bool LARGEP = false)
 // 	#pragma omp parallel for
 // 	for (auto i = 0; i < vlog_ZE.size(); i++) {
 // 		auto p_gamma = vq(i);
-// 		// cout << "i " << i << " p_gamma " << p_gamma << endl;
+// 		// Rcpp::Rccout << "i " << i << " p_gamma " << p_gamma << endl;
 // 		vlog_ZE(i) = -res_con.vcon(p_gamma) * log(1.0 - vR2(i)) + res_con.vpen(p_gamma);
 // 	}
 // 	ZE_exact_result result;
