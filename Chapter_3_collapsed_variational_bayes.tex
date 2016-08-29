@@ -35,37 +35,53 @@
 
 We develop mean field and structured variational Bayes approximations for Bayesian model selection on linear
 models using Zellner's g prior. Our mean field updates only depend on a single variational parameter $\tau_g$
-and other values which are fixed for each model considered. Using rank-1 updates, we are able to exhaustively
-search the model space in $\BigO(2^p np^2)$ rather than $\BigO(2^p np^3)$. An algorithm is developed which
-allows these models to be fit in parallel. Applications to a range of data sets are presented, showing 
-empirically that our method performs well on real-world data. Our method is computationally more efficient 
-than the exact Bayesian model.
+and other values which are fixed for each model considered. An algorithm is developed which allows these
+models to be fit in parallel. Applications to a range of data sets are presented, showing  empirically that
+our method performs well on real-world data. Our method is computationally more efficient  than the exact
+Bayesian model.
 
 \section{Introduction}
 
 % Problem in general
-The problem of model selection is one of the most important problems encountered in practice by
-applied statistical practitoners. There are many approaches to model selection including approaches based on
-functions of the residual sum of squares, lasso and L1 regression and Bayesian modelling approaches. A major
-motivation for this field of research is the need for a computationally feasible approach to performing model 
-selection on large scale problems where the number of covariates is large.
+The problem of model selection is one of the most important problems encountered in practice by applied
+statistical practitoners. There are many approaches to model selection including approaches based on functions
+of the residual sum of squares, lasso and L1 regression and Bayesian modelling approaches. A major motivation
+for this field of research is the need for a computationally feasible approach to performing model  selection
+on large scale problems where the number of covariates is large.
 
 % Bayesian
-The Bayesian approach to model selection has the advantage of not relying on a fixed choice of tuning
+
+% Background
+Reference other work on model selection, in a Bayesian context
+
+Paradoxes, reasons not to choose a fixed g. Reference Jeffrey's work 1961.
+
+Zellner's g prior Zellner 1986
+
+Zellner 1986 constructed a family of priors for a Gaussian regression model using a particular form
+of conjugate Normal-Gamma model,
+\begin{equation*}
+p(\sigma^2) \propto \frac{1}{\sigma^2}, \vbeta|\sigma^2 \sim \N\left(\vbeta, \frac{g}{\sigma^2} (\mX^\top \mX)^{-1}\right)
+\end{equation*}
+
+where the prior covariance matrix of $\vbeta$ is taken to be a multiple of the Fisher information 
+matrix by the parameter $g$. This immediately raises the question of how $g$ should be chosen.
+
+Hyper g prior, mixture of g-priors Liang 2008
+
+Liang et al. 2008 showed that fixed choices of $g$ lead to paradoxes such as Bartlett's Paradox and
+the Information Paradox.
+Using a mixture of g-priors has the advantage of not relying on a fixed choice of tuning
 parameter, instead allowing the specification of a prior distribution on that parameter. In this sense, the 
 choice of covariates for the optimal model selected can be considered to be automatic. This choice can be
 made while inducing sparsity.
 
-% Background
-\begin{itemize}
-\item Reference other work on model selection, in a Bayesian context.
-\item Zellner's g prior Zellner 1986
-\item Hyper g prior Liang 2008
-\item Paradoxes, reasons not to choose a fixed g. Reference Jeffrey's work 1961.
-\item Variational Bayes, Explaining Variational Approximations 2010
-\item Structured Variational Bayes for model selection, Wand and Ormerod Variational Bayes for Elaborate 
+
+Variational Bayes, Explaining Variational Approximations 2010
+
+Structured Variational Bayes for model selection, Wand and Ormerod Variational Bayes for Elaborate 
 Distributions
-\end{itemize}
+
 % VB in general
 
 Variational Bayes (see \cite{Ormerod2010}) is a computationally efficient, deterministic method of fitting
@@ -78,7 +94,13 @@ KL divergence between the posterior and the  approximating distribution $q(\vthe
 
 % Our main contribution
 In this paper, we develop variational Bayes approximations to model selection of linear models using
-Zellner's g prior as in \cite{Liang2008}.
+Zellner's g prior as in \cite{Liang2008}. We show that in this situation, our variational approximation
+is almost exact -- that is, the variational approximation of the Bayesian linear model gives almost perfect
+estimates.
+
+By searching of the model space as one covariate changes between each sub-model and  using rank-1 updates on
+$(\mX^\top \mX)^{-1}$, we are able to exhaustively search the model space in $\BigO(2^p np^2)$ rather than
+$\BigO(2^p np^3)$.
 
 This article is organised as follows. In Section \ref{sec:model_selection}, we review previous Bayesian
 approaches to model selection. In Section \ref{sec:methodology} we develop our approach. In Section
