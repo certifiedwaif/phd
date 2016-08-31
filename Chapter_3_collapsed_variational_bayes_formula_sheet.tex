@@ -741,27 +741,35 @@ then
 \Rightarrow &p(\vgamma_j = 1| \vgamma_{-j}, \vy) = p(\vgamma_j=1|\vy) \\
 \end{align*}
 
-If $p(\vgamma_s|\vy)$ = 1 (*)
+If 
+\begin{equation}\label{eq:star}
+p(\vgamma_s|\vy) = 1
+\end{equation}
 then
 \begin{align*}
-\sum p(\vgamma_s, \vgamma_{-s}|\vy) = 1 \\
-\sum_{\vgamma_{-s}} p(\vgamma_s|\vgamma_{-s}, \vy) p(\vgamma_s|\vy) = 1 \\
-\sum_{\vgamma_{-s}} p(\vgamma_s|\vgamma_{-s}, \vy) / p(\vgamma_{-s}, \vy) p(\vgamma_{-s}, \vy) / p(\vgamma_s|\vy) = 1 \\
-\sum_{\vgamma_{-s}} p(\vgamma_s|\vgamma_{-s}, \vy) p(\vgamma_{-s}|\vy) = 1 \\
+&\sum p(\vgamma_s, \vgamma_{-s}|\vy) = 1 \\
+&\sum_{\vgamma_{-s}} p(\vgamma_s|\vgamma_{-s}, \vy) p(\vgamma_s|\vy) = 1 \\
+&\sum_{\vgamma_{-s}} \frac{p(\vgamma_s|\vgamma_{-s}, \vy)}{p(\vgamma_{-s}, \vy)} \frac{p(\vgamma_{-s}, \vy)}{ p(\vgamma_s|\vy)} = 1 \\
+&\sum_{\vgamma_{-s}} p(\vgamma_s|\vgamma_{-s}, \vy) p(\vgamma_{-s}|\vy) = 1 \\
 \end{align*}
 
 Now
 \begin{align*}
-\va^T \vb = 1, 0 \leq a_j \leq 1 \\
-\vone^T \vb = 1 \\
-\therefore a_j = 1 \\
+&\va^\top \vb = 1, 0 \leq a_j \leq 1 \\
+&\vone^\top \vb = 1 \\
+\therefore &a_j = 1 \\
 \end{align*}
 
 as $\vb \ne \vzero$.
 
-$p(\vgamma_s|\vgamma_{-s}, \vy) = 1 \forall \vgamma_{-s}$
+Hence
+\begin{equation}\label{eq:starstar}
+p(\vgamma_s|\vgamma_{-s}, \vy) = 1 \forall \vgamma_{-s}
+\end{equation}
 
-as (*) = (**) the result follows. The opposite implication holds \ldots
+and as Equation \ref{eq:star} equals Equation \ref{eq:starstar} the result follows. The opposite implication
+holds \ldots
+
 \bibliographystyle{elsarticle-harv}
 \bibliography{references_mendeley}
 
