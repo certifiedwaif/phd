@@ -54,9 +54,45 @@ The log likelihood of the full model is then
 &\quad + b \log g - (a + b + 2) \log (1 + g) - \log \Beta(a + 1, b + 1)
 \end{align*}
 
+
+\subsection{Full Bayesian inference}
+
+From Result 6,
+
+\[
+	p(g|\vy) = \frac{(1-R^2)^{b+1} g^b [1 + g(1-R^2)]^{-n/2}}{\Beta{(p/2 + a + 1, b + 1)}}, 0 \leq R^2 < 1
+\]
+
+From Result 7,
+
+\[
+	\vbeta | \vy, \sigma^2, g \sim \N(\frac{g}{1+g} \hat{\vbeta}_{LS}, \frac{g}{1+g} \sigma^2 (\mX^\top \mX)^{-1})
+\]
+
+Re-using ideas from \S 2.2, we re-call that $\Var(\vbeta|\vy) = \E \vbeta \vbeta^\top - \vmu \vmu^\top$ and calculate
+
+\begin{align*}
+	\E [\vbeta^\top \vbeta|\vy] &= \int \vbeta \vbeta^\top p(\vbeta|\vy, \sigma^2, g) p(\sigma^2|\vy, g) p(g|\vy) d \vbeta d \sigma^2 d g \\
+	&= \Var \vbeta + \vmu \vmu^\top \\
+	&= \frac{g}{1+g} \sigma^2 (\mX^\top \mX)^{-1} + (\frac{g}{1+g})^2 \hat{\vbeta}_{LS} \hat{\vbeta}_{LS}^\top \\
+	&= \int \frac{g}{1+g} \sigma^2 (\mX^\top \mX)^{-1} p(\sigma^2 | \vy, g) p(g | \vy) d \sigma^2 d g +
+			\int (\frac{g}{1+g})^2 \hat{\vbeta}_{LS} \hat{\vbeta}_{LS}^\top p(g | \vy) d g
+\end{align*}
+
+We calculate each of these integrals seperately, and then add them to arrive at our result.
+
+\begin{align*}
+	&\int \frac{g}{1+g} \sigma^2 (\mX^\top \mX)^{-1} p(\sigma^2 | \vy, g) p(g | \vy) d \sigma^2 d g \\
+= &(\mX^\top \mX)^{-1} \int K (\sigma^2) \Beta(1 + b, p/2 + 4 + a) \Phi_1(1 + b, -n/2, n/2 + 3, \sigma^{-2} \frac{1}{2} \|\vy\|^2 R^2, R^2) \\
+&\times \frac{(1 - R^2)^{b + 1} g^{b + 1} (1 + g)^{-1} [1 + g (1 - R^2)]^{-n/2}}{\Beta(p/2 + a + 1, b + 1)} d \sigma^2 dg \\
+&\hat{\vbeta}_{LS} \hat{\vbeta}_{LS}^\top (1 - R^2) \int \frac{g^{b + 2} (1 + g)^{-2} [1 + g(1 - R^2)]^{-n/2}}{\Beta(p/2 + a + 1, b + 1)} dg \\
+=& \text{Some  confluent hypergeometric function} \\
+\end{align*}
+
+\subsection{Variational Approximation}
+
 For convenience, we will denote $\tau_{\sigma^2} = \E_q \left[ \frac{1}{\sigma^2} \right]$ and $\tau_{g} =
 \E_q \left[ \frac{1}{g} \right]$.
-
 
 \subsection{$q(\vbeta)$}
 
