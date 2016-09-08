@@ -2,6 +2,7 @@
 
 #include "taug.h"
 #include <ctgmath>
+#include <functional>
 #include <limits>
 #include <Eigen/Dense>
 #include <gsl/gsl_sf_gamma.h>
@@ -18,7 +19,7 @@ double trapint(const DenseBase<Derived1>& xgrid, const DenseBase<Derived2>& fgri
 {
 	auto sum = 0.0;
 
-	#pragma omp parallel for reduction(+:sum)
+	#pragma omp parallel for simd reduction(+:sum)
 	for (auto i = 0; i < xgrid.size() - 1; i++) {
 		sum += 0.5 * (xgrid(i + 1) - xgrid(i)) * (fgrid(i) + fgrid(i + 1));
 	}
@@ -26,6 +27,21 @@ double trapint(const DenseBase<Derived1>& xgrid, const DenseBase<Derived2>& fgri
 	return sum;
 }
 
+
+double trapint(std::function<double(int)> x, std::function<double(double)> f)
+{
+	auto sum = 0.0;
+
+  // #pragma omp parallel for simd reduction(+:sum)
+	for (auto i = 0; i < GRID_POINTS - 1; i++) {
+		sum += 0.5 * (x(i + 1) - x(i)) * (f(x(i + 1)) + f(x(i)));
+    // #ifndef _OPENMP
+	    // Rcout << sum << std::endl;
+    // #endif
+	}
+
+	return sum;
+}
 
 // Solve a*x*x + b*x + c = 0
 // Probably a numerically bad way of doing this see Num Rec in C
@@ -478,6 +494,22 @@ ZE_constants_result ZE_constants(int n, int pmax, bool LARGEP = false)
 	return result;
 }
 
+
+VectorXd ZE_exact(VectorXd vn, VectorXd vp, VectorXd vR2)
+{
+	VectorXd vlog_ZE(vR2.size());
+	#pragma omp parallel for
+	for (auto i = 0; i < vlog_ZE.size(); i++) {
+		auto n = vn(i);
+		auto p = vp(i);
+		ZE_constants_result res_con = ZE_constants(n, p);
+		// Rcpp::Rccout << "i " << i << " p_gamma " << p_gamma << endl;
+		vlog_ZE(i) = -res_con.vcon(p) * log(1.0 - vR2(i)) + res_con.vpen(p);
+	}
+	return vlog_ZE;
+}
+
+
 //' Calculate tau_g from n, p and R2
 //'
 //' @param n The number of observations
@@ -526,37 +558,6 @@ double tau_g(int n, int p, double R2)
 
 	return result;
 }
-
-
-// struct ZE_exact_result
-// {
-// 	MatrixXi mGraycode;
-// 	VectorXd vR2;
-// 	VectorXd vlog_ZE;
-// };
-//
-// ZE_exact_result ZE_exact(VectorXd vy, MatrixXd mX)
-// {
-// 	auto n = mX.rows();
-// 	auto p = mX.cols();
-// 	ZE_constants_result res_con = ZE_constants(n, p);
-// 	Graycode graycode(p);
-// 	auto mGraycode = graycode.to_MatrixXi();
-// 	auto vR2 = all_correlations_mX_cpp(vy, mX, 0, true, true);
-// 	VectorXi vq = mGraycode * MatrixXi::Ones(p, 1);
-// 	VectorXd vlog_ZE(vq.size());
-// 	#pragma omp parallel for
-// 	for (auto i = 0; i < vlog_ZE.size(); i++) {
-// 		auto p_gamma = vq(i);
-// 		// Rcpp::Rccout << "i " << i << " p_gamma " << p_gamma << endl;
-// 		vlog_ZE(i) = -res_con.vcon(p_gamma) * log(1.0 - vR2(i)) + res_con.vpen(p_gamma);
-// 	}
-// 	ZE_exact_result result;
-// 	result.mGraycode = mGraycode;
-// 	result.vR2 = vR2;
-// 	result.vlog_ZE = vlog_ZE;
-// 	return result;
-// }
 
 
 void tau_g(int n, const MatrixXd& mGraycode, const VectorXd& vR2, const VectorXd& vlog_ZE,
@@ -611,3 +612,5 @@ void tau_g(int n, const MatrixXd& mGraycode, const VectorXd& vR2, const VectorXd
 	vq = logqy_til.array().exp() / logqy_til.array().exp().sum();
 
 }
+
+
