@@ -43,23 +43,15 @@ List rcpp_taug(unsigned int n, NumericMatrix mGraycode, NumericVector vR2,
 //' @param n The number of samples
 //' @param p The number of covariates
 //' @param R2 The correlation
-//' @param upper_limit The upper limit of integration
 //' @return The value of the integral
 //' @export
 // [[Rcpp::export]]
-double var_int1(int n, double p, double R2, double upper_limit)
+double var_int1(int n, double p, double R2)
 {
   auto a = -3./4.;
   auto b = (n - p) / 2. - 2. - a;
-  return trapint([=](int i)->double {
-    return static_cast<double>(upper_limit * (i + 1)) / static_cast<double>(GRID_POINTS);
-  },
-  [=](double g)->double {
-    #ifndef _OPENMP
-      Rcout << "Called with " << g << std::endl;
-    #endif
-    return exp((b + 1.) * log(g) - log(1.+g) - n/2. * log(1. + (1.-R2)*g));
-  });
+
+  return (gsl_sf_beta(p / 2. + a + 1., b + 2.) / gsl_sf_beta(p / 2. + a + 1., b + 1.)) * gsl_sf_hyperg_2F1(p / 2. + a + 1., 1., n / 2. + 1., R2);
 }
 
 
@@ -68,20 +60,13 @@ double var_int1(int n, double p, double R2, double upper_limit)
 //' @param n The number of samples
 //' @param p The number of covariates
 //' @param R2 The correlation
-//' @param upper_limit The upper limit of integration
 //' @return The value of the integral
 //' @export
 // [[Rcpp::export]]
-double var_int2(int n, int p, double R2, double upper_limit)
+double var_int2(int n, int p, double R2)
 {
   auto a = -3./4.;
   auto b = (n - p) / 2. - 2. - a;
-  return trapint([=](int i)->double {
-    return static_cast<double>(upper_limit * (i + 1)) / static_cast<double>(GRID_POINTS);
-  },
-  [=](double g)->double {
-    auto result = (b + 2.) * log(g) - 2. * log(1. + g) - n / 2. * log(1. + (1.-R2) * g);
-    Rcout << g << " " << result << std::endl;
-    return result;
-  });
+
+  return (gsl_sf_beta(p / 2. + a + 1., b + 3.) / gsl_sf_beta(p / 2. + a + 1., b + 1.)) * gsl_sf_hyperg_2F1(p / 2. + a + 1., 2, n / 2. + 2., R2);
 }
