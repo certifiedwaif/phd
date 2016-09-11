@@ -44,17 +44,28 @@ Bayesian model.
 
 % Problem in general
 The problem of model selection is one of the most important problems encountered in practice by applied
-statistical practitoners. There are many approaches to model selection including approaches based on functions
-of the residual sum of squares, lasso and L1 regression and Bayesian modelling approaches. A major motivation
-for this field of research is the need for a computationally feasible approach to performing model  selection
-on large scale problems where the number of covariates is large.
+statistical practitioners. There are many approaches to model selection including approaches based on
+functions of the residual sum of squares, lasso and L1 regression and Bayesian modelling approaches. A major
+motivation for this field of research is the need for a computationally feasible approach to performing model
+selection on large scale problems where the number of covariates is large.
+
+The bias-variance trade-off is one of the central problems in statistical learning. The guise this problem
+takes in model selection is balancing the quality of the model fit, using, for example, $1 - R^2$ against the
+complexity of the model using, for example, dimension of the model, in an attempt to find a compromise between
+over-fitting and under-fitting, in the hope that our model fit will generalise well beyond the training data
+we have observed to the general population and that we haven't simply learned the noise in the training set.
+
+% Non-Bayesian
+Maximising the likelihood alone only maximises the quality of the model fit, without penalising the dimension.
+Many model selection criteria have been proposed to attempt to balance model likelihood and model complexity,
+including the Akaike Information Criteria AIC (\cite{DeLeeuw1992}), Bayesian Information Criterion BIC
+(\cite{Schwarz1978}) and Deviance Information Criterion DIC (\cite{Spiegelhalter2016}).
 
 % Bayesian
+A Bayesian approach to model selection uses Bayes Factors to compare models to see which one we should
+select.
 
 % Background
-Reference other work on model selection, in a Bayesian context
-
-Paradoxes, reasons not to choose a fixed g. Reference Jeffrey's work 1961.
 
 Zellner's g prior Zellner 1986
 
@@ -67,9 +78,12 @@ p(\sigma^2) \propto \frac{1}{\sigma^2}, \vbeta|\sigma^2 \sim \N\left(\vbeta, \fr
 where the prior covariance matrix of $\vbeta$ is taken to be a multiple of the Fisher information 
 matrix by the parameter $g$. This immediately raises the question of how $g$ should be chosen.
 
+There are many ways of choosing a prior on $g$.
 Hyper g prior, mixture of g-priors Liang 2008
 
-Liang et al. 2008 showed that fixed choices of $g$ lead to paradoxes such as Bartlett's Paradox and
+Paradoxes, reasons not to choose a fixed g. Reference Jeffrey's work 1946. \cite{Society2016}
+
+(\cite{Liang2008}) showed that fixed choices of $g$ lead to paradoxes such as Bartlett's Paradox and
 the Information Paradox.
 Using a mixture of g-priors has the advantage of not relying on a fixed choice of tuning
 parameter, instead allowing the specification of a prior distribution on that parameter. In this sense, the 
@@ -80,7 +94,7 @@ made while inducing sparsity.
 Variational Bayes, Explaining Variational Approximations 2010
 
 Structured Variational Bayes for model selection, Wand and Ormerod Variational Bayes for Elaborate 
-Distributions
+Distributions (\cite{Wand2011})
 
 % VB in general
 
