@@ -57,13 +57,8 @@ The log likelihood of the full model is then
 
 \subsection{Full Bayesian inference}
 
-From Result x,
-
-\[
-	\sigma^2 | \vy, g \sim \IG\left(\frac{n}{2}, \frac{n}{2} \left(1 - \frac{g}{1 + g} R^2\right)\right)
-\]
-
 From Result 6,
+
 \[
 	p(g|\vy) = \frac{(1-R^2)^{b+1} g^b [1 + g(1-R^2)]^{-n/2}}{\Beta{(p/2 + a + 1, b + 1)}}, 0 \leq R^2 < 1
 \]
@@ -73,30 +68,57 @@ From Result 7,
 	\vbeta | \vy, \sigma^2, g \sim \N\left(\frac{g}{1+g} \hat{\vbeta}_{\LS}, \frac{g}{1+g} \sigma^2 (\mX^\top \mX)^{-1}\right)
 \]
 
+From Result 8,
+
+\[
+	\sigma^2 | \vy, g \sim \IG\left(\frac{n}{2}, \frac{n}{2} \left(1 - \frac{g}{1 + g} R^2\right)\right)
+\]
+
+
 Using the Law of Total Expectation,
 \begin{align*}
 	\Var(\vbeta | \vy) &= \E_g[\Var(\vbeta | \vy)] + \Var_g[\E(\vbeta|\vy, g)] \\
-	&= \E_g\left[\frac{g}{1 + g} \E[\sigma^2|\vy, g] (\mX^\top \mX)^{-1} | \vy \right] + \Var_g\left[\frac{g}{1 + g} \vbetahatls \vbetahatls^\top\right] \\
-	&= \frac{n}{n - 2} \E_g\left[\frac{g}{1 + g} \left(1 - \frac{g}{1 + g} R^2 \right) \Bigm| \vy \right] (\mX^\top \mX)^{-1} + \Var_g\left[\frac{g}{1 + g} \right] \vbetahatls \vbetahatls^\top \\
+	&= \E_g\left[\frac{g}{1 + g} \E[\sigma^2|\vy, g] (\mX^\top \mX)^{-1} \Bigm| \vy \right] + \Var_g\left[\frac{g}{1 + g} \vbetahatls \vbetahatls^\top \Bigm| \vy \right] \\
+	&= \frac{n}{n - 2} \E_g\left[\frac{g}{1 + g} \left(1 - \frac{g}{1 + g} R^2 \right) \Bigm| \vy \right] (\mX^\top \mX)^{-1} + \Var_g\left[\frac{g}{1 + g} \Bigm| \vy \right] \vbetahatls \vbetahatls^\top \\
+&= \left( \frac{n}{n - 2} \right) (G_1 - G_2 R^2) (\mX^\top \mX)^{-1} + (G_2 - G_1^2) \vbetahatls \vbetahatls^\top
 \end{align*}
+
+where $G_1 = \E\left[\frac{g}{1 + g} \Bigm| \vy \right]$ and $G_2 = \E\left[ \left(\frac{g}{1 + g} \right)^2 \Bigm| \vy \right]$.
 
 \begin{align*}
-	\E\left(\frac{g}{1 + g} | \vy \right) &= \int_0^\infty \frac{g}{1 + g} p(g | \vy) dg \\
+	\E\left[\frac{g}{1 + g} \Bigm| \vy \right] &= \int_0^\infty \frac{g}{1 + g} p(g | \vy) dg \\
 	&= \frac{(1 - R^2)^{b+1}}{\Beta(p/2 + a + 1, b + 1)} \int_0^\infty g^{b+1} (1 + g)^{-1} [1 + g (1 - R^2)]^{-n/2} dg\\
-	&= \frac{\Beta(p/2 + a + 1, b + 2)}{\Beta(p /2 + a + 1, b + 1)} (1 - R^2)^{b+1} {}_2 F_1(p/2 + a + 1, 1; n/2 + 1; R^2)
+	&= \frac{\Beta(b + 2, n/2 + b + 3)}{\Beta(p /2 + a + 1, b + 1)} (1 - R^2)^{b+1} {}_2 F_1(n/2, b + 2; n/2 + 1; R^2) \\
+	&= \frac{\Beta(p/2 + a + 1, b + 2)}{\Beta(p /2 + a + 1, b + 1)} {}_2 F_1(p/2 + a + 1, 1; n/2 + 1; R^2)
 \end{align*}
 
-as
+using \cite{Gradshteyn1988} 3.197 Equation 5,
 
 \[
 	\int_0^\infty x^{\lambda-1} (1+x)^\nu (1 + \alpha x)^{\mu} dx = \Beta(\lambda, -\mu-\nu-\lambda) {}_2 F_1 (\mu, \lambda; -\mu-\nu; 1 - \alpha)
 \]
 
-when $[|\arg \alpha| < \pi], -\Re(\mu + \mu) > \Re \lambda > 0$
+when $[|\arg \alpha| < \pi], -\Re(\mu + \mu) > \Re \lambda > 0$ to obtain a closed form the the integral,  and
+Euler's identity
 
 \[
-	\E\left[ \left(\frac{g}{1 + g} \right)^2 | \vy \right] = \frac{\Beta(p/2 + a + 1, b + 2)}{\Beta(p /2 + a + 1, b + 1)} (1 - R^2)^{b+2} {}_2 F_1(p/2 + a + 1, 1; n/2 + 1; R^2)
+	{}_2 F_1(a, b; c; d) = (1 - d)^{c - a -  b} {}_2 F_1(c - a, c - b; c; d)
 \]
+
+to simplify the expression further.
+
+Similiarly,
+
+\[
+	\E\left[ \left(\frac{g}{1 + g} \right)^2 \Bigm| \vy \right] = \frac{\Beta(p/2 + a + 1, b + 2)}{\Beta(p /2 + a + 1, b + 1)} (1 - R^2)^{b+2} {}_2 F_1(p/2 + a + 1, 1; n/2 + 1; R^2)
+\]
+
+Thus we obtain
+
+\begin{align*}
+G_1 &= \frac{\Beta(p/2 + a + 1, b + 2)}{\Beta(p /2 + a + 1, b + 1)} (1 - R^2)^{b+1} {}_2 F_1(n/2, b + 1; n/2 + 1; R^2) \\
+G_2 &= \frac{\Beta(p/2 + a + 1, b + 3)}{\Beta(p /2 + a + 1, b + 1)} (1 - R^2)^{b+1} {}_2 F_1(n/2, b + 3; n/2 + 2; R^2)
+\end{align*}
 
 
 \subsection{Variational Approximation}
