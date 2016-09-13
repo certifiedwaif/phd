@@ -57,37 +57,47 @@ The log likelihood of the full model is then
 
 \subsection{Full Bayesian inference}
 
-From Result 6,
+From Result x,
 
+\[
+	\sigma^2 | \vy, g \sim \IG\left(\frac{n}{2}, \frac{n}{2} \left(1 - \frac{g}{1 + g} R^2\right)\right)
+\]
+
+From Result 6,
 \[
 	p(g|\vy) = \frac{(1-R^2)^{b+1} g^b [1 + g(1-R^2)]^{-n/2}}{\Beta{(p/2 + a + 1, b + 1)}}, 0 \leq R^2 < 1
 \]
 
 From Result 7,
-
 \[
-	\vbeta | \vy, \sigma^2, g \sim \N(\frac{g}{1+g} \hat{\vbeta}_{LS}, \frac{g}{1+g} \sigma^2 (\mX^\top \mX)^{-1})
+	\vbeta | \vy, \sigma^2, g \sim \N\left(\frac{g}{1+g} \hat{\vbeta}_{\LS}, \frac{g}{1+g} \sigma^2 (\mX^\top \mX)^{-1}\right)
 \]
 
-Re-using ideas from \S 2.2, we re-call that $\Var(\vbeta|\vy) = \E \vbeta \vbeta^\top - \vmu \vmu^\top$ and calculate
-
+Using the Law of Total Expectation,
 \begin{align*}
-	\E [\vbeta^\top \vbeta|\vy] &= \int \vbeta \vbeta^\top p(\vbeta|\vy, \sigma^2, g) p(\sigma^2|\vy, g) p(g|\vy) d \vbeta d \sigma^2 d g \\
-	&= \Var \vbeta + \vmu \vmu^\top \\
-	&= \frac{g}{1+g} \sigma^2 (\mX^\top \mX)^{-1} + (\frac{g}{1+g})^2 \hat{\vbeta}_{LS} \hat{\vbeta}_{LS}^\top \\
-	&= \int \frac{g}{1+g} \sigma^2 (\mX^\top \mX)^{-1} p(\sigma^2 | \vy, g) p(g | \vy) d \sigma^2 d g +
-			\int (\frac{g}{1+g})^2 \hat{\vbeta}_{LS} \hat{\vbeta}_{LS}^\top p(g | \vy) d g
+	\Var(\vbeta | \vy) &= \E_g[\Var(\vbeta | \vy)] + \Var_g[\E(\vbeta|\vy, g)] \\
+	&= \E_g\left[\frac{g}{1 + g} \E[\sigma^2|\vy, g] (\mX^\top \mX)^{-1} | \vy \right] + \Var_g\left[\frac{g}{1 + g} \vbetahatls \vbetahatls^\top\right] \\
+	&= \frac{n}{n - 2} \E_g\left[\frac{g}{1 + g} \left(1 - \frac{g}{1 + g} R^2 \right) \Bigm| \vy \right] (\mX^\top \mX)^{-1} + \Var_g\left[\frac{g}{1 + g} \right] \vbetahatls \vbetahatls^\top \\
 \end{align*}
 
-We calculate each of these integrals seperately, and then add them to arrive at our result.
-
 \begin{align*}
-	&\int \frac{g}{1+g} \sigma^2 (\mX^\top \mX)^{-1} p(\sigma^2 | \vy, g) p(g | \vy) d \sigma^2 d g \\
-= &(\mX^\top \mX)^{-1} \int K (\sigma^2) \Beta(1 + b, p/2 + 4 + a) \Phi_1(1 + b, -n/2, n/2 + 3, \sigma^{-2} \frac{1}{2} \|\vy\|^2 R^2, R^2) \\
-&\times \frac{(1 - R^2)^{b + 1} g^{b + 1} (1 + g)^{-1} [1 + g (1 - R^2)]^{-n/2}}{\Beta(p/2 + a + 1, b + 1)} d \sigma^2 dg \\
-&\hat{\vbeta}_{LS} \hat{\vbeta}_{LS}^\top (1 - R^2) \int \frac{g^{b + 2} (1 + g)^{-2} [1 + g(1 - R^2)]^{-n/2}}{\Beta(p/2 + a + 1, b + 1)} dg \\
-=& \text{Some  confluent hypergeometric function} \\
+	\E\left(\frac{g}{1 + g} | \vy \right) &= \int_0^\infty \frac{g}{1 + g} p(g | \vy) dg \\
+	&= \frac{(1 - R^2)^{b+1}}{\Beta(p/2 + a + 1, b + 1)} \int_0^\infty g^{b+1} (1 + g)^{-1} [1 + g (1 - R^2)]^{-n/2} dg\\
+	&= \frac{\Beta(p/2 + a + 1, b + 2)}{\Beta(p /2 + a + 1, b + 1)} (1 - R^2)^{b+1} {}_2 F_1(p/2 + a + 1, 1; n/2 + 1; R^2)
 \end{align*}
+
+as
+
+\[
+	\int_0^\infty x^{\lambda-1} (1+x)^\nu (1 + \alpha x)^{\mu} dx = \Beta(\lambda, -\mu-\nu-\lambda) {}_2 F_1 (\mu, \lambda; -\mu-\nu; 1 - \alpha)
+\]
+
+when $[|\arg \alpha| < \pi], -\Re(\mu + \mu) > \Re \lambda > 0$
+
+\[
+	\E\left[ \left(\frac{g}{1 + g} \right)^2 | \vy \right] = \frac{\Beta(p/2 + a + 1, b + 2)}{\Beta(p /2 + a + 1, b + 1)} (1 - R^2)^{b+2} {}_2 F_1(p/2 + a + 1, 1; n/2 + 1; R^2)
+\]
+
 
 \subsection{Variational Approximation}
 
