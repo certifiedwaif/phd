@@ -47,7 +47,7 @@ List taug(unsigned int n, NumericMatrix mGraycode, NumericVector vR2,
 //' @return The value of the integral
 //' @export
 // [[Rcpp::export]]
-double var_int1(int n, double p, double R2)
+double E_g_one_plus_g(int n, double p, double R2)
 {
   auto a = -3./4.;
   auto b = (n - p) / 2. - 2. - a;
@@ -64,7 +64,7 @@ double var_int1(int n, double p, double R2)
 //' @return The value of the integral
 //' @export
 // [[Rcpp::export]]
-double var_int2(int n, int p, double R2)
+double E_g_one_plus_g_squared(int n, int p, double R2)
 {
   auto a = -3./4.;
   auto b = (n - p) / 2. - 2. - a;
@@ -77,12 +77,12 @@ double var_int2(int n, int p, double R2)
 //'
 //' @param vn A numeric vector of n values
 //' @param vp A numeric vector of p values
-//' @param vR2 A numeric value of 
-//' @return List of the values of the posterior variance integrals. var_int1 contains the result of the first
-//' integral, while var_int2 contains the second.
+//' @param vR2 A numeric value of
+//' @return List of the values of the posterior variance integrals. E_g_one_plus_g contains the result of the first
+//' integral, while E_g_one_plus_g_squared contains the second.
 //' @export
 // [[Rcpp::export]]
-List var_ints(NumericVector vn, NumericVector vp, NumericVector vR2)
+List g_ints(NumericVector vn, NumericVector vp, NumericVector vR2)
 {
   if (vn.size() != vp.size()) throw std::range_error("vn and vp are different sizes");
   if (vn.size() != vR2.size()) throw std::range_error("vn and vR2 are different sizes");
@@ -92,13 +92,13 @@ List var_ints(NumericVector vn, NumericVector vp, NumericVector vR2)
 
   #pragma omp parallel for
   for (auto i = 0; i < vn.size(); i++) {
-    var_ints_1(i) = var_int1(vn[i], vp[i], vR2[i]);
-    var_ints_2(i) = var_int2(vn[i], vp[i], vR2[i]);
+    var_ints_1(i) = E_g_one_plus_g(vn[i], vp[i], vR2[i]);
+    var_ints_2(i) = E_g_one_plus_g_squared(vn[i], vp[i], vR2[i]);
   }
 
   NumericVector result1(Rcpp::wrap(var_ints_1));
   NumericVector result2(Rcpp::wrap(var_ints_2));
 
-  return List::create(Named("var_int1") = result1,
-                      Named("var_int2") =  result2);
+  return List::create(Named("E_g_one_plus_g") = result1,
+                      Named("E_g_one_plus_g_squared") =  result2);
 }
