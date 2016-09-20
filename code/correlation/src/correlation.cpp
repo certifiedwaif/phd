@@ -26,8 +26,8 @@ using Eigen::RowVectorXi;
 using Eigen::MatrixXi;
 using namespace std;
 
-const bool NUMERIC_FIX = true;
-#define DEBUG
+const bool NUMERIC_FIX = false;
+// #define DEBUG
 
 // Code copied from here: https://gist.github.com/stephenjbarr/2266900
 MatrixXd parseCSVfile_double(string infilename)
