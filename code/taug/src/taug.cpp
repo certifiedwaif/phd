@@ -32,7 +32,7 @@ double trapint(std::function<double(int)> x, std::function<double(double)> f)
 {
 	auto sum = 0.0;
 
-  // #pragma omp parallel for simd reduction(+:sum)
+  #pragma omp parallel for simd reduction(+:sum)
 	for (auto i = 0; i < GRID_POINTS - 1; i++) {
 		sum += 0.5 * (x(i + 1) - x(i)) * (f(x(i + 1)) + f(x(i)));
     // #ifndef _OPENMP
@@ -533,30 +533,7 @@ double tau_g(int n, int p, double R2)
 
 	// Calculate tau_g
 	double tau_g = tau_g_FullyExponentialLaplace(a,n,p,R2,20);
-
-	// Calculate the constant C (needed to calculate the normalizing constant for q(g)
-	double C = 0.5*n*R2/((1 + tau_g)*(1 - R2 + tau_g)) + 0.5*p/(1 + tau_g);
-
-	// Calculate the
-						 // Z.h.Laplace(U,B,C)
-	double Z = Z_g_trapint(A,B,C,1000).intVal;
-
-	// Calculate the lower bound on the log-likelihood
-	double result;
-	result = 0.5*p - 0.5*n*log(2*PI) - gsl_sf_lnbeta(a+1,b+1)  - 0.5*n*log(1 + tau_g - R2) ;
-	result = result - 0.5*(n+p)*log(0.5*(n+p))+ gsl_sf_lngamma(0.5*(n+p)) + C*tau_g + log(Z)  + 0.5*(n-p)*log(1 + tau_g);
-
-	// cout << " " << i << " " << velbo[i] << " " << tau_g << " " << C << " " << Z << "\n";
-
-	// How are failures from Z_g_trapint signalled?
-	// If there is an error stop here and have a look
-	// if (Z.failed) {
-	// 	print("error! press escape and have a look")
-	// 	string ans;
-	// 	cin >> ans;
-	// }
-
-	return result;
+	return tau_g;
 }
 
 
