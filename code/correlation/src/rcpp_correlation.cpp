@@ -1,5 +1,7 @@
 #include <Rcpp.h>
-#include <omp.h>
+#if defined(_OPENMP)
+  #include <omp.h>
+#endif;
 
 #include "graycode.h"
 #include "correlation.h"
@@ -25,7 +27,9 @@ NumericVector all_correlations_mX(NumericVector vy, NumericMatrix mX, int interc
 										bool bIntercept = false, bool bCentre = false, int cores = 1) {
 	Map<VectorXd> vy_m = as< Map<VectorXd> >(vy);
 	Map<MatrixXd> mX_m = as< Map<MatrixXd> >(mX);
-	omp_set_num_threads(cores);
+	#if defined(_OPENMP)
+		omp_set_num_threads(cores);
+	#endif;
 	VectorXd result = all_correlations_mX_cpp(vy_m, mX_m, intercept_col - 1, bIntercept, bCentre);
 	NumericVector wrap_result(wrap(result));
 	return wrap_result;
@@ -49,7 +53,9 @@ NumericVector all_correlations_mX_mZ(NumericVector vy, NumericMatrix mX, Numeric
 	Map<VectorXd> vy_m = as< Map<VectorXd> >(vy);
 	Map<MatrixXd> mX_m = as< Map<MatrixXd> >(mX);
 	Map<MatrixXd> mZ_m = as< Map<MatrixXd> >(mZ);
-	omp_set_num_threads(cores);
+	#if defined(_OPENMP)
+		omp_set_num_threads(cores);
+	#endif;
 	VectorXd result = all_correlations_mX_mZ_cpp(vy_m, mX_m, mZ_m, intercept_col - 1, bIntercept, bCentre);
 	NumericVector wrap_result(wrap(result));
 	return wrap_result;
