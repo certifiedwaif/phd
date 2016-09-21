@@ -1,4 +1,5 @@
 # numeric_experiments.R
+#' @import purrr
 
 #' @export
 compare_means <- function(n, p, R2, beta_hat_LS)
@@ -29,4 +30,23 @@ compare_covs <- function(n, p, R2, beta_hat_LS, mXTX_inv)
   diff_cov <- abs(exact_cov - approx_cov)
 
   return(diff_cov)
+}
+
+#' @export
+compare_approx_exact <- function()
+{
+  vp <- c(10, 20, 50, 100, 500, 1000)
+  vn <- c(1.1, 1.25, 1.5, 2, 5, 10)
+  vR2 <- seq(from=0.00, to=1.00, by = 1e-2)
+  df <- map(vp, function(p) {
+          map(vn, function(n) {
+            map(vR2, function(R2) {c(p*n, p, R2)})
+          })
+        }) %>% as.data.frame %>% t
+  colnames(df) <- c("vn", "vp", "vR2")
+  df <- as.data.frame(df)
+  exact_ints <- 1:nrow(df) %>% map(function(x) {
+    cat(x, "\n")
+    with(df[x,], taug::g_ints(vn, vp, vR2))
+  })
 }
