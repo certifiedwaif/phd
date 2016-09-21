@@ -24,8 +24,8 @@ compare_covs <- function(n, p, R2, beta_hat_LS, mXTX_inv)
   G_2 <- E_g_one_plus_g_squared(n, p, R2)
   exact_cov <- (G_2 - G_1^2) * tcrossprod(beta_hat_LS) + (n / (n - 2)) * (G_1 - G_2 * R2) * mXTX_inv
   tau_g <- tau_g(n, p, R2)
-  tau_sigma2 <- (1 - (1 + tau_g) * R2)^(-1)
-  approx_cov <- tau_sigma2 * (1 + tau_g)^(-1) * mXTX_inv
+  tau_sigma2 <- (1 - (1 + tau_g)^(-1) * R2)^(-1)
+  approx_cov <- tau_sigma2^(-1) * (1 + tau_g)^(-1) * mXTX_inv
   diff_cov <- abs(exact_cov - approx_cov)
 
   return(diff_cov)
