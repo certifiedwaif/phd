@@ -4,6 +4,8 @@
 #include <RcppEigen.h>
 #include <gsl/gsl_sf_gamma.h>
 #include <gsl/gsl_sf_hyperg.h>
+#include <gsl/gsl_errno.h>
+#include <sstream>
 
 // [[Rcpp::depends(Rcpp)]]
 // [[Rcpp::depends(RcppEigen)]]
@@ -39,6 +41,17 @@ List taug(unsigned int n, NumericMatrix mGraycode, NumericVector vR2,
 }
 
 
+void handler (const char * reason,
+              const char * file,
+              int line,
+              int gsl_errno)
+{
+  std::stringstream ss;
+  ss << reason << " in file " << file << " on " << line << ", errorno " << gsl_errno << std::endl;
+  throw std::range_error(ss.str());
+}
+
+
 //' Calculate the first integral for the posterior variance of beta_hat
 //'
 //' @param n The number of samples
@@ -49,10 +62,25 @@ List taug(unsigned int n, NumericMatrix mGraycode, NumericVector vR2,
 // [[Rcpp::export]]
 double E_g_one_plus_g(int n, double p, double R2)
 {
+  gsl_set_error_handler_off();
   auto a = -3./4.;
   auto b = (n - p) / 2. - 2. - a;
+  gsl_sf_result result;
+  auto alpha_1 = p / 2. + a + 1.;
+  auto beta_1 = b + 2.;
+  gsl_sf_beta_e(alpha_1, beta_1, &result);
+  auto num = result.val;
+  auto alpha_2 = p / 2. + a + 1.;
+  auto beta_2 = b + 1.;
+  gsl_sf_beta_e(p / 2. + a + 1., beta_2, &result);
+  auto den = result.val;
+  gsl_sf_hyperg_2F1_e(p / 2. + a + 1., 1., n / 2. + 1., R2, &result);
+  auto conf = result.val;
 
-  return (gsl_sf_beta(p / 2. + a + 1., b + 2.) / gsl_sf_beta(p / 2. + a + 1., b + 1.)) * gsl_sf_hyperg_2F1(p / 2. + a + 1., 1., n / 2. + 1., R2);
+  if (den == 0.0)
+    return NA_REAL;
+  else
+    return (num / den) * conf;
 }
 
 
@@ -66,10 +94,22 @@ double E_g_one_plus_g(int n, double p, double R2)
 // [[Rcpp::export]]
 double E_g_one_plus_g_squared(int n, int p, double R2)
 {
+  gsl_set_error_handler_off();
+
   auto a = -3./4.;
   auto b = (n - p) / 2. - 2. - a;
+  gsl_sf_result result;
+  gsl_sf_beta_e(p / 2. + a + 1., b + 3., &result);
+  auto num = result.val;
+  gsl_sf_beta_e(p / 2. + a + 1., b + 1., &result);
+  auto den = result.val;
+  gsl_sf_hyperg_2F1_e(p / 2. + a + 1., 2, n / 2. + 2., R2, &result);
+  auto conf = result.val;
 
-  return (gsl_sf_beta(p / 2. + a + 1., b + 3.) / gsl_sf_beta(p / 2. + a + 1., b + 1.)) * gsl_sf_hyperg_2F1(p / 2. + a + 1., 2, n / 2. + 2., R2);
+  if (den == 0.0)
+    return NA_REAL;
+  else
+    return (num / den) * conf;
 }
 
 
@@ -90,7 +130,7 @@ List g_ints(NumericVector vn, NumericVector vp, NumericVector vR2)
   VectorXd var_ints_1(vn.size());
   VectorXd var_ints_2(vn.size());
 
-  #pragma omp parallel for
+  // #pragma omp parallel for
   for (auto i = 0; i < vn.size(); i++) {
     var_ints_1(i) = E_g_one_plus_g(vn[i], vp[i], vR2[i]);
     var_ints_2(i) = E_g_one_plus_g_squared(vn[i], vp[i], vR2[i]);
@@ -99,6 +139,6 @@ List g_ints(NumericVector vn, NumericVector vp, NumericVector vR2)
   NumericVector result1(Rcpp::wrap(var_ints_1));
   NumericVector result2(Rcpp::wrap(var_ints_2));
 
-  return List::create(Named("E_g_one_plus_g") = result1,
-                      Named("E_g_one_plus_g_squared") =  result2);
+  return List::create(Named("G_1") = result1,
+                      Named("G_2") =  result2);
 }
