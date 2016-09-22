@@ -1,5 +1,7 @@
 # numeric_experiments.R
 #' @import purrr
+#' @import dplyr
+#' @import ggplot2
 
 #' @export
 compare_means <- function(n, p, R2, beta_hat_LS)
@@ -33,20 +35,57 @@ compare_covs <- function(n, p, R2, beta_hat_LS, mXTX_inv)
 }
 
 #' @export
-compare_approx_exact <- function()
+create_approx_exact_df <- function()
 {
+  #vp <- c(10, 20, 50, 100)
   vp <- c(10, 20, 50, 100, 500, 1000)
   vn <- c(1.1, 1.25, 1.5, 2, 5, 10)
   vR2 <- seq(from=0.00, to=1.00, by = 1e-2)
-  df <- map(vp, function(p) {
-          map(vn, function(n) {
-            map(vR2, function(R2) {c(p*n, p, R2)})
-          })
-        }) %>% as.data.frame %>% t
-  colnames(df) <- c("vn", "vp", "vR2")
-  df <- as.data.frame(df)
-  exact_ints <- 1:nrow(df) %>% map(function(x) {
-    cat(x, "\n")
-    with(df[x,], taug::g_ints(vn, vp, vR2))
-  })
+
+  param_df <- map(vp, function(p) {
+                map(vn, function(n) {
+                  map(vR2, function(R2) {c(p*n, p, R2)})
+                })
+              }) %>% as.data.frame %>% t
+  rownames(param_df) <- NULL
+  colnames(param_df) <- c("vn", "vp", "vR2")
+  param_df <- as.data.frame(param_df)
+
+  exact_ints_df <- param_df %>% with(taug::g_ints(vn, vp, vR2)) %>% as.data.frame
+
+  vtau_g <- param_df %>% with(pmap_dbl(list(vn, vp, vR2), tau_g))
+  vtau_sigma2 <- (1 - (1 + vtau_g)^(-1) * vR2)^(-1)
+  combined_df <- cbind(param_df, exact_ints_df) %>%
+                  mutate(vtau_g = vtau_g, vtau_sigma2 = vtau_sigma2) %>%
+                  mutate(approx_mean = (1 + vtau_g)^(-1), exact_mean = G_1) %>%
+                  mutate(approx_var = vtau_sigma2^(-1) * (1 + vtau_g)^(-1),
+                          exact_var = (vn / (vn - 2)) * (G_1 - G_2 * vR2))
+
+  return(combined_df)
+}
+
+#' @export
+plot_graphs <- function() {
+  # Split by n, p and plot
+  combined_df <- create_approx_exact_df()
+  label_fn <- function(df) {
+    map(df, ~ str_c("p = ", .))
+  }
+  approx_means_df <- combined_df %>%
+                      select(one_of(c("vp", "vn", "vR2", "approx_mean"))) %>%
+                      rename(mean = approx_mean) %>%
+                      mutate(mean_type = "Approximate")
+  exact_means_df <- combined_df %>%
+                    select(one_of(c("vp", "vn", "vR2", "exact_mean"))) %>%
+                    rename(mean = exact_mean) %>%
+                    mutate(mean_type = "Exact")
+  #full_join(approx_means_df, exact_means_df, by = c("vp", "vn", "vR2"))
+  means_df <- bind_rows(approx_means_df, exact_means_df) %>%
+              mutate(mean_type = factor(mean_type)) %>%
+              arrange(vp, vn, vR2, mean_type)
+  means_df %>% filter(!is.na(mean)) %>%
+    ggplot(aes(x=vR2, y=mean, group=vn)) +
+      geom_line(aes(color = vn, linetype = mean_type)) +
+      facet_wrap(~vp, labeller=label_fn) +
+      xlab("Correlation co-efficient") + ylab("Shrinkage")
 }
