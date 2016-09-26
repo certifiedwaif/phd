@@ -59,11 +59,12 @@ we have observed to the general population and that we haven't simply learned th
 Maximising the likelihood alone only maximises the quality of the model fit, without penalising the dimension.
 Many model selection criteria have been proposed to attempt to balance model likelihood and model complexity,
 including the Akaike Information Criteria AIC (\cite{DeLeeuw1992}), Bayesian Information Criterion BIC
-(\cite{Schwarz1978}) and Deviance Information Criterion DIC (\cite{Spiegelhalter2016}).
+(\cite{Schwarz1978}), Deviance Information Criterion DIC (\cite{Spiegelhalter2016}) and Risk Inflation
+Criterion (\cite{Foster1994}).
 
 % Bayesian
-A Bayesian approach to model selection uses Bayes Factors to compare models to see which one we should
-select.
+A Bayesian approach to model selection uses Bayes Factors to compares amongst candidate models to determine 
+which one we should select.
 
 % Background
 
@@ -71,15 +72,22 @@ Zellner's g prior Zellner 1986
 
 Zellner 1986 constructed a family of priors for a Gaussian regression model using a particular form
 of conjugate Normal-Gamma model,
-\begin{equation*}
-p(\sigma^2) \propto \frac{1}{\sigma^2}, \vbeta|\sigma^2 \sim \N\left(\vbeta, \frac{g}{\sigma^2} (\mX^\top \mX)^{-1}\right)
-\end{equation*}
+\begin{align*}
+p(\sigma^2) &\propto \frac{1}{\sigma^2} \\
+\vbeta|\sigma^2 &\sim \N\left(\vbeta, \frac{g}{\sigma^2} (\mX^\top \mX)^{-1}\right)
+\end{align*}
 
-where the prior covariance matrix of $\vbeta$ is taken to be a multiple of the Fisher information 
-matrix by the parameter $g$. This immediately raises the question of how $g$ should be chosen.
+where the prior covariance matrix of $\vbeta$ is taken to be a multiple of the Fisher information  matrix by
+the parameter $g$. This places the most prior mass on $\vbeta$ on the section of the parameter space where the
+data is least informative (expand io this? See STAT260 combined lecture notes, page 55). This leads to the
+posterior distribution
 
-There are many ways of choosing a prior on $g$.
-Hyper g prior, mixture of g-priors Liang 2008
+\[
+	\vbeta | \vy \sim \N\left(\frac{g}{1+g} \vbetahatls, g \sigma^2 (\mX^\top \mX)^{-1} \right)
+\]
+
+This immediately raises the question of how $g$ should be chosen. There are many ways of choosing a prior on
+$g$. Hyper g prior, mixture of g-priors Liang 2008
 
 Paradoxes, reasons not to choose a fixed g. Reference Jeffrey's work 1946. \cite{Society2016}
 
@@ -200,6 +208,19 @@ This allows the calculation of the optimal approximating densities $q_i^*(\vthet
 q_i^*(\vtheta_i) \propto \exp \left \{ \E_{-\vtheta_i} \log p(\vy, \vtheta) \right \}, 1 \leq i \leq M,
 \end{equation*}
 
+\subsection{Structured Variational Bayes}
+
+Let $\vgamma \in \{0, 1\}^p$ be the vector of indicators of whether each of the $p$ covariates in our
+covariate matrix $\mX$ is included in the model $\vgamma$. We perform model selection by using the above
+Variational Bayes approximation to each  candidate linear model and averaging over the space of available
+models.
+
+\begin{align*}
+\underline{p}(\vy) &= \sum_\vgamma \underline{p}(\vy|\vgamma) p(\vgamma) \\
+p(\vgamma|\vy) &\approx \frac{\underline{p}(\vy|\vgamma) p(\vgamma)}{\underline{p}(\vy)} \\
+p(\vbeta|\vy) &\approx \sum_\vgamma q(\vbeta|\vgamma) p(\vgamma|\vy) \\
+\end{align*}
+
 \subsection{Model}
 
 We consider a linear model with a g-prior, as in \cite{Liang2008}. Consider the linear model
@@ -224,10 +245,31 @@ q(\vtheta) = q(\vbeta) q(\sigma^2) q(g).
 
 Then $q(\vbeta) = \N(\vmu_{q(\vbeta)}, \mSigma_{q(\vbeta)})$, $q(\sigma^2) = \IG(\alpha_{q(\vbeta)}, \beta_{q(\vbeta)})$ and $q(g) = \text{Beta Prime}(\alpha_{q(g)}, \beta_{q(g)})$.
 
-\subsection{Mean field updates}
+\subsection{Naive mean field update}
+
+We first derive the naive mean field updates for the model.
 
 \begin{algorithm}
 \label{alg:algorithm_one}
+\caption{Fit VB approximation of linear model}
+\begin{algorithmic}
+\REQUIRE $\alpha_{q(\sigma^2)} \leftarrow \frac{n + p}{2}, \alpha_{q(g)} \leftarrow$
+\WHILE{the increase in $\log{\underline{p}}(\vy;q)$ is significant}
+\STATE $\vmu_{q(\vbeta)} \leftarrow (1 + \tau_g)^{-1} \vbetahatls$
+\STATE $\mSigma_{q(\vbeta)} \leftarrow [T_{\sigma^2} (1 + \tau_g)]^{-1} (\mX^\top \mX)^{-1}$
+\STATE $\beta_{q(\sigma^2)} \leftarrow  \frac{1}{2} {n[1 - (1 + \tau_g)^{-1} R^2] + \tau_{\sigma^2}^{-1} p}$
+\STATE $\beta_{q(g)} \leftarrow \frac{1}{2} (1 + \tau_g)^{-1} [\tau_{\sigma^2} (1 + \tau_g)^{-1} n R^2 + p]$
+\ENDWHILE
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Mean field updates}
+
+We are able to substantially improve up \ref{alg:algorithm_one} by noticing that all of the
+parameters in the mean field update algorithm depend on $\tau_g$.
+
+\begin{algorithm}
+\label{alg:algorithm_two}
 \caption{Fit VB approximation of linear model}
 \begin{algorithmic}
 \REQUIRE $\nu_{q(g)} - 1 \leftarrow b - \frac{p}{2}$, $\mu_{q(g)} - 1 \leftarrow (a + b + 2)$ \\
@@ -243,37 +285,29 @@ Then $q(\vbeta) = \N(\vmu_{q(\vbeta)}, \mSigma_{q(\vbeta)})$, $q(\sigma^2) = \IG
 
 \subsubsection{Numerical integration of $\tau_g$}\label{sec:num_int}
 
-Define $\tau_{\sigma^2} \equiv \E_q \left[ \frac{1}{\sigma^2} \right]$ and
-$\tau_g \equiv \E_q \left[ \frac{1}{g} \right]$. Then we calculate $\tau_g$ numerically using an iterative 
-scheme. First, we choose an initial guess $\tau_g = 1$. Then we use this initial guess to generate a new,
-improved guess $\tau_g'$ by performing the numerical integration
+Define $\tau_{\sigma^2} \equiv \E_q \left[ \sigma^{-2} \right]$ and $\tau_g
+\equiv \E_q \left[ g^{-1} \right]$. We can calculate $\tau_g$ numerically
+using the following iterative numerical scheme.
+
+First, we choose an initial guess $\tau_g^{(1)} = \E_q [g^{-1}] = (1 - R^2) [1 + (p / 2 + a + 1)/b]$. Then
+define
 
 \begin{align*}
-\tau_g' \leftarrow \int_0^\infty \frac{1}{g} \exp \left \{ \left(b - \frac{p}{2}\right) \log g
-- (a + b + 2) \log(1 + g)
-- \frac{1}{g} \frac{1}{2} (1 + \tau_g)^{-1} [\tau_{\sigma^2} (1 + \tau_g)^{-1} n R^2 + p]
+\tau_g^{(i+1)} \leftarrow \int_0^\infty g^{\left(b - \frac{p}{2} - 1\right)}
+ (1 + g)^{- (a + b + 2)}
+\exp \left \{- \frac{1}{2} g^{-1}  (1 + \tau_g^{(i)})^{-1} [\tau_{\sigma^2} (1 + \tau_g^{(i)})^{-1} n R^2 + p]
 	  \right \} dg
 \end{align*}
 
-where $\tau_{\sigma^2} = \frac{1}{1 - (1 + \tau_g)^{-1} R^2}$, $\nu - 1 = b - \frac{p}{2}$, 
+where $\tau_{\sigma^2} = \frac{1}{1 - (1 + \tau_g^{(i)})^{-1} R^2}$. This integral can be calculated
+numerically using Laplace's approximation.
+
+$\nu - 1 = b - \frac{p}{2}$, 
 $\beta = \frac{1}{2} (1 + \tau_g)^{-1} (\tau_{\sigma^2} n R^2 + p)$, 
 $\mu - 1 = (a + b + 2)$ and $\gamma = 1$. 
 
 
 This process continues until convergence.
-
-\subsection{Structured Variational Bayes}
-
-Let $\vgamma \in \{0, 1\}^p$ be the vector of indicators of whether each of the $p$ covariates in our
-covariate matrix $\mX$ is included in the model $\vgamma$. We perform model selection by using the above
-Variational Bayes approximation to each  candidate linear model and averaging over the space of available
-models.
-
-\begin{align*}
-\underline{p}(\vy) &= \sum_\vgamma \underline{p}(\vy|\vgamma) p(\vgamma) \\
-p(\vgamma|\vy) &\approx \frac{\underline{p}(\vy|\vgamma) p(\vgamma)}{\underline{p}(\vy)} \\
-p(\vbeta|\vy) &\approx \sum_\vgamma q(\vbeta|\vgamma) p(\vgamma|\vy) \\
-\end{align*}
 
 \subsection{Numerical issues}
 Numerical difficulties, and how we circumvented them.
