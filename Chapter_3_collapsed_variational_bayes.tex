@@ -72,8 +72,8 @@ which one we should select.
 of conjugate Normal-Gamma model,
 
 \begin{align*}
-p(\sigma^2) &\propto \sigma^{-2} \\
-\vbeta|\sigma^2 &\sim \N\left(\vzero, g\sigma^2 (\mX^\top \mX)^{-1}\right)
+	p(\sigma^2)     & \propto \sigma^{-2}                                       \\
+	\vbeta|\sigma^2 & \sim \N\left(\vzero, g\sigma^2 (\mX^\top \mX)^{-1}\right) 
 \end{align*}
 
 where the prior covariance matrix of $\vbeta$ is taken to be a multiple of the Fisher information  matrix by
@@ -155,7 +155,7 @@ approximating probability distribution.
 We index the space of models by a $p$-dimensional vector of indicator variables for each variable considered 
 for inclusion, $\vgamma$. For each model $\mathcal{M}_\vgamma$, the response vector $\vy$ is modelled by
 \begin{equation*}
-\mathcal{M}_\vgamma: \vmu_\vgamma = \vone_n \alpha + \mX_\vgamma \vbeta_\vgamma.
+	\mathcal{M}_\vgamma: \vmu_\vgamma = \vone_n \alpha + \mX_\vgamma \vbeta_\vgamma.
 \end{equation*}
 
 Let $\KL(q||p) = \int q(\vtheta) \log{\left( \frac{q(\vtheta)}{p(\vtheta|\vy)} \right)} d \vtheta$ be the
@@ -170,13 +170,13 @@ full posterior with a simplified approximating distribution $q(\vtheta)$. We rel
 approximating distributions as follows:
 
 \begin{align*}
-\log p(\vy) &= \log p(\vy) \int q(\vtheta) d \vtheta = \int q(\vtheta) \log p(\vy) d \vtheta \\
-&= \int q(\vtheta) \log \left\{ \frac{p(\vy, \vtheta) / q(\vtheta)}{p(\vy|\vtheta) / q(\vtheta)} \right\} d \vtheta \\
-&= \int q(\vtheta) \log\left\{ \frac{p(\vy, \vtheta)}{q(\vtheta)} \right\} d \vtheta +
-		\int q(\vtheta) \log\left\{ \frac{q(\vtheta)}{p(\vtheta|\vy)} \right\} d \vtheta \\
-&= \int q(\vtheta) \log\left\{ \frac{p(\vy, \vtheta)}{q(\vtheta)} \right\} d \vtheta +
-		\KL(q||p) \\
-&\geq \int q(\vtheta) \log\left\{ \frac{p(\vy, \vtheta)}{q(\vtheta)} \right\} d \vtheta.
+	\log p(\vy) & = \log p(\vy) \int q(\vtheta) d \vtheta = \int q(\vtheta) \log p(\vy) d \vtheta                                    \\
+	            & = \int q(\vtheta) \log \left\{ \frac{p(\vy, \vtheta) / q(\vtheta)}{p(\vy|\vtheta) / q(\vtheta)} \right\} d \vtheta \\
+	            & = \int q(\vtheta) \log\left\{ \frac{p(\vy, \vtheta)}{q(\vtheta)} \right\} d \vtheta +                              
+	\int q(\vtheta) \log\left\{ \frac{q(\vtheta)}{p(\vtheta|\vy)} \right\} d \vtheta \\
+	            & = \int q(\vtheta) \log\left\{ \frac{p(\vy, \vtheta)}{q(\vtheta)} \right\} d \vtheta +                              
+	\KL(q||p) \\
+	            & \geq \int q(\vtheta) \log\left\{ \frac{p(\vy, \vtheta)}{q(\vtheta)} \right\} d \vtheta.                            
 \end{align*}
 
 as $\KL(q||p) \geq 0$ for all probability densities $p$ and $q$. The last quantity is the variational lower
@@ -195,13 +195,13 @@ $\vtheta = (\vtheta_1, \vtheta_2, \ldots, \vtheta_{M-1}, \vtheta_M)$ and assumin
 partitioned parameters:
 
 \begin{equation*}
-q(\vtheta) \equiv q(\vtheta_1) q(\vtheta_2) \ldots q(\vtheta_{n-1}) q(\vtheta_n).
+	q(\vtheta) \equiv q(\vtheta_1) q(\vtheta_2) \ldots q(\vtheta_{n-1}) q(\vtheta_n).
 \end{equation*}
 
 This allows the calculation of the optimal approximating densities $q_i^*(\vtheta_i)$ as
 
 \begin{equation*}
-q_i^*(\vtheta_i) \propto \exp \left \{ \E_{-\vtheta_i} \log p(\vy, \vtheta) \right \}, 1 \leq i \leq M,
+	q_i^*(\vtheta_i) \propto \exp \left \{ \E_{-\vtheta_i} \log p(\vy, \vtheta) \right \}, 1 \leq i \leq M,
 \end{equation*}
 
 \subsection{Structured Variational Bayes}
@@ -212,9 +212,9 @@ Variational Bayes approximation to each  candidate linear model and averaging ov
 models.
 
 \begin{align*}
-\underline{p}(\vy) &= \sum_\vgamma \underline{p}(\vy|\vgamma) p(\vgamma) \\
-p(\vgamma|\vy) &\approx \frac{\underline{p}(\vy|\vgamma) p(\vgamma)}{\underline{p}(\vy)} \\
-p(\vbeta|\vy) &\approx \sum_\vgamma q(\vbeta|\vgamma) p(\vgamma|\vy) \\
+	\underline{p}(\vy) & = \sum_\vgamma \underline{p}(\vy|\vgamma) p(\vgamma)                     \\
+	p(\vgamma|\vy)     & \approx \frac{\underline{p}(\vy|\vgamma) p(\vgamma)}{\underline{p}(\vy)} \\
+	p(\vbeta|\vy)      & \approx \sum_\vgamma q(\vbeta|\vgamma) p(\vgamma|\vy)                    \\
 \end{align*}
 
 \subsection{Model}
@@ -223,21 +223,21 @@ p(\vbeta|\vy) &\approx \sum_\vgamma q(\vbeta|\vgamma) p(\vgamma|\vy) \\
 We consider a linear model with a g-prior, as in \cite{Liang2008}. Consider the linear model
 
 \begin{align*}
-\vy | \vbeta, \sigma^2 \sim \N_n(\mX \vbeta, \sigma^2 \mI)
+	\vy | \vbeta, \sigma^2 \sim \N_n(\mX \vbeta, \sigma^2 \mI) 
 \end{align*}
 
 with priors
 
 \begin{align*}
-\vbeta | \sigma^2, g &\sim \N_p(\vzero, g \sigma^2 (\mX^T \mX)^{-1}) \\
-p(\sigma^2) &= (\sigma^2)^{-1} \I(\sigma^2 > 0) \\
-p(g) &= \frac{g^b (1 + g)^{-(a + b + 2)}}{\Beta(a + 1, b + 1)} \I(g > 0)
+	\vbeta | \sigma^2, g & \sim \N_p(\vzero, g \sigma^2 (\mX^T \mX)^{-1})                     \\
+	p(\sigma^2)          & = (\sigma^2)^{-1} \I(\sigma^2 > 0)                                 \\
+	p(g)                 & = \frac{g^b (1 + g)^{-(a + b + 2)}}{\Beta(a + 1, b + 1)} \I(g > 0) 
 \end{align*}
 
 We choose a factored Variational Bayes approximation of the form
 
 \begin{align*}
-q(\vtheta) = q(\vbeta) q(\sigma^2) q(g).
+	q(\vtheta) = q(\vbeta) q(\sigma^2) q(g). 
 \end{align*}
 
 Then $q(\vbeta) = \N(\vmu_{q(\vbeta)}, \mSigma_{q(\vbeta)})$, $q(\sigma^2) = \IG(\alpha_{q(\vbeta)}, \beta_{q(\vbeta)})$ and $q(g) = \text{Beta Prime}(\alpha_{q(g)}, \beta_{q(g)})$.
@@ -259,10 +259,10 @@ First, we choose an initial guess $\tau_g^{(1)} = \E_q [g^{-1}] = (1 - R^2) [1 +
 define
 
 \begin{align*}
-\tau_g^{(i+1)} \leftarrow \int_0^\infty g^{\left(b - \frac{p}{2} - 1\right)}
- (1 + g)^{- (a + b + 2)}
-\exp \left \{- \frac{1}{2} g^{-1}  (1 + \tau_g^{(i)})^{-1} [\tau_{\sigma^2} (1 + \tau_g^{(i)})^{-1} n R^2 + p]
-	  \right \} dg
+	\tau_g^{(i+1)} \leftarrow \int_0^\infty g^{\left(b - \frac{p}{2} - 1\right)}                                   
+	(1 + g)^{- (a + b + 2)}                                                                                        
+	\exp \left \{- \frac{1}{2} g^{-1}  (1 + \tau_g^{(i)})^{-1} [\tau_{\sigma^2} (1 + \tau_g^{(i)})^{-1} n R^2 + p] 
+	\right \} dg                                                                                                   
 \end{align*}
 
 \noindent where $\tau_{\sigma^2} = [1 - (1 + \tau_g^{(i)})^{-1} R^2]^{-1}$. This integral can be calculated
@@ -273,48 +273,79 @@ $\beta = \frac{1}{2} (1 + \tau_g)^{-1} (\tau_{\sigma^2} n R^2 + p)$,
 $\mu - 1 = (a + b + 2)$ and $\gamma = 1$. 
 
 \begin{algorithm}
-\caption{Fit VB approximation of linear model}
-\label{alg:algorithm_one}
-\begin{algorithmic}
-\REQUIRE $\alpha_{q(\sigma^2)} \leftarrow \frac{n + p}{2}, \nu_{q(g)} - 1 \leftarrow b - \frac{p}{2}$, $\mu_{q(g)} - 1 \leftarrow (a + b + 2)$
-\WHILE{the increase in $\log{\underline{p}}(\vy;q)$ is significant}
-\STATE $\vmu_{q(\vbeta)} \leftarrow (1 + \tau_g)^{-1} \vbetahatls$
-\STATE $\mSigma_{q(\vbeta)} \leftarrow [\tau_{\sigma^2} (1 + \tau_g)]^{-1} (\mX^\top \mX)^{-1}$
-\STATE $\beta_{q(\sigma^2)} \leftarrow  \frac{1}{2} {n[1 - (1 + \tau_g)^{-1} R^2] + \tau_{\sigma^2}^{-1} p}$
-\STATE $\beta_{q(g)} \leftarrow \frac{1}{2} (1 + \tau_g)^{-1} [\tau_{\sigma^2} (1 + \tau_g)^{-1} n R^2 + p]$
-\ENDWHILE
-\end{algorithmic}
+	\caption{Fit VB approximation of linear model}
+	\label{alg:algorithm_one}
+	\begin{algorithmic}
+		\REQUIRE $\alpha_{q(\sigma^2)} \leftarrow \frac{n + p}{2}, \nu_{q(g)} - 1 \leftarrow b - \frac{p}{2}$, $\mu_{q(g)} - 1 \leftarrow (a + b + 2)$
+		\WHILE{the increase in $\log{\underline{p}}(\vy;q)$ is significant}
+		\STATE $\vmu_{q(\vbeta)} \leftarrow (1 + \tau_g)^{-1} \vbetahatls$
+		\STATE $\mSigma_{q(\vbeta)} \leftarrow [\tau_{\sigma^2} (1 + \tau_g)]^{-1} (\mX^\top \mX)^{-1}$
+		\STATE $\beta_{q(\sigma^2)} \leftarrow  \frac{1}{2} {n[1 - (1 + \tau_g)^{-1} R^2] + \tau_{\sigma^2}^{-1} p}$
+		\STATE $\beta_{q(g)} \leftarrow \frac{1}{2} (1 + \tau_g)^{-1} [\tau_{\sigma^2} (1 + \tau_g)^{-1} n R^2 + p]$
+		\ENDWHILE
+	\end{algorithmic}
 \end{algorithm}
 
 \subsection{Mean field updates}
 \label{sec:mean_field_updates}
 
-In naive mean field update algorithms, typically each variational parameter being iteratively updated may
-depend on all other variational parameters. But we notice that in Algorithm \ref{alg:algorithm_one} in Section
-\ref{sec:naive_mean_field_updates}, all variational parameter updates except the update for $g$ depend on $g$,
-while the update for $g$ is not functionally dependent on them. All parameters are functions of $\theta_g$,
-and thus we can define an isomorphism $\vtheta(\theta_g)$ so that
+Connections between Algorithm \ref{alg:algorithm_one} and Algorithm \ref{alg:algorithm_two}.
+
+$\vy^\top \mX (\mX^\top \mX)^{-1} \mX^\top \vy =\|\vy\|^2 R^2 = n R^2$
+
+When $\vmu = (1 + \tau_g)^{-1} \vbetahatls$ and $\mSigma = \tau_{\sigma^2}^{-1} (1 + \tau_g)^{-1} (\mX^\top \mX)^{-1}$
+
+\begin{align*}
+	\vmu^\top \mX^\top \mX \vmu & = (1 + \tau_g)^{-2} \vbetahatls^\top \mX^\top \mX \vbetahatls                                                        \\
+	                            & = (1 + \tau_g)^{-2} \vy^\top \mX (\mX^\top \mX)^{-1} \cancel{\mX^\top \mX} \cancel{(\mX^\top \mX)^{-1}} \mX^\top \vy \\
+	                            & = (1 + \tau_g)^{-2} n R^2                                                                                            
+\end{align*}
+
+\begin{align*}
+	s & = \frac{1}{2} [\|\vy\|^2 - 2 \vmu^\top \mX^\top \vy + (1 + \tau_g) \vmu^\top \mX^\top \mX \vmu (1 + \tau_g) +  \tr (\mX^\top \mX \mSigma)]                 \\
+	  & = \frac{1}{2} [n - \cancel{2} (1 + \tau_g) n R ^2 + \cancel{(1 + \tau_g) n R^2} + \tau_{\sigma^2} \tr (\cancel{\mX\top \mX} \cancel{(\mX^\top \mX)^{-1}})] \\
+	  & = \frac{1}{2} \{ n[1 - (1 + \tau_g)^{-1} R^2] + p \tau_{\sigma^2}^{-1} \}                                                                                  
+\end{align*}
+
+Note $\tau_{\sigma^2} = \E_q [\sigma^{-2}] = r/s = \frac{n+p}{n[1 - (1 + \tau_g)^{-1} R^2] + p \tau_{\sigma^2}^{-1}}$. Solving for $\tau_{\sigma^2}$ we obtain
+
 \[
-q(\vtheta) = q(\vtheta(\theta_g)) = q_g(\theta_g)
+	\tau_{\sigma^2} = [1 + (1 + \tau_g)^{-1}]^{-1}.
 \]
 
-\noindent where $\theta_g = \tau_g$. Thus optimisation can be performed on $\tau_g$ alone by repeatedly using
-the scheme presented in \ref{sec:num_int}. Once $\tau_g$ is fully optimised, the other variational parameters
-can be calculated from it as shown in Algorithm \ref{alg:algorithm_two}.
+Hence
+
+\[
+	s = \frac{r}{\tau_{\sigma^2}} = \frac{1}{2} (n + p) [1 - (1 + \tau_g)^{-1} R^2].
+\]
+
+and
+
+\begin{align*}
+	c & = \frac{\tau_{\sigma^2}}{2}[\vmu^\top \mX^\top \mX \vmu + \tr (\mX^\top \mX \mSigma)]                      \\
+	  & = \frac{\tau_{\sigma^2}}{2}\left[(1 + \tau_g)^{-2} n R^2 + \tau_{\sigma^2}^{-1} (1 + \tau_g)^{-1} p\right] \\
+	  & = \frac{1}{2} [ \tau_{\sigma^2} (1 + \tau_g)^{-2} n R^2 + (1 + \tau_g)^{-1} p]                             \\
+	  & = \frac{1}{2} \{ [1 + (1 + \tau_g)^{-1}]^{-1} (1 + \tau_g)^{-2} n R^2 + (1 + \tau_g)^{-1} p\}              
+\end{align*}
+
+\noindent Hence all variational parameters in Algorithm \ref{alg:algorithm_one} can be expressed as functions
+of $n$, $p$, $R^2$ and $\tau_g$. Thus optimisation can be performed on $\tau_g$ alone by repeatedly using the
+scheme presented in \ref{sec:num_int}. Once $\tau_g$ is fully optimised, the other variational parameters can
+be calculated from it as shown in Algorithm \ref{alg:algorithm_two}.
 
 \begin{algorithm}
-\caption{Fit VB approximation of linear model}
-\label{alg:algorithm_two}
-\begin{algorithmic}
-\REQUIRE $\nu_{q(g)} - 1 \leftarrow b - \frac{p}{2}$, $\mu_{q(g)} - 1 \leftarrow (a + b + 2)$ \\
-\WHILE{the increase in $\log{\underline{p}}(\vy;q)$ is significant}
-\STATE Calculate $\tau_{g}$ using numerical integration in Section \ref{sec:num_int}
-\ENDWHILE
-\STATE $\tau_{\sigma^2} \leftarrow \frac{n}{[1 - (1 + \tau_g)^{-1}] n R^2}$
-\STATE $\beta_{q(g)} \leftarrow \left(\frac{n (1 + \tau_g)^{-1}}{[1 - (1 + \tau_g)^{-1}]} + p \right)$
-\STATE $\vmu_{q(\vbeta)} \leftarrow (1 + \tau_g)^{-1} (\mX^\top \mX)^{-1} \mX^\top \vy$
-\STATE $\mSigma_{q(\vbeta)} \leftarrow \tau_{\sigma^2}^{-1} (1 + \tau_{g})^{-1}(\mX^\top \mX)^{-1}$
-\end{algorithmic}
+	\caption{Fit VB approximation of linear model}
+	\label{alg:algorithm_two}
+	\begin{algorithmic}
+		\REQUIRE $\nu_{q(g)} - 1 \leftarrow b - \frac{p}{2}$, $\mu_{q(g)} - 1 \leftarrow (a + b + 2)$ \\
+		\WHILE{the increase in $\log{\underline{p}}(\vy;q)$ is significant}
+		\STATE Calculate $\tau_{g}$ using numerical integration in Section \ref{sec:num_int}
+		\ENDWHILE
+		\STATE $\tau_{\sigma^2} \leftarrow \frac{n}{[1 - (1 + \tau_g)^{-1}] n R^2}$
+		\STATE $\beta_{q(g)} \leftarrow \left(\frac{n (1 + \tau_g)^{-1}}{[1 - (1 + \tau_g)^{-1}]} + p \right)$
+		\STATE $\vmu_{q(\vbeta)} \leftarrow (1 + \tau_g)^{-1} (\mX^\top \mX)^{-1} \mX^\top \vy$
+		\STATE $\mSigma_{q(\vbeta)} \leftarrow \tau_{\sigma^2}^{-1} (1 + \tau_{g})^{-1}(\mX^\top \mX)^{-1}$
+	\end{algorithmic}
 \end{algorithm}
 
 
@@ -331,45 +362,45 @@ Major League Baseball Data from the 1986 and 1987 seasons.
 An Introduction to Statistical Learning with Applications in R
 
 \begin{tabular}{llllllllllllllllllll}
-$\vp$&0.137&0.130&0.257&0.982&0.921&0.173&0.633&0.562&0.623&0.480&0.441&0.499&0.197&0.926&0.131&0.174&0.128&0.901&0.851 \\
-$\vq$&0.137&0.130&0.257&0.982&0.922&0.172&0.635&0.562&0.625&0.480&0.440&0.499&0.197&0.927&0.130&0.173&0.127&0.902&0.853 \\
+	$\vp$ & 0.137 & 0.130 & 0.257 & 0.982 & 0.921 & 0.173 & 0.633 & 0.562 & 0.623 & 0.480 & 0.441 & 0.499 & 0.197 & 0.926 & 0.131 & 0.174 & 0.128 & 0.901 & 0.851 \\
+	$\vq$ & 0.137 & 0.130 & 0.257 & 0.982 & 0.922 & 0.172 & 0.635 & 0.562 & 0.625 & 0.480 & 0.440 & 0.499 & 0.197 & 0.927 & 0.130 & 0.173 & 0.127 & 0.902 & 0.853 \\
 \end{tabular}
 
 Body Fat
 Source: ????
 
 \begin{tabular}{llllllllllllll}
-$\vp$&0.938&0.136&0.182&0.072&0.071&0.108&0.147&1.000&0.134&0.141&0.323&0.619&0.221\\
-$\vq$&0.939&0.136&0.182&0.071&0.070&0.107&0.146&1.000&0.134&0.140&0.323&0.620&0.221\\
+	$\vp$ & 0.938 & 0.136 & 0.182 & 0.072 & 0.071 & 0.108 & 0.147 & 1.000 & 0.134 & 0.141 & 0.323 & 0.619 & 0.221 \\
+	$\vq$ & 0.939 & 0.136 & 0.182 & 0.071 & 0.070 & 0.107 & 0.146 & 1.000 & 0.134 & 0.140 & 0.323 & 0.620 & 0.221 \\
 \end{tabular}
 
 Wage
 An Introduction to Statistical Learning with Applications in R
 
 \begin{tabular}{llllllllllllllllll}
-$\vp$&1&1&0.010&0.024&1&0.054&0.083&0.019&0.011&0.010&0.013&0.014&0.011&0.014&0.057&0.042&0.033\\
-$\vq$&1&1&0.010&0.024&1&0.054&0.083&0.019&0.011&0.010&0.013&0.014&0.011&0.014&0.057&0.042&0.033\\
+	$\vp$ & 1 & 1 & 0.010 & 0.024 & 1 & 0.054 & 0.083 & 0.019 & 0.011 & 0.010 & 0.013 & 0.014 & 0.011 & 0.014 & 0.057 & 0.042 & 0.033 \\
+	$\vq$ & 1 & 1 & 0.010 & 0.024 & 1 & 0.054 & 0.083 & 0.019 & 0.011 & 0.010 & 0.013 & 0.014 & 0.011 & 0.014 & 0.057 & 0.042 & 0.033 \\
 \end{tabular}
 
 Graduation Rate
 An Introduction to Statistical Learning with Applications in R
 
 \begin{tabular}{llllllllllllllllll}
-$\vp$&0.913&1.000&0.090&0.108&0.110&0.602&0.127&0.945&0.999&0.999&0.201&0.864&0.262&0.105&0.146&0.977&0.437\\
-$\vq$&0.914&1.000&0.090&0.108&0.110&0.602&0.127&0.945&0.999&0.999&0.201&0.864&0.262&0.105&0.146&0.977&0.437\\
+	$\vp$ & 0.913 & 1.000 & 0.090 & 0.108 & 0.110 & 0.602 & 0.127 & 0.945 & 0.999 & 0.999 & 0.201 & 0.864 & 0.262 & 0.105 & 0.146 & 0.977 & 0.437 \\
+	$\vq$ & 0.914 & 1.000 & 0.090 & 0.108 & 0.110 & 0.602 & 0.127 & 0.945 & 0.999 & 0.999 & 0.201 & 0.864 & 0.262 & 0.105 & 0.146 & 0.977 & 0.437 \\
 \end{tabular}
 
 US Crime
 
 \begin{tabular}{llllllllllllllll}
-$\vp$&0.226&0.849&0.997&0.216&0.502&0.244&0.358&0.569&0.324&0.202&0.424&0.696&0.869&0.229&0.655\\
-$\vq$&0.220&0.856&0.997&0.210&0.507&0.240&0.358&0.573&0.318&0.196&0.418&0.699&0.876&0.224&0.661\\
+	$\vp$ & 0.226 & 0.849 & 0.997 & 0.216 & 0.502 & 0.244 & 0.358 & 0.569 & 0.324 & 0.202 & 0.424 & 0.696 & 0.869 & 0.229 & 0.655 \\
+	$\vq$ & 0.220 & 0.856 & 0.997 & 0.210 & 0.507 & 0.240 & 0.358 & 0.573 & 0.318 & 0.196 & 0.418 & 0.699 & 0.876 & 0.224 & 0.661 \\
 \end{tabular}
 
 \begin{figure}
-\caption{Comparison of exact and approximate shrinkage}
-\label{fig:shrinkage}
-\includegraphics[width=17cm, height=17cm]{Chapter_3_shrinkage.pdf}
+	\caption{Comparison of exact and approximate shrinkage}
+	\label{fig:shrinkage}
+	\includegraphics[width=17cm, height=17cm]{Chapter_3_shrinkage.pdf}
 \end{figure}
 
 \section{Conclusion and Discussion}
