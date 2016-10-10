@@ -35,7 +35,7 @@ compare_covs <- function(n, p, R2, beta_hat_LS, mXTX_inv)
 }
 
 #' @export
-create_approx_exact_df <- function()
+create_param_df <- function()
 {
   #vp <- c(10, 20, 50, 100)
   vp <- c(10, 20, 50, 100, 500, 1000)
@@ -43,23 +43,39 @@ create_approx_exact_df <- function()
   vR2 <- seq(from=0.00, to=1.00, by = 1e-2)
 
   param_df <- map(vp, function(p) {
-                map(vn, function(n) {
-                  map(vR2, function(R2) {c(p*n, p, R2)})
-                })
-              }) %>% as.data.frame %>% t
+    map(vn, function(n) {
+      map(vR2, function(R2) {c(p*n, p, R2)})
+    })
+  }) %>% as.data.frame %>% t
   rownames(param_df) <- NULL
   colnames(param_df) <- c("vn", "vp", "vR2")
-  param_df <- as.data.frame(param_df)
+  return(as.data.frame(param_df))
+}
+
+#' @export
+create_approx_exact_df <- function()
+{
+  param_df <- create_param_df()
+  vp <- param_df$vp
+  vn <- param_df$vn
+  vR2 <- param_df$vR2
 
   exact_ints_df <- param_df %>% with(taug::g_ints(vn, vp, vR2)) %>% as.data.frame
 
   vtau_g <- param_df %>% with(pmap_dbl(list(vn, vp, vR2), tau_g))
+  vlog_p <- param_df %>% with(pmap_dbl(list(vn, vp, vR2), log_p))
   vtau_sigma2 <- (1 - (1 + vtau_g)^(-1) * vR2)^(-1)
+  vs <- (0.5 * (vn + vp) * (1 - (1 + vtau_g)^(-1)*vR2))
+  vc <- 0.5 * ((1 + (1 + vtau_g)^(-1))^(-1) * (1 + vtau_g)^(-2) * vn * vR2 + (1 + vtau_g)^(-1) * vp)
+  det_mXTX <- rep(1, length(vtau_g))
+  det_mSigma <- vtau_sigma2 * (1 + vtau_g)^(-1) / det_mXTX
+  velbo <- param_df %>% with(pmap_dbl(list(vn, vp, vc, vs, vtau_g, det_mXTX, det_mSigma), elbo))
   combined_df <- cbind(param_df, exact_ints_df) %>%
                   mutate(vtau_g = vtau_g, vtau_sigma2 = vtau_sigma2) %>%
                   mutate(approx_mean = (1 + vtau_g)^(-1), exact_mean = G_1) %>%
                   mutate(approx_var = vtau_sigma2^(-1) * (1 + vtau_g)^(-1),
-                          exact_var = (vn / (vn - 2)) * (G_1 - G_2 * vR2))
+                          exact_var = (vn / (vn - 2)) * (G_1 - G_2 * vR2)) %>%
+                  mutate(vlog_p = vlog_p, velbo = velbo)
 
   return(combined_df)
 }
@@ -79,13 +95,11 @@ plot_graphs <- function() {
                     select(one_of(c("vp", "vn", "vR2", "exact_mean"))) %>%
                     rename(mean = exact_mean) %>%
                     mutate(mean_type = "Exact")
-  #full_join(approx_means_df, exact_means_df, by = c("vp", "vn", "vR2"))
   means_df <- bind_rows(approx_means_df, exact_means_df) %>%
-              mutate(mean_type = factor(mean_type)) %>%
-              arrange(vp, vn, vR2, mean_type)
-  means_df %>% filter(!is.na(mean)) %>%
-    ggplot(aes(x=vR2, y=mean, group=vn)) +
-      geom_line(aes(color = vn, linetype = mean_type)) +
+              mutate(mean_type = factor(mean_type))
+  means_df %>%
+    ggplot(aes(x=vR2, y=mean)) +
+      geom_line(aes(group=interaction(vn, mean_type), color=vn, linetype=mean_type)) +
       facet_wrap(~vp, labeller=label_fn) +
       xlab("Correlation co-efficient") + ylab("Shrinkage")
 }
