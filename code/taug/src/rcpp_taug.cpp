@@ -157,7 +157,7 @@ double log_p(int n, int p, double R2)
   auto a = -3./4.;
   auto b = (n - p) / 2. - 2. - a;
 
-  auto result = gsl_sf_lngamma(p/2. + a + 1.) - n/2. * log(n * PI) - gsl_sf_lngamma((n - p) / 2.);
+  auto result = gsl_sf_lngamma(p/2. + a + 1.) - n/2. * log(n * PI) + gsl_sf_lngamma((n - p) / 2.);
   result = result - gsl_sf_lngamma(a + 1.) - ((n - p) / 2. - a - 1.) * log(1 - R2);
 
   return result;

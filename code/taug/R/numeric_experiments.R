@@ -68,7 +68,7 @@ create_approx_exact_df <- function()
   vs <- (0.5 * (vn + vp) * (1 - (1 + vtau_g)^(-1)*vR2))
   vc <- 0.5 * ((1 + (1 + vtau_g)^(-1))^(-1) * (1 + vtau_g)^(-2) * vn * vR2 + (1 + vtau_g)^(-1) * vp)
   det_mXTX <- rep(1, length(vtau_g))
-  det_mSigma <- vtau_sigma2 * (1 + vtau_g)^(-1) / det_mXTX
+  det_mSigma <- vtau_sigma2^vp * (1 + vtau_g)^(-vp) / det_mXTX
   velbo <- param_df %>% with(pmap_dbl(list(vn, vp, vc, vs, vtau_g, det_mXTX, det_mSigma), elbo))
   combined_df <- cbind(param_df, exact_ints_df) %>%
                   mutate(vtau_g = vtau_g, vtau_sigma2 = vtau_sigma2) %>%
