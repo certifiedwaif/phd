@@ -16,6 +16,7 @@
 \usepackage{amsthm}
 \usepackage{mathtools}
 \usepackage{algorithm,algorithmic}
+\usepackage{microtype}
 
 \newtheorem{theorem}{Theorem}[section]
 
@@ -50,62 +51,46 @@ motivation for this field of research is the need for a computationally feasible
 selection on large scale problems where the number of covariates is large.
 
 The bias-variance trade-off is one of the central problems in statistical learning. The guise this problem
-takes in model selection is balancing the quality of the model fit, using, for example, $1 - R^2$ against the
-complexity of the model using, for example, dimension of the model, in an attempt to find a compromise between
-over-fitting and under-fitting, in the hope that our model fit will generalise well beyond the training data
-we have observed to the general population and that we haven't simply learned the noise in the training set.
+takes in model selection is balancing the quality of the model fit against the complexity of the model, in an
+attempt to find a compromise between over-fitting and under-fitting, in the hope that our model fit will
+generalise well beyond the training data we have observed to the general population and that we haven't simply
+learned the noise in the training set.
 
 % Non-Bayesian
-Maximising the likelihood alone only maximises the quality of the model fit, without penalising the dimension.
-Many model selection criteria have been proposed to attempt to balance model likelihood and model complexity,
-including the Akaike Information Criteria AIC (\cite{DeLeeuw1992}), Bayesian Information Criterion BIC
-(\cite{Schwarz1978}), Deviance Information Criterion DIC (\cite{Spiegelhalter2016}) and Risk Inflation
+Maximising the likelihood alone only maximises the quality of the model fit, without penalising the  model
+complexity. Many model selection criteria have been proposed to attempt to balance model likelihood and model
+complexity, including the Akaike Information Criteria AIC (\cite{DeLeeuw1992}), Bayesian Information Criterion
+BIC (\cite{Schwarz1978}), Deviance Information Criterion DIC (\cite{Spiegelhalter2016}) and Risk Inflation
 Criterion (\cite{Foster1994}).
 
 % Bayesian
-A Bayesian approach to model selection uses Bayes Factors to compares amongst candidate models to determine
-which one we should select.
 
-% Background
+One approach to model selection in a Bayesian context is to use Bayes factors to compare the posterior
+likelihood of the candidate models to see which is most probable. \cite{Goel1986} suggested a particular form
+of conjugate Normal-Gamma family where the Bayes factors have a relatively simple form, incorporating a
+parameter $g$ to control mixing between the model fit from the data and a prior specification of model fit.
+This immediately raises the question of how $g$ should be chosen, and whether is should be fixed or have a
+prior specification.  (\cite{Liang2008}) showed that fixed choices of $g$ lead to paradoxes such as Bartlett's
+Paradox and the Information Paradox, and so a prior specification should be preferred. There are many ways of
+choosing a prior on $g$. Using a mixture of $g$-priors has the advantage of \ldots In this sense, the choice
+of covariates for the optimal model selected can be considered to be automatic. This choice can be made while
+inducing sparsity.
 
-\cite{Goel1986} constructed a family of priors for a Gaussian regression model using a particular form
-of conjugate Normal-Gamma model,
-
-\begin{align*}
-	p(\sigma^2)     & \propto \sigma^{-2}                                       \\
-	\vbeta|\sigma^2 & \sim \N\left(\vzero, g\sigma^2 (\mX^\top \mX)^{-1}\right) 
-\end{align*}
-
-where the prior covariance matrix of $\vbeta$ is taken to be a multiple of the Fisher information  matrix by
-the parameter $g$. This places the most prior mass on $\vbeta$ on the section of the parameter space where the
-data is least informative (expand io this? See STAT260 combined lecture notes, page 55). This leads to the
-posterior distribution
-
-\[
-	\vbeta | \vy \sim \N\left(\frac{g}{1+g} \vbetahatls, g \sigma^2 (\mX^\top \mX)^{-1} \right)
-\]
-
-This immediately raises the question of how $g$ should be chosen. There are many ways of choosing a prior on
-$g$. Hyper g prior, mixture of g-priors Liang 2008
-
-Paradoxes, reasons not to choose a fixed g. Reference Jeffrey's work 1946. \cite{Society2016}
-
-(\cite{Liang2008}) showed that fixed choices of $g$ lead to paradoxes such as Bartlett's Paradox and the
-Information Paradox. Using a mixture of g-priors has the advantage of not relying on a fixed choice of tuning
-parameter, instead allowing the specification of a prior distribution on that parameter. In this sense, the
-choice of covariates for the optimal model selected can be considered to be automatic. This choice can be made
-while inducing sparsity.
-
-Variational Bayes, Explaining Variational Approximations 2010
-
-Structured Variational Bayes for model selection, Wand and Ormerod Variational Bayes for Elaborate 
-Distributions (\cite{Wand2011})
+% Variational Bayes, Explaining Variational Approximations 2010
 
 % VB in general
 
-Variational Bayes (see \cite{Ormerod2010}) is a computationally efficient, deterministic method of fitting
-Bayesian models to data. Variational Bayes approximates the true posterior $p(\vy, \vtheta)$ by minimising the
-KL divergence between the posterior and the  approximating distribution $q(\vtheta)$.
+A challenge to applying this method of model selection is that exact model fitting may be computationally
+infeasible for models involving even moderate numbers of observations and covariates, and popular alternatives
+for fitting Bayesian models such as Monte Carlo Markov Chains (henceforth referred to as MCMC) are still
+extremely computationally intensive. Variational Bayes (see \cite{Ormerod2010}) is a computationally
+efficient, deterministic method of fitting Bayesian models to data. Variational Bayes approximates the true
+posterior $p(\vy, \vtheta)$ by minimising the KL divergence between the posterior and the  approximating
+distribution $q(\vtheta)$.
+
+% Structured Variational Bayes for model selection, Wand and Ormerod Variational Bayes for Elaborate 
+% Distributions (\cite{Wand2011})
+
 
 % Application
 
@@ -116,9 +101,9 @@ In this paper, we develop Variational Bayes approximations to model selection of
 g prior as in \cite{Liang2008}. We show that in this situation, our variational approximation is almost exact
 -- that is, the variational approximation of the Bayesian linear model gives almost perfect estimates.
 
-By searching of the model space as one covariate changes between each sub-model and  using rank-1 updates on
-$(\mX^\top \mX)^{-1}$, we are able to exhaustively search the model space in $\BigO(2^p np^2)$ rather than
-$\BigO(2^p np^3)$.
+% By searching of the model space as one covariate changes between each sub-model and  using rank-1 updates on
+% $(\mX^\top \mX)^{-1}$, we are able to exhaustively search the model space in $\BigO(2^p np^2)$ rather than
+% $\BigO(2^p np^3)$.
 
 This article is organised as follows. In Section \ref{sec:model_selection}, we review previous Bayesian
 approaches to model selection. In Section \ref{sec:methodology} we develop our approach. In Section
@@ -151,6 +136,29 @@ vector of responses, $\vtheta \in \R^p$ be the vector of parameters and $\mX \in
 matrix of covariates. Let $p(\vtheta)$ be the prior distribution of $\vtheta$, $p(\vy, \vtheta)$ be the full
 probability distribution of $\vy$, $p(\vtheta | \vy)$ the posterior distribution and $q(\vtheta)$ be the
 approximating probability distribution.
+
+Consider the model
+
+\begin{align*}
+	\vy|\vbeta, \sigma^2 & \sim \N(\mX \vbeta, \sigma^2 \mI) \\
+\end{align*}
+
+with priors
+
+\begin{align*}
+	\vbeta|g, \sigma^2 & \sim \N\left(\vzero, g\sigma^2 (\mX^\top \mX)^{-1}\right), \\
+	p(\sigma^2)        & \propto \sigma^{-2}.                                       
+\end{align*}
+
+\cite{Goel1986} constructed a family of priors for a Gaussian regression model using a particular form of
+conjugate Normal-Gamma model, where the prior covariance matrix of $\vbeta$ is taken to be a multiple of the
+Fisher information  matrix by the parameter $g$. This places the most prior mass on $\vbeta$ on the section of
+the parameter space where the data is least informative (expand io this? See STAT260 combined lecture notes,
+page 55). This leads to the posterior distribution
+
+\[
+	\vbeta | \vy \sim \N\left(\frac{g}{1+g} \vbetahatls, g \sigma^2 (\mX^\top \mX)^{-1} \right)
+\]
 
 We index the space of models by a $p$-dimensional vector of indicator variables for each variable considered 
 for inclusion, $\vgamma$. For each model $\mathcal{M}_\vgamma$, the response vector $\vy$ is modelled by
@@ -341,7 +349,7 @@ be calculated from it as shown in Algorithm \ref{alg:algorithm_two}.
 		\WHILE{the increase in $\log{\underline{p}}(\vy;q)$ is significant}
 		\STATE Calculate $\tau_{g}$ using numerical integration in Section \ref{sec:num_int}
 		\ENDWHILE
-		\STATE $\tau_{\sigma^2} \leftarrow \frac{n}{[1 - (1 + \tau_g)^{-1}] n R^2}$
+		\STATE $\tau_{\sigma^2} \leftarrow \{[1 - (1 + \tau_g)^{-1}] R^2\}^{-1}$
 		\STATE $\beta_{q(g)} \leftarrow \left(\frac{n (1 + \tau_g)^{-1}}{[1 - (1 + \tau_g)^{-1}]} + p \right)$
 		\STATE $\vmu_{q(\vbeta)} \leftarrow (1 + \tau_g)^{-1} (\mX^\top \mX)^{-1} \mX^\top \vy$
 		\STATE $\mSigma_{q(\vbeta)} \leftarrow \tau_{\sigma^2}^{-1} (1 + \tau_{g})^{-1}(\mX^\top \mX)^{-1}$
