@@ -1,0 +1,91 @@
+% Literature_review.tex
+\documentclass{amsart}[12pt]
+
+\addtolength{\oddsidemargin}{-.75in}%
+\addtolength{\evensidemargin}{-.75in}%
+\addtolength{\textwidth}{1.5in}%
+\addtolength{\textheight}{1.3in}%
+\addtolength{\topmargin}{-.8in}%
+\addtolength{\marginparpush}{-.75in}%
+% \setlength\parindent{0pt}
+% \setlength{\bibsep}{0pt plus 0.3ex}
+
+\usepackage[authoryear]{natbib}
+\usepackage{graphicx}
+\usepackage{algorithm,algorithmic}
+\usepackage{cancel}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{algorithm,algorithmic}
+\usepackage[inner=2.5cm,outer=1.5cm,bottom=2cm]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{microtype}
+
+\newtheorem{theorem}{Theorem}[section]
+
+\title{Literature review}
+\author{Mark Greenaway, John T. Ormerod}
+
+\input{include.tex}
+\input{Definitions.tex}
+
+\begin{document}
+
+\maketitle
+
+\section{Chapter 1 -- Zero-Inflated Models}
+
+Explaining Variational Approximations
+
+Gaussian Variational Approximations
+
+Approximate mean and covariance of mixed models using multivariate normal with mean $\vmu$ and covariance
+matrix $\mSigma$, using convex optimsation algorithms to optimise the variational lower bound directly
+
+B-Splines
+
+Approximate functions with piecewise cubic polynomials
+
+Zero-inflated and Bayesian models
+
+\section{Chapter 3 -- Variational Bayes for Linear Model Selection Using Mixtures of g-Priors}
+
+Zellner 1980
+
+'Although Zellner and Siow 1980 did not explicitly use a $g$-prior formulation with a prior on $g$,
+their recommendation of a multivariate Cauchy form for $p(\beta|\sigma^2)$ implicitly corresponds to using a
+$g$-prior with an inverse Gamma prior'
+
+Proposed Normal-Gamma conjugate model which includes $g$, with $g$ controlling the degree of shrinkage
+from the fitted mean towards the prior mean.
+
+Ormerod and Wand 2010
+
+Explaining Variational Approximations
+
+Highly cited paper explaining variational approximations using a number of examples.
+Defines basic terms, and gives proofs of lower bound and optimal mean field update
+
+George and Foster 2000
+
+Proposed selecting the model maximising the posterior probability of model $\gamma$ based on empirical
+Bayes estimates of $g$ and the standard unbiased estimate of $\sigma^2$
+
+Cui and George 2008
+
+Proposed marginning out $g$ with respect to a prior
+
+Liang 2008
+
+Builds on Zellner 1980, by proving that any fixed choice of $g$ leads to various kinds of paradoxes e.g.
+Information Paradox, Bartlett's Paradox.
+Proposed marginning out $g$ and $\sigma^2$ with respect to priors.
+
+Murayama and George 2011
+
+Fully Bayes Factors with a Generalised $g$-Prior
+Normal linear model, model selection based on a fully Bayes formulation with a generalisation of Zellner's
+$g$-prior which allows for $p > n$
+
+\end{document}
