@@ -81,7 +81,7 @@ VectorXd log_qg(const DenseBase<Derived>& x, double A, double B, double C)
 double log_qh(double x, double U, double B, double C)
 {
 	auto result = U*log(x) + B*log(1. + x) - C*x;
-	Rcout << "log_qh: x " << x << " U " << U << " B " << B << " C " << C << " result " << result << std::endl;
+	// Rcout << "log_qh: x " << x << " U " << U << " B " << B << " C " << C << " result " << result << std::endl;
 	return result;
 }
 
@@ -131,7 +131,7 @@ double hessian_qh(double x, double U, double B, double C)
 	auto x2 = x*x;
 	auto xp12 = (1+x)*(1+x);
 	auto result = -U/x2 - B/xp12;
-	Rcout << "hessian_qh: x " << x << " U " << U << " B " << B << " C " << C << " result " << result << std::endl;
+	// Rcout << "hessian_qh: x " << x << " U " << U << " B " << B << " C " << C << " result " << result << std::endl;
 	return result;
 }
 
@@ -159,11 +159,11 @@ double log_Z_h_Laplace(double U,double B,double C)
 	auto log_qh_hat = log_qh(h_hat,U,B,C);
 	auto sigma2_inv = -hessian_qh(h_hat,U,B,C) ;
 	auto sigma2 = 1/sigma2_inv;
-	Rcout << "Z_h_Laplace: res " << res;
-	Rcout << " h_hat " << h_hat;
-	Rcout << " log_qh_hat " << log_qh_hat;
-	Rcout << " sigma2_inv " << sigma2_inv;
-	Rcout << " sigma2 " << sigma2 << std::endl;
+	// Rcout << "Z_h_Laplace: res " << res;
+	// Rcout << " h_hat " << h_hat;
+	// Rcout << " log_qh_hat " << log_qh_hat;
+	// Rcout << " sigma2_inv " << sigma2_inv;
+	// Rcout << " sigma2 " << sigma2 << std::endl;
 
 	return log(sqrt(2*PI)) + log(sigma2) + log_qh_hat;
 }
@@ -201,7 +201,7 @@ double moment_h_FullyExponentialLaplace(double m,double U,double B,double C)
 {
 	auto val1 = log_Z_h_Laplace(U+m,B,C);
 	auto val2 = log_Z_h_Laplace(U,B,C);
-	Rcout << "val1 " << val1 << " val2 " << val2 << std::endl;
+	// Rcout << "val1 " << val1 << " val2 " << val2 << std::endl;
 	return exp(val1 - val2);
 }
 
@@ -450,7 +450,7 @@ double tau_g_Laplace(double a, int n, int p, double R2)
 double tau_g_FullyExponentialLaplace(double a, int n, int p, double R2, uint ITER)
 {
 	double tau = tau_g_Laplace(a,n,p,R2);
-	Rcout << "Initial value of tau " << tau << std::endl;
+	// Rcout << "Initial value of tau " << tau << std::endl;
 
 	double b = (n-p)/2. - a - 2.;
 	double A = b - p/2.;
@@ -463,11 +463,11 @@ double tau_g_FullyExponentialLaplace(double a, int n, int p, double R2, uint ITE
 		// #cat(i,tau,C,"\n")
 		tau = moment_h_FullyExponentialLaplace(1,U,B,C);
 		//  #cat(i,tau,C,"\n")
-		Rcout << "Iteration " << i << " C " << C << " tau " << tau << std::endl;
+		// Rcout << "Iteration " << i << " C " << C << " tau " << tau << std::endl;
 		if (isnan(tau) || fabs(tau) == 0.0) {
-			Rcout << "In NAN branch, using plug-in estimate: tau ";
+			// Rcout << "In NAN branch, using plug-in estimate: tau ";
 			tau = tau_plugin(a,n,p,R2);
-			Rcout << tau << std::endl;
+			// Rcout << tau << std::endl;
 			break;
 		}
 	}
@@ -673,21 +673,21 @@ double elbo(int n, int p, double c, double s, double tau_g, double log_det_XTX, 
 
   auto result =  p / 2. - n / 2. * log(2 * PI) + 0.5 * log_det_XTX - gsl_sf_lnbeta(a + 1., b + 1.) \
           - (n + p) / 2. * log(s) + gsl_sf_lngamma((n + p) / 2.) + c * tau_g + log_new_Z + 0.5 * log_det_mSigma;
-  Rcout << "elbo: n " << n;
-  Rcout << " p " << p;
-  Rcout << " c " << c;
-  Rcout << " s " << s;
-  Rcout << " tau_g " << tau_g;
-  Rcout << " log_det_XTX " << log_det_XTX;
-  Rcout << " log_det_mSigma " << log_det_mSigma;
-  Rcout << " a " << a;
-  Rcout << " b " << b;
-  Rcout << " beta " << beta;
-  Rcout << " nu " << nu;
-  Rcout << " mu " << mu;
-  Rcout << " old_Z " << old_Z;
-  Rcout << " log_new_Z " << log_new_Z;
-  Rcout << " result " << result << std::endl;
+  // Rcout << "elbo: n " << n;
+  // Rcout << " p " << p;
+  // Rcout << " c " << c;
+  // Rcout << " s " << s;
+  // Rcout << " tau_g " << tau_g;
+  // Rcout << " log_det_XTX " << log_det_XTX;
+  // Rcout << " log_det_mSigma " << log_det_mSigma;
+  // Rcout << " a " << a;
+  // Rcout << " b " << b;
+  // Rcout << " beta " << beta;
+  // Rcout << " nu " << nu;
+  // Rcout << " mu " << mu;
+  // Rcout << " old_Z " << old_Z;
+  // Rcout << " log_new_Z " << log_new_Z;
+  // Rcout << " result " << result << std::endl;
 
   return result;
 }
