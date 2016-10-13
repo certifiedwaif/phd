@@ -80,7 +80,9 @@ VectorXd log_qg(const DenseBase<Derived>& x, double A, double B, double C)
 // The log the q-density for h (where h is the inverse of g)
 double log_qh(double x, double U, double B, double C)
 {
-	return U*log(x) + B*log(1. + x) - C*x;
+	auto result = U*log(x) + B*log(1. + x) - C*x;
+	Rcout << "log_qh: x " << x << " U " << U << " B " << B << " C " << C << " result " << result << std::endl;
+	return result;
 }
 
 
@@ -128,7 +130,9 @@ double hessian_qh(double x, double U, double B, double C)
 {
 	auto x2 = x*x;
 	auto xp12 = (1+x)*(1+x);
-	return -U/x2 - B/xp12;
+	auto result = -U/x2 - B/xp12;
+	Rcout << "hessian_qh: x " << x << " U " << U << " B " << B << " C " << C << " result " << result << std::endl;
+	return result;
 }
 
 
@@ -148,15 +152,20 @@ double Z_g_Laplace(double A,double B,double C)
 
 // Calculate the Laplace approximation of the normalizing constant for the
 // q-density for h (where h is the inverse of g)
-double Z_h_Laplace(double U,double B,double C)
+double log_Z_h_Laplace(double U,double B,double C)
 {
 	auto res = mode_qh(U,B,C);
 	auto h_hat = res;
-	auto qh_hat = exp(log_qh(h_hat,U,B,C));
+	auto log_qh_hat = log_qh(h_hat,U,B,C);
 	auto sigma2_inv = -hessian_qh(h_hat,U,B,C) ;
 	auto sigma2 = 1/sigma2_inv;
+	Rcout << "Z_h_Laplace: res " << res;
+	Rcout << " h_hat " << h_hat;
+	Rcout << " log_qh_hat " << log_qh_hat;
+	Rcout << " sigma2_inv " << sigma2_inv;
+	Rcout << " sigma2 " << sigma2 << std::endl;
 
-	return sqrt(2*PI*sigma2)*qh_hat;
+	return log(sqrt(2*PI)) + log(sigma2) + log_qh_hat;
 }
 
 
@@ -190,9 +199,10 @@ double moment_g_FullyExponentialLaplace(double m,double A,double B,double C)
 // Approximate the mth moment of h using the Fully-Exponential-Laplace method
 double moment_h_FullyExponentialLaplace(double m,double U,double B,double C)
 {
-	auto val1 = Z_h_Laplace(U+m,B,C);
-	auto val2 = Z_h_Laplace(U,B,C);
-	return(val1/val2);
+	auto val1 = log_Z_h_Laplace(U+m,B,C);
+	auto val2 = log_Z_h_Laplace(U,B,C);
+	Rcout << "val1 " << val1 << " val2 " << val2 << std::endl;
+	return exp(val1 - val2);
 }
 
 
@@ -202,6 +212,7 @@ double moment_h_FullyExponentialLaplace(double m,double U,double B,double C)
 struct Trapint
 {
 	double intVal;
+	double log_intVal;
 	VectorXd vg;
 	VectorXd log_qg_vg;
 };
@@ -261,13 +272,15 @@ Trapint Z_g_trapint(double A, double B, double C, size_t N=10000)
 	// vg = seq(L,R,,N)
 	const VectorXd vg = VectorXd::LinSpaced(N, L, R);
 	auto log_qg_vg = log_qg(vg,A,B,C);
+	auto min_log_qg = log_qg_vg.minCoeff();
 
 	// Use trapezoidal integration
-	double intVal = trapint(vg,log_qg_vg.array().exp());
+	double intVal = trapint(vg,(log_qg_vg.array() - min_log_qg).exp());
 
 	// return(list(intVal=intVal,vg=vg,log_qg_vg=log_qg_vg))
 	Trapint result;
-	result.intVal = intVal;
+	result.intVal = exp(min_log_qg) * intVal;
+	result.log_intVal = log(intVal) + min_log_qg;
 	result.vg = vg;
 	result.log_qg_vg = log_qg_vg;
 	return result;
@@ -322,7 +335,22 @@ double moment_h_trapint(double m, double U, double B, double C, size_t N=1000000
 
 double whittakerW(double z, double kappa, double mu)
 {
-	return exp(-.5*z) * pow(z, mu + .5) * gsl_sf_hyperg_U(mu - kappa + .5, 1. + 2. * mu, z);
+	gsl_sf_result_e10 gsl_result;
+	gsl_sf_hyperg_U_e10_e(mu - kappa + .5, 1. + 2. * mu, z, &gsl_result);
+
+	auto U = gsl_result.val * pow(10, gsl_result.e10);
+	auto result = exp(-.5*z) * pow(z, mu + .5) * U;
+
+	// Rcout << "whittakerW: z " << z;
+	// Rcout << " kappa " << kappa;
+	// Rcout << " mu " << mu;
+	// Rcout << " gsl_result.val " << gsl_result.val;
+	// Rcout << " gsl_result.err " << gsl_result.err;
+	// Rcout << " gsl_result.e10 " << gsl_result.e10;
+	// Rcout << " U " << U;
+	// Rcout << " result " << result << endl;
+
+	return result;
 }
 
 
@@ -422,6 +450,7 @@ double tau_g_Laplace(double a, int n, int p, double R2)
 double tau_g_FullyExponentialLaplace(double a, int n, int p, double R2, uint ITER)
 {
 	double tau = tau_g_Laplace(a,n,p,R2);
+	Rcout << "Initial value of tau " << tau << std::endl;
 
 	double b = (n-p)/2. - a - 2.;
 	double A = b - p/2.;
@@ -432,12 +461,13 @@ double tau_g_FullyExponentialLaplace(double a, int n, int p, double R2, uint ITE
 	for (uint i = 0; i < ITER; i++) {
 		double C = 0.5*n*R2/((1. + tau)*(1. - R2 + tau)) + 0.5*p/(1. + tau);
 		// #cat(i,tau,C,"\n")
-		// cout << i << " " << tau << " " << C << endl;
 		tau = moment_h_FullyExponentialLaplace(1,U,B,C);
 		//  #cat(i,tau,C,"\n")
-		// cout << i << tau << C << endl;
+		Rcout << "Iteration " << i << " C " << C << " tau " << tau << std::endl;
 		if (isnan(tau) || fabs(tau) == 0.0) {
+			Rcout << "In NAN branch, using plug-in estimate: tau ";
 			tau = tau_plugin(a,n,p,R2);
+			Rcout << tau << std::endl;
 			break;
 		}
 	}
@@ -503,7 +533,7 @@ VectorXd ZE_exact(VectorXd vn, VectorXd vp, VectorXd vR2)
 		auto n = vn(i);
 		auto p = vp(i);
 		ZE_constants_result res_con = ZE_constants(n, p);
-		// Rcpp::Rccout << "i " << i << " p_gamma " << p_gamma << endl;
+		// Rcpp::Rcout << "i " << i << " p_gamma " << p_gamma << endl;
 		vlog_ZE(i) = -res_con.vcon(p) * log(1.0 - vR2(i)) + res_con.vpen(p);
 	}
 	return vlog_ZE;
@@ -532,7 +562,8 @@ double tau_g(int n, int p, double R2)
 	double U = -(A+B+2.);
 
 	// Calculate tau_g
-	double tau_g = tau_g_FullyExponentialLaplace(a,n,p,R2,20);
+	double tau_g = tau_g_FullyExponentialLaplace(a, n, p, R2, 20);
+	// Rcpp::Rcout << "n " << n << " p " << p << " tau_g " << tau_g << std::endl;
 	return tau_g;
 }
 
@@ -567,11 +598,11 @@ void tau_g(int n, const MatrixXd& mGraycode, const VectorXd& vR2, const VectorXd
 
 		// Calculate the
 							 // Z.h.Laplace(U,B,C)
-		double Z = Z_g_trapint(A,B,C,1000).intVal;
+		double log_Z = Z_g_trapint(A,B,C,1000).log_intVal;
 
 		// Calculate the lower bound on the log-likelihood
 		velbo(i) = 0.5*p - 0.5*n*log(2*PI) - gsl_sf_lnbeta(a+1,b+1)  - 0.5*n*log(1 + tau_g - vR2(i)) ;
-		velbo(i) = velbo(i) - 0.5*(n+p)*log(0.5*(n+p))+ gsl_sf_lngamma(0.5*(n+p)) + C*tau_g + log(Z)  + 0.5*(n-p)*log(1 + tau_g);
+		velbo(i) = velbo(i) - 0.5*(n+p)*log(0.5*(n+p))+ gsl_sf_lngamma(0.5*(n+p)) + C*tau_g + log_Z + 0.5*(n-p)*log(1 + tau_g);
 
 		// cout << " " << i << " " << velbo[i] << " " << tau_g << " " << C << " " << Z << "\n";
 
@@ -591,3 +622,72 @@ void tau_g(int n, const MatrixXd& mGraycode, const VectorXd& vR2, const VectorXd
 }
 
 
+//' Calculate marginal log-likelihood log p(y)
+//'
+//' @param n The number of observations
+//' @param p The number of covariates
+//' @param R2 The correlation co-efficient, squared
+//' @return The value of the marginal log-likelihood log p(y)
+//' @export
+// [[Rcpp::export]]
+double log_p(int n, int p, double R2)
+{
+  auto a = -3./4.;
+  auto b = (n - p) / 2. - 2. - a;
+
+  auto result = gsl_sf_lngamma(p/2. + a + 1.) - n/2. * log(n * PI) + gsl_sf_lngamma((n - p) / 2.);
+  result = result - gsl_sf_lngamma(a + 1.) - ((n - p) / 2. - a - 1.) * log(1 - R2);
+
+  return result;
+}
+
+//' Calculate the variational lower bound
+//'
+//' @param n The number of observations
+//' @param p The number of covariates
+//' @param c The variational parameter c
+//' @param s The variational parameter s
+//' @param tau_g The variational parameter tau_g
+//' @param log_det_XTX The log of the determinant of X^T X
+//' @param log_det_mSigma The log of the determinant of mSigma
+//' @return The variational lower bound
+//' @export
+// [[Rcpp::export]]
+double elbo(int n, int p, double c, double s, double tau_g, double log_det_XTX, double log_det_mSigma)
+{
+  auto a = -3./4.;
+  auto b = (n - p) / 2. - 2. - a;
+  auto beta = c;
+  auto nu = n / 2. - p - a - 1.;
+  auto mu = -(n - p/2.) + 1.;
+  auto old_Z = pow(beta, (nu - 1.) / 2.) * gsl_sf_gamma(1. - mu - nu) * exp(- beta/(2.*nu)) * whittakerW(beta, (nu - 1.)/2 + mu, -nu / 2.);
+
+	// Calculate
+	double A =  n/2. - p - a - 2.;
+	double B = -static_cast<double>(n-p)/2.;
+	double U = -(A+B+2.);
+
+	// Calculate the
+						 // Z.h.Laplace(U,B,C)
+	double log_new_Z = Z_g_trapint(A,B,c,1000).log_intVal;
+
+  auto result =  p / 2. - n / 2. * log(2 * PI) + 0.5 * log_det_XTX - gsl_sf_lnbeta(a + 1., b + 1.) \
+          - (n + p) / 2. * log(s) + gsl_sf_lngamma((n + p) / 2.) + c * tau_g + log_new_Z + 0.5 * log_det_mSigma;
+  Rcout << "elbo: n " << n;
+  Rcout << " p " << p;
+  Rcout << " c " << c;
+  Rcout << " s " << s;
+  Rcout << " tau_g " << tau_g;
+  Rcout << " log_det_XTX " << log_det_XTX;
+  Rcout << " log_det_mSigma " << log_det_mSigma;
+  Rcout << " a " << a;
+  Rcout << " b " << b;
+  Rcout << " beta " << beta;
+  Rcout << " nu " << nu;
+  Rcout << " mu " << mu;
+  Rcout << " old_Z " << old_Z;
+  Rcout << " log_new_Z " << log_new_Z;
+  Rcout << " result " << result << std::endl;
+
+  return result;
+}
