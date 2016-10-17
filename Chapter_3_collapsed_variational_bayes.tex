@@ -16,11 +16,14 @@
 \usepackage{amsthm}
 \usepackage{mathtools}
 \usepackage{algorithm,algorithmic}
+\usepackage[inner=2.5cm,outer=1.5cm,bottom=2cm]{geometry}
+\usepackage{setspace}
+\onehalfspacing
 \usepackage{microtype}
 
 \newtheorem{theorem}{Theorem}[section]
 
-\title{Chapter 3 Collapsed Variational Bayes}
+\title{Chapter 3 Variational Bayes for Linear Model Selection using Mixtures of $g$-priors}
 \author{Mark Greenaway, John T. Ormerod}
 
 \input{include.tex}
@@ -43,7 +46,10 @@ Bayesian model.
 
 \section{Introduction}
 
+\subsection{Background}
+
 % Problem in general
+
 The problem of model selection is one of the most important problems encountered in practice by applied
 statistical practitioners. There are many approaches to model selection including approaches based on
 functions of the residual sum of squares, lasso and L1 regression and Bayesian modelling approaches. A major
@@ -57,6 +63,7 @@ generalise well beyond the training data we have observed to the general populat
 learned the noise in the training set.
 
 % Non-Bayesian
+
 Maximising the likelihood alone only maximises the quality of the model fit, without penalising the  model
 complexity. Many model selection criteria have been proposed to attempt to balance model likelihood and model
 complexity, including the Akaike Information Criteria AIC (\cite{DeLeeuw1992}), Bayesian Information Criterion
@@ -66,15 +73,14 @@ Criterion (\cite{Foster1994}).
 % Bayesian
 
 One approach to model selection in a Bayesian context is to use Bayes factors to compare the posterior
-likelihood of the candidate models to see which is most probable. \cite{Goel1986} suggested a particular form
+likelihood of the candidate models to see which is most probable. \cite{Zellner1980} suggested a particular form
 of conjugate Normal-Gamma family where the Bayes factors have a relatively simple form, incorporating a
 parameter $g$ to control mixing between the model fit from the data and a prior specification of model fit.
 This immediately raises the question of how $g$ should be chosen, and whether is should be fixed or have a
 prior specification.  (\cite{Liang2008}) showed that fixed choices of $g$ lead to paradoxes such as Bartlett's
 Paradox and the Information Paradox, and so a prior specification should be preferred. There are many ways of
-choosing a prior on $g$. Using a mixture of $g$-priors has the advantage of \ldots In this sense, the choice
-of covariates for the optimal model selected can be considered to be automatic. This choice can be made while
-inducing sparsity.
+choosing a prior on $g$. Using a mixture of $g$-priors has the advantage of adapting the degree of shrinkage
+to the prior model dependent on the data.
 
 % Variational Bayes, Explaining Variational Approximations 2010
 
@@ -125,17 +131,22 @@ trade--off.
 Consider a normal linear model on $\vy$ with conjugate normal prior on $\vbeta$ with mean centred at $\vzero$,
 and covariance $g \sigma^2 (\mX^\top \mX)^{-1}$ where the prior on $g$ is Zellner's g-prior on the covariance
 matrices (Zellner 1986), as this yields a tractable posterior for $\vbeta$ as shown by \cite{Liang2008}. We
-choose $a$  and $b$ to be $-3/4$ and $(n - p)/2 - a$ respectively, as in \cite{Maruyama2011}.
+choose $a$  and $b$ to be $-3/4$ and $(n - p)/2 - a$ respectively, following \cite{Maruyama2011}.
 
 \section{Methodology}
 \label{sec:methodology}
 
+\subsection{Notation}
+
 % Definitions
+
 Let $n > 0$ be the number of observations and $p > 0$ be the number of covariates. Let $\vy \in \R^n$ be the
 vector of responses, $\vtheta \in \R^p$ be the vector of parameters and $\mX \in \R^{n \times p}$ be the
 matrix of covariates. Let $p(\vtheta)$ be the prior distribution of $\vtheta$, $p(\vy, \vtheta)$ be the full
 probability distribution of $\vy$, $p(\vtheta | \vy)$ the posterior distribution and $q(\vtheta)$ be the
 approximating probability distribution.
+
+\subsection{Model}
 
 Consider the model
 
@@ -153,7 +164,7 @@ with priors
 \cite{Goel1986} constructed a family of priors for a Gaussian regression model using a particular form of
 conjugate Normal-Gamma model, where the prior covariance matrix of $\vbeta$ is taken to be a multiple of the
 Fisher information  matrix by the parameter $g$. This places the most prior mass on $\vbeta$ on the section of
-the parameter space where the data is least informative (expand io this? See STAT260 combined lecture notes,
+the parameter space where the data is least informative (expand on this? See STAT260 combined lecture notes,
 page 55). This leads to the posterior distribution
 
 \[
@@ -299,44 +310,44 @@ $\mu - 1 = (a + b + 2)$ and $\gamma = 1$.
 
 Connections between Algorithm \ref{alg:algorithm_one} and Algorithm \ref{alg:algorithm_two}.
 
-$\vy^\top \mX (\mX^\top \mX)^{-1} \mX^\top \vy =\|\vy\|^2 R^2 = n R^2$
+A substantially simpler algorithm  which involves optimising over only one variational parameter can be
+obtained from Algorithm \ref{alg:algorithm_one} by utlising the following identities.
 
-When $\vmu = (1 + \tau_g)^{-1} \vbetahatls$ and $\mSigma = \tau_{\sigma^2}^{-1} (1 + \tau_g)^{-1} (\mX^\top \mX)^{-1}$
+First, we note that when assuming that $\vy^\top \vy / n = 1$,
+\[\vy^\top \mX (\mX^\top \mX)^{-1} \mX^\top \vy =\|\vy\|^2 R^2 = n R^2.\]
 
+Second, observe that when $\vmu = (1 + \tau_g)^{-1} \vbetahatls$ and $\mSigma = \tau_{\sigma^2}^{-1} (1 + \tau_g)^{-1} (\mX^\top \mX)^{-1}$,
 \begin{align*}
 	\vmu^\top \mX^\top \mX \vmu & = (1 + \tau_g)^{-2} \vbetahatls^\top \mX^\top \mX \vbetahatls                                                        \\
 	                            & = (1 + \tau_g)^{-2} \vy^\top \mX (\mX^\top \mX)^{-1} \cancel{\mX^\top \mX} \cancel{(\mX^\top \mX)^{-1}} \mX^\top \vy \\
-	                            & = (1 + \tau_g)^{-2} n R^2                                                                                            
+	                            & = (1 + \tau_g)^{-2} n R^2.                                    
 \end{align*}
 
+Third, utilising the above two identities, $s$ can be simplified to
 \begin{align*}
 	s & = \frac{1}{2} [\|\vy\|^2 - 2 \vmu^\top \mX^\top \vy + (1 + \tau_g) \vmu^\top \mX^\top \mX \vmu (1 + \tau_g) +  \tr (\mX^\top \mX \mSigma)]                 \\
 	  & = \frac{1}{2} [n - \cancel{2} (1 + \tau_g) n R ^2 + \cancel{(1 + \tau_g) n R^2} + \tau_{\sigma^2} \tr (\cancel{\mX\top \mX} \cancel{(\mX^\top \mX)^{-1}})] \\
-	  & = \frac{1}{2} \{ n[1 - (1 + \tau_g)^{-1} R^2] + p \tau_{\sigma^2}^{-1} \}                                                                                  
+	  & = \frac{1}{2} \{ n[1 - (1 + \tau_g)^{-1} R^2] + p \tau_{\sigma^2}^{-1} \}.
 \end{align*}
 
-Note $\tau_{\sigma^2} = \E_q [\sigma^{-2}] = r/s = \frac{n+p}{n[1 - (1 + \tau_g)^{-1} R^2] + p \tau_{\sigma^2}^{-1}}$. Solving for $\tau_{\sigma^2}$ we obtain
-
+Fourth, recalling that $\tau_{\sigma^2} = \E_q [\sigma^{-2}] = r/s = \frac{n+p}{n[1 - (1 + \tau_g)^{-1} R^2] + p \tau_{\sigma^2}^{-1}}$, we can solve for $\tau_{\sigma^2}$ in terms of $\tau_g$ to obtain
 \[
 	\tau_{\sigma^2} = [1 + (1 + \tau_g)^{-1}]^{-1}.
 \]
 
 Hence
-
 \[
 	s = \frac{r}{\tau_{\sigma^2}} = \frac{1}{2} (n + p) [1 - (1 + \tau_g)^{-1} R^2].
 \]
-
 and
-
 \begin{align*}
 	c & = \frac{\tau_{\sigma^2}}{2}[\vmu^\top \mX^\top \mX \vmu + \tr (\mX^\top \mX \mSigma)]                      \\
 	  & = \frac{\tau_{\sigma^2}}{2}\left[(1 + \tau_g)^{-2} n R^2 + \tau_{\sigma^2}^{-1} (1 + \tau_g)^{-1} p\right] \\
 	  & = \frac{1}{2} [ \tau_{\sigma^2} (1 + \tau_g)^{-2} n R^2 + (1 + \tau_g)^{-1} p]                             \\
-	  & = \frac{1}{2} \{ [1 + (1 + \tau_g)^{-1}]^{-1} (1 + \tau_g)^{-2} n R^2 + (1 + \tau_g)^{-1} p\}              
+	  & = \frac{1}{2} \{ [1 + (1 + \tau_g)^{-1}]^{-1} (1 + \tau_g)^{-2} n R^2 + (1 + \tau_g)^{-1} p\}.
 \end{align*}
 
-\noindent Hence all variational parameters in Algorithm \ref{alg:algorithm_one} can be expressed as functions
+\noindent Hence all of the variational parameter updates in Algorithm \ref{alg:algorithm_one} can be expressed as functions
 of $n$, $p$, $R^2$ and $\tau_g$. Thus optimisation can be performed on $\tau_g$ alone by repeatedly using the
 scheme presented in \ref{sec:num_int}. Once $\tau_g$ is fully optimised, the other variational parameters can
 be calculated from it as shown in Algorithm \ref{alg:algorithm_two}.
@@ -369,40 +380,50 @@ Hitters
 Major League Baseball Data from the 1986 and 1987 seasons.
 An Introduction to Statistical Learning with Applications in R
 
-\begin{tabular}{llllllllllllllllllll}
+\begin{tabular}{|l|lllllllllllllllllll|}
+	\hline
 	$\vp$ & 0.137 & 0.130 & 0.257 & 0.982 & 0.921 & 0.173 & 0.633 & 0.562 & 0.623 & 0.480 & 0.441 & 0.499 & 0.197 & 0.926 & 0.131 & 0.174 & 0.128 & 0.901 & 0.851 \\
 	$\vq$ & 0.137 & 0.130 & 0.257 & 0.982 & 0.922 & 0.172 & 0.635 & 0.562 & 0.625 & 0.480 & 0.440 & 0.499 & 0.197 & 0.927 & 0.130 & 0.173 & 0.127 & 0.902 & 0.853 \\
+	\hline
 \end{tabular}
 
 Body Fat
 Source: ????
 
-\begin{tabular}{llllllllllllll}
+\begin{tabular}{|l|lllllllllllll|}
+	\hline
 	$\vp$ & 0.938 & 0.136 & 0.182 & 0.072 & 0.071 & 0.108 & 0.147 & 1.000 & 0.134 & 0.141 & 0.323 & 0.619 & 0.221 \\
 	$\vq$ & 0.939 & 0.136 & 0.182 & 0.071 & 0.070 & 0.107 & 0.146 & 1.000 & 0.134 & 0.140 & 0.323 & 0.620 & 0.221 \\
+	\hline
 \end{tabular}
 
 Wage
 An Introduction to Statistical Learning with Applications in R
 
-\begin{tabular}{llllllllllllllllll}
+\begin{tabular}{|l|lllllllllllllllll|}
+	\hline
 	$\vp$ & 1 & 1 & 0.010 & 0.024 & 1 & 0.054 & 0.083 & 0.019 & 0.011 & 0.010 & 0.013 & 0.014 & 0.011 & 0.014 & 0.057 & 0.042 & 0.033 \\
 	$\vq$ & 1 & 1 & 0.010 & 0.024 & 1 & 0.054 & 0.083 & 0.019 & 0.011 & 0.010 & 0.013 & 0.014 & 0.011 & 0.014 & 0.057 & 0.042 & 0.033 \\
+	\hline
 \end{tabular}
 
 Graduation Rate
 An Introduction to Statistical Learning with Applications in R
 
-\begin{tabular}{llllllllllllllllll}
+\begin{tabular}{|l|lllllllllllllllll|}
+	\hline
 	$\vp$ & 0.913 & 1.000 & 0.090 & 0.108 & 0.110 & 0.602 & 0.127 & 0.945 & 0.999 & 0.999 & 0.201 & 0.864 & 0.262 & 0.105 & 0.146 & 0.977 & 0.437 \\
 	$\vq$ & 0.914 & 1.000 & 0.090 & 0.108 & 0.110 & 0.602 & 0.127 & 0.945 & 0.999 & 0.999 & 0.201 & 0.864 & 0.262 & 0.105 & 0.146 & 0.977 & 0.437 \\
+	\hline
 \end{tabular}
 
 US Crime
 
-\begin{tabular}{llllllllllllllll}
+\begin{tabular}{|l|lllllllllllllll|}
+	\hline
 	$\vp$ & 0.226 & 0.849 & 0.997 & 0.216 & 0.502 & 0.244 & 0.358 & 0.569 & 0.324 & 0.202 & 0.424 & 0.696 & 0.869 & 0.229 & 0.655 \\
 	$\vq$ & 0.220 & 0.856 & 0.997 & 0.210 & 0.507 & 0.240 & 0.358 & 0.573 & 0.318 & 0.196 & 0.418 & 0.699 & 0.876 & 0.224 & 0.661 \\
+	\hline
 \end{tabular}
 
 \begin{figure}
