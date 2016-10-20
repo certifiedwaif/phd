@@ -1,17 +1,19 @@
 Package: taug
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Calculate tau_g
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
-Description: More about what it does (maybe more than one line)
+Author: Mark Greenaway
+Maintainer: Mark Greenaway <markg@maths.usyd.edu.au>
+Description: Calculate tau_g
 License: What license is it under?
 LazyData: TRUE
-Imports:
-    Rcpp (>= 0.12.5),
+Imports: Rcpp (>= 0.12.5),
     RcppEigen,
-    RcppGSL
+    RcppGSL,
+    tidyverse,
+    stringr
 LinkingTo: Rcpp,
     RcppEigen,
-    RcppGSL
+    RcppGSL,
+    stringr
 RoxygenNote: 5.0.1
