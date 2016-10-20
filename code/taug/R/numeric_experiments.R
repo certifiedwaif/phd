@@ -35,6 +35,15 @@ compare_covs <- function(n, p, R2, beta_hat_LS, mXTX_inv)
 }
 
 #' @export
+exact_var_g <- function(n, p, R2)
+{
+  G_1 <- E_g_one_plus_g(n, p, R2)
+  G_2 <- E_g_one_plus_g_squared(n, p, R2)
+  exact_var_g <- G_2 - G_1^2
+  return(exact_var_g)
+}
+
+#' @export
 create_param_df <- function()
 {
   #vp <- c(10, 20, 50, 100)
@@ -55,27 +64,36 @@ create_param_df <- function()
 #' @export
 create_approx_exact_df <- function()
 {
-  param_df <- create_param_df()
+  param_df <- create_param_df()# %>% filter(vp == 500 & vn == 1000)
   vp <- param_df$vp
   vn <- param_df$vn
   vR2 <- param_df$vR2
 
-  exact_ints_df <- param_df %>% with(taug::g_ints(vn, vp, vR2)) %>% as.data.frame
+  exact_ints_df <- g_ints(vn, vp, vR2) %>% as.data.frame
 
-  vtau_g <- param_df %>% with(pmap_dbl(list(vn, vp, vR2), tau_g))
-  vlog_p <- param_df %>% with(pmap_dbl(list(vn, vp, vR2), log_p))
+  vtau_g <- pmap_dbl(list(vn, vp, vR2), tau_g)
+  vlog_p <- pmap_dbl(list(vn, vp, vR2), log_p)
   vtau_sigma2 <- (1 - (1 + vtau_g)^(-1) * vR2)^(-1)
   vs <- (0.5 * (vn + vp) * (1 - (1 + vtau_g)^(-1)*vR2))
-  vc <- 0.5 * ((1 + (1 + vtau_g)^(-1))^(-1) * (1 + vtau_g)^(-2) * vn * vR2 + (1 + vtau_g)^(-1) * vp)
+  #vc <- 0.5 * ((1 + (1 + vtau_g)^(-1))^(-1) * (1 + vtau_g)^(-2) * vn * vR2 + (1 + vtau_g)^(-1) * vp)
+  vc <- 0.5 * vn * vR2 / ((1 + vtau_g) * (1 - vR2 + vtau_g)) + 0.5 * vp / (1 + vtau_g)
   det_mXTX <- rep(1, length(vtau_g))
-  det_mSigma <- vtau_sigma2^vp * (1 + vtau_g)^(-vp) / det_mXTX
-  velbo <- param_df %>% with(pmap_dbl(list(vn, vp, vc, vs, vtau_g, det_mXTX, det_mSigma), elbo))
+  log_det_mXTX <- log(det_mXTX)
+  det_mSigma <- log(vtau_sigma2)^vp * (1 + vtau_g)^(-vp) / det_mXTX
+  log_det_mSigma <- vp * log(vtau_sigma2) - vp * log(1 + vtau_g) - log_det_mXTX
+  velbo <- pmap_dbl(list(vn, vp, vc, vs, vtau_g, log_det_mXTX, log_det_mSigma), elbo)
+
+  exact_var_g <- pmap_dbl(list(vn, vp, vR2), exact_var_g)
+  approx_var_g <- pmap_dbl(list(vn, vp, vR2), var_g_over_one_plus_g)
+
   combined_df <- cbind(param_df, exact_ints_df) %>%
                   mutate(vtau_g = vtau_g, vtau_sigma2 = vtau_sigma2) %>%
                   mutate(approx_mean = (1 + vtau_g)^(-1), exact_mean = G_1) %>%
                   mutate(approx_var = vtau_sigma2^(-1) * (1 + vtau_g)^(-1),
                           exact_var = (vn / (vn - 2)) * (G_1 - G_2 * vR2)) %>%
-                  mutate(vlog_p = vlog_p, velbo = velbo)
+                  mutate(vlog_p = vlog_p, velbo = velbo) %>%
+                  mutate(exact_var_g = exact_var_g, approx_var_g = approx_var_g)
+
 
   return(combined_df)
 }
@@ -102,4 +120,52 @@ plot_graphs <- function() {
       geom_line(aes(group=interaction(vn, mean_type), color=vn, linetype=mean_type)) +
       facet_wrap(~vp, labeller=label_fn) +
       xlab("Correlation co-efficient") + ylab("Shrinkage")
+
+  combined_df %>%
+    mutate(vn = factor(vn)) %>%
+    ggplot(aes(x=vR2, y=vlog_p, color=vn)) +
+    geom_line() +
+    facet_wrap(~vp, labeller=label_fn) +
+    xlab("Correlation co-efficient") + ylab("log(p)")
+
+  combined_df %>%
+    mutate(vn = factor(vn)) %>%
+    ggplot(aes(x=vR2, y=velbo, color=vn)) +
+    geom_line() +
+    facet_wrap(~vp, labeller=label_fn) +
+    xlab("Correlation co-efficient") + ylab("ELBO")
+
+  combined_df %>%
+    mutate(vn = factor(vn)) %>%
+    ggplot(aes(x=vR2, y=vlog_p / velbo, color=vn)) +
+    geom_line() +
+    facet_wrap(~vp, labeller=label_fn) +
+    xlab("Correlation co-efficient") + ylab("log(p) / ELBO")
+
+  combined_df %>%
+    mutate(vn = factor(vn)) %>%
+    ggplot(aes(x=vR2, y=exact_var_g, color=vn)) +
+    geom_line() +
+    facet_wrap(~vp, labeller=label_fn) +
+    xlab("Correlation co-efficient") + ylab("exact_var_g")
+
+  combined_df %>%
+    mutate(vn = factor(vn)) %>%
+    ggplot(aes(x=vR2, y=approx_var_g, color=vn)) +
+    geom_line() +
+    facet_wrap(~vp, labeller=label_fn) +
+    xlab("Correlation co-efficient") + ylab("approx_var_g")
+}
+
+plot_vw1_vw2 <- function() {
+  bodyfat_vw1 <- read.csv(file = "bodyfat_vw1.csv", header=FALSE)
+  GradRate_vw1 <- read.csv(file = "GradRate_vw1.csv", header=FALSE)
+  Hitters_vw1 <- read.csv(file = "Hitters_vw1.csv", header=FALSE)
+  USCrime_vw1 <- read.csv(file = "USCrime_vw1.csv", header=FALSE)
+  Wage_vw1 <- read.csv(file = "Wage_vw1.csv", header=FALSE)
+  bodyfat_vw2 <- read.csv(file = "bodyfat_vw2.csv", header=FALSE)
+  GradRate_vw2 <- read.csv(file = "GradRate_vw2.csv", header=FALSE)
+  Hitters_vw2 <- read.csv(file = "Hitters_vw2.csv", header=FALSE)
+  USCrime_vw2 <- read.csv(file = "USCrime_vw2.csv", header=FALSE)
+  Wage_vw2 <- read.csv(file = "Wage_vw2.csv", header=FALSE)
 }
