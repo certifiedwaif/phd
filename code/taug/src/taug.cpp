@@ -197,9 +197,9 @@ double moment_g_FullyExponentialLaplace(double m,double A,double B,double C)
 
 
 // Approximate the mth moment of h using the Fully-Exponential-Laplace method
-double moment_h_FullyExponentialLaplace(double m,double U,double B,double C)
+double moment_h_FullyExponentialLaplace(double m1, double m2, double U,double B,double C)
 {
-	auto val1 = log_Z_h_Laplace(U+m,B,C);
+	auto val1 = log_Z_h_Laplace(U+m1,B+m2,C);
 	auto val2 = log_Z_h_Laplace(U,B,C);
 	// Rcout << "val1 " << val1 << " val2 " << val2 << std::endl;
 	return exp(val1 - val2);
@@ -461,7 +461,7 @@ double tau_g_FullyExponentialLaplace(double a, int n, int p, double R2, uint ITE
 	for (uint i = 0; i < ITER; i++) {
 		double C = 0.5*n*R2/((1. + tau)*(1. - R2 + tau)) + 0.5*p/(1. + tau);
 		// #cat(i,tau,C,"\n")
-		tau = moment_h_FullyExponentialLaplace(1,U,B,C);
+		tau = moment_h_FullyExponentialLaplace(1., 0.,U,B,C);
 		//  #cat(i,tau,C,"\n")
 		// Rcout << "Iteration " << i << " C " << C << " tau " << tau << std::endl;
 		if (isnan(tau) || fabs(tau) == 0.0) {
@@ -473,6 +473,52 @@ double tau_g_FullyExponentialLaplace(double a, int n, int p, double R2, uint ITE
 	}
 
 	return tau;
+}
+
+
+//' Variance of g over one plug g under q
+//' @param n The number of observations
+//' @param p The number of covariates
+//' @param R2 The correlation co-efficient, squared
+//' @return The variance of g/(1+g) under q
+//' @export
+// [[Rcpp::export]]
+double var_g_over_one_plus_g(int n, int p, double R2)
+{
+	auto ITER = 20;
+	auto a = -0.75;
+	double tau = tau_g_Laplace(a,n,p,R2);
+	// Rcout << "Initial value of tau " << tau << std::endl;
+
+	double b = (n-p)/2. - a - 2.;
+	double A = b - p/2.;
+	double B = -(n-p)/2.;
+
+	double U =  -(A+B+2.);
+
+	double E_g_over_one_plus_g;
+	double E_g_over_one_plus_g_2;
+
+	for (uint i = 0; i < ITER; i++) {
+		double C = 0.5*n*R2/((1. + tau)*(1. - R2 + tau)) + 0.5*p/(1. + tau);
+		tau = moment_h_FullyExponentialLaplace(1.,0.,U,B,C);
+		E_g_over_one_plus_g = moment_h_FullyExponentialLaplace(0.,1.,U,B,C);
+		E_g_over_one_plus_g_2 = moment_h_FullyExponentialLaplace(0.,2.,U,B,C);
+		// Rcout << "var_g_over_one_plus_g:";
+		// Rcout << " tau " << tau;
+		// Rcout << " E_g_over_one_plus_g " << E_g_over_one_plus_g;
+		// Rcout << " E_g_over_one_plus_g_2 " << E_g_over_one_plus_g_2 << std::endl;
+
+		// Rcout << "Iteration " << i << " C " << C << " tau " << tau << std::endl;
+		if (isnan(tau) || fabs(tau) == 0.0) {
+			// Rcout << "In NAN branch, using plug-in estimate: tau ";
+			tau = tau_plugin(a,n,p,R2);
+			// Rcout << tau << std::endl;
+			break;
+		}
+	}
+
+	return (E_g_over_one_plus_g_2 - E_g_over_one_plus_g * E_g_over_one_plus_g);
 }
 
 
