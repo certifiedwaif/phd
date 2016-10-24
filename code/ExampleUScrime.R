@@ -664,3 +664,27 @@ ord <- order(vp,decreasing=TRUE)
 # Print the table for the top 20 models
 print( tab[ord[1:20],] ) 
 
+if (SETTING == 1) {
+	write.table(vw1, file = "Hitters_vw1.csv", col.names=FALSE, row.names = FALSE, sep=",")
+	write.table(vw2, file = "Hitters_vw2.csv", col.names=FALSE, row.names = FALSE, sep=",")
+}
+
+if (SETTING == 2) {
+	write.table(vw1, file = "bodyfat_vw1.csv", col.names=FALSE, row.names = FALSE, sep=",")
+	write.table(vw2, file = "bodyfat_vw2.csv", col.names=FALSE, row.names = FALSE, sep=",")
+}
+
+if (SETTING == 3) {
+	write.table(vw1, file = "Wage_vw1.csv", col.names=FALSE, row.names = FALSE, sep=",")
+	write.table(vw2, file = "Wage_vw2.csv", col.names=FALSE, row.names = FALSE, sep=",")
+}
+
+if (SETTING == 4) {
+	write.table(vw1, file = "GradRate_vw1.csv", col.names=FALSE, row.names = FALSE, sep=",")
+	write.table(vw2, file = "GradRate_vw2.csv", col.names=FALSE, row.names = FALSE, sep=",")
+}
+
+if (SETTING == 5) {
+	write.table(vw1, file = "USCrime_vw1.csv", col.names=FALSE, row.names = FALSE, sep=",")
+	write.table(vw2, file = "USCrime_vw2.csv", col.names=FALSE, row.names = FALSE, sep=",")
+}
