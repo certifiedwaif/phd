@@ -679,7 +679,6 @@ ord <- order(vp,decreasing=TRUE)
 # Print the table for the top 20 models
 print( tab[ord[1:20],] ) 
 
-
 if (SETTING == 1) {
 	write.table(vw1, file = "Hitters_vw1.csv", col.names=FALSE, row.names = FALSE, sep=",")
 	write.table(vw2, file = "Hitters_vw2.csv", col.names=FALSE, row.names = FALSE, sep=",")
