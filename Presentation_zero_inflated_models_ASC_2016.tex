@@ -90,39 +90,42 @@
 \end{frame}
 
 \begin{frame}
-
+	\frametitle{Graphical models}
 	\begin{figure}
-		\caption{Univariate graphical model}
-		\begin{tikzpicture}
-			\node[draw, circle, double] (y) {$\vy$};
-			\node[draw, circle, below left of=y] (x) {$\vx$};
-			\node[draw, circle, below of=x] (lambda) {$\lambda$};
-			\node[draw, circle, below right of=y] (r) {$\vr$};
-			\node[draw, circle, below of=r] (rho) {$\rho$};
-			\draw[<-] (y) -- (x);
-			\draw[<-] (x) -- (lambda);
-			\draw[<-] (y) -- (r);
-			\draw[<-] (r) -- (rho);
-		\end{tikzpicture}
+		\centering
+		\begin{subfigure}[t]{0.4 \textwidth}
+			\centering
+			\begin{tikzpicture}
+				\node[draw, circle, double] (y) {$\vy$};
+				\node[draw, circle, below left of=y] (x) {$\vx$};
+				\node[draw, circle, below of=x] (lambda) {$\lambda$};
+				\node[draw, circle, below right of=y] (r) {$\vr$};
+				\node[draw, circle, below of=r] (rho) {$\rho$};
+				\draw[<-] (y) -- (x);
+				\draw[<-] (x) -- (lambda);
+				\draw[<-] (y) -- (r);
+				\draw[<-] (r) -- (rho);
+			\end{tikzpicture}
+			\caption{Univariate graphical model}
+		\end{subfigure}
+		\begin{subfigure}[t]{0.4 \textwidth}
+			\centering
+			\begin{tikzpicture}
+				\node[draw, circle, double] (y) {$\vy$};
+				\node[draw, circle, below left of=y] (beta) {$\vbeta$};
+				\node[draw, circle, below of=y] (u) {$\vu$};
+				\node[draw, circle, below right of=y] (r) {$\vr$};
+				\node[draw, circle, below of=u] (sigma2) {$\sigma^2$};
+				\node[draw, circle, below of=r] (rho) {$\rho$};
+				\draw[<-] (y) -- (beta);
+				\draw[<-] (y) -- (u);
+				\draw[<-] (y) -- (r);
+				\draw[<-] (u) -- (sigma2);
+				\draw[<-] (r) -- (rho);
+			\end{tikzpicture}
+			\caption{Multivariate graphical model}
+		\end{subfigure}
 	\end{figure}
-
-	\begin{figure}
-		\caption{Multivariate graphical model}
-		\begin{tikzpicture}
-			\node[draw, circle, double] (y) {$\vy$};
-			\node[draw, circle, below left of=y] (beta) {$\vbeta$};
-			\node[draw, circle, below of=y] (u) {$\vu$};
-			\node[draw, circle, below right of=y] (r) {$\vr$};
-			\node[draw, circle, below of=u] (sigma2) {$\sigma^2$};
-			\node[draw, circle, below of=r] (rho) {$\rho$};
-			\draw[<-] (y) -- (beta);
-			\draw[<-] (y) -- (u);
-			\draw[<-] (y) -- (r);
-			\draw[<-] (u) -- (sigma2);
-			\draw[<-] (r) -- (rho);
-		\end{tikzpicture}
-	\end{figure}
-
 
 \end{frame}
 
@@ -385,22 +388,20 @@
 \begin{frame}
 	\frametitle{Optimising the Gaussian Variational Approximation}
 	The true likelihood $\log p(\vbeta, \vu, \mLambda)$ is hard to optimise due 
-	to the high dimensional integral involved, but the variational lower bound $\log \underline{p}(\vmu, \mLambda)$ can be optimised.
+	to the high dimensional integral involved:
 	\begin{align*}
 		\log p(\vbeta, \vu, \mLambda)      & = \vy^\top \mR \mC \vnu + \vone^\top c(\vy) + \frac{m}{2} \log |\mLambda| - \frac{mK}{2} \log{(2 \pi)}                           \\
 		                                   & \quad + \log  \int_{\mathbb{R}^{m}} \exp \big[ \vy^\top (\mR \mZ \vu - \mR^\top b( \mX \vbeta + \mZ \vu))                        \\
-		                                   & \quad \quad \quad \quad \quad \quad \quad - \half {\vu^\top \mLambda^{-1} \vu } \big] d \vu + \text{const.}                   \\
+		                                   & \quad \quad \quad \quad \quad \quad \quad - \half {\vu^\top \mLambda^{-1} \vu } \big] d \vu + \text{const.}
     \end{align*}
-
-    where $b(x) = e^x$ and $c(x) = \log \Gamma(x + 1)$.
-
+    where $b(x) = e^x$ and $c(x) = \log \Gamma(x + 1)$. But the variational lower bound $\log
+    \underline{p}(\vmu, \mLambda)$ can be optimised, using quasi-Newton Raphson style algorithms.
     \begin{align*}		                                   
 		\log \underline{p}(\vmu, \mLambda) & = \vy^\top \mR \mC \vmu - \vp^\top \exp{\left(\mC \vmu + \half \diag{(\mC \mLambda \mC^\top)}\right)}                               \\
-		                                   & \quad - \vmu^\top \mSigma^{-1} \vmu - \half \tr{(\mLambda \mSigma^{-1})} + \half \log{|\mSigma^{-1}\mLambda|} + \text{const.} \\
+		                                   & \quad - \vmu^\top \mSigma^{-1} \vmu - \half \tr{(\mLambda \mSigma^{-1})} + \half \log{|\mSigma^{-1}\mLambda|} + \text{const.}
 		%&= \mR\mC^T(\vy - B^{(1)}(\vmu, \sigma^2_u)) \\
 		%& \quad - \vmu^T \mSigma^{-1} \vmu - \half \tr{(\mLambda \mSigma^{-1})} + \half \log{|\mSigma^{-1}\mLambda|} + \text{const.} \\
 	\end{align*}
-	%\end{align*}
 	where $\vnu = (\vbeta, \vu)^\top$ and $\mC = [\mX, \mZ]$.
 \end{frame}
 
@@ -412,7 +413,6 @@
 	There are several alternative algorithms we've implemented or will implement
 	to fit this model, which all work by optimising the variational lower bound with respect to
 	$\vmu$ and $\mLambda$:
-	
 	% Point out the advantages of each
 	% \begin{enumerate}
 	% 	\item Optimise variational lower bound with L-BFGS, $\mLambda = \mR \mR^T$.\\
@@ -438,48 +438,63 @@
 \end{frame}
 
 \begin{frame}
-\frametitle{Covariance structures}
-
-	\begin{figure}
-		\begin{subfigure}{0.4\textwidth}
-			\includegraphics[scale=.25]{mX_mZ.pdf}
-			\caption{Covariance matrix -- Fixed effects before random effects}
-		\end{subfigure}
-		%
-		\begin{subfigure}{0.4\textwidth}
-			\includegraphics[scale=.25]{mZ_mX.pdf}
-			\caption{Covariance matrix -- Random effects before fixed effects}
-		\end{subfigure}
-	\end{figure}
+	\frametitle{Cholesky factors of $\mLambda$}
+	\begin{itemize}
+			\item Any symmetric matrix $\mSigma$ can be written $\mSigma = \mR \mR^\top$
+			where $\mR$ is lower triangular. $\mR$ is unique if $\mR_{ii} \geq 0$.
+			
+			\begin{align*}
+				&\begin{pmatrix}
+				\mR_{11}          & 0                                    & 0                                     \\
+				\mR_{21}          & \mR_{22}                             & 0                                     \\
+				\mR_{31}          & \mR_{32}                             & \mR_{33}                              
+				\end{pmatrix}
+				\begin{pmatrix}
+				\mR_{11}          & \mR_{21}                             & \mR_{31}                              \\
+				0                 & \mR_{22}                             & \mR_{32}                              \\
+				0                 & 0                                    & \mR_{33}                              
+				\end{pmatrix}
+				\\
+				=& \begin{pmatrix}
+				\mR_{11}^2        &                                      & \text{symmetric}                      \\
+				\mR_{21}\mR_{11} & \mR_{21}^2 + \mR_{22}^2 \\
+				\mR_{31} \mR_{11} & \mR_{31}\mR_{21} + \mR_{32} \mR_{22} & \mR_{31}^2 + \mR_{32} ^2 + \mR_{33}^2 
+				\end{pmatrix}.
+			\end{align*}
+			
+			\item We parameterise $\mLambda$ in this was, so that we only have $\frac{p(p-1)}{2}$ numbers to deal with 						instead of $p^2$ numbers.
+			\item Note that the lower rows of the product depend on the higher rows of the Cholesky factor. We can
+						exploit this fact.
+		\end{itemize}	
 \end{frame}
 
 \begin{frame}
-	\frametitle{Cholesky factors}
-	Any symmetric matrix $\mSigma$ can be written $\mSigma = \mR \mR^T$
-	where $\mR$ is lower triangular. $\mR$ is unique if $\mR_{ii} \geq 0$.
-	
-	\begin{align*}
-		&\begin{pmatrix}
-		\mR_{11}          & 0                                    & 0                                     \\
-		\mR_{21}          & \mR_{22}                             & 0                                     \\
-		\mR_{31}          & \mR_{32}                             & \mR_{33}                              
-		\end{pmatrix}
-		\begin{pmatrix}
-		\mR_{11}          & \mR_{21}                             & \mR_{31}                              \\
-		0                 & \mR_{22}                             & \mR_{32}                              \\
-		0                 & 0                                    & \mR_{33}                              
-		\end{pmatrix}
-		\\
-		=& \begin{pmatrix}
-		\mR_{11}^2        &                                      & \text{symmetric}                      \\
-		\mR_{21}\mR_{11} & \mR_{21}^2 + \mR_{22}^2 \\
-		\mR_{31} \mR_{11} & \mR_{31}\mR_{21} + \mR_{32} \mR_{22} & \mR_{31}^2 + \mR_{32} ^2 + \mR_{33}^2 
-		\end{pmatrix}.
-	\end{align*}
-	
-	So we only have $\frac{p(p-1)}{2}$ numbers to deal with instead of
-	$p^2$ numbers.
-	
+\frametitle{Structure of $\mLambda$}
+	\begin{itemize}
+		\item By re-ordering the fixed and random effects in $\mLambda$, we end up with a covariance structure
+					which is sparse in the first diagonal block.
+				\begin{figure}
+						\begin{subfigure}{0.4\textwidth}
+							\includegraphics[scale=.15]{mX_mZ_mLambda.pdf}
+							\caption{\tiny Covariance matrix -- Fixed effects before random effects}
+						\end{subfigure}
+						%
+						\begin{subfigure}{0.4\textwidth}
+							\includegraphics[scale=.15]{mZ_mX_mLambda.pdf}
+							\caption{\tiny Covariance matrix -- Random effects before fixed effects}
+						\end{subfigure}
+
+						\begin{subfigure}{0.4\textwidth}
+							\includegraphics[scale=.15]{mX_mZ_cholesky.pdf}
+							\caption{\tiny Cholesky factor -- Fixed effects before random effects}
+						\end{subfigure}
+						%
+						\begin{subfigure}{0.4\textwidth}
+							\includegraphics[scale=.15]{mZ_mX_cholesky.pdf}
+							\caption{\tiny Cholesky factor -- Random effects before fixed effects}
+						\end{subfigure}
+					\end{figure}
+	\end{itemize}
 \end{frame}
 
 \begin{frame}
@@ -505,56 +520,36 @@
 	
 	As the $\sigma_{\vu^2}$ block is diagonal, the Cholesky factor is 
 	sparse, with $\half m(m-1)$ zero elements. If $p$ is small
-	and $m$ is large, as will typically be the case, then this algorithm will
-	be much faster.
+	and $m$ is large, as will typically be the case, then dimension of the parameter space of our optimisation
+	problem will be much less.
 \end{frame}
 
 \begin{frame}
 	\frametitle{L-BFGS-B}
 	\begin{itemize}
-		\item gradient and Hessian establish the direction of line search.
-		\item line search to find the best point in that direction.
-		\item approximate a smooth convex function locally with a quadratic form i.e. Taylor expand around the current point twice.
+		\item Approximate a smooth convex function locally with a quadratic form i.e. Taylor expand around the current point twice.
 			\[
-				m_k(\vp) = f(\vx_k) + \Delta f(\vx_k)^\top \vp + \half \vp^\top \mB \vp
+				m_k(\vp) = f(\vx_k) + \nabla f(\vx_k)^\top \vp + \half \vp^\top \mB \vp
 			\]
-		\item if your function is numerically unstable and can't be evaluated at one of these points, it's game over. You
-		      have to work backwards to find the point at which the optimisation began to go wrong, attempt to fix the issue
-		      and try again.
+		\item \begin{enumerate}
+				\item Gradient and Hessian establish the direction of line search.
+				\item Line search to find the best point in that direction.
+		\end{enumerate}
+		\item We used \texttt{optim} in base R, which tries lots of points alone the line, including some extreme 
+					ones.
+		\item The parameterisation of the variational lower bound that we chose proved to be unstable in some 
+					regions. Much effort went into mitigating this.
 	\end{itemize}
-\end{frame}
-
-\begin{frame}
-	\frametitle{Results/Accuracy}
-	% Definition of accuracy
-	One measure of accuracy is defined as 1 minus half the difference in $L_1$ norm between the
-	true posterior distribution and the approximate posterior distribution of the
-	variational approximation.
-	
-	$$
-	\text{Accuracy} = 1 - \half \int \left |p(\vtheta|\vy) - q(\vtheta) \right | d \vtheta
-	$$
-	
-	This was calculated using the kernel density estimate of the posterior
-	distribution from MCMC minus the approximating distribution for each parameter of
-	interest.
-	
 \end{frame}
 
 \begin{frame}
 	\frametitle{Accuracy results using MCMC}
 	\begin{itemize}
-		\item Accuracy verified using 1 million MCMC iterations from Stan.
-		\item Stan converts your model specification into C++ code.
-		\item A one million iteration run for this model took over 32 CPU days.
-		\item Stan can be parallelised across multiple cores.
-		\item Pro tips:
-		      \begin{itemize}
-		      	\item Check your computer has enough RAM.
-		      	\item Run longrunning tasks with R -f script.R and nohup.
-		      	\item Run them on the biggest, fastest server you can find. verona's pretty good.
-		      	\item Checkpoint every few thousand iterations.
-		      \end{itemize}
+		\item	We measure the accuracy using
+					$$\text{Accuracy} = 1 - \half \int \left |p(\vtheta|\vy) - q(\vtheta) \right | d \vtheta.$$
+		\item	$p(\vtheta|\vy)$ was estimated using the kernel density estimate of the posterior
+					distribution from MCMC.
+		\item MCMC using 1 million iterations from Stan, which took over took over 32 CPU days.
 		\item The need for approximate methods is obvious, this is simply not
 		      practical for many types of applied work.
 	\end{itemize}
@@ -565,7 +560,7 @@
 	\begin{tabular}{|c|cccc|}
 		\hline
 		               & Laplacian & GVA                    & GVA                         & GVA NR \\
-		               &           & $(\mLambda=\mR \mR^T)$ & $[\mLambda=(\mR \mR)^{-1}]$ &        \\
+		               &           & $(\mLambda=\mR \mR^\top)$ & $[\mLambda=(\mR \mR)^{-1}]$ &        \\
 		\hline
 		$\vbeta_1$     & 0.95      & 0.95                   & 0.95                        & 0.95   \\
 		$\vbeta_2$     & 0.81      & 0.90                   & 0.85                        & 0.90   \\
@@ -619,11 +614,12 @@
 \end{frame}
 
 \begin{frame}{R package}
-	
-	\texttt{zipvb}
-	
-	up on GitHub
-	
+	\begin{itemize}
+		\item I'm intending to release the \texttt{zipvb} on GitHub when it's ready.
+		\item Interface modelled on \texttt{lme4}.
+		\item Currently, random intercepts and random slopes are supported.
+		\item Splines are also supported.
+	\end{itemize}	
 \end{frame}
 
 \begin{frame}
