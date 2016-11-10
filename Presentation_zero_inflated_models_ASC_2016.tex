@@ -29,7 +29,7 @@
 	Zero inflated data arises in many areas of application, such as physical
 	activity data, number of hospital vipsits per year per person and
 	number of insurance claims per year per person.
-	
+			
 	\bigskip 
 	We will work with zero-inflated count data. I encountered this sort of data 
 	while analysing physical activity data arising from the Get Healthy project.
@@ -47,12 +47,12 @@
 8 0
 	\end{verbatim}
 	%Take, for example, $\rho = \frac{1}{2}, \lambda = 5$.
-	
+			
 	\noindent Note that $n=50$, 
 	$n\times P(Z = 0) \approx 3.8$ for $Z\sim\mbox{Poisson}(\overline{X})$
 	and we have observed 21 zeros. Hence,
 	a Poisson model is not suitable.
-	
+			
 	% Histogram
 	\begin{figure}
 		% \includegraphics[width=50mm, height=50mm]{code/results/univariate_data_histogram.pdf}
@@ -66,31 +66,51 @@
 
 % 3. Univariate model
 \begin{frame}
-	\frametitle{Univariate model formulation}
-	
-	We start by building a relatively simple zero-inflated count model. Suppose that we observe
-	$$
-	X_i = R_i Y_i, \quad 1\le i\le n,
-	$$
-	
-	\noindent where for $1\le i\le n$,
-	\begin{align*} 
-		R_i & \sim \text{Bernoulli}(\rho) \text{ and} \\
-		Y_i & \sim \text{Poisson}(\lambda)            
-	\end{align*}
-	
-	\noindent for parameters $\rho$ and $\lambda$,
-	but we do not observe $R_i$ or $Y_i$ themselves.
-	Being Bayesians we use the priors:
-	\begin{align*} 
-		\rho    & \sim \text{Beta}(a_\rho, b_\rho)         \\
-		\lambda & \sim \text{Gamma}(a_\lambda, b_\lambda). 
-	\end{align*}
-	
+	\frametitle{Latent variable formulation of zero--inflated model}
+			
+	\begin{columns}
+		\begin{column}{0.8 \textwidth}
+							
+			Suppose that we observe
+			$$
+			Y_i = R_i X_i, \quad 1\le i\le n,
+			$$
+							
+			\noindent where for $1\le i\le n$,
+			\begin{align*} 
+				R_i & \sim \text{Bernoulli}(\rho) \text{ and} \\
+				X_i & \sim \text{Poisson}(\lambda)            
+			\end{align*}
+							
+			\noindent for parameters $\rho$ and $\lambda$,
+			We use the priors:
+			\begin{align*} 
+				\rho    & \sim \text{Beta}(a_\rho, b_\rho)         \\
+				\lambda & \sim \text{Gamma}(a_\lambda, b_\lambda). 
+			\end{align*}
+		\end{column}
+				
+		\begin{column}{0.2 \textwidth}
+			\begin{figure}
+				\begin{tikzpicture}
+					\node[draw, circle, double] (y) {$\vy$};
+					\node[draw, circle, below left of=y] (x) {$\vx$};
+					\node[draw, circle, below of=x] (lambda) {$\lambda$};
+					\node[draw, circle, below right of=y] (r) {$\vr$};
+					\node[draw, circle, below of=r] (rho) {$\rho$};
+					\draw[<-] (y) -- (x);
+					\draw[<-] (x) -- (lambda);
+					\draw[<-] (y) -- (r);
+					\draw[<-] (r) -- (rho);
+				\end{tikzpicture}
+				\caption{Latent variable formulation of zero--inflated model}
+			\end{figure}
+		\end{column}
+	\end{columns}
 \end{frame}
 
 \begin{frame}
-	\frametitle{Graphical models}
+	\frametitle{Extending to a multivariate mixed effects model}
 	\begin{figure}
 		\centering
 		\begin{subfigure}[t]{0.4 \textwidth}
@@ -106,7 +126,7 @@
 				\draw[<-] (y) -- (r);
 				\draw[<-] (r) -- (rho);
 			\end{tikzpicture}
-			\caption{Univariate graphical model}
+			\caption{Latent variable formulation of zero--inflated model}
 		\end{subfigure}
 		\begin{subfigure}[t]{0.4 \textwidth}
 			\centering
@@ -123,11 +143,97 @@
 				\draw[<-] (u) -- (sigma2);
 				\draw[<-] (r) -- (rho);
 			\end{tikzpicture}
-			\caption{Multivariate graphical model}
+			\caption{Mixed model extension of zero--inflated model}
 		\end{subfigure}
 	\end{figure}
-
+		
 \end{frame}
+
+% 9. Extension to linear model
+% 10. Overview GVA
+% 11. Algorithm
+% 12. Results?
+% 13. What next
+% 14. Conclusion
+% 15. References
+% \begin{frame}
+% 	\frametitle{Extension to multivariate/regression models}
+% 	\begin{itemize}
+% 		\item Univariate models are a nice proof of concept.
+% 		\item Most applied statisticians want to build regression models.
+% 		\item Applied statisticians love mixed models.
+% 		\item There is a need for better approaches to fitting zero-inflated mixed models.
+% 		\item For example, MCMC with existing software can take minutes to hours 
+% 		      to converge, or not converge at all.
+% 		\item Not practical for many applications.
+% 	\end{itemize}
+% \end{frame}
+
+
+
+% \begin{frame}
+% 	\frametitle{Linear mixed model set-up}
+% 	% Let $\vone$ be a vector of $1$s, and $\vone_n$ be a vector of $1$s of
+% 	% length $n$.
+	
+% 	% TODO: Where are the prior specifications. Is this entirely accurate? What about for the random
+% 	% slopes model?
+		
+% 	Consider a linear random intercept model with
+% 	$$
+% 	\begin{array}{ll}
+% 		\vy|\vbeta,\vu,\sigma_y^2 & \sim \N(\mX \vbeta + \mZ \vu, \sigma_\vy^2 \mI)  \\[2ex]
+% 		\vbeta                    & \sim \N(\vzero, \sigma_\vbeta^2 \mI) \text{ and} \\[2ex]
+% 		\vu|\sigma_{\vu}^2        & \sim \N(\vzero, \sigma_{\vu}^2 \mI).             
+% 	\end{array}
+% 	$$
+% 	\noindent where
+% 	$$
+% 	\begin{array}{rll}
+% 		            & \vy    & =                                 
+% 		\begin{pmatrix}
+% 		y_1 \\
+% 		\vdots \\
+% 		y_n
+% 		\end{pmatrix}, \\[2ex]
+% 		            & \mX    & = [\vone_n, \vx_1, \cdots, \vx_p] \\
+% 		            & \mZ    & =                                 
+% 		\begin{bmatrix}
+% 		\vone_{n_1} &        &                                   \\
+% 		            & \ddots &                                   \\
+% 		            &        & \vone_{n_m}                       
+% 		\end{bmatrix} \\
+% 		\text{and}  & \mC    & = [\mX, \mZ].                     
+% 	\end{array}
+% 	$$
+% \end{frame}
+
+
+
+\begin{frame}
+	\frametitle{Multivariate model formulation}
+	We use a zero-inflated Poisson random effects model.
+			
+	\medskip
+			
+	Suppose that we observe a vector of responses $\vy$ of length n, and matrices
+	of covariates $\mX$ and $\mZ$ of dimensions $n \times p$ and $n \times m$,
+	respectively.
+			
+	\begin{align*}
+		p(\vy|\vbeta, \vu, \vr)       & = \exp{\left[\vy^\top \mR(\mX \vbeta + \mZ \vu) - \vr^\top e^{\mX \vbeta + \mZ \vu} - \vone^\top \log{(\vy !)}\right]}, \\
+		\vr_i|\rho                    & \stackrel{\mbox{\tiny iid}}{\sim} \text{Bernoulli}(\rho), \ \{i \colon \vy_i=0\},                                       \\
+		\text{and }\vu|\sigma_{\vu}^2 & \sim \N({\bf 0}, \sigma_{\vu}^2 \mI)                                                                                    \\
+	\end{align*}
+	\noindent where $\mR =\mbox{diag}(\vr)$.
+	We use the priors:
+	\begin{align*}
+		\vbeta          & \sim \text{N}({\bf 0}, \sigma_\vbeta^2\mI),                  \\
+		\sigma_\vu^2    & \sim \text{IG}(\alpha_{\sigma_\vu^2}, \beta_{\sigma_\vu^2}), \\
+		\text{and }\rho & \sim \text{Beta}(a_\rho, b_\rho)                             \\
+	\end{align*}
+\end{frame}
+
 
 % 5. How to fit, and advantages and disadvantages of each approach
 % - Maximum likelihood
@@ -150,7 +256,7 @@
 		                  & Still quite accurate                                            &                                              \\
 		\hline
 	\end{tabular}
-	
+			
 \end{frame}
 
 % 6. Overview of Variational Bayes
@@ -158,18 +264,18 @@
 	\frametitle{An overview of Variational Bayes}
 	\begin{itemize}
 		\item \emph{Idea:} Approximate the full posterior $p(\theta|\vy)$ with a simpler approximation $q(\vtheta)$.
-		      
+		      		      		      
 		\item Fit $q(\vtheta)$ to the data by minimising the KL divergence between $p(\vtheta|\vy)$ and $q(\vtheta)$.
-		      
+		      		      		      
 		\item Theory guarantees that $\log p(\vy)\ge 
 		      \log \underline{p}(\vy;q)$ and that 
 		      $$
 		      \log \underline{p}(x;q) = \int q(\vtheta) \left\{ \frac{p(\vy,\vtheta)}{q(\vtheta)} \right\} d \vtheta
 		      $$ 
-		      
+		      		      		      
 		      \noindent will
 		      increase with each iteration.
-		      
+		      		      		      
 		\item If you use conjugate priors, a factored approximation can be used, and mean field updates can be used on
 		      each parameter in turn until convergence is reached.
 	\end{itemize}
@@ -180,96 +286,12 @@
 	% - Algorithm
 	We iteratively update the parameters of each approximate distribution
 	in turn until the lower bound of the approximation converges.
-	
+			
 	\bigskip 
 	This could be thought of as a generalisation of Expectation Maximisation, where each parameter is thought of as a latent
 	variable and estimated according to the expectations of the other parameters.
 \end{frame}
 
-% 9. Extension to linear model
-% 10. Overview GVA
-% 11. Algorithm
-% 12. Results?
-% 13. What next
-% 14. Conclusion
-% 15. References
-\begin{frame}
-	\frametitle{Extension to multivariate/regression models}
-	\begin{itemize}
-		\item Univariate models are a nice proof of concept.
-		\item Most applied statisticians want to build regression models.
-		\item Applied statisticians love mixed models.
-		\item There is a need for better approaches to fitting zero-inflated mixed models.
-		\item For example, MCMC with existing software can take minutes to hours 
-		      to converge, or not converge at all.
-		\item Not practical for many applications.
-	\end{itemize}
-\end{frame}
-
-
-
-\begin{frame}
-	\frametitle{Linear mixed model set-up}
-	% Let $\vone$ be a vector of $1$s, and $\vone_n$ be a vector of $1$s of
-	% length $n$.
-
-	% TODO: Where are the prior specifications. Is this entirely accurate? What about for the random
-	% slopes model?
-	
-	Consider a linear random intercept model with
-	$$
-	\begin{array}{ll}
-		\vy|\vbeta,\vu,\sigma_y^2 & \sim \N(\mX \vbeta + \mZ \vu, \sigma_\vy^2 \mI)  \\[2ex]
-		\vbeta                    & \sim \N(\vzero, \sigma_\vbeta^2 \mI) \text{ and} \\[2ex]
-		\vu|\sigma_{\vu}^2        & \sim \N(\vzero, \sigma_{\vu}^2 \mI).             
-	\end{array}
-	$$
-	\noindent where
-	$$
-	\begin{array}{rll}
-		            & \vy    & =                                 
-		\begin{pmatrix}
-		y_1 \\
-		\vdots \\
-		y_n
-		\end{pmatrix}, \\[2ex]
-		            & \mX    & = [\vone_n, \vx_1, \cdots, \vx_p] \\
-		            & \mZ    & =                                 
-		\begin{bmatrix}
-		\vone_{n_1} &        &                                   \\
-		            & \ddots &                                   \\
-		            &        & \vone_{n_m}                       
-		\end{bmatrix} \\
-		\text{and}  & \mC    & = [\mX, \mZ].                     
-	\end{array}
-	$$
-\end{frame}
-
-
-
-\begin{frame}
-	\frametitle{Multivariate model formulation}
-	We use a zero-inflated Poisson random effects model.
-	
-	\medskip
-	
-	Suppose that we observe a vector of responses $\vy$ of length n, and matrices
-	of covariates $\mX$ and $\mZ$ of dimensions $n \times p$ and $n \times m$,
-	respectively.
-	
-	\begin{align*}
-		p(\vy|\vbeta, \vu, \vr)       & = \exp{\left[\vy^\top \mR(\mX \vbeta + \mZ \vu) - \vr^\top e^{\mX \vbeta + \mZ \vu} - \vone^\top \log{(\vy !)}\right]}, \\
-		\vr_i|\rho                    & \stackrel{\mbox{\tiny iid}}{\sim} \text{Bernoulli}(\rho), \ \{i \colon \vy_i=0\},                \\
-		\text{and }\vu|\sigma_{\vu}^2 & \sim \N({\bf 0}, \sigma_{\vu}^2 \mI)                                                             \\
-	\end{align*}
-	\noindent where $\mR =\mbox{diag}(\vr)$.
-	We use the priors:
-	\begin{align*}
-		\vbeta          & \sim \text{N}({\bf 0}, \sigma_\vbeta^2\mI),                  \\
-		\sigma_\vu^2    & \sim \text{IG}(\alpha_{\sigma_\vu^2}, \beta_{\sigma_\vu^2}), \\
-		\text{and }\rho & \sim \text{Beta}(a_\rho, b_\rho)                             \\
-	\end{align*}
-\end{frame}
 
 \begin{frame}
 	\frametitle{Form of the multivariate approximation}
@@ -314,7 +336,7 @@
 	\begin{align*}
 		q(\vbeta, \vu)    & = \N(\vmu, \mLambda),                                                                                                                                                                                 \\
 		q(\sigma_{\vu}^2) & = \IG\left(\alpha_{q(\sigma_{\vu}^2)} = \alpha_{\sigma_u^2} + \frac{m}{2}, \beta_{q(\sigma_{\vu}^2)} = \beta_{\sigma_u^2} + \frac{\|\vmu_\vu\|^2}{2} + \frac{\text{tr}(\mLambda_{\vu\vu})}{2}\right), \\
-		q(\rho)           & = \Beta(\alpha_{q(\rho)} = \alpha_\rho + \vone^\top \vp, \beta_{q(\rho)} = \beta_\rho + \vone^\top(\vone - \vp))\text{ and}                                                                                  \\
+		q(\rho)           & = \Beta(\alpha_{q(\rho)} = \alpha_\rho + \vone^\top \vp, \beta_{q(\rho)} = \beta_\rho + \vone^\top(\vone - \vp))\text{ and}                                                                           \\
 		q(r_i)            & \sim \Bernoulli{(p_i)}, \ \ \ 1 \leq i \leq n                                                                                                                                                         
 	\end{align*}
 	where
@@ -361,44 +383,44 @@
 %Ormerod paper).
 %\end{frame}
 
-\begin{frame}
-	\frametitle{Laplace's method  of approximation}
-	We Taylor expand the log likelihood $\log{p(\vtheta)}$ around the mode
-	$\vtheta_*$:
-	\tiny
-	\begin{align*}
-		\log{p(\vtheta)} & \approx \log{p(\vtheta_*)} + \log{p'(\vtheta_*)}^\top (\vtheta - \vtheta^*) + \half (\vtheta - \vtheta^*)^\top \log{p''(\vtheta_*)}(\vtheta - \vtheta^*) \\
-		                 & = \log{p(\vtheta_*)} + \half (\vtheta - \vtheta^*)^\top \log{p''(\vtheta_*)}(\vtheta - \vtheta^*)                                                        
-	\end{align*}
-	\small
-	as $\log{p^{'}(\vtheta_*)}(\vtheta - \vtheta^*) = 0$ at the mode. This has
-	the same form as a Gaussian density
-	\begin{align*}
-		\log{N(\vtheta|\vmu, \eta^{-1})} & = \half \log{\eta} - \frac{p}{2} \log{2 \pi} - \frac{\eta}{2} (\theta-\mu)^\top (\theta-\mu) \\
-		                                 & = \half \log{\frac{\eta}{2\pi}} + \half (-\eta)(\theta-\mu)^\top (\theta-\mu)                
-	\end{align*}
-	
-	and so we have an approximate posterior $q(\vtheta) = \N(\vtheta|\mu, \eta^{-1})$ with
-	\begin{align*}
-		\mu  & = \theta_*              & \text{mode of the log-posterior, and}  \\
-		\eta & = -\log{p''(\vtheta_*)} & \text{negative curvature at the mode.} \\
-	\end{align*}
-\end{frame}
+% \begin{frame}
+% 	\frametitle{Laplace's method  of approximation}
+% 	We Taylor expand the log likelihood $\log{p(\vtheta)}$ around the mode
+% 	$\vtheta_*$:
+% 	\tiny
+% 	\begin{align*}
+% 		\log{p(\vtheta)} & \approx \log{p(\vtheta_*)} + \log{p'(\vtheta_*)}^\top (\vtheta - \vtheta^*) + \half (\vtheta - \vtheta^*)^\top \log{p''(\vtheta_*)}(\vtheta - \vtheta^*) \\
+% 		                 & = \log{p(\vtheta_*)} + \half (\vtheta - \vtheta^*)^\top \log{p''(\vtheta_*)}(\vtheta - \vtheta^*)                                                        
+% 	\end{align*}
+% 	\small
+% 	as $\log{p^{'}(\vtheta_*)}(\vtheta - \vtheta^*) = 0$ at the mode. This has
+% 	the same form as a Gaussian density
+% 	\begin{align*}
+% 		\log{N(\vtheta|\vmu, \eta^{-1})} & = \half \log{\eta} - \frac{p}{2} \log{2 \pi} - \frac{\eta}{2} (\theta-\mu)^\top (\theta-\mu) \\
+% 		                                 & = \half \log{\frac{\eta}{2\pi}} + \half (-\eta)(\theta-\mu)^\top (\theta-\mu)                
+% 	\end{align*}
+		
+% 	and so we have an approximate posterior $q(\vtheta) = \N(\vtheta|\mu, \eta^{-1})$ with
+% 	\begin{align*}
+% 		\mu  & = \theta_*              & \text{mode of the log-posterior, and}  \\
+% 		\eta & = -\log{p''(\vtheta_*)} & \text{negative curvature at the mode.} \\
+% 	\end{align*}
+% \end{frame}
 
 \begin{frame}
 	\frametitle{Optimising the Gaussian Variational Approximation}
 	The true likelihood $\log p(\vbeta, \vu, \mLambda)$ is hard to optimise due 
 	to the high dimensional integral involved:
 	\begin{align*}
-		\log p(\vbeta, \vu, \mLambda)      & = \vy^\top \mR \mC \vnu + \vone^\top c(\vy) + \frac{m}{2} \log |\mLambda| - \frac{mK}{2} \log{(2 \pi)}                           \\
-		                                   & \quad + \log  \int_{\mathbb{R}^{m}} \exp \big[ \vy^\top (\mR \mZ \vu - \mR^\top b( \mX \vbeta + \mZ \vu))                        \\
-		                                   & \quad \quad \quad \quad \quad \quad \quad - \half {\vu^\top \mLambda^{-1} \vu } \big] d \vu + \text{const.}
-    \end{align*}
-    where $b(x) = e^x$ and $c(x) = \log \Gamma(x + 1)$. But the variational lower bound $\log
-    \underline{p}(\vmu, \mLambda)$ can be optimised, using quasi-Newton Raphson style algorithms.
-    \begin{align*}		                                   
-		\log \underline{p}(\vmu, \mLambda) & = \vy^\top \mR \mC \vmu - \vp^\top \exp{\left(\mC \vmu + \half \diag{(\mC \mLambda \mC^\top)}\right)}                               \\
-		                                   & \quad - \vmu^\top \mSigma^{-1} \vmu - \half \tr{(\mLambda \mSigma^{-1})} + \half \log{|\mSigma^{-1}\mLambda|} + \text{const.}
+		\log p(\vbeta, \vu, \mLambda) & = \vy^\top \mR \mC \vnu + \vone^\top c(\vy) + \frac{m}{2} \log |\mLambda| - \frac{mK}{2} \log{(2 \pi)}      \\
+		                              & \quad + \log  \int_{\mathbb{R}^{m}} \exp \big[ \vy^\top (\mR \mZ \vu - \mR^\top b( \mX \vbeta + \mZ \vu))   \\
+		                              & \quad \quad \quad \quad \quad \quad \quad - \half {\vu^\top \mLambda^{-1} \vu } \big] d \vu + \text{const.} 
+	\end{align*}
+	where $b(x) = e^x$ and $c(x) = \log \Gamma(x + 1)$. But the variational lower bound $\log
+	\underline{p}(\vmu, \mLambda)$ can be optimised, using quasi-Newton Raphson style algorithms.
+	\begin{align*}		                                   
+		\log \underline{p}(\vmu, \mLambda) & = \vy^\top \mR \mC \vmu - \vp^\top \exp{\left(\mC \vmu + \half \diag{(\mC \mLambda \mC^\top)}\right)}                         \\
+		                                   & \quad - \vmu^\top \mSigma^{-1} \vmu - \half \tr{(\mLambda \mSigma^{-1})} + \half \log{|\mSigma^{-1}\mLambda|} + \text{const.} 
 		%&= \mR\mC^T(\vy - B^{(1)}(\vmu, \sigma^2_u)) \\
 		%& \quad - \vmu^T \mSigma^{-1} \vmu - \half \tr{(\mLambda \mSigma^{-1})} + \half \log{|\mSigma^{-1}\mLambda|} + \text{const.} \\
 	\end{align*}
@@ -409,136 +431,138 @@
 
 \begin{frame}
 	\frametitle{Algorithms to fit model using GVA}
-	% Detail what progress has been made, and what results have been obtained
-	There are several alternative algorithms we've implemented or will implement
-	to fit this model, which all work by optimising the variational lower bound with respect to
-	$\vmu$ and $\mLambda$:
-	% Point out the advantages of each
-	% \begin{enumerate}
-	% 	\item Optimise variational lower bound with L-BFGS, $\mLambda = \mR \mR^T$.\\
-	% 	      Advantage: Accurate.
-	% 	\item Optimise variational lower bound with L-BFGS, $\mLambda = (\mR \mR^T)^{-1}$. \\
-	% 	      Advantage: Accurate, and very fast.
-	% 	\item Newton-Raphson optimisation on the variational lower bound, using block inverses. \\
-	% 	      Advantage: Straightforward to implement, and very fast. \\
-	% 	      Disadvantage: Unstable.
-	% \end{enumerate}
-	\begin{tabular}{|l|ccc|}
-		\hline
-		Method & Accuracy & Speed & Stability \\
-		\hline
-		L-BFGS, $\mLambda = \mR \mR^\top$ & \checkmark & & \checkmark \\
-		L-BFGS, $\mLambda = (\mR \mR^\top)^{-1}$ & \checkmark & \checkmark & \checkmark \\
-		Newton-Raphson & \checkmark & \checkmark  &\\
-		\hline
-	\end{tabular}	
-
-	These algorithms should all fit the same model to the same data
-	within numerical tolerances.
+	\begin{itemize}
+		% Detail what progress has been made, and what results have been obtained
+		\item There are several alternative algorithms we've implemented or will implement
+		      to fit this model:
+		      % Point out the advantages of each
+		      % \begin{enumerate}
+		      % 	\item Optimise variational lower bound with L-BFGS, $\mLambda = \mR \mR^T$.\\
+		      % 	      Advantage: Accurate.
+		      % 	\item Optimise variational lower bound with L-BFGS, $\mLambda = (\mR \mR^T)^{-1}$. \\
+		      % 	      Advantage: Accurate, and very fast.
+		      % 	\item Newton-Raphson optimisation on the variational lower bound, using block inverses. \\
+		      % 	      Advantage: Straightforward to implement, and very fast. \\
+		      % 	      Disadvantage: Unstable.
+		      % \end{enumerate}
+		      \begin{tabular}{|l|ccc|}
+		      	\hline
+		      	Method                                   & Accuracy   & Speed      & Stability  \\
+		      	\hline
+		      	L-BFGS, $\mLambda = \mR \mR^\top$        & \checkmark &            & \checkmark \\
+		      	L-BFGS, $\mLambda = (\mR \mR^\top)^{-1}$ & \checkmark & \checkmark & \checkmark \\
+		      	Newton-Raphson                           & \checkmark & \checkmark &            \\
+		      	\hline
+		      \end{tabular}	
+		\item These algorithms optimise the variational lower bound with respect to
+		      $\vmu$ and $\mLambda$.
+		\item These algorithms should all fit the same model to the same data
+		      within numerical tolerances.
+	\end{itemize}
 \end{frame}
 
 \begin{frame}
 	\frametitle{Cholesky factors of $\mLambda$}
 	\begin{itemize}
-			\item Any symmetric matrix $\mSigma$ can be written $\mSigma = \mR \mR^\top$
-			where $\mR$ is lower triangular. $\mR$ is unique if $\mR_{ii} \geq 0$.
-			
-			\begin{align*}
-				&\begin{pmatrix}
-				\mR_{11}          & 0                                    & 0                                     \\
-				\mR_{21}          & \mR_{22}                             & 0                                     \\
-				\mR_{31}          & \mR_{32}                             & \mR_{33}                              
-				\end{pmatrix}
-				\begin{pmatrix}
-				\mR_{11}          & \mR_{21}                             & \mR_{31}                              \\
-				0                 & \mR_{22}                             & \mR_{32}                              \\
-				0                 & 0                                    & \mR_{33}                              
-				\end{pmatrix}
-				\\
-				=& \begin{pmatrix}
-				\mR_{11}^2        &                                      & \text{symmetric}                      \\
-				\mR_{21}\mR_{11} & \mR_{21}^2 + \mR_{22}^2 \\
-				\mR_{31} \mR_{11} & \mR_{31}\mR_{21} + \mR_{32} \mR_{22} & \mR_{31}^2 + \mR_{32} ^2 + \mR_{33}^2 
-				\end{pmatrix}.
-			\end{align*}
-			
-			\item We parameterise $\mLambda$ in this was, so that we only have $\frac{p(p-1)}{2}$ numbers to deal with 						instead of $p^2$ numbers.
-			\item Note that the lower rows of the product depend on the higher rows of the Cholesky factor. We can
-						exploit this fact.
-		\end{itemize}	
+		\item Any symmetric matrix $\mSigma$ can be written $\mSigma = \mR \mR^\top$
+		      where $\mR$ is lower triangular. $\mR$ is unique if $\mR_{ii} \geq 0$. 
+		      \begin{align*}
+		      	&\begin{pmatrix}
+		      	\mR_{11}          & 0                                    & 0                                     \\
+		      	\mR_{21}          & \mR_{22}                             & 0                                     \\
+		      	\mR_{31}          & \mR_{32}                             & \mR_{33}                              
+		      	\end{pmatrix}
+		      	\begin{pmatrix}
+		      	\mR_{11}          & \mR_{21}                             & \mR_{31}                              \\
+		      	0                 & \mR_{22}                             & \mR_{32}                              \\
+		      	0                 & 0                                    & \mR_{33}                              
+		      	\end{pmatrix}
+		      	\\
+		      	=& \begin{pmatrix}
+		      	\mR_{11}^2        &                                      & \text{symmetric}                      \\
+		      	\mR_{21}\mR_{11} & \mR_{21}^2 + \mR_{22}^2 \\
+		      	\mR_{31} \mR_{11} & \mR_{31}\mR_{21} + \mR_{32} \mR_{22} & \mR_{31}^2 + \mR_{32} ^2 + \mR_{33}^2 
+		      	\end{pmatrix}.
+		      \end{align*}
+		\item Note that the lower rows of the product depend on the higher rows of the Cholesky factor. We will
+		      exploit this fact.
+		\item We parameterise $\mLambda$ as $\mLambda = \mR \mR^\top$ so that is is guaranteed to be symmetric.
+		      $\frac{p(p-1)}{2}$ parameters to deal with instead of $p^2$ parameters.
+		\item We ensure $\mLambda$ is positive semi--definite by parameterising $\mLambda_{ii} = \exp(\mR_{ii})^2$.
+	\end{itemize}	
 \end{frame}
 
 \begin{frame}
-\frametitle{Structure of $\mLambda$}
+	\frametitle{Structure of $\mLambda$}
 	\begin{itemize}
 		\item By re-ordering the fixed and random effects in $\mLambda$, we end up with a covariance structure
-					which is sparse in the first diagonal block.
-				\begin{figure}
-						\begin{subfigure}{0.4\textwidth}
-							\includegraphics[scale=.15]{mX_mZ_mLambda.pdf}
-							\caption{\tiny Covariance matrix -- Fixed effects before random effects}
-						\end{subfigure}
-						%
-						\begin{subfigure}{0.4\textwidth}
-							\includegraphics[scale=.15]{mZ_mX_mLambda.pdf}
-							\caption{\tiny Covariance matrix -- Random effects before fixed effects}
-						\end{subfigure}
-
-						\begin{subfigure}{0.4\textwidth}
-							\includegraphics[scale=.15]{mX_mZ_cholesky.pdf}
-							\caption{\tiny Cholesky factor -- Fixed effects before random effects}
-						\end{subfigure}
-						%
-						\begin{subfigure}{0.4\textwidth}
-							\includegraphics[scale=.15]{mZ_mX_cholesky.pdf}
-							\caption{\tiny Cholesky factor -- Random effects before fixed effects}
-						\end{subfigure}
-					\end{figure}
+		      which is sparse in the first diagonal block.
+		      \begin{figure}
+		      	\begin{subfigure}{0.4\textwidth}
+		      		\includegraphics[scale=.15]{mX_mZ_mLambda.pdf}
+		      		\caption{\tiny Covariance matrix -- Fixed effects before random effects}
+		      	\end{subfigure}
+		      	%
+		      	\begin{subfigure}{0.4\textwidth}
+		      		\includegraphics[scale=.15]{mZ_mX_mLambda.pdf}
+		      		\caption{\tiny Covariance matrix -- Random effects before fixed effects}
+		      	\end{subfigure}
+		      			      	
+		      	\begin{subfigure}{0.4\textwidth}
+		      		\includegraphics[scale=.15]{mX_mZ_cholesky.pdf}
+		      		\caption{\tiny Cholesky factor -- Fixed effects before random effects}
+		      	\end{subfigure}
+		      	%
+		      	\begin{subfigure}{0.4\textwidth}
+		      		\includegraphics[scale=.15]{mZ_mX_cholesky.pdf}
+		      		\caption{\tiny Cholesky factor -- Random effects before fixed effects}
+		      	\end{subfigure}
+		      \end{figure}
 	\end{itemize}
 \end{frame}
 
-\begin{frame}
-	% Motivations behind the algorithms
-	\frametitle{Motivations behind the algorithms}
-	% ii) The Cholesky factor of a block matrix of the form
-	% diag for random effects, block for cross effects
-	% block for cross effects, diag for fixed effects
-	% is mostly diagonal
-	% Less parameters to optimise and store
-	If we re-arrange the covariance matrix to have random effects before
-	fixed effects, our posterior covariance matrix is of the form
-	\begin{align*} \mLambda =
-		\begin{pmatrix}
-		\mLambda_{\vu_1 \vu_1}    & 0                      & \ldots & 0                          & \mLambda_{\vbeta_0 \vu_1}    & \mLambda_{\vbeta_1 \vu_1}    \\
-		0                         & \mLambda_{\vu_2 \vu_2} & 0      & 0                          & \vdots                       & \vdots                       \\
-		\vdots                    & 0                      & \ddots & 0                          & \vdots                       & \vdots                       \\
-		0                         & 0                      & \ldots & \mLambda_{\vu_{m} \vu_{m}} & \mLambda_{\vbeta_0 \vu_{m}}  & \mLambda_{\vbeta_1 \vu_{m}}  \\
-		\mLambda_{\vbeta_0 \vu_1} & \ldots                 & \ldots & \mLambda_{\vbeta_0 \vu_m}  & \mLambda_{\vbeta_0 \vbeta_0} & \mLambda_{\vbeta_0 \vbeta_1} \\
-		\mLambda_{\vbeta_1 \vu_1} & \ldots                 & \ldots & \mLambda_{\vbeta_1 \vu_m}  & \mLambda_{\vbeta_1 \vbeta_0} & \mLambda_{\vbeta_1 \vbeta_1} 
-		\end{pmatrix}
-	\end{align*}
-	
-	As the $\sigma_{\vu^2}$ block is diagonal, the Cholesky factor is 
-	sparse, with $\half m(m-1)$ zero elements. If $p$ is small
-	and $m$ is large, as will typically be the case, then dimension of the parameter space of our optimisation
-	problem will be much less.
-\end{frame}
+% \begin{frame}
+% 	% Motivations behind the algorithms
+% 	\frametitle{Motivations behind the algorithms}
+% 	% ii) The Cholesky factor of a block matrix of the form
+% 	% diag for random effects, block for cross effects
+% 	% block for cross effects, diag for fixed effects
+% 	% is mostly diagonal
+% 	% Less parameters to optimise and store
+% 	If we re-arrange the covariance matrix to have random effects before
+% 	fixed effects, our posterior covariance matrix is of the form
+% 	\begin{align*} \mLambda =
+% 		\begin{pmatrix}
+% 		\mLambda_{\vu_1 \vu_1}    & 0                      & \ldots & 0                          & \mLambda_{\vbeta_0 \vu_1}    & \mLambda_{\vbeta_1 \vu_1}    \\
+% 		0                         & \mLambda_{\vu_2 \vu_2} & 0      & 0                          & \vdots                       & \vdots                       \\
+% 		\vdots                    & 0                      & \ddots & 0                          & \vdots                       & \vdots                       \\
+% 		0                         & 0                      & \ldots & \mLambda_{\vu_{m} \vu_{m}} & \mLambda_{\vbeta_0 \vu_{m}}  & \mLambda_{\vbeta_1 \vu_{m}}  \\
+% 		\mLambda_{\vbeta_0 \vu_1} & \ldots                 & \ldots & \mLambda_{\vbeta_0 \vu_m}  & \mLambda_{\vbeta_0 \vbeta_0} & \mLambda_{\vbeta_0 \vbeta_1} \\
+% 		\mLambda_{\vbeta_1 \vu_1} & \ldots                 & \ldots & \mLambda_{\vbeta_1 \vu_m}  & \mLambda_{\vbeta_1 \vbeta_0} & \mLambda_{\vbeta_1 \vbeta_1} 
+% 		\end{pmatrix}
+% 	\end{align*}
+		
+% 	As the $\sigma_{\vu^2}$ block is diagonal, the Cholesky factor is 
+% 	sparse, with $\half m(m-1)$ zero elements. If $p$ is small
+% 	and $m$ is large, as will typically be the case, then dimension of the parameter space of our optimisation
+% 	problem will be much less.
+% \end{frame}
 
 \begin{frame}
 	\frametitle{L-BFGS-B}
 	\begin{itemize}
 		\item Approximate a smooth convex function locally with a quadratic form i.e. Taylor expand around the current point twice.
-			\[
-				m_k(\vp) = f(\vx_k) + \nabla f(\vx_k)^\top \vp + \half \vp^\top \mB \vp
-			\]
+		      \[
+		      	m_k(\vp) = f(\vx_k) + \nabla f(\vx_k)^\top \vp + \half \vp^\top \mB \vp
+		      \]
 		\item \begin{enumerate}
-				\item Gradient and Hessian establish the direction of line search.
-				\item Line search to find the best point in that direction.
+		\item Gradient and Hessian establish the direction of line search.
+		\item Line search to find the best point in that direction.
 		\end{enumerate}
 		\item We used \texttt{optim} in base R, which tries lots of points alone the line, including some extreme 
-					ones.
+		      ones.
 		\item The parameterisation of the variational lower bound that we chose proved to be unstable in some 
-					regions. Much effort went into mitigating this.
+		      regions. Much effort went into mitigating this.
 	\end{itemize}
 \end{frame}
 
@@ -546,9 +570,9 @@
 	\frametitle{Accuracy results using MCMC}
 	\begin{itemize}
 		\item	We measure the accuracy using
-					$$\text{Accuracy} = 1 - \half \int \left |p(\vtheta|\vy) - q(\vtheta) \right | d \vtheta.$$
+		      $$\text{Accuracy} = 1 - \half \int \left |p(\vtheta|\vy) - q(\vtheta) \right | d \vtheta.$$
 		\item	$p(\vtheta|\vy)$ was estimated using the kernel density estimate of the posterior
-					distribution from MCMC.
+		      distribution from MCMC.
 		\item MCMC using 1 million iterations from Stan, which took over took over 32 CPU days.
 		\item The need for approximate methods is obvious, this is simply not
 		      practical for many types of applied work.
@@ -559,23 +583,23 @@
 	\frametitle{Accuracy results}
 	\begin{tabular}{|c|cccc|}
 		\hline
-		               & Laplacian & GVA                    & GVA                         & GVA NR \\
+		               & Laplacian & GVA                       & GVA                         & GVA NR \\
 		               &           & $(\mLambda=\mR \mR^\top)$ & $[\mLambda=(\mR \mR)^{-1}]$ &        \\
 		\hline
-		$\vbeta_1$     & 0.95      & 0.95                   & 0.95                        & 0.95   \\
-		$\vbeta_2$     & 0.81      & 0.90                   & 0.85                        & 0.90   \\
-		$\vu_1$        & 0.95      & 0.96                   & 0.95                        & 0.96   \\
-		$\vu_2$        & 0.94      & 0.96                   & 0.94                        & 0.96   \\
-		$\vu_3$        & 0.95      & 0.96                   & 0.95                        & 0.96   \\
-		$\vu_4$        & 0.95      & 0.96                   & 0.95                        & 0.96   \\
-		$\vu_5$        & 0.95      & 0.96                   & 0.95                        & 0.96   \\
-		$\vu_6$        & 0.95      & 0.96                   & 0.95                        & 0.96   \\
-		$\vu_7$        & 0.94      & 0.95                   & 0.95                        & 0.95   \\
-		$\vu_8$        & 0.95      & 0.96                   & 0.95                        & 0.96   \\
-		$\vu_9$        & 0.92      & 0.94                   & 0.93                        & 0.94   \\
-		$\vu_{10}$     & 0.95      & 0.97                   & 0.95                        & 0.97   \\
-		$\sigma_\vu^2$ & 0.96      & 0.95                   & 0.96                        & 0.95   \\
-		$\rho$         & 0.90      & 0.90                   & 0.90                        & 0.90   \\
+		$\vbeta_1$     & 0.95      & 0.95                      & 0.95                        & 0.95   \\
+		$\vbeta_2$     & 0.81      & 0.90                      & 0.85                        & 0.90   \\
+		$\vu_1$        & 0.95      & 0.96                      & 0.95                        & 0.96   \\
+		$\vu_2$        & 0.94      & 0.96                      & 0.94                        & 0.96   \\
+		$\vu_3$        & 0.95      & 0.96                      & 0.95                        & 0.96   \\
+		$\vu_4$        & 0.95      & 0.96                      & 0.95                        & 0.96   \\
+		$\vu_5$        & 0.95      & 0.96                      & 0.95                        & 0.96   \\
+		$\vu_6$        & 0.95      & 0.96                      & 0.95                        & 0.96   \\
+		$\vu_7$        & 0.94      & 0.95                      & 0.95                        & 0.95   \\
+		$\vu_8$        & 0.95      & 0.96                      & 0.95                        & 0.96   \\
+		$\vu_9$        & 0.92      & 0.94                      & 0.93                        & 0.94   \\
+		$\vu_{10}$     & 0.95      & 0.97                      & 0.95                        & 0.97   \\
+		$\sigma_\vu^2$ & 0.96      & 0.95                      & 0.96                        & 0.95   \\
+		$\rho$         & 0.90      & 0.90                      & 0.90                        & 0.90   \\
 		\hline
 	\end{tabular}
 \end{frame}
