@@ -27,7 +27,7 @@
 \begin{frame}
 	\frametitle{Introduction}
 	Zero inflated data arises in many areas of application, such as physical
-	activity data, number of hospital vipsits per year per person and
+	activity data, number of hospital visits per year per person and
 	number of insurance claims per year per person.
 			
 	\bigskip 
@@ -39,6 +39,7 @@
 % Example data 0 0 0 5 10
 \begin{frame}[fragile]
 	\frametitle{Example data}
+	Consider the following counts:
 	\begin{verbatim}
 0 7 3 4 5 3 2 6 5 0 0 1
 0 0 5 0 2 3 6 4 0 5 4 0
@@ -50,7 +51,7 @@
 			
 	\noindent Note that $n=50$, 
 	$n\times P(Z = 0) \approx 3.8$ for $Z\sim\mbox{Poisson}(\overline{X})$
-	and we have observed 21 zeros. Hence,
+	where $\overline{X}$ is the mean of the count data and we have observed 21 zeros. This suggests
 	a Poisson model is not suitable.
 			
 	% Histogram
@@ -64,12 +65,38 @@
 	\end{figure}% Density
 \end{frame}
 
+
+\begin{frame}
+	\frametitle{Multivariate model formulation}
+	We use a zero-inflated Poisson random effects model.
+			
+	\medskip
+			
+	Suppose that we observe a vector of responses $\vy$ of length n, and matrices
+	of covariates $\mX$ and $\mZ$ of dimensions $n \times p$ and $n \times m$,
+	respectively.
+			
+	\begin{align*}
+		p(\vy|\vbeta, \vu, \vr)       & = \exp{\left[\vy^\top \mR(\mX \vbeta + \mZ \vu) - \vr^\top e^{\mX \vbeta + \mZ \vu} - \vone^\top \log{(\vy !)}\right]}, \\
+		\vr_i|\rho                    & \stackrel{\mbox{\tiny iid}}{\sim} \text{Bernoulli}(\rho), \ \{i \colon \vy_i=0\},                                       \\
+		\text{and }\vu|\sigma_{\vu}^2 & \sim \N({\bf 0}, \sigma_{\vu}^2 \mI)                                                                                    \\
+	\end{align*}
+	\noindent where $\mR =\mbox{diag}(\vr)$.
+	We use the priors:
+	\begin{align*}
+		\vbeta          & \sim \text{N}({\bf 0}, \sigma_\vbeta^2\mI),                  \\
+		\sigma_\vu^2    & \sim \text{IG}(\alpha_{\sigma_\vu^2}, \beta_{\sigma_\vu^2}), \\
+		\text{and }\rho & \sim \text{Beta}(a_\rho, b_\rho)                             \\
+	\end{align*}
+\end{frame}
+
+
 % 3. Univariate model
 \begin{frame}
 	\frametitle{Latent variable formulation of zero--inflated model}
 			
 	\begin{columns}
-		\begin{column}{0.8 \textwidth}
+		\begin{column}{0.7 \textwidth}
 							
 			Suppose that we observe
 			$$
@@ -78,8 +105,8 @@
 							
 			\noindent where for $1\le i\le n$,
 			\begin{align*} 
-				R_i & \sim \text{Bernoulli}(\rho) \text{ and} \\
-				X_i & \sim \text{Poisson}(\lambda)            
+				R_i | \rho & \sim \text{Bernoulli}(\rho) \text{ and} \\
+				X_i | \lambda & \sim \text{Poisson}(\lambda)            
 			\end{align*}
 							
 			\noindent for parameters $\rho$ and $\lambda$,
@@ -111,9 +138,9 @@
 
 \begin{frame}
 	\frametitle{Extending to a multivariate mixed effects model}
-	\begin{figure}
+	\begin{figure}[h]
 		\centering
-		\begin{subfigure}[t]{0.4 \textwidth}
+		\begin{subfigure}[b]{0.4 \textwidth}
 			\centering
 			\begin{tikzpicture}
 				\node[draw, circle, double] (y) {$\vy$};
@@ -128,7 +155,7 @@
 			\end{tikzpicture}
 			\caption{Latent variable formulation of zero--inflated model}
 		\end{subfigure}
-		\begin{subfigure}[t]{0.4 \textwidth}
+		\begin{subfigure}[b]{0.4 \textwidth}
 			\centering
 			\begin{tikzpicture}
 				\node[draw, circle, double] (y) {$\vy$};
@@ -210,30 +237,6 @@
 
 
 
-\begin{frame}
-	\frametitle{Multivariate model formulation}
-	We use a zero-inflated Poisson random effects model.
-			
-	\medskip
-			
-	Suppose that we observe a vector of responses $\vy$ of length n, and matrices
-	of covariates $\mX$ and $\mZ$ of dimensions $n \times p$ and $n \times m$,
-	respectively.
-			
-	\begin{align*}
-		p(\vy|\vbeta, \vu, \vr)       & = \exp{\left[\vy^\top \mR(\mX \vbeta + \mZ \vu) - \vr^\top e^{\mX \vbeta + \mZ \vu} - \vone^\top \log{(\vy !)}\right]}, \\
-		\vr_i|\rho                    & \stackrel{\mbox{\tiny iid}}{\sim} \text{Bernoulli}(\rho), \ \{i \colon \vy_i=0\},                                       \\
-		\text{and }\vu|\sigma_{\vu}^2 & \sim \N({\bf 0}, \sigma_{\vu}^2 \mI)                                                                                    \\
-	\end{align*}
-	\noindent where $\mR =\mbox{diag}(\vr)$.
-	We use the priors:
-	\begin{align*}
-		\vbeta          & \sim \text{N}({\bf 0}, \sigma_\vbeta^2\mI),                  \\
-		\sigma_\vu^2    & \sim \text{IG}(\alpha_{\sigma_\vu^2}, \beta_{\sigma_\vu^2}), \\
-		\text{and }\rho & \sim \text{Beta}(a_\rho, b_\rho)                             \\
-	\end{align*}
-\end{frame}
-
 
 % 5. How to fit, and advantages and disadvantages of each approach
 % - Maximum likelihood
@@ -301,15 +304,15 @@
 	$$
 	where
 	\begin{align*}
-		q(\vbeta, \vu) & \sim \text{N}(\vmu, \mLambda),                               \\
-		q(\sigma_u^2)  & \sim \text{IG}(\alpha_{\sigma_u^2}, \beta_{\sigma_u^2}),     \\
-		q(\rho)        & = \text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)}) \text{ and} \\
-		q(r_i)         & = \text{Bernoulli}(p_i), \ \ 1 \leq i \leq n.                
+		q(\vbeta, \vu) & \text{ is a } \text{N}(\vmu, \mLambda) \text{ distribution},                               \\
+		q(\sigma_u^2)  & \text{ is a } \text{IG}(\alpha_{\sigma_u^2}, \beta_{\sigma_u^2}) \text{ distribution},     \\
+		q(\rho)        & \text{ is a } \text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)}) \text{ distribution} \text{ and} \\
+		q(r_i)         & \text{ is a } \text{Bernoulli}(p_i) \text{ distribution}, \ \ 1 \leq i \leq n.                
 	\end{align*}
 \end{frame}
 
 \begin{frame}
-	\frametitle{Gaussian and Laplacian Variational Approximations}
+	\frametitle{Gaussian and Laplace's Method Variational Approximations}
 	\begin{itemize}
 		\item Lack of conjugacy means mean field updates won't be analytically tractable for the regression parameters.
 		\item We try Laplace's method and Gaussian Variational Approximations (GVA) instead, assuming that
@@ -548,23 +551,23 @@
 % 	problem will be much less.
 % \end{frame}
 
-\begin{frame}
-	\frametitle{L-BFGS-B}
-	\begin{itemize}
-		\item Approximate a smooth convex function locally with a quadratic form i.e. Taylor expand around the current point twice.
-		      \[
-		      	m_k(\vp) = f(\vx_k) + \nabla f(\vx_k)^\top \vp + \half \vp^\top \mB \vp
-		      \]
-		\item \begin{enumerate}
-		\item Gradient and Hessian establish the direction of line search.
-		\item Line search to find the best point in that direction.
-		\end{enumerate}
-		\item We used \texttt{optim} in base R, which tries lots of points alone the line, including some extreme 
-		      ones.
-		\item The parameterisation of the variational lower bound that we chose proved to be unstable in some 
-		      regions. Much effort went into mitigating this.
-	\end{itemize}
-\end{frame}
+% \begin{frame}
+% 	\frametitle{L-BFGS-B}
+% 	\begin{itemize}
+% 		\item Approximate a smooth convex function locally with a quadratic form i.e. Taylor expand around the current point twice.
+% 		      \[
+% 		      	m_k(\vp) = f(\vx_k) + \nabla f(\vx_k)^\top \vp + \half \vp^\top \mB \vp
+% 		      \]
+% 		\item \begin{enumerate}
+% 		\item Gradient and Hessian establish the direction of line search.
+% 		\item Line search to find the best point in that direction.
+% 		\end{enumerate}
+% 		\item We used \texttt{optim} in base R, which tries lots of points alone the line, including some extreme 
+% 		      ones.
+% 		\item The parameterisation of the variational lower bound that we chose proved to be unstable in some 
+% 		      regions. Much effort went into mitigating this.
+% 	\end{itemize}
+% \end{frame}
 
 \begin{frame}
 	\frametitle{Accuracy results using MCMC}
@@ -573,7 +576,7 @@
 		      $$\text{Accuracy} = 1 - \half \int \left |p(\vtheta|\vy) - q(\vtheta) \right | d \vtheta.$$
 		\item	$p(\vtheta|\vy)$ was estimated using the kernel density estimate of the posterior
 		      distribution from MCMC.
-		\item MCMC using 1 million iterations from Stan, which took over took over 32 CPU days.
+		\item MCMC using 1 million iterations from Stan, about 8 CPU hours each.
 		\item The need for approximate methods is obvious, this is simply not
 		      practical for many types of applied work.
 	\end{itemize}
@@ -586,20 +589,23 @@
 		               & Laplacian & GVA                       & GVA                         & GVA NR \\
 		               &           & $(\mLambda=\mR \mR^\top)$ & $[\mLambda=(\mR \mR)^{-1}]$ &        \\
 		\hline
-		$\vbeta_1$     & 0.95      & 0.95                      & 0.95                        & 0.95   \\
-		$\vbeta_2$     & 0.81      & 0.90                      & 0.85                        & 0.90   \\
-		$\vu_1$        & 0.95      & 0.96                      & 0.95                        & 0.96   \\
-		$\vu_2$        & 0.94      & 0.96                      & 0.94                        & 0.96   \\
-		$\vu_3$        & 0.95      & 0.96                      & 0.95                        & 0.96   \\
-		$\vu_4$        & 0.95      & 0.96                      & 0.95                        & 0.96   \\
-		$\vu_5$        & 0.95      & 0.96                      & 0.95                        & 0.96   \\
-		$\vu_6$        & 0.95      & 0.96                      & 0.95                        & 0.96   \\
-		$\vu_7$        & 0.94      & 0.95                      & 0.95                        & 0.95   \\
-		$\vu_8$        & 0.95      & 0.96                      & 0.95                        & 0.96   \\
-		$\vu_9$        & 0.92      & 0.94                      & 0.93                        & 0.94   \\
-		$\vu_{10}$     & 0.95      & 0.97                      & 0.95                        & 0.97   \\
-		$\sigma_\vu^2$ & 0.96      & 0.95                      & 0.96                        & 0.95   \\
-		$\rho$         & 0.90      & 0.90                      & 0.90                        & 0.90   \\
+		$\vbeta_1$     & 0.84      & 0.94                      & 0.89                        & 0.94   \\
+		$\vbeta_2$     & 0.85      & 0.99                      & 0.97                        & 0.99   \\
+		$\vbeta_3$     & 0.85      & 0.97                      & 0.94                        & 0.97   \\
+		$\vu_1$        & 0.86      & 0.95                      & 0.90                        & 0.95   \\
+		$\vu_2$        & 0.88      & 0.95                      & 0.90                        & 0.95   \\
+		$\vu_3$        & 0.83      & 0.94                      & 0.90                        & 0.94   \\
+		$\vu_4$        & 0.58      & 0.93                      & 0.90                        & 0.93   \\
+		$\vu_5$        & 0.75      & 0.88                      & 0.82                        & 0.88   \\
+		$\vu_6$        & 0.62      & 0.83                      & 0.75                        & 0.83   \\
+		$\vu_7$        & 0.87      & 0.94                      & 0.91                        & 0.94   \\
+		$\vu_8$        & 0.83      & 0.97                      & 0.94                        & 0.97   \\
+		$\vu_9$        & 0.65      & 0.84                      & 0.79                        & 0.84   \\
+		$\vu_{10}$     & 0.84      & 0.96                      & 0.91                        & 0.96   \\
+		$\vu_{11}$     & 0.84      & 0.95                      & 0.92                        & 0.95   \\
+		$\vu_{12}$     & 0.79      & 0.96                      & 0.91                        & 0.96   \\
+		$\sigma_\vu^2$ & 0.58      & 0.57                      & 0.62                        & 0.57   \\
+		$\rho$         & 0.87      & 0.88                      & 0.87                        & 0.88   \\
 		\hline
 	\end{tabular}
 \end{frame}
@@ -621,21 +627,21 @@
 	\end{figure}
 \end{frame}
 
-\begin{frame}
-	\frametitle{Plots of the MCMC-estimated and approximating densities}
-	\begin{figure}
-		\caption{GVA ($\mLambda^{-1}$ parameterisation)}
-		\includegraphics[scale=0.15]{code/results/output_montage_application_gva2.png}
-	\end{figure}
-\end{frame}
+% \begin{frame}
+% 	\frametitle{Plots of the MCMC-estimated and approximating densities}
+% 	\begin{figure}
+% 		\caption{GVA ($\mLambda^{-1}$ parameterisation)}
+% 		\includegraphics[scale=0.15]{code/results/output_montage_application_gva2.png}
+% 	\end{figure}
+% \end{frame}
 
-\begin{frame}
-	\frametitle{Plots of the MCMC-estimated and approximating densities}
-	\begin{figure}
-		\caption{GVA Newton-Raphson}
-		\includegraphics[scale=0.15]{code/results/output_montage_application_gva_nr.png}
-	\end{figure}
-\end{frame}
+% \begin{frame}
+% 	\frametitle{Plots of the MCMC-estimated and approximating densities}
+% 	\begin{figure}
+% 		\caption{GVA Newton-Raphson}
+% 		\includegraphics[scale=0.15]{code/results/output_montage_application_gva_nr.png}
+% 	\end{figure}
+% \end{frame}
 
 \begin{frame}{R package}
 	\begin{itemize}
@@ -650,9 +656,9 @@
 	\frametitle{References}
 	\begin{itemize}
 		\item Explaining Variational Approximations, J.T. Ormerod, M.P. Wand, American Statistician, 2010
-		\item Gaussian Variational Approximations, J.T. Ormerod, M.P. Wand, 2012
-		\item General Design Mixed Models, M.P. Wand and others, 2006
-		\item Numerical Optimisation, Nocedal and Wright, 1999
+		\item Gaussian Variational Approximations, J.T. Ormerod, M.P. Wand, , Journal of Computational Statistics, 2012
+		\item General Design Mixed Models, M.P. Wand and others, Statistical Science, 2006, 
+		\item Numerical Optimisation, Nocedal and Wright, Textbook, 1999
 	\end{itemize}
 \end{frame}
 
