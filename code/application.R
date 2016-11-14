@@ -112,21 +112,21 @@ kappa(mult$mC)
 # Need more rounds of GVA NR to get mLambda in the ballpark.
 # 2 is too few. 5 is enough.
 
-# now <- Sys.time()
-# fit1 <- zipvb(mult, method="laplace", verbose=FALSE)
-# cat("Laplace", Sys.time() - now, "\n")
+now <- Sys.time()
+fit1 <- zipvb(mult, method="laplace", verbose=FALSE)
+cat("Laplace", Sys.time() - now, "\n")
 
-# now <- Sys.time()
-# fit2 <- zipvb(mult, method="gva", verbose=FALSE)
-# cat("GVA", Sys.time() - now, "\n")
+now <- Sys.time()
+fit2 <- zipvb(mult, method="gva", verbose=FALSE)
+cat("GVA", Sys.time() - now, "\n")
 
 now <- Sys.time()
 fit3 <- zipvb(mult, method="gva2", verbose=FALSE)
 cat("GVA2", Sys.time() - now, "\n")
 
-# now <- Sys.time()
-# fit4 <- zipvb(mult, method="gva_nr", verbose=FALSE)
-# cat("GVA_NR", Sys.time() - now, "\n")
+now <- Sys.time()
+fit4 <- zipvb(mult, method="gva_nr", verbose=FALSE)
+cat("GVA_NR", Sys.time() - now, "\n")
 
 # Check accuracy
 # save <- TRUE
@@ -143,5 +143,7 @@ if (save) {
   # load(file="/tmp/accuracy_spline_2015_05_19.RData")
 }
 
-var_accuracy <- calculate_accuracies("application", mult, mcmc_samples, fit3, "GVA NP", plot_flag=TRUE)
-print(var_accuracy)
+var_accuracy <- calculate_accuracies("application", mult, mcmc_samples, fit1, "Laplace", plot_flag=TRUE)
+var_accuracy2 <- calculate_accuracies("application", mult, mcmc_samples, fit2, "GVA", plot_flag=TRUE)
+var_accuracy3 <- calculate_accuracies("application", mult, mcmc_samples, fit3, "GVA2", plot_flag=TRUE)
+var_accuracy4 <- calculate_accuracies("application", mult, mcmc_samples, fit4, "GVA NP", plot_flag=TRUE)
