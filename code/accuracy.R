@@ -148,7 +148,7 @@ accuracy_plot <- function(title, mcmc_samples, dist_fn, ...)
   # browser()
   curve(dist_fn(x, ...),
         from=min(mcmc_density$x), to=max(mcmc_density$x),
-        lty=2, col="blue", ylab="")
+        lty=2, col="blue", xlab="", ylab="", yaxt="n")
   lines(mcmc_density$x, mcmc_density$y * opt$object / max(mcmc_density$y))
   legend("topright", c("MCMC estimate", "VB estimate"), lty=c(1, 2))
   title(title)
@@ -163,7 +163,7 @@ calculate_accuracies <- function(test, mult, mcmc_samples, var_result, approxima
   # TODO: Add support for checking the accuracy over multiple dimensions
   # cubature$adaptIntegrate
   
-  if (plot_flag) pdf(paste0("results/accuracy_plots_", test, "_", approximation, ".pdf"))
+  if (plot_flag) pdf(paste0("results/accuracy_plots_", test, "_", approximation, ".pdf"), width=6, height=6)
   #return(var_result)
   # vbeta accuracy
   
@@ -186,7 +186,7 @@ calculate_accuracies <- function(test, mult, mcmc_samples, var_result, approxima
       vbeta_accuracy[i] <- calculate_accuracy(mcmc_samples$vbeta[,i], dnorm,
                                               var_result$vmu[i], sqrt(var_result$mLambda[i,i]))
       vbeta_means[i] <- mean(mcmc_samples$vbeta[, i])
-      title <- latex2exp(sprintf("%s $\\textbf{\\beta_%d}$ accuracy: %2.0f%%", approximation, i, vbeta_accuracy[i]))
+      title <- latex2exp(sprintf("%s $\\textbf{\\beta_%d}$ accuracy: %2.3f%%", approximation, i, vbeta_accuracy[i]))
       if (print_flag) print(title)
       if (plot_flag) accuracy_plot(title, mcmc_samples$vbeta[,i], dnorm,
                                    var_result$vmu[i], sqrt(var_result$mLambda[i,i]))
@@ -585,4 +585,4 @@ main <- function()
   }
 }
 
-main()
+# main()
