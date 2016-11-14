@@ -1,6 +1,7 @@
 #!/usr/bin/env Rscript
 # accuracy.R
 library(zipvb)
+library(Rcpp)
 library(rstan)
 library(optparse)
 library(mvtnorm)
