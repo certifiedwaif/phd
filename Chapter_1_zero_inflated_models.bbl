@@ -90,14 +90,14 @@ Wand, M., Ormerod, J., 2008. On semiparametric regression with {O'Sullivan}
   penalized splines. Australian \& New Zealand Journal of Statistics 50~(2),
   179--198.
 
-\bibitem[{Y.~Zhao and Wand(2006)}]{zhao06}
-Y.~Zhao, J.~Staudenmayer, B. A.~C., Wand, M.~P., 2006. General design bayesian
-  generalized linear mixed models. Statistical Science 21~(1).
-
 \bibitem[{Yau et~al.(2003)Yau, Wang, and Lee}]{BIMJ:BIMJ200390024}
 Yau, K. K.~W., Wang, K., Lee, A.~H., 2003. {Zero-Inflated} {Negative}
   {Binomial} {Mixed} {Regression} {Modeling} {of} {Over}-{Dispersed} {Count}
   {Data} {with} {Extra} {Zeros}. Biometrical Journal 45~(4), 437--452.
 \newline\urlprefix\url{http://dx.doi.org/10.1002/bimj.200390024}
+
+\bibitem[{Zhao and Wand(2006)}]{zhao06}
+Zhao, Staudenmayer, C., Wand, 2006. General design bayesian generalized linear
+  mixed models. Statistical Science 21~(1).
 
 \end{thebibliography}
