@@ -151,7 +151,7 @@ accuracy_plot <- function(title, mcmc_samples, dist_fn, ...)
         lty=2, col="blue", xlab="", ylab="", yaxt="n")
   lines(mcmc_density$x, mcmc_density$y * opt$object / max(mcmc_density$y))
   legend("topright", c("MCMC estimate", "VB estimate"), lty=c(1, 2))
-  title(title)
+  title(title, cex.main=2.5)
   # mcmc_fn <- splinefun(mcmc_density$x, mcmc_density$y)
   # curve(mcmc_fn(x, ...),
   #       from=min(mcmc_density$x), to=max(mcmc_density$x),
@@ -210,7 +210,7 @@ calculate_accuracies <- function(test, mult, mcmc_samples, var_result, approxima
         vu_means[i] <- mean(mcmc_samples$vu[, m_idx, b_idx])
         vu_sd <- sqrt(var_result$mLambda[i + mult$p, i + mult$p])
         vu_accuracy[i] <- calculate_accuracy(mcmc_samples$vu[, m_idx, b_idx], dnorm, vu_mean, vu_sd)
-        title <- sprintf("%s vu[%d] accuracy: %2.0f%%", approximation, i, vu_accuracy[i])
+        title <- latex2exp(sprintf("%s $\\textbf{u}_{%d}$ accuracy: %2.3f%%", approximation, i, vu_accuracy[i]))
         if (print_flag) print(title)
         if (plot_flag) accuracy_plot(title, mcmc_samples$vu[, m_idx, b_idx], dnorm, vu_mean, vu_sd)
 
@@ -296,7 +296,7 @@ calculate_accuracies <- function(test, mult, mcmc_samples, var_result, approxima
   # rho accuracy
   rho_accuracy <- calculate_accuracy(mcmc_samples$rho, dbeta,
                                      var_result$a_rho, var_result$b_rho)
-  title <- sprintf("%s rho accuracy: %2.0f%%", approximation, rho_accuracy, "\n")
+  title <- latex2exp(sprintf("%s $\\rho$ accuracy: %2.0f%%", approximation, rho_accuracy, "\n"))
   if (print_flag) print(title)
   if (plot_flag) accuracy_plot(title, mcmc_samples$rho, dbeta,
                           var_result$a_rho, var_result$b_rho)
