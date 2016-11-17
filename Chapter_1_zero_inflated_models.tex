@@ -312,11 +312,11 @@ Start with a single observation before using matrix/vector notation.}
 	\begin{array}{rl}
 		\log p(y_i | \vx, \vr, \vz) & = y_i r_i (\vx_i^\top \vbeta + \vz_i^\top \vu) - r_i \exp (\vx_i^\top \vbeta + \vz_i^\top \vu) - \log \Gamma (y_i + 1). \\
 		r_i                         & \sim \text{Bernoulli}(\rho), 1 \leq i \leq n                                                                            \\
-		\rho                        & \sim \mbox{Uniform}(0, 1),                                                                                              \\
+		\rho                        & \sim \mbox{Uniform}(0, 1).                                                                                              \\
 	\end{array}
 \end{equation*}
 
-\noindent Let $\mR = \diag{(\vr)}$, $\mC = [\mX, \mZ]$ and $\vnu = [\vbeta^\top, \vu^\top]^\top$. Consider the model
+\noindent We now extend this to multiple observations. Let $\mR = \diag{(\vr)}$, $\mC = [\mX, \mZ]$ and $\vnu = [\vbeta^\top, \vu^\top]^\top$. Consider the model
 
 
 \begin{equation}\label{eq:main}
@@ -395,7 +395,7 @@ $$
 
 %$\propto \exp{\left \{-r_i \bE_{-r_i} [\exp{(c_i^\top\vnu)}] + r_i [\psi(\alpha_\rho) - \psi(\beta_\rho)] \right \} }.\\$
 
-The optimal approximation \joc{(reword: the ``optimal approximation'' might be called the true posterior)} for $\vr$ is
+\noindent The optimal approximation \joc{(reword: the ``optimal approximation'' might be called the true posterior)} for $\vr$ is
 
 
 $$
@@ -405,11 +405,12 @@ $$
 \end{array}
 $$
 
-where $\mD = \left[ (\mPsi + \sum_{i=1}^m \vmu_i \vmu_i^\top + \mLambda_{\vu_i\vu_i}) / (v - p - 1) \right]^{-1}$. 
+\noindent where $\mD = \left[ (\mPsi + \sum_{i=1}^m \vmu_i \vmu_i^\top + \mLambda_{\vu_i\vu_i}) / (v - p - 1) \right]^{-1}$. 
 
-This is close in form to a Poisson regression model. Poisson regression models with normal priors have no
-closed form for their mean field updates due to non- conjugacy, but can be fit using Gaussian Variational
-Approximation, as in \cite{ormerod09}. The model can be fit using Algorithm \ref{alg:algorithm_one} below.
+\noindent This is close in form to a Poisson regression model. Poisson regression models with normal priors
+have no closed form for their mean field updates due to non- conjugacy, but can be fit using Gaussian
+Variational Approximation, as in \cite{ormerod09}. The model can be fit using Algorithm
+\ref{alg:algorithm_one} below.
 
 \begin{algorithm}
 	\caption[Algorithm 1]{Iterative scheme for obtaining the parameters in the
@@ -472,13 +473,14 @@ Approximation, as in \cite{ormerod09}. The model can be fit using Algorithm \ref
 			\STATE $\vmu \leftarrow \vmu + \mLambda \left [ \frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \vmu} \right ]$ \\ [1ex]
 			\ENDWHILE
 		\end{algorithmic}
+		where $\frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \mLambda} & \approx - \mC^\top \text{diag}(\vp e^{(\mC \vmu)}) \mC - \mSigma^{-1}$.
 	\end{algorithm}
 	
 	\subsection{Gaussian Variational Approximation}
 	
 	% Detail techniques used for fitting models.
 	
-	\subsubsection{GVA, $\mR^\top \mR$}
+	\subsubsection{GVA, $\mLambda=\mR \mR^\top$}
 	
 	Assuming $q(\vnu) \sim N(\vmu, \mLambda)$, the Gaussian variational lower bound in Algorithm
 	\ref{alg:algorithm_one} can be optimised using a variety of algorithms. The variational lower bound is not
@@ -565,7 +567,7 @@ Approximation, as in \cite{ormerod09}. The model can be fit using Algorithm \ref
 	\noindent By interchanging the fixed and random effects in $\mC = [\mX \mZ]$ to $\mC = [\mZ \mX]$, and re-
 	ordering the dimensions of $\vmu, \mLambda$ and $\mSigma$ in the same manner, the independence between the
 	blocks relating to the random effects in $\mZ$ induce sparsity in the Cholesky factor $\mR$ of
-	$\mLambda^{-1}$. Thus the Gaussian $q(\vnu) \sim N(\vmu, \mLambda)$ can be optimised over a space of dimension
+	$\mLambda^{-1}$. Thus the Gaussian $q(\vnu) \sim \N(\vmu, \mLambda)$ can be optimised over a space of dimension
 	$\half p (p + 1) + pq + \half q (q + 1)$ rather than dimension $\half (p + mq) (p + mq + 1)$ as in the dense
 	parameterisation. This leads to subtantial performance gains when m is large, as is typically the case in
 	problems of practical importance such as longitudinal or clinical trials or the application presented in
@@ -666,6 +668,7 @@ Approximation, as in \cite{ormerod09}. The model can be fit using Algorithm \ref
 			\STATE $\vmu \leftarrow \vmu + \mLambda \left [ \frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu} \right ]$
 			\ENDWHILE
 		\end{algorithmic}
+		where $\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu} = \mP \mC (\vy - \mC^\top \exp(\mC \vmu + \half \text{diag}{(\mC \mLambda \mC^\top)})) - \mSigma^{-1} \vmu$.
 	\end{algorithm}
 	
 	% Splines
@@ -682,8 +685,7 @@ Approximation, as in \cite{ormerod09}. The model can be fit using Algorithm \ref
 	
 	For each of these simulations, the model is as presented in Section \ref{sec:methodology}.
 	
-	Several common application scenarios were simulated and their accuracy evaluated. A random intercept model was
-	simulated with $\vbeta = (2, 1)^\top$, $\rho = 0.5$, $m = 20$, $n_i = 10$ and $b = 1$. The results are
+	\noindent Several common application scenarios were simulated and their accuracy evaluated. A random intercept model was simulated with $\vbeta = (2, 1)^\top$, $\rho = 0.5$, $m = 20$, $n_i = 10$ and $b = 1$. The results are
 	presented in Table \ref{tab:accuracy_int}. A random slope model was simulated with $\vbeta = (2, 1)^\top$,
 	$\rho = 0.5$, $m = 20$, $n_i = 10$ and $b = 2$. The results are presented in Table \ref{tab:accuracy_slope}.
 	Spline model was fit to a data set generated from the function $3 + 3 \sin{(\pi x)}$ on the interval $[-1,
@@ -692,8 +694,7 @@ Approximation, as in \cite{ormerod09}. The model can be fit using Algorithm \ref
 	% The stability of the algorithms was confirmed by running them on 10,000 different data sets that were randomly
 	% generated after having initialised the random number generator with different seeds.
 	
-	Median accuracy of the algorithms was assessed by running them on 100 randomly generated data sets. The
-	results are presented in Figure \ref{fig:median_accuracy_intercept} and Figure
+	\noindent Median accuracy of the algorithms was assessed by running them on 100 randomly generated data sets. The	results are presented in Figure \ref{fig:median_accuracy_intercept} and Figure
 	\ref{fig:median_accuracy_slope}.
 	
 	% Figure: Median accuracy graph intercept
@@ -779,7 +780,7 @@ Approximation, as in \cite{ormerod09}. The model can be fit using Algorithm \ref
 	each algorithm from a range of different starting points. Errors due to numerical instability and the fitted
 	$\vmu$ were recorded for each starting point.
 	
-	A data set of 100 individuals in ten groups (m=10) was generated from a model with a fixed intercept
+	\noindent A data set of 100 individuals in ten groups (m=10) was generated from a model with a fixed intercept
 	and slope, and a random intercept. $\vmu$ was initialised from a grid of points on the interval
 	$[-4.5, 5]$ for intercept and slope. The error counts are presented in Table
 	\ref{tab:stability_results}.
@@ -812,12 +813,10 @@ Approximation, as in \cite{ormerod09}. The model can be fit using Algorithm \ref
 	predictors in the data set included the pre-treatment roach level, a treatment indicator, the time of the
 	observation and an indicator for whether the apartment is in a senior building restricted to the elderly.
 	
-	In the example application presented in this paper, the zero component represents an apartment completely free
-	of roaches, while the non-zero component represents an apartment where roaches have been able to live and
-	reproduce, possibly in spite of pest control treatment aimed at preventing them from doing so.
+	\noindent In the example application presented in this paper, the zero component represents an apartment completely free of roaches, while the non-zero component represents an apartment where roaches have been able to live and reproduce, possibly in spite of pest control treatment aimed at preventing them from doing so.
 	
-	The GVA NP algorithm was used to fit a random intercept model to the Roaches data set provided by Andrew
-	Gelman. The fitted co-efficients and accuracy results are presented in Table \ref{tab:application_roaches}.
+	\noindent The GVA NP algorithm was used to fit a random intercept model to the Roaches data set provided by Andrew Gelman. The fitted co-efficients and accuracy results are presented in Table
+	\ref{tab:application_roaches}.
 	
 	%       lci  uci
 	% 1  3.179 3.157 3.201
@@ -872,10 +871,7 @@ Approximation, as in \cite{ormerod09}. The model can be fit using Algorithm \ref
 		\end{tabular}
 	\end{figure}
 	
-	To assess the speed of each approach, a test case was constructed of a random slope model with $m=50$ groups,
-	each containing $n_i = 100$ individuals. A model was then fit to this data set ten times using each algorithm,
-	and the results averaged. They are presented in Table \ref{tab:application_slope_speed}. It should be noted
-	that the speed of the GVA and GVA FP algorithms was impaired by their implementation in R using the
+	\noindent To assess the speed of each approach, a test case was constructed of a random slope model with $m=50$ groups,	each containing $n_i = 100$ individuals. A model was then fit to this data set ten times using each algorithm, and the results averaged. They are presented in Table \ref{tab:application_slope_speed}. It should be noted that the speed of the GVA and GVA FP algorithms was impaired by their implementation in R using the
 	\texttt{optim()} function, which makes many function calls during its' execution. If the same algorithms were
 	re-implemented in another language with a vectorising compiler and modern well-implemented numerical linear
 	algebra libraries such as C++, the performance would be substantially improved.
@@ -904,24 +900,14 @@ Approximation, as in \cite{ormerod09}. The model can be fit using Algorithm \ref
 	parameterisation. Using MCMC methods as the gold standard to test against, we have assessed the accuracy and
 	computational speed of these algoritms.
 	
-	The use of Mean Field Variational Bayes allows estimation of Bayesian ZIP models in a fraction of the time
-	taken to fit the same model using even the best MCMC methods available, with only a small loss of accuracy.
+	\noindent The use of Mean Field Variational Bayes allows estimation of Bayesian ZIP models in a fraction of the time taken to fit the same model using even the best MCMC methods available, with only a small loss of accuracy.
 	This is of great utility in applications where speed matters, such as model selection or when applied
 	statisticians are experimenting with many models, as is typical in practice.
 	
-	The new parameterisation of Gaussian Variational Approximation using the Cholesky factorisation of the inverse
-	of $\mLambda$ presented in Section \ref{sec:algorithms} provides significant advantages.  It is well known
-	that the inverse of a sparse matrix need not be sparse. Fitting mixed models generally leads to covariance
-	matrices with an arrow head structure. Due to the sparsity of our parameterisation of $\mLambda^{-1}$,  our
-	algorithm for fitting these models leads to an optimisation problem of significantly lower dimension. This
-	allows the model to be fit more quickly, and with greatly improved numerical stability and with no loss of
+	\noindent The new parameterisation of Gaussian Variational Approximation using the Cholesky factorisation of the inverse of $\mLambda$ presented in Section \ref{sec:algorithms} provides significant advantages.  It is well known that the inverse of a sparse matrix need not be sparse. Fitting mixed models generally leads to covariance matrices with an arrow head structure. Due to the sparsity of our parameterisation of $\mLambda^{-1}$,  our algorithm for fitting these models leads to an optimisation problem of significantly lower dimension. This allows the model to be fit more quickly, and with greatly improved numerical stability and with no loss of
 	accuracy.
 	
-	The implementation of these algorithms was not without its' challenges, chiefly numerical issues encountered
-	during testing and verification of the accuracy of the model fitting. Using the exponential function to
-	parameterise the main diagonal coupled with L-BFGS-B's unconstrained line search and optim()'s lack of
-	robustness to infinities lead to many overflow problems which may have been lessened or dealt with entirely by
-	using a function with a less aggressive growth rate, such as an appropriate piecewise quadratic.
+	\noindent The implementation of these algorithms was not without its' challenges, chiefly numerical issues encountered during testing and verification of the accuracy of the model fitting. Using the exponential function to parameterise the main diagonal coupled with L-BFGS-B's unconstrained line search and optim()'s lack of robustness to infinities lead to many overflow problems which may have been lessened or dealt with entirely by using a function with a less aggressive growth rate, such as an appropriate piecewise quadratic.
 	
 	Some of the algorithms which we experimented with were found to be very sensitive to their starting points.
 	While these algorithms are typically initialised with a starting point as close as possible to the final
