@@ -9,7 +9,7 @@
 % \setlength\parindent{0pt}
 % \setlength{\bibsep}{0pt plus 0.3ex}
 
-\usepackage[authoryear]{natbib}
+% \usepackage[authoryear]{natbib}
 \usepackage{graphicx}
 \usepackage{algorithm,algorithmic}
 \usepackage{cancel}
@@ -20,14 +20,18 @@
 \usepackage{setspace}
 \onehalfspacing
 \usepackage{microtype}
+\usepackage{color}
 
 \newtheorem{theorem}{Theorem}[section]
 
-\title{Chapter 3 Variational Bayes for Linear Model Selection using Mixtures of $g$-priors}
+\title{Chapter 3 Variational Bayes for Linear Model Selection using Mixtures of g-priors}
 \author{Mark Greenaway, John T. Ormerod}
 
 \input{include.tex}
 \input{Definitions.tex}
+
+\newcommand{\mgc}[1]{{\color{blue}#1}}
+\newcommand{\joc}[1]{{\color{red}#1}}
 
 \begin{document}
 
@@ -66,9 +70,9 @@ learned the noise in the training set.
 
 Maximising the likelihood alone only maximises the quality of the model fit, without penalising the  model
 complexity. Many model selection criteria have been proposed to attempt to balance model likelihood and model
-complexity, including the Akaike Information Criteria AIC (\cite{DeLeeuw1992}), Bayesian Information Criterion
-BIC (\cite{Schwarz1978}), Deviance Information Criterion DIC (\cite{Spiegelhalter2016}) and Risk Inflation
-Criterion (\cite{Foster1994}).
+complexity, including the Akaike Information Criteria AIC \cite{DeLeeuw1992}, Bayesian Information Criterion
+BIC \cite{Schwarz1978}, Deviance Information Criterion DIC \cite{Spiegelhalter2016} and Risk Inflation
+Criterion \cite{Foster1994}.
 
 % Bayesian
 
@@ -77,7 +81,7 @@ likelihood of the candidate models to see which is most probable. \cite{Zellner1
 of conjugate Normal-Gamma family where the Bayes factors have a relatively simple form, incorporating a
 parameter $g$ to control mixing between the model fit from the data and a prior specification of model fit.
 This immediately raises the question of how $g$ should be chosen, and whether is should be fixed or have a
-prior specification.  (\cite{Liang2008}) showed that fixed choices of $g$ lead to paradoxes such as Bartlett's
+prior specification.  \cite{Liang2008} showed that fixed choices of $g$ lead to paradoxes such as Bartlett's
 Paradox and the Information Paradox, and so a prior specification should be preferred. There are many ways of
 choosing a prior on $g$. Using a mixture of $g$-priors has the advantage of adapting the degree of shrinkage
 to the prior model dependent on the data.
@@ -158,17 +162,20 @@ with priors
 
 \begin{align*}
 	\vbeta|g, \sigma^2 & \sim \N\left(\vzero, g\sigma^2 (\mX^\top \mX)^{-1}\right), \\
-	p(\sigma^2)        & \propto \sigma^{-2}.                                       
+	p(\sigma^2)        & = (\sigma^2)^{-1} \I(\sigma^2 > 0), \\
+	p(g) & = \frac{g^{-b} (1 + g)^{- a - b - 2}}{\Beta(a + 1, b + 1)} \I(g > 0).
 \end{align*}
 
 \cite{Goel1986} constructed a family of priors for a Gaussian regression model using a particular form of
 conjugate Normal-Gamma model, where the prior covariance matrix of $\vbeta$ is taken to be a multiple of the
 Fisher information  matrix by the parameter $g$. This places the most prior mass on $\vbeta$ on the section of
-the parameter space where the data is least informative (expand on this? See STAT260 combined lecture notes,
-page 55). This leads to the posterior distribution
+the parameter space where the data is least informative.
 
+\mgc{expand on this? See STAT260 combined lecture notes, page 55}
+
+This leads to the posterior distribution
 \[
-	\vbeta | \vy \sim \N\left(\frac{g}{1+g} \vbetahatls, g \sigma^2 (\mX^\top \mX)^{-1} \right)
+	\vbeta | \vy \sim \N\left(\frac{g}{1+g} \vbetahatls, g \sigma^2 (\mX^\top \mX)^{-1} \right).
 \]
 
 We index the space of models by a $p$-dimensional vector of indicator variables for each variable considered 
@@ -308,8 +315,6 @@ $\mu - 1 = (a + b + 2)$ and $\gamma = 1$.
 \subsection{Mean field updates}
 \label{sec:mean_field_updates}
 
-Connections between Algorithm \ref{alg:algorithm_one} and Algorithm \ref{alg:algorithm_two}.
-
 A substantially simpler algorithm  which involves optimising over only one variational parameter can be
 obtained from Algorithm \ref{alg:algorithm_one} by utlising the following identities.
 
@@ -336,11 +341,9 @@ Fourth, recalling that $\tau_{\sigma^2} = \E_q [\sigma^{-2}] = r/s = \frac{n+p}{
 \]
 
 Hence
-\[
-	s = \frac{r}{\tau_{\sigma^2}} = \frac{1}{2} (n + p) [1 - (1 + \tau_g)^{-1} R^2].
-\]
-and
+
 \begin{align*}
+	s & = \frac{r}{\tau_{\sigma^2}} = \frac{1}{2} (n + p) [1 - (1 + \tau_g)^{-1} R^2], \text{ and } \\
 	c & = \frac{\tau_{\sigma^2}}{2}[\vmu^\top \mX^\top \mX \vmu + \tr (\mX^\top \mX \mSigma)]                      \\
 	  & = \frac{\tau_{\sigma^2}}{2}\left[(1 + \tau_g)^{-2} n R^2 + \tau_{\sigma^2}^{-1} (1 + \tau_g)^{-1} p\right] \\
 	  & = \frac{1}{2} [ \tau_{\sigma^2} (1 + \tau_g)^{-2} n R^2 + (1 + \tau_g)^{-1} p]                             \\
@@ -374,59 +377,110 @@ be calculated from it as shown in Algorithm \ref{alg:algorithm_two}.
 Exact posterior and approximate shrinkage $\left( \frac{g}{1 + g} \right)$ were calculated for a range of
 values of $p$, $n$ and $R^2$ to compare their values. As can be seen from Figure $\ref{fig:shrinkage}$, the
 values of the exact posterior shrinkage and approximate shrinkage are almost the same over most of the range
-of these values, which deviation only noticeable in the $p=10$ and $p=20$ cases.
+of these values, with deviation only noticeable in the $p=10$ and $p=20$ cases.
 
-Hitters
-Major League Baseball Data from the 1986 and 1987 seasons.
-An Introduction to Statistical Learning with Applications in R
+% vw1 <- read.csv("Hitters_vw1.csv", header=FALSE)
+% r <- hist(as.matrix(vw1), breaks=19, axes=FALSE, prob=TRUE, main="", xlab="")
+% axis(1, r$mid, c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18"))
 
-\begin{tabular}{|l|lllllllllllllllllll|}
-	\hline
-	$\vp$ & 0.137 & 0.130 & 0.257 & 0.982 & 0.921 & 0.173 & 0.633 & 0.562 & 0.623 & 0.480 & 0.441 & 0.499 & 0.197 & 0.926 & 0.131 & 0.174 & 0.128 & 0.901 & 0.851 \\
-	$\vq$ & 0.137 & 0.130 & 0.257 & 0.982 & 0.922 & 0.172 & 0.635 & 0.562 & 0.625 & 0.480 & 0.440 & 0.499 & 0.197 & 0.927 & 0.130 & 0.173 & 0.127 & 0.902 & 0.853 \\
-	\hline
-\end{tabular}
+% bodyfat
+% Major League Baseball Data from the 1986 and 1987 seasons.
+% An Introduction to Statistical Learning with Applications in R
 
-Body Fat
-Source: ????
+% \begin{tabular}{|l|lllllllllllllllllll|}
+% 	\hline
+% 	$\vp$ & 0.137 & 0.130 & 0.257 & 0.982 & 0.921 & 0.173 & 0.633 & 0.562 & 0.623 & 0.480 & 0.441 & 0.499 & 0.197 & 0.926 & 0.131 & 0.174 & 0.128 & 0.901 & 0.851 \\
+% 	$\vq$ & 0.137 & 0.130 & 0.257 & 0.982 & 0.922 & 0.172 & 0.635 & 0.562 & 0.625 & 0.480 & 0.440 & 0.499 & 0.197 & 0.927 & 0.130 & 0.173 & 0.127 & 0.902 & 0.853 \\
+% 	\hline
+% \end{tabular}
 
-\begin{tabular}{|l|lllllllllllll|}
-	\hline
-	$\vp$ & 0.938 & 0.136 & 0.182 & 0.072 & 0.071 & 0.108 & 0.147 & 1.000 & 0.134 & 0.141 & 0.323 & 0.619 & 0.221 \\
-	$\vq$ & 0.939 & 0.136 & 0.182 & 0.071 & 0.070 & 0.107 & 0.146 & 1.000 & 0.134 & 0.140 & 0.323 & 0.620 & 0.221 \\
-	\hline
-\end{tabular}
+\subsection{Hitters}
+Source: \cite{James:2014:ISL:2517747}
 
-Wage
-An Introduction to Statistical Learning with Applications in R
+Figure \ref{fig:Hitters_inclusion}
 
-\begin{tabular}{|l|lllllllllllllllll|}
-	\hline
-	$\vp$ & 1 & 1 & 0.010 & 0.024 & 1 & 0.054 & 0.083 & 0.019 & 0.011 & 0.010 & 0.013 & 0.014 & 0.011 & 0.014 & 0.057 & 0.042 & 0.033 \\
-	$\vq$ & 1 & 1 & 0.010 & 0.024 & 1 & 0.054 & 0.083 & 0.019 & 0.011 & 0.010 & 0.013 & 0.014 & 0.011 & 0.014 & 0.057 & 0.042 & 0.033 \\
-	\hline
-\end{tabular}
+\begin{figure}[p]
+\label{fig:Hitters_inclusion}
+\caption{Hitters marginal inclusion probablities}
+\includegraphics[scale=.4]{Hitters_histogram.pdf}
+\end{figure}
 
-Graduation Rate
-An Introduction to Statistical Learning with Applications in R
+\subsection{Body Fat}
+Source: \cite{James:2014:ISL:2517747}
 
-\begin{tabular}{|l|lllllllllllllllll|}
-	\hline
-	$\vp$ & 0.913 & 1.000 & 0.090 & 0.108 & 0.110 & 0.602 & 0.127 & 0.945 & 0.999 & 0.999 & 0.201 & 0.864 & 0.262 & 0.105 & 0.146 & 0.977 & 0.437 \\
-	$\vq$ & 0.914 & 1.000 & 0.090 & 0.108 & 0.110 & 0.602 & 0.127 & 0.945 & 0.999 & 0.999 & 0.201 & 0.864 & 0.262 & 0.105 & 0.146 & 0.977 & 0.437 \\
-	\hline
-\end{tabular}
+Figure \ref{fig:bodyfat_inclusion}
 
-US Crime
+% \begin{tabular}{|l|lllllllllllll|}
+% 	\hline
+% 	$\vp$ & 0.938 & 0.136 & 0.182 & 0.072 & 0.071 & 0.108 & 0.147 & 1.000 & 0.134 & 0.141 & 0.323 & 0.619 & 0.221 \\
+% 	$\vq$ & 0.939 & 0.136 & 0.182 & 0.071 & 0.070 & 0.107 & 0.146 & 1.000 & 0.134 & 0.140 & 0.323 & 0.620 & 0.221 \\
+% 	\hline
+% \end{tabular}
 
-\begin{tabular}{|l|lllllllllllllll|}
-	\hline
-	$\vp$ & 0.226 & 0.849 & 0.997 & 0.216 & 0.502 & 0.244 & 0.358 & 0.569 & 0.324 & 0.202 & 0.424 & 0.696 & 0.869 & 0.229 & 0.655 \\
-	$\vq$ & 0.220 & 0.856 & 0.997 & 0.210 & 0.507 & 0.240 & 0.358 & 0.573 & 0.318 & 0.196 & 0.418 & 0.699 & 0.876 & 0.224 & 0.661 \\
-	\hline
-\end{tabular}
+\begin{figure}[p]
+\label{fig:bodyfat_inclusion}
+\caption{bodyfat marginal inclusion probablities}
+\includegraphics[scale=.4]{bodyfat_histogram.pdf}
+\end{figure}
 
-\begin{figure}
+\subsection{Wage}
+Source: \cite{James:2014:ISL:2517747}
+
+Figure \ref{fig:Wage_inclusion}
+
+% \begin{tabular}{|l|lllllllllllllllll|}
+% 	\hline
+% 	$\vp$ & 1 & 1 & 0.010 & 0.024 & 1 & 0.054 & 0.083 & 0.019 & 0.011 & 0.010 & 0.013 & 0.014 & 0.011 & 0.014 & 0.057 & 0.042 & 0.033 \\
+% 	$\vq$ & 1 & 1 & 0.010 & 0.024 & 1 & 0.054 & 0.083 & 0.019 & 0.011 & 0.010 & 0.013 & 0.014 & 0.011 & 0.014 & 0.057 & 0.042 & 0.033 \\
+% 	\hline
+% \end{tabular}
+
+\begin{figure}[p]
+\label{fig:Wage_inclusion}
+\caption{Wage marginal inclusion probablities}
+\includegraphics[scale=.4]{Wage_histogram.pdf}
+\end{figure}
+
+\subsection{Graduation Rate}
+Source: \cite{James:2014:ISL:2517747}
+
+Figure \ref{fig:GradRate_inclusion}
+
+% \begin{tabular}{|l|lllllllllllllllll|}
+% 	\hline
+% 	$\vp$ & 0.913 & 1.000 & 0.090 & 0.108 & 0.110 & 0.602 & 0.127 & 0.945 & 0.999 & 0.999 & 0.201 & 0.864 & 0.262 & 0.105 & 0.146 & 0.977 & 0.437 \\
+% 	$\vq$ & 0.914 & 1.000 & 0.090 & 0.108 & 0.110 & 0.602 & 0.127 & 0.945 & 0.999 & 0.999 & 0.201 & 0.864 & 0.262 & 0.105 & 0.146 & 0.977 & 0.437 \\
+% 	\hline
+% \end{tabular}
+
+\begin{figure}[p]
+\label{fig:GradRate_inclusion}
+\caption{GradRate marginal inclusion probablities}
+\includegraphics[scale=.4]{GradRate_histogram.pdf}
+\end{figure}
+
+\subsection{US Crime}
+Source: \cite{James:2014:ISL:2517747}
+
+Figure \ref{fig:USCrime_inclusion}
+
+% \begin{tabular}{|l|lllllllllllllll|}
+% 	\hline
+% 	$\vp$ & 0.226 & 0.849 & 0.997 & 0.216 & 0.502 & 0.244 & 0.358 & 0.569 & 0.324 & 0.202 & 0.424 & 0.696 & 0.869 & 0.229 & 0.655 \\
+% 	$\vq$ & 0.220 & 0.856 & 0.997 & 0.210 & 0.507 & 0.240 & 0.358 & 0.573 & 0.318 & 0.196 & 0.418 & 0.699 & 0.876 & 0.224 & 0.661 \\
+% 	\hline
+% \end{tabular}
+
+\begin{figure}[p]
+\label{fig:USCrime_inclusion}
+\caption{USCrime marginal inclusion probablities}
+\includegraphics[scale=.4]{USCrime_histogram.pdf}
+\end{figure}
+
+\subsection{Shrinkage}
+Figure \ref{fig:shrinkage}
+
+\begin{figure}[p]
 	\caption{Comparison of exact and approximate shrinkage}
 	\label{fig:shrinkage}
 	\includegraphics[width=17cm, height=17cm]{Chapter_3_shrinkage.pdf}
