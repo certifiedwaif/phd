@@ -12,14 +12,21 @@
 \usepackage[authoryear]{natbib}
 \usepackage{graphicx}
 \usepackage{algorithm,algorithmic}
+\usepackage{color}
 
 \title{Preliminaries}
 \author{Mark Greenaway}
 \input{include.tex}
 \input{Definitions.tex}
+
+\newcommand{\mgc}[1]{{\color{blue}#1}}
+\newcommand{\joc}[1]{{\color{red}#1}}
+
 \begin{document}
 \setlength{\parindent}{0pt}
 \maketitle
+
+\mgc{You have so much work to do on this chapter.}
 
 \section{Variational approximations}
 
@@ -169,7 +176,7 @@ IEEE 754: floating point in modern computers
 
 On modern computers, IEEE 754 is ubiquitous, and the base is $2$.
 
-Error bounds on $+, -, *, /, \sqrt$
+Error bounds on $+, -, *, /, \sqrt{}$
 
 $$
 \text{fl}(a \text{ op } b) = (1 + \epsilon) (a \text{ op } b) \text{ provided $\text{fl}(a \text{ op } b)$ neither overflows nor underflows}
@@ -329,7 +336,7 @@ of available functions and corresponding distributions is presented in Table \re
 Distribution & Parameter & Natural parameter & Inverse parameter mapping \\
 \hline
 Bernoulli distribution & $p$ & $\log{\frac{p}{1 - p}}$ & $\frac{1}{1 + e^\eta}$ \\
-Poisson distribution & $\lambda$ & \log \lambda & e^\eta \\
+Poisson distribution & $\lambda$ & $\log \lambda$ & $e^\eta$ \\
 Normal distribution (known variance) & $\mu$ & $\frac{\mu}{\sigma}$ & $\sigma \eta$ \\
 \hline
 \end{tabular}
@@ -342,9 +349,8 @@ Bernstein-von Mises Theorem
 
 \section{Model selection}
 
-Given a full data matrix $\mX \in \R^{n \times p}$, we may wish to find the subset of variables
-$\gamma \in \{ 1 \ldots p \}$ such that $\mX_\gamma \vbeta$ describe the data in $\vy$ best, in some
-sense.
+Given a full data matrix $\mX \in \R^{n \times p}$, we may wish to find the subset of variables $\gamma \in \{
+1 \ldots p \}$ such that $\mX_\gamma \vbeta_\gamma$ describe the data in $\vy$ best, in some sense.
 
 In a frequentist context, there are many functions which can be used to judge which model is best,
 such as AIC, BIC etc. These are functions $f: \gamma \to \R^+$ which allow the models under consideration to
@@ -357,6 +363,10 @@ $$
 
 These functions typically attempt to balance log likelihood against the complexity of the model, achieving
 a compromise between each.
+
+\mgc{AIC, BIC, DIC, Mallow's $C_p$}
+\mgc{Bayesian model selection}
+\mgc{Normal model selection with $g$--priors?}
 
 \bibliographystyle{elsarticle-harv}
 \bibliography{Chapter_0_preliminary}
