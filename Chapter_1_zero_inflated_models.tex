@@ -25,8 +25,9 @@
 
 \begin{document}
 
-Variational Approximation for Zero-Inflated Semiparametric Regression Models \\
-Mark Greenaway and John T. Ormerod
+\title{Variational Approximation for Zero-Inflated Semiparametric Regression Models}
+\author{Mark Greenaway and John T. Ormerod}
+% \maketitle
 
 \begin{abstract}
 	
@@ -309,8 +310,8 @@ Start with a single observation before using matrix/vector notation.}
 \noindent The log--likelihood for one observation is then
 \begin{equation*}
 	\begin{array}{rl}
-		\log p(y_i | \vx, \vr, \vz) & = y_i r_i (\vx_i^\top \vbeta + \vz_i^\top \vu) - r_i \exp (\vx_i^\top \vbeta + \vz_i^\top \vu) - \log \Gamma (y_i + 1). \\
-		r_i                         & \sim \text{Bernoulli}(\rho), 1 \leq i \leq n                                                                            \\
+		\log p(y_i | \vx, \vr, \vz) & = y_i r_i (\vx_i^\top \vbeta + \vz_i^\top \vu) - r_i \exp (\vx_i^\top \vbeta + \vz_i^\top \vu) - \log \Gamma (y_i + 1), \\
+		r_i                         & \sim \text{Bernoulli}(\rho), 1 \leq i \leq n, \text{ and }                                                                            \\
 		\rho                        & \sim \mbox{Uniform}(0, 1).                                                                                              \\
 	\end{array}
 \end{equation*}
@@ -348,7 +349,7 @@ $$
 \noindent where $\mX$ is $n \times p$, $\mZ$ is $n \times mb$ and $\mSigma_{\vu \vu}$ is $mb \times mb$ and
 $\mPsi$ is $b \times b$.
 
-The covariance of $\Cov(\vu) \equiv \blockdiag_{1 \leq i \leq m} (\mSigma) \equiv \mI_m \otimes \mSigma$
+The covariance of $\Cov(\vu) \equiv \blockdiag_{1 \leq i \leq m} (\mSigma) \equiv \mI_m \otimes \mSigma$.
 
 In the random intercept case, $\mSigma = \sigma_u^2 \mI$ while in the random slopes case
 $\mSigma = 
@@ -453,20 +454,23 @@ Variational Approximation, as in \cite{ormerod09}. The model can be fit using Al
 	
 	\subsection{Laplace-Variational Approximation}
 	
-	Laplace's method of approximation uses the second order Taylor expansion of the full log likelihood around the
-	mode to find a Gaussian approximation to the full posterior. This can then be optimised using Newton-Raphson
-	style iterations. The algorithm is very quick to execute, but the resulting approximate posterior
-	distributions are not as accurate as those produced by the other algorithms considered in this article.
+	Laplace's method of approximation uses the second order Taylor expansion of the full log likelihood around
+	the mode to find a Gaussian approximation to the full posterior. 
+	% The algorithm is very quick to execute, but the resulting approximate posterior
+	% distributions are not as accurate as those produced by the other algorithms considered in this article.
 	
 	% NR
 	% Detail the function and its derivatives
 	
-	Taylor expanding the full log likelihood once around the mode yields the following function
+	Taylor expanding the full log likelihood once around the mode yields the following approximation to the
+	log-liklihood:
 	\begin{align*}
 		\log \underline{p}(\vmu, \mLambda; \vy) = \vy^\top\mP\mC\vmu - \vp^\top\exp \left (\mC \vmu \right ) - \half \vmu^\top \mSigma^{-1} \vmu. 
 	\end{align*}
 	
-	This can be optimised using a Newton-Raphson style algorithm where
+	This can be iteratively optimised  where with respect to $\vmu$ and $\mLambda$ using a Newton-Raphson style
+	algorithm.
+
 	\begin{align*}
 		\frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \vmu}     & \approx \mP \mC (\vy - \exp{(\mC \vmu)}) - \mSigma^{-1} \vmu \text{ and} \\
 		\frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \mLambda} & \approx - \mC^\top \text{diag}(\vp e^{(\mC \vmu)}) \mC - \mSigma^{-1}.   
@@ -496,19 +500,19 @@ Variational Approximation, as in \cite{ormerod09}. The model can be fit using Al
 	
 	Assuming $q(\vnu) \sim N(\vmu, \mLambda)$, the Gaussian variational lower bound in Algorithm
 	\ref{alg:algorithm_one} can be optimised using a variety of algorithms. The variational lower bound is not
-	necessarily unimodal, leading to potential difficulty in optimising to the global maximum. However, for
-	fixed $\vp$ and $\mSigma$, the variational lower bound is log-concave, and so standard optimisation methods
-	such as L-BFGS-B as described in, for example, \cite{Liu1989}, work well. This leads to an extremely
-	accurate approximation of the true posterior at the expense of some additional computational effort.
+	necessarily unimodal if $\vp$ and $\mLambda$ are free to vary, leading to potential difficulty in optimising
+	to the global maximum. However, for fixed $\vp$ and $\mSigma$, the variational lower bound is log-concave
+	with respect to $\vmu$ and $\mLambda$, and so standard optimisation methods such as L-BFGS-B as described
+	in, for example, \cite{Liu1989}, work well. This leads to an extremely accurate approximation of the true
+	posterior at the expense of some additional computational effort.
 	
-	\noindent We fit the Gaussian part of our approximation $q(\vbeta, \vu) \sim \N(\vmu, \mLambda)$ by maximising the
-	variational lower bound
-	
+	\noindent We fit the Gaussian part of our approximation $q(\vbeta, \vu) \sim \N(\vmu, \mLambda)$ by maximising 
+	the variational lower bound	
 	\begin{align*}
 		\log \underline{p}(\vmu, \mLambda; \vy) & = \quad \vy^\top\mP \mC \vmu - \vp^\top \exp[\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)] - \half \vmu^\top \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} + \log{|\mR|} \\
 		                                        & \quad - \tfrac{p}{2} \log{(2 \pi)} + \half \log{|\mSigma^{-1}|} + \tfrac{p}{2} \log{(2 \pi)} + \tfrac{p}{2}                                                                              \\
 	\end{align*}
-	
+
 	\noindent with respect to $\vmu, \mLambda$, keeping $\vp, \mSigma, \rho$ fixed.
 	
 	\noindent To ensure symmetry of $\mLambda$, we parameterise the optimisation problem in terms of $\mLambda$'s
@@ -526,12 +530,13 @@ Variational Approximation, as in \cite{ormerod09}. The model can be fit using Al
 	
 	\noindent exponentiating the diagonal to ensure positive-definiteness of $\mR$.
 	
-  \noindent This parameterisation can lead to numeric overflow, which can lead to singular matrices when
-	attempting to invert $\mLambda$. We dealt with this issue by thresholding the values of the diagonals.  This
-	problem was mitigated by  instead working with the Cholesky factorisation of $\mLambda^{-1}$, allowing us to
-	solve rather than invert and multiply, which is also faster and more numerically stable. We use knowledge of
-	the regression model we are fitting to specify a sparse matrix structure, greatly reducing the dimension of
-	the problem and thus improving both computational speed and numeric accuracy.
+  \noindent This parameterisation can lead to numeric overflow when the diagonals of $\overline{\mR}$ become
+	moderately large, which can lead to singular matrices when   attempting to invert $\mLambda$. We dealt with
+	this issue by thresholding the values of the diagonals.  This   problem was mitigated by  instead working with
+	the Cholesky factorisation of $\mLambda^{-1}$, allowing us to   solve rather than invert and multiply, which
+	is also faster and more numerically stable. We use knowledge of   the regression model we are fitting to
+	specify a sparse matrix structure, greatly reducing the dimension of   the problem and thus improving both
+	computational speed and numeric accuracy.
 	
 	The first variant of the Gaussian Variational Approximation algorithm that we present optimises the Gaussian
 	variational lower bound of the log likelihood with respect to $\vmu$ and the Cholesky decomposition $\mR$ of
