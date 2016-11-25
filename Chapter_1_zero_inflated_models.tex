@@ -496,7 +496,7 @@ Variational Approximation, as in \cite{ormerod09}. The model can be fit using Al
 	
 	% Detail techniques used for fitting models.
 	
-	\subsubsection{GVA, $\mLambda=\mR \mR^\top$}
+	\subsubsection{Covariance parameterisation}
 	
 	Assuming $q(\vnu) \sim N(\vmu, \mLambda)$, the Gaussian variational lower bound in Algorithm
 	\ref{alg:algorithm_one} can be optimised using a variety of algorithms. The variational lower bound is not
@@ -556,7 +556,7 @@ Variational Approximation, as in \cite{ormerod09}. The model can be fit using Al
 		\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda} & = \left [\mLambda^{-1} - \mP \mC^\top \exp(\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)) \mP \mC) - \mSigma^{-1} \right ] \mR. 
 	\end{align*}
 	
-	\subsubsection{GVA, $\mLambda = (\mR \mR^\top)^{-1}$}
+	\subsubsection{Precision parameterisation}
 	
 	\noindent The second variant of the Gaussian Variational Approximation algorithm is similiar to the first, but
 	instead of optimising the Gaussian variational lower bound with respect to $\vmu$ and the Cholesky factor
@@ -681,6 +681,63 @@ Variational Approximation, as in \cite{ormerod09}. The model can be fit using Al
 	
 	% Splines
 	
+	\section{Computational cost of Gaussian Variational Approximation approaches}
+
+	The main computational cost is the evaluation of the variational lower bound and its' derivatives. By virtue
+	of their dimension, the expressions involving $\mLambda$ dominate the computational cost. The key term is
+	$\frac{1}{2} \diag(\mC \mLambda \mC^\top)$. The naive way to calculate this is to ignore the symmetry in
+	this expression and simply calculate the product $\mC \mLambda \mC^\top$, which takes $2 n \times (p + m
+	b)^2$ floating point operations, and take the diagonal entries of the result. This is obviously wasteful, as
+	all of the off--diagonal entries of the resulting product are immediately discarded.
+
+	By parameterising $\mLambda$ in terms of its' Cholesky factors and realising that
+
+	\[
+		\mC \mLambda \mC^\top = \mC \mR \mR^\top \mC^\top
+	\]
+
+	and that
+
+	\[
+		\diag(\mC \mLambda \mC^\top)_{ii} = \mC_{i .} \mR \mR^\top \mC_{i .}^\top, 1 \leq i \leq n
+	\]
+
+	we can calculate the products $\mC_{i .} \mR, 1 \leq i \leq n$, using $n \times \frac{1}{2}(p + m b)(p + m b
+	+ 1)$ floating point operations, and store them in a vector $\va$ and then calculate $\diag(\mC \mLambda
+	\mC^\top) = \va^\top \va$.
+
+	Moreover, by exploiting our knwoledge of the model, we can encode $\mR$ as a sparse matrix, and further reduce
+	this depending on the model. For example, in the random intercept case, only the diagonals of the random
+	effects blog need to be non-zero, and hence the above expression can be performed in
+	$n \times [m + \half{1}{2} p (p + 1) + p \times m b]$.
+
+	$\log |\mR|$ can be calculated using only $p + m b$ floating point operations, as $\mR$ is lower triangular.
+
+	For the precision parameterisation, we observe that in this parameterisation
+
+	\[
+		\diag(\mC \mLambda \mC^\top)_{ii} = \mC_{i .} \mR^{-T} \mR^{-1} \mC_{i .}^\top
+	\]
+
+	and so by solving
+
+	\[
+		\mR \va = \mC_{i .}^\top
+	\]
+
+	for $\va$ at a cost of $n \times \frac{1}{2} (p + m b) (p + m b + 1)$ floating point operations, and then
+	calculate
+
+	\[
+		\diag(\mC \mLambda \mC^\top)_{ii} = \va^\top \va
+	\]
+
+	to complete the computation.
+
+	As above, by using our knowledge of the model being fit we can encode $\mR$ sparsely to decreate the required
+	computation still further. In the random intercept model case, the computational cost will drop to
+	$n \times [m + \half{1}{2} p (p + 1) + p \times m b]$.
+
 	\section{Numerical results}
 	\label{sec:results}
 	
@@ -961,7 +1018,7 @@ Variational Approximation, as in \cite{ormerod09}. The model can be fit using Al
 	
 	% TODO: Generate images using local_solutions.R and place here
 	
-	\bibliographystyle{elsarticle-harv}
+	% \bibliographystyle{elsarticle-harv}
 	\bibliography{Chapter_1_zero_inflated_models}
 	
 \end{document}
