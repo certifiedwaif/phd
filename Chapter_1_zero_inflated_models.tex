@@ -246,20 +246,23 @@ $\text{KL}(q(\vtheta;\vxi)||p(\vtheta|\vy))$.
 
 Suppose we have a sample of counts $y_i$, $1\le i\le n$, where there are excessive number of zeros 
 for a Poisson model, but the sample otherwise behaves like a Poisson sample.
-% There are two main 
-% parameterizations for modelling such data. The first approach models the probability of a zero
-% by $\rho$ and adjusts for counts greater than zero. This model uses
-% $$
-% P(Y_i = 0) = \rho, 
-% \quad \mbox{and} \quad 
-% P(Y_j = y_i) = \left( \frac{1 - \rho}{1 - e^{-\lambda}} \right) \frac{\lambda^{y_i} e^{-\lambda}} {y_i!},\qquad y_i \ge 1,
-% $$
+
+There are two main  parameterizations for modelling such data. The first approach models the probability of a
+zero by $\rho$ and adjusts for counts greater than zero. This model uses
+
+$$
+P(Y_i = 0) = \rho, 
+\quad \mbox{and} \quad 
+P(Y_j = y_i) = \left( \frac{1 - \rho}{1 - e^{-\lambda}} \right) \frac{\lambda^{y_i} e^{-\lambda}} {y_i!},\qquad y_i \ge 1,
+$$
 
 % \noindent where $\lambda>0$ models the size of the counts. Here, $\bE(y_i) = ???$ 
 % and $\mbox{Var}(y_i) = ???$.
 
-\noindent An approach using latent variables considers the data as the product of two processes, a binary process
-that generates structural zeros, and a second process governed by a Poisson distribution. This leads to the model
+\noindent A second approach using latent variables considers the data as the product of two processes, a
+binary process that generates structural zeros, and a second process governed by a Poisson distribution. This
+leads to the model
+
 \begin{equation}\label{eq:modelTwo}
 	P(Y_i = 0) = \rho + (1 - \rho) e^{-\lambda}, 
 	\quad \mbox{and} \quad 
