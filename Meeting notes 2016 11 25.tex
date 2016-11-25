@@ -1,0 +1,57 @@
+\documentclass{amsart}
+\begin{document}
+\title{Meeting with John about thesis structure}
+\author{Mark Greenaway}
+
+\section{Thesis structure}
+Write at an Honours level audience
+
+Chapter 0 - Introduction
+Various kinds of variational approximations
+Bayesian inference
+Approximate inference
+Splines
+Components of model selection
+Specific data sets, if any
+Outline of thesis
+
+Chapter 1 - Gaussian Variational Approximations
+Cut and paste of paper
+
+Chapter 2 - Normal linear model selection
+Cut and paste of paper
+
+Chapter 3 - 
+Cut and paste of paper
+
+Every piece of statistical writing approximately follows the structure
+Introduction
+Model
+Methods
+Theory, if any
+Numerical section
+Conclusion
+
+\section{Zero-inflated models paper/chapter}
+Need an example for thesis
+There are two parameterisations, make the reader aware that we know about them.
+Make figures and captions larger
+Write a section on the computational cost of both approaches that we are using for the Gaussian Variational
+Approximation
+Plot of starting points from which the GVA algorithm successfully converge to the true answer
+
+\section{New parameterisation}
+$\lambda = f(\eta)$
+where $\eta = \mX \vbeta + \mZ \vu$
+
+Idea: Make link function exponential up to a threshold, and then quadratic from there
+
+a x^2 + b x + c
+
+Make quadratic match 0th, first and second derivatives of exponential function at threshold/transition point.
+
+\frac{\lambda^x \e^{-\lambda x}}{x!}
+
+x \log(\lambda) - \lambda x
+
+\end{document}
