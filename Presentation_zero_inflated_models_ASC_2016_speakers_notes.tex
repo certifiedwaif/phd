@@ -1,0 +1,128 @@
+\documentclass{amsart}
+\begin{document}
+
+Latent variable formulation
+
+Suppose we observe counts data, mixture of zero and non-zero parts. Let $y_i$ be the vector of observations,
+$r_i$ be a vector latent variables indicating whether each observation comes from the zero part of the mixture
+or the Poisson part and $x_i$ be the Poisson count if an observation is non-zero. $\rho$ is the proportion of
+observations coming from the zero part of the mixture. We put a gamma prior on $\lambda$, the parameter of the
+Poisson distribution, and a beta prior on $\rho$.
+
+Extending the univariate zero--inflated model
+
+This gives us some idea of how to construct a zero--inflated model. But we want to fit regression models, and
+we'd like these models to be flexible enough to deal with complications like repeated observations for
+longitudinal studies or multi-level models. We'd also like to have enough flexibility to fit curves to data. So
+we extend this formulation to a mixed model.
+
+We replace the non--zero Poisson part of our mixture with a multivariate normal distribution for ease of
+interpretation. Altering the covariance structure of the normal allows us to incorporate random effects or
+splines.
+
+Multivariate model formulation
+
+We make a slight alteration to a Poisson regression model in exponential family form, multiplying the vector
+of responses $\vy$ by the vector of non-zero indicators $\vr$.
+
+Note that we've used a normal prior for this model, which is not conjugate with the Poisson model. So this is
+a non-conjugate model.
+
+Fitting techniques
+
+There are a number of fitting techniques that we could attempt to use. We could use EM, but it is not flexible
+to complications like mixed models.
+
+A popular choice for Bayesian random effects models is Monte Carlo Markov Chains, which is very accurate but inherently computationally intensive.
+
+An alternative which has become more prominent in the statistical comunity in recent years is Variational
+Bayes.
+
+Variational Bayes
+
+Variational Bayes is a technique where the full posterior distribution $p(\vtheta | \vy)$ is approximated
+by a distribution $q(\vtheta)$. The KL divergence between $p(\vtheta | \vy)$ and $q(\vtheta)$ is then
+iteratively minimised.
+
+Form of the multivariate approximation
+
+We adopt a factored approximation and partition the fixed effects $\vbeta$ and the random effects $\vu$
+together, and choose a multivariate normal distribution for ease of interpretation.
+
+For the other parameters, we choose distributions matching the conjugate priors for those parameters.
+
+Gaussian Variational Approximations
+
+Because the multivariate normal is not conjugate, we cannot derive a closed form mean field update for
+$\vbeta$ and $\vu$. Instead, we use a Gaussian Variational Approximation to optimise $\vbeta$ and $\vu$
+while keeping the other parameters fixed, and then perform mean field updates on the other parameters in turn.
+Thus we arrive at the following algorithm.
+
+Algorithm
+
+Optimising the Gaussian Variational Approximation
+The true log likelihood is hard to optimise, because we need to integrate over the random effects. But the
+Gaussian Variational lower bound can be optmised using quasi-Newton Raphson style algorithms.
+
+Parameterisations
+
+There are several alternative parameterisaitons we've implemented to fit this model. The main difference between
+these parameterisations is in how the covariance matrix is parameterised.
+
+Cholesky factors of $\mLambda$
+
+Our parameterisations are in terms of the Cholesky factors of $\mLambda$. Any symmetric matrix $\mSigma$
+can be factorised into a lower triangular matrix multiplied by its' own transpose.
+
+Note that the lower rows of the product depend on the higher rows of the Cholesky factor. We will exploit this
+fact.
+
+We parameterise $\mLambda$ as $\mLambda = \mR \mR^\top$ so that $\mLambda$ is symmetric and we have half as
+many parameters to deal with.
+
+We ensure $\mLambda$ is positive semi--definite by parameterising the diagonals
+$\mLambda_{ii} = \exp(\mR_{ii})^2$.
+
+Structure of $\mLambda$
+
+By re--ordering the fixed and random effects in $\mLambda$, we can ensure sparsity in the Cholesky factors,
+as we can see in the following figures.
+
+Application
+
+We applied this to a data set on a study of cockroach infestation in city apartments. We fit a random intercept
+model, allowing for variation in the number of cockroaches in each building the apartments were in.
+
+Accuracy results
+
+We measure the accuracy using the $L_1$ norm of the difference betwen the true posterior and the approximating
+distribution.
+
+The true posterior was estimated using Stan.
+
+Accuracy of parameter estimation
+
+We can see the Laplace's method does okayt, but the Gaussian Variational Approximation does better on all
+parameters. We see that the covariance parameterisation is more accurate than the precision parameterisation.
+
+Plots
+
+and when we look at the plots of the distrbutions, we can see why. The Laplace approximation consistently
+underestimates the variance, while the Gaussian Variational Approximation gets it right.
+
+Stability results
+
+We also tested the stability of the algorithms. And we see that Laplace's algorithm is the most stable,
+followed by the precision parameterisation, and then the covariance parameterisation followed by the
+Newton-Raphson fixed point algorithm.
+
+R package
+
+I'm intending to release a zipvb package on GitHub when it's ready.
+
+...
+
+The current parameterisation is numerically unstable, because the exponential function grows very quickly.
+Over the summer, we plan on trying a function which grows less aggressively.
+
+\end{document}
