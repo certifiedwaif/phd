@@ -118,8 +118,8 @@
 
 \begin{frame}
 	\frametitle{Extending the univariate zero--inflated model}
-	This model is good as far as it goes, but limited. We extend it to a mixed model formulation, allowing
-	us to fit random effects models and splines.
+	We immediately extend this model to a multivariate mixed model formulation, allowing
+	us to fit random intercept and slope models and splines.
 \end{frame}
 
 
@@ -242,16 +242,16 @@
 	respectively.
 						
 	\begin{align*}
-		p(\vy|\vbeta, \vu, \vr)       & = \exp{\left[\vy^\top \mR(\mX \vbeta + \mZ \vu) - \vr^\top e^{\mX \vbeta + \mZ \vu} - \vone^\top \log{(\vy !)}\right]}, \\
+		p(\vy|\vbeta, \vu, \vr)       & = \exp{\left[\vy^\top \mR(\mX \vbeta + \mZ \vu) - \vr^\top e^{\mX \vbeta + \mZ \vu} - \vone^\top \log{\Gamma(\vy + \vone)}\right]}, \\
 		\vr_i|\rho                    & \stackrel{\mbox{\tiny iid}}{\sim} \text{Bernoulli}(\rho), \ \{i \colon \vy_i=0\},                                       \\
-		\text{and }\vu|\sigma_{\vu}^2 & \sim \N({\bf 0}, \sigma_{\vu}^2 \mI)                                                                                    \\
+		\text{and }\vu|\sigma_{\vu}^2 & \sim \N({\bf 0}, \mSigma)                                                                                    \\
 	\end{align*}
 	\noindent where $\mR =\mbox{diag}(\vr)$.
 	We use the priors:
 	\begin{align*}
 		\vbeta          & \sim \text{N}({\bf 0}, \sigma_\vbeta^2\mI),                  \\
 		\sigma_\vu^2    & \sim \text{IG}(\alpha_{\sigma_\vu^2}, \beta_{\sigma_\vu^2}), \\
-		\text{and }\rho & \sim \text{Beta}(a_\rho, b_\rho)                             \\
+		\text{and }\rho & \sim \text{Beta}(a_\rho, b_\rho).                             \\
 	\end{align*}
 \end{frame}
 
@@ -261,7 +261,7 @@
 	\begin{tabular}{p{2cm}p{3.5cm}p{4.5cm}}
 		Technique         & Pro                                                             & Con                                          \\
 		\hline
-		MLE               & EM could be used to fit these models, with $R_i$ as latent data & Not flexible to complications.               \\
+		MLE               & EM could be used to fit these models, with $R_i$ as latent data & Not flexible enough for mixed models.               \\
 		                  &                                                                 &                                              \\ %Frequentist \\
 		\hline
 		MCMC              & Bayesian                                                        & Slow                                         \\
@@ -269,7 +269,7 @@
 		\hline
 		Variational Bayes & Bayesian                                                        & May lose accuracy, or underestimate variance \\
 		                  & Fast                                                            &                                              \\ %Solution may be intractable \\ 
-		                  & Still quite accurate                                            &                                              \\
+		                  & Can be quite accurate                                            &                                              \\
 		\hline
 	\end{tabular}
 						
@@ -372,11 +372,11 @@
 			optimal densities $q^*(\vmu, \mLambda)$, $q^*(\mSigma_{\vu \vu})$ and $q^*(\rho)$}
 		\label{alg:algorithm_one}
 		\begin{algorithmic}
-			\REQUIRE{p_{q(\mSigma_{\vu \vu})} \leftarrow p + 1$} \\[1ex]
+			\REQUIRE{$p_{q(\mSigma_{\vu \vu})} \leftarrow p + 1$} \\[1ex]
 			\WHILE{the increase in $\log{\underline{p}}(\vy;q)$ is significant}
 			% \vmu, \mLambda
 			\STATE Optimise $\vmu$ and $\mLambda$ using $\vy, \mC, \vp$ and $\mSigma_{\vu \vu}$ \\[1ex]
-			% \vp
+% 			% \vp
 			\STATE $\alpha_{q(\rho)} \leftarrow \alpha_\rho + \vone^\top\vp$
 			\STATE $\beta_{q(\rho)} \leftarrow \beta_\rho + n - \vone^\top\vp$ \\[1ex]
 			\STATE $\eta \leftarrow -\exp \left [ \mC \vmu + \half \diag{(\mC\mLambda\mC^\top)} \right ] + \psi{(\alpha_{q{(\rho)}})} - \psi{(\beta_{q{(\rho)}})}$ \\[1ex]
@@ -478,7 +478,7 @@
 		\frametitle{Parameterisations to fit model using GVA}
 		\begin{itemize}
 			% Detail what progress has been made, and what results have been obtained
-			\item There are several alternative parameterisations we've implemented or will implement
+			\item There are several \mbox{alternative} parameterisations we've implemented
 			      to fit this model:
 			      % Point out the advantages of each
 			      % \begin{enumerate}
@@ -494,8 +494,8 @@
 			      	\hline
 			      	Method                                   & Accuracy   & Speed      & Stability  \\
 			      	\hline
-			      	L-BFGS, $\mLambda = \mR \mR^\top$        & \checkmark &            & \checkmark \\
-			      	L-BFGS, $\mLambda = (\mR \mR^\top)^{-1}$ & \checkmark & \checkmark & \checkmark \\
+			      	L-BFGS, covariance param.        & \checkmark &            & \checkmark \\
+			      	L-BFGS, precision param. & \checkmark & \checkmark & \checkmark \\
 			      	Newton-Raphson iteration                 & \checkmark & \checkmark &            \\
 			      	\hline
 			      \end{tabular}	
@@ -531,9 +531,10 @@
 			      \end{align*}
 			\item Note that the lower rows of the product depend on the higher rows of the Cholesky factor. We will
 			      exploit this fact.
-			\item We parameterise $\mLambda$ as $\mLambda = \mR \mR^\top$ so that is is guaranteed to be symmetric.
-			      $\frac{p(p-1)}{2}$ parameters to deal with instead of $p^2$ parameters.
-			\item We ensure $\mLambda$ is positive semi--definite by parameterising $\mLambda_{ii} = \exp(\mR_{ii})^2$.
+			\item We parameterise $\mLambda$ as $\mLambda = \mR \mR^\top$ so that it's symmetric
+						and	we have half as many parameters to deal with.
+			\item We ensure $\mLambda$ is positive semi--definite by parameterising the diagonals
+						$\mLambda_{ii} = \exp(\mR_{ii})^2$.
 		\end{itemize}	
 	\end{frame}
 		
@@ -629,42 +630,52 @@
 			      Data Analysis Using Regression and Multilevel/Hierarchical Models by Andrew Gelman and Jennifer
 			      Hill, \S 6.7.
 			      % TODO: Might need more explanation.
-			\item The model is $$y_i = \beta_0 + \beta_1 t + \beta_1 t + \beta_2 t + u_i$$ where\\
-			      $y_i$ = cockroaches caught in apartment i \\
-			      $\beta_0$ = fixed intercept \\
-			      $\beta_1$ = time \\
-			      $\beta_2$ = time $\times$ treatment \\
+			\item The model is $$y_i = \beta_0 + \beta_1 t_i + \beta_2 t_i \times \text{treatment}_i + u_i, 1 \leq i \leq n$$ 
+			where\\
+			      $y_i$ = cockroaches caught in apartment i, \\
+			      $\beta_0$ = fixed intercept, \\
+			      $\beta_1$ = time, \\
+			      $\beta_2$ = time $\times$ treatment, \\
 			      $u_1, \ldots, u_{12}$ random intercepts for the 12 buildings in the study, and \\
-			      $t$ is the time in days\\
+			      $_it$ is the time in days\\
 		\end{itemize}
 	\end{frame}
 	
 		
+	% \begin{frame}
+	% 	\frametitle{Accuracy results}
+	% 	\begin{tabular}{|c|cccc|}
+	% 		\hline
+	% 		               & Laplace & GVA $(\mLambda=\mR \mR^\top)$ & GVA $[\mLambda=(\mR \mR)^{-1}]$ & GVA NR \\
+	% 		\hline
+	% 		$\vbeta_0$     & 0.84      & 0.94                          & 0.89                            & 0.94   \\
+	% 		$\vbeta_1$     & 0.85      & 0.99                          & 0.97                            & 0.99   \\
+	% 		$\vbeta_2$     & 0.85      & 0.97                          & 0.94                            & 0.97   \\
+	% 		$\vu_1$        & 0.86      & 0.95                          & 0.90                            & 0.95   \\
+	% 		$\vu_2$        & 0.88      & 0.95                          & 0.90                            & 0.95   \\
+	% 		$\vu_3$        & 0.83      & 0.94                          & 0.90                            & 0.94   \\
+	% 		$\vu_4$        & 0.58      & 0.93                          & 0.90                            & 0.93   \\
+	% 		$\vu_5$        & 0.75      & 0.88                          & 0.82                            & 0.88   \\
+	% 		$\vu_6$        & 0.62      & 0.83                          & 0.75                            & 0.83   \\
+	% 		$\vu_7$        & 0.87      & 0.94                          & 0.91                            & 0.94   \\
+	% 		$\vu_8$        & 0.83      & 0.97                          & 0.94                            & 0.97   \\
+	% 		$\vu_9$        & 0.65      & 0.84                          & 0.79                            & 0.84   \\
+	% 		$\vu_{10}$     & 0.84      & 0.96                          & 0.91                            & 0.96   \\
+	% 		$\vu_{11}$     & 0.84      & 0.95                          & 0.92                            & 0.95   \\
+	% 		$\vu_{12}$     & 0.79      & 0.96                          & 0.91                            & 0.96   \\
+	% 		$\sigma_\vu^2$ & 0.58      & 0.57                          & 0.62                            & 0.57   \\
+	% 		$\rho$         & 0.87      & 0.88                          & 0.87                            & 0.88   \\
+	% 		\hline
+	% 	\end{tabular}
+	% \end{frame}
+
 	\begin{frame}
-		\frametitle{Accuracy results}
-		\begin{tabular}{|c|cccc|}
-			\hline
-			               & Laplacian & GVA $(\mLambda=\mR \mR^\top)$ & GVA $[\mLambda=(\mR \mR)^{-1}]$ & GVA NR \\
-			\hline
-			$\vbeta_0$     & 0.84      & 0.94                          & 0.89                            & 0.94   \\
-			$\vbeta_1$     & 0.85      & 0.99                          & 0.97                            & 0.99   \\
-			$\vbeta_2$     & 0.85      & 0.97                          & 0.94                            & 0.97   \\
-			$\vu_1$        & 0.86      & 0.95                          & 0.90                            & 0.95   \\
-			$\vu_2$        & 0.88      & 0.95                          & 0.90                            & 0.95   \\
-			$\vu_3$        & 0.83      & 0.94                          & 0.90                            & 0.94   \\
-			$\vu_4$        & 0.58      & 0.93                          & 0.90                            & 0.93   \\
-			$\vu_5$        & 0.75      & 0.88                          & 0.82                            & 0.88   \\
-			$\vu_6$        & 0.62      & 0.83                          & 0.75                            & 0.83   \\
-			$\vu_7$        & 0.87      & 0.94                          & 0.91                            & 0.94   \\
-			$\vu_8$        & 0.83      & 0.97                          & 0.94                            & 0.97   \\
-			$\vu_9$        & 0.65      & 0.84                          & 0.79                            & 0.84   \\
-			$\vu_{10}$     & 0.84      & 0.96                          & 0.91                            & 0.96   \\
-			$\vu_{11}$     & 0.84      & 0.95                          & 0.92                            & 0.95   \\
-			$\vu_{12}$     & 0.79      & 0.96                          & 0.91                            & 0.96   \\
-			$\sigma_\vu^2$ & 0.58      & 0.57                          & 0.62                            & 0.57   \\
-			$\rho$         & 0.87      & 0.88                          & 0.87                            & 0.88   \\
-			\hline
-		\end{tabular}
+		\frametitle{Accuracy of parameter estimation}
+		\begin{figure}
+			% \caption{Accuracy of parameter estimation}
+			% \includegraphics[scale=0.23]{code/results/accuracy_plots_application_laplace-montage.pdf}
+			\includegraphics[scale=0.45]{code/results/accuracy_of_parameter_estimation.pdf}
+		\end{figure}
 	\end{frame}
 		
 	% Pretty pictures
@@ -679,8 +690,8 @@
 	\begin{frame}
 		\frametitle{Plots of the MCMC-estimated and approximating densities}
 		\begin{figure}
-			\caption{GVA ($\mLambda=(\mR \mR^\top)^{-1}$ parameterisation)}
-			\includegraphics[scale=0.23]{code/results/accuracy_plots_application_gva_3-montage.pdf}
+			\caption{GVA (precision parameterisation)}
+			\includegraphics[scale=0.23]{code/results/accuracy_plots_application_GVA-montage.pdf}
 		\end{figure}
 	\end{frame}
 		
@@ -719,9 +730,9 @@
 				Algorithm           & Error count \\
 				\hline
 				Laplace's algorithm & 12          \\
-				GVA                 & 1,771       \\
-				GVA NP              & 537         \\
-				GVA FP              & 992         \\
+				GVA covariance parameterisation                & 1,771       \\
+				GVA precision parameterisation              & 537         \\
+				GVA Newton-Raphson fixed point              & 992         \\
 				\hline
 			\end{tabular}
 		\end{table}
@@ -732,9 +743,11 @@
 			\item I'm intending to release the \texttt{zipvb} on GitHub when it's ready.
 			\item 1,463 lines of R, 117 lines of C++ using Eigen.
 			\item Interface is currently pretty rough. I'd prefer an interface modelled on \texttt{lme4}.
-			\item Random intercepts and random slopes are supported.
+			\item Random intercept and random slope models are supported.
 			\item Splines are also supported.
 			\item Other covariance structures could easily be added.
+			\item The current parameterisation is numerically unstable. We will re-implement the Gaussian
+						Variational Approximation part of the algorithm to solve this problem.
 		\end{itemize}	
 	\end{frame}
 		
