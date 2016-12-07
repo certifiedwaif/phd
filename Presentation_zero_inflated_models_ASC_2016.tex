@@ -13,7 +13,7 @@
 \usefonttheme{serif}
 
 \title{Gaussian Variational Bayes approximations to zero--inflated mixed models}
-\author{Mark Greenaway}
+\author{Mark Greenaway, John Ormerod}
 
 \mode<presentation>
 { \usetheme{boxes} }
@@ -116,16 +116,10 @@
 
 
 \begin{frame}
-	\frametitle{Extending to a zero--inflated mixed model}
-	We immediately extend this model to a multivariate mixed model formulation, allowing
-	us to fit random intercept and slope models and splines.
-
-	\cite{Zhao2006}
-\end{frame}
-
-
-\begin{frame}
 	\frametitle{Extending to a multivariate mixed effects model}
+	We extend this model to a multivariate mixed model formulation, allowing
+	us to fit random intercept and slope models and splines. \cite{Zhao2006}
+
 	\begin{figure}[h]
 		\centering
 		\begin{subfigure}[b]{0.4 \textwidth}
@@ -234,14 +228,15 @@
 
 \begin{frame}
 	\frametitle{Multivariate model formulation}
-	We use a zero-inflated Poisson random effects model.
+	We modify a Poisson random effects model to include the vector of non--zero indicators from
+	before.
 							
 	\medskip
 							
 	Suppose that we observe a vector of responses $\vy$ of length n, and matrices
 	of covariates $\mX$ and $\mZ$ of dimensions $n \times p$ and $n \times m$,
-	respectively.
-							
+	respectively.	
+
 	\begin{align*}
 		p(\vy|\vbeta, \vu, \vr)       & = \exp{\left[\vy^\top \mR(\mX \vbeta + \mZ \vu) - \vr^\top e^{\mX \vbeta + \mZ \vu} - \vone^\top \log{\Gamma(\vy + \vone)}\right]}, \\
 		\vr_i|\rho                    & \stackrel{\mbox{\tiny iid}}{\sim} \text{Bernoulli}(\rho), \ \{i \colon \vy_i=0\},                                                   \\
@@ -279,6 +274,8 @@
 					\cite{Ormerod2010}.
 		      		      		      		      		      		      		      
 		\item Fit $q(\vtheta)$ to the data by minimising the KL divergence between $p(\vtheta|\vy)$ and $q(\vtheta)$.
+
+		\item This turns statistical inference into an optimisation problem.
 		      		      		      		      		      		      		      
 		\item We iteratively update the parameters of each approximate distribution
 		      in turn until the lower bound of the approximation converges.
@@ -292,8 +289,8 @@
 		      %       \noindent will
 		      %       increase with each iteration.
 		      		      		      		      		      		      		      
-		\item If you use conjugate priors, a factored approximation can be used, and mean field updates can be used on
-		      each parameter in turn until convergence is reached.
+		\item If you use a factored approximation with conjugate distributions, these mean field
+			  updates will either have closed forms/be analytically tractable.
 	\end{itemize}
 \end{frame}
 
@@ -460,7 +457,7 @@
 			                               & \quad + \log  \int_{\mathbb{R}^{m}} \exp \big[ \vy^\top \mR \mZ \vu - \mR^\top b( \mX \vbeta + \mZ \vu)   \\
 			                               & \quad \quad \quad \quad \quad \quad \quad - \half {\vu^\top \mSigma^{-1} \vu } \big] d \vu + \text{const.} 
 		\end{align*}
-		where $b(x) = e^x$ and $c(x) = \log \Gamma(x + 1)$. But the Gaussian Variational lower bound $\log
+		where $b(x) = e^x$ and $c(x) = -\log \Gamma(x + 1)$. But the Gaussian Variational lower bound $\log
 		\underline{p}(\vmu, \mLambda)$ can be optimised using quasi-Newton Raphson style algorithms 
 		\cite{Nocedal2006}.
 		\begin{align*}		                                   
@@ -499,15 +496,16 @@
 			      	Newton-Raphson iteration  & \checkmark & \checkmark &            \\
 			      	\hline
 			      \end{tabular}	
-			\item These algorithms optimise the variational lower bound with respect to
+			\item These algorithms optimise the Gaussian Variational lower bound with respect to
 			      $\vmu$ and $\mLambda$.
-			\item These algorithms should all fit the same model to the same data
+			\item They should all fit the same model to the same data
 			      within numerical tolerances.
+			\item The crucial part is how we parameterise $\mLambda$.
 		\end{itemize}
 	\end{frame}
 			
 	\begin{frame}
-		\frametitle{Cholesky factors of $\mLambda$}
+		\frametitle{Parameterising $\mLambda$ using its' Cholesky factors}
 		\begin{itemize}
 			\item Any symmetric matrix $\mSigma$ can be written $\mSigma = \mR \mR^\top$
 			      where $\mR$ is lower triangular. $\mR$ is unique if $r_{ii} \geq 0$. 
@@ -541,8 +539,9 @@
 	\begin{frame}
 		\frametitle{Structure of $\mLambda$}
 		\begin{itemize}
-			\item By re-ordering the fixed and random effects in $\mLambda$, we end up with a covariance structure
-			      which is sparse in the first diagonal block.
+			\item By re-ordering the fixed and random effects in our design matrices and hence
+				  in $\mLambda$, we end up with a covariance structure which is sparse in the 
+				  upper left block.
 			      \begin{figure}
 			      	\begin{subfigure}{0.4\textwidth}
 			      		\includegraphics[scale=.15]{mX_mZ_mLambda.pdf}
@@ -719,10 +718,12 @@
 		% and slope, and a random intercept. $\vmu$ was initialised from a grid of points on the interval
 		% $[-4.5, 5]$ for intercept and slope. The error counts are presented below.
 				
-		The numerical stability of each fitting algorithm was assessed on simulated data by initialising
-		each algorithm from a range of different starting points. Errors due to numerical instability and the fitted
-		$\vmu$ were recorded for each starting point.
-				
+		\begin{itemize}
+			\item The numerical stability of each fitting algorithm was assessed on simulated data 
+					by initialising each algorithm from a range of different starting points.
+			\item A count of errors due to numerical instability and the fitted
+				  $\vmu$ were recorded for each starting point.
+		\end{itemize}				
 		\begin{table}
 			\caption{Count of numerical errors for each algorithm during stability tests}
 			\label{tab:stability_results}
@@ -733,21 +734,21 @@
 				Laplace's algorithm             & 12          \\
 				GVA covariance parameterisation & 1,771       \\
 				GVA precision parameterisation  & 537         \\
-				GVA Newton-Raphson fixed point  & 992         \\
+				% GVA Newton-Raphson fixed point  & 992         \\
 				\hline
 			\end{tabular}
 		\end{table}
 	\end{frame}
 		
-	\begin{frame}{R package}
+	\begin{frame}{Conclusion and future work}
 		\begin{itemize}
 			\item I'm intending to release the \texttt{zipvb} on GitHub when it's ready.
-			\item 1,463 lines of R, 117 lines of C++ using Eigen.
+			\item 1,463 lines of R, 117 lines of C++ using \texttt{Rcpp} and \texttt{RcppEigen}.
 			\item Interface is currently pretty rough. I'd prefer an interface modelled on \texttt{lme4}.
 			\item Random intercept and random slope models are supported.
 			\item Splines are also supported.
 			\item Other covariance structures could easily be added.
-			\item The current parameterisation is numerically unstable. We will re-implement the Gaussian
+			\item The current parameterisation is numerically unstable. We will modify the Gaussian
 			      Variational Approximation part of the algorithm to solve this problem.
 		\end{itemize}	
 	\end{frame}
