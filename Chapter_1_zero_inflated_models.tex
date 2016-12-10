@@ -487,7 +487,73 @@ Variational Approximation, as in \cite{ormerod09}. The model can be fit using Al
 	
 	\subsubsection{Covariance parameterisation}
 	
-	Assuming $q(\vnu) \sim N(\vmu, \mLambda)$, the Gaussian variational lower bound in Algorithm
+  \noindent Any symmetric matrix $\mSigma$ can be written as a product of its' Cholesky factors, $\mSigma =
+	\mR \mR^\top$   where $\mR$ is lower triangular. $\mR$ is unique if $\mR_{ii} \geq 0$.
+
+  \begin{align*}
+  	&\begin{pmatrix}
+  	\mR_{11}          & 0                                    & 0                                     \\
+  	\mR_{21}          & \mR_{22}                             & 0                                     \\
+  	\mR_{31}          & \mR_{32}                             & \mR_{33}                              
+  	\end{pmatrix}
+  	\begin{pmatrix}
+  	\mR_{11}          & \mR_{21}                             & \mR_{31}                              \\
+  	0                 & \mR_{22}                             & \mR_{32}                              \\
+  	0                 & 0                                    & \mR_{33}                              
+  	\end{pmatrix}
+  	\\
+  	=& \begin{pmatrix}
+  	\mR_{11}^2        &                                      & \text{symmetric}                      \\
+  	\mR_{21}\mR_{11} & \mR_{21}^2 + \mR_{22}^2 \\
+  	\mR_{31} \mR_{11} & \mR_{31}\mR_{21} + \mR_{32} \mR_{22} & \mR_{31}^2 + \mR_{32} ^2 + \mR_{33}^2 
+  	\end{pmatrix}.
+  \end{align*}
+
+  % \noindent By noticing that the lower rows of the product depend on the higher rows of the Cholesky factor, we
+  % observe that by re-ordering the fixed and random effects in $\mLambda$ so that the , we arrive at a covariance structure which is sparse in the first diagonal block. Thus the Cholesky factor of $\mLambda$ that we optimise over is as sparse as possible. This reduces the dimension of the optimisation problem we have to solve from
+  % $\BigO(np^2)$ to $\BigO(np)$.
+
+	\noindent By interchanging the fixed and random effects in the design matrix $\mC = [\mX \mZ]$ to $\mC = [\mZ \mX]$, and re-
+	ordering the dimensions of $\vmu, \mLambda$ and $\mSigma$ in the same manner, the independence between the
+	blocks relating to the random effects in $\mZ$ induce sparsity in the Cholesky factor $\mR$ of
+	$\mLambda^{-1}$, as can be seen in Figures \ref{fig:covfixedrandom}, \ref{fig:covrandomfixed},
+	\ref{fig:cholfixedrandom} and \ref{fig:cholrandomfixed}. Thus the Gaussian $q(\vnu) \sim \N(\vmu, \mLambda)$ can be optimised over a space of dimension
+	$\half p (p + 1) + pq + \half q (q + 1)$ rather than dimension $\half (p + mq) (p + mq + 1)$ as in the dense
+	parameterisation. This leads to subtantial performance gains when $m$ is large, as is typically the case in
+	problems of practical importance such as longitudinal or clinical trials or the application presented in
+	Section \ref{sec:application}.
+	
+	\noindent We parameterise $\mLambda$ as $\mLambda = \mR \mR^\top$ so that is is guaranteed to be symmetric.
+  $\frac{p(p-1)}{2}$ parameters to deal with instead of $p^2$ parameters.
+	
+	\noindent By re-ordering the fixed and random effects in $\mLambda$, we end up with a covariance structure
+	which is sparse in the first diagonal block.
+
+	\begin{figure}[p]
+		\caption{\tiny Covariance matrix -- Fixed effects before random effects}
+		\label{fig:covfixedrandom}
+		\includegraphics[scale=.25]{mX_mZ_mLambda.pdf}
+	\end{figure}
+
+	\begin{figure}[p]
+		\caption{\tiny Covariance matrix -- Random effects before fixed effects}
+		\label{fig:covrandomfixed}
+		\includegraphics[scale=.25]{mZ_mX_mLambda.pdf}
+	\end{figure}
+					      				      			      			      			      	
+	\begin{figure}[p]
+		\caption{\tiny Cholesky factor -- Fixed effects before random effects}
+		\label{fig:cholfixedrandom}
+		\includegraphics[scale=.25]{mX_mZ_cholesky.pdf}
+	\end{figure}
+
+	\begin{figure}[p]
+		\caption{\tiny Cholesky factor -- Random effects before fixed effects}
+		\label{fig:cholrandomfixed}
+		\includegraphics[scale=.25]{mZ_mX_cholesky.pdf}
+	\end{figure}
+
+	\noindent Assuming $q(\vnu) \sim N(\vmu, \mLambda)$, the Gaussian variational lower bound in Algorithm
 	\ref{alg:algorithm_one} can be optimised using a variety of algorithms. The variational lower bound is not
 	necessarily unimodal if $\vp$ and $\mLambda$ are free to vary, leading to potential difficulty in optimising
 	to the global maximum. However, for fixed $\vp$ and $\mSigma$, the variational lower bound is log-concave
@@ -501,7 +567,6 @@ Variational Approximation, as in \cite{ormerod09}. The model can be fit using Al
 		\log \underline{p}(\vmu, \mLambda; \vy) & = \quad \vy^\top\mP \mC \vmu - \vp^\top \exp[\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)] - \half \vmu^\top \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} + \log{|\mR|} \\
 		                                        & \quad - \tfrac{p}{2} \log{(2 \pi)} + \half \log{|\mSigma^{-1}|} + \tfrac{p}{2} \log{(2 \pi)} + \tfrac{p}{2}                                                                              \\
 	\end{align*}
-
 	\noindent with respect to $\vmu, \mLambda$, keeping $\vp, \mSigma, \rho$ fixed.
 	
 	\noindent To ensure symmetry of $\mLambda$, we parameterise the optimisation problem in terms of $\mLambda$'s
@@ -569,70 +634,6 @@ Variational Approximation, as in \cite{ormerod09}. The model can be fit using Al
 	$\va^\top\va$ where $\mC_{i} = $ the $i$th row of $\mC$, rather than calculating $\text{diag}(\mC \mLambda
 	\mC^\top)$ directly.
 	
-	Any symmetric matrix $\mSigma$ can be written as a product of its' Cholesky factors, $\mSigma = \mR \mR^\top$
-  where $\mR$ is lower triangular. $\mR$ is unique if $\mR_{ii} \geq 0$. 
-
-  \begin{align*}
-  	&\begin{pmatrix}
-  	\mR_{11}          & 0                                    & 0                                     \\
-  	\mR_{21}          & \mR_{22}                             & 0                                     \\
-  	\mR_{31}          & \mR_{32}                             & \mR_{33}                              
-  	\end{pmatrix}
-  	\begin{pmatrix}
-  	\mR_{11}          & \mR_{21}                             & \mR_{31}                              \\
-  	0                 & \mR_{22}                             & \mR_{32}                              \\
-  	0                 & 0                                    & \mR_{33}                              
-  	\end{pmatrix}
-  	\\
-  	=& \begin{pmatrix}
-  	\mR_{11}^2        &                                      & \text{symmetric}                      \\
-  	\mR_{21}\mR_{11} & \mR_{21}^2 + \mR_{22}^2 \\
-  	\mR_{31} \mR_{11} & \mR_{31}\mR_{21} + \mR_{32} \mR_{22} & \mR_{31}^2 + \mR_{32} ^2 + \mR_{33}^2 
-  	\end{pmatrix}.
-  \end{align*}
-
-  Notice that the lower rows of the product depend on the higher rows of the Cholesky factor. By re-ordering the fixed and random effects in $\mLambda$, we arrive at a covariance structure which is sparse in the first diagonal block. Thus the Cholesky factor of $\mLambda$ that we optimise over is as sparse as possible. 
-
-	\noindent By interchanging the fixed and random effects in $\mC = [\mX \mZ]$ to $\mC = [\mZ \mX]$, and re-
-	ordering the dimensions of $\vmu, \mLambda$ and $\mSigma$ in the same manner, the independence between the
-	blocks relating to the random effects in $\mZ$ induce sparsity in the Cholesky factor $\mR$ of
-	$\mLambda^{-1}$, as can be seen in Figures \ref{fig:covfixedrandom}, \ref{fig:covrandomfixed},
-	\ref{fig:cholfixedrandom} and \ref{fig:cholrandomfixed}. Thus the Gaussian $q(\vnu) \sim \N(\vmu, \mLambda)$ can be optimised over a space of dimension
-	$\half p (p + 1) + pq + \half q (q + 1)$ rather than dimension $\half (p + mq) (p + mq + 1)$ as in the dense
-	parameterisation. This leads to subtantial performance gains when $m$ is large, as is typically the case in
-	problems of practical importance such as longitudinal or clinical trials or the application presented in
-	Section \ref{sec:application}.
-	
-	We parameterise $\mLambda$ as $\mLambda = \mR \mR^\top$ so that is is guaranteed to be symmetric.
-  $\frac{p(p-1)}{2}$ parameters to deal with instead of $p^2$ parameters.
-	
-	By re-ordering the fixed and random effects in $\mLambda$, we end up with a covariance structure
-	which is sparse in the first diagonal block.
-
-	\begin{figure}[p]
-		\caption{\tiny Covariance matrix -- Fixed effects before random effects}
-		\label{fig:covfixedrandom}
-		\includegraphics[scale=.25]{mX_mZ_mLambda.pdf}
-	\end{figure}
-
-	\begin{figure}[p]
-		\caption{\tiny Covariance matrix -- Random effects before fixed effects}
-		\label{fig:covrandomfixed}
-		\includegraphics[scale=.25]{mZ_mX_mLambda.pdf}
-	\end{figure}
-					      				      			      			      			      	
-	\begin{figure}[p]
-		\caption{\tiny Cholesky factor -- Fixed effects before random effects}
-		\label{fig:cholfixedrandom}
-		\includegraphics[scale=.25]{mX_mZ_cholesky.pdf}
-	\end{figure}
-
-	\begin{figure}[p]
-		\caption{\tiny Cholesky factor -- Random effects before fixed effects}
-		\label{fig:cholrandomfixed}
-		\includegraphics[scale=.25]{mZ_mX_cholesky.pdf}
-	\end{figure}
-	
 	\noindent The Gaussian variational lower bound in this parameterisation is
 	\begin{align*}
 		\log \underline{p}(\vmu, \mLambda; \vy) & = \quad \vy\mP\mC \vmu - \vp^\top \exp(\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)) - \half \vmu^\top \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} \\
@@ -687,53 +688,53 @@ Variational Approximation, as in \cite{ormerod09}. The model can be fit using Al
 	b)^2$ floating point operations, and take the diagonal entries of the result. This is obviously wasteful, as
 	all of the off--diagonal entries of the resulting product are immediately discarded.
 
-	By parameterising $\mLambda$ in terms of its' Cholesky factors and realising that
+	\noindent By parameterising $\mLambda$ in terms of its' Cholesky factors and realising that
 
 	\[
 		\mC \mLambda \mC^\top = \mC \mR \mR^\top \mC^\top
 	\]
 
-	and that
+	\noindent and that
 
 	\[
 		\diag(\mC \mLambda \mC^\top)_{ii} = \mC_{i .} \mR \mR^\top \mC_{i .}^\top, 1 \leq i \leq n
 	\]
 
-	we can calculate the products $\mC_{i .} \mR, 1 \leq i \leq n$, using $n \times \frac{1}{2}(p + m b)(p + m b
-	+ 1)$ floating point operations, and storing the results of the $i$th product in the $i$th element of the
-	vector $\va$ and then calculate $\diag(\mC \mLambda \mC^\top) = \va^\top \va$.
+  \noindent we can calculate the products $\mC_{i .} \mR, 1 \leq i \leq n$, using $n \times \frac{1}{2}(p + m
+	b)(p + m b   + 1)$ floating point operations, and storing the results of the $i$th product in the $i$th
+	element of the   vector $\va$ and then calculate $\diag(\mC \mLambda \mC^\top) = \va^\top \va$.
 
-	Moreover, by exploiting our knowledge of the model, we can encode $\mR$ as a sparse matrix, and further reduce
-	this depending on the model. For example, in the random intercept case, only the diagonals of the random
-	effects blog need to be non-zero, and hence the above expression can be performed in
-	$n \times [m + \half{1}{2} p (p + 1) + p \times m b]$ floating point operations.
+  \noindent Moreover, by exploiting our knowledge of the model, we can encode $\mR$ as a sparse matrix, and
+	further reduce   this depending on the model. For example, in the random intercept case, only the diagonals of
+	the random   effects blog need to be non-zero, and hence the above expression can be performed in   $n \times
+	[m + \frac{1}{2} p (p + 1) + p \times m b]$ floating point operations.
 
 	% $\log |\mR|$ can be calculated using only $p + m b$ floating point operations, as $\mR$ is lower triangular.
 
-	For the precision parameterisation, we observe that in this parameterisation
+	\noindent For the precision parameterisation, we observe that in this parameterisation
 
 	\[
 		\diag(\mC \mLambda \mC^\top)_{ii} = \mC_{i .} \mR^{-T} \mR^{-1} \mC_{i .}^\top
 	\]
 
-	and so by solving
+	\noindent and so by solving
 
 	\[
 		\mR \va = \mC_{i .}^\top
 	\]
 
-	for $\va$ at a cost of $n \times \frac{1}{2} (p + m b) (p + m b + 1)$ floating point operations, and then
-	calculating
+	\noindent for $\va$ at a cost of $n \times \frac{1}{2} (p + m b) (p + m b + 1)$ floating point operations, and 
+	then calculating
 
 	\[
 		\diag(\mC \mLambda \mC^\top)_{ii} = \va^\top \va
 	\],
 
-	we can calculate $\diag(\mC \mLambda \mC^\top)$.
+	\noindent we can calculate $\diag(\mC \mLambda \mC^\top)$.
 
-	As above, by using our knowledge of the model being fit we can encode $\mR$ sparsely to decreate the required
-	computation still further. In the random intercept model case, the computational cost will drop to
-	$n \times [m + \half{1}{2} p (p + 1) + p \times m b]$.
+  \noindent As above, by using our knowledge of the model being fit we can encode $\mR$ sparsely to decreate
+	the required   computation still further. In the random intercept model case, the computational cost will drop
+	to   $n \times [m + \half{1}{2} p (p + 1) + p \times m b]$.
 
 	\section{Numerical results}
 	\label{sec:results}
