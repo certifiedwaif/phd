@@ -52,7 +52,7 @@ and we have observed 21 zeros. Hence,
 a Poisson model is not suitable.
 
 % Histogram
-\includegraphics[width=50mm, height=50mm]{code/univariate_data_histogram.pdf}
+% \includegraphics[width=50mm, height=50mm]{code/univariate_data_histogram.pdf}
 % Density
 \end{frame}
 
@@ -482,16 +482,16 @@ If we re-arrange the covariance matrix to have random effects before
 fixed effects, our posterior covariance matrix is of the form
 \begin{align*} \mLambda =
 \begin{pmatrix}
-\mLambda_\vu^2 & 0 & \ldots & 0 & \mLambda_{\vbeta \vu} & \mLambda_{\vbeta \vu} \\
+\mLambda_{\vu^2} & 0 & \ldots & 0 & \mLambda_{\vbeta \vu} & \mLambda_{\vbeta \vu} \\
 0 & \mLambda_{\vu}^2 & 0 & 0 & \vdots & \vdots \\
 \vdots & 0 & \ddots & 0 & \vdots & \vdots \\
-0 & 0 & \ldots & \mLambda_\vu^2 & \mLambda_{\vbeta \vu} & \mLambda_{\vbeta \vu} \\
-\mLambda_{\vbeta \vu} & \ldots & \ldots & \mLambda_{\vbeta \vu} & \mLambda_\vbeta_1^2 & \mLambda_{\vbeta_1 \vbeta_2} \\
-\mLambda_{\vbeta \vu} & \ldots & \ldots &\mLambda_{\vbeta \vu}  & \mLambda_{\vbeta_1 \vbeta_2} & \mLambda_\vbeta_2^2
+0 & 0 & \ldots & \mLambda_{\vu^2} & \mLambda_{\vbeta \vu} & \mLambda_{\vbeta \vu} \\
+\mLambda_{\vbeta \vu} & \ldots & \ldots & \mLambda_{\vbeta \vu} & \mLambda_{\vbeta_1^2} & \mLambda_{\vbeta_1 \vbeta_2} \\
+\mLambda_{\vbeta \vu} & \ldots & \ldots &\mLambda_{\vbeta \vu}  & \mLambda_{\vbeta_1 \vbeta_2} & \mLambda_{\vbeta_2^2}
 \end{pmatrix}
 \end{align*}
 
-As the $\sigma_\vu^2$ block is diagonal, the Cholesky factor is 
+As the $\sigma_{\vu^2}$ block is diagonal, the Cholesky factor is 
 sparse, with $\half m(m-1)$ zero elements. If $p$ is small
 and $m$ is large, as will typically be the case, then this algorithm will
 be much faster.

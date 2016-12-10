@@ -144,6 +144,6 @@ if (save) {
 }
 
 var_accuracy <- calculate_accuracies("application", mult, mcmc_samples, fit1, "Laplace", plot_flag=TRUE)
-var_accuracy2 <- calculate_accuracies("application", mult, mcmc_samples, fit2, "GVA", plot_flag=TRUE)
-var_accuracy3 <- calculate_accuracies("application", mult, mcmc_samples, fit3, "GVA2", plot_flag=TRUE)
-var_accuracy4 <- calculate_accuracies("application", mult, mcmc_samples, fit4, "GVA NP", plot_flag=TRUE)
+# var_accuracy2 <- calculate_accuracies("application", mult, mcmc_samples, fit2, "GVA", plot_flag=TRUE)
+var_accuracy3 <- calculate_accuracies("application", mult, mcmc_samples, fit3, "GVA", plot_flag=TRUE)
+# var_accuracy4 <- calculate_accuracies("application", mult, mcmc_samples, fit4, "GVA", plot_flag=TRUE)

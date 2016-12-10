@@ -13,6 +13,5 @@ LinkingTo: Rcpp, RcppEigen
 Imports:
     Rcpp,
     RcppEigen,
-    Matrix,
-    limma
+    Matrix
 RoxygenNote: 5.0.1

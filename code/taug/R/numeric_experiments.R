@@ -135,7 +135,7 @@ plot_graphs <- function() {
     facet_wrap(~vp, labeller=label_fn) +
     xlab("Correlation co-efficient") + ylab("ELBO")
 
-  combined_df %>%
+  combined_df %>% filter(vR2 < .75) %>%
     mutate(vn = factor(vn)) %>%
     ggplot(aes(x=vR2, y=vlog_p / velbo, color=vn)) +
     geom_line() +

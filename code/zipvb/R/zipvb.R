@@ -7,7 +7,6 @@
 #'@import RcppEigen
 #'@importFrom Rcpp sourceCpp
 #'@import Matrix
-#'@import limma
 #'@docType package
 #'@aliases zipvb zipvb-package
 

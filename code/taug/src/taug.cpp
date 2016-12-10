@@ -687,6 +687,34 @@ double log_p(int n, int p, double R2)
   return result;
 }
 
+
+//' Calculate AIC
+//'
+//' @param n The number of observations
+//' @param p The number of covariates
+//' @param R2 The correlation co-efficient, squared
+//' @return The value of the marginal log-likelihood log p(y)
+//' @export
+// [[Rcpp::export]]
+double aic(int n, int p, double R2)
+{
+	return -2 * log_p(n, p, R2) + 2 * p;
+}
+
+
+//' Calculate BIC
+//'
+//' @param n The number of observations
+//' @param p The number of covariates
+//' @param R2 The correlation co-efficient, squared
+//' @return The value of the marginal log-likelihood log p(y)
+//' @export
+// [[Rcpp::export]]
+double bic(int n, int p, double R2)
+{
+	return -2 * log_p(n, p, R2) + p * log(n);
+}
+
 //' Calculate the variational lower bound
 //'
 //' @param n The number of observations

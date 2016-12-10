@@ -68,6 +68,38 @@ The O'Sullivan splines paper shows that the integrals involved in calculating th
 
 Zero-inflated and Bayesian models
 
+Challis and Barber 2013
+
+Gaussian Kullback-Leibler Approximate Inference
+
+Constrained parameterisations of Gaussian covariance that make G-KL methods fast and scalable. But I'm fairly
+sure they don't have our exact parameterisation. Discusses complexity. Numerical results.
+
+This paper is worth reading closely. Our parameterisation is a mixture of the (c) Chevron and (d) Subspace
+structures.
+
+Challis and Barber 2011
+
+Concave Gaussian Variational Approximations for Inference in Large-Scale Bayesian Linear Models
+
+Looks at relationships between two popular approaches to forming bounds in approximate Bayesian inference
+(local variational methods and minimal Kullback-Leibler divergence methods, the latter of which we use).
+
+Also looks at the computational complexity of calculating the lower bound for various forms of
+parameterisation of the covariance matrix.
+
+Eklund and Karlsson 2007
+
+Computational Efficiency in Bayesian Model and Variable Selection
+
+Talks about MCMC schemes for model averaging by adding and removing single covariates or swapping covariates,
+as well as more sophisticated schemes.
+
+Also talks about the computational complexity of solving the least squares problem: how people very rarely
+invert $\mX^\top \mX$, and instead work with a matrix factorisation of the form $A B$ that is easy to solve,
+either the $QR$ factorisation which is considered to have good numerical properties or the Cholesky
+factorisation when the matrix involved is a large $p$ by $p$ matrix.
+
 \section{Chapter 3 -- Variational Bayes for Linear Model Selection Using Mixtures of g-Priors}
 
 Zellner 1980
@@ -131,7 +163,7 @@ Bayorri, Berger, Forte and Garci\'{a} 2012
 Criteria for Bayesian Model Choice with Application to Variable Selection
 
 Has many good references for model selection in a Bayesian framework. I should probably go through all of them
-to make sure I've made a thorough survey of the field.
+to make sure I've made a thorough survey of the field:
 
 Jeffreys (1961)
 Zellner and Siox (1980, 1984)

@@ -21,9 +21,9 @@ xaxis_labels <- c(expression(beta[0]),
 									expression(rho))
 axis(1, at=1:length(xaxis_labels), labels = xaxis_labels)
 lines(accuracy[,3], ylim=c(0, 1), type="l", col="red")
-lines(accuracy[,4], ylim=c(0, 1), type="l", col="green")
+lines(accuracy[,4], ylim=c(0, 1), type="l", col="blue")
 # lines(accuracy[,5], ylim=c(0, 1), type="l", col="blue")
 legend("bottomright",
-				c("Laplace", "GVA covariance", "GVA precision", "GVA NR"),
-				fill=c("black", "red", "green", "blue"))
+				c("Laplace", "GVA covariance", "GVA precision"),
+				fill=c("black", "red", "blue"))
 dev.off()

@@ -1,4 +1,5 @@
 \documentclass{amsart}[12pt]
+% \documentclass[times, doublespace]{anzsauth}
 
 \addtolength{\oddsidemargin}{-.75in}%
 \addtolength{\evensidemargin}{-.75in}%
@@ -128,7 +129,7 @@ underfitting. Several model selection criteria have been proposed to balance the
 AIC (\cite{DeLeeuw1992}), BIC (\cite{Schwarz1978}), Mallow's $C_p$ and DIC. As \cite{Breiman1996} and
 \cite{Efron2013} showed, while  the standard formulation of a linear model is unbiased, the goodness of fit of
 these models is numerically  unstable. Breiman showed that by introducing a penalty on the size of the
-regression co- efficients such as  in ridge regression, this numerical stability can be avoided. This reduces
+regression co- efficients such as  in ridge regression, this numerical instability can be avoided. This reduces
 the variances of the co-efficient estimates, at the expense of introducing some bias --- the bias--variance
 trade--off.
 
@@ -166,10 +167,10 @@ with priors
 	p(g) & = \frac{g^{-b} (1 + g)^{- a - b - 2}}{\Beta(a + 1, b + 1)} \I(g > 0).
 \end{align*}
 
-\cite{Goel1986} constructed a family of priors for a Gaussian regression model using a particular form of
-conjugate Normal-Gamma model, where the prior covariance matrix of $\vbeta$ is taken to be a multiple of the
-Fisher information  matrix by the parameter $g$. This places the most prior mass on $\vbeta$ on the section of
-the parameter space where the data is least informative.
+Zellner constructed a family of priors for a Gaussian regression model using a particular form of conjugate
+Normal-Gamma model, where the prior covariance matrix of $\vbeta$ is taken to be a multiple of the Fisher
+information  matrix by the parameter $g$ \cite{Goel1986}. This places the most prior mass on $\vbeta$ on the
+section of the parameter space where the data is least informative.
 
 \mgc{expand on this? See STAT260 combined lecture notes, page 55}
 
@@ -374,10 +375,6 @@ be calculated from it as shown in Algorithm \ref{alg:algorithm_two}.
 \section{Numerical experiments}
 \label{sec:num_exp}
 
-Exact posterior and approximate shrinkage $\left( \frac{g}{1 + g} \right)$ were calculated for a range of
-values of $p$, $n$ and $R^2$ to compare their values. As can be seen from Figure $\ref{fig:shrinkage}$, the
-values of the exact posterior shrinkage and approximate shrinkage are almost the same over most of the range
-of these values, with deviation only noticeable in the $p=10$ and $p=20$ cases.
 
 % vw1 <- read.csv("Hitters_vw1.csv", header=FALSE)
 % r <- hist(as.matrix(vw1), breaks=19, axes=FALSE, prob=TRUE, main="", xlab="")
@@ -395,9 +392,10 @@ of these values, with deviation only noticeable in the $p=10$ and $p=20$ cases.
 % \end{tabular}
 
 \subsection{Hitters}
-Source: \cite{James:2014:ISL:2517747}
 
-Figure \ref{fig:Hitters_inclusion}
+The Hitters data set was taken from Source: \cite{James:2014:ISL:2517747}
+
+The marginal covariate inclusion probabilities are presented in Figure \ref{fig:Hitters_inclusion}
 
 \begin{figure}[p]
 \label{fig:Hitters_inclusion}
@@ -406,9 +404,9 @@ Figure \ref{fig:Hitters_inclusion}
 \end{figure}
 
 \subsection{Body Fat}
-Source: \cite{James:2014:ISL:2517747}
+The Body Fat data set was taken from Source: \cite{James:2014:ISL:2517747}
 
-Figure \ref{fig:bodyfat_inclusion}
+The marginal covariate inclusion probabilities are presented in Figure \ref{fig:bodyfat_inclusion}
 
 % \begin{tabular}{|l|lllllllllllll|}
 % 	\hline
@@ -424,9 +422,9 @@ Figure \ref{fig:bodyfat_inclusion}
 \end{figure}
 
 \subsection{Wage}
-Source: \cite{James:2014:ISL:2517747}
+The Wage gap data set was taken from Source: \cite{James:2014:ISL:2517747}
 
-Figure \ref{fig:Wage_inclusion}
+The marginal covariate inclusion probabilities are presented in Figure \ref{fig:Wage_inclusion}
 
 % \begin{tabular}{|l|lllllllllllllllll|}
 % 	\hline
@@ -442,9 +440,9 @@ Figure \ref{fig:Wage_inclusion}
 \end{figure}
 
 \subsection{Graduation Rate}
-Source: \cite{James:2014:ISL:2517747}
+The Graduation Rate data set was taken from Source: \cite{James:2014:ISL:2517747}
 
-Figure \ref{fig:GradRate_inclusion}
+The marginal covariate inclusion probabilities are presented in Figure \ref{fig:GradRate_inclusion}
 
 % \begin{tabular}{|l|lllllllllllllllll|}
 % 	\hline
@@ -460,9 +458,9 @@ Figure \ref{fig:GradRate_inclusion}
 \end{figure}
 
 \subsection{US Crime}
-Source: \cite{James:2014:ISL:2517747}
+The US Crime data set was taken from Source: \cite{James:2014:ISL:2517747}
 
-Figure \ref{fig:USCrime_inclusion}
+The marginal covariate inclusion probabilities are presented in Figure \ref{fig:USCrime_inclusion}
 
 % \begin{tabular}{|l|lllllllllllllll|}
 % 	\hline
@@ -478,6 +476,12 @@ Figure \ref{fig:USCrime_inclusion}
 \end{figure}
 
 \subsection{Shrinkage}
+
+Exact posterior and approximate shrinkage $\left( \frac{g}{1 + g} \right)$ were calculated for a range of
+values of $p$, $n$ and $R^2$ to compare their values. As can be seen from Figure $\ref{fig:shrinkage}$, the
+values of the exact posterior shrinkage and approximate shrinkage are almost the same over most of the range
+of these values, with deviation only noticeable in the $p=10$ and $p=20$ cases.
+
 Figure \ref{fig:shrinkage}
 
 \begin{figure}[p]

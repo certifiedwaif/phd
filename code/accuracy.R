@@ -163,7 +163,8 @@ calculate_accuracies <- function(test, mult, mcmc_samples, var_result, approxima
   # TODO: Add support for checking the accuracy over multiple dimensions
   # cubature$adaptIntegrate
   
-  if (plot_flag) pdf(paste0("results/accuracy_plots_", test, "_", approximation, ".pdf"), width=6, height=6)
+  # if (plot_flag) pdf(paste0("results/accuracy_plots_", test, "_", approximation, ".pdf"), width=6, height=6)
+  if (plot_flag) pdf(paste0("~/phd/code/results/accuracy_plots_", test, "_", approximation, ".pdf"), width=6, height=6)
   #return(var_result)
   # vbeta accuracy
   
@@ -186,7 +187,7 @@ calculate_accuracies <- function(test, mult, mcmc_samples, var_result, approxima
       vbeta_accuracy[i] <- calculate_accuracy(mcmc_samples$vbeta[,i], dnorm,
                                               var_result$vmu[i], sqrt(var_result$mLambda[i,i]))
       vbeta_means[i] <- mean(mcmc_samples$vbeta[, i])
-      title <- latex2exp(sprintf("%s $\\textbf{\\beta_%d}$ accuracy: %2.3f%%", approximation, i, vbeta_accuracy[i]))
+      title <- latex2exp(sprintf("%s $\\textbf{\\beta_%d}$ accuracy: %2.1f%%", approximation, i, vbeta_accuracy[i]))
       if (print_flag) print(title)
       if (plot_flag) accuracy_plot(title, mcmc_samples$vbeta[,i], dnorm,
                                    var_result$vmu[i], sqrt(var_result$mLambda[i,i]))
@@ -210,7 +211,7 @@ calculate_accuracies <- function(test, mult, mcmc_samples, var_result, approxima
         vu_means[i] <- mean(mcmc_samples$vu[, m_idx, b_idx])
         vu_sd <- sqrt(var_result$mLambda[i + mult$p, i + mult$p])
         vu_accuracy[i] <- calculate_accuracy(mcmc_samples$vu[, m_idx, b_idx], dnorm, vu_mean, vu_sd)
-        title <- latex2exp(sprintf("%s $\\textbf{u}_{%d}$ accuracy: %2.3f%%", approximation, i, vu_accuracy[i]))
+        title <- latex2exp(sprintf("%s $\\textbf{u}_{%d}$ accuracy: %2.1f%%", approximation, i, vu_accuracy[i]))
         if (print_flag) print(title)
         if (plot_flag) accuracy_plot(title, mcmc_samples$vu[, m_idx, b_idx], dnorm, vu_mean, vu_sd)
 
@@ -224,7 +225,7 @@ calculate_accuracies <- function(test, mult, mcmc_samples, var_result, approxima
         vu_sd <- sqrt(var_result$mLambda[i + mult$p, i + mult$p])
         vu_accuracy[i] <- calculate_accuracy(mcmc_samples$vu[, i], dnorm, vu_mean, vu_sd)
         vu_means[i] <- mean(mcmc_samples$vu[, i])
-        title <- sprintf("%s vu[%d] accuracy: %2.0f%%", approximation, i, vu_accuracy[i], "\n")
+        title <- sprintf("%s vu[%d] accuracy: %2.1f%%", approximation, i, vu_accuracy[i], "\n")
         if (print_flag) print(title)
         if (plot_flag) accuracy_plot(title, mcmc_samples$vu[, i], dnorm, vu_mean, vu_sd)
       }
@@ -505,7 +506,8 @@ test_spline_accuracy <- function(mult, allKnots, fit, approximation, plot=FALSE)
   }
 
   if (plot) {
-    pdf(sprintf("results/accuracy_plots_spline_%s.pdf", approximation))
+    # pdf(sprintf("results/accuracy_plots_spline_%s.pdf", approximation))
+    pdf(sprintf("~/phd/code/results/accuracy_plots_spline_%s.pdf", approximation))
     # pdf(sprintf("results/splines_ci_%s.pdf", approximation))
     within_bounds_idx <- (mult$mX[, 2] > -1) && (mult$mX[, 2] < 1)
     plot(x[within_bounds_idx], exp(vb_lci[within_bounds_idx]), type="l", col="blue",

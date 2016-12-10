@@ -1,4 +1,4 @@
-
+library(ISLR)
 
 #rm(list = ls())
 
@@ -10,7 +10,6 @@ SETTING <- 1
 
 if (SETTING==1) 
 {
-	library(ISLR)
 	Hitters <- na.omit(Hitters)
 	
 	# Get y vector and X matrix
