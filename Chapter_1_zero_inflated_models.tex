@@ -116,7 +116,7 @@ and $\mC = [ \mX \mZ ]$.
 Let $\vbeta$ be the $p \times 1$ column vector representing the fixed effects,
 $\vu$ be the $m b \times 1$ column vector representing the random effects
 and $\vnu = [\vbeta^\top, \vu^\top]$.
-Let $\mSigma$, $\mPsi$ and $\mLambda$ be $(p + m b + 1) \times (p + m b + 1)$ matrices.
+Let $\mSigma$, $\mPsi$ and $\mLambda$ be $(p + m b) \times (p + m b)$ matrices.
 Let $\vp$ be the $n \times 1$ column vector of probabilities that each observation in $\vy$ is non-zero.
 Let $\expit(x)$ denote the function $\tfrac{1}{1 + \exp(-x)}$, the inverse of the logit function.
 Let $p(x)$ be the full probability distribution, and $q(x)$ be the approximating probability distribution.
@@ -166,8 +166,6 @@ optimisation methods must be used, as for the Gaussian Variational Approximation
 in this paper. These methods are generally difficult to apply in practice, as the problems can involve the
 optimisation of many parameters over high-dimensional, constrained spaces whose constraints cannot be simply
 expressed.
-
-\newpage 
 
 \joc{
 	Comments: 
@@ -221,14 +219,14 @@ $i$ with the remaining $q_j^*(\theta_j)$, $j\ne i$ fixed, results in a monotonic
 Kullback-Leibler divergence. Note that a combination of (A) and (B) can be used which has recently
 been formalized by Rohde \& Wand (2015). 
 
-\noindent Note that it can easily be shown that
+\noindent It can easily be shown that
 
 $$
 \ds \log p(\vy) = \int q(\vtheta;\vxi)\frac{p(\vy|\vtheta)p(\vtheta)}{q(\vtheta;\vxi)} d\vtheta + \text{KL}(q(\vtheta;\vxi)||p(\vtheta|\vy)).
 $$
 
-\noindent Noting the Kullback-Leibler divergence is strictly positive the first term on the right hand side
-defined a lower bound on the marginal log-likelihood which we will denfine by
+\noindent As the Kullback-Leibler divergence is strictly positive, the first term on the right hand side
+is a lower bound on the marginal log-likelihood which we will define by
 $$
 \ds \log \underline{p}(\vy;\vxi) \equiv \int q(\vtheta;\vxi)\frac{p(\vy|\vtheta)p(\vtheta)}{q(\vtheta;\vxi)} d\vtheta
 $$
@@ -244,11 +242,10 @@ $\text{KL}(q(\vtheta;\vxi)||p(\vtheta|\vy))$.
 
 \subsection{Modeling zero-inflated Poisson data}
 
-Suppose we have a sample of counts $y_i$, $1\le i\le n$, where there are excessive number of zeros 
-for a Poisson model, but the sample otherwise behaves like a Poisson sample.
-
-There are two main  parameterizations for modelling such data. The first approach models the probability of a
-zero by $\rho$ and adjusts for counts greater than zero. This model uses
+Suppose we have a sample of counts $y_i$, $1\le i\le n$, where there are excessive number of zeros  for a
+Poisson model, but the sample otherwise behaves like a Poisson sample. There are two main  parameterizations
+for modelling such data. The first approach models the probability of a zero by $\rho$ and adjusts for counts
+greater than zero. This model uses
 
 $$
 P(Y_i = 0) = \rho, 
@@ -285,12 +282,12 @@ $$
 $\vx_i,\vbeta\in\bR^p$ with $\vx_i$ being a vector of observed predictors and $\vbeta$ is 
 a vector of regression coefficients. Let $\vr = (r_1,\ldots,r_n)$
  
-\begin{equation}\label{eq:main}
+\begin{equation}%\label{eq:main}
 	\begin{array}{rl}
 		\log p(\vy|\vr, \vbeta) 
-		    & = \vy^T \mR (\mX\vbeta)                              
-		- \vr^T \exp{(\mX\vbeta)} 
-		- \vone^T \log{\Gamma{(\vy + \vone)}}, \quad \mbox{ and }\\ [1ex]
+		    & = \vy^\top \mR (\mX\vbeta)                              
+		- \vr^\top \exp{(\mX\vbeta)} 
+		- \vone^\top \log{\Gamma{(\vy + \vone)}}, \quad \mbox{ and }\\ [1ex]
 		r_i & \sim \text{Bernoulli}(1-\rho), \quad 1 \leq i \leq n \\
 	\end{array}
 \end{equation} 
@@ -329,40 +326,30 @@ Start with a single observation before using matrix/vector notation.}
 	\end{array}
 \end{equation}
 
-\noindent \joc{(The prior structure will depend on the structure of the rrandom effects model)}
+\noindent \joc{(The prior structure will depend on the structure of the random effects model)}
 with priors
-
-$$ 
-\begin{array}{rl}
-	\log{p(\mSigma_{\vu \vu})}     & = \text{Inverse Wishart}(\mPsi, v),     \\
-	p(\rho)                        & \propto 1                               \\ 
-	\mbox{ and } \vnu|\sigma_\vu^2 & \sim \mbox{N}(\vzero, \sigma_\vu^2 \mI) \\
-\end{array}
-$$
-
-
 \begin{align*}
 	\log{p(\mSigma_{\vu \vu})} & = \text{Inverse Wishart}(\mPsi, v), \\
-	\rho \sim \mbox{Uniform}(0, 1),\\
-	\vbeta|\sigma^2_\vbeta \sim \N_p(\vzero, \sigma^2_\vbeta \mI)\\
-	\mbox{ and } \vu|\mG \sim \N_{mb}(\vzero, \mG)
+	\rho &\sim \mbox{Uniform}(0, 1),\\
+	\vbeta|\sigma^2_\vbeta &\sim \N_p(\vzero, \sigma^2_\vbeta \mI)\\
+	\mbox{ and } \vu|\mG &\sim \N_{mb}(\vzero, \mG)
 \end{align*}
 
 
 \noindent where $\mX$ is $n \times p$, $\mZ$ is $n \times mb$ and $\mSigma_{\vu \vu}$ is $mb \times mb$ and
 $\mPsi$ is $b \times b$.
 
-The covariance of $\Cov(\vu) \equiv \blockdiag_{1 \leq i \leq m} (\mSigma) \equiv \mI_m \otimes \mSigma$.
+\noindent The covariance of $\Cov(\vu) \equiv \blockdiag_{1 \leq i \leq m} (\mSigma) \equiv \mI_m \otimes \mSigma$.
 
-In the random intercept case, $\mSigma = \sigma_u^2 \mI$ while in the random slopes case
-$\mSigma = 
+\noindent In the random intercept case, $\mSigma = \sigma_u^2 \mI$ while in the random slopes case
+$$\mSigma = 
 \begin{pmatrix}
 \sigma_{\vu_1}^2 & \rho_{\vu_1 \vu_2} \sigma_{\vu_1} \sigma_{\vu_2} \\
 \rho_{\vu_1 \vu_2} \sigma_{\vu_1} \sigma_{\vu_2} & \sigma_{\vu_2}^2
 \end{pmatrix}
-$
+$$
 where $\sigma_{\vu_1}^2$ is the variance of the random intercepts, $\sigma_{\vu_2}^2$ is the variance of the
-random slopes and $\rho_\vu$ is the covariance between the random intercepts and random slopes.
+random slopes and $\rho_{\vu_1 \vu_2}$ is the correlation between the random intercepts and random slopes.
 
 % \joc{Shouldn't we specify the structure of $\mSigma_{\vu \vu})$ later
 % which is different for the random intercept, slope and spline cases?}
@@ -377,11 +364,11 @@ Typically zero-inflated models arise in applications where we wish to build mult
 be able to construct multivariate models with as much generality as possible, we specify the full model as a
 General Design Bayesian Generalized Linear Mixed Model, as in \cite{zhao06}.
 
-\noindent This allows us to incorporate within-subject correlation, and smoothing splines (as in
-\cite{Wand2008}) in our models.
+\noindent This allows us to incorporate within-subject correlation and smoothing splines (as in
+\cite{Wand2008}) into our models.
 
-General Design Bayesian Generalized Linear Mixed Model, as in \cite{zhao06}. This allows us to incorporate
-within-subject correlation, and smoothing splines (as in \cite{Wand2008}) in our models.
+% General Design Bayesian Generalized Linear Mixed Model, as in \cite{zhao06}. This allows us to incorporate
+% within-subject correlation, and smoothing splines (as in \cite{Wand2008}) in our models.
 
 
 % Idea: We can use an approximation of the from q(\beta, \u, \Sigma) q(\rho) \Product q(r_i)
@@ -390,18 +377,15 @@ within-subject correlation, and smoothing splines (as in \cite{Wand2008}) in our
 
 \subsection{Approximation}
 
-Our variational approximation for models of the form 
+Our variational approximation for the model is of the form 
 $$
 q(\vr_0, \vnu, \sigma_{\vu}^2, \rho) = q(\vnu)q(\rho) q(\vr_0)q(\mSigma_{\vu \vu})  \\
 $$
 
 \noindent 
 where we define $\vr_0 = \{ r_i : y_i = 0 \}$,
-$q(\sigma_{\vu}^2) = \mbox{Inverse Wishart}\left(\mPsi + \sum_{i=1}^m \vmu_i \vmu_i^\top + \mLambda_{\vu_i \vu_i}, v + m + 
-p\right)$ \mbox{and } $q(r_i) = \Bernoulli{(p_i)}$
-
-\noindent 
-with
+$q(\sigma_{\vu}^2) = \mbox{Inverse Wishart}\left(\mPsi + \sum_{i=1}^m (\vmu_i \vmu_i^\top + \mLambda_{\vu_i \vu_i}), v + m + 
+p\right)$ \mbox{and } $q(r_i) = \Bernoulli{(p_i)}$ with
 $$
 p_i = \expit\left[ \psi{(\alpha_{q(\rho)})} - \psi{(\beta_{q(\rho)})} - \exp{(c_i^\top\vmu + \half c_i^\top \mLambda c_i)} \right]
 $$
@@ -465,21 +449,23 @@ Variational Approximation, as in \cite{ormerod09}. The model can be fit using Al
 	% NR
 	% Detail the function and its derivatives
 	
-	Taylor expanding the full log likelihood once around the mode yields the following approximation to the
-	log-liklihood:
+	\noindent Taylor expanding the full log likelihood once around the mode yields the following approximation to 
+	the	log-likelihood:
 	\begin{align*}
 		\log \underline{p}(\vmu, \mLambda; \vy) = \vy^\top\mP\mC\vmu - \vp^\top\exp \left (\mC \vmu \right ) - \half \vmu^\top \mSigma^{-1} \vmu. 
 	\end{align*}
 	
-	This can be iteratively optimised  where with respect to $\vmu$ and $\mLambda$ using a Newton-Raphson style
+	\noindent This can be iteratively optimised with respect to $\vmu$ and $\mLambda$ using a Newton-Raphson style
 	algorithm.
+
+	\mgc{Are the derivatives better placed in the appendices?}
 
 	\begin{align*}
 		\frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \vmu}     & \approx \mP \mC (\vy - \exp{(\mC \vmu)}) - \mSigma^{-1} \vmu \text{ and} \\
 		\frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \mLambda} & \approx - \mC^\top \text{diag}(\vp e^{(\mC \vmu)}) \mC - \mSigma^{-1}.   
 	\end{align*}
 	
-	The steps of the algorithm are shown in Algorithm \ref{alg:laplace_alg}.
+	\noindent The steps of the algorithm are shown in Algorithm \ref{alg:laplace_alg}.
 	
 	\begin{algorithm}
 		\caption{Laplace scheme for optimising $\log \underline{p}(\vmu, \mLambda; \vy)$}
@@ -541,11 +527,14 @@ Variational Approximation, as in \cite{ormerod09}. The model can be fit using Al
 	specify a sparse matrix structure, greatly reducing the dimension of   the problem and thus improving both
 	computational speed and numeric accuracy.
 	
-	The first variant of the Gaussian Variational Approximation algorithm that we present optimises the Gaussian
-	variational lower bound of the log likelihood with respect to $\vmu$ and the Cholesky decomposition $\mR$ of
-	$\mLambda$, that is, $\mLambda = \mR \mR^\top$. This algorithm trades the computational complexity of
-	numerically evaluating an integral for greatly increased accuracy in the approximating posterior
-	distribution. The resulting function is below and can be optimised with L-BFGS-B.
+  \noindent The first variant of the Gaussian Variational Approximation algorithm that we present optimises
+	the    Gaussian variational lower bound of the log likelihood with respect to $\vmu$ and the Cholesky
+	decomposition $\mR$ of   $\mLambda$, that is, $\mLambda = \mR \mR^\top$.
+
+	% This algorithm trades the computational complexity of
+	% numerically evaluating an integral for greatly increased accuracy in the approximating posterior
+	% distribution. 
+	The resulting function is below and can be optimised with L-BFGS-B.
 	
 	% Detail the function and its derivatives
 	\begin{align*}
@@ -607,7 +596,8 @@ Variational Approximation, as in \cite{ormerod09}. The model can be fit using Al
 	\noindent By interchanging the fixed and random effects in $\mC = [\mX \mZ]$ to $\mC = [\mZ \mX]$, and re-
 	ordering the dimensions of $\vmu, \mLambda$ and $\mSigma$ in the same manner, the independence between the
 	blocks relating to the random effects in $\mZ$ induce sparsity in the Cholesky factor $\mR$ of
-	$\mLambda^{-1}$. Thus the Gaussian $q(\vnu) \sim \N(\vmu, \mLambda)$ can be optimised over a space of dimension
+	$\mLambda^{-1}$, as can be seen in Figures \ref{fig:covfixedrandom}, \ref{fig:covrandomfixed},
+	\ref{fig:cholfixedrandom} and \ref{fig:cholrandomfixed}. Thus the Gaussian $q(\vnu) \sim \N(\vmu, \mLambda)$ can be optimised over a space of dimension
 	$\half p (p + 1) + pq + \half q (q + 1)$ rather than dimension $\half (p + mq) (p + mq + 1)$ as in the dense
 	parameterisation. This leads to subtantial performance gains when $m$ is large, as is typically the case in
 	problems of practical importance such as longitudinal or clinical trials or the application presented in
@@ -620,23 +610,27 @@ Variational Approximation, as in \cite{ormerod09}. The model can be fit using Al
 	which is sparse in the first diagonal block.
 
 	\begin{figure}[p]
-		\includegraphics[scale=.25]{mX_mZ_mLambda.pdf}
 		\caption{\tiny Covariance matrix -- Fixed effects before random effects}
+		\label{fig:covfixedrandom}
+		\includegraphics[scale=.25]{mX_mZ_mLambda.pdf}
 	\end{figure}
 
 	\begin{figure}[p]
-		\includegraphics[scale=.25]{mZ_mX_mLambda.pdf}
 		\caption{\tiny Covariance matrix -- Random effects before fixed effects}
+		\label{fig:covrandomfixed}
+		\includegraphics[scale=.25]{mZ_mX_mLambda.pdf}
 	\end{figure}
 					      				      			      			      			      	
 	\begin{figure}[p]
-		\includegraphics[scale=.25]{mX_mZ_cholesky.pdf}
 		\caption{\tiny Cholesky factor -- Fixed effects before random effects}
+		\label{fig:cholfixedrandom}
+		\includegraphics[scale=.25]{mX_mZ_cholesky.pdf}
 	\end{figure}
 
 	\begin{figure}[p]
-		\includegraphics[scale=.25]{mZ_mX_cholesky.pdf}
 		\caption{\tiny Cholesky factor -- Random effects before fixed effects}
+		\label{fig:cholrandomfixed}
+		\includegraphics[scale=.25]{mZ_mX_cholesky.pdf}
 	\end{figure}
 	
 	\noindent The Gaussian variational lower bound in this parameterisation is
@@ -706,15 +700,15 @@ Variational Approximation, as in \cite{ormerod09}. The model can be fit using Al
 	\]
 
 	we can calculate the products $\mC_{i .} \mR, 1 \leq i \leq n$, using $n \times \frac{1}{2}(p + m b)(p + m b
-	+ 1)$ floating point operations, and store them in a vector $\va$ and then calculate $\diag(\mC \mLambda
-	\mC^\top) = \va^\top \va$.
+	+ 1)$ floating point operations, and storing the results of the $i$th product in the $i$th element of the
+	vector $\va$ and then calculate $\diag(\mC \mLambda \mC^\top) = \va^\top \va$.
 
-	Moreover, by exploiting our knwoledge of the model, we can encode $\mR$ as a sparse matrix, and further reduce
+	Moreover, by exploiting our knowledge of the model, we can encode $\mR$ as a sparse matrix, and further reduce
 	this depending on the model. For example, in the random intercept case, only the diagonals of the random
 	effects blog need to be non-zero, and hence the above expression can be performed in
-	$n \times [m + \half{1}{2} p (p + 1) + p \times m b]$.
+	$n \times [m + \half{1}{2} p (p + 1) + p \times m b]$ floating point operations.
 
-	$\log |\mR|$ can be calculated using only $p + m b$ floating point operations, as $\mR$ is lower triangular.
+	% $\log |\mR|$ can be calculated using only $p + m b$ floating point operations, as $\mR$ is lower triangular.
 
 	For the precision parameterisation, we observe that in this parameterisation
 
@@ -729,13 +723,13 @@ Variational Approximation, as in \cite{ormerod09}. The model can be fit using Al
 	\]
 
 	for $\va$ at a cost of $n \times \frac{1}{2} (p + m b) (p + m b + 1)$ floating point operations, and then
-	calculate
+	calculating
 
 	\[
 		\diag(\mC \mLambda \mC^\top)_{ii} = \va^\top \va
-	\]
+	\],
 
-	to complete the computation.
+	we can calculate $\diag(\mC \mLambda \mC^\top)$.
 
 	As above, by using our knowledge of the model being fit we can encode $\mR$ sparsely to decreate the required
 	computation still further. In the random intercept model case, the computational cost will drop to
@@ -979,12 +973,13 @@ Variational Approximation, as in \cite{ormerod09}. The model can be fit using Al
 	solution, this gives some sense of the stability of each algorithm.
 	
 	This article presents the essential ideas necessary for a performant implementation implementing model fitting
-	for ZIP regression models, but the performance would be even better if our algorithm was re-implemented in a
-	compiled language with good numeric libraries such as C++ with Eigen. The majority of the performance
+	for ZIP regression models.%, but the performance would be even better if our algorithm was re-implemented in a
+	%compiled language with good numeric libraries such as C++ with Eigen.
+	The majority of the performance
 	improvements over existing approaches come from avoiding unneccessary matrix inversion, which is a
-	computationally expensive $O(p^3)$ and numerically unstable process, and from constructing and calculating
-	with sparse matrices. The gains of these approaches, particularly from sparse matrix techniques, can be
-	difficult to fully realise in R without expert knowledge of the underlying implementation and libraries.
+	computationally expensive and numerically unstable process taking $O(p^3)$ flops, and from constructing and 
+	calculating	with sparse matrices. The gains of these approaches, particularly from sparse matrix techniques, 
+	can be difficult to fully realise in R without expert knowledge of the underlying implementation and libraries.
 	
 	Our application of these ideas to Andrew Gelman's data showed that the new parameterisation very effectively
 	speeds up fitting zero-inflated mixed models to real world data with a large number of groups, while still
@@ -999,7 +994,6 @@ Variational Approximation, as in \cite{ormerod09}. The model can be fit using Al
 	
 	The variational lower bound is equal to $\bE_q[\log{p(\vy, \vtheta)} - \log{q(\vtheta)}] = T_1 + T_2 + T_3$,
 	where
-	
 	% This is the new T_1
 	$$
 	\begin{array}{rl}
@@ -1015,7 +1009,7 @@ Variational Approximation, as in \cite{ormerod09}. The model can be fit using Al
 	\end{array}
 	$$
 	
-	with $\bE_q \big[ \log |\mSigma_{\vu \vu}| \big] = m \log 2 + \log \left | \Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu} \right | + \sum_{i=1}^m \Psi \left ( \frac{v - i + 1}{2} \right )$
+	\noindent with $\bE_q \big[ \log |\mSigma_{\vu \vu}| \big] = m \log 2 + \log \left | \Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu} \right | + \sum_{i=1}^m \Psi \left ( \frac{v - i + 1}{2} \right )$
 	
 	\subsection{Numerical stability of fitting algorithms with respect to starting point}
 	
