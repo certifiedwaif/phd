@@ -1,0 +1,69 @@
+% Progress_update_2016_10_24.tex
+\documentclass{beamer}
+\usetheme{Warsaw}
+\usepackage{graphicx}
+\usepackage{ulem}
+\usepackage{tikz}
+\usepackage{listings}
+\input{include.tex}
+\input{Definitions.tex}
+
+\usefonttheme{serif}
+
+\title{Progress update}
+\author{Mark Greenaway}
+
+\mode<presentation>
+{ \usetheme{boxes} }
+\author{Mark Greenaway}
+\begin{document}
+\begin{frame}
+	\maketitle
+\end{frame}
+\begin{frame}{Numeric results}
+	\begin{itemize}
+		\item I had some numeric errors caused by underflow, which I fixed. So now I'm getting nice smooth curves.
+		      \begin{figure}
+		      	\includegraphics[scale=.25]{Chapter_3_shrinkage.pdf}
+		      \end{figure}
+		\item That's one major step closer to finishing the paper.
+	\end{itemize}% Include nice graphs here
+\end{frame}
+
+\begin{frame}{Tidyverse, and packaging}
+\begin{itemize}
+\item I saw Kevin using \texttt{dplyr} and friends, which I've been resisting for a while, and I thought
+``If you can't beat them, join them''
+\item Hadley Wickham grouped all his packages together into \texttt{tidyverse}, so now I just use that
+\item I used \texttt{dplyr} and \texttt{ggplot2} to generate the plots in my paper
+\item It was fun, and not too hard
+\item John said we should be ready to release our code when we finish the paper. I've gotten into the
+habit of doing everything in packages, which makes releasing code a lot easier
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Literature review}
+	I've been reading lots of papers, and I'm writing up summaries in my literature review. I hope this will
+	make up part of the first chapter in my thesis.
+	
+	Major papers:
+	
+	\begin{itemize}
+		\item Jeffreys (1961)
+		\item Zellner and Siox (1980, 1984)
+		\item Laud and Ibrahim (1995) Criterion-Based Methods for Bayesian Model Assessment
+		\item Kass and Wasserman (1995)
+		\item Berger and Pericchi (1996)
+		\item Moreno, Bertolino and Racugno (1998) Can't find
+		\item De Santis and Spezzaferri (1999)
+		\item Perez and Berger (2002)
+		\item Bayorri and Garci\'{a}--Donato (2008)
+		\item Liang et al. (2008)
+		\item Cui and Goerge (2008)
+		\item Maruyama and George (2008)
+		\item Maruyama and Strawderman (2010)
+	\end{itemize}
+\end{frame}
+
+
+\end{document}
