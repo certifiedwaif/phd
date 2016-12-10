@@ -1,0 +1,98 @@
+% Progress update 2016 10 24.tex
+\documentclass{beamer}
+
+\usetheme{Warsaw}
+\usepackage{graphicx}
+\usepackage{ulem}
+\input{include.tex}
+\input{Definitions.tex}
+
+\usefonttheme{serif}
+
+\title{Progress update}
+\author{Mark Greenaway}
+
+\mode<presentation>
+{ \usetheme{boxes} }
+
+\begin{document}
+\begin{frame}
+	\titlepage
+\end{frame}
+
+\begin{frame}{Numeric experiments}
+	\begin{itemize}
+		\item I had some numeric errors in my code, which was messing up my results when $p$ became large.
+		\item I fixed an underflow so now we're getting nice continuous smooth curves for large values of
+		      $p$ e.g. $500$ or more.
+		\item The plot on the next slide shows the shrinkage from the fitted co-efficients to the
+		      prior co-efficients as a function of $n$, $p$ and $R^2$. $1$ means no shrinkage, $0$ means complete
+		      shrinkage.
+		\item As $p$ gets larger, our approximation begins to match the exact calculation very closely.
+		\item That's good!!!
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\begin{figure}
+		\includegraphics[width=9cm, height=9cm]{Chapter_3_shrinkage.pdf}
+	\end{figure}
+\end{frame}
+
+\begin{frame}{Tidyverse, and packaging}
+	\begin{itemize}
+		\item I was enviously looking at Kevin's data manipulation code which used \texttt{dplyr}. I thought
+		      ``If you can't beat them, join them.'', so now I'm using it too.
+		\item Hadley Wickham's packages all work well together. He's packaged them together as \texttt{tidyverse} so
+		      that you can install and use them all easily:
+		      \begin{verbatim}
+						install.packages("tidyverse") \\
+						library(tidyverse)
+		\end{verbatim}
+		\item All of the plots in my paper are made with \texttt{dplyr} and \texttt{ggplot2} now. It wasn't \emph{that}
+		      hard to switch from \texttt{base}.
+		\item John said we should be ready to release our code. I do everything in packages now, so this
+		      will be relatively easy. The code is packaged as \texttt{taug}.
+		\item I'm using RStudio for package builds, because I'm using \texttt{Roxygen} and \texttt{Rcpp}. So far, I've
+		      found building non-trivial packages without RStudio to be tricky.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Literature review}
+	I've been reading lots of papers and writing summaries, so that I have a more solid idea of the field, and
+	more to write in the introductory chapter of my thesis.
+	\tiny
+	\begin{itemize}
+		\item Jeffreys (1961)
+		\item Zellner and Siox (1980, 1984)
+		\item Laud and Ibrahim (1995)
+		\item Kass and Wasserman (1995)
+		\item Berger and Pericchi (1996)
+		\item Moreno, Bertolino and Racugno (1998)
+		\item De Santis and Spezzaferri (1999)
+		\item Perez and Berger (2002)
+		\item Bayorri and Garci\'{a}--Donato (2008)
+		\item Liang et al. (2008)
+		\item Cui and Goerge (2008)
+		\item Maruyama and George (2008)
+		\item Maruyama and Strawderman (2010)
+		\item and many others \ldots
+	\end{itemize}
+	\small
+\end{frame}
+
+\begin{frame}[t]\frametitle{What's next?}
+	    
+	\begin{itemize}
+		\item John wants us to compare this form of model selection to other forms of model selection criteria e.g.
+		      AIC, BIC, DIC etc. So that requires more numeric experiments.
+		\item We're mostly interested in the probability that a particular covariate gets selected by each different method.
+		\item More writing. We want to submit this paper to a journal like the Australian and New Zealand Journal of
+		      Statistics, so I'll look at their template this week.
+		\item Think about the next project. John wants to do a project based on my correlation-calculating code. The
+		      code's already written, so we hope this will go quickly.
+	\end{itemize}
+	
+\end{frame}
+
+\end{document}
