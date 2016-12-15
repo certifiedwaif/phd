@@ -765,3 +765,37 @@ double elbo(int n, int p, double c, double s, double tau_g, double log_det_XTX, 
 
   return result;
 }
+
+
+double fall_fact(double x, double k)
+{
+	return gsl_sf_gamma(x + 1) / gsl_sf_gamma(x - k + 1);
+}
+
+
+double hyperg_1F2(int a1, int b1, int b2, double z)
+{
+	double sum = 0.;
+	for (auto k = 0; k < 10; k++) {
+		sum += (fall_fact(a1, k) * pow(z, k)) / (fall_fact(b1, k) * fall_fact(b2, k) * gsl_sf_gamma(k + 1));
+	}
+	return sum;
+}
+
+
+//' Calculate the exact precision
+//'
+//' @param n The number of observations
+//' @param p The number of covariates
+//' @param R2 The correlation coefficient squared
+//' @return The exact precision
+//' @export
+// [[Rcpp::export]]
+double exact_precision(int n, int p, double R2)
+{
+  auto a = -3./4.;
+  auto b = (n - p) / 2. - 2. - a;
+
+	return pow((1-R2), b + 1.) * gsl_sf_hyperg_2F1(n / 2. + 1., b + 1., n/2., R2);
+	// return pow((1-R2), b + 1.) * hyperg_1F2(n / 2. + 1, b + 1., n/2., R2);
+}
