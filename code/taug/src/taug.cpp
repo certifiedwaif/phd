@@ -799,3 +799,42 @@ double exact_precision(int n, int p, double R2)
 	return pow((1-R2), b + 1.) * gsl_sf_hyperg_2F1(n / 2. + 1., b + 1., n/2., R2);
 	// return pow((1-R2), b + 1.) * hyperg_1F2(n / 2. + 1, b + 1., n/2., R2);
 }
+
+
+//' Calculate the exact posterior expectation of g
+//'
+//' @param n The number of observations
+//' @param p The number of covariates
+//' @param R2 The correlation coefficient squared
+//' @return The exact posterior expectation of g
+//' @export
+// [[Rcpp::export]]
+double E_g_y(int n, int p, double R2)
+{
+  auto a = -3./4.;
+  auto b = (n - p) / 2. - 2. - a;
+
+	return 1./ (1. - R2) * (p / 2. + a + 1.) / (b + 2.);
+}
+
+
+//' Calculate the approximate posterior expectation of g
+//'
+//' @param n The number of observations
+//' @param p The number of covariates
+//' @param R2 The correlation coefficient squared
+//' @param c The co-efficient c of the exponential function exp(-c/g)
+//' @return The approximate posterior expectation of g
+//' @export
+// [[Rcpp::export]]
+double E_q_g(int n, int p, double R2, double c)
+{
+  auto a = -3./4.;
+  auto b = (n - p) / 2. - 2. - a;
+	auto A =  n/2. - p - a - 2.;
+	auto B = -static_cast<double>(n-p)/2.;
+	auto log_new_Z = Z_g_trapint(A,B,c,1000).log_intVal;
+
+	return exp(-log_new_Z + c) * pow(c, (n/2. - p - a - 1) / 2.) * gsl_sf_gamma((n - p) / 2. - n / 2. + p + a) \
+				 * whittakerW((n / 2. - p - a - 1.) / 2., -(n / 2. - p - a) / 2., c);
+}
