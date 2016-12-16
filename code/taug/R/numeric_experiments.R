@@ -67,6 +67,15 @@ create_param_df <- function()
   return(as.data.frame(param_df))
 }
 
+E_q_g <- function(n, p, R2, c)
+{
+  a <- -3. / 4.
+  b <- (n - p) / 2. - 2. - a
+  result <- exp(-c) * c^(n/2. - p - a - 1) / 2. * gamma((n - p) / 2. - n / 2. + p + a) * Re(whittakerW(c, -3. * n / 4. - a / 2. + 1. / 2., -n / 4. + p / 2. + a / 2.))
+  cat("result ", result, "\n")
+  return(result)
+}
+
 #' @export
 create_approx_exact_df <- function()
 {
@@ -96,7 +105,7 @@ create_approx_exact_df <- function()
   approx_var_g <- pmap_dbl(list(vn, vp, vR2), var_g_over_one_plus_g)
 
   vE_g_y <- pmap_dbl(list(vn, vp, vR2), E_g_y)
-  vE_q_g <- pmap_dbl(list(vn, vp, vR2, vc), E_q_g)
+  vE_q_g <- pmap_dbl(list(vn, vp, vR2, vc), E_q_g_c)
 
   combined_df <- cbind(param_df, exact_ints_df) %>%
                   mutate(vtau_g = vtau_g, vtau_sigma2 = vtau_sigma2) %>%

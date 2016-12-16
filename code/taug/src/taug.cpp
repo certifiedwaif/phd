@@ -791,7 +791,7 @@ double hyperg_1F2(int a1, int b1, int b2, double z)
 //' @return The exact precision
 //' @export
 // [[Rcpp::export]]
-double exact_precision(int n, int p, double R2)
+double exact_precision(double n, double p, double R2)
 {
   auto a = -3./4.;
   auto b = (n - p) / 2. - 2. - a;
@@ -809,7 +809,7 @@ double exact_precision(int n, int p, double R2)
 //' @return The exact posterior expectation of g
 //' @export
 // [[Rcpp::export]]
-double E_g_y(int n, int p, double R2)
+double E_g_y(double n, double p, double R2)
 {
   auto a = -3./4.;
   auto b = (n - p) / 2. - 2. - a;
@@ -827,7 +827,7 @@ double E_g_y(int n, int p, double R2)
 //' @return The approximate posterior expectation of g
 //' @export
 // [[Rcpp::export]]
-double E_q_g(int n, int p, double R2, double c)
+double E_q_g_c(double n, double p, double R2, double c)
 {
   auto a = -3./4.;
   auto b = (n - p) / 2. - 2. - a;
@@ -835,6 +835,22 @@ double E_q_g(int n, int p, double R2, double c)
 	auto B = -static_cast<double>(n-p)/2.;
 	auto log_new_Z = Z_g_trapint(A,B,c,1000).log_intVal;
 
-	return exp(-log_new_Z + c) * pow(c, (n/2. - p - a - 1) / 2.) * gsl_sf_gamma((n - p) / 2. - n / 2. + p + a) \
-				 * whittakerW((n / 2. - p - a - 1.) / 2., -(n / 2. - p - a) / 2., c);
+	// Rcout << "n " << n << " p " << p << " R2 " << R2 << " c " << c <<  std::endl;
+
+	// auto result = exp(-log_new_Z + c) * pow(c, (n/2. - p - a - 1) / 2.) * gsl_sf_gamma((n - p) / 2. - n / 2. + p + a) \
+	// 			 * whittakerW(-3. * n / 4. - a / 2. + 1. / 2., -n / 4. + p / 2. + a / 2.,  c);;
+	// auto result = whittakerW(-3. * n / 4. - a / 2. + 1. / 2., -n / 4. + p / 2. + a / 2.,  c);
+	const auto GRID_POINTS = 1000;
+	VectorXd x(GRID_POINTS), f(GRID_POINTS);
+	for (auto i = 1; i < GRID_POINTS; i++) {
+		double g = i / 10.;
+		x(i) = g;
+		// f(i) = pow((g/(1 + g)), (n - p) / 2.) * pow(g, -p/2. - a - 1.) * exp(-c/g);
+		// f(i) = exp((n - p) / 2. * (log(g) - log(1. + g)) + (-p/2. - a - 1.) * log(g) + -c/g);
+		f(i) = exp((n / 2. - p - a - 2.) * log(g) - ((n - p) / 2.) * log(1. + g) - c/g);
+		// Rcout << x(i) << " " <<  f(i) << std::endl;
+	}
+	auto result = exp(-log_new_Z) * trapint(x, f);
+	// Rcout << " = " << result << std::endl;
+	return result;
 }
