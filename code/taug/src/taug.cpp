@@ -405,7 +405,7 @@ moment_g_exact_result moment_g_exact(double m, double A, double B, double C)
 
 // Use the plug in approximation for tau
 
-double tau_plugin(int a, int n, int p, double R2)
+double tau_plugin(double a, double n, double p, double R2)
 {
 	double b = (n-p)/2. - a - 2.;
 	double A = b - p/2.;
@@ -418,7 +418,7 @@ double tau_plugin(int a, int n, int p, double R2)
 
 // Apply the update for tau_g using trapezoidal integration for ITER iterations
 
-double tau_g_trapint(double a, int n, int p, double R2, uint ITER, uint N=1000)
+double tau_g_trapint(double a, double n, double p, double R2, uint ITER, uint N=1000)
 {
 	double tau = tau_plugin(a,n,p,R2);
 
@@ -437,7 +437,7 @@ double tau_g_trapint(double a, int n, int p, double R2, uint ITER, uint N=1000)
 
 // Use the Laplace approximation for tau_g
 
-double tau_g_Laplace(double a, int n, int p, double R2)
+double tau_g_Laplace(double a, double n, double p, double R2)
 {
 	double A = 2.*a + p;
 	double res = A*(1. - R2)/(n - A);
@@ -447,7 +447,7 @@ double tau_g_Laplace(double a, int n, int p, double R2)
 
 // Apply the update for tau_g using FEL for ITER iterations
 
-double tau_g_FullyExponentialLaplace(double a, int n, int p, double R2, uint ITER)
+double tau_g_FullyExponentialLaplace(double a, double n, double p, double R2, uint ITER)
 {
 	double tau = tau_g_Laplace(a,n,p,R2);
 	// Rcout << "Initial value of tau " << tau << std::endl;
@@ -483,7 +483,7 @@ double tau_g_FullyExponentialLaplace(double a, int n, int p, double R2, uint ITE
 //' @return The variance of g/(1+g) under q
 //' @export
 // [[Rcpp::export]]
-double var_g_over_one_plus_g(int n, int p, double R2)
+double var_g_over_one_plus_g(double n, double p, double R2)
 {
 	auto ITER = 20;
 	auto a = -0.75;
@@ -524,7 +524,7 @@ double var_g_over_one_plus_g(int n, int p, double R2)
 
 // Apply the update for tau_g using Laplace's method for ITER iterations
 
-double tau_g_IterativeLaplace(double a, int n, int p, double R2, uint ITER)
+double tau_g_IterativeLaplace(double a, double n, double p, double R2, uint ITER)
 {
 
 	double tau = tau_plugin(a,n,p,R2);
@@ -550,7 +550,8 @@ struct ZE_constants_result
 	VectorXd vpen;
 };
 
-ZE_constants_result ZE_constants(int n, int pmax, bool LARGEP = false)
+
+ZE_constants_result ZE_constants(double n, int pmax, bool LARGEP = false)
 {
 	VectorXd vcon(pmax + 1);
 	VectorXd vpen(pmax + 1);
@@ -595,7 +596,7 @@ VectorXd ZE_exact(VectorXd vn, VectorXd vp, VectorXd vR2)
 //'
 //' @export
 // [[Rcpp::export]]
-double tau_g(int n, int p, double R2)
+double tau_g(double n, double p, double R2)
 {
 	auto a = -0.75;
 
@@ -676,7 +677,7 @@ void tau_g(int n, const MatrixXd& mGraycode, const VectorXd& vR2, const VectorXd
 //' @return The value of the marginal log-likelihood log p(y)
 //' @export
 // [[Rcpp::export]]
-double log_p(int n, int p, double R2)
+double log_p(double n, double p, double R2)
 {
   auto a = -3./4.;
   auto b = (n - p) / 2. - 2. - a;
@@ -696,7 +697,7 @@ double log_p(int n, int p, double R2)
 //' @return The value of the marginal log-likelihood log p(y)
 //' @export
 // [[Rcpp::export]]
-double aic(int n, int p, double R2)
+double aic(double n, double p, double R2)
 {
 	return -2 * log_p(n, p, R2) + 2 * p;
 }
@@ -710,7 +711,7 @@ double aic(int n, int p, double R2)
 //' @return The value of the marginal log-likelihood log p(y)
 //' @export
 // [[Rcpp::export]]
-double bic(int n, int p, double R2)
+double bic(double n, double p, double R2)
 {
 	return -2 * log_p(n, p, R2) + p * log(n);
 }
@@ -727,7 +728,7 @@ double bic(int n, int p, double R2)
 //' @return The variational lower bound
 //' @export
 // [[Rcpp::export]]
-double elbo(int n, int p, double c, double s, double tau_g, double log_det_XTX, double log_det_mSigma)
+double elbo(double n, double p, double c, double s, double tau_g, double log_det_XTX, double log_det_mSigma)
 {
   auto a = -3./4.;
   auto b = (n - p) / 2. - 2. - a;
@@ -813,8 +814,22 @@ double E_g_y(double n, double p, double R2)
 {
   auto a = -3./4.;
   auto b = (n - p) / 2. - 2. - a;
+	auto A =  n/2. - p - a - 2.;
+	auto B = -static_cast<double>(n-p)/2.;
 
-	return 1./ (1. - R2) * (p / 2. + a + 1.) / (b + 2.);
+	return (b + 2.) / ((1. - R2) * (p / 2. + a + 1.));
+	// const auto GRID_POINTS = 10000;
+	// VectorXd x(GRID_POINTS), f(GRID_POINTS);
+	// for (auto i = 1; i < GRID_POINTS; i++) {
+	// 	double g = i / 100.;
+	// 	x(i) = g;
+	// 	// f(i) = pow((g/(1 + g)), (n - p) / 2.) * pow(g, -p/2. - a - 1.) * exp(-c/g);
+	// 	// f(i) = exp((n - p) / 2. * (log(g) - log(1. + g)) + (-p/2. - a - 1.) * log(g) + -c/g);
+	// 	// f(i) = pow(g, b + 1.) * pow(1 + g * (1 - R2), -n / 2.);
+	// 	f(i) = exp((b + 1.) * log(g) - (n / 2.) * log(1 + g * (1 - R2)));
+	// 	// Rcout << x(i) << " " <<  f(i) << std::endl;
+	// }
+	// return pow(1. - R2, b + 1.) * trapint(x, f) / gsl_sf_beta(p / 2. + a + 1., b + 1.);
 }
 
 
@@ -835,22 +850,94 @@ double E_q_g_c(double n, double p, double R2, double c)
 	auto B = -static_cast<double>(n-p)/2.;
 	auto log_new_Z = Z_g_trapint(A,B,c,1000).log_intVal;
 
-	// Rcout << "n " << n << " p " << p << " R2 " << R2 << " c " << c <<  std::endl;
+	auto result = exp(-log_new_Z +  Z_g_trapint(A + 1., B, c, 1000).log_intVal);
+	return result;
 
+	// Rcout << "n " << n << " p " << p << " R2 " << R2 << " c " << c <<  std::endl;
 	// auto result = exp(-log_new_Z + c) * pow(c, (n/2. - p - a - 1) / 2.) * gsl_sf_gamma((n - p) / 2. - n / 2. + p + a) \
 	// 			 * whittakerW(-3. * n / 4. - a / 2. + 1. / 2., -n / 4. + p / 2. + a / 2.,  c);;
 	// auto result = whittakerW(-3. * n / 4. - a / 2. + 1. / 2., -n / 4. + p / 2. + a / 2.,  c);
+	// const auto GRID_POINTS = 10000;
+	// VectorXd x(GRID_POINTS), f(GRID_POINTS);
+	// for (auto i = 1; i < GRID_POINTS; i++) {
+	// 	double g = i / 100.;
+	// 	x(i) = g;
+	// 	// f(i) = pow((g/(1 + g)), (n - p) / 2.) * pow(g, -p/2. - a - 1.) * exp(-c/g);
+	// 	// f(i) = exp((n - p) / 2. * (log(g) - log(1. + g)) + (-p/2. - a - 1.) * log(g) + -c/g);
+	// 	f(i) = exp((n / 2. - p - a - 1.) * log(g) - ((n - p) / 2.) * log(1. + g) - c/g);
+	// 	// Rcout << x(i) << " " <<  f(i) << std::endl;
+	// }
+	// auto result = trapint(x, f);
+	// Rcout << " = " << result << std::endl;
+	// return moment_g_FullyExponentialLaplace(1.0, A,  B, c);
+}
+
+
+double p_sigma2_y(double n, double p, double R2, double sigma2)
+{
+  auto a = -3./4.;
+  auto b = (n - p) / 2. - 2. - a;
+	auto result =  pow(1. - R2, b + 1.) * pow(n / 2., n / 2.) * pow(sigma2, -(n / 2. + 1.)) / gsl_sf_gamma(n / 2.) \
+				* exp(- n / (2. * sigma2)) * gsl_sf_hyperg_1F1(b + 1., n / 2., (n * R2) / (2 * sigma2));
+
+	if (isnan(result)) {
+	  result = exp((b + 1.) * log(1. - R2) + n / 2. * log(n / 2.) - (n / 2. + 1.) * log(sigma2) \
+	                - gsl_sf_lngamma(n / 2.) - n / (2. * sigma2) \
+	                + log(gsl_sf_hyperg_1F1(b + 1., n / 2., (n * R2) / (2 * sigma2))));
+	}
+
+	if (isnan(result)) {
+		Rcout << "p_sigma2_y: n " << n;
+		Rcout << " p " << p;
+		Rcout << " R2 " << R2;
+		Rcout << " sigma2 " << sigma2;
+		Rcout << " = " << result << std::endl;
+	}
+
+	return result;
+}
+
+
+double q_sigma2(double r, double s, double sigma2)
+{
+	auto result = pow(s, r) / gsl_sf_gamma(r) * pow(sigma2, -r - 1.) * exp(- s / sigma2);
+
+	if (isnan(result)) {
+		result = exp(r * log(s) - gsl_sf_lngamma(r) - (r + 1.) * log(sigma2) - s / sigma2);
+	}
+
+	if (isnan(result)) {
+		Rcout << "q_sigma2: r " << r;
+		Rcout << " s " << s;
+		Rcout << " sigma2 " << sigma2;
+		Rcout << " = " << result << std::endl;
+	}
+
+	return result;
+}
+
+
+//' Calculate the accuracy of the approximation of sigma2
+//'
+//' @param n The number of observations
+//' @param p The number of covariates
+//' @param R2 The correlation co-efficient, squared
+//' @param r The first parameter of the q(sigma2) distribution
+//' @param s The second parameter of the q(sigma2) distribution
+//' @return The accuracy of the approximation of sigma2
+//' @export
+// [[Rcpp::export]]
+double accuracy_sigma2(double n, double p, double R2, double r, double s)
+{
 	const auto GRID_POINTS = 1000;
 	VectorXd x(GRID_POINTS), f(GRID_POINTS);
 	for (auto i = 1; i < GRID_POINTS; i++) {
-		double g = i / 10.;
-		x(i) = g;
-		// f(i) = pow((g/(1 + g)), (n - p) / 2.) * pow(g, -p/2. - a - 1.) * exp(-c/g);
-		// f(i) = exp((n - p) / 2. * (log(g) - log(1. + g)) + (-p/2. - a - 1.) * log(g) + -c/g);
-		f(i) = exp((n / 2. - p - a - 2.) * log(g) - ((n - p) / 2.) * log(1. + g) - c/g);
+		double sigma2 = i / 100.;
+		x(i) = sigma2;
+		f(i) = abs(p_sigma2_y(n, p, R2, sigma2) - q_sigma2(r, s, sigma2));
 		// Rcout << x(i) << " " <<  f(i) << std::endl;
 	}
-	auto result = exp(-log_new_Z) * trapint(x, f);
-	// Rcout << " = " << result << std::endl;
-	return result;
+
+	return 1. - 0.5 * trapint(x, f);
+	// return trapint(x, f);
 }

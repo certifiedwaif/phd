@@ -107,6 +107,8 @@ create_approx_exact_df <- function()
   vE_g_y <- pmap_dbl(list(vn, vp, vR2), E_g_y)
   vE_q_g <- pmap_dbl(list(vn, vp, vR2, vc), E_q_g_c)
 
+  vaccuracy_sigma2 <- pmap_dbl(list(vn, vp, vR2, vr, vs), accuracy_sigma2)
+
   combined_df <- cbind(param_df, exact_ints_df) %>%
                   mutate(vtau_g = vtau_g, vtau_sigma2 = vtau_sigma2) %>%
                   mutate(approx_mean = (1 + vtau_g)^(-1), exact_mean = G_1) %>%
@@ -117,7 +119,8 @@ create_approx_exact_df <- function()
                   mutate(E_q_sigma2_inv = E_q_sigma2_inv) %>%
                   mutate(vexact_precision = vexact_precision) %>%
                   mutate(vE_g_y = vE_g_y) %>%
-                  mutate(vE_q_g = vE_q_g)
+                  mutate(vE_q_g = vE_q_g) %>%
+                  mutate(vaccuracy_sigma2 = vaccuracy_sigma2)
 
   return(combined_df)
 }
