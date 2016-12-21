@@ -947,9 +947,11 @@ double p_g_y(double n, double p, double R2, double g)
 {
   auto a = -3./4.;
   auto b = (n - p) / 2. - 2. - a;
-	auto num = pow(1. - R2, b + 1.) * pow(g, b) * pow(1. + g * (1. - R2), -n / 2.);
-	auto den = gsl_sf_beta(p / 2. + a + 1., b + 1.);
-	return num / den;
+	// auto num = pow(1. - R2, b + 1.) * pow(g, b) * pow(1. + g * (1. - R2), -n / 2.);
+	// auto den = gsl_sf_beta(p / 2. + a + 1., b + 1.);
+	auto log_num = (b + 1.) * log(1. - R2) + b * log(g) -n / 2. * log(1. + g * (1. - R2));
+	auto log_den = gsl_sf_lnbeta(p / 2. + a + 1., b + 1.);
+	return exp(log_num - log_den);
 }
 
 
