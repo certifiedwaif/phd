@@ -887,11 +887,11 @@ double p_sigma2_y(double n, double p, double R2, double sigma2)
 	}
 
 	if (isnan(result)) {
-		Rcout << "p_sigma2_y: n " << n;
-		Rcout << " p " << p;
-		Rcout << " R2 " << R2;
-		Rcout << " sigma2 " << sigma2;
-		Rcout << " = " << result << std::endl;
+		// Rcout << "p_sigma2_y: n " << n;
+		// Rcout << " p " << p;
+		// Rcout << " R2 " << R2;
+		// Rcout << " sigma2 " << sigma2;
+		// Rcout << " = " << result << std::endl;
 	}
 
 	return result;
@@ -907,10 +907,10 @@ double q_sigma2(double r, double s, double sigma2)
 	}
 
 	if (isnan(result)) {
-		Rcout << "q_sigma2: r " << r;
-		Rcout << " s " << s;
-		Rcout << " sigma2 " << sigma2;
-		Rcout << " = " << result << std::endl;
+		// Rcout << "q_sigma2: r " << r;
+		// Rcout << " s " << s;
+		// Rcout << " sigma2 " << sigma2;
+		// Rcout << " = " << result << std::endl;
 	}
 
 	return result;
@@ -935,6 +935,53 @@ double accuracy_sigma2(double n, double p, double R2, double r, double s)
 		double sigma2 = i / 100.;
 		x(i) = sigma2;
 		f(i) = abs(p_sigma2_y(n, p, R2, sigma2) - q_sigma2(r, s, sigma2));
+		// Rcout << x(i) << " " <<  f(i) << std::endl;
+	}
+
+	return 1. - 0.5 * trapint(x, f);
+	// return trapint(x, f);
+}
+
+
+double p_g_y(double n, double p, double R2, double g)
+{
+  auto a = -3./4.;
+  auto b = (n - p) / 2. - 2. - a;
+	auto num = pow(1. - R2, b + 1.) * pow(g, b) * pow(1. + g * (1. - R2), -n / 2.);
+	auto den = gsl_sf_beta(p / 2. + a + 1., b + 1.);
+	return num / den;
+}
+
+
+double q_g(double n, double p, double R2, double c, double g)
+{
+  auto a = -3./4.;
+  auto b = (n - p) / 2. - 2. - a;
+	auto A =  n/2. - p - a - 2.;
+	auto B = -static_cast<double>(n-p)/2.;
+	auto log_new_Z = Z_g_trapint(A,B,c,1000).log_intVal;
+	auto log_num = (n / 2. - p - a - 2.) * log(g) - (n - p) / 2. * log(1. + g) - c / g;
+	return exp(log_num - log_new_Z);
+}
+
+
+//' Calculate the accuracy of the approximation of g
+//'
+//' @param n The number of observations
+//' @param p The number of covariates
+//' @param R2 The correlation co-efficient, squared
+//' @param c The c parameter
+//' @return The accuracy of the approximation of g
+//' @export
+// [[Rcpp::export]]
+double accuracy_g(double n, double p, double R2, double c)
+{
+	const auto GRID_POINTS = 1000;
+	VectorXd x(GRID_POINTS), f(GRID_POINTS);
+	for (auto i = 1; i < GRID_POINTS; i++) {
+		double g = i / 100.;
+		x(i) = g;
+		f(i) = abs(p_g_y(n, p, R2, g) - q_g(n, p, R2, c, g));
 		// Rcout << x(i) << " " <<  f(i) << std::endl;
 	}
 
