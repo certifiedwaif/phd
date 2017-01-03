@@ -79,7 +79,7 @@ E_q_g <- function(n, p, R2, c)
 #' @export
 create_approx_exact_df <- function()
 {
-  param_df <- create_param_df()
+  param_df <- create_param_df() %>% filter(vp == 1000)
   vp <- param_df$vp
   vn <- param_df$vn
   vR2 <- param_df$vR2
@@ -90,6 +90,7 @@ create_approx_exact_df <- function()
   vlog_p <- pmap_dbl(list(vn, vp, vR2), log_p)
   vtau_sigma2 <- (1 - (1 + vtau_g)^(-1) * vR2)^(-1)
   vexact_precision <- pmap_dbl(list(vn, vp, vR2), exact_precision)
+  vexact_precision <- 1 / vexact_precision
   vr <- (vn + vp) / 2
   vs <- (0.5 * (vn + vp) * (1 - (1 + vtau_g)^(-1)*vR2))
   E_q_sigma2_inv <- vs / (vr - 1)
@@ -107,6 +108,9 @@ create_approx_exact_df <- function()
   vE_g_y <- pmap_dbl(list(vn, vp, vR2), E_g_y)
   vE_q_g <- pmap_dbl(list(vn, vp, vR2, vc), E_q_g_c)
 
+  vsigma2 <- seq(from=.01, to=10, length.out=length(vn))
+  # vp_sigma2_y <- pmap_dbl(list(vn, vp, vR2, vsigma2), p_sigma2_y)
+  # vq_sigma2 <- pmap_dbl(list(vr, vs, vsigma2), q_sigma2)
   vaccuracy_sigma2 <- pmap_dbl(list(vn, vp, vR2, vr, vs), accuracy_sigma2)
   vaccuracy_g <- pmap_dbl(list(vn, vp, vR2, vc), accuracy_g)
 
@@ -121,6 +125,9 @@ create_approx_exact_df <- function()
                   mutate(vexact_precision = vexact_precision) %>%
                   mutate(vE_g_y = vE_g_y) %>%
                   mutate(vE_q_g = vE_q_g) %>%
+                  mutate(vsigma2 = vsigma2) %>%
+                  # mutate(vp_sigma2_y = vp_sigma2_y) %>%
+                  # mutate(vq_sigma2 = vq_sigma2) %>%
                   mutate(vaccuracy_sigma2 = vaccuracy_sigma2) %>%
                   mutate(vaccuracy_g = vaccuracy_g)
 
@@ -134,6 +141,7 @@ plot_graphs <- function() {
   label_fn <- function(df) {
     map(df, ~ str_c("p = ", .))
   }
+
   approx_means_df <- combined_df %>%
                       select(one_of(c("vp", "vn", "vR2", "approx_mean"))) %>%
                       rename(mean = approx_mean) %>%
@@ -148,75 +156,85 @@ plot_graphs <- function() {
     ggplot(aes(x=vR2, y=mean)) +
       geom_line(aes(group=interaction(vn, mean_type), color=vn, linetype=mean_type)) +
       facet_wrap(~vp, labeller=label_fn) +
-      xlab("Correlation co-efficient") + ylab("Shrinkage")
+      xlab(TeX("$R^2$")) + ylab("Shrinkage")
 
-  pdf("log_p.pdf")
-  combined_df %>%
-    mutate(vn = factor(vn)) %>%
-    ggplot(aes(x=vR2, y=vlog_p, color=vn)) +
-    geom_line() +
-    facet_wrap(~vp, labeller=label_fn) +
-    xlab("Correlation co-efficient") + ylab("log(p)")
-  dev.off()
+  approx_log_p_df <- combined_df %>%
+                      select(one_of(c("vp", "vn", "vR2", "velbo"))) %>%
+                      rename(log_p = velbo) %>%
+                      mutate(log_p_type = "Approximate")
+  exact_log_p_df <- combined_df %>%
+                      select(one_of(c("vp", "vn", "vR2", "vlog_p"))) %>%
+                      rename(log_p = vlog_p) %>%
+                      mutate(log_p_type = "Exact")
+  log_p_df <- bind_rows(approx_log_p_df, exact_log_p_df) %>%
+              mutate(log_p_type = factor(log_p_type))
+  log_p_df %>% filter(vR2 <= 0.99) %>%
+    ggplot(aes(x=vR2, y=log_p)) +
+      geom_line(aes(group=interaction(vn, log_p_type), color=vn, linetype=log_p_type)) +
+      facet_wrap(~vp, labeller=label_fn) +
+      xlab(TeX("$R^2$")) + ylab("log(p)")
 
-  pdf("elbo.pdf")
-  combined_df %>%
-    mutate(vn = factor(vn)) %>%
-    ggplot(aes(x=vR2, y=velbo, color=vn)) +
-    geom_line() +
-    facet_wrap(~vp, labeller=label_fn) +
-    xlab("Correlation co-efficient") + ylab("ELBO")
-  dev.off()
+  approx_var_df <- combined_df %>%
+                      select(one_of(c("vp", "vn", "vR2", "approx_var"))) %>%
+                      rename(var = approx_var) %>%
+                      mutate(var_type = "Approximate")
+  exact_var_df <- combined_df %>%
+                    select(one_of(c("vp", "vn", "vR2", "exact_var"))) %>%
+                    rename(var = exact_var) %>%
+                    mutate(var_type = "Exact")
+  var_df <- bind_rows(approx_var_df, exact_var_df) %>%
+              mutate(var_type = factor(var_type))
+  var_df %>%
+    ggplot(aes(x=vR2, y=var)) +
+      geom_line(aes(group=interaction(vn, var_type), color=vn, linetype=var_type)) +
+      facet_wrap(~vp, labeller=label_fn) +
+      xlab(TeX("$R^2$")) + ylab("Variance")
 
-  pdf("log_p_div_elbo.pdf")
-  combined_df %>% filter(vR2 < .75) %>%
-    mutate(vn = factor(vn)) %>%
-    ggplot(aes(x=vR2, y=vlog_p / velbo, color=vn)) +
-    geom_line() +
-    facet_wrap(~vp, labeller=label_fn) +
-    xlab("Correlation co-efficient") + ylab("log(p) / ELBO")
-  dev.off()
-
-  pdf("exact_var_g.pdf")
-  combined_df %>%
-    mutate(vn = factor(vn)) %>%
-    ggplot(aes(x=vR2, y=exact_var_g, color=vn)) +
-    geom_line() +
-    facet_wrap(~vp, labeller=label_fn) +
-    xlab("Correlation co-efficient") + ylab("exact_var_g")
-  dev.off()
-
-  pdf("approx_var_g.pdf")
-  combined_df %>% filter(vp >= 20) %>%
-    mutate(vn = factor(vn)) %>%
-    ggplot(aes(x=vR2, y=approx_var_g, color=vn)) +
-    geom_line() +
-    facet_wrap(~vp, labeller=label_fn) +
-    xlab("Correlation co-efficient") + ylab("approx_var_g")
-  dev.off()
-
-  pdf("exact_var_g_div_approx_var_g.pdf")
-  combined_df %>% filter(vR2 <= .75) %>%
-    mutate(vn = factor(vn)) %>%
-    ggplot(aes(x=vR2, y=exact_var_g / approx_var_g, color=vn)) +
-    geom_line() +
-    facet_wrap(~vp, labeller=label_fn) +
-    xlab("Correlation co-efficient") + ylab("exact_var_g / approx_var_g")
-  dev.off()
+  approx_precision_df <- combined_df %>%
+                      select(one_of(c("vp", "vn", "vR2", "E_q_sigma2_inv"))) %>%
+                      rename(precision = E_q_sigma2_inv) %>%
+                      mutate(precision_type = "Approximate")
+  exact_precision_df <- combined_df %>%
+                    select(one_of(c("vp", "vn", "vR2", "vexact_precision"))) %>%
+                    rename(precision = vexact_precision) %>%
+                    mutate(precision_type = "Exact")
+  precision_df <- bind_rows(approx_precision_df, exact_precision_df) %>%
+              mutate(precision_type = factor(precision_type))
+  precision_df %>%
+    ggplot(aes(x=vR2, y=precision)) +
+      geom_line(aes(group=interaction(vn, precision_type), color=vn, linetype=precision_type)) +
+      facet_wrap(~vp, labeller=label_fn) +
+      xlab(TeX("$R^2$")) + ylab("Precision")
 
   combined_df %>%
-    mutate(vn = factor(vn)) %>%
-    ggplot(aes(x=vR2, y=1/vexact_precision, color=vn)) +
-    geom_line() +
+    ggplot(aes(x=vsigma2, y=vp_sigma2_y)) +
+    geom_line(aes(group=vn, color=vn)) +
     facet_wrap(~vp, labeller=label_fn) +
-    xlab("Correlation co-efficient") + ylab("Exact precision")
+    xlab(TeX("$R^2$")) + ylab("p_sigma2_y")
 
   combined_df %>%
-    mutate(vn = factor(vn)) %>%
-    ggplot(aes(x=vR2, y=E_q_sigma2_inv, color=vn)) +
-    geom_line() +
+    ggplot(aes(x=vsigma2, y=vq_sigma2)) +
+    geom_line(aes(group=vn, color=vn)) +
     facet_wrap(~vp, labeller=label_fn) +
-    xlab("Correlation co-efficient") + ylab("Approximate precision")
+    xlab(TeX("$R^2$")) + ylab("q_sigma2")
+
+  combined_df %>%
+    ggplot(aes(x=vsigma2, y=(vp_sigma2_y - vq_sigma2))) +
+    geom_line(aes(group=vn, color=vn)) +
+    facet_wrap(~vp, labeller=label_fn) +
+    xlab(TeX("$R^2$")) + ylab("q_sigma2")
+
+  combined_df %>% dplyr::filter(vaccuracy_sigma2 >= 0.0 & vaccuracy_sigma2 <= 1.0) %>%
+    ggplot(aes(x=vR2, y=vaccuracy_sigma2)) +
+    geom_line(aes(group=vn, color=vn)) +
+    facet_wrap(~vp, labeller=label_fn) +
+    xlab(TeX("$R^2$")) + ylab(TeX("Accuracy $\\sigma^2$"))
+
+  combined_df %>%
+    ggplot(aes(x=vR2, y=vaccuracy_g)) +
+    geom_line(aes(group=vn, color=vn)) +
+    facet_wrap(~vp, labeller=label_fn) +
+    xlab(TeX("$R^2$")) + ylab("Accuracy g")
 }
 
 plot_vw1_vw2 <- function() {

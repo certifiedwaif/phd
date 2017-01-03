@@ -11,9 +11,10 @@ Imports: Rcpp (>= 0.12.5),
     RcppEigen,
     RcppGSL,
     tidyverse,
-    stringr
+    stringr,
+    ggplot2,
+    latex2exp
 LinkingTo: Rcpp,
     RcppEigen,
     RcppGSL,
-    stringr
 RoxygenNote: 5.0.1

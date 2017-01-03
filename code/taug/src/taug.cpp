@@ -797,7 +797,14 @@ double exact_precision(double n, double p, double R2)
   auto a = -3./4.;
   auto b = (n - p) / 2. - 2. - a;
 
-	return pow((1-R2), b + 1.) * gsl_sf_hyperg_2F1(n / 2. + 1., b + 1., n/2., R2);
+  auto twoFone = gsl_sf_hyperg_2F1(n / 2. + 1., b + 1., n/2., R2);
+  Rcout << "n " << n;
+  Rcout << " p " << p;
+  Rcout << " R2 " << R2;
+  Rcout << " twoFone " << twoFone;
+  auto result = exp((b + 1.) * log(1-R2)) * twoFone;
+  Rcout << " = " << result;
+	return result;
 	// return pow((1-R2), b + 1.) * hyperg_1F2(n / 2. + 1, b + 1., n/2., R2);
 }
 
@@ -873,45 +880,81 @@ double E_q_g_c(double n, double p, double R2, double c)
 }
 
 
+//' p_sigma2_y
+//'
+//' @param n The number of observations
+//' @param p The number of covariates
+//' @param R2 The correlation co-efficient, squared
+//' @param sigma2 The value of sigma2
+//' @return The value of p_sigma2_y
+//' @export
+// [[Rcpp::export]]
 double p_sigma2_y(double n, double p, double R2, double sigma2)
 {
   auto a = -3./4.;
   auto b = (n - p) / 2. - 2. - a;
-	auto result =  pow(1. - R2, b + 1.) * pow(n / 2., n / 2.) * pow(sigma2, -(n / 2. + 1.)) / gsl_sf_gamma(n / 2.) \
-				* exp(- n / (2. * sigma2)) * gsl_sf_hyperg_1F1(b + 1., n / 2., (n * R2) / (2 * sigma2));
+	// auto result =  pow(1. - R2, b + 1.) * pow(n / 2., n / 2.) * pow(sigma2, -(n / 2. + 1.)) / gsl_sf_gamma(n / 2.) \
+	// 			* exp(- n / (2. * sigma2)) * gsl_sf_hyperg_1F1(b + 1., n / 2., (n * R2) / (2 * sigma2));
 
-	if (isnan(result)) {
-	  result = exp((b + 1.) * log(1. - R2) + n / 2. * log(n / 2.) - (n / 2. + 1.) * log(sigma2) \
-	                - gsl_sf_lngamma(n / 2.) - n / (2. * sigma2) \
-	                + log(gsl_sf_hyperg_1F1(b + 1., n / 2., (n * R2) / (2 * sigma2))));
-	}
+  double result;
 
-	if (isnan(result)) {
+	// if (isnan(result)) {
+  if (R2 == 1.) {
+    result = 0.;
+  } else {
+		auto T1 = (b + 1.) * log(1. - R2) + n / 2. * log(n / 2.) - (n / 2. + 1.) * log(sigma2);
+		auto T2 = - gsl_sf_lngamma(n / 2.) - n / (2. * sigma2);
+		auto x = (n * R2) / (2 * sigma2);
+		auto oneFone = gsl_sf_hyperg_1F1(n / 2. - b - 1., n / 2., -x);
+		auto T3 = x + log(oneFone);
+		// The above expression for oneFone occasionally evaluates to zero, and so T3 underflows. In this
+		// case, we try an alternative.
+		if (oneFone == 0.) {
+			oneFone = gsl_sf_hyperg_1F1(b + 1., n / 2., (n * R2) / (2 * sigma2));
+			T3 = + log(oneFone);
+		}
+		result = exp(T1 + T2 + T3);
+	// }
+
+	// if (isnan(result)) {
 		// Rcout << "p_sigma2_y: n " << n;
 		// Rcout << " p " << p;
 		// Rcout << " R2 " << R2;
 		// Rcout << " sigma2 " << sigma2;
 		// Rcout << " = " << result << std::endl;
+		// Rcout << "oneFone = " << oneFone << std::endl;
+		// Rcout << "T1 = " << T1 << " T2 " << T2 << " T3 " << T3 << std::endl;
+		// if (isinf(T3))
+		// 	result = 1.;
+	// }
 	}
 
 	return result;
 }
 
 
+//' q_sigma2
+//'
+//' @param r The first parameter of the Inverse Gamma distribution
+//' @param s The second parameter of the Inverse Gamma distribution
+//' @param sigma2 The value of sigma2
+//' @return The value of q_sigma2
+//' @export
+// [[Rcpp::export]]
 double q_sigma2(double r, double s, double sigma2)
 {
-	auto result = pow(s, r) / gsl_sf_gamma(r) * pow(sigma2, -r - 1.) * exp(- s / sigma2);
+	// auto result = pow(s, r) / gsl_sf_gamma(r) * pow(sigma2, -r - 1.) * exp(- s / sigma2);
 
-	if (isnan(result)) {
-		result = exp(r * log(s) - gsl_sf_lngamma(r) - (r + 1.) * log(sigma2) - s / sigma2);
-	}
+	// if (isnan(result)) {
+		auto result = exp(r * log(s) - gsl_sf_lngamma(r) - (r + 1.) * log(sigma2) - s / sigma2);
+	// }
 
-	if (isnan(result)) {
+	// if (isnan(result)) {
 		// Rcout << "q_sigma2: r " << r;
 		// Rcout << " s " << s;
 		// Rcout << " sigma2 " << sigma2;
 		// Rcout << " = " << result << std::endl;
-	}
+	// }
 
 	return result;
 }
@@ -931,24 +974,44 @@ double accuracy_sigma2(double n, double p, double R2, double r, double s)
 {
 	const auto GRID_POINTS = 1000;
 	VectorXd x(GRID_POINTS), f(GRID_POINTS);
+
+	#pragma omp parallel for simd
 	for (auto i = 1; i < GRID_POINTS; i++) {
-		double sigma2 = i / 100.;
+		double sigma2 = (i + 1) / 100.;
 		x(i) = sigma2;
-		f(i) = abs(p_sigma2_y(n, p, R2, sigma2) - q_sigma2(r, s, sigma2));
+		auto p_val = p_sigma2_y(n, p, R2, sigma2);
+		auto q_val = q_sigma2(r, s, sigma2);
+		f(i) = abs(p_val - q_val);
+		// These are monotonically decreasing functions past their mode. If both functions are numerically
+		// zero, then there's no point numerically integrating over more than one zero.
+		// if (p_val < 1e-16 && q_val < 1e-16) {
+		// 	x.resize(i);
+		// 	f.resize(i);
+		// 	break;
+		// }
+		// Rcout << "p_sigma2_y(" << n << "," << p << "," << R2 << "," << sigma2 << ") " << p_sigma2_y(n, p, R2, sigma2) << std::endl;
+		// Rcout << "q_sigma2(" << r << "," << s << "," << sigma2 << ") " << q_sigma2(r, s, sigma2) << std::endl;
 		// Rcout << x(i) << " " <<  f(i) << std::endl;
 	}
 
-	return 1. - 0.5 * trapint(x, f);
-	// return trapint(x, f);
+	auto result = 1. - 0.5 * trapint(x, f);
+	// Rcout << "accuracy_sigma2: n " << n;
+	// Rcout << " p " << p;
+	// Rcout << " R2 " << R2;
+	// Rcout << " r " << r;
+	// Rcout << " s " << s;
+	// Rcout << " = " << result << std::endl;
+	return result;
 }
 
 
 double p_g_y(double n, double p, double R2, double g)
 {
-  auto a = -3./4.;
+  auto a = -3. / 4.;
   auto b = (n - p) / 2. - 2. - a;
 	// auto num = pow(1. - R2, b + 1.) * pow(g, b) * pow(1. + g * (1. - R2), -n / 2.);
 	// auto den = gsl_sf_beta(p / 2. + a + 1., b + 1.);
+	// return num/den;
 	auto log_num = (b + 1.) * log(1. - R2) + b * log(g) -n / 2. * log(1. + g * (1. - R2));
 	auto log_den = gsl_sf_lnbeta(p / 2. + a + 1., b + 1.);
 	return exp(log_num - log_den);
@@ -978,15 +1041,27 @@ double q_g(double n, double p, double R2, double c, double g)
 // [[Rcpp::export]]
 double accuracy_g(double n, double p, double R2, double c)
 {
-	const auto GRID_POINTS = 1000;
+	const auto GRID_POINTS = 10000;
 	VectorXd x(GRID_POINTS), f(GRID_POINTS);
+
+	#pragma omp parallel for simd
 	for (auto i = 1; i < GRID_POINTS; i++) {
-		double g = i / 100.;
+		double g = i / 10000.;
+
 		x(i) = g;
 		f(i) = abs(p_g_y(n, p, R2, g) - q_g(n, p, R2, c, g));
-		// Rcout << x(i) << " " <<  f(i) << std::endl;
+
+		// if (p == 1000 && n == 1100 && R2 > 0.28 && R2 < 0.32) {
+		// 	Rcout << x(i) << " " <<  f(i) << std::endl;
+		// }
 	}
 
-	return 1. - 0.5 * trapint(x, f);
+	// Rcout << "accuracy_g: n " << n;
+	// Rcout << " p " << p;
+	// Rcout << " R2 " << R2;
+	// Rcout << " c " << c;
+	auto accuracy = 1. - 0.5 * trapint(x, f);
+	// Rcout << " accuracy " << accuracy << std::endl;
+	return accuracy;
 	// return trapint(x, f);
 }
