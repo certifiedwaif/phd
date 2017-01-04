@@ -7,6 +7,7 @@ library(ISLR)
 # Choose a simulation setting
 
 SETTING <- 1
+# SETTING <- commandArgs(trailingOnly = TRUE)[1]
 
 if (SETTING==1) 
 {
@@ -651,28 +652,40 @@ vw1 <- round( t(vp)%*%res$mA, 3)
 vw2 <- round( t(vq)%*%res$mA, 3)
 cat(vw1)
 cat(vw2)
+barplot(as.vector(vw1))
+barplot(as.vector(vw2))
 
 # Calculate AIC
 logpy <- n*log(1 - res$vR2)
-vlog.AIC <- -0.5*logpy - 0.5*apply(res$mA,1,sum)*2 
+vlog.AIC <- -0.5*apply(res$mA,1,sum) - 0.5*logpy
 vlog.AIC.til <- vlog.AIC - max(vlog.AIC)
 vp.AIC <- exp(vlog.AIC.til)/sum(exp(vlog.AIC.til))
-pip.AIC <- ( t(res$mA)%*%vp.AIC)
-vw3 <- round( t(vaic)%*%res$mA, 3)
+pip.AIC <- ( t(vp.AIC)%*%res$mA)
+barplot(as.vector(pip.AIC))
+vw3 <- round( t(vlog.AIC.til)%*%res$mA, 3)
 
 # Calculate BIC
 vlog.BIC <- -0.5*logpy - 0.5*apply(res$mA,1,sum)* log(nrow(X.f)) 
 vlog.BIC.til <- vlog.BIC - max(vlog.BIC)
 vp.BIC <- exp(vlog.BIC.til)/sum(exp(vlog.BIC.til))
-pip.BIC <- ( t(res$mA)%*%vp.BIC)
+pip.BIC <- ( t(vp.BIC)%*%res$mA)
+barplot(as.vector(pip.BIC))
+vw4 <- round( t(vlog.BIC.til)%*%res$mA, 3)
 
-mW <- rbind(vw1, vw2, t(pip.AIC), t(pip.BIC))
-colnames(mW) <- varnames
-print(mW)
+# Plot ranks
+par(mfrow=c(2, 2))
+plot(rank(as.vector(vw1)[1:100]), rank(as.vector(vw2[1:100])))
+plot(rank(as.vector(vw1)[1:100]), rank(as.vector(vw3[1:100])))
+plot(rank(as.vector(vw3)[1:100]), rank(as.vector(vw4[1:100])))
+par(mfrow=c(1, 1))
+
+# mW <- rbind(vw1, vw2, t(pip.AIC), t(pip.BIC))
+# colnames(mW) <- varnames
+# print(mW)
 
 # Put the results in a table
-tab <- cbind( round(100*vp,3),round(100*vq,3),res$mA )
-colnames(tab) <- c("prob p","prob q",varnames)
+tab <- cbind( round(100*vp,3),round(100*vq,3),round(100*vp.AIC,3),round(100*vp.BIC,3),res$mA )
+colnames(tab) <- c("prob p", "prob q", "prob AIC", "prob BIC", varnames)
 ord <- order(vp,decreasing=TRUE)
 
 # Print the table for the top 20 models
@@ -681,24 +694,34 @@ print( tab[ord[1:20],] )
 if (SETTING == 1) {
 	write.table(vw1, file = "Hitters_vw1.csv", col.names=FALSE, row.names = FALSE, sep=",")
 	write.table(vw2, file = "Hitters_vw2.csv", col.names=FALSE, row.names = FALSE, sep=",")
+	write.table(pip.AIC, file = "Hitters_pip_AIC.csv", col.names=FALSE, row.names = FALSE, sep=",")
+	write.table(pip.BIC, file = "Hitters_pip_BIC.csv", col.names=FALSE, row.names = FALSE, sep=",")
 }
 
 if (SETTING == 2) {
 	write.table(vw1, file = "bodyfat_vw1.csv", col.names=FALSE, row.names = FALSE, sep=",")
 	write.table(vw2, file = "bodyfat_vw2.csv", col.names=FALSE, row.names = FALSE, sep=",")
+	write.table(pip.AIC, file = "bodyfat_pip_AIC.csv", col.names=FALSE, row.names = FALSE, sep=",")
+	write.table(pip.BIC, file = "bodyfat_pip_BIC.csv", col.names=FALSE, row.names = FALSE, sep=",")
 }
 
 if (SETTING == 3) {
 	write.table(vw1, file = "Wage_vw1.csv", col.names=FALSE, row.names = FALSE, sep=",")
 	write.table(vw2, file = "Wage_vw2.csv", col.names=FALSE, row.names = FALSE, sep=",")
+	write.table(pip.AIC, file = "Wage_pip_AIC.csv", col.names=FALSE, row.names = FALSE, sep=",")
+	write.table(pip.BIC, file = "Wage_pip_BIC.csv", col.names=FALSE, row.names = FALSE, sep=",")
 }
 
 if (SETTING == 4) {
 	write.table(vw1, file = "GradRate_vw1.csv", col.names=FALSE, row.names = FALSE, sep=",")
 	write.table(vw2, file = "GradRate_vw2.csv", col.names=FALSE, row.names = FALSE, sep=",")
+	write.table(pip.AIC, file = "GradRate_pip_AIC.csv", col.names=FALSE, row.names = FALSE, sep=",")
+	write.table(pip.BIC, file = "GradRate_pip_BIC.csv", col.names=FALSE, row.names = FALSE, sep=",")
 }
 
 if (SETTING == 5) {
 	write.table(vw1, file = "USCrime_vw1.csv", col.names=FALSE, row.names = FALSE, sep=",")
 	write.table(vw2, file = "USCrime_vw2.csv", col.names=FALSE, row.names = FALSE, sep=",")
+	write.table(pip.AIC, file = "USCrime_pip_AIC.csv", col.names=FALSE, row.names = FALSE, sep=",")
+	write.table(pip.BIC, file = "USCrime_pip_BIC.csv", col.names=FALSE, row.names = FALSE, sep=",")
 }
