@@ -1,0 +1,67 @@
+% Chapter_3_normal_linear_models_numerical_issues.tex
+
+\documentclass{amsart}[12pt]
+% \documentclass[times, doublespace]{anzsauth}
+
+\addtolength{\oddsidemargin}{-.75in}%
+\addtolength{\evensidemargin}{-.75in}%
+\addtolength{\textwidth}{1.5in}%
+\addtolength{\textheight}{1.3in}%
+\addtolength{\topmargin}{-.8in}%
+\addtolength{\marginparpush}{-.75in}%
+% \setlength\parindent{0pt}
+% \setlength{\bibsep}{0pt plus 0.3ex}
+
+% \usepackage[authoryear]{natbib}
+\usepackage{graphicx}
+\usepackage{algorithm,algorithmic}
+\usepackage{cancel}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{algorithm,algorithmic}
+\usepackage[inner=2.5cm,outer=1.5cm,bottom=2cm]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{microtype}
+\usepackage{color}
+
+\newtheorem{theorem}{Theorem}[section]
+
+\title{Chapter 3 Variational Bayes for Linear Model Selection using Mixtures of g-priors}
+\author{Mark Greenaway, John T. Ormerod}
+
+\input{include.tex}
+\input{Definitions.tex}
+
+\newcommand{\mgc}[1]{{\color{blue}#1}}
+\newcommand{\joc}[1]{{\color{red}#1}}
+
+\begin{document}
+
+\maketitle
+
+$\tau_g$
+
+Trapezoidal integration for $\E[g | \vy]$, choose points for function evaluation, how many and where. Use
+John's Z_g_trapint code, which does clever things to find the endpoints of integration.
+
+Accuracy of g. 10,000 grid points between 0 and 10. Functions exponentially decrease to 0 monotonically
+outside of this interval.
+
+Accuracy of $\sigma^2$, identities for $_1 F_2$ allow us to avoid overflows and numerically evaluate the
+accuracy integral. 1,000 grid points spread between 0 and 10. Functions exponentially decrease to 0
+monotonically outside of this interval.
+
+Precision, identities for $_2 F_1$ allow us to avoid underflow and numerically evaluate the expression.
+
+We work on the log scale to avoid one part of an expression overflowing and another part underflowing. Working
+on the log scale leads to working with numbers which are smaller in magnitude, which avoids floating point
+overflow and underflow. The large positive and negative logs of the terms in the expressions then have the
+opportunity to additively cancel, and we can then exponentiate the resulting value to complete the
+calculation. The price that we pay is the loss of accuracy from taking logs of the terms and then
+exponentiating.
+
+\bibliographystyle{elsarticle-harv}
+\bibliography{references_mendeley}
+
+\end{document}
