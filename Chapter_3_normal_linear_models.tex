@@ -78,14 +78,14 @@ Criterion \cite{Foster1994}.
 % Bayesian
 
 One approach to model selection in a Bayesian context is to use Bayes factors to compare the posterior
-likelihood of the candidate models to see which is most probable. \cite{Zellner1980} suggested a particular form
-of conjugate Normal-Gamma family where the Bayes factors have a relatively simple form, incorporating a
-parameter $g$ to control mixing between the model fit from the data and a prior specification of model fit.
-This immediately raises the question of how $g$ should be chosen, and whether is should be fixed or have a
-prior specification.  \cite{Liang2008} showed that fixed choices of $g$ lead to paradoxes such as Bartlett's
-Paradox and the Information Paradox, and so a prior specification should be preferred. There are many ways of
-choosing a prior on $g$. Using a mixture of $g$-priors has the advantage of adapting the degree of shrinkage
-to the prior model dependent on the data.
+likelihood of the candidate models to see which is most probable given the observed data. \cite{Zellner1980}
+suggested a particular form of conjugate Normal-Gamma family where the Bayes factors have a relatively simple
+form, incorporating a parameter $g$ to control mixing between the model fit from the data and a prior
+specification of model fit. This immediately raises the question of how $g$ should be chosen, and whether it
+should be fixed or have a prior specification.  \cite{Liang2008} showed that fixed choices of $g$ lead to
+paradoxes such as Bartlett's Paradox and the Information Paradox, and so a prior specification should be
+preferred. There are many ways of choosing a prior on $g$. Using a mixture of $g$-priors has the advantage of
+adapting the degree of shrinkage to the prior model dependent on the data. \mgc{Too terse?}
 
 % Variational Bayes, Explaining Variational Approximations 2010
 
@@ -153,23 +153,9 @@ approximating probability distribution.
 
 \subsection{Model}
 
-Consider the model
-
-\begin{align*}
-	\vy|\vbeta, \sigma^2 & \sim \N(\mX \vbeta, \sigma^2 \mI) \\
-\end{align*}
-
-with priors
-
-\begin{align*}
-	\vbeta|g, \sigma^2 & \sim \N\left(\vzero, g\sigma^2 (\mX^\top \mX)^{-1}\right), \\
-	p(\sigma^2)        & = (\sigma^2)^{-1} \I(\sigma^2 > 0), \\
-	p(g) & = \frac{g^{-b} (1 + g)^{- a - b - 2}}{\Beta(a + 1, b + 1)} \I(g > 0).
-\end{align*}
-
 Zellner constructed a family of priors for a Gaussian regression model using a particular form of conjugate
 Normal-Gamma model, where the prior covariance matrix of $\vbeta$ is taken to be a multiple of the Fisher
-information  matrix by the parameter $g$ \cite{Goel1986}. This places the most prior mass on $\vbeta$ on the
+information  matrix by the parameter $g$ \cite{Goel1986}. This places the most prior mass for $\vbeta$ on the
 section of the parameter space where the data is least informative.
 
 \mgc{expand on this? See STAT260 combined lecture notes, page 55}
@@ -214,8 +200,7 @@ The approximation is fit by iteratively maximising the variational lower bound u
 updates, with each update guaranteed to increase the variational lower bound relative to the previous
 iteration. This sequence of mean field updates reduces the KL divergence between the true probability
 distribution $p(\vy)$ and the $q(\vtheta)$. The process converges when the variational lower bound no longer
-increases, and the KL divergence between the posterior distribution and the approximating distribution is
-minimised.
+increases. By the above derivation, this can be seen to be equivalent to the KL divergence between the posterior distribution and the approximating distribution being minimised.
 
 A popular form of approximation is to restrict $q(\vtheta)$ to a subclass of product densities by partitioning
 $\vtheta = (\vtheta_1, \vtheta_2, \ldots, \vtheta_{M-1}, \vtheta_M)$ and assuming independence between the
@@ -256,13 +241,12 @@ We consider a linear model with a g-prior, as in \cite{Liang2008}. Consider the 
 with priors
 
 \begin{align*}
-	\vbeta | \sigma^2, g & \sim \N_p(\vzero, g \sigma^2 (\mX^T \mX)^{-1})                     \\
-	p(\sigma^2)          & = (\sigma^2)^{-1} \I(\sigma^2 > 0)                                 \\
-	p(g)                 & = \frac{g^b (1 + g)^{-(a + b + 2)}}{\Beta(a + 1, b + 1)} \I(g > 0) 
+	\vbeta | \sigma^2, g & \sim \N_p(\vzero, g \sigma^2 (\mX^T \mX)^{-1}),                    \\
+	p(\sigma^2)          & = (\sigma^2)^{-1} \I(\sigma^2 > 0), \text{ and }                   \\
+	p(g)                 & = \frac{g^b (1 + g)^{-(a + b + 2)}}{\Beta(a + 1, b + 1)} \I(g > 0).
 \end{align*}
 
 We choose a factored Variational Bayes approximation of the form
-
 \begin{align*}
 	q(\vtheta) = q(\vbeta) q(\sigma^2) q(g). 
 \end{align*}
@@ -295,7 +279,7 @@ define
 \noindent where $\tau_{\sigma^2} = [1 - (1 + \tau_g^{(i)})^{-1} R^2]^{-1}$. This integral can be calculated
 numerically using Laplace's approximation. This process is repeated until convergence.
 
-$\nu - 1 = b - \frac{p}{2}$, 
+Let $\nu - 1 = b - \frac{p}{2}$, 
 $\beta = \frac{1}{2} (1 + \tau_g)^{-1} (\tau_{\sigma^2} n R^2 + p)$, 
 $\mu - 1 = (a + b + 2)$ and $\gamma = 1$. 
 
@@ -326,14 +310,14 @@ Second, observe that when $\vmu = (1 + \tau_g)^{-1} \vbetahatls$ and $\mSigma = 
 \begin{align*}
 	\vmu^\top \mX^\top \mX \vmu & = (1 + \tau_g)^{-2} \vbetahatls^\top \mX^\top \mX \vbetahatls                                                        \\
 	                            & = (1 + \tau_g)^{-2} \vy^\top \mX (\mX^\top \mX)^{-1} \cancel{\mX^\top \mX} \cancel{(\mX^\top \mX)^{-1}} \mX^\top \vy \\
-	                            & = (1 + \tau_g)^{-2} n R^2.                                    
+	                            & = (1 + \tau_g)^{-2} n R^2.                                                                                           
 \end{align*}
 
 Third, utilising the above two identities, $s$ can be simplified to
 \begin{align*}
 	s & = \frac{1}{2} [\|\vy\|^2 - 2 \vmu^\top \mX^\top \vy + (1 + \tau_g) \vmu^\top \mX^\top \mX \vmu (1 + \tau_g) +  \tr (\mX^\top \mX \mSigma)]                 \\
 	  & = \frac{1}{2} [n - \cancel{2} (1 + \tau_g) n R ^2 + \cancel{(1 + \tau_g) n R^2} + \tau_{\sigma^2} \tr (\cancel{\mX\top \mX} \cancel{(\mX^\top \mX)^{-1}})] \\
-	  & = \frac{1}{2} \{ n[1 - (1 + \tau_g)^{-1} R^2] + p \tau_{\sigma^2}^{-1} \}.
+	  & = \frac{1}{2} \{ n[1 - (1 + \tau_g)^{-1} R^2] + p \tau_{\sigma^2}^{-1} \}.                                                                                 
 \end{align*}
 
 Fourth, recalling that $\tau_{\sigma^2} = \E_q [\sigma^{-2}] = r/s = \frac{n+p}{n[1 - (1 + \tau_g)^{-1} R^2] + p \tau_{\sigma^2}^{-1}}$, we can solve for $\tau_{\sigma^2}$ in terms of $\tau_g$ to obtain
@@ -344,11 +328,11 @@ Fourth, recalling that $\tau_{\sigma^2} = \E_q [\sigma^{-2}] = r/s = \frac{n+p}{
 Hence
 
 \begin{align*}
-	s & = \frac{r}{\tau_{\sigma^2}} = \frac{1}{2} (n + p) [1 - (1 + \tau_g)^{-1} R^2], \text{ and } \\
+	s & = \frac{r}{\tau_{\sigma^2}} = \frac{1}{2} (n + p) [1 - (1 + \tau_g)^{-1} R^2], \text{ and }                \\
 	c & = \frac{\tau_{\sigma^2}}{2}[\vmu^\top \mX^\top \mX \vmu + \tr (\mX^\top \mX \mSigma)]                      \\
 	  & = \frac{\tau_{\sigma^2}}{2}\left[(1 + \tau_g)^{-2} n R^2 + \tau_{\sigma^2}^{-1} (1 + \tau_g)^{-1} p\right] \\
 	  & = \frac{1}{2} [ \tau_{\sigma^2} (1 + \tau_g)^{-2} n R^2 + (1 + \tau_g)^{-1} p]                             \\
-	  & = \frac{1}{2} \{ [1 + (1 + \tau_g)^{-1}]^{-1} (1 + \tau_g)^{-2} n R^2 + (1 + \tau_g)^{-1} p\}.
+	  & = \frac{1}{2} \{ [1 + (1 + \tau_g)^{-1}]^{-1} (1 + \tau_g)^{-2} n R^2 + (1 + \tau_g)^{-1} p\}.             
 \end{align*}
 
 \noindent Hence all of the variational parameter updates in Algorithm \ref{alg:algorithm_one} can be expressed as functions
@@ -375,6 +359,77 @@ be calculated from it as shown in Algorithm \ref{alg:algorithm_two}.
 \section{Numerical experiments}
 \label{sec:num_exp}
 
+\subsection{Shrinkage}
+
+Exact posterior and approximate shrinkage $\left( \frac{g}{1 + g} \right)$ were calculated for a range of
+values of $p$, $n$ and $R^2$ to compare their values. As can be seen from Figure $\ref{fig:shrinkage}$, the
+values of the exact posterior shrinkage and approximate shrinkage are almost the same over most of the range
+of these values, with deviation only noticeable in the $p=10$ and $p=20$ cases.
+
+Figure \ref{fig:shrinkage}
+
+\begin{figure}[p]
+	\caption{Comparison of exact and approximate shrinkage}
+	\label{fig:shrinkage}
+	\includegraphics[width=17cm, height=17cm]{Chapter_3_shrinkage.pdf}
+\end{figure}
+
+Coefficient posterior variance \\
+
+\begin{figure}[p]
+	\caption{Comparison of exact and approximate posterior variance}
+	\label{fig:variance}
+	\includegraphics[width=17cm, height=17cm]{code/taug/Variance.pdf}
+\end{figure}
+
+Accuracy of approximation to $p(\sigma^2 | \vy)$ \\
+
+\begin{figure}[p]
+	\caption{Accuracy of approximation to $p(\sigma^2 | \vy)$}
+	\label{fig:accuracy_sigma2}
+	\includegraphics[width=17cm, height=17cm]{code/taug/Accuracy_sigma2.pdf}
+\end{figure}
+
+
+Accuracy of approximation to $p(g | \vy)$ \\
+
+\begin{figure}[p]
+	\caption{Accuracy of approximation to $p(g | \vy)$}
+	\label{fig:accuracy_g}
+	\includegraphics[width=17cm, height=17cm]{code/taug/Accuracy_g.pdf}
+\end{figure}
+
+
+$\log{p(\vy)}$ versus ELBO \\
+
+\begin{figure}[p]
+	\caption{Relative error of the variational lower bound versus $\log{p(\vy)}$}
+	\label{fig:relative_error}
+	\includegraphics[width=17cm, height=17cm]{code/taug/Relative_error_log_p.pdf}
+\end{figure}
+
+\subsection{Marginal covariate inclusion probabilities}
+
+The marginal covariate inclusion probabilities from the variational approximation match those from the the
+exact posterior likelihood very closely. Comparing these marginal covariate inclusion probabilities to those
+produced by weighting each model considered by AIC and BIC, we see that the probabilities produced by the
+variational approximation and exact posterior likelihood are more conservative.
+
+\begin{figure}[p]
+	\caption{$\log p(y)$ divided by the lower bound}
+	\label{fig:log_p_div_elbo}
+	\includegraphics[width=17cm, height=17cm]{log_p_div_elbo.pdf}
+\end{figure}
+
+\mgc{I'm suspicious of the variance figure, as the exact variance seems to spike too high. First off, are
+		 you calculating the right quantities?}
+
+\begin{figure}[p]
+	\caption{Exact variance of $g$ divided by the approximate variance of $g$}
+	\label{fig:exact_var_g_div_approx_var_g}
+	\includegraphics[width=17cm, height=17cm]{exact_var_g_div_approx_var_g.pdf}
+\end{figure}
+
 
 % vw1 <- read.csv("Hitters_vw1.csv", header=FALSE)
 % r <- hist(as.matrix(vw1), breaks=19, axes=FALSE, prob=TRUE, main="", xlab="")
@@ -391,20 +446,20 @@ be calculated from it as shown in Algorithm \ref{alg:algorithm_two}.
 % 	\hline
 % \end{tabular}
 
-\subsection{Hitters}
+\subsubsection{Hitters}
 
-The Hitters data set was taken from Source: \cite{James:2014:ISL:2517747}
+The Hitters data set was taken from \cite{James:2014:ISL:2517747}
 
 The marginal covariate inclusion probabilities are presented in Figure \ref{fig:Hitters_inclusion}
 
 \begin{figure}[p]
-\label{fig:Hitters_inclusion}
-\caption{Hitters marginal inclusion probablities}
-\includegraphics[scale=.4]{Hitters_histogram.pdf}
+	\label{fig:Hitters_inclusion}
+	\caption{Hitters marginal inclusion probablities}
+	\includegraphics[scale=.4]{Hitters_variable_selection.pdf}
 \end{figure}
 
-\subsection{Body Fat}
-The Body Fat data set was taken from Source: \cite{James:2014:ISL:2517747}
+\subsubsection{Body Fat}
+The Body Fat data set was taken from \cite{James:2014:ISL:2517747}
 
 The marginal covariate inclusion probabilities are presented in Figure \ref{fig:bodyfat_inclusion}
 
@@ -416,13 +471,13 @@ The marginal covariate inclusion probabilities are presented in Figure \ref{fig:
 % \end{tabular}
 
 \begin{figure}[p]
-\label{fig:bodyfat_inclusion}
-\caption{bodyfat marginal inclusion probablities}
-\includegraphics[scale=.4]{bodyfat_histogram.pdf}
+	\label{fig:bodyfat_inclusion}
+	\caption{bodyfat marginal inclusion probablities}
+	\includegraphics[scale=.4]{bodyfat_variable_selection.pdf}
 \end{figure}
 
-\subsection{Wage}
-The Wage gap data set was taken from Source: \cite{James:2014:ISL:2517747}
+\subsubsection{Wage}
+The Wage gap data set was taken from \cite{James:2014:ISL:2517747}
 
 The marginal covariate inclusion probabilities are presented in Figure \ref{fig:Wage_inclusion}
 
@@ -434,13 +489,13 @@ The marginal covariate inclusion probabilities are presented in Figure \ref{fig:
 % \end{tabular}
 
 \begin{figure}[p]
-\label{fig:Wage_inclusion}
-\caption{Wage marginal inclusion probablities}
-\includegraphics[scale=.4]{Wage_histogram.pdf}
+	\label{fig:Wage_inclusion}
+	\caption{Wage marginal inclusion probablities}
+	\includegraphics[scale=.4]{Wage_variable_selection.pdf}
 \end{figure}
 
-\subsection{Graduation Rate}
-The Graduation Rate data set was taken from Source: \cite{James:2014:ISL:2517747}
+\subsubsection{Graduation Rate}
+The Graduation Rate data set was taken from \cite{James:2014:ISL:2517747}
 
 The marginal covariate inclusion probabilities are presented in Figure \ref{fig:GradRate_inclusion}
 
@@ -452,13 +507,13 @@ The marginal covariate inclusion probabilities are presented in Figure \ref{fig:
 % \end{tabular}
 
 \begin{figure}[p]
-\label{fig:GradRate_inclusion}
-\caption{GradRate marginal inclusion probablities}
-\includegraphics[scale=.4]{GradRate_histogram.pdf}
+	\label{fig:GradRate_inclusion}
+	\caption{GradRate marginal inclusion probablities}
+	\includegraphics[scale=.4]{GradRate_variable_selection.pdf}
 \end{figure}
 
-\subsection{US Crime}
-The US Crime data set was taken from Source: \cite{James:2014:ISL:2517747}
+\subsubsection{US Crime}
+The US Crime data set was taken from \cite{James:2014:ISL:2517747}
 
 The marginal covariate inclusion probabilities are presented in Figure \ref{fig:USCrime_inclusion}
 
@@ -470,37 +525,27 @@ The marginal covariate inclusion probabilities are presented in Figure \ref{fig:
 % \end{tabular}
 
 \begin{figure}[p]
-\label{fig:USCrime_inclusion}
-\caption{USCrime marginal inclusion probablities}
-\includegraphics[scale=.4]{USCrime_histogram.pdf}
+	\label{fig:USCrime_inclusion}
+	\caption{USCrime marginal inclusion probablities}
+	\includegraphics[scale=.4]{USCrime_variable_selection.pdf}
 \end{figure}
 
-\subsection{Shrinkage}
-
-Exact posterior and approximate shrinkage $\left( \frac{g}{1 + g} \right)$ were calculated for a range of
-values of $p$, $n$ and $R^2$ to compare their values. As can be seen from Figure $\ref{fig:shrinkage}$, the
-values of the exact posterior shrinkage and approximate shrinkage are almost the same over most of the range
-of these values, with deviation only noticeable in the $p=10$ and $p=20$ cases.
-
-Figure \ref{fig:shrinkage}
-
-\begin{figure}[p]
-	\caption{Comparison of exact and approximate shrinkage}
-	\label{fig:shrinkage}
-	\includegraphics[width=17cm, height=17cm]{Chapter_3_shrinkage.pdf}
-\end{figure}
+Model ranking
 
 \section{Conclusion and Discussion}
 \label{sec:conclusion}
 
-The Variational Bayes approximation produces results which are almost exactly the same as the exact version.
+The Variational Bayes approximation produces results which are almost identical to the exact likelihood.
 The VB metholodology extends naturally to new situations, such as robust model fitting, mixed effects, missing
 data, measurement error and splines. We are able to retain high accuracy with less computational overhead than
 exact or MCMC.
 
-Amenability to univariate optimisation depending only on $n$, $p$ and $R^2$ provides opportunities for
-application in many areas where speed and/or parallelisability is paramount, such as model selection via
-Structured Variational Bayes.
+All of the variational parameters in Algorithm \ref{alg:algorithm_two} except $\tau_g$ depend only on
+$\tau_g$ and the fixed quantities $n$, $p$, $R^2$, $\mX$ and $\vy$. This allows us to optimise $\tau_g$
+only, and then set the rest of the variational parameters at the end of the algorithm. The fact that only
+univariate optimisation is required reduces the computation required to fit our approximation considerably,
+which makes this algorithm applicable when speed and/or the ability to parallelise the algorithm are
+paramount, such as model selection via structured Variational Bayes.
 
 \bibliographystyle{elsarticle-harv}
 \bibliography{references_mendeley}
