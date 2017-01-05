@@ -149,7 +149,8 @@ Let $n > 0$ be the number of observations and $p > 0$ be the number of covariate
 vector of responses, $\vtheta \in \R^p$ be the vector of parameters and $\mX \in \R^{n \times p}$ be the
 matrix of covariates. Let $p(\vtheta)$ be the prior distribution of $\vtheta$, $p(\vy, \vtheta)$ be the full
 probability distribution of $\vy$, $p(\vtheta | \vy)$ the posterior distribution and $q(\vtheta)$ be the
-approximating probability distribution.
+approximating probability distribution. Let $\kappa$ be the inflation factor such that for the examples under
+consideration $n = \kappa p$.
 
 \subsection{Model}
 
@@ -376,6 +377,9 @@ Figure \ref{fig:shrinkage}
 
 Coefficient posterior variance \\
 
+We can see from Figure \ref{fig:variance} that as $p$ and $\kappa$ increase, the approximation to the
+posterior variance of \ldots becomes more and more accurate.
+
 \begin{figure}[p]
 	\caption{Comparison of exact and approximate posterior variance}
 	\label{fig:variance}
@@ -407,6 +411,18 @@ $\log{p(\vy)}$ versus ELBO \\
 	\label{fig:relative_error}
 	\includegraphics[width=17cm, height=17cm]{code/taug/Relative_error_log_p.pdf}
 \end{figure}
+
+Precision \\
+
+As $p$ and $\kappa$ increase, we can see that the approximate precision is converging towards the exact
+precision for all values of $R^2$.
+
+\begin{figure}[p]
+	\caption{Comparison of exact and approximate posterior precision}
+	\label{fig:precision}
+	\includegraphics[width=17cm, height=17cm]{code/taug/Precision.pdf}
+\end{figure}
+
 
 \subsection{Marginal covariate inclusion probabilities}
 
