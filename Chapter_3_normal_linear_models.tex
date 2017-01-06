@@ -356,9 +356,13 @@ be calculated from it as shown in Algorithm \ref{alg:algorithm_two}.
 	\end{algorithmic}
 \end{algorithm}
 
-
 \section{Numerical experiments}
 \label{sec:num_exp}
+
+To assess the accuracy of our variational approximations to the exact posteriors, we examined a number of
+measures. All of the measures that we examined were functions of $\kappa$, $p$ and $R^2$, and so serve to
+characterise the performance of our approximation on any possible data set with a number of observations
+$n$, number of covariates $p$ and correlation $R$ between the response $\vy$ and the covariate matrix $\mX$.
 
 \subsection{Shrinkage}
 
@@ -366,8 +370,6 @@ Exact posterior and approximate shrinkage $\left( \frac{g}{1 + g} \right)$ were 
 values of $p$, $n$ and $R^2$ to compare their values. As can be seen from Figure $\ref{fig:shrinkage}$, the
 values of the exact posterior shrinkage and approximate shrinkage are almost the same over most of the range
 of these values, with deviation only noticeable in the $p=10$ and $p=20$ cases.
-
-Figure \ref{fig:shrinkage}
 
 \begin{figure}[p]
 	\caption{Comparison of exact and approximate shrinkage}
@@ -388,12 +390,18 @@ posterior variance of \ldots becomes more and more accurate.
 
 Accuracy of approximation to $p(\sigma^2 | \vy)$ \\
 
+We assessed the accuracy of the approximation to $p(\sigma^2 | \vy)$ by $q(\sigma^2)$ by numerically evaluating
+the integral
+\[
+	1 - \frac{1}{2} \int_0^\infty |p(\sigma^2 | \vy) - q(\sigma^2)| d \sigma^2
+\]
+for a range of values of $p$, $\kappa$ and $R^2$. The results are presented in Figure \ref{fig:accuracy_sigma2}.
+
 \begin{figure}[p]
 	\caption{Accuracy of approximation to $p(\sigma^2 | \vy)$}
 	\label{fig:accuracy_sigma2}
 	\includegraphics[width=17cm, height=17cm]{code/taug/Accuracy_sigma2.pdf}
 \end{figure}
-
 
 Accuracy of approximation to $p(g | \vy)$ \\
 
@@ -403,8 +411,18 @@ Accuracy of approximation to $p(g | \vy)$ \\
 	\includegraphics[width=17cm, height=17cm]{code/taug/Accuracy_g.pdf}
 \end{figure}
 
+We assessed the accuracy of the approximation to $p(g | \vy)$ by $q(g)$ by numerically evaluating the integral
+\[
+	1 - \frac{1}{2} \int_0^\infty |p(g | \vy) - q(g)| d g
+\]
+for a range of values of $p$, $\kappa$ and $R^2$. The results are presented in Figure \ref{fig:accuracy_g}.
+
 
 $\log{p(\vy)}$ versus ELBO \\
+
+We assessed the accuracy of the variational lower bound by calculating the relative error of
+$\log{\underline{p}(\vy)}$ versus $\log{p(\vy)}$. The results are presented in Figure
+\ref{fig:relative_error}.
 
 \begin{figure}[p]
 	\caption{Relative error of the variational lower bound versus $\log{p(\vy)}$}
@@ -414,15 +432,16 @@ $\log{p(\vy)}$ versus ELBO \\
 
 Precision \\
 
-As $p$ and $\kappa$ increase, we can see that the approximate precision is converging towards the exact
-precision for all values of $R^2$.
+The accuracy of the precision was assessed by calculating the relative error of the approximate precision
+versus the exact posterior precision. The results are presented in Figure \ref{fig:precision}. As $p$ and
+$\kappa$ increase, we can see that the approximate precision is converging towards the exact precision for all
+values of $R^2$.
 
 \begin{figure}[p]
-	\caption{Comparison of exact and approximate posterior precision}
+	\caption{Relative error of the approximate posterior precision versus the exact posterior precision}
 	\label{fig:precision}
 	\includegraphics[width=17cm, height=17cm]{code/taug/Precision.pdf}
 \end{figure}
-
 
 \subsection{Marginal covariate inclusion probabilities}
 
@@ -432,18 +451,9 @@ produced by weighting each model considered by AIC and BIC, we see that the prob
 variational approximation and exact posterior likelihood are more conservative.
 
 \begin{figure}[p]
-	\caption{$\log p(y)$ divided by the lower bound}
-	\label{fig:log_p_div_elbo}
-	\includegraphics[width=17cm, height=17cm]{log_p_div_elbo.pdf}
-\end{figure}
-
-\mgc{I'm suspicious of the variance figure, as the exact variance seems to spike too high. First off, are
-		 you calculating the right quantities?}
-
-\begin{figure}[p]
-	\caption{Exact variance of $g$ divided by the approximate variance of $g$}
-	\label{fig:exact_var_g_div_approx_var_g}
-	\includegraphics[width=17cm, height=17cm]{exact_var_g_div_approx_var_g.pdf}
+	\caption{Log of the relative error of the approximate variance of g relative to the exact variance of g}
+	\label{fig:rel_error_var_g}
+	\includegraphics[width=17cm, height=17cm]{code/taug/Log_of_Relative_error_of_Variance_of_g.pdf}
 \end{figure}
 
 
@@ -466,18 +476,26 @@ variational approximation and exact posterior likelihood are more conservative.
 
 The Hitters data set was taken from \cite{James:2014:ISL:2517747}
 
-The marginal covariate inclusion probabilities are presented in Figure \ref{fig:Hitters_inclusion}
+The marginal covariate inclusion probabilities are presented in Figure \ref{fig:Hitters_inclusion}.
 
 \begin{figure}[p]
-	\label{fig:Hitters_inclusion}
 	\caption{Hitters marginal inclusion probablities}
+	\label{fig:Hitters_inclusion}
 	\includegraphics[scale=.4]{Hitters_variable_selection.pdf}
+\end{figure}
+
+The model ranking scatterplots are presented in Figure \ref{fig:Hitters_model_ranking}.
+
+\begin{figure}[p]
+	\caption{Hitters model ranking scatterplot}
+	\label{fig:Hitters_model_ranking}
+	\includegraphics[scale=.4]{code/Model_selection_scatter_plot_1.pdf}
 \end{figure}
 
 \subsubsection{Body Fat}
 The Body Fat data set was taken from \cite{James:2014:ISL:2517747}
 
-The marginal covariate inclusion probabilities are presented in Figure \ref{fig:bodyfat_inclusion}
+The marginal covariate inclusion probabilities are presented in Figure \ref{fig:bodyfat_inclusion}.
 
 % \begin{tabular}{|l|lllllllllllll|}
 % 	\hline
@@ -487,15 +505,24 @@ The marginal covariate inclusion probabilities are presented in Figure \ref{fig:
 % \end{tabular}
 
 \begin{figure}[p]
-	\label{fig:bodyfat_inclusion}
 	\caption{bodyfat marginal inclusion probablities}
+	\label{fig:bodyfat_inclusion}
 	\includegraphics[scale=.4]{bodyfat_variable_selection.pdf}
 \end{figure}
 
-\subsubsection{Wage}
-The Wage gap data set was taken from \cite{James:2014:ISL:2517747}
+The model ranking scatterplots are presented in Figure \ref{fig:bodyfat_model_ranking}.
 
-The marginal covariate inclusion probabilities are presented in Figure \ref{fig:Wage_inclusion}
+\begin{figure}[p]
+	\caption{bodyfat model ranking scatterplot}
+	\label{fig:bodyfat_model_ranking}
+	\includegraphics[scale=.4]{code/Model_selection_scatter_plot_2.pdf}
+\end{figure}
+
+\subsubsection{Wage}
+
+The Wage gap data set was taken from \cite{James:2014:ISL:2517747}.
+
+The marginal covariate inclusion probabilities are presented in Figure \ref{fig:Wage_inclusion}.
 
 % \begin{tabular}{|l|lllllllllllllllll|}
 % 	\hline
@@ -505,15 +532,24 @@ The marginal covariate inclusion probabilities are presented in Figure \ref{fig:
 % \end{tabular}
 
 \begin{figure}[p]
-	\label{fig:Wage_inclusion}
 	\caption{Wage marginal inclusion probablities}
+	\label{fig:Wage_inclusion}
 	\includegraphics[scale=.4]{Wage_variable_selection.pdf}
 \end{figure}
 
-\subsubsection{Graduation Rate}
-The Graduation Rate data set was taken from \cite{James:2014:ISL:2517747}
+The model ranking scatterplots are presented in Figure \ref{fig:Wage_model_ranking}.
 
-The marginal covariate inclusion probabilities are presented in Figure \ref{fig:GradRate_inclusion}
+\begin{figure}[p]
+	\caption{Wage model ranking scatterplot}
+	\label{fig:Wage_model_ranking}
+	\includegraphics[scale=.4]{code/Model_selection_scatter_plot_3.pdf}
+\end{figure}
+
+
+\subsubsection{Graduation Rate}
+The Graduation Rate data set was taken from \cite{James:2014:ISL:2517747}.
+
+The marginal covariate inclusion probabilities are presented in Figure \ref{fig:GradRate_inclusion}.
 
 % \begin{tabular}{|l|lllllllllllllllll|}
 % 	\hline
@@ -523,15 +559,23 @@ The marginal covariate inclusion probabilities are presented in Figure \ref{fig:
 % \end{tabular}
 
 \begin{figure}[p]
-	\label{fig:GradRate_inclusion}
 	\caption{GradRate marginal inclusion probablities}
+	\label{fig:GradRate_inclusion}
 	\includegraphics[scale=.4]{GradRate_variable_selection.pdf}
 \end{figure}
 
-\subsubsection{US Crime}
-The US Crime data set was taken from \cite{James:2014:ISL:2517747}
+The model ranking scatterplots are presented in Figure \ref{fig:GradRate_model_ranking}.
 
-The marginal covariate inclusion probabilities are presented in Figure \ref{fig:USCrime_inclusion}
+\begin{figure}[p]
+	\caption{GradRate model ranking scatterplot}
+	\label{fig:GradRate_model_ranking}
+	\includegraphics[scale=.4]{code/Model_selection_scatter_plot_4.pdf}
+\end{figure}
+
+\subsubsection{US Crime}
+The US Crime data set was taken from \cite{James:2014:ISL:2517747}.
+
+The marginal covariate inclusion probabilities are presented in Figure \ref{fig:USCrime_inclusion}.
 
 % \begin{tabular}{|l|lllllllllllllll|}
 % 	\hline
@@ -541,12 +585,18 @@ The marginal covariate inclusion probabilities are presented in Figure \ref{fig:
 % \end{tabular}
 
 \begin{figure}[p]
-	\label{fig:USCrime_inclusion}
 	\caption{USCrime marginal inclusion probablities}
+	\label{fig:USCrime_inclusion}
 	\includegraphics[scale=.4]{USCrime_variable_selection.pdf}
 \end{figure}
 
-Model ranking
+The model ranking scatterplots are presented in Figure \ref{fig:USCrime_model_ranking}.
+
+\begin{figure}[p]
+	\caption{USCrime model ranking scatterplot}
+	\label{fig:USCrime_model_ranking}
+	\includegraphics[scale=.4]{code/Model_selection_scatter_plot_5.pdf}
+\end{figure}
 
 \section{Conclusion and Discussion}
 \label{sec:conclusion}
