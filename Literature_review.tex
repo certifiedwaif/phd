@@ -188,7 +188,7 @@ Schwarz Criterion is another name for the BIC.
 
 Berger and Pericchi (1996) The Intrinsic Bayes Factor for Model Selection and Prediction
 Yet another model selection criterion, with some claimed advantages. Advocates automatic methods of model 
-selection, as "analysis of nonnested and/or multiplemodels or hypotheses is very difficult in a frequentist
+selection, as "analysis of nonnested and/or multiple models or hypotheses is very difficult in a frequentist
 framework".
 
 De Santis and Spezzaferri (1999) Automatic and robust methods for model comparison using fractional Bayes
@@ -201,5 +201,280 @@ Bayorri and Garci\'{a}--Donato (2008) Divergence Based Priors for Bayesian Hypot
 Cui and George (2008) Empirical Bayes versus fully Bayes variable selection.
 
 Maruyama and Strawderman (2010). A New Class of Generalised Bayes Minimax Ridge Regression Estimators.
+
+Zellner, Jeffreys-Bayes Posterior Odds Ratio and the Akaike Information Criterion for Discriminating Between
+Models
+
+\subsection{References from Liang et al 2008}
+Barbieri and Berge 2004 Optimal Predictive Model Selection
+Choose a model for future prediction and it is natural to measure the accuracy of a future prediction by
+squared error loss. Under the Bayesian approach, it is commonly perceived that the optimal predictive model is
+the model with highest probability, but this is not necessarily the case. In this paper we show that for
+selection among the normal linear models, the optimal predictive model is often the median probability model,
+which is defined as the model consisting of those variagbles which have overall posterior probabliity greater
+than or equal to $\frac{1}{2}$ of being in a model. The median probability model often differs from the highest
+probability model.
+
+Bartlett ``A Comment on D.v. Lindley's Statistical Paradox'', Biometrika
+Contradiction between hypothesis test results and posterior probability of the null hypothesis. Correcting 
+Lindley.
+
+Berger and Pericchi, 2001, ``Objective Bayesian Methods for Model Selection: Introduction and Comparison''
+The basics of the Bayesian approach to model selection are first presented, as well as the motivations for the
+Bayesian approach. We then review four methods of developing default Bayesian procedures that have undergone
+considerable recent development, the Conventional Prior approach, the Bayes Information Criterion, the
+Intrinsic Bayes Factor, and the Fractional Bayes Factor. As part of the review, these methods are illustrated
+on examples involving the normal linear model. The later part of the chapter focuses on comparison of the
+four approaches, and includes an extensive discussion of criteria for judging model selection procedures.
+
+Berger, Pericchi and Varshavsky, ``Bayes Factors and Marginal Distributions in Invariant Situation''
+In Bayesian analysis with a ``minimal'' data set and common noninformative priors, the (formal) marginal
+density of the data is surprisingly often independent of the error distribution. This results in great
+simplifications in certain model selection metholodologies; for instance, the Intrinsic Bayes Factor for
+models with this property reduces simply to Bayes factor with respect to the noninformative priors. The basic
+result holds for comparison of models which are invariant with respect to the same group structure. Indeed the
+condition reduces to a condition on the distributions of the common maximal invariant. In these situations,
+the marginal density of a ``minimal'' data set is typically available in closed form, regardless of the error
+distribution. This provides very useful expressions for computation of Intrinsic Bayes Factors in more general
+settings. The conditions for the results to hold are explored in some detail for nonnormal linear models and
+various transformations thereof.
+
+Breiman and Friedman, ``Estimating Optimal Transformations for Multiple Regression and Correlation''
+In regression analysis the response variable $\vy$ and the predictor variables $\mX_1, \ldots, \mX_p$ are often
+replaced by functions $\theta(\vy)$ and $\phi(X_1)$, \ldots, $\phi(X_p)$. We discuss a procedure for estimating
+those functions $\theta^*$ and $\phi_1^*$, \ldots, $\phi_p^*$ that minimise
+$e^2 = \frac{\E\{ [\theta(\vy) - \sum_{j=1}^p \phi_j (X_j)]^2 \}}{\text{var}[\theta(\vy)]}$
+given on a sample $\{ (\vy_k, \vx_{k1}, \ldots, \vx_{kp}), 1 \leq k \leq N \}$ and making minimal assumptions
+concerning the data distribution or the form of the solution functions. For the bivariate case, $p=1$,
+$\theta^*$ and $\rho^*=\rho(\theta^*, \phi^*) = \text{max}_{\theta, \phi} \rho[\theta(\vy), \psi(\mX)]$, where
+$\rho$ is the product moment correlation coefficient and $\rho^*$ is the maximum correlation between $X$ and
+$Y$. Our procedure thus also provides a method for estimating the maximum correlation between two variables.
+
+Butler and Wood (2002), ``Laplace Approximations for Hypergeometric Functions with Matrix Argument''
+In this paper we present Laplace approximations for two functions of matrix argument: the Type I confluent
+hypergeometric function and the Gauss hypergeometric function. Both of these functions play an important role
+in distribution theory in multivariate analysis, but from a practical point of view they have proved
+challenging, and they have acquired a reputation for being difficult to approximate. Appealing features of the
+approximations we present are: (i) they are fully explicit (and simple to evaluate in practice) and
+(ii) typically, they have excellent numerical accuracy. \ldots Relative error properties of these
+approximations are also studied, and it is noted that the approximations have uniformly bounded relative
+errors in important cases.
+
+Casella and Moreno, (2006) ``Objective Bayes Variable Selection''
+A novel fully automatic Bayesian procedure for variable selection in normal regression models is proposed. The
+procedure uses the posterior probabilities of the models to drive a stochastic search. The posterior
+probabilities are computed using intrinsic priors, which can be considered default priors for model selection
+problems; that is, they are derived from the model structure and are free from tuning parameters. Thus they
+can be seen as objective priors for model selection. The stochastic search is based on a Metropolis-Hastings
+algorithm with a stationary distribution proportional to the model posterior probabilities. The procedure is
+illustrated on both simulated and real examples.
+
+Clyde and George, 2000, Flexible Empirical Bayes Information for Wavelets
+Wavelet shrinkage estimation is an increasingly popular method for signal denoising and compression. Although
+Bayes estimators can provide excellent mean-squared error (MSE) properties, the selection of an effective
+prior is a difficult task. To address this problem, we propose empirical Bayes (EB) prior selection methods for
+various error distributions including the normal and heavier-tailed Student's t-distributions. Under such EB
+prior distributions, we obtain threshold shrinkage estimators based on model selection, and multiple-shrinkage
+estimators based on model averaging. These EB estimators are seen to be computationally competitive with standard
+classical thesholding methods, and to be robust to outliers in both the data and wavelet domains. Simulated and
+real examples are used to illustrate the flexibility and improved performance of these methods in a wide variety
+of settings.
+
+Cui and George, 2007, Empirical Bayes versus Fully Bayes Variable Selection
+For the problem of variable selection for the normal linear model, fixed penalty selection criteria such as
+AIC, $C_p$, BIC and RIC correspond to the posterior modes of a hierarchical Bayes model for various fixed
+hyperparameter settings. Adaptive selection criteria obtained by empirical Bayes estimation of the
+hyperparameters have been shown by George and Foster [2000, Calibration and Empirical Bayes variable selection,
+Biometrika] to improve on these fixed selection criteria. In this paper, we study the potential of alternative
+fully Bayes methods which instead margin out the hyperparameters with respect to prior distributions. Several
+structured prior formulations are considered for which fully Bayes selection and estimation methods are
+obtained. Analytical and simulation comparisons with empirical Bayes counterparts are studied.
+
+Fernandez, Ley and Steel, 2000, Benchmark priors for Bayesian model averaging
+In contrast to a posterior analysis given a particular sampling model posterior model probabilities in the
+context of model uncertainty are typically rather sensitive to the specification of the prior. In particular,
+`diffuse' priors on model-specific parameters can lead to quite unexpected consequences. Here we focus on the
+practically relevant situation where we need to entertain a (large) number of sampling models and we have (or wish to use) little or no subjective prior information. We aim at providing an `automatic' or `benchmark'
+prior structure that can be used in such cases. We focus on the normal regression model with uncertainty in
+the choice of regressors. We propose a partly non-informative prior structure related to a natural conjugate
+$g$-prior specification, where the amount of subjective information requested from the user is limited to the
+choice of a single scalar hyperparameter $g_{0j}$. The consequences of different choices for $g_{0j}$ are
+examined. We investigate theoretical properties such as consistency of the implied Bayesian procedure. Links
+with classical information criteria are provided. More importantly, we examine the finite sample implications
+of several choices of $g_{0j}$ in a simulation study. \ldots In addition to posterior criteria, we shall also
+compare the predictive performance of different priors. A classic example concerning the economics of crime
+will also be provided and contrasted with results in the literature. The main findings of the paper will lead
+us to propose a `benchmark' prior specification in a linear regression context with model uncertainty.
+
+Foster and George, 1994, The Risk Inflation Criterion for Multiple Regression
+A new criterion is proposed for the evaluation of variable selection procedures in multiple regression. This
+criterion, which we call the risk inflation, is based on an adjustment to the risk. Essentially, the risk
+inflation is the maximum increase in risk due to selecting rather than knowing the ``correct'' predictiors.
+A new variable selection procedure is obtained which, in the case of orthogonal predictors, substantially
+improves on AIC, C_p and BIC and is close to optimal. In contrast to AIC, C_P and BIC which use dimensionality
+penalties of 2, 2 and log n respectively, this new procedure uses a penalty 2 log p, where p is the number of
+available predictors. For the case of nonorthogonal predictors, bounds for the optimal penalty are obtained.
+
+George, E (1999) Discussion of ``Model Averaging and Model Search Strategies''
+2000, ``The Variable Selection Problem''
+The problem of variable selection is one of the most pervasive model selection problems in statistical
+applications. Often referred to as the problem of subset selection, it arises when one wants to model the
+relationship between a variable of interest and a subset of potential explanatory variables or predictors but
+there is uncertainty about which subset to use. This vignette reviews some of the key developments that have led 
+to the wide variety of approaches to the problem.
+
+George and Foster (2000) Calibration and Empirical Bayes Variable Selection
+For the problem of variable selection for the normal linear model, selection criteria such as AIC, C_p, BIC
+and RIC have fixed dimension penalties. Such criteria are shown to correspond to selection of maximum
+posterior models under implicit hyperparameter choices for a particular hierarchical Bayes formulation. Based
+on this calibration, we propose empirical BAyes selection criteria that use hyperparameter estimates instead
+of fixed choices. For obtaining these estimates, both marginal and conditional maximum likelihood methods are
+considered. As opposed to traditional fixed penalty criteria, these empirical Bayes criteria have dimensionality
+penalties that depend on the data. Their performance is seen to approximate adaptively the perform of the best
+fixed-penalty criterion across a variety of orthogonal and non-orthogonal set-ups, incuding wavelet regression.
+Empirical Bayes shrinkage estimators of the selected coefficients are also proposed.
+
+George and McCulloch (1993) ``Variable Selection via Gibbs Sampling''
+A crucial problem in building a multiple regression model is the selection of predictors to include. The main
+thrust of this article is to propose and develop a procedure that uses probabilistic considerations for selecting
+promising subsets. This procedure entails embedding the regression setup in a hierarchical normal mixture model 
+where latent variables are used to identify subset choices. In this framework the promising subsets of predictors
+can be identified as those with higher posterior probability. The computational burden is then alleviated by
+using a Gibbs sampler to indirectly sample from this multinomial posterior distribution on the set of possible
+subset choices. Those subsets with higher probability -- the promising ones -- can then be identified by their
+more frequent appearance in the Gibbs sample.
+
+Geweke, J. (1996), ``Variable Selection and Model Comparison in Regression''
+In the specification of linear regression models it is common to indicate a list of candidate variables from
+which a subset enters the model with nonzero coefficients. This paper interprets this specification as a mixed
+continuous-discrete prior distribution for coefficient values. It then utilises a Gibbs sampler to construct
+posterior moments. It is shown how this method can incorporate sign-constraints and provide posterior 
+probabilities for all possible subsets of regressors. The methods are illustrated using some standard data sets.
+
+Hansen and Yu, 2001, ``Model Selection and the Principle of Minimum Description Length''
+This article reviews the principle of minimum description length (MDL) for problems of model selection. By
+viewing statistical modeling as a means of generating \emph{descriptions} of observed data, the MDL frameowkr
+discriminates between competing models based on the \emph{complexity} of each description. This approach began
+with Kolmogorov's theory of algorithmic complexity, matured in the literature on information theory, and has
+recently received renewed attention within the statistics community. Here we review both the practical and the
+theoretical aspects of MDL as a tool for model selection, emphasising the rich connections between information
+theory and statistics. At the boundary between these two disciplines we find many interesting interpretations
+of popular frequentist and Bayesian procedures. As we show, MDL provides an objective umbrella under which rather disparate approaches to statistical modelling can coexist and be compared. We illustrate the MDL principle by
+considering problems in linear regression, nonparametric curve estimation, cluster analysis and time series
+analysis. Because model selection in linear regression is an extremely common problem that arises in many
+applications, we present details derivations of several MDL criteria in this context and discuss their properties
+through a number of examples. Our emphasis is on the practical application of MDL, and hence we make extensive
+use of real data sets. In writing this review, we tried to make a descriptive philosophy of MDL natural to a
+statistics audience by examining classical roblems in model selection. In the engineering literature, however,
+MDL is being applied to ever more exotic modelling situations. As a principle for statistical modelling in 
+general, one strength of MDL is that it can be intuitively extended to provide useful tools for new problems.
+
+Hoeting, Madigan, Raftery, Valinksy (1999) ``Bayesian Model Averaging: A Tutorial''
+Standard statistical practice ignores model uncertainty. Data analysts typically select a model from some class
+of models and then process as if the select model had generated the data. This approach ignores the uncertainty
+in model selection, leading to overconfident inferences and decisions that are more risky than one thinks they
+are. Bayesian model averaging (BMA) provides a coherent mechanism for accounting for this model uncertainty.
+Several methods for implementing BMA have recently emerged. We discuss these methods and present a number of
+examples. In those examples, BMA provides improved out-of-sample predictive performance. We also provide a
+catalogue of currently available BMA software.
+
+Jeffreys (1961) Theory of Probability
+
+Johnstone and Silverman (2005) ``Empirical Bayes Selection of Wavelet Thresholds''
+Not very relevant
+
+Kass, Raftery (1995) Bayes Factors
+Bayes factors are very general and do not required alternative models to be nested
+The Schwarz criterion (or BIC) gives a rough approximation to the log of the Bayes factor, which is easy
+to use and does not require evaluation of prior distributions.
+Bayes factors can be converted into weights to be attached to various models \ldots takes account of model
+uncertainty
+
+Leamer, E. E. (1978a) ``Regression Selection Strategies and Revealed Priors''
+The computation and selection of constrained regressions may be motivated by prior information and, if so,
+a regression selection strategy reveals the implicit prior. The selection strategies of principal component
+regression, stepwise regression, and imposing equality constraints are connected with prior densities which are
+uniform on spheres, hyperbolas, and cones respectively. Omitting variables in a predetermined order reveals
+lexicographic priors.
+
+Miller, A. J. (2001) Subsets Selection in Regression
+Fitting and choosing models that are linear in their parameters and to understanding and correcting the bias
+introduced by selecting a model that fits only slightly better than the others.
+
+Mitchell and Beauchamp (1988) ``Bayesian Variable Selection in Linear Regression''
+Complicated, not fully Bayesian
+
+Pauler, Wakefield and Kass (1999) ``Bayes Factors and Approximations for Variance Component Models''
+Tests of variance components
+
+Raftery, Madigan and Hoeting (1997) ``Bayesian Model Averaging for Linear Regression Models''
+Conditioning on a single selected model ignores model uncertainty and thus leads to the underestimation of
+uncertainty when making inferences. A Bayesian solution to this problem involves averaging over all possible
+models, but this is often not practical. First, we describe an ad hoc procedure, ``Occam's Window'', which
+indicates a small set of models over which a model average can be computed. Second, we describe a Markov chain
+method
+
+Zellner, A (1971) ``An Introduction to Bayesian Inference in Econometrics''
+
+(1986) ``On Assessing Prior Distributions and Bayesian Regression Analysis With g-prior Distributions''
+
+Zellner, A. and Min, C. (1997) ``Bayesian Analysis, Model Selection and Prediction''
+
+Zellner, A. and Siow, A. (1980) ``Posterior Odds Ratios for Selected Regression Hypotheses''
+
+\subsection{References from Murayama and George}
+Akaike, H. (1974) ``A new look at the statistical model identification''
+The history of the development of statistical hypothesis testing in time series is reviewed briefly and it is
+pointed out that the hypothesis testing procedure is not adequately defined as the procedure for statistical
+identification. The classical maximum likelihood estimation procedure is reviewed and a new estimate minimum
+information theoretical criterion (AIC) estimate (MAICE) which is designed for the purpose of statistical
+information is introduced. When there are several completing models the MAICE is deinfed by the model and the
+maximum likelihood estimates of the parameters which give the minimum of AIC defined by
+
+\[
+	\text{AIC} = -2 ( \text{log likelihood} ) + 2 (\text{number of independently adjusted parameters within the model})
+\]
+
+Casella, G. (1980) ``Minimax ridge regression estimation''
+The technique of ridge regression, first proposed by Hoerl and Kennard, has become a poopular tool for data
+analysts faced with a high degree of multicollinearity in their data. By using a ridge estimator, one hopes to
+both stabilise one's estimates (lower the condition number of the matrix) and improve upon the squared error
+loss of the least squares estimator.
+
+Recently, much attention has been focused on the latter objective. Building on the work of Stein and others,
+Strawderman and Thisted have developed classes of ridge regression estimators which dominate the usual estimator
+of risk, and hence are minimax. The unwieldy form of the risk function, however, has led these authors to
+minimise conditions which are stronger than needed.
+
+In this paper, using an entirely new method of proof, we derive the conditions that are necessary and sufficient
+for minimaxity of a large class of ridge regression estimators. The conditions derived here are very similiar
+to those derived for minimaxity of some Stein-style estimators.
+
+We also show, however, that if one forces a ridge regression estimator to satisfy the minimax conditions, it is
+quite likely that the other goal of Hoerl and Kennard (stability of estimates) cannot be realised.
+
+Casella, G. (1985) ``Condition numbers and minimax regression estimators''
+Ridge regression was originally formulated with two goals in mind: improvement in mean squared error and numerical
+stability of the coefficients estimates. Conditions are given under which a minimax ridge regression estimator
+can also improve numerical stability, a quantity that can be measured with the condition number of the matrix
+to be inverted. The consequences of trading numerical stability for minimaxity are also discussed.
+
+Geluk, J. L. and De Haan, L. (1987) ``Regular variatioan, extensions and Tauberian theorems''
+
+Hurwich, C. M. and Tsai, C.-L. (1989) ``Regression and time series model selection in small samples''
+A bias correction to the Akaike information criterion, AIC, is derived for regression and autoregressive time
+series models. The connection is of particular use when the sample size is small, or when the number of fitted
+parameters is a moderate to large fraction of the sample size. The corrected method, called AICC, is 
+asymptotically efficient if the true model is infinite dimensional. Furthermore, when the true model is of
+finite dimension, AICC is found to provide better model order choices than any other asymptotically efficient
+method. Applications to nonstationary autoregressive and mixed autoregressive moving average time series models
+are also discussed.
+
+Knight, K. and F, W. (2000) ``Assymptotics for lasso-type estimators''
+We consider the asymptotics behaviour of regression estimators that minimise the residual sum of squares plus
+a penalty proportional to $\sum_j \|\beta_j\|^\lambda$ for some $\lambda > 0$. These estimators include
+the lasso as a special case when $\lambda = 1$. Under appropriate conditions, we show that the limiting 
+distributions can have positive probability mass at $0$ when the true valueof the parameter is $0$. We also 
+consider asymptotics for ``nearly singular'' designs.
 
 \end{document}
