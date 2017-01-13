@@ -268,9 +268,9 @@ We consider a linear model with a g-prior, as in \cite{Liang2008}. Consider the 
 with priors
 
 \begin{align*}
-	\vbeta | \sigma^2, g & \sim \N_p(\vzero, g \sigma^2 (\mX^T \mX)^{-1}),                    \\
-	p(\sigma^2)          & = (\sigma^2)^{-1} \I(\sigma^2 > 0), \text{ and }                   \\
-	p(g)                 & = \frac{g^b (1 + g)^{-(a + b + 2)}}{\Beta(a + 1, b + 1)} \I(g > 0).
+	\vbeta | \sigma^2, g & \sim \N_p(\vzero, g \sigma^2 (\mX^T \mX)^{-1}),                     \\
+	p(\sigma^2)          & = (\sigma^2)^{-1} \I(\sigma^2 > 0), \text{ and }                    \\
+	p(g)                 & = \frac{g^b (1 + g)^{-(a + b + 2)}}{\Beta(a + 1, b + 1)} \I(g > 0). 
 \end{align*}
 
 We choose a factored Variational Bayes approximation of the form
@@ -400,7 +400,7 @@ of these values, with deviation only noticeable in the $p=10$ and $p=20$ cases.
 \begin{figure}[p]
 	\includegraphics[width=17cm, height=17cm]{Chapter_3_shrinkage.pdf}
 	\caption{The ratio $\frac{g}{1 + g} | \vy$ controls the degree to which the model fit tends back towards
-	the prior mean. This ratio is approximated in the variational approximation by $(1 + \tau_g^{-1})^{-1}$. We
+		the prior mean. This ratio is approximated in the variational approximation by $(1 + \tau_g^{-1})^{-1}$. We
 	compare these two quantities in the figure above.}
 	\label{fig:shrinkage}
 \end{figure}
@@ -413,7 +413,7 @@ posterior variance of \ldots becomes more and more accurate.
 \begin{figure}[p]
 	\includegraphics[width=17cm, height=17cm]{code/taug/Variance.pdf}
 	\caption{The posterior variance of the example model $p(\sigma^2 | \vy)$ is compared against the approximation
-	to the posterior variance $q(\sigma^2)$ across a range of numbers of covariates, sample sizes and $R^2$
+		to the posterior variance $q(\sigma^2)$ across a range of numbers of covariates, sample sizes and $R^2$
 	values.}
 	\label{fig:variance}
 \end{figure}
@@ -429,8 +429,8 @@ for a range of values of $p$, $\kappa$ and $R^2$. The results are presented in F
 
 \begin{figure}[p]
 	\includegraphics[width=17cm, height=17cm]{code/taug/Accuracy_sigma2.pdf}
-  \caption{The accuracy of the approximation $q(\sigma^2)$ is assessed by computing the integral   $1 -
-	\frac{1}{2} \int_0^\infty |p(\sigma^2 | \vy) - q(\sigma^2)| d \sigma^2$ and graphing the result over a range
+	\caption{The accuracy of the approximation $q(\sigma^2)$ is assessed by computing the integral   $1 -
+		\frac{1}{2} \int_0^\infty |p(\sigma^2 | \vy) - q(\sigma^2)| d \sigma^2$ and graphing the result over a range
 	of numbers of covariates, sample sizes and $R^2$  values.}
 	\label{fig:accuracy_sigma2}
 \end{figure}
@@ -439,8 +439,8 @@ Accuracy of approximation to $p(g | \vy)$ \\
 
 \begin{figure}[p]
 	\includegraphics[width=17cm, height=17cm]{code/taug/Accuracy_g.pdf}
-  \caption{The accuracy of the approximation $q(g)$ is assessed by computing the integral   $1 -
-	\frac{1}{2} \int_0^\infty |p(g | \vy) - q(g)| d g$ and graphing the result over a range
+	\caption{The accuracy of the approximation $q(g)$ is assessed by computing the integral   $1 -
+		\frac{1}{2} \int_0^\infty |p(g | \vy) - q(g)| d g$ and graphing the result over a range
 	of numbers of covariates, sample sizes and $R^2$  values.}
 	\label{fig:accuracy_g}
 \end{figure}
@@ -513,30 +513,30 @@ The Hitters data set was taken from the StatLib library maintained by Carnegie M
 League Baseball seasons for 1986 and 1987, and includes the following covariates:
 
 \begin{tabular}{|ll|}
-\hline
-Covariate&Description \\
-\hline
-AtBat&Number of times at bat in 1986 \\
-Hits&Number of hits in 1986 \\
-HmRun&Number of home runs in 1986 \\
-Runs&Number of runs in 1986 \\
-RBI&Number of runs batted in in 1986 \\
-Walks&Number of walks in 1986 \\
-Years&Number of years in the major leagues \\
-CAtBat&Number of times at bat during his career \\
-CHits&Number of hits during his career \\
-CHmRun&Number of home runs during his career \\
-CRuns&Number of runs during his career \\
-CRBI&Number of runs batted in during his career \\
-CWalks&Number of walks during his career \\
-League&A factor with levels A and N indicating player’s league at the end of 1986 \\
-Division&A factor with levels E and W indicating player’s division at the end of 1986 \\
-PutOuts&Number of put outs in 1986 \\
-Assists&Number of assists in 1986 \\
-Errors&Number of errors in 1986 \\
-Salary&1987 annual salary on opening day in thousands of dollars \\
-NewLeague&A factor with levels A and N indicating player’s league at the beginning of 1987 \\
-\hline
+	\hline
+	Covariate & Description                                                                        \\
+	\hline
+	AtBat     & Number of times at bat in 1986                                                     \\
+	Hits      & Number of hits in 1986                                                             \\
+	HmRun     & Number of home runs in 1986                                                        \\
+	Runs      & Number of runs in 1986                                                             \\
+	RBI       & Number of runs batted in in 1986                                                   \\
+	Walks     & Number of walks in 1986                                                            \\
+	Years     & Number of years in the major leagues                                               \\
+	CAtBat    & Number of times at bat during his career                                           \\
+	CHits     & Number of hits during his career                                                   \\
+	CHmRun    & Number of home runs during his career                                              \\
+	CRuns     & Number of runs during his career                                                   \\
+	CRBI      & Number of runs batted in during his career                                         \\
+	CWalks    & Number of walks during his career                                                  \\
+	League    & A factor with levels A and N indicating player’s league at the end of 1986       \\
+	Division  & A factor with levels E and W indicating player’s division at the end of 1986     \\
+	PutOuts   & Number of put outs in 1986                                                         \\
+	Assists   & Number of assists in 1986                                                          \\
+	Errors    & Number of errors in 1986                                                           \\
+	Salary    & 1987 annual salary on opening day in thousands of dollars                          \\
+	NewLeague & A factor with levels A and N indicating player’s league at the beginning of 1987 \\
+	\hline
 \end{tabular}
 
 The marginal covariate inclusion probabilities are presented in Figure \ref{fig:Hitters_inclusion}.
@@ -563,25 +563,25 @@ fat and simple body measurements. The data set consists of 128 observations, and
 are:
 
 \begin{tabular}
-\hline
-Covariate & Description \\
-\hline
-Id & Identifier \\
-Bodyfat & Bodyfat percentage \\
-Age & Age (years) \\
-Weight & Weight (kg) \\
-Height & Height (inches) \\
-Neck & Neck circumference (cm) \\
-Chest & Chest circumference (cm) \\
-Abdo & Abdomen circumference (cm) "at the umbilicus and level with the iliac crest" \\
-Hip & Hip circumference (cm) \\
-Thigh & Thigh circumference (cm) \\
-Knee & Knee circumference (cm) \\
-Ankle & Ankle circumference (cm) \\
-Bic & Extended biceps circumference (cm) \\
-Fore & Forearm circumference (cm) \\
-Wrist & Wrist circumference (cm) "distal to the styloid processes" \\
-\hline
+	\hline
+	Covariate & Description                                                                  \\
+	\hline
+	Id        & Identifier                                                                   \\
+	Bodyfat   & Bodyfat percentage                                                           \\
+	Age       & Age (years)                                                                  \\
+	Weight    & Weight (kg)                                                                  \\
+	Height    & Height (inches)                                                              \\
+	Neck      & Neck circumference (cm)                                                      \\
+	Chest     & Chest circumference (cm)                                                     \\
+	Abdo      & Abdomen circumference (cm) "at the umbilicus and level with the iliac crest" \\
+	Hip       & Hip circumference (cm)                                                       \\
+	Thigh     & Thigh circumference (cm)                                                     \\
+	Knee      & Knee circumference (cm)                                                      \\
+	Ankle     & Ankle circumference (cm)                                                     \\
+	Bic       & Extended biceps circumference (cm)                                           \\
+	Fore      & Forearm circumference (cm)                                                   \\
+	Wrist     & Wrist circumference (cm) "distal to the styloid processes"                   \\
+	\hline
 \end{tabular}
 
 The marginal covariate inclusion probabilities are presented in Figure \ref{fig:bodyfat_inclusion}.
@@ -613,24 +613,24 @@ The Wage gap data set was taken from \cite{James:2014:ISL:2517747}, on 3000 work
 region. The data set includes 12 covariates:
 
 \begin{tabular}{|ll|}
-\hline
-Covariate & Description \\
-\hline
-Year & Year that the wage information was recorded \\
-Age & Age of worker \\
-Sex & Gender \\
-Marital status & Marital status -- Never Married, Married, Widowed, Divorced or Seperated \\
-Race & White, Black, Asian or Other \\
-Education & Education level -- Did not graduate high school, Graduated high school, Some College,
-College Graduate \\
-					& or Advanced College Degree \\
-Region & Region of the country \\
-Job class & Type of job \\
-Health & Either Good or Less, or Very Good or Better \\
-Health insurance & Yes or No \\
-Log of wage & The log of the worker's wage \\
-Wage & The worker's wage \\
-\hline
+	\hline
+	Covariate        & Description                                                                           \\
+	\hline
+	Year             & Year that the wage information was recorded                                           \\
+	Age              & Age of worker                                                                         \\
+	Sex              & Gender                                                                                \\
+	Marital status   & Marital status -- Never Married, Married, Widowed, Divorced or Seperated              \\
+	Race             & White, Black, Asian or Other                                                          \\
+	Education        & Education level -- Did not graduate high school, Graduated high school, Some College, 
+	College Graduate \\
+	                 & or Advanced College Degree                                                            \\
+	Region           & Region of the country                                                                 \\
+	Job class        & Type of job                                                                           \\
+	Health           & Either Good or Less, or Very Good or Better                                           \\
+	Health insurance & Yes or No                                                                             \\
+	Log of wage      & The log of the worker's wage                                                          \\
+	Wage             & The worker's wage                                                                     \\
+	\hline
 \end{tabular}
 
 The marginal covariate inclusion probabilities are presented in Figure \ref{fig:Wage_inclusion}.
@@ -664,28 +664,28 @@ issue of US News and World Report, and is on a large number of US Colleges. The 
 observations, and includes the following covariates:
 
 \begin{tabular}{|ll|}
-\hline
-Covariate & Description \\
-\hline
-Private & A factor with levels No and Yes indicating private or public university \\
-Apps & Number of applications received \\
-Accept & Number of applications accepted \\
-Enroll & Number of new students enrolled \\
-Top10perc & Percentage of new students from top 10\% of H.S. class \\
-Top25perc & Percentage of new students from top 25\% of H.S. class \\
-F.Undergrad & Number of fulltime undergraduates \\
-P.Undergrad & Number of parttime undergraduates \\
-Outstate & Out-of-state tuition \\
-Room.Board & Room and board costs \\
-Books & Estimated book costs \\
-Personal & Estimated personal spending \\
-PhD & Percentage of faculty with Ph.D.’s \\
-Terminal & Percentage of faculty with terminal degree \\
-S.F.Ratio & Student/faculty ratio \\
-perc.alumni & Percentage of alumni who donate \\
-Expend & Instructional expenditure per student \\
-Grad.Rate & Graduation rate \\
-\hline
+	\hline
+	Covariate   & Description                                                             \\
+	\hline
+	Private     & A factor with levels No and Yes indicating private or public university \\
+	Apps        & Number of applications received                                         \\
+	Accept      & Number of applications accepted                                         \\
+	Enroll      & Number of new students enrolled                                         \\
+	Top10perc   & Percentage of new students from top 10\% of H.S. class                  \\
+	Top25perc   & Percentage of new students from top 25\% of H.S. class                  \\
+	F.Undergrad & Number of fulltime undergraduates                                       \\
+	P.Undergrad & Number of parttime undergraduates                                       \\
+	Outstate    & Out-of-state tuition                                                    \\
+	Room.Board  & Room and board costs                                                    \\
+	Books       & Estimated book costs                                                    \\
+	Personal    & Estimated personal spending                                             \\
+	PhD         & Percentage of faculty with Ph.D.’s                                    \\
+	Terminal    & Percentage of faculty with terminal degree                              \\
+	S.F.Ratio   & Student/faculty ratio                                                   \\
+	perc.alumni & Percentage of alumni who donate                                         \\
+	Expend      & Instructional expenditure per student                                   \\
+	Grad.Rate   & Graduation rate                                                         \\
+	\hline
 \end{tabular}
 
 The marginal covariate inclusion probabilities are presented in Figure \ref{fig:GradRate_inclusion}.
@@ -717,26 +717,26 @@ punishment regimes on crime rates. The data set includes 47 states of the United
 variables have been re-scaled for convenience, and include the following covariates:
 
 \begin{tabular}{|ll|}
-\hline
-Covariate & Description \\
-\hline
-M & percentage of males aged 14–24. \\
-So & indicator variable for a Southern state. \\
-Ed & mean years of schooling. \\
-Po1 & police expenditure in 1960. \\
-Po2 & police expenditure in 1959. \\
-LF & labour force participation rate. \\
-M.F & number of males per 1000 females. \\
-Pop & state population. \\
-NW & number of non-whites per 1000 people. \\
-U1 & unemployment rate of urban males 14–24. \\
-U2 & unemployment rate of urban males 35–39. \\
-GDP & gross domestic product per head. \\
-Ineq & income inequality. \\
-Prob & probability of imprisonment. \\
-Time & average time served in state prisons. \\
-y & rate of crimes in a particular category per head of population. \\
-\hline
+	\hline
+	Covariate & Description                                                     \\
+	\hline
+	M         & percentage of males aged 14–24.                               \\
+	So        & indicator variable for a Southern state.                        \\
+	Ed        & mean years of schooling.                                        \\
+	Po1       & police expenditure in 1960.                                     \\
+	Po2       & police expenditure in 1959.                                     \\
+	LF        & labour force participation rate.                                \\
+	M.F       & number of males per 1000 females.                               \\
+	Pop       & state population.                                               \\
+	NW        & number of non-whites per 1000 people.                           \\
+	U1        & unemployment rate of urban males 14–24.                       \\
+	U2        & unemployment rate of urban males 35–39.                       \\
+	GDP       & gross domestic product per head.                                \\
+	Ineq      & income inequality.                                              \\
+	Prob      & probability of imprisonment.                                    \\
+	Time      & average time served in state prisons.                           \\
+	y         & rate of crimes in a particular category per head of population. \\
+	\hline
 \end{tabular}
 
 The marginal covariate inclusion probabilities are presented in Figure \ref{fig:USCrime_inclusion}.
