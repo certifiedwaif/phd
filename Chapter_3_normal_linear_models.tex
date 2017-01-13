@@ -63,26 +63,24 @@ selection on large scale problems where the number of covariates is large.
 
 The bias-variance trade-off is one of the central problems in statistical learning. The guise this problem
 takes in model selection is balancing the quality of the model fit against the complexity of the model, in an
-attempt to find a compromise between over-fitting and under-fitting, in the hope that our model fit will
+attempt to find a compromise between over-fitting and under-fitting, in the hope that the model fit will
 generalise well beyond the training data we have observed to the general population and that we haven't simply
 learned the noise in the training set.
 
 % Non-Bayesian
 
 Maximising the likelihood alone only maximises the quality of the model fit, without penalising the  model
-complexity. Many model selection criteria have been proposed to attempt to balance model likelihood and model
-complexity, including the Akaike Information Criteria AIC \cite{DeLeeuw1992}, Bayesian Information Criterion
-BIC \cite{Schwarz1978}, Deviance Information Criterion DIC \cite{Spiegelhalter2016} and Risk Inflation
-Criterion \cite{Foster1994}.
+complexity. There are many approaches to model selection that can be taken. Many model selection criteria have
+been proposed to attempt to balance model likelihood and model complexity. One approach to model selection is
+to select between entire models, using a model selection criterion. These criterion may have a fixed penalty
+for model complexity, such as Akaike's Information Criterion \cite{Akaike1974}, the Risk Inflation Criterion
+\cite{Foster1994}, the Schwarz criterion or Bayesian Information Criterion \cite{Schwarz1978}, the Deviance
+Information Criterion \cite{Spiegelhalter2016} or the Principle of Minimum Description Length
+\cite{Hansen2001}. Alternatively, the penalty may be adaptive/data--dependent \cite{George2000}. An
+alternative to model selection criterion is to select models based on their posterior probability, such as by
+selecting the median probability model as in \cite{Barbieri2004}.
 
-One approach to model selection is to select between entire models, using a model selection criterion. These
-criterion may have a fixed penalty for model complexity, such as Akaike's Information Criterion
-\cite{Akaike1974}, the Risk Inflation Criterion \cite{Foster1994}, the Schwarz criterion or Bayesian
-Information Criterion \cite{Schwarz1978} or the Principle of Minimum Description Length \cite{Hansen2001}.
-Alternatively, the penalty may be adaptive/data--dependent \cite{George2000}. An alternative to model
-selection criterion is to select models based on their posterior probability, such as by selecting the median
-probability model as in \cite{Barbieri2004}.
-
+% Bayesian
 Another approach to model selection in a Bayesian context is to use Bayes factors to compare the posterior
 likelihoods of the candidate models to see which is most probable given the observed data. This can be done,
 for example, by using Bayes Factors as in \cite{Kass1993}.
@@ -97,20 +95,16 @@ driven by posterior probabilities, as in \cite{Casella2006}, or by Gibbs samplin
 Rather than selecting one candidate model, several models can be combined together using Bayesian model 
 averaging, as in \cite{Hoeting1999}, \cite{Raftery1997}, \cite{Fernandez2001} or \cite{Papaspiliopoulos2016}.
 
-Finally, model selection can be made implicit in the model fitting process, as in ridge regression \cite{Casella1980}, of which the lasso is a special case.
+Finally, model selection can be made implicit in the model fitting process itself, as in ridge regression
+\cite{Casella1980}, of which the well-known lasso is a special case \cite{Tibshirani1996}.
 
-% Bayesian
-
-One approach to model selection i
-
-\cite{Zellner1980}
-suggested a particular form of conjugate Normal-Gamma family where the Bayes factors have a relatively simple
-form, incorporating a parameter $g$ to control mixing between the model fit from the data and a prior
-specification of model fit. This immediately raises the question of how $g$ should be chosen, and whether it
-should be fixed or have a prior specification.  \cite{Liang2008} showed that fixed choices of $g$ lead to
-paradoxes such as Bartlett's Paradox and the Information Paradox, and so a prior specification should be
-preferred. There are many ways of choosing a prior on $g$. Using a mixture of $g$-priors has the advantage of
-adapting the degree of shrinkage to the prior model dependent on the data. \mgc{Too terse?}
+\cite{Zellner1980} suggested a particular form of conjugate Normal-Gamma family where the Bayes factors have a
+relatively simple form, incorporating a parameter $g$ to control mixing between the model fit from the data
+and a prior specification of model fit. This immediately raises the question of how $g$ should be chosen, and
+whether it should be fixed or have a prior specification. \cite{Liang2008} showed that fixed choices of $g$
+lead to paradoxes such as Bartlett's Paradox and the Information Paradox, and so a prior specification should
+be preferred. There are many ways of choosing a prior on $g$. Using a mixture of $g$-priors has the advantage
+of adapting the degree of shrinkage to the prior model dependent on the data.
 
 % Variational Bayes, Explaining Variational Approximations 2010
 
@@ -191,7 +185,7 @@ Normal-Gamma model, where the prior covariance matrix of $\vbeta$ is taken to be
 information  matrix by the parameter $g$ \cite{Goel1986}. This places the most prior mass for $\vbeta$ on the
 section of the parameter space where the data is least informative.
 
-\mgc{expand on this? See STAT260 combined lecture notes, page 55}
+% \mgc{expand on this? See STAT260 combined lecture notes, page 55}
 
 This leads to the posterior distribution
 \[
@@ -404,9 +398,11 @@ values of the exact posterior shrinkage and approximate shrinkage are almost the
 of these values, with deviation only noticeable in the $p=10$ and $p=20$ cases.
 
 \begin{figure}[p]
-	\caption{Comparison of exact and approximate shrinkage}
-	\label{fig:shrinkage}
 	\includegraphics[width=17cm, height=17cm]{Chapter_3_shrinkage.pdf}
+	\caption{The ratio $\frac{g}{1 + g} | \vy$ controls the degree to which the model fit tends back towards
+	the prior mean. This ratio is approximated in the variational approximation by $(1 + \tau_g^{-1})^{-1}$. We
+	compare these two quantities in the figure above.}
+	\label{fig:shrinkage}
 \end{figure}
 
 Coefficient posterior variance \\
@@ -415,9 +411,11 @@ We can see from Figure \ref{fig:variance} that as $p$ and $\kappa$ increase, the
 posterior variance of \ldots becomes more and more accurate.
 
 \begin{figure}[p]
-	\caption{Comparison of exact and approximate posterior variance}
-	\label{fig:variance}
 	\includegraphics[width=17cm, height=17cm]{code/taug/Variance.pdf}
+	\caption{The posterior variance of the example model $p(\sigma^2 | \vy)$ is compared against the approximation
+	to the posterior variance $q(\sigma^2)$ across a range of numbers of covariates, sample sizes and $R^2$
+	values.}
+	\label{fig:variance}
 \end{figure}
 
 Accuracy of approximation to $p(\sigma^2 | \vy)$ \\
@@ -430,17 +428,21 @@ the integral
 for a range of values of $p$, $\kappa$ and $R^2$. The results are presented in Figure \ref{fig:accuracy_sigma2}.
 
 \begin{figure}[p]
-	\caption{Accuracy of approximation to $p(\sigma^2 | \vy)$}
-	\label{fig:accuracy_sigma2}
 	\includegraphics[width=17cm, height=17cm]{code/taug/Accuracy_sigma2.pdf}
+  \caption{The accuracy of the approximation $q(\sigma^2)$ is assessed by computing the integral   $1 -
+	\frac{1}{2} \int_0^\infty |p(\sigma^2 | \vy) - q(\sigma^2)| d \sigma^2$ and graphing the result over a range
+	of numbers of covariates, sample sizes and $R^2$  values.}
+	\label{fig:accuracy_sigma2}
 \end{figure}
 
 Accuracy of approximation to $p(g | \vy)$ \\
 
 \begin{figure}[p]
-	\caption{Accuracy of approximation to $p(g | \vy)$}
-	\label{fig:accuracy_g}
 	\includegraphics[width=17cm, height=17cm]{code/taug/Accuracy_g.pdf}
+  \caption{The accuracy of the approximation $q(g)$ is assessed by computing the integral   $1 -
+	\frac{1}{2} \int_0^\infty |p(g | \vy) - q(g)| d g$ and graphing the result over a range
+	of numbers of covariates, sample sizes and $R^2$  values.}
+	\label{fig:accuracy_g}
 \end{figure}
 
 We assessed the accuracy of the approximation to $p(g | \vy)$ by $q(g)$ by numerically evaluating the integral
@@ -457,9 +459,9 @@ $\log{\underline{p}(\vy)}$ versus $\log{p(\vy)}$. The results are presented in F
 \ref{fig:relative_error}.
 
 \begin{figure}[p]
+	\includegraphics[width=17cm, height=17cm]{code/taug/Relative_error_log_p.pdf}
 	\caption{Relative error of the variational lower bound versus $\log{p(\vy)}$}
 	\label{fig:relative_error}
-	\includegraphics[width=17cm, height=17cm]{code/taug/Relative_error_log_p.pdf}
 \end{figure}
 
 Precision \\
@@ -470,9 +472,9 @@ $\kappa$ increase, we can see that the approximate precision is converging towar
 values of $R^2$.
 
 \begin{figure}[p]
+	\includegraphics[width=17cm, height=17cm]{code/taug/Precision.pdf}
 	\caption{Relative error of the approximate posterior precision versus the exact posterior precision}
 	\label{fig:precision}
-	\includegraphics[width=17cm, height=17cm]{code/taug/Precision.pdf}
 \end{figure}
 
 \subsection{Marginal covariate inclusion probabilities}
@@ -483,9 +485,9 @@ produced by weighting each model considered by AIC and BIC, we see that the prob
 variational approximation and exact posterior likelihood are more conservative.
 
 \begin{figure}[p]
+	\includegraphics[width=17cm, height=17cm]{code/taug/Log_of_Relative_error_of_Variance_of_g.pdf}
 	\caption{Log of the relative error of the approximate variance of g relative to the exact variance of g}
 	\label{fig:rel_error_var_g}
-	\includegraphics[width=17cm, height=17cm]{code/taug/Log_of_Relative_error_of_Variance_of_g.pdf}
 \end{figure}
 
 
@@ -506,26 +508,81 @@ variational approximation and exact posterior likelihood are more conservative.
 
 \subsubsection{Hitters}
 
-The Hitters data set was taken from \cite{James:2014:ISL:2517747}
+The Hitters data set was taken from the StatLib library maintained by Carnegie Mellon University, and used in
+\cite{James:2014:ISL:2517747}. The data was gathered from the the performance of players during the Major
+League Baseball seasons for 1986 and 1987, and includes the following covariates:
+
+\begin{tabular}{|ll|}
+\hline
+Covariate&Description \\
+\hline
+AtBat&Number of times at bat in 1986 \\
+Hits&Number of hits in 1986 \\
+HmRun&Number of home runs in 1986 \\
+Runs&Number of runs in 1986 \\
+RBI&Number of runs batted in in 1986 \\
+Walks&Number of walks in 1986 \\
+Years&Number of years in the major leagues \\
+CAtBat&Number of times at bat during his career \\
+CHits&Number of hits during his career \\
+CHmRun&Number of home runs during his career \\
+CRuns&Number of runs during his career \\
+CRBI&Number of runs batted in during his career \\
+CWalks&Number of walks during his career \\
+League&A factor with levels A and N indicating player’s league at the end of 1986 \\
+Division&A factor with levels E and W indicating player’s division at the end of 1986 \\
+PutOuts&Number of put outs in 1986 \\
+Assists&Number of assists in 1986 \\
+Errors&Number of errors in 1986 \\
+Salary&1987 annual salary on opening day in thousands of dollars \\
+NewLeague&A factor with levels A and N indicating player’s league at the beginning of 1987 \\
+\hline
+\end{tabular}
 
 The marginal covariate inclusion probabilities are presented in Figure \ref{fig:Hitters_inclusion}.
 
 \begin{figure}[p]
+	\includegraphics[scale=.4]{Hitters_variable_selection.pdf}
 	\caption{Hitters marginal inclusion probablities}
 	\label{fig:Hitters_inclusion}
-	\includegraphics[scale=.4]{Hitters_variable_selection.pdf}
 \end{figure}
 
 The model ranking scatterplots are presented in Figure \ref{fig:Hitters_model_ranking}.
 
+
+
 \begin{figure}[p]
+	\includegraphics[scale=.4]{code/Model_selection_scatter_plot_1.pdf}
 	\caption{Hitters model ranking scatterplot}
 	\label{fig:Hitters_model_ranking}
-	\includegraphics[scale=.4]{code/Model_selection_scatter_plot_1.pdf}
 \end{figure}
 
 \subsubsection{Body Fat}
-The Body Fat data set was taken from \cite{James:2014:ISL:2517747}
+The Body Fat data set was taken from \cite{Tarr2015}, and is on the relationship between percentage of body
+fat and simple body measurements. The data set consists of 128 observations, and the covariates in the data set
+are:
+
+\begin{tabular}
+\hline
+Covariate & Description \\
+\hline
+Id & Identifier \\
+Bodyfat & Bodyfat percentage \\
+Age & Age (years) \\
+Weight & Weight (kg) \\
+Height & Height (inches) \\
+Neck & Neck circumference (cm) \\
+Chest & Chest circumference (cm) \\
+Abdo & Abdomen circumference (cm) "at the umbilicus and level with the iliac crest" \\
+Hip & Hip circumference (cm) \\
+Thigh & Thigh circumference (cm) \\
+Knee & Knee circumference (cm) \\
+Ankle & Ankle circumference (cm) \\
+Bic & Extended biceps circumference (cm) \\
+Fore & Forearm circumference (cm) \\
+Wrist & Wrist circumference (cm) "distal to the styloid processes" \\
+\hline
+\end{tabular}
 
 The marginal covariate inclusion probabilities are presented in Figure \ref{fig:bodyfat_inclusion}.
 
@@ -537,22 +594,44 @@ The marginal covariate inclusion probabilities are presented in Figure \ref{fig:
 % \end{tabular}
 
 \begin{figure}[p]
+	\includegraphics[scale=.4]{bodyfat_variable_selection.pdf}
 	\caption{bodyfat marginal inclusion probablities}
 	\label{fig:bodyfat_inclusion}
-	\includegraphics[scale=.4]{bodyfat_variable_selection.pdf}
 \end{figure}
 
 The model ranking scatterplots are presented in Figure \ref{fig:bodyfat_model_ranking}.
 
 \begin{figure}[p]
+	\includegraphics[scale=.4]{code/Model_selection_scatter_plot_2.pdf}
 	\caption{bodyfat model ranking scatterplot}
 	\label{fig:bodyfat_model_ranking}
-	\includegraphics[scale=.4]{code/Model_selection_scatter_plot_2.pdf}
 \end{figure}
 
 \subsubsection{Wage}
 
-The Wage gap data set was taken from \cite{James:2014:ISL:2517747}.
+The Wage gap data set was taken from \cite{James:2014:ISL:2517747}, on 3000 workers in the Mid-Atlantic
+region. The data set includes 12 covariates:
+
+\begin{tabular}{|ll|}
+\hline
+Covariate & Description \\
+\hline
+Year & Year that the wage information was recorded \\
+Age & Age of worker \\
+Sex & Gender \\
+Marital status & Marital status -- Never Married, Married, Widowed, Divorced or Seperated \\
+Race & White, Black, Asian or Other \\
+Education & Education level -- Did not graduate high school, Graduated high school, Some College,
+College Graduate \\
+					& or Advanced College Degree \\
+Region & Region of the country \\
+Job class & Type of job \\
+Health & Either Good or Less, or Very Good or Better \\
+Health insurance & Yes or No \\
+Log of wage & The log of the worker's wage \\
+Wage & The worker's wage \\
+\hline
+\end{tabular}
 
 The marginal covariate inclusion probabilities are presented in Figure \ref{fig:Wage_inclusion}.
 
@@ -564,23 +643,50 @@ The marginal covariate inclusion probabilities are presented in Figure \ref{fig:
 % \end{tabular}
 
 \begin{figure}[p]
+	\includegraphics[scale=.4]{Wage_variable_selection.pdf}
 	\caption{Wage marginal inclusion probablities}
 	\label{fig:Wage_inclusion}
-	\includegraphics[scale=.4]{Wage_variable_selection.pdf}
 \end{figure}
 
 The model ranking scatterplots are presented in Figure \ref{fig:Wage_model_ranking}.
 
 \begin{figure}[p]
+	\includegraphics[scale=.4]{code/Model_selection_scatter_plot_3.pdf}
 	\caption{Wage model ranking scatterplot}
 	\label{fig:Wage_model_ranking}
-	\includegraphics[scale=.4]{code/Model_selection_scatter_plot_3.pdf}
 \end{figure}
 
 
 \subsubsection{Graduation Rate}
 
-The Graduation Rate data set was taken from \cite{James:2014:ISL:2517747}.
+The Graduation Rate data set was taken from \cite{James:2014:ISL:2517747}. The data is drawn from the 1995
+issue of US News and World Report, and is on a large number of US Colleges. The data set consists of 777
+observations, and includes the following covariates:
+
+\begin{tabular}{|ll|}
+\hline
+Covariate & Description \\
+\hline
+Private & A factor with levels No and Yes indicating private or public university \\
+Apps & Number of applications received \\
+Accept & Number of applications accepted \\
+Enroll & Number of new students enrolled \\
+Top10perc & Percentage of new students from top 10\% of H.S. class \\
+Top25perc & Percentage of new students from top 25\% of H.S. class \\
+F.Undergrad & Number of fulltime undergraduates \\
+P.Undergrad & Number of parttime undergraduates \\
+Outstate & Out-of-state tuition \\
+Room.Board & Room and board costs \\
+Books & Estimated book costs \\
+Personal & Estimated personal spending \\
+PhD & Percentage of faculty with Ph.D.’s \\
+Terminal & Percentage of faculty with terminal degree \\
+S.F.Ratio & Student/faculty ratio \\
+perc.alumni & Percentage of alumni who donate \\
+Expend & Instructional expenditure per student \\
+Grad.Rate & Graduation rate \\
+\hline
+\end{tabular}
 
 The marginal covariate inclusion probabilities are presented in Figure \ref{fig:GradRate_inclusion}.
 
@@ -592,21 +698,46 @@ The marginal covariate inclusion probabilities are presented in Figure \ref{fig:
 % \end{tabular}
 
 \begin{figure}[p]
+	\includegraphics[scale=.4]{GradRate_variable_selection.pdf}
 	\caption{GradRate marginal inclusion probablities}
 	\label{fig:GradRate_inclusion}
-	\includegraphics[scale=.4]{GradRate_variable_selection.pdf}
 \end{figure}
 
 The model ranking scatterplots are presented in Figure \ref{fig:GradRate_model_ranking}.
 
 \begin{figure}[p]
+	\includegraphics[scale=.4]{code/Model_selection_scatter_plot_4.pdf}
 	\caption{GradRate model ranking scatterplot}
 	\label{fig:GradRate_model_ranking}
-	\includegraphics[scale=.4]{code/Model_selection_scatter_plot_4.pdf}
 \end{figure}
 
 \subsubsection{US Crime}
-The US Crime data set was taken from \cite{James:2014:ISL:2517747}.
+The US Crime data set was taken from the \texttt{MASS} package \cite{Venables2002}, and is on the effect of
+punishment regimes on crime rates. The data set includes 47 states of the United States of America. The
+variables have been re-scaled for convenience, and include the following covariates:
+
+\begin{tabular}{|ll|}
+\hline
+Covariate & Description \\
+\hline
+M & percentage of males aged 14–24. \\
+So & indicator variable for a Southern state. \\
+Ed & mean years of schooling. \\
+Po1 & police expenditure in 1960. \\
+Po2 & police expenditure in 1959. \\
+LF & labour force participation rate. \\
+M.F & number of males per 1000 females. \\
+Pop & state population. \\
+NW & number of non-whites per 1000 people. \\
+U1 & unemployment rate of urban males 14–24. \\
+U2 & unemployment rate of urban males 35–39. \\
+GDP & gross domestic product per head. \\
+Ineq & income inequality. \\
+Prob & probability of imprisonment. \\
+Time & average time served in state prisons. \\
+y & rate of crimes in a particular category per head of population. \\
+\hline
+\end{tabular}
 
 The marginal covariate inclusion probabilities are presented in Figure \ref{fig:USCrime_inclusion}.
 
@@ -618,17 +749,17 @@ The marginal covariate inclusion probabilities are presented in Figure \ref{fig:
 % \end{tabular}
 
 \begin{figure}[p]
+	\includegraphics[scale=.4]{USCrime_variable_selection.pdf}
 	\caption{USCrime marginal inclusion probablities}
 	\label{fig:USCrime_inclusion}
-	\includegraphics[scale=.4]{USCrime_variable_selection.pdf}
 \end{figure}
 
 The model ranking scatterplots are presented in Figure \ref{fig:USCrime_model_ranking}.
 
 \begin{figure}[p]
+	\includegraphics[scale=.4]{code/Model_selection_scatter_plot_5.pdf}
 	\caption{USCrime model ranking scatterplot}
 	\label{fig:USCrime_model_ranking}
-	\includegraphics[scale=.4]{code/Model_selection_scatter_plot_5.pdf}
 \end{figure}
 
 \section{Conclusion and Discussion}
