@@ -168,11 +168,27 @@ probability distribution of $\vy$, $p(\vtheta | \vy)$ the posterior distribution
 approximating probability distribution. 
 
 \subsection{Model}
+\label{sec:model}
 
 Zellner constructed a family of priors for a Gaussian regression model using a particular form of conjugate
 Normal-Gamma model, where the prior covariance matrix of $\vbeta$ is taken to be a multiple of the Fisher
 information  matrix by the parameter $g$ \cite{Goel1986}. This places the most prior mass for $\vbeta$ on the
 section of the parameter space where the data is least informative.
+
+We consider a linear model with a g-prior, as in \cite{Liang2008}. Consider the linear model
+
+\begin{align*}
+	\vy | \vbeta, \sigma^2 \sim \N_n(\mX \vbeta, \sigma^2 \mI) 
+\end{align*}
+
+with priors
+
+\begin{align*}
+	\vbeta | \sigma^2, g & \sim \N_p(\vzero, g \sigma^2 (\mX^T \mX)^{-1}),                     \\
+	p(\sigma^2)          & = (\sigma^2)^{-1} \I(\sigma^2 > 0), \text{ and }                    \\
+	p(g)                 & = \frac{g^b (1 + g)^{-(a + b + 2)}}{\Beta(a + 1, b + 1)} \I(g > 0). 
+\end{align*}
+
 
 % \mgc{expand on this? See STAT260 combined lecture notes, page 55}
 
@@ -181,13 +197,7 @@ This leads to the posterior distribution
 	\vbeta | \vy \sim \N\left(\frac{g}{1+g} \vbetahatls, g \sigma^2 (\mX^\top \mX)^{-1} \right).
 \]
 
-We index the space of models by a $p$-dimensional vector of indicator variables for each variable considered 
-for inclusion, $\vgamma$. For each model $\mathcal{M}_\vgamma$, the response vector $\vy$ is modelled by
-\begin{equation*}
-	\mathcal{M}_\vgamma: \vmu_\vgamma = \vone_n \alpha + \mX_\vgamma \vbeta_\vgamma.
-\end{equation*}
-
-\subsection{Full Bayesian inference}
+\section{Fully Bayesian inference}
 
 In this section, we derive the expression required for fully Bayesian inference for the model presented in
 Section \ref{sec:model}. Throughout the rest of this article, we will assume that assume without loss of
@@ -209,12 +219,12 @@ R^2 = \frac{\vy^T\mX(\mX^T\mX)^{-1}\mX^T\vy}{\|\vy\|^2}
 \end{equation}
 where $R^2$ is the usual $R$-squared statistic associated with least squares regression.
 
-Equation 3.194 (iii) of G\&R is
+Equation 3.194 (iii) of \cite{Gradshteyn1988} is
 \begin{equation}\label{res:03}
 \int_0^\infty \frac{ x^{\mu - 1} }{(1 + \beta x)^\nu} dx = \beta^{-\mu} \mbox{Beta}(\mu,\nu - \mu) \quad \quad \mbox{(assuming $\mu,\nu>0$ and $\nu>\mu$).}
 \end{equation}
 
-Equation 3.385 of G\&R is
+Equation 3.385 of \cite{Gradshteyn1988} is
 \begin{equation} \label{res:04}
 \int_{0}^1 x^{\nu - 1} (1 - x)^{\lambda - 1}(1 - \beta x)^{\varrho} e^{-\mu x} dx = \mbox{Beta}(\nu,\lambda) \Phi_1(\nu,\varrho,\lambda+\nu,-\mu,\beta)
 \end{equation}
@@ -240,7 +250,7 @@ Equation 3.385 of G\&R is
 
 
  
-\noindent First we derive $p(\vy|\sigma^2,g)$ via
+\noindent First we derive the conditional likelihood of $\vy$ given $\sigma^2$ and $g$ via
 $$
 \begin{array}{rl}
 \ds p(\vy|\sigma^2,g) 
@@ -286,15 +296,15 @@ $$
 \end{array}
 $$
 
-\noindent were the third and last lines follow from
-Result \ref{res:01} and Result  \ref{res:02} respectively.
+\noindent where the third and last lines follow from
+Equation \ref{res:01} and Equation \ref{res:02} respectively.
 We also used $\|\vy\|^2 = n$ and the property of determinants that $|c\mA| = c^d|\mA|$ and $|\mA^{-1}| = |\mA|^{-1}$ when $\mA \in\bR^{d\times d}$.
 
 %\medskip 
 %\noindent {\bf Result 4:}
 %$\ds p(\vy|g) = \frac{\Gamma(n/2)}{\pi^{n/2} \|\vy\|^n} (1 + g)^{(n-p)/2} \left[  1 + g(1 -  R^2) \right] ^{-n/2}$.
 
-Next, we obtain the conditional likelihood of $\vy$ conditional on $g$ by integrating out $\sigma^2$ via
+Next, we obtain the likelihood of $\vy$ conditional on $g$ by integrating out $\sigma^2$ via
 $$
 \begin{array}{rl}
 \ds p(\vy|g) 
@@ -343,11 +353,10 @@ dg
 \end{array}
 $$
 
-\subsubsection{Expressions for 
-	parameter posteriors}
+\subsection{Posterior distributions of the parameters}
+We now derive the expressions for the posterior distributions of each of the parameters. Using Equation
+\ref{res:03} and Equation \ref{res:04} we have
 
-
-Using Result \ref{res:03} and Result \ref{res:04} we have
 \begin{equation}\label{res:06}
 p(g|\vy) = \frac{(1 -  R^2)^{b+1} g^{b} \left[  1 + g(1 -  R^2) \right]^{-n/2}}{\mbox{Beta}(p/2 + a + 1,b+1)} \text{ and }
 \end{equation}
@@ -369,7 +378,7 @@ $$
 \noindent Using the change of variables $h=g/(1+g)$ we have
 
 \begin{equation}
-p(h|\vy) = \frac{(1 -  R^2)^{b+1}}{\mbox{Beta}(p/2 + a + 1,b+1)} h^{b}(1 - h)^{2-b+n/2}  (1  - h R^2)^{-n/2}
+p(h|\vy) = \frac{(1 -  R^2)^{b+1}}{\mbox{Beta}(p/2 + a + 1,b+1)} h^{b}(1 - h)^{2-b+n/2}  (1  - h R^2)^{-n/2}.
 \end{equation}
  
 
@@ -384,16 +393,14 @@ The full conditional for $\vbeta$ is given by
 \end{equation}
 \noindent where $\widehat{\vbeta}_{\mbox{\tiny LS}} = \left( \mX^T\mX \right)^{-1}\mX^T\vy$.
 
-The full conditional for $\sigma^2$ is obtained by taking  integrating out $\vbeta$ is
+The full conditional for $\sigma^2$ is obtained by integrating out $\vbeta$ is
 \begin{equation}
 \sigma^2|\vy,g \sim \mbox{IG}\left[\tfrac{n}{2},\tfrac{n}{2}\left( 
 1 -
-\tfrac{g}{1+g} R^2\right) \right]
+\tfrac{g}{1+g} R^2\right) \right].
 \end{equation}
 
-\subsubsection{Density for $p(\sigma^2|\vy)$}
-
-
+The density for $p(\sigma^2|\vy)$ is obtained by evaluating the integral
 $$
 \begin{array}{rl}
 \ds p(\sigma^2|\vy) 
@@ -445,41 +452,28 @@ $$
 \end{array}
 $$
 
-$$
--b-2+n/2 = p/2 + a  
-$$
+% \mgc{How is this used?}
+% $$
+% -b-2+n/2 = p/2 + a  
+% $$
 
 \noindent where
-$$
-h = \frac{g}{1+g},
-\quad 
-g = \frac{h}{1-h},
-\quad 
-1 - h = \frac{1}{(1 + g)},
-\quad \mbox{and}\quad 
-\frac{dh}{dg} = \frac{1}{1+g} - \frac{g}{(1 +g)^2} = \frac{1}{(1+g)^2} = (1 - h)^2.
-$$
+$h = \frac{g}{1+g}$,
+$g = \frac{h}{1-h}$,
+$1 - h = \frac{1}{(1 + g)}$,
+and
+$\frac{dh}{dg} = \frac{1}{1+g} - \frac{g}{(1 +g)^2} = \frac{1}{(1+g)^2} = (1 - h)^2$.
 
-\noindent Equation 3.383(1) of G\&R is
+\noindent From Equation 3.383(i) of \cite{Gradshteyn1988},
 $$
 \int_{0}^u x^{\nu - 1} (u - x)^{\mu - 1}  e^{\beta x} dx = \mbox{Beta}(\nu,\mu) {}_1 F_1(\nu;\mu+\nu;\beta u)
 $$
 
 \noindent provided $\mbox{Re}(\mu)>0$, $\mbox{Re}(\nu)>0$.
 
-\medskip 
 \noindent We have
-$$
-u = 1, \quad \nu = b + 1 = \frac{n-p}{2} - a - 1 >0, \quad \mu = a + p/2 + 1 >0, \quad \mbox{and} \quad 
-\beta = \frac{nR^2}{2\sigma^2}
-$$
-
-$$
-\frac{n}{2}  
-$$
-
-
-\noindent Hence, (and this could be a new distribution)
+$u = 1$, $\nu = b + 1 = \frac{n-p}{2} - a - 1 >0$, $\mu = a + p/2 + 1 >0$, and 
+$\beta = \frac{nR^2}{2\sigma^2}$, so $\nu + \mu = \frac{n}{2}$. Hence
 $$
 \begin{array}{rl}
 \ds p(\sigma^2|\vy) 
@@ -492,7 +486,7 @@ $$
 \noindent where ${}_1 F_1(\alpha;\gamma;z) \equiv \Phi_1(\alpha;\gamma;z) = M(\alpha;\gamma;z)$ 
 is the
 degenerate hypergeometric function or
-confluent hypergeometric function.
+confluent hypergeometric function. To the best of our knowledge, this is a new distribution.
 
 \noindent Using the change of variables $\tau= 1/\sigma^2$ we have
 $$
@@ -544,17 +538,18 @@ $$
     
     \\ [2ex]
     & \ds =  (1 -  R^2)^{b+1}
-    {}_1 F_2(n/2+1,b+1,n/2;R^2)  
+    {}_1 F_2(n/2+1,b+1,n/2;R^2)  .
 \end{array}
 $$
 
-$A = n/2 + 1$
+% \mgc{Why are these here?}
+% $A = n/2 + 1$
 
-$B - 1 = b$
+% $B - 1 = b$
 
-$B = b + 1$
+% $B = b + 1$
 
-$C = n/2$
+% $C = n/2$
 
 Using the Law of Total Expectation,
 \begin{align*}
@@ -581,9 +576,8 @@ using \cite{Gradshteyn1988} 3.197 Equation 5,
 	\int_0^\infty x^{\lambda-1} (1+x)^\nu (1 + \alpha x)^{\mu} dx = \Beta(\lambda, -\mu-\nu-\lambda) {}_2 F_1 (\mu, \lambda; -\mu-\nu; 1 - \alpha)
 \]
 
-when $[|\arg \alpha| < \pi], -\Re(\mu + \mu) > \Re \lambda > 0$ to obtain a closed form the the integral,  and
-Euler's identity
-
+when $[|\arg \alpha| < \pi], -\Re(\mu + \mu) > \Re \lambda > 0$ to obtain a closed form for the integral,  and
+using Euler's identity
 \[
 	{}_2 F_1(a, b; c; d) = (1 - d)^{c - a -  b} {}_2 F_1(c - a, c - b; c; d)
 \]
@@ -647,23 +641,6 @@ This allows the calculation of the optimal approximating densities $q_i^*(\vthet
 \begin{equation*}
 	q_i^*(\vtheta_i) \propto \exp \left \{ \E_{-\vtheta_i} \log p(\vy, \vtheta) \right \}, 1 \leq i \leq M,
 \end{equation*}
-
-\subsection{Model}
-\label{sec:model}
-
-We consider a linear model with a g-prior, as in \cite{Liang2008}. Consider the linear model
-
-\begin{align*}
-	\vy | \vbeta, \sigma^2 \sim \N_n(\mX \vbeta, \sigma^2 \mI) 
-\end{align*}
-
-with priors
-
-\begin{align*}
-	\vbeta | \sigma^2, g & \sim \N_p(\vzero, g \sigma^2 (\mX^T \mX)^{-1}),                     \\
-	p(\sigma^2)          & = (\sigma^2)^{-1} \I(\sigma^2 > 0), \text{ and }                    \\
-	p(g)                 & = \frac{g^b (1 + g)^{-(a + b + 2)}}{\Beta(a + 1, b + 1)} \I(g > 0). 
-\end{align*}
 
 We choose a factored Variational Bayes approximation of the form
 \begin{align*}
@@ -778,9 +755,16 @@ be calculated from it as shown in Algorithm \ref{alg:algorithm_two}.
 
 Let $\vgamma \in \{0, 1\}^p$ be the vector of indicators of inclusion of the $p$th column of $\mX$ in the
 model $\vgamma$. Then $\mX_\vgamma$ is the covariate matrix formed by including only the columns of $\mX$
-indicated by $\vgamma$. We perform model selection by using the above Variational Bayes approximation to each
-candidate linear model and averaging over the space of available models.
+indicated by $\vgamma$.
 
+We index the space of models by a $p$-dimensional vector of indicator variables for each variable considered 
+for inclusion, $\vgamma$. For each model $\mathcal{M}_\vgamma$, the response vector $\vy$ is modelled by
+\begin{equation*}
+	\mathcal{M}_\vgamma: \vmu_\vgamma = \vone_n \alpha + \mX_\vgamma \vbeta_\vgamma.
+\end{equation*}
+
+We perform model selection by using the above Variational Bayes approximation to each
+candidate linear model and averaging over the space of available models.
 \begin{align*}
 	\underline{p}(\vy) & = \sum_\vgamma \underline{p}(\vy|\vgamma) p(\vgamma),                     \\
 	p(\vgamma|\vy)     & \approx \frac{\underline{p}(\vy|\vgamma) p(\vgamma)}{\underline{p}(\vy)} \text { and } \\
