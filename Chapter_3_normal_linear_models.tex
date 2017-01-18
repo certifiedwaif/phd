@@ -209,24 +209,24 @@ We first present the following results which will aid us in deriving the express
 inference over the parameters in the model.
 
 \begin{equation}\label{res:01}
-\int \exp\left\{ -\tfrac{1}{2}\vx^T\mA\vx + \vb^T\vx \right\} d \vx = |2\pi\mSigma|^{1/2} \exp\left\{ \tfrac{1}{2}\vmu^T\mSigma^{-1}\vmu \right\}
+	\int \exp\left\{ -\tfrac{1}{2}\vx^T\mA\vx + \vb^T\vx \right\} d \vx = |2\pi\mSigma|^{1/2} \exp\left\{ \tfrac{1}{2}\vmu^T\mSigma^{-1}\vmu \right\}
 \end{equation}
 where $\vmu = \mA^{-1}\vb$ and $\mSigma = \mA^{-1}$.
  
 If $\vone^T\vy=0$ the $R$-squared statistic can be expressed
 \begin{equation} \label{res:02}
-R^2 = \frac{\vy^T\mX(\mX^T\mX)^{-1}\mX^T\vy}{\|\vy\|^2}
+	R^2 = \frac{\vy^T\mX(\mX^T\mX)^{-1}\mX^T\vy}{\|\vy\|^2}
 \end{equation}
 where $R^2$ is the usual $R$-squared statistic associated with least squares regression.
 
 Equation 3.194 (iii) of \cite{Gradshteyn1988} is
 \begin{equation}\label{res:03}
-\int_0^\infty \frac{ x^{\mu - 1} }{(1 + \beta x)^\nu} dx = \beta^{-\mu} \mbox{Beta}(\mu,\nu - \mu) \quad \quad \mbox{(assuming $\mu,\nu>0$ and $\nu>\mu$).}
+	\int_0^\infty \frac{ x^{\mu - 1} }{(1 + \beta x)^\nu} dx = \beta^{-\mu} \mbox{Beta}(\mu,\nu - \mu) \quad \quad \mbox{(assuming $\mu,\nu>0$ and $\nu>\mu$).}
 \end{equation}
 
 Equation 3.385 of \cite{Gradshteyn1988} is
 \begin{equation} \label{res:04}
-\int_{0}^1 x^{\nu - 1} (1 - x)^{\lambda - 1}(1 - \beta x)^{\varrho} e^{-\mu x} dx = \mbox{Beta}(\nu,\lambda) \Phi_1(\nu,\varrho,\lambda+\nu,-\mu,\beta)
+	\int_{0}^1 x^{\nu - 1} (1 - x)^{\lambda - 1}(1 - \beta x)^{\varrho} e^{-\mu x} dx = \mbox{Beta}(\nu,\lambda) \Phi_1(\nu,\varrho,\lambda+\nu,-\mu,\beta)
 \end{equation}
 \noindent provided $\mbox{Re}(\lambda)>0$, $\mbox{Re}(\nu)>0$ and $|\mbox{arg}(1-\beta)|<\pi$.
 
@@ -253,46 +253,46 @@ Equation 3.385 of \cite{Gradshteyn1988} is
 \noindent First we derive the conditional likelihood of $\vy$ given $\sigma^2$ and $g$ via
 $$
 \begin{array}{rl}
-\ds p(\vy|\sigma^2,g) 
-    & \ds = \int \exp\left\{
-    -\tfrac{n}{2}\log(2\pi\sigma^2) - \tfrac{1}{2\sigma^2}\|\vy - \mX\vbeta\|^2
-    -\tfrac{p}{2}\log(2\pi g\sigma^2) + \tfrac{1}{2}\log|\mX^T\mX| - \tfrac{1}{2g\sigma^2}\vbeta^T\mX^T\mX\vbeta
-    \right\} d\vbeta
-    \\ [2ex]
-    & \ds = \exp\left\{
-    -\tfrac{n}{2}\log(2\pi\sigma^2) - \tfrac{1}{2\sigma^2}\|\vy\|^2 -\tfrac{p}{2}\log(2\pi g\sigma^2) + \tfrac{1}{2}\log|\mX^T\mX| \right\}
-    \\
-    & \ds \qquad \times \int 
-    \exp\left\{ - \tfrac{1}{2}\vbeta^T \left[ \sigma^{-2}(1+g^{-1})\mX^T\mX \right]\vbeta + \sigma^{-2}\vbeta^T\mX^T\vy
-    \right\} d\vbeta \\ [2ex]
-    & \ds = \exp\left\{
-    -\tfrac{n}{2}\log(2\pi\sigma^2) - \tfrac{1}{2\sigma^2}\|\vy\|^2 -\tfrac{p}{2}\log(2\pi g\sigma^2) + \tfrac{1}{2}\log|\mX^T\mX| \right\}
-    \\
-    & \ds \qquad \times 
-    |2\pi \left[ \sigma^{-2}(1+g^{-1})\mX^T\mX \right]^{-1}|^{1/2}\exp\left\{  \tfrac{1}{2\sigma^2}  \vy^T\mX\left[ (1+g^{-1})\mX^T\mX \right]^{-1}\mX^T\vy
-    \right\}
-    \\ [2ex]
-    & \ds = \exp\left\{
-    -\tfrac{n}{2}\log(2\pi\sigma^2) 
-    - \tfrac{1}{2\sigma^2}\|\vy\|^2 
-    -\tfrac{p}{2}\log(2\pi g\sigma^2) 
-    + \tfrac{1}{2}\log|\mX^T\mX| \right\}
-    \\
-    & \ds \qquad \times 
-    \exp\left\{ 
-    \tfrac{p}{2}\log(2\pi) 
-    + \tfrac{p}{2}\log(\sigma^2)
-    - \tfrac{p}{2}\log(1+g^{-1})
-    - \tfrac{1}{2}\log|\mX^T\mX| 
-    + \tfrac{1}{2\sigma^2}  \vy^T\mX\left[ (1+g^{-1})\mX^T\mX \right]^{-1}\mX^T\vy
-    \right\}
-    \\ [2ex]
-& \ds = \exp\left\{
--\tfrac{n}{2}\log(2\pi\sigma^2) 
-- \tfrac{p}{2}\log(1+g)
-- \tfrac{n}{2\sigma^2} 
-+ \tfrac{g}{2\sigma^2(1+g)} n R^2
-\right\}
+	\ds p(\vy|\sigma^2,g) 
+	  & \ds = \int \exp\left\{ 
+	-\tfrac{n}{2}\log(2\pi\sigma^2) - \tfrac{1}{2\sigma^2}\|\vy - \mX\vbeta\|^2
+	-\tfrac{p}{2}\log(2\pi g\sigma^2) + \tfrac{1}{2}\log|\mX^T\mX| - \tfrac{1}{2g\sigma^2}\vbeta^T\mX^T\mX\vbeta
+	\right\} d\vbeta
+	\\ [2ex]
+	  & \ds = \exp\left\{      
+	-\tfrac{n}{2}\log(2\pi\sigma^2) - \tfrac{1}{2\sigma^2}\|\vy\|^2 -\tfrac{p}{2}\log(2\pi g\sigma^2) + \tfrac{1}{2}\log|\mX^T\mX| \right\}
+	\\
+	  & \ds \qquad \times \int 
+	\exp\left\{ - \tfrac{1}{2}\vbeta^T \left[ \sigma^{-2}(1+g^{-1})\mX^T\mX \right]\vbeta + \sigma^{-2}\vbeta^T\mX^T\vy
+	\right\} d\vbeta \\ [2ex]
+	  & \ds = \exp\left\{      
+	-\tfrac{n}{2}\log(2\pi\sigma^2) - \tfrac{1}{2\sigma^2}\|\vy\|^2 -\tfrac{p}{2}\log(2\pi g\sigma^2) + \tfrac{1}{2}\log|\mX^T\mX| \right\}
+	\\
+	  & \ds \qquad \times      
+	|2\pi \left[ \sigma^{-2}(1+g^{-1})\mX^T\mX \right]^{-1}|^{1/2}\exp\left\{  \tfrac{1}{2\sigma^2}  \vy^T\mX\left[ (1+g^{-1})\mX^T\mX \right]^{-1}\mX^T\vy
+	\right\}
+	\\ [2ex]
+	  & \ds = \exp\left\{      
+	-\tfrac{n}{2}\log(2\pi\sigma^2) 
+	- \tfrac{1}{2\sigma^2}\|\vy\|^2 
+	-\tfrac{p}{2}\log(2\pi g\sigma^2) 
+	+ \tfrac{1}{2}\log|\mX^T\mX| \right\}
+	\\
+	  & \ds \qquad \times      
+	\exp\left\{ 
+	\tfrac{p}{2}\log(2\pi) 
+	+ \tfrac{p}{2}\log(\sigma^2)
+	- \tfrac{p}{2}\log(1+g^{-1})
+	- \tfrac{1}{2}\log|\mX^T\mX| 
+	+ \tfrac{1}{2\sigma^2}  \vy^T\mX\left[ (1+g^{-1})\mX^T\mX \right]^{-1}\mX^T\vy
+	\right\}
+	\\ [2ex]
+	  & \ds = \exp\left\{      
+	-\tfrac{n}{2}\log(2\pi\sigma^2) 
+	- \tfrac{p}{2}\log(1+g)
+	- \tfrac{n}{2\sigma^2} 
+	+ \tfrac{g}{2\sigma^2(1+g)} n R^2
+	\right\}
 \end{array}
 $$
 
@@ -307,49 +307,49 @@ We also used $\|\vy\|^2 = n$ and the property of determinants that $|c\mA| = c^d
 Next, we obtain the likelihood of $\vy$ conditional on $g$ by integrating out $\sigma^2$ via
 $$
 \begin{array}{rl}
-\ds p(\vy|g) 
-    & \ds = \exp\left\{
-    - \tfrac{n}{2}\log(2\pi) - \tfrac{p}{2}\log(1+g) 
-    - \tfrac{1}{2\sigma^2}n
-    \right\}
-    \\ [1ex]
-    & \ds \qquad \times 
-    \int_0^\infty (\sigma^2)^{-(n/2 + 1)}
-    \exp\left\{
-    - \sigma^{-2} \left[ \tfrac{n}{2} - \tfrac{g}{2(1+g)} nR^2 \right] 
-    \right\} d\sigma^2
-    \\ [2ex]
-    & \ds = \exp\left\{
-    - \tfrac{n}{2}\log(2\pi) - \tfrac{p}{2}\log(1+g)
-    \right\}
-   \times 
-    \frac{\Gamma(n/2)}{\ds \left[ \tfrac{1}{2}\|\vy\|^2 - \tfrac{g}{2(1+g)}nR^2 \right] ^{n/2}}
-    \\ [2ex]
-%    & \ds = \frac{\Gamma(n/2)}{(n\pi)^{n/2}} (1 + g)^{-p/2} \left[  1 - \frac{g}{(1+g)}  R^2 \right] ^{-n/2}
-%    \\ [2ex]
-& \ds = \frac{\Gamma(n/2)}{(n\pi)^{n/2}} (1 + g)^{(n-p)/2} \left[  1 + g(1 -  R^2) \right] ^{-n/2}.
+	\ds p(\vy|g) 
+	  & \ds = \exp\left\{                                                                                 
+	- \tfrac{n}{2}\log(2\pi) - \tfrac{p}{2}\log(1+g) 
+	- \tfrac{1}{2\sigma^2}n
+	\right\}
+	\\ [1ex]
+	  & \ds \qquad \times                                                                                 
+	\int_0^\infty (\sigma^2)^{-(n/2 + 1)}
+	\exp\left\{
+	- \sigma^{-2} \left[ \tfrac{n}{2} - \tfrac{g}{2(1+g)} nR^2 \right] 
+	\right\} d\sigma^2
+	\\ [2ex]
+	  & \ds = \exp\left\{                                                                                 
+	- \tfrac{n}{2}\log(2\pi) - \tfrac{p}{2}\log(1+g)
+	\right\}
+	\times 
+	\frac{\Gamma(n/2)}{\ds \left[ \tfrac{1}{2}\|\vy\|^2 - \tfrac{g}{2(1+g)}nR^2 \right] ^{n/2}}
+	\\ [2ex]
+	%    & \ds = \frac{\Gamma(n/2)}{(n\pi)^{n/2}} (1 + g)^{-p/2} \left[  1 - \frac{g}{(1+g)}  R^2 \right] ^{-n/2}
+	%    \\ [2ex]
+	  & \ds = \frac{\Gamma(n/2)}{(n\pi)^{n/2}} (1 + g)^{(n-p)/2} \left[  1 + g(1 -  R^2) \right] ^{-n/2}. 
 \end{array}
 $$
 
 \noindent Finally, we derive the marginal likelihood of $\vy$ by integrating out $g$. Using $b= (n-p)/2 - 2 - a$ we have
 $$
 \begin{array}{rl}
-\ds p(\vy) 
-& \ds = \int_0^\infty
-\frac{g^{b}(1 + g)^{-a-b-2}}{\mbox{Beta}(a+1,b+1)}
-\frac{\Gamma(n/2)}{(n\pi)^{n/2}} (1 + g)^{(n-p)/2} \left[  1 + g(1 -  R^2) \right]^{-n/2}
-dg
-\\ [2ex]
-& \ds = \frac{\Gamma(n/2)}{(n\pi)^{n/2} \mbox{Beta}(a+1,b+1)} 
-\int_0^\infty g^{b} \left[  1 + g(1 -  R^2) \right]^{-n/2}
-\\ [2ex]
-& \ds = \frac{\Gamma(n/2) }{(n\pi)^{n/2}} 
-\frac{\mbox{Beta}( p/2 + a + 1,b+1)}{\mbox{Beta}(a+1,b+1)}
-(1 -  R^2)^{-(b+1)}.
-\\ [2ex]
-& \ds  
-= \frac{\Gamma( p/2 + a + 1)}{(n\pi)^{n/2}} 
-\frac{\Gamma((n-p)/2)}{\Gamma(a+1)} (1 -  R^2)^{-((n-p)/2 - a - 1)} \\
+	\ds p(\vy) 
+	  & \ds = \int_0^\infty                                         
+	\frac{g^{b}(1 + g)^{-a-b-2}}{\mbox{Beta}(a+1,b+1)}
+	\frac{\Gamma(n/2)}{(n\pi)^{n/2}} (1 + g)^{(n-p)/2} \left[  1 + g(1 -  R^2) \right]^{-n/2}
+	dg
+	\\ [2ex]
+	  & \ds = \frac{\Gamma(n/2)}{(n\pi)^{n/2} \mbox{Beta}(a+1,b+1)} 
+	\int_0^\infty g^{b} \left[  1 + g(1 -  R^2) \right]^{-n/2}
+	\\ [2ex]
+	  & \ds = \frac{\Gamma(n/2) }{(n\pi)^{n/2}}                     
+	\frac{\mbox{Beta}( p/2 + a + 1,b+1)}{\mbox{Beta}(a+1,b+1)}
+	(1 -  R^2)^{-(b+1)}.
+	\\ [2ex]
+	  & \ds                                                         
+	= \frac{\Gamma( p/2 + a + 1)}{(n\pi)^{n/2}} 
+	\frac{\Gamma((n-p)/2)}{\Gamma(a+1)} (1 -  R^2)^{-((n-p)/2 - a - 1)} \\
 \end{array}
 $$
 
@@ -358,95 +358,95 @@ We now derive the expressions for the posterior distributions of each of the par
 \ref{res:03} and Equation \ref{res:04} we have
 
 \begin{equation}\label{res:06}
-p(g|\vy) = \frac{(1 -  R^2)^{b+1} g^{b} \left[  1 + g(1 -  R^2) \right]^{-n/2}}{\mbox{Beta}(p/2 + a + 1,b+1)} \text{ and }
+	p(g|\vy) = \frac{(1 -  R^2)^{b+1} g^{b} \left[  1 + g(1 -  R^2) \right]^{-n/2}}{\mbox{Beta}(p/2 + a + 1,b+1)} \text{ and }
 \end{equation}
 $$
 \begin{array}{rl}
-\ds \frac{\mbox{Beta}(p/2 + a + 1,b)}{\mbox{Beta}(p/2 + a + 1,b+1)}
-& \ds = \frac{\Gamma(p/2 + a + 1)\Gamma(b)}{\Gamma(p/2 + a + 1 + b)}
-\frac{\Gamma(p/2 + a + 1 + b + 1)}{\Gamma(p/2 + a + 1)\Gamma(b+1)}
-\\
-& \ds = \frac{\Gamma(b)}{\Gamma(p/2 + a + 1 + b)}
-\frac{\Gamma(p/2 + a + 1 + b + 1)}{\Gamma(b+1)}
-\\
-& \ds = \frac{p/2 + a + 1 + b}{b}
-\\
-& \ds = 1 + \frac{p/2 + a + 1}{b}.
+	\ds \frac{\mbox{Beta}(p/2 + a + 1,b)}{\mbox{Beta}(p/2 + a + 1,b+1)}
+	  & \ds = \frac{\Gamma(p/2 + a + 1)\Gamma(b)}{\Gamma(p/2 + a + 1 + b)} 
+	\frac{\Gamma(p/2 + a + 1 + b + 1)}{\Gamma(p/2 + a + 1)\Gamma(b+1)}
+	\\
+	  & \ds = \frac{\Gamma(b)}{\Gamma(p/2 + a + 1 + b)}                    
+	\frac{\Gamma(p/2 + a + 1 + b + 1)}{\Gamma(b+1)}
+	\\
+	  & \ds = \frac{p/2 + a + 1 + b}{b}                                    
+	\\
+	  & \ds = 1 + \frac{p/2 + a + 1}{b}.                                   
 \end{array}
 $$
 
 \noindent Using the change of variables $h=g/(1+g)$ we have
 
 \begin{equation}
-p(h|\vy) = \frac{(1 -  R^2)^{b+1}}{\mbox{Beta}(p/2 + a + 1,b+1)} h^{b}(1 - h)^{2-b+n/2}  (1  - h R^2)^{-n/2}.
+	p(h|\vy) = \frac{(1 -  R^2)^{b+1}}{\mbox{Beta}(p/2 + a + 1,b+1)} h^{b}(1 - h)^{2-b+n/2}  (1  - h R^2)^{-n/2}.
 \end{equation}
  
 
 The full conditional for $\vbeta$ is given by
 \begin{equation}
-\begin{array}{rl}
-\vbeta|\vy,\sigma^2,g \sim \N\left[
-\tfrac{g}{1+g}\widehat{\vbeta}_{\mbox{\tiny LS}},
-\tfrac{g}{1+g} \sigma^2 \left( \mX^T\mX \right)^{-1}
-\right] 
-\end{array} 
+	\begin{array}{rl}
+		\vbeta|\vy,\sigma^2,g \sim \N\left[                  
+		\tfrac{g}{1+g}\widehat{\vbeta}_{\mbox{\tiny LS}},    
+		\tfrac{g}{1+g} \sigma^2 \left( \mX^T\mX \right)^{-1} 
+		\right]                                              
+	\end{array} 
 \end{equation}
 \noindent where $\widehat{\vbeta}_{\mbox{\tiny LS}} = \left( \mX^T\mX \right)^{-1}\mX^T\vy$.
 
 The full conditional for $\sigma^2$ is obtained by integrating out $\vbeta$ is
 \begin{equation}
-\sigma^2|\vy,g \sim \mbox{IG}\left[\tfrac{n}{2},\tfrac{n}{2}\left( 
-1 -
-\tfrac{g}{1+g} R^2\right) \right].
+	\sigma^2|\vy,g \sim \mbox{IG}\left[\tfrac{n}{2},\tfrac{n}{2}\left( 
+		1 -
+	\tfrac{g}{1+g} R^2\right) \right].
 \end{equation}
 
 The density for $p(\sigma^2|\vy)$ is obtained by evaluating the integral
 $$
 \begin{array}{rl}
-\ds p(\sigma^2|\vy) 
-    & \ds = \int_0^\infty p(\sigma^2|\vy,g) p(g|\vy) dg
-    
-    \\ [2ex]
-    
-    & \ds = \int_0^\infty 
-\left[ \frac{\left[\tfrac{n}{2}\left( 
+	\ds p(\sigma^2|\vy) 
+	  & \ds = \int_0^\infty p(\sigma^2|\vy,g) p(g|\vy) dg                                                                                                                                  
+	    
+	\\ [2ex]
+	    
+	  & \ds = \int_0^\infty                                                                                                                                                                
+	\left[ \frac{\left[\tfrac{n}{2}\left( 
 	1 -
 	\tfrac{g}{1+g} R^2\right) \right]^{n/2}}{\Gamma(n/2)} (\sigma^2)^{-(n/2 + 1)} \exp\left\{ - \sigma^{-2} \tfrac{n}{2}\left( 
-1 -
-\tfrac{g}{1+g} R^2\right) \right\} \right]
-    \\ [2ex]
-    & \ds \qquad \times \left[
-    \frac{(1 -  R^2)^{b+1} g^{b} \left[  1 + g(1 -  R^2) \right]^{-n/2}}{\mbox{Beta}(p/2 + a + 1,b+1)}
-    \right] dg
-    
-    \\ [2ex]
-    
-    
-    
-    & \ds = \frac{(1 -  R^2)^{b+1} \left( \frac{n}{2}\right)^{n/2}(\sigma^2)^{-(n/2 + 1)}\exp\left\{ -  \tfrac{n}{2\sigma^2} \right\}}{\Gamma(n/2)\mbox{Beta}(p/2 + a + 1,b+1)} 
-    \\ [2ex]
-    & \ds \quad \times \int_0^\infty 
-    \left( 
-    1 -
-    \tfrac{g}{1+g} R^2\right)^{n/2} g^{b} \left[  1 + g(1 -  R^2) \right]^{-n/2}
-\exp\left\{ 
-\frac{g}{1+g} \frac{nR^2}{2\sigma^2} \right\} dg
-
-\\ [2ex]
-
-    & \ds = \frac{(1 -  R^2)^{b+1} \left( \frac{n}{2}\right)^{n/2}(\sigma^2)^{-(n/2 + 1)}\exp\left\{ -  \tfrac{n}{2\sigma^2} \right\}}{\Gamma(n/2)\mbox{Beta}(p/2 + a + 1,b+1)} 
-    \\ [2ex]
-    & \ds \quad \times \int_0^1
-    \left( 
-    1 -
-    h R^2\right)^{n/2} \left( \frac{h}{1 - h}\right)^{b} \left[  1 + \frac{h}{1 - h}(1 -  R^2) \right]^{-n/2}
-    \exp\left\{ 
-    h \frac{nR^2}{2\sigma^2} \right\}\frac{1}{(1-h)^2} dh
-    
+	1 -
+	\tfrac{g}{1+g} R^2\right) \right\} \right]
+	\\ [2ex]
+	  & \ds \qquad \times \left[                                                                                                                                                           
+	\frac{(1 -  R^2)^{b+1} g^{b} \left[  1 + g(1 -  R^2) \right]^{-n/2}}{\mbox{Beta}(p/2 + a + 1,b+1)}
+	\right] dg
+	    
+	\\ [2ex]
+	    
+	    
+	    
+	  & \ds = \frac{(1 -  R^2)^{b+1} \left( \frac{n}{2}\right)^{n/2}(\sigma^2)^{-(n/2 + 1)}\exp\left\{ -  \tfrac{n}{2\sigma^2} \right\}}{\Gamma(n/2)\mbox{Beta}(p/2 + a + 1,b+1)}          
+	\\ [2ex]
+	  & \ds \quad \times \int_0^\infty                                                                                                                                                     
+	\left( 
+	1 -
+	\tfrac{g}{1+g} R^2\right)^{n/2} g^{b} \left[  1 + g(1 -  R^2) \right]^{-n/2}
+	\exp\left\{ 
+	\frac{g}{1+g} \frac{nR^2}{2\sigma^2} \right\} dg
+	
 	\\ [2ex]
 	
-	& \ds = \frac{ (1 -  R^2)^{b+1}\left( \frac{n}{2}\right)^{n/2}(\sigma^2)^{-(n/2 + 1)}\exp\left\{ -  \tfrac{n}{2\sigma^2} \right\}}{\Gamma(n/2)\mbox{Beta}(p/2 + a + 1,b+1)} \int_0^1
-	 h^{b}(1-h)^{a+p/2} 
+	  & \ds = \frac{(1 -  R^2)^{b+1} \left( \frac{n}{2}\right)^{n/2}(\sigma^2)^{-(n/2 + 1)}\exp\left\{ -  \tfrac{n}{2\sigma^2} \right\}}{\Gamma(n/2)\mbox{Beta}(p/2 + a + 1,b+1)}          
+	\\ [2ex]
+	  & \ds \quad \times \int_0^1                                                                                                                                                          
+	\left( 
+	1 -
+	h R^2\right)^{n/2} \left( \frac{h}{1 - h}\right)^{b} \left[  1 + \frac{h}{1 - h}(1 -  R^2) \right]^{-n/2}
+	\exp\left\{ 
+	h \frac{nR^2}{2\sigma^2} \right\}\frac{1}{(1-h)^2} dh
+	    
+	\\ [2ex]
+		
+	  & \ds = \frac{ (1 -  R^2)^{b+1}\left( \frac{n}{2}\right)^{n/2}(\sigma^2)^{-(n/2 + 1)}\exp\left\{ -  \tfrac{n}{2\sigma^2} \right\}}{\Gamma(n/2)\mbox{Beta}(p/2 + a + 1,b+1)} \int_0^1 
+	h^{b}(1-h)^{a+p/2} 
 	\exp\left\{ 
 	h \frac{nR^2}{2\sigma^2} \right\}  dh    
 \end{array}
@@ -476,10 +476,10 @@ $u = 1$, $\nu = b + 1 = \frac{n-p}{2} - a - 1 >0$, $\mu = a + p/2 + 1 >0$, and
 $\beta = \frac{nR^2}{2\sigma^2}$, so $\nu + \mu = \frac{n}{2}$. Hence
 $$
 \begin{array}{rl}
-\ds p(\sigma^2|\vy) 
-& \ds = \frac{(1 -  R^2)^{b+1} ( n/2)^{n/2}}{\Gamma(n/2)}
-(\sigma^2)^{-(n/2 + 1)}\exp\left\{ -  \frac{n}{2} \sigma^{-2} \right\}  {}_1 F_1\left(
-b + 1; \frac{n}{2}; \frac{nR^2}{2} \sigma^{-2} \right)
+	\ds p(\sigma^2|\vy) 
+	  & \ds = \frac{(1 -  R^2)^{b+1} ( n/2)^{n/2}}{\Gamma(n/2)} 
+	(\sigma^2)^{-(n/2 + 1)}\exp\left\{ -  \frac{n}{2} \sigma^{-2} \right\}  {}_1 F_1\left(
+	b + 1; \frac{n}{2}; \frac{nR^2}{2} \sigma^{-2} \right)
 \end{array}
 $$
 
@@ -491,14 +491,14 @@ confluent hypergeometric function. To the best of our knowledge, this is a new d
 \noindent Using the change of variables $\tau= 1/\sigma^2$ we have
 $$
 \begin{array}{rl}
-\ds p(\tau|\vy) 
-& \ds = \frac{(1 -  R^2)^{b+1} ( n/2)^{n/2}}{\Gamma(n/2)} 
-\tau^{n/2 - 1}\exp\left\{ -  \frac{n}{2} \tau \right\} {}_1 F_1\left(
-b + 1; \frac{n}{2}; \frac{nR^2}{2} \tau \right)
+	\ds p(\tau|\vy) 
+	  & \ds = \frac{(1 -  R^2)^{b+1} ( n/2)^{n/2}}{\Gamma(n/2)} 
+	\tau^{n/2 - 1}\exp\left\{ -  \frac{n}{2} \tau \right\} {}_1 F_1\left(
+	b + 1; \frac{n}{2}; \frac{nR^2}{2} \tau \right)
 \end{array}
 $$
 
-\noindent Calculating the integral using the result from G\&R above we have
+\noindent Calculating the integral using the result from \cite{Gradshteyn1988} above we have
 $$
 \int_0^\infty \tau^{n/2 - 1}\exp\left\{ -  \tfrac{n}{2} \tau \right\}{}_1 F_1\left(
 b + 1; \frac{n}{2}; \frac{nR^2}{2} \tau \right) d \tau = 
@@ -512,33 +512,33 @@ We now calculate the posterior expectation of the precision, $\bE(\sigma^{-2}|\v
 
 $$
 \begin{array}{rl}
-\ds \int_0^\infty \sigma^{-2} p(\sigma^2|\vy) d\sigma^2 
-    & \ds = \int_0^\infty \int_0^\infty \sigma^{-2} p(\sigma^2|\vy,g) d\sigma^2 p(g|\vy) dg
-    \\ [2ex]
-    & \ds =  \int_0^\infty \frac{1}{\left( 
-    1 -
-    \tfrac{g}{1+g} R^2\right)} \frac{(1 -  R^2)^{b+1} g^{b} \left[  1 + g(1 -  R^2) \right]^{-n/2}}{\mbox{Beta}(p/2 + a + 1,b+1)} dg
-    \\ [2ex]
-    & \ds =  \frac{(1 -  R^2)^{b+1}}{\mbox{Beta}(p/2 + a + 1,b+1)}
-    \int_0^\infty \left( 
-    1 -
-    \tfrac{g}{1+g} R^2\right)^{-1} g^{b} \left[  1 + g(1 -  R^2) \right]^{-n/2}dg
-    \\ [2ex]
-    & \ds =  \frac{(1 -  R^2)^{b+1}}{\mbox{Beta}(p/2 + a + 1,b+1)}
-    \int_0^1 \left( 
-   	1 -
-    h R^2\right)^{-1} \left( \frac{h}{1 - h}\right)^{b} \left[  1 + \frac{h}{1 - h}(1 -  R^2) \right]^{-n/2} \frac{1}{(1 - h)^2} dh
-
-
-    \\ [2ex]
-    
-    & \ds =  \frac{(1 -  R^2)^{b+1}}{\mbox{Beta}(p/2 + a + 1,b+1)}
-    \int_0^1  h^b (1 - h)^{n/2 - b - 2} ( 1 -  hR^2)^{-(n/2+1)}  dh
-    
-    
-    \\ [2ex]
-    & \ds =  (1 -  R^2)^{b+1}
-    {}_1 F_2(n/2+1,b+1,n/2;R^2)  .
+	\ds \int_0^\infty \sigma^{-2} p(\sigma^2|\vy) d\sigma^2 
+	  & \ds = \int_0^\infty \int_0^\infty \sigma^{-2} p(\sigma^2|\vy,g) d\sigma^2 p(g|\vy) dg 
+	\\ [2ex]
+	  & \ds =  \int_0^\infty \frac{1}{\left(                                                  
+	1 -
+	\tfrac{g}{1+g} R^2\right)} \frac{(1 -  R^2)^{b+1} g^{b} \left[  1 + g(1 -  R^2) \right]^{-n/2}}{\mbox{Beta}(p/2 + a + 1,b+1)} dg
+	\\ [2ex]
+	  & \ds =  \frac{(1 -  R^2)^{b+1}}{\mbox{Beta}(p/2 + a + 1,b+1)}                          
+	\int_0^\infty \left( 
+	1 -
+	\tfrac{g}{1+g} R^2\right)^{-1} g^{b} \left[  1 + g(1 -  R^2) \right]^{-n/2}dg
+	\\ [2ex]
+	  & \ds =  \frac{(1 -  R^2)^{b+1}}{\mbox{Beta}(p/2 + a + 1,b+1)}                          
+	\int_0^1 \left( 
+	1 -
+	h R^2\right)^{-1} \left( \frac{h}{1 - h}\right)^{b} \left[  1 + \frac{h}{1 - h}(1 -  R^2) \right]^{-n/2} \frac{1}{(1 - h)^2} dh
+	
+	
+	\\ [2ex]
+	    
+	  & \ds =  \frac{(1 -  R^2)^{b+1}}{\mbox{Beta}(p/2 + a + 1,b+1)}                          
+	\int_0^1  h^b (1 - h)^{n/2 - b - 2} ( 1 -  hR^2)^{-(n/2+1)}  dh
+	    
+	    
+	\\ [2ex]
+	  & \ds =  (1 -  R^2)^{b+1}                                                               
+	{}_1 F_2(n/2+1,b+1,n/2;R^2)  .
 \end{array}
 $$
 
@@ -559,7 +559,7 @@ Using the Law of Total Expectation,
 	                   & = \left( \frac{n}{n - 2} \right) (G_1 - G_2 R^2) (\mX^\top \mX)^{-1} + (G_2 - G_1^2) \vbetahatls \vbetahatls^\top                                                                                      
 \end{align*}
 
-where $G_1 = \E\left[\frac{g}{1 + g} \Bigm| \vy \right]$ and $G_2 = \E\left[ \left(\frac{g}{1 + g} \right)^2 \Bigm| \vy \right]$.
+where $G_1 = \E\left[\frac{g}{1 + g} \Bigm| \vy \right]$ and $G_2 = \E\left[ \left(\frac{g}{1 + g} \right)^2 \Bigm| \vy \right]$. We will calculate these expectations below.
 
 To calculate $G_1$, we evaluate the integral
 
@@ -593,7 +593,7 @@ Similiarly, we compute $G_2$ by evaluating
 Thus we obtain
 \begin{align*}
 	G_1 & = \frac{\Beta(p/2 + a + 1, b + 2)}{\Beta(p /2 + a + 1, b + 1)} (1 - R^2)^{b+1} {}_2 F_1(n/2, b + 1; n/2 + 1; R^2), \text{ and } \\
-	G_2 & = \frac{\Beta(p/2 + a + 1, b + 3)}{\Beta(p /2 + a + 1, b + 1)} (1 - R^2)^{b+1} {}_2 F_1(n/2, b + 3; n/2 + 2; R^2). 
+	G_2 & = \frac{\Beta(p/2 + a + 1, b + 3)}{\Beta(p /2 + a + 1, b + 1)} (1 - R^2)^{b+1} {}_2 F_1(n/2, b + 3; n/2 + 2; R^2).              
 \end{align*}
 
 
@@ -766,9 +766,9 @@ for inclusion, $\vgamma$. For each model $\mathcal{M}_\vgamma$, the response vec
 We perform model selection by using the above Variational Bayes approximation to each
 candidate linear model and averaging over the space of available models.
 \begin{align*}
-	\underline{p}(\vy) & = \sum_\vgamma \underline{p}(\vy|\vgamma) p(\vgamma),                     \\
+	\underline{p}(\vy) & = \sum_\vgamma \underline{p}(\vy|\vgamma) p(\vgamma),                                  \\
 	p(\vgamma|\vy)     & \approx \frac{\underline{p}(\vy|\vgamma) p(\vgamma)}{\underline{p}(\vy)} \text { and } \\
-	p(\vbeta|\vy)      & \approx \sum_\vgamma q(\vbeta|\vgamma) p(\vgamma|\vy).                    \\
+	p(\vbeta|\vy)      & \approx \sum_\vgamma q(\vbeta|\vgamma) p(\vgamma|\vy).                                 \\
 \end{align*}
 
 \section{Numerical experiments}
@@ -828,7 +828,7 @@ posterior variance of \ldots becomes more and more accurate.
 	\includegraphics[width=17cm, height=17cm]{code/taug/Variance.pdf}
 	\caption{The posterior variance of the example model $p(\sigma^2 | \vy)$ is compared against the approximation
 		to the posterior variance $q(\sigma^2)$ across a range of numbers of covariates, sample sizes and $R^2$
-	values. Here $n = \kappa p$.}
+		values. Here $n = \kappa p$.}
 	\label{fig:variance}
 \end{figure}
 
@@ -845,7 +845,7 @@ for a range of values of $p$, $\kappa$ and $R^2$. The results are presented in F
 	\includegraphics[width=17cm, height=17cm]{code/taug/Accuracy_sigma2.pdf}
 	\caption{The accuracy of the approximation $q(\sigma^2)$ is assessed by computing the integral   $1 -
 		\frac{1}{2} \int_0^\infty |p(\sigma^2 | \vy) - q(\sigma^2)| d \sigma^2$ and graphing the result over a range
-	of numbers of covariates, sample sizes and $R^2$  values. Here $n = \kappa p$.}
+		of numbers of covariates, sample sizes and $R^2$  values. Here $n = \kappa p$.}
 	\label{fig:accuracy_sigma2}
 \end{figure}
 
@@ -855,7 +855,7 @@ Accuracy of approximation to $p(g | \vy)$ \\
 	\includegraphics[width=17cm, height=17cm]{code/taug/Accuracy_g.pdf}
 	\caption{The accuracy of the approximation $q(g)$ is assessed by computing the integral   $1 -
 		\frac{1}{2} \int_0^\infty |p(g | \vy) - q(g)| d g$ and graphing the result over a range
-	of numbers of covariates, sample sizes and $R^2$  values. Here $n = \kappa p$.}
+		of numbers of covariates, sample sizes and $R^2$  values. Here $n = \kappa p$.}
 	\label{fig:accuracy_g}
 \end{figure}
 
@@ -875,8 +875,8 @@ $\log{\underline{p}(\vy)}$ versus $\log{p(\vy)}$. The results are presented in F
 \begin{figure}[p]
 	\includegraphics[width=17cm, height=17cm]{code/taug/Relative_error_log_p.pdf}
 	\caption{The accuracy of the variational lower bound was assessed by computing the relative error
-						$\frac{\log p(\vy) - \log \underline{p}(\vy)}{p(\sigma^2 | \vy)}$ over a range
-	of numbers of covariates, sample sizes and $R^2$  values. Here $n = \kappa p$.}
+		$\frac{\log p(\vy) - \log \underline{p}(\vy)}{p(\sigma^2 | \vy)}$ over a range
+		of numbers of covariates, sample sizes and $R^2$  values. Here $n = \kappa p$.}
 	\label{fig:relative_error}
 \end{figure}
 
@@ -890,8 +890,8 @@ values of $R^2$.
 \begin{figure}[p]
 	\includegraphics[width=17cm, height=17cm]{code/taug/Precision.pdf}
 	\caption{The accuracy of the approximation to the posterior precision was assessed by plotting
-						$p(\sigma^{-2} | \vy)$ against $q(\sigma^{-2})$ over a range
-	of numbers of covariates, sample sizes and $R^2$  values. Here $n = \kappa p$.}
+		$p(\sigma^{-2} | \vy)$ against $q(\sigma^{-2})$ over a range
+		of numbers of covariates, sample sizes and $R^2$  values. Here $n = \kappa p$.}
 	\label{fig:precision}
 \end{figure}
 
@@ -905,8 +905,8 @@ variational approximation and exact posterior likelihood are more conservative.
 \begin{figure}[p]
 	\includegraphics[width=17cm, height=17cm]{code/taug/Log_of_Relative_error_of_Variance_of_g.pdf}
 	\caption{The accuracy of the approximation to the variance of $g$ was assessed by computing the relative
-						error of $q(g)$ relative to $p(g | \vy)$ over a range
-	of numbers of covariates, sample sizes and $R^2$  values. Here $n = \kappa p$.}
+		error of $q(g)$ relative to $p(g | \vy)$ over a range
+		of numbers of covariates, sample sizes and $R^2$  values. Here $n = \kappa p$.}
 	\label{fig:rel_error_var_g}
 \end{figure}
 
