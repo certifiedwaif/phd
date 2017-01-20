@@ -120,7 +120,7 @@ posterior $p(\vy, \vtheta)$ by minimising the KL divergence between the posterio
 distribution $q(\vtheta)$.
 
 A linear model with normal priors allows exact inference on the regression and model selection parameters in
-closed form, which might appear to negate the beenfits of a variational approximation to the model. However,
+closed form, which might appear to negate the benefits of a variational approximation to the model. However,
 the performance of our variational approximation should remain simil.iar if the priors are altered to cater
 for complications such as robustness, while exact Bayesian inference calculations are no longer possible
 in closed form in these situations.
@@ -201,8 +201,8 @@ This leads to the posterior distribution
 \label{sec:full_bayes}
 
 In this section, we derive the expression required for fully Bayesian inference for the model presented in
-Section \ref{sec:model}. Throughout the rest of this article, we will assume that assume without loss of
-generality that $\vy^\top\vone = 0$ and that $\|\vy\|^2 = n$.
+Section \ref{sec:model}. Throughout the rest of this article, we will assume without loss of generality that
+$\vy^\top\vone = 0$ and that $\|\vy\|^2 = n$.
 
 \subsection{Useful Results}	
 
@@ -665,24 +665,35 @@ for inclusion, $\vgamma$. For each model $\mathcal{M}_\vgamma$, the response vec
 	\mathcal{M}_\vgamma: \vmu_\vgamma = \vone_n \alpha + \mX_\vgamma \vbeta_\vgamma.
 \end{equation*}
 
-We perform model selection by using the above Variational Bayes approximation to each
-candidate linear model and averaging over the space of available models.
-\begin{align*}
-	\underline{p}(\vy) & = \sum_\vgamma \underline{p}(\vy|\vgamma) p(\vgamma),                                  \\
-	p(\vgamma|\vy)     & \approx \frac{\underline{p}(\vy|\vgamma) p(\vgamma)}{\underline{p}(\vy)} \text { and } \\
-	p(\vbeta|\vy)      & \approx \sum_\vgamma q(\vbeta|\vgamma) p(\vgamma|\vy).                                 \\
-\end{align*}
+% $p(\vbeta|\vy)      \approx \sum_\vgamma q(\vbeta|\vgamma) p(\vgamma|\vy)$
+
+All models in the space are considered equally likely, so we place a uniform prior on $\vgamma$, $p(\vgamma) =
+1/n$. We approximate the marginal likelihood by using the variational lower bound conditioned on $\vgamma$,
+which is taken to be the variational lower bound calculated for the variational approximation to the model
+$\vgamma$. This is denoted $\underline{p}(\vy)$. 
+
+$$\underline{p}(\vy) = \sum_\vgamma \underline{p}(\vy|\vgamma) p(\vgamma)$$
+
+\noindent There are $2^p$ candidate models, so computing this summation is a substantial computational task. The
+variational lower bound takes the place of $p(\vy|\vgamma)$, and can then be used to approximate
+$p(\vgamma|\vy)$ using Bayes Rule.
+
+$$p(\vgamma|\vy)     \approx \frac{\underline{p}(\vy|\vgamma) p(\vgamma)}{\underline{p}(\vy)}$$
+
+\noindent These posterior probabilities then allow the models to be ranked.
+
+Fully Bayesian model selection can be performed by using the exact expressions for $p(\vy)$ and $p(\vgamma|\vy)$, allowing the posterior probabilities of $\vgamma$ to be calculated and used for model ranking.
 
 \section{Numerical experiments}
 \label{sec:num_exp}
 
 Let $\kappa$ be the inflation factor such that for the examples under consideration $n = \kappa p$.
 
-\subsection{Implementation details}
+\subsection{Implementation}
 \label{sec:implementation}
 
 \begin{itemize}
-\item Rank 1 updates of $(\mX^\top \mX)^{-1}$ in $\BigO(np)$.
+\item Rank 1 updates of $(\mX^\top \mX)^{-1}$ in $\BigO(np^2)$.
 \item Graycode traversal such that only one bit changes at a time.
 \item Special care was taken to minimise memory allocation and deallocation.
 \item Rcpp, RcppEigen.
@@ -696,7 +707,7 @@ Initially, we calculate $R^2$ for the model including the first covariate, $\vga
 0)^\top$. So $(\mX_{\vgamma_1}^\top \mX_{\vgamma_1})^{-1} = (\vx_{\vgamma_1}^\top \vx_{\vgamma_1})^{-1}$ which
 is a scalar, and so can be computed in $\BigO(n)$. Then the set of possible models $\vgamma_i$ is iterated
 through in graycode order. This ensures that only one element of $\vgamma$ changes as each new model is
-visited, allowing $(\mX_{\vgamma_(i+1)}^\top \mX_{\vgamma_(i+1)})^{-1}$ to be calculated using the previously
+visited, allowing $(\mX_{\vgamma_{i+1}}^\top \mX_{\vgamma_{i+1}})^{-1}$ to be calculated using the previously
 calculated $(\mX_{\vgamma_i}^\top \mX_{\vgamma_i})^{-1}$ and a rank-1 update or downdate. This allows us to
 avoid directly computing the product $\mX_{\vgamma_{i+1}}^\top \mX_{\vgamma_{i+1}}$ and then performing a full
 inversion, reducing the computational time from $\BigO(n p^3)$  to $\BigO(n p^2)$.
@@ -852,9 +863,11 @@ The marginal covariate inclusion probabilities are presented in Figure \ref{fig:
 	\label{fig:Hitters_inclusion}
 \end{figure}
 
+[Place Figure \ref{fig:Hitters_inclusion} here.]
+
 The model ranking scatterplots are presented in Figure \ref{fig:Hitters_model_ranking}.
 
-
+[Place Figure \ref{fig:Hitters_model_ranking} here.]
 
 \begin{figure}[p]
 	\includegraphics[scale=.9]{code/Model_selection_scatter_plot_1.pdf}
@@ -879,17 +892,21 @@ probabilities are presented in Figure \ref{fig:bodyfat_inclusion}.
 
 \begin{figure}[p]
 	\includegraphics[scale=.9]{code/Model_selection_covariate_inclusion_2.pdf}
-	\caption{bodyfat marginal inclusion probablities}
+	\caption{Body fat marginal inclusion probablities}
 	\label{fig:bodyfat_inclusion}
 \end{figure}
+
+[Place Figure \ref{fig:bodyfat_inclusion} here.]
 
 The model ranking scatterplots are presented in Figure \ref{fig:bodyfat_model_ranking}.
 
 \begin{figure}[p]
 	\includegraphics[scale=.9]{code/Model_selection_scatter_plot_2.pdf}
-	\caption{bodyfat model ranking scatterplot}
+	\caption{Body fat model ranking scatterplot}
 	\label{fig:bodyfat_model_ranking}
 \end{figure}
+
+[Place Figure \ref{fig:bodyfat_model_ranking} here.]
 
 \subsubsection{Wage}
 
@@ -911,6 +928,8 @@ in Figure \ref{fig:Wage_inclusion}.
 	\label{fig:Wage_inclusion}
 \end{figure}
 
+[Place Figure \ref{fig:Wage_inclusion} here.]
+
 The model ranking scatterplots are presented in Figure \ref{fig:Wage_model_ranking}.
 
 \begin{figure}[p]
@@ -919,6 +938,7 @@ The model ranking scatterplots are presented in Figure \ref{fig:Wage_model_ranki
 	\label{fig:Wage_model_ranking}
 \end{figure}
 
+[Place Figure \ref{fig:Wage_model_ranking} here.]
 
 \subsubsection{Graduation Rate}
 
@@ -936,17 +956,21 @@ presented in Figure \ref{fig:GradRate_inclusion}.
 
 \begin{figure}[p]
 	\includegraphics[scale=.9]{code/Model_selection_covariate_inclusion_4.pdf}
-	\caption{GradRate marginal inclusion probablities}
+	\caption{Graduation Rate marginal inclusion probablities}
 	\label{fig:GradRate_inclusion}
 \end{figure}
+
+[Place Figure \ref{fig:GradRate_inclusion} here.]
 
 The model ranking scatterplots are presented in Figure \ref{fig:GradRate_model_ranking}.
 
 \begin{figure}[p]
 	\includegraphics[scale=.9]{code/Model_selection_scatter_plot_4.pdf}
-	\caption{GradRate model ranking scatterplot}
+	\caption{Graduation Rate model ranking scatterplot}
 	\label{fig:GradRate_model_ranking}
 \end{figure}
+
+[Place Figure \ref{fig:GradRate_model_ranking} here.]
 
 \subsubsection{US Crime}
 
@@ -964,17 +988,21 @@ inclusion probabilities are presented in Figure \ref{fig:USCrime_inclusion}.
 
 \begin{figure}[p]
 	\includegraphics[scale=.9]{code/Model_selection_covariate_inclusion_5.pdf}
-	\caption{USCrime marginal inclusion probablities}
+	\caption{US Crime marginal inclusion probablities}
 	\label{fig:USCrime_inclusion}
 \end{figure}
+
+[Place Figure \ref{fig:USCrime_inclusion} here.]
 
 The model ranking scatterplots are presented in Figure \ref{fig:USCrime_model_ranking}.
 
 \begin{figure}[p]
 	\includegraphics[scale=.9]{code/Model_selection_scatter_plot_5.pdf}
-	\caption{USCrime model ranking scatterplot}
+	\caption{US Crime model ranking scatterplot}
 	\label{fig:USCrime_model_ranking}
 \end{figure}
+
+[Place Figure \ref{fig:USCrime_model_ranking} here.]
 
 \section{Conclusion and Discussion}
 \label{sec:conclusion}
