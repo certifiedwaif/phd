@@ -79,7 +79,7 @@ E_q_g <- function(n, p, R2, c)
 #' @export
 create_approx_exact_df <- function()
 {
-  param_df <- create_param_df() # %>% filter(vp == 1000)
+  param_df <- create_param_df() # %>% filter(vp == 10. && vkappa == 1.1)
   vp <- param_df$vp
   vn <- param_df$vn
   vkappa <- param_df$vkappa
@@ -143,21 +143,23 @@ plot_graphs <- function() {
     map(df, ~ str_c("p = ", .))
   }
 
+  pdf("Shrinkage.pdf")
   approx_means_df <- combined_df %>%
                       select(one_of(c("vp", "vkappa", "vR2", "approx_mean"))) %>%
-                      rename(mean = approx_mean) %>%
-                      mutate(mean_type = "Approximate")
+                      rename(mean = approx_mean, Kappa = vkappa) %>%
+                      mutate(Type = "Approximate")
   exact_means_df <- combined_df %>%
                     select(one_of(c("vp", "vkappa", "vR2", "exact_mean"))) %>%
-                    rename(mean = exact_mean) %>%
-                    mutate(mean_type = "Exact")
+                    rename(mean = exact_mean, Kappa = vkappa) %>%
+                    mutate(Type = "Exact")
   means_df <- bind_rows(approx_means_df, exact_means_df) %>%
-              mutate(mean_type = factor(mean_type))
+              mutate(Type = factor(Type))
   means_df %>%
     ggplot(aes(x=vR2, y=mean)) +
-      geom_line(aes(group=interaction(vkappa, mean_type), color=vkappa, linetype=mean_type)) +
+      geom_line(aes(group=interaction(Kappa, Type), color=Kappa, linetype=Type)) +
       facet_wrap(~vp, labeller=label_fn) +
-      xlab(TeX("$R^2$")) + ylab("Shrinkage")
+      xlab(TeX("$R^2$")) + ylab("Shrinkage") + theme_bw() + scale_colour_gradient(low="#777777", high="#ffffff")
+  dev.off()
 
   # approx_log_p_df <- combined_df %>%
   #                     select(one_of(c("vp", "vkappa", "vR2", "velbo"))) %>%
@@ -169,56 +171,79 @@ plot_graphs <- function() {
   #                     mutate(log_p_type = "Exact")
   # log_p_df <- bind_rows(approx_log_p_df, exact_log_p_df) %>%
   #             mutate(log_p_type = factor(log_p_type))
+  pdf("Relative_error_log_p.pdf")
   combined_df %>% filter(vR2 <= 0.99) %>%
-    mutate(relative_error=(velbo - vlog_p)/vlog_p) %>%
+    mutate(relative_error=(vlog_p - velbo)/vlog_p) %>%
+    rename(Kappa = vkappa) %>%
     ggplot(aes(x=vR2, y=relative_error)) +
-      geom_line(aes(group=vkappa, color=vkappa)) +
+      geom_line(aes(group=Kappa, color=Kappa)) +
       facet_wrap(~vp, labeller=label_fn) +
-      xlab(TeX("$R^2$")) + ylab("Relative error")
+      xlab(TeX("$R^2$")) + ylab("Relative error") + ylim(-.15, 2) + theme_bw() + scale_colour_gradient(low="#777777", high="#ffffff")
+  dev.off()
 
+  pdf("Log_of_Relative_error_of_Variance_of_g.pdf")
+  combined_df %>% filter(vR2 <= 0.99) %>%
+    mutate(relative_error=log10((approx_var_g - exact_var_g)/exact_var_g)) %>%
+    rename(Kappa = vkappa) %>%
+    ggplot(aes(x=vR2, y=relative_error)) +
+      geom_line(aes(group=Kappa, color=Kappa)) +
+      facet_wrap(~vp, labeller=label_fn) +
+      xlab(TeX("$R^2$")) + ylab(TeX("$\\log_{10}$ of relative error")) + theme_bw() + scale_colour_gradient(low="#777777", high="#ffffff")
+  dev.off()
+
+  pdf("Variance.pdf")
   approx_var_df <- combined_df %>%
                       select(one_of(c("vp", "vkappa", "vR2", "approx_var"))) %>%
-                      rename(var = approx_var) %>%
-                      mutate(var_type = "Approximate")
+                      rename(var = approx_var, Kappa = vkappa) %>%
+                      mutate(Type = "Approximate")
   exact_var_df <- combined_df %>%
                     select(one_of(c("vp", "vkappa", "vR2", "exact_var"))) %>%
-                    rename(var = exact_var) %>%
-                    mutate(var_type = "Exact")
+                    rename(var = exact_var, Kappa = vkappa) %>%
+                    mutate(Type = "Exact")
   var_df <- bind_rows(approx_var_df, exact_var_df) %>%
-              mutate(var_type = factor(var_type))
+              mutate(Type = factor(Type))
   var_df %>%
     ggplot(aes(x=vR2, y=var)) +
-      geom_line(aes(group=interaction(vkappa, var_type), color=vkappa, linetype=var_type)) +
+      geom_line(aes(group=interaction(Kappa, Type), color=Kappa, linetype=Type)) +
       facet_wrap(~vp, labeller=label_fn) +
-      xlab(TeX("$R^2$")) + ylab("Variance")
+      xlab(TeX("$R^2$")) + ylab("Variance") + theme_bw() + scale_colour_gradient(low="#777777", high="#ffffff")
+  dev.off()
 
+  pdf("Precision.pdf")
   approx_precision_df <- combined_df %>%
                       select(one_of(c("vp", "vkappa", "vR2", "E_q_sigma2_inv"))) %>%
-                      rename(precision = E_q_sigma2_inv) %>%
-                      mutate(precision_type = "Approximate")
+                      rename(precision = E_q_sigma2_inv, Kappa = vkappa) %>%
+                      mutate(Type = "Approximate")
   exact_precision_df <- combined_df %>%
                     select(one_of(c("vp", "vkappa", "vR2", "vexact_precision"))) %>%
-                    rename(precision = vexact_precision) %>%
-                    mutate(precision_type = "Exact")
+                    rename(precision = vexact_precision, Kappa = vkappa) %>%
+                    mutate(Type = "Exact")
   precision_df <- bind_rows(approx_precision_df, exact_precision_df) %>%
-              mutate(precision_type = factor(precision_type))
+              mutate(Type = factor(Type))
   precision_df %>%
     ggplot(aes(x=vR2, y=precision)) +
-      geom_line(aes(group=interaction(vkappa, precision_type), color=vkappa, linetype=precision_type)) +
+      geom_line(aes(group=interaction(Kappa, Type), color=Kappa, linetype=Type)) +
       facet_wrap(~vp, labeller=label_fn) +
-      xlab(TeX("$R^2$")) + ylab("Precision")
+      xlab(TeX("$R^2$")) + ylab("Precision") + theme_bw() + scale_colour_gradient(low="#777777", high="#ffffff")
+  dev.off()
 
+  pdf("Accuracy_sigma2.pdf")
   combined_df %>% dplyr::filter(vaccuracy_sigma2 >= 0.0 & vaccuracy_sigma2 <= 1.0) %>%
+    rename(Kappa = vkappa) %>%
     ggplot(aes(x=vR2, y=vaccuracy_sigma2)) +
-    geom_line(aes(group=vkappa, color=vkappa)) +
+    geom_line(aes(group=Kappa, color=Kappa)) +
     facet_wrap(~vp, labeller=label_fn) +
-    xlab(TeX("$R^2$")) + ylab(TeX("Accuracy $\\sigma^2$"))
+    xlab(TeX("$R^2$")) + ylab(TeX("Accuracy $\\sigma^2$")) + theme_bw() + scale_colour_gradient(low="#777777", high="#ffffff")
+  dev.off()
 
+  pdf("Accuracy_g.pdf")
   combined_df %>%
+    rename(Kappa = vkappa) %>%
     ggplot(aes(x=vR2, y=vaccuracy_g)) +
-    geom_line(aes(group=vkappa, color=vkappa)) +
+    geom_line(aes(group=Kappa, color=Kappa)) +
     facet_wrap(~vp, labeller=label_fn) +
-    xlab(TeX("$R^2$")) + ylab("Accuracy g")
+    xlab(TeX("$R^2$")) + ylab("Accuracy g") + theme_bw() + scale_colour_gradient(low="#777777", high="#ffffff")
+  dev.off()
 }
 
 plot_vw1_vw2 <- function() {
