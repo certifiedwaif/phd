@@ -175,7 +175,8 @@ Normal-Gamma model, where the prior covariance matrix of $\vbeta$ is taken to be
 information  matrix by the parameter $g$ \citep{Goel1986}. This places the most prior mass for $\vbeta$ on the
 section of the parameter space where the data is least informative.
 
-We consider a linear model with a g-prior, as in \citep{Liang2008}. Consider the linear model
+We consider a linear model with a g-prior, following \citep{Maruyama2011} and \citep{Liang2008}. Consider the
+linear model
 \begin{align*}
 	\vy | \vbeta, \sigma^2 \sim \N_n(\mX \vbeta, \sigma^2 \mI) 
 \end{align*}
@@ -186,12 +187,6 @@ We consider a linear model with a g-prior, as in \citep{Liang2008}. Consider the
 	p(\sigma^2)          & = (\sigma^2)^{-1} \I(\sigma^2 > 0), \text{ and }                    \\
 	p(g)                 & = \frac{g^b (1 + g)^{-(a + b + 2)}}{\Beta(a + 1, b + 1)} \I(g > 0). 
 \end{align*}
-
-This leads to the posterior distribution
-
-\[
-	\vbeta | \vy \sim \N\left(\frac{g}{1+g} \vbetahatls, g \sigma^2 (\mX^\top \mX)^{-1} \right).
-\]
 
 \section{Fully Bayesian inference}
 \label{sec:full_bayes}
@@ -225,9 +220,6 @@ Equation 3.385 of \citep{Gradshteyn1988} is
 	\int_{0}^1 x^{\nu - 1} (1 - x)^{\lambda - 1}(1 - \beta x)^{\varrho} e^{-\mu x} dx = \mbox{Beta}(\nu,\lambda) \Phi_1(\nu,\varrho,\lambda+\nu,-\mu,\beta)
 \end{equation}
 \noindent provided $\mbox{Re}(\lambda)>0$, $\mbox{Re}(\nu)>0$ and $|\mbox{arg}(1-\beta)|<\pi$.
-
-
-
 
 \subsection{Derivation of the marginal likelihood}
 
@@ -330,7 +322,51 @@ Using Equation \ref{res:03} and Equation \ref{res:04} we have
 		\right]                                              
 	\end{array} 
 \end{equation}
-\noindent where $\widehat{\vbeta}_{\mbox{\tiny LS}} = \left( \mX^T\mX \right)^{-1}\mX^T\vy$. \mgc{Should we say something about being unable to get the posterior distribution of $\vbeta$ in closed form?}
+\noindent where $\widehat{\vbeta}_{\mbox{\tiny LS}} = \left( \mX^T\mX \right)^{-1}\mX^T\vy$. \mgc{Should we
+say something about being unable to get the posterior distribution of $\vbeta$ in closed form?} We were unable
+to find an analytically tractable closed form for the posterior distribution of $\vbeta$. However, we were
+able to find closed form expressions for the posterior expectation and posterior expectation of $\vbeta$.
+
+First, we calculate the posterior variance of $\vbeta$. Using the Law of Total Expectation,
+\begin{align*}
+	\Var(\vbeta | \vy) & = \E_g[\Var(\vbeta | \vy)] + \Var_g[\E(\vbeta|\vy, g)]                                                                                                                                                 \\
+	                   & = \E_g\left[\frac{g}{1 + g} \E[\sigma^2|\vy, g] (\mX^\top \mX)^{-1} \Bigm| \vy \right] + \Var_g\left[\frac{g}{1 + g} \vbetahatls \vbetahatls^\top \Bigm| \vy \right]                                   \\
+	                   & = \left( \frac{n}{n - 2} \right) (G_1 - G_2 R^2) (\mX^\top \mX)^{-1} + (G_2 - G_1^2) \vbetahatls \vbetahatls^\top                                                                                      
+\end{align*}
+
+\noindent where $G_1 = \E\left[g/(1+g) \Bigm| \vy \right]$ and $G_2 = \E\left[ \left(g/(1+g) \right)^2 \Bigm| \vy \right]$. We will calculate these expectations below.
+
+\noindent To calculate $G_1$, we evaluate the integral
+\begin{align*}
+	\E\left[\frac{g}{1 + g} \Bigm| \vy \right] & = \int_0^\infty \frac{g}{1 + g} p(g | \vy) dg                                                                      \\
+	                                           & = \frac{(1 - R^2)^{b+1}}{\Beta(p/2 + a + 1, b + 1)} \int_0^\infty g^{b+1} (1 + g)^{-1} [1 + g (1 - R^2)]^{-n/2} dg \\
+	                                           & = \frac{\Beta(p/2 + a + 1, b + 2)}{\Beta(p /2 + a + 1, b + 1)} {}_2 F_1(p/2 + a + 1, 1; n/2 + 1; R^2)              
+\end{align*}
+
+\noindent using \citep{Gradshteyn1988} 3.197 Equation 5,
+
+\[
+	\int_0^\infty x^{\lambda-1} (1+x)^\nu (1 + \alpha x)^{\mu} dx = \Beta(\lambda, -\mu-\nu-\lambda) {}_2 F_1 (\mu, \lambda; -\mu-\nu; 1 - \alpha)
+\]
+
+\noindent when $[|\arg \alpha| < \pi], -\Re(\mu + \mu) > \Re \lambda > 0$ to obtain a closed form for the integral,  and
+using Euler's identity
+\[
+	{}_2 F_1(a, b; c; d) = (1 - d)^{c - a -  b} {}_2 F_1(c - a, c - b; c; d)
+\]
+
+\noindent to simplify the expression further.
+
+Similiarly, we compute $G_2$ by evaluating
+\[
+	\E\left[ \left(\frac{g}{1 + g} \right)^2 \Bigm| \vy \right] = \frac{\Beta(p/2 + a + 1, b + 2)}{\Beta(p /2 + a + 1, b + 1)} (1 - R^2)^{b+2} {}_2 F_1(p/2 + a + 1, 1; n/2 + 1; R^2).
+\]
+
+\noindent Thus we obtain
+\begin{align*}
+	G_1 & = \frac{\Beta(p/2 + a + 1, b + 2)}{\Beta(p /2 + a + 1, b + 1)} (1 - R^2)^{b+1} {}_2 F_1(n/2, b + 1; n/2 + 1; R^2), \text{ and } \\
+	G_2 & = \frac{\Beta(p/2 + a + 1, b + 3)}{\Beta(p /2 + a + 1, b + 1)} (1 - R^2)^{b+1} {}_2 F_1(n/2, b + 3; n/2 + 2; R^2).              
+\end{align*}
 
 The full conditional for $\sigma^2$ obtained by integrating out $\vbeta$ is
 \begin{equation}
@@ -428,49 +464,6 @@ $$
 
 % $C = n/2$
 
-\subsection{Expectations and Variances of Parameters}
-Finally, we calculate the posterior expectation and variance of some parameters from the model.
-
-First, we calculate the posterior variance of $\vbeta$. Using the Law of Total Expectation,
-\begin{align*}
-	\Var(\vbeta | \vy) & = \E_g[\Var(\vbeta | \vy)] + \Var_g[\E(\vbeta|\vy, g)]                                                                                                                                                 \\
-	                   & = \E_g\left[\frac{g}{1 + g} \E[\sigma^2|\vy, g] (\mX^\top \mX)^{-1} \Bigm| \vy \right] + \Var_g\left[\frac{g}{1 + g} \vbetahatls \vbetahatls^\top \Bigm| \vy \right]                                   \\
-	                   & = \left( \frac{n}{n - 2} \right) (G_1 - G_2 R^2) (\mX^\top \mX)^{-1} + (G_2 - G_1^2) \vbetahatls \vbetahatls^\top                                                                                      
-\end{align*}
-
-\noindent where $G_1 = \E\left[g/(1+g) \Bigm| \vy \right]$ and $G_2 = \E\left[ \left(g/(1+g) \right)^2 \Bigm| \vy \right]$. We will calculate these expectations below.
-
-\noindent To calculate $G_1$, we evaluate the integral
-\begin{align*}
-	\E\left[\frac{g}{1 + g} \Bigm| \vy \right] & = \int_0^\infty \frac{g}{1 + g} p(g | \vy) dg                                                                      \\
-	                                           & = \frac{(1 - R^2)^{b+1}}{\Beta(p/2 + a + 1, b + 1)} \int_0^\infty g^{b+1} (1 + g)^{-1} [1 + g (1 - R^2)]^{-n/2} dg \\
-	                                           & = \frac{\Beta(p/2 + a + 1, b + 2)}{\Beta(p /2 + a + 1, b + 1)} {}_2 F_1(p/2 + a + 1, 1; n/2 + 1; R^2)              
-\end{align*}
-
-\noindent using \citep{Gradshteyn1988} 3.197 Equation 5,
-
-\[
-	\int_0^\infty x^{\lambda-1} (1+x)^\nu (1 + \alpha x)^{\mu} dx = \Beta(\lambda, -\mu-\nu-\lambda) {}_2 F_1 (\mu, \lambda; -\mu-\nu; 1 - \alpha)
-\]
-
-\noindent when $[|\arg \alpha| < \pi], -\Re(\mu + \mu) > \Re \lambda > 0$ to obtain a closed form for the integral,  and
-using Euler's identity
-\[
-	{}_2 F_1(a, b; c; d) = (1 - d)^{c - a -  b} {}_2 F_1(c - a, c - b; c; d)
-\]
-
-\noindent to simplify the expression further.
-
-Similiarly, we compute $G_2$ by evaluating
-\[
-	\E\left[ \left(\frac{g}{1 + g} \right)^2 \Bigm| \vy \right] = \frac{\Beta(p/2 + a + 1, b + 2)}{\Beta(p /2 + a + 1, b + 1)} (1 - R^2)^{b+2} {}_2 F_1(p/2 + a + 1, 1; n/2 + 1; R^2).
-\]
-
-\noindent Thus we obtain
-\begin{align*}
-	G_1 & = \frac{\Beta(p/2 + a + 1, b + 2)}{\Beta(p /2 + a + 1, b + 1)} (1 - R^2)^{b+1} {}_2 F_1(n/2, b + 1; n/2 + 1; R^2), \text{ and } \\
-	G_2 & = \frac{\Beta(p/2 + a + 1, b + 3)}{\Beta(p /2 + a + 1, b + 1)} (1 - R^2)^{b+1} {}_2 F_1(n/2, b + 3; n/2 + 2; R^2).              
-\end{align*}
 
 Finally, we calculate the posterior expectation of the precision, $\E(\sigma^{-2}|\vy)$
 
@@ -566,7 +559,7 @@ numerically using Laplace's approximation. This process is repeated until conver
 
 Let $\nu - 1 = b - \frac{p}{2}$, 
 $\beta = \frac{1}{2} (1 + \tau_g)^{-1} (\tau_{\sigma^2} n R^2 + p)$, 
-$\mu - 1 = (a + b + 2)$ and $\gamma = 1$. 
+$\mu - 1 = (a + b + 2)$ and $\gamma = 1$. \mgc{What is the context for this?}
 
 \begin{algorithm}
 	\caption{Fit VB approximation of linear model}
@@ -591,24 +584,24 @@ obtained from Algorithm \ref{alg:algorithm_one} by utlising the following identi
 First, we note that when assuming that $\vy^\top \vy / n = 1$,
 \[\vy^\top \mX (\mX^\top \mX)^{-1} \mX^\top \vy =\|\vy\|^2 R^2 = n R^2.\]
 
-Second, observe that when $\vmu = (1 + \tau_g)^{-1} \vbetahatls$ and $\mSigma = \tau_{\sigma^2}^{-1} (1 + \tau_g)^{-1} (\mX^\top \mX)^{-1}$,
+\noindent Second, observe that when $\vmu = (1 + \tau_g)^{-1} \vbetahatls$ and $\mSigma = \tau_{\sigma^2}^{-1} (1 + \tau_g)^{-1} (\mX^\top \mX)^{-1}$,
 \begin{align*}
 	\vmu^\top \mX^\top \mX \vmu & = (1 + \tau_g)^{-2} \vbetahatls^\top \mX^\top \mX \vbetahatls                                                        \\
 	                            & = (1 + \tau_g)^{-2} n R^2.                                                                                           
 \end{align*}
 
-Third, utilising the above two identities, $s$ can be simplified to
+\noindent Third, utilising the above two identities, $s$ can be simplified to
 \begin{align*}
 	s & = \frac{1}{2} [\|\vy\|^2 - 2 \vmu^\top \mX^\top \vy + (1 + \tau_g) \vmu^\top \mX^\top \mX \vmu (1 + \tau_g) +  \tr (\mX^\top \mX \mSigma)]                 \\
 	  & = \frac{1}{2} \{ n[1 - (1 + \tau_g)^{-1} R^2] + p \tau_{\sigma^2}^{-1} \}.                                                                                 
 \end{align*}
 
-Fourth, recalling that $\tau_{\sigma^2} = \E_q [\sigma^{-2}] = r/s = (n+p)/(n[1 - (1 + \tau_g)^{-1} R^2] + p \tau_{\sigma^2}^{-1})$, we can solve for $\tau_{\sigma^2}$ in terms of $\tau_g$ to obtain
+\noindent Fourth, recalling that $\tau_{\sigma^2} = \E_q [\sigma^{-2}] = r/s = (n+p)/(n[1 - (1 + \tau_g)^{-1} R^2] + p \tau_{\sigma^2}^{-1})$, we can solve for $\tau_{\sigma^2}$ in terms of $\tau_g$ to obtain
 \[
 	\tau_{\sigma^2} = [1 + (1 + \tau_g)^{-1}]^{-1}.
 \]
 
-Hence
+\noindent Hence
 \begin{align*}
 	s & = \frac{r}{\tau_{\sigma^2}} = \frac{1}{2} (n + p) [1 - (1 + \tau_g)^{-1} R^2], \text{ and }                \\
 	c & = \frac{\tau_{\sigma^2}}{2}[\vmu^\top \mX^\top \mX \vmu + \tr (\mX^\top \mX \mSigma)]                      \\
