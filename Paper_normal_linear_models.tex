@@ -10,7 +10,7 @@
 % \setlength\parindent{0pt}
 % \setlength{\bibsep}{0pt plus 0.3ex}
 
-% \usepackage[authoryear]{natbib}
+\usepackage[authoryear]{natbib}
 \usepackage{graphicx}
 \usepackage{algorithm,algorithmic}
 \usepackage{cancel}
@@ -25,7 +25,7 @@
 
 \newtheorem{theorem}{Theorem}[section]
 
-\title{Chapter 3 Variational Bayes for Linear Model Selection using Mixtures of g-priors}
+\title{Variational Bayes for Linear Model Selection using Mixtures of g-priors}
 \author{Mark Greenaway, John T. Ormerod}
 
 \input{include.tex}
@@ -73,36 +73,36 @@ Model selection attempts to balance goodness of fit against model complexity, ne
 underfitting. Many approaches to model selection have been investigated, with various model selection criteria
 proposed to attempt to balance model likelihood against model complexity. One approach to model selection is
 to select between entire models, using a model selection criterion. These criterion may have a fixed penalty
-for model complexity, such as Akaike's Information Criterion \cite{Akaike1974}, the Risk Inflation Criterion
-\cite{Foster1994}, the Schwarz criterion or Bayesian Information Criterion \cite{Schwarz1978}, the Deviance
-Information Criterion \cite{Spiegelhalter2016} or the Principle of Minimum Description Length
-\cite{Hansen2001}. Alternatively, the penalty may be adaptive/data--dependent as in \cite{George2000}. An
+for model complexity, such as Akaike's Information Criterion \citep{Akaike1974}, the Risk Inflation Criterion
+\citep{Foster1994}, the Schwarz criterion or Bayesian Information Criterion \citep{Schwarz1978}, the Deviance
+Information Criterion \citep{Spiegelhalter2016} or the Principle of Minimum Description Length
+\citep{Hansen2001}. Alternatively, the penalty may be adaptive/data--dependent as in \citep{George2000}. An
 alternative to model selection criterion is to select models based on their posterior probability, such as by
-selecting the median probability model as in \cite{Barbieri2004}. In a Bayesian context is to use Bayes
+selecting the median probability model as in \citep{Barbieri2004}. In a Bayesian context is to use Bayes
 factors to compare the posterior likelihoods of the candidate models to see which is most probable given the
-observed data. This can be done, for example, by using Bayes Factors as in \cite{Kass1993}. Rather than
+observed data. This can be done, for example, by using Bayes Factors as in \citep{Kass1993}. Rather than
 selecting one candidate model, several models can be combined together using Bayesian model  averaging, as in
-\cite{Hoeting1999}, \cite{Raftery1997}, \cite{Fernandez2001} or \cite{Papaspiliopoulos2016}. Or model
-selection can be made implicit in the model fitting process itself, as in ridge regression \cite{Casella1980},
-of which the well-known lasso is a special case \cite{Tibshirani1996}. As \cite{Breiman1996} and
-\cite{Efron2013} showed, while  the standard formulation of a linear model is unbiased, the goodness of fit of
+\citep{Hoeting1999}, \citep{Raftery1997}, \citep{Fernandez2001} or \citep{Papaspiliopoulos2016}. Or model
+selection can be made implicit in the model fitting process itself, as in ridge regression \citep{Casella1980},
+of which the well-known lasso is a special case \citep{Tibshirani1996}. As \citep{Breiman1996} and
+\citep{Efron2013} showed, while  the standard formulation of a linear model is unbiased, the goodness of fit of
 these models is numerically  unstable. Breiman showed that by introducing a penalty on the size of the
 regression co- efficients such as  in ridge regression, this numerical instability can be avoided. This
 reduces the variances of the co-efficient estimates, at the expense of introducing some bias --- the bias--
 variance trade--off.
 
 Another approach to model selection is to focus on selecting individual covariates, rather than entire
-models. This approach can either be Fully Bayesian or Empirically Bayesian as in \cite{Cui2008}. Variable
+models. This approach can either be Fully Bayesian or Empirically Bayesian as in \citep{Cui2008}. Variable
 selection approaches involve a stochastic search over the variables in the model space. This search can be
-driven by posterior probabilities, as in \cite{Casella2006}, or by Gibbs sampling approaches such as in
-\cite{George1993}. These two approaches of model selection and variable selection can be combined, as in
-\cite{Geweke1996}.
+driven by posterior probabilities, as in \citep{Casella2006}, or by Gibbs sampling approaches such as in
+\citep{George1993}. These two approaches of model selection and variable selection can be combined, as in
+\citep{Geweke1996}.
 
 
-\cite{Zellner1980} suggested a particular form of conjugate Normal-Gamma family where the Bayes factors have a
+\citep{Zellner1980} suggested a particular form of conjugate Normal-Gamma family where the Bayes factors have a
 relatively simple form, incorporating a parameter $g$ to control mixing between the model fit from the data
 and a prior specification of model fit. This immediately raises the question of how $g$ should be chosen, and
-whether it should be fixed or have a prior specification. \cite{Liang2008} showed that fixed choices of $g$
+whether it should be fixed or have a prior specification. \citep{Liang2008} showed that fixed choices of $g$
 lead to paradoxes such as Bartlett's Paradox and the Information Paradox, and so a prior specification should
 be preferred. There are many ways of choosing a prior on $g$. Using a mixture of $g$-priors has the advantage
 of adapting the degree of shrinkage to the prior model dependent on the data.
@@ -114,7 +114,7 @@ of adapting the degree of shrinkage to the prior model dependent on the data.
 A challenge to applying this method of model selection is that exact model fitting may be computationally
 infeasible for models involving even moderate numbers of observations and covariates, and popular alternatives
 for fitting Bayesian models such as Monte Carlo Markov Chains (henceforth referred to as MCMC) are still
-extremely computationally intensive. Variational Bayes (see \cite{Ormerod2010}) is a computationally
+extremely computationally intensive. Variational Bayes (see \citep{Ormerod2010}) is a computationally
 efficient, deterministic method of fitting Bayesian models to data. Variational Bayes approximates the true
 posterior $p(\vy, \vtheta)$ by minimising the KL divergence between the posterior and the  approximating
 distribution $q(\vtheta)$.
@@ -127,7 +127,7 @@ in closed form in these situations.
 
 
 % Structured Variational Bayes for model selection, Wand and Ormerod Variational Bayes for Elaborate 
-% Distributions (\cite{Wand2011})
+% Distributions (\citep{Wand2011})
 
 
 % Application
@@ -136,7 +136,7 @@ in closed form in these situations.
 
 % Our main contribution
 In this paper, we develop Variational Bayes approximations to model selection of linear models using Zellner's
-g prior as in \cite{Liang2008}. We show that in this situation, our variational approximation is almost exact
+g prior as in \citep{Liang2008}. We show that in this situation, our variational approximation is almost exact
 -- that is, the variational approximation of the Bayesian linear model gives almost perfect estimates.
 
 % By searching of the model space as one covariate changes between each sub-model and  using rank-1 updates on
@@ -151,8 +151,8 @@ in Section \ref{sec:conclusion}, we provide a Conclusion and Discussion.
 
 Consider a normal linear model on $\vy$ with conjugate normal prior on $\vbeta$ with mean centred at $\vzero$,
 and covariance $g \sigma^2 (\mX^\top \mX)^{-1}$ where the prior on $g$ is Zellner's g-prior on the covariance
-matrices (Zellner 1986), as this yields a tractable posterior for $\vbeta$ as shown by \cite{Liang2008}. We
-choose $a$  and $b$ to be $-3/4$ and $(n - p)/2 - a - 2$ respectively, following \cite{Maruyama2011}.
+matrices (Zellner 1986), as this yields a tractable posterior for $\vbeta$ as shown by \citep{Liang2008}. We
+choose $a$  and $b$ to be $-3/4$ and $(n - p)/2 - a - 2$ respectively, following \citep{Maruyama2011}.
 
 \section{Methodology}
 \label{sec:methodology}
@@ -172,27 +172,23 @@ approximating probability distribution.
 
 Zellner constructed a family of priors for a Gaussian regression model using a particular form of conjugate
 Normal-Gamma model, where the prior covariance matrix of $\vbeta$ is taken to be a multiple of the Fisher
-information  matrix by the parameter $g$ \cite{Goel1986}. This places the most prior mass for $\vbeta$ on the
+information  matrix by the parameter $g$ \citep{Goel1986}. This places the most prior mass for $\vbeta$ on the
 section of the parameter space where the data is least informative.
 
-We consider a linear model with a g-prior, as in \cite{Liang2008}. Consider the linear model
-
+We consider a linear model with a g-prior, as in \citep{Liang2008}. Consider the linear model
 \begin{align*}
 	\vy | \vbeta, \sigma^2 \sim \N_n(\mX \vbeta, \sigma^2 \mI) 
 \end{align*}
 
-with priors
-
+\noindent with priors
 \begin{align*}
 	\vbeta | \sigma^2, g & \sim \N_p(\vzero, g \sigma^2 (\mX^T \mX)^{-1}),                     \\
 	p(\sigma^2)          & = (\sigma^2)^{-1} \I(\sigma^2 > 0), \text{ and }                    \\
 	p(g)                 & = \frac{g^b (1 + g)^{-(a + b + 2)}}{\Beta(a + 1, b + 1)} \I(g > 0). 
 \end{align*}
 
-
-% \mgc{expand on this? See STAT260 combined lecture notes, page 55}
-
 This leads to the posterior distribution
+
 \[
 	\vbeta | \vy \sim \N\left(\frac{g}{1+g} \vbetahatls, g \sigma^2 (\mX^\top \mX)^{-1} \right).
 \]
@@ -208,7 +204,6 @@ $\vy^\top\vone = 0$ and that $\|\vy\|^2 = n$.
 
 We first present the following results which will aid us in deriving the expressions required for fully Bayesian
 inference over the parameters in the model.
-
 \begin{equation}\label{res:01}
 	\int \exp\left\{ -\tfrac{1}{2}\vx^T\mA\vx + \vb^T\vx \right\} d \vx = |2\pi\mSigma|^{1/2} \exp\left\{ \tfrac{1}{2}\vmu^T\mSigma^{-1}\vmu \right\}
 \end{equation}
@@ -220,12 +215,12 @@ If $\vone^T\vy=0$ the $R$-squared statistic can be expressed
 \end{equation}
 where $R^2$ is the usual $R$-squared statistic associated with least squares regression.
 
-Equation 3.194 (iii) of \cite{Gradshteyn1988} is
+Equation 3.194 (iii) of \citep{Gradshteyn1988} is
 \begin{equation}\label{res:03}
 	\int_0^\infty \frac{ x^{\mu - 1} }{(1 + \beta x)^\nu} dx = \beta^{-\mu} \mbox{Beta}(\mu,\nu - \mu) \quad \quad \mbox{(assuming $\mu,\nu>0$ and $\nu>\mu$).}
 \end{equation}
 
-Equation 3.385 of \cite{Gradshteyn1988} is
+Equation 3.385 of \citep{Gradshteyn1988} is
 \begin{equation} \label{res:04}
 	\int_{0}^1 x^{\nu - 1} (1 - x)^{\lambda - 1}(1 - \beta x)^{\varrho} e^{-\mu x} dx = \mbox{Beta}(\nu,\lambda) \Phi_1(\nu,\varrho,\lambda+\nu,-\mu,\beta)
 \end{equation}
@@ -316,19 +311,17 @@ $$
 \subsection{Posterior distributions of the parameters}
 We are now in a position to derive the expressions for the posterior distributions of each of the parameters.
 Using Equation \ref{res:03} and Equation \ref{res:04} we have
-
 \begin{equation}\label{res:06}
 	p(g|\vy) = \frac{(1 -  R^2)^{b+1} g^{b} \left[  1 + g(1 -  R^2) \right]^{-n/2}}{\mbox{Beta}(p/2 + a + 1,b+1)}.
 \end{equation}
 
 \noindent Using the change of variables $h=g/(1+g)$ we have
-
 \begin{equation}
 	p(h|\vy) = \frac{(1 -  R^2)^{b+1}}{\mbox{Beta}(p/2 + a + 1,b+1)} h^{b}(1 - h)^{2-b+n/2}  (1  - h R^2)^{-n/2}.
 \end{equation}
  
 
-The full conditional for $\vbeta$ is given by
+\noindent The full conditional for $\vbeta$ is given by
 \begin{equation}
 	\begin{array}{rl}
 		\vbeta|\vy,\sigma^2,g \sim \N\left[                  
@@ -346,7 +339,7 @@ The full conditional for $\sigma^2$ obtained by integrating out $\vbeta$ is
 	\tfrac{g}{1+g} R^2\right) \right].
 \end{equation}
 
-The density for $p(\sigma^2|\vy)$ is obtained by evaluating the integral
+\noindent The density for $p(\sigma^2|\vy)$ is obtained by evaluating the integral
 $$
 \begin{array}{rl}
 	\ds p(\sigma^2|\vy) 
@@ -385,14 +378,14 @@ $1 - h = \frac{1}{(1 + g)}$,
 and
 $\frac{dh}{dg} = \frac{1}{1+g} - \frac{g}{(1 +g)^2} = \frac{1}{(1+g)^2} = (1 - h)^2$.
 
-\noindent Utilising Equation 3.383(i) of \cite{Gradshteyn1988},
+\noindent Utilising Equation 3.383(i) of \citep{Gradshteyn1988},
 $$
 \int_{0}^u x^{\nu - 1} (u - x)^{\mu - 1}  e^{\beta x} dx = \mbox{Beta}(\nu,\mu) {}_1 F_1(\nu;\mu+\nu;\beta u)
 $$
 
 \noindent provided $\mbox{Re}(\mu)>0$, $\mbox{Re}(\nu)>0$, with
 $u = 1$, $\nu = b + 1 = \frac{n-p}{2} - a - 1 >0$, $\mu = a + p/2 + 1 >0$, and 
-$\beta = \frac{nR^2}{2\sigma^2}$, so $\nu + \mu = \frac{n}{2}$, we have
+$\beta = nR^2/(2\sigma^2)$. Hence $\nu + \mu = n/2$, and we have
 $$
 \begin{array}{rl}
 	\ds p(\sigma^2|\vy) 
@@ -417,7 +410,7 @@ $$
 \end{array}
 $$
 
-\noindent Calculating the integral using the result from \cite{Gradshteyn1988} above we have
+\noindent Calculating the integral using the result from \citep{Gradshteyn1988} above we have
 $$
 \int_0^\infty \tau^{n/2 - 1}\exp\left\{ -  \tfrac{n}{2} \tau \right\}{}_1 F_1\left(
 b + 1; \frac{n}{2}; \frac{nR^2}{2} \tau \right) d \tau = 
@@ -445,37 +438,35 @@ First, we calculate the posterior variance of $\vbeta$. Using the Law of Total E
 	                   & = \left( \frac{n}{n - 2} \right) (G_1 - G_2 R^2) (\mX^\top \mX)^{-1} + (G_2 - G_1^2) \vbetahatls \vbetahatls^\top                                                                                      
 \end{align*}
 
-where $G_1 = \E\left[\frac{g}{1 + g} \Bigm| \vy \right]$ and $G_2 = \E\left[ \left(\frac{g}{1 + g} \right)^2 \Bigm| \vy \right]$. We will calculate these expectations below.
+\noindent where $G_1 = \E\left[g/(1+g) \Bigm| \vy \right]$ and $G_2 = \E\left[ \left(g/(1+g) \right)^2 \Bigm| \vy \right]$. We will calculate these expectations below.
 
-To calculate $G_1$, we evaluate the integral
-
+\noindent To calculate $G_1$, we evaluate the integral
 \begin{align*}
 	\E\left[\frac{g}{1 + g} \Bigm| \vy \right] & = \int_0^\infty \frac{g}{1 + g} p(g | \vy) dg                                                                      \\
 	                                           & = \frac{(1 - R^2)^{b+1}}{\Beta(p/2 + a + 1, b + 1)} \int_0^\infty g^{b+1} (1 + g)^{-1} [1 + g (1 - R^2)]^{-n/2} dg \\
 	                                           & = \frac{\Beta(p/2 + a + 1, b + 2)}{\Beta(p /2 + a + 1, b + 1)} {}_2 F_1(p/2 + a + 1, 1; n/2 + 1; R^2)              
 \end{align*}
 
-using \cite{Gradshteyn1988} 3.197 Equation 5,
+\noindent using \citep{Gradshteyn1988} 3.197 Equation 5,
 
 \[
 	\int_0^\infty x^{\lambda-1} (1+x)^\nu (1 + \alpha x)^{\mu} dx = \Beta(\lambda, -\mu-\nu-\lambda) {}_2 F_1 (\mu, \lambda; -\mu-\nu; 1 - \alpha)
 \]
 
-when $[|\arg \alpha| < \pi], -\Re(\mu + \mu) > \Re \lambda > 0$ to obtain a closed form for the integral,  and
+\noindent when $[|\arg \alpha| < \pi], -\Re(\mu + \mu) > \Re \lambda > 0$ to obtain a closed form for the integral,  and
 using Euler's identity
 \[
 	{}_2 F_1(a, b; c; d) = (1 - d)^{c - a -  b} {}_2 F_1(c - a, c - b; c; d)
 \]
 
-to simplify the expression further.
+\noindent to simplify the expression further.
 
 Similiarly, we compute $G_2$ by evaluating
-
 \[
 	\E\left[ \left(\frac{g}{1 + g} \right)^2 \Bigm| \vy \right] = \frac{\Beta(p/2 + a + 1, b + 2)}{\Beta(p /2 + a + 1, b + 1)} (1 - R^2)^{b+2} {}_2 F_1(p/2 + a + 1, 1; n/2 + 1; R^2).
 \]
 
-Thus we obtain
+\noindent Thus we obtain
 \begin{align*}
 	G_1 & = \frac{\Beta(p/2 + a + 1, b + 2)}{\Beta(p /2 + a + 1, b + 1)} (1 - R^2)^{b+1} {}_2 F_1(n/2, b + 1; n/2 + 1; R^2), \text{ and } \\
 	G_2 & = \frac{\Beta(p/2 + a + 1, b + 3)}{\Beta(p /2 + a + 1, b + 1)} (1 - R^2)^{b+1} {}_2 F_1(n/2, b + 3; n/2 + 2; R^2).              
@@ -500,7 +491,7 @@ $$
 \section{Variational Bayes}
 \label{sec:vb}
 
-Let $\KL(q||p) = \int q(\vtheta) \log{\left( \frac{q(\vtheta)}{p(\vtheta|\vy)} \right)} d \vtheta$ be the
+Let $\KL(q||p) = \int q(\vtheta) \log{\left( q(\vtheta)/p(\vtheta|\vy) \right)} d \vtheta$ be the
 Kuhlback-Leibner divergence between $q$ and $p$, a measure of the distance between the probability
 distributions $p$ and $q$.
 
@@ -508,7 +499,6 @@ The desired posterior distribution $p(\vtheta | \vy)$ typically requires the cal
 intractable integral for all but the simplest models with conjugate priors. Variational Bayes approximates the
 full posterior with a simplified approximating distribution $q(\vtheta)$. We relate the true and
 approximating distributions as follows:
-
 \begin{align*}
 	\log p(\vy) & = \log p(\vy) \int q(\vtheta) d \vtheta = \int q(\vtheta) \log p(\vy) d \vtheta                                    \\
 	            & = \int q(\vtheta) \log \left\{ \frac{p(\vy, \vtheta) / q(\vtheta)}{p(\vy|\vtheta) / q(\vtheta)} \right\} d \vtheta \\
@@ -519,9 +509,10 @@ approximating distributions as follows:
 	            & \geq \int q(\vtheta) \log\left\{ \frac{p(\vy, \vtheta)}{q(\vtheta)} \right\} d \vtheta.                            
 \end{align*}
 
-as $\KL(q||p) \geq 0$ for all probability densities $p$ and $q$. The last quantity is the variational lower
-bound $\underline{p}(\vtheta) \equiv \int q(\vtheta) \log\left\{ \frac{p(\vy, \vtheta)}{q(\vtheta)} \right\}
-d\vtheta$. By the inequality above, this is guaranteed to bound the true probability distribution from below.
+\noindent as $\KL(q||p) \geq 0$ for all probability densities $p$ and $q$. The last quantity is the
+variational lower bound $\underline{p}(\vtheta) \equiv \int q(\vtheta) \log\left\{ \frac{p(\vy,
+\vtheta)}{q(\vtheta)} \right\} d\vtheta$. By the inequality above, this is guaranteed to bound the true
+probability distribution from below.
 
 The approximation is fit by iteratively maximising the variational lower bound using a sequence of mean field
 updates, with each update guaranteed to increase the variational lower bound relative to the previous
@@ -532,13 +523,11 @@ increases. By the above derivation, this can be seen to be equivalent to the KL 
 A popular form of approximation is to restrict $q(\vtheta)$ to a subclass of product densities by partitioning
 $\vtheta = (\vtheta_1, \vtheta_2, \ldots, \vtheta_{M-1}, \vtheta_M)$ and assuming independence between the
 partitioned parameters:
-
 \begin{equation*}
 	q(\vtheta) \equiv q(\vtheta_1) q(\vtheta_2) \ldots q(\vtheta_{n-1}) q(\vtheta_n).
 \end{equation*}
 
-This allows the calculation of the optimal approximating densities $q_i^*(\vtheta_i)$ as
-
+\noindent This allows the calculation of the optimal approximating densities $q_i^*(\vtheta_i)$ as
 \begin{equation*}
 	q_i^*(\vtheta_i) \propto \exp \left \{ \E_{-\vtheta_i} \log p(\vy, \vtheta) \right \}, 1 \leq i \leq M,
 \end{equation*}
@@ -548,7 +537,7 @@ We choose a factored Variational Bayes approximation of the form
 	q(\vtheta) = q(\vbeta) q(\sigma^2) q(g). 
 \end{align*}
 
-Then $q(\vbeta) = \N(\vmu_{q(\vbeta)}, \mSigma_{q(\vbeta)})$, $q(\sigma^2) = \IG(\alpha_{q(\vbeta)}, \beta_{q(\vbeta)})$ and $q(g) = \text{Beta Prime}(\alpha_{q(g)}, \beta_{q(g)})$.
+\noindent Then $q(\vbeta) = \N(\vmu_{q(\vbeta)}, \mSigma_{q(\vbeta)})$, $q(\sigma^2) = \IG(\alpha_{q(\vbeta)}, \beta_{q(\vbeta)})$ and $q(g) = \text{Beta Prime}(\alpha_{q(g)}, \beta_{q(g)})$.
 
 \subsection{Naive mean field update}
 \label{sec:naive_mean_field_updates}
@@ -565,7 +554,6 @@ Define $\tau_{\sigma^2} \equiv \E_q \left[ \sigma^{-2} \right]$ and $\tau_g \equ
 
 First, we choose an initial guess $\tau_g^{(1)} = \E_q [g^{-1}] = (1 - R^2) [1 + (p / 2 + a + 1)/b]$. Then
 define
-
 \begin{align*}
 	\tau_g^{(i+1)} \leftarrow \int_0^\infty g^{\left(b - \frac{p}{2} - 1\right)}                                   
 	(1 + g)^{- (a + b + 2)}                                                                                        
@@ -615,13 +603,12 @@ Third, utilising the above two identities, $s$ can be simplified to
 	  & = \frac{1}{2} \{ n[1 - (1 + \tau_g)^{-1} R^2] + p \tau_{\sigma^2}^{-1} \}.                                                                                 
 \end{align*}
 
-Fourth, recalling that $\tau_{\sigma^2} = \E_q [\sigma^{-2}] = r/s = \frac{n+p}{n[1 - (1 + \tau_g)^{-1} R^2] + p \tau_{\sigma^2}^{-1}}$, we can solve for $\tau_{\sigma^2}$ in terms of $\tau_g$ to obtain
+Fourth, recalling that $\tau_{\sigma^2} = \E_q [\sigma^{-2}] = r/s = (n+p)/(n[1 - (1 + \tau_g)^{-1} R^2] + p \tau_{\sigma^2}^{-1})$, we can solve for $\tau_{\sigma^2}$ in terms of $\tau_g$ to obtain
 \[
 	\tau_{\sigma^2} = [1 + (1 + \tau_g)^{-1}]^{-1}.
 \]
 
 Hence
-
 \begin{align*}
 	s & = \frac{r}{\tau_{\sigma^2}} = \frac{1}{2} (n + p) [1 - (1 + \tau_g)^{-1} R^2], \text{ and }                \\
 	c & = \frac{\tau_{\sigma^2}}{2}[\vmu^\top \mX^\top \mX \vmu + \tr (\mX^\top \mX \mSigma)]                      \\
@@ -667,13 +654,11 @@ All models in the space are considered equally likely, so we place a uniform pri
 1/n$. We approximate the marginal likelihood by using the variational lower bound conditioned on $\vgamma$,
 which is taken to be the variational lower bound calculated for the variational approximation to the model
 $\vgamma$. This is denoted $\underline{p}(\vy)$. 
-
 $$\underline{p}(\vy) = \sum_\vgamma \underline{p}(\vy|\vgamma) p(\vgamma)$$
 
 \noindent There are $2^p$ candidate models, so computing this summation is a substantial computational task. The
 variational lower bound takes the place of $p(\vy|\vgamma)$, and can then be used to approximate
 $p(\vgamma|\vy)$ using Bayes Rule.
-
 $$p(\vgamma|\vy)     \approx \frac{\underline{p}(\vy|\vgamma) p(\vgamma)}{\underline{p}(\vy)}$$
 
 \noindent These posterior probabilities then allow the models to be ranked.
@@ -729,9 +714,9 @@ same over most of the range of these values, with deviation only noticeable in t
 \begin{figure}[p]
 	\includegraphics[width=8.5cm, height=8.5cm]{code/taug/Shrinkage.pdf}
 	\caption{The ratio $\frac{g}{1 + g} | \vy$ controls the degree to which the model fit tends back towards
-		the prior mean. This ratio is approximated in the variational approximation by $(1 + \tau_g^{-1})^{-1}$. We
-		compare these two quantities in the figure above for a range of numbers of covariates, sample sizes and $R^2$
-		values. Here $n = \kappa p$.}
+		the prior mean. This ratio is approximated in the variational approximation by $(1 + \tau_g^{-1})^{-1}$. 
+		The ratios were plotted for $p =10, 20, 50, 100, 500, 1000$ and $\kappa = 1.1, 1.25, 1.5, 2, 5, 10$, where
+		$n = \kappa p$.}
 	\label{fig:shrinkage}
 \end{figure}
 
@@ -744,8 +729,7 @@ $\kappa$ increase, the approximation to the posterior variance of \ldots becomes
 \begin{figure}[p]
 	\includegraphics[width=8.5cm, height=8.5cm]{code/taug/Variance.pdf}
 	\caption{The posterior variance of the example model $p(\sigma^2 | \vy)$ is compared against the approximation
-		to the posterior variance $q(\sigma^2)$ across a range of numbers of covariates, sample sizes and $R^2$
-		values. Here $n = \kappa p$.}
+		to the posterior variance $q(\sigma^2)$. These were plotted for $p =10, 20, 50, 100, 500, 1000$, $\kappa = 1.1, 1.25, 1.5, 2, 5, 10$ and $0 \leq R^2 \leq 1$, where $n = \kappa p$.}
 	\label{fig:variance}
 \end{figure}
 
@@ -761,8 +745,9 @@ for a range of values of $p$, $\kappa$ and $R^2$. The results are presented in F
 \begin{figure}[p]
 	\includegraphics[width=8.5cm, height=8.5cm]{code/taug/Accuracy_sigma2.pdf}
 	\caption{The accuracy of the approximation $q(\sigma^2)$ is assessed by computing the integral   $1 -
-		\frac{1}{2} \int_0^\infty |p(\sigma^2 | \vy) - q(\sigma^2)| d \sigma^2$ and graphing the result over a range
-		of numbers of covariates, sample sizes and $R^2$  values. Here $n = \kappa p$.}
+		\frac{1}{2} \int_0^\infty |p(\sigma^2 | \vy) - q(\sigma^2)| d \sigma^2$ and graphing the result for
+		$p =10, 20, 50, 100, 500, 1000$, $\kappa = 1.1, 1.25, 1.5, 2, 5, 10$ and $0 \leq R^2 \leq 1$, where
+		$n = \kappa p$.}
 	\label{fig:accuracy_sigma2}
 \end{figure}
 
@@ -771,8 +756,9 @@ for a range of values of $p$, $\kappa$ and $R^2$. The results are presented in F
 \begin{figure}[p]
 	\includegraphics[width=8.5cm, height=8.5cm]{code/taug/Accuracy_g.pdf}
 	\caption{The accuracy of the approximation $q(g)$ is assessed by computing the integral   $1 -
-		\frac{1}{2} \int_0^\infty |p(g | \vy) - q(g)| d g$ and graphing the result over a range
-		of numbers of covariates, sample sizes and $R^2$  values. Here $n = \kappa p$.}
+		\frac{1}{2} \int_0^\infty |p(g | \vy) - q(g)| d g$ and graphing the result The accuracies were plotted for
+		$p =10, 20, 50, 100, 500, 1000$, $\kappa = 1.1, 1.25, 1.5, 2, 5, 10$ and $0 \leq R^2 \leq 1$, where
+		$n = \kappa p$.}
 	\label{fig:accuracy_g}
 \end{figure}
 
@@ -792,8 +778,9 @@ $\log{\underline{p}(\vy)}$ versus $\log{p(\vy)}$. The results are presented in F
 \begin{figure}[p]
 	\includegraphics[width=8.5cm, height=8.5cm]{code/taug/Relative_error_log_p.pdf}
 	\caption{The accuracy of the variational lower bound was assessed by computing the relative error
-		$\frac{\log p(\vy) - \log \underline{p}(\vy)}{p(\sigma^2 | \vy)}$ over a range
-		of numbers of covariates, sample sizes and $R^2$  values. Here $n = \kappa p$.}
+		$\frac{\log p(\vy) - \log \underline{p}(\vy)}{p(\sigma^2 | \vy)}$. The relative errors were plotted for
+		$p =10, 20, 50, 100, 500, 1000$, $\kappa = 1.1, 1.25, 1.5, 2, 5, 10$ and $0 \leq R^2 \leq 1$, where
+		$n = \kappa p$.}
 	\label{fig:relative_error}
 \end{figure}
 
@@ -847,7 +834,7 @@ probabilities produced by the variational approximation and exact posterior like
 \subsubsection{Hitters}
 
 The Hitters data set was taken from the StatLib library maintained by Carnegie Mellon University, and used in
-\cite{James:2014:ISL:2517747}. The data was gathered from the the performance of players in baseball games
+\citep{James:2014:ISL:2517747}. The data was gathered from the the performance of players in baseball games
 during the Major League Baseball seasons for 1986 and 1987, and includes 20 covariates on their performance
 ($p=20$).
 
@@ -873,7 +860,7 @@ The model ranking scatterplots are presented in Figure \ref{fig:Hitters_model_ra
 
 \subsubsection{Body Fat}
 
-The Body Fat data set was taken from \cite{Tarr2015}, and is on the relationship between percentage of body
+The Body Fat data set was taken from \citep{Tarr2015}, and is on the relationship between percentage of body
 fat and simple body measurements. The data set consists of 128 observations, and the covariates in the data
 set are taken from 15 $(p=15)$ measurements, including age, weight, height, body fat percentage and
 circumference of various body parts such as neck, hip and chest. The marginal covariate inclusion
@@ -906,7 +893,7 @@ The model ranking scatterplots are presented in Figure \ref{fig:bodyfat_model_ra
 
 \subsubsection{Wage}
 
-The Wage gap data set was taken from \cite{James:2014:ISL:2517747}, on 3000 workers in the Mid-Atlantic
+The Wage gap data set was taken from \citep{James:2014:ISL:2517747}, on 3000 workers in the Mid-Atlantic
 region. The data set includes 12 covariates including the year the wage information was recorded,
 sociodemographic factors and the worker's wage. The marginal covariate inclusion probabilities are presented
 in Figure \ref{fig:Wage_inclusion}.
@@ -938,7 +925,7 @@ The model ranking scatterplots are presented in Figure \ref{fig:Wage_model_ranki
 
 \subsubsection{Graduation Rate}
 
-The Graduation Rate data set was taken from \cite{James:2014:ISL:2517747}. The data is drawn from the 1995
+The Graduation Rate data set was taken from \citep{James:2014:ISL:2517747}. The data is drawn from the 1995
 issue of US News and World Report, and is on a large number of US Colleges. The data set consists of 777
 observations, and includes 18 $(p=18)$ covariates. The marginal covariate inclusion probabilities are
 presented in Figure \ref{fig:GradRate_inclusion}.
@@ -970,7 +957,7 @@ The model ranking scatterplots are presented in Figure \ref{fig:GradRate_model_r
 
 \subsubsection{US Crime}
 
-The US Crime data set was taken from the \texttt{MASS} package \cite{Venables2002}, and is on the effect of
+The US Crime data set was taken from the \texttt{MASS} package \citep{Venables2002}, and is on the effect of
 punishment regimes on crime rates. The data set includes 47 states of the United States of America. The
 variables have been re-scaled for convenience, and includes 16 ($p=16$) covariates. The marginal covariate
 inclusion probabilities are presented in Figure \ref{fig:USCrime_inclusion}.
@@ -1008,12 +995,12 @@ The VB metholodology extends naturally to new situations, such as robust model f
 data, measurement error and splines. We are able to retain high accuracy with less computational overhead than
 exact or MCMC.
 
-All of the variational parameters in Algorithm \ref{alg:algorithm_two} except $\tau_g$ depend only on
-$\tau_g$ and the fixed quantities $n$, $p$, $R^2$, $\mX$ and $\vy$. This allows us to optimise $\tau_g$
-only, and then set the rest of the variational parameters at the end of the algorithm. The fact that only
-univariate optimisation is required reduces the computation required to fit our approximation considerably,
-which makes this algorithm applicable when speed and/or the ability to parallelise the algorithm are
-paramount, such as model selection via structured Variational Bayes.
+All of the variational parameters in Algorithm \ref{alg:algorithm_two} except $\tau_g$ depend only on $\tau_g$
+and the fixed quantities $n$, $p$, $R^2$, $\mX$ and $\vy$. This allows us to optimise $\tau_g$ only, and then
+set the rest of the variational parameters at the end of the algorithm. The fact that only univariate
+optimisation is required reduces the computation to fit our approximation considerably, which makes this
+algorithm applicable when speed and/or the ability to parallelise the algorithm are paramount, such as model
+selection via structured Variational Bayes.
 
 \bibliographystyle{elsarticle-harv}
 \bibliography{references_mendeley}
