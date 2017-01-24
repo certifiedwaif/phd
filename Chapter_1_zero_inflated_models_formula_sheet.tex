@@ -5,16 +5,18 @@
 
 \begin{document}
 
-\section{Appendix} 
+\section{Univariate model} 
+
+\subsection{Model}
+\begin{align*}
+	\vx_i   & \sim \text{Poisson}(\lambda)                    \\
+	\lambda & \sim \text{Gamma}(\alpha_\lambda,\beta_\lambda) \\
+	\rho    & \sim \text{Beta}(\alpha_\rho, \beta_\rho)       \\
+	\vr_i   & \sim \text{Binomial}(\vp_i)                     
+\end{align*}
 
 \subsection{Log-likelihood}
-\begin{align*}
-\log p(\vy, \vtheta) &= \vy^\top \mR(\mC \vnu) - \vr^\top \exp{(\mC \vnu)} - \vone^\top \log \Gamma(\vy + \vone) \\
-&+ \vr^\top \log{(\rho)} + (\vone - \vr)^\top \log{(\vone - \rho)} \\
-&+ \frac{\nu}{2} \log |\mPsi| - \left( \frac{\nu + p + 1}{2} \right) \log{|\mSigma|} - \frac{1}{2} \tr (\mPsi \mSigma^{-1}) \\
-&- \frac{1}{2} \log{|\sigma^2_\vbeta \mI_p|} - \frac{1}{2} \vbeta^\top \sigma_\vbeta^{-2} \mI_p \vbeta \\
-&-\frac{1}{2} \log |\mG| - \frac{1}{2} \vu^\top \mG^{-1} \vu
-\end{align*}
+
 
 \subsection{Mean field update equations}
 We are now in a position to calculate the mean field update equations for the factorised
@@ -127,33 +129,6 @@ $$
 
 % Include derivations for mean field updates at the end?
 
-\noindent The optimal approximation for $\vr$ is
-$$
-\begin{array}{rl}
-	q(\vr) & \propto \exp{\{\bE_{-q(\vr)}y^T\mR(\mC\vmu) - \vr^T\exp{(\mC\vnu)}-\half \vnu^T \text{diag}(\sigma_{\vu}^2)^{-1} \vnu\}} 
-\end{array}
-$$
-
-$$
-\begin{array}{rl}
-	  & \bE_{-q(\vr)} [\vy^T\mR(C\vnu) - \vr^T\exp{(\mC\vnu)}-\half \vnu^T \text{diag}(\sigma_{\vu}^2)^{-1} \vnu]                                                 \\
-	= & \vy^T\mR\mC \vmu - \vp^T \exp{\{\mC \vmu + \half \text{diag}(\mC \mLambda \mC^T)\}} - \half \vmu^T \hat{\mD} \vmu - \half \text{tr}(\mLambda \hat{\mD} )) 
-\end{array}
-$$
-
-Recall that $\E \vu^\top \mA^{-1} \vu = \E \tr(\vu^\top \mA^{-1} \vu) = \tr [\E (\vu \vu^\top) \mA^{-1}]$, and
-that $\mG = \text{Cov}(\vu) = \text{blockdiag}_{1 \leq i \leq m} \mSigma = \mI_m \otimes \mSigma.$ Then the
-optimal approximation for $q^*(\mSigma)$ is
-
-\begin{align*}
-q^*(\mSigma) &\propto \exp \left \{ -\frac{1}{2} \tr (\mPsi \mSigma^{-1}) - \frac{1}{2} \E \vu^\top \mG^{-1} \vu
-											- \frac{\nu + p + 1}{2} \log |\mSigma| - \frac{1}{2} \log |\mG| \right \} \\
-						&=\exp \left \{ -\frac{1}{2} \tr \left[\mPsi + \sum_{i=1}^m (\vmu_i \vmu_i^\top + \mLambda_i) \mSigma^{-1}\right]
-											- \frac{\nu + p + m + 1}{2} \log |\mSigma| \right \}.
-\end{align*}
-
-Hence, $q(\mSigma) = \text{Inverse Wishart} \left( \mPsi + \sum_{i=1}^m (\vmu_i \vmu_i^\top + \mLambda_i), \nu + m \right)$.
-
 \subsection{Lower bound}
 The lower bound $\log{\underline{p}(\vtheta)}$ is
 $$
@@ -200,11 +175,11 @@ $$
 	\\
 	\bE[r_i]            & =                                                                                                                                                             
 	\begin{cases}
-	1                   & \text{if } y_i \ne 0                                                                                                                                              \\
-	p_i                 & \text{if } y_i = 0,                                                                                                                                               \\
+	1                   & \text{if } y_i \ne 0                                                                                                                                          \\
+	p_i                 & \text{if } y_i = 0,                                                                                                                                           \\
 	\end{cases}
 	\\
-	-\bE_q[\log{q(r)}]  & = \sum_{i=1}^n \I(y_i = 0) \log{(p_i)}                                                                                                                         \\ [0.5ex]
+	-\bE_q[\log{q(r)}]  & = \sum_{i=1}^n \I(y_i = 0) \log{(p_i)}                                                                                                                        \\ [0.5ex]
 	-\bE_q[\log{q(\lambda)}] 
 	                    & = \alpha_{q(\lambda)} - \log{(\beta_{q(\lambda)})} + \log{\Gamma{(\alpha_{q(\lambda)})}} + (1 - \alpha_{q(\lambda)}) \psi{(\alpha_{q(\lambda)})},             \\ [0.5ex]
 	\mbox{and}\quad \bE_q[\log{q(\rho)}] 
@@ -212,6 +187,45 @@ $$
 	                    & \quad + (\alpha_{q(\rho)} + \beta_{q(\rho)} - 2)\psi{(\alpha_{q(\rho)} + \beta_{q(\rho)})} \}.                                                                \\ [0.5ex]
 \end{array}
 $$
+
+\section{Multivariate model}
+\subsection{Log-likelihood}
+\begin{align*}
+	\log p(\vy, \vtheta) & = \vy^\top \mR(\mC \vnu) - \vr^\top \exp{(\mC \vnu)} - \vone^\top \log \Gamma(\vy + \vone)                                 \\
+	                     & + \vr^\top \log{(\rho)} + (\vone - \vr)^\top \log{(\vone - \rho)}                                                          \\
+	                     & + \frac{\nu}{2} \log |\mPsi| - \left( \frac{\nu + p + 1}{2} \right) \log{|\mSigma|} - \frac{1}{2} \tr (\mPsi \mSigma^{-1}) \\
+	                     & - \frac{1}{2} \log{|\sigma^2_\vbeta \mI_p|} - \frac{1}{2} \vbeta^\top \sigma_\vbeta^{-2} \mI_p \vbeta                      \\
+	                     & -\frac{1}{2} \log |\mG| - \frac{1}{2} \vu^\top \mG^{-1} \vu                                                                
+\end{align*}
+
+\subsection{Mean field updates}
+\noindent The optimal approximation for $\vr$ is
+$$
+\begin{array}{rl}
+	q(\vr) & \propto \exp{\{\bE_{-q(\vr)}y^T\mR(\mC\vmu) - \vr^T\exp{(\mC\vnu)}-\half \vnu^T \text{diag}(\sigma_{\vu}^2)^{-1} \vnu\}} 
+\end{array}
+$$
+
+$$
+\begin{array}{rl}
+	  & \bE_{-q(\vr)} [\vy^T\mR(C\vnu) - \vr^T\exp{(\mC\vnu)}-\half \vnu^T \text{diag}(\sigma_{\vu}^2)^{-1} \vnu]                                                 \\
+	= & \vy^T\mR\mC \vmu - \vp^T \exp{\{\mC \vmu + \half \text{diag}(\mC \mLambda \mC^T)\}} - \half \vmu^T \hat{\mD} \vmu - \half \text{tr}(\mLambda \hat{\mD} )) 
+\end{array}
+$$
+
+Recall that $\E \vu^\top \mA^{-1} \vu = \E \tr(\vu^\top \mA^{-1} \vu) = \tr [\E (\vu \vu^\top) \mA^{-1}]$, and
+that $\mG = \text{Cov}(\vu) = \text{blockdiag}_{1 \leq i \leq m} \mSigma = \mI_m \otimes \mSigma.$ Then the
+optimal approximation for $q^*(\mSigma)$ is
+
+\begin{align*}
+	q^*(\mSigma) & \propto \exp \left \{ -\frac{1}{2} \tr (\mPsi \mSigma^{-1}) - \frac{1}{2} \E \vu^\top \mG^{-1} \vu               
+	- \frac{\nu + p + 1}{2} \log |\mSigma| - \frac{1}{2} \log |\mG| \right \} \\
+	             & =\exp \left \{ -\frac{1}{2} \tr \left[\mPsi + \sum_{i=1}^m (\vmu_i \vmu_i^\top + \mLambda_i) \mSigma^{-1}\right] 
+	- \frac{\nu + p + m + 1}{2} \log |\mSigma| \right \}.
+\end{align*}
+
+Hence, $q(\mSigma) = \text{Inverse Wishart} \left( \mPsi + \sum_{i=1}^m (\vmu_i \vmu_i^\top + \mLambda_i), \nu + m \right)$.
+
 
 \subsection{Calculation of the Variational Lower bound}
 % Where are the priors for \vbeta and \vu
