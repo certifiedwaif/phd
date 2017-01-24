@@ -152,7 +152,7 @@ q^*(\mSigma) &\propto \exp \left \{ -\frac{1}{2} \tr (\mPsi \mSigma^{-1}) - \fra
 											- \frac{\nu + p + m + 1}{2} \log |\mSigma| \right \}.
 \end{align*}
 
-Hence, $q(\mSigma) = \text{Inverse Wishart}(\mPsi + \sum_{i=1}^m (\vmu_i \vmu_i^\top + \mLambda_i), \nu + m)$.
+Hence, $q(\mSigma) = \text{Inverse Wishart} \left( \mPsi + \sum_{i=1}^m (\vmu_i \vmu_i^\top + \mLambda_i), \nu + m \right)$.
 
 \subsection{Lower bound}
 The lower bound $\log{\underline{p}(\vtheta)}$ is
@@ -193,25 +193,48 @@ $\bE [\lambda] = \alpha_{q(\lambda)}/\beta_{q(\lambda)}$,
 % T_1 terms
 $$
 \begin{array}{rl}
-	\bE [\log{\lambda}] & \ds = -\{ \alpha_{q(\lambda)} - \log{(\beta_{q(\lambda)})} + \log{\Gamma(\alpha_{q(\lambda)})} + (1 - \alpha_{q(\lambda)}) \psi{(\alpha_{q(\lambda)})} \},        \\
+	\bE [\log{\lambda}] & = -\{ \alpha_{q(\lambda)} - \log{(\beta_{q(\lambda)})} + \log{\Gamma(\alpha_{q(\lambda)})} + (1 - \alpha_{q(\lambda)}) \psi{(\alpha_{q(\lambda)})} \},        \\
 	\\
-	\bE[\log{\rho}]     & \ds = - \{ \log{\text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)})} - (\alpha_{q(\rho)} - 1) \psi{(\alpha_{q(\rho)})} - (\beta_{q(\rho)} - 1)\psi{(\beta_{q(\rho)})}  \\
-	                    & \ds \qquad + (\alpha_{q(\rho)} + \beta_{q(\rho)} - 2)\psi{(\alpha_{q(\rho)} + \beta_{q(\rho)})} \},                                                               
+	\bE[\log{\rho}]     & = - \{ \log{\text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)})} - (\alpha_{q(\rho)} - 1) \psi{(\alpha_{q(\rho)})} - (\beta_{q(\rho)} - 1)\psi{(\beta_{q(\rho)})}  \\
+	                    & \qquad + (\alpha_{q(\rho)} + \beta_{q(\rho)} - 2)\psi{(\alpha_{q(\rho)} + \beta_{q(\rho)})} \},                                                               
 	\\
-	\bE[r_i]            & \ds =                                                                                                                                                             
+	\bE[r_i]            & =                                                                                                                                                             
 	\begin{cases}
 	1                   & \text{if } y_i \ne 0                                                                                                                                              \\
 	p_i                 & \text{if } y_i = 0,                                                                                                                                               \\
 	\end{cases}
 	\\
-	-\bE_q[\log{q(r)}]  & \ds = \sum_{i=1}^n I(y_i = 0) \log{(p_i)}                                                                                                                         \\ [0.5ex]
+	-\bE_q[\log{q(r)}]  & = \sum_{i=1}^n \I(y_i = 0) \log{(p_i)}                                                                                                                         \\ [0.5ex]
 	-\bE_q[\log{q(\lambda)}] 
-	                    & \ds = \alpha_{q(\lambda)} - \log{(\beta_{q(\lambda)})} + \log{\Gamma{(\alpha_{q(\lambda)})}} + (1 - \alpha_{q(\lambda)}) \psi{(\alpha_{q(\lambda)})},             \\ [0.5ex]
+	                    & = \alpha_{q(\lambda)} - \log{(\beta_{q(\lambda)})} + \log{\Gamma{(\alpha_{q(\lambda)})}} + (1 - \alpha_{q(\lambda)}) \psi{(\alpha_{q(\lambda)})},             \\ [0.5ex]
 	\mbox{and}\quad \bE_q[\log{q(\rho)}] 
-	                    & \ds = - \{ \log{(\text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)})} - (\alpha_{q(\rho)} - 1) \psi{(\alpha_{q(\rho)})} - (\beta_{q(\rho)} - 1)\psi{(\beta_{q(\rho)})} \\ [0.5ex]
-	                    & \ds \quad + (\alpha_{q(\rho)} + \beta_{q(\rho)} - 2)\psi{(\alpha_{q(\rho)} + \beta_{q(\rho)})} \}.                                                                \\ [0.5ex]
+	                    & = - \{ \log{(\text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)})} - (\alpha_{q(\rho)} - 1) \psi{(\alpha_{q(\rho)})} - (\beta_{q(\rho)} - 1)\psi{(\beta_{q(\rho)})} \\ [0.5ex]
+	                    & \quad + (\alpha_{q(\rho)} + \beta_{q(\rho)} - 2)\psi{(\alpha_{q(\rho)} + \beta_{q(\rho)})} \}.                                                                \\ [0.5ex]
 \end{array}
 $$
+
+\subsection{Calculation of the Variational Lower bound}
+% Where are the priors for \vbeta and \vu
+	
+The variational lower bound is equal to $\bE_q[\log{p(\vy, \vtheta)} - \log{q(\vtheta)}] = T_1 + T_2 + T_3$,
+where
+% This is the new T_1
+$$
+\begin{array}{rl}
+	T_1 & = \quad \bE_q[\log{p(\vy, \vnu)} - \log{q(\vnu)}]                                                                                                                                                  \\
+	    & = \quad \vy \mP \mC \vmu - \vp^\top \exp{\left[ \mC \vmu + \half \text{diag} (\mC \mLambda \mC^\top) \right]} - \vone^\top\log \Gamma{(\vy + \vone)}                                               \\
+	    & \quad + \frac{p + m}{2} (1 + \log{2 \pi}) + \half \log{|\mLambda|},                                                                                                                                \\
+	T_2 & = \quad \bE_q \left[ \log p(\mSigma_{\vu \vu}) - \log q(\mSigma_{\vu \vu}) \right]                                                                                                                 \\
+	    & = \quad \bE_q \big[ v/2(\log |\Psi| - \log |\Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu}|) + \half \log 2 + \half \log|\mSigma_{\vu \vu}| + \log \Gamma_{p+1}(v/2) - \log \Gamma_{p}(v/2)    \\
+	    & \quad + \half \tr((\vmu_{\vu} \vmu_{\vu}^\top + \mLambda_{\vu \vu}) \mSigma_{\vu \vu}^{-1}) \big]                                                                                                  \\
+	    & = \quad v/2\big(\log |\Psi| - \log |\Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu}|\big) + \half \log 2 + \half \bE_q \log |\mSigma_{\vu \vu}| + \log \Gamma_{p+1}(v/2) - \log \Gamma_{p}(v/2) \\
+	    & \quad + \half \tr\big(\mI_m + \Psi(\Psi+ \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu})^{-1}/(v + p + 2)\big)                                                                                        \\
+	T_3 & = - \vp^\top \log \vp - (\vone - \vp)^\top \log (\vone - \vp) - \log \Beta (\alpha_\rho, \beta_\rho) + \log \Beta (\alpha_q, \beta_q)                                                              
+\end{array}
+$$
+	
+\noindent with $\bE_q \big[ \log |\mSigma_{\vu \vu}| \big] = m \log 2 + \log \left | \Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu} \right | + \sum_{i=1}^m \Psi \left ( \frac{v - i + 1}{2} \right )$
+
 
 \section{Appendix - Algebraic derivations of conditional likelihoods}
 
