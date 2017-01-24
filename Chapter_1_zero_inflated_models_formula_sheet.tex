@@ -7,6 +7,15 @@
 
 \section{Appendix} 
 
+\subsection{Log-likelihood}
+\begin{align*}
+\log p(\vy, \vtheta) &= \vy^\top \mR(\mC \vnu) - \vr^\top \exp{(\mC \vnu)} - \vone^\top \log \Gamma(\vy + \vone) \\
+&+ \vr^\top \log{(\rho)} + (\vone - \vr)^\top \log{(\vone - \rho)} \\
+&+ \frac{\nu}{2} \log |\mPsi| - \left( \frac{\nu + p + 1}{2} \right) \log{|\mSigma|} - \frac{1}{2} \tr (\mPsi \mSigma^{-1}) \\
+&- \frac{1}{2} \log{|\sigma^2_\vbeta \mI_p|} - \frac{1}{2} \vbeta^\top \sigma_\vbeta^{-2} \mI_p \vbeta \\
+&-\frac{1}{2} \log |\mG| - \frac{1}{2} \vu^\top \mG^{-1} \vu
+\end{align*}
+
 \subsection{Mean field update equations}
 We are now in a position to calculate the mean field update equations for the factorised
 variational approximation.
@@ -17,7 +26,7 @@ $$
 \begin{array}{rl}
 	q^*(\lambda)
 	  & \propto                                                            
-	\lambda^{\alpha_\lambda+\vone^T\vx - 1} 
+	\lambda^{\alpha_\lambda+\vone^T\vy - 1} 
 	\exp\left\{ 
 	\bE_{-q(\lambda)} \left[
 	-(\beta_\lambda + \vone^T\vr) \lambda 
@@ -25,9 +34,9 @@ $$
 	\right\} 
 	\\ [0.5ex]
 	  &                                                                    
-	\propto \lambda^{\alpha_\lambda+\vone^T\vx - 1} \exp{\left \{-(\beta_\lambda + \vone^T\vp)\lambda \right \} } 
+	\propto \lambda^{\alpha_\lambda+\vone^T\vy - 1} \exp{\left \{-(\beta_\lambda + \vone^T\vp)\lambda \right \} } 
 	\\
-	  & = \myGamma{(\alpha_\lambda+\vone^T\vx, \beta_\lambda+\vone^T\vp)}, 
+	  & = \myGamma{(\alpha_\lambda+\vone^T\vy, \beta_\lambda+\vone^T\vp)}, 
 \end{array}
 $$
 
@@ -59,8 +68,8 @@ $$
 
 $$
 \begin{array}{rl}
-	\ds \log{q^*(r_i)} & \propto -\bE_{q(\lambda)} [\lambda ] r_i + x_i \log{(r_i)} + r_i \bE_{q(\rho)} \left[\log{\left(\frac{\rho}{1 - \rho}\right)}\right]          \\[0.5ex]
-	                   & \ds = -r_i \frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} + x_i \log{(r_i)} + r_i \left(\psi(\alpha_{q(\rho)}) - \psi(\beta_{q(\rho)})\right) \\ [0.5ex]%
+	\ds \log{q^*(r_i)} & \propto -\bE_{q(\lambda)} [\lambda ] r_i + y_i \log{(r_i)} + r_i \bE_{q(\rho)} \left[\log{\left(\frac{\rho}{1 - \rho}\right)}\right]          \\[0.5ex]
+	                   & \ds = -r_i \frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} + y_i \log{(r_i)} + r_i \left(\psi(\alpha_{q(\rho)}) - \psi(\beta_{q(\rho)})\right) \\ [0.5ex]%
 	                   & \ds = \text{Bernoulli}(p_i)                                                                                                                   
 \end{array}
 $$
@@ -70,23 +79,23 @@ $$
 $$
 \begin{array}{rl}
 	\ds p_i                                               
-	= \frac{\exp{(\eta_i)}}{I(x_i = 0) + \exp{(\eta_i)}}  
-	= \text{expit}(\eta_i), \quad \mbox{(when $x_i = 0$)} 
+	= \frac{\exp{(\eta_i)}}{I(y_i = 0) + \exp{(\eta_i)}}  
+	= \text{expit}(\eta_i), \quad \mbox{(when $y_i = 0$)} 
 \end{array}
 $$
 
 \noindent and $\eta_i = - \alpha_{q(\lambda)}/\beta_{q(\lambda)} + \psi(\alpha_{q(\rho)}) - \psi(\beta_{q(\rho)})$.
 %
-%Note that if $x_i = 0$ then
-%$x_i \log{(r_i)} = \log{(x_i^{r_i})} = \log{(0^0)} = \log{(1)} = 0$. Dr John %Ormerod hit
+%Note that if $y_i = 0$ then
+%$y_i \log{(r_i)} = \log{(y_i^{r_i})} = \log{(0^0)} = \log{(1)} = 0$. Dr John %Ormerod hit
 %upon the idea of side-stepping this problem by writing the q-likelihood as
 %
 %$$
-%q^*(r_i) \propto r_i^{x_i} \exp{(r_i \eta_i)}
+%q^*(r_i) \propto r_i^{y_i} \exp{(r_i \eta_i)}
 %$$
 %
 %
-%Now, either $x_i = 0$ or $x_i \ne 0$.
+%Now, either $y_i = 0$ or $y_i \ne 0$.
 %
 %So
 %
@@ -99,7 +108,7 @@ $$
 %
 %$$
 %\begin{array}{ll}
-%p_i &= \ds \frac{\exp{(\eta_i)}}{I(x_i = 0) + \exp{(\eta_i)}} %\\
+%p_i &= \ds \frac{\exp{(\eta_i)}}{I(y_i = 0) + \exp{(\eta_i)}} %\\
 %&= \text{expit}(\eta_i)
 %\end{array}
 %\begin{array}{cl}
@@ -107,7 +116,7 @@ $$
 %\beta_{q(\rho)} &\leftarrow \beta_\rho + n - \vone^T\vp \\
 %\eta &\leftarrow -\frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} + \psi(\alpha_{q(\rho)}) - \psi(\beta_{q(\rho)}) \\
 %\vp_{q(\vr_0)} &\leftarrow \expit{(\eta)} \\
-%\alpha_{q(\lambda)} &\leftarrow \alpha_\lambda+ \vone^T\vx \\
+%\alpha_{q(\lambda)} &\leftarrow \alpha_\lambda+ \vone^T\vy \\
 %\beta_{q(\lambda)} &\leftarrow \beta_\lambda+ \vone^T\vp
 %\end{array}
 %$$
@@ -132,22 +141,35 @@ $$
 \end{array}
 $$
 
+Recall that $\E \vu^\top \mA^{-1} \vu = \E \tr(\vu^\top \mA^{-1} \vu) = \tr [\E (\vu \vu^\top) \mA^{-1}]$, and
+that $\mG = \text{Cov}(\vu) = \text{blockdiag}_{1 \leq i \leq m} \mSigma = \mI_m \otimes \mSigma.$ Then the
+optimal approximation for $q^*(\mSigma)$ is
+
+\begin{align*}
+q^*(\mSigma) &\propto \exp \left \{ -\frac{1}{2} \tr (\mPsi \mSigma^{-1}) - \frac{1}{2} \E \vu^\top \mG^{-1} \vu
+											- \frac{\nu + p + 1}{2} \log |\mSigma| - \frac{1}{2} \log |\mG| \right \} \\
+						&=\exp \left \{ -\frac{1}{2} \tr \left[\mPsi + \sum_{i=1}^m (\vmu_i \vmu_i^\top + \mLambda_i) \mSigma^{-1}\right]
+											- \frac{\nu + p + m + 1}{2} \log |\mSigma| \right \}.
+\end{align*}
+
+Hence, $$q(\mSigma) = \text{Inverse Wishart}(\mPsi + \sum_{i=1}^m (\vmu_i \vmu_i^\top + \mLambda_i), \nu + m)
+
 \subsection{Lower bound}
 The lower bound $\log{\underline{p}(\vtheta)}$ is
 $$
-\bE_q[\log{p(\vx, \vtheta)} - \log{q(\vtheta)}]
+\bE_q[\log{p(\vy, \vtheta)} - \log{q(\vtheta)}]
 $$
 
 \noindent where $q(\vtheta) = q(\lambda) q(\rho) \prod_{i=1}^n q(r_i)$,
 $q(\lambda) \sim \text{Gamma}{(\alpha_{q(\lambda)}, \beta_{q(\lambda)})}$,
 $q(\rho) \sim \text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)})$ and
-$q(r_i) = 1$ if $x_i \ne 0$, and $p_i$ if $x_i = 0$, where $p_i$ is
+$q(r_i) = 1$ if $y_i \ne 0$, and $p_i$ if $y_i = 0$, where $p_i$ is
 calculated for each iteration as specified in Algorithm \ref{algorithm1}.
 
 The lower bound can be calculated directly to be
 $$
 \begin{array}{rl}
-	\bE_q \left\{ \log{p(\vx, \vr, \lambda, \rho)} - \log{q(\vr, \lambda, \rho)} \right\} & = T_1 + T_2 \\
+	\bE_q \left\{ \log{p(\vy, \vr, \lambda, \rho)} - \log{q(\vr, \lambda, \rho)} \right\} & = T_1 + T_2 \\
 \end{array}
 $$
 
@@ -156,7 +178,7 @@ $$
 \begin{array}{rl}
 	T_1 & \ds =                                                                                                                          
 	\alpha_\lambda \log{(\beta_\lambda)} + (\alpha_\lambda - 1) \bE_q[\log{(\lambda)}] - \beta_\lambda \bE_q [\lambda] - \log\Gamma(\alpha_\lambda) \\
-	    & \ds \quad + \sum_{i=1}^n ( -\bE_q [\lambda] \bE_q [r_i] + \bE_q[x_i \log{(\lambda r_i)}] - \log\Gamma(x_i+1)) \quad \mbox{and} 
+	    & \ds \quad + \sum_{i=1}^n ( -\bE_q [\lambda] \bE_q [r_i] + \bE_q[y_i \log{(\lambda r_i)}] - \log\Gamma(y_i+1)) \quad \mbox{and} 
 	\\ [1ex]
 	T_2 & =\bE_q[r_i] \bE_q[\log{(\rho)}] + \bE_q[(1 - r_i)] \bE_q[\log{(1 - \rho)}]                                                     
 	- \bE_q[\log{q(r)}] 
@@ -178,11 +200,11 @@ $$
 	\\
 	\bE[r_i]            & \ds =                                                                                                                                                             
 	\begin{cases}
-	1                   & \text{if } x_i \ne 0                                                                                                                                              \\
-	p_i                 & \text{if } x_i = 0,                                                                                                                                               \\
+	1                   & \text{if } y_i \ne 0                                                                                                                                              \\
+	p_i                 & \text{if } y_i = 0,                                                                                                                                               \\
 	\end{cases}
 	\\
-	-\bE_q[\log{q(r)}]  & \ds = \sum_{i=1}^n I(x_i = 0) \log{(p_i)}                                                                                                                         \\ [0.5ex]
+	-\bE_q[\log{q(r)}]  & \ds = \sum_{i=1}^n I(y_i = 0) \log{(p_i)}                                                                                                                         \\ [0.5ex]
 	-\bE_q[\log{q(\lambda)}] 
 	                    & \ds = \alpha_{q(\lambda)} - \log{(\beta_{q(\lambda)})} + \log{\Gamma{(\alpha_{q(\lambda)})}} + (1 - \alpha_{q(\lambda)}) \psi{(\alpha_{q(\lambda)})},             \\ [0.5ex]
 	\mbox{and}\quad \bE_q[\log{q(\rho)}] 
@@ -196,38 +218,38 @@ $$
 The joint likelihood is:
 
 $$
-p(\vx, \vr, \lambda, \rho) = \frac{b^a \lambda^{a - 1} \exp{(-b \lambda)}}{\Gamma{(a)}} \prod_{i=1}^n \frac{\exp{(-\lambda r_i)} (\lambda r_i)^{x_i}}{x_i !} \rho^{r_i} (1 - \rho)^{1 - r_i}.
+p(\vy, \vr, \lambda, \rho) = \frac{b^a \lambda^{a - 1} \exp{(-b \lambda)}}{\Gamma{(a)}} \prod_{i=1}^n \frac{\exp{(-\lambda r_i)} (\lambda r_i)^{y_i}}{y_i !} \rho^{r_i} (1 - \rho)^{1 - r_i}.
 $$
 
 %\begin{align*}
-%p(\lambda|\vx, \vr, \rho) &= \frac{\prod_{i=1}^n p(x_i | \lambda, r_i) p(\lambda) p(r_i|\rho) p(\rho)}{\int \prod_{i=1}^n p(x_i | \lambda, r_i) p(\lambda) p(r_i|\rho) p(\rho)) d \lambda}.
+%p(\lambda|\vy, \vr, \rho) &= \frac{\prod_{i=1}^n p(y_i | \lambda, r_i) p(\lambda) p(r_i|\rho) p(\rho)}{\int \prod_{i=1}^n p(y_i | \lambda, r_i) p(\lambda) p(r_i|\rho) p(\rho)) d \lambda}.
 %\end{align*}
 %
 %Concentrating for now on the denominator in this expression, we re-arrange and collect
 %like terms to obtain
 %$$
-%\prod_{i=1}^n \rho^r_i (1 - \rho)^{1 - r_i} \frac{r_i^{x_i}}{x_i !}
-%    \int \frac{b^a \lambda^{a - 1} \exp{(-b \lambda)} \lambda^{x_i} \exp{(-\lambda r_i)}}{\Gamma{(a)}} d \lambda
+%\prod_{i=1}^n \rho^r_i (1 - \rho)^{1 - r_i} \frac{r_i^{y_i}}{y_i !}
+%    \int \frac{b^a \lambda^{a - 1} \exp{(-b \lambda)} \lambda^{y_i} \exp{(-\lambda r_i)}}{\Gamma{(a)}} d \lambda
 %$$
 %
 %The integral in this expression is
 %\begin{align*}
-%& \int \frac{b^a \lambda^{(a + x_i) - 1} \exp{(-\lambda(b + r_i))}}{\Gamma{(a + x_i)}} d \lambda \frac{\Gamma{(a+ x_i)}}{\Gamma{(a)} b^{-x_i}} \\
-%=& \frac{\Gamma{(a+ x_i)}}{\Gamma{(a)} b^{-x_i}}.
+%& \int \frac{b^a \lambda^{(a + y_i) - 1} \exp{(-\lambda(b + r_i))}}{\Gamma{(a + y_i)}} d \lambda \frac{\Gamma{(a+ y_i)}}{\Gamma{(a)} b^{-y_i}} \\
+%=& \frac{\Gamma{(a+ y_i)}}{\Gamma{(a)} b^{-y_i}}.
 %\end{align*}
 %
 %Collecting the multiplicands in the integral over $\lambda$ together, we obtain
 %$$
-%\prod_{i=1}^n \rho^{r_i} (1 - \rho)^{1 - r_i} \frac{r_i^{x_i}}{x_i!}
-%    \int \frac{b^{na + \sum_{i=1}^n x_i} \lambda^{(na + \sum_{i=1}^n x_i) - 1} \exp{(-\lambda(nb + \sum_{i=1}^n r_i))}}{\Gamma{(na + \sum_{i=1}^n x_i)}} d \lambda
-%    \frac{\Gamma{(na + \sum_{i=1}^n x_i)}}{\Gamma{(na)} b^{-\sum_{i=1}^n x_i}}.
+%\prod_{i=1}^n \rho^{r_i} (1 - \rho)^{1 - r_i} \frac{r_i^{y_i}}{y_i!}
+%    \int \frac{b^{na + \sum_{i=1}^n y_i} \lambda^{(na + \sum_{i=1}^n y_i) - 1} \exp{(-\lambda(nb + \sum_{i=1}^n r_i))}}{\Gamma{(na + \sum_{i=1}^n y_i)}} d \lambda
+%    \frac{\Gamma{(na + \sum_{i=1}^n y_i)}}{\Gamma{(na)} b^{-\sum_{i=1}^n y_i}}.
 %$$
 
 %By cancelling like terms in the numerator and denominator of the full likelihood we arrive 
 %at
 
 $$
-\beta_{\lambda}^{\alpha_\lambda+\vone^T\vx} \lambda^{(\alpha_\lambda + \vone^T\vx) - 1} \exp{\left(-(\beta_\lambda + \vone^T\vr) \lambda \right)}
+\beta_{\lambda}^{\alpha_\lambda+\vone^T\vy} \lambda^{(\alpha_\lambda + \vone^T\vy) - 1} \exp{\left(-(\beta_\lambda + \vone^T\vr) \lambda \right)}
 $$
 
 $$
@@ -236,17 +258,17 @@ $$
 
 $$
 \begin{array}{ll}
-	p(r_i | \text{rest}) & \ds \propto \frac{(\lambda r_i)^{x_i} \exp{(-\lambda r_i)}}{x_i !} \rho^{r_i} (1 - \rho)^{1 - r_i} \\
-	                     & \ds \propto r_i^{x_i} (e^{-\lambda})^{r_i} \rho^{r_i} (1 - \rho)^{1 - r_i}                         
+	p(r_i | \text{rest}) & \ds \propto \frac{(\lambda r_i)^{y_i} \exp{(-\lambda r_i)}}{y_i !} \rho^{r_i} (1 - \rho)^{1 - r_i} \\
+	                     & \ds \propto r_i^{y_i} (e^{-\lambda})^{r_i} \rho^{r_i} (1 - \rho)^{1 - r_i}                         
 \end{array}
 $$
 
-We make use of the fact that if $x_i = 0$, $r_i = 0$, and if $x_i \ne 0$,
-$r_i = 1$. So $x_i^{r_i} = I(x \ne 0)$ and hence the likelihood can be re-written as
+We make use of the fact that if $y_i = 0$, $r_i = 0$, and if $y_i \ne 0$,
+$r_i = 1$. So $y_i^{r_i} = I(x \ne 0)$ and hence the likelihood can be re-written as
 
 $$
 \begin{array}{ll}
-	p(r_i | \text{rest}) & \ds = \frac{(e^{-\lambda + \logit{(\rho)}})^{r_i}}{I(x_i = 0) + (e^{-\lambda + \logit{(\rho)}})^{r_i}} 
+	p(r_i | \text{rest}) & \ds = \frac{(e^{-\lambda + \logit{(\rho)}})^{r_i}}{I(y_i = 0) + (e^{-\lambda + \logit{(\rho)}})^{r_i}} 
 \end{array}
 $$
 
