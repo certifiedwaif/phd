@@ -75,6 +75,57 @@ fit.Lap <- function(vmu, vy, vr, mC, mSigma.inv, mLambda)
   return(list(vmu=vmu, mLambda=mLambda, f=f))
 }
 
+safeexp <- function(x)
+{
+  t <- 2
+  a <- exp(t) / 2
+  b <- (1 - t) * exp(t)
+  c < (1 - t^2 / 2 - (1 - t) * t) * exp(t)
+
+  if (x < t)
+    exp(x)
+  else
+    a * x^2 + b * x + c
+}
+
+safeexp_diff <- function(x)
+{
+  t <- 2
+  a <- exp(t) / 2
+  b <- (1 - t) * exp(t)
+  c < (1 - t^2 / 2 - (1 - t) * t) * exp(t)
+
+  if (x < t)
+    exp(x)
+  else
+    2 * a * x + b
+}
+
+safeexp_diff_diff <- function(x)
+{
+  t <- 2
+  a <- exp(t) / 2
+  b <- (1 - t) * exp(t)
+  c < (1 - t^2 / 2 - (1 - t) * t) * exp(t)
+
+  if (x < t)
+    exp(x)
+  else
+    2 * a
+}
+
+safeexp_inv <- function(x)
+{
+  t <- 2
+  a <- exp(t) / 2
+  b <- (1 - t) * exp(t)
+  c < (1 - t^2 / 2 - (1 - t) * t) * exp(t)
+  if (x < exp(t))
+    log(x)
+  else
+    (-b + sqrt(b^2 - 4 * a * c)) / (2 * a)
+}
+
 vtheta_enc <- function(vmu, mR)
 {
   diag(mR) <- log(diag(mR))
@@ -90,6 +141,10 @@ vtheta_dec <- function(vtheta, d)
   Rinds <- which(lower.tri(mR, diag=TRUE))
   mR[Rinds] <- vtheta[(d + 1):length(vtheta)]
   diag(mR) <- exp(diag(mR))
+  # Threshold entries in the diagonal of mR at 100,000
+  for (i in 1:length(Dinds)) {
+      mR[Dinds[i]] <- min(c(1.0E5,mR[Dinds[i]]))
+  }
   return(list(vmu=vmu, mR=mR, Dinds=Dinds, Rinds=Rinds))
 }
 
@@ -116,11 +171,6 @@ f.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
   vmu <- decode$vmu
   mR <- decode$mR
   Dinds <- decode$Dinds
-
-  # Threshold entries in the diagonal of mR at 100,000
-  for (i in 1:length(Dinds)) {
-      mR[Dinds[i]] <- min(c(1.0E5,mR[Dinds[i]]))
-  }
 
   f <- sum(log(diag(mR))) + f.G(vmu, mR, vy, vr, mC, mSigma.inv, gh)
   f <- f + 0.5 * d * log(2 * pi) + 0.5 * d
@@ -199,11 +249,6 @@ vg.GVA <- function(vtheta, vy, vr, mC, mSigma.inv, gh)
   mR <- decode$mR
   Dinds <- decode$Dinds
   Rinds <- decode$Rinds
-
-  # Threshold entries of mR at 100,000
-  for (i in 1:length(Dinds)) {
-      mR[Dinds[i]] <- min(c(1.0E5, mR[Dinds[i]]))
-  }
 
   # mLambda <- tcrossprod(mR)
 
