@@ -16,7 +16,12 @@
 \end{align*}
 
 \subsection{Log-likelihood}
-
+\begin{align*}
+\log p(\vy) &= \quad \log p(\vy | \lambda, \vr) + \log p(\vr | \rho) + \log p(\rho) + \log p(\lambda) \\
+&= \quad (\vr_i \vx_i) \log \lambda - \log \Gamma(\vr_i \vx_i + 1) + \vr_i \log(\rho) + (1 - \vr_i) \log(1 - \rho) \\
+& \quad + (\alpha_\rho - 1) \log (\rho) + (\beta_\rho - 1) \log(1 - \rho) - \log \text{Beta} (\alpha_\rho, \beta_\rho) \\
+& \quad + \alpha_\lambda \log \beta_\lambda - \log \Gamma(\alpha_\lambda) + (\alpha_\lambda - 1) \log \lambda - \beta_\lambda \lambda
+\end{align*}
 
 \subsection{Mean field update equations}
 We are now in a position to calculate the mean field update equations for the factorised
@@ -191,11 +196,11 @@ $$
 \section{Multivariate model}
 \subsection{Log-likelihood}
 \begin{align*}
-	\log p(\vy, \vtheta) & = \vy^\top \mR(\mC \vnu) - \vr^\top \exp{(\mC \vnu)} - \vone^\top \log \Gamma(\vy + \vone)                                 \\
-	                     & + \vr^\top \log{(\rho)} + (\vone - \vr)^\top \log{(\vone - \rho)}                                                          \\
-	                     & + \frac{\nu}{2} \log |\mPsi| - \left( \frac{\nu + p + 1}{2} \right) \log{|\mSigma|} - \frac{1}{2} \tr (\mPsi \mSigma^{-1}) \\
-	                     & - \frac{1}{2} \log{|\sigma^2_\vbeta \mI_p|} - \frac{1}{2} \vbeta^\top \sigma_\vbeta^{-2} \mI_p \vbeta                      \\
-	                     & -\frac{1}{2} \log |\mG| - \frac{1}{2} \vu^\top \mG^{-1} \vu                                                                
+	\log p(\vy, \vtheta) & = \quad \vy^\top \mR(\mC \vnu) - \vr^\top \exp{(\mC \vnu)} - \vone^\top \log \Gamma(\vy + \vone)                                 \\
+	                     & \quad + \vr^\top \log{(\rho)} + (\vone - \vr)^\top \log{(\vone - \rho)}                                                          \\
+	                     & \quad + \frac{\nu}{2} \log |\mPsi| - \left( \frac{\nu + p + 1}{2} \right) \log{|\mSigma|} - \frac{1}{2} \tr (\mPsi \mSigma^{-1}) \\
+	                     & \quad - \frac{1}{2} \log{|\sigma^2_\vbeta \mI_p|} - \frac{1}{2} \vbeta^\top \sigma_\vbeta^{-2} \mI_p \vbeta                      \\
+	                     & \quad - \frac{1}{2} \log |\mG| - \frac{1}{2} \vu^\top \mG^{-1} \vu                                                                
 \end{align*}
 
 \subsection{Mean field updates}
@@ -224,7 +229,7 @@ optimal approximation for $q^*(\mSigma)$ is
 	- \frac{\nu + p + m + 1}{2} \log |\mSigma| \right \}.
 \end{align*}
 
-Hence, $q(\mSigma) = \text{Inverse Wishart} \left( \mPsi + \sum_{i=1}^m (\vmu_i \vmu_i^\top + \mLambda_i), \nu + m \right)$.
+Hence, $q^*(\mSigma) = \text{Inverse Wishart} \left( \mPsi + \sum_{i=1}^m (\vmu_i \vmu_i^\top + \mLambda_i), \nu + m \right)$.
 
 
 \subsection{Calculation of the Variational Lower bound}
@@ -249,6 +254,31 @@ $$
 	
 \noindent with $\bE_q \big[ \log |\mSigma_{\vu \vu}| \big] = m \log 2 + \log \left | \Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu} \right | + \sum_{i=1}^m \Psi \left ( \frac{v - i + 1}{2} \right )$
 
+	\section{New writing on the piecewise polynomial idea}
+	The exponential function grows very fast for moderate arguments, which can lead to floating point overflow
+	and underflow issues. We instead define a piecewise function
+	$$
+	\begin{cases}
+	e^{r_{ij}}, r_{ij} < t \\
+	a r_{ij}^2 + b r_{ij} + c, r_{ij} \geq t
+	\end{cases}
+	$$
+	and then choose the co-efficients $a$, $b$ and $c$ such that the function, first and second derivatives all
+	agree at $r_{ij} = t$.
+
+	$$
+	\begin{array}{lllll}
+	e^t &= &a t^2 &+ \quad b t &+ \quad c \\
+	e^t &= &&\quad 2a t &+ \quad b \\
+	e^t &= &&&\quad 2a \\
+	\end{array}
+	$$
+
+	\begin{align*}
+	\therefore a &= e^t / 2 \\
+		b &= e^t - t e^t = (1 - t) e^t \\
+		c &= e^t - at^2 - bt = e^t - e^t/2 t^2 - (1 - t) e^t t = [1 - t^2/2 - (1 - t) t] e^t
+	\end{align*}
 
 \section{Appendix - Algebraic derivations of conditional likelihoods}
 
