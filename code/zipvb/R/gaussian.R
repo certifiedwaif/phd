@@ -80,12 +80,9 @@ safeexp <- function(x)
   t <- 2
   a <- exp(t) / 2
   b <- (1 - t) * exp(t)
-  c < (1 - t^2 / 2 - (1 - t) * t) * exp(t)
+  c <- (1 - (t^2) / 2 - (1 - t) * t) * exp(t)
 
-  if (x < t)
-    exp(x)
-  else
-    a * x^2 + b * x + c
+  ifelse(x < t, exp(x), a * x^2 + b * x + c)
 }
 
 safeexp_diff <- function(x)
@@ -93,12 +90,9 @@ safeexp_diff <- function(x)
   t <- 2
   a <- exp(t) / 2
   b <- (1 - t) * exp(t)
-  c < (1 - t^2 / 2 - (1 - t) * t) * exp(t)
+  c <- (1 - (t^2) / 2 - (1 - t) * t) * exp(t)
 
-  if (x < t)
-    exp(x)
-  else
-    2 * a * x + b
+  ifelse(x < t, exp(x), 2 * a * x + b)
 }
 
 safeexp_diff_diff <- function(x)
@@ -106,12 +100,9 @@ safeexp_diff_diff <- function(x)
   t <- 2
   a <- exp(t) / 2
   b <- (1 - t) * exp(t)
-  c < (1 - t^2 / 2 - (1 - t) * t) * exp(t)
+  c <- (1 - (t^2) / 2 - (1 - t) * t) * exp(t)
 
-  if (x < t)
-    exp(x)
-  else
-    2 * a
+  ifelse(x < t, exp(x), 2 * a)
 }
 
 safeexp_inv <- function(x)
@@ -119,16 +110,17 @@ safeexp_inv <- function(x)
   t <- 2
   a <- exp(t) / 2
   b <- (1 - t) * exp(t)
-  c < (1 - t^2 / 2 - (1 - t) * t) * exp(t)
-  if (x < exp(t))
-    log(x)
-  else
-    (-b + sqrt(b^2 - 4 * a * c)) / (2 * a)
+  c <- (1 - (t^2) / 2 - (1 - t) * t) * exp(t)
+  
+  # Complete the square
+  h <- -b / (2 * a)
+  k <- c - a * h^2
+  ifelse(x < exp(t), log(x), sqrt((x - k) / a) + h)
 }
 
 vtheta_enc <- function(vmu, mR)
 {
-  diag(mR) <- log(diag(mR))
+  diag(mR) <- safeexp_inv(diag(mR))
   Rinds <- which(lower.tri(mR, diag=TRUE))
   c(vmu, mR[Rinds])
 }
@@ -140,7 +132,7 @@ vtheta_dec <- function(vtheta, d)
   Dinds <- d*((1:d)-1)+(1:d)
   Rinds <- which(lower.tri(mR, diag=TRUE))
   mR[Rinds] <- vtheta[(d + 1):length(vtheta)]
-  diag(mR) <- exp(diag(mR))
+  diag(mR) <- safeexp(diag(mR))
   # Threshold entries in the diagonal of mR at 100,000
   for (i in 1:length(Dinds)) {
       mR[Dinds[i]] <- min(c(1.0E5,mR[Dinds[i]]))
