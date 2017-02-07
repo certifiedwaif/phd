@@ -1,0 +1,67 @@
+\documentclass{amsart}
+\title{Meeting with Dr John Ormerod - 7/2/2017}
+
+\input{../Definitions.tex}
+
+\begin{document}
+
+\maketitle
+
+Our choice of $a$ and $b$ is different from Maruyama and George, because they don't handle the "no intercept"
+case. Our choice of $a$ and $b$ gives us closed form expressions.
+
+"Prior is scale invariant" should be changed to "Marginal is scale-invariant"
+
+Hyper prior on g, a mixture of g priors, avoid Bartlett's paradox and information paradox
+
+prior on $\sigma^2$ is improper, Berger justifies that the posterior is proper
+
+Empirical Bayes, maximise marginal likelihood with respect to $g$
+	Local Empirical Bayes, each model
+	Global, marginal distribution given $g$. George and Foster
+
+Zellner-Siow prior on $g$, leads to model selection consistency
+
+Look at Liang 2007 Theorem 3
+
+hyper-g on n prior, Liang 2007
+
+Computationally, use prior on $\vbeta$ to avoid dealing with the log of the determinant of
+$(\mX^\top \mX)^{-1}$
+
+Section 3.
+
+Covariates scale free due to transformation on the covariate matrix $\mX$
+
+Sentence on why $p(\vy)$ depending on gamma functions rather than something nastier like confluent
+hypergeometric functions is important. Gamma functions are easier to deal with computationally
+
+Result 1: The expectation and variance of $\vbeta$
+Proof:
+
+Check Maruyama and George for $R^2 \to 1$ implies $g/(1 + g) \to 1$
+
+Result 2: $p(\sigma^2 | \vy)$
+
+Talk more about Variational Bayes: more than 1 reference. Look at Chong's paper.
+
+As sample size increases empirical Bayes estimators resemble fully Bayes estimators
+
+If we change model slightly, full Bayes becomes computationally difficult whereas VB remains computationally
+tractable
+
+Transfer algebra from the formula sheets to appendix
+
+George and Foster 2000 empirical Bayes estimates
+
+Look at Lee and Clyde model selection in GLMs for desirable properties
+
+Choice of $b$ makes $g$ $\BigO(n)$
+
+Try $t=50$, see if things break
+
+Try larger intercepts, see if you get problems
+
+Look at what Nott and Linda did with a safer alternative to the exponential
+
+\end{document}
