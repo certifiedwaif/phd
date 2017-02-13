@@ -1,0 +1,38 @@
+%\documentclass[colclass=amsart]{combine}% Missing \endcsname inserted.
+\documentclass[12pt]{amsart}% Works
+
+\usepackage[utf8]{inputenc}
+
+\addtolength{\oddsidemargin}{-.75in}%
+\addtolength{\evensidemargin}{-.75in}%
+\addtolength{\textwidth}{1.5in}%
+\addtolength{\textheight}{1.3in}%
+\addtolength{\topmargin}{-.8in}%
+\addtolength{\marginparpush}{-.75in}%
+% \setlength\parindent{0pt}
+% \setlength{\bibsep}{0pt plus 0.3ex}
+
+\usepackage{amsthm}
+\usepackage[authoryear]{natbib}
+\usepackage{graphicx}
+\usepackage{algorithm,algorithmic}
+\usepackage{cancel}
+\usepackage{mathtools}
+\usepackage{algorithm,algorithmic}
+\usepackage[inner=2.5cm,outer=1.5cm,bottom=2cm]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{microtype}
+\usepackage{color}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{res}{Result}%[chapter]
+
+\newcommand{\mgc}[1]{{\color{blue}#1}}
+\newcommand{\joc}[1]{{\color{red}#1}}
+
+\begin{document}
+    \begin{res}
+        Theorem statement
+    \end{res}
+\end{document}
