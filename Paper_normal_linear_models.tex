@@ -106,13 +106,16 @@ of adapting the degree of shrinkage to the prior model dependent on the data.
 
 % VB in general
 
-A challenge to applying this method of model selection is that exact model fitting may be computationally
-infeasible for models involving even moderate numbers of observations and covariates, and popular alternatives
-for fitting Bayesian models such as Monte Carlo Markov Chains (henceforth referred to as MCMC) are still
-extremely computationally intensive. Variational Bayes (see \citep{Ormerod2010}) is a computationally
-efficient, deterministic method of fitting Bayesian models to data. Variational Bayes approximates the true
-posterior $p(\vy, \vtheta)$ by minimising the KL divergence between the posterior and the  approximating
-distribution $q(\vtheta)$.
+A challenge in applying this method of model selection is that exact model fitting \mgc{full Bayesian
+inference?} may be computationally infeasible for models involving even moderate numbers of observations and
+covariates, and popular alternatives for fitting Bayesian models such as Monte Carlo Markov Chains (henceforth
+referred to as MCMC) are still extremely computationally intensive. Variational Bayes (see
+\citep{Ormerod2010}) is a computationally efficient, deterministic method of fitting Bayesian models to data.
+Variational Bayes approximates the true posterior $p(\vy, \vtheta)$ by minimising the KL divergence between
+the posterior and the  approximating distribution $q(\vtheta)$.
+
+Variational Bayes has been applied to the problem of model selection in papers such as in \citep{McGrory2007}
+where the variational lower bound is related to the Deviance Information Criterion.
 
 A linear model with normal priors allows exact inference on the regression and model selection parameters in
 closed form, which might appear to negate the benefits of a variational approximation to the model. However,
@@ -147,6 +150,8 @@ In Section \ref{sec:full_bayes}, we derive expressions that allow fully Bayesian
 In Section \ref{sec:vb}, we present a Variational Bayes approximation to the model and an algorithm for naive mean field updates to fit this model to data. We then show that the mean
 field updates on this model depend only on a single variational parameter, and present a revised algorithm which
 only requires optimisation of this parameter.
+In Section \ref{sec:implementation}, we discuss details of our implementation which made our approach 
+computationally feasible.
 In Section \ref{sec:num_exp} we perform a series of numerical experiments to show the accuracy of our approach. Finally, in Section \ref{sec:conclusion}, we provide a Conclusion and Discussion.
 
 
@@ -163,11 +168,13 @@ matrix of covariates. Let $p(\vtheta)$ be the prior distribution of $\vtheta$, $
 probability distribution of $\vy$, $p(\vtheta | \vy)$ the posterior distribution and $q(\vtheta)$ be the
 approximating probability distribution. 
 
+Throughout the rest of this article, we will assume without loss of generality that
+$\vy^\top\vone = 0$, $\|\vy\|^2 = n$ and the covariates in $\mX$ are centred.
+
 \subsection{Model}
 \label{sec:model}
 
-Consider the
-linear model
+Consider the linear model
 \begin{align*}
 	\vy | \vbeta, \sigma^2 \sim \N_n(\mX \vbeta, \sigma^2 \mI) 
 \end{align*}
@@ -179,27 +186,26 @@ linear model
 	p(g)                 & = \frac{g^b (1 + g)^{-(a + b + 2)}}{\Beta(a + 1, b + 1)} \I(g > 0). 
 \end{align*}
 
-where the prior on $g$ is Zellner's g-prior on the covariance matrices \cite{Goel1986}, as this yields a
-tractable posterior for $\vbeta$ as shown by \citep{Liang2008}. We choose $a$  and $b$ to be $-3/4$ and $(n -
-p)/2 - a - 2$ respectively, following \citep{Maruyama2011}.
-\mgc{Why?}
-The prior on $\sigma^2$ is the Jeffrey's prior, as discussed in \cite{Berger2012}.
+\noindent where the prior on $g$ is Zellner's g-prior on the covariance matrices \citep{Goel1986}, as this
+yields a tractable posterior for $\vbeta$ as shown by \citep{Liang2008}. We choose $a$  and $b$ to be $-3/4$
+and $(n - p)/2 - a - 2$ respectively. This choice of hyperprior on $g$ leads to a closed form expression for
+the Bayes Factor of $\vgamma$ versus the null model, and ensures that $g = \BigO(n)$. Thus, the likelihood can
+be stabilised as $\tr\{\Var(\vbeta | g, \sigma^2)\} = \BigO(1)$, preventing the g-prior from dominating the
+likelihood, as shown in \citep{Maruyama2011}.. Furthermore, as detailed in \citep{Liang2008} this choice of
+hyperprior avoids Bartlett's Paradox and the Information Paradox. The prior on $\sigma^2$ is the Jeffrey's
+prior, as discussed in \citep{Berger2012}.
 
 Zellner constructed a family of priors for a Gaussian regression model using a particular form of conjugate
 Normal-Gamma model, where the prior covariance matrix of $\vbeta$ is taken to be a multiple of the Fisher
 information  matrix by the parameter $g$ \citep{Goel1986}. This places the most prior mass for $\vbeta$ on the
-section of the parameter space where the data is least informative, makes the prior scale-invariant
-
-We consider a linear model with a g-prior, following \citep{Maruyama2011} and \citep{Liang2008}. 
+section of the parameter space where the data is least informative, and makes the marginal likelihood of the
+model scale-invariant.
 
 \section{Fully Bayesian inference}
 \label{sec:full_bayes}
 
 In this section, we derive the expression required for fully Bayesian inference for the model presented in
-Section \ref{sec:model}. Throughout the rest of this article, we will assume without loss of generality that
-$\vy^\top\vone = 0$, $\|\vy\|^2 = n$ and the covariates in $\mX$ are centred.
-
-\subsection{Useful Results}	
+Section \ref{sec:model}. 
 
 \subsection{Derivation of the marginal likelihood}
 
@@ -289,6 +295,11 @@ $$
 \end{array}
 $$
 
+This expression involves Gamma functions rather than confluent hypergeometric functions, due to the choice of
+$b$. This is computationally preferable, as Gamma functions are typically far easier to numerically evaluate
+than confluent hypergeometric functions, which are notoriously prone to overflow and instability
+\citep{Pearson2014}.
+
 \subsection{Posterior distributions of the parameters}
 We are now in a position to derive the expressions for the posterior distributions of each of the parameters.
 
@@ -308,10 +319,10 @@ Using Equation \ref{res:03} and Equation \ref{res:04} we have
 	p(g|\vy) = \frac{(1 -  R^2)^{b+1} g^{b} \left[  1 + g(1 -  R^2) \right]^{-n/2}}{\mbox{Beta}(p/2 + a + 1,b+1)}.
 \end{equation}
 
-\noindent Using the change of variables $h=g/(1+g)$ we have
-\begin{equation}
-	p(h|\vy) = \frac{(1 -  R^2)^{b+1}}{\mbox{Beta}(p/2 + a + 1,b+1)} h^{b}(1 - h)^{2-b+n/2}  (1  - h R^2)^{-n/2}.
-\end{equation}
+% \noindent Using the change of variables $h=g/(1+g)$ we have
+% \begin{equation}
+% 	p(h|\vy) = \frac{(1 -  R^2)^{b+1}}{\mbox{Beta}(p/2 + a + 1,b+1)} h^{b}(1 - h)^{2-b+n/2}  (1  - h R^2)^{-n/2}.
+% \end{equation}
  
 
 \noindent The full conditional for $\vbeta$ is given by
@@ -328,7 +339,23 @@ say something about being unable to get the posterior distribution of $\vbeta$ i
 to find an analytically tractable closed form for the posterior distribution of $\vbeta$. However, we were
 able to find closed form expressions for the posterior expectation and posterior expectation of $\vbeta$.
 
-First, we calculate the posterior variance of $\vbeta$. Using the Law of Total Expectation,
+Result 1: $\E[\vbeta | \vy] = G_1 \vbetahatls$ and
+					$\Var(\vbeta | \vy) = \left( \frac{n}{n - 2} \right) (G_1 - G_2 R^2) (\mX^\top \mX)^{-1} + (G_2 - G_1^2) \vbetahatls \vbetahatls^\top$,
+	\\ where
+	$G_1 = \frac{\Beta(p/2 + a + 1, b + 2)}{\Beta(p /2 + a + 1, b + 1)} (1 - R^2)^{b+1} {}_2 F_1(n/2, b + 1; n/2 + 1; R^2), \text{ and }$ \\
+	$G_2 = \frac{\Beta(p/2 + a + 1, b + 3)}{\Beta(p /2 + a + 1, b + 1)} (1 - R^2)^{b+1} {}_2 F_1(n/2, b + 3; n/2 + 2; R^2)$.
+
+Proof:
+First, we calculate the posterior expectation of $\vbeta$, deferring the calculation of
+$G_1 = \E\left[g/(1+g) \Bigm| \vy \right]$ and $G_2 = \E\left[ \left(g/(1+g) \right)^2 \Bigm| \vy \right]$
+until later.
+\begin{align*}
+	\E[\vbeta | \vy] &= \E_g \left[g/(1+g) \Bigm| \vy \right] \vbetahatls \\
+	&= G_1 \vbetahatls
+\end{align*}
+following from the full conditional of $\vbeta$ above.
+
+Next, we calculate the posterior variance of $\vbeta$. Using the Law of Total Expectation,
 \begin{align*}
 	\Var(\vbeta | \vy) & = \E_g[\Var(\vbeta | \vy)] + \Var_g[\E(\vbeta|\vy, g)]                                                                                                                                                 \\
 	                   & = \E_g\left[\frac{g}{1 + g} \E[\sigma^2|\vy, g] (\mX^\top \mX)^{-1} \Bigm| \vy \right] + \Var_g\left[\frac{g}{1 + g} \vbetahatls \vbetahatls^\top \Bigm| \vy \right]                                   \\
@@ -367,6 +394,14 @@ using Euler's identity
 	G_2 & = \frac{\Beta(p/2 + a + 1, b + 3)}{\Beta(p /2 + a + 1, b + 1)} (1 - R^2)^{b+1} {}_2 F_1(n/2, b + 3; n/2 + 2; R^2).              
 \end{align*}
 
+Result 2:
+\[
+	p(\sigma^2|\vy) 
+		  \ds = \frac{(1 -  R^2)^{b+1} ( n/2)^{n/2}}{\Gamma(n/2)} 
+		(\sigma^2)^{-(n/2 + 1)}\exp\left\{ -  \frac{n}{2 \sigma^{2}}  \right\}  {}_1 F_1\left(
+		b + 1; \frac{n}{2}; \frac{nR^2}{2 \sigma^{2}}  \right)
+\]
+Proof:
 \noindent The full conditional for $\sigma^2$ obtained by integrating out $\vbeta$ is
 \begin{equation}
 	\sigma^2|\vy,g \sim \mbox{IG}\left[\tfrac{n}{2},\tfrac{n}{2}\left( 
@@ -660,22 +695,22 @@ Fully Bayesian model selection can be performed by using the exact expressions f
 \section{Implementation}
 \label{sec:implementation}
 
-\begin{itemize}
-	\item Rank 1 updates of $(\mX^\top \mX)^{-1}$ in $\BigO(np^2)$.
-	\item Graycode traversal such that only one bit changes at a time.
-	\item Special care was taken to minimise memory allocation and deallocation.
-	\item Rcpp, RcppEigen.
-\end{itemize}
+% \begin{itemize}
+% 	\item Rank 1 updates of $(\mX^\top \mX)^{-1}$ in $\BigO(np^2)$.
+% 	\item Graycode traversal such that only one bit changes at a time.
+% 	\item Special care was taken to minimise memory allocation and deallocation.
+% 	\item Rcpp, RcppEigen.
+% \end{itemize}
 
 The fully Bayesian inference and variational approximation to the model in this paper depend on $n$, $p$ and
 $R^2$. To calculate $R^2$ for every model $\vgamma$ under consideration, we implemented an algorithm using
 \texttt{Rcpp} and \texttt{RcppEigen}.
 
-Initially, we calculate $R^2$ for the model including the first covariate, $\vgamma_1 = (1, 0, 0, \ldots, 0,
-0)^\top$. So $(\mX_{\vgamma_1}^\top \mX_{\vgamma_1})^{-1} = (\vx_{\vgamma_1}^\top \vx_{\vgamma_1})^{-1}$ which
-is a scalar, and so can be computed in $\BigO(n)$. Then the set of possible models $\vgamma_i$ is iterated
-through in graycode order. This ensures that only one element of $\vgamma$ changes as each new model is
-visited. As we traverse the space of models $\vgamma$, we calculate
+Initially, we calculate $R^2_\vgamma$ for the model including the first covariate, $\vgamma_1 = (1, 0, 0,
+\ldots, 0, 0)^\top$. So $(\mX_{\vgamma_1}^\top \mX_{\vgamma_1})^{-1} = (\vx_{\vgamma_1}^\top
+\vx_{\vgamma_1})^{-1}$ which is a scalar, and so can be computed in $\BigO(n)$. Then the set of possible
+models $\vgamma_i$ is iterated through in graycode order. This ensures that only one element of $\vgamma$
+changes as each new model is visited. As we traverse the space of models $\vgamma$, we calculate
 \[
 	R^2_\vgamma = \frac{\vy^\top \mX_\vgamma (\mX_\vgamma^\top \mX_\vgamma)^{-1} \mX_\vgamma^\top \vy}{\vy^\top \vy}.
 \]
@@ -1076,5 +1111,110 @@ selection via structured Variational Bayes.
 \appendix
 \section{Derivation of Naive Mean Field Updates}
 \label{sec:appendix}
+For convenience, we will denote $\tau_{\sigma^2} = \E_q \left[ \frac{1}{\sigma^2} \right]$ and $\tau_{g} =
+\E_q \left[ \frac{1}{g} \right]$.
+
+\subsection{$q(\vbeta)$}
+
+\begin{align*}
+	q_\vbeta^*(\vmu_{q(\vbeta)}, \mSigma_{q(\vbeta)}) & \propto \exp \left \{ \E_q[-\frac{1}{2} (\mX \vbeta - \vy)^\top \sigma^{-2} \mI_n (\mX \vbeta - \vy) - \frac{1}{2} \vbeta^\top \sigma^{-2} g^{-1} \mI_p (\mX^\top \mX) \vbeta] \right \} \\
+	                                                  & = \exp \left \{ \E_q \left[-\frac{1}{2} \frac{1}{\sigma^2} (1 + g^{-1})\vbeta^\top \mX^\top \mX \vbeta + \frac{1}{\sigma^2}\vbeta^\top \mX^\top \vy \right] \right \}                    
+\end{align*}
+
+and thus
+$q^*(\vbeta) \sim \N (\vmu_{q(\vbeta)}, \mSigma_{q(\vbeta)} )$
+where $\vmu_{q(\vbeta)} = (1 + \tau_g)^{-1} (\mX^\top \mX)^{-1} \mX^\top \vy$,
+$\mSigma_{q(\vbeta)} = [\tau_{\sigma^2}(1 + \tau_{g})]^{-1}(\mX^\top \mX)^{-1}$.
+
+\small
+\subsection{$q(\sigma^2)$}
+\begin{align*}
+	q(\sigma^2; \alpha_{q(\sigma^2)}, \beta_{q(\sigma^2)}) & \propto \exp \left \{ \E_{-\sigma^2} [-\half \log |2 \pi \sigma^2 \mI_n| - \half (\vy - \mX \vbeta)^\top \sigma^{-2} \mI_n (\vy - \mX \vbeta) - \half \log |2 \pi g \sigma^2 (\mX^\top \mX)^{-1}| - \half \vbeta^\top \sigma^{-2} \frac{1}{g} (\mX^\top \mX) \vbeta] \right \}                        \\
+	                                                       & \propto  \exp \left \{ \E_{-\sigma^2} \left[- \frac{n}{2} \log \sigma^2 - \frac{1}{2 \sigma^2}(\vy - \mX \vbeta)^\top(\vy - \mX \vbeta) - \frac{p}{2} \log \sigma^2 - \frac{1}{2 \sigma^2} \frac{1}{g} \vbeta^\top (\mX^\top \mX) \vbeta - \log \sigma^2\right] \right \}                             \\
+	                                                       & =  \exp \left \{ {-\left(\frac{n + p}{2} + 1\right) \log \sigma^2 - \frac{1}{2 \sigma^2} \E_{q(\vbeta)} \left[ \vy^\top \vy + \left(1 + \frac{1}{g} \right) \vbeta^\top \mX^\top \mX \vbeta - 2 \vbeta^\top \mX^\top \vy \right]}  \right \}                                                          \\
+	                                                       & =  \exp \left \{ -\left(\frac{n + p}{2} + 1 \right)\log \sigma^2  - \frac{1}{2 \sigma^2} [\vy^\top\vy + \left( 1 + \tau_g \right) \vmu_{q(\vbeta)}^\top \mX^\top \mX \vmu_{q(\vbeta)} + \left( 1 + \tau_g \right) \tr(\mX^\top \mX \mSigma_{q(\vbeta)}) - 2 \vy^\top \mX \vmu_{q(\vbeta)} ] \right \} \\
+	                                                       & =  \exp \Bigg \{ -\left(\frac{n + p}{2} + 1 \right)\log \sigma^2  - \frac{1}{2 \sigma^2} [\|\vy\|^2 + \cancel{\left( 1 + \tau_g \right)} (1 + \tau_g)^{\cancel{-2}} \vy^\top \mX^\top \cancel{(\mX^\top \mX)^{-1}} \cancel{\mX^\top \mX} (\mX^\top \mX)^{-1} \mX^\top \vy                             \\
+	                                                       & \quad \quad \quad \quad + \tau_{\sigma^2}^{-1} \cancel{\left( 1 + \tau_g \right)} \cancel{\left( 1 + \tau_g \right)^{-1}} \tr(\cancel{\mX^\top \mX} \cancel{(\mX^\top \mX)^{-1}}) - 2 (1 + \tau_g)^{-1} \vy^\top \mX (\mX^\top \mX)^{-1} \mX^\top \vy ] \Bigg \}                                      \\
+	                                                       & = \exp \left \{ -\left(\frac{n + p}{2} + 1 \right)\log \sigma^2 - \frac{1}{2 \sigma^2} \{n[1 - (1 + \tau_g)^{-1}  R^2] + \tau_{\sigma^2}^{-1} p \} \right \}                                                                                                                                          
+\end{align*}
+
+and thus $q^*(\sigma^2) \sim \IG(\alpha_{q(\sigma^2)}, \beta_{q(\sigma^2)})$ where
+$\alpha_{q(\sigma^2)} = \frac{n + p}{2}$ and $\beta_{q(\sigma^2)} = \frac{1}{2} \{n[1 - (1 + \tau_g)^{-1}  R^2] + \tau_{\sigma^2}^{-1} p \}$.
+
+\subsection{$q(g)$}
+\begin{align*}
+	q(g) & \propto \exp \left\{ \E_{-g} \left[-\frac{p}{2} \log g - \frac{1}{g} \frac{1}{2 \sigma^2} \vbeta^\top \mX^\top \mX \vbeta + b \log g - (a + b + 2) \log(1 + g) \right] \right\}                                                                                                                                                               \\
+	     & = \exp \left \{ \left(b - \frac{p}{2}\right) \log g  - (a + b + 2) \log(1 + g) - \frac{1}{g} \frac{1}{2} \tau_{\sigma^2} \tr[(\mSigma_{q(\vbeta)} + \vmu_{q(\vbeta)} \vmu_{q(\vbeta)}^T) \mX^\top \mX] \right \}                                                                                                                              \\
+	     & = \exp \Biggl \{ \left(b - \frac{p}{2}\right) \log g - (a + b + 2) \log(1 + g)                                                                                                                                                                                                                                                                \\
+	     & \quad \quad \qquad  - \frac{1}{g} \frac{1}{2} \left[\tau_{\sigma^2} (1 + \tau_g)^{-2} \vy^\top \mX^\top \cancel{(\mX^\top \mX)^{-1}} \cancel{\mX^\top \mX} (\mX^\top \mX)^{-1} \mX \vy + \cancel{\tau_{\sigma^2}} \tr{[\cancel{\tau_{\sigma^2}^{-1}} (1 + \tau_g)^{-1} \cancel{\mX^\top \mX} \cancel{(\mX^\top \mX)^{-1}}]} \right]	\biggl \} \\
+	     & = \exp \left \{ \left(b - \frac{p}{2}\right) \log g - (a + b + 2) \log(1 + g) - \frac{1}{g} \frac{1}{2} (1 + \tau_g)^{-1} [\tau_{\sigma^2} (1 + \tau_g)^{-1} n R^2 + p]                                                                                                                                                                       
+	\right \}
+\end{align*}
+
+So setting
+\begin{align*}
+	\nu - 1 & = b - \frac{p}{2}                                                             \\
+	\beta   & = \frac{1}{2} (1 + \tau_g)^{-1} [\tau_{\sigma^2} (1 + \tau_g)^{-1} n R^2 + p] \\
+	\mu - 1 & = (a + b + 2)                                                                 \\
+	\gamma  & = 1                                                                           
+\end{align*}
+
+and solving for $\nu, \beta, \mu$ and $\gamma$ we obtain an ET 234(13)a function (see Identity 7 on 
+page 3.471 of \cite{Gradshteyn1988},
+$\beta^{\frac{\nu - 1}{2} \gamma^{\frac{\nu - 1}{2}}} \Gamma(1 - \mu - \nu) e^{\frac{\beta}{2 \gamma}} W_{\frac{\nu - 1}{2} + \mu, \frac{\nu}{2}}\left(\frac{\beta}{\gamma}\right)$, where $W_{a, b}(x)$ is the
+Whittaker function.
+
+Note that as
+
+\begin{align*}
+	\tau_{\sigma^2} = \frac{n + p}{n[1 - (1 + \tau_g)^{-1} R^2] + p \tau_{\sigma^2}^{-1}} 
+\end{align*}
+
+solving for $\tau_{\sigma^2}$, we obtain
+
+\begin{align*}
+	\tau_{\sigma^2} = \frac{1}{1 - (1 + \tau_g)^{-1} R^2}. 
+\end{align*}
+
+\subsection{Variational lower bound}
+
+\begin{align*}
+	\log \underline{p}(\vy; q) \equiv & \E_q [\log p(\vy | \vbeta, \sigma^2) + \log p(\vbeta | \sigma^2, g)                        
+	+ \log p(\sigma^2) + \log p(g) - \log q(\vbeta)
+	- \log q(\sigma^2) - \log p(g)] \\
+	=                                 & \quad \E_q [\log p(\vy| \vbeta, \sigma^2) + \log p(\vbeta | \sigma^2, g) - \log q(\vbeta)] \\
+	                                  & + \E_q [\log p(\sigma^2) - \log q(\sigma^2)]                                               \\
+	                                  & + \E_q [\log p(g) - \log q(g)]                                                             \\
+	=                                 & T_1 + T_2 + T_3                                                                            
+\end{align*}
+
+\begin{align*}
+	T_1 & = -\half \E_q [\log \sigma^2] -\half \E_q [\sigma^{-2}]] \E_q \tr (\vy - \mX \vbeta)^T (\vy - \mX \vbeta)            
+	- \frac{p}{2} \E_q \log [\sigma^2] - \frac{p}{2} \E_q \log [g] - \half \E_q [\sigma^{-2}]] \E_q g^{-1} \E_q \tr \vbeta^T (\mX^T \mX) \vbeta \\
+	    & \quad + \half \log |\mSigma_{q(\vbeta)}| + k                                                                         \\
+	    & = -\frac{p + 1}{2} \E_q [\log \sigma^2] - \frac{p}{2} \E_q \log g                                                    
+	-\half \E_q [\sigma^{-2}] [\E_q \tr (\vy - \mX \vbeta)^T (\vy - \mX \vbeta) + \E_q g^{-1} \E_q \tr \vbeta^T (\mX^T \mX) \vbeta]
+	+ \half \log |\mSigma_{q(\vbeta)}| + k \\
+	    & = -\frac{p + 1}{2} \left (\log (\beta_{q(\sigma^2)}) - \frac{p}{2} \E_q \log g - \psi(\alpha_{q(\sigma^2)}) \right ) 
+	- \half \E_q [\sigma^{-2}]] \left \{ \| \vy\|^2 - 2 \vy^\top \mX \vmu_{q(\vbeta)} + (1 + \E_q g^{-1}) \tr[(\vmu_{q(\vbeta)} \vmu_{q(\vbeta)}^\top + \mSigma_{q(\vbeta)}) \mX^\top \mX] \right \}  \\
+	    & \quad + \half \log |\mSigma_{q(\vbeta)}| + k                                                                         
+\end{align*}
+where k does not depend on $\vbeta$.
+
+\begin{align*}
+	T_2 & = \E_q [\log p(\sigma^2) - \log q(\sigma^2)]                               \\
+	    & = \tau_{\sigma^2} - \log(\beta_{q(\sigma^2)}) + \psi(\alpha_{q(\sigma^2)}) 
+\end{align*}
+
+\begin{align*}
+	T_3 & = \E_q [\log p(g) - \log q(g)]                                                                                                                     \\
+	    & = \E_q \log \left [ \frac{g^b (1 + g)^{-[(a + 1) + (b + 1)]}}{\Beta(a + 1, b + 1)} \right ] -                                                      
+	\E_q \log \left [ g^{\nu - 1} (g + \gamma)^{\mu - 1} e^{-\frac{\beta}{g}} \right ] \\
+	    & = \E_q [b - (\nu - 1)] \log g - [(a + 1) + (b + 1) - (\mu - 1)] \log (1 + g) - \beta \tau_g                                                        
+	- \E_q \log \Beta(a + 1,  b + 1) \\
+	    & = \quad \E_q \left [\cancel{b} - \cancel{b} + \frac{p}{2} \right ] \log g - [\cancel{(a + 1) + (b + 1)} - \cancel{(a + 1) - (b + 1)}] \log (1 + g) 
+	- \frac{\tau_g}{1 + \tau_g} (\tau_{\sigma^2} \|\vy\|^2 R^2 + p)\\
+	    & \quad - \E_q \log \Beta(a + 1,  b + 1)                                                                                                             \\
+\end{align*}
 
 \end{document}
