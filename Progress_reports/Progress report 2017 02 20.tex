@@ -1,0 +1,67 @@
+\documentclass{beamer}
+
+\usetheme{Warsaw}
+\usepackage{graphicx}
+\usepackage{ulem}
+\input{../include.tex}
+\input{../Definitions.tex}
+
+\usefonttheme{serif}
+
+\title{Progress report - 20/02/2017}
+\author{Mark Greenaway\\PhD candidate\\markg@maths.usyd.edu.au}
+
+\mode<presentation>
+{ \usetheme{boxes} }
+
+\begin{document}
+\begin{frame}
+\maketitle
+\end{frame}
+
+\begin{frame}{Writing}
+\begin{itemize}
+\item I've learned a lot about writing in the past few months. I still have a lot left to learn
+\item Draft of second paper on normal linear model selection is with John for final editing
+\item Now back to my first paper on zero-inflated models
+\item Writing preliminary material for my thesis
+\item ''There's light at the end of the tunnel'' -- John
+\end{itemize}
+\end{frame}
+
+\begin{frame}{safeexp}
+\begin{itemize}
+\item I had a lot of overflow problems the last time I worked on zero-inflated Poisson models, because of the
+			$\exp(x)$ function
+\item John had the idea of defining a piecewise function which behaved like $\exp(x)$ up to a threshold $t$,
+			and then like	a quadratic function beyond that threshold. So
+			$$f(x) = 
+			\begin{cases}
+			e^{x}, x < t \\
+			a x^2 + b x + c, x \geq t
+			\end{cases}
+			$$
+			where $a$, $b$ and $c$ were chosen so that the function, first and second derivatives match at the
+			point $t$.
+\item I found the co-efficients $a$, $b$ and $c$ and implemented this, and so far it's working pretty well
+\item More testing is needed, but this is promising
+\end{itemize}
+\end{frame}
+
+\begin{frame}{R 3.4.0 is coming soon}
+Lots of performance improvements
+\begin{itemize}
+\item A just-in-time compiler will be included
+\begin{quote}
+In 3.4.0, loops in your R scripts and functions you write will be byte-compiled as you use them ("just-in-time"), 
+so you can get improved performance for your R code without taking any additional actions.
+\end{quote}
+\item Linear algebra performance improvements
+\item Accumulating vectors in a loop is faster
+\item Improvements for packages with compiled code
+\end{itemize}
+It's good that the community is interested in working on these issues. That makes me feel things are headed in
+the right direction. Every little bit helps
+\end{frame}
+
+\end{document}
