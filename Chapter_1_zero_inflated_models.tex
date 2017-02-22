@@ -151,7 +151,9 @@ and $\text{Inverse Wishart}(\mPsi, v)$ denote the probability distribution
 $\tfrac{|\mPsi|^\frac{v}{2}}{2^{\frac{vp}{2}} \Gamma_p{(\tfrac{v}{2})}} |\mX|^{-\tfrac{v + p + 1}{2}} \exp{[-\half \tr{(\mPsi \mX^{-1})}]}$ where $\Gamma_p{(x)}$ denotes the multivariate gamma function and
 $\tr$ is the trace function.
 
-\subsection{Modeling zero-inflated Poisson data}
+\subsection{Modelling zero-inflated Poisson data}
+
+\mgc{Re-write this paragraph}
 
 Suppose we have a sample of counts $y_i$, $1\le i\le n$, where there are excessive number of zeros  for a
 Poisson model, but the sample otherwise behaves like a Poisson sample. There are two main  parameterizations
@@ -412,7 +414,7 @@ $$
 
 \noindent where $\mD = \left[ (\mPsi + \sum_{i=1}^m \vmu_i \vmu_i^\top + \mLambda_{\vu_i\vu_i}) / (v - p - 1) \right]^{-1}$. 
 
-\noindent This is close in form to a Poisson regression model. Poisson regression models with normal priors
+This is close in form to a Poisson regression model. Poisson regression models with normal priors
 have no closed form for their mean field updates due to non- conjugacy, but can be fit using Gaussian
 Variational Approximation, as in \citep{ormerod09}. The model can be fit using Algorithm
 \ref{alg:algorithm_one} below.
@@ -437,7 +439,7 @@ Variational Approximation, as in \citep{ormerod09}. The model can be fit using A
 		\end{algorithmic}
 	\end{algorithm}
 			
-	\section{Implementation / Numerical optimisation strategies}
+	\section{Optimising the Gaussian Part of the Model}
 	\label{sec:algorithms}
 		
 	In this section, we compare the accuracy, stability and speed of a number of algorithms for fitting the
@@ -455,14 +457,14 @@ Variational Approximation, as in \citep{ormerod09}. The model can be fit using A
 	% NR
 	% Detail the function and its derivatives
 		
-	\noindent Taylor expanding the full log likelihood once around the mode yields the following approximation to 
+	Taylor expanding the full log likelihood once around the mode yields the following approximation to 
 	the	log-likelihood:
 	\begin{align*}
 		\log \underline{p}(\vmu, \mLambda; \vy) = \vy^\top\mP\mC\vmu - \vp^\top\exp \left (\mC \vmu \right ) - \half \vmu^\top \mSigma^{-1} \vmu. 
 	\end{align*}
 		
 	\noindent This can be iteratively optimised with respect to $\vmu$ and $\mLambda$ using a Newton-Raphson style
-	algorithm.
+	algorithm, with the derivatives for $\vmu$ and $\mLambda$ given below.
 	\mgc{Are the derivatives better placed in the appendices?}
 	\begin{align*}
 		\frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \vmu}     & \approx \mP \mC (\vy - \exp{(\mC \vmu)}) - \mSigma^{-1} \vmu \text{ and} \\
@@ -491,10 +493,10 @@ Variational Approximation, as in \citep{ormerod09}. The model can be fit using A
 		
 	The full variational likelihood for Generalised Linear Mixed models is computationally difficult to compute,
 	requiring the evaluating of a high dimensional integral. However, \citep{ormerod09} devised an accurate
-	approximation to the full variational likelihood which only requires the evaluation of a substantially
-	simpler univariate function.
+	approximation to the full variational likelihood, the Gaussian Variational Lower Bound, which only requires the 
+	evaluation of a substantially simpler univariate function.
 	
-	The approximate variational likelihood still needs to be optimised over the set of $\vmu$ and $\mLambda$
+	To optimise the Gaussian component of the model in each iteration of \ref{alg:algorithm_one}, the Gaussian variational lower bound must to be optimised over the set of $\vmu$ and $\mLambda$
 	values, and $\mLambda$ in particular is both of high dimension $(p + mb)^2$ and constrained to be
 	semi-positive definite. Thus care must be taken in its' parameterisation in order to optimise
 	$\mLambda$ effectively.
@@ -517,31 +519,6 @@ Variational Approximation, as in \citep{ormerod09}. The model can be fit using A
 	\end{align*}
 	\noindent with respect to $\vmu, \mLambda$, keeping $\vp$, $\mSigma$, and $\rho$ fixed.
 		
-	To ensure symmetry of $\mLambda$, we parameterise the optimisation problem in terms of $\mLambda$'s
-	Cholesky factor  $\mLambda = \mR^\top \mR$. We optimise over the space $(\vmu, \overline{\mR})$, where $\vmu
-	\in \R^{p + mq}$ and $\overline{\mR}$ is a lower-triangular $(p + mq) \times (p + mq)$ matrix. Then
-		
-	\begin{equation*}
-		\mR_{ij} =
-		\begin{cases}
-			\exp(\overline{\mR}_{ij}), & i = j             \\
-			\overline{\mR}_{ij},       & i > j             \\
-			0,                         & \text{otherwise}, 
-		\end{cases}
-	\end{equation*}
-		
-	\noindent exponentiating the diagonal to ensure positive-definiteness of $\mR$.
-		
-	This parameterisation can lead to numeric overflow when the diagonals of $\overline{\mR}$ become moderately
-	large, which can lead to singular matrices when attempting to invert $\mLambda$. We dealt with this issue by
-	thresholding the values of the diagonals.  This problem was mitigated by  instead working with the Cholesky
-	factorisation of $\mLambda^{-1}$, allowing us to solve a system of equations rather than invert and multiply
-	by a matrix, which is also faster and more numerically stable. We use knowledge of the regression  model we
-	are fitting to specify a sparse matrix structure, greatly reducing the dimension of   the problem and thus
-	improving both computational speed and numeric accuracy.
-		
-	The implementation of these algorithms was not without its' challenges, chiefly numerical issues encountered during testing and verification of the accuracy of the model fitting. Using the exponential function to parameterise the main diagonal coupled with L-BFGS-B's unconstrained line search and \texttt{optim()}'s lack of robustness to infinities lead to many overflow problems which may have been lessened or dealt with entirely by using a function with a less aggressive growth rate, such as an appropriate piecewise quadratic.
-
 	The first variant of the Gaussian Variational Approximation algorithm that we present optimises the
 	Gaussian variational lower bound of the log likelihood with respect to $\vmu$ and the Cholesky decomposition
 	$\mR$ of   $\mLambda$, that is, $\mLambda = \mR \mR^\top$. The resulting function is below and can be
@@ -560,43 +537,6 @@ Variational Approximation, as in \citep{ormerod09}. The model can be fit using A
 		\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda} & = \left [\mLambda^{-1} - \mP \mC^\top \exp(\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)) \mP \mC) - \mSigma^{-1} \right ] \mR. 
 	\end{align*}
 
-	\noindent Any symmetric matrix $\mSigma$ can be written as a product of its' Cholesky factors, $\mSigma =
-	\mR \mR^\top$   where $\mR$ is lower triangular. $\mR$ is unique if $\mR_{ii} \geq 0$.
-	
-	\begin{align*}
-		&\begin{pmatrix}
-		\mR_{11}          & 0                                    & 0                                     \\
-		\mR_{21}          & \mR_{22}                             & 0                                     \\
-		\mR_{31}          & \mR_{32}                             & \mR_{33}                              
-		\end{pmatrix}
-		\begin{pmatrix}
-		\mR_{11}          & \mR_{21}                             & \mR_{31}                              \\
-		0                 & \mR_{22}                             & \mR_{32}                              \\
-		0                 & 0                                    & \mR_{33}                              
-		\end{pmatrix}
-		\\
-		=& \begin{pmatrix}
-		\mR_{11}^2        &                                      & \text{symmetric}                      \\
-		\mR_{21}\mR_{11} & \mR_{21}^2 + \mR_{22}^2 \\
-		\mR_{31} \mR_{11} & \mR_{31}\mR_{21} + \mR_{32} \mR_{22} & \mR_{31}^2 + \mR_{32} ^2 + \mR_{33}^2 
-		\end{pmatrix}.
-	\end{align*}
-	
-	% \noindent By noticing that the lower rows of the product depend on the higher rows of the Cholesky factor, we
-	% observe that by re-ordering the fixed and random effects in $\mLambda$ so that the , we arrive at a covariance structure which is sparse in the first diagonal block. Thus the Cholesky factor of $\mLambda$ that we optimise over is as sparse as possible. This reduces the dimension of the optimisation problem we have to solve from
-	% $\BigO(np^2)$ to $\BigO(np)$.
-	
-	By interchanging the fixed and random effects in the design matrix $\mC = [\mX \mZ]$ to $\mC = [\mZ \mX]$, and re-ordering the dimensions of $\vmu, \mLambda$ and $\mSigma$ in the same manner, the independence between the
-	blocks relating to the random effects in $\mZ$ induce sparsity in the Cholesky factor $\mR$ of
-	$\mLambda^{-1}$, as can be seen in Figures \ref{fig:covfixedrandom}, \ref{fig:covrandomfixed},
-	\ref{fig:cholfixedrandom} and \ref{fig:cholrandomfixed}. Thus the Gaussian $q(\vnu) \sim \N(\vmu, \mLambda)$ can be optimised over a space of dimension $\half p (p + 1) + pq + \half q (q + 1)$ rather than dimension
-	$\half (p + mq) (p + mq + 1)$ as in the dense parameterisation. This leads to subtantial performance gains
-	when $m$ is large, as is typically the case in problems of practical importance such as longitudinal or 
-	clinical trials with many subjects or the application presented in Section \ref{sec:application}.
-		
-	We parameterise $\mLambda$ as $\mLambda = \mR \mR^\top$ so that is is guaranteed to be symmetric, and
-	we only have $p(p-1)/2$ parameters to deal with instead of $p^2$ parameters, some of which are constrained. By re-ordering the fixed and random effects in $\mLambda$, we end up with a covariance structure which is sparse in the first diagonal block.
-	
 	\begin{figure}[p]
 		\caption{\tiny Covariance matrix -- Fixed effects before random effects}
 		\label{fig:covfixedrandom}
@@ -626,30 +566,16 @@ Variational Approximation, as in \citep{ormerod09}. The model can be fit using A
 	\noindent The second variant of the Gaussian Variational Approximation algorithm is similiar to the first, but
 	instead of optimising the Gaussian variational lower bound with respect to $\vmu$ and the Cholesky factor
 	$\mR$ of $\mLambda$, we instead optimise the Cholesky factor of the inverse of $\mLambda$ i.e. $\mLambda =
-	(\mR \mR^\top)^{-1}$. We optimise over the space $(\vmu, \overline{\mR})$ as before, but now 
-		
-	\begin{equation*}
-		\mR_{ij} =
-		\begin{cases}
-			\exp(-\overline{\mR}_{ij}), & i = j             \\
-			\overline{\mR}_{ij},        & i > j             \\
-			0,                          & \text{otherwise}, 
-		\end{cases}
-	\end{equation*}
-	
-	\noindent This new choice of parameterisation allows us to calculate $\half \text{diag}(\mC \mLambda
-	\mC^\top)$ by solving the linear systems $\mR \va = \mC_{i}, i=1, \ldots, n$ for   $\va$ and then calculating
-	$\va^\top\va$ where $\mC_{i} = $ the $i$th row of $\mC$, rather than calculating $\text{diag}(\mC \mLambda
-	\mC^\top)$ directly.
-		
-	\noindent The Gaussian variational lower bound in this parameterisation is
+	(\mR \mR^\top)^{-1}$.
+
+	The Gaussian variational lower bound in this parameterisation is
 	\begin{align*}
 		\log \underline{p}(\vmu, \mLambda; \vy) & = \quad \vy\mP\mC \vmu - \vp^\top \exp(\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)) - \half \vmu^\top \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} \\
 		                                        & \quad- \tfrac{p}{2} \log{(2 \pi)} + \half \log{|\mSigma^{-1}|} + \tfrac{p}{2} \log{(2 \pi)} + \tfrac{p}{2} - \log{|\mR|}                                             
 	\end{align*}
 		
-	\noindent The derivative with respect to $\vmu$ is the same as that in the GVA algorithm, but as the parameterisation of
-	$\mLambda$ has changed, the  derivative with respect to $\mLambda$ becomes
+	\noindent The derivative with respect to $\vmu$ is the same as that in the first variant of the algorithm, but 
+	as the parameterisation of $\mLambda$ has changed, the  derivative with respect to $\mLambda$ becomes
 	\begin{align*}
 		\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda}
 		  & = \hphantom{-}(\mLambda^{-1} + \mH)(-\mLambda \mR \mLambda) \\
@@ -687,7 +613,92 @@ Variational Approximation, as in \citep{ormerod09}. The model can be fit using A
 		
 	% Splines
 		
-	\section{Computational cost of Gaussian Variational Approximation approaches}
+	\section{Parameterisations and computational cost of Gaussian Variational Approximation approaches}
+
+	\subsection{Covariance parameterisation of $\mLambda$}
+
+	To ensure symmetry of $\mLambda$, we parameterise the optimisation problem in terms of $\mLambda$'s
+	Cholesky factor  $\mLambda = \mR^\top \mR$. We optimise over the space $(\vmu, \overline{\mR})$, where $\vmu
+	\in \R^{p + mq}$ and $\overline{\mR}$ is a lower-triangular $(p + mq) \times (p + mq)$ matrix. Then
+		
+	\begin{equation*}
+		\mR_{ij} =
+		\begin{cases}
+			\exp(\overline{\mR}_{ij}), & i = j             \\
+			\overline{\mR}_{ij},       & i > j             \\
+			0,                         & \text{otherwise}, 
+		\end{cases}
+	\end{equation*}
+		
+	\noindent exponentiating the diagonal to ensure positive-definiteness of $\mR$. We parameterise $\mLambda$
+	as $\mLambda = \mR \mR^\top$ so that is is guaranteed to be symmetric, and we only have $p(p-1)/2$ 
+	parameters to deal with instead of $p^2$ parameters, some of which are constrained. 
+
+	\mgc{safeexp}
+	This parameterisation can lead to numeric overflow when the diagonals of $\overline{\mR}$ become moderately
+	large, which can lead to singular matrices when attempting to invert $\mLambda$. We dealt with this issue by
+	thresholding the values of the diagonals.  This problem was mitigated by  instead working with the Cholesky
+	factorisation of $\mLambda^{-1}$, allowing us to solve a system of equations rather than invert and multiply
+	by a matrix, which is also faster and more numerically stable. We use knowledge of the regression  model we
+	are fitting to specify a sparse matrix structure, greatly reducing the dimension of   the problem and thus
+	improving both computational speed and numeric accuracy.
+
+	% \noindent By noticing that the lower rows of the product depend on the higher rows of the Cholesky factor, we
+	% observe that by re-ordering the fixed and random effects in $\mLambda$ so that the , we arrive at a covariance structure which is sparse in the first diagonal block. Thus the Cholesky factor of $\mLambda$ that we optimise over is as sparse as possible. This reduces the dimension of the optimisation problem we have to solve from
+	% $\BigO(np^2)$ to $\BigO(np)$.
+	
+	Any symmetric matrix $\mLambda$ can be written as a product of its' Cholesky factors, $\mLambda =
+	\mR \mR^\top$ where $\mR$ is lower triangular. $\mR$ is unique if $\mR_{ii} \geq 0$.
+	
+	\begin{align*}
+		&\begin{pmatrix}
+		\mR_{11}          & 0                                    & 0                                     \\
+		\mR_{21}          & \mR_{22}                             & 0                                     \\
+		\mR_{31}          & \mR_{32}                             & \mR_{33}                              
+		\end{pmatrix}
+		\begin{pmatrix}
+		\mR_{11}          & \mR_{21}                             & \mR_{31}                              \\
+		0                 & \mR_{22}                             & \mR_{32}                              \\
+		0                 & 0                                    & \mR_{33}                              
+		\end{pmatrix}
+		\\
+		=& \begin{pmatrix}
+		\mR_{11}^2        &                                      & \text{symmetric}                      \\
+		\mR_{21}\mR_{11} & \mR_{21}^2 + \mR_{22}^2 \\
+		\mR_{31} \mR_{11} & \mR_{31}\mR_{21} + \mR_{32} \mR_{22} & \mR_{31}^2 + \mR_{32} ^2 + \mR_{33}^2 
+		\end{pmatrix}.
+	\end{align*}
+
+	\noindent We exploit this structure. By interchanging the fixed and random effects in the design matrix $\mC = [\mX \mZ]$ to $\mC = [\mZ \mX]$, and re-ordering the dimensions of $\vmu, \mLambda$ and $\mSigma$ in the same manner, the independence between the
+	blocks relating to the random effects in $\mZ$ induce sparsity in the Cholesky factor $\mR$ of
+	$\mLambda^{-1}$, as can be seen in Figures \ref{fig:covfixedrandom}, \ref{fig:covrandomfixed},
+	\ref{fig:cholfixedrandom} and \ref{fig:cholrandomfixed}. Thus the Gaussian $q(\vnu) \sim \N(\vmu, \mLambda)$ can be optimised over a space of dimension $\half p (p + 1) + pq + \half q (q + 1)$ rather than dimension
+	$\half (p + mq) (p + mq + 1)$ as in the dense parameterisation. This leads to subtantial performance gains
+	when $m$ is large, as is typically the case in problems of practical importance such as longitudinal or 
+	clinical trials with many subjects or the application presented in Section \ref{sec:application}.
+		
+	By re-ordering the fixed and random effects in $\mLambda$, we end up with a covariance structure which is 
+	sparse in the first diagonal block.
+
+	\subsection{Precision parameterisation}
+
+	We optimise over the space $(\vmu, \overline{\mR})$ as before, but now 
+		
+	\begin{equation*}
+		\mR_{ij} =
+		\begin{cases}
+			\exp(-\overline{\mR}_{ij}), & i = j             \\
+			\overline{\mR}_{ij},        & i > j             \\
+			0,                          & \text{otherwise}, 
+		\end{cases}
+	\end{equation*}
+	
+	\noindent This new choice of parameterisation allows us to calculate $\half \text{diag}(\mC \mLambda
+	\mC^\top)$ by solving the linear systems $\mR \va = \mC_{i}, i=1, \ldots, n$ for   $\va$ and then calculating
+	$\va^\top\va$ where $\mC_{i} = $ the $i$th row of $\mC$, rather than calculating $\text{diag}(\mC \mLambda
+	\mC^\top)$ directly.
+	
+	The implementation of these algorithms was not without its' challenges, chiefly numerical issues encountered during testing and verification of the accuracy of the model fitting. Using the exponential function to parameterise the main diagonal coupled with L-BFGS-B's unconstrained line search and \texttt{optim()}'s lack of robustness to infinities lead to many overflow problems which may have been lessened or dealt with entirely by using a function with a less aggressive growth rate, such as an appropriate piecewise quadratic.
 	
 	The main computational cost is the evaluation of the variational lower bound and its' derivatives. By virtue
 	of their dimension, the expressions involving $\mLambda$ dominate the computational cost. The key term is
