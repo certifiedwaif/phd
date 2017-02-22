@@ -122,32 +122,29 @@ and $b$ be the block size for each of those individuals.
 We use $\vone_p$ and $\vzero_p$ to denote the $p \times 1$ column vector with all entries equal to 1 or 0,
 respectively.
 
-Let $\vy$ by the $n \times 1$ vector.
+$\vy$ by the $n \times 1$ vector. The norm of a column vector $\vv$, defined to be $\sqrt{\vv^\top \vv}$, is 
+denoted by $\|\vv\|$. For a $p \times 1$ vector $\va$, we let $\diag{(\va)}$ denote the $p \times p$.
 
-The norm of a column vector $\vv$, defined to be $\sqrt{\vv^\top \vv}$, is denoted by $\|\vv\|$.
-For a $p \times 1$ vector $\va$, we let $\diag{(\va)}$ denote the $p \times p$.
-
-Let $\vtheta$ be the parameter vector in $\R^p$,
-$\mX$ be a matrix with dimensions $n \times p$,
-$\mZ$ be a matrix with dimensions $n \times m b$
+$\vtheta$ is the parameter vector in $\R^p$,
+$\mX$ is the design matrix of fixed effects with dimensions $n \times p$,
+$\mZ$ is the design matrix of random effects with dimensions $n \times m b$
 and $\mC = [ \mX \mZ ]$.
 
-Let $\vbeta$ be the $p \times 1$ column vector representing the fixed effects,
+$\vbeta$ is the $p \times 1$ column vector representing the fixed effects,
 $\vu$ be the $m b \times 1$ column vector representing the random effects
 and $\vnu = [\vbeta^\top, \vu^\top]$.
 
-Let $\mSigma$, $\mPsi$ and $\mLambda$ be $(p + m b) \times (p + m b)$ matrices.
+$\mSigma$, $\mPsi$ and $\mLambda$ are $(p + m b) \times (p + m b)$ matrices.
 
-Let $\vp$ be the $n \times 1$ column vector of probabilities that each observation in $\vy$ is non-zero.
+$\vp$ is the $n \times 1$ column vector of probabilities that each observation in $\vy$ is non-zero.
 
-Let $\expit(x)$ denote the function $\tfrac{1}{1 + \exp(-x)}$, the inverse of the logit function.
+$\expit(x)$ denotes the function $\tfrac{1}{1 + \exp(-x)}$, the inverse of the logit function.
 
-Let $p(x)$ be the full probability distribution, and $q(x)$ be the approximating probability distribution.
+$p(x)$ is the full probability distribution, $q(x)$ the approximating probability distribution.
+and $q^*(x)$ the optimal approximating probability distribution.
 
-Let $q^*(x)$ be the optimal approximating probability distribution.
-
-Let $\text{Bernoulli}(\pi)$  denote the probability distribution $\pi^k (1 - \pi)^{1-k}$
-and $\text{Inverse Wishart}(\mPsi, v)$ denote the probability distribution
+$\text{Bernoulli}(\pi)$ denotes the probability distribution $\pi^k (1 - \pi)^{1-k}$
+and $\text{Inverse Wishart}(\mPsi, v)$ denotes the probability distribution
 $\tfrac{|\mPsi|^\frac{v}{2}}{2^{\frac{vp}{2}} \Gamma_p{(\tfrac{v}{2})}} |\mX|^{-\tfrac{v + p + 1}{2}} \exp{[-\half \tr{(\mPsi \mX^{-1})}]}$ where $\Gamma_p{(x)}$ denotes the multivariate gamma function and
 $\tr$ is the trace function.
 
@@ -155,7 +152,7 @@ $\tr$ is the trace function.
 
 \mgc{Re-write this paragraph}
 
-Suppose we have a sample of counts $y_i$, $1\le i\le n$, where there are excessive number of zeros  for a
+We consider have a sample of counts $y_i$, $1\le i\le n$, where there are excessive number of zeros for a
 Poisson model, but the sample otherwise behaves like a Poisson sample. There are two main  parameterizations
 for modelling such data. The first approach models the probability of a zero by $\rho$ and adjusts for counts
 greater than zero. This model uses
@@ -212,7 +209,7 @@ a vector of regression coefficients. Let $\vr = (r_1,\ldots,r_n)$
 
 The $j$th predictor/response pair for the $i$th group is denoted by $(\vx_{ij}, \vy_{ij}), 1 \leq j \leq n_i, 1 \leq i \leq m$, where $\vx_{ij} \in \R$, and the $\vy_{ij}$ are nonnegative integers.
 
-\noindent For each $1 \leq i \leq m$, define the $n_i \times 1$ vectors $\vy_{ij} = [\vy_{i 1}, \ldots, \vy_{i
+For each $1 \leq i \leq m$, define the $n_i \times 1$ vectors $\vy_{ij} = [\vy_{i 1}, \ldots, \vy_{i
 	n_i}]^\top$ and let $\vone$ define a vector of ones of appropriate length, where the first of these vectors is
 the response. It is reasonable to assume that the vectors $\vy_1, \ldots, \vy_m$ are independent of each
 other.
@@ -277,6 +274,23 @@ random slopes and $\rho_{\vu_1 \vu_2}$ is the correlation between the random int
 % which is different for the random intercept, slope and spline cases?}
 % \joc{(Perhaps it is wroth spelling out all of the various random effects structures that we will be using. Consider templating from Zhao \etal (2006).))}
 \mgc{Need more detail, ala Zhao paper page 38, Example 1 and Example 2. Spline case still to go.}
+
+In the spline case, we use the cubic spline basis
+$1$, $x$, $x^3$, $(x - \kappa_1)_+$, \ldots, $(x - \kappa_K)_+$, where $K$ is the number of knots.
+$\mSigma$ is a $K + 2$ banded matrix, where $K$ is the number of knots. Banded matrices
+are highly sparse, and matrix operations can be performed on them in $\BigO(n)$ time.
+
+The matrix $\mSigma$ is symmetric, with contents
+\[
+	\mSigma =
+	\begin{pmatrix}
+	\sigma^2_{\text{intercept}} \\
+		\rho_{\text{intercept} x} & \sigma^2_x \\
+		\rho_{\text{intercept} x^2} & \rho_{x x^2} & \sigma^2_{x^2} \\
+		\rho_{\text{intercept} x^3} & \rho_{x x^3} & \rho_{x^2 x^3} & \sigma^2_{x^3} \\
+		0 & \rho_{x (x - \kappa_1)^3_+} & \rho_{x^2 (x-\kappa_1)_+^3} & \rho_{x^3 (x - \kappa_1)_+^3} & \sigma^2_{(x - \kappa_1)_+^3}
+	\end{pmatrix}
+\]
 
 \section{Variational Bayes}
 \label{sec:model_and_data}
