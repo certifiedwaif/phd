@@ -127,7 +127,6 @@ create_accuracy_df <- function(accuracy, make_colnames=FALSE) {
   rows <- length(accuracy)
   df <- matrix(NA, rows, cols)
   for (i in 1:length(accuracy)) {
-    cat(i, "\n")
     l <- accuracy[[i]]
     vec <- c(l$vbeta_accuracy, l$vu_accuracy, l$sigma2_vu_accuracy, l$rho_accuracy)
     df[i, ] <- vec
@@ -214,7 +213,7 @@ median_accuracy_graph_all <- function(test) {
   {
     mean_vu <- matrix(0, nrow(accuracy_df), b)
     for (i in 1:b) {
-      mean_vu[, i] <- apply(accuracy_df[, (p + 1) + i - 1 + 0:(m - 1) * b], 2, function(x) mean(as.numeric(x)))
+      mean_vu[, i] <- apply(accuracy_df[, p + i + 0:(m - 1) * b], 1, function(x) mean(as.numeric(x)))
     }
     return(mean_vu)
   }
@@ -258,7 +257,7 @@ median_accuracy_graph_all <- function(test) {
   #   acc <- 100.0 * acc
   # }
   boxplot(acc,
-          col=gray(1:4),
+          col=gray(1/1:4),
           xaxt="n",
           ylim=c(0.0, 100.0),
           ylab="Accuracy")
@@ -283,7 +282,7 @@ median_accuracy_graph_all <- function(test) {
          at = 1:7 * 4 - 0.25,
          tick=TRUE)
   }
-  legend("bottomright", c("Laplace", "GVA", "GVA NP", "GVA FP"), lty=1, col=gray(1:4))
+  legend("bottomright", c("Laplace", "GVA", "GVA NP", "GVA FP"), lty=1, col=gray(1/1:4))
   title(sprintf("Combined median accuracy graph - %s", test))
   dev.off()
   # TODO: Label the axes better
