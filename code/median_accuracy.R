@@ -72,7 +72,7 @@ load_stan_data <- function(i, test)
 median_accuracy <- function(approximation="gva", test="intercept", save_flag=FALSE)
 {
   if (save_flag) {
-    ITER <- 100
+    ITER <- 10
 
     # Saving the fit allows us to skip the recompilation of the C++ for the model
     # Update: Well, it's supposed to. Stan seems to want to keep recompiling the
@@ -86,7 +86,7 @@ median_accuracy <- function(approximation="gva", test="intercept", save_flag=FAL
       } else {
         mult <- result
       }
-      var_result <- zipvb(mult, method=approximation, verbose=TRUE)
+      var_result <- zipvb(mult, method=approximation, verbose=FALSE)
       stan_fit <- load_stan_data(i, test)
       mcmc_samples <- stan_fit$mcmc_samples
       # Must handle the case where integrate() throws a non-finite function value error
@@ -122,20 +122,23 @@ median_accuracy <- function(approximation="gva", test="intercept", save_flag=FAL
 }
 
 create_accuracy_df <- function(accuracy, make_colnames=FALSE) {
-  # Construct a data frame
-  vbeta_accuracy <- t(sapply(accuracy, function(x) {x$vbeta_accuracy}))
-  vu_accuracy <- t(sapply(accuracy, function(x) {x$vu_accuracy}))
-  sigma2_vu_accuracy <- t(sapply(accuracy, function(x) {x$sigma2_vu_accuracy}))
-  if (class("sigma2_vu_accuracy") != "matrix")
-    sigma2_vu_accuracy <- as.matrix(sigma2_vu_accuracy)
-  rho_accuracy <- sapply(accuracy, function(x) {x$rho_accuracy})
-  accuracy_df <- cbind(vbeta_accuracy, vu_accuracy, sigma2_vu_accuracy, rho_accuracy)
+  l <- accuracy[[1]]
+  cols <- length(c(l$vbeta_accuracy, l$vu_accuracy, l$sigma2_vu_accuracy, l$rho_accuracy))
+  rows <- length(accuracy)
+  df <- matrix(NA, rows, cols)
+  for (i in 1:length(accuracy)) {
+    cat(i, "\n")
+    l <- accuracy[[i]]
+    vec <- c(l$vbeta_accuracy, l$vu_accuracy, l$sigma2_vu_accuracy, l$rho_accuracy)
+    df[i, ] <- vec
+  }
+  accuracy_df <- as.data.frame(df)
   if (make_colnames) {
     colnames(accuracy_df) <- c("vbeta_0", "vbeta_1", 
-      sapply(1:ncol(vu_accuracy), function(x) paste0("vu_", x)),
-      sapply(1:ncol(sigma2_vu_accuracy), function(x) paste0("sigma2_vu_", x)), "rho")
+      sapply(1:length(l$vu_accuracy), function(x) paste0("vu_", x)),
+      sapply(1:length(l$sigma2_vu_accuracy), function(x) paste0("sigma2_vu_", x)), "rho")
   }
-  accuracy_df
+  return(accuracy_df)
 }
 
 # Somehow do this across all approximations.
@@ -255,7 +258,7 @@ median_accuracy_graph_all <- function(test) {
   #   acc <- 100.0 * acc
   # }
   boxplot(acc,
-          col=1:4,
+          col=gray(1:4),
           xaxt="n",
           ylim=c(0.0, 100.0),
           ylab="Accuracy")
@@ -280,7 +283,7 @@ median_accuracy_graph_all <- function(test) {
          at = 1:7 * 4 - 0.25,
          tick=TRUE)
   }
-  legend("bottomright", c("Laplace", "GVA", "GVA NP", "GVA FP"), lty=1, col=1:4)
+  legend("bottomright", c("Laplace", "GVA", "GVA NP", "GVA FP"), lty=1, col=gray(1:4))
   title(sprintf("Combined median accuracy graph - %s", test))
   dev.off()
   # TODO: Label the axes better
