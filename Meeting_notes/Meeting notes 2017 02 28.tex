@@ -1,0 +1,46 @@
+\documentclass{amsart}
+\title{Meeting with Dr John Ormerod - 28/2/2017}
+
+\input{../Definitions.tex}
+
+\usepackage{amsmath, amsthm, amssymb}
+
+\begin{document}
+
+\maketitle
+
+Second paper is very equation heavy
+First paper seems better in this regard
+Compare old thresholdless version with new threshold version
+
+\section{Third project}
+\[
+	q(g) = \sum_{k=1}^K w_k \I(\gamma = \gamma_k)
+\]
+
+$\vgamma_1, \ldots, \vgamma_k$ are atoms or particles
+
+$\log p(\vy) \geq \log \underline{p}(y; q) = \sum_{k=1}^K w_k \log p(\vy, \vgamma_k) - w_k \log w_k$
+
+where the last term is the entropy term, repels particles which are close together. So this balances goodness
+of fit against a diverse range of solutions.
+Constructed under the assumption that each of the gammas is unique
+\[
+	w_k = \frac{p(\vy, \vgamma_k)}{\sum_j p(\vy, \vgamma_j)}
+\]
+where
+\[
+	\vgamma_{jk} = \begin{cases}
+		1 \text{ if } p(\vy, \vgamma_k^{(j, 1)}) > p(\vy, \vgamma_k^{(j, 0)})
+		0 \text{ otherwise}
+	\end{cases}
+\]
+Example $K = p$, $\vgamma_k = e_k$ covariate selection
+
+Particle EM for Variable Selection
+$R^2$, $n$, $p$ can be used to calculate Liang, AIC, BIC, Murayama and George
+
+\[
+	p(\vgamma_j | \theta) = \text{Bernoulli}(\theta), \rho \sim \text{Beta}(1, \rho)
+\]
+\end{document}
