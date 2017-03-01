@@ -64,7 +64,7 @@
 
 Count data with a large number of zero counts arises in many areas of application, such as data arising from
 physical activity studies, insurance claims, hospital visits or defects in manufacturing processes. Zero
-inflation is a frequent cause of overdispersion in Poisson data, and not accounting for the extra zeroes leads
+inflation is a frequent cause of overdispersion in Poisson data, and not accounting for the extra zeroes
 may lead to biased parameter estimates. These models have been used for many applications, including defects
 in manufacturing in \citep{lambert1992}, horticulture in \citep{BIOM:BIOM1030} and \citep{Hall2000}, length of
 stay data from hospital admissions in \citep{BIMJ:BIMJ200390024}, psychology in \citep{JOFP:rethink},
@@ -100,20 +100,20 @@ The focus of this paper is on developing a method of fitting flexible ZIP regres
 showing the advantages of our method to previously presented methods. In Section \ref{sec:methodology} we
 briefly introduce Variational Bayes methodogy. In Section \ref{sec:model_and_data} we define our model and
 provide a framework for our approach incorporating regression modelling and random effects. In Section
-\ref{sec:algorithms} we present algorithms for fitting these models, along with a new parameterisation which
-offers substantial advantages in accuracy, numerical stability and computational speed. In Section
-\ref{sec:results} we perform numerical experiments on simulated data which show how our approach offers
-computational advantages over existing approaches. In Section \ref{sec:application} we show an application of
-our method to a multi-level longitudinal study of pest control in apartments. Finally, in Section
-\ref{sec:discussion} we conclude with a discussion of the results. An appendix contains details of the
-derivation of the variational lower bound for our model.
+\ref{sec:algorithms} we present algorithms for fitting these models. In Section \ref{sec:param}, we present
+new parameterisations for use in these algorithms which offers substantial advantages in accuracy, numerical
+stability and computational speed. In Section \ref{sec:results} we perform numerical experiments on simulated
+data which show how our approach offers computational advantages over existing approaches. In Section
+\ref{sec:application} we show an application of our method to a multi-level longitudinal study of pest control
+in apartments. Finally, in Section \ref{sec:discussion} we conclude with a discussion of the results. An
+appendix contains details of the derivation of the variational lower bound for our model.
 
 \section{Model}
 \label{sec:methodology}
 
-In this section we present a VB approach to a Bayesian zero-inflated Poisson model for count data with extra
-zeroes. After introducing the latent variable representation of Bayesian zero-inflated models and a short summary 
-of VB methodology we derive several variational approxiamtions for the model.
+In this section we present a Bayesian zero-inflated Poisson model for count data with extra zeroes. After
+introducing the latent variable representation of Bayesian zero-inflated models, we incorporate regression
+modelling and extend the model to a more flexible mixed model approach.
 
 \subsection{Definitions}
 
@@ -152,11 +152,10 @@ $\tr$ is the trace function.
 
 \mgc{Re-write this paragraph}
 
-We consider have a sample of counts $y_i$, $1\le i\le n$, where there are excessive number of zeros for a
-Poisson model, but the sample otherwise behaves like a Poisson sample. There are two main  parameterizations
-for modelling such data. The first approach models the probability of a zero by $\rho$ and adjusts for counts
-greater than zero. This model uses
-
+We consider a sample of counts $y_i$, $1 \le i\le n$, where there are excessive number of zeros for a Poisson
+model, but the sample is otherwise well--modelled by a Poisson distribution. There are two main
+parameterizations for modelling such data. The first approach models the probability of a zero by $\rho$ and
+adjusts for counts greater than zero. This model uses the probability distribution
 $$
 P(Y_i = 0) = \rho, 
 \quad \mbox{and} \quad 
@@ -166,10 +165,9 @@ $$
 % \noindent where $\lambda>0$ models the size of the counts. Here, $\bE(y_i) = ???$ 
 % and $\mbox{Var}(y_i) = ???$.
 
-\noindent A second approach using latent variables considers the data as the product of two processes, a
-binary process that generates structural zeros, and a second process governed by a Poisson distribution. This
-leads to the model
-
+A second approach using latent variables views the data as the product of two data--generating processes, a
+Bernoulli process that determines whether the data is zero, and a second process where data is generated from
+a Poisson distribution if it is non-zero. This leads to the model
 \begin{equation}\label{eq:modelTwo}
 	P(Y_i = 0) = \rho + (1 - \rho) e^{-\lambda}, 
 	\quad \mbox{and} \quad 
@@ -179,19 +177,17 @@ leads to the model
 \noindent where $\bE(y_i) = (1 - \rho)\lambda$ 
 and $\mbox{Var}(y_i) =  \lambda(1 - \rho)(1 + \rho\lambda)$.
 
-\noindent An auxiliary variable representation of this parameterization introduces the auxiliary
-variables $r_i$ which equals $1$ when $y_i>0$ and is unobserved otherwise. This leads to the
-specification 
+An auxiliary variable representation of this parameterization introduces the auxiliary variables $r_i$ which
+equal $1$ when $y_i>0$ and $0$ otherwise. This leads to the specification
 $$
 P(Y_i=y_i|r_i) = \frac{\exp(-\lambda r_i)(\lambda r_i)^{y_i}}{y_i!} \quad \mbox{and} \quad r_i \sim \mbox{Bernoulli}(1-\rho)
 $$
 
 \noindent Marginalising the above likelihood over $r_i$ leads to the likelihood in (\ref{eq:modelTwo}).
 
-\noindent We can add covariates using a log-link where we replace $\lambda$ with $\vx_i^T\vbeta$ where
-$\vx_i,\vbeta\in\bR^p$ with $\vx_i$ being a vector of observed predictors and $\vbeta$ is 
-a vector of regression coefficients. Let $\vr = (r_1,\ldots,r_n)$
- 
+We can extend the model naturally to multiple covariates by using a log-link and replacing $\lambda$ with
+$\vx_i^\top \vbeta$ where $\vx_i,\vbeta\in\bR^p$ with $\vx_i$ being a vector of observed predictors and
+$\vbeta$ is  a vector of regression coefficients. Let $\vr = (r_1,\ldots,r_n)$ 
 \begin{equation}%\label{eq:main}
 	\begin{array}{rl}
 		\log p(\vy|\vr, \vbeta) 
@@ -204,8 +200,11 @@ a vector of regression coefficients. Let $\vr = (r_1,\ldots,r_n)$
 
 \noindent where $\mX$ is the $n\times p$ matrix whose $i$th rows equal $\vx_i$.
 
-
 \subsection{Mixed model architecture}
+
+Typically zero-inflated models arise in applications where we wish to build multivariate regression models. To
+be able to construct multivariate models with as much generality as possible, we specify the full model as a
+General Design Bayesian Generalized Linear Mixed Model, as in \citep{zhao06}.
 
 The $j$th predictor/response pair for the $i$th group is denoted by $(\vx_{ij}, \vy_{ij}), 1 \leq j \leq n_i, 1 \leq i \leq m$, where $\vx_{ij} \in \R$, and the $\vy_{ij}$ are nonnegative integers.
 
@@ -217,15 +216,13 @@ other.
 \joc{The next paragraph is too abrupt. How did this model come about? Where is the Poisson component? How is this combined with the zero-inflation?
 Start with a single observation before using matrix/vector notation.}
 
-Typically zero-inflated models arise in applications where we wish to build multivariate regression models. To
-be able to construct multivariate models with as much generality as possible, we specify the full model as a
-General Design Bayesian Generalized Linear Mixed Model, as in \citep{zhao06}.
 The above approach can be extended to a flexible mixed model approach by incorporating the zero indicator
-variable $\vr$ into a regression model likelihood -- in this case a Poisson mixed model. When the indicator
-$\vr_i = 0$, the likelihood is $1$ for $\vy_i = 0$ and $0$ for all $\vy_i > 0$. $\vr_i$ is a Bernoulli
-indicator with probability $\rho$, allowing a proportion of zeroes in the observed data to be specified.
-This allows us to incorporate within-subject correlation and smoothing splines (as in
-\citep{Wand2008}) into our models.
+variable $\vr$ into a regression model likelihood -- in this case a Poisson mixed model. This allows us to
+incorporate within-subject correlation and smoothing splines (as in \citep{Wand2008}) into our models. When
+the indicator $\vr_i = 0$, the likelihood is $1$ for $\vy_i = 0$ and $0$ for all $\vy_i > 0$, and when the
+indicator is $\vr_i = 1$, the likelihood is a Poisson regression likelihood for $\vy_i$. $\vr_i$ is a
+Bernoulli indicator with probability $\rho$, allowing a proportion of zeroes in the observed data to be
+specified.
 
 The log--likelihood for one observation is then
 \begin{equation*}
@@ -254,13 +251,11 @@ with priors
 	\mbox{ and } \vu|\mG       & \sim \N_{mb}(\vzero, \mG)              
 \end{align*}
 
-
 \noindent where $\mX$ is $n \times p$, $\mZ$ is $n \times mb$ and $\mSigma_{\vu \vu}$ is $mb \times mb$ and
-$\mPsi$ is $b \times b$.
+$\mPsi$ is $b \times b$. The covariance of $\Cov(\vu) \equiv \blockdiag_{1 \leq i \leq m} (\mSigma) \equiv
+\mI_m \otimes \mSigma$.
 
-\noindent The covariance of $\Cov(\vu) \equiv \blockdiag_{1 \leq i \leq m} (\mSigma) \equiv \mI_m \otimes \mSigma$.
-
-\noindent In the random intercept case, $\mSigma = \sigma_u^2 \mI$ while in the random slopes case
+In the random intercept case, $\mSigma = \sigma_u^2 \mI$ while in the random slopes case
 $$\mSigma = 
 \begin{pmatrix}
 	\sigma_{\vu_1}^2                                 & \rho_{\vu_1 \vu_2} \sigma_{\vu_1} \sigma_{\vu_2} \\
@@ -284,13 +279,17 @@ The matrix $\mSigma$ is symmetric, with contents
 \[
 	\mSigma =
 	\begin{pmatrix}
-	\sigma^2_{\text{intercept}} \\
-		\rho_{\text{intercept} x} & \sigma^2_x \\
-		\rho_{\text{intercept} x^2} & \rho_{x x^2} & \sigma^2_{x^2} \\
-		\rho_{\text{intercept} x^3} & \rho_{x x^3} & \rho_{x^2 x^3} & \sigma^2_{x^3} \\
-		0 & \rho_{x (x - \kappa_1)^3_+} & \rho_{x^2 (x-\kappa_1)_+^3} & \rho_{x^3 (x - \kappa_1)_+^3} & \sigma^2_{(x - \kappa_1)_+^3}
+	\sigma^2_{\text{intercept}} & \ldots \\
+		\rho_{\text{intercept} x} & \sigma^2_x & \ldots\\
+		\rho_{\text{intercept} x^2} & \rho_{x x^2} & \sigma^2_{x^2} & \ldots \\
+		\rho_{\text{intercept} x^3} & \rho_{x x^3} & \rho_{x^2 x^3} & \sigma^2_{x^3} & \ldots \\
+		0 & \rho_{x (x - \kappa_1)^3_+} & \rho_{x^2 (x-\kappa_1)_+^3} & \rho_{x^3 (x - \kappa_1)_+^3} & \sigma^2_{(x - \kappa_1)_+^3} & \ldots \\
+		0 & 0 & \rho_{x^2 (x-\kappa_2)_+^3} & \rho_{x^3 (x-\kappa_2)_+^3} & \rho_{(x-\kappa_1)_+^3 (x-\kappa_2)_+^3} &\sigma^2_{(x - \kappa_2)_+^3} \\
+		0 & 0 & 0 & \rho_{x^3 (x - \kappa_3)_+^3} \\
 	\end{pmatrix}
 \]
+
+
 
 \section{Variational Bayes}
 \label{sec:model_and_data}
@@ -512,7 +511,7 @@ Variational Approximation, as in \citep{ormerod09}. The model can be fit using A
 	
 	To optimise the Gaussian component of the model in each iteration of \ref{alg:algorithm_one}, the Gaussian variational lower bound must to be optimised over the set of $\vmu$ and $\mLambda$
 	values, and $\mLambda$ in particular is both of high dimension $(p + mb)^2$ and constrained to be
-	semi-positive definite. Thus care must be taken in its' parameterisation in order to optimise
+	semi-positive definite. Thus care must be taken in the parameterisation in order to optimise
 	$\mLambda$ effectively.
 	
 	\subsubsection{Covariance parameterisation}
@@ -535,9 +534,7 @@ Variational Approximation, as in \citep{ormerod09}. The model can be fit using A
 		
 	The first variant of the Gaussian Variational Approximation algorithm that we present optimises the
 	Gaussian variational lower bound of the log likelihood with respect to $\vmu$ and the Cholesky decomposition
-	$\mR$ of   $\mLambda$, that is, $\mLambda = \mR \mR^\top$. The resulting function is below and can be
-	optimised with L-BFGS-B.
-	
+	$\mR$ of   $\mLambda$, that is, $\mLambda = \mR \mR^\top$. The resulting function
 	% This algorithm trades the computational complexity of
 	% numerically evaluating an integral for greatly increased accuracy in the approximating posterior
 	% distribution. 
@@ -545,7 +542,7 @@ Variational Approximation, as in \citep{ormerod09}. The model can be fit using A
 		\log \underline{p}(\vmu, \mLambda; \vy) & = \quad \vy^\top\mP \mC \vmu - \vp^\top \exp[\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)] - \half \vmu^\top \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} + \log{|\mR|} \\
 		                                        & \quad - \tfrac{p}{2} \log{(2 \pi)} + \half \log{|\mSigma^{-1}|} + \tfrac{p}{2} \log{(2 \pi)} + \tfrac{p}{2}                                                                              
 	\end{align*}
-	using the derivatives
+	can be optimised with L-BFGS-B using the derivatives
 	\begin{align*}
 		\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu}     & = \mP \mC (\vy - \mC^\top \exp(\mC \vmu + \half \text{diag}{(\mC \mLambda \mC^\top)})) - \mSigma^{-1} \vmu \text{ and}                \\
 		\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda} & = \left [\mLambda^{-1} - \mP \mC^\top \exp(\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)) \mP \mC) - \mSigma^{-1} \right ] \mR. 
@@ -604,12 +601,15 @@ Variational Approximation, as in \citep{ormerod09}. The model can be fit using A
 	% Fixed point update of \mLambda
 		
 	This variant of the algorithm uses Newton-Raphson-like fixed point updates on the Gaussian variational lower
-	bound. This algorithm is fast, but unstable. The steps are presented in Algorithm \ref{alg:algorithm_nr} where
+	bound. We optimise the same variational lower bound as in the covariance parameterisation above, using the
+	derivatives below. The steps are presented in Algorithm \ref{alg:algorithm_nr} where	
 	\begin{align*}
 		\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu}     & = \quad \mC^\top\vp \left [\vy - \mC\exp(\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)) \right ] - \mSigma^{-1} \vmu \text{ and} \\
 		\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda} & = -\mC^\top \text{diag}(\vp^\top \exp(\mC \vmu +\half \text{diag}(\mC \mLambda \mC^\top))) - \mSigma^{-1}.                             
 	\end{align*}
-		
+	As this algorithm involves a simple Newton-Raphson style update step, it is computationally simple to
+	implement, but potentially unstable as there is no adaptation of step size, as in L-BFGS-B.
+
 	\begin{algorithm}
 		\caption[Algorithm GVA NR]{Iterative scheme for obtaining optimal $\vmu$ and $\mLambda$
 			given $\vy$, $\mC$ and $\vp$}
@@ -628,12 +628,12 @@ Variational Approximation, as in \citep{ormerod09}. The model can be fit using A
 	% Splines
 		
 	\section{Parameterisations and computational cost of Gaussian Variational Approximation approaches}
-
+	\label{sec:param}
 	\subsection{Covariance parameterisation of $\mLambda$}
 
 	To ensure symmetry of $\mLambda$, we parameterise the optimisation problem in terms of $\mLambda$'s
 	Cholesky factor  $\mLambda = \mR^\top \mR$. We optimise over the space $(\vmu, \overline{\mR})$, where $\vmu
-	\in \R^{p + mq}$ and $\overline{\mR}$ is a lower-triangular $(p + mq) \times (p + mq)$ matrix. Then
+	\in \R^{p + m}b$ and $\overline{\mR}$ is a lower-triangular $(p + mb) \times (p + mb)$ matrix. Then
 		
 	\begin{equation*}
 		\mR_{ij} =
@@ -648,13 +648,35 @@ Variational Approximation, as in \citep{ormerod09}. The model can be fit using A
 	as $\mLambda = \mR \mR^\top$ so that is is guaranteed to be symmetric, and we only have $p(p-1)/2$ 
 	parameters to deal with instead of $p^2$ parameters, some of which are constrained. 
 
-	\mgc{safeexp}
 	This parameterisation can lead to numeric overflow when the diagonals of $\overline{\mR}$ become moderately
-	large, which can lead to singular matrices when attempting to invert $\mLambda$. We dealt with this issue by
-	thresholding the values of the diagonals.  This problem was mitigated by  instead working with the Cholesky
-	factorisation of $\mLambda^{-1}$, allowing us to solve a system of equations rather than invert and multiply
-	by a matrix, which is also faster and more numerically stable. We use knowledge of the regression  model we
-	are fitting to specify a sparse matrix structure, greatly reducing the dimension of   the problem and thus
+	large, which can lead to singular matrices when attempting to invert $\mLambda$. We dealt with this by
+	defining a piecewise function which is exponential for arguments less than $t$, and quadratic for arguments
+	greater than or equal to $t$
+	$$
+	f(r_{ij}) =
+	\begin{cases}
+	e^{r_{ij}}, r_{ij} < t \\
+	a r_{ij}^2 + b r_{ij} + c, r_{ij} \geq t
+	\end{cases}
+	$$
+	and then choosing the co-efficients $a$, $b$ and $c$ such that the function, first and second derivatives would
+	agree at $r_{ij} = t$.
+
+	To find the co-efficients $a$, $b$ and $c$, we solved the system of equations formed by repeatedly 
+	differentiating the quadratic at $r_{ij} =  t$ and equating it with $e^t$
+	$$
+	\begin{array}{lllll}
+	e^t &= &a t^2 &+ \quad b t &+ \quad c \\
+	e^t &= &&\quad 2a t &+ \quad b \\
+	e^t &= &&&\quad 2a \\
+	\end{array}
+	$$
+	to obtain $a = e^t / 2$, $b = (1 - t) e^t$ and $c = [1 - t^2/2 - (1 - t) t] e^t$.
+
+	We also addressed the overflow problem by working with the Cholesky factorisation of $\mLambda^{-1}$
+	rather than $\mLambda$, allowing us to solve a system of equations rather than invert and multiply by a
+	matrix, which is also faster and more numerically stable. We use knowledge of the regression  model we are
+	fitting to specify a sparse matrix structure, greatly reducing the dimension of   the problem and thus
 	improving both computational speed and numeric accuracy.
 
 	% \noindent By noticing that the lower rows of the product depend on the higher rows of the Cholesky factor, we
@@ -721,7 +743,7 @@ Variational Approximation, as in \citep{ormerod09}. The model can be fit using A
 	b)^2$ floating point operations, and take the diagonal entries of the result. This is obviously wasteful, as
 	all of the off--diagonal entries of the resulting product are immediately discarded.
 	
-	\noindent By parameterising $\mLambda$ in terms of its' Cholesky factors and realising that
+	By parameterising $\mLambda$ in terms of its' Cholesky factors and realising that
 	
 	\[
 		\mC \mLambda \mC^\top = \mC \mR \mR^\top \mC^\top
@@ -743,23 +765,19 @@ Variational Approximation, as in \citep{ormerod09}. The model can be fit using A
 	
 	For the precision parameterisation, we observe that in this parameterisation
 	\[
-		\diag(\mC \mLambda \mC^\top)_{ii} = \mC_{i .} \mR^{-\top} \mR^{-1} \mC_{i .}^\top
+		\diag(\mC \mLambda \mC^\top)_{ii} = \mC_{i .} \mR^{-\top} \mR^{-1} \mC_{i .}^\top, 1 \leq i \leq n,
 	\]
 	
-	\noindent and so by solving
+  \noindent and so by solving $\mR \va = \mC_{i .}^\top$ for $\va$ for all $i$ at a cost of $n \times
+	\frac{1}{2} (p + m b) (p + m b + 1)$ floating point operations, and then calculating
+
 	\[
-		\mR \va = \mC_{i .}^\top
-	\]
-	
-	\noindent for $\va$ at a cost of $n \times \frac{1}{2} (p + m b) (p + m b + 1)$ floating point operations, and 
-	then calculating
-	\[
-		\diag(\mC \mLambda \mC^\top)_{ii} = \va^\top \va,
+		\diag(\mC \mLambda \mC^\top)_{ii} = \va^\top \va, 1 \leq i \leq n,
 	\]
 	
 	\noindent we can then calculate $\diag(\mC \mLambda \mC^\top)$.
 	
-	\noindent As above, by using our knowledge of the model being fit we can encode $\mR$ sparsely to decreate
+	As above, by using our knowledge of the model being fit we can encode $\mR$ sparsely to decreate
 	the required   computation still further. In the random intercept model case, the computational cost will drop
 	to   $n \times [m + \half{1}{2} p (p + 1) + p \times m b]$.
 	
@@ -775,7 +793,7 @@ Variational Approximation, as in \citep{ormerod09}. The model can be fit using A
 		
 	For each of these simulations, the model is as presented in Section \ref{sec:methodology}.
 		
-	\noindent Several common application scenarios were simulated and their accuracy evaluated. A random intercept model was simulated with $\vbeta = (2, 1)^\top$, $\rho = 0.5$, $m = 20$, $n_i = 10$ and $b = 1$. The results are
+	Several common application scenarios were simulated and their accuracy evaluated. A random intercept model was simulated with $\vbeta = (2, 1)^\top$, $\rho = 0.5$, $m = 20$, $n_i = 10$ and $b = 1$. The results are
 	presented in Table \ref{tab:accuracy_int}. A random slope model was simulated with $\vbeta = (2, 1)^\top$,
 	$\rho = 0.5$, $m = 20$, $n_i = 10$ and $b = 2$. The results are presented in Table \ref{tab:accuracy_slope}.
 	Spline model was fit to a data set generated from the function $3 + 3 \sin{(\pi x)}$ on the interval $[-1,
@@ -784,7 +802,7 @@ Variational Approximation, as in \citep{ormerod09}. The model can be fit using A
 	% The stability of the algorithms was confirmed by running them on 10,000 different data sets that were randomly
 	% generated after having initialised the random number generator with different seeds.
 		
-	\noindent Median accuracy of the algorithms was assessed by running them on 100 randomly generated data sets. The	results are presented in Figure \ref{fig:median_accuracy_intercept} and Figure
+	Median accuracy of the algorithms was assessed by running them on 100 randomly generated data sets. The	results are presented in Figure \ref{fig:median_accuracy_intercept} and Figure
 	\ref{fig:median_accuracy_slope}.
 		
 	% Figure: Median accuracy graph intercept
@@ -811,11 +829,11 @@ Variational Approximation, as in \citep{ormerod09}. The model can be fit using A
 			\hline
 			                   & Laplace's Method & GVA $(\mLambda = \mR \mR^\top)$ & GVA NP $(\mLambda = (\mR \mR^\top)^{-1})$ & GVA FP   \\
 			\hline
-			$\vbeta_1$         & $83\%$           & $91\%$                          & $91\%$                                    & $91\%$   \\ 
-			$\vbeta_2$         & $77\%$           & $99\%$                          & $99\%$                                    & $99\%$   \\ 
-			Mean of $\vu$      & $81\%$           & $95\%$                          & $95\%$                                    & $95\%$   \\
-			$\sigma^2_{\vu_1}$ & $63.0\%$         & $63.4\%$                        & $63.4\%$                                  & $63.4\%$ \\ 
-			$\rho$             & $98\%$           & $97\%$                          & $97\%$                                    & $97\%$   \\ 
+			$\vbeta_1$         & $85\%$           & $90\%$                          & $91\%$                                    & $90\%$   \\ 
+			$\vbeta_2$         & $76\%$           & $98\%$                          & $99\%$                                    & $99\%$   \\ 
+			Mean of $\vu$      & $81\%$           & $94\%$                          & $94\%$                                    & $94\%$   \\
+			$\sigma^2_{\vu_1}$ & $66\%$         & $66\%$                        & $66\%$                                  & $66\%$ \\ 
+			$\rho$             & $99\%$           & $99\%$                          & $99\%$                                    & $99\%$   \\ 
 			\hline
 		\end{tabular}
 	\end{table}
@@ -827,11 +845,11 @@ Variational Approximation, as in \citep{ormerod09}. The model can be fit using A
 			\hline
 			                   & Laplace's Method & GVA $(\mLambda = \mR \mR^\top)$ & GVA $(\mLambda = (\mR \mR^\top)^{-1})$ & GVA FP \\
 			\hline
-			$\vbeta_1$         & 66\%             & 88\%                            & 89\%                                   & 88\%   \\
-			$\vbeta_2$         & 69\%             & 88\%                            & 90\%                                   & 88\%   \\
-			Mean of $\vu$      & 72\%             & 91\%                            & 91\%                                   & 91\%   \\
-			$\sigma^2_{\vu_1}$ & 69.6\%           & 71.5\%                          & 71.5\%                                 & 71.5\% \\
-			$\sigma^2_{\vu_2}$ & 65.9\%           & 67.6\%                          & 67.6\%                                 & 67.6\% \\
+			$\vbeta_1$         & 67\%             & 88\%                            & 88\%                                   & 88\%   \\
+			$\vbeta_2$         & 70\%             & 89\%                            & 88\%                                   & 89\%   \\
+			Mean of $\vu$      & 70\%             & 91\%                            & 91\%                                   & 91\%   \\
+			$\sigma^2_{\vu_1}$ & 71\%           & 73\%                          & 73\%                                 & 73\% \\
+			$\sigma^2_{\vu_2}$ & 68\%           & 69\%                          & 69\%                                 & 69\% \\
 			$\rho$             & 91\%             & 90\%                            & 90\%                                   & 90\%   \\
 			\hline
 		\end{tabular}
@@ -870,9 +888,9 @@ Variational Approximation, as in \citep{ormerod09}. The model can be fit using A
 	each algorithm from a range of different starting points. Errors due to numerical instability and the fitted
 	$\vmu$ were recorded for each starting point.
 		
-	\noindent A data set of 100 individuals in ten groups (m=10) was generated from a model with a fixed intercept
-	and slope, and a random intercept. $\vmu$ was initialised from a grid of points on the interval
-	$[-4.5, 5]$ for intercept and slope. The error counts are presented in Table
+	A data set of 100 individuals in ten groups ($m=10$) was generated from a model with a fixed intercept and
+	slope, and a random intercept. $\vmu$ was initialised from a grid of points on the interval $[-4.5, 5]$ for
+	intercept and slope, spaced $0.1$ apart. The error counts are presented in Table
 	\ref{tab:stability_results}.
 		
 	\begin{table}
@@ -883,9 +901,9 @@ Variational Approximation, as in \citep{ormerod09}. The model can be fit using A
 			Algorithm           & Error count \\
 			\hline
 			Laplace's algorithm & 12          \\
-			GVA                 & 1,771       \\
-			GVA NP              & 537         \\
-			GVA FP              & 992         \\
+			GVA $\mLambda = \mR^\top \mR$                 & 1,306       \\
+			GVA $\mLambda = (\mR^\top \mR)^{-1}$              & 1         \\
+			GVA NR fixed point              & 992         \\
 			\hline
 		\end{tabular}
 	\end{table}
@@ -905,8 +923,9 @@ Variational Approximation, as in \citep{ormerod09}. The model can be fit using A
 		
 	In the example application presented in this paper, the zero component represents an apartment completely free of roaches, while the non-zero component represents an apartment where roaches have been able to live and reproduce, possibly in spite of pest control treatment aimed at preventing them from doing so.
 		
-	The GVA NP algorithm was used to fit a random intercept model to the Roaches data set provided by Andrew Gelman. The fitted co-efficients and accuracy results are presented in Table
-	\ref{tab:application_roaches}.
+	The GVA algorithm with the $\mLambda = (\mR^\top \mR)^{-1}$ parameterisation was used to fit a random
+	intercept model to the Roaches data set provided by Andrew Gelman. The fitted co-efficients and accuracy
+	results are presented in Table \ref{tab:application_roaches}.
 		
 	%       lci  uci
 	% 1  3.179 3.157 3.201
@@ -970,10 +989,11 @@ Variational Approximation, as in \citep{ormerod09}. The model can be fit using A
 			\hline
 			Algorithm        & Mean (seconds) & Standard deviation (seconds) \\
 			\hline
-			Laplace's method & 18.79 s        & 0.07 s                       \\
-			GVA              & 76.18 s        & 1.24 s                       \\
-			GVA NP           & 27.55 s        & 0.66 s                       \\
-			GVA FP           & 4.83 s         & 0.07 s                       \\
+			Laplace's method & 0.37 s        & 0.07 s                       \\
+			GVA              & 2.04 s        & 1.24 s                       \\
+			% Why is this slower?
+			GVA NP           & 0.38 s        & 0.66 s                       \\
+			GVA FP           & 0.05 s         & 0.07 s                       \\
 			\hline
 		\end{tabular}
 	\end{table}
