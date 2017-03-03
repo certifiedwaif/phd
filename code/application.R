@@ -147,3 +147,43 @@ var_accuracy <- calculate_accuracies("application", mult, mcmc_samples, fit1, "L
 # var_accuracy2 <- calculate_accuracies("application", mult, mcmc_samples, fit2, "GVA", plot_flag=TRUE)
 var_accuracy3 <- calculate_accuracies("application", mult, mcmc_samples, fit3, "GVA", plot_flag=TRUE)
 # var_accuracy4 <- calculate_accuracies("application", mult, mcmc_samples, fit4, "GVA", plot_flag=TRUE)
+
+# Police stops example
+	
+library(arm) # for display() function
+frisk <- read.table("frisk_with_noise.dat",skip=6,header=TRUE)
+model.matrix(, data=frisk)
+display(fit.1)
+C <- model.matrix(stops~factor(precinct)+factor(eth)+crime, data=frisk)
+vy <- frisk$stops
+mZ <- C[, 2:75]
+mX <- C[, c(1, 76:78)]
+mult <- create_mult(vy, mX, mZ, 1e5, m=75, blocksize=1, v=2)
+zipvb(mult, method="gva2", verbose=TRUE)
+
+save <- FALSE
+if (save) {
+  mcmc_result <- mcmc(mult, p=4, iterations=1e5, warmup=1e4, mc.cores = 1)
+  mcmc_samples <- mcmc_result$mcmc_samples
+  fit <- mcmc_result$fit
+  print(fit)
+  save(mult, mcmc_samples, fit, file="data/accuracy_application_2015_11_20.RData")
+  # save(mult, mcmc_samples, fit, allKnots, file="/tmp/accuracy_spline_2015_05_19.RData")
+} else {
+  load(file="data/accuracy_application_2015_11_20.RData")
+  # load(file="/tmp/accuracy_spline_2015_05_19.RData")
+}
+
+var_accuracy <- calculate_accuracies("application2", mult, mcmc_samples, fit, "GVA2", plot_flag=TRUE)
+# var_accuracy2 <- calculate_accuracies("application", mult, mcmc_samples, fit2, "GVA", plot_flag=TRUE)
+# var_accuracy3 <- calculate_accuracies("application", mult, mcmc_samples, fit3, "GVA", plot_flag=TRUE)
+# var_accuracy4 <- calculate_accuracies("application", mult, mcmc_samples, fit4, "GVA", plot_flag=TRUE)
+
+# > var_accuracy$vbeta_accuracy
+# [1] 74.37920 96.78242 99.17660 97.05468
+# > mean(var_accuracy$vu_accuracy)
+# [1] 78.72966
+# > var_accuracy$sigma2_vu_accuracy
+# [1] 44.44708
+# > var_accuracy$rho_accuracy
+# [1] 98.30838

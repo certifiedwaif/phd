@@ -97,19 +97,19 @@ resulting Gaussian posterior of the regression parameters easy to interpret. We 
 Bayes (VB) approach on the other parameters in the model to derive the rest of the approximation.
 
 The focus of this paper is on developing a method of fitting flexible ZIP regression models accurately, and
-showing the advantages of our method to previously presented methods. In Section \ref{sec:methodology} we
-briefly introduce Variational Bayes methodogy. In Section \ref{sec:model_and_data} we define our model and
-provide a framework for our approach incorporating regression modelling and random effects. In Section
-\ref{sec:algorithms} we present algorithms for fitting these models. In Section \ref{sec:param}, we present
-new parameterisations for use in these algorithms which offers substantial advantages in accuracy, numerical
-stability and computational speed. In Section \ref{sec:results} we perform numerical experiments on simulated
-data which show how our approach offers computational advantages over existing approaches. In Section
-\ref{sec:application} we show an application of our method to a multi-level longitudinal study of pest control
-in apartments. Finally, in Section \ref{sec:discussion} we conclude with a discussion of the results. An
-appendix contains details of the derivation of the variational lower bound for our model.
+showing the advantages of our method to previously presented methods. In Section \ref{sec:model} we define our
+model and provide a framework for our approach incorporating regression modelling and random effects. In
+Section \ref{sec:vb} we briefly introduce Variational Bayes methodogy. In Section \ref{sec:gaussian} we
+focus on fitting the Gaussian part of our model. In Section \ref{sec:param}, we present new parameterisations for
+use in these algorithms which offers substantial advantages in accuracy, numerical stability and computational
+speed. In Section \ref{sec:results} we perform numerical experiments on simulated data which show how our
+approach offers computational advantages over existing approaches. In Section \ref{sec:application} we show an
+application of our method to a multi-level longitudinal study of pest control in apartments. Finally, in
+Section \ref{sec:discussion} we conclude with a discussion of the results. An appendix contains details of the
+derivation of the variational lower bound for our model.
 
 \section{Model}
-\label{sec:methodology}
+\label{sec:model}
 
 In this section we present a Bayesian zero-inflated Poisson model for count data with extra zeroes. After
 introducing the latent variable representation of Bayesian zero-inflated models, we incorporate regression
@@ -218,7 +218,7 @@ Start with a single observation before using matrix/vector notation.}
 
 The above approach can be extended to a flexible mixed model approach by incorporating the zero indicator
 variable $\vr$ into a regression model likelihood -- in this case a Poisson mixed model. This allows us to
-incorporate within-subject correlation and smoothing splines (as in \citep{Wand2008}) into our models. When
+incorporate within-subject correlation and smoothing splines, as in \citep{Wand2008}, into our models. When
 the indicator $\vr_i = 0$, the likelihood is $1$ for $\vy_i = 0$ and $0$ for all $\vy_i > 0$, and when the
 indicator is $\vr_i = 1$, the likelihood is a Poisson regression likelihood for $\vy_i$. $\vr_i$ is a
 Bernoulli indicator with probability $\rho$, allowing a proportion of zeroes in the observed data to be
@@ -271,7 +271,7 @@ random slopes and $\rho_{\vu_1 \vu_2}$ is the correlation between the random int
 \mgc{Need more detail, ala Zhao paper page 38, Example 1 and Example 2. Spline case still to go.}
 
 In the spline case, we use the cubic spline basis
-$1$, $x$, $x^3$, $(x - \kappa_1)_+$, \ldots, $(x - \kappa_K)_+$, where $K$ is the number of knots.
+$1$, $x$, $x^3$, $(x - \kappa_1)^3_+$, \ldots, $(x - \kappa_K)^3_+$, where $K$ is the number of knots.
 $\mSigma$ is a $K + 2$ banded matrix, where $K$ is the number of knots. Banded matrices
 are highly sparse, and matrix operations can be performed on them in $\BigO(n)$ time.
 
@@ -279,7 +279,7 @@ The matrix $\mSigma$ is symmetric, with contents
 \[
 	\mSigma =
 	\begin{pmatrix}
-	\sigma^2_{\text{intercept}} & \ldots \\
+	\sigma^2_{\text{intercept}} & \ldots & & & & \text{symmetric} \\
 		\rho_{\text{intercept} x} & \sigma^2_x & \ldots\\
 		\rho_{\text{intercept} x^2} & \rho_{x x^2} & \sigma^2_{x^2} & \ldots \\
 		\rho_{\text{intercept} x^3} & \rho_{x x^3} & \rho_{x^2 x^3} & \sigma^2_{x^3} & \ldots \\
@@ -292,7 +292,7 @@ The matrix $\mSigma$ is symmetric, with contents
 
 
 \section{Variational Bayes}
-\label{sec:model_and_data}
+\label{sec:vb}
 
 % General Design Bayesian Generalized Linear Mixed Model, as in \citep{zhao06}. This allows us to incorporate
 % within-subject correlation, and smoothing splines (as in \citep{Wand2008}) in our models.
@@ -453,7 +453,7 @@ Variational Approximation, as in \citep{ormerod09}. The model can be fit using A
 	\end{algorithm}
 			
 	\section{Optimising the Gaussian Part of the Model}
-	\label{sec:algorithms}
+	\label{sec:gaussian}
 		
 	In this section, we compare the accuracy, stability and speed of a number of algorithms for fitting the
 	Gaussian component of our model, $q(\vmu, \mLambda)$ in Algorithm \ref{alg:algorithm_one}.  We compare four
@@ -759,7 +759,8 @@ Variational Approximation, as in \citep{ormerod09}. The model can be fit using A
 	b)(p + m b   + 1)$ floating point operations, and storing the results of the $i$th product in the $i$th
 	element of the   vector $\va$ and then calculate $\diag(\mC \mLambda \mC^\top) = \va^\top \va$.
 	
-	Moreover, mixed models typically have sparse design matrices, allowing us to encode $\mR$ as a sparse matrix, and	further reduce   this depending on the model. For example, in the random intercept case, only the diagonals of the random effects block need to be non-zero, and hence the above expression can be performed in   $n \times [m + \frac{1}{2} p (p + 1) + p \times m b]$ floating point operations.
+	Moreover, mixed models typically have sparse design matrices, allowing us to encode $\mR$ as a sparse matrix, and	further reduce   this depending on the model. For example, in the random intercept case, only the diagonals of the random effects block need to be non-zero, and hence the above expression can be calculated in
+	$\BigO(n)$ floating point operations.
 	
 	% $\log |\mR|$ can be calculated using only $p + m b$ floating point operations, as $\mR$ is lower triangular.
 	
@@ -770,28 +771,27 @@ Variational Approximation, as in \citep{ormerod09}. The model can be fit using A
 	
   \noindent and so by solving $\mR \va = \mC_{i .}^\top$ for $\va$ for all $i$ at a cost of $n \times
 	\frac{1}{2} (p + m b) (p + m b + 1)$ floating point operations, and then calculating
-
 	\[
 		\diag(\mC \mLambda \mC^\top)_{ii} = \va^\top \va, 1 \leq i \leq n,
 	\]
 	
 	\noindent we can then calculate $\diag(\mC \mLambda \mC^\top)$.
 	
-	As above, by using our knowledge of the model being fit we can encode $\mR$ sparsely to decreate
+	As above, by using our knowledge of the model being fit we can encode $\mR$ sparsely to decrease
 	the required   computation still further. In the random intercept model case, the computational cost will drop
 	to   $n \times [m + \half{1}{2} p (p + 1) + p \times m b]$.
 	
 	\section{Numerical results}
 	\label{sec:results}
 		
-	The accuracy of each model fitting algorithm presented in Section \ref{sec:algorithms} was assessed by
+	The accuracy of each model fitting algorithms presented in Section \ref{sec:gaussian} was assessed by
 	comparing the approximating distribution of each parameter with the posterior distribution of Monte Carlo
 	Markov Chain samples of that parameter. 1 million Monte Carlo Markov Chain samples were generated using Stan.
 	The accuracy of examples of random intercept, random slope and spline models were evaluated using this method.
 		
 	\subsection{Simulated data}
 		
-	For each of these simulations, the model is as presented in Section \ref{sec:methodology}.
+	For each of these simulations, the model is as presented in Section \ref{sec:model}.
 		
 	Several common application scenarios were simulated and their accuracy evaluated. A random intercept model was simulated with $\vbeta = (2, 1)^\top$, $\rho = 0.5$, $m = 20$, $n_i = 10$ and $b = 1$. The results are
 	presented in Table \ref{tab:accuracy_int}. A random slope model was simulated with $\vbeta = (2, 1)^\top$,
@@ -884,7 +884,7 @@ Variational Approximation, as in \citep{ormerod09}. The model can be fit using A
 		
 	\subsection{Stability results}
 		
-	The numerical stability of each fitting algorithm in Section \ref{sec:algorithms} was assessed by initialising
+	The numerical stability of each fitting algorithm in Section \ref{sec:gaussian} was assessed by initialising
 	each algorithm from a range of different starting points. Errors due to numerical instability and the fitted
 	$\vmu$ were recorded for each starting point.
 		
@@ -910,9 +910,21 @@ Variational Approximation, as in \citep{ormerod09}. The model can be fit using A
 		
 	\section{Application}
 	\label{sec:application}
-		
+
+	\subsection{Poisson example}
+	The data set used for this example was the police stop example from Chapter 15 of \citep{Gelman2007}.
+	The
+	model fit was
+	\[
+		stops = \beta_0 + \beta_j \text{ethnicity}_j + \beta_{j+1} \text{crime} + u_i + \epsilon
+	\]
+	where $i$ is the $i$-th precinct, and $j$ is the $j$-th crime category (violent crime, weapons, property,
+	drugs)
+	and was intended to find the relationship between the number of police stops in each precinct by ethnicity
+	for each type of crime.
+
 	% TODO: You need to describe the data set and the model.
-		
+	\subsection{Zero--inflated example -- Cockroaches in Apartments data set from Gelman}
 	The model fitting was applied to the cockroach data set from \citep{Gelman2007} taken from a study on the
 	effect of integrated pest management in controlling cockroach levels in urban apartments. The data set
 	contains data on 160 treatment and 104 control apartments, along with the response $y_i$ in each apartment of
@@ -1011,7 +1023,7 @@ Variational Approximation, as in \citep{ormerod09}. The model can be fit using A
 	This is of great utility in applications where speed matters, such as model selection or when applied
 	statisticians are experimenting with many models, as is typical in practice.
 		
-	The new parameterisation of Gaussian Variational Approximation using the Cholesky factorisation of the inverse of $\mLambda$ presented in Section \ref{sec:algorithms} provides significant advantages.  It is well known that the inverse of a sparse matrix need not be sparse. Fitting mixed models generally leads to covariance matrices with an arrow head structure. Due to the sparsity of our parameterisation of $\mLambda^{-1}$,  our algorithm for fitting these models leads to an optimisation problem of significantly lower dimension. This allows the model to be fit more quickly, and with greatly improved numerical stability and with no loss of
+	The new parameterisation of Gaussian Variational Approximation using the Cholesky factorisation of the inverse of $\mLambda$ presented in Section \ref{sec:param} provides significant advantages.  It is well known that the inverse of a sparse matrix need not be sparse. Fitting mixed models generally leads to covariance matrices with an arrow head structure. Due to the sparsity of our parameterisation of $\mLambda^{-1}$,  our algorithm for fitting these models leads to an optimisation problem of significantly lower dimension. This allows the model to be fit more quickly, and with greatly improved numerical stability and with no loss of
 	accuracy.
 	
 	Some of the algorithms which we experimented with were found to be very sensitive to their starting points.
