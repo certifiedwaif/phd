@@ -3,7 +3,7 @@
 library(optparse)
 library(zipvb)
 
-local_solutions <- function(approximation)
+find_error_locations <- function(approximation)
 {
 	# Construct suitable mX, mZ and vy
 	n <- 100
@@ -43,6 +43,7 @@ local_solutions <- function(approximation)
 	vmus <- matrix(NA, (10 * 1e2)^2, 2 + 9)
 
 	# Start fits from a range of points on a 2 dimensional grid
+	options(threshold=2)
 	GRID_SIZE <- 1e-1
 	error_locations <- c(-99, -99)
 	for (init_intercept in seq(- 4.5, 5, GRID_SIZE)) {
@@ -50,7 +51,7 @@ local_solutions <- function(approximation)
 			cat("init_intercept", init_intercept, "")
 			cat("init_slope", init_slope, "")
 			cat("counter", counter, "")
-			cat("error_count", error_count, "")
+			cat("error_count", error_count, "\n")
 			mult$vmu[1] <- init_intercept
 			mult$vmu[2] <- init_slope
 			fit <- tryCatch(zipvb(mult, method=approximation, verbose=FALSE, glm_init=FALSE),
@@ -88,24 +89,9 @@ local_solutions <- function(approximation)
 							error_locations=error_locations[2:error_count, ]))
 }
 
-display_local_solutions <- function(error_locations)
+display_error_locations <- function(error_locations)
 {
-	min_x <- min(x)
-	max_x <- max(x)
-	min_y <- min(y)
-	max_y <- max(y)
-
-	x <- seq(min_x, max_x, by=0.1)
-	y <- seq(min_y, max_y, by=0.1)
-
-	image_mat <- matrix(x, y, matrix(0, length(x), length(y)))
-	for (i in 1:nrow(error_locations)) {
-		err_x <- error_locations[i, 2]
-		err_y <- error_locations[i, 3]
-		image_mat[err_x, err_y] <- 1
-	}
-
-	image(x, y, image_mat)
+	plot(error_locations[, 1], error_locations[, 2])
 }
 
 main <- function()
@@ -113,7 +99,7 @@ main <- function()
   option_list <- list(make_option(c("-a", "--approximation"), default="gva"))
   opt <- parse_args(OptionParser(option_list=option_list))
   approximation <- opt$approximation
-  result <- local_solutions(approximation)
+  result <- find_error_locations(approximation)
   vmus <- result$vmus
   error_locations <- result$error_locations
   write.csv(vmus, file=sprintf("results/local_solutions_%s_vmus.csv", approximation))
