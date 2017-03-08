@@ -158,7 +158,7 @@ plot_graphs <- function() {
     ggplot(aes(x=vR2, y=mean)) +
       geom_line(aes(group=interaction(Kappa, Type), color=Kappa, linetype=Type)) +
       facet_wrap(~vp, labeller=label_fn) +
-      xlab(TeX("$R^2$")) + ylab("Shrinkage") + theme_bw() + scale_colour_gradient(low="#777777", high="#ffffff")
+      xlab(TeX("$R^2$")) + ylab("Shrinkage") + theme_bw() + scale_colour_gradient(TeX("$\\kappa$"), low="#777777", high="#000000")
   dev.off()
 
   # approx_log_p_df <- combined_df %>%
@@ -178,7 +178,7 @@ plot_graphs <- function() {
     ggplot(aes(x=vR2, y=relative_error)) +
       geom_line(aes(group=Kappa, color=Kappa)) +
       facet_wrap(~vp, labeller=label_fn) +
-      xlab(TeX("$R^2$")) + ylab("Relative error") + ylim(-.15, 2) + theme_bw() + scale_colour_gradient(low="#777777", high="#ffffff")
+      xlab(TeX("$R^2$")) + ylab("Relative error") + ylim(-.15, 2) + theme_bw() + scale_colour_gradient(TeX("$\\kappa$"), low="#777777", high="#000000")
   dev.off()
 
   pdf("Log_of_Relative_error_of_Variance_of_g.pdf")
@@ -188,7 +188,7 @@ plot_graphs <- function() {
     ggplot(aes(x=vR2, y=relative_error)) +
       geom_line(aes(group=Kappa, color=Kappa)) +
       facet_wrap(~vp, labeller=label_fn) +
-      xlab(TeX("$R^2$")) + ylab(TeX("$\\log_{10}$ of relative error")) + theme_bw() + scale_colour_gradient(low="#777777", high="#ffffff")
+      xlab(TeX("$R^2$")) + ylab(TeX("$\\log_{10}$ of relative error")) + theme_bw() + scale_colour_gradient(TeX("$\\kappa$"), low="#777777", high="#000000")
   dev.off()
 
   pdf("Variance.pdf")
@@ -206,7 +206,7 @@ plot_graphs <- function() {
     ggplot(aes(x=vR2, y=var)) +
       geom_line(aes(group=interaction(Kappa, Type), color=Kappa, linetype=Type)) +
       facet_wrap(~vp, labeller=label_fn) +
-      xlab(TeX("$R^2$")) + ylab("Variance") + theme_bw() + scale_colour_gradient(low="#777777", high="#ffffff")
+      xlab(TeX("$R^2$")) + ylab("Variance") + theme_bw() + scale_colour_gradient(TeX("$\\kappa$"), low="#777777", high="#000000")
   dev.off()
 
   pdf("Precision.pdf")
@@ -224,7 +224,7 @@ plot_graphs <- function() {
     ggplot(aes(x=vR2, y=precision)) +
       geom_line(aes(group=interaction(Kappa, Type), color=Kappa, linetype=Type)) +
       facet_wrap(~vp, labeller=label_fn) +
-      xlab(TeX("$R^2$")) + ylab("Precision") + theme_bw() + scale_colour_gradient(low="#777777", high="#ffffff")
+      xlab(TeX("$R^2$")) + ylab("Precision") + theme_bw() + scale_colour_gradient(TeX("$\\kappa$"), low="#777777", high="#000000")
   dev.off()
 
   pdf("Accuracy_sigma2.pdf")
@@ -233,7 +233,7 @@ plot_graphs <- function() {
     ggplot(aes(x=vR2, y=vaccuracy_sigma2)) +
     geom_line(aes(group=Kappa, color=Kappa)) +
     facet_wrap(~vp, labeller=label_fn) +
-    xlab(TeX("$R^2$")) + ylab(TeX("Accuracy $\\sigma^2$")) + theme_bw() + scale_colour_gradient(low="#777777", high="#ffffff")
+    xlab(TeX("$R^2$")) + ylab(TeX("Accuracy $\\sigma^2$")) + theme_bw() + scale_colour_gradient(TeX("$\\kappa$"), low="#777777", high="#000000")
   dev.off()
 
   pdf("Accuracy_g.pdf")
@@ -242,7 +242,7 @@ plot_graphs <- function() {
     ggplot(aes(x=vR2, y=vaccuracy_g)) +
     geom_line(aes(group=Kappa, color=Kappa)) +
     facet_wrap(~vp, labeller=label_fn) +
-    xlab(TeX("$R^2$")) + ylab("Accuracy g") + theme_bw() + scale_colour_gradient(low="#777777", high="#ffffff")
+    xlab(TeX("$R^2$")) + ylab("Accuracy g") + theme_bw() + scale_colour_gradient(TeX("$\\kappa$"), low="#777777", high="#000000")
   dev.off()
 }
 
