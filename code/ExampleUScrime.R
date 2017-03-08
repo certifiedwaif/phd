@@ -6,7 +6,7 @@ library(ISLR)
 
 # Choose a simulation setting
 
-SETTING <- 1
+SETTING <- 5
 # SETTING <- commandArgs(trailingOnly = TRUE)[1]
 
 if (SETTING==1) 
@@ -648,12 +648,14 @@ logqy.til <- velbo - max(velbo)
 vq <- exp(logqy.til)/sum(exp(logqy.til))
 
 # Calculate the variable inclusion probabilities
+pdf(sprintf("Model_selection_covariate_inclusion_%s.pdf", SETTING), width=8, height=2)
+par(mfrow=c(1, 4))
 vw1 <- round( t(vp)%*%res$mA, 3)
 vw2 <- round( t(vq)%*%res$mA, 3)
 cat(vw1)
 cat(vw2)
-barplot(as.vector(vw1))
-barplot(as.vector(vw2))
+barplot(as.vector(vw1), main="Exact")
+barplot(as.vector(vw2), main="Approximate")
 
 # Calculate AIC
 logpy <- n*log(1 - res$vR2)
@@ -661,7 +663,7 @@ vlog.AIC <- -0.5*apply(res$mA,1,sum) - 0.5*logpy
 vlog.AIC.til <- vlog.AIC - max(vlog.AIC)
 vp.AIC <- exp(vlog.AIC.til)/sum(exp(vlog.AIC.til))
 pip.AIC <- ( t(vp.AIC)%*%res$mA)
-barplot(as.vector(pip.AIC))
+barplot(as.vector(pip.AIC), main="AIC")
 vw3 <- round( t(vlog.AIC.til)%*%res$mA, 3)
 
 # Calculate BIC
@@ -669,15 +671,18 @@ vlog.BIC <- -0.5*logpy - 0.5*apply(res$mA,1,sum)* log(nrow(X.f))
 vlog.BIC.til <- vlog.BIC - max(vlog.BIC)
 vp.BIC <- exp(vlog.BIC.til)/sum(exp(vlog.BIC.til))
 pip.BIC <- ( t(vp.BIC)%*%res$mA)
-barplot(as.vector(pip.BIC))
+barplot(as.vector(pip.BIC), main="BIC")
 vw4 <- round( t(vlog.BIC.til)%*%res$mA, 3)
+dev.off()
 
 # Plot ranks
-par(mfrow=c(2, 2))
-plot(rank(as.vector(vw1)[1:100]), rank(as.vector(vw2[1:100])))
-plot(rank(as.vector(vw1)[1:100]), rank(as.vector(vw3[1:100])))
-plot(rank(as.vector(vw3)[1:100]), rank(as.vector(vw4[1:100])))
+pdf(sprintf("Model_selection_scatter_plot_%s.pdf", SETTING), width=6, height=2)
+par(mfrow=c(1, 3))
+plot(rank(as.vector(vw1)[1:100]), rank(as.vector(vw2[1:100])), xlab="Exact ranking", ylab="Approximate ranking")
+plot(rank(as.vector(vw1)[1:100]), rank(as.vector(vw3[1:100])), xlab="Exact ranking", ylab="AIC ranking")
+plot(rank(as.vector(vw3)[1:100]), rank(as.vector(vw4[1:100])), xlab="AIC ranking", ylab="BIC ranking")
 par(mfrow=c(1, 1))
+dev.off()
 
 # mW <- rbind(vw1, vw2, t(pip.AIC), t(pip.BIC))
 # colnames(mW) <- varnames
