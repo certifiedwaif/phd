@@ -58,6 +58,7 @@
 # IPM_BASELINE_R2.csv        RoachCounts.csv
 # IPM_BASELINE_R2_032006.csv roachdata.csv
 library(zipvb)
+setwd("~/Dropbox/phd/code/")
 source("accuracy.R")
 library(sqldf)
 
@@ -150,34 +151,48 @@ var_accuracy3 <- calculate_accuracies("application", mult, mcmc_samples, fit3, "
 
 # Police stops example
 	
-library(arm) # for display() function
 frisk <- read.table("frisk_with_noise.dat",skip=6,header=TRUE)
-model.matrix(, data=frisk)
-display(fit.1)
-C <- model.matrix(stops~factor(precinct)+factor(eth)+crime, data=frisk)
+# Crime should be a factor
+C <- model.matrix(stops~factor(eth)+factor(crime)+factor(precinct), data=frisk)
 vy <- frisk$stops
-mZ <- C[, 2:75]
-mX <- C[, c(1, 76:78)]
+mX <- C[, 1:6]
+mZ <- C[, 7:ncol(C)]
 mult <- create_mult(vy, mX, mZ, 1e5, m=75, blocksize=1, v=2)
-zipvb(mult, method="gva2", verbose=TRUE)
+mult$prior$a_rho <- 3
+
+now <- Sys.time()
+fit1 <- zipvb(mult, method="laplace", verbose=FALSE)
+cat("Laplace", Sys.time() - now, "\n")
+
+now <- Sys.time()
+fit2 <- zipvb(mult, method="gva", verbose=FALSE)
+cat("GVA", Sys.time() - now, "\n")
+
+now <- Sys.time()
+fit3 <- zipvb(mult, method="gva2", verbose=FALSE)
+cat("GVA2", Sys.time() - now, "\n")
+
+now <- Sys.time()
+fit4 <- zipvb(mult, method="gva_nr", verbose=FALSE)
+cat("GVA NR", Sys.time() - now, "\n")
 
 save <- FALSE
 if (save) {
-  mcmc_result <- mcmc(mult, p=4, iterations=1e5, warmup=1e4, mc.cores = 1)
+  mcmc_result <- mcmc(mult, p=6, iterations=1e4, warmup=1e3, mc.cores = 1)
   mcmc_samples <- mcmc_result$mcmc_samples
   fit <- mcmc_result$fit
   print(fit)
-  save(mult, mcmc_samples, fit, file="data/accuracy_application_2015_11_20.RData")
+  save(mult, mcmc_samples, fit, file="data/accuracy_application2_2017_03_06.RData")
   # save(mult, mcmc_samples, fit, allKnots, file="/tmp/accuracy_spline_2015_05_19.RData")
 } else {
-  load(file="data/accuracy_application_2015_11_20.RData")
+  load(file="data/accuracy_application2_2017_03_06.RData")
   # load(file="/tmp/accuracy_spline_2015_05_19.RData")
 }
 
-var_accuracy <- calculate_accuracies("application2", mult, mcmc_samples, fit, "GVA2", plot_flag=TRUE)
-# var_accuracy2 <- calculate_accuracies("application", mult, mcmc_samples, fit2, "GVA", plot_flag=TRUE)
-# var_accuracy3 <- calculate_accuracies("application", mult, mcmc_samples, fit3, "GVA", plot_flag=TRUE)
-# var_accuracy4 <- calculate_accuracies("application", mult, mcmc_samples, fit4, "GVA", plot_flag=TRUE)
+var_accuracy <- calculate_accuracies("application2", mult, mcmc_samples, fit1, "Laplace", plot_flag=TRUE)
+var_accuracy2 <- calculate_accuracies("application2", mult, mcmc_samples, fit2, "GVA", plot_flag=TRUE)
+var_accuracy3 <- calculate_accuracies("application2", mult, mcmc_samples, fit3, "GVA2", plot_flag=TRUE)
+var_accuracy4 <- calculate_accuracies("application2", mult, mcmc_samples, fit4, "GVA_NR", plot_flag=TRUE)
 
 # > var_accuracy$vbeta_accuracy
 # [1] 74.37920 96.78242 99.17660 97.05468
