@@ -61,84 +61,180 @@ BEGIN_RCPP
 END_RCPP
 }
 // var_g_over_one_plus_g
-double var_g_over_one_plus_g(int n, int p, double R2);
+double var_g_over_one_plus_g(double n, double p, double R2);
 RcppExport SEXP taug_var_g_over_one_plus_g(SEXP nSEXP, SEXP pSEXP, SEXP R2SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type n(nSEXP);
-    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< double >::type n(nSEXP);
+    Rcpp::traits::input_parameter< double >::type p(pSEXP);
     Rcpp::traits::input_parameter< double >::type R2(R2SEXP);
     rcpp_result_gen = Rcpp::wrap(var_g_over_one_plus_g(n, p, R2));
     return rcpp_result_gen;
 END_RCPP
 }
 // tau_g
-double tau_g(int n, int p, double R2);
+double tau_g(double n, double p, double R2);
 RcppExport SEXP taug_tau_g(SEXP nSEXP, SEXP pSEXP, SEXP R2SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type n(nSEXP);
-    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< double >::type n(nSEXP);
+    Rcpp::traits::input_parameter< double >::type p(pSEXP);
     Rcpp::traits::input_parameter< double >::type R2(R2SEXP);
     rcpp_result_gen = Rcpp::wrap(tau_g(n, p, R2));
     return rcpp_result_gen;
 END_RCPP
 }
 // log_p
-double log_p(int n, int p, double R2);
+double log_p(double n, double p, double R2);
 RcppExport SEXP taug_log_p(SEXP nSEXP, SEXP pSEXP, SEXP R2SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type n(nSEXP);
-    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< double >::type n(nSEXP);
+    Rcpp::traits::input_parameter< double >::type p(pSEXP);
     Rcpp::traits::input_parameter< double >::type R2(R2SEXP);
     rcpp_result_gen = Rcpp::wrap(log_p(n, p, R2));
     return rcpp_result_gen;
 END_RCPP
 }
 // aic
-double aic(int n, int p, double R2);
+double aic(double n, double p, double R2);
 RcppExport SEXP taug_aic(SEXP nSEXP, SEXP pSEXP, SEXP R2SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type n(nSEXP);
-    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< double >::type n(nSEXP);
+    Rcpp::traits::input_parameter< double >::type p(pSEXP);
     Rcpp::traits::input_parameter< double >::type R2(R2SEXP);
     rcpp_result_gen = Rcpp::wrap(aic(n, p, R2));
     return rcpp_result_gen;
 END_RCPP
 }
 // bic
-double bic(int n, int p, double R2);
+double bic(double n, double p, double R2);
 RcppExport SEXP taug_bic(SEXP nSEXP, SEXP pSEXP, SEXP R2SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type n(nSEXP);
-    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< double >::type n(nSEXP);
+    Rcpp::traits::input_parameter< double >::type p(pSEXP);
     Rcpp::traits::input_parameter< double >::type R2(R2SEXP);
     rcpp_result_gen = Rcpp::wrap(bic(n, p, R2));
     return rcpp_result_gen;
 END_RCPP
 }
 // elbo
-double elbo(int n, int p, double c, double s, double tau_g, double log_det_XTX, double log_det_mSigma);
+double elbo(double n, double p, double c, double s, double tau_g, double log_det_XTX, double log_det_mSigma);
 RcppExport SEXP taug_elbo(SEXP nSEXP, SEXP pSEXP, SEXP cSEXP, SEXP sSEXP, SEXP tau_gSEXP, SEXP log_det_XTXSEXP, SEXP log_det_mSigmaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int >::type n(nSEXP);
-    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< double >::type n(nSEXP);
+    Rcpp::traits::input_parameter< double >::type p(pSEXP);
     Rcpp::traits::input_parameter< double >::type c(cSEXP);
     Rcpp::traits::input_parameter< double >::type s(sSEXP);
     Rcpp::traits::input_parameter< double >::type tau_g(tau_gSEXP);
     Rcpp::traits::input_parameter< double >::type log_det_XTX(log_det_XTXSEXP);
     Rcpp::traits::input_parameter< double >::type log_det_mSigma(log_det_mSigmaSEXP);
     rcpp_result_gen = Rcpp::wrap(elbo(n, p, c, s, tau_g, log_det_XTX, log_det_mSigma));
+    return rcpp_result_gen;
+END_RCPP
+}
+// exact_precision
+double exact_precision(double n, double p, double R2);
+RcppExport SEXP taug_exact_precision(SEXP nSEXP, SEXP pSEXP, SEXP R2SEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type n(nSEXP);
+    Rcpp::traits::input_parameter< double >::type p(pSEXP);
+    Rcpp::traits::input_parameter< double >::type R2(R2SEXP);
+    rcpp_result_gen = Rcpp::wrap(exact_precision(n, p, R2));
+    return rcpp_result_gen;
+END_RCPP
+}
+// E_g_y
+double E_g_y(double n, double p, double R2);
+RcppExport SEXP taug_E_g_y(SEXP nSEXP, SEXP pSEXP, SEXP R2SEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type n(nSEXP);
+    Rcpp::traits::input_parameter< double >::type p(pSEXP);
+    Rcpp::traits::input_parameter< double >::type R2(R2SEXP);
+    rcpp_result_gen = Rcpp::wrap(E_g_y(n, p, R2));
+    return rcpp_result_gen;
+END_RCPP
+}
+// E_q_g_c
+double E_q_g_c(double n, double p, double R2, double c);
+RcppExport SEXP taug_E_q_g_c(SEXP nSEXP, SEXP pSEXP, SEXP R2SEXP, SEXP cSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type n(nSEXP);
+    Rcpp::traits::input_parameter< double >::type p(pSEXP);
+    Rcpp::traits::input_parameter< double >::type R2(R2SEXP);
+    Rcpp::traits::input_parameter< double >::type c(cSEXP);
+    rcpp_result_gen = Rcpp::wrap(E_q_g_c(n, p, R2, c));
+    return rcpp_result_gen;
+END_RCPP
+}
+// p_sigma2_y
+double p_sigma2_y(double n, double p, double R2, double sigma2);
+RcppExport SEXP taug_p_sigma2_y(SEXP nSEXP, SEXP pSEXP, SEXP R2SEXP, SEXP sigma2SEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type n(nSEXP);
+    Rcpp::traits::input_parameter< double >::type p(pSEXP);
+    Rcpp::traits::input_parameter< double >::type R2(R2SEXP);
+    Rcpp::traits::input_parameter< double >::type sigma2(sigma2SEXP);
+    rcpp_result_gen = Rcpp::wrap(p_sigma2_y(n, p, R2, sigma2));
+    return rcpp_result_gen;
+END_RCPP
+}
+// q_sigma2
+double q_sigma2(double r, double s, double sigma2);
+RcppExport SEXP taug_q_sigma2(SEXP rSEXP, SEXP sSEXP, SEXP sigma2SEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type r(rSEXP);
+    Rcpp::traits::input_parameter< double >::type s(sSEXP);
+    Rcpp::traits::input_parameter< double >::type sigma2(sigma2SEXP);
+    rcpp_result_gen = Rcpp::wrap(q_sigma2(r, s, sigma2));
+    return rcpp_result_gen;
+END_RCPP
+}
+// accuracy_sigma2
+double accuracy_sigma2(double n, double p, double R2, double r, double s);
+RcppExport SEXP taug_accuracy_sigma2(SEXP nSEXP, SEXP pSEXP, SEXP R2SEXP, SEXP rSEXP, SEXP sSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type n(nSEXP);
+    Rcpp::traits::input_parameter< double >::type p(pSEXP);
+    Rcpp::traits::input_parameter< double >::type R2(R2SEXP);
+    Rcpp::traits::input_parameter< double >::type r(rSEXP);
+    Rcpp::traits::input_parameter< double >::type s(sSEXP);
+    rcpp_result_gen = Rcpp::wrap(accuracy_sigma2(n, p, R2, r, s));
+    return rcpp_result_gen;
+END_RCPP
+}
+// accuracy_g
+double accuracy_g(double n, double p, double R2, double c);
+RcppExport SEXP taug_accuracy_g(SEXP nSEXP, SEXP pSEXP, SEXP R2SEXP, SEXP cSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type n(nSEXP);
+    Rcpp::traits::input_parameter< double >::type p(pSEXP);
+    Rcpp::traits::input_parameter< double >::type R2(R2SEXP);
+    Rcpp::traits::input_parameter< double >::type c(cSEXP);
+    rcpp_result_gen = Rcpp::wrap(accuracy_g(n, p, R2, c));
     return rcpp_result_gen;
 END_RCPP
 }
