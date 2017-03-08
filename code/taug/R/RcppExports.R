@@ -120,3 +120,85 @@ elbo <- function(n, p, c, s, tau_g, log_det_XTX, log_det_mSigma) {
     .Call('taug_elbo', PACKAGE = 'taug', n, p, c, s, tau_g, log_det_XTX, log_det_mSigma)
 }
 
+#' Calculate the exact precision
+#'
+#' @param n The number of observations
+#' @param p The number of covariates
+#' @param R2 The correlation coefficient squared
+#' @return The exact precision
+#' @export
+exact_precision <- function(n, p, R2) {
+    .Call('taug_exact_precision', PACKAGE = 'taug', n, p, R2)
+}
+
+#' Calculate the exact posterior expectation of g
+#'
+#' @param n The number of observations
+#' @param p The number of covariates
+#' @param R2 The correlation coefficient squared
+#' @return The exact posterior expectation of g
+#' @export
+E_g_y <- function(n, p, R2) {
+    .Call('taug_E_g_y', PACKAGE = 'taug', n, p, R2)
+}
+
+#' Calculate the approximate posterior expectation of g
+#'
+#' @param n The number of observations
+#' @param p The number of covariates
+#' @param R2 The correlation coefficient squared
+#' @param c The co-efficient c of the exponential function exp(-c/g)
+#' @return The approximate posterior expectation of g
+#' @export
+E_q_g_c <- function(n, p, R2, c) {
+    .Call('taug_E_q_g_c', PACKAGE = 'taug', n, p, R2, c)
+}
+
+#' p_sigma2_y
+#'
+#' @param n The number of observations
+#' @param p The number of covariates
+#' @param R2 The correlation co-efficient, squared
+#' @param sigma2 The value of sigma2
+#' @return The value of p_sigma2_y
+#' @export
+p_sigma2_y <- function(n, p, R2, sigma2) {
+    .Call('taug_p_sigma2_y', PACKAGE = 'taug', n, p, R2, sigma2)
+}
+
+#' q_sigma2
+#'
+#' @param r The first parameter of the Inverse Gamma distribution
+#' @param s The second parameter of the Inverse Gamma distribution
+#' @param sigma2 The value of sigma2
+#' @return The value of q_sigma2
+#' @export
+q_sigma2 <- function(r, s, sigma2) {
+    .Call('taug_q_sigma2', PACKAGE = 'taug', r, s, sigma2)
+}
+
+#' Calculate the accuracy of the approximation of sigma2
+#'
+#' @param n The number of observations
+#' @param p The number of covariates
+#' @param R2 The correlation co-efficient, squared
+#' @param r The first parameter of the q(sigma2) distribution
+#' @param s The second parameter of the q(sigma2) distribution
+#' @return The accuracy of the approximation of sigma2
+#' @export
+accuracy_sigma2 <- function(n, p, R2, r, s) {
+    .Call('taug_accuracy_sigma2', PACKAGE = 'taug', n, p, R2, r, s)
+}
+
+#' Calculate the accuracy of the approximation of g
+#'
+#' @param n The number of observations
+#' @param p The number of covariates
+#' @param R2 The correlation co-efficient, squared
+#' @param c The c parameter
+#' @return The accuracy of the approximation of g
+#' @export
+accuracy_g <- function(n, p, R2, c) {
+    .Call('taug_accuracy_g', PACKAGE = 'taug', n, p, R2, c)
+}
+
