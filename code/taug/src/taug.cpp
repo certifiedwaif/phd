@@ -223,8 +223,7 @@ Trapint Z_g_trapint(double A, double B, double C, size_t N=10000)
 	auto TOR = 1.0E-5;
 
 	// Find the mode of g
-	auto res = mode_qg(A,B,C);
-	auto g_hat = res;
+	auto g_hat = mode_qg(A,B,C);
 
 	// Evaluate q(g) at the mode
 	auto log_qg_max = log_qg(g_hat,A,B,C);
@@ -247,6 +246,7 @@ Trapint Z_g_trapint(double A, double B, double C, size_t N=10000)
 		//count = count + 1
 		g_curr = g_curr + delta_1;
 		log_qg_curr = log_qg(g_curr,A,B,C);
+		// Rcout << "g_curr " << g_curr << " log_qg_curr " << log_qg_curr << " log_qg_max " << log_qg_max << " log(TOR) " << log(TOR) << std::endl;
 	}
 	auto R = g_curr;
 
@@ -263,6 +263,7 @@ Trapint Z_g_trapint(double A, double B, double C, size_t N=10000)
 		}
 		g_curr = g_curr - delta_2;
 		log_qg_curr = log_qg(g_curr,A,B,C);
+		// Rcout << "g_curr " << g_curr << " log_qg_curr " << log_qg_curr << " log_qg_max " << log_qg_max << " log(TOR) " << log(TOR) << std::endl;
 	}
 	auto L = g_curr;
 
@@ -797,13 +798,16 @@ double exact_precision(double n, double p, double R2)
   auto a = -3./4.;
   auto b = (n - p) / 2. - 2. - a;
 
-  auto twoFone = gsl_sf_hyperg_2F1(n / 2. + 1., b + 1., n/2., R2);
-  Rcout << "n " << n;
-  Rcout << " p " << p;
-  Rcout << " R2 " << R2;
-  Rcout << " twoFone " << twoFone;
-  auto result = exp((b + 1.) * log(1-R2)) * twoFone;
-  Rcout << " = " << result;
+  // auto twoFone = gsl_sf_hyperg_2F1(n / 2. + 1., b + 1., n/2., R2);
+  auto twoFone = gsl_sf_hyperg_2F1(-1., p / 2. + a + 1., n / 2., R2);
+  // Rcout << "n " << n;
+  // Rcout << " p " << p;
+  // Rcout << " R2 " << R2;
+  // Rcout << " b " << b;
+  // Rcout << " twoFone " << twoFone;
+  // auto result = exp((b + 1.) * log(1-R2)) * twoFone;
+  auto result = twoFone / (1. - R2);
+  // Rcout << " = " << result << std::endl;
 	return result;
 	// return pow((1-R2), b + 1.) * hyperg_1F2(n / 2. + 1, b + 1., n/2., R2);
 }
@@ -1046,7 +1050,7 @@ double accuracy_g(double n, double p, double R2, double c)
 
 	#pragma omp parallel for simd
 	for (auto i = 1; i < GRID_POINTS; i++) {
-		double g = i / 10000.;
+		double g = i / 1000.;
 
 		x(i) = g;
 		f(i) = abs(p_g_y(n, p, R2, g) - q_g(n, p, R2, c, g));
