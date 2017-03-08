@@ -164,7 +164,7 @@ calculate_accuracies <- function(test, mult, mcmc_samples, var_result, approxima
   # cubature$adaptIntegrate
   
   # if (plot_flag) pdf(paste0("results/accuracy_plots_", test, "_", approximation, ".pdf"), width=6, height=6)
-  if (plot_flag) pdf(paste0("~/phd/code/results/accuracy_plots_", test, "_", approximation, ".pdf"), width=6, height=6)
+  if (plot_flag) pdf(paste0("results/accuracy_plots_", test, "_", approximation, ".pdf"), width=6, height=6)
   #return(var_result)
   # vbeta accuracy
   
@@ -325,10 +325,10 @@ test_accuracies_intercept <- function(save=FALSE)
   # }
   # save(mult, mcmc_samples, file="accuracy_good.RData")
   if (save) {
-    set.seed(1)
+    set.seed(3)
     m <- 20
     ni <- 10
-    mult <- generate_int_test_data(m, ni, expected_beta = c(2, 1), expected_rho = 0.5)
+    mult <- generate_int_test_data(m, ni, expected_beta = c(3, 2), expected_rho = 0.5)
     # Monte Carlo Markov Chains approximation
     result <- mcmc(mult, iterations=1e5, warmup = 1e4)
     fit <- result$fit
@@ -399,8 +399,11 @@ test_accuracies_slope <- function(save=FALSE)
   if (save) {
     seed <- 3
     set.seed(seed)
-    mult <- generate_slope_test_data(m=20, ni=10)
-    result <-  mcmc(mult, iterations=3e5, warmup = 5e4)
+    # mult <- generate_slope_test_data(m=20, ni=10, expected_rho=0.5)
+    # mult <- generate_slope_test_data(m=50, ni=100, expected_rho=0.5)
+    mult <- generate_slope_test_data(m=20, ni=20, expected_rho=1.0)
+    # result <-  mcmc(mult, iterations=3e5, warmup = 5e4)
+    result <-  mcmc(mult, iterations=1e5, warmup = 5e4)
     fit <- result$fit
     print(fit)
     mcmc_samples <- result$mcmc_samples
@@ -413,6 +416,8 @@ test_accuracies_slope <- function(save=FALSE)
   # m <- 20
   # mult$vmu <- c(2, 1, rep(0, (m-1) * 2))
   
+  options(threshold=Inf)
+
   now <- Sys.time()
   var1_result <- zipvb(mult, method="laplace", verbose=FALSE)
   cat("Laplace", Sys.time() - now, "\n")
@@ -432,7 +437,7 @@ test_accuracies_slope <- function(save=FALSE)
   print(var2_accuracy$rho_accuracy)
 
   now <- Sys.time()
-  var3_result <- zipvb(mult, method="gva2", verbose=TRUE)
+  var3_result <- zipvb(mult, method="gva2", verbose=FALSE)
   cat("GVA NP", Sys.time() - now, "\n")
   var3_accuracy <- calculate_accuracies("slope", mult, mcmc_samples, var3_result, "gva2", print_flag=FALSE, plot_flag=TRUE)
   print(var3_accuracy$vbeta_accuracy)
@@ -586,5 +591,4 @@ main <- function()
     test_accuracies_spline(opt$save)
   }
 }
-
-# main()
+main()
