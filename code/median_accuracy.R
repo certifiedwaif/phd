@@ -5,6 +5,7 @@ library(parallel)
 source("generate.R")
 library(zipvb)
 source("accuracy.R")
+library(latex2exp)
 
 # Repeatedly run trials and compare accuracy. Plot boxplots.
 generate_test_case <- function(i, test) {
@@ -72,7 +73,7 @@ load_stan_data <- function(i, test)
 median_accuracy <- function(approximation="gva", test="intercept", save_flag=FALSE)
 {
   if (save_flag) {
-    ITER <- 10
+    ITER <- 100
 
     # Saving the fit allows us to skip the recompilation of the C++ for the model
     # Update: Well, it's supposed to. Stan seems to want to keep recompiling the
@@ -108,7 +109,7 @@ median_accuracy <- function(approximation="gva", test="intercept", save_flag=FAL
         vb_spline_fn <- splinefun(xtilde, f_hat_vb)
         result <- calculate_accuracy_spline(xtilde, mcmc_spline_fn, vb_spline_fn)
       } else {
-        result <- calculate_accuracies("", mult, mcmc_samples, var_result, approximation, print_flag=TRUE,
+        result <- calculate_accuracies("", mult, mcmc_samples, var_result, approximation, print_flag=FALSE,
                                        plot_flag=TRUE)
       }
       # In spline case, should calculate accuracy of the fit functions
@@ -257,7 +258,7 @@ median_accuracy_graph_all <- function(test) {
   #   acc <- 100.0 * acc
   # }
   boxplot(acc,
-          col=gray(1/1:4),
+          col=gray((1:4)/(2:5)),
           xaxt="n",
           ylim=c(0.0, 100.0),
           ylab="Accuracy")
@@ -282,7 +283,10 @@ median_accuracy_graph_all <- function(test) {
          at = 1:7 * 4 - 0.25,
          tick=TRUE)
   }
-  legend("bottomright", c("Laplace", "GVA", "GVA NP", "GVA FP"), lty=1, col=gray(1/1:4))
+  legend("bottomright", c("Laplace",
+                          latex2exp("GVA $\\Lambda = R^T R$"),
+                          latex2exp("GVA $\\Lambda = (R^T R)^{-1}$"),
+                          "GVA NP"), lty=1, col=gray((1:4)/(2:5)))
   title(sprintf("Combined median accuracy graph - %s", test))
   dev.off()
   # TODO: Label the axes better
@@ -428,6 +432,7 @@ main <- function()
                       make_option(c("-s", "--save_flag"),  action="store_true", default=FALSE),
                       make_option(c("-d", "--save_mcmc"),  action="store_true", default=FALSE))
   opt <- parse_args(OptionParser(option_list=option_list))
+  # cat(str(opt), "\n")
   test <- opt$test
   if (opt$save_mcmc) {
     save_mcmc(test)
