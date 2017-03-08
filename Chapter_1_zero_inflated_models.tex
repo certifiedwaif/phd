@@ -892,6 +892,12 @@ Variational Approximation, as in \citep{ormerod09}. The model can be fit using A
 	slope, and a random intercept. $\vmu$ was initialised from a grid of points on the interval $[-4.5, 5]$ for
 	intercept and slope, spaced $0.1$ apart. The error counts are presented in Table
 	\ref{tab:stability_results}.
+
+	The stability of the GVA algorithm with the parameterisation $\mLambda = (\mR^\top \mR)^{-1}$ depends on the
+	threshold chosen for the safe exponential function. When the threshold is set to $2$, the algorithm is stable
+	for all starting points within the grid except $6$. When the threshold is set to $\infty$, equivalent to using
+	the naive $\exp$ parameterisation, the algorithm encounters numerical errors for every starting point on the 
+	grid.
 		
 	\begin{table}
 		\caption{Count of numerical errors for each algorithm during stability tests}
@@ -902,7 +908,7 @@ Variational Approximation, as in \citep{ormerod09}. The model can be fit using A
 			\hline
 			Laplace's algorithm & 12          \\
 			GVA $\mLambda = \mR^\top \mR$                 & 1,306       \\
-			GVA $\mLambda = (\mR^\top \mR)^{-1}$              & 1         \\
+			GVA $\mLambda = (\mR^\top \mR)^{-1}$              & 6         \\
 			GVA NR fixed point              & 992         \\
 			\hline
 		\end{tabular}
@@ -913,15 +919,48 @@ Variational Approximation, as in \citep{ormerod09}. The model can be fit using A
 
 	\subsection{Poisson example}
 	The data set used for this example was the police stop example from Chapter 15 of \citep{Gelman2007}.
-	The
-	model fit was
-	\[
-		stops = \beta_0 + \beta_j \text{ethnicity}_j + \beta_{j+1} \text{crime} + u_i + \epsilon
-	\]
-	where $i$ is the $i$-th precinct, and $j$ is the $j$-th crime category (violent crime, weapons, property,
-	drugs)
-	and was intended to find the relationship between the number of police stops in each precinct by ethnicity
-	for each type of crime.
+	The model fit was
+	\begin{align*}
+		y_{ep} &\sim \text{Poisson}(n_{ep} e^{\beta_0 + \beta_e \text{ethnicity}_e + \alpha_{k} \text{crime} + u_p + \epsilon_{ep}}) \\
+		u_p &\sim \N(0, \sigma_u^2) \\
+		\epsilon_{ep} &\sim \N(0, \sigma_\epsilon^2) \\
+	\end{align*}
+	where $p$ is the $p$-th precinct, and $e$ is the $e$-th ethnicity (blacks, hispanics or whites), and $c$ is
+	the $c$-th category of crime (violent crimes, weapons crimes, propery crimes, drug crimes). The random 
+	intercepts $u_p$ allow for variation in the base rates of stops across precincts,
+	the co-efficients $\beta_j$ measure the effect of ethnicity on the rate of police stops and
+	the co-efficients $\alpha_k$ measure the effect of each type of crime on the rate.
+	The model finds the relationship between the number of police stops in each precinct and 
+	ethnicity	for each type of crime.
+
+	The model was fit using the GVA algorithm with the $\mLambda = (\mR^\top \mR)^{-1}$ parameterisation, using
+	the prior $a_\rho = 3$, $b_\rho = 1$ on $\rho$. Accuracy of the approximation was assessed by comparing the
+	fitted distribution for each parameter to a kernel density estimate of the parameter's distribution from
+	1 million samples from the equivalent model fitted using Stan. The results are presented in Table
+	\ref{tab:application_police_stops}.
+
+	% Table of results
+	\begin{table}
+		\caption{Table of results - Police stops}
+		\label{tab:application_police_stops}
+		\begin{tabular}{|l|rrrr|}
+			\hline
+			Covariate          & Posterior Mean & Lower 95\% CI & Upper 95\% CI & Accuracy \\
+			\hline
+			Intercept [African-Americans] & 4.04 & 4.03 & 4.042 & 82.4\% \\
+			$\beta_2$ [hispanics] & -0.445 & -0.445 & -0.445 & 98.1\% \\
+			$\beta_3$ [whites] & -1.380 & -1.380 & -1.380 & 98.5\% \\
+			$\alpha_1$ [weapons crimes] & 0.580 & 0.580 & 0.580 & 89.2\%     \\
+			$\alpha_2$ [property crimes] & -0.191 & -0.191 & -0.191 & 92.2\%     \\
+			$\alpha_3$ [drug crimes] & -0.750 & -0.750 & -0.750 & 94.9\%     \\
+			Random intercept & 1.321 & -0.190 & 2.202 & 86.7\% \\
+			$\sigma^2_{\vu}$ & 2.095 & 1.585 & 3.26 & 40\% \\
+			\hline
+		\end{tabular}
+	\end{table}
+
+	% Table of speeds
+
 
 	% TODO: You need to describe the data set and the model.
 	\subsection{Zero--inflated example -- Cockroaches in Apartments data set from Gelman}
