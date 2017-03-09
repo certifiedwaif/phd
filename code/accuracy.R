@@ -7,6 +7,7 @@ library(optparse)
 library(mvtnorm)
 library(limma)
 library(latex2exp)
+library(MCMCpack)
 
 source("generate.R")
 
@@ -258,7 +259,7 @@ calculate_accuracies <- function(test, mult, mcmc_samples, var_result, approxima
   #   sigma_u_inv[i, , ] <- solve(sigma_u[i, , ])
   # }
   sigma2_vu_accuracy <- rep(0, B)
-  v <- mult$v
+  v <- mult$v + mult$m
   if (B == 2) {
     # E_mPsi_inv <- var_result$mult$mPsi / (4 - 2 - 1)
     sigma_u_inv <- array(0, c(dim(mcmc_samples$sigma_u)[1], 2, 2))
@@ -280,17 +281,19 @@ calculate_accuracies <- function(test, mult, mcmc_samples, var_result, approxima
   for (i in 1:B) {
     # sigma2 <- E_mPsi_inv[i, i]
     # sigma2_inv <- solve(var_result$mPsi)[i, i]
-    sigma_vu <- sqrt(mPsi_inv[i, i])
+    # sigma_vu <- sqrt(mPsi_inv[i, i])
+    sigma_vu <- mPsi_inv[i, i]
+    psi <- var_result$mPsi[i, i]
     # sigma_vu <- sqrt(var_result$mPsi[i, i])
     sigma2_vu_accuracy[i] <- calculate_accuracy_normalised(sigma_u_inv[, i, i],
-                                               function(x, ...) dchisq(x / sigma_vu, df = v, ...))
+                                               function(x, ...) dinvgamma(x, psi / 2, v / 2, ...))
     title <- latex2exp(sprintf("%s $\\sigma^2_{u_%d}$ accuracy: %2.0f%%",
                        approximation,
                        i,
                        sigma2_vu_accuracy[i]))
     if (print_flag) print(title)
     if (plot_flag) {
-      accuracy_plot(title, sigma_u_inv[, i, i], function(x, ...) dchisq(x / sigma_vu, df = v, ...))
+      accuracy_plot(title, sigma_u_inv[, i, i], function(x, ...) dinvgamma(x, psi / 2, v / 2, ...))
     }
   }
   
@@ -416,7 +419,7 @@ test_accuracies_slope <- function(save=FALSE)
   # m <- 20
   # mult$vmu <- c(2, 1, rep(0, (m-1) * 2))
   
-  options(threshold=Inf)
+  options(threshold=2)
 
   now <- Sys.time()
   var1_result <- zipvb(mult, method="laplace", verbose=FALSE)
@@ -591,4 +594,4 @@ main <- function()
     test_accuracies_spline(opt$save)
   }
 }
-main()
+# main()
