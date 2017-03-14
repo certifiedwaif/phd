@@ -27,3 +27,11 @@ template <typename Derived1, typename Derived2>
 MatrixBase<Derived2>& get_cols(const MatrixBase<Derived1>& m1, const dbitset& gamma, MatrixBase<Derived2>& m2);
 template <typename Derived1, typename Derived2>
 MatrixBase<Derived2>& get_rows(const MatrixBase<Derived1>& m1, const dbitset& gamma, MatrixBase<Derived2>& m2);
+template <typename Derived1, typename Derived2>
+MatrixBase<Derived2>& rank_one_update(const dbitset& gamma, const uint col_abs, const uint min_idx,
+	const uint fixed,
+const MatrixBase<Derived1>& mXTX, const MatrixBase<Derived1>& mA, MatrixBase<Derived2>& mA_prime, bool& bLow);
+template <typename Derived1, typename Derived2>
+MatrixBase<Derived2>& rank_one_downdate(const uint col_abs, const uint min_idx, const uint fixed,
+const MatrixBase<Derived1>& mA, MatrixBase<Derived2>& mA_prime);
+void centre(VectorXd& v);
