@@ -4,6 +4,7 @@
 // [[Rcpp::depends(RcppGSL)]]
 #include <RcppGSL.h>
 #include <vector>
+#include <cmath>
 #include <gsl/gsl_randist.h>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_sf.h>
@@ -14,9 +15,14 @@ using namespace std;
 using namespace Rcpp;
 
 
-double prob(const uint n, const uint p, const double sigma2, const double a, const double b)
+double prob(const int n, const int p, const double sigma2, const double a, const double b)
 {
-	double log_p = -n / 2. * log(sigma2) - p / 2. * log(n) + gsl_sf_lnbeta(a, b);
+	double log_sigma2 = std::log(sigma2);
+	double log_n = std::log(n);
+	// Rcpp::Rcout << "log_sigma2 " << log_sigma2 << std::endl;
+	// Rcpp::Rcout << "log_n " << log_n << std::endl;
+	double log_p = -n / 2. * log_sigma2 - p / 2. * log_n + gsl_sf_lnbeta(a, b);
+	// Rcpp::Rcout << "log_p " << log_p << std::endl;
 
 	return exp(log_p);
 }
@@ -30,7 +36,7 @@ double prob(const uint n, const uint p, const double sigma2, const double a, con
 //' @return Good question!
 //' @export
 // [[Rcpp::export]]
-double cva(NumericVector vy_in, NumericMatrix mX_in, const uint K)
+void cva(NumericVector vy_in, NumericMatrix mX_in, const int K)
 {
 	VectorXd vy(vy_in.length()); // = Rcpp::as<Eigen::Map<Eigen::VectorXd>>(vy_in);
 	for (auto i = 0; i < vy_in.length(); i++) vy[i] = vy_in[i];
@@ -72,14 +78,18 @@ double cva(NumericVector vy_in, NumericMatrix mX_in, const uint K)
 					gamma[k][j] = false;
 			}
 		}
+		Rcpp::Rcout << "gamma[" << k << "] " << gamma[k] << std::endl;
 	}
 
 	// Initialise mXTX_inv
 	// Initialise sigma2
 	for (auto k = 0; k < K; k++) {
 		auto p_gamma = gamma[k].count();
+		MatrixXd mX_gamma(n, p_gamma);
+		get_cols(mX, gamma[k], mX_gamma);
 		MatrixXd mX_gamma_Ty(p_gamma, 1);
 		get_rows(mXTy, gamma[k], mX_gamma_Ty);
+		mXTX_inv[k] = (mX_gamma.transpose() * mX_gamma).inverse();
 		sigma2[k] = 1. - (mX_gamma_Ty.transpose() * mXTX_inv[k] * mX_gamma_Ty).value() / n;
 	}
 
@@ -91,28 +101,21 @@ double cva(NumericVector vy_in, NumericMatrix mX_in, const uint K)
 				dbitset gamma_0 = gamma[k];
 				gamma_0[j] = false;
 				auto p_gamma_0 = gamma_0.count();
-				MatrixXd mX_gamma_0(n, p_gamma_0);
-				get_cols(mX, gamma_0, mX_gamma_0);
-				MatrixXd mX_gamma_0_Ty = mX_gamma_0.transpose() * vy;
 
 				dbitset gamma_1 = gamma[k];
 				gamma_1[j] = true;
 				auto p_gamma_1 = gamma_1.count();
-				MatrixXd mX_gamma_1(n, p_gamma_1);
-				get_cols(mX, gamma_1, mX_gamma_1);
-				MatrixXd mX_gamma_1_Ty = mX_gamma_1.transpose() * vy;
 
-				uint p_gamma;
 				bool bUpdate = !gamma[k][j];
 				MatrixXd mXTX_inv_prime;
 				Rcpp::Rcout << "gamma[" << k << "] " << gamma[k] << std::endl;
 				if (bUpdate) {
-					p_gamma = p_gamma_1;
+					Rcpp::Rcout << "Updating " << j << std::endl;
 					Rcpp::Rcout << "p_gamma_1 " << p_gamma_1 << std::endl;
 						// Update mXTX_inv
 						mXTX_inv_prime.resize(p_gamma_1, p_gamma_1);
-						bool bLow;
-						rank_one_update(gamma_1, j, gamma_1.find_first(),
+						bool bLow; // gamma_1 or gamma[k]?
+						rank_one_update(gamma[k], j, gamma_1.find_first(),
 														0,
 														mXTX,
 														mXTX_inv[k],
@@ -120,40 +123,58 @@ double cva(NumericVector vy_in, NumericMatrix mX_in, const uint K)
 														bLow);
 						mXTX_inv[k] = mXTX_inv_prime;
 				} else {
-					p_gamma = p_gamma_0;
+					// If only one bit is set and downdating would lead to the null model, then we should skip
+					// checking the downdate
+					if (p_gamma_0 == 0)
+						continue;
+					Rcpp::Rcout << "Downdating " << j << std::endl;
 					// Downdate mXTX_inv
 					mXTX_inv_prime.resize(p_gamma_0, p_gamma_0);
 					rank_one_downdate(j, gamma_0.find_first(), 0,
 														mXTX_inv[k], mXTX_inv_prime);
 				}
 
-				MatrixXd mX_gamma_0TX_gamma_0_inv(p_gamma_0, p_gamma_0);
-				MatrixXd mX_gamma_1TX_gamma_1_inv(p_gamma_1, p_gamma_1);
-
-				MatrixXd mXgammaTXgamma_inv(p_gamma, p_gamma);
-				MatrixXd mXgamma_Ty = get_rows(mXTy, gamma_1, mXgamma_Ty);
 				double sigma2_0;
 				double sigma2_1;
 
  				if (bUpdate){
+					MatrixXd mX_gamma_1(n, p_gamma_1);
+					get_cols(mX, gamma_1, mX_gamma_1);
+					MatrixXd mX_gamma_1_Ty = mX_gamma_1.transpose() * vy;
  					sigma2_0 = sigma2[k];
-					sigma2_1 = 1. - (mX_gamma_1_Ty.transpose() * mX_gamma_1TX_gamma_1_inv * mX_gamma_1_Ty).value() / n;
+					MatrixXd mXgamma_1_Ty(n, p_gamma_1);
+					get_rows(mXTy, gamma_1, mXgamma_1_Ty);
+					sigma2_1 = 1. - (mX_gamma_1_Ty.transpose() * mXTX_inv_prime * mX_gamma_1_Ty).value() / n;
  				} else {
- 					sigma2_0 = 1. - (mX_gamma_0_Ty.transpose() * mX_gamma_0TX_gamma_0_inv * mX_gamma_0_Ty).value() / n;
+					MatrixXd mX_gamma_0(n, p_gamma_0);
+					get_cols(mX, gamma_0, mX_gamma_0);
+					MatrixXd mX_gamma_0_Ty = mX_gamma_0.transpose() * vy;
+					MatrixXd mXgamma_0_Ty(n, p_gamma_0);
+					get_rows(mXTy, gamma_0, mXgamma_0_Ty);
+ 					sigma2_0 = 1. - (mX_gamma_0_Ty.transpose() * mXTX_inv_prime * mX_gamma_0_Ty).value() / n;
  					sigma2_1 = sigma2[k];
  				}
 
+				Rcpp::Rcout << "sigma2_0 " << sigma2_0 << std::endl;
+				Rcpp::Rcout << "sigma2_1 " << sigma2_1 << std::endl;
 				double p_0 = prob(n, p, sigma2_0, a, b);
 				double p_1 = prob(n, p, sigma2_1, a, b);
+				Rcpp::Rcout << "p_0 " << p_0 << std::endl;
+				Rcpp::Rcout << "p_1 " << p_1 << std::endl;
 				if (p_0 > p_1) {
-					gamma[k][j] = true;
-					sigma2[k] = sigma2_0;
-					if (!bUpdate) mXTX_inv[k] = mXTX_inv_prime;
-				}	else {
 					gamma[k][j] = false;
-					sigma2[k] = sigma2_1;
-					mXTX_inv[k] = mXTX_inv_prime;
-					if (bUpdate) mXTX_inv[k] = mXTX_inv_prime;
+					if (!bUpdate) {
+						Rcpp::Rcout << "Keep downdate" << std::endl;
+						sigma2[k] = sigma2_0;
+						mXTX_inv[k] = mXTX_inv_prime;
+					}
+				}	else {
+					gamma[k][j] = true;
+					if (bUpdate) {
+						Rcpp::Rcout << "Keep update" << std::endl;
+						sigma2[k] = sigma2_1;
+						mXTX_inv[k] = mXTX_inv_prime;
+					}
 				}
 			}
 		}
