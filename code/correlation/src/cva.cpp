@@ -61,6 +61,16 @@ void cva(NumericVector vy_in, NumericMatrix mX_in, const int K)
 	auto f_lambda_prev = 0.;
 	const auto EPSILON = 1e-8;
 
+	// // Centre vy
+	// centre(vy);
+
+	// // Centre non-intercept columns of mX
+	// for (uint i = 0; i < mX.cols(); i++) {
+	// 	VectorXd vcol = mX.col(i);
+	// 	centre(vcol);
+	// 	mX.col(i) = vcol;
+	// }
+
 	gsl_rng_env_setup();
 
 	T = gsl_rng_default;
@@ -112,26 +122,32 @@ void cva(NumericVector vy_in, NumericMatrix mX_in, const int K)
 				if (bUpdate) {
 					Rcpp::Rcout << "Updating " << j << std::endl;
 					Rcpp::Rcout << "p_gamma_1 " << p_gamma_1 << std::endl;
-						// Update mXTX_inv
-						mXTX_inv_prime.resize(p_gamma_1, p_gamma_1);
-						bool bLow; // gamma_1 or gamma[k]?
-						rank_one_update(gamma[k], j, gamma_1.find_first(),
-														0,
-														mXTX,
-														mXTX_inv[k],
-														mXTX_inv_prime,
-														bLow);
-						mXTX_inv[k] = mXTX_inv_prime;
+					// Update mXTX_inv
+					mXTX_inv_prime.resize(p_gamma_1, p_gamma_1);
+					bool bLow; // gamma_1 or gamma[k]?
+					rank_one_update(gamma[k], j, gamma_1.find_first(),
+													0,
+													mXTX,
+													mXTX_inv[k],
+													mXTX_inv_prime,
+													bLow);
+					Rcpp::Rcout << "mXTX_inv[k]\n " << mXTX_inv[k] << std::endl;
+					Rcpp::Rcout << "mXTX_inv_prime\n " << mXTX_inv_prime << std::endl;
+					Rcpp::Rcout << "bLow " << bLow << std::endl;
+					// mXTX_inv[k] = mXTX_inv_prime;
 				} else {
 					// If only one bit is set and downdating would lead to the null model, then we should skip
 					// checking the downdate
 					if (p_gamma_0 == 0)
 						continue;
 					Rcpp::Rcout << "Downdating " << j << std::endl;
+					Rcpp::Rcout << "p_gamma_0 " << p_gamma_0 << std::endl;
 					// Downdate mXTX_inv
 					mXTX_inv_prime.resize(p_gamma_0, p_gamma_0);
 					rank_one_downdate(j, gamma_0.find_first(), 0,
 														mXTX_inv[k], mXTX_inv_prime);
+					Rcpp::Rcout << "mXTX_inv[k]\n " << mXTX_inv[k] << std::endl;
+					Rcpp::Rcout << "mXTX_inv_prime\n " << mXTX_inv_prime << std::endl;
 				}
 
 				double sigma2_0;
@@ -141,36 +157,44 @@ void cva(NumericVector vy_in, NumericMatrix mX_in, const int K)
 					MatrixXd mX_gamma_1(n, p_gamma_1);
 					get_cols(mX, gamma_1, mX_gamma_1);
 					MatrixXd mX_gamma_1_Ty = mX_gamma_1.transpose() * vy;
+					// MatrixXd mX_gamma_1_Ty(n, p_gamma_1);
+					// get_rows(mXTy, gamma_1, mX_gamma_1_Ty);
  					sigma2_0 = sigma2[k];
-					MatrixXd mXgamma_1_Ty(n, p_gamma_1);
-					get_rows(mXTy, gamma_1, mXgamma_1_Ty);
+					Rcpp::Rcout << "mX_gamma_1.transpose() * mX_gamma_1\n" << mX_gamma_1.transpose() * mX_gamma_1 << std::endl;
+					Rcpp::Rcout << "mXTX_inv_prime * mX_gamma_1.transpose() * mX_gamma_1\n" << mXTX_inv_prime * mX_gamma_1.transpose() * mX_gamma_1 << std::endl;
+ 					Rcpp::Rcout << "mXTX_inv_prime * mX_gamma_1_Ty " << mXTX_inv_prime * mX_gamma_1_Ty << std::endl;
+ 					Rcpp::Rcout << "(mX_gamma_1_Ty.transpose() * mXTX_inv_prime * mX_gamma_1_Ty).value() " << (mX_gamma_1_Ty.transpose() * mXTX_inv_prime * mX_gamma_1_Ty).value() << std::endl;
 					sigma2_1 = 1. - (mX_gamma_1_Ty.transpose() * mXTX_inv_prime * mX_gamma_1_Ty).value() / n;
  				} else {
 					MatrixXd mX_gamma_0(n, p_gamma_0);
 					get_cols(mX, gamma_0, mX_gamma_0);
 					MatrixXd mX_gamma_0_Ty = mX_gamma_0.transpose() * vy;
-					MatrixXd mXgamma_0_Ty(n, p_gamma_0);
-					get_rows(mXTy, gamma_0, mXgamma_0_Ty);
+					// MatrixXd mX_gamma_0_Ty(n, p_gamma_0);
+					// get_rows(mXTy, gamma_0, mX_gamma_0_Ty);
+					Rcpp::Rcout << "mX_gamma_0.transpose() * mX_gamma_0\n" << mX_gamma_0.transpose() * mX_gamma_0 << std::endl;
+					Rcpp::Rcout << "mXTX_inv_prime * mX_gamma_0.transpose() * mX_gamma_0\n" << mXTX_inv_prime * mX_gamma_0.transpose() * mX_gamma_0 << std::endl;
+ 					Rcpp::Rcout << "mXTX_inv_prime * mX_gamma_0_Ty " << mXTX_inv_prime * mX_gamma_0_Ty << std::endl;
+ 					Rcpp::Rcout << "(mX_gamma_0_Ty.transpose() * mXTX_inv_prime * mX_gamma_0_Ty).value() " << (mX_gamma_0_Ty.transpose() * mXTX_inv_prime * mX_gamma_0_Ty).value() << std::endl;
  					sigma2_0 = 1. - (mX_gamma_0_Ty.transpose() * mXTX_inv_prime * mX_gamma_0_Ty).value() / n;
  					sigma2_1 = sigma2[k];
  				}
 
 				Rcpp::Rcout << "sigma2_0 " << sigma2_0 << std::endl;
 				Rcpp::Rcout << "sigma2_1 " << sigma2_1 << std::endl;
-				double p_0 = prob(n, p, sigma2_0, a, b);
-				double p_1 = prob(n, p, sigma2_1, a, b);
+				double p_0 = prob(n, p_gamma_0, sigma2_0, a, b);
+				double p_1 = prob(n, p_gamma_1, sigma2_1, a, b);
 				Rcpp::Rcout << "p_0 " << p_0 << std::endl;
 				Rcpp::Rcout << "p_1 " << p_1 << std::endl;
 				if (p_0 > p_1) {
-					gamma[k][j] = false;
 					if (!bUpdate) {
+						gamma[k][j] = false;
 						Rcpp::Rcout << "Keep downdate" << std::endl;
 						sigma2[k] = sigma2_0;
 						mXTX_inv[k] = mXTX_inv_prime;
 					}
 				}	else {
-					gamma[k][j] = true;
 					if (bUpdate) {
+						gamma[k][j] = true;
 						Rcpp::Rcout << "Keep update" << std::endl;
 						sigma2[k] = sigma2_1;
 						mXTX_inv[k] = mXTX_inv_prime;
