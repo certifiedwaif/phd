@@ -33,10 +33,12 @@ double prob(const int n, const int p, const double sigma2, const double a, const
 //' @param vy Vector of responses
 //' @param mX Matrix of covariates
 //' @param K The number of particles in the population
-//' @return Good question!
+//' @param lambda The weighting factor for the entropy in f_lambda. Defaults to 1.
+//' @return A list containing the named element models, which is a K by p matrix of the models
+//'					selected by the algorithm
 //' @export
 // [[Rcpp::export]]
-void cva(NumericVector vy_in, NumericMatrix mX_in, const int K)
+List cva(NumericVector vy_in, NumericMatrix mX_in, const int K, const double lambda = 1.)
 {
 	VectorXd vy(vy_in.length()); // = Rcpp::as<Eigen::Map<Eigen::VectorXd>>(vy_in);
 	for (auto i = 0; i < vy_in.length(); i++) vy[i] = vy_in[i];
@@ -77,6 +79,7 @@ void cva(NumericVector vy_in, NumericMatrix mX_in, const int K)
 	r = gsl_rng_alloc(T);
 
 	// Initialise population of K particles randomly
+	Rcpp::Rcout << "Generated" << std::endl;
 	for (auto k = 0; k < K; k++) {
 		gamma[k].resize(p);
 		// Empty models are pointless, so we keep regenerating gammas until we get a non-zero one
@@ -118,10 +121,14 @@ void cva(NumericVector vy_in, NumericMatrix mX_in, const int K)
 
 				bool bUpdate = !gamma[k][j];
 				MatrixXd mXTX_inv_prime;
+				#ifdef DEBUG
 				Rcpp::Rcout << "gamma[" << k << "] " << gamma[k] << std::endl;
+				#endif
 				if (bUpdate) {
+					#ifdef DEBUG
 					Rcpp::Rcout << "Updating " << j << std::endl;
 					Rcpp::Rcout << "p_gamma_1 " << p_gamma_1 << std::endl;
+					#endif
 					// Update mXTX_inv
 					mXTX_inv_prime.resize(p_gamma_1, p_gamma_1);
 					bool bLow; // gamma_1 or gamma[k]?
@@ -131,23 +138,29 @@ void cva(NumericVector vy_in, NumericMatrix mX_in, const int K)
 													mXTX_inv[k],
 													mXTX_inv_prime,
 													bLow);
+					#ifdef DEBUG
 					Rcpp::Rcout << "mXTX_inv[k]\n " << mXTX_inv[k] << std::endl;
 					Rcpp::Rcout << "mXTX_inv_prime\n " << mXTX_inv_prime << std::endl;
 					Rcpp::Rcout << "bLow " << bLow << std::endl;
+					#endif
 					// mXTX_inv[k] = mXTX_inv_prime;
 				} else {
 					// If only one bit is set and downdating would lead to the null model, then we should skip
 					// checking the downdate
 					if (p_gamma_0 == 0)
 						continue;
+					#ifdef DEBUG
 					Rcpp::Rcout << "Downdating " << j << std::endl;
 					Rcpp::Rcout << "p_gamma_0 " << p_gamma_0 << std::endl;
+					#endif
 					// Downdate mXTX_inv
 					mXTX_inv_prime.resize(p_gamma_0, p_gamma_0);
 					rank_one_downdate(j, gamma_0.find_first(), 0,
 														mXTX_inv[k], mXTX_inv_prime);
+					#ifdef DEBUG
 					Rcpp::Rcout << "mXTX_inv[k]\n " << mXTX_inv[k] << std::endl;
 					Rcpp::Rcout << "mXTX_inv_prime\n " << mXTX_inv_prime << std::endl;
+					#endif
 				}
 
 				double sigma2_0;
@@ -160,42 +173,85 @@ void cva(NumericVector vy_in, NumericMatrix mX_in, const int K)
 					// MatrixXd mX_gamma_1_Ty(n, p_gamma_1);
 					// get_rows(mXTy, gamma_1, mX_gamma_1_Ty);
  					sigma2_0 = sigma2[k];
+					#ifdef DEBUG
 					Rcpp::Rcout << "mX_gamma_1.transpose() * mX_gamma_1\n" << mX_gamma_1.transpose() * mX_gamma_1 << std::endl;
 					Rcpp::Rcout << "mXTX_inv_prime * mX_gamma_1.transpose() * mX_gamma_1\n" << mXTX_inv_prime * mX_gamma_1.transpose() * mX_gamma_1 << std::endl;
- 					Rcpp::Rcout << "mXTX_inv_prime * mX_gamma_1_Ty " << mXTX_inv_prime * mX_gamma_1_Ty << std::endl;
+ 					Rcpp::Rcout << "mXTX_inv_prime * mX_gamma_1_Ty\n" << mXTX_inv_prime * mX_gamma_1_Ty << std::endl;
  					Rcpp::Rcout << "(mX_gamma_1_Ty.transpose() * mXTX_inv_prime * mX_gamma_1_Ty).value() " << (mX_gamma_1_Ty.transpose() * mXTX_inv_prime * mX_gamma_1_Ty).value() << std::endl;
-					sigma2_1 = 1. - (mX_gamma_1_Ty.transpose() * mXTX_inv_prime * mX_gamma_1_Ty).value() / n;
+					#endif
+ 					double nR2 = (mX_gamma_1_Ty.transpose() * mXTX_inv_prime * mX_gamma_1_Ty).value();
+ 					if (nR2 <= n) {
+						sigma2_1 = 1. - nR2 / n;
+					} else {
+						// It's mathematically impossible that nR2 can be that high. Therefore, our inverse must be bad.
+						// Recalculate it from scratch and try again.
+						#ifdef DEBUG
+						Rcpp::Rcout << "Re-calculating mXTX_inv_prime" << std::endl;
+						#endif
+						mXTX_inv_prime = (mX_gamma_1.transpose() * mX_gamma_1).inverse();
+						#ifdef DEBUG
+						Rcpp::Rcout << "mXTX_inv_prime * mX_gamma_1.transpose() * mX_gamma_1\n" << mXTX_inv_prime * mX_gamma_1.transpose() * mX_gamma_1 << std::endl;
+						#endif
+						nR2 = (mX_gamma_1_Ty.transpose() * mXTX_inv_prime * mX_gamma_1_Ty).value();
+						sigma2_1 = 1. - nR2 / n;
+					}
  				} else {
 					MatrixXd mX_gamma_0(n, p_gamma_0);
 					get_cols(mX, gamma_0, mX_gamma_0);
 					MatrixXd mX_gamma_0_Ty = mX_gamma_0.transpose() * vy;
 					// MatrixXd mX_gamma_0_Ty(n, p_gamma_0);
 					// get_rows(mXTy, gamma_0, mX_gamma_0_Ty);
+					#ifdef DEBUG
 					Rcpp::Rcout << "mX_gamma_0.transpose() * mX_gamma_0\n" << mX_gamma_0.transpose() * mX_gamma_0 << std::endl;
 					Rcpp::Rcout << "mXTX_inv_prime * mX_gamma_0.transpose() * mX_gamma_0\n" << mXTX_inv_prime * mX_gamma_0.transpose() * mX_gamma_0 << std::endl;
- 					Rcpp::Rcout << "mXTX_inv_prime * mX_gamma_0_Ty " << mXTX_inv_prime * mX_gamma_0_Ty << std::endl;
+ 					Rcpp::Rcout << "mXTX_inv_prime * mX_gamma_0_Ty\n" << mXTX_inv_prime * mX_gamma_0_Ty << std::endl;
  					Rcpp::Rcout << "(mX_gamma_0_Ty.transpose() * mXTX_inv_prime * mX_gamma_0_Ty).value() " << (mX_gamma_0_Ty.transpose() * mXTX_inv_prime * mX_gamma_0_Ty).value() << std::endl;
+					#endif
+ 					double nR2 = (mX_gamma_0_Ty.transpose() * mXTX_inv_prime * mX_gamma_0_Ty).value();
  					sigma2_0 = 1. - (mX_gamma_0_Ty.transpose() * mXTX_inv_prime * mX_gamma_0_Ty).value() / n;
+ 					if (nR2 <= n) {
+						sigma2_0 = 1. - nR2 / n;
+					} else {
+						// It's mathematically impossible that nR2 can be that high. Therefore, our inverse must be bad.
+						// Recalculate it from scratch and try again.
+						#ifdef DEBUG
+						Rcpp::Rcout << "Re-calculating mXTX_inv_prime" << std::endl;
+						#endif
+						mXTX_inv_prime = (mX_gamma_0.transpose() * mX_gamma_0).inverse();
+						#ifdef DEBUG
+						Rcpp::Rcout << "mXTX_inv_prime * mX_gamma_0.transpose() * mX_gamma_0\n" << mXTX_inv_prime * mX_gamma_0.transpose() * mX_gamma_0 << std::endl;
+						#endif
+						nR2 = (mX_gamma_0_Ty.transpose() * mXTX_inv_prime * mX_gamma_0_Ty).value();
+						sigma2_0 = 1. - nR2 / n;
+					}
  					sigma2_1 = sigma2[k];
  				}
 
+				#ifdef DEBUG
 				Rcpp::Rcout << "sigma2_0 " << sigma2_0 << std::endl;
 				Rcpp::Rcout << "sigma2_1 " << sigma2_1 << std::endl;
+				#endif
 				double p_0 = prob(n, p_gamma_0, sigma2_0, a, b);
 				double p_1 = prob(n, p_gamma_1, sigma2_1, a, b);
+				#ifdef DEBUG
 				Rcpp::Rcout << "p_0 " << p_0 << std::endl;
 				Rcpp::Rcout << "p_1 " << p_1 << std::endl;
+				#endif
 				if (p_0 > p_1) {
 					if (!bUpdate) {
 						gamma[k][j] = false;
+						#ifdef DEBUG
 						Rcpp::Rcout << "Keep downdate" << std::endl;
+						#endif
 						sigma2[k] = sigma2_0;
 						mXTX_inv[k] = mXTX_inv_prime;
 					}
 				}	else {
 					if (bUpdate) {
 						gamma[k][j] = true;
+						#ifdef DEBUG
 						Rcpp::Rcout << "Keep update" << std::endl;
+						#endif
 						sigma2[k] = sigma2_1;
 						mXTX_inv[k] = mXTX_inv_prime;
 					}
@@ -212,7 +268,7 @@ void cva(NumericVector vy_in, NumericMatrix mX_in, const int K)
 		}
 
 		// Check for convergence - is f_lambda changed from the last iteration?
-		const auto lambda = 1.;
+		// const auto lambda = 2.;
 		VectorXd p_l(K);
 		p_l = VectorXd::Zero(K);
 		for (auto l = 0; l < K; l++) {
@@ -222,10 +278,23 @@ void cva(NumericVector vy_in, NumericMatrix mX_in, const int K)
 		}
 		auto H = -(p_l.array() * p_l.array().log()).sum();
 		double f_lambda = w.dot(probs) + lambda * H;
+		Rcpp::Rcout << "f_lambda_prev " << f_lambda_prev << " f_lambda " << f_lambda << std::endl;
 		if ((f_lambda - f_lambda_prev) > EPSILON) {
 			f_lambda_prev = f_lambda;
 		} else {
 			converged = true;
 		}
 	}
+	Rcpp::Rcout << "Converged" << std::endl;
+	for (auto k = 0; k < K; k++) {
+		Rcpp::Rcout << "gamma[" << k << "] " << gamma[k] << std::endl;
+	}
+	NumericMatrix bitstrings(K, p);
+	for (auto k = 0; k < K; k++) {
+		for (auto j = 0; j < p; j++) {
+			bitstrings(k, j) = gamma[k][j] ? 1. : 0.;
+		}
+	}
+	List result = List::create(Named("models") = bitstrings);
+	return result;
 }
