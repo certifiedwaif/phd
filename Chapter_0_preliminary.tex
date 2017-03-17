@@ -1,4 +1,5 @@
-\documentclass{article}[12pt]
+% \documentclass{amsart}[12pt]
+\documentclass{usydthesis}[12pt]
 
 \addtolength{\oddsidemargin}{-.75in}%
 \addtolength{\evensidemargin}{-.75in}%
@@ -10,6 +11,7 @@
 %\setlength{\bibsep}{0pt plus 0.3ex}
 
 \usepackage[authoryear]{natbib}
+\usepackage[doublespacing]{setspace}
 \usepackage{graphicx}
 \usepackage{algorithm,algorithmic}
 \usepackage{color}
@@ -25,6 +27,41 @@
 \begin{document}
 \setlength{\parindent}{0pt}
 \maketitle
+
+\section{Introduction}
+
+Linear and generalised linear regression models are the standard tools used by applied statisticians to
+explain the relationship between an outcome variable and one or more explanatory variables. They provide a
+general method  to analyse quantified relationships between variables within a data set in an easily
+interpretable way. A standard assumption is that the outcomes are independent, and that the effect of the
+explanatory variables on the outcome is fixed. But if the outcomes are dependent and this assumption is not
+met, then linear and generalised linear models can be extended to linear mixed models. These allow us to
+incorporate dependencies amongst the  observations via the assumption of a more complicated covariance
+structure, including random effects for  different subgroups or longitudinal data and other extensions such as
+splines, missing data and measurement error. This additional flexibility makes their application popular in
+many fields, such as public health, psychology and agriculture.
+
+While mixed models are very useful for gaining insight into a data set, fitting them can be computationally
+challenging. For all but the simplest situations, fitting these models involves computing high-dimensional
+integrals which are often analytically and computationally intractable. Thus, approximations must be used.
+
+In the frequentist paradigm, model parameters are fixed and uncertainty enters the model through random
+errors, which have associated variance. The data is modelled as a combination of these fixed parameters and
+random errors. In the Bayesian paradigm, the uncertainty enters the model by assuming parameters are random
+variables, while the data is fixed.
+
+Model selection -- the task of selecting a statistical model from a set of candidate models given data, is one
+of the fundamental tasks of scientific inquiry. It is one of the central tasks of applied statistical
+analysis, and there is a correspondingly large literature on the subject. The problem of model selection for
+normal linear models is particularly well studied, owing to the popularity and importance of normal linear
+models in applications.
+There are many approaches to model selection, including criteria based approaches,
+variable selection,
+penalised regression,
+and Bayesian modelling approaches. Model selection is a difficult problem in high--dimensional space in general
+because as the dimension of the space increases, the number of possible models increases combinatorially.
+Many model selection algorithms use heuristics in an attempt to search the model space more efficiently but
+still find an optimal or near-optimal model.
 
 \mgc{You have so much work to do on this chapter.}
 
@@ -55,25 +92,23 @@ $$
 Factored approximation
 Mean field update
 
-A more thorough introduction to the topic of variational approximations is available in \cite{ormerod10}.
+A more thorough introduction to the topic of variational approximations is available in \cite{Ormerod2010}.
 
 \subsection{Laplace's Method of approximation}
 
 \subsubsection{Definition}
 
 Consider the second order Taylor expansion of $\log f(\vtheta)$ around the mode $\vtheta_m$
-
 $$
-\log f(\vtheta) \approx f(\vtheta_m) + (\vtheta - \vtheta_m) \nabla \log f(\vtheta) + \half (\vtheta - \vtheta_m)^\top \mH_{\log f}(\vtheta_m) (\vtheta - \vtheta_m) + \sO((\vtheta - \vtheta_m)^3).
+\log f(\vtheta) \approx f(\vtheta_m) + (\vtheta - \vtheta_m) \nabla \log f(\vtheta) + \half (\vtheta - \vtheta_m)^\top \mH_{\log f}(\vtheta_m) (\vtheta - \vtheta_m) + \sO(\|\vtheta - \vtheta_m\|^3).
 $$
 
 Assuming that $\vtheta$ is a stationary point of $\log f$, then $\nabla f(\vtheta) = \vzero$ and so
-
 $$
-\log f(\vtheta) \approx f(\vtheta_m) + \half (\vtheta - \vtheta_m)^\top \mH_{\log f}(\vtheta_m) (\vtheta - \vtheta_m) + \sO((\vtheta - \vtheta_m)^3)
+\log f(\vtheta) \approx f(\vtheta_m) + \half (\vtheta - \vtheta_m)^\top \mH_{\log f}(\vtheta_m) (\vtheta - \vtheta_m) + \sO(\|\vtheta - \vtheta_m\|^3)
 $$
 
-at such a point. The quadratic form in $\vtheta$ in the approximate expresion for the log likelihood above gives 
+at such a point. The quadratic form in $\vtheta$ in the approximate expression for the log likelihood above gives 
 rise to a Gaussian approximation for the likelihood $\N(\vtheta_m, \mH_{\log f}(\vtheta_m)^{-1})$.
 
 The approximation is crude but can be quite accurate if the likelihood is symmetric and unimodal.
@@ -200,12 +235,25 @@ Demmel's course: http://www.cs.berkeley.edu/~demmel/cs267/lecture21/lecture21.ht
 algorithms to assess their error bounds, and attempt to mitigate these problems as much as possible to allow
 us to solve numerical problems on modern computers.
 
-Truncation and round-off error
-Numerical stability
-
+\subsection{Truncation and round-off error}
+\subsection{Numerical stability}
 \subsection{Numerical differentiation and integration}
+\subsubsection{Trapezoidal integration}
+
+Trapezoidal integration is a method of approximating the integral of a function $f: \R \to \R$ over the
+interval $(a, b)$. First, the interval is partitioned into $x_1, x_2, \ldots, x_{n-1}, x_n$, and then
+
+\[
+	\int_a^b f(x) dx \approx \sum_{i=1}^{n-1} \frac{1}{2} \frac{f(x_i) + f(x_{i+1})}{x_{i+1} - x_i}
+\]
+
+Note that the points $x_i$ can be chosen arbitrarily within the interval $(a, b)$, and do not need to be
+evenly spaced. \mgc{What's the error bound? Error analysis using Taylor's theorem?}
+
 \subsection{Numerical linear algebra}
 Condition numbers
+LDU decomposition
+Cholesky decomposition
 \subsection{Difficulty of inverting linear systems}
 
 Sparsity of a matrix does not ensure sparsity of its' inverse.
@@ -273,19 +321,42 @@ $$
 where
 
 \begin{align*}
-B_{i, 1}(x) &:= \begin{cases}
+B_{i, 0}(x) &:= \begin{cases}
 1 & \text{if } t_i \leq x < t_{i+1} \\
 0 & \text{otherwise}
 \end{cases} \\
-B_{i, k}(x) &:= \frac{x - t_i}{t_{i + k - 1} - t_i} B_{i, k-1} (x) + \frac{t_{i + k} - x}{t_{i + k} - t_{i + 1}} B_{i, k-1} (x)
+B_{i, k}(x) &:= \frac{x - t_i}{t_{i + 1} - t_i} B_{i, k-1} (x) + \frac{t_{i + k + 1} - x}{t_{i + k + 1} - t_{i + 1}} B_{i, k-1} (x).
 \end{align*}
+
+\subsection{O'Sullivan Splines}
+
+Let $B_1$, \ldots, $B_{K+4}$ be the cubic B-spline basis functions defined by the knots $\kappa_1$ to
+$\kappa_{K+4}$
+
+$B_{ik} = B_k (x)$
+$B_x = [B_1(x), \ldots, B_K+4(x)]$
+
+O'Sullivan splines are penalised splines which are penalised using the $\mOmega$ matrix.
+
+Let $\mOmega$ be the $(K+4) \times (K+4)$ matrix where the $(k, k')-th$ element is
+\[
+	\mOmega_{k k'} = \int_a^b B''_k(x) B''_{k'}(x) dx.
+\]
+Then the O'Sullivan spline estimate of the true function $f$ at the point $x$ is
+$\hat{f}_O(x; \lambda) = \mB_x \hat{\vnu}_O$, where
+$\hat{\vnu}_O = (\mB^\top \mB + \lambda \mOmega)^{-1} \mB^\top \vy$.
+
+$\mOmega$ is defined in this way to penalise oscillation, which is measured by the second derivative.
+
+The penalty differs from P-splines in that the P-spline penalty matrix is $\mD_2^\top \mD_2$ where $\mD_2$ is
+the second-order differencing matrix.
 
 % Divided difference notation?
 % Lagrange's interpolating polynomials?
 % Semiparametric regression / Connection to mixed models
 We follow the discussion of semiparametric regression in \cite{RuppertWandCarroll}.
-Using a mixed models setup to fit spline models, protects against overfitting.
-Construct an $\mZ$ matrix with the appropriate B-Spline function evaluations in each of the rows, where
+Using a mixed models setup to fit spline models protects against overfitting.
+Constructing an $\mZ$ matrix with the appropriate B-Spline function evaluations in each of the rows, where
 each column corresponds to a knot.
 
 \subsection{Degrees of freedom}
@@ -320,7 +391,6 @@ chi-squared, beta, Dirichlet, Bernoulli, categorical, Poisson, Wishart and Inver
 be represented in this form.
 
 Canonical form
-
 $$
 \log p(\vnu; \vy) = \vy^\top \mC \vnu - b(\mC \vnu)
 $$
@@ -349,6 +419,8 @@ Bernstein-von Mises Theorem
 
 \section{Model selection}
 
+\subsection{Frequentist}
+
 Given a full data matrix $\mX \in \R^{n \times p}$, we may wish to find the subset of variables $\gamma \in \{
 1 \ldots p \}$ such that $\mX_\gamma \vbeta_\gamma$ describe the data in $\vy$ best, in some sense.
 
@@ -356,7 +428,6 @@ In a frequentist context, there are many functions which can be used to judge wh
 such as AIC, BIC etc. These are functions $f: \gamma \to \R^+$ which allow the models under consideration to
 be ranked, and the best model chosen from those available. Thus the optimal model under such a measure
 f is
-
 $$
 \gamma^* = \max_\gamma f(\gamma)
 $$
@@ -365,10 +436,21 @@ These functions typically attempt to balance log likelihood against the complexi
 a compromise between each.
 
 \mgc{AIC, BIC, DIC, Mallow's $C_p$}
-\mgc{Bayesian model selection}
+
+\subsection{Bayesian model selection}
+
 \mgc{Normal model selection with $g$--priors?}
 
+\section{Hamiltonian Monte Carlo}
+
+\cite{Betancourt2017}
+
+Basic idea: Sample the typical set efficiently by following a contour/level set of the likelihood surface
+Hamiltonian is a mixture of the position and momentum
+If you can't write any more clearly than this, then you don't understand well enough yet
+
 \bibliographystyle{elsarticle-harv}
-\bibliography{Chapter_0_preliminary}
+% \bibliography{Chapter_0_preliminary}
+\bibliography{references_mendeley}
 
 \end{document}
