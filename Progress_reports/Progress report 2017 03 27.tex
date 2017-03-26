@@ -1,0 +1,58 @@
+\documentclass{beamer}
+
+\usetheme{Warsaw}
+\usepackage{graphicx}
+\usepackage{ulem}
+\input{../include.tex}
+\input{../Definitions.tex}
+
+\usefonttheme{serif}
+
+\title{Progress report - 29/06/2015}
+\author{Mark Greenaway\\PhD candidate\\markg@maths.usyd.edu.au}
+
+\mode<presentation>
+{ \usetheme{boxes} }
+
+\begin{document}
+\begin{frame}
+\maketitle
+\end{frame}
+
+\begin{frame}{Writing}
+\begin{itemize}
+\item I'm mostly working on my introduction chapter
+\item Laplace approximation
+\item Hamiltonian sampler
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Collapsed variational approximation}
+Suppose that
+\[
+	q(\vgamma) = \sum_{k=1}^K w_k \I(\vgamma = \vgamma_k)
+\]
+A variational lower bound is given by
+\[
+\log \underline{p}(\vy; \vw, \Gamma) = \sum_{k=1}^K w_k \log p(\vy, \vgamma_k) - w_k \log w_k
+\]
+\end{frame}
+
+\begin{frame}{Algorithm}
+\begin{itemize}
+\item Loop until convergence\\
+\quad for $k = 1,  \ldots, K$\\
+\quad \quad for $j = 1, \ldots, p$\\
+\quad \quad \quad $\vgamma_{jk} = \begin{cases}
+1, \text{if } p(\vy, \vgamma_{jk}^{(1)}) > p(\vy, \vgamma_{jk}^{(1)}) \\
+0, \text{otherwise}
+\end{cases}$\\
+\quad \quad for $k = 1, \ldots, K$\\
+\quad \quad \quad $w_k = p(\vy, \vgamma_k) / \sum_{j=1}^K p(\vy, \vgamma_j)$
+\item I've implemented this algorithm and done some preliminary tests
+\item John is implementing it now, and we'll test the results against each other's implementations
+\end{itemize}
+\end{frame}
+
+\end{document}
