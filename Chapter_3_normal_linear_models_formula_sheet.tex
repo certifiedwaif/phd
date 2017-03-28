@@ -19,7 +19,12 @@
 \usepackage{algorithm,algorithmic}
 \usepackage{microtype}
 
-\newtheorem{theorem}{Theorem}[section]
+\theoremstyle{definition}
+\newtheorem{defn}{Definition}%[chapter]
+\newtheorem{thm}{Theorem}%[chapter]
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{res}{Result}%[chapter]
 
 \title{Chapter 3 Collapsed Variational Bayes}
 \author{Mark Greenaway, John T. Ormerod}
@@ -838,6 +843,46 @@ Hence
 
 and as Equation \ref{eq:star} equals Equation \ref{eq:starstar} the result follows. The opposite implication
 holds \ldots
+
+\subsection{$\alpha$ integral}
+$\alpha | \vy, \sigma^2 \sim \N(0, \frac{\sigma^2}{n})$ \\
+$p(\sigma^2 | \vy) = K (\sigma^2)^{-(c+1)} e^{-\frac{n}{2 \sigma^2}} _1 F_1(b + 1, c; \frac{n R^2}{2 \sigma^2})$
+where $c=\frac{n-1}{2}$, $b = \frac{n - p - 5}{2} - a$ \\
+$p(\alpha | \vy) = \int p(\alpha | \vy, \sigma^2) p(\sigma^2 | \vy) d \sigma^2$ \\
+Let $I = \int (2 \pi \sigma^2)^{-\frac{1}{2}} \exp{(- \frac{1}{2 \sigma^2}) \alpha^2} K (\sigma^2)^{-(c+1)}
+e^{-\frac{n}{2 \sigma^2}} _1 F_1(b + 1, c; \frac{n R^2}{2 \sigma^2}) d \sigma^2$
+Let $t = \frac{n R^2}{2 \sigma^2}$, $\frac{dt}{d\sigma^2} = -\frac{n R^2}{2 (\sigma^2)^2}$, 
+$-\frac{2 (\sigma^2)^2}{nR^2} dt = d \sigma^2 = -2 \frac{n\cancel{^2} (R^2)\cancel{^2}}{(2t)^2 \cancel{n R^2}} dt$
+$\sigma^2 = \frac{n R^2}{2 t}$
+
+\begin{align*}
+	I &= \int (2 \pi \frac{n R^2}{2t})^{-\frac{1}{2}} \exp(-\frac{t \alpha^2}{nR^2}) K (\frac{n R^2}{2 t})^{-(c + 1)} e^{-\frac{\cancel{n} t}{\cancel{n} R^2}} _1 F_1(b + 1, c; t) \frac{n R^2}{2 t^2} dt \\
+	&= K \int n^{\frac{1}{2}} (R^2)^{\frac{1}{2}} 2^{\frac{1}{2}} t^{\frac{3}{2}} \exp{(-\frac{t(\alpha^2 + n)}{n R^2})} (\frac{n R^2}{2 t})^{-(c + 1)} _1 F_1(b + 1, c; t) dt \\
+	&= K \int n^{-c-\frac{1}{2}} (R^2)^{-c-\frac{1}{2}} 2^{-c-\frac{1}{2}} t^{c + 2} \exp{(\frac{-t(\alpha^2 + n)}{n R^2})} _1 F_1(b + 1, c; t) dt
+\end{align*}
+
+Try
+\[
+	\int_0^\infty e^{-st} t^{\alpha'} M_{\mu, \nu} (t) dt = \frac{\alpha' + \nu + \frac{3}{2}}{(\frac{1}{2} + s)^{\alpha' + \nu + \frac{3}{2}}} _1 F_1(\alpha' + \nu + \frac{3}{2}, -\mu + \nu + \frac{1}{2}; 2v + 1; \frac{2}{2s + 1})
+\]
+
+where $\text{Re}(\alpha' + \mu + \frac{3}{2}) > 0$, $\text{Re}(s) > \frac{1}{2}$ and
+\[
+	M_{\lambda, \mu} (z) z^{\mu + \frac{1}{2}} e^{-\frac{z}{2}} \Phi(\mu - \lambda + \frac{1}{2}, 2\mu + 1; z)
+\]
+
+so
+\[
+	z^{-(\mu + \frac{1}{2})} e^{\frac{z}{2}} M_{\lambda, \mu}(z) = \Phi(\mu - \lambda + \frac{1}{2}, 2\mu + 1; z)
+\]
+
+$2\mu + 1 = c$, $\mu = \frac{c - 1}{2}$ \\
+$\mu - \lambda = b + \frac{1}{2}$, $\lambda = \mu - b - \frac{1}{2}$ \\
+$z^{-\frac{c}{2}} e^{\frac{z}{2}} M_{\frac{c-1}{2} - b - \frac{1}{2}, \frac{c-1}{2}}(z)$
+
+So $I = K \int(n R^2 c)^{-(c + \frac{1}{2})} t^{\frac{c}{2} + 2} \exp(\frac{-t(\alpha^2 + n + \frac{1}{2}nR^2)}{nR^2}) M_{\frac{c-1}{2} - b - \frac{1}{2}, \frac{c-1}{2}}(t) dt$ \\
+with $s = \frac{\alpha'^2 + n + \frac{1}{2} n R^2}{n R^2}$, $\alpha'=\frac{c}{2} + 2$,
+$\lambda = \frac{c-1}{2} - b - \frac{1}{2}$, $\mu = \frac{c-1}{2}$
 
 \bibliographystyle{elsarticle-harv}
 \bibliography{references_mendeley}
