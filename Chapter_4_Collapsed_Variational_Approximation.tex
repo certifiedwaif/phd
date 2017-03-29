@@ -1,0 +1,92 @@
+\documentclass{amsart}[12pt]
+% \documentclass{usydthesis}[12pt]
+
+\addtolength{\oddsidemargin}{-.75in}%
+\addtolength{\evensidemargin}{-.75in}%
+\addtolength{\textwidth}{1.5in}%
+\addtolength{\textheight}{1.3in}%
+\addtolength{\topmargin}{-.8in}%
+\addtolength{\marginparpush}{-.75in}%
+%\setlength\parindent{0pt}
+%\setlength{\bibsep}{0pt plus 0.3ex}
+
+\usepackage[authoryear]{natbib}
+\usepackage[doublespacing]{setspace}
+\usepackage{graphicx}
+\usepackage{algorithm,algorithmic}
+\usepackage{color}
+
+\title{Preliminaries}
+\author{Mark Greenaway}
+\input{include.tex}
+\input{Definitions.tex}
+
+\newcommand{\mgc}[1]{{\color{blue}#1}}
+\newcommand{\joc}[1]{{\color{red}#1}}
+
+\begin{document}
+\setlength{\parindent}{0pt}
+\maketitle
+
+\section{Introduction}
+
+Start off with a summary of the Particle Em for Variable Selection paper by Veronika Rockova
+
+Introduction
+EM vulnerable to local entrapment when likelihood is multi-modal, especially spike-and-slab posterior
+distributions for model selection
+non-parametric Variational Bayes, repulsive particles. These particles are geared towards unchartered areas of
+the posterior, providing a more comprehensive summary of its' topography than simple parallel EM deployments
+Report of a single model will be a misleading reflection of the model uncertainty in a highly multimodal
+posterior. Identify a collection of representative models
+What's our choice of prior?
+Hard to explore model space and escape local entrapment, especially in high dimensions
+Population-based methods, allow trajectories to ``communicate''
+
+Main contributions
+As a precursor to Particle Em, we propose the Reversed EMVS algorithm, a discrete optimisation approach for
+spike-and-slab variable selection. Treat $\vgamma$ as parameters of interest, and $\vbeta$ as missing data.
+Closed form updates, targeting the discrete model space.
+
+Population-based optimisation approach that exhibits both individual and social behaviour. Particles share a
+common goal (finding essential posterior modes) and realise it by exploring the posterior environment while
+mutually interacting. Social behaviour is mediated through entropy, which serves as a diversifying penalty.
+
+Entire trajectory of evolving posteriors is far more informative for variable selection
+
+By forging connections between Particle EM and sequential Monte Carlo (SMC) procedures, we propose a
+stochastic Particle EM variant
+
+Visualisation
+
+Approximate Bayesian inference
+Variational Approximation
+Variational Bayes
+Collapsed Variational Bayes
+
+My writing
+
+Bayesian model selection is a powerful set of techniques for model selection. These techniques are especially
+useful in problems of high-dimension, such as bioinformatics problems where the model space is complex and
+the optimal model is difficult for statisticians to manually specify.
+
+However, most computational schemes for Bayesian model selection involve MCMC techniques for computing the
+posterior distributions, which are both computationally expensive and can become trapped in local maxima of
+the posterior distribution if the distribution is high-dimensional and multi-modal, as is the case with spike-
+and-slab priors, which are a popular choice for Bayesian model selection problems.
+
+We propose a non-parametric Variational Bayes approximation.
+Rather than searching for a single optimal model, we instead maintain a population of models (particles). This
+allows us to explore more of the posterior model space, gaining a better estimate of the variation of the
+model space. It also allows the particles to ``interact'', searching for the essential posterior modes
+together. In our variational approximation, this is done by incorporating an ``entropy term'' in our
+variational lower bound, which ensures diversity amongst the models in the population, preventing all particles
+from simply seeking the global posterior modes.
+
+Can be searched deterministically.
+We are able to execute our algorithm efficiently using rank one updates.
+
+\bibliographystyle{elsarticle-harv}
+\bibliography{references_mendeley}
+
+\end{document}
