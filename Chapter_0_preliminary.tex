@@ -243,16 +243,73 @@ $$
 q^*(\vtheta) = \argmin_{q \in Q} \KL \{ {q(\vtheta) || p(\vtheta|\vy)} \}.
 $$
 
-% Mean field update
-Factored approximation
-Mean field update
+If $\vtheta$ is partitioned into $M$ partitions $\vtheta_1$, $\vtheta_2$, \ldots, $\vtheta_M$ then a 
+simple form of approximation to adopt is the factored approximation of the form
+\[
+	q(\vtheta) = \Pi_{i=1}^M q(\vtheta_i)
+\]
+
+is often adopted. This form of approximation is computationally convenient, but assumes that the partitions
+of $\vtheta$ are completely independent of one another.
+
+The optimal mean field update for each of the parameters $\vtheta_i$ is then
+\[
+	q^*(\vtheta_i) \propto \exp \{ \E [\log p(\vy; \vtheta)] \}
+\]
 
 A more thorough introduction to the topic of variational approximations is available in \cite{Ormerod2010}.
 
+\subsection{Gaussian Variational Approximation}
+
+In cases where there is a strong dependence between partitions of $\vtheta$, such as between the parameters
+$\vmu$ and $\mSigma$ in a hierarchical Gaussian model, a factored approximation may not approximate the true
+distribution accurately. In this case, an alternate form of approximation may be used with the parameters
+considered together to take their dependence into account. One such form of approximation is the Gaussian
+Variational Approximation \cite{Ormerod2012}, which assumes that the distribution of the parameters being 
+approximated is multivariate Gaussian. The covariance matrix of the Gaussian allows the approximation to
+capture the dependence amongst the elements of $\vtheta$, which increases the accuracy of the variational
+approximation relative to the factored approximation.
+
 \subsection{Laplace's Method of approximation}
 
-\subsubsection{Definition}
+Laplace's method is a technique use to approximate integrals of the form
+\[
+	\int_a^b e^{M f(x)} dx
+\]
 
+where $f(x)$ is twice differentiable, $M \in \R$ and $a, b \in \R \cup \{-\infty, \infty\}$.
+
+Let $f(x)$ have a unique global maximum at $x_0$.
+
+\[
+	f(x) = f(x_0) + f'(x_0) (x - x_0) + \frac{1}{2} f''(x_0) (x - x_0)^2 + R
+\]
+
+where $R = \BigO((x - x_0)^3)$.
+
+As $f$ has a global maximum at $x_0$, the first derivative of $f$ is zero at $x_0$. Thus, the function $f(x)$
+may be approximated by
+\[
+	f(x) \approx f(x_0) - \frac{1}{2} |f''(x_0)| (x - x_0)^2
+\]
+
+for $x$ sufficiently close to $x_0$, as the second derivative is negative at $x_0$. This ensures that the
+accuracy of
+
+\[
+	\int_a^b e^{M f(x)} dx \approx e^{M f(x_0)} \int_a^b e^{-M |f''(x_0)|(x - x_0)^2} dx.
+\]
+
+This is a Gaussian integral, and thus we find that
+
+\[
+	\int_a^b e^{M f(x)} dx \approx \sqrt{\frac{2 \pi}{M |f''(x_0)|}} e^{M f(x_0)}
+\]
+
+Relative error
+
+
+Following a similiar path, we can extend the approach to multiple dimensions.
 Consider the second order Taylor expansion of $\log f(\vtheta)$ around the mode $\vtheta_m$
 $$
 \log f(\vtheta) \approx f(\vtheta_m) + (\vtheta - \vtheta_m) \nabla \log f(\vtheta) + \half (\vtheta - \vtheta_m)^\top \mH_{\log f}(\vtheta_m) (\vtheta - \vtheta_m) + \sO(\|\vtheta - \vtheta_m\|^3).
@@ -327,7 +384,7 @@ step length.
 
 Denote a univariate function $\phi$ restricted to the direction $\vp_k$ as
 $\phi(\alpha) = f(\vx_k + \alpha \vp_k)$. A step length $\alpha_k$ is said to satisfy the \emph{Wolfe conditions}
-is the following two inequalities hold:
+if the following two inequalities hold:
 
 \begin{enumerate}
 \item[(i)] $f(\vx_k + \alpha_k \vp_k) \leq f(\vx_k) + c_1 \alpha_k \vp_k^\top \nabla f(\vx_k)$ \text{(Armijo rule)}
@@ -406,14 +463,106 @@ Note that the points $x_i$ can be chosen arbitrarily within the interval $(a, b)
 evenly spaced. \mgc{What's the error bound? Error analysis using Taylor's theorem?}
 
 \subsection{Numerical linear algebra}
-Condition numbers
-LDU decomposition
+Matrix norms \\
+We can define a norm on the space of matrices such that
+\begin{align*}
+\|A\| \geq 0 \\
+\|A\| = 0 iff A = 0 \\
+\|\alpha A\| = |\alpha| \|A\| \forall \alpha \in \R \\
+\|A + B\| \leq \|A\| + \|B\|\text{ for all matrices } A, B \\
+\text{Additionally, for square matrices} \\
+\|AB\| \leq \|A\| \|B\| \\
+\end{align*}
+Examples
+
+1) The Frobenius Norm \\
+The Frobenius Norm (Euclidean norm) is a matrix norm on the matrix $\mA$ defined as the square root of the sum
+of the absolute squares of its elements,
+\[
+	\|\mA\|_F = \sqrt{\sum_{i=1}^m \sum_{j=1}^n |a_{ij}|^2}
+\]
+
+2) The operator norm
+\[
+	\|\mA\|_p = \sup_{\vx \ne 0} \frac{\|\mA \vx\|_p}{\|\vx\|_p}
+\]
+
+TODO: Relationship to eigenvalues
+
+Condition numbers \\
+In numerical linear algebra, a useful measure is the \emph{condition number} of A; it depends on the matrix
+norm (so now you have to define matrix norms) used and is defined by
+\[
+	\text{cond}(\mA) := \|\mA^{-1}\|.\|\mA\|
+\]
+
+This is a useful tool in characterising the accuracy and stability of numerical linear algebra algorithms.
+Golub and van Loan \S 2
+
+LDU decomposition \\
+
+If a matrix $\mA$ is square, it can be factored into the product of a lower triangular matrix and an upper 
+triangular matrix
+\[
+	\mA = \mL \mU
+\]
+
 Cholesky decomposition
+
+If a matrix $\mA$ is square $p \times p$, symmetric and positive definite then it can be factored into the
+product a lower triangular matrix and its' transpose
+\[
+	\mA = \mL \mL^\top
+\]
+
+by noting that
+
+% \begin{align*}
+% \end{align*}
+
+and so
+
+\begin{align*}
+	L_{jj} = \sqrt{A_{jj} - \sum_{k=1}^{j-1} L_{jk}^2}
+	L_{ij} = \frac{1}{L_{jj} (A_{ij} - \sum_{k=1}^{j-1} L_{ik} L_{jk})}, \text{ for } i > j
+\end{align*}
+
+This can be computed in $\BigO{p^2}$ for a $p \times p$ matrix. Once this form is obtained, it has several
+computational advantages over working with the original matrix $\mA$. Firstly, as $\mL$ is lower triangular
+only the non-zero entries need to be stored. Secondly, the triangular form of $\mL$ allows matrix equations
+involving $\mL$ to be solved in $\BigO{p^2}$ using back-substitution and forward-substitution, without using
+Gaussian elmination or calculating a matrix inverse.
+
 \subsection{Difficulty of inverting linear systems}
 
-Sparsity of a matrix does not ensure sparsity of its' inverse.
+Sparsity of a matrix does not ensure sparsity of its' inverse. Demonstrate this using the block-inverse
+formula.
 Inverting a matrix is an inherently unstable operation. The number of floating point operations involved
 leads to magnification of error.
+
+Block inverse formula \\
+\[
+	\begin{pmatrix}
+	A & B \\
+	C & D
+	\end{pmatrix}^{-1}
+	=
+	\begin{pmatrix}
+	I & 0 \\
+	-D^{-1} C & I
+	\end{pmatrix}
+	\begin{pmatrix}
+	(A - B^{-1}C)^{-1} & 0 \\
+	0 & D^{-1}
+	\end{pmatrix}
+	\begin{pmatrix}
+	I & 0 \\
+	-BD^{-1} & I
+	\end{pmatrix}
+\]
+
+An immediate consequence of this formula is that if any of the blocks of the original matrix is not sparse,
+then the inverse will not be sparse in \emph{any} of the corresponding blocks.
 
 \section{Positive semi-definite matrices}
 A positive semidefinite matrix $\mLambda$ is a square matrix of size $n \times n$ such that for any vector
