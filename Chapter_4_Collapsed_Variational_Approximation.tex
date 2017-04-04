@@ -66,25 +66,69 @@ Collapsed Variational Bayes
 
 My writing
 
+\section{Abstract}
+
+Bayesian model selection is computationally expensive, and prone to getting stuck in local minima if the
+posterior likelihood is multi-modal. This issue is particularly acute if the spike-and-slab prior,
+particularly popular for Bayesian model selection, is used. We seek to address both problems by proposing a
+population non-parametric Variational Bayes approximation algorithm - a population-based optimisation
+strategy. Maintaining a population allows the posterior distribution to be explored more thoroughly, finding
+multiple maxima. The variational approximation's lower bound includes an entropy term which ensures diversity
+in the population by penalising similarity (the particles repel each other). This ensures the high probability
+regions of the posterior distribution is thoroughly explored. This better reflects model selection
+uncertainty.
+
+\section{Introduction}
+
 Bayesian model selection is a powerful set of techniques for model selection. These techniques are especially
 useful in problems of high-dimension, such as bioinformatics problems where the model space is complex and
 the optimal model is difficult for statisticians to manually specify.
 
-However, most computational schemes for Bayesian model selection involve MCMC techniques for computing the
-posterior distributions, which are both computationally expensive and can become trapped in local maxima of
-the posterior distribution if the distribution is high-dimensional and multi-modal, as is the case with spike-
-and-slab priors, which are a popular choice for Bayesian model selection problems.
+In this article, we focus on the important case of model selection for normal linear models
+\[
+	p(\vy | \valpha, \vbeta) = \N_n(\vone^\top \alpha + \mX \vbeta, \mI_n)
+\]
+% Justify choice of prior
+We use a g-prior for model selection (\cite{Goel1986}), as it avoids the Lindley and Bartlett paradoxes, as 
+described in \cite{Liang2008}.
 
-We propose a non-parametric Variational Bayes approximation.
-Rather than searching for a single optimal model, we instead maintain a population of models (particles). This
-allows us to explore more of the posterior model space, gaining a better estimate of the variation of the
-model space. It also allows the particles to ``interact'', searching for the essential posterior modes
-together. In our variational approximation, this is done by incorporating an ``entropy term'' in our
-variational lower bound, which ensures diversity amongst the models in the population, preventing all particles
-from simply seeking the global posterior modes.
+Many computational schemes for Bayesian model selection exist, using Monte Carlo Markov Chains techniques for 
+computing the posterior distributions of $\vgamma$.
+However, these schemes are both computationally intensive and can become trapped in local maxima of
+the posterior distribution if the distribution is high-dimensional and multi-modal, as is the case with
+popular choices of prior for Bayesian model selection problems, such as spike-and-slab priors. The difficulty
+of becoming trapped in local maxima can be partially mitigated by using population-based MCMC schemes such
+as Jasra et al. 2007, Bottolo and Richardson 2010, Hans et al 2007, Liang and Wong 2000. However, this
+increases the computational cost of sampling from the posterior distributions still further, especially in
+high-dimensional problems.
 
-Can be searched deterministically.
-We are able to execute our algorithm efficiently using rank one updates.
+Existing approaches to the problem focus upon finding a single best model quickly (\cite{You2014},
+\cite{Rockova2014}). Exploring the model space using only one model at a time will provide a misleading view
+of the uncertainty in the posterior, as it is typically highly multimodal.
+
+\cite{Rockova2016}
+We propose a non-parametric Variational Bayes approximation. Rather than searching for a single optimal model,
+we instead maintain a population of models (particles). This allows us to explore more of the posterior model
+space, gaining a better estimate of the variation of the model space than an approximation involving only a
+single model. It also allows the particles to ``interact'', searching for the essential posterior modes
+together. In our variational approximation, this is done by incorporating an ``entropy term'' in the
+variational lower bound, which ensures diversity amongst the models in the population, preventing all
+particles from simply seeking the global posterior modes. This algorithm is determininistic, and can be
+executed efficiently using rank one updates and downdates.
+
+% Collapsed Variational Bayes
+Collapsed Variational Bayes approaches have proved useful in Bayesian nonparametric settings such as Latent
+Dirichlet Allocation \cite{Teh2007}
+Our variational approximation is a fixed form parametric approximation which places a weight on each covariate
+\[
+	q(\vgamma) = \sum_{i=1}^p p_i \I(\vgamma_i)
+\]
+
+% Population-based MCMC approaches
+
+This article is organised as follows.
+
+Results
 
 \bibliographystyle{elsarticle-harv}
 \bibliography{references_mendeley}
