@@ -1,0 +1,32 @@
+\documentclass{amsart}
+\begin{document}
+Graycode
+
+The Graycode was originally developed to aid in detecting errors in analog to digital conversions in
+communications systems by Frank Gray in 1947. It is a sequence of binary numbers whose key feature is that
+one and only one binary digit is different between binary number in the sequence. As we index the space of
+models $\Gamma$ using binary numbers, this sequence allows us to enumerate the entire model space in an order
+which only adds or removes one covariate from the previous model at a time. We use this to perform rank
+one updates and downdates in the calculation of the residual sum of squares for each model.
+
+Special function evaluation
+
+The Confluent Hypergeometric function is notoriously difficult to evaluate in general (see
+\cite{Press:2007:NRE:1403886} Chapter 6), , due to issues such as numerical overflow/underflow and numerical
+instability. As its' definition involves the ratio of two quantities which can diverge rapidly, an infinite
+series
+\[
+	M(a, b, z) = \sum_{n=0}^\infty \frac{a^{(n) z^n}}{b^{(n)} n!} = {_1} F_1(a; b; z)
+\]
+
+No scheme for accurately numerically evaluating this function has been found which works across all ranges of
+$a$, $b$ and $z$ values. Bill Gosper did a great deal of work into evaluating these functions using continued
+fractions.
+
+We tried several options. The fAsianOptions library only worked in a narrow range of cases. The GNU Scientific
+Library worked well for the range of cases that we tried.
+
+\bibliographystyle{elsarticle-harv}
+\bibliography{references_mendeley}
+
+\end{document}
