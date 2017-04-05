@@ -1,35 +1,38 @@
 #include <Rcpp.h>
 // [[Rcpp::depends(RcppEigen)]]
 #include <RcppEigen.h>
-// [[Rcpp::depends(RcppGSL)]]
-#include <RcppGSL.h>
 #include <vector>
 #include <cmath>
-#include <gsl/gsl_randist.h>
-#include <gsl/gsl_rng.h>
-#include <gsl/gsl_sf.h>
+#include <sstream>
 #include "graycode.h"
 #include "correlation.h"
+
+// #define DEBUG
 
 using namespace std;
 using namespace Rcpp;
 
 
-double prob(const int n, const int p, const double sigma2, const double a, const double b)
+double log_prob(const int n, const int p, const double sigma2, const double a, const double b)
 {
 	double log_sigma2 = std::log(sigma2);
 	double log_n = std::log(n);
-	// Rcpp::Rcout << "log_sigma2 " << log_sigma2 << std::endl;
-	// Rcpp::Rcout << "log_n " << log_n << std::endl;
-	double log_p = -n / 2. * log_sigma2 - p / 2. * log_n + gsl_sf_lnbeta(a, b);
-	// Rcpp::Rcout << "log_p " << log_p << std::endl;
+	#ifdef DEBUG
+	Rcpp::Rcout << "log_sigma2 " << log_sigma2 << std::endl;
+	Rcpp::Rcout << "log_n " << log_n << std::endl;
+	#endif
+	double log_p = -n / 2. * log_sigma2 - p / 2. * log_n + Rf_lbeta(a, b);
+	#ifdef DEBUG
+	Rcpp::Rcout << "log_p " << log_p << std::endl;
+	#endif
 
-	return exp(log_p);
+	return log_p;
 }
 
 
 //' Run a Collapsed Variational Approximation to find the K best linear models
 //'
+//' @param gamma_initial Matrix of initial models, a K by p logical matrix
 //' @param vy Vector of responses
 //' @param mX Matrix of covariates
 //' @param K The number of particles in the population
@@ -38,7 +41,7 @@ double prob(const int n, const int p, const double sigma2, const double a, const
 //'					selected by the algorithm
 //' @export
 // [[Rcpp::export]]
-List cva(NumericVector vy_in, NumericMatrix mX_in, const int K, const double lambda = 1.)
+List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, const int K, const double lambda = 1.)
 {
 	VectorXd vy(vy_in.length()); // = Rcpp::as<Eigen::Map<Eigen::VectorXd>>(vy_in);
 	for (auto i = 0; i < vy_in.length(); i++) vy[i] = vy_in[i];
@@ -57,8 +60,8 @@ List cva(NumericVector vy_in, NumericMatrix mX_in, const int K, const double lam
 	vector< dbitset > gamma(K);
 	vector< MatrixXd > mXTX_inv(K);
 	VectorXd sigma2(K);
-	const gsl_rng_type *T;
-	gsl_rng *r;
+	// const gsl_rng_type *T;
+	// gsl_rng *r;
 	const auto RHO = 0.1;
 	auto f_lambda_prev = 0.;
 	const auto EPSILON = 1e-8;
@@ -73,22 +76,41 @@ List cva(NumericVector vy_in, NumericMatrix mX_in, const int K, const double lam
 	// 	mX.col(i) = vcol;
 	// }
 
-	gsl_rng_env_setup();
+	// gsl_rng_env_setup();
 
-	T = gsl_rng_default;
-	r = gsl_rng_alloc(T);
+	// T = gsl_rng_default;
+	// r = gsl_rng_alloc(T);
 
 	// Initialise population of K particles randomly
-	Rcpp::Rcout << "Generated" << std::endl;
+	// Rcpp::Rcout << "Generated" << std::endl;
+	// for (auto k = 0; k < K; k++) {
+	// 	gamma[k].resize(p);
+	// 	// Empty models are pointless, so we keep regenerating gammas until we get a non-zero one
+	// 	while (gamma[k].count() == 0) {
+	// 		for (auto j = 0; j < p; j++) {
+	// 			if (gsl_rng_uniform(r) <= RHO)
+	// 				gamma[k][j] = true;
+	// 			else
+	// 				gamma[k][j] = false;
+	// 		}
+	// 	}
+	// 	Rcpp::Rcout << "gamma[" << k << "] " << gamma[k] << std::endl;
+	// }
+
+	if (gamma_initial.nrow() != K || gamma_initial.ncol() != p) {
+		stringstream ss;
+		ss << "initial_gamma is " << to_string(gamma_initial.nrow()) << " by " << to_string(gamma_initial.ncol()) << ", expected " << K << " by " << p;
+		stop(ss.str());
+	}
+
+	Rcpp::Rcout << "initial_gamma" << std::endl;
 	for (auto k = 0; k < K; k++) {
 		gamma[k].resize(p);
-		// Empty models are pointless, so we keep regenerating gammas until we get a non-zero one
-		while (gamma[k].count() == 0) {
-			for (auto j = 0; j < p; j++) {
-				if (gsl_rng_uniform(r) <= RHO)
-					gamma[k][j] = true;
-				else
-					gamma[k][j] = false;
+		for (auto j = 0; j < p; j++) {
+			if (gamma_initial(k, j) >= EPSILON) {
+				gamma[k][j] = true;
+			} else {
+				gamma[k][j] = false;
 			}
 		}
 		Rcpp::Rcout << "gamma[" << k << "] " << gamma[k] << std::endl;
@@ -143,7 +165,6 @@ List cva(NumericVector vy_in, NumericMatrix mX_in, const int K, const double lam
 					Rcpp::Rcout << "mXTX_inv_prime\n " << mXTX_inv_prime << std::endl;
 					Rcpp::Rcout << "bLow " << bLow << std::endl;
 					#endif
-					// mXTX_inv[k] = mXTX_inv_prime;
 				} else {
 					// If only one bit is set and downdating would lead to the null model, then we should skip
 					// checking the downdate
@@ -231,13 +252,13 @@ List cva(NumericVector vy_in, NumericMatrix mX_in, const int K, const double lam
 				Rcpp::Rcout << "sigma2_0 " << sigma2_0 << std::endl;
 				Rcpp::Rcout << "sigma2_1 " << sigma2_1 << std::endl;
 				#endif
-				double p_0 = prob(n, p_gamma_0, sigma2_0, a, b);
-				double p_1 = prob(n, p_gamma_1, sigma2_1, a, b);
+				double log_p_0 = log_prob(n, p_gamma_0, sigma2_0, a, b);
+				double log_p_1 = log_prob(n, p_gamma_1, sigma2_1, a, b);
 				#ifdef DEBUG
-				Rcpp::Rcout << "p_0 " << p_0 << std::endl;
-				Rcpp::Rcout << "p_1 " << p_1 << std::endl;
+				Rcpp::Rcout << "log_p_0 " << log_p_0 << std::endl;
+				Rcpp::Rcout << "log_p_1 " << log_p_1 << std::endl;
 				#endif
-				if (p_0 > p_1) {
+				if (log_p_0 > log_p_1) {
 					if (!bUpdate) {
 						gamma[k][j] = false;
 						#ifdef DEBUG
@@ -260,7 +281,7 @@ List cva(NumericVector vy_in, NumericMatrix mX_in, const int K, const double lam
 		}
 
 		for (auto k = 0; k < K; k++) {
-			probs[k] = prob(n, p, sigma2[k], a, b);
+			probs[k] = exp(log_prob(n, p, sigma2[k], a, b));
 		}
 
 		for (auto k = 0; k < K; k++) {
