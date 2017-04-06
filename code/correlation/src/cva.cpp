@@ -4,26 +4,36 @@
 #include <vector>
 #include <cmath>
 #include <sstream>
+#include <unordered_map>
+#define BOOST_DYNAMIC_BITSET_DONT_USE_FRIENDS
+#include <boost/functional/hash.hpp>
 #include "graycode.h"
 #include "correlation.h"
 
-// #define DEBUG
+#define DEBUG
 
 using namespace std;
 using namespace Rcpp;
 
+namespace boost {
+template <typename B, typename A>
+std::size_t hash_value(const boost::dynamic_bitset<B, A>& bs) {
+  return boost::hash_value(bs.m_bits);
+}
+}
 
-double log_prob(const int n, const int p, const double sigma2, const double a, const double b)
+double log_prob(const int n, const int p, int p_gamma, const double sigma2, const double a, const double b)
 {
 	double log_sigma2 = std::log(sigma2);
 	double log_n = std::log(n);
 	#ifdef DEBUG
-	Rcpp::Rcout << "log_sigma2 " << log_sigma2 << std::endl;
-	Rcpp::Rcout << "log_n " << log_n << std::endl;
+	// Rcpp::Rcout << "log_sigma2 " << log_sigma2 << std::endl;
+	// Rcpp::Rcout << "log_n " << log_n << std::endl;
+	// Rcpp::Rcout << "Rf_lbeta(" << a + p_gamma << ", " << b + p - p_gamma << ") " << Rf_lbeta(a + p_gamma, b + p - p_gamma) << std::endl;
 	#endif
-	double log_p = -n / 2. * log_sigma2 - p / 2. * log_n + Rf_lbeta(a, b);
+	double log_p = -n / 2. * log_sigma2 - p / 2. * log_n + Rf_lbeta(a + p_gamma, b + p - p_gamma);
 	#ifdef DEBUG
-	Rcpp::Rcout << "log_p " << log_p << std::endl;
+	// Rcpp::Rcout << "log_p " << log_p << std::endl;
 	#endif
 
 	return log_p;
@@ -49,10 +59,10 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 	for (auto i = 0; i < mX_in.nrow(); i++)
 		for (auto j = 0; j < mX_in.ncol(); j++)
 			mX(i, j) = mX_in(i, j);
-	const auto a = 1.;
-	const auto b = 1.;
 	const auto n = mX.rows();
 	const auto p = mX.cols();
+	auto a = 1.;
+	auto b = p;
 	const MatrixXd mXTX = mX.transpose() * mX;
 	const MatrixXd mXTy = mX.transpose() * vy;
 	VectorXd probs(K);
@@ -60,6 +70,7 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 	vector< dbitset > gamma(K);
 	vector< MatrixXd > mXTX_inv(K);
 	VectorXd sigma2(K);
+	std::unordered_map< std::size_t, bool > hash;
 	// const gsl_rng_type *T;
 	// gsl_rng *r;
 	const auto RHO = 0.1;
@@ -114,6 +125,7 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 			}
 		}
 		Rcpp::Rcout << "gamma[" << k << "] " << gamma[k] << std::endl;
+		hash.insert({boost::hash_value(gamma[k]), true});
 	}
 
 	// Initialise mXTX_inv
@@ -130,8 +142,13 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 
 	// Loop until convergence
 	auto converged = false;
+	auto iteration = 1;
 	while (!converged) {
+		Rcpp::Rcout << "Iteration " << iteration << std::endl;
 		for (auto k = 0; k < K; k++) {
+			#ifdef DEBUG
+			Rcpp::Rcout << "gamma[" << k << "] " << gamma[k] << std::endl;
+			#endif
 			for (auto j = 0; j < p; j++) {
 				dbitset gamma_0 = gamma[k];
 				gamma_0[j] = false;
@@ -143,10 +160,28 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 
 				bool bUpdate = !gamma[k][j];
 				MatrixXd mXTX_inv_prime;
-				#ifdef DEBUG
-				Rcpp::Rcout << "gamma[" << k << "] " << gamma[k] << std::endl;
-				#endif
+				// if (hash.find(gamma[k].to_ulong()) != hash.end()) {
+				// 	hash.insert({gamma[k].to_ulong(), true});
+				// }
 				if (bUpdate) {
+					// If we've seen this bitstring before, don't do the update
+					auto h = boost::hash_value(gamma_1);
+					#ifdef DEBUG
+					Rcpp::Rcout << "h " << h << std::endl;
+					#endif
+					auto search = hash.find(h);
+					// Rcpp::Rcout << "search->first " << search->first << std::endl;
+					if (search != hash.end()) {
+						#ifdef DEBUG
+						Rcpp::Rcout << "Skipping" << std::endl;
+						#endif
+						continue;
+					} else {
+						#ifdef DEBUG
+						Rcpp::Rcout << "Inserting" << std::endl;
+						#endif
+						hash.insert({h, true});
+					}
 					#ifdef DEBUG
 					Rcpp::Rcout << "Updating " << j << std::endl;
 					Rcpp::Rcout << "p_gamma_1 " << p_gamma_1 << std::endl;
@@ -161,8 +196,8 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 													mXTX_inv_prime,
 													bLow);
 					#ifdef DEBUG
-					Rcpp::Rcout << "mXTX_inv[k]\n " << mXTX_inv[k] << std::endl;
-					Rcpp::Rcout << "mXTX_inv_prime\n " << mXTX_inv_prime << std::endl;
+					// Rcpp::Rcout << "mXTX_inv[k]\n " << mXTX_inv[k] << std::endl;
+					// Rcpp::Rcout << "mXTX_inv_prime\n " << mXTX_inv_prime << std::endl;
 					Rcpp::Rcout << "bLow " << bLow << std::endl;
 					#endif
 				} else {
@@ -170,6 +205,18 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 					// checking the downdate
 					if (p_gamma_0 == 0)
 						continue;
+					// If we've seen this bitstring before, don't do the update
+					auto h = boost::hash_value(gamma_0);
+					Rcpp::Rcout << "h " << h << std::endl;
+					auto search = hash.find(h);
+					// Rcpp::Rcout << "search->first " << search->first << std::endl;
+					if (search != hash.end()) {
+						Rcpp::Rcout << "Skipping" << std::endl;
+						continue;
+					} else {
+						Rcpp::Rcout << "Inserting" << std::endl;
+						hash.insert({h, true});
+					}
 					#ifdef DEBUG
 					Rcpp::Rcout << "Downdating " << j << std::endl;
 					Rcpp::Rcout << "p_gamma_0 " << p_gamma_0 << std::endl;
@@ -179,8 +226,8 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 					rank_one_downdate(j, gamma_0.find_first(), 0,
 														mXTX_inv[k], mXTX_inv_prime);
 					#ifdef DEBUG
-					Rcpp::Rcout << "mXTX_inv[k]\n " << mXTX_inv[k] << std::endl;
-					Rcpp::Rcout << "mXTX_inv_prime\n " << mXTX_inv_prime << std::endl;
+					// Rcpp::Rcout << "mXTX_inv[k]\n " << mXTX_inv[k] << std::endl;
+					// Rcpp::Rcout << "mXTX_inv_prime\n " << mXTX_inv_prime << std::endl;
 					#endif
 				}
 
@@ -195,10 +242,10 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 					// get_rows(mXTy, gamma_1, mX_gamma_1_Ty);
  					sigma2_0 = sigma2[k];
 					#ifdef DEBUG
-					Rcpp::Rcout << "mX_gamma_1.transpose() * mX_gamma_1\n" << mX_gamma_1.transpose() * mX_gamma_1 << std::endl;
-					Rcpp::Rcout << "mXTX_inv_prime * mX_gamma_1.transpose() * mX_gamma_1\n" << mXTX_inv_prime * mX_gamma_1.transpose() * mX_gamma_1 << std::endl;
- 					Rcpp::Rcout << "mXTX_inv_prime * mX_gamma_1_Ty\n" << mXTX_inv_prime * mX_gamma_1_Ty << std::endl;
- 					Rcpp::Rcout << "(mX_gamma_1_Ty.transpose() * mXTX_inv_prime * mX_gamma_1_Ty).value() " << (mX_gamma_1_Ty.transpose() * mXTX_inv_prime * mX_gamma_1_Ty).value() << std::endl;
+					// Rcpp::Rcout << "mX_gamma_1.transpose() * mX_gamma_1\n" << mX_gamma_1.transpose() * mX_gamma_1 << std::endl;
+					// Rcpp::Rcout << "mXTX_inv_prime * mX_gamma_1.transpose() * mX_gamma_1\n" << mXTX_inv_prime * mX_gamma_1.transpose() * mX_gamma_1 << std::endl;
+ 				// 	Rcpp::Rcout << "mXTX_inv_prime * mX_gamma_1_Ty\n" << mXTX_inv_prime * mX_gamma_1_Ty << std::endl;
+ 				// 	Rcpp::Rcout << "(mX_gamma_1_Ty.transpose() * mXTX_inv_prime * mX_gamma_1_Ty).value() " << (mX_gamma_1_Ty.transpose() * mXTX_inv_prime * mX_gamma_1_Ty).value() << std::endl;
 					#endif
  					double nR2 = (mX_gamma_1_Ty.transpose() * mXTX_inv_prime * mX_gamma_1_Ty).value();
  					if (nR2 <= n) {
@@ -207,11 +254,11 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 						// It's mathematically impossible that nR2 can be that high. Therefore, our inverse must be bad.
 						// Recalculate it from scratch and try again.
 						#ifdef DEBUG
-						Rcpp::Rcout << "Re-calculating mXTX_inv_prime" << std::endl;
+						// Rcpp::Rcout << "Re-calculating mXTX_inv_prime" << std::endl;
 						#endif
 						mXTX_inv_prime = (mX_gamma_1.transpose() * mX_gamma_1).inverse();
 						#ifdef DEBUG
-						Rcpp::Rcout << "mXTX_inv_prime * mX_gamma_1.transpose() * mX_gamma_1\n" << mXTX_inv_prime * mX_gamma_1.transpose() * mX_gamma_1 << std::endl;
+						// Rcpp::Rcout << "mXTX_inv_prime * mX_gamma_1.transpose() * mX_gamma_1\n" << mXTX_inv_prime * mX_gamma_1.transpose() * mX_gamma_1 << std::endl;
 						#endif
 						nR2 = (mX_gamma_1_Ty.transpose() * mXTX_inv_prime * mX_gamma_1_Ty).value();
 						sigma2_1 = 1. - nR2 / n;
@@ -223,10 +270,10 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 					// MatrixXd mX_gamma_0_Ty(n, p_gamma_0);
 					// get_rows(mXTy, gamma_0, mX_gamma_0_Ty);
 					#ifdef DEBUG
-					Rcpp::Rcout << "mX_gamma_0.transpose() * mX_gamma_0\n" << mX_gamma_0.transpose() * mX_gamma_0 << std::endl;
-					Rcpp::Rcout << "mXTX_inv_prime * mX_gamma_0.transpose() * mX_gamma_0\n" << mXTX_inv_prime * mX_gamma_0.transpose() * mX_gamma_0 << std::endl;
- 					Rcpp::Rcout << "mXTX_inv_prime * mX_gamma_0_Ty\n" << mXTX_inv_prime * mX_gamma_0_Ty << std::endl;
- 					Rcpp::Rcout << "(mX_gamma_0_Ty.transpose() * mXTX_inv_prime * mX_gamma_0_Ty).value() " << (mX_gamma_0_Ty.transpose() * mXTX_inv_prime * mX_gamma_0_Ty).value() << std::endl;
+					// Rcpp::Rcout << "mX_gamma_0.transpose() * mX_gamma_0\n" << mX_gamma_0.transpose() * mX_gamma_0 << std::endl;
+					// Rcpp::Rcout << "mXTX_inv_prime * mX_gamma_0.transpose() * mX_gamma_0\n" << mXTX_inv_prime * mX_gamma_0.transpose() * mX_gamma_0 << std::endl;
+ 				// 	Rcpp::Rcout << "mXTX_inv_prime * mX_gamma_0_Ty\n" << mXTX_inv_prime * mX_gamma_0_Ty << std::endl;
+ 				// 	Rcpp::Rcout << "(mX_gamma_0_Ty.transpose() * mXTX_inv_prime * mX_gamma_0_Ty).value() " << (mX_gamma_0_Ty.transpose() * mXTX_inv_prime * mX_gamma_0_Ty).value() << std::endl;
 					#endif
  					double nR2 = (mX_gamma_0_Ty.transpose() * mXTX_inv_prime * mX_gamma_0_Ty).value();
  					sigma2_0 = 1. - (mX_gamma_0_Ty.transpose() * mXTX_inv_prime * mX_gamma_0_Ty).value() / n;
@@ -236,11 +283,11 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 						// It's mathematically impossible that nR2 can be that high. Therefore, our inverse must be bad.
 						// Recalculate it from scratch and try again.
 						#ifdef DEBUG
-						Rcpp::Rcout << "Re-calculating mXTX_inv_prime" << std::endl;
+						// Rcpp::Rcout << "Re-calculating mXTX_inv_prime" << std::endl;
 						#endif
 						mXTX_inv_prime = (mX_gamma_0.transpose() * mX_gamma_0).inverse();
 						#ifdef DEBUG
-						Rcpp::Rcout << "mXTX_inv_prime * mX_gamma_0.transpose() * mX_gamma_0\n" << mXTX_inv_prime * mX_gamma_0.transpose() * mX_gamma_0 << std::endl;
+						// Rcpp::Rcout << "mXTX_inv_prime * mX_gamma_0.transpose() * mX_gamma_0\n" << mXTX_inv_prime * mX_gamma_0.transpose() * mX_gamma_0 << std::endl;
 						#endif
 						nR2 = (mX_gamma_0_Ty.transpose() * mXTX_inv_prime * mX_gamma_0_Ty).value();
 						sigma2_0 = 1. - nR2 / n;
@@ -252,14 +299,15 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 				Rcpp::Rcout << "sigma2_0 " << sigma2_0 << std::endl;
 				Rcpp::Rcout << "sigma2_1 " << sigma2_1 << std::endl;
 				#endif
-				double log_p_0 = log_prob(n, p_gamma_0, sigma2_0, a, b);
-				double log_p_1 = log_prob(n, p_gamma_1, sigma2_1, a, b);
+				double log_p_0 = log_prob(n, p, p_gamma_0, sigma2_0, a, b);
+				double log_p_1 = log_prob(n, p, p_gamma_1, sigma2_1, a, b);
 				#ifdef DEBUG
 				Rcpp::Rcout << "log_p_0 " << log_p_0 << std::endl;
 				Rcpp::Rcout << "log_p_1 " << log_p_1 << std::endl;
 				#endif
 				if (log_p_0 > log_p_1) {
 					if (!bUpdate) {
+						hash.erase(boost::hash_value(gamma[k]));
 						gamma[k][j] = false;
 						#ifdef DEBUG
 						Rcpp::Rcout << "Keep downdate" << std::endl;
@@ -269,6 +317,7 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 					}
 				}	else {
 					if (bUpdate) {
+						hash.erase(boost::hash_value(gamma[k]));
 						gamma[k][j] = true;
 						#ifdef DEBUG
 						Rcpp::Rcout << "Keep update" << std::endl;
@@ -281,11 +330,19 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 		}
 
 		for (auto k = 0; k < K; k++) {
-			probs[k] = exp(log_prob(n, p, sigma2[k], a, b));
+			auto p_gamma = gamma[k].count();
+			auto b = p;
+			probs[k] = exp(log_prob(n, p, p_gamma, sigma2[k], a, b));
+			#ifdef DEBUG
+			// Rcpp::Rcout << "probs[" << k << "] " << probs[k] << std::endl;
+			#endif
 		}
 
 		for (auto k = 0; k < K; k++) {
 			w[k] = probs[k] / probs.sum();
+			#ifdef DEBUG
+			// Rcpp::Rcout << "w[" << k << "] " << w[k] << std::endl;
+			#endif
 		}
 
 		// Check for convergence - is f_lambda changed from the last iteration?
@@ -298,6 +355,7 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 			}
 		}
 		auto H = -(p_l.array() * p_l.array().log()).sum();
+		Rcpp::Rcout << "H " << H << std::endl;
 		double f_lambda = w.dot(probs) + lambda * H;
 		Rcpp::Rcout << "f_lambda_prev " << f_lambda_prev << " f_lambda " << f_lambda << std::endl;
 		if ((f_lambda - f_lambda_prev) > EPSILON) {
@@ -305,11 +363,12 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 		} else {
 			converged = true;
 		}
+		for (auto k = 0; k < K; k++) {
+			Rcpp::Rcout << "gamma[" << k << "] " << gamma[k] << std::endl;
+		}
+		iteration++;
 	}
 	Rcpp::Rcout << "Converged" << std::endl;
-	for (auto k = 0; k < K; k++) {
-		Rcpp::Rcout << "gamma[" << k << "] " << gamma[k] << std::endl;
-	}
 	NumericMatrix bitstrings(K, p);
 	for (auto k = 0; k < K; k++) {
 		for (auto j = 0; j < p; j++) {
