@@ -116,19 +116,30 @@ variational lower bound, which ensures diversity amongst the models in the popul
 particles from simply seeking the global posterior modes. This algorithm is determininistic, and can be
 executed efficiently using rank one updates and downdates.
 
+Difficulty of implementation -- practical model selection
+\cite{Chipman2014}
+
 % Collapsed Variational Bayes
-Collapsed Variational Bayes approaches have proved useful in Bayesian nonparametric settings such as Latent
-Dirichlet Allocation \cite{Teh2007}
+% Collapsed Variational Bayes approaches have proved useful in Bayesian nonparametric settings such as Latent
+% Dirichlet Allocation \cite{Teh2007}
 Our variational approximation is a fixed form parametric approximation which places a weight on each covariate
 \[
-	q(\vgamma) = \sum_{i=1}^p p_i \I(\vgamma_i)
+	q(\vgamma) = \sum_{i=1}^p w_i \I(\vgamma_i)
 \]
 
 % Population-based MCMC approaches
 
 This article is organised as follows.
 
-Results
+\section{Results}
+
+
+\section{Implementation techniques}
+To ensure uniqueness of the $K$ models in the population, before a new candidate model with a covariate added
+or removed is considered, the population of existing models is checked to see if it already exists in the
+population. If so, the addition or removal of the covariate is skipped and the next candidate model considered.
+In our implementation, this check is made computationally efficient by maintaining a hash table of the models,
+allowing the check as to wether the model is already in the population to be performed in $\BigO(1)$ time.
 
 \bibliographystyle{elsarticle-harv}
 \bibliography{references_mendeley}
