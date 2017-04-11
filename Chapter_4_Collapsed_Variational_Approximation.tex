@@ -16,7 +16,7 @@
 \usepackage{algorithm,algorithmic}
 \usepackage{color}
 
-\title{Preliminaries}
+\title{Collapsed Variational Approximation}
 \author{Mark Greenaway}
 \input{include.tex}
 \input{Definitions.tex}
@@ -27,44 +27,6 @@
 \begin{document}
 \setlength{\parindent}{0pt}
 \maketitle
-
-\section{Introduction}
-
-Start off with a summary of the Particle Em for Variable Selection paper by Veronika Rockova
-
-Introduction
-EM vulnerable to local entrapment when likelihood is multi-modal, especially spike-and-slab posterior
-distributions for model selection
-non-parametric Variational Bayes, repulsive particles. These particles are geared towards unchartered areas of
-the posterior, providing a more comprehensive summary of its' topography than simple parallel EM deployments
-Report of a single model will be a misleading reflection of the model uncertainty in a highly multimodal
-posterior. Identify a collection of representative models
-What's our choice of prior?
-Hard to explore model space and escape local entrapment, especially in high dimensions
-Population-based methods, allow trajectories to ``communicate''
-
-Main contributions
-As a precursor to Particle Em, we propose the Reversed EMVS algorithm, a discrete optimisation approach for
-spike-and-slab variable selection. Treat $\vgamma$ as parameters of interest, and $\vbeta$ as missing data.
-Closed form updates, targeting the discrete model space.
-
-Population-based optimisation approach that exhibits both individual and social behaviour. Particles share a
-common goal (finding essential posterior modes) and realise it by exploring the posterior environment while
-mutually interacting. Social behaviour is mediated through entropy, which serves as a diversifying penalty.
-
-Entire trajectory of evolving posteriors is far more informative for variable selection
-
-By forging connections between Particle EM and sequential Monte Carlo (SMC) procedures, we propose a
-stochastic Particle EM variant
-
-Visualisation
-
-Approximate Bayesian inference
-Variational Approximation
-Variational Bayes
-Collapsed Variational Bayes
-
-My writing
 
 \section{Abstract}
 
@@ -89,8 +51,9 @@ In this article, we focus on the important case of model selection for normal li
 	p(\vy | \valpha, \vbeta) = \N_n(\vone^\top \alpha + \mX \vbeta, \mI_n)
 \]
 % Justify choice of prior
-We use a g-prior for model selection (\cite{Goel1986}), as it avoids the Lindley and Bartlett paradoxes, as 
-described in \cite{Liang2008}.
+
+We use the Cake variant of the spike and slab prior for model selection, as it avoids the Lindley and Bartlett
+paradoxes. Citation.
 
 Many computational schemes for Bayesian model selection exist, using Monte Carlo Markov Chains techniques for 
 computing the posterior distributions of $\vgamma$.
@@ -102,9 +65,34 @@ as Jasra et al. 2007, Bottolo and Richardson 2010, Hans et al 2007, Liang and Wo
 increases the computational cost of sampling from the posterior distributions still further, especially in
 high-dimensional problems.
 
-Existing approaches to the problem focus upon finding a single best model quickly (\cite{You2014},
+\cite{Mitchell1988} initially proposed the spike-and-slab prior distribution on regression co-efficients not
+currently included in the model -- which places a mixture of a point mass 'spike' at $0$ and a diffuse uniform
+distribution 'slab' elsewhere. The random error component is assigned a normal distribution with mean $0$ and
+standard deviation $\sigma$. The approach was further developed by \cite{Madigan1994} to incorporate an
+alternative Bayesian approach that takes full account of the true model uncertainty by averaging over a small
+subset of models, and an efficient search algorithm for finding these models. \cite{George1997} investigated
+computational methods for posterior evaluation and exploration in this setting, and using Gray Code sequencing
+and Markov Chain Monte Carlo to explore the model space in moderate and large-sized problems respectively.
+More recently, \cite{Ishwaran2005} developed a rescaled spike-and-slab model improves effective variable
+selection in terms of risk misclassification by using selective shrinkage.
+
+Existing approaches to the problem of model selection focus upon finding a single best model quickly (\cite{You2014},
 \cite{Rockova2014}). Exploring the model space using only one model at a time will provide a misleading view
 of the uncertainty in the posterior, as it is typically highly multimodal.
+
+Our main contributions are:
+
+i) Search over the binary strings $\vgamma$ directly, as the estimates of $\vbeta$ are available in closed
+form once $\vgamma$ is known.
+
+ii) We make use of a population--based optimisation scheme to search the model space. We take advantage of the
+population of solutions by incorporating a penalty for lack of entropy.
+
+iii) The entire trajectory of particles gives far more information about variable selection than a single
+snapshot of the final best decision.
+
+iv) Our model incorporates the Cake prior, which avoids Lindley's and Bartlett's paradoxes by selecting the
+prior based on sample size.
 
 \cite{Rockova2016}
 We propose a non-parametric Variational Bayes approximation. Rather than searching for a single optimal model,
@@ -129,9 +117,34 @@ Our variational approximation is a fixed form parametric approximation which pla
 
 % Population-based MCMC approaches
 
-This article is organised as follows.
+This article is organised as follows. In Section 2, we detail the derivation of our approximation and fitting
+algorithms. In Section 3, we discuss computational issues with implementing our algorithm efficiently. In
+Section 4, we present the results of our numerical experiments. In Section 5, we present our conclusions and
+discuss our results.
+
+\section{Method}
+
+Base on John's CVB for Mark document.
+
+The main body of the algorithm is a two--stage process. In the first stage, we iterate through the population of
+bitstrings, using a greedy search strategy to attempt to alter each bit in the model bitstring to increase the log likelihood. If the log likelihood for the new bitstring is no higher than the previous bitstring, then the
+alteration is rejected and the next alteration tried. The alterations are also rejected if the new bitstring
+already exists within the population, ensuring that the constraint that all models in the population are
+unique is maintained.
+
+In the second stage, we re--calculate the weights for each individual in the population, based on the
+likelihood of that model relative to the data $p(\vy; \vbeta_\vgamma)$ and the use this to re--calculate the
+probability--based weights $w_i$ for each bitstring in the population. This is then used to re--calculate the
+lower bound
+\[
+	\log \underline{p}(\vy; \vw, \Gamma) = \sum_{k=1}^K \vw_k \log p(\vy; \vbeta_{\vgamma_k}) - \vw_k \log \vw_k
+\]
+
+which is the sum of the weighted log-likelihood of the population and the entropy of the probability weights.
+These two stages repeat until the lower bound converges.
 
 \section{Results}
+
 
 
 \section{Implementation techniques}
