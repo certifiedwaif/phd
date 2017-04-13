@@ -40,6 +40,18 @@ double log_prob(const int n, const int p, int p_gamma, const double sigma2, cons
 }
 
 
+void gamma_to_NumericMatrix(const vector< dbitset >& gamma, NumericMatrix& nm)
+{
+	auto K = gamma.size();
+	auto p = gamma[0].size();
+	for (auto k = 0; k < K; k++) {
+		for (auto j = 0; j < p; j++) {
+			nm(k, j) = gamma[k][j] ? 1. : 0.;
+		}
+	}
+}
+
+
 //' Run a Collapsed Variational Approximation to find the K best linear models
 //'
 //' @param gamma_initial Matrix of initial models, a K by p logical matrix
@@ -48,7 +60,8 @@ double log_prob(const int n, const int p, int p_gamma, const double sigma2, cons
 //' @param K The number of particles in the population
 //' @param lambda The weighting factor for the entropy in f_lambda. Defaults to 1.
 //' @return A list containing the named element models, which is a K by p matrix of the models
-//'					selected by the algorithm
+//'					selected by the algorithm, and the named element trajectory, which includes a list
+//'					of the populations of models for each iteration of the algorithm until it converged
 //' @export
 // [[Rcpp::export]]
 List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, const int K, const double lambda = 1.)
@@ -68,6 +81,7 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 	VectorXd probs(K);
 	VectorXd w(K);
 	vector< dbitset > gamma(K);
+	vector< vector< dbitset > > trajectory;
 	vector< MatrixXd > mXTX_inv(K);
 	VectorXd sigma2(K);
 	std::unordered_map< std::size_t, bool > hash;
@@ -160,14 +174,11 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 
 				bool bUpdate = !gamma[k][j];
 				MatrixXd mXTX_inv_prime;
-				// if (hash.find(gamma[k].to_ulong()) != hash.end()) {
-				// 	hash.insert({gamma[k].to_ulong(), true});
-				// }
 				if (bUpdate) {
 					// If we've seen this bitstring before, don't do the update
 					auto h = boost::hash_value(gamma_1);
 					#ifdef DEBUG
-					Rcpp::Rcout << "h " << h << std::endl;
+					// Rcpp::Rcout << "h " << h << std::endl;
 					#endif
 					auto search = hash.find(h);
 					// Rcpp::Rcout << "search->first " << search->first << std::endl;
@@ -184,7 +195,7 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 					}
 					#ifdef DEBUG
 					Rcpp::Rcout << "Updating " << j << std::endl;
-					Rcpp::Rcout << "p_gamma_1 " << p_gamma_1 << std::endl;
+					// Rcpp::Rcout << "p_gamma_1 " << p_gamma_1 << std::endl;
 					#endif
 					// Update mXTX_inv
 					mXTX_inv_prime.resize(p_gamma_1, p_gamma_1);
@@ -207,7 +218,7 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 						continue;
 					// If we've seen this bitstring before, don't do the update
 					auto h = boost::hash_value(gamma_0);
-					Rcpp::Rcout << "h " << h << std::endl;
+					// Rcpp::Rcout << "h " << h << std::endl;
 					auto search = hash.find(h);
 					// Rcpp::Rcout << "search->first " << search->first << std::endl;
 					if (search != hash.end()) {
@@ -219,7 +230,7 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 					}
 					#ifdef DEBUG
 					Rcpp::Rcout << "Downdating " << j << std::endl;
-					Rcpp::Rcout << "p_gamma_0 " << p_gamma_0 << std::endl;
+					// Rcpp::Rcout << "p_gamma_0 " << p_gamma_0 << std::endl;
 					#endif
 					// Downdate mXTX_inv
 					mXTX_inv_prime.resize(p_gamma_0, p_gamma_0);
@@ -238,8 +249,6 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 					MatrixXd mX_gamma_1(n, p_gamma_1);
 					get_cols(mX, gamma_1, mX_gamma_1);
 					MatrixXd mX_gamma_1_Ty = mX_gamma_1.transpose() * vy;
-					// MatrixXd mX_gamma_1_Ty(n, p_gamma_1);
-					// get_rows(mXTy, gamma_1, mX_gamma_1_Ty);
  					sigma2_0 = sigma2[k];
 					#ifdef DEBUG
 					// Rcpp::Rcout << "mX_gamma_1.transpose() * mX_gamma_1\n" << mX_gamma_1.transpose() * mX_gamma_1 << std::endl;
@@ -267,8 +276,6 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 					MatrixXd mX_gamma_0(n, p_gamma_0);
 					get_cols(mX, gamma_0, mX_gamma_0);
 					MatrixXd mX_gamma_0_Ty = mX_gamma_0.transpose() * vy;
-					// MatrixXd mX_gamma_0_Ty(n, p_gamma_0);
-					// get_rows(mXTy, gamma_0, mX_gamma_0_Ty);
 					#ifdef DEBUG
 					// Rcpp::Rcout << "mX_gamma_0.transpose() * mX_gamma_0\n" << mX_gamma_0.transpose() * mX_gamma_0 << std::endl;
 					// Rcpp::Rcout << "mXTX_inv_prime * mX_gamma_0.transpose() * mX_gamma_0\n" << mXTX_inv_prime * mX_gamma_0.transpose() * mX_gamma_0 << std::endl;
@@ -296,14 +303,14 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
  				}
 
 				#ifdef DEBUG
-				Rcpp::Rcout << "sigma2_0 " << sigma2_0 << std::endl;
-				Rcpp::Rcout << "sigma2_1 " << sigma2_1 << std::endl;
+				// Rcpp::Rcout << "sigma2_0 " << sigma2_0 << std::endl;
+				// Rcpp::Rcout << "sigma2_1 " << sigma2_1 << std::endl;
 				#endif
 				double log_p_0 = log_prob(n, p, p_gamma_0, sigma2_0, a, b);
 				double log_p_1 = log_prob(n, p, p_gamma_1, sigma2_1, a, b);
 				#ifdef DEBUG
-				Rcpp::Rcout << "log_p_0 " << log_p_0 << std::endl;
-				Rcpp::Rcout << "log_p_1 " << log_p_1 << std::endl;
+				Rcpp::Rcout << "log_p_0 " << log_p_0;
+				Rcpp::Rcout << " log_p_1 " << log_p_1 << std::endl;
 				#endif
 				if (log_p_0 > log_p_1) {
 					if (!bUpdate) {
@@ -346,15 +353,7 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 		}
 
 		// Check for convergence - is f_lambda changed from the last iteration?
-		// const auto lambda = 2.;
-		VectorXd p_l(K);
-		p_l = VectorXd::Zero(K);
-		for (auto l = 0; l < K; l++) {
-			for (auto k = 0; k < K; k++) {
-				p_l[l] += w[k] * (gamma[l][k] ? 1. : 0.);
-			}
-		}
-		auto H = -(p_l.array() * p_l.array().log()).sum();
+		auto H = -(w.array() * w.array().log()).sum();
 		Rcpp::Rcout << "H " << H << std::endl;
 		double f_lambda = w.dot(probs) + lambda * H;
 		Rcpp::Rcout << "f_lambda_prev " << f_lambda_prev << " f_lambda " << f_lambda << std::endl;
@@ -367,14 +366,20 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 			Rcpp::Rcout << "gamma[" << k << "] " << gamma[k] << std::endl;
 		}
 		iteration++;
+		trajectory.push_back(gamma);
 	}
 	Rcpp::Rcout << "Converged" << std::endl;
 	NumericMatrix bitstrings(K, p);
-	for (auto k = 0; k < K; k++) {
-		for (auto j = 0; j < p; j++) {
-			bitstrings(k, j) = gamma[k][j] ? 1. : 0.;
-		}
+	gamma_to_NumericMatrix(gamma, bitstrings);
+	
+	List trajectory_bitstrings;
+	for (auto i = 0; i < trajectory.size(); i++) {
+		NumericMatrix bitstrings2(K, p);
+		gamma_to_NumericMatrix(trajectory[i], bitstrings2);
+		trajectory_bitstrings.push_back(bitstrings2);
 	}
-	List result = List::create(Named("models") = bitstrings);
+
+	List result = List::create(Named("models") = bitstrings,
+															Named("trajectory") = trajectory_bitstrings);
 	return result;
 }
