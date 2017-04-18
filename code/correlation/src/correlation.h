@@ -13,25 +13,26 @@ typedef unsigned int uint;
 
 #pragma once
 
+using namespace Rcpp;
 using Eigen::VectorXd;
 using Eigen::MatrixXd;
 using Eigen::MatrixBase;
 using std::string;
 
 MatrixXd parseCSVfile_double(string infilename);
-VectorXd all_correlations_mX_mZ_cpp(VectorXd vy, MatrixXd mX, MatrixXd mZ, const uint intercept_col,
+List all_correlations_mX_mZ_cpp(VectorXd vy, MatrixXd mX, MatrixXd mZ, const uint intercept_col,
 																		const bool bIntercept = false, const bool bCentre = true);
-VectorXd all_correlations_mX_cpp(VectorXd vy, MatrixXd mX, const uint intercept_col,
+List all_correlations_mX_cpp(VectorXd vy, MatrixXd mX, const uint intercept_col,
 																 const bool bIntercept = false, const bool bCentre = true);
 template <typename Derived1, typename Derived2>
-MatrixBase<Derived2>& get_cols(const MatrixBase<Derived1>& m1, const dbitset& gamma, MatrixBase<Derived2>& m2);
+Eigen::MatrixBase<Derived2>& get_cols(const Eigen::MatrixBase<Derived1>& m1, const dbitset& gamma, Eigen::MatrixBase<Derived2>& m2);
 template <typename Derived1, typename Derived2>
-MatrixBase<Derived2>& get_rows(const MatrixBase<Derived1>& m1, const dbitset& gamma, MatrixBase<Derived2>& m2);
+Eigen::MatrixBase<Derived2>& get_rows(const Eigen::MatrixBase<Derived1>& m1, const dbitset& gamma, Eigen::MatrixBase<Derived2>& m2);
 template <typename Derived1, typename Derived2>
-MatrixBase<Derived2>& rank_one_update(const dbitset& gamma, const uint col_abs, const uint min_idx,
+Eigen::MatrixBase<Derived2>& rank_one_update(const dbitset& gamma, const uint col_abs, const uint min_idx,
 	const uint fixed,
-const MatrixBase<Derived1>& mXTX, const MatrixBase<Derived1>& mA, MatrixBase<Derived2>& mA_prime, bool& bLow);
+const Eigen::MatrixBase<Derived1>& mXTX, const Eigen::MatrixBase<Derived1>& mA, Eigen::MatrixBase<Derived2>& mA_prime, bool& bLow);
 template <typename Derived1, typename Derived2>
-MatrixBase<Derived2>& rank_one_downdate(const uint col_abs, const uint min_idx, const uint fixed,
-const MatrixBase<Derived1>& mA, MatrixBase<Derived2>& mA_prime);
+Eigen::MatrixBase<Derived2>& rank_one_downdate(const uint col_abs, const uint min_idx, const uint fixed,
+const Eigen::MatrixBase<Derived1>& mA, Eigen::MatrixBase<Derived2>& mA_prime);
 void centre(VectorXd& v);

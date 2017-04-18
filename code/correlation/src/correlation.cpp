@@ -25,6 +25,7 @@ using Eigen::VectorXi;
 using Eigen::RowVectorXi;
 using Eigen::MatrixXi;
 using namespace std;
+using namespace Rcpp;
 
 const bool NUMERIC_FIX = false;
 // #define DEBUG
@@ -107,7 +108,7 @@ vector<uint>& get_indices_from_dbitset(const dbitset& gamma, vector<uint>& v)
 // Need a corresponding get rows
 // And get rows and columns
 template <typename Derived1, typename Derived2>
-MatrixBase<Derived2>& get_cols(const MatrixBase<Derived1>& m1, const dbitset& gamma, MatrixBase<Derived2>& m2)
+Eigen::MatrixBase<Derived2>& get_cols(const Eigen::MatrixBase<Derived1>& m1, const dbitset& gamma, Eigen::MatrixBase<Derived2>& m2)
 {
 	// Special case of get_rows_and_cols
 	vector<uint> columns;
@@ -122,7 +123,7 @@ MatrixBase<Derived2>& get_cols(const MatrixBase<Derived1>& m1, const dbitset& ga
 
 
 template <typename Derived1, typename Derived2>
-MatrixBase<Derived2>& get_rows(const MatrixBase<Derived1>& m1, const dbitset& gamma, MatrixBase<Derived2>& m2)
+Eigen::MatrixBase<Derived2>& get_rows(const Eigen::MatrixBase<Derived1>& m1, const dbitset& gamma, Eigen::MatrixBase<Derived2>& m2)
 {
 	// Special case of get_rows_and_cols
 	vector<uint> rows;
@@ -138,8 +139,8 @@ MatrixBase<Derived2>& get_rows(const MatrixBase<Derived1>& m1, const dbitset& ga
 
 
 template <typename Derived1, typename Derived2>
-MatrixBase<Derived2>& get_rows_and_cols(const MatrixBase<Derived1>& m1, const dbitset& rows_bs,
-const dbitset& cols_bs, MatrixBase<Derived2>& m2)
+Eigen::MatrixBase<Derived2>& get_rows_and_cols(const Eigen::MatrixBase<Derived1>& m1, const dbitset& rows_bs,
+const dbitset& cols_bs, Eigen::MatrixBase<Derived2>& m2)
 {
 	vector<uint> row_indices;
 	row_indices = get_indices_from_dbitset(rows_bs, row_indices);
@@ -205,9 +206,9 @@ void show_matrix_difference(ostream& os, const MatrixXd& m1, const MatrixXd& m2,
 
 // Perform the rank one update on (X_gamma^T X_gamma)^{-1}
 template <typename Derived1, typename Derived2>
-MatrixBase<Derived2>& rank_one_update(const dbitset& gamma, const uint col_abs, const uint min_idx,
+Eigen::MatrixBase<Derived2>& rank_one_update(const dbitset& gamma, const uint col_abs, const uint min_idx,
 	const uint fixed,
-const MatrixBase<Derived1>& mXTX, const MatrixBase<Derived1>& mA, MatrixBase<Derived2>& mA_prime, bool& bLow)
+const Eigen::MatrixBase<Derived1>& mXTX, const Eigen::MatrixBase<Derived1>& mA, Eigen::MatrixBase<Derived2>& mA_prime, bool& bLow)
 {
 	auto p = mXTX.cols();
 	auto p_gamma_prime = mA_prime.cols();
@@ -289,8 +290,8 @@ const MatrixBase<Derived1>& mXTX, const MatrixBase<Derived1>& mA, MatrixBase<Der
 
 // Perform the rank one downdate on (X_gamma^T X_gamma)^{-1}
 template <typename Derived1, typename Derived2>
-MatrixBase<Derived2>& rank_one_downdate(const uint col_abs, const uint min_idx, const uint fixed,
-const MatrixBase<Derived1>& mA, MatrixBase<Derived2>& mA_prime)
+Eigen::MatrixBase<Derived2>& rank_one_downdate(const uint col_abs, const uint min_idx, const uint fixed,
+const Eigen::MatrixBase<Derived1>& mA, Eigen::MatrixBase<Derived2>& mA_prime)
 {
 	auto p_gamma_prime = mA_prime.cols();
 	auto p_gamma = mA.cols();
@@ -340,7 +341,7 @@ const MatrixBase<Derived1>& mA, MatrixBase<Derived2>& mA_prime)
 template <typename Derived1, typename Derived2>
 void update_mA_prime(bool bUpdate, const dbitset& gamma,
 const uint col, const uint min_idx, const uint fixed,
-const MatrixBase<Derived1>& mXTX, const MatrixBase<Derived1>& mA, MatrixBase<Derived2>& mA_prime,
+const Eigen::MatrixBase<Derived1>& mXTX, const Eigen::MatrixBase<Derived1>& mA, Eigen::MatrixBase<Derived2>& mA_prime,
 bool& bLow)
 {
 	if (bUpdate) {
@@ -361,13 +362,14 @@ bool& bLow)
 
 
 // Calculate the correlations for every subset of the covariates in mX
-VectorXd all_correlations_main(const Graycode& graycode, VectorXd vy, MatrixXd mX, const uint fixed,
+List all_correlations_main(const Graycode& graycode, VectorXd vy, MatrixXd mX, const uint fixed,
 	const uint intercept_col, const uint max_iterations, const bool bIntercept = false,
 	const bool bCentre = true)
 {
 	const uint n = mX.rows();									 // The number of observations
 	const uint p = mX.cols();									 // The number of covariates
 	VectorXd vR2_all(max_iterations);					 // Vector of correlations for all models
+	VectorXd vpgamma_all(max_iterations);			 // Vector of number of covariates included in each model
 	bool bmA_set = false;											 // Whether mA has been set yet
 	bool bUpdate;															 // True for an update, false for a downdate
 	uint diff_idx;														 // The covariate which is changing
@@ -502,16 +504,18 @@ VectorXd all_correlations_main(const Graycode& graycode, VectorXd vy, MatrixXd m
 		Rcpp::Rcout << " R2 " << R2 << endl;
 		#endif
 		vR2_all(idx) = R2;											 // Calculate correlation
+		vpgamma_all(idx) = p_gamma_prime;
 
 		p_gamma = p_gamma_prime;
 		// FIXME: How do you do this in a thread-safe way?
 		// Rcpp::checkUserInterrupt();
 	}
-	return vR2_all;
+	return List::create(Named("vR2") = vR2_all,
+											Named("vp_gamma") = vpgamma_all);
 }
 
 // [[Rcpp:export]]
-VectorXd all_correlations_mX_cpp(VectorXd vy, MatrixXd mX, const uint intercept_col,
+List all_correlations_mX_cpp(VectorXd vy, MatrixXd mX, const uint intercept_col,
 const bool bIntercept, const bool bCentre)
 {
 	const uint p = mX.cols();
@@ -525,7 +529,7 @@ const bool bIntercept, const bool bCentre)
 
 // Calculate the correlations for every subset of the covariates in mX
 // [[Rcpp:export]]
-VectorXd all_correlations_mX_mZ_cpp(VectorXd vy, MatrixXd mX, MatrixXd mZ, const uint intercept_col,
+List all_correlations_mX_mZ_cpp(VectorXd vy, MatrixXd mX, MatrixXd mZ, const uint intercept_col,
 																		const bool bIntercept, const bool bCentre)
 {
 	const uint n = mX.rows();
