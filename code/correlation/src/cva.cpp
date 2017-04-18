@@ -15,12 +15,14 @@
 using namespace std;
 using namespace Rcpp;
 
-namespace boost {
-template <typename B, typename A>
-std::size_t hash_value(const boost::dynamic_bitset<B, A>& bs) {
-  return boost::hash_value(bs.m_bits);
+namespace boost
+{
+	template <typename B, typename A>
+	std::size_t hash_value(const boost::dynamic_bitset<B, A>& bs) {
+		return boost::hash_value(bs.m_bits);
+	}
 }
-}
+
 
 double log_prob(const int n, const int p, int p_gamma, const double sigma2, const double a, const double b)
 {
@@ -37,6 +39,24 @@ double log_prob(const int n, const int p, int p_gamma, const double sigma2, cons
 	#endif
 
 	return log_p;
+}
+
+
+void calculate_probabilities(vector< dbitset > gamma, VectorXd sigma2, int n, VectorXd& probs)
+{
+	auto K = gamma.size();
+	auto p = gamma[0].size();
+	auto a = 1.;
+
+
+	for (auto k = 0; k < K; k++) {
+		auto p_gamma = gamma[k].count();
+		auto b = p;
+		probs[k] = exp(log_prob(n, p, p_gamma, sigma2[k], a, b));
+		#ifdef DEBUG
+		// Rcpp::Rcout << "probs[" << k << "] " << probs[k] << std::endl;
+		#endif
+	}
 }
 
 
@@ -66,9 +86,10 @@ void gamma_to_NumericMatrix(const vector< dbitset >& gamma, NumericMatrix& nm)
 // [[Rcpp::export]]
 List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, const int K, const double lambda = 1.)
 {
-	VectorXd vy(vy_in.length()); // = Rcpp::as<Eigen::Map<Eigen::VectorXd>>(vy_in);
+	VectorXd vy(vy_in.length());   // = Rcpp::as<Eigen::Map<Eigen::VectorXd>>(vy_in);
 	for (auto i = 0; i < vy_in.length(); i++) vy[i] = vy_in[i];
-	MatrixXd mX(mX_in.nrow(), mX_in.ncol()); // = Rcpp::as<Eigen::Map<Eigen::MatrixXd>>(mX_in);
+																 // = Rcpp::as<Eigen::Map<Eigen::MatrixXd>>(mX_in);
+	MatrixXd mX(mX_in.nrow(), mX_in.ncol());
 	for (auto i = 0; i < mX_in.nrow(); i++)
 		for (auto j = 0; j < mX_in.ncol(); j++)
 			mX(i, j) = mX_in(i, j);
@@ -82,6 +103,7 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 	VectorXd w(K);
 	vector< dbitset > gamma(K);
 	vector< vector< dbitset > > trajectory;
+	vector< VectorXd > trajectory_probs;
 	vector< MatrixXd > mXTX_inv(K);
 	VectorXd sigma2(K);
 	std::unordered_map< std::size_t, bool > hash;
@@ -90,21 +112,6 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 	const auto RHO = 0.1;
 	auto f_lambda_prev = 0.;
 	const auto EPSILON = 1e-8;
-
-	// // Centre vy
-	// centre(vy);
-
-	// // Centre non-intercept columns of mX
-	// for (uint i = 0; i < mX.cols(); i++) {
-	// 	VectorXd vcol = mX.col(i);
-	// 	centre(vcol);
-	// 	mX.col(i) = vcol;
-	// }
-
-	// gsl_rng_env_setup();
-
-	// T = gsl_rng_default;
-	// r = gsl_rng_alloc(T);
 
 	// Initialise population of K particles randomly
 	// Rcpp::Rcout << "Generated" << std::endl;
@@ -134,12 +141,14 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 		for (auto j = 0; j < p; j++) {
 			if (gamma_initial(k, j) >= EPSILON) {
 				gamma[k][j] = true;
-			} else {
+			}
+			else {
 				gamma[k][j] = false;
 			}
 		}
 		Rcpp::Rcout << "gamma[" << k << "] " << gamma[k] << std::endl;
-		hash.insert({boost::hash_value(gamma[k]), true});
+		hash.insert({boost::hash_value(gamma[k]), true}
+		);
 	}
 
 	// Initialise mXTX_inv
@@ -152,162 +161,121 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 		get_rows(mXTy, gamma[k], mX_gamma_Ty);
 		mXTX_inv[k] = (mX_gamma.transpose() * mX_gamma).inverse();
 		sigma2[k] = 1. - (mX_gamma_Ty.transpose() * mXTX_inv[k] * mX_gamma_Ty).value() / n;
+		// Rcpp::Rcout << "sigma2[" << k << "] " << sigma2[k] << std::endl;
+		calculate_probabilities(gamma, sigma2, n, probs);
 	}
+	trajectory.push_back(gamma);
+	trajectory_probs.push_back(probs);
 
 	// Loop until convergence
 	auto converged = false;
 	auto iteration = 1;
 	while (!converged) {
 		Rcpp::Rcout << "Iteration " << iteration << std::endl;
+
 		for (auto k = 0; k < K; k++) {
 			#ifdef DEBUG
 			Rcpp::Rcout << "gamma[" << k << "] " << gamma[k] << std::endl;
 			#endif
 			for (auto j = 0; j < p; j++) {
-				dbitset gamma_0 = gamma[k];
-				gamma_0[j] = false;
-				auto p_gamma_0 = gamma_0.count();
-
-				dbitset gamma_1 = gamma[k];
-				gamma_1[j] = true;
-				auto p_gamma_1 = gamma_1.count();
+				dbitset gamma_prime = gamma[k];
+				gamma_prime[j] = !gamma_prime[j];
+				auto p_gamma = gamma[k].count();
+				auto p_gamma_prime = gamma_prime.count();
+				if (p_gamma_prime == 0)
+					continue;
 
 				bool bUpdate = !gamma[k][j];
 				MatrixXd mXTX_inv_prime;
+				// If we've seen this bitstring before, don't do the update
+				auto h = boost::hash_value(gamma_prime);
+				#ifdef DEBUG
+				// Rcpp::Rcout << "h " << h << std::endl;
+				#endif
+				auto search = hash.find(h);
+				// Rcpp::Rcout << "search->first " << search->first << std::endl;
+				if (search != hash.end()) {
+					#ifdef DEBUG
+					// Rcpp::Rcout << "Skipping" << std::endl;
+					#endif
+					continue;
+				}
+				else {
+					#ifdef DEBUG
+					Rcpp::Rcout << "Inserting" << std::endl;
+					#endif
+					hash.insert({h, true}
+					);
+				}
+				#ifdef DEBUG
+				Rcpp::Rcout << "Updating " << j << std::endl;
+				// Rcpp::Rcout << "p_gamma_1 " << p_gamma_1 << std::endl;
+				#endif
+				// Update mXTX_inv
+				mXTX_inv_prime.resize(p_gamma_prime, p_gamma_prime);
+				bool bLow;             // gamma_1 or gamma[k]?
 				if (bUpdate) {
-					// If we've seen this bitstring before, don't do the update
-					auto h = boost::hash_value(gamma_1);
-					#ifdef DEBUG
-					// Rcpp::Rcout << "h " << h << std::endl;
-					#endif
-					auto search = hash.find(h);
-					// Rcpp::Rcout << "search->first " << search->first << std::endl;
-					if (search != hash.end()) {
-						#ifdef DEBUG
-						Rcpp::Rcout << "Skipping" << std::endl;
-						#endif
-						continue;
-					} else {
-						#ifdef DEBUG
-						Rcpp::Rcout << "Inserting" << std::endl;
-						#endif
-						hash.insert({h, true});
-					}
-					#ifdef DEBUG
-					Rcpp::Rcout << "Updating " << j << std::endl;
-					// Rcpp::Rcout << "p_gamma_1 " << p_gamma_1 << std::endl;
-					#endif
-					// Update mXTX_inv
-					mXTX_inv_prime.resize(p_gamma_1, p_gamma_1);
-					bool bLow; // gamma_1 or gamma[k]?
-					rank_one_update(gamma[k], j, gamma_1.find_first(),
-													0,
-													mXTX,
-													mXTX_inv[k],
-													mXTX_inv_prime,
-													bLow);
-					#ifdef DEBUG
-					// Rcpp::Rcout << "mXTX_inv[k]\n " << mXTX_inv[k] << std::endl;
-					// Rcpp::Rcout << "mXTX_inv_prime\n " << mXTX_inv_prime << std::endl;
-					Rcpp::Rcout << "bLow " << bLow << std::endl;
-					#endif
+					rank_one_update(gamma[k], j, gamma_prime.find_first(),
+						0,
+						mXTX,
+						mXTX_inv[k],
+						mXTX_inv_prime,
+						bLow);
 				} else {
-					// If only one bit is set and downdating would lead to the null model, then we should skip
-					// checking the downdate
-					if (p_gamma_0 == 0)
-						continue;
-					// If we've seen this bitstring before, don't do the update
-					auto h = boost::hash_value(gamma_0);
-					// Rcpp::Rcout << "h " << h << std::endl;
-					auto search = hash.find(h);
-					// Rcpp::Rcout << "search->first " << search->first << std::endl;
-					if (search != hash.end()) {
-						Rcpp::Rcout << "Skipping" << std::endl;
-						continue;
-					} else {
-						Rcpp::Rcout << "Inserting" << std::endl;
-						hash.insert({h, true});
-					}
-					#ifdef DEBUG
-					Rcpp::Rcout << "Downdating " << j << std::endl;
-					// Rcpp::Rcout << "p_gamma_0 " << p_gamma_0 << std::endl;
-					#endif
-					// Downdate mXTX_inv
-					mXTX_inv_prime.resize(p_gamma_0, p_gamma_0);
-					rank_one_downdate(j, gamma_0.find_first(), 0,
-														mXTX_inv[k], mXTX_inv_prime);
-					#ifdef DEBUG
-					// Rcpp::Rcout << "mXTX_inv[k]\n " << mXTX_inv[k] << std::endl;
-					// Rcpp::Rcout << "mXTX_inv_prime\n " << mXTX_inv_prime << std::endl;
-					#endif
+					rank_one_downdate(j, gamma_prime.find_first(), 0,
+						mXTX_inv[k], mXTX_inv_prime);
 				}
 
-				double sigma2_0;
-				double sigma2_1;
+				double sigma2_prime;
 
- 				if (bUpdate){
-					MatrixXd mX_gamma_1(n, p_gamma_1);
-					get_cols(mX, gamma_1, mX_gamma_1);
-					MatrixXd mX_gamma_1_Ty = mX_gamma_1.transpose() * vy;
- 					sigma2_0 = sigma2[k];
+				MatrixXd mX_gamma_prime(n, p_gamma_prime);
+				get_cols(mX, gamma_prime, mX_gamma_prime);
+				MatrixXd mX_gamma_prime_Ty = mX_gamma_prime.transpose() * vy;
+				#ifdef DEBUG
+				// Rcpp::Rcout << "mX_gamma_1.transpose() * mX_gamma_1\n" << mX_gamma_1.transpose() * mX_gamma_1 << std::endl;
+				// Rcpp::Rcout << "mXTX_inv_prime * mX_gamma_1.transpose() * mX_gamma_1\n" << mXTX_inv_prime * mX_gamma_1.transpose() * mX_gamma_1 << std::endl;
+				// 	Rcpp::Rcout << "mXTX_inv_prime * mX_gamma_1_Ty\n" << mXTX_inv_prime * mX_gamma_1_Ty << std::endl;
+				// 	Rcpp::Rcout << "(mX_gamma_1_Ty.transpose() * mXTX_inv_prime * mX_gamma_1_Ty).value() " << (mX_gamma_1_Ty.transpose() * mXTX_inv_prime * mX_gamma_1_Ty).value() << std::endl;
+				#endif
+				double nR2 = (mX_gamma_prime_Ty.transpose() * mXTX_inv_prime * mX_gamma_prime_Ty).value();
+				Rcpp::Rcout << "nR2 " << nR2 << std::endl;
+				if (false && nR2 <= n) {
+					sigma2_prime = 1. - nR2 / n;
+					// Rcpp::Rcout << "sigma2_1 " << sigma2_1 << std::endl;
+				}
+				else {
+					// It's mathematically impossible that nR2 can be that high. Therefore, our inverse must be bad.
+					// Recalculate it from scratch and try again.
 					#ifdef DEBUG
-					// Rcpp::Rcout << "mX_gamma_1.transpose() * mX_gamma_1\n" << mX_gamma_1.transpose() * mX_gamma_1 << std::endl;
+					// Rcpp::Rcout << "Re-calculating mXTX_inv_prime" << std::endl;
+					#endif
+					mXTX_inv_prime = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
+					#ifdef DEBUG
 					// Rcpp::Rcout << "mXTX_inv_prime * mX_gamma_1.transpose() * mX_gamma_1\n" << mXTX_inv_prime * mX_gamma_1.transpose() * mX_gamma_1 << std::endl;
- 				// 	Rcpp::Rcout << "mXTX_inv_prime * mX_gamma_1_Ty\n" << mXTX_inv_prime * mX_gamma_1_Ty << std::endl;
- 				// 	Rcpp::Rcout << "(mX_gamma_1_Ty.transpose() * mXTX_inv_prime * mX_gamma_1_Ty).value() " << (mX_gamma_1_Ty.transpose() * mXTX_inv_prime * mX_gamma_1_Ty).value() << std::endl;
 					#endif
- 					double nR2 = (mX_gamma_1_Ty.transpose() * mXTX_inv_prime * mX_gamma_1_Ty).value();
- 					if (nR2 <= n) {
-						sigma2_1 = 1. - nR2 / n;
-					} else {
-						// It's mathematically impossible that nR2 can be that high. Therefore, our inverse must be bad.
-						// Recalculate it from scratch and try again.
-						#ifdef DEBUG
-						// Rcpp::Rcout << "Re-calculating mXTX_inv_prime" << std::endl;
-						#endif
-						mXTX_inv_prime = (mX_gamma_1.transpose() * mX_gamma_1).inverse();
-						#ifdef DEBUG
-						// Rcpp::Rcout << "mXTX_inv_prime * mX_gamma_1.transpose() * mX_gamma_1\n" << mXTX_inv_prime * mX_gamma_1.transpose() * mX_gamma_1 << std::endl;
-						#endif
-						nR2 = (mX_gamma_1_Ty.transpose() * mXTX_inv_prime * mX_gamma_1_Ty).value();
-						sigma2_1 = 1. - nR2 / n;
+					double sigma2_prime_check = 1. - nR2 / n;
+					nR2 = (mX_gamma_prime_Ty.transpose() * mXTX_inv_prime * mX_gamma_prime_Ty).value();
+					sigma2_prime = 1. - nR2 / n;
+					if (abs(sigma2_prime - sigma2_prime_check) > EPSILON) {
+						Rcpp::Rcout << "sigma2_prime " << sigma2_prime << " sigma2_prime_check " << sigma2_prime_check << std::endl;
 					}
- 				} else {
-					MatrixXd mX_gamma_0(n, p_gamma_0);
-					get_cols(mX, gamma_0, mX_gamma_0);
-					MatrixXd mX_gamma_0_Ty = mX_gamma_0.transpose() * vy;
-					#ifdef DEBUG
-					// Rcpp::Rcout << "mX_gamma_0.transpose() * mX_gamma_0\n" << mX_gamma_0.transpose() * mX_gamma_0 << std::endl;
-					// Rcpp::Rcout << "mXTX_inv_prime * mX_gamma_0.transpose() * mX_gamma_0\n" << mXTX_inv_prime * mX_gamma_0.transpose() * mX_gamma_0 << std::endl;
- 				// 	Rcpp::Rcout << "mXTX_inv_prime * mX_gamma_0_Ty\n" << mXTX_inv_prime * mX_gamma_0_Ty << std::endl;
- 				// 	Rcpp::Rcout << "(mX_gamma_0_Ty.transpose() * mXTX_inv_prime * mX_gamma_0_Ty).value() " << (mX_gamma_0_Ty.transpose() * mXTX_inv_prime * mX_gamma_0_Ty).value() << std::endl;
-					#endif
- 					double nR2 = (mX_gamma_0_Ty.transpose() * mXTX_inv_prime * mX_gamma_0_Ty).value();
- 					sigma2_0 = 1. - (mX_gamma_0_Ty.transpose() * mXTX_inv_prime * mX_gamma_0_Ty).value() / n;
- 					if (nR2 <= n) {
-						sigma2_0 = 1. - nR2 / n;
-					} else {
-						// It's mathematically impossible that nR2 can be that high. Therefore, our inverse must be bad.
-						// Recalculate it from scratch and try again.
-						#ifdef DEBUG
-						// Rcpp::Rcout << "Re-calculating mXTX_inv_prime" << std::endl;
-						#endif
-						mXTX_inv_prime = (mX_gamma_0.transpose() * mX_gamma_0).inverse();
-						#ifdef DEBUG
-						// Rcpp::Rcout << "mXTX_inv_prime * mX_gamma_0.transpose() * mX_gamma_0\n" << mXTX_inv_prime * mX_gamma_0.transpose() * mX_gamma_0 << std::endl;
-						#endif
-						nR2 = (mX_gamma_0_Ty.transpose() * mXTX_inv_prime * mX_gamma_0_Ty).value();
-						sigma2_0 = 1. - nR2 / n;
-					}
- 					sigma2_1 = sigma2[k];
- 				}
+					// Rcpp::Rcout << "sigma2_1 " << sigma2_1 << std::endl;
+				}
 
 				#ifdef DEBUG
-				// Rcpp::Rcout << "sigma2_0 " << sigma2_0 << std::endl;
-				// Rcpp::Rcout << "sigma2_1 " << sigma2_1 << std::endl;
+				Rcpp::Rcout << "sigma2[k] " << sigma2[k] << std::endl;
+				Rcpp::Rcout << "sigma2_prime " << sigma2_prime << std::endl;
 				#endif
-				double log_p_0 = log_prob(n, p, p_gamma_0, sigma2_0, a, b);
-				double log_p_1 = log_prob(n, p, p_gamma_1, sigma2_1, a, b);
+				double log_p_0;
+				double log_p_1;
+				if (bUpdate) {
+					log_p_0 = log_prob(n, p, p_gamma, sigma2[k], a, b);
+					log_p_1 = log_prob(n, p, p_gamma_prime, sigma2_prime, a, b);
+
+				} else {
+					log_p_0 = log_prob(n, p, p_gamma_prime, sigma2_prime, a, b);
+					log_p_1 = log_prob(n, p, p_gamma, sigma2[k], a, b);
+				}
 				#ifdef DEBUG
 				Rcpp::Rcout << "log_p_0 " << log_p_0;
 				Rcpp::Rcout << " log_p_1 " << log_p_1 << std::endl;
@@ -315,35 +283,29 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 				if (log_p_0 > log_p_1) {
 					if (!bUpdate) {
 						hash.erase(boost::hash_value(gamma[k]));
-						gamma[k][j] = false;
+						gamma[k][j] = bUpdate;
 						#ifdef DEBUG
 						Rcpp::Rcout << "Keep downdate" << std::endl;
 						#endif
-						sigma2[k] = sigma2_0;
+						sigma2[k] = sigma2_prime;
 						mXTX_inv[k] = mXTX_inv_prime;
 					}
-				}	else {
+				}
+				else {
 					if (bUpdate) {
 						hash.erase(boost::hash_value(gamma[k]));
-						gamma[k][j] = true;
+						gamma[k][j] = bUpdate;
 						#ifdef DEBUG
 						Rcpp::Rcout << "Keep update" << std::endl;
 						#endif
-						sigma2[k] = sigma2_1;
+						sigma2[k] = sigma2_prime;
 						mXTX_inv[k] = mXTX_inv_prime;
 					}
 				}
 			}
 		}
 
-		for (auto k = 0; k < K; k++) {
-			auto p_gamma = gamma[k].count();
-			auto b = p;
-			probs[k] = exp(log_prob(n, p, p_gamma, sigma2[k], a, b));
-			#ifdef DEBUG
-			// Rcpp::Rcout << "probs[" << k << "] " << probs[k] << std::endl;
-			#endif
-		}
+		calculate_probabilities(gamma, sigma2, n, probs);
 
 		for (auto k = 0; k < K; k++) {
 			w[k] = probs[k] / probs.sum();
@@ -359,27 +321,34 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 		Rcpp::Rcout << "f_lambda_prev " << f_lambda_prev << " f_lambda " << f_lambda << std::endl;
 		if ((f_lambda - f_lambda_prev) > EPSILON) {
 			f_lambda_prev = f_lambda;
-		} else {
+		}
+		else {
 			converged = true;
 		}
 		for (auto k = 0; k < K; k++) {
-			Rcpp::Rcout << "gamma[" << k << "] " << gamma[k] << std::endl;
+			Rcpp::Rcout << "gamma[" << k + 1 << "] " << gamma[k] << std::endl;
 		}
 		iteration++;
 		trajectory.push_back(gamma);
+		trajectory_probs.push_back(probs);
 	}
 	Rcpp::Rcout << "Converged" << std::endl;
 	NumericMatrix bitstrings(K, p);
 	gamma_to_NumericMatrix(gamma, bitstrings);
-	
+
 	List trajectory_bitstrings;
+	NumericMatrix trajectory_probabilities(K, trajectory.size());
 	for (auto i = 0; i < trajectory.size(); i++) {
 		NumericMatrix bitstrings2(K, p);
 		gamma_to_NumericMatrix(trajectory[i], bitstrings2);
 		trajectory_bitstrings.push_back(bitstrings2);
+		for (auto k = 0; k < K; k++) {
+			trajectory_probabilities(k, i) = trajectory_probs[i](k);
+		}
 	}
 
 	List result = List::create(Named("models") = bitstrings,
-															Named("trajectory") = trajectory_bitstrings);
+															Named("trajectory") = trajectory_bitstrings,
+															Named("trajectory_probs") = trajectory_probabilities);
 	return result;
 }
