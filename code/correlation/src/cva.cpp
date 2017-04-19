@@ -10,7 +10,7 @@
 #include "graycode.h"
 #include "correlation.h"
 
-#define DEBUG
+// #define DEBUG
 
 using namespace std;
 using namespace Rcpp;
@@ -135,7 +135,9 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 		stop(ss.str());
 	}
 
+	#ifdef DEBUG
 	Rcpp::Rcout << "initial_gamma" << std::endl;
+	#endif
 	for (auto k = 0; k < K; k++) {
 		gamma[k].resize(p);
 		for (auto j = 0; j < p; j++) {
@@ -146,7 +148,9 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 				gamma[k][j] = false;
 			}
 		}
+		#ifdef DEBUG
 		Rcpp::Rcout << "gamma[" << k << "] " << gamma[k] << std::endl;
+		#endif
 		hash.insert({boost::hash_value(gamma[k]), true}
 		);
 	}
@@ -238,7 +242,9 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 				// 	Rcpp::Rcout << "(mX_gamma_1_Ty.transpose() * mXTX_inv_prime * mX_gamma_1_Ty).value() " << (mX_gamma_1_Ty.transpose() * mXTX_inv_prime * mX_gamma_1_Ty).value() << std::endl;
 				#endif
 				double nR2 = (mX_gamma_prime_Ty.transpose() * mXTX_inv_prime * mX_gamma_prime_Ty).value();
+				#ifdef DEBUG
 				Rcpp::Rcout << "nR2 " << nR2 << std::endl;
+				#endif
 				if (false && nR2 <= n) {
 					sigma2_prime = 1. - nR2 / n;
 					// Rcpp::Rcout << "sigma2_1 " << sigma2_1 << std::endl;
@@ -257,7 +263,9 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 					nR2 = (mX_gamma_prime_Ty.transpose() * mXTX_inv_prime * mX_gamma_prime_Ty).value();
 					sigma2_prime = 1. - nR2 / n;
 					if (abs(sigma2_prime - sigma2_prime_check) > EPSILON) {
+						#ifdef DEBUG
 						Rcpp::Rcout << "sigma2_prime " << sigma2_prime << " sigma2_prime_check " << sigma2_prime_check << std::endl;
+						#endif
 					}
 					// Rcpp::Rcout << "sigma2_1 " << sigma2_1 << std::endl;
 				}
@@ -326,7 +334,9 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 			converged = true;
 		}
 		for (auto k = 0; k < K; k++) {
+			#ifdef DEBUG
 			Rcpp::Rcout << "gamma[" << k + 1 << "] " << gamma[k] << std::endl;
+			#endif
 		}
 		iteration++;
 		trajectory.push_back(gamma);
