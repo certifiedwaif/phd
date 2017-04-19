@@ -175,7 +175,9 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 	auto converged = false;
 	auto iteration = 1;
 	while (!converged) {
+		#ifdef DEBUG
 		Rcpp::Rcout << "Iteration " << iteration << std::endl;
+		#endif
 
 		for (auto k = 0; k < K; k++) {
 			#ifdef DEBUG
@@ -324,9 +326,13 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 
 		// Check for convergence - is f_lambda changed from the last iteration?
 		auto H = -(w.array() * w.array().log()).sum();
+		#ifdef  DEBUG
 		Rcpp::Rcout << "H " << H << std::endl;
+		#endif
 		double f_lambda = w.dot(probs) + lambda * H;
+		#ifdef DEBUG
 		Rcpp::Rcout << "f_lambda_prev " << f_lambda_prev << " f_lambda " << f_lambda << std::endl;
+		#endif
 		if ((f_lambda - f_lambda_prev) > EPSILON) {
 			f_lambda_prev = f_lambda;
 		}
@@ -342,7 +348,9 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 		trajectory.push_back(gamma);
 		trajectory_probs.push_back(probs);
 	}
+	#ifdef DEBUG
 	Rcpp::Rcout << "Converged" << std::endl;
+	#endif
 	NumericMatrix bitstrings(K, p);
 	gamma_to_NumericMatrix(gamma, bitstrings);
 
