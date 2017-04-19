@@ -369,7 +369,7 @@ List all_correlations_main(const Graycode& graycode, VectorXd vy, MatrixXd mX, c
 	const uint n = mX.rows();									 // The number of observations
 	const uint p = mX.cols();									 // The number of covariates
 	VectorXd vR2_all(max_iterations);					 // Vector of correlations for all models
-	VectorXd vpgamma_all(max_iterations);			 // Vector of number of covariates included in each model
+	VectorXi vpgamma_all(max_iterations);			 // Vector of number of covariates included in each model
 	bool bmA_set = false;											 // Whether mA has been set yet
 	bool bUpdate;															 // True for an update, false for a downdate
 	uint diff_idx;														 // The covariate which is changing
@@ -510,8 +510,16 @@ List all_correlations_main(const Graycode& graycode, VectorXd vy, MatrixXd mX, c
 		// FIXME: How do you do this in a thread-safe way?
 		// Rcpp::checkUserInterrupt();
 	}
-	return List::create(Named("vR2") = vR2_all,
-											Named("vp_gamma") = vpgamma_all);
+	VectorXd vR2(max_iterations);
+	VectorXi vp_gamma(max_iterations);
+	for (auto i = 1; i < max_iterations; i++) {
+		// if (i <= 10)
+		// 	Rcpp::Rcout << i << " to " << graycode.gray_to_binary(i) << std::endl;
+		vR2(i) = vR2_all(graycode.gray_to_binary(i));
+		vp_gamma(i) = vpgamma_all(graycode.gray_to_binary(i));
+	}
+	return List::create(Named("vR2") = vR2,
+											Named("vp_gamma") = vp_gamma);
 }
 
 // [[Rcpp:export]]
