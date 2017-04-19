@@ -52,8 +52,22 @@ In this article, we focus on the important case of model selection for normal li
 \]
 % Justify choice of prior
 
-We use the Cake variant of the spike and slab prior for model selection, as it avoids the Lindley and Bartlett
+\cite{Mitchell1988} initially proposed the spike-and-slab prior distribution on regression co-efficients not
+currently included in the model -- which places a mixture of a point mass 'spike' at $0$ and a diffuse uniform
+distribution 'slab' elsewhere. The random error component is assigned a normal distribution with mean $0$ and
+standard deviation $\sigma$. The approach was further developed by \cite{Madigan1994} to incorporate an
+alternative Bayesian approach that takes full account of the true model uncertainty by averaging over a small
+subset of models, and an efficient search algorithm for finding these models. \cite{George1997} investigated
+computational methods for posterior evaluation and exploration in this setting, and using Gray Code sequencing
+and Markov Chain Monte Carlo to explore the model space in moderate and large-sized problems respectively.
+More recently, \cite{Ishwaran2005} developed a rescaled spike-and-slab model which improves effective variable
+selection in terms of risk misclassification by using selective shrinkage. We further extend this approach, by
+using the Cake variant of the spike-and-slab prior for model selection, as it avoids the Lindley and Bartlett
 paradoxes. Citation.
+
+Existing approaches to the problem of model selection focus upon finding a single best model quickly
+(\cite{You2014}, \cite{Rockova2014}). Exploring the model space using only one model at a time will provide a
+misleading view of the uncertainty in the posterior, as it is typically highly multimodal.
 
 Many computational schemes for Bayesian model selection exist, using Monte Carlo Markov Chains techniques for 
 computing the posterior distributions of $\vgamma$.
@@ -65,44 +79,18 @@ as Jasra et al. 2007, Bottolo and Richardson 2010, Hans et al 2007, Liang and Wo
 increases the computational cost of sampling from the posterior distributions still further, especially in
 high-dimensional problems.
 
-\cite{Mitchell1988} initially proposed the spike-and-slab prior distribution on regression co-efficients not
-currently included in the model -- which places a mixture of a point mass 'spike' at $0$ and a diffuse uniform
-distribution 'slab' elsewhere. The random error component is assigned a normal distribution with mean $0$ and
-standard deviation $\sigma$. The approach was further developed by \cite{Madigan1994} to incorporate an
-alternative Bayesian approach that takes full account of the true model uncertainty by averaging over a small
-subset of models, and an efficient search algorithm for finding these models. \cite{George1997} investigated
-computational methods for posterior evaluation and exploration in this setting, and using Gray Code sequencing
-and Markov Chain Monte Carlo to explore the model space in moderate and large-sized problems respectively.
-More recently, \cite{Ishwaran2005} developed a rescaled spike-and-slab model improves effective variable
-selection in terms of risk misclassification by using selective shrinkage.
+\cite{Rockova2016} introduced the notion of Particle EM. Rather than searching for a single optimal model,
+Particle EM instead maintains a population of models (particles). This allows the algorithm to explore more of
+the posterior model space, gaining a better estimate of the variation of the model space than an algorithm
+involving only a single model. It also allows the particles to ``interact'', searching for the essential
+posterior modes together. In Particle EM, this is done by incorporating an ``entropy term'' in the variational
+lower bound, which ensures diversity amongst the models in the population, preventing all particles from
+simply seeking the global posterior modes. The algorithm is determininistic.
 
-Existing approaches to the problem of model selection focus upon finding a single best model quickly (\cite{You2014},
-\cite{Rockova2014}). Exploring the model space using only one model at a time will provide a misleading view
-of the uncertainty in the posterior, as it is typically highly multimodal.
-
-Our main contributions are:
-
-i) Search over the binary strings $\vgamma$ directly, as the estimates of $\vbeta$ are available in closed
-form once $\vgamma$ is known.
-
-ii) We make use of a population--based optimisation scheme to search the model space. We take advantage of the
-population of solutions by incorporating a penalty for lack of entropy.
-
-iii) The entire trajectory of particles gives far more information about variable selection than a single
-snapshot of the final best decision.
-
-iv) Our model incorporates the Cake prior, which avoids Lindley's and Bartlett's paradoxes by selecting the
-prior based on sample size.
-
-\cite{Rockova2016}
-We propose a non-parametric Variational Bayes approximation. Rather than searching for a single optimal model,
-we instead maintain a population of models (particles). This allows us to explore more of the posterior model
-space, gaining a better estimate of the variation of the model space than an approximation involving only a
-single model. It also allows the particles to ``interact'', searching for the essential posterior modes
-together. In our variational approximation, this is done by incorporating an ``entropy term'' in the
-variational lower bound, which ensures diversity amongst the models in the population, preventing all
-particles from simply seeking the global posterior modes. This algorithm is determininistic, and can be
-executed efficiently using rank one updates and downdates.
+We build upon this work by proposing a fixed-form parametric Variational Bayes approximation of $\vgamma$.
+We adopt a prior structure incorporating the Cake prior for variable selection, which avoids the Lindley
+and Bartlett's paradoxes.
+Our fitting algorithm can be executed efficiently using rank-one updates and downdates.
 
 Difficulty of implementation -- practical model selection
 \cite{Chipman2014}
@@ -112,10 +100,24 @@ Difficulty of implementation -- practical model selection
 % Dirichlet Allocation \cite{Teh2007}
 Our variational approximation is a fixed form parametric approximation which places a weight on each covariate
 \[
-	q(\vgamma) = \sum_{i=1}^p w_i \I(\vgamma_i)
+	q(\vgamma) = \sum_{k=1}^K w_k \I(\vgamma_i)
 \]
 
 % Population-based MCMC approaches
+
+Our main contributions are:
+
+i) Our algorithm searches over the binary strings $\vgamma$ directly, as the estimates of $\vbeta$ are available 
+in closed form once $\vgamma$ is known.
+
+ii) We make use of a population--based optimisation scheme to search the model space. We take advantage of the
+population of solutions by incorporating a penalty for lack of entropy.
+
+iii) The entire trajectory of particles gives far more information about variable selection than a single
+snapshot of the final best decision.
+
+iv) Our model incorporates the Cake prior, which avoids Lindley's and Bartlett's paradoxes by selecting the
+prior based on sample size.
 
 This article is organised as follows. In Section 2, we detail the derivation of our approximation and fitting
 algorithms. In Section 3, we discuss computational issues with implementing our algorithm efficiently. In
@@ -145,14 +147,70 @@ These two stages repeat until the lower bound converges.
 
 \section{Results}
 
+If the covariates in a model selection problem are highly collinear then the posterior distribution will be
+highly multi-modal when a spike-and-slab prior structure is used. This can make seeking the optimal model very
+challenging, due to the many local optima. In this section, we present a series of numerical experiments which
+demonstrate the capability of our algorithm to successfully find the models with high posterior probability in
+such situations.
 
+We first present an example where $n > p$ and $p$ is relatively small ($p = 12$), to allow for the full 
+enumeration of the model space. Later, we show an example for the important $p > n$ case, and compare our results 
+against the xxx algorithm.
+
+\subsection{$n > p$}
+
+Our first numerical experiment is designed to show that our algorithm successfully finds the posterior models
+of high probability, overcoming the difficulties of optimising over the multi-modal spike-and-slab posterior.
+We consider a random sample of $n = 50$ observations on $p = 12$ predictors. $\\mX_i \sim \N_p(\vzero, \mSigma)$
+for $i = 1, \ldots, n$ where
+$\mSigma = \text{bdiag}(\mSigma_1, \mSigma_1, \mSigma_1, \mSigma_1)$ with
+$\mSigma_1 = (\sigma_{ij})_{i, j = 1}^{3, 3}$ where $\sigma_{ij} = 0.9$ for $i \ne j$ and $\sigma_{ii} = 1$.
+The true model is $\vbeta_0 = (1.3, 0, 0, 1.3, 0, 0, 1.3, 0, 0, 1.3, 0, 0)^\top$.
+The responses are then generated from $\vy = \mX \vbeta_0 + \epsilon$, where
+$\epsilon \sim N_n(\vzero, \mI_n)$.
+
+\subsubsection{CVA}
+
+Figure \ref{fig:result1} shows all $4,096$ posterior model probabilities ordered by the model's bit
+strings. We can clearly see a few peaks in the full posterior distribution. Our experiment aims to show that
+these posterior peaks our successfully identified by our algorithm.
+
+We begin by using the setting $\lambda = 1$, allowing particle repulsion between each of the models within the
+population. Our population of bit strings $\Gamma^{(0)} = [\vgamma_1^{(0)}, \ldots, \vgamma_K^{(0)}]$ with
+$K = 20$ particles was randomly initialised from a sequencial of independent Bernoulli trials with probability
+of success $1/2$.
+
+\begin{figure}	
+	\caption{Posterior model probabilities when $p = 12$. Red triangles denote models visited by the CVA
+						algorithm, while black triangles are models that were not visited.}
+	\label{fig:result1}
+	\includegraphics{code/correlation/cva_low_dimensional.pdf}
+\end{figure}
+
+\subsection{$p > n$}
+
+\begin{table}
+	\caption{}
+	\label{tab:result2}
+	\begin{tabular}{l|llllllllllll}
+	\hline
+	 					& \multicolumn{4}{c}{K=10} 	& \multicolumn{4}{c}{K=50} & \multicolumn{4}{c}{K=100} \\
+	$\lambda$ & 0 & 1 & 2 & 3 & 0 & 1 & 2 & 3 & 0 & 1 & 2 & 3 \\
+	\hline
+	\# Modes & \\
+	\% Posterior & \\
+	Global Mode & \\
+	\hline
+	\end{tabular}
+
+\end{table}
 
 \section{Implementation techniques}
 To ensure uniqueness of the $K$ models in the population, before a new candidate model with a covariate added
 or removed is considered, the population of existing models is checked to see if it already exists in the
 population. If so, the addition or removal of the covariate is skipped and the next candidate model considered.
 In our implementation, this check is made computationally efficient by maintaining a hash table of the models,
-allowing the check as to wether the model is already in the population to be performed in $\BigO(1)$ time.
+allowing the check as to whether the model is already in the population to be performed in $\BigO(1)$ time.
 
 \bibliographystyle{elsarticle-harv}
 \bibliography{references_mendeley}
