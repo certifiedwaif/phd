@@ -1,4 +1,14 @@
-\documentclass[11pt]{amsart}
+\documentclass{amsart}[12pt]
+% \documentclass[times, doublespace]{anzsauth}
+
+\addtolength{\oddsidemargin}{-.75in}%
+\addtolength{\evensidemargin}{-.75in}%
+\addtolength{\textwidth}{1.5in}%
+\addtolength{\textheight}{1.3in}%
+\addtolength{\topmargin}{-.8in}%
+\addtolength{\marginparpush}{-.75in}%
+% \setlength\parindent{0pt}
+% \setlength{\bibsep}{0pt plus 0.3ex}
 
 \input{include.tex}
 \input{Definitions.tex}
@@ -25,11 +35,11 @@
 
 \subsection{Mean field update equations}
 We are now in a position to calculate the mean field update equations for the factorised
-variational approximation.
-Assuming that $q(r_i) \sim \Bernoulli{(p_i)}$ then,
+variational approximation for the univariate zero-inflated model.
 
+First, we find the approximation for $\lambda$. Assuming that $q(r_i) \sim \Bernoulli{(p_i)}$,
 % Mean field update for q(\lambda)
-$$
+\[
 \begin{array}{rl}
 	q^*(\lambda)
 	  & \propto                                                            
@@ -45,10 +55,11 @@ $$
 	\\
 	  & = \myGamma{(\alpha_\lambda+\vone^T\vy, \beta_\lambda+\vone^T\vp)}, 
 \end{array}
-$$
+\]
 
+\noindent Next, turning our attention fo $\rho$,
 % Mean field update for q(\rho)
-$$
+\[
 \begin{array}{rl}
 	\log{q^*(\rho)} 
 	  &                                                                 
@@ -69,27 +80,23 @@ $$
 	\\ [0.5ex]
 	  & = \Beta(\alpha_\rho + \vone^T\vp, \beta_\rho + n - \vone^T\vp), 
 \end{array}
-$$
-
-\noindent and
-
-$$
+\]
+\noindent and for $\vr_i, i=1, \ldots, n$,
+\[
 \begin{array}{rl}
 	\ds \log{q^*(r_i)} & \propto -\bE_{q(\lambda)} [\lambda ] r_i + y_i \log{(r_i)} + r_i \bE_{q(\rho)} \left[\log{\left(\frac{\rho}{1 - \rho}\right)}\right]          \\[0.5ex]
 	                   & \ds = -r_i \frac{\alpha_{q(\lambda)}}{\beta_{q(\lambda)}} + y_i \log{(r_i)} + r_i \left(\psi(\alpha_{q(\rho)}) - \psi(\beta_{q(\rho)})\right) \\ [0.5ex]%
 	                   & \ds = \text{Bernoulli}(p_i)                                                                                                                   
 \end{array}
-$$
-
+\]
 \noindent where
-
-$$
+\[
 \begin{array}{rl}
 	\ds p_i                                               
 	= \frac{\exp{(\eta_i)}}{I(y_i = 0) + \exp{(\eta_i)}}  
 	= \text{expit}(\eta_i), \quad \mbox{(when $y_i = 0$)} 
 \end{array}
-$$
+\]
 
 \noindent and $\eta_i = - \alpha_{q(\lambda)}/\beta_{q(\lambda)} + \psi(\alpha_{q(\rho)}) - \psi(\beta_{q(\rho)})$.
 %
@@ -134,102 +141,116 @@ $$
 
 % Include derivations for mean field updates at the end?
 
-\subsection{Lower bound}
+\subsection{Deriving the Variational Lower bound}
 The lower bound $\log{\underline{p}(\vtheta)}$ is
 $$
 \bE_q[\log{p(\vy, \vtheta)} - \log{q(\vtheta)}]
 $$
 
-\noindent where $q(\vtheta) = q(\lambda) q(\rho) \prod_{i=1}^n q(r_i)$,
-$q(\lambda) \sim \text{Gamma}{(\alpha_{q(\lambda)}, \beta_{q(\lambda)})}$,
-$q(\rho) \sim \text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)})$ and
-$q(r_i) = 1$ if $y_i \ne 0$, and $p_i$ if $y_i = 0$, where $p_i$ is
-calculated for each iteration as specified in Algorithm \ref{algorithm1}.
+\noindent where
+\begin{align*}
+	q(\vtheta) &= q(\lambda) q(\rho) \prod_{i=1}^n q(r_i), \\
+	q(\lambda) &\sim \text{Gamma}{(\alpha_{q(\lambda)}, \beta_{q(\lambda)})}, \\
+	q(\rho) &\sim \text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)}) \text{ and } \\
+	q(r_i) &= 1 \text{ if } y_i \ne 0$,\text{ and } p_i \text{ if } y_i = 0,
+\end{align*}
+where $p_i$ is calculated for each iteration as specified in Algorithm \ref{algorithm1}.
 
 The lower bound can be calculated directly to be
-$$
-\begin{array}{rl}
-	\bE_q \left\{ \log{p(\vy, \vr, \lambda, \rho)} - \log{q(\vr, \lambda, \rho)} \right\} & = T_1 + T_2 \\
-\end{array}
-$$
+\[
+	\begin{array}{rl}
+		\E_q \left\{ \log{p(\vy, \vr, \lambda, \rho)} - \log{q(\vr, \lambda, \rho)} \right\} & = T_1 + T_2 \\
+	\end{array}
+\]
 
 \noindent where
-$$
-\begin{array}{rl}
-	T_1 & \ds =                                                                                                                          
-	\alpha_\lambda \log{(\beta_\lambda)} + (\alpha_\lambda - 1) \bE_q[\log{(\lambda)}] - \beta_\lambda \bE_q [\lambda] - \log\Gamma(\alpha_\lambda) \\
-	    & \ds \quad + \sum_{i=1}^n ( -\bE_q [\lambda] \bE_q [r_i] + \bE_q[y_i \log{(\lambda r_i)}] - \log\Gamma(y_i+1)) \quad \mbox{and} 
-	\\ [1ex]
-	T_2 & =\bE_q[r_i] \bE_q[\log{(\rho)}] + \bE_q[(1 - r_i)] \bE_q[\log{(1 - \rho)}]                                                     
-	- \bE_q[\log{q(r)}] 
-	- \bE_q[\log{q(\lambda)}] 
-	- \bE_q[ \log{q(\rho)}]
-\end{array}
-$$
+\[
+	\begin{array}{rl}
+		T_1 & \ds =                                                                                                                          
+		\quad \alpha_\lambda \log{(\beta_\lambda)} + (\alpha_\lambda - 1) \bE_q[\log{(\lambda)}] - \beta_\lambda \bE_q [\lambda] - \log\Gamma(\alpha_\lambda) \\
+		    & \ds \quad + \sum_{i=1}^n ( -\bE_q [\lambda] \bE_q [r_i] + \bE_q[y_i \log{(\lambda r_i)}] - \log\Gamma(y_i+1)) \quad \mbox{and} 
+		\\ [1ex]
+		T_2 & = \quad \E_q[r_i] \bE_q[\log{(\rho)}] + \bE_q[(1 - r_i)] \bE_q[\log{(1 - \rho)}]                                                     
+		- \bE_q[\log{q(r)}] 
+		- \bE_q[\log{q(\lambda)}] 
+		- \bE_q[ \log{q(\rho)}]
+	\end{array}
+\]
 
 \noindent with 
-$\bE[\lambda] = \alpha_{q(\lambda)}/\beta_{q(\lambda)}$,
-$\bE [\lambda] = \alpha_{q(\lambda)}/\beta_{q(\lambda)}$,
-% T_1 terms
-$$
-\begin{array}{rl}
-	\bE [\log{\lambda}] & = -\{ \alpha_{q(\lambda)} - \log{(\beta_{q(\lambda)})} + \log{\Gamma(\alpha_{q(\lambda)})} + (1 - \alpha_{q(\lambda)}) \psi{(\alpha_{q(\lambda)})} \},        \\
-	\\
-	\bE[\log{\rho}]     & = - \{ \log{\text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)})} - (\alpha_{q(\rho)} - 1) \psi{(\alpha_{q(\rho)})} - (\beta_{q(\rho)} - 1)\psi{(\beta_{q(\rho)})}  \\
-	                    & \qquad + (\alpha_{q(\rho)} + \beta_{q(\rho)} - 2)\psi{(\alpha_{q(\rho)} + \beta_{q(\rho)})} \},                                                               
-	\\
-	\bE[r_i]            & =                                                                                                                                                             
-	\begin{cases}
-	1                   & \text{if } y_i \ne 0                                                                                                                                          \\
-	p_i                 & \text{if } y_i = 0,                                                                                                                                           \\
-	\end{cases}
-	\\
-	-\bE_q[\log{q(r)}]  & = \sum_{i=1}^n \I(y_i = 0) \log{(p_i)}                                                                                                                        \\ [0.5ex]
-	-\bE_q[\log{q(\lambda)}] 
-	                    & = \alpha_{q(\lambda)} - \log{(\beta_{q(\lambda)})} + \log{\Gamma{(\alpha_{q(\lambda)})}} + (1 - \alpha_{q(\lambda)}) \psi{(\alpha_{q(\lambda)})},             \\ [0.5ex]
-	\mbox{and}\quad \bE_q[\log{q(\rho)}] 
-	                    & = - \{ \log{(\text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)})} - (\alpha_{q(\rho)} - 1) \psi{(\alpha_{q(\rho)})} - (\beta_{q(\rho)} - 1)\psi{(\beta_{q(\rho)})} \\ [0.5ex]
-	                    & \quad + (\alpha_{q(\rho)} + \beta_{q(\rho)} - 2)\psi{(\alpha_{q(\rho)} + \beta_{q(\rho)})} \}.                                                                \\ [0.5ex]
-\end{array}
-$$
+\[
+	\begin{array}{rl}
+	\E[\lambda] &= \alpha_{q(\lambda)}/\beta_{q(\lambda)}, \\
+		\E [\log{\lambda}] & = -\{ \alpha_{q(\lambda)} - \log{(\beta_{q(\lambda)})} + \log{\Gamma(\alpha_{q(\lambda)})} + (1 - \alpha_{q(\lambda)}) \psi{(\alpha_{q(\lambda)})} \},        \\
+		\E[\log{\rho}]     & = - [ \quad \log{\text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)})} - (\alpha_{q(\rho)} - 1) \psi{(\alpha_{q(\rho)})} - (\beta_{q(\rho)} - 1)\psi{(\beta_{q(\rho)})}  \\
+		                    & \qquad + (\alpha_{q(\rho)} + \beta_{q(\rho)} - 2)\psi{(\alpha_{q(\rho)} + \beta_{q(\rho)})} ],                                                               
+		\\
+		\E[r_i]            & =                                                                                                                                                             
+		\begin{cases}
+		1                   & \text{if } y_i \ne 0                                                                                                                                          \\
+		p_i                 & \text{if } y_i = 0,                                                                                                                                           \\
+		\end{cases}
+		\\
+		-\E_q[\log{q(r)}]  & = \sum_{i=1}^n \I(y_i = 0) \log{(p_i)}                                                                                                                        \\ [0.5ex]
+		-\E_q[\log{q(\lambda)}] 
+		                    & = \alpha_{q(\lambda)} - \log{(\beta_{q(\lambda)})} + \log{\Gamma{(\alpha_{q(\lambda)})}} + (1 - \alpha_{q(\lambda)}) \psi{(\alpha_{q(\lambda)})}, \text{ and }            \\ [0.5ex]
+		\E_q[\log{q(\rho)}] & = - \{ \quad \log{(\text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)})} - (\alpha_{q(\rho)} - 1) \psi{(\alpha_{q(\rho)})} - (\beta_{q(\rho)} - 1)\psi{(\beta_{q(\rho)})} \\ [0.5ex]
+		                    & \qquad + (\alpha_{q(\rho)} + \beta_{q(\rho)} - 2)\psi{(\alpha_{q(\rho)} + \beta_{q(\rho)})} \}.                                                                \\ [0.5ex]
+	\end{array}
+\]
 
 \section{Multivariate model}
+
+The variational approximation of the univariate zero-inflated Poisson model extends naturally to the
+multivariate case.
+
+\subsection{Model}
+
 \subsection{Log-likelihood}
+The full log-likelihood is then
 \begin{align*}
 	\log p(\vy, \vtheta) & = \quad \vy^\top \mR(\mC \vnu) - \vr^\top \exp{(\mC \vnu)} - \vone^\top \log \Gamma(\vy + \vone)                                 \\
 	                     & \quad + \vr^\top \log{(\rho)} + (\vone - \vr)^\top \log{(\vone - \rho)}                                                          \\
 	                     & \quad + \frac{\nu}{2} \log |\mPsi| - \left( \frac{\nu + p + 1}{2} \right) \log{|\mSigma|} - \frac{1}{2} \tr (\mPsi \mSigma^{-1}) \\
 	                     & \quad - \frac{1}{2} \log{|\sigma^2_\vbeta \mI_p|} - \frac{1}{2} \vbeta^\top \sigma_\vbeta^{-2} \mI_p \vbeta                      \\
-	                     & \quad - \frac{1}{2} \log |\mG| - \frac{1}{2} \vu^\top \mG^{-1} \vu                                                                
+	                     & \quad - \frac{1}{2} \log |\mG| - \frac{1}{2} \vu^\top \mG^{-1} \vu.                                                                
 \end{align*}
 
 \subsection{Mean field updates}
+The optimal approximation for $\vmu$ is
+\[
+	\begin{array}{rl}
+		q(\vmu) & \propto \exp \{ \E_{-q(\vnu)} \log p(\vy, \vtheta) \}.
+	\end{array}
+\]
+
 \noindent The optimal approximation for $\vr$ is
-$$
-\begin{array}{rl}
-	q(\vr) & \propto \exp{\{\bE_{-q(\vr)}y^T\mR(\mC\vmu) - \vr^T\exp{(\mC\vnu)}-\half \vnu^T \text{diag}(\sigma_{\vu}^2)^{-1} \vnu\}} 
-\end{array}
-$$
+\[
+	\begin{array}{rl}
+		q(\vr) & \propto \exp{\{\E_{-q(\vr)}y^\top\mR(\mC\vmu) - \vr^\top\exp{(\mC\vnu)}- \frac{1}{2} \vnu^\top \text{diag}(\sigma_{\vu}^2)^{-1} \vnu\}} 
+	\end{array}
+\]
+where
+\[
+	\begin{array}{rl}
+		  & \E_{-q(\vr)} [\vy^\top\mR(C\vnu) - \vr^\top\exp{(\mC\vnu)}- \frac{1}{2} \vnu^\top \text{diag}(\sigma_{\vu}^2)^{-1} \vnu]                                                 \\
+		= & \vy^\top\mR\mC \vmu - \vp^\top \exp{\{\mC \vmu +  \frac{1}{2} \text{diag}(\mC \mLambda \mC^\top)\}} -  \frac{1}{2} \vmu^\top \hat{\mD} \vmu - \half \text{tr}(\mLambda \hat{\mD} )) 
+	\end{array}
+\]
 
-$$
-\begin{array}{rl}
-	  & \bE_{-q(\vr)} [\vy^T\mR(C\vnu) - \vr^T\exp{(\mC\vnu)}-\half \vnu^T \text{diag}(\sigma_{\vu}^2)^{-1} \vnu]                                                 \\
-	= & \vy^T\mR\mC \vmu - \vp^T \exp{\{\mC \vmu + \half \text{diag}(\mC \mLambda \mC^T)\}} - \half \vmu^T \hat{\mD} \vmu - \half \text{tr}(\mLambda \hat{\mD} )) 
-\end{array}
-$$
-
-Recall that $\E \vu^\top \mA^{-1} \vu = \E \tr(\vu^\top \mA^{-1} \vu) = \tr [\E (\vu \vu^\top) \mA^{-1}]$, and
-that $\mG = \text{Cov}(\vu) = \text{blockdiag}_{1 \leq i \leq m} \mSigma = \mI_m \otimes \mSigma.$ Then the
+Recall that
+$\E \vu^\top \mA^{-1} \vu = \E \tr(\vu^\top \mA^{-1} \vu) = \tr [\E (\vu \vu^\top) \mA^{-1}] = \vmu^\top \mA^{-1} \vmu + \tr{(\mA^{-1} \mSigma)}$,
+and that $\mG = \text{Cov}(\vu) = \text{blockdiag}_{1 \leq i \leq m} \mSigma = \mI_m \otimes \mSigma.$ Then the
 optimal approximation for $q^*(\mSigma)$ is
 
 \begin{align*}
 	q^*(\mSigma) & \propto \exp \left \{ -\frac{1}{2} \tr (\mPsi \mSigma^{-1}) - \frac{1}{2} \E \vu^\top \mG^{-1} \vu               
 	- \frac{\nu + p + 1}{2} \log |\mSigma| - \frac{1}{2} \log |\mG| \right \} \\
-	             & =\exp \left \{ -\frac{1}{2} \tr \left[\mPsi + \sum_{i=1}^m (\vmu_i \vmu_i^\top + \mLambda_i) \mSigma^{-1}\right] 
+	             & =\exp \left \{ -\frac{1}{2} \tr \left[\mPsi + \sum_{i=1}^m (\vmu_i \vmu_i^\top + \mLambda_i) \right] \mSigma^{-1}
 	- \frac{\nu + p + m + 1}{2} \log |\mSigma| \right \}.
 \end{align*}
 
-Hence, $q^*(\mSigma) = \text{Inverse Wishart} \left( \mPsi + \sum_{i=1}^m (\vmu_i \vmu_i^\top + \mLambda_i), \nu + m \right)$.
+\noindent Hence, $q^*(\mSigma) = \text{Inverse Wishart} \left( \mPsi + \sum_{i=1}^m (\vmu_i \vmu_i^\top + \mLambda_i), \nu + m \right)$.
 
 
 \subsection{Calculation of the Variational Lower bound}
@@ -240,45 +261,45 @@ where
 % This is the new T_1
 $$
 \begin{array}{rl}
-	T_1 & = \quad \bE_q[\log{p(\vy, \vnu)} - \log{q(\vnu)}]                                                                                                                                                  \\
-	    & = \quad \vy \mP \mC \vmu - \vp^\top \exp{\left[ \mC \vmu + \half \text{diag} (\mC \mLambda \mC^\top) \right]} - \vone^\top\log \Gamma{(\vy + \vone)}                                               \\
-	    & \quad + \frac{p + m}{2} (1 + \log{2 \pi}) + \half \log{|\mLambda|},                                                                                                                                \\
-	T_2 & = \quad \bE_q \left[ \log p(\mSigma_{\vu \vu}) - \log q(\mSigma_{\vu \vu}) \right]                                                                                                                 \\
-	    & = \quad \bE_q \big[ v/2(\log |\Psi| - \log |\Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu}|) + \half \log 2 + \half \log|\mSigma_{\vu \vu}| + \log \Gamma_{p+1}(v/2) - \log \Gamma_{p}(v/2)    \\
-	    & \quad + \half \tr((\vmu_{\vu} \vmu_{\vu}^\top + \mLambda_{\vu \vu}) \mSigma_{\vu \vu}^{-1}) \big]                                                                                                  \\
-	    & = \quad v/2\big(\log |\Psi| - \log |\Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu}|\big) + \half \log 2 + \half \bE_q \log |\mSigma_{\vu \vu}| + \log \Gamma_{p+1}(v/2) - \log \Gamma_{p}(v/2) \\
-	    & \quad + \half \tr\big(\mI_m + \Psi(\Psi+ \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu})^{-1}/(v + p + 2)\big)                                                                                        \\
-	T_3 & = - \vp^\top \log \vp - (\vone - \vp)^\top \log (\vone - \vp) - \log \Beta (\alpha_\rho, \beta_\rho) + \log \Beta (\alpha_q, \beta_q)                                                              
+	T_1 & = \quad \E_q[\log{p(\vy, \vnu)} - \log{q(\vnu)}]                                                                                                                                                  \\
+	    & = \quad \vy \mP \mC \vmu - \vp^\top \exp{\left[ \mC \vmu + \frac{1}{2} \text{diag} (\mC \mLambda \mC^\top) \right]} - \vone^\top\log \Gamma{(\vy + \vone)}                                               \\
+	    & \quad + \frac{p + m}{2} (1 + \log{2 \pi}) + \frac{1}{2} \log{|\mLambda|},                                                                                                                                \\
+	T_2 & = \quad \E_q \left[ \log p(\mSigma_{\vu \vu}) - \log q(\mSigma_{\vu \vu}) \right]                                                                                                                 \\
+	    & = \quad \E_q \big[ v/2(\log |\Psi| - \log |\Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu}|) + \frac{1}{2} \log 2 + \frac{1}{2} \log|\mSigma_{\vu \vu}| + \log \Gamma_{p+1}(v/2) \\
+	    & \quad - \log \Gamma_{p}(v/2) + \frac{1}{2} \tr((\vmu_{\vu} \vmu_{\vu}^\top + \mLambda_{\vu \vu}) \mSigma_{\vu \vu}^{-1}) \big]                                                                                                  \\
+	    & = \quad v/2\big(\log |\Psi| - \log |\Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu}|\big) + \frac{1}{2} \log 2 + \frac{1}{2} \E_q \log |\mSigma_{\vu \vu}| + \log \Gamma_{p+1}(v/2) \\
+	    & \quad - \log \Gamma_{p}(v/2) + \frac{1}{2} \tr\big(\mI_m + \Psi(\Psi+ \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu})^{-1}/(v + p + 2)\big), \text{ and }                                                                                       \\
+	T_3 & = - \vp^\top \log \vp - (\vone - \vp)^\top \log (\vone - \vp) - \log \Beta (\alpha_\rho, \beta_\rho) + \log \Beta (\alpha_q, \beta_q),
 \end{array}
 $$
 	
-\noindent with $\bE_q \big[ \log |\mSigma_{\vu \vu}| \big] = m \log 2 + \log \left | \Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu} \right | + \sum_{i=1}^m \Psi \left ( \frac{v - i + 1}{2} \right )$
+\noindent with $\E_q \big[ \log |\mSigma_{\vu \vu}| \big] = m \log 2 + \log \left | \Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu} \right | + \sum_{i=1}^m \Psi \left ( \frac{v - i + 1}{2} \right )$
 
-	\section{New writing on the piecewise polynomial idea}
-	The exponential function grows very fast for moderate arguments, which can lead to floating point overflow
-	and underflow issues. We instead define a piecewise function
-	$$
+\section{New writing on the piecewise polynomial idea}
+The exponential function grows very fast for moderate arguments, which can lead to floating point overflow
+and underflow issues. We instead define a piecewise function
+\[
 	\begin{cases}
-	e^{r_{ij}}, r_{ij} < t \\
-	a r_{ij}^2 + b r_{ij} + c, r_{ij} \geq t
+		e^{r_{ij}}, r_{ij} < t \\
+		a r_{ij}^2 + b r_{ij} + c, r_{ij} \geq t
 	\end{cases}
-	$$
-	and then choose the co-efficients $a$, $b$ and $c$ such that the function, first and second derivatives all
-	agree at $r_{ij} = t$.
+\]
+and then choose the co-efficients $a$, $b$ and $c$ such that the function, first and second derivatives all
+agree at $r_{ij} = t$. This allows us to form the following system of equations
 
-	$$
+\[
 	\begin{array}{lllll}
-	e^t &= &a t^2 &+ \quad b t &+ \quad c \\
-	e^t &= &&\quad 2a t &+ \quad b \\
-	e^t &= &&&\quad 2a \\
+		e^t &= &a t^2 &+ \quad b t &+ \quad c \\
+		e^t &= &&\quad 2a t &+ \quad b \\
+		e^t &= &&&\quad 2a \\
 	\end{array}
-	$$
-
-	\begin{align*}
-	\therefore a &= e^t / 2 \\
-		b &= e^t - t e^t = (1 - t) e^t \\
-		c &= e^t - at^2 - bt = e^t - e^t/2 t^2 - (1 - t) e^t t = [1 - t^2/2 - (1 - t) t] e^t
-	\end{align*}
+\]
+Then solving for $a$, $b$ and $c$, we obtain
+\begin{align*}
+	a &= e^t / 2 \\
+	b &= e^t - t e^t = (1 - t) e^t \\
+	c &= e^t - at^2 - bt = e^t - e^t/2 t^2 - (1 - t) e^t t = [1 - t^2/2 - (1 - t) t] e^t
+\end{align*}
 
 \section{Appendix - Algebraic derivations of conditional likelihoods}
 
