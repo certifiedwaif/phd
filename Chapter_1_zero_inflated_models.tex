@@ -78,25 +78,24 @@ combined with a multivariate mixed model regression framework, an extremely rich
 allowing a broad range of applications to be addressed. Often the transition from zero to non-zero has a
 direct interpretation in the area of application, and is interesting in its' own right.
 
-In this paper, we build upon the earlier work on Bayesian zero-inflated models of \citep{Ghosh20061360} and
-\citep{VatsaWilson2014}. While simple forms of these models are easy to fit with standard maximum likelihood
+In this chapter, we build upon the earlier work on Bayesian zero-inflated models of \citep{Ghosh2006} and
+\citep{Vatsa2014}. While simple forms of these models are easy to fit with standard maximum likelihood
 techniques, more general models incorporating random effects, splines and missing data typically have no
 closed form solutions and hence present a greater computational challenge to fit.
 
 Fitting these models is typically done with Monte Carlo Markov Chain techniques, but these can be slow and
-prone to convergence problems. Semiparametric mean field Variational Bayes is an approximate Bayesian
-inference method as detailed in \citep{ormerod10} and \citep{RohdeWand2015}. We build upon a latent variable
-representation of these models to allow a tractable semiparametric mean field Variational Bayes approximation
-to be derived. Semiparametric mean field Variational Bayes is an approximate Bayesian inference method as
-detailed in \citep{ormerod10} and \citep{RohdeWand2015}, which allows us to fit close approximations to these
-models using a deterministic algorithm which converges much more quickly.
+prone to convergence problems. We build upon a latent variable representation of these models to allow a 
+tractable semiparametric mean field Variational Bayes approximation to be derived. Semiparametric mean field 
+Variational Bayes is an approximate Bayesian inference method as detailed in \citep{Ormerod2010} and
+\citep{RohdeWand2015}, which allows us to fit close approximations to these models using a deterministic 
+algorithm which converges much more quickly.
 
 We allow a flexible regression modelling approach by using a Gaussian Variational Approximation as defined in
-\citep{ormerod09} on the regression parameters to allow a non-conjugate Gaussian prior to be used, making the
-resulting Gaussian posterior of the regression parameters easy to interpret. We adopt a Mean Field Variational
-Bayes (VB) approach on the other parameters in the model to derive the rest of the approximation.
+\citep{Ormerod2012} on the regression parameters to allow a non-conjugate Gaussian prior to be used, making 
+the resulting Gaussian posterior of the regression parameters easy to interpret. We adopt a Mean Field 
+Variational Bayes (VB) approach on the other parameters in the model to derive the rest of the approximation.
 
-The focus of this paper is on developing a method of fitting flexible ZIP regression models accurately, and
+The focus of this chapter is on developing a method of fitting flexible ZIP regression models accurately, and
 showing the advantages of our method to previously presented methods. In Section \ref{sec:model} we define our
 model and provide a framework for our approach incorporating regression modelling and random effects. In
 Section \ref{sec:vb} we briefly introduce Variational Bayes methodogy. In Section \ref{sec:gaussian} we
@@ -406,8 +405,7 @@ $$
 
 \noindent 
 where we define $\vr_0 = \{ r_i : y_i = 0 \}$,
-$q(\sigma_{\vu}^2) = \mbox{Inverse Wishart}\left(\mPsi + \sum_{i=1}^m (\vmu_i \vmu_i^\top + \mLambda_{\vu_i \vu_i}), v + m + 
-p\right)$ \mbox{and } $q(r_i) = \Bernoulli{(p_i)}$ with
+$q(\sigma_{\vu}^2) = \mbox{Inverse Wishart}\left(\mPsi + \sum_{i=1}^m (\vmu_i \vmu_i^\top + \mLambda_{\vu_i \vu_i}), v + m \right)$ \mbox{and } $q(r_i) = \Bernoulli{(p_i)}$ with
 $$
 p_i = \expit\left[ \psi{(\alpha_{q(\rho)})} - \psi{(\beta_{q(\rho)})} - \exp{(c_i^\top\vmu + \half c_i^\top \mLambda c_i)} \right]
 $$
@@ -882,6 +880,20 @@ Variational Approximation, as in \citep{ormerod09}. The model can be fit using A
 	% MCMC posterior, with approximating posterior for at least one or two of the
 	% key parameters, such as, say, vbeta[2]
 		
+	\subsection{Numerical stability}
+
+	In the process of performing numerical experiments, we discovered that our model fitting software was 
+	prone to numeric overflow due to the log link in our model and the exponentiation of the diagonals of the
+	Cholesky factors in the covariance parameterisation of the Gaussian Variational Approximation of $\vnu$.
+
+	We dealt with this difficulty by developing a 'safe exponential' parameterisation for the diagonals of the
+	Cholesky factors. The parameterisation is exponential up to a threshold $t$, and then quadratic beyond that
+	threshold.
+
+	We repeated our numerical experiments with the new parameterisation, varying the threshold within reasonable
+	bounds and found that the numerical experiments no longer resulted in overflow, and that the numerical accuracy
+	of the approximation was still very good.
+
 	\subsection{Stability results}
 		
 	The numerical stability of each fitting algorithm in Section \ref{sec:gaussian} was assessed by initialising
@@ -892,6 +904,7 @@ Variational Approximation, as in \citep{ormerod09}. The model can be fit using A
 	slope, and a random intercept. $\vmu$ was initialised from a grid of points on the interval $[-4.5, 5]$ for
 	intercept and slope, spaced $0.1$ apart. The error counts are presented in Table
 	\ref{tab:stability_results}.
+
 
 	The stability of the GVA algorithm with the parameterisation $\mLambda = (\mR^\top \mR)^{-1}$ depends on the
 	threshold chosen for the safe exponential function. When the threshold is set to $2$, the algorithm is stable
@@ -923,7 +936,7 @@ Variational Approximation, as in \citep{ormerod09}. The model can be fit using A
 	\begin{align*}
 		y_{ep} &\sim \text{Poisson}(n_{ep} e^{\beta_0 + \beta_e \text{ethnicity}_e + \alpha_{k} \text{crime} + u_p + \epsilon_{ep}}) \\
 		u_p &\sim \N(0, \sigma_u^2) \\
-		\epsilon_{ep} &\sim \N(0, \sigma_\epsilon^2) \\
+		\epsilon_{ep} &\sim \N(0, \sigma_\epsilon^2)
 	\end{align*}
 	where $p$ is the $p$-th precinct, and $e$ is the $e$-th ethnicity (blacks, hispanics or whites), and $c$ is
 	the $c$-th category of crime (violent crimes, weapons crimes, propery crimes, drug crimes). The random 
@@ -964,13 +977,14 @@ Variational Approximation, as in \citep{ormerod09}. The model can be fit using A
 
 	% TODO: You need to describe the data set and the model.
 	\subsection{Zero--inflated example -- Cockroaches in Apartments data set from Gelman}
-	The model fitting was applied to the cockroach data set from \citep{Gelman2007} taken from a study on the
-	effect of integrated pest management in controlling cockroach levels in urban apartments. The data set
-	contains data on 160 treatment and 104 control apartments, along with the response $y_i$ in each apartment of
-	the number of cockroaches caught in a set of traps. The apartments had the traps deployed for different
-	numbers of days, referred to as trap days, which was handled by using a log offset \citep{Agresti2002}. The
-	predictors in the data set included the pre-treatment roach level, a treatment indicator, the time of the
-	observation and an indicator for whether the apartment is in a senior building restricted to the elderly.
+	The model fitting was applied to the cockroach data set from \S 6.7 of \citep{Gelman2007} taken from a study
+	on the effect of integrated pest management in controlling cockroach levels in urban apartments. The data
+	set contains data on 160 treatment and 104 control apartments, along with the response $y_i$ in each
+	apartment of the number of cockroaches caught in a set of traps. The apartments had the traps deployed for
+	different numbers of days, referred to as trap days, which was handled by using a log offset
+	\citep{Agresti2002}. The predictors in the data set included the pre-treatment roach level, a treatment
+	indicator, the time of the observation and an indicator for whether the apartment is in a senior building
+	restricted to the elderly.
 		
 	In the example application presented in this paper, the zero component represents an apartment completely free of roaches, while the non-zero component represents an apartment where roaches have been able to live and reproduce, possibly in spite of pest control treatment aimed at preventing them from doing so.
 		
@@ -1106,7 +1120,7 @@ Variational Approximation, as in \citep{ormerod09}. The model can be fit using A
 	\end{array}
 	$$
 		
-	\noindent with $\bE_q \big[ \log |\mSigma_{\vu \vu}| \big] = m \log 2 + \log \left | \Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu} \right | + \sum_{i=1}^m \Psi \left ( \frac{v - i + 1}{2} \right )$
+	\noindent with $\bE_q \log |\mSigma_{\vu \vu}| = m \log 2 + \log \left | \Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu} \right | + \sum_{i=1}^m \Psi \left ( \frac{v - i + 1}{2} \right )$
 		
 	\subsection{Numerical stability of fitting algorithms with respect to starting point}
 		
