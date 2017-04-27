@@ -55,7 +55,7 @@ Count data with a large number of zero counts arises in many areas of applicatio
 physical activity studies, insurance claims, hospital visits or defects in manufacturing processes. Zero
 inflation is a frequent cause of overdispersion in Poisson data, and not accounting for the extra zeroes
 may lead to biased parameter estimates. These models have been used for many applications, including defects
-in manufacturing in \citep{lambert1992}, horticulture in \citep{BIOM:BIOM1030} and \citep{Hall2000}, length of
+in manufacturing in \citep{lambert1992}, horticulture in \citep{BIOM:BIOM1030}, length of
 stay data from hospital admissions in \citep{BIMJ:BIMJ200390024}, psychology in \citep{JOFP:rethink},
 pharmaceutical studies in \citep{Min01042005}, traffic accidents on roadways in \citep{Shankar1997829} and
 longitudinal studies in \citep{LeeWangScottYauMcLachlan2006}.
@@ -67,21 +67,23 @@ combined with a multivariate mixed model regression framework, an extremely rich
 allowing a broad range of applications to be addressed. Often the transition from zero to non-zero has a
 direct interpretation in the area of application, and is interesting in its' own right.
 
-In this paper, we build upon the earlier work on Bayesian zero-inflated models of \citep{Ghosh20061360} and
-\citep{VatsaWilson2014}. While simple forms of these models are easy to fit with standard maximum likelihood
-techniques, more general models incorporating random effects, splines and missing data typically have no
-closed form solutions and hence present a greater computational challenge to fit.
+Bayesian estimation methods for zero-inflated models was developed in \citep{Ghosh2006} using MCMC 
+implemented with WinBUGS, and in \citep{Vatsa2014} using a Variational Bayes solution to the inverse
+zero-inflated Poisson regression problem. While simple forms of these models are easy to fit with standard 
+maximum likelihood techniques, more general models incorporating random effects, splines and missing data 
+typically have no closed form solutions and hence present a greater computational challenge to fit.
 
 Fitting these models is typically done with Monte Carlo Markov Chain techniques, but these can be slow and
-prone to convergence problems. Semiparametric mean field Variational Bayes is an approximate Bayesian
-inference method as detailed in \citep{ormerod10} and \citep{RohdeWand2015}. We build upon a latent variable
-representation of these models to allow a tractable semiparametric mean field Variational Bayes approximation
-to be derived. Semiparametric mean field Variational Bayes is an approximate Bayesian inference method as
-detailed in \citep{ormerod10} and \citep{RohdeWand2015}, which allows us to fit close approximations to these
-models using a deterministic algorithm which converges much more quickly.
+prone to convergence problems. Other fitting methods such as the Variational Bayes approach above can be
+inflexible, not allowing general models incorporating random effects and so on. 
+We build upon a latent variable representation of these models to allow a
+tractable semiparametric mean field Variational Bayes approximation to be derived. Semiparametric mean field
+Variational Bayes is an approximate Bayesian inference method as detailed in \citep{Ormerod2010} and
+\citep{Rohde2015}, which allows us to fit close approximations to these models using a deterministic algorithm
+which converges much more quickly.
 
 We allow a flexible regression modelling approach by using a Gaussian Variational Approximation as defined in
-\citep{ormerod09} on the regression parameters to allow a non-conjugate Gaussian prior to be used, making the
+\citep{Ormerod2012} on the regression parameters to allow a non-conjugate Gaussian prior to be used, making the
 resulting Gaussian posterior of the regression parameters easy to interpret. We adopt a Mean Field Variational
 Bayes (VB) approach on the other parameters in the model to derive the rest of the approximation.
 
@@ -168,14 +170,67 @@ This is a more severe penalty for model complexity than in the Akaike's Informat
 greater than $8$. BIC can be shown to be approximately equivalent to model selection using Bayes Factors
 in certain contexts \cite{Kass1993}.
 
+\subsection{Existing literature}
+The problem of model selection is one of the most important problems encountered in practice by applied
+statistical practitioners. There are many approaches to model selection including approaches based on
+functions of the model selection criterion, penalized regression and Bayesian modelling approaches. A major
+motivation for this field of research is the need for a computationally feasible approach to performing model
+selection on large scale problems where the number of covariates is large.
+
+% Non-Bayesian
+\subsection{Frequentist Approachs to Model Selection}
+Many approaches to model selection have been investigated, with various model selection criteria proposed to
+attempt to balance model likelihood against model complexity. One approach to model selection is to select
+between entire models, using a model selection criterion. These criterion may have a fixed penalty for model
+complexity, such as Akaike's Information Criterion \citep{Akaike1974}, the Risk Inflation Criterion
+\citep{Foster1994}, the Schwarz criterion or Bayesian Information Criterion \citep{Schwarz1978}, the Deviance
+Information Criterion \citep{Spiegelhalter2016} or the Principle of Minimum Description Length
+\citep{Hansen2001}. Alternatively, the penalty may be adaptive/data--dependent as in \citep{George2000}.
+
+Model selection can also be made implicit in the model fitting process itself, as in ridge regression
+\citep{Casella1980}, of which the well-known lasso is a special case \citep{Tibshirani1996}. As shown in
+papers by \citep{Breiman1996} and \citep{Efron2013} showed, while  the standard formulation of a linear model
+is unbiased, the goodness of fit of these models is numerically  unstable. Breiman showed that by introducing
+a penalty on the size of the regression co- efficients such as  in ridge regression, this numerical
+instability can be avoided. This reduces the variances of the co-efficient estimates, at the expense of
+introducing some bias -- the bias- variance trade--off.
+
 \subsection{Bayesian Approaches to Model Selection}
-In a Bayesian framework, candidate models can be selected by comparing their posterior likelihoods to see
-which is most probable given the observed data, as in \cite{Kass1993}. Bayesian model selection approaches
+An alternative to model selection criterion is to select models based on their posterior probability. In a
+Bayesian context, this can be accomplished by comparing the posterior likelihoods of the candidate models to
+see which is most probable given the observed data. This can be done, for example, by using Bayes Factors as
+in \citep{Kass1993}. Rather than selecting one candidate model, several models can be combined together using
+Bayesian model averaging, as in \citep{Hoeting1999}, \citep{Raftery1997}, \citep{Fernandez2001} or
+\citep{Papaspiliopoulos2016}.
+
+The problem of model selection can also be considered within a Bayesian framework.
+Within this framework, candidate models can be selected by comparing their posterior likelihoods to see
+which is most probable given the observed data, as in \citep{Kass1993}. Bayesian model selection approaches
 can incorporate prior information, such as the prior probability of selecting each candidate model $\vgamma$.
 
+A special case of model selection is variable selection, where the focus is on selecting individual
+covariates, rather than entire models. Variable selection approaches search over the
+variables in the model space for the best covariates to include in the candidate model. Due to the large
+number of possible combinations of covariates -- typically $2^p$ where $p$ is the number of covariates, such
+searches are often stochastic. This approach can either be Fully Bayesian or Empirically Bayesian as in
+\citep{Cui2008}.  This search can be driven by posterior probabilities, as in \citep{Casella2006}, or by Gibbs
+sampling approaches such as in \citep{George1993}. These two approaches of model selection and variable
+selection can be combined, as in \citep{Geweke1996}. Variable selection can also be accomplished by selecting
+the median probability model, consisting of those models whose posterior inclusion probability is at least
+$1/2$, as in \citep{Barbieri2004}.
+
 \section{Hamiltonian Monte Carlo}
-\cite{MacKay:2002:ITI:971143}
-\cite{Betancourt2017}
+
+% Basic idea: Sample the typical set efficiently by following a contour/level set of the likelihood surface
+% Hamiltonian is a mixture of the position and momentum
+% If you can't write any more clearly than this, then you don't understand well enough yet
+
+The Hamiltonian Monte Carlo algorithm was devised by Simon Duane, A. D. Kennedy, Brian Pendleton and Duncan
+Roweth in 1987 
+Duane, S., Kennedy,A. D., Pendleton, B. J., and Roweth, D. 1987. Hybrid Monte Carlo. Physics Letters B, 195:216–222.
+Earl,
+(found the reference in \cite{Neal2011}).
+
 The Hamiltonian Monte Carlo method is a Metropolis-Hasting method that makes use of gradient information to
 seek states of higher probability in the distribution being sampled from, reducing random walk behaviour. The method uses this information to spend a greater proportion of computational time sampling from the typical set of 
 the distribution.
@@ -196,7 +251,7 @@ defined by the Hamiltonian
 
 where $K(\vp)$ is the kinetic energy. These two proposals are used to sample from the joint density
 \[
-	P_H(\vx, \vp) = \frac{1}{Z_H} \exp{[-H(\vx, \vp)]} = \frac{1}{Z_H} \exp{[-E(\vx)]} \exp{-K(\vp)}
+	P_H(\vx, \vp) = \frac{1}{Z_H} \exp{[-H(\vx, \vp)]} = \frac{1}{Z_H} \exp{[-E(\vx)]} \exp{[ -K(\vp)]}
 \]
 
 As this probability distribution factorises, the marginal distribution of $\vx$ is the distribution that we
@@ -218,6 +273,8 @@ As the change in $\vx$ is always in the direction of the momentum $\vp$ during e
 state of the system tends to move a distance that varies \emph{linearly} with the computational time, rather
 than as the square root as with other sampling methods.
 
+For an introduction to Hamiltonian Monte Carlo, see the chapter in \cite{MacKay:2002:ITI:971143}. A deeper
+and more thorough introduction is provided in \cite{Betancourt2017}.
 
 
 \section{Variational approximations}
@@ -231,17 +288,15 @@ of the model, allowing us to summarise the data and perform statistical inferenc
 Call the approximating model $q(\theta)$. Then we seek a $q(\theta)$ which approximates $p(\vtheta|\vy)$
 as closely as possible in some sense. A useful measure of distance between probability distributions is the
 Kullback-Leibler divergence, which is defined as
-
-$$
-\KL(q || p) \equiv \int q(\vtheta) \log{\frac{q(\theta)}{p(\theta)}} d \vtheta.
-$$
+\[
+	\KL(q || p) \equiv \int q(\vtheta) \log{\frac{q(\theta)}{p(\theta)}} d \vtheta.
+\]
 
 We may seek a best approximating distribution $q^*(\vtheta)$ to a given posterior distribution
 $p(\vtheta|\vy)$ from a parameteric family of approximating distributions $Q$ by finding
-
-$$
-q^*(\vtheta) = \argmin_{q \in Q} \KL \{ {q(\vtheta) || p(\vtheta|\vy)} \}.
-$$
+\[
+	q^*(\vtheta) = \argmin_{q \in Q} \KL \{ {q(\vtheta) || p(\vtheta|\vy)} \}.
+\]
 
 If $\vtheta$ is partitioned into $M$ partitions $\vtheta_1$, $\vtheta_2$, \ldots, $\vtheta_M$ then a 
 simple form of approximation to adopt is the factored approximation of the form
@@ -249,15 +304,17 @@ simple form of approximation to adopt is the factored approximation of the form
 	q(\vtheta) = \Pi_{i=1}^M q(\vtheta_i)
 \]
 
-is often adopted. This form of approximation is computationally convenient, but assumes that the partitions
-of $\vtheta$ are completely independent of one another.
+where each of the density $q(\vtheta_i)$ is a member of a parametric family of density functions. This form of
+approximation is computationally convenient, but assumes that the partitions of $\vtheta$ are completely
+independent of one another.
 
-The optimal mean field update for each of the parameters $\vtheta_i$ is then
+The optimal mean field update for each of the parameters $\vtheta_i$ can be shown to be
 \[
-	q^*(\vtheta_i) \propto \exp \{ \E [\log p(\vy; \vtheta)] \}
+	q^*(\vtheta_i) \propto \exp \{ \E [\log p(\vy; \vtheta)] \}.
 \]
 
-A more thorough introduction to the topic of variational approximations is available in \cite{Ormerod2010}.
+For details of the proof, and a more thorough introduction to the topic of variational approximations, see
+\cite{Ormerod2010}.
 
 \subsection{Gaussian Variational Approximation}
 
@@ -279,7 +336,7 @@ Laplace's method is a technique use to approximate integrals of the form
 
 where $f(x)$ is twice differentiable, $M \in \R$ and $a, b \in \R \cup \{-\infty, \infty\}$.
 
-Let $f(x)$ have a unique global maximum at $x_0$.
+Let $f(x)$ have a unique global maximum at $x_0$. Then, Taylor expanding about $x_0$, we have
 
 \[
 	f(x) = f(x_0) + f'(x_0) (x - x_0) + \frac{1}{2} f''(x_0) (x - x_0)^2 + R
@@ -293,7 +350,7 @@ may be approximated by
 	f(x) \approx f(x_0) - \frac{1}{2} |f''(x_0)| (x - x_0)^2
 \]
 
-for $x$ sufficiently close to $x_0$, as the second derivative is negative at $x_0$. This ensures that the
+for $x$ sufficiently close to $x_0$, as the second derivative is negative at $x_0$. This ensures the
 accuracy of
 
 \[
@@ -309,7 +366,7 @@ This is a Gaussian integral, and thus we find that
 Relative error
 
 
-Following a similiar path, we can extend the approach to multiple dimensions.
+This approach to approximating integrals extends naturally to multiple dimensions.
 Consider the second order Taylor expansion of $\log f(\vtheta)$ around the mode $\vtheta_m$
 $$
 \log f(\vtheta) \approx f(\vtheta_m) + (\vtheta - \vtheta_m) \nabla \log f(\vtheta) + \half (\vtheta - \vtheta_m)^\top \mH_{\log f}(\vtheta_m) (\vtheta - \vtheta_m) + \sO(\|\vtheta - \vtheta_m\|^3).
@@ -320,8 +377,8 @@ $$
 \log f(\vtheta) \approx f(\vtheta_m) + \half (\vtheta - \vtheta_m)^\top \mH_{\log f}(\vtheta_m) (\vtheta - \vtheta_m) + \sO(\|\vtheta - \vtheta_m\|^3)
 $$
 
-at such a point. The quadratic form in $\vtheta$ in the approximate expression for the log likelihood above gives 
-rise to a Gaussian approximation for the likelihood $\N(\vtheta_m, \mH_{\log f}(\vtheta_m)^{-1})$.
+at such a point. The quadratic form in $\vtheta$ in the approximate expression for the log likelihood above
+leads to a Gaussian approximation for the likelihood $\N(\vtheta_m, \mH_{\log f}(\vtheta_m)^{-1})$.
 
 The approximation is crude but can be quite accurate if the likelihood is symmetric and unimodal.
 
@@ -368,16 +425,14 @@ L-BFGS-B
 
 % Wolfe conditions
 The problem of interest is to find
-
-$$
-\min_\vx f(\vx)
-$$
+\[
+	\min_\vx f(\vx)
+\]
 
 for some smooth $f: \R^n \to \R$. Each step involves approximately solving the subproblem
-
-$$
-\min_\alpha f(\vx_k + \alpha \vp_k)
-$$
+\[
+	\min_\alpha f(\vx_k + \alpha \vp_k)
+\]
 
 where $\vx_k$ is the current best guess, $\vp_k \in \R^n$ is a search direction and $\alpha$ is the
 step length.
@@ -415,41 +470,41 @@ implies $\mB_{k+1}$ is also positive definite.
 In this section, I'd like to talk about floating point representation and its' consequences, numerical
 analysis/error bounds and in particular their relevance to numerical linear algebra.
 
-\subsection{Floating point numbers}
+% \subsection{Floating point numbers}
 
-$$\text{sign } \text{significand} \times \text{base}^\text{exponent}$$
+% $$\text{sign } \text{significand} \times \text{base}^\text{exponent}$$
 
-IEEE 754: floating point in modern computers
+% IEEE 754: floating point in modern computers
 
-On modern computers, IEEE 754 is ubiquitous, and the base is $2$.
+% On modern computers, IEEE 754 is ubiquitous, and the base is $2$.
 
-Error bounds on $+, -, *, /, \sqrt{}$
+% Error bounds on $+, -, *, /, \sqrt{}$
 
-$$
-\text{fl}(a \text{ op } b) = (1 + \epsilon) (a \text{ op } b) \text{ provided $\text{fl}(a \text{ op } b)$ neither overflows nor underflows}
-$$
+% $$
+% \text{fl}(a \text{ op } b) = (1 + \epsilon) (a \text{ op } b) \text{ provided $\text{fl}(a \text{ op } b)$ neither overflows nor underflows}
+% $$
 
-where $\epsilon$ is the machine epsilon, the minimum difference between $1$ and the next representable
-floating point number.
+% where $\epsilon$ is the machine epsilon, the minimum difference between $1$ and the next representable
+% floating point number.
 
-Exceptional values: $\pm \infty$, $\text{NaN}$
+% Exceptional values: $\pm \infty$, $\text{NaN}$
 
-When doing arithmetic on computers, it is important to understand the full ramifications of this.
+% When doing arithmetic on computers, it is important to understand the full ramifications of this.
 
-\begin{enumerate}
-\item All numerical values are in fact approximations within an interval.
-\item Every arithmetic operation has an associated amount of error, and these errors accumulate as more
-			arithmetic operations are performed.
-\end{enumerate}
+% \begin{enumerate}
+% \item All numerical values are in fact approximations within an interval.
+% \item Every arithmetic operation has an associated amount of error, and these errors accumulate as more
+% 			arithmetic operations are performed.
+% \end{enumerate}
 
-The field of numerical analysis (references Classical and Modern Numerical Analysis,
-Demmel's course: http://www.cs.berkeley.edu/~demmel/cs267/lecture21/lecture21.html, Kahan) analyses numerical 
-algorithms to assess their error bounds, and attempt to mitigate these problems as much as possible to allow
-us to solve numerical problems on modern computers.
+% The field of numerical analysis (references Classical and Modern Numerical Analysis,
+% Demmel's course: http://www.cs.berkeley.edu/~demmel/cs267/lecture21/lecture21.html, Kahan) analyses numerical 
+% algorithms to assess their error bounds, and attempt to mitigate these problems as much as possible to allow
+% us to solve numerical problems on modern computers.
 
-\subsection{Truncation and round-off error}
-\subsection{Numerical stability}
-\subsection{Numerical differentiation and integration}
+% \subsection{Truncation and round-off error}
+% \subsection{Numerical stability}
+% \subsection{Numerical differentiation and integration}
 \subsubsection{Trapezoidal integration}
 
 Trapezoidal integration is a method of approximating the integral of a function $f: \R \to \R$ over the
@@ -463,43 +518,59 @@ Note that the points $x_i$ can be chosen arbitrarily within the interval $(a, b)
 evenly spaced. \mgc{What's the error bound? Error analysis using Taylor's theorem?}
 
 \subsection{Numerical linear algebra}
-Matrix norms \\
-We can define a norm on the space of matrices such that
+\subsubsection{Matrix norms}
+We can define a norm on the space of matrices such that the matrix norms obey the following axioms
 \begin{align*}
-\|A\| \geq 0 \\
-\|A\| = 0 iff A = 0 \\
-\|\alpha A\| = |\alpha| \|A\| \forall \alpha \in \R \\
-\|A + B\| \leq \|A\| + \|B\|\text{ for all matrices } A, B \\
-\text{Additionally, for square matrices} \\
-\|AB\| \leq \|A\| \|B\| \\
+	\|\mA\| &\geq 0 \\
+	\|\mA\| &= 0 iff \mA = 0 \\
+	\|\alpha \mA\| &= |\alpha| \|\mA\| \forall \alpha \in \R \\
+	\|\mA + \mB\| &\leq \|\mA\| + \|\mB\|\text{ for all matrices } \mA, \mB
 \end{align*}
-Examples
+Additionally, for square matrices
+\[
+	\|\mA\mB\| &\leq \|\mA\| \|\mB\|
+\]
+\subsubsection{Examples}
 
-1) The Frobenius Norm \\
+\begin{enumerate}
+\item{The Frobenius Norm:}
 The Frobenius Norm (Euclidean norm) is a matrix norm on the matrix $\mA$ defined as the square root of the sum
 of the absolute squares of its elements,
 \[
-	\|\mA\|_F = \sqrt{\sum_{i=1}^m \sum_{j=1}^n |a_{ij}|^2}
+	\|\mA\|_F = \sqrt{\sum_{i=1}^m \sum_{j=1}^n |a_{ij}|^2}.
 \]
 
-2) The operator norm
+\item{The p norm:}
+The p norm is a matrix norm on the matrix $\mA$ defined as the supremum of the ratio of the norm of
+$\mA \vx$ divided by the norm of $\vx$ over the set of vectors $\vx \ne \vzero$.
 \[
-	\|\mA\|_p = \sup_{\vx \ne 0} \frac{\|\mA \vx\|_p}{\|\vx\|_p}
+	\|\mA\|_p = \sup_{\vx \ne 0} \frac{\|\mA \vx\|_p}{\|\vx\|_p}.
+\]
+\end{enumerate}
+
+The $p$-norm of a matrix and its' singular values from its' SVD are connected in the following way.
+
+\cite{Golub:1996:MC:248979} Corollary 2.4.3 % Matrix Computations
+If $\sigma_1$, $\sigma_2$, \ldots, $\sigma_p$ are the ordered descending singular values of the SVD of $\mA
+\in \R^{m \times n}$ where $p = \min{(m, n)}$ then
+\[
+\|\mA\|_F = \sqrt{\sigma_1^2 + \sigma_2^2 + \ldots + \sigma_p^2} \geq |\sigma_1|
 \]
 
-TODO: Relationship to eigenvalues
-
-Condition numbers \\
+\subsubsection{Condition numbers}
 In numerical linear algebra, a useful measure is the \emph{condition number} of A; it depends on the matrix
-norm (so now you have to define matrix norms) used and is defined by
+norm used and is defined by
 \[
-	\text{cond}(\mA) := \|\mA^{-1}\|.\|\mA\|
+	\kappa(\mA) := \|\mA^{-1}\|.\|\mA\| = \frac{\sigma_{\text{max}}(\mA)}{\sigma_{\text{min}}(\mA)}.
 \]
 
 This is a useful tool in characterising the accuracy and stability of numerical linear algebra algorithms.
-Golub and van Loan \S 2
+\cite{Golub:1996:MC:248979} \S 2. In particular, if $\kappa(\mA)$ is large, then $\mA$ is said to be
+an \emph{ill-conditioned} matrix. Conversely, matrices with small condition numbers are said to be
+\emph{well-conditioned}. If a matrix is either close to singular or has very large singular values, then it
+will be ill-conditioned.
 
-LDU decomposition \\
+\subsubsection{LDU decomposition}
 
 If a matrix $\mA$ is square, it can be factored into the product of a lower triangular matrix and an upper 
 triangular matrix
@@ -507,27 +578,38 @@ triangular matrix
 	\mA = \mL \mU
 \]
 
-Cholesky decomposition
+\subsection{Cholesky decomposition}
 
 If a matrix $\mA$ is square $p \times p$, symmetric and positive definite then it can be factored into the
 product a lower triangular matrix and its' transpose
 \[
 	\mA = \mL \mL^\top
 \]
-
 by noting that
-
-% \begin{align*}
-% \end{align*}
-
-and so
-
 \begin{align*}
-	L_{jj} = \sqrt{A_{jj} - \sum_{k=1}^{j-1} L_{jk}^2}
-	L_{ij} = \frac{1}{L_{jj} (A_{ij} - \sum_{k=1}^{j-1} L_{ik} L_{jk})}, \text{ for } i > j
+	\mA = \mL^\top \mL &= \begin{pmatrix}
+		\mL_{11} & 0 & 0 \\
+		\mL_{21} & \mL_{22} & 0 \\
+		\mL_{31} & \mL_{32} & \mL_{33}
+	\end{pmatrix}
+	\begin{pmatrix}
+		\mL_{11} & \mL_{21} & \mL_{31} \\
+		0 & \mL_{22} & \mL_{32} \\
+		0 & 0 & \mL_{33}
+	\end{pmatrix}	\\
+	&= \begin{pmatrix}
+	\mL_{11}^2 & & \text{symmetric} \\
+	\mL_{21} \mL_{11} & \mL_{21}^2 + \mL_{22}^2 & \\
+	\mL_{31} \mL_{11} & \mL_{31} \mL_{21} + \mL_{32} \mL_{22} & \mL_{31}^2 + \mL_{32}^2 + \mL_{33}^2
+	\end{pmatrix}
+\end{align*}
+and so
+\begin{align*}
+	\mL_{jj} &= \sqrt{\mA_{jj} - \sum_{k=1}^{j-1} \mL_{jk}^2} \text{ and}\\
+	\mL_{ij} &= \frac{1}{\mL_{jj}} (\mA_{ij} - \sum_{k=1}^{j-1} \mL_{ik} \mL_{jk}), \text{ for } i > j.
 \end{align*}
 
-This can be computed in $\BigO{p^2}$ for a $p \times p$ matrix. Once this form is obtained, it has several
+This can be computed in $\BigO(p^2)$ for a $p \times p$ matrix. Once this form is obtained, it has several
 computational advantages over working with the original matrix $\mA$. Firstly, as $\mL$ is lower triangular
 only the non-zero entries need to be stored. Secondly, the triangular form of $\mL$ allows matrix equations
 involving $\mL$ to be solved in $\BigO{p^2}$ using back-substitution and forward-substitution, without using
@@ -535,29 +617,32 @@ Gaussian elmination or calculating a matrix inverse.
 
 \subsection{Difficulty of inverting linear systems}
 
-Sparsity of a matrix does not ensure sparsity of its' inverse. Demonstrate this using the block-inverse
-formula.
-Inverting a matrix is an inherently unstable operation. The number of floating point operations involved
-leads to magnification of error.
+\subsubsection{Instability}
+
+
+\subsubsection{Sparsity of the inverse}
+Sparsity of a matrix does not ensure sparsity of its' inverse. Demonstrate this using
+the block-inverse formula. Inverting a matrix is an inherently unstable operation. The number of floating
+point operations involved leads to magnification of error.
 
 Block inverse formula \\
 \[
 	\begin{pmatrix}
-	A & B \\
-	C & D
+	\mA & \mB \\
+	\mC & \mD
 	\end{pmatrix}^{-1}
 	=
 	\begin{pmatrix}
-	I & 0 \\
-	-D^{-1} C & I
+	\mI & 0 \\
+	-\mD^{-1} \mC & I
 	\end{pmatrix}
 	\begin{pmatrix}
-	(A - B^{-1}C)^{-1} & 0 \\
-	0 & D^{-1}
+	(\mA - \mB^{-1}\mC)^{-1} & 0 \\
+	0 & \mD^{-1}
 	\end{pmatrix}
 	\begin{pmatrix}
-	I & 0 \\
-	-BD^{-1} & I
+	\mI & 0 \\
+	-\mB\mD^{-1} & \mI
 	\end{pmatrix}
 \]
 
@@ -744,14 +829,6 @@ a compromise between each.
 \subsection{Bayesian model selection}
 
 \mgc{Normal model selection with $g$--priors?}
-
-\section{Hamiltonian Monte Carlo}
-
-\cite{Betancourt2017}
-
-Basic idea: Sample the typical set efficiently by following a contour/level set of the likelihood surface
-Hamiltonian is a mixture of the position and momentum
-If you can't write any more clearly than this, then you don't understand well enough yet
 
 \bibliographystyle{elsarticle-harv}
 % \bibliography{Chapter_0_preliminary}
