@@ -880,7 +880,7 @@ Variational Approximation, as in \citep{ormerod09}. The model can be fit using A
 	% MCMC posterior, with approximating posterior for at least one or two of the
 	% key parameters, such as, say, vbeta[2]
 		
-	\subsection{Numerical stability}
+	\subsection{Numerical stability of the parameterisation}
 
 	In the process of performing numerical experiments, we discovered that our model fitting software was 
 	prone to numeric overflow due to the log link in our model and the exponentiation of the diagonals of the
@@ -890,11 +890,22 @@ Variational Approximation, as in \citep{ormerod09}. The model can be fit using A
 	Cholesky factors. The parameterisation is exponential up to a threshold $t$, and then quadratic beyond that
 	threshold.
 
+	The stability of this scheme was tested by calculating the accuracy of the approximations fit with a range
+	of safe exponential thresholds, the results of which are presented in Figure \ref{fig:stability_intercept}.
+	The variational approximation was found to be stable, with the accuracy largely insensitive to the choice of
+	threshold.
+
+	\begin{figure}
+		\label{fig:stability_intercept}
+		\caption{Accuracy of approximation of parameters versus the safe exponential threshold}
+		\includegraphics{code/stability_intercept.pdf}
+	\end{figure}
+
 	We repeated our numerical experiments with the new parameterisation, varying the threshold within reasonable
 	bounds and found that the numerical experiments no longer resulted in overflow, and that the numerical accuracy
 	of the approximation was still very good.
 
-	\subsection{Stability results}
+	\subsection{Stability results for different starting points}
 		
 	The numerical stability of each fitting algorithm in Section \ref{sec:gaussian} was assessed by initialising
 	each algorithm from a range of different starting points. Errors due to numerical instability and the fitted
@@ -904,7 +915,6 @@ Variational Approximation, as in \citep{ormerod09}. The model can be fit using A
 	slope, and a random intercept. $\vmu$ was initialised from a grid of points on the interval $[-4.5, 5]$ for
 	intercept and slope, spaced $0.1$ apart. The error counts are presented in Table
 	\ref{tab:stability_results}.
-
 
 	The stability of the GVA algorithm with the parameterisation $\mLambda = (\mR^\top \mR)^{-1}$ depends on the
 	threshold chosen for the safe exponential function. When the threshold is set to $2$, the algorithm is stable
