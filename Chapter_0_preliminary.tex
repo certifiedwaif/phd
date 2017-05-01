@@ -528,7 +528,7 @@ We can define a norm on the space of matrices such that the matrix norms obey th
 \end{align*}
 Additionally, for square matrices
 \[
-	\|\mA\mB\| &\leq \|\mA\| \|\mB\|
+	\|\mA\mB\| \leq \|\mA\| \|\mB\|
 \]
 \subsubsection{Examples}
 
@@ -565,10 +565,7 @@ norm used and is defined by
 \]
 
 This is a useful tool in characterising the accuracy and stability of numerical linear algebra algorithms.
-\cite{Golub:1996:MC:248979} \S 2. In particular, if $\kappa(\mA)$ is large, then $\mA$ is said to be
-an \emph{ill-conditioned} matrix. Conversely, matrices with small condition numbers are said to be
-\emph{well-conditioned}. If a matrix is either close to singular or has very large singular values, then it
-will be ill-conditioned.
+\cite{Golub:1996:MC:248979} \S 2.
 
 \subsubsection{LDU decomposition}
 
@@ -612,13 +609,49 @@ and so
 This can be computed in $\BigO(p^2)$ for a $p \times p$ matrix. Once this form is obtained, it has several
 computational advantages over working with the original matrix $\mA$. Firstly, as $\mL$ is lower triangular
 only the non-zero entries need to be stored. Secondly, the triangular form of $\mL$ allows matrix equations
-involving $\mL$ to be solved in $\BigO{p^2}$ using back-substitution and forward-substitution, without using
+involving $\mL$ to be solved in $\BigO{(p^2)}$ using back-substitution and forward-substitution, without using
 Gaussian elmination or calculating a matrix inverse.
 
 \subsection{Difficulty of inverting linear systems}
 
 \subsubsection{Instability}
 
+A precise measure of linear system sensitivity can be obtained by considering the parameterised system
+\[
+	(\mA + \epsilon \mF) \vx(\epsilon) = \vb + \epsilon + \vf,  \vx(0) = \vx
+\]
+where $\mF \in \R^{n \times n}$ and $\vf \in \R^n$. If $\mA$ is nonsingular, it is clear that $x(\epsilon)$ is
+differentiable in a neighbourhood of zero. Moreover, $\dot{x}(0) = \mA^{-1} (\vf - \mF \vx)$ and so the
+Taylor series expansion for $\vx$ has the form
+\[
+	x(\epsilon) = x + \epsilon \dot{\vx}(0) + \BigO(\epsilon^2).
+\]
+
+Using any vector norm and consistent matrix norm we obtain
+\[
+	\frac{\|\vx(\epsilon) - \vx\|}{\vx} \leq |\epsilon| \|\mA^{-1}\| \left\{\frac{\|\vf\|}{\|\vx\|} + \|\mF\|\right\} + \BigO(\epsilon^2)
+\]
+
+From \S 2.6.2 of \citep{Golub:1996:MC:248979}
+when solving linear equations in the form $\mA \vx = \vb$
+\[
+	\frac{\|\vx(\epsilon) - \vx\|}{\|\vx\|} \leq \kappa(\mA) (\rho_A + \rho_b) + \BigO(\epsilon^2)
+\]
+where $\rho_A = |\epsilon| \frac{\|\mF\|}{\|\mA\|}$ and $\rho_B = |\epsilon| \frac{\|f\|}{\|b\|}$ represent
+the relative errors in $\mA$ and $\vb$, respectively. Thus the relative error in $\vx$ can be $\kappa(\mA)$
+times the relative error in $\mA$ and $\vb$. In this sense, the condition number $\kappa(\mA)$ quantifies the
+sensitivity of the $\mA \vx = \vb$ problem.
+
+% From \cite{trefethen97}'s section on Conditioning and Condition Numbers, p91
+
+A problem is \emph{well-conditioned} if $\kappa$ is small (e.g. $1$, $10$, $10^2$) and \emph{ill-conditioned}
+if $\kappa$ is large (e.g. $10^6$, $10^16$) \cite{trefethen97}.  If a matrix is either close to singular or
+has very large singular values, then it will be ill-conditioned.
+
+An immediate consequence of this is that if either $\mA$ or its' inverse are ill-conditioned, then inversion
+or solution of the linear system will be highly numerically unstable.
+
+In our ZIP code, we routinely saw values of at least $10^5$ on the diagonals of our Cholesky factors.
 
 \subsubsection{Sparsity of the inverse}
 Sparsity of a matrix does not ensure sparsity of its' inverse. Demonstrate this using
