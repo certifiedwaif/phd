@@ -17,10 +17,12 @@ b <- (n - p) / 2 - a - 2
 c <- (n-1) / 2
 R2 <- .5
 
-sigma2 <- seq(0.1, 10, .01)
+sigma2 <- seq(0.1, 100, 0.01)
 log_K <- c * log(n/2) + (b + 1) * log(1 - R2) - lgamma(c) - 0.5 * log(2*pi / n)
-integrand <- exp(log_K-(n*alpha^2)/(2*sigma2) * -(c+1) * log(sigma2) - n/(2 * sigma2)) * hyperg_1F1(b + 1, c, (n * R2)/(2*sigma2))
+integrand <- exp(-(n*alpha^2)/(2*sigma2) + -(c+3/2) * log(sigma2) -n/(2 * sigma2)) * hyperg_1F1(b + 1, c, (n * R2)/(2*sigma2))
 
-trapint(sigma2, integrand)
+numeric <- exp(log_K) * trapint(sigma2, integrand)
 
-exp(lgamma(c + 0.5) + (b + 1) * log(1 - R2) - lgamma(c) - 0.5 * log(pi) -n/2 * log(1 + alpha^2)) * hyperg_2F1(b + 1, c + 0.5, c, R2 / (1 + alpha^2))
+analytic <- exp(lgamma(c + 0.5) + (b + 1) * log(1 - R2) - lgamma(c) - 0.5 * log(pi) -n/2 * log(1 + alpha^2)) * hyperg_2F1(b + 1, c + 0.5, c, R2 / (1 + alpha^2))
+
+abs((numeric - analytic) / numeric)
