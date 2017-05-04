@@ -9,20 +9,30 @@ trapint <- function(xgrid, fgrid)
 	return(integ)
 }
 
-n <- 50
-p <- 30
-alpha <- 1
-a <- -3/4
-b <- (n - p) / 2 - a - 2
-c <- (n-1) / 2
-R2 <- .5
+n <- seq(20, 100, 1)
+p <- seq(10, 80, 1)
+alpha <- seq(-10, 10, 1)
+R2 <- seq(-0.9, 0.9, 0.1)
+grid_df <- expand.grid(n = n, p = p, alpha = alpha, R2 = R2)
+grid_df <- subset(grid_df, n >= p)
 
-sigma2 <- seq(0.1, 100, 0.01)
-log_K <- c * log(n/2) + (b + 1) * log(1 - R2) - lgamma(c) - 0.5 * log(2*pi / n)
-integrand <- exp(-(n*alpha^2)/(2*sigma2) + -(c+3/2) * log(sigma2) -n/(2 * sigma2)) * hyperg_1F1(b + 1, c, (n * R2)/(2*sigma2))
+sigma2 <- seq(0.1, 1e5, 0.1)
+for (i in 1:1000) {
+	n <- grid_df[i, "n"]
+	p <- grid_df[i, "p"]
+	alpha <- grid_df[i, "alpha"]
+	R2 <- grid_df[i, "R2"]
 
-numeric <- exp(log_K) * trapint(sigma2, integrand)
+	a <- -3/4
+	b <- (n - p) / 2 - a - 2
+	c <- (n-1) / 2
 
-analytic <- exp(lgamma(c + 0.5) + (b + 1) * log(1 - R2) - lgamma(c) - 0.5 * log(pi) -n/2 * log(1 + alpha^2)) * hyperg_2F1(b + 1, c + 0.5, c, R2 / (1 + alpha^2))
+	log_K <- c * log(n/2) + (b + 1) * log(1 - R2) - lgamma(c) - 0.5 * log(2*pi / n)
+	integrand <- exp(-(n*alpha^2)/(2*sigma2) + -(c+3/2) * log(sigma2) -n/(2 * sigma2)) * hyperg_1F1(b + 1, c, (n * R2)/(2*sigma2))
 
-abs((numeric - analytic) / numeric)
+	numeric <- exp(log_K) * trapint(sigma2, integrand)
+
+	analytic <- exp(lgamma(c + 0.5) + (b + 1) * log(1 - R2) - lgamma(c) - 0.5 * log(pi) -n/2 * log(1 + alpha^2)) * hyperg_2F1(b + 1, c + 0.5, c, R2 / (1 + alpha^2))
+
+	cat(numeric, analytic, abs((numeric - analytic) / numeric), "\n")
+}
