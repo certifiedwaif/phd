@@ -95,7 +95,7 @@ where $G_1 = \E\left[\frac{g}{1 + g} \Bigm| \vy \right]$ and $G_2 = \E\left[ \le
 	\E\left[\frac{g}{1 + g} \Bigm| \vy \right] & = \int_0^\infty \frac{g}{1 + g} p(g | \vy) dg                                                                      \\
 	                                           & = \frac{(1 - R^2)^{b+1}}{\Beta(p/2 + a + 1, b + 1)} \int_0^\infty g^{b+1} (1 + g)^{-1} [1 + g (1 - R^2)]^{-n/2} dg \\
 	                                           & = \frac{\Beta(b + 2, n/2 + b + 3)}{\Beta(p /2 + a + 1, b + 1)} (1 - R^2)^{b+1} {}_2 F_1(n/2, b + 2; n/2 + 1; R^2)  \\
-	                                           & = \frac{\Beta(p/2 + a + 1, b + 2)}{\Beta(p /2 + a + 1, b + 1)} {}_2 F_1(p/2 + a + 1, 1; n/2 + 1; R^2)              
+	                                           & = \frac{\Beta(p/2 + a + 1, b + 2)}{\Beta(p /2 + a + 1, b + 1)} {}_2 F_1(p/2 + a + 1, b + 2; n/2 + 1; R^2)              
 \end{align*}
 
 using \cite{Gradshteyn1988} 3.197 Equation 5,
@@ -116,7 +116,7 @@ to simplify the expression further.
 Similiarly,
 
 \[
-	\E\left[ \left(\frac{g}{1 + g} \right)^2 \Bigm| \vy \right] = \frac{\Beta(p/2 + a + 1, b + 2)}{\Beta(p /2 + a + 1, b + 1)} (1 - R^2)^{b+2} {}_2 F_1(p/2 + a + 1, 1; n/2 + 1; R^2)
+	\E\left[ \left(\frac{g}{1 + g} \right)^2 \Bigm| \vy \right] = \frac{\Beta(p/2 + a + 1, b + 3)}{\Beta(p /2 + a + 1, b + 1)} (1 - R^2)^{b+2} {}_2 F_1(p/2 + a + 1, b + 3; n/2 + 1; R^2)
 \]
 
 Thus we obtain
@@ -236,6 +236,129 @@ where k does not depend on $\vbeta$.
 \end{align*}
 
 \section{Collapsed Variational Bayes}
+
+\subsection{$\alpha$ integral}
+Consider the model
+\begin{align*}
+\alpha | \vy, \sigma^2 &\sim \N(0, \frac{\sigma^2}{n}) \\
+p(\sigma^2 | \vy) &= K (\sigma^2)^{-(c+1)} e^{-\frac{n}{2 \sigma^2}} {_1} F_1(b + 1, c; \frac{n R^2}{2 \sigma^2})
+\end{align*}
+where $c=\frac{n-1}{2}$ and $b = \frac{n - p - 5}{2} - a$. We wish to compute
+\begin{align*}
+	p(\alpha | \vy) &= \int p(\alpha | \vy, \sigma^2) p(\sigma^2 | \vy) d \sigma^2 \\
+	&= \int_0^\infty \frac{1}{\sqrt{2 \pi \sigma^2 / n}} \exp(-\frac{\alpha^2}{2 \sigma^2 / n}) K (\sigma^2)^{-(c+1)} \exp (- \frac{n}{2 \sigma^2}) {_1} F_1(b+1, c; \frac{n R^2}{2 \sigma^2}) d \sigma^2 \\
+	&= \int_0^\infty n^{\frac{1}{2}} 2 \pi^{-\frac{1}{2}} (\sigma^2)^{-(c + \frac{3}{2})} \exp [-\frac{n(\alpha^2 + 1)}{2 \sigma^2}] {_1} F_1(b + 1, c; \frac{n R^2}{2 \sigma^2}) d \sigma^2
+\end{align*}
+
+Then after a change of variables $\sigma^2 = 1 / \tau$, $[ d \sigma^2 = - \tau^{-1} d \tau]$
+
+\[
+	p(\alpha | \vy) \propto \int_0^\infty \tau^{c - \frac{1}{2}} \exp [-\frac{n(1 + \alpha^2)}{2} \tau] {_1} F_1(b + 1, c; -\frac{n R^2}{2}, c; \frac{n R^2}{2} \tau)
+\]
+
+Equation 7.621 (4) of \citep{Gradshteyn1988} is
+\[
+	\int_0^\infty e^{-st} t^{b-1} {_1} F_1(a, c, kt) dt =
+	\begin{cases}
+		\Gamma(b) s^{-b} F(a, b, c, ks^{-1}) (\text{ if } |s| > |k|) \\
+		\Gamma(b) (s - k)^{-b} F(c - a, b, c; \frac{k}{k - s}) (\text{ if } |s - k| > |k|)
+	\end{cases}
+\]
+
+Here $s = \frac{n(1 + \alpha^2)}{2}$, $b = c + \frac{1}{2}$, $k = \frac{n R^2}{2}$, $c = c$ and $a = b + 1$.
+
+The first case of the identity holds since
+\[
+	|s| = \frac{n(1 + \alpha^2)}{2} > |k| = \frac{n R^2}{2} \text{ as } 0 \leq R^2 \leq 1 \text{ and } \alpha^2 \geq 0
+\]
+
+Checking the other conditions
+\[
+	b \leftrightarrow c + \frac{1}{2} = \frac{(n - 1)}{2} + \frac{1}{2} > 0
+\]
+
+Hence,
+\[
+	p(\alpha | \vy) = \left[ \frac{\frac{n}{2}^{-\frac{1}{2}} (1 - R^2)^{b + 1}}{\Gamma(c) \sqrt{2 \pi}} \right] \times \Gamma\left(c + \frac{1}{2}\right) \left[ \frac{n(1 + \alpha^2)}{2} \right]^{-c-\frac{1}{2}} F\left(b + 1, c + \frac{1}{2}, c, \frac{\cancel{n} R^2}{\cancel{2}} \frac{\cancel{2}}{\cancel{n} (1 + \alpha^2)}\right)
+\]
+
+% Let $I = \int (2 \pi \sigma^2)^{-\frac{1}{2}} \exp{(- \frac{1}{2 \sigma^2}) \alpha^2} K (\sigma^2)^{-(c+1)}
+% e^{-\frac{n}{2 \sigma^2}} {_1}F_1(b + 1, c; \frac{n R^2}{2 \sigma^2}) d \sigma^2$ \\
+% We make the substitution $t = \frac{n R^2}{2 \sigma^2}$, so then$\frac{dt}{d\sigma^2} = -\frac{n R^2}{2 (\sigma^2)^2}$, 
+% and $-\frac{2 (\sigma^2)^2}{nR^2} dt = d \sigma^2 = -2 \frac{n\cancel{^2} (R^2)\cancel{^2}}{(2t)^2 \cancel{n R^2}} dt$
+% $\sigma^2 = \frac{n R^2}{2 t}$.
+% \begin{align*}
+% 	I &= \int \left(2 \pi \frac{n R^2}{2t}\right)^{-\frac{1}{2}} \exp\left(-\frac{t \alpha^2}{nR^2}\right) K \left(\frac{n R^2}{2 t}\right)^{-(c + 1)} e^{-\frac{\cancel{n} t}{\cancel{n} R^2}} {_1} F_1(b + 1, c; t) \frac{n R^2}{2 t^2} dt \\
+% 	&= K \int n^{\frac{1}{2}} (R^2)^{\frac{1}{2}} 2^{\frac{1}{2}} t^{\frac{3}{2}} \exp{\left(-\frac{t(\alpha^2 + n)}{n R^2}\right)} \left(\frac{n R^2}{2 t}\right)^{-(c + 1)} {_1} F_1(b + 1, c; t) dt \\
+% 	&= K \int n^{-c-\frac{1}{2}} (R^2)^{-c-\frac{1}{2}} 2^{-c-\frac{1}{2}} t^{c + 2} \exp{\left(\frac{-t(\alpha^2 + n)}{n R^2}\right)} {_1} F_1(b + 1, c; t) dt
+% \end{align*}
+
+% \noindent We make use of the identity \S7.621 (iv) from \citep{Gradshteyn1988}
+
+% \[
+% 	\int_0^\infty e^{-st} t^{b'-1} {_1} F_1 (a; c'; kt) = \Gamma(b') F(a, b'; c'; k s^{-1})
+% \]
+
+% \noindent with $a = \frac{\alpha^2 + n}{n R^2}$, $b'=c + 3$, $a = b + 1$, $c' = c$ and $k = 1$. This form of the identity is true if $|s| > |k|$. That is,
+% \[
+% 	\frac{\alpha^2 + n}{n R^2} > 1
+% \]
+% \noindent which is true under the mild conditions that $R^2 < 1$ and $\alpha^2 > 0$. So the above integral becomes
+% \[
+% 	I = K (2 n R^2)^{-(c + \frac{1}{2})} \Gamma(c + 3) F\left(b + 1, c + 3, c; \frac{n R^2}{\alpha^2 + n}\right).
+% \]
+
+
+
+
+% \noindent Now,
+% \[
+% 	M_{\lambda, \mu}(t) = t^{\mu + \frac{1}{2}} z^{-t/2} \phi(\mu - \lambda + \frac{1}{2}, 2 \mu + 1; t)
+% \]
+% and so
+% \[
+% 	t^{-\mu - \frac{1}{2} e^{t/2}} e^{t/2} M_{\lambda, \mu}(t) = \phi(\mu - \lambda + \frac{1}{2}, 2 \mu + 1; t).
+% \]
+
+% \noindent We make use of this to re-express ${_1}F_1(b+1, c; t)$ in terms of $M_{\lambda, \mu}(t)$. As
+% \begin{align*}
+% 	\mu - \lambda + \frac{1}{2} &= b + 1 \\
+% 	2\mu + 1 &= c
+% \end{align*}
+% this implies that $\mu = \frac{c-1}{2}$ and hence $\lambda = \mu - b - \frac{1}{2} = \frac{c-1}{2} - b - \frac{1}{2}$ and so
+% \[
+% 	\phi(b + 1, c; t) = t^{-\frac{c - 1}{2}} e^{t/2} M_{\frac{c-1}{2} - b - 1, \frac{c-1}{2}}(t).
+% \]
+
+% \noindent Thus
+% \begin{align*}
+% 	I &= K \int n^{-c-\frac{1}{2}} (R^2)^{-c-\frac{1}{2}} 2^{-c-\frac{1}{2}} t^{c + 2} \exp{(\frac{-t(\alpha^2 + n)}{n R^2})} t^{-\frac{c - 1}{2}} e^{t/2} M_{\frac{c-1}{2} - b - 1, \frac{c-1}{2}}(t) dt \\
+% 	&= K \int n^{-c-\frac{1}{2}} (R^2)^{-c-\frac{1}{2}} 2^{-c-\frac{1}{2}} t^{c/2 + 3/2} \exp{(\frac{-t(\alpha^2 + n-1/2 n R^2)}{n R^2})} M_{\frac{c-1}{2} - b - 1, \frac{c-1}{2}}(t) dt
+% \end{align*}
+
+
+% \noindent We try the identity \S7.621 ii on page 822 of \citep{Gradshteyn1988}
+% \[
+% 	\int_0^\infty e^{-st} t^{\alpha'} M_{\mu, \nu} (t) dt = \frac{\alpha' + \nu + \frac{3}{2}}{(\frac{1}{2} + s)^{\alpha' + \nu + \frac{3}{2}}} {_2} F_1(\alpha' + \nu + \frac{3}{2}, -\mu + \nu + \frac{1}{2}; 2v + 1; \frac{2}{2s + 1})
+% \]
+
+% where $\text{Re}(\alpha' + \mu + \frac{3}{2}) > 0$, $\text{Re}(s) > \frac{1}{2}$ and
+% \[
+% 	M_{\lambda, \mu} (z) z^{\mu + \frac{1}{2}} e^{-\frac{z}{2}} \Phi(\mu - \lambda + \frac{1}{2}, 2\mu + 1; z)
+% \]
+
+% so
+% \[
+% 	z^{-(\mu + \frac{1}{2})} e^{\frac{z}{2}} M_{\lambda, \mu}(z) = \Phi(\mu - \lambda + \frac{1}{2}, 2\mu + 1; z)
+% \]
+
+% $2\mu + 1 = c$, $\mu = \frac{c - 1}{2}$ \\
+% $\mu - \lambda = b + \frac{1}{2}$, $\lambda = \mu - b - \frac{1}{2}$ \\
+% $z^{-\frac{c}{2}} e^{\frac{z}{2}} M_{\frac{c-1}{2} - b - \frac{1}{2}, \frac{c-1}{2}}(z)$
+
+% So $I = K \int(n R^2 c)^{-(c + \frac{1}{2})} t^{\frac{c}{2} + 2} \exp(\frac{-t(\alpha^2 + n + \frac{1}{2}nR^2)}{nR^2}) M_{\frac{c-1}{2} - b - \frac{1}{2}, \frac{c-1}{2}}(t) dt$ \\
+% with $s = \frac{\alpha'^2 + n + \frac{1}{2} n R^2}{n R^2}$, $\alpha'=\frac{c}{2} + 2$,
+% $\lambda = \frac{c-1}{2} - b - \frac{1}{2}$, $\mu = \frac{c-1}{2}$
 
 \section{Appendix -- Variational Bayes approximation}
 
@@ -843,129 +966,6 @@ Hence
 
 and as Equation \ref{eq:star} equals Equation \ref{eq:starstar} the result follows. The opposite implication
 holds \ldots
-
-\subsection{$\alpha$ integral}
-Consider the model
-\begin{align*}
-\alpha | \vy, \sigma^2 &\sim \N(0, \frac{\sigma^2}{n}) \\
-p(\sigma^2 | \vy) &= K (\sigma^2)^{-(c+1)} e^{-\frac{n}{2 \sigma^2}} {_1} F_1(b + 1, c; \frac{n R^2}{2 \sigma^2})
-\end{align*}
-where $c=\frac{n-1}{2}$ and $b = \frac{n - p - 5}{2} - a$. We wish to compute
-\begin{align*}
-	p(\alpha | \vy) &= \int p(\alpha | \vy, \sigma^2) p(\sigma^2 | \vy) d \sigma^2 \\
-	&= \int_0^\infty \frac{1}{\sqrt{2 \pi \sigma^2 / n}} \exp(-\frac{\alpha^2}{2 \sigma^2 / n}) K (\sigma^2)^{-(c+1)} \exp (- \frac{n}{2 \sigma^2}) {_1} F_1(b+1, c; \frac{n R^2}{2 \sigma^2}) d \sigma^2 \\
-	&= \int_0^\infty n^{\frac{1}{2}} 2 \pi^{-\frac{1}{2}} (\sigma^2)^{-(c + \frac{3}{2})} \exp [-\frac{n(\alpha^2 + 1)}{2 \sigma^2}] {_1} F_1(b + 1, c; \frac{n R^2}{2 \sigma^2}) d \sigma^2
-\end{align*}
-
-Then after a change of variables $\sigma^2 = 1 / \tau$, $[ d \sigma^2 = - \tau^{-1} d \tau]$
-
-\[
-	p(\alpha | \vy) \propto \int_0^\infty \tau^{c - \frac{1}{2}} \exp [-\frac{n(1 + \alpha^2)}{2} \tau] {_1} F_1(b + 1, c; -\frac{n R^2}{2}, c; \frac{n R^2}{2} \tau)
-\]
-
-Equation 7.621 (4) of \citep{Gradshteyn1988} is
-\[
-	\int_0^\infty e^{-st} t^{b-1} {_1} F_1(a, c, kt) dt =
-	\begin{cases}
-		\Gamma(b) s^{-b} F(a, b, c, ks^{-1}) (\text{ if } |s| > |k|) \\
-		\Gamma(b) (s - k)^{-b} F(c - a, b, c; \frac{k}{k - s}) (\text{ if } |s - k| > |k|)
-	\end{cases}
-\]
-
-Here $s = \frac{n(1 + \alpha^2)}{2}$, $b = c + \frac{1}{2}$, $k = \frac{n R^2}{2}$, $c = c$ and $a = b + 1$.
-
-The first case of the identity holds since
-\[
-	|s| = \frac{n(1 + \alpha^2)}{2} > |k| = \frac{n R^2}{2} \text{ as } 0 \leq R^2 \leq 1 \text{ and } \alpha^2 \geq 0
-\]
-
-Checking the other conditions
-\[
-	b \leftrightarrow c + \frac{1}{2} = \frac{(n - 1)}{2} + \frac{1}{2} > 0
-\]
-
-Hence,
-\[
-	p(\alpha | \vy) = \left[ \frac{\frac{n}{2}^{-\frac{1}{2}} (1 - R^2)^{b + 1}}{\Gamma(c) \sqrt{2 \pi}} \right] \times \Gamma\left(c + \frac{1}{2}\right) \left[ \frac{n(1 + \alpha^2)}{2} \right]^{-c-\frac{1}{2}} F\left(b + 1, c + \frac{1}{2}, c, \frac{\cancel{n} R^2}{\cancel{2}} \frac{\cancel{2}}{\cancel{n} (1 + \alpha^2)}\right)
-\]
-
-% Let $I = \int (2 \pi \sigma^2)^{-\frac{1}{2}} \exp{(- \frac{1}{2 \sigma^2}) \alpha^2} K (\sigma^2)^{-(c+1)}
-% e^{-\frac{n}{2 \sigma^2}} {_1}F_1(b + 1, c; \frac{n R^2}{2 \sigma^2}) d \sigma^2$ \\
-% We make the substitution $t = \frac{n R^2}{2 \sigma^2}$, so then$\frac{dt}{d\sigma^2} = -\frac{n R^2}{2 (\sigma^2)^2}$, 
-% and $-\frac{2 (\sigma^2)^2}{nR^2} dt = d \sigma^2 = -2 \frac{n\cancel{^2} (R^2)\cancel{^2}}{(2t)^2 \cancel{n R^2}} dt$
-% $\sigma^2 = \frac{n R^2}{2 t}$.
-% \begin{align*}
-% 	I &= \int \left(2 \pi \frac{n R^2}{2t}\right)^{-\frac{1}{2}} \exp\left(-\frac{t \alpha^2}{nR^2}\right) K \left(\frac{n R^2}{2 t}\right)^{-(c + 1)} e^{-\frac{\cancel{n} t}{\cancel{n} R^2}} {_1} F_1(b + 1, c; t) \frac{n R^2}{2 t^2} dt \\
-% 	&= K \int n^{\frac{1}{2}} (R^2)^{\frac{1}{2}} 2^{\frac{1}{2}} t^{\frac{3}{2}} \exp{\left(-\frac{t(\alpha^2 + n)}{n R^2}\right)} \left(\frac{n R^2}{2 t}\right)^{-(c + 1)} {_1} F_1(b + 1, c; t) dt \\
-% 	&= K \int n^{-c-\frac{1}{2}} (R^2)^{-c-\frac{1}{2}} 2^{-c-\frac{1}{2}} t^{c + 2} \exp{\left(\frac{-t(\alpha^2 + n)}{n R^2}\right)} {_1} F_1(b + 1, c; t) dt
-% \end{align*}
-
-% \noindent We make use of the identity \S7.621 (iv) from \citep{Gradshteyn1988}
-
-% \[
-% 	\int_0^\infty e^{-st} t^{b'-1} {_1} F_1 (a; c'; kt) = \Gamma(b') F(a, b'; c'; k s^{-1})
-% \]
-
-% \noindent with $a = \frac{\alpha^2 + n}{n R^2}$, $b'=c + 3$, $a = b + 1$, $c' = c$ and $k = 1$. This form of the identity is true if $|s| > |k|$. That is,
-% \[
-% 	\frac{\alpha^2 + n}{n R^2} > 1
-% \]
-% \noindent which is true under the mild conditions that $R^2 < 1$ and $\alpha^2 > 0$. So the above integral becomes
-% \[
-% 	I = K (2 n R^2)^{-(c + \frac{1}{2})} \Gamma(c + 3) F\left(b + 1, c + 3, c; \frac{n R^2}{\alpha^2 + n}\right).
-% \]
-
-
-
-
-% \noindent Now,
-% \[
-% 	M_{\lambda, \mu}(t) = t^{\mu + \frac{1}{2}} z^{-t/2} \phi(\mu - \lambda + \frac{1}{2}, 2 \mu + 1; t)
-% \]
-% and so
-% \[
-% 	t^{-\mu - \frac{1}{2} e^{t/2}} e^{t/2} M_{\lambda, \mu}(t) = \phi(\mu - \lambda + \frac{1}{2}, 2 \mu + 1; t).
-% \]
-
-% \noindent We make use of this to re-express ${_1}F_1(b+1, c; t)$ in terms of $M_{\lambda, \mu}(t)$. As
-% \begin{align*}
-% 	\mu - \lambda + \frac{1}{2} &= b + 1 \\
-% 	2\mu + 1 &= c
-% \end{align*}
-% this implies that $\mu = \frac{c-1}{2}$ and hence $\lambda = \mu - b - \frac{1}{2} = \frac{c-1}{2} - b - \frac{1}{2}$ and so
-% \[
-% 	\phi(b + 1, c; t) = t^{-\frac{c - 1}{2}} e^{t/2} M_{\frac{c-1}{2} - b - 1, \frac{c-1}{2}}(t).
-% \]
-
-% \noindent Thus
-% \begin{align*}
-% 	I &= K \int n^{-c-\frac{1}{2}} (R^2)^{-c-\frac{1}{2}} 2^{-c-\frac{1}{2}} t^{c + 2} \exp{(\frac{-t(\alpha^2 + n)}{n R^2})} t^{-\frac{c - 1}{2}} e^{t/2} M_{\frac{c-1}{2} - b - 1, \frac{c-1}{2}}(t) dt \\
-% 	&= K \int n^{-c-\frac{1}{2}} (R^2)^{-c-\frac{1}{2}} 2^{-c-\frac{1}{2}} t^{c/2 + 3/2} \exp{(\frac{-t(\alpha^2 + n-1/2 n R^2)}{n R^2})} M_{\frac{c-1}{2} - b - 1, \frac{c-1}{2}}(t) dt
-% \end{align*}
-
-
-% \noindent We try the identity \S7.621 ii on page 822 of \citep{Gradshteyn1988}
-% \[
-% 	\int_0^\infty e^{-st} t^{\alpha'} M_{\mu, \nu} (t) dt = \frac{\alpha' + \nu + \frac{3}{2}}{(\frac{1}{2} + s)^{\alpha' + \nu + \frac{3}{2}}} {_2} F_1(\alpha' + \nu + \frac{3}{2}, -\mu + \nu + \frac{1}{2}; 2v + 1; \frac{2}{2s + 1})
-% \]
-
-% where $\text{Re}(\alpha' + \mu + \frac{3}{2}) > 0$, $\text{Re}(s) > \frac{1}{2}$ and
-% \[
-% 	M_{\lambda, \mu} (z) z^{\mu + \frac{1}{2}} e^{-\frac{z}{2}} \Phi(\mu - \lambda + \frac{1}{2}, 2\mu + 1; z)
-% \]
-
-% so
-% \[
-% 	z^{-(\mu + \frac{1}{2})} e^{\frac{z}{2}} M_{\lambda, \mu}(z) = \Phi(\mu - \lambda + \frac{1}{2}, 2\mu + 1; z)
-% \]
-
-% $2\mu + 1 = c$, $\mu = \frac{c - 1}{2}$ \\
-% $\mu - \lambda = b + \frac{1}{2}$, $\lambda = \mu - b - \frac{1}{2}$ \\
-% $z^{-\frac{c}{2}} e^{\frac{z}{2}} M_{\frac{c-1}{2} - b - \frac{1}{2}, \frac{c-1}{2}}(z)$
-
-% So $I = K \int(n R^2 c)^{-(c + \frac{1}{2})} t^{\frac{c}{2} + 2} \exp(\frac{-t(\alpha^2 + n + \frac{1}{2}nR^2)}{nR^2}) M_{\frac{c-1}{2} - b - \frac{1}{2}, \frac{c-1}{2}}(t) dt$ \\
-% with $s = \frac{\alpha'^2 + n + \frac{1}{2} n R^2}{n R^2}$, $\alpha'=\frac{c}{2} + 2$,
-% $\lambda = \frac{c-1}{2} - b - \frac{1}{2}$, $\mu = \frac{c-1}{2}$
 
 \bibliographystyle{elsarticle-harv}
 \bibliography{references_mendeley}
