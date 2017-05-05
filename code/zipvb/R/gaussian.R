@@ -77,7 +77,10 @@ fit.Lap <- function(vmu, vy, vr, mC, mSigma.inv, mLambda)
 
 safeexp <- function(x)
 {
-  t <- 2
+  t <- getOption("threshold")
+  if (is.null(t)) {
+    t <- 2
+  }
   a <- exp(t) / 2
   b <- (1 - t) * exp(t)
   c <- (1 - (t^2) / 2 - (1 - t) * t) * exp(t)
@@ -87,7 +90,10 @@ safeexp <- function(x)
 
 safeexp_diff <- function(x)
 {
-  t <- 2
+  t <- getOption("threshold")
+  if (is.null(t)) {
+    t <- 2
+  }
   a <- exp(t) / 2
   b <- (1 - t) * exp(t)
   c <- (1 - (t^2) / 2 - (1 - t) * t) * exp(t)
@@ -97,7 +103,10 @@ safeexp_diff <- function(x)
 
 safeexp_diff_diff <- function(x)
 {
-  t <- 2
+  t <- getOption("threshold")
+  if (is.null(t)) {
+    t <- 2
+  }
   a <- exp(t) / 2
   b <- (1 - t) * exp(t)
   c <- (1 - (t^2) / 2 - (1 - t) * t) * exp(t)
@@ -107,11 +116,14 @@ safeexp_diff_diff <- function(x)
 
 safeexp_inv <- function(x)
 {
-  t <- 2
+  t <- getOption("threshold")
+  if (is.null(t)) {
+    t <- 2
+  }
   a <- exp(t) / 2
   b <- (1 - t) * exp(t)
   c <- (1 - (t^2) / 2 - (1 - t) * t) * exp(t)
-  
+
   # Complete the square
   h <- -b / (2 * a)
   k <- c - a * h^2
@@ -120,19 +132,27 @@ safeexp_inv <- function(x)
 
 vtheta_enc <- function(vmu, mR)
 {
-  diag(mR) <- safeexp_inv(diag(mR))
+  safe_exp <- !is.null(getOption("safe_exp"))
+  if (safe_exp)
+    diag(mR) <- safeexp_inv(diag(mR))
+  else
+    diag(mR) <- log(diag(mR))
   Rinds <- which(lower.tri(mR, diag=TRUE))
   c(vmu, mR[Rinds])
 }
 
 vtheta_dec <- function(vtheta, d)
 {
+  safe_exp <- !is.null(getOption("safe_exp"))
   vmu <- vtheta[1:d]
   mR <- matrix(0, d, d)
   Dinds <- d*((1:d)-1)+(1:d)
   Rinds <- which(lower.tri(mR, diag=TRUE))
   mR[Rinds] <- vtheta[(d + 1):length(vtheta)]
-  diag(mR) <- safeexp(diag(mR))
+  if (safe_exp)
+    diag(mR) <- safeexp(diag(mR))
+  else
+    diag(mR) <- exp(diag(mR))
   # Threshold entries in the diagonal of mR at 100,000
   for (i in 1:length(Dinds)) {
       mR[Dinds[i]] <- min(c(1.0E5,mR[Dinds[i]]))
@@ -320,18 +340,27 @@ fit.GVA <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e-12
 # Gaussian variational approxmation, mLambda = (mR mR^T)^-1 ----
 vtheta_enc_new <- function(vmu, mR, Rinds)
 {
-  diag(mR) <- -log(diag(mR))
-  c(vmu, mR[Rinds])
+  # cat("vtheta_enc_new: vmu ", vmu, "\n")
+  safe_exp <- !is.null(getOption("safe_exp"))
+  if (safe_exp) 
+    diag(mR) <- -safeexp_inv(diag(mR))
+  else
+    diag(mR) <- -log(diag(mR))
+  return(c(vmu, mR[Rinds]))
 }
 
 vtheta_dec_new <- function(vtheta, d, Rinds)
 {
   # browser()
+  safe_exp <- !is.null(getOption("safe_exp"))
   vmu <- vtheta[1:d]
   mR <- matrix(0, d, d)
   Dinds <- d*((1:d)-1)+(1:d)
   mR[Rinds] <- vtheta[(d + 1):length(vtheta)]
-  diag(mR) <- exp(-diag(mR))
+  if (safe_exp)
+    diag(mR) <- safeexp(-diag(mR))
+  else
+    diag(mR) <- exp(-diag(mR))
   return(list(vmu=vmu, mR=mR, Dinds=Dinds))
 }
 
@@ -359,7 +388,9 @@ f.G_new <- function(vmu, mR, vy, vr, mC, mSigma.inv, gh)
   if (any(!is.finite(vB0))) {
     f <- -1.0E16
   } else {
-    f <- sum(vr * (vy * vmu.til - vB0)) - 0.5 * t(vmu) %*% mSigma.inv %*% vmu - 0.5 * tr(mSigma.inv %*% mLambda)
+    f <- sum(vr * (vy * vmu.til - vB0))
+    f <- f - 0.5 * t(vmu) %*% mSigma.inv %*% vmu
+    f <- f - 0.5 * tr(mSigma.inv %*% mLambda)
     f <- f - 0.5 * d * log(2 * pi) + 0.5 * log(det(mSigma.inv))
   }
   return(f)
@@ -384,7 +415,7 @@ f.GVA_new <- function(vtheta, vy, vr, mC, mSigma.inv, gh, Rinds)
 
   # cat("sum(log(diag(mR)))", sum(log(diag(mR))), "\n")
   f <- -sum(log(diag(mR))) + f.G_new(vmu, mR, vy, vr, mC, mSigma.inv, gh)
-  f <- f + 0.5 * d * log(2 * pi) + 0.5 * d
+  f <- f + 0.5 * d + 0.5 * d * log(2 * pi)
 
   if (!is.finite(f) || abs(f) > 1e36) {
     f <- -1.0E16
