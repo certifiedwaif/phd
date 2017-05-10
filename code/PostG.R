@@ -1,4 +1,4 @@
-
+library(gsl)
 
 R2 = 0.5
 n = 100
@@ -72,3 +72,32 @@ for (i in 1:N) {
 
 lines(vsigma2,vf,col="blue")
 
+# Rao-Blackwellised alpha|y
+valpha <- seq(-0.3, 0.3,, 1e5)
+vf_alpha = 0 * exp(log.f)
+for (i in 1:N) {
+	vf_alpha = vf_alpha + (1 / N) * dnorm(valpha, 0, sqrt(vsigma2.post[i]) / sqrt(n))
+}
+plot(valpha,vf_alpha,col="blue",type="l")
+
+analytic <- exp(lgamma(c + 0.5) + (b + 1) * log(1 - R2) - lgamma(c) - 0.5 * log(pi) -n/2 * log(1 + valpha^2)) * hyperg_2F1(b + 1, c + 0.5, c, R2 / (1 + valpha^2))
+lines(valpha, analytic, col="red")
+legend("topright", lty=1, legend = c("Rao-Blackwellised estimator", "Analytic expression"), col = c("blue", "red"))
+
+# Rao-Blackwellised beta|y
+vbeta <- seq(-10, 10,, 1e5)
+vf_beta = 0 * exp(log.f)
+beta_hat <- 1.
+for (i in 1:N) {
+	vf_beta = vf_beta + (1 / N) * dnorm(vbeta, g[i]/(1 + g[i]) * beta_hat, sqrt(g[i]/(1 + g[i]) * vsigma2.post[i]))
+}
+plot(vbeta,vf_beta,col="blue",type="l")
+
+
+log_K <- (b + 1) * log(1-R2) - lbeta(p/2 + a + 1, b + 1)
+analytic <- exp(log_K + lbeta(p / 2 + a + 1, b + 2)) * hyperg_2F1(n/2, b + 2, n / 2 + 1, R2)
+# analytic <- exp(log_K + lbeta(p / 2 + a + 1, b + 2)) * hyperg_2F1(p/2 + a + 1, 1, n / 2 + 1, R2)
+lines(vbeta, analytic, col="red")
+legend("topright", lty=1, legend = c("Rao-Blackwellised estimator", "Analytic expression"), col = c("blue", "red"))
+
+trapint(vbeta, vbeta * vf_beta)
