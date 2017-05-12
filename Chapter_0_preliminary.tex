@@ -160,7 +160,7 @@ a compromise between each.
 Information criteria are frequently used to compare amongst models. Let $\vgamma$ denote the candidate model.
 The Information Criteria are of the form
 \[
-\text{Information Criteria} = -2 \log p(\vy | \hat{\vtheta_\vgamma}) + \text{complexity penalty}
+	\text{Information Criteria} = -2 \log p(\vy | \hat{\vtheta_\vgamma}) + \text{complexity penalty}
 \]
 
 where $\log p(\vy | \hat{\vtheta_\gamma})$ is the log-likelihood of the model and the complexity penalty is
@@ -283,8 +283,8 @@ $\exp{-K(\vp)}/Z_K$. This proposal is always accepted. During the second, dynami
 variable determines the change in the state $\vx$, and the \emph{gradient} of $E(\vx)$ determines the change
 in the momentum $\vp$, using the equations
 \begin{align*}
-\dot{\vx} &= \vp \\
-\dot{\vp} &= -\frac{\partial E(\vx)}{\partial \vx}.
+	\dot{\vx} & = \vp                                    \\
+	\dot{\vp} & = -\frac{\partial E(\vx)}{\partial \vx}. 
 \end{align*}
 
 As the change in $\vx$ is always in the direction of the momentum $\vp$ during each dynamical proposal, the
@@ -426,8 +426,8 @@ $\phi(\alpha) = f(\vx_k + \alpha \vp_k)$. A step length $\alpha_k$ is said to sa
 if the following two inequalities hold:
 
 \begin{enumerate}
-\item[(i)] $f(\vx_k + \alpha_k \vp_k) \leq f(\vx_k) + c_1 \alpha_k \vp_k^\top \nabla f(\vx_k)$ \text{(Armijo rule)}
-\item[(ii)] $\vp_k^\top \nabla f(\vx_k + \alpha_k \vp_k) \geq c_2 \vp_k^\top \nabla f(\vx_k)$ \text{(curvature condition)}
+	\item[(i)] $f(\vx_k + \alpha_k \vp_k) \leq f(\vx_k) + c_1 \alpha_k \vp_k^\top \nabla f(\vx_k)$ \text{(Armijo rule)}
+	\item[(ii)] $\vp_k^\top \nabla f(\vx_k + \alpha_k \vp_k) \geq c_2 \vp_k^\top \nabla f(\vx_k)$ \text{(curvature condition)}
 \end{enumerate}
 
 The first condition ensures that the step length $\alpha_k$ decreases $f$ sufficiently, while the second condition
@@ -575,10 +575,10 @@ analysis/error bounds and in particular their relevance to numerical linear alge
 \subsubsection{Matrix norms}
 We can define a norm on the space of matrices such that the matrix norms obey the following axioms
 \begin{align*}
-	\|\mA\| &\geq 0 \\
-	\|\mA\| &= 0 iff \mA = 0 \\
-	\|\alpha \mA\| &= |\alpha| \|\mA\| \forall \alpha \in \R \\
-	\|\mA + \mB\| &\leq \|\mA\| + \|\mB\|\text{ for all matrices } \mA, \mB
+	\|\mA\|        & \geq 0                                                   \\
+	\|\mA\|        & = 0 iff \mA = 0                                          \\
+	\|\alpha \mA\| & = |\alpha| \|\mA\| \forall \alpha \in \R                 \\
+	\|\mA + \mB\|  & \leq \|\mA\| + \|\mB\|\text{ for all matrices } \mA, \mB 
 \end{align*}
 Additionally, for square matrices
 \[
@@ -587,19 +587,19 @@ Additionally, for square matrices
 \subsubsection{Examples}
 
 \begin{enumerate}
-\item{The Frobenius Norm:}
-The Frobenius Norm (Euclidean norm) is a matrix norm on the matrix $\mA$ defined as the square root of the sum
-of the absolute squares of its elements,
-\[
-	\|\mA\|_F = \sqrt{\sum_{i=1}^m \sum_{j=1}^n |a_{ij}|^2}.
-\]
-
-\item{The p norm:}
-The p norm is a matrix norm on the matrix $\mA$ defined as the supremum of the ratio of the norm of
-$\mA \vx$ divided by the norm of $\vx$ over the set of vectors $\vx \ne \vzero$.
-\[
-	\|\mA\|_p = \sup_{\vx \ne 0} \frac{\|\mA \vx\|_p}{\|\vx\|_p}.
-\]
+	\item{The Frobenius Norm:}
+	The Frobenius Norm (Euclidean norm) is a matrix norm on the matrix $\mA$ defined as the square root of the sum
+	of the absolute squares of its elements,
+	\[
+		\|\mA\|_F = \sqrt{\sum_{i=1}^m \sum_{j=1}^n |a_{ij}|^2}.
+	\]
+	
+	\item{The p norm:}
+	The p norm is a matrix norm on the matrix $\mA$ defined as the supremum of the ratio of the norm of
+	$\mA \vx$ divided by the norm of $\vx$ over the set of vectors $\vx \ne \vzero$.
+	\[
+		\|\mA\|_p = \sup_{\vx \ne 0} \frac{\|\mA \vx\|_p}{\|\vx\|_p}.
+	\]
 \end{enumerate}
 
 The $p$-norm of a matrix and its' singular values from its' SVD are connected in the following way.
@@ -608,7 +608,7 @@ The $p$-norm of a matrix and its' singular values from its' SVD are connected in
 If $\sigma_1$, $\sigma_2$, \ldots, $\sigma_p$ are the ordered descending singular values of the SVD of $\mA
 \in \R^{m \times n}$ where $p = \min{(m, n)}$ then
 \[
-\|\mA\|_F = \sqrt{\sigma_1^2 + \sigma_2^2 + \ldots + \sigma_p^2} \geq |\sigma_1|
+	\|\mA\|_F = \sqrt{\sigma_1^2 + \sigma_2^2 + \ldots + \sigma_p^2} \geq |\sigma_1|
 \]
 
 \subsubsection{Condition numbers}
@@ -639,25 +639,25 @@ product a lower triangular matrix and its' transpose
 by noting that
 \begin{align*}
 	\mA = \mL^\top \mL &= \begin{pmatrix}
-		\mL_{11} & 0 & 0 \\
-		\mL_{21} & \mL_{22} & 0 \\
-		\mL_{31} & \mL_{32} & \mL_{33}
+	\mL_{11}          & 0                                     & 0                                    \\
+	\mL_{21}          & \mL_{22}                              & 0                                    \\
+	\mL_{31}          & \mL_{32}                              & \mL_{33}                             
 	\end{pmatrix}
 	\begin{pmatrix}
-		\mL_{11} & \mL_{21} & \mL_{31} \\
-		0 & \mL_{22} & \mL_{32} \\
-		0 & 0 & \mL_{33}
+	\mL_{11}          & \mL_{21}                              & \mL_{31}                             \\
+	0                 & \mL_{22}                              & \mL_{32}                             \\
+	0                 & 0                                     & \mL_{33}                             
 	\end{pmatrix}	\\
 	&= \begin{pmatrix}
-	\mL_{11}^2 & & \text{symmetric} \\
-	\mL_{21} \mL_{11} & \mL_{21}^2 + \mL_{22}^2 & \\
-	\mL_{31} \mL_{11} & \mL_{31} \mL_{21} + \mL_{32} \mL_{22} & \mL_{31}^2 + \mL_{32}^2 + \mL_{33}^2
+	\mL_{11}^2        &                                       & \text{symmetric}                     \\
+	\mL_{21} \mL_{11} & \mL_{21}^2 + \mL_{22}^2               &                                      \\
+	\mL_{31} \mL_{11} & \mL_{31} \mL_{21} + \mL_{32} \mL_{22} & \mL_{31}^2 + \mL_{32}^2 + \mL_{33}^2 
 	\end{pmatrix}
 \end{align*}
 and so
 \begin{align*}
-	\mL_{jj} &= \sqrt{\mA_{jj} - \sum_{k=1}^{j-1} \mL_{jk}^2} \text{ and}\\
-	\mL_{ij} &= \frac{1}{\mL_{jj}} (\mA_{ij} - \sum_{k=1}^{j-1} \mL_{ik} \mL_{jk}), \text{ for } i > j.
+	\mL_{jj} & = \sqrt{\mA_{jj} - \sum_{k=1}^{j-1} \mL_{jk}^2} \text{ and}                               \\
+	\mL_{ij} & = \frac{1}{\mL_{jj}} (\mA_{ij} - \sum_{k=1}^{j-1} \mL_{ik} \mL_{jk}), \text{ for } i > j. 
 \end{align*}
 
 This can be computed in $\BigO(p^2)$ for a $p \times p$ matrix. Once this form is obtained, it has several
@@ -719,7 +719,7 @@ below. Consider a block matrix
 \[
 	\begin{pmatrix}
 		\mA & \mB \\
-		\mC & \mD
+		\mC & \mD 
 	\end{pmatrix}.
 \]
 Then the inverse of this matrix is given by the block-matrix inverse formula
@@ -730,21 +730,21 @@ Then the inverse of this matrix is given by the block-matrix inverse formula
 %Block inverse formula \\
 \[
 	\begin{pmatrix}
-	\mA & \mB \\
-	\mC & \mD
+		\mA & \mB \\
+		\mC & \mD 
 	\end{pmatrix}^{-1}
 	=
 	\begin{pmatrix}
-	\mI & 0 \\
-	-\mD^{-1} \mC & I
+		\mI           & 0 \\
+		-\mD^{-1} \mC & I 
 	\end{pmatrix}
 	\begin{pmatrix}
-	(\mA - \mB^{-1}\mC)^{-1} & 0 \\
-	0 & \mD^{-1}
+		(\mA - \mB^{-1}\mC)^{-1} & 0        \\
+		0                        & \mD^{-1} 
 	\end{pmatrix}
 	\begin{pmatrix}
-	\mI & 0 \\
-	-\mB\mD^{-1} & \mI
+		\mI          & 0   \\
+		-\mB\mD^{-1} & \mI 
 	\end{pmatrix}
 \]
 
@@ -793,11 +793,11 @@ $$
 where
 
 \begin{align*}
-B_{i, 0}(x) &:= \begin{cases}
-1 & \text{if } t_i \leq x < t_{i+1} \\
-0 & \text{otherwise}
-\end{cases} \\
-B_{i, k}(x) &:= \frac{x - t_i}{t_{i + 1} - t_i} B_{i, k-1} (x) + \frac{t_{i + k + 1} - x}{t_{i + k + 1} - t_{i + 1}} B_{i, k-1} (x).
+	B_{i, 0}(x) & := \begin{cases}                                                                                                        
+	1           & \text{if } t_i \leq x < t_{i+1}                                                                                         \\
+	0           & \text{otherwise}                                                                                                        
+	\end{cases} \\
+	B_{i, k}(x) & := \frac{x - t_i}{t_{i + 1} - t_i} B_{i, k-1} (x) + \frac{t_{i + k + 1} - x}{t_{i + k + 1} - t_{i + 1}} B_{i, k-1} (x). 
 \end{align*}
 
 \subsection{O'Sullivan Splines}
@@ -839,10 +839,10 @@ Consider the fixed effects model $\vy = \mX \vbeta$ where $\mX \in \R^{n \times 
 defined as $\mH = \mX (\mX^\top\mX)^{-1} \mX^\top$ then
 
 \begin{align*}
-\tr(\mH) &= \tr[\mX(\mX^\top\mX)^{-1}\mX^\top] \\
-&= \tr[\mX^\top\mX (\mX^\top\mX)^{-1}] \\
-&= \tr(\mI_p) \\
-&= p
+	\tr(\mH) & = \tr[\mX(\mX^\top\mX)^{-1}\mX^\top]  \\
+	         & = \tr[\mX^\top\mX (\mX^\top\mX)^{-1}] \\
+	         & = \tr(\mI_p)                          \\
+	         & = p                                   
 \end{align*}
 
 which is the number of parameters in the fixed effects model. Thus we use the trace of the hat matrix as
@@ -871,17 +871,17 @@ Different choices of the function $b:\R \to \R$ lead to different generalised li
 of available functions and corresponding distributions is presented in Table \ref{tab:b_functions}.
 
 \begin{table}
-\caption{Table of b functions}
-\label{tab:b_functions}
-\begin{tabular}{|l|lll|}
-\hline
-Distribution & Parameter & Natural parameter & Inverse parameter mapping \\
-\hline
-Bernoulli distribution & $p$ & $\log{\frac{p}{1 - p}}$ & $\frac{1}{1 + e^\eta}$ \\
-Poisson distribution & $\lambda$ & $\log \lambda$ & $e^\eta$ \\
-Normal distribution (known variance) & $\mu$ & $\frac{\mu}{\sigma}$ & $\sigma \eta$ \\
-\hline
-\end{tabular}
+	\caption{Table of b functions}
+	\label{tab:b_functions}
+	\begin{tabular}{|l|lll|}
+		\hline
+		Distribution                         & Parameter & Natural parameter       & Inverse parameter mapping \\
+		\hline
+		Bernoulli distribution               & $p$       & $\log{\frac{p}{1 - p}}$ & $\frac{1}{1 + e^\eta}$    \\
+		Poisson distribution                 & $\lambda$ & $\log \lambda$          & $e^\eta$                  \\
+		Normal distribution (known variance) & $\mu$     & $\frac{\mu}{\sigma}$    & $\sigma \eta$             \\
+		\hline
+	\end{tabular}
 \end{table}
 
 \subsection{Bias of MLE}
