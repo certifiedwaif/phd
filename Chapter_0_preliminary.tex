@@ -88,7 +88,10 @@ resulting Gaussian posterior of the regression parameters easy to interpret. We 
 Bayes (VB) approach on the other parameters in the model to derive the rest of the approximation.
 
 \section{Model selection}
-The task of selecting a statistical model from a set of candidate models given data, is one
+% Given a full data matrix $\mX \in \R^{n \times p}$, we may wish to find the subset of variables $\gamma \in \{
+% 1 \ldots p \}$ such that $\mX_\gamma \vbeta_\gamma$ describe the data in $\vy$ best.
+
+The task of selecting a statistical model from a set of candidate models given a data set is one
 of the fundamental tasks of scientific inquiry. It is one of the central tasks of applied statistical
 analysis, and there is a correspondingly large literature on the subject. The problem of model selection for
 normal linear models is particularly well studied, owing to the popularity and importance of normal linear
@@ -139,6 +142,21 @@ probability model, consisting of those models whose posterior inclusion probabil
 
 \section{Frequentist Approaches to Model Selection}
 \subsection{Information criteria}
+
+
+In a frequentist context, there are many functions which can be used to judge which model is best,
+such as AIC, BIC etc. These are functions $f: \gamma \to \R^+$ which allow the models under consideration to
+be ranked, and the best model chosen from those available. Thus the optimal model under such a measure
+f is
+\[
+	\gamma^* = \max_\gamma f(\gamma)
+\]
+These functions typically attempt to balance log likelihood against the complexity of the model, achieving
+a compromise between each.
+
+\mgc{AIC, BIC, DIC, Mallow's $C_p$}
+
+
 Information criteria are frequently used to compare amongst models. Let $\vgamma$ denote the candidate model.
 The Information Criteria are of the form
 \[
@@ -327,62 +345,29 @@ approximated is multivariate Gaussian. The covariance matrix of the Gaussian all
 capture the dependence amongst the elements of $\vtheta$, which increases the accuracy of the variational
 approximation relative to the factored approximation.
 
-\subsection{Laplace's Method of approximation}
+\section{Matrix calculus}
 
-Laplace's method is a technique use to approximate integrals of the form
-\[
-	\int_a^b e^{M f(x)} dx
-\]
+Matrix calculus is a very elegant and compact notation for the derivatives of functions of vectors and matrices.
+A useful introduction is \cite{Wand2002}, while a more comprehensive treatment can be found in
+\cite{magnus99}.
 
-where $f(x)$ is twice differentiable, $M \in \R$ and $a, b \in \R \cup \{-\infty, \infty\}$.
+\subsection{Notation}
 
-Let $f(x)$ have a unique global maximum at $x_0$. Then, Taylor expanding about $x_0$, we have
+Given a function $f:\R^{n \times n} \to \R$ of a matrix $\mLambda$, we denote the matrix derivative of $f$ with 
+respect to $\mLambda$ as $\mD_\mLambda f$, and the Hessian of $f$ with respect to $\mLambda$ as
+$\mH_\mLambda f$ the Hessian with respect to $\mLambda$.
 
-\[
-	f(x) = f(x_0) + f'(x_0) (x - x_0) + \frac{1}{2} f''(x_0) (x - x_0)^2 + R
-\]
-
-where $R = \BigO((x - x_0)^3)$.
-
-As $f$ has a global maximum at $x_0$, the first derivative of $f$ is zero at $x_0$. Thus, the function $f(x)$
-may be approximated by
-\[
-	f(x) \approx f(x_0) - \frac{1}{2} |f''(x_0)| (x - x_0)^2
-\]
-
-for $x$ sufficiently close to $x_0$, as the second derivative is negative at $x_0$. This ensures the
-accuracy of
+The Hessian matrix is a $d \times d$ matrix whose $(i, j)$-th entry is equal to
 
 \[
-	\int_a^b e^{M f(x)} dx \approx e^{M f(x_0)} \int_a^b e^{-M |f''(x_0)|(x - x_0)^2} dx.
+	\frac{\partial^2}{\partial x_i x_j} f(\vx)
 \]
 
-This is a Gaussian integral, and thus we find that
+and is denoted by $\mH f(\vx)$.
 
-\[
-	\int_a^b e^{M f(x)} dx \approx \sqrt{\frac{2 \pi}{M |f''(x_0)|}} e^{M f(x_0)}
-\]
-
-Relative error
-
-
-This approach to approximating integrals extends naturally to multiple dimensions.
-Consider the second order Taylor expansion of $\log f(\vtheta)$ around the mode $\vtheta_m$
-$$
-\log f(\vtheta) \approx f(\vtheta_m) + (\vtheta - \vtheta_m) \nabla \log f(\vtheta) + \half (\vtheta - \vtheta_m)^\top \mH_{\log f}(\vtheta_m) (\vtheta - \vtheta_m) + \sO(\|\vtheta - \vtheta_m\|^3).
-$$
-
-Assuming that $\vtheta$ is a stationary point of $\log f$, then $\nabla f(\vtheta) = \vzero$ and so
-$$
-\log f(\vtheta) \approx f(\vtheta_m) + \half (\vtheta - \vtheta_m)^\top \mH_{\log f}(\vtheta_m) (\vtheta - \vtheta_m) + \sO(\|\vtheta - \vtheta_m\|^3)
-$$
-
-at such a point. The quadratic form in $\vtheta$ in the approximate expression for the log likelihood above
-leads to a Gaussian approximation for the likelihood $\N(\vtheta_m, \mH_{\log f}(\vtheta_m)^{-1})$.
-
-The approximation is crude but can be quite accurate if the likelihood is symmetric and unimodal.
-
+\section{Optimisation}
 \subsection{Newton-Raphson}
+\cite{Nocedal2006}
 
 \subsubsection{Definition}
 
@@ -417,9 +402,8 @@ of Quasi-Newton algorithms, such as BFGS, L-BFGS and L-BFGS-B, discussed in Sect
 
 \subsubsection{Radius of convergence and convergence to local solutions}
 
-\subsection{Quasi-Newton Rapson algorithms}
+\subsection{Quasi-Newton Raphson algorithms: L-BFGS-B}
 \label{sec:quasi_newton}
-L-BFGS-B
 
 \subsubsection{Definition}
 
@@ -465,7 +449,88 @@ implies $\mB_{k+1}$ is also positive definite.
 
 \subsubsection{Time and memory complexity}
 
-\section{Numerical matters}
+\section{Integrals}
+\subsection{Laplace's Method of approximation}
+
+Laplace's method of approximation is used to approximate integrals of a unimodal function with negative second
+derivative at the mode, indicating that the function is decreasing rapidly away from this point. The essential
+idea is that if the function is decreasing rapidly away from the mode, the bulk of the area under the function
+will be within a neighbourhood of the mode. Thus the integral of the function can be well approximated by an
+integral over the neighbourhood of the mode. How large that neighbourhood needs to be is estimated using
+how fast the function is changing at the mode, which is estimated by $|f''(x_0)|$.
+
+Consider
+\[
+	\int_a^b e^{M f(x)} dx
+\]
+
+where $f(x)$ is twice differentiable and $f''(x_0) < 0$, $M \in \R$ and $a, b \in \R \cup \{-\infty, \infty\}$.
+
+Let $f(x)$ have a unique global maximum at $x_0$. Then, Taylor expanding about $x_0$, we have
+
+\[
+	f(x) = f(x_0) + f'(x_0) (x - x_0) + \frac{1}{2} f''(x_0) (x - x_0)^2 + R
+\]
+
+where $R = \BigO((x - x_0)^3)$.
+
+As $f$ has a global maximum at $x_0$, the first derivative of $f$ is zero at $x_0$. Thus, the function $f(x)$
+may be approximated by
+\[
+	f(x) \approx f(x_0) - \frac{1}{2} |f''(x_0)| (x - x_0)^2
+\]
+
+for $x$ sufficiently close to $x_0$, as the second derivative is negative at $x_0$. This ensures the
+accuracy of
+
+\[
+	\int_a^b e^{M f(x)} dx \approx e^{M f(x_0)} \int_a^b e^{-M |f''(x_0)|(x - x_0)^2} dx.
+\]
+
+This is a Gaussian integral, and thus we find that
+
+\[
+	\int_a^b e^{M f(x)} dx \approx \sqrt{\frac{2 \pi}{M |f''(x_0)|}} e^{M f(x_0)}
+\]
+
+Thus we have approximated our integral by a closed form expression.
+
+\subsubsection{Relative error} % What to write about this? Include the justification/proof?
+The approximation above is $O(1/\sqrt{M})$. % See the Relative error section of the Wikipedia page, for instance.
+The approximation can be made more accurate by using a Taylor
+expansion beyond second order.
+
+\subsubsection{Extending to multiple dimensions}
+This approach to approximating integrals extends naturally to multiple dimensions.
+Consider the second order Taylor expansion of $\log f(\vtheta)$ around the mode $\vtheta_m$
+$$
+\log f(\vtheta) \approx f(\vtheta_m) + (\vtheta - \vtheta_m) \nabla \log f(\vtheta) + \half (\vtheta - \vtheta_m)^\top \mH_{\log f}(\vtheta_m) (\vtheta - \vtheta_m) + \sO(\|\vtheta - \vtheta_m\|^3).
+$$
+
+Assuming that $\vtheta$ is a stationary point of $\log f$, then $\nabla f(\vtheta) = \vzero$ and so
+$$
+\log f(\vtheta) \approx f(\vtheta_m) + \half (\vtheta - \vtheta_m)^\top \mH_{\log f}(\vtheta_m) (\vtheta - \vtheta_m) + \sO(\|\vtheta - \vtheta_m\|^3)
+$$
+
+at such a point. The quadratic form in $\vtheta$ in the approximate expression for the log likelihood above
+leads to a Gaussian approximation for the likelihood $\N(\vtheta_m, \mH_{\log f}(\vtheta_m)^{-1})$.
+
+The approximation is crude but can be quite accurate if the likelihood is symmetric and unimodal.
+
+\subsection{Trapezoidal integration}
+
+If an integral cannot be approximated well using Laplace's method or some other method of approximation, then
+it can often be evaluated numerically using a quadrature scheme. Trapezoidal integration is a method of
+numerically computing the integral of a function $f: \R \to \R$ over the interval $(a, b)$. First, the
+interval is partitioned into $x_1, x_2, \ldots, x_{n-1}, x_n$, and then
+\[
+	\int_a^b f(x) dx \approx \sum_{i=1}^{n-1} \frac{1}{2} \frac{f(x_i) + f(x_{i+1})}{x_{i+1} - x_i}
+\]
+
+Note that the points $x_i$ can be chosen arbitrarily within the interval $(a, b)$, and do not need to be
+evenly spaced. \mgc{What's the error bound? Error analysis using Taylor's theorem?}
+
+\section{Numerical computation}
 
 In this section, I'd like to talk about floating point representation and its' consequences, numerical
 analysis/error bounds and in particular their relevance to numerical linear algebra.
@@ -505,17 +570,6 @@ analysis/error bounds and in particular their relevance to numerical linear alge
 % \subsection{Truncation and round-off error}
 % \subsection{Numerical stability}
 % \subsection{Numerical differentiation and integration}
-\subsubsection{Trapezoidal integration}
-
-Trapezoidal integration is a method of approximating the integral of a function $f: \R \to \R$ over the
-interval $(a, b)$. First, the interval is partitioned into $x_1, x_2, \ldots, x_{n-1}, x_n$, and then
-
-\[
-	\int_a^b f(x) dx \approx \sum_{i=1}^{n-1} \frac{1}{2} \frac{f(x_i) + f(x_{i+1})}{x_{i+1} - x_i}
-\]
-
-Note that the points $x_i$ can be chosen arbitrarily within the interval $(a, b)$, and do not need to be
-evenly spaced. \mgc{What's the error bound? Error analysis using Taylor's theorem?}
 
 \subsection{Numerical linear algebra}
 \subsubsection{Matrix norms}
@@ -558,8 +612,8 @@ If $\sigma_1$, $\sigma_2$, \ldots, $\sigma_p$ are the ordered descending singula
 \]
 
 \subsubsection{Condition numbers}
-In numerical linear algebra, a useful measure is the \emph{condition number} of A; it depends on the matrix
-norm used and is defined by
+In numerical linear algebra, a useful measure for quantifying the sensitivity of numerical procedures such as
+solving linear systems is the \emph{condition number} of A. It depends on the matrix norm used and is defined by
 \[
 	\kappa(\mA) := \|\mA^{-1}\|.\|\mA\| = \frac{\sigma_{\text{max}}(\mA)}{\sigma_{\text{min}}(\mA)}.
 \]
@@ -612,9 +666,14 @@ only the non-zero entries need to be stored. Secondly, the triangular form of $\
 involving $\mL$ to be solved in $\BigO{(p^2)}$ using back-substitution and forward-substitution, without using
 Gaussian elmination or calculating a matrix inverse.
 
-\subsection{Difficulty of inverting linear systems}
+\subsection{Difficulty of inverting matrices which are nearly singular}
+In computational statistics, the task of inverting matrices often arises when
+attempting to solve a statistical problem such as fitting a model. While theoretically this task can always be
+done successfully, in practice if the matrix or its' inverse being inverted is close to singular this can be
+difficult or even impossible. This can arise in numerical procedures which are prone to overflow, such as
+Poisson regression, which overflows due to the exponential link function in the formulation of the problem.
 
-\subsubsection{Instability}
+\subsubsection{Sensitivity of solving linear systems}
 
 A precise measure of linear system sensitivity can be obtained by considering the parameterised system
 \[
@@ -645,20 +704,30 @@ sensitivity of the $\mA \vx = \vb$ problem.
 % From \cite{trefethen97}'s section on Conditioning and Condition Numbers, p91
 
 A problem is \emph{well-conditioned} if $\kappa$ is small (e.g. $1$, $10$, $10^2$) and \emph{ill-conditioned}
-if $\kappa$ is large (e.g. $10^6$, $10^16$) \cite{trefethen97}.  If a matrix is either close to singular or
+if $\kappa$ is large (e.g. $10^6$, $10^{16}$) \cite{trefethen97}.  If a matrix is either close to singular or
 has very large singular values, then it will be ill-conditioned.
 
 An immediate consequence of this is that if either $\mA$ or its' inverse are ill-conditioned, then inversion
-or solution of the linear system will be highly numerically unstable.
-
-In our ZIP code, we routinely saw values of at least $10^5$ on the diagonals of our Cholesky factors.
+or solution of the linear system will be highly numerically unstable. In our ZIP code, we routinely saw values of 
+at least $10^5$ on the diagonals of our Cholesky factors until we changed the parameterisation to the safe
+exponential parameterisation.
 
 \subsubsection{Sparsity of the inverse}
-Sparsity of a matrix does not ensure sparsity of its' inverse. Demonstrate this using
-the block-inverse formula. Inverting a matrix is an inherently unstable operation. The number of floating
-point operations involved leads to magnification of error.
+We often wish to work with sparse matrices due to the computational advantages and increased numerical
+stability they provide. But sparse matrices do not necessarily have sparse inverses as will be demonstrated
+below. Consider a block matrix
+\[
+	\begin{pmatrix}
+		\mA & \mB \\
+		\mC & \mD
+	\end{pmatrix}.
+\]
+Then the inverse of this matrix is given by the block-matrix inverse formula
+%Demonstrate this using
+%the block-inverse formula. Inverting a matrix is an inherently unstable operation. The number of floating
+%point operations involved leads to magnification of error.
 
-Block inverse formula \\
+%Block inverse formula \\
 \[
 	\begin{pmatrix}
 	\mA & \mB \\
@@ -685,34 +754,15 @@ then the inverse will not be sparse in \emph{any} of the corresponding blocks.
 \section{Positive semi-definite matrices}
 A positive semidefinite matrix $\mLambda$ is a square matrix of size $n \times n$ such that for any vector
 $\vx \in \R^n$, $\vx^\top \mLambda \vx \geq 0$. Equivalently, all eigenvalues of $\mLambda$ are greater than or 
-equal to 0.
-
-\section{Matrix calculus}
-
-Matrix calculus is a very useful and compact notation for the derivatives of functions of vectors and matrices.
-A useful introduction is \cite{wand02}, while a more comprehensive treatment can be found in
-\cite{MagnusNeudecker99}.
-
-\subsection{Notation}
-
-Given a function $f:\R^{n \times n} \to \R$ of a matrix $\mLambda$, we denote the matrix derivative of $f$ with 
-respect to $\mLambda$ as $\mD_\mLambda f$, and the Hessian of $f$ with respect to $\mLambda$ as
-$\mH_\mLambda f$ the Hessian with respect to $\mLambda$.
-
-The Hessian matrix is a $d \times d$ matrix whose $(i, j)$-th entry is equal to
-
-$$
-\frac{\partial^2}{\partial x_i x_j} f(\vx)
-$$
-
-and is denoted by $\mH f(\vx)$.
+equal to 0. A typical example arising in statistics is the covariance matrix of a random vector, which is
+positive definite by definition.
 
 \section{Splines}
 The most general form of the univariate regression problem is
 
-$$
-y_i = f(x_i)
-$$
+\[
+	y_i = f(x_i)
+\]
 
 where $f: \R \to \R$ is unknown, and we wish to estimate it as $\hat{f}$. We treat the functional form of
 $f$ as unknown, and attempt to estimate it purely from the data available to us. Fully non-parametric regression
@@ -838,30 +888,6 @@ Normal distribution (known variance) & $\mu$ & $\frac{\mu}{\sigma}$ & $\sigma \e
 
 How does this relate to Bayesian estimation? Maybe it's just interesting background.
 Bernstein-von Mises Theorem
-
-\section{Model selection}
-
-\subsection{Frequentist}
-
-Given a full data matrix $\mX \in \R^{n \times p}$, we may wish to find the subset of variables $\gamma \in \{
-1 \ldots p \}$ such that $\mX_\gamma \vbeta_\gamma$ describe the data in $\vy$ best, in some sense.
-
-In a frequentist context, there are many functions which can be used to judge which model is best,
-such as AIC, BIC etc. These are functions $f: \gamma \to \R^+$ which allow the models under consideration to
-be ranked, and the best model chosen from those available. Thus the optimal model under such a measure
-f is
-$$
-\gamma^* = \max_\gamma f(\gamma)
-$$
-
-These functions typically attempt to balance log likelihood against the complexity of the model, achieving
-a compromise between each.
-
-\mgc{AIC, BIC, DIC, Mallow's $C_p$}
-
-\subsection{Bayesian model selection}
-
-\mgc{Normal model selection with $g$--priors?}
 
 \bibliographystyle{elsarticle-harv}
 % \bibliography{Chapter_0_preliminary}
