@@ -116,13 +116,12 @@ to simplify the expression further.
 Similiarly,
 
 \[
-	\E\left[ \left(\frac{g}{1 + g} \right)^2 \Bigm| \vy \right] = \frac{\Beta(p/2 + a + 1, b + 3)}{\Beta(p /2 + a + 1, b + 1)} (1 - R^2)^{b+2} {}_2 F_1(p/2 + a + 1, b + 3; n/2 + 1; R^2)
+	\E\left[ \left(\frac{g}{1 + g} \right)^2 \Bigm| \vy \right] = \frac{\Beta(p/2 + a + 1, b + 3)}{\Beta(p /2 + a + 1, b + 1)} (1 - R^2)^{b+2} {}_2 F_1(p/2 + a + 1, b + 3; n/2 + 2; R^2)
 \]
 
 Thus we obtain
-
 \begin{align*}
-	G_1 & = \frac{\Beta(p/2 + a + 1, b + 2)}{\Beta(p /2 + a + 1, b + 1)} (1 - R^2)^{b+1} {}_2 F_1(n/2, b + 1; n/2 + 1; R^2) \\
+	G_1 & = \frac{\Beta(p/2 + a + 1, b + 2)}{\Beta(p /2 + a + 1, b + 1)} (1 - R^2)^{b+1} {}_2 F_1(n/2, b + 2; n/2 + 1; R^2) \\
 	G_2 & = \frac{\Beta(p/2 + a + 1, b + 3)}{\Beta(p /2 + a + 1, b + 1)} (1 - R^2)^{b+1} {}_2 F_1(n/2, b + 3; n/2 + 2; R^2) 
 \end{align*}
 
@@ -917,6 +916,32 @@ Then the above integral becomes
 \begin{align*}
 	\int_0^1 \frac{h^{b - p/2} [1 + (\frac{h}{1 - h})(1 - R^2)]^{-n/2}}{(1 - h)^b (1 - h R^2)^{p/2} \{ 1 + \frac{1}{n}[h(1 - h R^2)]^{-1} (\vbeta - h \hat{\vbeta}_{LS})^\top \mX^\top \mX (\vbeta - h \hat{\vbeta}_{LS}) \}} \left(1 + \frac{h}{1 - h}\right)^2 dh 
 \end{align*}
+
+
+\section{Proof that if $x|z \sim \N(\mu, \sigma^2 \mV)$ and $z \sim \IG(a, b)$ then $\vx \sim t_{2a}(\mu, \frac{b}{a}\mV)$}
+
+We begin by calculating the marginal distribution of $p(x)$
+
+\begin{align*}
+	p(\vx) &= \int_0^\infty p(\vx|z) p(z) dz = \int_0^\infty (2 \pi)^{-p/2} |\sigma^2 \mV|^{-1/2} 
+					\exp{\left[-\frac{1}{2}(\vx - \vmu)^\top \sigma^{-2} \mV^{-1} (\vx - \vmu) \right]} 
+					\frac{b^a}{\Gamma(a)} (\sigma^2)^{-a-1} \exp{\left(-\frac{b}{\sigma^2}\right)} d \sigma^2 \\
+			&= (2 \pi)^{-p/2} |\mV|^{-1/2} \frac{b^a}{\Gamma(a)} \int_0^\infty (\sigma^2)^{-p/2-a-1} \exp \left[-\frac{1}{\sigma^2} (b + \frac{1}{2} (\vx - \vmu)^\top \mV^{-1} (\vx - \vmu))) \right] d \sigma^2
+\end{align*}
+
+Making the change of variable $z = \sigma^{-2}[b + \frac{1}{2}(\vx - \vmu)^\top \mV^{-1} (\vx - \vmu)]$,
+$dz = - \frac{1}{(\sigma^2)^2} [b + \frac{1}{2} (\vx - \vmu)^\top \mV^{-1} (\vx - \vmu)] d \sigma^2$
+the integral becomes
+
+\begin{align*}
+	&= K \int_0^\infty z^{p/2 + a + 1} \left[b + \frac{1}{2} (\vx - \vmu)^\top \mV^{-1} (\vx - \vmu)\right]^{-p/2 -a - 1}
+			\exp{(-z)} z^{-2} [b + \frac{1}{2} (\vx - \vmu)^\top \mV^{-1} (\vx - \vmu)]^{2-1} dz \\
+	&= K \left[b + \frac{1}{2} (\vx - \vmu)^\top \mV^{-1} (\vx - \vmu)\right]^{-p/2 - a} \Gamma(p/2 + a) \\
+	&= (2 \pi)^{-p/2} |\mV|^{-1/2} \cancel{b^a} \frac{\Gamma(p/2 + a)}{\Gamma(a)} b^{-p/2 \cancel{- a}} \left[ 1 + \frac{1}{2} (\vx - \vmu)^\top b^{-1} \mV^{-1} (\vx - \vmu) \right]^{-p/2 - a}
+\end{align*}
+
+This \emph{almost} proves what's required. We just need to manipulate the integral to include powers of $a$
+in a couple of places.
 
 \section{Proof that $q(\beta_s, \gamma_s) \Pi_{j \notin S} q(\beta_j, \gamma_j)$ is a good factored approximation}
 
