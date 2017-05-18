@@ -33,7 +33,11 @@ double log_prob(const int n, const int p, int p_gamma, const double sigma2, cons
 	// Rcpp::Rcout << "log_n " << log_n << std::endl;
 	// Rcpp::Rcout << "Rf_lbeta(" << a + p_gamma << ", " << b + p - p_gamma << ") " << Rf_lbeta(a + p_gamma, b + p - p_gamma) << std::endl;
 	#endif
-	double log_p = -n / 2. * log_sigma2 - p / 2. * log_n + Rf_lbeta(a + p_gamma, b + p - p_gamma);
+	double log_p;
+	if (sigma2 == 0.) {
+		log_p = -INFINITY;
+	}
+	log_p = -n / 2. * log_sigma2 - p_gamma / 2. * log_n + Rf_lbeta(a + p_gamma, b + p - p_gamma);
 	#ifdef DEBUG
 	// Rcpp::Rcout << "log_p " << log_p << std::endl;
 	#endif
@@ -42,21 +46,26 @@ double log_prob(const int n, const int p, int p_gamma, const double sigma2, cons
 }
 
 
-void calculate_probabilities(vector< dbitset > gamma, VectorXd sigma2, int n, VectorXd& probs)
+void calculate_log_probabilities(vector< dbitset > gamma, VectorXd sigma2, int n, VectorXd& log_probs)
 {
 	auto K = gamma.size();
 	auto p = gamma[0].size();
 	auto a = 1.;
 
-
 	for (auto k = 0; k < K; k++) {
-		auto p_gamma = gamma[k].count();
-		auto b = p;
-		probs[k] = exp(log_prob(n, p, p_gamma, sigma2[k], a, b));
+		if (sigma2[k] == 0.) {
+			log_probs[k] = -INFINITY;
+		} else {
+			auto p_gamma = gamma[k].count();
+			auto b = p;
+			log_probs[k] = log_prob(n, p, p_gamma, sigma2[k], a, b);
+		}
 		#ifdef DEBUG
-		// Rcpp::Rcout << "probs[" << k << "] " << probs[k] << std::endl;
+		// Rcpp::Rcout << "log_probs[" << k << "] " << log_probs[k] << std::endl;
 		#endif
 	}
+	// Re-normalise
+	log_probs = log_probs.array() - log_probs.maxCoeff();
 }
 
 
@@ -99,7 +108,7 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 	auto b = p;
 	const MatrixXd mXTX = mX.transpose() * mX;
 	const MatrixXd mXTy = mX.transpose() * vy;
-	VectorXd probs(K);
+	VectorXd log_probs(K);
 	VectorXd w(K);
 	vector< dbitset > gamma(K);
 	vector< vector< dbitset > > trajectory;
@@ -166,10 +175,10 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 		mXTX_inv[k] = (mX_gamma.transpose() * mX_gamma).inverse();
 		sigma2[k] = 1. - (mX_gamma_Ty.transpose() * mXTX_inv[k] * mX_gamma_Ty).value() / n;
 		// Rcpp::Rcout << "sigma2[" << k << "] " << sigma2[k] << std::endl;
-		calculate_probabilities(gamma, sigma2, n, probs);
+		calculate_log_probabilities(gamma, sigma2, n, log_probs);
 	}
 	trajectory.push_back(gamma);
-	trajectory_probs.push_back(probs);
+	trajectory_probs.push_back(log_probs.array().exp());
 
 	// Loop until convergence
 	auto converged = false;
@@ -315,21 +324,57 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 			}
 		}
 
-		calculate_probabilities(gamma, sigma2, n, probs);
+		calculate_log_probabilities(gamma, sigma2, n, log_probs);
 
+		auto a = log_probs.maxCoeff();
+		auto denom = 0.;
 		for (auto k = 0; k < K; k++) {
-			w[k] = probs[k] / probs.sum();
+			if (sigma2[k] == 0.) {
+				continue;
+			}	else {
+				denom += exp(log_probs[k] - a);
+			}
+		}
+		auto log_denom = a + log(denom);
+		for (auto k = 0; k < K; k++) {
+			// Need to use log-sum-exp trick here
+			// Have to skip 0 probabilities somehow.
+			// w[k] = probs[k] / probs.sum();
+			if (sigma2[k] == 0.) {
+				w[k] = 0.;
+			} else {
+				w[k] = exp(log_probs[k] - log_denom);
+			}
 			#ifdef DEBUG
-			// Rcpp::Rcout << "w[" << k << "] " << w[k] << std::endl;
+			Rcpp::Rcout << "w[" << k << "] " << w[k] << std::endl;
 			#endif
 		}
 
 		// Check for convergence - is f_lambda changed from the last iteration?
-		auto H = -(w.array() * w.array().log()).sum();
+		// Don't add 0 weights
+		auto H = 0.;
+		// -(w.array() * w.array().log()).sum();
+		for (auto k = 0; k < K; k++) {
+			if (w[k] == 0.) {
+				continue;
+			}	else {
+				H += -w[k] * log(w[k]);
+			}
+		}
 		#ifdef  DEBUG
 		Rcpp::Rcout << "H " << H << std::endl;
 		#endif
-		double f_lambda = w.dot(probs) + lambda * H;
+		// Rcpp::Rcout << "w.dot(probs) " << w.dot(probs) << std::endl;
+		auto w_dot_prob = 0.;
+		for (auto k = 0; k < K; k++) {
+			if (w[k] == 0.) {
+				continue;
+			} else {
+				w_dot_prob += w[k] * exp(log_probs[k]);
+			}
+			Rcpp::Rcout << "w[k] " << w[k] << " log_probs[k] " << log_probs[k] << " w_dot_prob " << k << " " << w_dot_prob << " " << std::endl;
+		}
+		double f_lambda = w_dot_prob + lambda * H;
 		#ifdef DEBUG
 		Rcpp::Rcout << "f_lambda_prev " << f_lambda_prev << " f_lambda " << f_lambda << std::endl;
 		#endif
@@ -346,7 +391,7 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 		}
 		iteration++;
 		trajectory.push_back(gamma);
-		trajectory_probs.push_back(probs);
+		trajectory_probs.push_back(log_probs.array().exp());
 	}
 	#ifdef DEBUG
 	Rcpp::Rcout << "Converged" << std::endl;
