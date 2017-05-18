@@ -372,7 +372,9 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 			} else {
 				w_dot_prob += w[k] * exp(log_probs[k]);
 			}
+			#ifdef DEBUG
 			Rcpp::Rcout << "w[k] " << w[k] << " log_probs[k] " << log_probs[k] << " w_dot_prob " << k << " " << w_dot_prob << " " << std::endl;
+			#endif
 		}
 		double f_lambda = w_dot_prob + lambda * H;
 		#ifdef DEBUG
