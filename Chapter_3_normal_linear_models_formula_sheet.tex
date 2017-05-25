@@ -917,6 +917,51 @@ Then the above integral becomes
 	\int_0^1 \frac{h^{b - p/2} [1 + (\frac{h}{1 - h})(1 - R^2)]^{-n/2}}{(1 - h)^b (1 - h R^2)^{p/2} \{ 1 + \frac{1}{n}[h(1 - h R^2)]^{-1} (\vbeta - h \hat{\vbeta}_{LS})^\top \mX^\top \mX (\vbeta - h \hat{\vbeta}_{LS}) \}} \left(1 + \frac{h}{1 - h}\right)^2 dh 
 \end{align*}
 
+\section{Proof that $-2 \log p(\vy) = \text{BIC} + \BigO{(1)}$}
+
+We first write the difference between $-2 \log p(\vy)$ and the BIC for normal linear models:
+
+\begin{align*}
+-2 \log p(\vy) - \text{BIC} =& -2 \log K(n) - 2 \log \Gamma(p/2 + a + 1) - 2 \log \Gamma(a + b + 2) + 2 (b + 1) \log(1 - R^2) \\
+& + 2 \log \Gamma(p/2 + a + b + 2) + 2 \log \Gamma(a + 1) - n \log(1 - R^2) - n \log(2 \pi) - n - p \log n \\
+\approx&-(n-1) \log((n-1)/2) + (n - 1) + \log n + (n - 1) \log n + (n - 1) \log \pi \\
+&-2(p/2 + a + 1) \log(p/2 + a + 1) + 2(p/2 + a + b + 1) \\
+&-2(a + b + 2) \log (a + b + 2) + 2(a + b + 2) \\
+&+2(b + 1) \log(1 - R^2) + 2(p/2 + a + b + 2) \log(p/2 + a + b + 2) - 2(p/2 + a + b + 2) \\
+&+2(a + 1)\log(a + 1) - 2(a + 1) - n \log(1 - R^2) - n \log(2 \pi) - n - p \log n + \BigO(1)
+\end{align*}
+
+We rewrite this as $-2 \log p(\vy) - \text{BIC} = T_1 + T_2 + T_3$ where
+\begin{align*}
+T_1=&-(n - 1) \log((n-1)/2) + (n - 1) \log n - 2(a + b + 2) \log(a + b + 2) + 2(p/2 + a + b + 2) \log(p/2 + a + b + 2),
+\end{align*}
+\begin{align*}
+T_2=&(n - 1)(1 + \log \pi) + (2a + 2b + 4) + 2(b + 1)\log(1 - R^2) - 2(p/2 + a + b + 2) -n \log(1 - R^2) - n \log(2 \pi) - n
+\end{align*}
+and
+\begin{align*}
+T_3 = \log(n) - p \log(n)
+\end{align*}
+
+This proved to be too hard, so we were forced to abandon it.
+
+\section{Proof that $2 \log p(\vy | \gamma_1) - 2 \log p(\vy | \gamma_2) = \BIC(\gamma_2) - \BIC(\gamma_1) + \BigO(\log n)$}
+
+$$
+\begin{array}{rrl}
+&&-2 \log\Gamma(p_{\gamma_1}/2 + a + b_{\gamma_1}) - 2(b_{\gamma_1} + 1) \log(1 - R^2_{\gamma_1})) \\
+&&+2 \log\Gamma(p_{\gamma_2}/2 + a + b_{\gamma_2}) + 2(b_{\gamma_2} + 1) \log(1 - R^2_{\gamma_2})) \\
+&=& -n \log(1 - R_{\gamma_1}^2) -\cancel{n \log(2 \pi) - n} - p_{\gamma_1} \log n \\
+&&+n \log(1 - R_{\gamma_2}^2) +\cancel{n \log(2 \pi) + n} + p_{\gamma_2} \log n \\
+\Leftrightarrow&&-2 (p_{\gamma_1}/2 + a + b_{\gamma_1})\log(p_{\gamma_1}/2 + a + b_{\gamma_1}) - 2(p_{\gamma_1}/2 + a + b_{\gamma_1}) - 2(b_{\gamma_1} + 1) \log(1 - R^2_{\gamma_1})) \\
+&&+2 (p_{\gamma_2}/2 + a + b_{\gamma_2})\log(p_{\gamma_2}/2 + a + b_{\gamma_2}) + 2(p_{\gamma_2}/2 + a + b_{\gamma_2}) + 2(b_{\gamma_2} + 1) \log(1 - R^2_{\gamma_2})) \\
+&\approx& -n \log \left(\frac{1 - R_{\gamma_1}^2}{1 - R_{\gamma_2}^2} \right) - (p_{\gamma_1} - p_{\gamma_2}) \log n \\
+% Next step of simplification - p/2 will cancel with -p/2 in b
+\Leftrightarrow&&-2 (p_{\gamma_1}/2 + a + b_{\gamma_1})\log(p_{\gamma_1}/2 + a + b_{\gamma_1}) - 2(p_{\gamma_1}/2 + a + b_{\gamma_1}) - 2(b_{\gamma_1} + 1) \log(1 - R^2_{\gamma_1})) \\
+&&+2 (p_{\gamma_2}/2 + a + b_{\gamma_2})\log(p_{\gamma_2}/2 + a + b_{\gamma_2}) + 2(p_{\gamma_2}/2 + a + b_{\gamma_2}) + 2(b_{\gamma_2} + 1) \log(1 - R^2_{\gamma_2})) \\
+&\approx& -n \log \left(\frac{1 - R_{\gamma_1}^2}{1 - R_{\gamma_2}^2} \right) - (p_{\gamma_1} - p_{\gamma_2}) \log n
+\end{array}
+$$
 
 \section{Proof that if $x|z \sim \N(\mu, \sigma^2 \mV)$ and $z \sim \IG(a, b)$ then $\vx \sim t_{2a}(\mu, \frac{b}{a}\mV)$}
 
@@ -937,10 +982,10 @@ the integral becomes
 	&= K \int_0^\infty z^{p/2 + a + 1} \left[b + \frac{1}{2} (\vx - \vmu)^\top \mV^{-1} (\vx - \vmu)\right]^{-p/2 -a - 1}
 			\exp{(-z)} z^{-2} [b + \frac{1}{2} (\vx - \vmu)^\top \mV^{-1} (\vx - \vmu)]^{2-1} dz \\
 	&= K \left[b + \frac{1}{2} (\vx - \vmu)^\top \mV^{-1} (\vx - \vmu)\right]^{-p/2 - a} \Gamma(p/2 + a) \\
-	&= (2 \pi)^{-p/2} |\mV|^{-1/2} \cancel{b^a} \frac{\Gamma(p/2 + a)}{\Gamma(a)} b^{-p/2 \cancel{- a}} \left[ 1 + \frac{1}{2} (\vx - \vmu)^\top b^{-1} \mV^{-1} (\vx - \vmu) \right]^{-p/2 - a}
+	&= (2 \pi)^{-p/2} |\mV|^{-1/2} \cancel{b^a} \frac{\Gamma(p/2 + a)}{\Gamma(a)} b^{-p/2 \cancel{- a}} \left[ 1 + \frac{1}{2a} (\vx - \vmu)^\top a b^{-1} \mV^{-1} (\vx - \vmu) \right]^{-p/2 - a}
 \end{align*}
 
-This \emph{almost} proves what's required. We just need to manipulate the integral to include powers of $a$
+which proves what's required. We just need to manipulate the integral to include powers of $a$
 in a couple of places.
 
 \section{Proof that $q(\beta_s, \gamma_s) \Pi_{j \notin S} q(\beta_j, \gamma_j)$ is a good factored approximation}
