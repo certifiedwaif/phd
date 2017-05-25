@@ -608,14 +608,16 @@ Variational Approximation, as in \citep{Ormerod2012}. The model can be fit using
 			\[
 				\mLambda =
 				\begin{pmatrix}
-					\mA & \mB \\
-					\mB^\top & \mD
+					\mLambda_{\vbeta \vbeta} & \mLambda_{\vbeta \vu} \\
+					\mLambda_{\vbeta \vu}^\top & \mLambda_{\vu \vu}
 				\end{pmatrix}
 			\]
-			where $\mA$ is $p \times p$, $\mB$ is $p \times mb$ and $\mD$ is $mb \times mb$.
+			where $\mLambda_{\vbeta \vbeta}$ is the $p \times p$ approximation of the fixed effects covariance, $\mLambda_{\vbeta \vu}$ is the $p \times mb$
+			approximation of the covariances between the fixed and random effects and $\mLambda_{\vu \vu}$ is the $mb \times mb$
+			approximation of the random effects covariance.
 
 			Sometimes in the course of  executing the algorithm, we observed numerical issues which had to be dealt
-			with in order for the algorithm to successfully complete. If the block$\mD$ cannot be inverted on an
+			with in order for the algorithm to successfully complete. If the block $\mLambda_{\vu \vu}$ cannot be inverted on an
 			iteration, we reverted to $\vmu$ and $\mLambda$ from the previous iteration. If after updating $\vmu$
 			any element is NaN, we reverted to the $\vmu$ and $\mLambda$ from the previous iteration. This greatly
 			improved the stability of the algorithm.
@@ -629,8 +631,9 @@ Variational Approximation, as in \citep{Ormerod2012}. The model can be fit using
 					% Fit \vmu, \mLambda using Laplace approximation
 					\WHILE{the increase in $\log{\underline{p}}(\vmu, \mLambda; \vy)$ is significant}
 					% \vmu, \mLambda
-					\STATE $\mLambda \leftarrow \left [ \mP^\top \mC^\top \exp(\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)) \mC \mP \right ]^{-1}$ \\ [1ex]
-					If $\mD$ cannot be inverted, revert to $\vmu$ and $\mLambda$ from the previous iteration \\ [1ex]
+					\STATE $\mLambda^{-1} = \left [ \mP^\top \mC^\top \exp(\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)) \mC \mP \right ]$ \\ [1ex]
+					Calculate \STATE $\mLambda \leftarrow \left (\mLambda^{-1} \right )^{-1}$  using the block inverse formula \\ [1ex]
+					If $\mLambda_{\vu \vu}$ cannot be inverted in the above calculation, revert to $\vmu$ and $\mLambda$ from the previous iteration \\ [1ex]
 					\STATE $\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu} = -\mC^\top \text{diag}(\vp^\top \exp(\mC \vmu +\half \text{diag}(\mC \mLambda \mC^\top))) - \mSigma^{-1}$ \\ [1ex]
 					\STATE $\vmu \leftarrow \vmu + \mLambda \left [ \frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu} \right ]$ \\ [1ex]
 					If any element of $\vmu$ is NaN, revert to $\vmu$ and $\mLambda$ from the previous iteration
