@@ -959,9 +959,18 @@ $$
 % Next step of simplification - p/2 will cancel with -p/2 in b
 \Leftrightarrow&&-2 (p_{\gamma_1}/2 + a + b_{\gamma_1})\log(p_{\gamma_1}/2 + a + b_{\gamma_1}) - 2(p_{\gamma_1}/2 + a + b_{\gamma_1}) - 2(b_{\gamma_1} + 1) \log(1 - R^2_{\gamma_1})) \\
 &&+2 (p_{\gamma_2}/2 + a + b_{\gamma_2})\log(p_{\gamma_2}/2 + a + b_{\gamma_2}) + 2(p_{\gamma_2}/2 + a + b_{\gamma_2}) + 2(b_{\gamma_2} + 1) \log(1 - R^2_{\gamma_2})) \\
-&\approx& -n \log \left(\frac{1 - R_{\gamma_1}^2}{1 - R_{\gamma_2}^2} \right) - (p_{\gamma_1} - p_{\gamma_2}) \log n
+&=& -n \log \left(\frac{1 - R_{\gamma_1}^2}{1 - R_{\gamma_2}^2} \right) - (p_{\gamma_1} - p_{\gamma_2}) \log n
 \end{array}
 $$
+
+\noindent Noting that $p_{\gamma_1}/2 + a + b_{\gamma_1} = p_{\gamma_1}/2 + a + (n - p_{\gamma_1})/2 - a - 2)
+= n/2 - 2$ and the same holds for $p_{\gamma_1}/2 + a + b_{\gamma_1}$ the majority of the left-hand side of
+the equality cancels and we are left with
+
+\begin{align*}
+&\cancel{n \log \left(\frac{1 - R_{\gamma_1}^2}{1 - R_{\gamma_2}^2} \right)} + \BigO(1) \\
+=-&\cancel{n \log \left(\frac{1 - R_{\gamma_1}^2}{1 - R_{\gamma_2}^2} \right)} - (p_{\gamma_1} - p_{\gamma_2}) \log n
+\end{align*}
 
 \section{Proof that if $x|z \sim \N(\mu, \sigma^2 \mV)$ and $z \sim \IG(a, b)$ then $\vx \sim t_{2a}(\mu, \frac{b}{a}\mV)$}
 
@@ -985,8 +994,7 @@ the integral becomes
 	&= (2 \pi)^{-p/2} |\mV|^{-1/2} \cancel{b^a} \frac{\Gamma(p/2 + a)}{\Gamma(a)} b^{-p/2 \cancel{- a}} \left[ 1 + \frac{1}{2a} (\vx - \vmu)^\top a b^{-1} \mV^{-1} (\vx - \vmu) \right]^{-p/2 - a}
 \end{align*}
 
-which proves what's required. We just need to manipulate the integral to include powers of $a$
-in a couple of places.
+which proves what's required.
 
 \section{Proof that $q(\beta_s, \gamma_s) \Pi_{j \notin S} q(\beta_j, \gamma_j)$ is a good factored approximation}
 
