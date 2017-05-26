@@ -947,40 +947,42 @@ This proved to be too hard, so we were forced to abandon it.
 
 \section{Proof that $2 \log p(\vy | \gamma_1) - 2 \log p(\vy | \gamma_2) = \BIC(\gamma_2) - \BIC(\gamma_1) + \BigO(\log n)$}
 
+We begin by equating the expression for $2 \log p(\vy | \gamma_1) - 2 \log p(\vy | \gamma_2)$ with the
+expression for $\BIC(\gamma_2) - \BIC(\gamma_1)$
 $$
-\begin{array}{rrl}
-&&-2 \log\Gamma(p_{\gamma_1}/2 + a + b_{\gamma_1}) - 2(b_{\gamma_1} + 1) \log(1 - R^2_{\gamma_1})) \\
-&&+2 \log\Gamma(p_{\gamma_2}/2 + a + b_{\gamma_2}) + 2(b_{\gamma_2} + 1) \log(1 - R^2_{\gamma_2})) \\
-&=& -n \log(1 - R_{\gamma_1}^2) -\cancel{n \log(2 \pi) - n} - p_{\gamma_1} \log n \\
-&&+n \log(1 - R_{\gamma_2}^2) +\cancel{n \log(2 \pi) + n} + p_{\gamma_2} \log n \\
-\Leftrightarrow&&-2 (p_{\gamma_1}/2 + a + b_{\gamma_1})\log(p_{\gamma_1}/2 + a + b_{\gamma_1}) - 2(p_{\gamma_1}/2 + a + b_{\gamma_1}) - 2(b_{\gamma_1} + 1) \log(1 - R^2_{\gamma_1})) \\
-&&+2 (p_{\gamma_2}/2 + a + b_{\gamma_2})\log(p_{\gamma_2}/2 + a + b_{\gamma_2}) + 2(p_{\gamma_2}/2 + a + b_{\gamma_2}) + 2(b_{\gamma_2} + 1) \log(1 - R^2_{\gamma_2})) \\
-&\approx& -n \log \left(\frac{1 - R_{\gamma_1}^2}{1 - R_{\gamma_2}^2} \right) - (p_{\gamma_1} - p_{\gamma_2}) \log n \\
+\begin{array}{rl}
+&-2 \log\Gamma(p_{\gamma_1}/2 + a + b_{\gamma_1}) - 2(b_{\gamma_1} + 1) \log(1 - R^2_{\gamma_1})) 
++2 \log\Gamma(p_{\gamma_2}/2 + a + b_{\gamma_2}) + 2(b_{\gamma_2} + 1) \log(1 - R^2_{\gamma_2})) \\
+=& -n \log(1 - R_{\gamma_1}^2) -\cancel{n \log(2 \pi) - n} - p_{\gamma_1} \log n 
++n \log(1 - R_{\gamma_2}^2) +\cancel{n \log(2 \pi) + n} + p_{\gamma_2} \log n \\
+\end{array}
+$$
+
+\noindent Applying Stirling's approximation, this becomes
+$$
+\begin{array}{rl}
+&-2 (p_{\gamma_1}/2 + a + b_{\gamma_1})\log(p_{\gamma_1}/2 + a + b_{\gamma_1}) - 2(p_{\gamma_1}/2 + a + b_{\gamma_1}) - 2(b_{\gamma_1} + 1) \log(1 - R^2_{\gamma_1}) \\
+&+2 (p_{\gamma_2}/2 + a + b_{\gamma_2})\log(p_{\gamma_2}/2 + a + b_{\gamma_2}) + 2(p_{\gamma_2}/2 + a + b_{\gamma_2}) + 2(b_{\gamma_2} + 1) \log(1 - R^2_{\gamma_2}) \\
+\approx& -n \log \left(\frac{1 - R_{\gamma_1}^2}{1 - R_{\gamma_2}^2} \right) - (p_{\gamma_1} - p_{\gamma_2}) \log n
 % Next step of simplification - p/2 will cancel with -p/2 in b
-\Leftrightarrow&&-2 (p_{\gamma_1}/2 + a + b_{\gamma_1})\log(p_{\gamma_1}/2 + a + b_{\gamma_1}) - 2(p_{\gamma_1}/2 + a + b_{\gamma_1}) - 2(b_{\gamma_1} + 1) \log(1 - R^2_{\gamma_1})) \\
-&&+2 (p_{\gamma_2}/2 + a + b_{\gamma_2})\log(p_{\gamma_2}/2 + a + b_{\gamma_2}) + 2(p_{\gamma_2}/2 + a + b_{\gamma_2}) + 2(b_{\gamma_2} + 1) \log(1 - R^2_{\gamma_2})) \\
-&=& -n \log \left(\frac{1 - R_{\gamma_1}^2}{1 - R_{\gamma_2}^2} \right) - (p_{\gamma_1} - p_{\gamma_2}) \log n
 \end{array}
 $$
 
 \noindent Noting that $p_{\gamma_1}/2 + a + b_{\gamma_1} = p_{\gamma_1}/2 + a + (n - p_{\gamma_1})/2 - a - 2)
 = n/2 - 2$ and the same holds for $p_{\gamma_1}/2 + a + b_{\gamma_1}$ the majority of the left-hand side of
-the equality cancels and we are left with
-
-\begin{align*}
-&\cancel{n \log \left(\frac{1 - R_{\gamma_1}^2}{1 - R_{\gamma_2}^2} \right)} + \BigO(1) \\
-=-&\cancel{n \log \left(\frac{1 - R_{\gamma_1}^2}{1 - R_{\gamma_2}^2} \right)} - (p_{\gamma_1} - p_{\gamma_2}) \log n
-\end{align*}
+the equality cancels or is $\BigO(1)$ and we are left with
+$\cancel{n \log ((1 - R_{\gamma_1}^2)/(1 - R_{\gamma_2}^2) )} + \BigO(1)
+=-\cancel{n \log ((1 - R_{\gamma_1}^2)/(1 - R_{\gamma_2}^2) )} - (p_{\gamma_1} - p_{\gamma_2}) \log n$
 
 \section{Proof that if $x|z \sim \N(\mu, \sigma^2 \mV)$ and $z \sim \IG(a, b)$ then $\vx \sim t_{2a}(\mu, \frac{b}{a}\mV)$}
 
 We begin by calculating the marginal distribution of $p(x)$
 
 \begin{align*}
-	p(\vx) &= \int_0^\infty p(\vx|z) p(z) dz = \int_0^\infty (2 \pi)^{-p/2} |\sigma^2 \mV|^{-1/2} 
-					\exp{\left[-\frac{1}{2}(\vx - \vmu)^\top \sigma^{-2} \mV^{-1} (\vx - \vmu) \right]} 
-					\frac{b^a}{\Gamma(a)} (\sigma^2)^{-a-1} \exp{\left(-\frac{b}{\sigma^2}\right)} d \sigma^2 \\
-			&= (2 \pi)^{-p/2} |\mV|^{-1/2} \frac{b^a}{\Gamma(a)} \int_0^\infty (\sigma^2)^{-p/2-a-1} \exp \left[-\frac{1}{\sigma^2} (b + \frac{1}{2} (\vx - \vmu)^\top \mV^{-1} (\vx - \vmu))) \right] d \sigma^2
+p(\vx) &= \int_0^\infty p(\vx|z) p(z) dz = \int_0^\infty (2 \pi)^{-p/2} |\sigma^2 \mV|^{-1/2} 
+				\exp{\left[-\frac{1}{2}(\vx - \vmu)^\top \sigma^{-2} \mV^{-1} (\vx - \vmu) \right]} 
+				\frac{b^a}{\Gamma(a)} (\sigma^2)^{-a-1} \exp{\left(-\frac{b}{\sigma^2}\right)} d \sigma^2 \\
+		&= (2 \pi)^{-p/2} |\mV|^{-1/2} \frac{b^a}{\Gamma(a)} \int_0^\infty (\sigma^2)^{-p/2-a-1} \exp \left[-\frac{1}{\sigma^2} (b + \frac{1}{2} (\vx - \vmu)^\top \mV^{-1} (\vx - \vmu))) \right] d \sigma^2
 \end{align*}
 
 Making the change of variable $z = \sigma^{-2}[b + \frac{1}{2}(\vx - \vmu)^\top \mV^{-1} (\vx - \vmu)]$,
