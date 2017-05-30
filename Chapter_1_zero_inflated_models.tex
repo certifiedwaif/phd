@@ -750,14 +750,16 @@ Variational Approximation, as in \citep{Ormerod2012}. The model can be fit using
 			$\va^\top\va$ where $\mC_{i} = $ the $i$th row of $\mC$, rather than calculating $\text{diag}(\mC \mLambda
 			\mC^\top)$ directly.
 				
+			% TODO: We fixed this using safe-exp
 			The implementation of these algorithms was not without its' challenges, chiefly numerical issues encountered during testing and verification of the accuracy of the model fitting. Using the exponential function to parameterise the main diagonal coupled with L-BFGS-B's unconstrained line search and \texttt{optim()}'s lack of robustness to infinities lead to many overflow problems which may have been lessened or dealt with entirely by using a function with a less aggressive growth rate, such as an appropriate piecewise quadratic.
 				
-			The main computational cost is the evaluation of the variational lower bound and its' derivatives. By virtue
-			of their dimension, the expressions involving $\mLambda$ dominate the computational cost. The key term is
-			$\frac{1}{2} \diag(\mC \mLambda \mC^\top)$. The naive way to calculate this is to ignore the symmetry in
-			this expression and simply calculate the product $\mC \mLambda \mC^\top$, which takes $2 n \times (p + m
-			b)^2$ floating point operations, and take the diagonal entries of the result. This is obviously wasteful, as
-			all of the off--diagonal entries of the resulting product are immediately discarded.
+			The main computational cost is the evaluation of the variational lower bound and its' derivatives. By
+			virtue of their dimension, the expressions involving $\mLambda$ dominate the computational cost. The key
+			term is $\frac{1}{2} \diag(\mC \mLambda \mC^\top)$. This can be naively calculate by ignoring the
+			symmetry in the expression and simply calculating the product $\mC \mLambda \mC^\top$, taking $2 n
+			\times (p + m b)^2$ floating point operations, and retaining the diagonal entries of the result. This is
+			obviously wasteful, as the off--diagonal entries of the resulting product that has just been computed
+			are immediately discarded.
 				
 			By parameterising $\mLambda$ in terms of its' Cholesky factors and realising that
 				
@@ -919,14 +921,6 @@ Variational Approximation, as in \citep{Ormerod2012}. The model can be fit using
 				\includegraphics{code/stability_intercept.pdf}
 			\end{figure}
 			
-			\begin{figure}
-				\label{fig:stability_locations}
-				\caption{Starting locations which caused the fitting algorithm to fail with numeric errors. The true model 						had fixed parameters $\vbeta = (2, 1)^\top$ and random intercepts. There were ten groups in the
-					hierarchical model each	with ten individuals $(m=10, n_i=10)$}
-				\includegraphics[scale=0.4]{code/safe_exp_stability.pdf}
-				\includegraphics[scale=0.4]{code/no_safe_exp_stability.pdf}
-			\end{figure}
-			
 			We repeated our numerical experiments with the new parameterisation, varying the threshold within reasonable
 			bounds and found that the numerical experiments no longer resulted in overflow, and that the numerical accuracy
 			of the approximation was still very good.
@@ -947,7 +941,7 @@ Variational Approximation, as in \citep{Ormerod2012}. The model can be fit using
 			slope, and a random intercept. $\vmu$ was initialised from a grid of points on the interval $[-4.5, 5]$ for
 			intercept and slope, spaced $0.1$ apart. The error counts are presented in Table
 			\ref{tab:stability_results}. Plots of the starting locations which resulted in numerical errors when the
-			fitting algorithm was run are presented in \ref{fig:stability_locations}.
+			fitting algorithm was run are presented in \ref{fig:stability_locations_gva}.
 					
 			\begin{table}
 				\caption{Count of numerical errors for each algorithm during stability tests}
@@ -963,7 +957,34 @@ Variational Approximation, as in \citep{Ormerod2012}. The model can be fit using
 					\hline
 				\end{tabular}
 			\end{table}
+
+			The GVA algorithm with the $\mLambda = (\mR \mR^\top)^{-1}$ parameterisation was less prone to
+			instability due to starting point when the safe exponential parameterisation was used then when it was
+			not used, as can be seen from Figure \ref{fig:stability_locations_gva}. % FIXME: Add error counts
 					
+			\begin{figure}
+				\label{fig:stability_locations_gva}
+				\caption{Starting locations which caused the GVA fitting algorithm to fail with numeric errors. The true model had fixed parameters $\vbeta = (2, 1)^\top$ and random intercepts. There were ten groups in the
+					hierarchical model each	with ten individuals $(m=10, n_i=10)$}
+				\includegraphics[scale=0.4]{code/safe_exp_stability.pdf}
+				\includegraphics[scale=0.4]{code/no_safe_exp_stability.pdf}
+			\end{figure}
+
+			The naive fixed point algorithm was extremely unstable for many starting points, as can be seen from
+			Figure \ref{fig:stability_locations_nr}. The variant of the algorithm which checked whether the
+			inversion of the $\mLambda_{\vu \vu}$ block of $\mLambda$ was performed successfully was much more
+			stable, and did not suffer from any numeric errors at all over the range of starting points we tested.
+			The algorithm is able to abort safely, and allow the Variational Bayes algorithm to update the other
+			parameters before trying to fit the Gaussian component of the model again until the correct parameters
+			are accurately estimated.
+
+			\begin{figure}
+				\label{fig:stability_locations_nr}
+				\caption{Starting locations which caused the NR fitting algorithm to fail with numeric errors. The true model 						had fixed parameters $\vbeta = (2, 1)^\top$ and random intercepts. There were ten groups in the
+					hierarchical model each	with ten individuals $(m=10, n_i=10)$}
+				\includegraphics[scale=0.4]{code/local_solutions_gva_nr_error_locations_no_protections.pdf}
+			\end{figure}
+			
 			\section{Application}
 			\label{sec:application}
 			
