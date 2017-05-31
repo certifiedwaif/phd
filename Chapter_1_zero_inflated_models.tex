@@ -124,16 +124,15 @@ model approach incorporating both fixed and random effects.
 
 Let $p$ be the dimension of the space of fixed effects, $m$ be the number of individuals in the random effects
 and $b$ be the block size for each of those individuals. We use $\vone_p$ and $\vzero_p$ to denote the $p
-\times 1$ column vector with all entries equal to 1 or 0, respectively.
+\times 1$ column vectors with all entries equal to 1 or 0, respectively.
 
 Let $\vy$ be the $n \times 1$ vector. The norm of a column vector $\vv$, defined to be $\sqrt{\vv^\top \vv}$,
 is  denoted by $\|\vv\|$. For a $p \times 1$ vector $\va$, we let $\diag{(\va)}$ denote the $p \times p$
 matrix with the elements of $\va$ along its' diagonal.
 
-We denote the design matrix of fixed effects with
-dimensions $n \times p$ as $\mX$ is , and the design matrix of random  effects with dimensions $n \times m b$
-as $\mZ$.  $\mC$ is formed by appending the columns of $\mX$ to the columns of $\mZ$, giving $\mC = [ \mX, \mZ
-]$.
+We denote the design matrix of fixed effects with dimensions $n \times p$ as $\mX$ is , and the design matrix
+of random  effects with dimensions $n \times m b$ as $\mZ$. The combined design matrix $\mC$ is formed by
+appending the columns of $\mX$ to the columns of $\mZ$, giving $\mC = [ \mX, \mZ ]$.
 
 Let $\vtheta$ is the vector of all parameters.
 Let $\vbeta$ be the $p \times 1$ column vector of fixed
@@ -148,10 +147,10 @@ $\mPsi$ the covariance matrix prior on $\mSigma$.
 These matrices are all of dimension $(p + m b) \times (p + m b)$.
 
 
-\noindent $\expit(x)$ denotes the function $\tfrac{1}{1 + \exp(-x)}$ which is the inverse of the logit
+$\expit(x)$ denotes the function $\tfrac{1}{1 + \exp(-x)}$ which is the inverse of the logit
 function.
 
-\noindent $\text{Bernoulli}(\pi)$ denotes the probability distribution $\pi^k (1 - \pi)^{1-k}$ and
+$\text{Bernoulli}(\pi)$ denotes the probability distribution $\pi^k (1 - \pi)^{1-k}$ and
 $\text{Inverse Wishart}(\mPsi, v)$ denotes the probability distribution
 $$\tfrac{|\mPsi|^\frac{v}{2}}{2^{\frac{vp}{2}} \Gamma_p{(\tfrac{v}{2})}} |\mX|^{-\tfrac{v + p + 1}{2}}
 \exp{[-\half \tr{(\mPsi \mX^{-1})}]}$$ where $\Gamma_p{(x)}$ denotes the multivariate gamma function and $\tr$
@@ -207,9 +206,7 @@ General Design Bayesian Generalized Linear Mixed Model, as in \citep{Zhao2006}.
 The $j$th predictor/response pair for the $i$th group is denoted by $(\vx_{ij}, \vy_{ij}), 1 \leq j \leq n_i, 1 \leq i \leq m$, where $\vx_{ij} \in \R$, and the $\vy_{ij}$ are nonnegative integers.
 
 For each $1 \leq i \leq m$, define the $n_i \times 1$ vectors $\vy_{ij} = [\vy_{i 1}, \ldots, \vy_{i
-	n_i}]^\top$ and let $\vone$ define a vector of ones of appropriate length, where the first of these vectors is
-the response. It is reasonable to assume that the vectors $\vy_1, \ldots, \vy_m$ are independent of each
-other.
+n_i}]^\top$ as the response vector. Vectors $\vy_1, \ldots, \vy_m$ are assumed to be independent of each other.
 
 \joc{The next paragraph is too abrupt. How did this model come about? Where is the Poisson component? How is this combined with the zero-inflation?
 Start with a single observation before using matrix/vector notation.}
@@ -297,40 +294,18 @@ $\BigO(n)$ time. The matrix $\mSigma$ is symmetric, with contents
 
 \subsubsection{Definitions}
 
-$p(x)$ is the full probability distribution, $q(x)$ the approximating probability distribution.
-and $q^*(x)$ the optimal approximating probability distribution.
+% TODO: This whole section is terse, and the wording and ordering is strange.
+
+Let $p(x)$ be the true probability distribution, $q(x)$ be a probability distribution we are using
+to approximate $p(x)$ and $q^*(x)$ be the optimal approximating probability distribution.
 
 The density function of a random vector $\vu$ is denoted by $p(\vu)$.  The conditional density function of a
 random vector $\vu$ given $\vv$ is denoted by $p(\vu|\vv)$. Consider a generic Bayesian model with parameter
 vector $\vtheta \in \Theta$. Throughout this section we assume that $\vy$ and $\vtheta$ are continuous random
 vectors. The KL divergence between the probability distributions $p$ and $q$ is defined as
-$$
-\KL(q || p) \equiv \int q(\vtheta) \log \left \{ \frac{q(\vtheta)}{p(\vtheta | \vy)} \right \} d \vtheta.
-$$
-
-\noindent The approximation is fit by iteratively minimising the Kullback-Leibler divergence between the true
-posterior and an approximating distribution. Thus the optimal approximation $q^*(\vtheta)$ is
-$$
-q^*(\vtheta) = \argmin_{\vxi \in \Xi} \text{KL} \{ {q(\vtheta|\vxi) || p(\vtheta|\vy)} \}.
-$$
-
-\noindent A common approach is to assume an approximation in a factorised form
-$$q(\vtheta) = \Pi_{i=1}^M q(\theta_i).$$
-
-\noindent The variational lower bound is maximised iteratively. On each iteration, the value of each parameter
-in the model is calculated as the expectation of the full likelihood relative to the other parameters in the
-model, which is referred to as the mean field update:
-$$q_i^*(\theta_i) \propto \exp{\{ \bE_{-q(\theta_i)} \log p(\vy, \vtheta) \}}$$
-
-\noindent This is done for each parameter in the model in turn until the variational lower bound's increase is
-negligible and convergence is achieved.
-
-This approach works well for classes of models where all of the parameters are conjugate. For more
-general classes of models, mean field updates are not analytically tractable and general gradient-based
-optimisation methods must be used, as for the Gaussian Variational Approximation (see \citep{Ormerod2012}) used
-in this paper. These methods are generally difficult to apply in practice, as the problems can involve the
-optimisation of many parameters over high-dimensional, constrained spaces whose constraints cannot be simply
-expressed.
+\[
+	\KL(q || p) \equiv \int q(\vtheta) \log \left \{ \frac{q(\vtheta)}{p(\vtheta | \vy)} \right \} d \vtheta.
+\]
 
 Much of Bayesian inference is based on the posterior distribution of a model's parameters given observed data 
 defined by $p(\vtheta|\vy) = p(\vy|\vtheta)p(\vtheta)/p(\vy)$ where $\vy$ is a vector of observed data,
@@ -340,21 +315,18 @@ over the domain of $\vtheta$. If a subset of $\vtheta$ are discrete random varia
 these parameters is replaced with a combinatorial sum over all possible values of these discrete random 
 variables.
 
-\noindent The calculation of the posterior distribution is usually either computationally intractable or no
-closed from exists for the posterior distribution and approximation is required. Variational approximation is
-a  class of methods for dealing with this problem by transforming the problem into an optimization problem.
-Most, but not all variational approximations are based on minimising the Kullback-Leibler divergence between
-the true posterior $p(\vtheta|\vy)$ and an approximating distribution $q(\vtheta)$, sometimes called a
-$q$-density. Suppose that $q(\vtheta)$ is parameterised by $\vxi$ and write $q(\vtheta)\equiv
-q(\vtheta;\vxi)$. We attempt to solve
-$$
-\ds q^*(\vtheta) = \argmin_{\vxi \in \Xi} \text{KL} \{ {q(\vtheta;\vxi) || p(\vtheta|\vy)} \}.
-$$
+The calculation of the posterior distribution is usually either computationally intractable or no
+closed form exists for the posterior distribution and so an approximation is required. Variational
+approximation is a  class of methods for transforming the problem of approximating one distribution with another 
+into an optimization problem. Most, but not all variational approximations are based on minimising the Kullback-
+Leibler divergence between the true posterior $p(\vtheta|\vy)$ and an approximating distribution $q(\vtheta)$,
+sometimes called a $q$-density. Suppose that $q(\vtheta)$ is parameterised by $\vxi$ and write
+$q(\vtheta)\equiv q(\vtheta;\vxi)$. We attempt to solve
+\[
+	\ds q^*(\vtheta) = \argmin_{\vxi \in \Xi} \text{KL} \{ {q(\vtheta;\vxi) || p(\vtheta|\vy)} \}.
+\]
 
-\noindent Noting that the Kullback-Leibler divergence between two distributions is zero if and only if
-the two distributions are equal almost everywhere the above problem is no easier than the original problem
-of finding $p(\vtheta|\vy)$. This problem is mitigated by imposing structure on the form of $q$. Two
-strategies for doing this are:
+\noindent Two strategies for selecting a suitable class of approximating distributions $q$ are:
 \begin{enumerate}
 	\item[(A)] Specifying the parametric form of $q$; or 
 	\item[(B)] choosing $q$ to be of the form $q(\vtheta) = \prod_{i=1}^M q(\theta_i)$,
@@ -385,6 +357,33 @@ $$
 
 \noindent and maximizing $\log \underline{p}(\vy;\vxi)$ with respect to $\vxi$ is eqivalent to minimizing
 $\text{KL}(q(\vtheta;\vxi)||p(\vtheta|\vy))$.
+
+\noindent Variational Bayes aims to approximate a true, possibly intractable probability distribution $p(x)$
+by a simpler, more tractable distribution $q(x)$ of known form.
+
+\noindent The approximation is fit by iteratively minimising the Kullback-Leibler divergence between the true
+posterior and an approximating distribution. Thus the optimal approximation $q^*(\vtheta)$ is
+\[
+	q^*(\vtheta) = \argmin_{\vxi \in \Xi} \text{KL} \{ {q(\vtheta|\vxi) || p(\vtheta|\vy)} \}.
+\]
+
+\noindent A common approach is to assume an approximation in a factorised form
+$$q(\vtheta) = \Pi_{i=1}^M q(\theta_i).$$
+
+\noindent The variational lower bound is maximised iteratively. On each iteration, the value of each parameter
+in the model is calculated as the expectation of the full likelihood relative to the other parameters in the
+model, which is referred to as the mean field update:
+$$q_i^*(\theta_i) \propto \exp{\{ \bE_{-q(\theta_i)} \log p(\vy, \vtheta) \}}$$
+
+\noindent This is done for each parameter in the model in turn until the variational lower bound's increase is
+negligible and convergence is achieved.
+
+This approach works well for classes of models where all of the parameters are conjugate. For more
+general classes of models, mean field updates are not analytically tractable and general gradient-based
+optimisation methods must be used, as for the Gaussian Variational Approximation (see \citep{Ormerod2012}) used
+in this paper. These methods are generally difficult to apply in practice, as the problems can involve the
+optimisation of many parameters over high-dimensional, constrained spaces whose constraints cannot be simply
+expressed.
 
 %This approach works well for classes of models where all of the parameters are conjugate. For more general
 %classes of models, mean field updates are not analytically tractable and general gradient-based optimisation
