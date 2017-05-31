@@ -78,41 +78,47 @@ combined with a multivariate mixed model regression framework, an extremely rich
 allowing a broad range of applications to be addressed. Often the transition from zero to non-zero has a
 direct interpretation in the area of application, and is interesting in its' own right.
 
-In this chapter, we build upon the earlier work on Bayesian zero-inflated models of \citep{Ghosh2006} and
+In this chapter, we build upon the earlier work on Bayesian zero-inflated models by \citep{Ghosh2006} and
 \citep{Vatsa2014}. While simple forms of these models are easy to fit with standard maximum likelihood
 techniques, more general models incorporating random effects, splines and missing data typically have no
 closed form solutions and hence present a greater computational challenge to fit.
 
-Fitting these models is typically done with Monte Carlo Markov Chain techniques, but these can be slow and
-prone to convergence problems. We build upon a latent variable representation of these models to allow a 
-tractable semiparametric mean field Variational Bayes approximation to be derived. Semiparametric mean field 
-Variational Bayes is an approximate Bayesian inference method as detailed in \citep{Ormerod2010} and
-\citep{Rohde2015}, which allows us to fit close approximations to these models using a deterministic 
-algorithm which converges much more quickly.
+Fitting these models is typically done with Monte Carlo Markov Chain techniques, but these techniques can be
+computationally intensive and prone to convergence problems. We build upon a latent variable representation of
+these models to allow a tractable semiparametric mean field Variational Bayes approximation to be derived.
+Semiparametric Mean Field  Variational Bayes is an approximate Bayesian inference method as detailed in
+\citep{Ormerod2010} and \citep{Rohde2015}, which allows us to fit close approximations to these models using a
+deterministic  algorithm which converges much more quickly.
 
-We allow a flexible regression modelling approach by using a Gaussian Variational Approximation as defined in
-\citep{Ormerod2012} on the regression parameters to allow a non-conjugate Gaussian prior to be used, making 
-the resulting Gaussian posterior of the regression parameters easy to interpret. We adopt a Mean Field 
-Variational Bayes (VB) approach on the other parameters in the model to derive the rest of the approximation.
+We allow a flexible regression modelling approach incorporating both fixed and random effects by using a
+Gaussian Variational Approximation as defined in \citep{Ormerod2012} on the regression parameters to allow a
+non- conjugate Gaussian prior to be used, making the resulting Gaussian posterior distribution of the
+regression parameters easy to interpret. We adopt a Mean Field  Variational Bayes (VB) approach on the other
+parameters in the model to derive the rest of the approximation.
 
-The focus of this chapter is on developing a method of fitting flexible ZIP regression models accurately, and
-showing the advantages of our method to previously presented methods. In Section \ref{sec:model} we define our
-model and provide a framework for our approach incorporating regression modelling and random effects. In
-Section \ref{sec:vb} we briefly introduce Variational Bayes methodogy. In Section \ref{sec:gaussian} we
-focus on fitting the Gaussian part of our model. In Section \ref{sec:param}, we present new parameterisations for
-use in these algorithms which offers substantial advantages in accuracy, numerical stability and computational
-speed. In Section \ref{sec:results} we perform numerical experiments on simulated data which show how our
-approach offers computational advantages over existing approaches. In Section \ref{sec:application} we show an
-application of our method to a multi-level longitudinal study of pest control in apartments. Finally, in
-Section \ref{sec:discussion} we conclude with a discussion of the results. An appendix contains details of the
+The focus of this chapter is on developing methods of fitting flexible ZIP regression models accurately, and
+showing the advantages of our methods to previously presented methods. We also investigate stability problems
+that can arise when using naive versions of these methods, and the modifications to the fitting methods we
+devised to mitigate these problems. In Section \ref{sec:model} we define our model and provide a framework for
+our approach incorporating regression modelling and random effects. In Section \ref{sec:vb} we briefly
+introduce Variational Bayes methodogy. In Section \ref{sec:gaussian} we focus on several approaches to fitting
+the Gaussian component of our model. In Section \ref{sec:param}, we present new parameterisations for use in
+these algorithms which offers substantial advantages in accuracy, numerical stability and computational speed.
+In Section \ref{sec:results} we perform numerical experiments on simulated data which show how our approach
+offers computational advantages over existing approaches -- in terms of both speed and stability. In Section
+\ref{sec:application} we show an application of our pure Poisson model fitting method to a hierarchical model
+studying the effect of ethnicity on the rate of police stops, and an application of our zero-inflated Poisson
+model fitting method to a multi-level longitudinal study of pest control in apartments. Finally, in Section
+\ref{sec:discussion} we conclude with a discussion of the results. An appendix contains details of the
 derivation of the variational lower bound for our model.
 
 \section{Model}
 \label{sec:model}
 
 In this section we present a Bayesian zero-inflated Poisson model for count data with extra zeroes. After
-introducing the latent variable representation of Bayesian zero-inflated models, we incorporate regression
-modelling and extend the model to a more flexible mixed model approach.
+introducing the latent variable representation of Bayesian zero-inflated models, we first extend this to
+a model incorporating fixed effects regression modelling, and extend the model again to a more flexible mixed 
+model approach incorporating both fixed and random effects.
 
 \subsection{Definitions}
 
@@ -122,18 +128,27 @@ and $b$ be the block size for each of those individuals. We use $\vone_p$ and $\
 
 Let $\vy$ be the $n \times 1$ vector. The norm of a column vector $\vv$, defined to be $\sqrt{\vv^\top \vv}$,
 is  denoted by $\|\vv\|$. For a $p \times 1$ vector $\va$, we let $\diag{(\va)}$ denote the $p \times p$
-matrix with the elements of $\va$ along its' diagonal. We denote the design matrix of fixed effects with
+matrix with the elements of $\va$ along its' diagonal.
+
+We denote the design matrix of fixed effects with
 dimensions $n \times p$ as $\mX$ is , and the design matrix of random  effects with dimensions $n \times m b$
 as $\mZ$.  $\mC$ is formed by appending the columns of $\mX$ to the columns of $\mZ$, giving $\mC = [ \mX, \mZ
 ]$.
 
-$\vtheta$ is the parameter vector in $\R^p$, $\vbeta$ is the $p \times 1$ column vector representing the fixed
-effects, and $\vu$ is the $m b \times 1$ column vector representing the random effects. $\vnu$ is the
-concatenation of these vectors  $[\vbeta^\top, \vu^\top]$. $\mSigma$, $\mPsi$ and $\mLambda$ are $(p + m b) \times
-(p + m b)$ matrices. $\vp$ is the $n \times 1$ column vector of probabilities that each observation in $\vy$ is
-non-zero.
+Let $\vtheta$ is the vector of all parameters.
+Let $\vbeta$ be the $p \times 1$ column vector of fixed
+effects, and $\vu$ the $m b \times 1$ column vector of random effects. $\vnu$ is the
+concatenation of these vectors $[\vbeta^\top, \vu^\top]$.
+% Let $\vp$ be the $n \times 1$ column vector of probabilities that each observation in $\vy$ is
+% non-zero.
 
-\noindent $\expit(x)$ denotes the function $\tfrac{1}{1 + exp(-x)}$ which is the inverse of the logit
+Let $\mSigma$ be the covariance matrix of the random effects $\vu$,
+and 
+$\mPsi$ the covariance matrix prior on $\mSigma$.
+These matrices are all of dimension $(p + m b) \times (p + m b)$.
+
+
+\noindent $\expit(x)$ denotes the function $\tfrac{1}{1 + \exp(-x)}$ which is the inverse of the logit
 function.
 
 \noindent $\text{Bernoulli}(\pi)$ denotes the probability distribution $\pi^k (1 - \pi)^{1-k}$ and
@@ -153,19 +168,12 @@ adjusts for counts greater than zero. This model uses the probability distributi
 	\quad \mbox{and} \quad 
 	P(Y_j = y_i) = \left( \frac{1 - \rho}{1 - e^{-\lambda}} \right) \frac{\lambda^{y_i} e^{-\lambda}} {y_i!},\qquad y_i \ge 1,
 \]
-% \noindent where $\lambda>0$ models the size of the counts. Here, $\bE(y_i) = ???$ 
-% and $\mbox{Var}(y_i) = ???$.
 
 A second approach using latent variables views the data as the product of two data--generating processes, a
-Bernoulli process that determines whether the data is definitely zero, and a second process where data is generated from a Poisson distribution if it is not definitely zero.
-% This leads to the model
-% \begin{equation}\label{eq:modelTwo}
-% 	P(Y_i = 0) = \rho + (1 - \rho) e^{-\lambda}, 
-% 	\quad \mbox{and} \quad 
-% 	P(Y_i = y_i) = (1 - \rho) \frac{\lambda^{y_i} e^{-\lambda}} {y_i!},\qquad y_i \ge 1,
-% \end{equation}
-% \noindent where $\bE(y_i) = (1 - \rho)\lambda$ and $\mbox{Var}(y_i) =  \lambda(1 - \rho)(1 + \rho\lambda)$.
-Notice that this allows zeros to be generated from the model in one of two ways -- either from the Bernoulli
+Bernoulli process that determines whether the data is definitely zero, and a second process where data is
+generated from a Poisson distribution which may be zero.
+
+Note that this allows zeros to be generated from the model in one of two ways -- either from the Bernoulli
 process generating a zero or from the Bernoulli process generating a Poisson sample which is then zero.
 A latent variable representation of this parameterization introduces the latent variables $r_i$ which
 equal $1$ when $y_i>0$ and $0$ otherwise. This leads to the specification
@@ -173,9 +181,11 @@ equal $1$ when $y_i>0$ and $0$ otherwise. This leads to the specification
 	P(Y_i=y_i|r_i) = \frac{\exp(-\lambda r_i)(\lambda r_i)^{y_i}}{y_i!} \quad \mbox{and} \quad r_i \sim \mbox{Bernoulli}(1-\rho)
 \]
 
-We can extend the model naturally to multiple covariates by using a log-link and replacing $\lambda$
-with $\vx_i^\top \vbeta$ where $\vx_i,\vbeta\in\bR^p$ with $\vx_i$ being a vector of observed predictors and
-$\vbeta$ is  a vector of regression coefficients. Let $\vr = (r_1,\ldots,r_n)$,
+Typically zero-inflated models arise in applications where we wish to build multivariate regression models. 
+We can extend the model naturally to a multiple covariate regression model by using a log link function and
+replacing $\lambda$ in the model above with with $\vx_i^\top \vbeta$ where $\vx_i,\vbeta \in \R^p$, with
+$\vx_i$ being the vector of observed predictors and $\vbeta$ the vector of regression coefficients. Let $\vr =
+(r_1,\ldots,r_n)$, with
 \[%\label{eq:main}
 	\begin{array}{rl}
 		\log p(\vy|\vr, \vbeta) 
@@ -186,11 +196,11 @@ $\vbeta$ is  a vector of regression coefficients. Let $\vr = (r_1,\ldots,r_n)$,
 	\end{array}
 \]
 
-\noindent where $\mX$ is the $n\times p$ matrix whose $i$th rows equal $\vx_i$.
+\noindent where $\mX$ is the $n\times p$ matrix whose $i$th row equals $\vx_i$ and $\mR = \diag{(\vr)}$.
 
 \subsection{Mixed model architecture}
 
-Typically zero-inflated models arise in applications where we wish to build multivariate regression models. To
+To
 be able to construct multivariate models with as much generality as possible, we specify the full model as a
 General Design Bayesian Generalized Linear Mixed Model, as in \citep{Zhao2006}.
 
@@ -204,12 +214,13 @@ other.
 \joc{The next paragraph is too abrupt. How did this model come about? Where is the Poisson component? How is this combined with the zero-inflation?
 Start with a single observation before using matrix/vector notation.}
 
-The zero-inflated model introduced above can be extended to a flexible mixed model by incorporating the zero
-indicator variable $\vr$ into a Poisson mixed model likelihood. This allows us to incorporate within-subject
-correlation and smoothing splines, as in \citep{Wand2008}, into our models. When the indicator $\vr_{ij} = 0$,
-the likelihood is $1$ for $\vy_{ij} = 0$ and $0$ for all $\vy_{ij} > 0$, and when the indicator $\vr_{ij} =
-1$, the likelihood is a Poisson regression likelihood for $\vy_{ij}$. $\vr_{ij}$ is a Bernoulli indicator with
-probability $\rho$, allowing a proportion of zeroes in the observed data to be specified.
+The zero-inflated model introduced above can be extended to a flexible mixed model by incorporating the latent
+variable $\vr$ into a Poisson mixed model likelihood. This allows for a very rich class of models, which can
+incorporate such features as random intercepts and slopes, within-subject correlation and smoothing splines,
+as in \citep{Wand2008}, into our models. When the indicator $\vr_{ij} = 0$, the likelihood is $1$ for
+$\vy_{ij} = 0$ and $0$ for all $\vy_{ij} > 0$, and when the indicator $\vr_{ij} = 1$, the likelihood is a
+Poisson mixed model regression likelihood for $\vy_{ij}$. $\vr_{ij}$ is a Bernoulli indicator with probability
+$\rho$, allowing a proportion of zero-inflation in the observed data to be specified.
 
 The log-likelihood for one observation is then
 \[
@@ -220,7 +231,7 @@ The log-likelihood for one observation is then
 	\end{array}
 \]
 
-\noindent We now extend this to multiple observations. Let $\mR = \diag{(\vr)}$, $\mC = [\mX, \mZ]$ and $\vnu = [\vbeta^\top, \vu^\top]^\top$. Consider the model
+\noindent We now extend this to multiple observations. Let $\mC = [\mX, \mZ]$ and $\vnu = [\vbeta^\top, \vu^\top]^\top$. Consider the model
 
 \begin{equation}\label{eq:main}
 	\begin{array}{rl}
@@ -229,26 +240,26 @@ The log-likelihood for one observation is then
 	\end{array}
 \end{equation}
 
-\noindent \joc{(The prior structure will depend on the structure of the random effects model)}
-with priors
+% \joc{(The prior structure will depend on the structure of the random effects model)}
+\noindent with priors
 \begin{align*}
 	\log{p(\mSigma_{\vu \vu})} & = \text{Inverse Wishart}(\mPsi, v),    \\
-	\rho                       & \sim \mbox{Uniform}(0, 1),             \\
+	\rho                       & \sim \Beta(\alpha, \beta),             \\
 	\vbeta|\sigma^2_\vbeta     & \sim \N_p(\vzero, \sigma^2_\vbeta \mI) \\
 	\mbox{ and } \vu|\mG       & \sim \N_{mb}(\vzero, \mG)              
 \end{align*}
 
 \noindent where $\mX$ is $n \times p$, $\mZ$ is $n \times mb$ and $\mSigma_{\vu \vu}$ is $mb \times mb$ and
 $\mPsi$ is $b \times b$. The covariance of $\Cov(\vu) \equiv \blockdiag_{1 \leq i \leq m} (\mSigma) \equiv
-\mI_m \otimes \mSigma$.
-
-In the random intercept case, $\mSigma = \sigma_u^2 \mI$ while in the random slopes case
-$$\mSigma = 
-\begin{pmatrix}
-	\sigma_{\vu_1}^2                                 & \rho_{\vu_1 \vu_2} \sigma_{\vu_1} \sigma_{\vu_2} \\
-	\rho_{\vu_1 \vu_2} \sigma_{\vu_1} \sigma_{\vu_2} & \sigma_{\vu_2}^2                                 
-\end{pmatrix}
-$$
+\mI_m \otimes \mSigma$. The covariance matrix of random effects $\mSigma$ will depend on the mixed model being
+fit. In the random intercept case, $\mSigma = \sigma_u^2 \mI$ while in the random slopes case
+\[
+	\mSigma = 
+	\begin{pmatrix}
+		\sigma_{\vu_1}^2                                 & \rho_{\vu_1 \vu_2} \sigma_{\vu_1} \sigma_{\vu_2} \\
+		\rho_{\vu_1 \vu_2} \sigma_{\vu_1} \sigma_{\vu_2} & \sigma_{\vu_2}^2                                 
+	\end{pmatrix}
+\]
 where $\sigma_{\vu_1}^2$ is the variance of the random intercepts, $\sigma_{\vu_2}^2$ is the variance of the
 random slopes and $\rho_{\vu_1 \vu_2}$ is the correlation between the random intercepts and random slopes.
 
@@ -256,12 +267,10 @@ random slopes and $\rho_{\vu_1 \vu_2}$ is the correlation between the random int
 % which is different for the random intercept, slope and spline cases?}
 % \joc{(Perhaps it is wroth spelling out all of the various random effects structures that we will be using. Consider templating from Zhao \etal (2006).))}
 
-In the spline case, we use the cubic spline basis
-$1$, $x$, $x^3$, $(x - \kappa_1)^3_+$, \ldots, $(x - \kappa_K)^3_+$, where $K$ is the number of knots.
-$\mSigma$ is a $K + 2$ banded matrix, where $K$ is the number of knots. Banded matrices
-are highly sparse, and matrix operations can be performed on them in $\BigO(n)$ time.
-
-The matrix $\mSigma$ is symmetric, with contents
+In the spline case, we use the cubic spline basis $1$, $x$, $x^3$, $(x - \kappa_1)^3_+$, \ldots, $(x -
+\kappa_K)^3_+$, where $K$ is the number of knots. $\mSigma$ is a $K + 2$ banded matrix, where $K$ is the
+number of knots. Banded matrices are highly sparse, and matrix operations can be performed on them in
+$\BigO(n)$ time. The matrix $\mSigma$ is symmetric, with contents
 \[
 	\mSigma =
 	\begin{pmatrix}
@@ -273,16 +282,13 @@ The matrix $\mSigma$ is symmetric, with contents
 		0                           & 0                           & \rho_{x^2 (x-\kappa_2)_+^3} & \rho_{x^3 (x-\kappa_2)_+^3}   & \rho_{(x-\kappa_1)_+^3 (x-\kappa_2)_+^3} & \sigma^2_{(x - \kappa_2)_+^3} \\
 		0 & 0 & 0 & \rho_{x^3 (x - \kappa_3)_+^3} & \rho_{(x - \kappa_1)_+^3 (x - \kappa_3)_+^3} & \rho_{(x - \kappa_2)_+^3 (x - \kappa_3)_+^3} \\
 	\end{pmatrix}
-\]
-
-
+\].
 
 \section{Variational Bayes}
 \label{sec:vb}
 
 % General Design Bayesian Generalized Linear Mixed Model, as in \citep{zhao06}. This allows us to incorporate
 % within-subject correlation, and smoothing splines (as in \citep{Wand2008}) in our models.
-
 
 % Idea: We can use an approximation of the from q(\beta, \u, \Sigma) q(\rho) \Product q(r_i)
 % and use GVA on q(\beta, \u, \Sigma) and mean field updates on \rho and r_i
@@ -394,7 +400,9 @@ q(\vr_0, \vnu, \sigma_{\vu}^2, \rho) = q(\vnu)q(\rho) q(\vr_0)q(\mSigma_{\vu \vu
 $$
 
 \noindent 
-where we define $\vr_0 = \{ r_i : y_i = 0 \}$,
+where we define
+$q(\vnu) = \N(\vmu, \mLambda)$,
+$\vr_0 = \{ r_i : y_i = 0 \}$,
 $q(\sigma_{\vu}^2) = \mbox{Inverse Wishart}\left(\mPsi + \sum_{i=1}^m (\vmu_i \vmu_i^\top + \mLambda_{\vu_i \vu_i}), v + m \right)$ \mbox{and } $q(r_i) = \Bernoulli{(p_i)}$ with
 $$
 p_i = \expit\left[ \psi{(\alpha_{q(\rho)})} - \psi{(\beta_{q(\rho)})} - \exp{(c_i^\top\vmu + \half c_i^\top \mLambda c_i)} \right]
@@ -931,7 +939,7 @@ Variational Approximation, as in \citep{Ormerod2012}. The model can be fit using
 			the naive $\exp$ parameterisation, the algorithm encounters numerical errors for every starting point on the 
 			grid.
 				
-			\subsection{Stability results for different starting points}
+			\subsection{Stability of the GVA precision parameterisation algorithm for different starting points}
 					
 			The numerical stability of each fitting algorithm in Section \ref{sec:gaussian} was assessed by initialising
 			each algorithm from a range of different starting points. Errors due to numerical instability and the fitted
@@ -970,6 +978,8 @@ Variational Approximation, as in \citep{Ormerod2012}. The model can be fit using
 				\includegraphics[scale=0.4]{code/no_safe_exp_stability.pdf}
 			\end{figure}
 
+			\subsection{Stability of the GVA fixed point algorithm for different starting points}
+
 			The naive fixed point algorithm was extremely unstable for many starting points, as can be seen from
 			Figure \ref{fig:stability_locations_nr}. The variant of the algorithm which checked whether the
 			inversion of the $\mLambda_{\vu \vu}$ block of $\mLambda$ was performed successfully was much more
@@ -988,7 +998,7 @@ Variational Approximation, as in \citep{Ormerod2012}. The model can be fit using
 			\section{Application}
 			\label{sec:application}
 			
-			\subsection{Poisson example}
+			\subsection{Poisson example without zero-inflated component}
 			The data set used for this example was the police stop example from Chapter 15 of \citep{Gelman2007}.
 			The model fit was
 			\begin{align*}
