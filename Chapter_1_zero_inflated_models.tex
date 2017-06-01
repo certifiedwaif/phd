@@ -400,6 +400,7 @@ We choose a factored variational approximation for the model of the form
 
 \noindent 
 where we define $\vr_0 = \{ r_i : y_i = 0 \}$. \\
+% The distributions we select are?
 $q(\vnu) = \N(\vmu, \mLambda)$, \\
 $q(\sigma_{\vu}^2) = \text{Inverse Wishart}\left(\mPsi + \sum_{i=1}^m (\vmu_i \vmu_i^\top + \mLambda_{\vu_i \vu_i}), v + m \right)$ \mbox{and } \\
 $q(r_i) = \Bernoulli{(p_i)}$ with
@@ -444,14 +445,20 @@ for the regression parameters do not have closed form expressions. But these mod
 			\section{Optimising the Gaussian Part of the Model}
 			\label{sec:gaussian}
 					
-			In this section, we compare the accuracy, stability and speed of a number of algorithms for fitting the
-			Gaussian component of our model, $q(\vmu, \mLambda)$ in Algorithm \ref{alg:algorithm_one}.  We compare four
-			approaches for accuracy, computational complexity and stability.
+			In this section, we compare the accuracy, stability and speed of four different algorithms for fitting
+			the Gaussian component of our model, $q(\vmu, \mLambda)$ in Algorithm \ref{alg:algorithm_one}.  We
+			compare these approaches for accuracy, computational complexity and stability.
+
+			The naive implementations of some of these algorithms were prone to numerical stability problems when
+			initialised to some starting points. We also discuss modifications to the algorithms to enhance their
+			numerical stability.
 				
 			\subsection{Laplace-Variational Approximation}
-					
-			Laplace's method of approximation uses the second order Taylor expansion of the full log likelihood of the 
-			model around the mode to find a Gaussian approximation to the full posterior. Taylor expanding the full log likelihood once around the mode yields the following approximation:
+			The Laplace-Variational Approximation method is based on Laplace's method of approximating integrals.
+			The variational lower bound  is approximated by a Gaussian centred at its' mode. Laplace's method of
+			approximation uses the second order Taylor expansion of the full log likelihood of the  model around the
+			mode to find a Gaussian approximation to the full posterior. Taylor expanding the full log likelihood
+			once around the mode yields the following approximation:
 			% The algorithm is very quick to execute, but the resulting approximate posterior
 			% distributions are not as accurate as those produced by the other algorithms considered in this article.
 			% NR
@@ -468,7 +475,9 @@ for the regression parameters do not have closed form expressions. But these mod
 			\end{align*}
 					
 			\noindent The steps of the algorithm are shown in Algorithm \ref{alg:laplace_alg}. Sometimes in the course of	executing the algorithm, we observed numerical issues which had to be dealt with in order for the
-			algorithm to successfully complete. If the inversion  of $\mLambda$ failing, the diagonal elements of
+			algorithm to successfully complete.
+			% Describe the iteration
+			If the inversion  of $\mLambda$ fails, the diagonal elements of
 			$\mLambda$ becoming negative when $\mLambda$ were positive-definite, we reverted to the $\vmu$ and
 			$\mLambda$ values from the previous iteration. If any of the elements of the gradient vector of the
 			Gaussian variational lower bound with respect to $\vmu$ became NaN or $\infty$, the algorithm was
