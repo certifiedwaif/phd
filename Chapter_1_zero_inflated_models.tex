@@ -391,40 +391,34 @@ expressed.
 %These methods are generally difficult to apply in practice, as the problems can involve the optimisation of
 %many parameters over high-dimensional, constrained spaces whose constraints cannot be simply expressed.
 
-\subsection{Approximation}
+\subsection{Variational Bayes Approximation to the Zero-Inflated Poisson model}
 
-Our variational approximation for the model is of the form 
-$$
-q(\vr_0, \vnu, \sigma_{\vu}^2, \rho) = q(\vnu)q(\rho) q(\vr_0)q(\mSigma_{\vu \vu})  \\
-$$
-
-\noindent 
-where we define
-$q(\vnu) = \N(\vmu, \mLambda)$,
-$\vr_0 = \{ r_i : y_i = 0 \}$,
-$q(\sigma_{\vu}^2) = \mbox{Inverse Wishart}\left(\mPsi + \sum_{i=1}^m (\vmu_i \vmu_i^\top + \mLambda_{\vu_i \vu_i}), v + m \right)$ \mbox{and } $q(r_i) = \Bernoulli{(p_i)}$ with
-$$
-p_i = \expit\left[ \psi{(\alpha_{q(\rho)})} - \psi{(\beta_{q(\rho)})} - \exp{(c_i^\top\vmu + \half c_i^\top \mLambda c_i)} \right]
-$$
+We choose a factored variational approximation for the model of the form 
+\[
+	q(\vnu, \sigma_{\vu}^2,\vr_0, \rho) = q(\vnu) q(\mSigma_{\vu \vu}) q(\vr_0) q(\rho)
+\]
 
 \noindent 
-\text{when} $\vy_i = 0$.
+where we define $\vr_0 = \{ r_i : y_i = 0 \}$. \\
+$q(\vnu) = \N(\vmu, \mLambda)$, \\
+$q(\sigma_{\vu}^2) = \text{Inverse Wishart}\left(\mPsi + \sum_{i=1}^m (\vmu_i \vmu_i^\top + \mLambda_{\vu_i \vu_i}), v + m \right)$ \mbox{and } \\
+$q(r_i) = \Bernoulli{(p_i)}$ with
+$p_i = \expit\left[ \psi{(\alpha_{q(\rho)})} - \psi{(\beta_{q(\rho)})} - \exp{(c_i^\top\vmu + \half c_i^\top \mLambda c_i)} \right]$ when $\vy_i = 0$, and $1$ otherwise.
 
 %$\propto \exp{\left \{-r_i \bE_{-r_i} [\exp{(c_i^\top\vnu)}] + r_i [\psi(\alpha_\rho) - \psi(\beta_\rho)] \right \} }.\\$
 
-\noindent The optimal approximation \joc{(reword: the ``optimal approximation'' might be called the true posterior)} for $\vr$ is
-$$
+The optimal approximation \joc{(reword: the ``optimal approximation'' might be called the true posterior)} for
+$\vr$ is
+\[
 \begin{array}{rl}
 	q(\vr) & \propto \exp \left [ \bE_{-q(\vr)}\vy^\top\mR(\mC\vmu) - \vr^\top\exp{(\mC\vnu)}-\half \vnu^\top \mSigma_{\vu \vu} \vnu \right ]                                                  \\ [1ex]
 	       & = \exp{ \left\{ \vy^\top\mR\mC \vmu - \vr^\top \exp{[\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)]} - \half \vmu^\top \mD \vmu - \half \text{tr}(\mLambda \mD ) \right\} } 
 \end{array}
-$$
-
+\]
 \noindent where $\mD = \left[ (\mPsi + \sum_{i=1}^m \vmu_i \vmu_i^\top + \mLambda_{\vu_i\vu_i}) / (v - p - 1) \right]^{-1}$. 
 
-This is close in form to a Poisson regression model. Poisson regression models with normal priors
-have no closed form for their mean field updates due to non- conjugacy, but can be fit using Gaussian
-Variational Approximation, as in \citep{Ormerod2012}. The model can be fit using Algorithm
+We observe that this expression is close in form to the likelihood of a Poisson regression model with random effects. Poisson regression models are non-conjugate with normal priors, and hence the mean field updates
+for the regression parameters do not have closed form expressions. But these models can still be fit using a Gaussian Variational Approximation, as described in \citep{Ormerod2012}. The model can be fit using Algorithm
 \ref{alg:algorithm_one} below.
 
 \begin{algorithm}
