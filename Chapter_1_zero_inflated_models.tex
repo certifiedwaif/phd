@@ -315,39 +315,22 @@ over the domain of $\vtheta$. If a subset of $\vtheta$ are discrete random varia
 these parameters is replaced with a combinatorial sum over all possible values of these discrete random 
 variables.
 
-The calculation of the posterior distribution is usually either computationally intractable or no
-closed form exists for the posterior distribution and so an approximation is required. Variational
-approximation is a  class of methods for transforming the problem of approximating one distribution with another 
-into an optimization problem. Most, but not all variational approximations are based on minimising the Kullback-
-Leibler divergence between the true posterior $p(\vtheta|\vy)$ and an approximating distribution $q(\vtheta)$,
-sometimes called a $q$-density. Suppose that $q(\vtheta)$ is parameterised by $\vxi$ and write
-$q(\vtheta)\equiv q(\vtheta;\vxi)$. We attempt to solve
+The calculation of the true posterior distribution is often either computationally intractable or no closed form
+exists for the posterior distribution and so an approximation is required. Variational approximation is a
+class of methods for transforming the problem of approximating a distribution $p(x)$ by another more
+convenient distribution $q(x)$. Variational approximation can be viewed as minimising the Kullback- Leibler
+divergence between the true posterior $p(\vtheta|\vy)$ and an approximating distribution $q(\vtheta)$,
+sometimes called a $q$-density. Suppose that a class of candidate approximating distributions
+$q(\vtheta)$ is parameterised by $\vxi$ and write $q(\vtheta)\equiv q(\vtheta;\vxi)$. We attempt to find an 
+optimal approximating distribution $q^*(\vtheta)$ such that
 \[
 	\ds q^*(\vtheta) = \argmin_{\vxi \in \Xi} \text{KL} \{ {q(\vtheta;\vxi) || p(\vtheta|\vy)} \}.
 \]
 
-\noindent Two strategies for selecting a suitable class of approximating distributions $q$ are:
-\begin{enumerate}
-	\item[(A)] Specifying the parametric form of $q$; or 
-	\item[(B)] choosing $q$ to be of the form $q(\vtheta) = \prod_{i=1}^M q(\theta_i)$,
-\end{enumerate}
-
-\noindent where it can be shown (see Ormerod \& Wand, 2010, for example) that the optimal form of the
-$q_i$'s are of the form
-\begin{equation}\label{eq:consistency}
-	q_i^*(\theta_i) \propto \exp{\{ \bE_{-q(\theta_i)} \log p(\vy, \vtheta) \}},  \quad 1\le i\le M,
-\end{equation}
-
-\noindent where the above set of equations, sometimes called consistency conditions, need to be 
-satisfied simultaneously. It can be shown that by calculating $q_i^*(\theta_i)$ for a particular
-$i$ with the remaining $q_j^*(\theta_j)$, $j\ne i$ fixed, results in a monotonic decrease in the 
-Kullback-Leibler divergence. Note that a combination of (A) and (B) can be used which has recently
-been formalized by Rohde \& Wand (2015). 
-
 \noindent It can easily be shown that
-$$
-\ds \log p(\vy) = \int q(\vtheta;\vxi)\frac{p(\vy|\vtheta)p(\vtheta)}{q(\vtheta;\vxi)} d\vtheta + \text{KL}(q(\vtheta;\vxi)||p(\vtheta|\vy)).
-$$
+\[
+	\ds \log p(\vy) = \int q(\vtheta;\vxi)\frac{p(\vy|\vtheta)p(\vtheta)}{q(\vtheta;\vxi)} d\vtheta + \text{KL}(q(\vtheta;\vxi)||p(\vtheta|\vy)).
+\]
 
 \noindent As the Kullback-Leibler divergence is strictly positive, the first term on the right hand side
 is a lower bound on the marginal log-likelihood which we will define by
@@ -356,19 +339,31 @@ $$
 $$
 
 \noindent and maximizing $\log \underline{p}(\vy;\vxi)$ with respect to $\vxi$ is eqivalent to minimizing
-$\text{KL}(q(\vtheta;\vxi)||p(\vtheta|\vy))$.
+$\text{KL}(q(\vtheta;\vxi)||p(\vtheta|\vy))$. $\log \underline{p}(\vy;\vxi)$ is referred to as the
+variational lower bound.
 
-\noindent Variational Bayes aims to approximate a true, possibly intractable probability distribution $p(x)$
-by a simpler, more tractable distribution $q(x)$ of known form.
+Two strategies for selecting a suitable class of approximating distributions $q$ such that
+an optimal distribution $q^*(\vtheta)$ can be found are:
+\begin{enumerate}
+	\item[(A)] Specifying the parametric form of $q$; or 
+	\item[(B)] choosing $q$ to be of the form $q(\vtheta) = \prod_{i=1}^M q(\theta_i)$.
+\end{enumerate}
 
-\noindent The approximation is fit by iteratively minimising the Kullback-Leibler divergence between the true
-posterior and an approximating distribution. Thus the optimal approximation $q^*(\vtheta)$ is
-\[
-	q^*(\vtheta) = \argmin_{\vxi \in \Xi} \text{KL} \{ {q(\vtheta|\vxi) || p(\vtheta|\vy)} \}.
-\]
+\noindent For the second alternative,
+it can be shown (see Ormerod \& Wand, 2010, for example) that the optimal form of the
+approximating distributions $q_i$ for each parameter are of the form
+\begin{equation}\label{eq:consistency}
+	q_i^*(\theta_i) \propto \exp{\{ \bE_{-q(\theta_i)} \log p(\vy, \vtheta) \}},  \quad 1\le i\le M.
+\end{equation}
 
-\noindent A common approach is to assume an approximation in a factorised form
-$$q(\vtheta) = \Pi_{i=1}^M q(\theta_i).$$
+\noindent When the optimal distributions for each $q_i^*(\theta_i)$ are calculated, they yield a set of
+equations, sometimes called the consistency conditions, which need to be  satisfied simultaneously. These
+yield a series of mean field updates for the parameters of each approximating distribution. By executing the
+mean field update equations in turn for each parameter in the model, the variational lower bound for the model
+$\underline{p}(\vtheta; \vy)$ is iteratively increased. It can be shown that by calculating $q_i^*(\theta_i)$ for 
+a particular $i$ with the remaining $q_j^*(\theta_j)$, $j\ne i$ fixed, results in a monotonic increase in the
+variational lower bound, and thus a monotonic decrease in the Kullback-Leibler divergence between
+$p(\vtheta|\vy)$ and $q(\vtheta)$.
 
 \noindent The variational lower bound is maximised iteratively. On each iteration, the value of each parameter
 in the model is calculated as the expectation of the full likelihood relative to the other parameters in the
@@ -377,6 +372,11 @@ $$q_i^*(\theta_i) \propto \exp{\{ \bE_{-q(\theta_i)} \log p(\vy, \vtheta) \}}$$
 
 \noindent This is done for each parameter in the model in turn until the variational lower bound's increase is
 negligible and convergence is achieved.
+
+Note that a combination of (A) and (B) can be used which has recently been formalized by \cite{Rohde2015}.
+
+\noindent Variational Bayes aims to approximate a true, possibly intractable probability distribution $p(x)$
+by a simpler, more tractable distribution $q(x)$ of known form.
 
 This approach works well for classes of models where all of the parameters are conjugate. For more
 general classes of models, mean field updates are not analytically tractable and general gradient-based
