@@ -191,7 +191,7 @@ $\vx_i$ being the vector of observed predictors and $\vbeta$ the vector of regre
 		    & = \vy^\top \mR (\mX\vbeta)                           
 		- \vr^\top \exp{(\mX\vbeta)} 
 		- \vone^\top \log{\Gamma{(\vy + \vone)}}, \quad \mbox{ and }\\ [1ex]
-		r_i & \sim \text{Bernoulli}(1-\rho), \quad 1 \leq i \leq n \\
+		r_i | \rho & \sim \text{Bernoulli}(1-\rho), \quad 1 \leq i \leq n \\
 	\end{array}
 \]
 
@@ -223,8 +223,8 @@ The log-likelihood for one observation is then
 \[
 	\begin{array}{rl}
 		\log p(\vy_{ij} | \vx, \vr, \vz) & = \vy_{ij} \vr_{ij} (\vx_i^\top \vbeta + \vz_{ij}^\top \vu) - \vr_{ij} \exp (\vx_{ij}^\top \vbeta + \vz_{ij}^\top \vu) - \log \Gamma (\vy_{ij} + 1), \\
-		\vr_{ij}                         & \sim \text{Bernoulli}(\rho), 1 \leq i \leq m, 1 \leq j \leq n, \text{ and }                                                              \\
-		\rho                        & \sim \mbox{Uniform}(0, 1).                                                                                              \\
+		\vr_{ij} | \rho                  & \sim \text{Bernoulli}(\rho), 1 \leq i \leq m, 1 \leq j \leq n, \text{ and }                                                              \\
+		\rho                        & \sim \text{Beta}(\alpha, \beta).                                                                                              \\
 	\end{array}
 \]
 
@@ -242,8 +242,8 @@ The log-likelihood for one observation is then
 \begin{align*}
 	\log{p(\mSigma_{\vu \vu})} & = \text{Inverse Wishart}(\mPsi, v),    \\
 	\rho                       & \sim \Beta(\alpha, \beta),             \\
-	\vbeta|\sigma^2_\vbeta     & \sim \N_p(\vzero, \sigma^2_\vbeta \mI) \\
-	\mbox{ and } \vu|\mG       & \sim \N_{mb}(\vzero, \mG)              
+	\vbeta|\sigma^2_\vbeta     & \sim \N_p(\vzero, \sigma^2_\vbeta \mI) \text{ and } \\
+	\vu|\mG       & \sim \N_{mb}(\vzero, \mG)              
 \end{align*}
 
 \noindent where $\mX$ is $n \times p$, $\mZ$ is $n \times mb$ and $\mSigma_{\vu \vu}$ is $mb \times mb$ and
@@ -455,10 +455,12 @@ for the regression parameters do not have closed form expressions. But these mod
 				
 			\subsection{Laplace-Variational Approximation}
 			The Laplace-Variational Approximation method is based on Laplace's method of approximating integrals.
-			The variational lower bound  is approximated by a Gaussian centred at its' mode. Laplace's method of
-			approximation uses the second order Taylor expansion of the full log likelihood of the  model around the
-			mode to find a Gaussian approximation to the full posterior. Taylor expanding the full log likelihood
-			once around the mode yields the following approximation:
+			The variational lower bound  is approximated by a Gaussian centred at its' mode.
+			% Laplace's method of
+			% approximation uses the second order Taylor expansion of the full log likelihood of the  model around the
+			% mode to find a Gaussian approximation to the full posterior. Taylor expanding the full log likelihood
+			% once around the mode yields the following approximation.
+			This yields the approximation to the variational lower bound below:
 			% The algorithm is very quick to execute, but the resulting approximate posterior
 			% distributions are not as accurate as those produced by the other algorithms considered in this article.
 			% NR
@@ -467,21 +469,24 @@ for the regression parameters do not have closed form expressions. But these mod
 				\log \underline{p}(\vmu, \mLambda; \vy) \approx \vy^\top\mP\mC\vmu - \vp^\top\exp \left (\mC \vmu \right ) - \half \vmu^\top \mSigma^{-1} \vmu. 
 			\end{align*}
 					
-			\noindent This expression can be iteratively optimised with respect to $\vmu$ and $\mLambda$ using a Newton-Raphson style algorithm, with the derivatives for $\vmu$ and $\mLambda$ given below.
-			\mgc{Are the derivatives better placed in the appendices?}
-			\begin{align*}
-				\frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \vmu}     & \approx \mP \mC (\vy - \exp{(\mC \vmu)}) - \mSigma^{-1} \vmu \text{ and} \\
-				\frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \mLambda} & \approx - \mC^\top \text{diag}(\vp e^{(\mC \vmu)}) \mC - \mSigma^{-1}.   
-			\end{align*}
+			\noindent This expression can be iteratively optimised with respect to $\vmu$ and $\mLambda$ using the
+			Newton-Raphson method, with the derivatives for $\vmu$ and $\mLambda$ given in Appendix
+			\ref{sec:appendix_derivatives_laplace}. The steps of the algorithm are shown in Algorithm \ref{alg:laplace_alg}.
 					
-			\noindent The steps of the algorithm are shown in Algorithm \ref{alg:laplace_alg}. Sometimes in the course of	executing the algorithm, we observed numerical issues which had to be dealt with in order for the
-			algorithm to successfully complete.
+			Upon implementing the algorithm and performing numerical experiments, we observed numerical issues which had to be dealt with in 
+			order for the algorithm to successfully complete.
 			% Describe the iteration
-			If the inversion  of $\mLambda$ fails, the diagonal elements of
-			$\mLambda$ becoming negative when $\mLambda$ were positive-definite, we reverted to the $\vmu$ and
-			$\mLambda$ values from the previous iteration. If any of the elements of the gradient vector of the
-			Gaussian variational lower bound with respect to $\vmu$ became NaN or $\infty$, the algorithm was
-			terminated and the $\vmu$ and $\mLambda$ values from the previous iteration were returned.
+			We implemented checks for error conditions, and steps to recover from the error conditions should
+			they arise.
+
+			If during an iteration of the Laplace-Variational approximation algorithm the inversion  of $\mLambda$
+			fails, or the diagonal elements of $\mLambda$ become negative when $\mLambda$ must be positive-definite,
+			then $\vmu$ and $\mLambda$ were reverted to the previous iteration's $\vmu$ and $\mLambda$ values and
+			the algorithm was terminated.
+
+			If after calculating the gradient of the Gaussian Variational lower bound with respect to $\vmu$, any of
+			its' elements were NaN or $\infty$, then $\vmu$ and $\mLambda$ were reverted to the previous iteration's
+			$\vmu$ and $\mLambda$ values and the algorithm was terminated.
 					
 			\begin{algorithm}
 				\caption{Laplace scheme for optimising $\log \underline{p}(\vmu, \mLambda; \vy)$}
@@ -506,28 +511,26 @@ for the regression parameters do not have closed form expressions. But these mod
 			\subsection{Gaussian Variational Approximation}
 					
 			% Detail techniques used for fitting models.
-					
 			The full variational likelihood for a Generalised Linear Mixed model is computationally difficult to
-			compute, requiring the evaluating of a high dimensional integral. However, \citep{Ormerod2012} devised
+			compute, requiring the evaluation of a high dimensional integral. However, \citep{Ormerod2012} devised
 			an accurate approximation to the full variational likelihood, the Gaussian Variational Lower Bound,
 			which only requires the evaluation of a substantially simpler univariate integral.
 				
-			To optimise the Gaussian component of the model in each iteration of \ref{alg:algorithm_one}, the Gaussian variational lower bound must to be optimised over the set of $\vmu$ and $\mLambda$
-			values, and $\mLambda$ in particular is both of high dimension $(p + mb)^2$ and constrained to be
-			semi-positive definite. Thus care must be taken in the parameterisation in order to optimise
-			$\mLambda$ effectively.
+			To optimise the Gaussian component of the lower bound in each iteration of Algorithm
+			\ref{alg:algorithm_one}, optimal $\vmu$ and $\mLambda$ values must be found while keeping the other
+			variational parameters fixed. The variational lower bound is not necessarily unimodal if $\vp$ and
+			$\mSigma$ are free to vary, leading to potential difficulty in optimising to the global maximum.
+			However, for fixed $\vp$ and $\mSigma$, the variational lower bound is log-concave with respect to
+			$\vmu$ and $\mLambda$, and so standard optimisation methods such as L-BFGS-B as described in, for
+			example, \citep{Liu1989} \citep{Nocedal2006}, work well. This leads to an extremely accurate
+			approximation of the true posterior at the expense of some additional computational effort. Care must be
+			taken in the parameterisation of $\mLambda$, as it is both of high dimension $(p + mb)^2$ and
+			constrained to be semi- positive definite. We present and compare two approaches to parameterising the
+			covariance matrix $\mLambda$ below.
 				
 			\subsubsection{Covariance parameterisation $\mLambda = \mR^\top \mR$}
 			
-			Assuming $q(\vnu)$ is a multivariate normal distribution $\N(\vmu, \mLambda)$, the Gaussian variational lower
-			bound in Algorithm \ref{alg:algorithm_one} can be optimised using a variety of algorithms. The variational
-			lower bound is not necessarily unimodal if $\vp$ and $\mLambda$ are free to vary, leading to potential
-			difficulty in optimising to the global maximum. However, for fixed $\vp$ and $\mSigma$, the variational
-			lower bound is log-concave with respect to $\vmu$ and $\mLambda$, and so standard optimisation methods such
-			as L-BFGS-B as described in, for example, \citep{Liu1989}, work well. This leads to an extremely accurate
-			approximation of the true posterior at the expense of some additional computational effort.
-					
-			We fit the Gaussian part of our approximation $q(\vbeta, \vu) \sim \N(\vmu, \mLambda)$ by maximising 
+			We fit the Gaussian component of our approximation in Algorithm \ref{alg:algorithm_one} by maximising 
 			the variational lower bound	
 			\begin{align*}
 				\log \underline{p}(\vmu, \mLambda; \vy) & = \quad \vy^\top\mP \mC \vmu - \vp^\top \exp[\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)] - \half \vmu^\top \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} + \log{|\mR|} \\
@@ -537,7 +540,10 @@ for the regression parameters do not have closed form expressions. But these mod
 					
 			The first variant of the Gaussian Variational Approximation algorithm that we present optimises the
 			Gaussian variational lower bound of the log likelihood with respect to $\vmu$ and the Cholesky decomposition
-			$\mR$ of   $\mLambda$, that is, $\mLambda = \mR \mR^\top$. The resulting function
+			$\mR$ of $\mLambda$, that is, $\mLambda = \mR \mR^\top$. This ensures that $\mLambda$ remains positive
+			definite, and reduces the number of parameters we have to optimise over in order to optimise $\mLambda$
+			to the $(p + 1) p / 2$, as $\mR$ is lower triangular.	We refer to this as the covariance
+			parameterisation. The resulting function
 			% This algorithm trades the computational complexity of
 			% numerically evaluating an integral for greatly increased accuracy in the approximating posterior
 			% distribution. 
@@ -545,11 +551,7 @@ for the regression parameters do not have closed form expressions. But these mod
 				\log \underline{p}(\vmu, \mLambda; \vy) & = \quad \vy^\top\mP \mC \vmu - \vp^\top \exp[\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)] - \half \vmu^\top \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} + \log{|\mR|} \\
 				                                        & \quad - \tfrac{p}{2} \log{(2 \pi)} + \half \log{|\mSigma^{-1}|} + \tfrac{p}{2} \log{(2 \pi)} + \tfrac{p}{2}                                                                              
 			\end{align*}
-			can be optimised with L-BFGS-B using the derivatives
-			\begin{align*}
-				\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu}     & = \mP \mC (\vy - \mC^\top \exp(\mC \vmu + \half \text{diag}{(\mC \mLambda \mC^\top)})) - \mSigma^{-1} \vmu \text{ and}                \\
-				\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda} & = \left [\mLambda^{-1} - \mP \mC^\top \exp(\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)) \mP \mC) - \mSigma^{-1} \right ] \mR. 
-			\end{align*}
+			can be optimised with L-BFGS-B using the derivatives in Appendix \ref{sec:appendix_derivatives_gva}.
 			
 			\begin{figure}[p]
 				\caption{\tiny Covariance matrix -- Fixed effects before random effects}
@@ -1191,7 +1193,23 @@ for the regression parameters do not have closed form expressions. But these mod
 			$$
 					
 			\noindent with $\bE_q \log |\mSigma_{\vu \vu}| = m \log 2 + \log \left | \Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu} \right | + \sum_{i=1}^m \Psi \left ( \frac{v - i + 1}{2} \right )$
+
+			\section{Appendix}
+			\subsection{Derivatives for Laplace-Gaussian Variational Approximation}
+			\label{sec:appendix_derivatives_laplace}
+			\begin{align*}
+				\frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \vmu}     & \approx \mP \mC (\vy - \exp{(\mC \vmu)}) - \mSigma^{-1} \vmu \text{ and} \\
+				\frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \mLambda} & \approx - \mC^\top \text{diag}(\vp e^{(\mC \vmu)}) \mC - \mSigma^{-1}.   
+			\end{align*}
 					
+			\subsection{Derivatives for Gaussian Variational Approximation with parameterisation $\mLambda = \mR \mR^\top$}
+			\label{sec:appendix_derivatives_gva}
+			\begin{align*}
+				\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu}     & = \mP \mC (\vy - \mC^\top \exp(\mC \vmu + \half \text{diag}{(\mC \mLambda \mC^\top)})) - \mSigma^{-1} \vmu \text{ and}                \\
+				\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda} & = \left [\mLambda^{-1} - \mP \mC^\top \exp(\mC \vmu + \half \text{diag}(\mC \mLambda \mC^\top)) \mP \mC) - \mSigma^{-1} \right ] \mR. 
+			\end{align*}
+
+
 			\bibliographystyle{elsarticle-harv}
 			\bibliography{references_mendeley}
 					
