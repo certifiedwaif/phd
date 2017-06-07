@@ -198,7 +198,7 @@ FUNCTION {emphasize}
 { skip$ }
 
 FUNCTION {capitalize}
-{ "u" change.case$ "t" change.case$ }
+{ "u" "t" }
 
 FUNCTION {space.word}
 { " " swap$ * " " * }
