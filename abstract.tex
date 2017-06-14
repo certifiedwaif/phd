@@ -1,0 +1,36 @@
+\documentclass{article}
+\usepackage{natbib}
+\title{Abstract}
+\author{Mark Greenaway}
+\begin{document}
+\maketitle
+
+In this thesis, we examine several complicated Bayesian models which applied statisticians wish to fit
+to data. These models are typically fit with Monte Carlo Markov Chains, but these techniques are
+computationally expensive and prone to convergence problems. These models can be fit much faster with Variational 
+Bayes.
+
+In the first chapter, we consider variational inference for zero--inflated Poisson regression models using a
+latent   variable representation. The model is extended to include random effects which allow simple
+incorporation of   spline and other modelling structures. Several variational approximations to the resulting
+set of models are   presented, including a novel approach based on the inverse covariance matrix rather than
+the covariance matrix   of the approximate posterior density for the random effects. This parameterisation
+improves upon the   computational cost and numerical stability of previous methods. We demonstrate these
+approximations on   simulated and real data sets.
+
+In the second chapter, we develop mean field and structured variational Bayes approximations for Bayesian
+model selection on linear models using a special case of the prior proposed in \cite{Maruyama2011}. We show
+that both approaches only depend on a single variational parameter $\tau_g$ and the sample size, model
+dimension and the $R^2$ value of the linear model. An algorithm is developed which allows these models to be
+fit in parallel. Applications to a range of data sets are presented, showing  empirically that our method
+performs comparably to other methods on real-world data. Our method is computationally more efficient  than
+the exact Bayesian model.
+
+In the third chapter, we approach model selection from a different, population-based perspective, by developed
+a Collapsed Variational Approximation which uses a population-based approach to explore the model space for
+a normal linear model selection problem. We compare the results of this approximation to the 
+previously published EMVS approach in \cite{Rockova2014}.
+\bibliographystyle{elsarticle-harv-nourl}
+\bibliography{references_mendeley}
+
+\end{document}
