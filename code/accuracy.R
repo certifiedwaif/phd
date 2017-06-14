@@ -95,12 +95,15 @@ integrate2 <- function(f, min_x, max_x, subdivisions = 0)
 
 calculate_accuracy_normalised <- function(mcmc_samples, dist_fn, ...)
 {
+  browser()
   mcmc_density <- density(mcmc_samples)
   opt <- optimize(function(x) dist_fn(x, ...), interval=c(min(mcmc_density$x), max(mcmc_density$x)), maximum=TRUE)
   mcmc_fn <- splinefun(mcmc_density$x, mcmc_density$y * opt$object / max(mcmc_density$y))
   result1 <- integrate(mcmc_fn, min(mcmc_density$x), max(mcmc_density$x),
                      subdivisions = length(mcmc_density$x))
-  result2 <- integrate(function(x) dist_fn(x, ...), min(mcmc_density$x), max(mcmc_density$x),
+  lower_bound <- max(min(mcmc_density$x), 1e-8)
+  upper_bound <- max(mcmc_density$x)
+  result2 <- integrate(function(x) dist_fn(x, ...), lower_bound, upper_bound,
                      subdivisions = length(mcmc_density$x))
   
   integrand <- function(x)
@@ -110,7 +113,10 @@ calculate_accuracy_normalised <- function(mcmc_samples, dist_fn, ...)
   result <- integrate2(integrand, min(mcmc_density$x), max(mcmc_density$x),
                      subdivisions = length(mcmc_density$x))
   accuracy <- 1 - .5 * result$value
-  return(100 * accuracy)
+  if (is.nan(accuracy))
+    return(0)
+  else
+    return(100 * accuracy)
 }
 
 calculate_accuracy <- function(mcmc_samples, dist_fn, ...)
@@ -188,7 +194,7 @@ calculate_accuracies <- function(test, mult, mcmc_samples, var_result, approxima
       vbeta_accuracy[i] <- calculate_accuracy(mcmc_samples$vbeta[,i], dnorm,
                                               var_result$vmu[i], sqrt(var_result$mLambda[i,i]))
       vbeta_means[i] <- mean(mcmc_samples$vbeta[, i])
-      title <- latex2exp(sprintf("%s $\\textbf{\\beta_%d}$ accuracy: %2.1f%%", approximation, i, vbeta_accuracy[i]))
+      title <- TeX(sprintf("%s $\\textbf{\\beta_%d}$ accuracy: %2.1f%%", approximation, i, vbeta_accuracy[i]))
       if (print_flag) print(title)
       if (plot_flag) accuracy_plot(title, mcmc_samples$vbeta[,i], dnorm,
                                    var_result$vmu[i], sqrt(var_result$mLambda[i,i]))
@@ -212,7 +218,7 @@ calculate_accuracies <- function(test, mult, mcmc_samples, var_result, approxima
         vu_means[i] <- mean(mcmc_samples$vu[, m_idx, b_idx])
         vu_sd <- sqrt(var_result$mLambda[i + mult$p, i + mult$p])
         vu_accuracy[i] <- calculate_accuracy(mcmc_samples$vu[, m_idx, b_idx], dnorm, vu_mean, vu_sd)
-        title <- latex2exp(sprintf("%s $\\textbf{u}_{%d}$ accuracy: %2.1f%%", approximation, i, vu_accuracy[i]))
+        title <- TeX(sprintf("%s $\\textbf{u}_{%d}$ accuracy: %2.1f%%", approximation, i, vu_accuracy[i]))
         if (print_flag) print(title)
         if (plot_flag) accuracy_plot(title, mcmc_samples$vu[, m_idx, b_idx], dnorm, vu_mean, vu_sd)
 
@@ -287,7 +293,7 @@ calculate_accuracies <- function(test, mult, mcmc_samples, var_result, approxima
     # sigma_vu <- sqrt(var_result$mPsi[i, i])
     sigma2_vu_accuracy[i] <- calculate_accuracy_normalised(sigma_u_inv[, i, i],
                                                function(x, ...) dinvgamma(x, psi / 2, v / 2, ...))
-    title <- latex2exp(sprintf("%s $\\sigma^2_{u_%d}$ accuracy: %2.0f%%",
+    title <- TeX(sprintf("%s $\\sigma^2_{u_%d}$ accuracy: %2.0f%%",
                        approximation,
                        i,
                        sigma2_vu_accuracy[i]))
@@ -300,7 +306,7 @@ calculate_accuracies <- function(test, mult, mcmc_samples, var_result, approxima
   # rho accuracy
   rho_accuracy <- calculate_accuracy(mcmc_samples$rho, dbeta,
                                      var_result$a_rho, var_result$b_rho)
-  title <- latex2exp(sprintf("%s $\\rho$ accuracy: %2.0f%%", approximation, rho_accuracy, "\n"))
+  title <- TeX(sprintf("%s $\\rho$ accuracy: %2.0f%%", approximation, rho_accuracy, "\n"))
   if (print_flag) print(title)
   if (plot_flag) accuracy_plot(title, mcmc_samples$rho, dbeta,
                           var_result$a_rho, var_result$b_rho)
