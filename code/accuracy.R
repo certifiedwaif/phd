@@ -95,7 +95,6 @@ integrate2 <- function(f, min_x, max_x, subdivisions = 0)
 
 calculate_accuracy_normalised <- function(mcmc_samples, dist_fn, ...)
 {
-  browser()
   mcmc_density <- density(mcmc_samples)
   opt <- optimize(function(x) dist_fn(x, ...), interval=c(min(mcmc_density$x), max(mcmc_density$x)), maximum=TRUE)
   mcmc_fn <- splinefun(mcmc_density$x, mcmc_density$y * opt$object / max(mcmc_density$y))
@@ -141,7 +140,7 @@ calculate_accuracy_spline <- function(vx, mcmc_fn, vb_fn)
     return(abs(mcmc_fn(x) - vb_fn(x)))
   }
   result <- integrate2(integrand, min(vx), max(vx),
-                     subdivisions = length(vx))
+                        subdivisions = length(vx))
   accuracy <- 1 - .5 * result$value
   return(accuracy)
   
