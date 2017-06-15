@@ -13,8 +13,8 @@ transformed data {
   vector[P] zeros_beta;
   vector[B] zeros_u;
 
-  zeros_beta <- rep_vector(0, P);
-  zeros_u <- rep_vector(0, B);
+  zeros_beta = rep_vector(0, P);
+  zeros_u = rep_vector(0, B);
 }
 
 parameters {
@@ -35,9 +35,9 @@ model {
   rho ~ beta(1.0, 1.0);
   sigma_u ~ inv_wishart(v, psi);
 
-  chol_BetaPrior <- cholesky_decompose(BetaPrior);
+  chol_BetaPrior = cholesky_decompose(BetaPrior);
   vbeta ~ multi_normal_cholesky(zeros_beta, chol_BetaPrior);
-  chol_sigma_u <- cholesky_decompose(sigma_u);
+  chol_sigma_u = cholesky_decompose(sigma_u);
   // This definitely works, but it's slow.
   # for (m in 1:(M-1)) {
   #   vu[m] ~ multi_normal_cholesky(zeros_u, chol_sigma_u);
@@ -55,12 +55,13 @@ model {
       }
     }
 
-    eta <- dot_product(X[n], vbeta) + dot_product(Z[n], u);
+    eta = dot_product(X[n], vbeta) + dot_product(Z[n], u);
 
     if (y[n] == 0)
-      increment_log_prob(log_sum_exp(bernoulli_log(0, rho),
-        bernoulli_log(1, rho) + poisson_log_log(y[n], eta)));
+      # target += log_sum_exp(bernoulli_lpmf(0|rho),
+      #                       bernoulli_lpmf(1|rho) + poisson_log_lpmf(y[n]|eta));
+      target += bernoulli_lpmf(0|rho);
     else
-      increment_log_prob(bernoulli_log(1, rho) + poisson_log_log(y[n], eta));
+      target += bernoulli_lpmf(1|rho) + poisson_log_lpmf(y[n]|eta);
   };
 }
