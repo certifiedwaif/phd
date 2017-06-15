@@ -8,7 +8,7 @@ data {
 transformed data {
   vector[P] zeros_beta;
 
-  zeros_beta <- rep_vector(0, P);
+  zeros_beta = rep_vector(0, P);
 }
 
 parameters {
@@ -23,16 +23,17 @@ model {
 
   rho ~ beta(1.0, 1.0);
 
-  chol_BetaPrior <- cholesky_decompose(BetaPrior);
+  chol_BetaPrior = cholesky_decompose(BetaPrior);
   vbeta ~ multi_normal_cholesky(zeros_beta, chol_BetaPrior);
   
   for (n in 1:N) {
-    eta <- dot_product(X[n], vbeta);
+    eta = dot_product(X[n], vbeta);
 
     if (y[n] == 0)
-      increment_log_prob(log_sum_exp(bernoulli_log(0, rho),
-        bernoulli_log(1, rho) + poisson_log_log(y[n], eta)));
+      # target += log_sum_exp(bernoulli_lpmf(0|rho),
+      #                       bernoulli_lpmf(1|rho) + poisson_log_lpmf(y[n]|eta));
+      target += bernoulli_lpmf(0|rho);
     else
-      increment_log_prob(bernoulli_log(1, rho) + poisson_log_log(y[n], eta));
+      target += bernoulli_lpmf(1|rho) + poisson_log_lpmf(y[n]|eta);
   };
 }
