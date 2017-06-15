@@ -702,31 +702,35 @@ fit.GVA_nr <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0e
     # Use block inverse formula to speed computation
     # Let -mH = [A B]
     #           [B D]
-    u_dim <- (m - 1) * blocksize + spline_dim
-    A <- -mH[1:p, 1:p]
-    B <- -mH[1:p, (p + 1):(p + u_dim)]
-    D <- -mH[(p + 1):(p + u_dim), (p + 1):(p + u_dim)]
-    # Then -mH^{-1} = [(A - B D^-1 B^T)^-1, -(A-B D^-1 B^T)^-1 B D^-1]
-    #                 [-D^-1 B^T (A - B D^-1 B^T)^-1, D^-1 + D^-1 B^T (A - B D^-1 B^T)^-1 B D^-1]
-    # D^-1 and (A - B D^-1 B^T)^-1 appear repeatedly, so we precalculate them
-    D.inv <- tryCatch(solve(D), error=function(e) NULL)
-    # D.inv <- solve(D)
-    # We can't invert D, so bail out with the last known good vmu and mLambda.
-    # This probably means that the answer we've come up with to our optimisation
-    # problem isn't very good, because we're in a part of the parameter space that
-    # we shouldn't be in!
-    if (is.null(D.inv)) {
-      vmu <- vmu.old
-      mLambda <- mLambda.old
-      break
+    if (m > 0) {
+      u_dim <- (m - 1) * blocksize + spline_dim
+      A <- -mH[1:p, 1:p]
+      B <- -mH[1:p, (p + 1):(p + u_dim)]
+      D <- -mH[(p + 1):(p + u_dim), (p + 1):(p + u_dim)]
+      # Then -mH^{-1} = [(A - B D^-1 B^T)^-1, -(A-B D^-1 B^T)^-1 B D^-1]
+      #                 [-D^-1 B^T (A - B D^-1 B^T)^-1, D^-1 + D^-1 B^T (A - B D^-1 B^T)^-1 B D^-1]
+      # D^-1 and (A - B D^-1 B^T)^-1 appear repeatedly, so we precalculate them
+      D.inv <- tryCatch(solve(D), error=function(e) NULL)
+      # D.inv <- solve(D)
+      # We can't invert D, so bail out with the last known good vmu and mLambda.
+      # This probably means that the answer we've come up with to our optimisation
+      # problem isn't very good, because we're in a part of the parameter space that
+      # we shouldn't be in!
+      if (is.null(D.inv)) {
+        vmu <- vmu.old
+        mLambda <- mLambda.old
+        break
+      }
+      A_BDB.inv <- solve(A - B %*% D.inv %*% t(B))
+      beta_idx <- 1:p
+      u_idx <- (p + 1):(p + u_dim)
+      mLambda[beta_idx, beta_idx] <- A_BDB.inv
+      mLambda[beta_idx, u_idx] <- -A_BDB.inv %*% B %*% D.inv
+      mLambda[u_idx, u_idx] <- D.inv + D.inv %*% t(B) %*% A_BDB.inv %*% B %*% D.inv
+      mLambda[u_idx, beta_idx] <- t(mLambda[beta_idx, u_idx])
+    } else {
+      mLambda <- solve(-mH)
     }
-    A_BDB.inv <- solve(A - B %*% D.inv %*% t(B))
-    beta_idx <- 1:p
-    u_idx <- (p + 1):(p + u_dim)
-    mLambda[beta_idx, beta_idx] <- A_BDB.inv
-    mLambda[beta_idx, u_idx] <- -A_BDB.inv %*% B %*% D.inv
-    mLambda[u_idx, u_idx] <- D.inv + D.inv %*% t(B) %*% A_BDB.inv %*% B %*% D.inv
-    mLambda[u_idx, beta_idx] <- t(mLambda[beta_idx, u_idx])
 
     vmu <- vmu + mLambda %*% vg
 
