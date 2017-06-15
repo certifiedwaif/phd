@@ -619,11 +619,13 @@ fit.GVA_new <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0
 
   # Swap order of parameters so that random effects are before fixed effects
   u_dim = (m-1)*blocksize+spline_dim
-  result <- swap_mX_mZ(vmu, mLambda, mSigma.inv, mC, p, u_dim)
-  vmu <- result$vmu
-  mLambda <- result$mLambda
-  mSigma.inv <- result$mSigma.inv
-  mC <- result$mC
+  if (m > 0) {
+    result <- swap_mX_mZ(vmu, mLambda, mSigma.inv, mC, p, u_dim)
+    vmu <- result$vmu
+    mLambda <- result$mLambda
+    mSigma.inv <- result$mSigma.inv
+    mC <- result$mC
+  }
 
   mR <- t(chol(solve(mLambda + diag(1.0E-8, d))))
   mC2 <- mC
@@ -655,11 +657,13 @@ fit.GVA_new <- function(vmu, mLambda, vy, vr, mC, mSigma.inv, method, reltol=1.0
   mLambda <- solve(crossprod(t(mR)) + diag(1e-8, d), tol=1e-99)
 
   # Swap back
-  result <- swap_mX_mZ_back(vmu, mLambda, mSigma.inv, mC, p, u_dim)
-  vmu <- result$vmu
-  mLambda <- result$mLambda
-  mSigma.inv <- result$mSigma.inv
-  mC <- result$mC
+  if (m > 0) {
+    result <- swap_mX_mZ_back(vmu, mLambda, mSigma.inv, mC, p, u_dim)
+    vmu <- result$vmu
+    mLambda <- result$mLambda
+    mSigma.inv <- result$mSigma.inv
+    mC <- result$mC
+  }
 
   return(list(res=res, vmu=vmu, mLambda=mLambda))
 }
