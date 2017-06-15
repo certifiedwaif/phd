@@ -111,25 +111,25 @@ vy <- round(with(roaches_long, roachsum / trapdays))
 
 mult <- create_mult(vy, mX, mZ, 1e5, m=13, blocksize=1, v=2)
 kappa(mult$mC)
-# Condition number for this matrix is very high.
+# Condition number for this matrix was very high. It's okay now.
 # Why does this work with GVA NR, but go crazy with GVA2?
 # Need more rounds of GVA NR to get mLambda in the ballpark.
 # 2 is too few. 5 is enough.
 
 now <- Sys.time()
-fit1 <- zipvb(mult, method="laplace", verbose=FALSE)
+fit1 <- zipvb(mult, method="laplace", verbose=FALSE, glm_init=FALSE)
 cat("Laplace", Sys.time() - now, "\n")
 
 now <- Sys.time()
-fit2 <- zipvb(mult, method="gva", verbose=FALSE)
+fit2 <- zipvb(mult, method="gva", verbose=FALSE, glm_init=FALSE)
 cat("GVA", Sys.time() - now, "\n")
 
 now <- Sys.time()
-fit3 <- zipvb(mult, method="gva2", verbose=FALSE)
+fit3 <- zipvb(mult, method="gva2", verbose=FALSE, glm_init=FALSE)
 cat("GVA2", Sys.time() - now, "\n")
 
 now <- Sys.time()
-fit4 <- zipvb(mult, method="gva_nr", verbose=FALSE)
+fit4 <- zipvb(mult, method="gva_nr", verbose=FALSE, glm_init=FALSE)
 cat("GVA_NR", Sys.time() - now, "\n")
 
 # Check accuracy
@@ -140,7 +140,8 @@ if (save) {
   mcmc_samples <- mcmc_result$mcmc_samples
   fit <- mcmc_result$fit
   print(fit)
-  save(mult, mcmc_samples, fit, file="data/accuracy_application_2015_11_20.RData")
+  save(mult, mcmc_samples, fit, file="data/accuracy_application_2017_06_15.RData")
+  #save(mult, mcmc_samples, fit, file="data/accuracy_application_2015_11_20.RData")
   # save(mult, mcmc_samples, fit, allKnots, file="/tmp/accuracy_spline_2015_05_19.RData")
 } else {
   load(file="data/accuracy_application_2015_11_20.RData")
@@ -148,11 +149,11 @@ if (save) {
 }
 
 var_accuracy <- calculate_accuracies("application", mult, mcmc_samples, fit1, "Laplace", plot_flag=TRUE)
-# var_accuracy2 <- calculate_accuracies("application", mult, mcmc_samples, fit2, "GVA", plot_flag=TRUE)
-var_accuracy3 <- calculate_accuracies("application", mult, mcmc_samples, fit3, "GVA", plot_flag=TRUE)
-# var_accuracy4 <- calculate_accuracies("application", mult, mcmc_samples, fit4, "GVA", plot_flag=TRUE)
+var_accuracy2 <- calculate_accuracies("application", mult, mcmc_samples, fit2, "GVA", plot_flag=TRUE)
+var_accuracy3 <- calculate_accuracies("application", mult, mcmc_samples, fit3, "GVA2", plot_flag=TRUE)
+var_accuracy4 <- calculate_accuracies("application", mult, mcmc_samples, fit4, "GVA_NR", plot_flag=TRUE)
 
-# Police stops example
+# Police stops ----
 	
 frisk <- read.table("frisk_with_noise.dat",skip=6,header=TRUE)
 # Crime should be a factor
@@ -217,13 +218,32 @@ vy <- Owls$BroodSize
 mZ <- matrix_owls[, c(2:27)]
 mX <- matrix_owls[, c(1, 28:32)]
 mult <- create_mult(vy, mX, mZ, 1e5, m=27, blocksize=1, v=2)
-fit2 <- zipvb(mult, method="gva", verbose=TRUE)
-mcmc_result <- mcmc(mult, p=6, iterations=1e6, warmup=1e5, mc.cores = 1)
-mcmc_samples <- mcmc_result$mcmc_samples
-fit <- mcmc_result$fit
-print(fit)
-save(mult, mcmc_samples, fit, file="data/accuracy_application_owls_2017_06_13.RData")
-load("data/accuracy_application_owls_2017_06_13.RData")
+options(safe_exp=TRUE)
+options(threshold=2)
+mult$vmu <- c(1.227201872, 0.021548804, -0.022080941, 0.009512686, 0.029998340, -0.144064431, -0.02786557, -0.21322109, 0.15850888, -0.60222721, -0.22030416, 0.08061675,
+             0.26442913, 0.03432444, -0.05121882, -0.48156911, -0.43796729, 0.14886683,
+             -0.14279895, -0.01222272, 0.10345183, -0.09308130, 0.14679597, 0.04010766,
+             0.20814423, 0.07130716, -0.10389356, 0.17254664, -0.15006083, -0.09940608,
+             0.03127815, 0.33652980)
+diag(mult$mLambda) <- c(0.0076032244, 0.0024105979, 0.0034231703, 0.0007061844, 0.0009130394, 0.0008311690,
+                       0.006365079, 0.003121902, 0.002068152, 0.009367957, 0.006465884, 0.015536956,
+                       0.003330430, 0.003317606, 0.008721746, 0.006239084, 0.003621780, 0.011382923,
+                       0.001730124, 0.003626150, 0.003492311, 0.005951388, 0.022084240, 0.010736673,
+                       0.003397334, 0.006982409, 0.002334816, 0.020312150, 0.038029579, 0.001628342,
+                       0.005718847, 0.001838861)
+diag(mult$mLambda) <- diag(mult$mLambda)^2
+fit2 <- zipvb(mult, method="gva", verbose=TRUE, glm_init=FALSE)
+
+save <- FALSE
+if (save) {
+  mcmc_result <- mcmc(mult, p=6, iterations=1e6, warmup=1e5, mc.cores = 1)
+  mcmc_samples <- mcmc_result$mcmc_samples
+  fit <- mcmc_result$fit
+  print(fit)
+  save(mult, mcmc_samples, fit, file="data/accuracy_application_owls_2017_06_13.RData")
+} else {
+  load("data/accuracy_application_owls_2017_06_13.RData")
+}
 apply(mcmc_samples$vbeta, 2, mean)
 apply(mcmc_samples$vu, 2, mean)
 fit2$vmu
@@ -244,6 +264,8 @@ vy <- epil2$y
 mZ <- matrix_epil2[, 2:59]
 mX <- matrix_epil2[, c(1, 60:63)]
 mult <- create_mult(vy, mX, mZ, 1e5, m=59, blocksize=1, v=2)
+options(safe_exp=TRUE)
+options(threshold=2)
 fit1 <- zipvb(mult, method="laplace", verbose=TRUE)
 glm_fit <- glm(y~trt, family=poisson, data=epil2)
 summary(glm_fit)
@@ -254,17 +276,24 @@ library(zipvb)
 source("accuracy.R")
 setwd("~/Dropbox/phd/code/")
 library(pscl)
+#bioChemists <- bioChemists[bioChemists$art != 0, ]
+bioChemists <- pscl::bioChemists[1:915, ]
+#matrix_bioChemists <- model.matrix(art~fem+mar+kid5+phd+ment, data=bioChemists)
 matrix_bioChemists <- model.matrix(art~fem+mar+kid5+phd+ment, data=bioChemists)
 vy <- bioChemists$art
-mZ <- as.matrix(matrix_bioChemists[, 1:2])
-mX <- matrix_bioChemists[, 3:6]
-mult <- create_mult(vy, mX, mZ, 1e5, m=3, blocksize=1, v=2)
-options(safe_exp=TRUE)
+mZ <- NULL
+mX <- matrix_bioChemists[, 1:5]
+mult <- create_mult(vy, mX, mZ, 1e5, mPsi=NULL, m=0, blocksize=1, v=2)
+options(safe_exp=FALSE)
 options(threshold=2)
-fit1 <- zipvb(mult, method="gva", verbose=TRUE)
+fit1 <- zipvb(mult, method="laplace", verbose=TRUE, glm_init=TRUE)
+fit2 <- zipvb(mult, method="gva", verbose=TRUE, glm_init=TRUE)
+fit3 <- zipvb(mult, method="gva2", verbose=TRUE, glm_init=TRUE)
+fit4 <- zipvb(mult, method="gva_nr", verbose=TRUE, glm_init=TRUE)
 save <- FALSE
 if (save) {
-  mcmc_result <- mcmc(mult, p=4, iterations=1e5, warmup=1e4, mc.cores = 1)
+  mcmc_result <- mcmc(mult, p=5, iterations=1e6, warmup=1e4, mc.cores = 1,
+                      stan_file="multivariate_zip_fixed.stan")
   mcmc_samples <- mcmc_result$mcmc_samples
   fit <- mcmc_result$fit
   save(mult, mcmc_samples, fit, file="data/accuracy_application_biochemists_2017_06_13.RData")
@@ -278,4 +307,8 @@ fit1$vmu
 apply(mcmc_samples$vbeta, 2, sd)
 apply(mcmc_samples$vu, 2, sd)
 sqrt(diag(fit1$mLambda))
-var_accuracy2 <- calculate_accuracies("application_biochemists", mult, mcmc_samples, fit1, "GVA", plot_flag=TRUE)
+
+var_accuracy1 <- calculate_accuracies("application_biochemists", mult, mcmc_samples, fit1, "laplace", plot_flag=TRUE)
+var_accuracy2 <- calculate_accuracies("application_biochemists", mult, mcmc_samples, fit2, "GVA", plot_flag=TRUE)
+var_accuracy3 <- calculate_accuracies("application_biochemists", mult, mcmc_samples, fit3, "GVA inv param", plot_flag=TRUE)
+var_accuracy4 <- calculate_accuracies("application_biochemists", mult, mcmc_samples, fit4, "GVA fixed point", plot_flag=TRUE)
