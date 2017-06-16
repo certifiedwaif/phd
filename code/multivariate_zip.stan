@@ -51,15 +51,16 @@ model {
     // i.e. u <- to_vector(vu);
     for (m in 1:(M-1)) {
       for (b in 1:B) {
-        u[(m-1)*B+b] = vu[m][b];
+        u[(m-1)*B+b] <- vu[m][b];
       }
     }
 
     eta = dot_product(X[n], vbeta) + dot_product(Z[n], u);
 
     if (y[n] == 0)
-      target += log_sum_exp(bernoulli_lpmf(0|rho),
-        bernoulli_lpmf(1|rho) + poisson_log_lpmf(y[n]|eta));
+      # target += log_sum_exp(bernoulli_lpmf(0|rho),
+      #                       bernoulli_lpmf(1|rho) + poisson_log_lpmf(y[n]|eta));
+      target += bernoulli_lpmf(0|rho);
     else
       target += bernoulli_lpmf(1|rho) + poisson_log_lpmf(y[n]|eta);
   };
