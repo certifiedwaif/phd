@@ -33,7 +33,7 @@ to Bayesian Analysis. Hopefully this week
 \begin{itemize}
 \item{Biochemist example}
 \begin{align*}
-y_i &= R_i e^{\vbeta_1 + \vbeta_2 \text{women} + \vbeta_3 \text{married} + \vbeta_4 \text{children} + \vbeta_5 \text{PhD}} \\
+y_i &= R_i e^{\vbeta_1 + \vbeta_2 \text{female} + \vbeta_3 \text{married} + \vbeta_4 \text{children} + \vbeta_5 \text{PhD}} \\
 R_i &\sim \Bernoulli(\rho) \\
 \rho &\sim \Beta(\alpha, \beta) \\
 \vbeta &\sim \N(0, \sigma_\vbeta^2)
@@ -43,7 +43,7 @@ I fit this model, and the accuracy was \emph{terrible}
 It turns out our variational approximation was using the seperate parameterisation
 \begin{align*}
 P(y_i = 0) &= 1 - \rho \\
-P(y_i = y) &= \rho \Poisson(y; e^{\mX \vbeta}), y \ne 0
+P(y_i = y) &= \rho \Poisson(y; e^{\mX \vbeta})/(1 - e^{\mX \vbeta}), y \ne 0
 \end{align*}
 while Stan was using the overlapping representation
 \begin{align*}
