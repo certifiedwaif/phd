@@ -21,7 +21,11 @@
 
 \begin{frame}{Writing}
 \begin{itemize}
-\item 80 rough pages
+\item 80 rough pages of thesis writing so far
+\item Aiming to submit by the end of the year
+\item John and I are very close to submitting a paper on normal linear model selection using g-priors
+to Bayesian Analysis. Hopefully this week
+\item Marek asked me to prepare a one-page document on IT problems
 \end{itemize}
 \end{frame}
 
@@ -29,13 +33,30 @@
 \begin{itemize}
 \item{Biochemist example}
 \begin{align*}
-y_i &= R_i e^{\vbeta_0 + \vbeta_1 \text{women} + \vbeta_2 \text{married} + \vbeta_3 \text{children} + \vbeta_4 \text{PhD}} \\
+y_i &= R_i e^{\vbeta_1 + \vbeta_2 \text{women} + \vbeta_3 \text{married} + \vbeta_4 \text{children} + \vbeta_5 \text{PhD}} \\
 R_i &\sim \Bernoulli(\rho) \\
-\rho &\sim \Beta(\alpha, \beta)
-\vbeta \sim \N(0, \sigma_\vbeta^2)
+\rho &\sim \Beta(\alpha, \beta) \\
+\vbeta &\sim \N(0, \sigma_\vbeta^2)
 \end{align*}
-\item Wrong parameterisation
+I fit this model, and the accuracy was \emph{terrible}
+\item Wrong parameterisation \\
+It turns out our variational approximation was using the seperate parameterisation
+\begin{align*}
+P(y_i = 0) &= 1 - \rho \\
+P(y_i = y) &= \rho \Poisson(y; e^{\mX \vbeta}), y \ne 0
+\end{align*}
+while Stan was using the overlapping representation
+\begin{align*}
+P(y_i = 0) &= 1 - \rho + \rho \Poisson(0; e^{\mX \vbeta})\\
+P(y_i = y) &= \rho \Poisson(y; e^{\mX \vbeta}), y \ne 0
+\end{align*}
 \end{itemize}
+\end{frame}
+
+\begin{frame}{When this was fixed, accuracy was good}
+\begin{figure}
+\includegraphics[scale=0.3]{../code/results/accuracy_plots_application_biochemists_GVA_inv_param-nup.pdf}
+\end{figure}
 \end{frame}
 
 \begin{frame}
@@ -44,13 +65,18 @@ Suppose that
 \[
 	q(\vgamma) = \sum_{k=1}^K w_k \I(\vgamma = \vgamma_k)
 \]
+where
+\[
+	w_k = p(\vy, \vgamma_k) / \sum_{j=1}^K p(\vy, \vgamma_j).
+\]
 A variational lower bound is given by
 \[
-\log \underline{p}(\vy; \vw, \Gamma) = \sum_{k=1}^K w_k \log p(\vy, \vgamma_k) - w_k \log w_k
+\log \underline{p}(\vy; \vw, \Gamma) = \sum_{k=1}^K w_k \log p(\vy, \vgamma_k) - w_k \log w_k.
 \]
 \end{frame}
 
 \begin{frame}{Algorithm}
+We can fit this model using the following algorithm.
 \begin{itemize}
 \item Initialise population of K bitstrings, $\vgamma$ \\
 Loop until convergence\\
@@ -62,9 +88,21 @@ Loop until convergence\\
 \end{cases}$\\
 \quad for $k = 1, \ldots, K$\\
 \quad \quad $w_k = p(\vy, \vgamma_k) / \sum_{j=1}^K p(\vy, \vgamma_j)$
-\item I've implemented this algorithm and done some preliminary tests
-\item John is implementing it now, and we'll test the results against each other's implementations
+\item I've had some time to experiment now, and we're getting some interesting results
 \end{itemize}
+\end{frame}
+
+\begin{frame}{Model selection}
+
+\begin{figure}
+\includegraphics[scale=0.45]{../code/correlation/cva_more_dimensions.png}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Covariate selection}
+\begin{figure}
+\includegraphics[scale=0.45]{../code/correlation/covariate_inclusion_probabilities.pdf}
+\end{figure}
 \end{frame}
 
 \end{document}
