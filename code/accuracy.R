@@ -100,7 +100,7 @@ calculate_accuracy_normalised <- function(mcmc_samples, dist_fn, ...)
   mcmc_fn <- splinefun(mcmc_density$x, mcmc_density$y * opt$object / max(mcmc_density$y))
   result1 <- integrate(mcmc_fn, min(mcmc_density$x), max(mcmc_density$x),
                      subdivisions = length(mcmc_density$x))
-  lower_bound <- min(mcmc_density$x)
+  lower_bound <- 0.01
   upper_bound <- max(mcmc_density$x)
   result2 <- integrate(function(x) {
                         result <- dist_fn(x, ...)
@@ -114,7 +114,7 @@ calculate_accuracy_normalised <- function(mcmc_samples, dist_fn, ...)
     result <- abs(mcmc_fn(x)/result1$value - dist_fn(x, ...)/result2$value)
     return(result)
   }
-  result <- integrate2(integrand, 0.001, max(mcmc_density$x),
+  result <- integrate2(integrand, 0.01, max(mcmc_density$x),
                      subdivisions = length(mcmc_density$x))
   accuracy <- 1 - .5 * result$value
   if (any(is.nan(accuracy)))
@@ -295,6 +295,7 @@ calculate_accuracies <- function(test, mult, mcmc_samples, var_result, approxima
       sigma_vu <- mPsi_inv[i, i]
       psi <- var_result$mPsi[i, i]
       # sigma_vu <- sqrt(var_result$mPsi[i, i])
+      # sigma2_vu_accuracy[i] <- 0
       sigma2_vu_accuracy[i] <- calculate_accuracy_normalised(sigma_u_inv[, i, i],
                                                  function(x, ...) dinvgamma(x, psi / 2, v / 2, ...))
       title <- TeX(sprintf("%s $\\sigma^2_{u_%d}$ accuracy: %2.0f%%",
