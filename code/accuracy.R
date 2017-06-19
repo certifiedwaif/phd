@@ -36,7 +36,7 @@ mcmc <- function(mult, seed=1, iterations=NA, warmup=NA, mc.cores=1, p=2,
   mSigma.beta <- mult$mSigma.beta
   
   zip_data <- list(N=length(vy), P=p, M=m, B=blocksize, spline_dim=spline_dim,
-                   y=vy, X=mX, Z=as.matrix(mZ),
+                   y=vy, X=mX, Z=mZ,
                    v=v, psi=mPsi, BetaPrior=mSigma.beta)
 
   options(mc.cores = mc.cores)
@@ -100,19 +100,24 @@ calculate_accuracy_normalised <- function(mcmc_samples, dist_fn, ...)
   mcmc_fn <- splinefun(mcmc_density$x, mcmc_density$y * opt$object / max(mcmc_density$y))
   result1 <- integrate(mcmc_fn, min(mcmc_density$x), max(mcmc_density$x),
                      subdivisions = length(mcmc_density$x))
-  lower_bound <- max(min(mcmc_density$x), 1e-8)
+  lower_bound <- min(mcmc_density$x)
   upper_bound <- max(mcmc_density$x)
-  result2 <- integrate(function(x) dist_fn(x, ...), lower_bound, upper_bound,
-                     subdivisions = length(mcmc_density$x))
+  result2 <- integrate(function(x) {
+                        result <- dist_fn(x, ...)
+                        return(result)
+                       }, 
+                       lower_bound, upper_bound,
+                       subdivisions = length(mcmc_density$x))
   
   integrand <- function(x)
   {
-    return(abs(mcmc_fn(x)/result1$value - dist_fn(x, ...)/result2$value))
+    result <- abs(mcmc_fn(x)/result1$value - dist_fn(x, ...)/result2$value)
+    return(result)
   }
-  result <- integrate2(integrand, min(mcmc_density$x), max(mcmc_density$x),
+  result <- integrate2(integrand, 0.001, max(mcmc_density$x),
                      subdivisions = length(mcmc_density$x))
   accuracy <- 1 - .5 * result$value
-  if (is.nan(accuracy))
+  if (any(is.nan(accuracy)))
     return(0)
   else
     return(100 * accuracy)
@@ -151,7 +156,6 @@ accuracy_plot <- function(title, mcmc_samples, dist_fn, ...)
   mcmc_density <- density(mcmc_samples)
   # Find the maximum of the function and use it to normalise plots.
   opt <- optimize(function(x) dist_fn(x, ...), interval=c(min(mcmc_density$x), max(mcmc_density$x)), maximum=TRUE)
-  # browser()
   curve(dist_fn(x, ...),
         from=min(mcmc_density$x), to=max(mcmc_density$x),
         lty=2, col="blue", xlab="", ylab="", yaxt="n")
@@ -258,48 +262,52 @@ calculate_accuracies <- function(test, mult, mcmc_samples, var_result, approxima
   # TODO: Add mSigma.u accuracy
   # TODO: Need to generalise this to the splines case
   # We need to iterate through the sigma_u samples, inverting each matrix
-  n <- dim(mcmc_samples$sigma_u)[1]
-  sigma_u_inv <- array(0, dim(mcmc_samples$sigma_u))
-  # for (i in 1:n) {
-  #   sigma_u_inv[i, , ] <- solve(sigma_u[i, , ])
-  # }
-  sigma2_vu_accuracy <- rep(0, B)
-  v <- mult$v + mult$m
-  if (B == 2) {
-    # E_mPsi_inv <- var_result$mult$mPsi / (4 - 2 - 1)
-    sigma_u_inv <- array(0, c(dim(mcmc_samples$sigma_u)[1], 2, 2))
-    a <- mcmc_samples$sigma_u[, 1, 1]
-    b <- mcmc_samples$sigma_u[, 1, 2]
-    c <- mcmc_samples$sigma_u[, 2, 1]
-    d <- mcmc_samples$sigma_u[, 2, 2]
-    sigma_u_inv[, 1, 1] <- d / (a * d - b * c)
-    sigma_u_inv[, 1, 2] <- -b / (a * d - b * c)
-    sigma_u_inv[, 2, 1] <- -c / (a * d - b * c)
-    sigma_u_inv[, 2, 2] <- a / (a * d - b * c)
-    # sigma_u_inv <- mcmc_samples$sigma_u
-  } else {
-    sigma_u_inv <- array(0, c(dim(mcmc_samples$sigma_u)[1], 1, 1))
-    sigma_u_inv[, 1, 1] <- 1 / mcmc_samples$sigma_u[, 1, 1]
-    # sigma_u_inv[, 1, 1] <- mcmc_samples$sigma_u[, 1, 1]
-  }
-  mPsi_inv <- solve(var_result$mPsi)
-  for (i in 1:B) {
-    # sigma2 <- E_mPsi_inv[i, i]
-    # sigma2_inv <- solve(var_result$mPsi)[i, i]
-    # sigma_vu <- sqrt(mPsi_inv[i, i])
-    sigma_vu <- mPsi_inv[i, i]
-    psi <- var_result$mPsi[i, i]
-    # sigma_vu <- sqrt(var_result$mPsi[i, i])
-    sigma2_vu_accuracy[i] <- calculate_accuracy_normalised(sigma_u_inv[, i, i],
-                                               function(x, ...) dinvgamma(x, psi / 2, v / 2, ...))
-    title <- TeX(sprintf("%s $\\sigma^2_{u_%d}$ accuracy: %2.0f%%",
-                       approximation,
-                       i,
-                       sigma2_vu_accuracy[i]))
-    if (print_flag) print(title)
-    if (plot_flag) {
-      accuracy_plot(title, sigma_u_inv[, i, i], function(x, ...) dinvgamma(x, psi / 2, v / 2, ...))
+  if (mult$m > 0) {
+    n <- dim(mcmc_samples$sigma_u)[1]
+    sigma_u_inv <- array(0, dim(mcmc_samples$sigma_u))
+    # for (i in 1:n) {
+    #   sigma_u_inv[i, , ] <- solve(sigma_u[i, , ])
+    # }
+    sigma2_vu_accuracy <- rep(0, B)
+    v <- mult$v + mult$m
+    if (B == 2) {
+      # E_mPsi_inv <- var_result$mult$mPsi / (4 - 2 - 1)
+      sigma_u_inv <- array(0, c(dim(mcmc_samples$sigma_u)[1], 2, 2))
+      a <- mcmc_samples$sigma_u[, 1, 1]
+      b <- mcmc_samples$sigma_u[, 1, 2]
+      c <- mcmc_samples$sigma_u[, 2, 1]
+      d <- mcmc_samples$sigma_u[, 2, 2]
+      sigma_u_inv[, 1, 1] <- d / (a * d - b * c)
+      sigma_u_inv[, 1, 2] <- -b / (a * d - b * c)
+      sigma_u_inv[, 2, 1] <- -c / (a * d - b * c)
+      sigma_u_inv[, 2, 2] <- a / (a * d - b * c)
+      # sigma_u_inv <- mcmc_samples$sigma_u
+    } else {
+      sigma_u_inv <- array(0, c(dim(mcmc_samples$sigma_u)[1], 1, 1))
+      sigma_u_inv[, 1, 1] <- 1 / mcmc_samples$sigma_u[, 1, 1]
+      # sigma_u_inv[, 1, 1] <- mcmc_samples$sigma_u[, 1, 1]
     }
+    mPsi_inv <- solve(var_result$mPsi)
+    for (i in 1:B) {
+      # sigma2 <- E_mPsi_inv[i, i]
+      # sigma2_inv <- solve(var_result$mPsi)[i, i]
+      # sigma_vu <- sqrt(mPsi_inv[i, i])
+      sigma_vu <- mPsi_inv[i, i]
+      psi <- var_result$mPsi[i, i]
+      # sigma_vu <- sqrt(var_result$mPsi[i, i])
+      sigma2_vu_accuracy[i] <- calculate_accuracy_normalised(sigma_u_inv[, i, i],
+                                                 function(x, ...) dinvgamma(x, psi / 2, v / 2, ...))
+      title <- TeX(sprintf("%s $\\sigma^2_{u_%d}$ accuracy: %2.0f%%",
+                         approximation,
+                         i,
+                         sigma2_vu_accuracy[i]))
+      if (print_flag) print(title)
+      if (plot_flag) {
+        accuracy_plot(title, sigma_u_inv[, i, i], function(x, ...) dinvgamma(x, psi / 2, v / 2, ...))
+      }
+    }
+  } else {
+    sigma2_vu_accuracy <- NULL
   }
   
   # rho accuracy
