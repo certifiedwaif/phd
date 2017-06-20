@@ -1006,9 +1006,10 @@ for the regression parameters do not have closed form expressions. But these mod
 			The data set used for this example was the police stop example from Chapter 15 of \citep{Gelman2007}.
 			The model fit was
 			\begin{align*}
-				y_{ep}        & \sim \text{Poisson}(n_{ep} e^{\beta_0 + \beta_e \text{ethnicity}_e + \alpha_{k} \text{crime} + u_p + \epsilon_{ep}}) \\
-				u_p           & \sim \N(0, \sigma_u^2)                                                                                               \\
-				\epsilon_{ep} & \sim \N(0, \sigma_\epsilon^2)                                                                                        
+				\vy_{ep}        & \sim \text{Poisson}(n_{ep} e^{\beta_0 + \beta_e \text{ethnicity}_e + \alpha_{c} \text{crime} + \vu_p}) \\
+				\valpha				& \sim \N(0, \sigma_\valpha^2)	\\
+				\vbeta        & \sim \N(0, \sigma_\vbeta^2)	\\
+				\vu_p         & \sim \N(0, \sigma_\vu^2)
 			\end{align*}
 			where $p$ is the $p$-th precinct, and $e$ is the $e$-th ethnicity (blacks, hispanics or whites), and $c$ is
 			the $c$-th category of crime (violent crimes, weapons crimes, propery crimes, drug crimes). The random 
@@ -1049,7 +1050,8 @@ for the regression parameters do not have closed form expressions. But these mod
 			
 			% TODO: You need to describe the data set and the model.
 			\subsection{Zero--inflated example -- Cockroaches in Apartments data set from Gelman}
-			The model fitting was applied to the cockroach data set from \S 6.7 of \citep{Gelman2007} taken from a study
+			The model described in this section was fit
+			 to the cockroach data set from \S 6.7 of \citep{Gelman2007}, taken from a study
 			on the effect of integrated pest management in controlling cockroach levels in urban apartments. The data
 			set contains data on 160 treatment and 104 control apartments, along with the response $y_i$ in each
 			apartment of the number of cockroaches caught in a set of traps. The apartments had the traps deployed for
@@ -1059,6 +1061,24 @@ for the regression parameters do not have closed form expressions. But these mod
 			restricted to the elderly.
 					
 			In the example application presented in this paper, the zero component represents an apartment completely free of roaches, while the non-zero component represents an apartment where roaches have been able to live and reproduce, possibly in spite of pest control treatment aimed at preventing them from doing so.
+
+			The model fit was
+			\begin{align*}
+				y_i &= \begin{cases}
+				0 if R_i = 0 \\
+				\Poisson(e^{\mX_i \vbeta + \mZ_i \vu}) \phantom{-} \text{if} R_i = 1,
+				\end{cases} \\
+				R_i &\sim \Bernoulli(\rho), \\
+				\rho &\sim \Beta(a, b), \\
+				\vbeta &\sim \N(\vzero, \sigma^2_\vbeta \mI), \\
+				\vu &\sim \N(\vzero, \mSigma), \text{and} \\
+				\mSigma &\sim \text{Inverse-Wishart}(\mPsi, v)
+			\end{align*}
+			with prior parameters $a = 1$, $b = 1$, $\sigma^2_\vbeta = 10^5$, $\mPsi = 10^{-5} \mI$ and $v = 2$.
+			These priors were chosen to be vaguely informative for the variance components and a uniform prior for
+			the zero-inflation proportion latent variable $\rho$. The fixed effects covariates included in the
+			model were time in days and time in days $\times$ pest control treatment. A random intercept to account
+			for variation between the apartment buildings was included.
 					
 			The GVA algorithm with the $\mLambda = (\mR^\top \mR)^{-1}$ parameterisation was used to fit a random
 			intercept model to the Roaches data set provided by Andrew Gelman. The fitted co-efficients and accuracy
@@ -1134,7 +1154,80 @@ for the regression parameters do not have closed form expressions. But these mod
 					\hline
 				\end{tabular}
 			\end{table}
-					
+
+			\subsection{Example - Biochemists}
+			The model described in this section was fit to the biochemistry data set analysed by
+			\cite{10.2307/2579146}. The sample was taken from 915 biochemistry graduate students. The outcome
+			$\vy_i$ is the number of articles published in the last three years of the PhD. The covariates were the
+			gender of the student, coded $1$ for female and $0$ for male, the marital status of the student ($1$ for
+			married, $0$ for unmarried), the number of children under age six and the prestige of the PhD program.
+
+			The model fit was
+			\[
+			y_i = R_i e^{\vbeta_1 + \vbeta_2 \text{female} + \vbeta_3 \text{married} + \vbeta_4 \text{children under age 6} + \vbeta_5 \text{PhD}}
+			\]
+			with priors
+			\begin{align*}
+			R_i &\sim \Bernoulli(\rho), \\
+			\rho &\sim \Beta(A, B), \text { and } \\
+			\vbeta &\sim \N(0, \sigma_\vbeta^2 \mI)
+			\end{align*}
+
+			\noindent with $A=1$, $B=1$ and $\sigma_\vbeta^2 = 10,000$. The model was fit using the GVA inverse parameterisation algorithm.
+
+			\begin{figure}
+			\label{fig:biochemists}
+			\caption{Accuracy of the approximations of the parameters fit to the biochemists data}
+			\includegraphics[scale=0.3]{code/results/accuracy_plots_application_biochemists_GVA_inv_param-nup.pdf}
+			\end{figure}
+			
+			\subsection{Example - Owls}
+			The model described in this section was fit to the Owls data set from taken from \cite{zuur_mixed_2009}.
+			The sample was 599 observations of owls grouped across 25 nests.The fixed covariates
+			fit in the model were FoodTreatment (Deprived or Satiated) and ArrivalTime, a continuous covariate.
+			The variation between the 25 different nests sampled from was modelled by a random intercept
+			$\vu$.
+
+			\[
+			y_i = R_i e^{\vbeta_1 + \vbeta_2 \text{Satiated} + \vbeta_3 \text{Arrival Time} + u_n}
+			\]
+			where $n$ is the nest number, $1 \leq n \leq 25$, with priors
+			\begin{align*}
+			R_i &\sim \Bernoulli(\rho), \\
+			\rho &\sim \Beta(A, B), \\
+			\vbeta &\sim \N(\vzero, \sigma_\vbeta^2 \mI), \\
+			\vu &\sim \N(0, \sigma_\vu^2), \text { and } 
+			\sigma_\vu^2 &\sim \text{Inverse-Gamma}(s, t).
+			\end{align*}
+			where $\sigma_\vbeta^2=10,000$, $A=1$, $B=1$, $s=1$ and $r=10^{-5}$.
+
+			The model was fit using the GVA inverse parameterisation algorithm. The accuracy of the parameter
+			estimates is shown in Figure \ref{fig:owls}. The variance component
+			The runtime of the algorithms is shown in Table
+			\ref{tab:owls_times}. We draw attention to the difference in run-times between the covariance and
+			inverse parameterisations -- the inverse parameterisation is 
+
+			\begin{figure}
+			\caption{Accuracy of the approximations of the parameters fit to the Owls data}
+			\label{fig:owls}
+			\includegraphics[scale=0.3]{code/results/accuracy_plots_application_owls_GVA_inv_param-highlights-nup.pdf}
+			\end{figure}
+
+			\begin{table}
+			\caption{}
+			\label{tab:owls_times}
+			\begin{tabular}{|l|r|}
+			\hline
+			Algorithm & Time in seconds \\
+			\hline
+			Laplace & 0.988 \\
+			GVA covariance parameterisation & 46.014 \\
+			GVA inverse parameterisation & 2.056 \\
+			GVA fixed point & 0.580 \\
+			\hline
+			\end{tabular}
+			\end{table}
+
 			\section{Discussion}
 			\label{sec:discussion}
 					
