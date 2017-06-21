@@ -1302,6 +1302,27 @@ for the regression parameters do not have closed form expressions. But these mod
 			optimisation problem to be solved when models are being fit -- as only the non-zero values in the
 			covariance matrices need to be optimised over. This allows models to be fit more quickly, and with
 			greatly improved numerical stability and without loss of accuracy.
+
+			While all of the fitting algorithms presented in this chapter except the Laplace's approximation
+			algorithm were able to fit ZIP random and fixed effects models with high accuracy, and the 
+			Gaussian inverse parameterisation and fixed point algorithms were able to do so at high speed, they 
+			could be numerically unstable depending on the data the model was being fit to and their starting points.
+			In the case of the Gaussian inverse parameterisation algorithm, the source of the problem was tracked down
+			to the exponential used in the parameterisation of the diagonal of the Cholesky factor of the precision
+			matrix combined with the exponential that arises in the derivation of the Gaussian variational lower
+			bound for Poisson mixed models -- leading to frequent numeric overflows during the fitting process. This
+			problem, once discovered, was mitigated by replacing the exponential parameterisation of the diagonal
+			of the Cholesky factor with a piecewise function which is exponential beneath a threshold and quadratic
+			above that threshold. This was shown to greatly increase the numeric stability of the GVA inverse
+			parameterisation for a range of starting points.
+
+			Stability fixes.
+
+			Cockroaches - few fixed covariates, random intercept for apartment buildings, zero-inflation
+			Police stops - Pure Poisson model, no zero-inflation, random intercept for precincts/locality
+			Biochemists - Zero-inflated, fixed effects
+			Owls - Zero-inflated, random intercepts for nests, large number of nests, able to estimate variance 
+			component very accurately
 				
 			Some of the algorithms which we experimented with were found to be very sensitive to their starting points.
 			While these algorithms are typically initialised with a starting point as close as possible to the final
