@@ -829,6 +829,24 @@ for the regression parameters do not have closed form expressions. But these mod
 			Spline model was fit to a data set generated from the function $3 + 3 \sin{(\pi x)}$ on the interval $[-1,
 			1]$. The resulting model fits are presented in Figure \ref{fig:spline}.
 					
+			To assess the speed of each approach, a test case was constructed of a random slope model with $m=50$ groups,	each containing $n_i = 100$ individuals. A model was then fit to this data set ten times using each algorithm, and the results averaged. They are presented in Table \ref{tab:application_slope_speed}.
+
+			\begin{table}
+				\caption{Table of results - Speed}
+				\label{tab:application_slope_speed}
+				\begin{tabular}{|l|rr|}
+					\hline
+					Algorithm                            & Mean (seconds) & Standard deviation (seconds) \\
+					\hline
+					Laplace's method                     & 0.37 s         & 0.07 s                       \\
+					GVA covariance parameterisation        & 2.04 s         & 1.24 s                       \\
+					% Why is this slower?
+					GVA inverse parameterisation & 0.38 s         & 0.66 s                       \\
+					GVA fixed point                            & 0.05 s         & 0.07 s                       \\
+					\hline
+				\end{tabular}
+			\end{table}
+
 			% The stability of the algorithms was confirmed by running them on 10,000 different data sets that were randomly
 			% generated after having initialised the random number generator with different seeds.
 					
@@ -1002,13 +1020,13 @@ for the regression parameters do not have closed form expressions. But these mod
 			\section{Application}
 			\label{sec:application}
 			
-			\subsection{Poisson example without zero-inflated component}
+			\subsection{Poisson example without zero-inflated component -- Police stops}
 			The data set used for this example was the police stop example from Chapter 15 of \citep{Gelman2007}.
 			The model fit was
 			\begin{align*}
-				\vy_{ep}        & \sim \text{Poisson}(n_{ep} e^{\beta_0 + \beta_e \text{ethnicity}_e + \alpha_{c} \text{crime} + \vu_p}) \\
-				\valpha				& \sim \N(0, \sigma_\valpha^2)	\\
-				\vbeta        & \sim \N(0, \sigma_\vbeta^2)	\\
+				\vy_{ep}        & \sim \text{Poisson}(n_{ep} e^{\beta_0 + \beta_e \text{ethnicity}_e + \alpha_{c} \text{crime} + \vu_p}), \\
+				\valpha				& \sim \N(0, \sigma_\valpha^2),	\\
+				\vbeta        & \sim \N(0, \sigma_\vbeta^2), \text{ and }\\
 				\vu_p         & \sim \N(0, \sigma_\vu^2)
 			\end{align*}
 			where $p$ is the $p$-th precinct, and $e$ is the $e$-th ethnicity (blacks, hispanics or whites), and $c$ is
@@ -1025,6 +1043,11 @@ for the regression parameters do not have closed form expressions. But these mod
 			1 million samples from the equivalent model fitted using Stan. The results are presented in Table
 			\ref{tab:application_police_stops}.
 			
+			\begin{figure}\label{fig:police_stops}
+			\caption{}
+			\includegraphics[scale=0.3]{}
+			\end{figure}
+
 			% Table of results
 			\begin{table}
 				\caption{Table of results - Police stops}
@@ -1065,8 +1088,8 @@ for the regression parameters do not have closed form expressions. But these mod
 			The model fit was
 			\begin{align*}
 				y_i &= \begin{cases}
-				0 if R_i = 0 \\
-				\Poisson(e^{\mX_i \vbeta + \mZ_i \vu}) \phantom{-} \text{if} R_i = 1,
+				0 \phantom{-} \text{if} \phantom{-} R_i = 0 \\
+				\Poisson(e^{\mX_i \vbeta + \mZ_i \vu}) \phantom{-} \text{if} \phantom{-} R_i = 1,
 				\end{cases} \\
 				R_i &\sim \Bernoulli(\rho), \\
 				\rho &\sim \Beta(a, b), \\
@@ -1114,12 +1137,12 @@ for the regression parameters do not have closed form expressions. But these mod
 					\hline
 					Covariate          & Posterior Mean & Lower 95\% CI & Upper 95\% CI & Accuracy \\
 					\hline
-					Intercept          & 3.18           & 3.16          & 3.20          & 89\%     \\
-					Time               & $-$0.05        & $-$0.05       & $-$0.04       & 97\%     \\
-					Time:Treatment     & $-$0.43        & $-$0.43       & $-$0.41       & 93\%     \\
+					Intercept          & 3.42						& 3.2 					& 3.65          & 95\%     \\
+					Time               & $-$0.14        & $-$0.05       & $-$0.02       & 96\%     \\
+					Time:Treatment     & $-$0.31        & $-$0.43       & $-$0.14       & 96\%     \\
 					Random intercept   & $-$1.60        & $-$1.71       & $-$1.49       & 90\%     \\
-					$\sigma^2_{\vu_1}$ & 0.58           & 0.57          & 0.57          & 62\%     \\
-					$\rho$             & 0.71           & 0.67          & 0.75          & 88\%     \\
+					$\sigma^2_{\vu_1}$ & 3.29           & 2.02          & 8.48          & 63\%     \\
+					$\rho$             & 0.51           & 0.50          & 0.55          & 62\%     \\
 					\hline
 				\end{tabular}
 			\end{table}
@@ -1130,31 +1153,10 @@ for the regression parameters do not have closed form expressions. But these mod
 				\centering
 				% \includepdf[width=75mm,height=75mm,pages={1,2,3,16},nup=2x2]{code/results/accuracy_plots_application_GVA2.pdf}
 				\begin{tabular}{@{}c@{\hspace{.5cm}}c@{}}
-					\includegraphics[page=1,width=.45\textwidth]{code/results/accuracy_plots_application_GVA_NP.pdf} &   
-					\includegraphics[page=2,width=.45\textwidth]{code/results/accuracy_plots_application_GVA_NP.pdf} \\[.5cm]
-					\includegraphics[page=3,width=.45\textwidth]{code/results/accuracy_plots_application_GVA_NP.pdf} &   
-					\includegraphics[page=16,width=.45\textwidth]{code/results/accuracy_plots_application_GVA_NP.pdf} \\[.5cm]
+				\includegraphics[scale=0.3]{code/results/accuracy_plots_application_GVA_inv_param-highlights-nup.pdf}
 				\end{tabular}
 			\end{figure}
 					
-			To assess the speed of each approach, a test case was constructed of a random slope model with $m=50$ groups,	each containing $n_i = 100$ individuals. A model was then fit to this data set ten times using each algorithm, and the results averaged. They are presented in Table \ref{tab:application_slope_speed}.
-					
-			\begin{table}
-				\caption{Table of results - Speed}
-				\label{tab:application_slope_speed}
-				\begin{tabular}{|l|rr|}
-					\hline
-					Algorithm                            & Mean (seconds) & Standard deviation (seconds) \\
-					\hline
-					Laplace's method                     & 0.37 s         & 0.07 s                       \\
-					GVA $\mLambda = \mR^\top \mR$        & 2.04 s         & 1.24 s                       \\
-					% Why is this slower?
-					GVA $\mLambda = (\mR^\top \mR)^{-1}$ & 0.38 s         & 0.66 s                       \\
-					GVA NR FP                            & 0.05 s         & 0.07 s                       \\
-					\hline
-				\end{tabular}
-			\end{table}
-
 			\subsection{Example - Biochemists}
 			The model described in this section was fit to the biochemistry data set analysed by
 			\cite{10.2307/2579146}. The sample was taken from 915 biochemistry graduate students. The outcome
@@ -1162,44 +1164,76 @@ for the regression parameters do not have closed form expressions. But these mod
 			gender of the student, coded $1$ for female and $0$ for male, the marital status of the student ($1$ for
 			married, $0$ for unmarried), the number of children under age six and the prestige of the PhD program.
 
+			In this example application, the zero component represents the number of biochemists who did not publish
+			any articles during the last three years of their PhD. Examination of the data reveals that this number
+			is higher than would be expected if the data followed a purely Poisson distribution -- 30\% of
+			biochemistry graduate students published no articles in their final years whereas a Poisson distribution
+			would predict only 18\%. This justifies our choice of model.
+
 			The model fit was
 			\[
-			y_i = R_i e^{\vbeta_1 + \vbeta_2 \text{female} + \vbeta_3 \text{married} + \vbeta_4 \text{children under age 6} + \vbeta_5 \text{PhD}}
+				y_i = \begin{cases}
+				\begin{array}{ll}
+				0 &\phantom{-} \text{if} \phantom{-} R_i = 0, \\
+				\Poisson(e^{\vbeta_1 + \vbeta_2 \text{female} + \vbeta_3 \text{married} + \vbeta_4 \text{children under age 6} + \vbeta_5 \text{PhD}}) &\phantom{-} \text{if} \phantom{-} R_i = 1,
+				\end{array}
+				\end{cases}
 			\]
-			with priors
+
+
+			\noindent with priors
 			\begin{align*}
 			R_i &\sim \Bernoulli(\rho), \\
 			\rho &\sim \Beta(A, B), \text { and } \\
 			\vbeta &\sim \N(0, \sigma_\vbeta^2 \mI)
 			\end{align*}
 
-			\noindent with $A=1$, $B=1$ and $\sigma_\vbeta^2 = 10,000$. The model was fit using the GVA inverse parameterisation algorithm.
+			\noindent with $A=1$, $B=1$ and $\sigma_\vbeta^2 = 10,000$. The model was fit using the GVA inverse parameterisation algorithm. The resulting model fit is presented in Table \ref{tab:biochemists_results}
+			The accuracy of the parameter estimates is presented in Figure
+			\ref{fig:biochemists}. As this is a fixed effects model with a large number of samples relative to the
+			number of parameters being fit, we are able to estimate all of the parameters with great accuracy.
 
 			\begin{figure}
 			\label{fig:biochemists}
 			\caption{Accuracy of the approximations of the parameters fit to the biochemists data}
 			\includegraphics[scale=0.3]{code/results/accuracy_plots_application_biochemists_GVA_inv_param-nup.pdf}
 			\end{figure}
+
+			\begin{table}\label{tab:biochemists_results}
+			\caption{}
+			\begin{tabular}{|l|rrrr|}
+				\hline
+				Covariate          & Posterior Mean & Lower 95\% CI & Upper 95\% CI & Accuracy \\
+				\hline
+				Intercept & \\
+				Female & \\
+				Married & \\
+				Children under age 6 & \\
+				PhD & \\
+				\hline
+			\end{tabular}			
+			\end{table}
 			
 			\subsection{Example - Owls}
 			The model described in this section was fit to the Owls data set from taken from \cite{zuur_mixed_2009}.
 			The sample was 599 observations of owls grouped across 25 nests.The fixed covariates
-			fit in the model were FoodTreatment (Deprived or Satiated) and ArrivalTime, a continuous covariate.
+			fit in the model were food treatment (Deprived or Satiated) and arrival time, a continuous covariate.
 			The variation between the 25 different nests sampled from was modelled by a random intercept
 			$\vu$.
 
+			The model fit was
 			\[
 			y_i = R_i e^{\vbeta_1 + \vbeta_2 \text{Satiated} + \vbeta_3 \text{Arrival Time} + u_n}
 			\]
-			where $n$ is the nest number, $1 \leq n \leq 25$, with priors
+			where $n$ is the $n$-th nest, with priors
 			\begin{align*}
 			R_i &\sim \Bernoulli(\rho), \\
 			\rho &\sim \Beta(A, B), \\
 			\vbeta &\sim \N(\vzero, \sigma_\vbeta^2 \mI), \\
-			\vu &\sim \N(0, \sigma_\vu^2), \text { and } 
+			\vu &\sim \N(0, \sigma_\vu^2), \text { and } \\
 			\sigma_\vu^2 &\sim \text{Inverse-Gamma}(s, t).
 			\end{align*}
-			where $\sigma_\vbeta^2=10,000$, $A=1$, $B=1$, $s=1$ and $r=10^{-5}$.
+			where $\sigma_\vbeta^2=10,000$, $A=1$, $B=1$, $s=10^{-2}$ and $r=10^{-2}$.
 
 			The model was fit using the GVA inverse parameterisation algorithm. The accuracy of the parameter
 			estimates is shown in Figure \ref{fig:owls}. The variance component
@@ -1212,6 +1246,20 @@ for the regression parameters do not have closed form expressions. But these mod
 			\label{fig:owls}
 			\includegraphics[scale=0.3]{code/results/accuracy_plots_application_owls_GVA_inv_param-highlights-nup.pdf}
 			\end{figure}
+
+			\begin{table}\label{tab:owls_results}
+			\begin{tabular}{|l|rrrr|}
+				\hline
+				Covariate          & Posterior Mean & Lower 95\% CI & Upper 95\% CI & Accuracy \\
+				\hline
+				Intercept & \\
+				Female & \\
+				Married & \\
+				Children under age 6 & \\
+				PhD & \\
+				\hline
+			\end{tabular}			
+			\end{table}
 
 			\begin{table}
 			\caption{}
@@ -1239,10 +1287,21 @@ for the regression parameters do not have closed form expressions. But these mod
 					
 			The use of Mean Field Variational Bayes allows estimation of Bayesian ZIP models in a fraction of the time taken to fit the same model using even the best MCMC methods available, with only a small loss of accuracy.
 			This is of great utility in applications where speed matters, such as model selection or when applied
-			statisticians are experimenting with many models, as is typical in practice.
+			statisticians are choosing amongst many candidate models, as is typical in practice.
 					
-			The new parameterisation of Gaussian Variational Approximation using the Cholesky factorisation of the inverse of $\mLambda$ presented in Section \ref{sec:param} provides significant advantages.  It is well known that the inverse of a sparse matrix need not be sparse. Fitting mixed models generally leads to covariance matrices with an arrow head structure. Due to the sparsity of our parameterisation of $\mLambda^{-1}$,  our algorithm for fitting these models leads to an optimisation problem of significantly lower dimension. This allows the model to be fit more quickly, and with greatly improved numerical stability and with no loss of
-			accuracy.
+			The new parameterisation of Gaussian Variational Approximation using the Cholesky factorisation of the inverse of $\mLambda$ presented in Section \ref{sec:param} provides significant advantages.  It is well known that the inverse of a sparse matrix need not be sparse. 
+
+			Mixed models have covariance matrices with a block structure, due to the dependence structure of the
+			random effects. The precision parameterisation presented in this chapter is able to preserve this
+			sparsity within the structure of the Cholesky factors of the inverses of the covariance matrices use in
+			the variational lower bound by re-ordering the rows and columns of the matrices so that the random
+			effects blocks appear first. The Owls example presented in this chapter shows the computational
+			advantages of this approach when the number of groups $m$ in the model is large (m=27 in this case) --
+			as the covariance parameterisation takes 46 seconds to fit whereas the inverse parameterisation only
+			takes 3 seconds. This clearly demonstrates advantage of using sparsity to reduce the dimension of the
+			optimisation problem to be solved when models are being fit -- as only the non-zero values in the
+			covariance matrices need to be optimised over. This allows models to be fit more quickly, and with
+			greatly improved numerical stability and without loss of accuracy.
 				
 			Some of the algorithms which we experimented with were found to be very sensitive to their starting points.
 			While these algorithms are typically initialised with a starting point as close as possible to the final
