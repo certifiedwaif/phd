@@ -27,8 +27,8 @@ struct Graycode {
 	const uint varying;
 	const uint size;
 
-	uint binary_to_gray(const uint num);
-	uint gray_to_binary(const uint num);
+	uint binary_to_gray(const uint num) const;
+	uint gray_to_binary(const uint num) const;
 	VectorXd binary_to_vec(const uint num);
 	VectorXd gray_vec(const uint i);
 	MatrixXi to_MatrixXi();
