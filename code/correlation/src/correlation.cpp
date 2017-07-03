@@ -363,7 +363,8 @@ bool& bLow)
 
 // Calculate the correlations for every subset of the covariates in mX
 List all_correlations_main(const Graycode& graycode, VectorXd vy, MatrixXd mX, const uint fixed,
-	const uint intercept_col, const uint max_iterations, const bool bIntercept = false,
+	const uint intercept_col, const uint max_iterations, const bool bNatural_Order = false,
+	const bool bIntercept = false,
 	const bool bCentre = true)
 {
 	const uint n = mX.rows();									 // The number of observations
@@ -510,35 +511,39 @@ List all_correlations_main(const Graycode& graycode, VectorXd vy, MatrixXd mX, c
 		// FIXME: How do you do this in a thread-safe way?
 		// Rcpp::checkUserInterrupt();
 	}
-	VectorXd vR2(max_iterations);
-	VectorXi vp_gamma(max_iterations);
-	for (auto i = 1; i < max_iterations; i++) {
-		// if (i <= 10)
-		// 	Rcpp::Rcout << i << " to " << graycode.gray_to_binary(i) << std::endl;
-		vR2(i) = vR2_all(graycode.gray_to_binary(i));
-		vp_gamma(i) = vpgamma_all(graycode.gray_to_binary(i));
+	if (!bNatural_Order) {
+		return List::create(Named("vR2") = vR2_all,
+												Named("vp_gamma") = vpgamma_all);
+	} else {
+		VectorXd vR2(max_iterations);
+		VectorXi vp_gamma(max_iterations);
+		for (auto i = 1; i < max_iterations; i++) {
+			vR2(i) = vR2_all(graycode.gray_to_binary(i));
+			vp_gamma(i) = vpgamma_all(graycode.gray_to_binary(i));
+		}
+		return List::create(Named("vR2") = vR2,
+												Named("vp_gamma") = vp_gamma);
 	}
-	return List::create(Named("vR2") = vR2,
-											Named("vp_gamma") = vp_gamma);
 }
 
 // [[Rcpp:export]]
 List all_correlations_mX_cpp(VectorXd vy, MatrixXd mX, const uint intercept_col,
-const bool bIntercept, const bool bCentre)
+const bool bNatural_Order, const bool bIntercept, const bool bCentre)
 {
 	const uint p = mX.cols();
 	const uint fixed = 0;
 	const uint max_iterations = 1 << p;
 
 	Graycode graycode(p);
-	return all_correlations_main(graycode, vy, mX, fixed, intercept_col, max_iterations, bIntercept, bCentre);
+	return all_correlations_main(graycode, vy, mX, fixed, intercept_col, max_iterations, bNatural_Order,
+																bIntercept, bCentre);
 }
 
 
 // Calculate the correlations for every subset of the covariates in mX
 // [[Rcpp:export]]
 List all_correlations_mX_mZ_cpp(VectorXd vy, MatrixXd mX, MatrixXd mZ, const uint intercept_col,
-																		const bool bIntercept, const bool bCentre)
+																		const bool bNatural_Order, const bool bIntercept, const bool bCentre)
 {
 	const uint n = mX.rows();
 	const uint p1 = mX.cols();
@@ -550,7 +555,8 @@ List all_correlations_mX_mZ_cpp(VectorXd vy, MatrixXd mX, MatrixXd mZ, const uin
 	mC.leftCols(p1) = mX;
 	mC.rightCols(p2) = mZ;
 	Graycode graycode(p1, p2);
-	return all_correlations_main(graycode, vy, mC, p1, intercept_col, max_iterations, bIntercept, bCentre);
+	return all_correlations_main(graycode, vy, mC, p1, intercept_col, max_iterations, bNatural_Order, 
+																bIntercept, bCentre);
 }
 
 
