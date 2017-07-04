@@ -69,6 +69,56 @@ void calculate_log_probabilities(vector< dbitset > gamma, VectorXd sigma2, int n
 }
 
 
+void calculate_weights(VectorXd sigma2, VectorXd log_probs, VectorXd& w, const int K)
+{
+	for (auto k = 0; k < K; k++) {
+		// Need to use log-sum-exp trick here
+		// Have to skip 0 probabilities somehow.
+		if (sigma2[k] == 0.) {
+			w[k] = 0.;
+		} else {
+			w[k] = exp(log_probs[k]) / log_probs.array().exp().sum();
+		}
+		#ifdef DEBUG
+		Rcpp::Rcout << "w[" << k << "] " << w[k] << std::endl;
+		#endif
+	}
+}
+
+
+double calculate_entropy(VectorXd w, const int K)
+{
+	// Don't add 0 weights
+	auto H = 0.;
+	for (auto k = 0; k < K; k++) {
+		if (w[k] == 0.) {
+			continue;
+		}	else {
+			H += -w[k] * log(w[k]);
+		}
+	}
+
+	return H;
+}
+
+
+double calculate_w_dot_prob(VectorXd w, VectorXd log_probs, const int K)
+{
+	auto w_dot_prob = 0.;
+	for (auto k = 0; k < K; k++) {
+		if (w[k] == 0.) {
+			continue;
+		} else {
+			w_dot_prob += w[k] * exp(log_probs[k]);
+		}
+		#ifdef DEBUG
+		Rcpp::Rcout << "w[k] " << w[k] << " log_probs[k] " << log_probs[k] << " w_dot_prob " << k << " " << w_dot_prob << " " << std::endl;
+		#endif
+	}
+	return w_dot_prob;
+}
+
+
 void gamma_to_NumericMatrix(const vector< dbitset >& gamma, NumericMatrix& nm)
 {
 	auto K = gamma.size();
@@ -199,34 +249,25 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 				auto p_gamma_prime = gamma_prime.count();
 				if (p_gamma_prime == 0)
 					continue;
-
 				bool bUpdate = !gamma[k][j];
-				MatrixXd mXTX_inv_prime;
+
 				// If we've seen this bitstring before, don't do the update
 				auto h = boost::hash_value(gamma_prime);
-				#ifdef DEBUG
-				// Rcpp::Rcout << "h " << h << std::endl;
-				#endif
 				auto search = hash.find(h);
-				// Rcpp::Rcout << "search->first " << search->first << std::endl;
 				if (search != hash.end()) {
-					#ifdef DEBUG
-					// Rcpp::Rcout << "Skipping" << std::endl;
-					#endif
 					continue;
-				}
-				else {
-					#ifdef DEBUG
-					Rcpp::Rcout << "Inserting" << std::endl;
-					#endif
-					hash.insert({h, true}
-					);
+				}	else {
+					hash.insert({h, true});
 				}
 				#ifdef DEBUG
-				Rcpp::Rcout << "Updating " << j << std::endl;
-				// Rcpp::Rcout << "p_gamma_1 " << p_gamma_1 << std::endl;
+				if (bUpdate)
+					Rcpp::Rcout << "Updating " << j << std::endl;
+				else
+					Rcpp::Rcout << "Downdating " << j << std::endl;
 				#endif
-				// Update mXTX_inv
+
+				// Update or downdate mXTX_inv
+				MatrixXd mXTX_inv_prime;
 				mXTX_inv_prime.resize(p_gamma_prime, p_gamma_prime);
 				bool bLow;             // gamma_1 or gamma[k]?
 				if (bUpdate) {
@@ -241,35 +282,22 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 						mXTX_inv[k], mXTX_inv_prime);
 				}
 
+				// Calculate sigma2_prime
 				double sigma2_prime;
 
 				MatrixXd mX_gamma_prime(n, p_gamma_prime);
 				get_cols(mX, gamma_prime, mX_gamma_prime);
 				MatrixXd mX_gamma_prime_Ty = mX_gamma_prime.transpose() * vy;
-				#ifdef DEBUG
-				// Rcpp::Rcout << "mX_gamma_1.transpose() * mX_gamma_1\n" << mX_gamma_1.transpose() * mX_gamma_1 << std::endl;
-				// Rcpp::Rcout << "mXTX_inv_prime * mX_gamma_1.transpose() * mX_gamma_1\n" << mXTX_inv_prime * mX_gamma_1.transpose() * mX_gamma_1 << std::endl;
-				// 	Rcpp::Rcout << "mXTX_inv_prime * mX_gamma_1_Ty\n" << mXTX_inv_prime * mX_gamma_1_Ty << std::endl;
-				// 	Rcpp::Rcout << "(mX_gamma_1_Ty.transpose() * mXTX_inv_prime * mX_gamma_1_Ty).value() " << (mX_gamma_1_Ty.transpose() * mXTX_inv_prime * mX_gamma_1_Ty).value() << std::endl;
-				#endif
 				double nR2 = (mX_gamma_prime_Ty.transpose() * mXTX_inv_prime * mX_gamma_prime_Ty).value();
 				#ifdef DEBUG
 				Rcpp::Rcout << "nR2 " << nR2 << std::endl;
 				#endif
 				if (false && nR2 <= n) {
 					sigma2_prime = 1. - nR2 / n;
-					// Rcpp::Rcout << "sigma2_1 " << sigma2_1 << std::endl;
-				}
-				else {
+				}	else {
 					// It's mathematically impossible that nR2 can be that high. Therefore, our inverse must be bad.
 					// Recalculate it from scratch and try again.
-					#ifdef DEBUG
-					// Rcpp::Rcout << "Re-calculating mXTX_inv_prime" << std::endl;
-					#endif
 					mXTX_inv_prime = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
-					#ifdef DEBUG
-					// Rcpp::Rcout << "mXTX_inv_prime * mX_gamma_1.transpose() * mX_gamma_1\n" << mXTX_inv_prime * mX_gamma_1.transpose() * mX_gamma_1 << std::endl;
-					#endif
 					double sigma2_prime_check = 1. - nR2 / n;
 					nR2 = (mX_gamma_prime_Ty.transpose() * mXTX_inv_prime * mX_gamma_prime_Ty).value();
 					sigma2_prime = 1. - nR2 / n;
@@ -290,7 +318,6 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 				if (bUpdate) {
 					log_p_0 = log_prob(n, p, p_gamma, sigma2[k], a, b);
 					log_p_1 = log_prob(n, p, p_gamma_prime, sigma2_prime, a, b);
-
 				} else {
 					log_p_0 = log_prob(n, p, p_gamma_prime, sigma2_prime, a, b);
 					log_p_1 = log_prob(n, p, p_gamma, sigma2[k], a, b);
@@ -299,87 +326,44 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 				Rcpp::Rcout << "log_p_0 " << log_p_0;
 				Rcpp::Rcout << " log_p_1 " << log_p_1 << std::endl;
 				#endif
-				if (log_p_0 > log_p_1) {
-					if (!bUpdate) {
-						hash.erase(boost::hash_value(gamma[k]));
-						gamma[k][j] = bUpdate;
-						#ifdef DEBUG
-						Rcpp::Rcout << "Keep downdate" << std::endl;
-						#endif
-						sigma2[k] = sigma2_prime;
-						mXTX_inv[k] = mXTX_inv_prime;
-					}
-				}
-				else {
-					if (bUpdate) {
-						hash.erase(boost::hash_value(gamma[k]));
-						gamma[k][j] = bUpdate;
-						#ifdef DEBUG
+				if ((log_p_0 > log_p_1 && !bUpdate) || (log_p_1 > log_p_0 && bUpdate)) {
+					hash.erase(boost::hash_value(gamma[k]));
+					gamma[k][j] = bUpdate;
+					hash.insert({boost::hash_value(gamma[k]), true});
+					#ifdef DEBUG
+					if (bUpdate)
 						Rcpp::Rcout << "Keep update" << std::endl;
-						#endif
-						sigma2[k] = sigma2_prime;
-						mXTX_inv[k] = mXTX_inv_prime;
-					}
+					else
+						Rcpp::Rcout << "Keep downdate" << std::endl;
+					#endif
+					sigma2[k] = sigma2_prime;
+					mXTX_inv[k] = mXTX_inv_prime;
 				}
 			}
 		}
 
 		calculate_log_probabilities(gamma, sigma2, n, log_probs);
 
-		auto a = log_probs.maxCoeff();
-		auto denom = 0.;
-		for (auto k = 0; k < K; k++) {
-			if (sigma2[k] == 0.) {
-				continue;
-			}	else {
-				denom += exp(log_probs[k] - a);
-			}
-		}
-		auto log_denom = a + log(denom);
-		for (auto k = 0; k < K; k++) {
-			// Need to use log-sum-exp trick here
-			// Have to skip 0 probabilities somehow.
-			// w[k] = probs[k] / probs.sum();
-			if (sigma2[k] == 0.) {
-				w[k] = 0.;
-			} else {
-				w[k] = exp(log_probs[k] - log_denom);
-			}
-			#ifdef DEBUG
-			Rcpp::Rcout << "w[" << k << "] " << w[k] << std::endl;
-			#endif
-		}
+		// Calculate weights
+		calculate_weights(sigma2, log_probs, w, K);
 
-		// Check for convergence - is f_lambda changed from the last iteration?
-		// Don't add 0 weights
-		auto H = 0.;
-		// -(w.array() * w.array().log()).sum();
-		for (auto k = 0; k < K; k++) {
-			if (w[k] == 0.) {
-				continue;
-			}	else {
-				H += -w[k] * log(w[k]);
-			}
-		}
+		// Calculate entropy
+		auto H = calculate_entropy(w, K);
+
+		// Rcpp::Rcout << "w.dot(probs) " << w.dot(probs) << std::endl;
+		auto w_dot_prob = calculate_w_dot_prob(w, log_probs, K);
 		#ifdef  DEBUG
+		Rcpp::Rcout << "w_dot_prob " << w_dot_prob << std::endl;
 		Rcpp::Rcout << "H " << H << std::endl;
 		#endif
-		// Rcpp::Rcout << "w.dot(probs) " << w.dot(probs) << std::endl;
-		auto w_dot_prob = 0.;
-		for (auto k = 0; k < K; k++) {
-			if (w[k] == 0.) {
-				continue;
-			} else {
-				w_dot_prob += w[k] * exp(log_probs[k]);
-			}
-			#ifdef DEBUG
-			Rcpp::Rcout << "w[k] " << w[k] << " log_probs[k] " << log_probs[k] << " w_dot_prob " << k << " " << w_dot_prob << " " << std::endl;
-			#endif
-		}
+
+		// Calculate f_lambda
 		double f_lambda = w_dot_prob + lambda * H;
 		#ifdef DEBUG
 		Rcpp::Rcout << "f_lambda_prev " << f_lambda_prev << " f_lambda " << f_lambda << std::endl;
 		#endif
+
+		// Check for convergence - is f_lambda changed from the last iteration?
 		if ((f_lambda - f_lambda_prev) > EPSILON) {
 			f_lambda_prev = f_lambda;
 		}
