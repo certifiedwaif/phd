@@ -10,64 +10,44 @@
 \caption{Top 10 models selected for the Hitters data set ranked by posterior model probability, the difference
 					in log probabilities $\log p(\vy|\vgamma)$ between the best model and this model and the difference
 					between the Bayesian Information Criteria for this model and the best model}
-\begin{tabular}{|l|llll|}
+\begin{center}
+\begin{tabular}{r|l|l|c|r|r}
+rank & $\vgamma$ (base: 1, 2, 6, 15, 16) & $p(\vgamma|\vy)$ & $R^2$ & $\widetilde{\text{BIC}}_\text{Best} - \widetilde{\text{BIC}}$ & $\text{BIC}_\text{Best} - \text{BIC}$ \\
 \hline
-$\vgamma$ (2, 6, 15, 16 are in all models) & $p(\vgamma|\vy)$ & $R^2$ & $\log p(\vy | \vgamma_\text{Best}) - \log p(\vy | \vgamma)$ & $\text{BIC}_\text{Best} - \text{BIC}$ \\
-\hline
-1, 10, 11, 13&  2.56&  0.53&  0&  0\\
-1, 11, 12, 13&  2.29&  0.53&  0.22&  0.23\\
-1, 8, 11, 12, 13&  1.6&  0.53&  0.94&  2.17\\
-1, 8, 9, 10&  1.23&  0.53&  1.47&  1.53\\
-1, 10, 11, 13, 17&  1.1&  0.53&  1.69&  2.95\\
-1, 12&  1.1&  0.51&  1.7&  -0.3\\
-1, 7, 11, 12, 13,&  1.07&  0.53&  1.75&  3.02\\
-1, 8, 11, 12, 13, 17&  1.03&  0.54&  1.83&  4.4\\
-1, 9, 11, 12, 13&  0.67&  0.53&  2.68&  3.99\\
-1, 8, 9, 12&  0.64&  0.52&  2.78&  2.89\\
-1, 10, 11, 13, 14,&  0.64&  0.53&  2.79&  4.1\\
-1, 4, 10, 11, 13,&  0.58&  0.53&  2.98&  4.3\\
-1, 11, 12, 13, 17&  0.53&  0.53&  3.17&  4.5\\
-1, 8, 9, 10, 17&  0.52&  0.53&  3.18&  4.51\\
-1, 9, 10, 13&  0.51&  0.52&  3.25&  3.37\\
-1, 7, 10, 11, 13&  0.49&  0.53&  3.3&  4.63\\
-8, 9, 10&  0.48&  0.51&  3.34&  2.36\\
-1, 8, 9, 10, 13&  0.48&  0.53&  3.36&  4.7\\
-1, 4, 8, 11, 12, 13&  0.45&  0.54&  3.47&  6.11\\
-1, 10, 11, 13, 19&  0.45&  0.53&  3.48&  4.83\\
-\hline
+1  & base: +10, +11, +13&  2.56\%&  0.53&  0.00&  0.00\\
+2  & base: +11, +12, +13&  2.29\%&  0.53&  0.22&  0.23\\
+3  & base: +8, +11, +12, +13&  1.6\%&  0.53&  0.94&  2.17\\
+4  & base: +8, +9, +10&  1.23\%&  0.53&  1.47&  1.53\\
+5  & base: +10, +11, +13, +17&  1.10\%&  0.53&  1.69&  2.95\\
+6  & base: +12&  1.1\%&  0.51&  1.70&  $-$0.30\\
+7  & base: +7, +11, +12, +13,&  1.07\%&  0.53&  1.75&  3.02\\
+8  & base: +8, +11, +12, +13, +17&  1.03\%&  0.54&  1.83&  4.40\\
+9  & base: +9, +11, +12, +13&  0.67\%&  0.53&  2.68&  3.99\\
+10 & base: +8, +9, +12&  0.64\%&  0.52&  2.78&  2.89\\
 \end{tabular}
+\end{center}
 \end{table}
 \begin{table}
 \label{tab:numerical_results_bodyfat}
 \caption{Top 10 models selected for the Body fat data set ranked by posterior model probability, the difference
 					in log probabilities $\log p(\vy|\vgamma)$ between the best model and this model and the difference
 					between the Bayesian Information Criteria for this model and the best model}
-\begin{tabular}{|l|llll|}
+\begin{center}
+\begin{tabular}{r|l|l|c|r|r}
+rank & $\vgamma$ (base: 6, 13) & $p(\vgamma|\vy)$ & $R^2$ & $\widetilde{\text{BIC}}_\text{Best} - \widetilde{\text{BIC}}$ & $\text{BIC}_\text{Best} - \text{BIC}$ \\
 \hline
-$\vgamma$ (6 is in all models) & $p(\vgamma|\vy)$ & $R^2$ & $\log p(\vy | \vgamma_\text{Best}) - \log p(\vy | \vgamma)$ & $\text{BIC}_\text{Best} - \text{BIC}$ \\
-\hline
-2, 13&  17.64&  0.73&  0&  0\\
-3, 13&  5.85&  0.73&  2.21&  2.25\\
-2, 11, 13&  5.74&  0.74&  2.25&  1.98\\
-2, 12, 13&  3.56&  0.74&  3.2&  2.95\\
-1, 3, 13&  2.83&  0.74&  3.66&  3.42\\
-1, 13&  2.69&  0.73&  3.76&  3.84\\
-2, 3, 13&  2.07&  0.74&  4.28&  4.06\\
-3, 5, 13&  2.03&  0.74&  4.33&  4.11\\
-2, 8, 13&  1.96&  0.74&  4.4&  4.18\\
-1, 2, 13&  1.81&  0.74&  4.55&  4.33\\
-7, 13&  1.79&  0.73&  4.58&  4.66\\
-2&  1.74&  0.72&  4.63&  5.37\\
-3, 7, 13&  1.57&  0.73&  4.84&  4.63\\
-2, 4, 13&  1.33&  0.73&  5.17&  4.97\\
-2, 5, 13&  1.18&  0.73&  5.41&  5.22\\
-3, 4, 13&  1.17&  0.73&  5.42&  5.22\\
-2, 7, 13&  1.16&  0.73&  5.44&  5.24\\
-2, 9, 13&  1.16&  0.73&  5.44&  5.24\\
-2, 10, 13&  1.04&  0.73&  5.66&  5.47\\
-1, 2, 11, 13&  0.74&  0.74&  6.34&  6.11\\
-\hline
+1  & base: +2&  17.64\%&  0.73&  0.00&  0.00\\
+2 & base: +3&  5.85\%&  0.73&  2.21&  2.25\\
+3 & base: +2, +11&  5.74\%&  0.74&  2.25&  1.98\\
+4 & base: +2, +12&  3.56\%&  0.74&  3.20&  2.95\\
+5 & base: +1, +3&  2.83\%&  0.74&  3.66&  3.42\\
+6 & base: +1&  2.69\%&  0.73&  3.76&  3.84\\
+7 & base: +2, +3&  2.07\%&  0.74&  4.28&  4.06\\
+8 & base: +3, +5&  2.03\%&  0.74&  4.33&  4.11\\
+9 & base: +2, +8&  1.96\%&  0.74&  4.40&  4.18\\
+10 & base: +1, +2&  1.81\%&  0.74&  4.55&  4.33\\
 \end{tabular}
+\end{center}
 \end{table}
 
 \begin{table}
@@ -75,96 +55,66 @@ $\vgamma$ (6 is in all models) & $p(\vgamma|\vy)$ & $R^2$ & $\log p(\vy | \vgamm
 \caption{Top 10 models selected for the Wage data set ranked by posterior model probability, the difference
 					in log probabilities $\log p(\vy|\vgamma)$ between the best model and this model and the difference
 					between the Bayesian Information Criteria for this model and the best model}
-\begin{tabular}{|l|llll|}
+\begin{center}
+\begin{tabular}{r|l|l|c|r|r}
+rank & $\vgamma$ (base: 13, 16, 17) & $p(\vgamma|\vy)$ & $R^2$ & $\widetilde{\text{BIC}}_\text{Best} - \widetilde{\text{BIC}}$ & $\text{BIC}_\text{Best} - \text{BIC}$ \\
 \hline
-$\vgamma$ (13, 16, 17 are in all models) & $p(\vgamma|\vy)$ & $R^2$ & $\log p(\vy | \vgamma_\text{Best}) - \log p(\vy | \vgamma)$ & $\text{BIC}_\text{Best} - \text{BIC}$ \\
-\hline
-&  67.57&  0.91&  0&  0\\
-11&  5.57&  0.91&  4.99&  3.7\\
-12&  3.99&  0.91&  5.66&  4.37\\
-3&  3.88&  0.91&  5.71&  4.43\\
-2&  2.86&  0.91&  6.32&  5.04\\
-1&  2.18&  0.91&  6.86&  5.58\\
-14&  1.56&  0.91&  7.54&  6.25\\
-10&  0.92&  0.91&  8.59&  7.31\\
-4&  0.91&  0.91&  8.61&  7.33\\
-6&  0.85&  0.91&  8.75&  7.47\\
-7&  0.81&  0.91&  8.84&  7.56\\
-9&  0.74&  0.91&  9.03&  7.75\\
-5&  0.68&  0.91&  9.2&  7.92\\
-8&  0.66&  0.91&  9.25&  7.97\\
-15&  0.65&  0.91&  9.28&  8.01\\
-3, 11&  0.44&  0.91&  10.06&  7.76\\
-10, 11&  0.44&  0.91&  10.07&  7.77\\
-2, 11&  0.35&  0.91&  10.52&  8.23\\
-3, 12&  0.24&  0.91&  11.31&  9.02\\
-1, 11&  0.22&  0.91&  11.42&  9.13\\
-\hline
+1 & base: &  67.57\%&  0.91&  0.00&  0.00\\
+2 & base: +11&  5.57\%&  0.91&  4.99&  3.70\\
+3 & base: +12&  3.99\%&  0.91&  5.66&  4.37\\
+4 & base: +3&  3.88\%&  0.91&  5.71&  4.43\\
+5 & base: +2&  2.86\%&  0.91&  6.32&  5.04\\
+6 & base: +1&  2.18\%&  0.91&  6.86&  5.58\\
+7 & base: +14&  1.56\%&  0.91&  7.54&  6.25\\
+8 & base: +10&  0.92\%&  0.91&  8.59&  7.31\\
+9 & base: +4&  0.91\%&  0.91&  8.61&  7.33\\
+10 & base: +6&  0.85\%&  0.91&  8.75&  7.47\\
 \end{tabular}
+\end{center}
 \end{table}
 
 \begin{table}
 \label{tab:numerical_results_gradrate}
 \caption{Top 10 models selected for the Graduation Rate data set ranked by posterior model probability, the
 					difference in log probabilities $\log p(\vy|\vgamma)$ between the best model and this model and the difference between the Bayesian Information Criteria for this model and the best model}
-\begin{tabular}{|l|llll|}
+\begin{center}
+\begin{tabular}{r|l|l|c|r|r}
+rank & $\vgamma$ (base: 2, 8, 9, 10, 16, 17) & $p(\vgamma|\vy)$ & $R^2$ & $\widetilde{\text{BIC}}_\text{Best} - \widetilde{\text{BIC}}$ & $\text{BIC}_\text{Best} - \text{BIC}$ \\
 \hline
-$\vgamma$ (2, 8, 10, 16 are in all models) & $p(\vgamma|\vy)$ & $R^2$ & $\log p(\vy | \vgamma_\text{Best}) - \log p(\vy | \vgamma)$ & $\text{BIC}_\text{Best} - \text{BIC}$ \\
-\hline
-6, 9, 12, 17&  7.62&  0.45&  0&  0\\
-1, 6, 9, 12, 17&  6.8&  0.46&  0.23&  1.65\\
-6, 9, 17&  4.88&  0.45&  0.89&  -0.4\\
-1, 6, 9, 17&  4.46&  0.45&  1.07&  1.08\\
-6, 7, 9, 17&  2.43&  0.45&  2.28&  2.31\\
-6, 7, 9, 12, 17&  2.37&  0.45&  2.33&  3.79\\
-5, 9, 12, 17&  2.29&  0.45&  2.41&  2.43\\
-3, 6, 9, 12, 17&  1.56&  0.45&  3.17&  4.63\\
-5, 6, 9, 12, 17&  1.52&  0.45&  3.22&  4.69\\
-5, 9, 17&  1.32&  0.45&  3.5&  2.24\\
-1, 5, 9, 12, 17&  1.3&  0.45&  3.54&  5.01\\
-1, 5, 6, 9, 12, 17&  1.29&  0.46&  3.55&  6.56\\
-1, 3, 6, 9, 12, 17&  1.14&  0.46&  3.8&  6.81\\
-1, 6, 7, 9, 12, 17&  1.06&  0.46&  3.95&  6.96\\
-6, 9, 12&  1.04&  0.45&  3.98&  2.72\\
-6, 9, 12, 14, 17&  1.03&  0.45&  4.01&  5.49\\
-3, 6, 9, 17&  1&  0.45&  4.06&  4.11\\
-4, 6, 9, 12, 17&  0.99&  0.45&  4.07&  5.55\\
-1, 6, 9, 12&  0.97&  0.45&  4.13&  4.18\\
-1, 6, 7, 9, 17&  0.96&  0.45&  4.14&  5.62\\
-\hline
+1 & base: +6, +12&  7.62\%&  0.45&  0.00&  0.00\\
+2 & base: +1, +6, +12&  6.8\%&  0.46&  0.23&  1.65\\
+3 & base: +6&  4.88\%&  0.45&  0.89&  $-$0.40\\
+4 & base: +1, +6&  4.46\%&  0.45&  1.07&  1.08\\
+5 & base: +6, +7&  2.43\%&  0.45&  2.28&  2.31\\
+6 & base: +6, +7, +12&  2.37\%&  0.45&  2.33&  3.79\\
+7 & base: +5, +12&  2.29\%&  0.45&  2.41&  2.43\\
+8 & base: +3, +6, +12&  1.56\%&  0.45&  3.17&  4.63\\
+9 & base: +5, +6, +12&  1.52\%&  0.45&  3.22&  4.69\\
+10 &base:  +5&  1.32\%&  0.45&  3.50&  2.24\\
 \end{tabular}
+\end{center}
 \end{table}
 
 \begin{table}
 \label{tab:numerical_results_uscrime}
 \caption{Top 10 models selected for the US Crime data set ranked by posterior model probability, the
 					difference in log probabilities $\log p(\vy|\vgamma)$ between the best model and this model and the difference between the Bayesian Information Criteria for this model and the best model}
-\begin{tabular}{|l|llll|}
+\begin{center}
+\begin{tabular}{r|l|l|l|l|l}
+rank & $\vgamma$ (base: 1, 3, 4, 13 are in all models)& $p(\vgamma|\vy)$ & $R^2$ & $\widetilde{\text{BIC}}_\text{Best} - \widetilde{\text{BIC}}$ & $\text{BIC}_\text{Best} - \text{BIC}$ \\
 \hline
-$\vgamma$ (3, 4, 13 are in all models)& $p(\vgamma|\vy)$ & $R^2$ & $\log p(\vy | \vgamma_\text{Best}) - \log p(\vy | \vgamma)$ & $\text{BIC}_\text{Best} - \text{BIC}$ \\
-\hline
-1, 11, 14&  2.48&  0.77&  0&  0\\
-1, 14&  1.47&  0.74&  1.05&  1.45\\
-1, 11, 12, 14&  0.99&  0.77&  1.85&  2.07\\
-1, 10, 11, 14&  0.93&  0.77&  1.97&  2.22\\
-1, 8, 11, 14&  0.89&  0.77&  2.06&  2.33\\
-1, 11&  0.78&  0.73&  2.31&  2.91\\
-1, 12, 14&  0.71&  0.75&  2.51&  2.99\\
-1, 7, 14&  0.69&  0.75&  2.56&  3.04\\
-1, 7, 11, 14&  0.69&  0.77&  2.56&  2.94\\
-1, 7, 10, 11, 14&  0.69&  0.79&  2.56&  2.85\\
-1, 5, 11, 14&  0.64&  0.77&  2.7&  3.11\\
-1, 2, 11, 14&  0.59&  0.77&  2.88&  3.32\\
-1, 11, 12&  0.57&  0.75&  2.93&  3.49\\
-1&  0.57&  0.7&  2.96&  3.88\\
-1, 6, 11, 14&  0.56&  0.77&  2.99&  3.46\\
-14&  0.54&  0.7&  3.04&  3.98\\
-1, 12&  0.52&  0.72&  3.12&  3.85\\
-1, 11, 14, 15&  0.52&  0.77&  3.14&  3.64\\
-1, 10, 14&  0.48&  0.75&  3.29&  3.91\\
-1, 9, 11, 14&  0.48&  0.77&  3.3&  3.84\\
-\hline
+1 & base: +11, +14&  2.48\%&  0.77&  0&  0\\
+2 & base: +14&  1.47\%&  0.74&  1.05&  1.45\\
+3 & base: +11, +12, +14&  0.99\%&  0.77&  1.85&  2.07\\
+4 & base: +10, +11, +14&  0.93\%&  0.77&  1.97&  2.22\\
+5 & base: +8, +11, +14&  0.89\%&  0.77&  2.06&  2.33\\
+6 & base: +11&  0.78\%&  0.73&  2.31&  2.91\\
+7 & base: +12, +14&  0.71\%&  0.75&  2.51&  2.99\\
+8 & base: +7, +14&  0.69\%&  0.75&  2.56&  3.04\\
+9 & base: +7, +11, +14&  0.69\%&  0.77&  2.56&  2.94\\
+10 & base: +7, +10, +11, +14&  0.69\%&  0.79&  2.56&  2.85\\
 \end{tabular}
+\end{center}
 \end{table}
 
 \end{document}
