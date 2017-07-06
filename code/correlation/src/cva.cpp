@@ -46,7 +46,8 @@ double log_prob(const int n, const int p, int p_gamma, const double sigma2, cons
 }
 
 
-void calculate_log_probabilities(vector< dbitset > gamma, VectorXd sigma2, int n, VectorXd& log_probs)
+void calculate_log_probabilities(const vector< dbitset >& gamma, const VectorXd& sigma2, const int n,
+																	VectorXd& log_probs)
 {
 	auto K = gamma.size();
 	auto p = gamma[0].size();
@@ -69,7 +70,7 @@ void calculate_log_probabilities(vector< dbitset > gamma, VectorXd sigma2, int n
 }
 
 
-void calculate_weights(VectorXd sigma2, VectorXd log_probs, VectorXd& w, const int K)
+void calculate_weights(const VectorXd& sigma2, const VectorXd& log_probs, VectorXd& w, const int K)
 {
 	for (auto k = 0; k < K; k++) {
 		// Need to use log-sum-exp trick here
@@ -86,7 +87,7 @@ void calculate_weights(VectorXd sigma2, VectorXd log_probs, VectorXd& w, const i
 }
 
 
-double calculate_entropy(VectorXd w, const int K)
+double calculate_entropy(const VectorXd& w, const int K)
 {
 	// Don't add 0 weights
 	auto H = 0.;
@@ -102,7 +103,7 @@ double calculate_entropy(VectorXd w, const int K)
 }
 
 
-double calculate_w_dot_prob(VectorXd w, VectorXd log_probs, const int K)
+double calculate_w_dot_prob(const VectorXd& w, const VectorXd& log_probs, const int K)
 {
 	auto w_dot_prob = 0.;
 	for (auto k = 0; k < K; k++) {
@@ -270,15 +271,32 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 				MatrixXd mXTX_inv_prime;
 				mXTX_inv_prime.resize(p_gamma_prime, p_gamma_prime);
 				bool bLow;             // gamma_1 or gamma[k]?
+				uint min_idx = std::min(gamma[k].find_first(), gamma_prime.find_first());
+				#ifdef DEBUG
+				Rcpp::Rcout << "min_idx " << min_idx << std::endl;
+				#endif
+
+				// This is totally evil
+				// Explanation: mXTX is addressed absolutely, but mXTX_inv is addressed relatively. To account for
+				// this, we abuse fixed to adjust for the gaps in gamma_prime
+				int fixed = 0;
+				for (auto idx = min_idx; idx < j; idx++) {
+					if (!gamma_prime[idx])
+						fixed--;
+				}
+
 				if (bUpdate) {
-					rank_one_update(gamma[k], j, gamma_prime.find_first(),
-						0,
+					rank_one_update(gamma[k], j, min_idx,
+						fixed,
 						mXTX,
 						mXTX_inv[k],
 						mXTX_inv_prime,
 						bLow);
+						#ifdef DEBUG
+						Rcpp::Rcout << "bLow " << bLow << std::endl;
+						#endif
 				} else {
-					rank_one_downdate(j, gamma_prime.find_first(), 0,
+					rank_one_downdate(j, min_idx, fixed,
 						mXTX_inv[k], mXTX_inv_prime);
 				}
 
@@ -289,25 +307,31 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 				get_cols(mX, gamma_prime, mX_gamma_prime);
 				MatrixXd mX_gamma_prime_Ty = mX_gamma_prime.transpose() * vy;
 				double nR2 = (mX_gamma_prime_Ty.transpose() * mXTX_inv_prime * mX_gamma_prime_Ty).value();
+				sigma2_prime = 1. - nR2 / n;
+				// #ifdef DEBUG
+				// It's mathematically impossible that nR2 can be that high. Therefore, our inverse must be bad.
+				// Recalculate it from scratch and try again.
+				
 				#ifdef DEBUG
-				Rcpp::Rcout << "nR2 " << nR2 << std::endl;
-				#endif
-				if (false && nR2 <= n) {
-					sigma2_prime = 1. - nR2 / n;
-				}	else {
-					// It's mathematically impossible that nR2 can be that high. Therefore, our inverse must be bad.
-					// Recalculate it from scratch and try again.
-					mXTX_inv_prime = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
-					double sigma2_prime_check = 1. - nR2 / n;
-					nR2 = (mX_gamma_prime_Ty.transpose() * mXTX_inv_prime * mX_gamma_prime_Ty).value();
-					sigma2_prime = 1. - nR2 / n;
-					if (abs(sigma2_prime - sigma2_prime_check) > EPSILON) {
-						#ifdef DEBUG
-						Rcpp::Rcout << "sigma2_prime " << sigma2_prime << " sigma2_prime_check " << sigma2_prime_check << std::endl;
-						#endif
-					}
-					// Rcpp::Rcout << "sigma2_1 " << sigma2_1 << std::endl;
+				MatrixXd mXTX_inv_prime_check = (mX_gamma_prime.transpose() * mX_gamma_prime).inverse();
+				if (mXTX_inv_prime != mXTX_inv_prime_check) {
+					Rcpp::Rcout << "gamma[k]    " << gamma[k] << std::endl;
+					Rcpp::Rcout << "gamma_prime " << gamma_prime << std::endl;
+					Rcpp::Rcout << "mXTX_inv_prime " << std::endl << mXTX_inv_prime << std::endl;
+					Rcpp::Rcout << "mXTX_inv_prime_check " << std::endl << mXTX_inv_prime_check << std::endl;
+					Rcpp::Rcout << "Difference " << std::endl << mXTX_inv_prime - mXTX_inv_prime_check << std::endl;
+					// throw std::range_error("Rank one update failed. I wonder why?");
 				}
+
+				double nR2_check = (mX_gamma_prime_Ty.transpose() * mXTX_inv_prime * mX_gamma_prime_Ty).value();
+				double sigma2_prime_check = 1. - nR2_check / n;
+				if (abs(sigma2_prime - sigma2_prime_check) > EPSILON) {
+					Rcpp::Rcout << "sigma2_prime " << sigma2_prime << " sigma2_prime_check " << sigma2_prime_check << std::endl;
+				}
+				mXTX_inv_prime = mXTX_inv_prime_check;
+				#endif
+				// Rcpp::Rcout << "sigma2_1 " << sigma2_1 << std::endl;
+				// #endif
 
 				#ifdef DEBUG
 				Rcpp::Rcout << "sigma2[k] " << sigma2[k] << std::endl;
