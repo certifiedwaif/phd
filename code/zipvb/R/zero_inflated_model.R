@@ -22,7 +22,7 @@ blockDiag <- function(mA, mB)
 #' @param v The degrees of freedom of the Inverse WIshart distribution
 #' @return A mult object, initialised to contain all of the parameters.
 #' @export
-create_mult <- function(vy, mX, mZ, sigma2.beta, mPsi=NULL, m=ncol(mZ), blocksize=1, spline_dim=0, v=0)
+create_mult <- function(vy, mX, mZ, sigma2.beta, m=ncol(mZ), blocksize=1, spline_dim=0, v=0)
 {
   # Initialise
   n <- length(vy)
@@ -51,9 +51,7 @@ create_mult <- function(vy, mX, mZ, sigma2.beta, mPsi=NULL, m=ncol(mZ), blocksiz
 
   # Set prior parameters for Inverse Wishart distribution
   #mPsi=diag(1, rep(blocksize))
-  if (is.null(mPsi)) {
-    mPsi <- 1e-5 * diag(1, d)
-  }
+  mPsi <- 1e-5 * diag(1, d)
 
   prior <- list(v=v, mPsi=mPsi,
                 a_rho=1, b_rho=1,
@@ -61,6 +59,8 @@ create_mult <- function(vy, mX, mZ, sigma2.beta, mPsi=NULL, m=ncol(mZ), blocksiz
   v <- prior$v
 
   if (!is.null(ncol(mZ))) {
+    # TODO: We don't yet handle the case where there are splines and random intercepts/
+    # slopes.
     if (m == 1) {
       mSigma.u.inv <- diag(1, spline_dim)
     } else {
@@ -116,18 +116,12 @@ calculate_lower_bound <- function(mult, verbose=FALSE)
 
 	# Terms for (beta, u)
 	T1 <- t(vy * vp) %*% mC %*% vmu
-  # cat("T1", T1, "\n")
 	T1 <- T1 - t(vp) %*% exp(mC %*% vmu + .5 * diag(mC %*% mLambda %*% t(mC)))
-  # cat("T1", T1, "\n")
-  # cat("diag(mC %*% mLambda %*% t(mC)))", diag(mC %*% mLambda %*% t(mC)), "\n")
 	T1 <- T1 - sum(lgamma(vy + 1))
-  # cat("T1", T1, "\n")
   if (p > 0) {
 	 T1 <- T1 - .5 * p * log(prior$sigma2.beta) - .5 * (sum(vmu[beta_idx] ^ 2) + tr(mLambda[beta_idx, beta_idx])) / prior$sigma2.beta
-    # cat("T1", T1, "\n")
   }
 	T1 <- T1 + .5 * (p + m) + .5 * log(det(mLambda))
-  # cat("T1", T1, "\n")
 	eps <- 1e-10
 
 	E_log_det_mSigma_u <- sum(digamma(.5 * (v + 1 - 1:d))) + d * log(2) - log(det(mPsi))
@@ -163,7 +157,7 @@ calculate_lower_bound <- function(mult, verbose=FALSE)
 zipvb <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE, glm_init=TRUE)
 {
   # browser()
-  MAXITER <- 5
+  MAXITER <- 10
 
   # Initialise variables from mult
   N <- length(mult$vy)
@@ -194,7 +188,6 @@ zipvb <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE, glm
   if (glm_init) {
     fit <- glm.fit(mult$mC, mult$vy, family=poisson())
     vmu <- fit$coefficients
-    #mLambda <- vcov(fit)
   }
   # vmu[is.na(vmu)] <- 0
   i <- 0
@@ -246,8 +239,7 @@ zipvb <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE, glm
       }
       # fit1 <- fit.GVA(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B")
     } else if (method == "gva2") {
-      if (i <= 1) {
-        # fit1 <- fit.Lap(vmu, vy, vp, mC, mSigma.inv, mLambda)
+      if (i <= 5) {
         fit1 <- fit.GVA_nr(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B", p=p, m=m,
                           blocksize=blocksize, spline_dim=spline_dim)
         eig <- eigen(fit1$mLambda)
@@ -266,12 +258,8 @@ zipvb <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE, glm
         # fit1 <- fit.GVA_new(vmu, mLambda, vy, vp, mC, mSigma.inv, "BFGS")
       }
     } else if (method == "gva_nr") {
-      if (i <= 1) {
-        fit1 <- fit.Lap(vmu, vy, vp, mC, mSigma.inv, mLambda)
-      } else {
-        fit1 <- fit.GVA_nr(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B", p=p, m=m,
-                          blocksize=blocksize, spline_dim=spline_dim)
-      }
+      fit1 <- fit.GVA_nr(vmu, mLambda, vy, vp, mC, mSigma.inv, "L-BFGS-B", p=p, m=m,
+                        blocksize=blocksize, spline_dim=spline_dim)
     } else {
       stop("method must be either laplace, gva, gva2 or gva_nr")
     }
@@ -282,11 +270,10 @@ zipvb <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE, glm
 
     # Update parameters for q_vr
     if (length(zero.set) != 0) {
-      #cat("zero.set", zero.set, "\n")
+      # cat("zero.set", zero.set, "\n")
       vp[zero.set] <- expit((vy[zero.set] * mC[zero.set,]) %*% vmu - exp(mC[zero.set,] %*% vmu +
                             0.5 * diag(mC[zero.set,] %*% mLambda %*% t(mC[zero.set,])) +
                             digamma(a_rho) - digamma(b_rho)))
-      #cat("vp[zero.set]", vp[zero.set], "\n")
     }
 
     # Update parameters for q_rho

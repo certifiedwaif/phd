@@ -11,7 +11,7 @@ Graycode::Graycode(uint _fixed, uint _varying) : fixed(_fixed), varying(_varying
 }
 
 
-uint Graycode::binary_to_gray(uint num) const
+uint Graycode::binary_to_gray(uint num)
 {
 	return (num >> 1) ^ num;
 }
@@ -21,7 +21,7 @@ uint Graycode::binary_to_gray(uint num) const
 	The purpose of this function is to convert a reflected binary
 	Gray code number to a binary number.
 */
-uint Graycode::gray_to_binary(uint num) const
+uint Graycode::gray_to_binary(uint num)
 {
 	uint mask;
 	for (mask = num >> 1; mask != 0; mask = mask >> 1) {
