@@ -1,41 +1,32 @@
 library(correlation)
 library(Matrix)
+library(EMVS)
 
 # Test 1
-set.seed(as.numeric(Sys.time()))
+set.seed(1)
 
-generate_data <- function()
+generate_data <- function(n=50, K=50)
 {
-  n <- 50
   p <- 12
   sigma2 <- 1.
   mX <- matrix(0, n, p)
   mSigma_block <- matrix(c(1, .9, .9,
-                     .9, 1, .9,
-                     .9, .9, 1), 3, 3)
-  mSigma <- as.matrix(bdiag(mSigma_block, mSigma_block, mSigma_block, mSigma_block))
+                           .9, 1, .9,
+                           .9, .9, 1), 3, 3)
+  mSigma <- as.matrix(bdiag(mSigma_block, mSigma_block, mSigma_block,
+                            mSigma_block))
   chol_mSigma <- chol(mSigma)
   for (i in 1:n) {
     mX[i, ] <- t(chol_mSigma) %*% rnorm(p)
   }
-  vy <- 1.3 * mX[, 1] + 13 * mX[, 4] + 1.3 * mX[, 7] + 1.3 * mX[, 10] + rnorm(n, 0., sigma2)
   mX <- scale(mX)
+  vy <- 1.3 * mX[, 1] + 1.3 * mX[, 4] + 1.3 * mX[, 7] + 1.3 * mX[, 10] + rnorm(n, 0., sigma2)
+
   vy <- (vy - mean(vy))
   vy <- sqrt(n) * vy / sqrt(sum(vy ^ 2))
-  K <- 200
   initial_gamma <- matrix(rbinom(K * p, 1, .5), K, p)
   return(list(n=n, p=p, vy=vy, mX=mX, K=K, initial_gamma=initial_gamma))
 }
-data <- generate_data()
-n <- data$n
-p <- data$p
-vy <- data$vy
-mX <- data$mX
-K <- data$K
-initial_gamma <- data$initial_gamma
-
-cva_result <- cva(initial_gamma, vy, mX, K)
-corr_result <- correlation::all_correlations_mX(vy, mX)
 
 binary_to_model <- function(binary_vec)
 {
@@ -57,13 +48,57 @@ log_p <- function(n, p, vR2, vp_gamma)
   return(-n / 2 * log(1 - R2) - p_gamma / 2 * log(n) + lbeta(a + p_gamma, b + p - p_gamma))
 }
 
-pdf("cva_low_dimensional.pdf")
-R2 <- corr_result$vR2
-p_gamma <- corr_result$vp_gamma
-plot(exp(log_p(n, p, R2, p_gamma)), pch=24, xlab="Model Index", ylab="Posterior Model Probability")
-cva_models <- apply(cva_result$models, 1, binary_to_model)
-points(cva_models, exp(log_p(n, p, R2, p_gamma))[cva_models], pch=24, col="red")
-dev.off()
+posterior_percentage <- rep(NA, 100)
+for (i in 1:1) {
+  cat("i", i, "\n")
+  data <- generate_data(n=50, K=5)
+  n <- data$n
+  p <- data$p
+  vy <- data$vy
+  mX <- data$mX
+  K <- data$K
+  initial_gamma <- data$initial_gamma
+
+  cva_result <- cva(initial_gamma, vy, mX, K, 1.0)
+  corr_result <- correlation::all_correlations_mX(vy, mX, 1, TRUE)
+  R2 <- corr_result$vR2
+  p_gamma <- corr_result$vp_gamma
+  cva_models <- apply(cva_result$models, 1, binary_to_model)
+
+  vlog_p <- log_p(n, p, R2, p_gamma)
+  vlog_p.til <- vlog_p - max(vlog_p)
+  vp <- exp(vlog_p.til)/sum(exp(vlog_p.til))
+  #plot(vlog_p.til, pch=21, xlab="Model Index", ylab="Log Posterior Model Probability", col="black", bg="black")
+  #points(cva_models, vlog_p.til[cva_models], pch=21, col="red", bg="red")
+  posterior_percentage[i] <- sum(vp[cva_models])
+}
+mean(posterior_percentage)
+
+# Compare with EMVS
+v0=seq(0.001,0.2,by=0.005)
+v1=1.0E3
+beta_init=rep(1,p)
+a=1
+b=1
+epsilon=1.0E-5
+
+EMVS_result=EMVS(vy,mX,v0=v0,v1=v1,type="betabinomial",beta_init=beta_init,sigma_init=1,epsilon=epsilon,a=a,b=b)
+
+EMVSplot(EMVS_result,"both",FALSE)
+EMVSbest(EMVS_result)
+EMVSsummary(EMVS_result)
+
+x <- diff(vlog_p)
+n <- length(x)
+
+# Why do we care about the zero crossings?
+# Modes
+zero_crossings <- c()
+for (i in 1:(n-1)) {
+  if (x[i] > 0 & x[i + 1] < 0) {
+    zero_crossings <- c(zero_crossings, i)
+  }
+}
 
 plot_traj_probs <- function(cva_result)
 {
@@ -76,10 +111,13 @@ plot_traj_probs <- function(cva_result)
 }
 plot_traj_probs(cva_result)
 
-median_posterior_percentage <- function(K, lambda)
+posterior_percentages <- function(K, lambda=1.)
 {
+  n_sims <- 1e4
   cva_results <- list()
-  for (i in 1:1e2) {
+  global_mode <- rep(NA, n_sims)
+  posterior_percentage <- rep(NA, n_sims)
+  for (i in 1:n_sims) {
     data <- generate_data()
     n <- data$n
     p <- data$p
@@ -88,19 +126,44 @@ median_posterior_percentage <- function(K, lambda)
     K <- data$K
     initial_gamma <- data$initial_gamma
 
-    cva_results[[i]] <- cva(initial_gamma, vy, mX, K, lambda=1.)
+    cva_results[[i]] <- cva(initial_gamma, vy, mX, K, lambda=lambda)
+    corr_result <- correlation::all_correlations_mX(vy, mX)
+    R2 <- corr_result$vR2
+    p_gamma <- corr_result$vp_gamma
+    vp <- exp(log_p(n, p, R2, p_gamma))
+    cva_models <- apply(cva_results[[i]]$models, 1, binary_to_model)
+    global_mode[i] <- ifelse(any(cva_models == which.max(vp)), 1, 0)
+    posterior_percentage[i] <- sum(vp[cva_models])/sum(vp)
   }
-  cva_models <- lapply(cva_results, function(x) {sort(apply(x$models, 1, function(y) {binary_to_model(y)}))})
-  vp <- exp(log_p(n, p, R2, p_gamma))
-  posterior_percentage <- sapply(cva_models, function(x) {sum(vp[x])/sum(vp)})
-  return(median(posterior_percentage))
+
+  return(list(median_posterior_percentage=median(posterior_percentage),
+              mean_global_mode=mean(global_mode)))
 }
 
 for (K in c(20, 50, 100, 200)) {
-  for (lambda in 1:4) {
-    cat(K, lambda, median_posterior_percentage(20, 1), "\n")
+  for (lambda in 0:3) {
+    cat(K, lambda, "\n")
+    cat(str(posterior_percentages(K, lambda)), "\n")
   }
 }
+
+covariate_selection_probs <- apply(cva_result$models, 2, sum)/K
+
+# Distance between covariation inclusion probabilities from CVA and EMVS
+# The probabilities seem to be on different scales.
+apply(EMVS_result$prob_inclusion, 1, function(x) { sqrt(sum((covariate_selection_probs - x)^2)) })
+
+v0=exp(seq(log(0.05),log(5),,20))
+v1=1000
+
+beta_init=rep(0,p)
+
+a=1
+b=p
+epsilon=10E-3
+sigma_init=1
+
+res.emvs <- EMVS(vy, mX, v0=v0,v1=v1,type="betabinomial",beta_init=beta_init,sigma_init=1,epsilon=epsilon,a=a,b=b)
 
 # Test 2
 K <- 2
@@ -167,4 +230,3 @@ EMVSplot(result2,"both",FALSE)
 EMVSbest(result2)
 library(Matrix)
 image(Matrix(result$models))
-
