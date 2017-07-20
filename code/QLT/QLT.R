@@ -82,7 +82,7 @@ ebic.ncvreg <- function(vy,mX,penalty)
 		ebic[i] <- log(rss/n) + (dof/n)*(log(n) + 2*log(p))
 	}
 	best <- which.min(ebic)
-	return(list(beta=res$beta[,best],rss=res$loss[best]))
+	return(list(beta=res$beta[,best],rss=res$loss[best],res=res))
 }
 ################################################################################
 
@@ -209,7 +209,7 @@ if (RESTART) {
 
 doBAS <- FALSE
 doBMS <- TRUE
-doEMVS <- TRUE
+doEMVS <- FALSE
 doVARBVS <- TRUE
 doVB <- TRUE
 doVBscreen <- TRUE
@@ -379,54 +379,94 @@ for (trials in start:TRIALS)
 	
 	if (doCVA) {
 		library(correlation)
-		K <- 20
-	  initial_gamma <- matrix(0, K, ncol(mX.til))
-	  for (k in 1:K) {
-	  	valid <- FALSE
-	  	while (!valid) {
-	  		initial_gamma[k, sample(1:ncol(mX.til), 10, replace=FALSE)] <- 1
-	  		# p_gamma <- sum(initial_gamma[k, ])
-	  		# if (p_gamma > 0 && p_gamma < n) {
-	  		# 	valid <- TRUE
-	  		# }
-	  	}
-	  }
-		a4 <- proc.time()[3]
-		n <- nrow(mX.til)
-		p <- ncol(mX.til)
+		K <- 50
+	  # initial_gamma <- matrix(rbinom(K * ncol(mX.til), 1, 10/(K * ncol(mX.til))), K, ncol(mX.til))
+	  cat("dim(res.scad$res$beta)", dim(res.scad$res$beta))
+	  scad_models <- ifelse(t(res.scad$res$beta) != 0, 1, 0)
+	  scad_models_dedup <- scad_models[!duplicated(scad_models), ]
+	  # Remove null model
+	  scad_models_dedup <- scad_models_dedup[2:nrow(scad_models_dedup), 2:ncol(scad_models_dedup)]
 
-		# Normalise
-		y.n <- (vy - mean(vy))/sd(vy)
-		mX.n <- matrix(0,n,p)
-		for (j in 1:p) {
-			mX.n[,j] <- (mX.til[,j] - mean(mX.til[,j]))/sd(mX.til[,j])
-		} 
-
-		cva.res  		<- cva (initial_gamma, y.n, mX.n, K)
-		vR2 <- rep(0, K)
-		vp_gamma <- rep(0, K)
-		for (model in 1:K) {
-			inds <- which(cva.res$models[model, ] == 1)
-			vR2[model] <- (t(y.n) %*% mX.n[, inds] %*% solve(t(mX.n[, inds]) %*% mX.n[, inds])  %*% t(mX.n[, inds]) %*% y.n)/(t(y.n) %*% y.n)
-			vp_gamma[model] <- sum(cva.res$models[model, ])
-		}
 		log_p <- function(n, p, vR2, vp_gamma)
 		{
 		  a <- 1
 		  b <- p
 		  return(-n / 2 * log(1 - vR2) - vp_gamma / 2 * log(n) + lbeta(a + vp_gamma, b + p - vp_gamma))
 		}
-		vlog_p <- log_p(n, P, vR2, vp_gamma)
+
+		model_likelihood <- function(models, y.n, mX.n)
+		{
+			nmodels <- nrow(models)
+			vR2 <- rep(0, nmodels)
+			vp_gamma <- rep(0, nmodels)
+			for (model in 1:nmodels) {
+				inds <- which(models[model, ] == 1)
+				vR2[model] <- (t(y.n) %*% mX.n[, inds] %*% solve(t(mX.n[, inds]) %*% mX.n[, inds])  %*% t(mX.n[, inds]) %*% y.n)/(t(y.n) %*% y.n)
+				vp_gamma[model] <- sum(models[model, ])
+			}
+			vlog_p <- log_p(n, P, vR2, vp_gamma)
+
+			return(vlog_p)
+		}
+
+	  # If K > nrow(warm_start), generate the rest of the rows by randomly selecting covariates from
+	  # t(res.scad$res$beta) != 0. Must ensure uniqueness.
+		# FIXME: Choose model with the highest marginal likelihood
+		cov_probs <- apply(scad_models_dedup, 2, sum) / nrow(scad_models_dedup)
+
+		# Normalise
+		n <- nrow(mX)
+		p <- ncol(mX)
+		y.n <- (vy - mean(vy))/sd(vy)
+		mX.n <- matrix(0,n,p)
+		for (j in 1:p) {
+			mX.n[,j] <- (mX[,j] - mean(mX[,j]))/sd(mX[,j])
+		} 
+		# scad_models <- scad_models_dedup[(52-K+1):52, 2:ncol(scad_models_dedup)]
+		scad_models <- scad_models_dedup
+		scad_models_vlogp <- model_likelihood(scad_models, y.n, mX.n)
+		scad_models <- scad_models[order(scad_models_vlogp, decreasing = TRUE)[1:K], ]
+	  # warm_start <- as.matrix(warm_start)
+	  # warm_start <- t(warm_start)
+
+	  # if (ncol(warm_start) == 1) {
+	  # 	warm_start <- t(warm_start)
+	  # }
+	  # if (ncol(warm_start) != ncol(mX)) {
+	  # 	warm_start <- matrix(warm_start[, 2:ncol(warm_start)], K, ncol(mX))
+	  # }
+
+		# K <- 100
+		# cat("Generating data ...")
+	  # initial_gamma <- matrix(0, K, ncol(mX.til))
+	 #  for (k in 1:K) {
+  # 		# initial_gamma[k, sample(1:ncol(mX.til), 10, replace=FALSE)] <- 1
+  # 		initial_gamma[k, ] <- rbinom(ncol(mX.til), 1, 0.005)
+	 #  	valid <- FALSE
+	 #  	while (!valid) {
+	 #  		p_gamma <- sum(initial_gamma[k, ])
+	 #  		if (p_gamma > 0 && p_gamma < n) {
+	 #  			valid <- TRUE
+	 #  		}
+	 #  	}
+	 #  }
+
+		a4 <- proc.time()[3]
+
+		# cva.res  		<- cva (initial_gamma, y.n, mX.n, K)
+		cva.res  		<- cva(scad_models, y.n, mX.n, K)
+
+		vlog_p <- model_likelihood(cva.res$models, y.n, mX.n)
 
 		# Get gamma with maximum likelihood
 		vgamma.hat  <- cva.res$models[which.max(vlog_p), ]
 		vgamma.hat  <- apply(vlog_p * cva.res$models, 2, sum) / sum(vlog_p)
 		vgamma.hat.inds <- which(vgamma.hat != 0)
-		vbeta.hat.inds   <- solve(t(mX.til[, vgamma.hat.inds]) %*% mX.til[, vgamma.hat.inds]) %*% t(mX.til[, vgamma.hat.inds]) %*% vy
-		vbeta.hat <- rep(0, ncol(mX.til))
+		vbeta.hat.inds   <- solve(t(mX.n[, vgamma.hat.inds]) %*% mX.n[, vgamma.hat.inds]) %*% t(mX.n[, vgamma.hat.inds]) %*% vy
+		vbeta.hat <- rep(0, ncol(mX.n))
 		vbeta.hat[vgamma.hat.inds] <- vbeta.hat.inds
-		vy.hat      <- mX.til %*%  vbeta.hat
-		scores.cva 	<- CalcSelectionScores(c(vgamma),c(vgamma.hat[2:length(vgamma.hat)])) 
+		vy.hat      <- mX.n %*%  vbeta.hat
+		scores.cva 	<- CalcSelectionScores(c(vgamma),c(vgamma.hat)) 
 		b4 <- proc.time()[3]     
 		print(scores.cva)
 	    print(b4-a4) 
@@ -440,7 +480,7 @@ for (trials in start:TRIALS)
 				as.numeric(SCORES.lasso[10,] ),
 				as.numeric(SCORES.scad[10,] ),
 				as.numeric(SCORES.mcp[10,] ),
-				as.numeric(SCORES.emvs[10,] ),
+				# as.numeric(SCORES.emvs[10,] ),
 				as.numeric(SCORES.bms[10,] ),
 				as.numeric(SCORES.varbvs[10,] ),
 				as.numeric(SCORES.cva[10,] )
@@ -448,7 +488,9 @@ for (trials in start:TRIALS)
 				
 	dev.off()
 	
-	boxplot(dat,names=c("lasso","scad","mcp","emvs","bms","varbvs","cva"),ylim=c(0,1))
+	boxplot(dat,names=c("lasso","scad","mcp",
+		# "emvs",
+		"bms","varbvs","cva"),ylim=c(0,1))
  
 }
 
