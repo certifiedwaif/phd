@@ -28,6 +28,34 @@ generate_data <- function(n=50, K=50)
   return(list(n=n, p=p, vy=vy, mX=mX, K=K, initial_gamma=initial_gamma))
 }
 
+
+generate_data_high_dimensional <- function(n=100, K=50)
+{
+  p <- 200
+  sigma2 <- 1.
+  mX <- matrix(0, n, p)
+  mSigma_block <- matrix(0.999, 10, 10)
+  diag(mSigma_block) <- 1
+
+  mSigma <- as.matrix(do.call(bdiag, rep(list(mSigma_block), 20)))
+  chol_mSigma <- chol(mSigma)
+  for (i in 1:n) {
+    mX[i, 1:200] <- t(chol_mSigma) %*% rnorm(p)
+  }
+  mX <- scale(mX)
+  nonzero_locations <- c(1, 11, 21, 31)
+  nonzero_effects <- c(1.5, 2, 2.5, 3)
+  vy <- vector("double", n)
+  for (i in 1:n) {
+    vy[i] <- sum(nonzero_effects * mX[i, nonzero_locations])
+  }
+  vy <- (vy - mean(vy))
+  vy <- sqrt(n) * vy / sqrt(sum(vy ^ 2))
+  initial_gamma <- matrix(rbinom(K * p, 1, .5), K, p)
+  return(list(n=n, p=p, vy=vy, mX=mX, K=K, initial_gamma=initial_gamma))
+}
+
+
 binary_to_model <- function(binary_vec)
 {
   acc <- 0
@@ -39,6 +67,7 @@ binary_to_model <- function(binary_vec)
   return(acc)
 }
 
+
 log_p <- function(n, p, vR2, vp_gamma)
 {
   R2 <- R2[2:length(R2)]
@@ -47,6 +76,7 @@ log_p <- function(n, p, vR2, vp_gamma)
   b <- p
   return(-n / 2 * log(1 - R2) - p_gamma / 2 * log(n) + lbeta(a + p_gamma, b + p - p_gamma))
 }
+
 
 posterior_percentage <- rep(NA, 100)
 for (i in 1:1) {
@@ -100,6 +130,7 @@ for (i in 1:(n-1)) {
   }
 }
 
+
 plot_traj_probs <- function(cva_result)
 {
   traj_prob <- log(cva_result$trajectory_probs)
@@ -110,6 +141,7 @@ plot_traj_probs <- function(cva_result)
   }
 }
 plot_traj_probs(cva_result)
+
 
 posterior_percentages <- function(K, lambda=1.)
 {
