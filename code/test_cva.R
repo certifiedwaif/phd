@@ -32,7 +32,7 @@ generate_data <- function(n=50, K=50)
 generate_data_high_dimensional <- function(n=100, K=50)
 {
   p <- 200
-  sigma2 <- 1.
+  sigma2.true <- 1.
   mX <- matrix(0, n, p)
   mSigma_block <- matrix(0.999, 10, 10)
   diag(mSigma_block) <- 1
@@ -45,14 +45,17 @@ generate_data_high_dimensional <- function(n=100, K=50)
   mX <- scale(mX)
   nonzero_locations <- c(1, 11, 21, 31)
   nonzero_effects <- c(1.5, 2, 2.5, 3)
-  vy <- vector("double", n)
+  vbeta <- rep(0, p)
+  vbeta[nonzero_locations] <- nonzero_effects
+  vf <- vector("double", n)
   for (i in 1:n) {
-    vy[i] <- sum(nonzero_effects * mX[i, nonzero_locations])
+    vf[i] <- sum(nonzero_effects * mX[i, nonzero_locations])
   }
+  vy <- vf + rnorm(nrow(mX),0,sqrt(sigma2.true))
   vy <- (vy - mean(vy))
   vy <- sqrt(n) * vy / sqrt(sum(vy ^ 2))
   initial_gamma <- matrix(rbinom(K * p, 1, .5), K, p)
-  return(list(n=n, p=p, vy=vy, mX=mX, K=K, initial_gamma=initial_gamma))
+  return(list(vbeta=vbeta, n=n, p=p, vf=vf, vy=vy, mX=mX, K=K, initial_gamma=initial_gamma))
 }
 
 

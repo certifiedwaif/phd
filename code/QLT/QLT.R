@@ -21,54 +21,58 @@ library(varbvs)
 dataset <- "QTL"
 print(dataset)
 
-response <- read.table("phe_simulat.csv",header=FALSE,sep=",")
-covariates <- read.table("gen_simulat.csv",header=FALSE,sep=",")
+generate_data_QTL <- function()
+{
+	response <- read.table("phe_simulat.csv",header=FALSE,sep=",")
+	covariates <- read.table("gen_simulat.csv",header=FALSE,sep=",")
 
-n <- nrow(response)
-P <- ncol(covariates)
+	n <- nrow(response)
+	P <- ncol(covariates)
 
-vbeta <- c()
-mX <- matrix(0,n,7381)
-count <- 1
-for (i in 1:P) {
-    for (j in i:P) {
-        if (i==j) {
-            mX[,count] <- covariates[,i] 
-        } else {
-            mX[,count] <- covariates[,i]*covariates[,j]
-        }
-        
-        vbeta[count] <- 0
-        
-        if ((i==1)&(j==1))     { vbeta[count] <- 4.47; }
-        if ((i==21)&(j==21))   { vbeta[count] <- 3.16; }
-        if ((i==31)&(j==31))   { vbeta[count] <- 2.24; }
-        if ((i==51)&(j==51))   { vbeta[count] <- 1.58; }
-        if ((i==71)&(j==71))   { vbeta[count] <- 1.58; }
-        if ((i==91)&(j==91))   { vbeta[count] <- 1.10; }
-        if ((i==101)&(j==101)) { vbeta[count] <- 1.10; }
-        if ((i==111)&(j==111)) { vbeta[count] <- 0.77; }
-        if ((i==121)&(j==121)) { vbeta[count] <- 0.77; }
-        if ((i==1)&(j==11))    { vbeta[count] <- 1.00; }
-        if ((i==2)&(j==119))   { vbeta[count] <- 3.87; }
-        if ((i==10)&(j==91))   { vbeta[count] <- 1.30; }
-        if ((i==15)&(j==75))   { vbeta[count] <- 1.73; }
-        if ((i==20)&(j==46))   { vbeta[count] <- 1.00; }
-        if ((i==21)&(j==22))   { vbeta[count] <- 1.00; }
-        if ((i==26)&(j==91))   { vbeta[count] <- 1.00; }
-        if ((i==41)&(j==61))   { vbeta[count] <- 0.71; }
-        if ((i==56)&(j==91))   { vbeta[count] <- 3.16; }
-        if ((i==65)&(j==85))   { vbeta[count] <- 2.24; }
-        if ((i==86)&(j==96))   { vbeta[count] <- 0.89; }
-        if ((i==101)&(j==105)) { vbeta[count] <- 1.00; }
-        if ((i==111)&(j==121)) { vbeta[count] <- 2.24; }
-       
-        count <- count + 1
-    }
+	vbeta <- c()
+	mX <- matrix(0,n,7381)
+	count <- 1
+	for (i in 1:P) {
+	    for (j in i:P) {
+	        if (i==j) {
+	            mX[,count] <- covariates[,i] 
+	        } else {
+	            mX[,count] <- covariates[,i]*covariates[,j]
+	        }
+	        
+	        vbeta[count] <- 0
+	        
+	        if ((i==1)&(j==1))     { vbeta[count] <- 4.47; }
+	        if ((i==21)&(j==21))   { vbeta[count] <- 3.16; }
+	        if ((i==31)&(j==31))   { vbeta[count] <- 2.24; }
+	        if ((i==51)&(j==51))   { vbeta[count] <- 1.58; }
+	        if ((i==71)&(j==71))   { vbeta[count] <- 1.58; }
+	        if ((i==91)&(j==91))   { vbeta[count] <- 1.10; }
+	        if ((i==101)&(j==101)) { vbeta[count] <- 1.10; }
+	        if ((i==111)&(j==111)) { vbeta[count] <- 0.77; }
+	        if ((i==121)&(j==121)) { vbeta[count] <- 0.77; }
+	        if ((i==1)&(j==11))    { vbeta[count] <- 1.00; }
+	        if ((i==2)&(j==119))   { vbeta[count] <- 3.87; }
+	        if ((i==10)&(j==91))   { vbeta[count] <- 1.30; }
+	        if ((i==15)&(j==75))   { vbeta[count] <- 1.73; }
+	        if ((i==20)&(j==46))   { vbeta[count] <- 1.00; }
+	        if ((i==21)&(j==22))   { vbeta[count] <- 1.00; }
+	        if ((i==26)&(j==91))   { vbeta[count] <- 1.00; }
+	        if ((i==41)&(j==61))   { vbeta[count] <- 0.71; }
+	        if ((i==56)&(j==91))   { vbeta[count] <- 3.16; }
+	        if ((i==65)&(j==85))   { vbeta[count] <- 2.24; }
+	        if ((i==86)&(j==96))   { vbeta[count] <- 0.89; }
+	        if ((i==101)&(j==105)) { vbeta[count] <- 1.00; }
+	        if ((i==111)&(j==121)) { vbeta[count] <- 2.24; }
+	       
+	        count <- count + 1
+	    }
+	}
+	vf <- mX%*%matrix(vbeta)
+	vy <- vf + rnorm(nrow(mX),0,sqrt(sigma2.true)) ##how about intercept??
+
+	return(list(mX=mX, vbeta=vbeta, n=n, p=p, vf=vf, vy=vy))
 }
-
-mX.intercept <- cbind(1,mX)
-p <- ncol(mX.intercept)
 
 ################################################################################
 
@@ -86,7 +90,8 @@ ebic.ncvreg <- function(vy,mX,penalty)
 }
 ################################################################################
 
-transfer <- function(mX,vbeta){ #mX without intcpt
+transfer <- function(mX,vbeta)
+{ #mX without intcpt
   vmean <- apply(mX,2,mean)
   vsd   <- apply(mX,2,sd)
   new.vbeta   <- vbeta / vsd
@@ -143,8 +148,6 @@ CalcSelectionScores <- function(vgamma,vgamma.hat)
 TRIALS <- 5
 sigma2.true <- 20
 percent <- 0.7
-
-mX.til <- cbind(1,mX)
 
 t.lasso <- rep(0,TRIALS)
 t.mcp   <- rep(0,TRIALS)
@@ -219,15 +222,25 @@ doCVA <- TRUE
 for (trials in start:TRIALS) 
 {
 	#############################################################################
+  set.seed(trials)
 	
-    set.seed(trials)
-		
-    true.inds <- which(vbeta!=0)
-    cat("True predictors are:\n")
-    cat(which(vbeta!=0),"\n")
+	#res.gen <- generate_data_QTL()
+	res.gen <- generate_data_high_dimensional()
+	mX <- res.gen$mX
+	vbeta <- res.gen$vbeta
+	n <- res.gen$n
+	P <- res.gen$p
+	vf <- res.gen$vf
+	vy <- res.gen$vy
+
+	mX.til <- cbind(1,mX)
+	mX.intercept <- cbind(1,mX)
+	p <- ncol(mX.intercept)
+
+  true.inds <- which(vbeta!=0)
+  cat("True predictors are:\n")
+  cat(which(vbeta!=0),"\n")
 	
-	vf <- mX%*%matrix(vbeta)
-	vy <- vf + rnorm(nrow(mX),0,sqrt(sigma2.true)) ##how about intercept??
 	vy.cent <- vy - mean(vy)
 	mX.std <- mX
 	for (j in 1:ncol(mX.std)) {
@@ -379,7 +392,7 @@ for (trials in start:TRIALS)
 	
 	if (doCVA) {
 		library(correlation)
-		K <- 50
+		K <- 10
 	  # initial_gamma <- matrix(rbinom(K * ncol(mX.til), 1, 10/(K * ncol(mX.til))), K, ncol(mX.til))
 	  cat("dim(res.scad$res$beta)", dim(res.scad$res$beta))
 	  scad_models <- ifelse(t(res.scad$res$beta) != 0, 1, 0)
