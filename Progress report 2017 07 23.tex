@@ -1,0 +1,54 @@
+\documentclass{beamer}
+
+\usetheme{Warsaw}
+\usepackage{graphicx}
+\usepackage{ulem}
+%\input{../include.tex}
+%\input{../Definitions.tex}
+
+\usefonttheme{serif}
+
+\title{Progress report - 19/06/2017}
+\author{Mark Greenaway\\PhD candidate\\markg@maths.usyd.edu.au}
+
+\mode<presentation>
+{ \usetheme{boxes} }
+
+\begin{document}
+\begin{frame}
+\maketitle
+\end{frame}
+
+\begin{frame}
+Three methods of initialising $\Gamma$ were used.
+\begin{enumerate}
+\item Cold start each $\gamma_{ij}$ in $\gamma_i$, $1 \leq i \leq K$ were initialised randomly from a
+$\text{Bernoulli}(p)$ distribution, with $p = 10 / K$
+\item Two methods of warm start were also tried, to explore whether the CVA algorithm could do better by being
+initialised from another method than by being initialised randomly. 
+\item Warm start from SCAD, preferring models with higher marginal likelihood
+\item Warm start from SCAD, preferring models with more covariates
+\end{enumerate}
+\end{frame}
+
+\begin{frame}{A warm start from scad preferring models with more covariates included did very well}
+
+\begin{figure}
+\includegraphics[scale=0.33]{QLT_warm_start_covariates.png}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Models with high marginal likelihood do quite well}
+
+\begin{figure}
+\includegraphics[scale=0.33]{QLT_warm_start_marginal_likelihood.png}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Cold start did better for the high-dimension example, which is interesting}
+\begin{figure}
+\includegraphics[scale=0.33]{Particle_EM_high_dimensional_cold_start.png}
+\end{figure}
+\end{frame}
+
+\end{document}
