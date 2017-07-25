@@ -9,6 +9,8 @@
 #include <unordered_map>
 #define BOOST_DYNAMIC_BITSET_DONT_USE_FRIENDS
 #include <boost/functional/hash.hpp>
+// [[Rcpp::depends(RcppGSL)]]
+#include <gsl/gsl_sf_hyperg.h>
 #include "graycode.h"
 #include "correlation.h"
 
@@ -23,6 +25,126 @@ namespace boost
 	std::size_t hash_value(const boost::dynamic_bitset<B, A>& bs) {
 		return boost::hash_value(bs.m_bits);
 	}
+}
+
+
+VectorXd vBIC(const int n, const int p, VectorXd vR2, VectorXd vp_gamma)
+{
+	VectorXd vBIC = n * (1 - vR2.array()).array().log() + vp_gamma.array() * log(n);
+	return vBIC;
+}
+
+
+VectorXd vZE(const int n, const int p, VectorXd vR2, VectorXd vp_gamma)
+{
+	auto a = -0.75;
+	VectorXd vb = 0.5 * (n - vp_gamma.array() - 5) - a;
+	auto c = 0.5 * (n - 1);
+	VectorXd vd = 0.5 * vp_gamma.array() + a;
+
+	VectorXd log_vp(vR2.size());
+	VectorXd vZE(vR2.size());
+	for (auto i = 0; i < vR2.size(); i++) {
+		log_vp[i] = -(vb[i]+1)*log(1 - vR2[i]) + Rf_lbeta(vd[i]+1,vb[i]+1) - Rf_lbeta(a+1,vb[i]+1);
+		vZE[i] = -2*log_vp[i];
+	}
+	return vZE;
+}
+
+
+double log_hyperg_2F1(double b, double c, double x)
+{
+	auto val = 0.;
+	val += log(c-1);
+	val += (1-c)*log(x);
+	val += (c-b-1)*log(1-x);
+	val += Rf_lbeta(c-1,b-c+1);
+	val += Rf_pbeta(x, (c-1), (b-c+1), false, true);
+	return val;
+}
+	
+
+double log_hyperg_2F1_naive(double b, double c, double x)
+{
+	auto val = log(gsl_sf_hyperg_2F1( b, 1, c, x));
+	return val;
+}	
+	
+
+VectorXd var_prob3(const int n, const int p, VectorXd vR2, VectorXd vp_gamma)
+{
+	auto a = 3.;
+	const auto M = vR2.size();
+	VectorXd log_vp_g(M);
+	for (auto i = 0; i < M; i++) {
+		log_vp_g[i] = log(a - 2) - log(vp_gamma[i] + a - 2) + log(gsl_sf_hyperg_2F1(0.5*(n-1), 1, 0.5*(vp_gamma[i] + a), vR2[i]));
+	}
+	return log_vp_g;
+}	
+
+
+VectorXd var_prob4(const int n, const int p, VectorXd vR2, VectorXd vp_gamma)
+{
+	auto a = 3.;
+	const auto M = vR2.size();
+	VectorXd log_vp_g2(M);
+	for (auto i = 0; i < M; i++) {
+		log_vp_g2[i] = log(a - 2) - log(vp_gamma[i] + a - 2) + log(gsl_sf_hyperg_1F1( 0.5*(n-1), 0.5*(vp_gamma[i]+a), vR2[i]));
+	}
+	return log_vp_g2;
+}
+
+
+VectorXd var_prob5(const int n, const int p, VectorXd vR2, VectorXd vp_gamma)
+{
+	const int M = vR2.size();
+	VectorXd log_vp_gprior5(M);
+	for (auto i = 1; i < M; i++) {
+		log_vp_gprior5[i] -= 0.5*vp_gamma[i]*log(n+1);
+		log_vp_gprior5[i] += 0.5*vp_gamma[i]*log(vp_gamma[i]+1);
+		log_vp_gprior5[i] -= 0.5*(n - 1)*log(vR2[i]);
+		log_vp_gprior5[i] -= log(vp_gamma[i]+1);
+		log_vp_gprior5[i] += log(gsl_sf_hyperg_2F1( 0.5*(vp_gamma[i]+1), 0.5*(n-1), 0.5*(vp_gamma[i]+3), (1-1/vR2[i])*(vp_gamma[i]+1)/(n+1)));
+	}
+	return log_vp_gprior5;
+}
+
+
+VectorXd var_prob6(const int n, const int p, VectorXd vR2, VectorXd vp_gamma)
+{
+	const int M = vR2.size();
+	VectorXd vL = (1 + n)/(1 + vp_gamma.array()) - 1;
+	VectorXd vsigma2 = 1 - vR2.array();
+	VectorXd vz = vR2.array()/(1 + vL.array()*vsigma2.array());
+	
+	VectorXd log_vp_gprior6(M);
+	for (auto i = 1; i < M; i++) {
+		log_vp_gprior6[i] += 0.5*(n - vp_gamma[i] - 1)*log( n + 1 );
+		log_vp_gprior6[i] -= 0.5*(n - vp_gamma[i] - 1)*log( vp_gamma[i] + 1);
+		log_vp_gprior6[i] -= 0.5*(n - 1)*log(1 + vL[i]*vsigma2[i]);
+		log_vp_gprior6[i] -= log (vp_gamma[i] + 1);
+		log_vp_gprior6[i] += log(gsl_sf_hyperg_1F1( 0.5*(n-1), 0.5*(vp_gamma[i]+3), vz[i] ));
+	}	
+	return log_vp_gprior6;
+}
+
+
+VectorXd var_prob7(const int n, const int p, VectorXd vR2, VectorXd vp_gamma)
+{
+	const int M = vR2.size();
+	VectorXd vsigma2 = 1 - vR2.array();
+	VectorXd vL = (1 + n)/(1 + vp_gamma.array()) - 1;
+	VectorXd vz = vR2.array()/(1 + vL.array()*vsigma2.array());
+
+	VectorXd log_vp_gprior7(M);
+	for (auto i = 1; i < M; i++) {
+		log_vp_gprior7[i] += 0.5*(n - vp_gamma[i] - 1)*log( n + 1 );
+		log_vp_gprior7[i] -= 0.5*(n - vp_gamma[i] - 1)*log( vp_gamma[i] + 1);
+		log_vp_gprior7[i] -= 0.5*(n - 1)*log(1 + vL[i]*vsigma2[i]);
+		log_vp_gprior7[i] -= log (vp_gamma[i] + 1);
+		log_vp_gprior7[i] += log(gsl_sf_hyperg_2F1( 0.5*(n-1), 1, 0.5*(vp_gamma[i] + 3), vz[i]));
+	}	
+	return log_vp_gprior7;
 }
 
 
@@ -42,8 +164,9 @@ double log_prob(const int n, const int p, int p_gamma, const double sigma2, cons
 	#endif
 	double log_p;
 	log_p = -n / 2. * log_sigma2 - p_gamma / 2. * log_n + Rf_lbeta(a + p_gamma, b + p - p_gamma);
-	if (sigma2 == 0. || isnan(sigma2)) {
+	if (sigma2 == 0. || std::isnan(sigma2)) {
 		log_p = -INFINITY;
+		// throw std::range_error("Invalid sigma2");
 	}
 	#ifdef DEBUG
 	Rcpp::Rcout << "log_p " << log_p << std::endl;
@@ -69,13 +192,9 @@ void calculate_log_probabilities(const vector< dbitset >& gamma, const VectorXd&
 	auto a = 1.;
 
 	for (auto k = 0; k < K; k++) {
-		if (sigma2[k] == 0.) {
-			log_probs[k] = -INFINITY;
-		} else {
-			auto p_gamma = gamma[k].count();
-			auto b = p;
-			log_probs[k] = log_prob(n, p, p_gamma, sigma2[k], a, b);
-		}
+		auto p_gamma = gamma[k].count();
+		auto b = p;
+		log_probs[k] = log_prob(n, p, p_gamma, sigma2[k], a, b);
 		#ifdef DEBUG
 		// Rcpp::Rcout << "log_probs[" << k << "] " << log_probs[k] << std::endl;
 		#endif

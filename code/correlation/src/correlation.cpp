@@ -413,7 +413,7 @@ List all_correlations_main(const Graycode& graycode, VectorXd vy, MatrixXd mX, c
 	#pragma omp parallel for\
 		firstprivate(gamma, gamma_prime, bmA_set, vec_mX_gamma, vec_mA, vec_m1)\
 		private(diff_idx, min_idx, p_gamma_prime, p_gamma, bUpdate)\
-			shared(mX, vR2_all, graycode)\
+			shared(mX, vR2_all, vpgamma_all, graycode)\
 			default(none)
 	for (uint idx = 1; idx < max_iterations; idx++) {
 		#ifdef DEBUG
