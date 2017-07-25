@@ -177,7 +177,7 @@ void calculate_log_probabilities(const vector< dbitset >& gamma, const VectorXd&
 	for (auto k = 0; k < K; k++) {
 		auto p_gamma = gamma[k].count();
 		auto b = p;
-		log_probs[k] = log_prob(n, p, p_gamma, sigma2[k]);
+		log_probs[k] = log_prob(n, p, 1. - sigma2[k], p_gamma);
 		#ifdef DEBUG
 		// Rcpp::Rcout << "log_probs[" << k << "] " << log_probs[k] << std::endl;
 		#endif
@@ -483,11 +483,11 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 				double log_p_0;
 				double log_p_1;
 				if (bUpdate) {
-					log_p_0 = log_prob(n, p, p_gamma, sigma2[k]);
-					log_p_1 = log_prob(n, p, p_gamma_prime, sigma2_prime);
+					log_p_0 = log_prob(n, p, 1. - sigma2[k], p_gamma);
+					log_p_1 = log_prob(n, p, 1. - sigma2_prime, p_gamma_prime);
 				} else {
-					log_p_0 = log_prob(n, p, p_gamma_prime, sigma2_prime);
-					log_p_1 = log_prob(n, p, p_gamma, sigma2[k]);
+					log_p_0 = log_prob(n, p, 1. - sigma2_prime, p_gamma_prime);
+					log_p_1 = log_prob(n, p, 1. - sigma2[k], p_gamma);
 				}
 				#ifdef DEBUG
 				Rcpp::Rcout << "log_p_0 " << log_p_0;
