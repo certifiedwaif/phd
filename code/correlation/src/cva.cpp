@@ -28,134 +28,17 @@ namespace boost
 }
 
 
-VectorXd vBIC(const int n, const int p, VectorXd vR2, VectorXd vp_gamma)
+double log_prob1(const int n, const int p, const double R2, int p_gamma)
 {
-	VectorXd vBIC = n * (1 - vR2.array()).array().log() + vp_gamma.array() * log(n);
-	return vBIC;
-}
-
-
-VectorXd vZE(const int n, const int p, VectorXd vR2, VectorXd vp_gamma)
-{
-	auto a = -0.75;
-	VectorXd vb = 0.5 * (n - vp_gamma.array() - 5) - a;
-	auto c = 0.5 * (n - 1);
-	VectorXd vd = 0.5 * vp_gamma.array() + a;
-
-	VectorXd log_vp(vR2.size());
-	VectorXd vZE(vR2.size());
-	for (auto i = 0; i < vR2.size(); i++) {
-		log_vp[i] = -(vb[i]+1)*log(1 - vR2[i]) + Rf_lbeta(vd[i]+1,vb[i]+1) - Rf_lbeta(a+1,vb[i]+1);
-		vZE[i] = -2*log_vp[i];
-	}
-	return vZE;
-}
-
-
-double log_hyperg_2F1(double b, double c, double x)
-{
-	auto val = 0.;
-	val += log(c-1);
-	val += (1-c)*log(x);
-	val += (c-b-1)*log(1-x);
-	val += Rf_lbeta(c-1,b-c+1);
-	val += Rf_pbeta(x, (c-1), (b-c+1), false, true);
-	return val;
-}
-	
-
-double log_hyperg_2F1_naive(double b, double c, double x)
-{
-	auto val = log(gsl_sf_hyperg_2F1( b, 1, c, x));
-	return val;
-}	
-	
-
-VectorXd var_prob3(const int n, const int p, VectorXd vR2, VectorXd vp_gamma)
-{
-	auto a = 3.;
-	const auto M = vR2.size();
-	VectorXd log_vp_g(M);
-	for (auto i = 0; i < M; i++) {
-		log_vp_g[i] = log(a - 2) - log(vp_gamma[i] + a - 2) + log(gsl_sf_hyperg_2F1(0.5*(n-1), 1, 0.5*(vp_gamma[i] + a), vR2[i]));
-	}
-	return log_vp_g;
-}	
-
-
-VectorXd var_prob4(const int n, const int p, VectorXd vR2, VectorXd vp_gamma)
-{
-	auto a = 3.;
-	const auto M = vR2.size();
-	VectorXd log_vp_g2(M);
-	for (auto i = 0; i < M; i++) {
-		log_vp_g2[i] = log(a - 2) - log(vp_gamma[i] + a - 2) + log(gsl_sf_hyperg_1F1( 0.5*(n-1), 0.5*(vp_gamma[i]+a), vR2[i]));
-	}
-	return log_vp_g2;
-}
-
-
-VectorXd var_prob5(const int n, const int p, VectorXd vR2, VectorXd vp_gamma)
-{
-	const int M = vR2.size();
-	VectorXd log_vp_gprior5(M);
-	for (auto i = 1; i < M; i++) {
-		log_vp_gprior5[i] -= 0.5*vp_gamma[i]*log(n+1);
-		log_vp_gprior5[i] += 0.5*vp_gamma[i]*log(vp_gamma[i]+1);
-		log_vp_gprior5[i] -= 0.5*(n - 1)*log(vR2[i]);
-		log_vp_gprior5[i] -= log(vp_gamma[i]+1);
-		log_vp_gprior5[i] += log(gsl_sf_hyperg_2F1( 0.5*(vp_gamma[i]+1), 0.5*(n-1), 0.5*(vp_gamma[i]+3), (1-1/vR2[i])*(vp_gamma[i]+1)/(n+1)));
-	}
-	return log_vp_gprior5;
-}
-
-
-VectorXd var_prob6(const int n, const int p, VectorXd vR2, VectorXd vp_gamma)
-{
-	const int M = vR2.size();
-	VectorXd vL = (1 + n)/(1 + vp_gamma.array()) - 1;
-	VectorXd vsigma2 = 1 - vR2.array();
-	VectorXd vz = vR2.array()/(1 + vL.array()*vsigma2.array());
-	
-	VectorXd log_vp_gprior6(M);
-	for (auto i = 1; i < M; i++) {
-		log_vp_gprior6[i] += 0.5*(n - vp_gamma[i] - 1)*log( n + 1 );
-		log_vp_gprior6[i] -= 0.5*(n - vp_gamma[i] - 1)*log( vp_gamma[i] + 1);
-		log_vp_gprior6[i] -= 0.5*(n - 1)*log(1 + vL[i]*vsigma2[i]);
-		log_vp_gprior6[i] -= log (vp_gamma[i] + 1);
-		log_vp_gprior6[i] += log(gsl_sf_hyperg_1F1( 0.5*(n-1), 0.5*(vp_gamma[i]+3), vz[i] ));
-	}	
-	return log_vp_gprior6;
-}
-
-
-VectorXd var_prob7(const int n, const int p, VectorXd vR2, VectorXd vp_gamma)
-{
-	const int M = vR2.size();
-	VectorXd vsigma2 = 1 - vR2.array();
-	VectorXd vL = (1 + n)/(1 + vp_gamma.array()) - 1;
-	VectorXd vz = vR2.array()/(1 + vL.array()*vsigma2.array());
-
-	VectorXd log_vp_gprior7(M);
-	for (auto i = 1; i < M; i++) {
-		log_vp_gprior7[i] += 0.5*(n - vp_gamma[i] - 1)*log( n + 1 );
-		log_vp_gprior7[i] -= 0.5*(n - vp_gamma[i] - 1)*log( vp_gamma[i] + 1);
-		log_vp_gprior7[i] -= 0.5*(n - 1)*log(1 + vL[i]*vsigma2[i]);
-		log_vp_gprior7[i] -= log (vp_gamma[i] + 1);
-		log_vp_gprior7[i] += log(gsl_sf_hyperg_2F1( 0.5*(n-1), 1, 0.5*(vp_gamma[i] + 3), vz[i]));
-	}	
-	return log_vp_gprior7;
-}
-
-
-double log_prob(const int n, const int p, int p_gamma, const double sigma2, const double a, const double b)
-{
+	const auto sigma2 = 1. - R2;
+	const auto a = 1.;
+	const auto b = p;
 	#ifdef DEBUG
 	Rcpp::Rcout << "sigma2 " << sigma2 << std::endl;
 	Rcpp::Rcout << "n " << n << std::endl;
 	#endif
-	double log_sigma2 = std::log(sigma2);
-	double log_n = std::log(n);
+	const auto log_sigma2 = std::log(sigma2);
+	const auto log_n = std::log(n);
 	#ifdef DEBUG
 	Rcpp::Rcout << "log_sigma2 " << log_sigma2 << std::endl;
 	Rcpp::Rcout << "p_gamma " << p_gamma << std::endl;
@@ -184,8 +67,108 @@ double log_prob(const int n, const int p, int p_gamma, const double sigma2, cons
 }
 
 
+double BIC(const int n, const int p, double R2, int vp_gamma)
+{
+	auto BIC = n * log(1 - R2) + vp_gamma * log(n);
+	return BIC;
+}
+
+
+double ZE(const int n, const int p, double R2, int p_gamma)
+{
+	auto a = -0.75;
+	auto b = 0.5 * (n - p_gamma - 5) - a;
+	auto c = 0.5 * (n - 1);
+	auto d = 0.5 * p_gamma + a;
+
+	auto log_p = -(b+1)*log(1 - R2) + Rf_lbeta(d+1,b+1) - Rf_lbeta(a+1,b+1);
+	auto ZE = -2*log_p;
+	return ZE;
+}
+
+
+double log_hyperg_2F1(double b, double c, double x)
+{
+	auto val = 0.;
+	val += log(c-1);
+	val += (1-c)*log(x);
+	val += (c-b-1)*log(1-x);
+	val += Rf_lbeta(c-1,b-c+1);
+	val += Rf_pbeta(x, (c-1), (b-c+1), false, true);
+	return val;
+}
+	
+
+double log_hyperg_2F1_naive(double b, double c, double x)
+{
+	auto val = log(gsl_sf_hyperg_2F1( b, 1, c, x));
+	return val;
+}	
+	
+
+double log_var_prob3(const int n, const int p, double R2, int p_gamma)
+{
+	auto a = 3.;
+	double log_p_g;
+	log_p_g = log(a - 2) - log(p_gamma + a - 2) + log(gsl_sf_hyperg_2F1(0.5*(n-1), 1, 0.5*(p_gamma + a), R2));
+	return log_p_g;
+}	
+
+
+double log_var_prob4(const int n, const int p, double R2, int p_gamma)
+{
+	auto a = 3.;
+	auto log_vp_g2 = log(a - 2) - log(p_gamma + a - 2) + log(gsl_sf_hyperg_1F1( 0.5*(n-1), 0.5*(p_gamma+a), R2));
+	return log_vp_g2;
+}
+
+
+double log_var_prob5(const int n, const int p, double R2, int p_gamma)
+{
+	double log_vp_gprior5;
+	log_vp_gprior5 -= 0.5*p_gamma*log(n+1);
+	log_vp_gprior5 += 0.5*p_gamma*log(p_gamma+1);
+	log_vp_gprior5 -= 0.5*(n - 1)*log(R2);
+	log_vp_gprior5 -= log(p_gamma+1);
+	log_vp_gprior5 += log(gsl_sf_hyperg_2F1( 0.5*(p_gamma+1), 0.5*(n-1), 0.5*(p_gamma+3), (1-1/R2)*(p_gamma+1)/(n+1)));
+	return log_vp_gprior5;
+}
+
+
+double log_var_prob6(const int n, const int p, double R2, int p_gamma)
+{
+	auto L = (1. + n)/(1. + p_gamma) - 1.;
+	auto sigma2 = 1. - R2;
+	auto z = R2/(1. + L*sigma2);
+	
+	double log_vp_gprior6;
+	log_vp_gprior6 += 0.5*(n - p_gamma - 1)*log( n + 1 );
+	log_vp_gprior6 -= 0.5*(n - p_gamma - 1)*log( p_gamma + 1);
+	log_vp_gprior6 -= 0.5*(n - 1)*log(1 + L*sigma2);
+	log_vp_gprior6 -= log (p_gamma + 1);
+	log_vp_gprior6 += log(gsl_sf_hyperg_1F1( 0.5*(n-1), 0.5*(p_gamma+3), z ));
+	return log_vp_gprior6;
+}
+
+
+double log_var_prob7(const int n, const int p, double R2, int p_gamma)
+{
+	auto sigma2 = 1. - R2;
+	auto L = (1. + n)/(1. + p_gamma) - 1.;
+	auto z = R2/(1. + L*sigma2);
+
+	double log_vp_gprior7;
+	log_vp_gprior7 += 0.5*(n - p_gamma - 1)*log( n + 1 );
+	log_vp_gprior7 -= 0.5*(n - p_gamma - 1)*log( p_gamma + 1);
+	log_vp_gprior7 -= 0.5*(n - 1)*log(1 + L*sigma2);
+	log_vp_gprior7 -= log (p_gamma + 1);
+	log_vp_gprior7 += log(gsl_sf_hyperg_2F1( 0.5*(n-1), 1, 0.5*(p_gamma + 3), z));
+	return log_vp_gprior7;
+}
+
+
 void calculate_log_probabilities(const vector< dbitset >& gamma, const VectorXd& sigma2, const int n,
-																	VectorXd& log_probs)
+																	VectorXd& log_probs, std::function<double (const int n, const int p, double vR2, int vp_gamma)> log_prob)
 {
 	auto K = gamma.size();
 	auto p = gamma[0].size();
@@ -194,7 +177,7 @@ void calculate_log_probabilities(const vector< dbitset >& gamma, const VectorXd&
 	for (auto k = 0; k < K; k++) {
 		auto p_gamma = gamma[k].count();
 		auto b = p;
-		log_probs[k] = log_prob(n, p, p_gamma, sigma2[k], a, b);
+		log_probs[k] = log_prob(n, p, p_gamma, sigma2[k]);
 		#ifdef DEBUG
 		// Rcpp::Rcout << "log_probs[" << k << "] " << log_probs[k] << std::endl;
 		#endif
@@ -275,12 +258,15 @@ void gamma_to_NumericMatrix(const vector< dbitset >& gamma, NumericMatrix& nm)
 //' @param mX Matrix of covariates
 //' @param K The number of particles in the population
 //' @param lambda The weighting factor for the entropy in f_lambda. Defaults to 1.
+//' @param log_lik The log likelihood function to use in ranking models. One of 
+//' 							 "log_prob1" "BIC" "ZE" "3" "4" "5" "6" "7".
 //' @return A list containing the named element models, which is a K by p matrix of the models
 //'					selected by the algorithm, and the named element trajectory, which includes a list
 //'					of the populations of models for each iteration of the algorithm until it converged
 //' @export
 // [[Rcpp::export]]
-List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, const int K, const double lambda = 1.)
+List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, const int K, 
+				 const double lambda = 1., std::string log_lik = "log_prob1")
 {
 	VectorXd vy(vy_in.length());   // = Rcpp::as<Eigen::Map<Eigen::VectorXd>>(vy_in);
 	for (auto i = 0; i < vy_in.length(); i++) vy[i] = vy_in[i];
@@ -291,8 +277,6 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 			mX(i, j) = mX_in(i, j);
 	const auto n = mX.rows();
 	const auto p = mX.cols();
-	auto a = 1.;
-	auto b = p;
 	const MatrixXd mXTX = mX.transpose() * mX;
 	const MatrixXd mXTy = mX.transpose() * vy;
 	VectorXd log_probs(K);
@@ -309,6 +293,27 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 	auto f_lambda_prev = 0.;
 	const auto EPSILON = 1e-8;
 
+	std::function<double (const int n, const int p, double vR2, int vp_gamma)> log_prob;
+	if (log_lik == "log_prob1") {
+		log_prob = log_prob1;
+	} else if (log_lik == "BIC") {
+		log_prob = BIC;
+	}
+	else if (log_lik == "ZE") {
+		log_prob = ZE;
+	} else if (log_lik == "3") {
+		log_prob = log_var_prob3;
+	} else if (log_lik == "4") {
+		log_prob = log_var_prob4;
+	} else if (log_lik == "5") {
+		log_prob = log_var_prob5;
+	} else if (log_lik == "6") {
+		log_prob = log_var_prob6;
+	} else if (log_lik == "7") {
+		log_prob = log_var_prob7;
+	} else {
+		log_prob = log_prob1;
+	}
 	// Initialise population of K particles randomly
 	// Rcpp::Rcout << "Generated" << std::endl;
 	// for (auto k = 0; k < K; k++) {
@@ -362,7 +367,7 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 		mXTX_inv[k] = (mX_gamma.transpose() * mX_gamma).inverse();
 		sigma2[k] = 1. - (mX_gamma_Ty.transpose() * mXTX_inv[k] * mX_gamma_Ty).value() / n;
 		// Rcpp::Rcout << "sigma2[" << k << "] " << sigma2[k] << std::endl;
-		calculate_log_probabilities(gamma, sigma2, n, log_probs);
+		calculate_log_probabilities(gamma, sigma2, n, log_probs, log_prob);
 	}
 	trajectory.push_back(gamma);
 	trajectory_probs.push_back(log_probs.array().exp());
@@ -478,11 +483,11 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 				double log_p_0;
 				double log_p_1;
 				if (bUpdate) {
-					log_p_0 = log_prob(n, p, p_gamma, sigma2[k], a, b);
-					log_p_1 = log_prob(n, p, p_gamma_prime, sigma2_prime, a, b);
+					log_p_0 = log_prob(n, p, p_gamma, sigma2[k]);
+					log_p_1 = log_prob(n, p, p_gamma_prime, sigma2_prime);
 				} else {
-					log_p_0 = log_prob(n, p, p_gamma_prime, sigma2_prime, a, b);
-					log_p_1 = log_prob(n, p, p_gamma, sigma2[k], a, b);
+					log_p_0 = log_prob(n, p, p_gamma_prime, sigma2_prime);
+					log_p_1 = log_prob(n, p, p_gamma, sigma2[k]);
 				}
 				#ifdef DEBUG
 				Rcpp::Rcout << "log_p_0 " << log_p_0;
@@ -504,7 +509,7 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 			}
 		}
 
-		calculate_log_probabilities(gamma, sigma2, n, log_probs);
+		calculate_log_probabilities(gamma, sigma2, n, log_probs, log_prob);
 
 		// Calculate weights
 		calculate_weights(sigma2, log_probs, w);
