@@ -19,6 +19,7 @@
 using namespace std;
 using namespace Rcpp;
 
+
 namespace boost
 {
 	template <typename B, typename A>
@@ -118,7 +119,7 @@ double log_var_prob3(const int n, const int p, double R2, int p_gamma)
 double log_var_prob4(const int n, const int p, double R2, int p_gamma)
 {
 	auto a = 3.;
-	auto log_vp_g2 = log(a - 2) - log(p_gamma + a - 2) + log(gsl_sf_hyperg_1F1( 0.5*(n-1), 0.5*(p_gamma+a), R2));
+	auto log_vp_g2 = log(a - 2) - log(p_gamma + a - 2) + log_hyperg_2F1( 0.5*(n-1), 0.5*(p_gamma+a), R2);
 	return log_vp_g2;
 }
 
