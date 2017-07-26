@@ -1,0 +1,14 @@
+The problem of variable selection in the context of linear models is well-studied.  Maruyama & George (2011)
+introduced the hyperparameter $g$ to control Bayesian model averaging. The prior on  $g$ must be carefully
+chosen to ensure model selection consistency and avoid paradoxes such as Bartlett's  Paradox and the
+Information Paradox. Liang et al. (2008) showed that while a fixed choice of $g$ falls prey to these
+paradoxes, a mixture of $g$ avoids them.
+
+We consider linear models with a special case of the prior structure proposed in Maruyama & George (2011) and
+perform numerical analyses of the resulting parameter posterior distributions. To this end we derive several
+approaches including Monte Carlo sampling schemes.
+We derive new exact expressions for these posterior parameter distributions in terms of special functions and
+distributions where possible, and provide convenient asymptotic approximations of parameter posterior distributions where exact expressions could not be obtained. Implementation
+issues of Bayesian model averaging under the proposed prior structure are also discussed and R software is made
+availables for this purpose. Our methodology is illustrated on several datasets.
+
