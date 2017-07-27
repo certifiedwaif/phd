@@ -90,12 +90,14 @@ double ZE(const int n, const int p, double R2, int p_gamma)
 
 double log_hyperg_2F1(double b, double c, double x)
 {
+	if (x == 0.)
+		return 0.;
 	auto val = 0.;
 	val += log(c-1);
 	val += (1-c)*log(x);
 	val += (c-b-1)*log(1-x);
 	val += Rf_lbeta(c-1,b-c+1);
-	val += Rf_pbeta(x, (c-1), (b-c+1), false, true);
+	val += Rf_pbeta(x, (c-1), (b-c+1), true, true);
 	return val;
 }
 	
@@ -127,6 +129,8 @@ double log_var_prob4(const int n, const int p, double R2, int p_gamma)
 double log_var_prob5(const int n, const int p, double R2, int p_gamma)
 {
 	double log_vp_gprior5;
+	if (p_gamma == 0)
+		return 0.;
 	log_vp_gprior5 -= 0.5*p_gamma*log(n+1);
 	log_vp_gprior5 += 0.5*p_gamma*log(p_gamma+1);
 	log_vp_gprior5 -= 0.5*(n - 1)*log(R2);
@@ -138,16 +142,27 @@ double log_var_prob5(const int n, const int p, double R2, int p_gamma)
 
 double log_var_prob6(const int n, const int p, double R2, int p_gamma)
 {
+	Rcpp::Rcout << "n " << n;
+	Rcpp::Rcout << " p " << p;
+	Rcpp::Rcout << " R2 " << R2;
+	Rcpp::Rcout << " p_gamma " << p_gamma;
+	if (R2 > 1.) {
+		R2 = 1.;
+	}
 	auto L = (1. + n)/(1. + p_gamma) - 1.;
 	auto sigma2 = 1. - R2;
 	auto z = R2/(1. + L*sigma2);
 	
 	double log_vp_gprior6;
+
+	if (p_gamma == 0)
+		return 0.;
 	log_vp_gprior6 += 0.5*(n - p_gamma - 1)*log( n + 1 );
 	log_vp_gprior6 -= 0.5*(n - p_gamma - 1)*log( p_gamma + 1);
 	log_vp_gprior6 -= 0.5*(n - 1)*log(1 + L*sigma2);
 	log_vp_gprior6 -= log (p_gamma + 1);
 	log_vp_gprior6 += log(gsl_sf_hyperg_1F1( 0.5*(n-1), 0.5*(p_gamma+3), z ));
+	Rcpp::Rcout << " log_vp_gprior6 " << log_vp_gprior6 << std::endl;
 	return log_vp_gprior6;
 }
 
@@ -158,6 +173,8 @@ double log_var_prob7(const int n, const int p, double R2, int p_gamma)
 	auto L = (1. + n)/(1. + p_gamma) - 1.;
 	auto z = R2/(1. + L*sigma2);
 
+	if (p_gamma == 0)
+		return 0.;
 	double log_vp_gprior7;
 	log_vp_gprior7 += 0.5*(n - p_gamma - 1)*log( n + 1 );
 	log_vp_gprior7 -= 0.5*(n - p_gamma - 1)*log( p_gamma + 1);
