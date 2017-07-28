@@ -1,12 +1,12 @@
-The problem of variable selection in the context of linear models is well-studied.  Zellner (1986) introduced
-the prior hyperparameter $g$ to control Bayesian model averaging.
-An alternative choice of hyperprior with computational advantages was proposed by Maruyama & George (2011).
-Weighted by eigenvalues, rotated parameter space.
+The problem of model selection in the context of linear models is well-studied. Zellner (1986)  first
+introduced the idea of a prior on the regression coefficients for a model using the hyperprior $g$ to control
+Bayesian model averaging. An alternative choice of prior on the regression coefficients for a model with
+computational advantages was later proposed by Maruyama & George (2011), using the eigenvalue decomposition of
+the cross-product of the covariate matrix for a model.
 
-The hyperprior on $g$ must be carefully
-chosen to ensure model selection consistency and avoid paradoxes such as Bartlett's  Paradox and the
-Information Paradox. Liang et al. (2008) showed that while a fixed choice of $g$ falls prey to these
-paradoxes, a mixture of $g$-priors avoids them.
+The hyperprior on $g$ must be carefully chosen when performing model selection to ensure model selection
+consistency and avoid paradoxes such as Bartlett's  Paradox and the Information Paradox. Liang et al. (2008)
+showed that while a fixed choice of $g$ falls prey to these paradoxes, a mixture of $g$-priors avoids them.
 
 We consider linear models with a special case of the prior structure proposed in Maruyama & George (2011) and
 perform numerical analyses of the resulting parameter posterior distributions. To this end we derive several
@@ -18,5 +18,5 @@ We show that, under a particular asymptotic setting, model averaging using the c
 equivalent to model averaging under the Bayesian Information Criterion (BIC).
 
 Implementation issues of Bayesian model averaging under the proposed prior structure are also discussed and R
-software is made availables for this purpose. Our methodology is illustrated on several datasets from the
+software is made available for this purpose. Our methodology is illustrated on several datasets taken from the
 StatLib library.
