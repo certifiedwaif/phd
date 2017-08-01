@@ -1,0 +1,28 @@
+Dear Marek,
+
+In my progress review, we discussed my desire to extend my thesis
+submission deadline to December 2017. Do you know which form I need to
+fill in? I've discussed this with my supervisor.
+
+My current plan for each month is:
+June: Write code for Collapsed Variational Approximation, debug
+numerical issues.
+July: Perform Collapsed Variational Approximation numerical experiments
+with different priors. Analyse
+epilepsy data with the Zero-Inflated Poisson model.
+August: Perform Collapsed Variational Approximation numerical
+experiments with different priors, write up
+numerical results of these experiments.
+September: Write and edit thesis, any final additional numerical
+experiments.
+October: Write and edit thesis.
+November: Write and edit thesis.
+December: Write and edit thesis. Submit thesis.
+
+
+So far, things are going according to plan.
+
+
+Thanks,
+
+Mark
