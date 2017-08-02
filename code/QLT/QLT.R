@@ -431,11 +431,8 @@ QLT <- function(K, data_fn, start, prior)
       # K <- 100
       # cat("Generating data ...")
       # initial_gamma <- matrix(0, K, ncol(mX.til))
-      
-      browser()
       a4 <- proc.time()[3]
       cat(c(K, 1, as.character(prior)), "\n")
-      browser()
       cva.res <- cva (initial_gamma, y.n, mX.n, K, 1, as.character(prior))
       cat("covariates in models ", apply(cva.res$models, 1, sum), "\n")
       
