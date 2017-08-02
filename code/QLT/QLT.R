@@ -203,6 +203,22 @@ model_likelihood <- function(models, y.n, mX.n)
 ################################################################################
 
 
+fill_in <- function(initial_gamma, lower, upper)
+{
+	for (k in lower:upper) {
+		valid <- FALSE
+		while (!valid) {
+			initial_gamma[k, ] <- rbinom(ncol(mX.n), 1, 0.005)
+			p_gamma <- sum(initial_gamma[k, ])
+			if (p_gamma > 0 && p_gamma < n) {
+				valid <- TRUE
+			}
+		}
+	}
+	return(initial_gamma)
+}
+
+
 QLT <- function(K, data_fn, start, prior)
 {
 	# Check parameters
@@ -382,20 +398,17 @@ QLT <- function(K, data_fn, start, prior)
         	browser()
           cov_count <- apply(scad_models_dedup, 1, sum)
           cov_order <- order(cov_count, decreasing = TRUE, na.last = NA)
-          initial_gamma[1:length(cov_order), ] <- scad_models_dedup[cov_order, ]
-					for (k in (length(cov_order) + 1):K) {
-						valid <- FALSE
-						while (!valid) {
-							initial_gamma[k, ] <- rbinom(ncol(mX.n), 1, 0.005)
-							p_gamma <- sum(initial_gamma[k, ])
-							if (p_gamma > 0 && p_gamma < n) {
-								valid <- TRUE
-							}
-						}
-					}
+          initial_gamma[1:min(K, length(cov_order)), ] <- scad_models_dedup[cov_order, ]
+          if (length(cov_order) < K) {
+          	initial_gamma <- fill_in(initial_gamma, length(cov_order) + 1, K)
+        	}
         } else if (start == "warm_start_likelihood") {
           scad_models_vlogp <- model_likelihood(scad_models_dedup, y.n, mX.n)
-          initial_gamma <- scad_models_dedup[order(scad_models_vlogp, decreasing = TRUE)[1:K], ]
+          vlogp_order <- order(cov_count, decreasing = TRUE, na.last = NA)
+          initial_gamma[1:min(K, length(vlogp_order)), ] <- scad_models_dedup[vlogp_order, ]
+          if (length(vlogp_order) < K) {
+          	initial_gamma <- fill_in(initial_gamma, length(vlogp_order) + 1, K)
+        	}
         }
         if (K == 1) {
           initial_gamma <- matrix(initial_gamma, 1, p)
