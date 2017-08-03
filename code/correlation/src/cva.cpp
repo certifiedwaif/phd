@@ -378,6 +378,11 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 	// Initialise sigma2
 	for (auto k = 0; k < K; k++) {
 		auto p_gamma = gamma[k].count();
+		if (p_gamma == 0) {
+			stringstream ss;
+			ss << "gamma[" << k + 1 << "] has no bits set" << endl;
+			throw domain_error(ss.str());
+		}
 		MatrixXd mX_gamma(n, p_gamma);
 		get_cols(mX, gamma[k], mX_gamma);
 		MatrixXd mX_gamma_Ty(p_gamma, 1);
@@ -398,6 +403,7 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 		Rcpp::Rcout << "Iteration " << iteration << std::endl;
 		#endif
 
+		#pragma omp parallel for
 		for (auto k = 0; k < K; k++) {
 			#ifdef DEBUG
 			Rcpp::Rcout << "gamma[" << k << "] " << gamma[k] << std::endl;
