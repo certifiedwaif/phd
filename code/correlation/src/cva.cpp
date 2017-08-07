@@ -70,7 +70,17 @@ double log_prob1(const int n, const int p, const double R2, int p_gamma)
 
 double BIC(const int n, const int p, double R2, int vp_gamma)
 {
-	auto BIC = n * log(1 - R2) + vp_gamma * log(n);
+	const auto sigma2 = 1. - R2;
+	Rcpp::Rcout << "n " << n << " p " << p << " R2 " << R2 << " vp_gamma " << vp_gamma << std::endl;
+	auto BIC = n * log(sigma2) + vp_gamma * log(n);
+	if (sigma2 == 0. || std::isnan(sigma2)) {
+		BIC = -INFINITY;
+		// throw std::range_error("Invalid sigma2");
+	}
+	#ifdef DEBUG
+	Rcpp::Rcout << "n * log(1 - R2) " << n * log(1 - R2) << std::endl;
+	Rcpp::Rcout << "vp_gamma * log(n) " << vp_gamma * log(n) << std::endl;
+	#endif
 	return BIC;
 }
 
@@ -360,7 +370,7 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 	for (auto k = 0; k < K; k++) {
 		gamma[k].resize(p);
 		for (auto j = 0; j < p; j++) {
-			if (gamma_initial(k, j) >= EPSILON) {
+			if (gamma_initial(k, j) == 1.) {
 				gamma[k][j] = true;
 			}
 			else {
@@ -370,8 +380,7 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 		#ifdef DEBUG
 		Rcpp::Rcout << "gamma[" << k << "] " << gamma[k] << std::endl;
 		#endif
-		hash.insert({boost::hash_value(gamma[k]), true}
-		);
+		hash.insert({boost::hash_value(gamma[k]), true});
 	}
 
 	// Initialise mXTX_inv
@@ -389,9 +398,11 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 		get_rows(mXTy, gamma[k], mX_gamma_Ty);
 		mXTX_inv[k] = (mX_gamma.transpose() * mX_gamma).inverse();
 		sigma2[k] = 1. - (mX_gamma_Ty.transpose() * mXTX_inv[k] * mX_gamma_Ty).value() / n;
-		// Rcpp::Rcout << "sigma2[" << k << "] " << sigma2[k] << std::endl;
-		calculate_log_probabilities(gamma, sigma2, n, log_probs, log_prob);
+		#ifdef DEBUG
+		Rcpp::Rcout << "sigma2[" << k << "] " << sigma2[k] << std::endl;
+		#endif
 	}
+	calculate_log_probabilities(gamma, sigma2, n, log_probs, log_prob);
 	trajectory.push_back(gamma);
 	trajectory_probs.push_back(log_probs.array().exp());
 
@@ -403,7 +414,7 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 		Rcpp::Rcout << "Iteration " << iteration << std::endl;
 		#endif
 
-		#pragma omp parallel for
+		// #pragma omp parallel for
 		for (auto k = 0; k < K; k++) {
 			#ifdef DEBUG
 			Rcpp::Rcout << "gamma[" << k << "] " << gamma[k] << std::endl;
@@ -413,7 +424,7 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 				gamma_prime[j] = !gamma_prime[j];
 				auto p_gamma = gamma[k].count();
 				auto p_gamma_prime = gamma_prime.count();
-				if (p_gamma_prime == 0)
+				if ((p_gamma_prime == 0) || (p_gamma_prime >= n - 1))
 					continue;
 				bool bUpdate = !gamma[k][j];
 
@@ -529,6 +540,13 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 					#endif
 					sigma2[k] = sigma2_prime;
 					mXTX_inv[k] = mXTX_inv_prime;
+				} else {
+					#ifdef DEBUG
+					if (bUpdate)
+						Rcpp::Rcout << "Don't keep update" << std::endl;
+					else
+						Rcpp::Rcout << "Don't keep downdate" << std::endl;
+					#endif
 				}
 			}
 		}
