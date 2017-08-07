@@ -71,7 +71,9 @@ double log_prob1(const int n, const int p, const double R2, int p_gamma)
 double BIC(const int n, const int p, double R2, int vp_gamma)
 {
 	const auto sigma2 = 1. - R2;
+	#ifdef DEBUG
 	Rcpp::Rcout << "n " << n << " p " << p << " R2 " << R2 << " vp_gamma " << vp_gamma << std::endl;
+	#endif
 	auto BIC = n * log(sigma2) + vp_gamma * log(n);
 	if (sigma2 == 0. || std::isnan(sigma2)) {
 		BIC = -INFINITY;
@@ -152,13 +154,12 @@ double log_var_prob5(const int n, const int p, double R2, int p_gamma)
 
 double log_var_prob6(const int n, const int p, double R2, int p_gamma)
 {
+	#ifdef DEBUG
 	Rcpp::Rcout << "n " << n;
 	Rcpp::Rcout << " p " << p;
 	Rcpp::Rcout << " R2 " << R2;
 	Rcpp::Rcout << " p_gamma " << p_gamma;
-	if (R2 > 1.) {
-		R2 = 1.;
-	}
+	#endif
 	auto L = (1. + n)/(1. + p_gamma) - 1.;
 	auto sigma2 = 1. - R2;
 	auto z = R2/(1. + L*sigma2);
@@ -172,7 +173,9 @@ double log_var_prob6(const int n, const int p, double R2, int p_gamma)
 	log_vp_gprior6 -= 0.5*(n - 1)*log(1 + L*sigma2);
 	log_vp_gprior6 -= log (p_gamma + 1);
 	log_vp_gprior6 += log(gsl_sf_hyperg_1F1( 0.5*(n-1), 0.5*(p_gamma+3), z ));
+	#ifdef DEBUG
 	Rcpp::Rcout << " log_vp_gprior6 " << log_vp_gprior6 << std::endl;
+	#endif
 	return log_vp_gprior6;
 }
 
