@@ -437,15 +437,22 @@ QLT <- function(K, data_fn, start, prior)
       cat("covariates in models ", apply(cva.res$models, 1, sum), "\n")
       
       vlog_p <- model_likelihood(cva.res$models, y.n, mX.n)
+      cat("vlog_p ", vlog_p, "\n")
       
       # Get gamma with maximum likelihood
       vgamma.hat  <- cva.res$models[which.max(vlog_p), ]
       vgamma.hat  <- apply(vlog_p * cva.res$models, 2, sum) / sum(vlog_p)
-      vgamma.hat.inds <- which(vgamma.hat != 0)
-      vbeta.hat.inds   <- solve(t(mX.n[, vgamma.hat.inds]) %*% mX.n[, vgamma.hat.inds]) %*% t(mX.n[, vgamma.hat.inds]) %*% vy
-      vbeta.hat <- rep(0, ncol(mX.n))
-      vbeta.hat[vgamma.hat.inds] <- vbeta.hat.inds
-      vy.hat      <- mX.n %*%  vbeta.hat
+      vgamma.hat.inds <- which(vgamma.hat > 0.5)
+      cat("vgamma.hat.inds ", vgamma.hat.inds, "\n")
+      if (length(vgamma.hat.inds) == 0) {
+        vbeta.hat <- rep(0, ncol(mX.n))
+        vy.hat    <- rep(mean(y.n), n)
+      } else {
+        vbeta.hat.inds   <- solve(t(mX.n[, vgamma.hat.inds]) %*% mX.n[, vgamma.hat.inds]) %*% t(mX.n[, vgamma.hat.inds]) %*% vy
+        vbeta.hat <- rep(0, ncol(mX.n))
+        vbeta.hat[vgamma.hat.inds] <- vbeta.hat.inds
+        vy.hat      <- mX.n %*%  vbeta.hat
+      }
       scores.cva 	<- CalcSelectionScores(c(vgamma),c(vgamma.hat)) 
       b4 <- proc.time()[3]     
       print(scores.cva)
