@@ -77,7 +77,7 @@ generate_data_QTL <- function()
 }
 
 
-generate_data_high_dimensional <- function(n=100, K=50)
+generate_data_high_dimensional <- function(n=150, K=50)
 {
   p <- 200
   sigma2.true <- 1.
@@ -203,8 +203,9 @@ model_likelihood <- function(models, y.n, mX.n)
 ################################################################################
 
 
-fill_in <- function(initial_gamma, lower, upper, proportion = 0.005)
+fill_in <- function(initial_gamma, lower, upper, proportion = 0.05)
 {
+  cat("Filling in ...")
 	for (k in lower:upper) {
 		valid <- FALSE
 		while (!valid) {
@@ -292,7 +293,7 @@ QLT <- function(K, data_fn, start, prior)
 	doBAS <- FALSE
 	doBMS <- TRUE
 	doEMVS <- FALSE
-	doVARBVS <- TRUE
+	doVARBVS <- FALSE
 	doVB <- TRUE
 	doVBscreen <- TRUE
 	doCVA <- TRUE
@@ -375,6 +376,7 @@ QLT <- function(K, data_fn, start, prior)
     ###########################################################################    
     
     if (doCVA) {
+      cat("Start of CVA section\n")
       library(correlation)
       
       # Normalise
@@ -562,7 +564,7 @@ QLT <- function(K, data_fn, start, prior)
 					as.numeric(SCORES.mcp[10,] ),
 					# as.numeric(SCORES.emvs[10,] ),
 					as.numeric(SCORES.bms[10,] ),
-					as.numeric(SCORES.varbvs[10,] ),
+					# as.numeric(SCORES.varbvs[10,] ),
 					as.numeric(SCORES.cva[10,] )
 					)
 					
