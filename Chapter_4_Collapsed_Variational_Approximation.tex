@@ -162,10 +162,11 @@ The median posterior model probability was calculated by taking the median acros
 total posterior probability of all of the models discovered by the CVA algorithm during that run. The global
 percentage was the proportion of the runs where the CVA algorithm successfully found the global mode.
 
-\subsection{$n > p$}
+\subsection{$n < p$, High dimensional example, Particle EM}
 
 Our first numerical experiment is designed to show that our algorithm successfully finds the posterior models
 of high probability, overcoming the difficulties of optimising over the multi-modal spike-and-slab posterior.
+This example is taken from \citep{Rockova2016}. 
 We consider a random sample of $n = 50$ observations on $p = 12$ predictors. $\mX_i \sim \N_p(\vzero, \mSigma)$
 for $i = 1, \ldots, n$ where
 $\mSigma = \text{bdiag}(\mSigma_1, \mSigma_1, \mSigma_1, \mSigma_1)$ with
@@ -173,6 +174,36 @@ $\mSigma_1 = (\sigma_{ij})_{i, j = 1}^{3, 3}$ where $\sigma_{ij} = 0.9$ for $i \
 The true model is $\vbeta_0 = (1.3, 0, 0, 1.3, 0, 0, 1.3, 0, 0, 1.3, 0, 0)^\top$.
 The responses are then generated from $\vy = \mX \vbeta_0 + \vepsilon$, where
 $\vepsilon \sim \N_n(\vzero, \mI_n)$.
+
+When initialising $\Gamma$ with a warm start from SCAD preferring models with more covariates or with higher
+likelihood, CVA performed poorly with a lower number of particles (K=$20$). Performance improved as the number
+of particles in the population was increased, as can be seen in Figures
+\ref{fig:highdim_warm_start_covariates} and \ref{fig:highdim_warm_start_likelihood}. Performance was better
+when $\Gamma$ was initialised randomly, for all population sizes $K=20$, $50$ or $100$. This indicates that
+the CVA algorithm is sensitive to its' initialisation, and that as SCAD does poorly on these problems, CVA
+also does poorly comparatively with a warm start from SCAD, although still better than SCAD alone.
+
+\begin{figure}\label{fig:highdim_warm_start_covariates}
+\caption{$F_1$ scores for CVA on the simulated high dimensional data with $\Gamma$ initialised from the SCAD models, with models with more covariates preferred. $K=20, 50, 100$ respectively}
+\includegraphics[scale=0.33]{code/QLT/results/20_generate_data_high_dimensional_warm_start_covariates_log_prob1.pdf}
+\includegraphics[scale=0.33]{code/QLT/results/50_generate_data_high_dimensional_warm_start_covariates_log_prob1.pdf}
+\includegraphics[scale=0.33]{code/QLT/results/100_generate_data_high_dimensional_warm_start_covariates_log_prob1.pdf}
+\end{figure}
+
+\begin{figure}\label{fig:highdim_warm_start_likelihood}
+\caption{$F_1$ scores for CVA on the simulated high dimensional data with $\Gamma$ initialised from the SCAD models, with models with higher likelihood preferred. $K=20, 50, 100$ respectively}
+\includegraphics[scale=0.33]{code/QLT/results/20_generate_data_high_dimensional_warm_start_likelihood_log_prob1.pdf}
+\includegraphics[scale=0.33]{code/QLT/results/50_generate_data_high_dimensional_warm_start_likelihood_log_prob1.pdf}
+\includegraphics[scale=0.33]{code/QLT/results/100_generate_data_high_dimensional_warm_start_likelihood_log_prob1.pdf}
+\end{figure}
+
+\begin{figure}\label{fig:highdim_cold_start}
+\caption{$F_1$ scores for CVA on the simulated high-dimensional data with $\Gamma$ initialised randomly}
+\includegraphics[scale=0.33]{code/QLT/results/20_generate_data_high_dimensional_cold_start_log_prob1.pdf}
+\includegraphics[scale=0.33]{code/QLT/results/50_generate_data_high_dimensional_cold_start_log_prob1.pdf}
+\includegraphics[scale=0.33]{code/QLT/results/100_generate_data_high_dimensional_cold_start_log_prob1.pdf}
+\end{figure}
+
 
 \subsubsection{CVA}
 
@@ -189,8 +220,8 @@ of success $1/2$.
 \begin{figure}	
 	\caption{Posterior model probabilities when $p = 12$. Red triangles denote models visited by the CVA
 						algorithm, while black triangles are models that were not visited.}
-	\label{fig:result1}
-	\includegraphics{code/correlation/cva_low_dimensional.pdf}
+	\label{fig:cva_posterior_models}
+	\includegraphics[scale=0.33]{code/correlation/cva_low_dimensional.pdf}
 \end{figure}
 
 \subsection{$p > n$}
@@ -213,10 +244,9 @@ of success $1/2$.
 
 Experiment 2
 
-Figure \ref{} shows 
-
 % Show posterior probabilities on the log scale
-In the plots of the log posterior probabilities of the models, the particles can be seen clustering at the
+As Figure \ref{fig:cva_posterior_models} shows, 
+in the plots of the log posterior probabilities of the models, the particles can be seen clustering at the
 highest probability models first, then spreading through the medium and low probability models. From these
 plots we can see that once $K$ is high enough, there is a good variety of high, medium and low posterior
 probability models in the population of particles. The coverage of the posterior probability distribution
@@ -225,7 +255,7 @@ by the population of particles is high, as the particles
 \subsection{QTL example}
 The QTL example is taken from \cite{Xu2007}. A BC population of $n=600$ was simulated for a single large
 chromosome of $1800$ cM. This chromosome was covered by 121 evenly spaced markers. Nine of the markers
-overlapped with QTL of the main effects and 13 out of the $121 \choose{2} = 7,260$ possible marker pairs had
+overlapped with QTL of the main effects and 13 out of the $\binom{121, 2} = 7,260$ possible marker pairs had
 interaction effects.
 
 Three methods of initialising $\Gamma$ were used.
@@ -234,25 +264,38 @@ $\Bernoulli(p)$ distribution, with $p = 10 / K$
 Two methods of warm start were also tried, to explore whether the CVA algorithm could do better by being
 initialised from another method than by being initialised randomly. 
 A warm start from scad preferring models with more covariates included did very well
-\begin{figure}
-\includegraphics{QLT_warm_start_covariates.png}
+
+When initialising $\Gamma$ with a warm start from SCAD preferring models with more covariates,
+CVA performed well on the QTL example, consistently achieving higher $F_1$ scores than the competing methods
+that we examined, as can be seen from Figure \ref{fig:QLT_warm_start_covariates}
+
+\begin{figure}\label{fig:QLT_warm_start_covariates}
+\caption{$F_1$ scores for CVA on the simulated QLT data with $\Gamma$ initialised from the SCAD models, with
+models with more covariates preferred. $K=20, 50, 100$ respectively}
+\includegraphics[scale=0.33]{code/QLT/results/20_generate_data_QTL_warm_start_covariates_log_prob1.pdf}
+\includegraphics[scale=0.33]{code/QLT/results/50_generate_data_QTL_warm_start_covariates_log_prob1.pdf}
+\includegraphics[scale=0.33]{code/QLT/results/100_generate_data_QTL_warm_start_covariates_log_prob1.pdf}
 \end{figure}
 
-Models with high marginal likelihood do quite well
-\begin{figure}
-\includegraphics{QLT_warm_start_marginal_likelihood.png}
+When initialising $\Gamma$ with a warm start from SCAD preferring models with higher likelihood,
+CVA performed less well on the QTL example than SCAD preferring models with more covariates, but still
+better than other competing methods except for MCP,
+as can be seen from Figure \ref{fig:QLT_warm_start_likelihood}
+\begin{figure}\label{fig:QLT_warm_start_likelihood}
+\caption{$F_1$ scores for CVA on the simulated QLT data with $\Gamma$ initialised from the SCAD models, with
+higher likelihood models preferred. $K=20, 50, 100$ respectively}
+\includegraphics[scale=0.33]{code/QLT/results/20_generate_data_high_dimensional_warm_start_likelihood_log_prob1.pdf}
+\includegraphics[scale=0.33]{code/QLT/results/50_generate_data_high_dimensional_warm_start_likelihood_log_prob1.pdf}
+\includegraphics[scale=0.33]{code/QLT/results/100_generate_data_high_dimensional_warm_start_likelihood_log_prob1.pdf}
 \end{figure}
 
-Cold start does poorly by comparison.
-\begin{figure}
-\includegraphics{}
-\end{figure}
-
-\subsection{High dimensional example, Particle EM}
-The high dimemsional Particle EM example is ...
-Warm start from scad does poorly, cold start does well, still pretty fast
-\begin{figure}
-\includegraphics{Particle_EM_high_dimensional_cold_start.png}
+Initialising $\Gamma$ randomly, CVA performed poorly by comparison with either of the warm start methods
+above, as can be seen from \ref{fig:QLT_cold_start}.
+\begin{figure}\label{fig:QLT_cold_start}
+\caption{$F_1$ scores for CVA on the simulated QLT data with $\Gamma$ initialised randomly. $K=20, 50, 100$ respectively}
+% \includegraphics{code/QLT/results/20_generate_data_QTL_cold_start_log_prob1.pdf}
+% \includegraphics{code/QLT/results/50_generate_data_QTL_cold_start_log_prob1.pdf}
+\includegraphics[scale=0.33]{code/QLT/results/100_generate_data_QTL_cold_start_log_prob1.pdf}
 \end{figure}
 
 \section{Implementation techniques}
@@ -263,10 +306,6 @@ or removed is considered, the population of existing models is checked to see if
 population. If so, the addition or removal of the covariate is skipped and the next candidate model considered.
 In our implementation, this check is made computationally efficient by maintaining a hash table of the models,
 allowing the check as to whether the model is already in the population to be performed in $\BigO(1)$ time.
-
-\begin{figure}
-\includegraphics{Particle_EM_high_dimensional_cold_start.png}
-\end{figure}
 
 \bibliographystyle{elsarticle-harv}
 \bibliography{references_mendeley}
