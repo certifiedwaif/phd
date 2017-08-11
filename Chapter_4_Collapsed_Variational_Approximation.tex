@@ -298,7 +298,6 @@ when $\Gamma$ was initialised randomly, for all population sizes $K=20$, $50$ or
 the CVA algorithm is sensitive to its' initialisation, and that as SCAD does poorly on these problems, CVA
 also does poorly comparatively with a warm start from SCAD, although still better than SCAD alone.
 
-
 \begin{figure}\label{fig:QLT_warm_start_covariates}
 \caption{$F_1$ scores for CVA on the simulated QLT data with $\Gamma$ initialised from the SCAD models, with
 models with more covariates preferred. $K=20, 50, 100$ respectively}
@@ -306,6 +305,16 @@ models with more covariates preferred. $K=20, 50, 100$ respectively}
 \includegraphics[scale=0.33]{code/QLT/results/50_generate_data_QTL_warm_start_covariates_log_prob1.pdf}
 \includegraphics[scale=0.33]{code/QLT/results/100_generate_data_QTL_warm_start_covariates_log_prob1.pdf}
 \end{figure}
+
+Initialising $\Gamma$ randomly, CVA performed poorly by comparison with either of the warm start methods
+above, as can be seen from \ref{fig:QLT_cold_start}.
+\begin{figure}\label{fig:QLT_cold_start}
+\caption{$F_1$ scores for CVA on the simulated QLT data with $\Gamma$ initialised randomly. $K=20, 50, 100$ respectively}
+\includegraphics[scale=0.33]{code/QLT/results/20_generate_data_QTL_cold_start_log_prob1.pdf}
+\includegraphics[scale=0.33]{code/QLT/results/50_generate_data_QTL_cold_start_log_prob1.pdf}
+\includegraphics[scale=0.33]{code/QLT/results/100_generate_data_QTL_cold_start_log_prob1.pdf}
+\end{figure}
+
 
 \subsubsection{High-dimensional example $p > n$}
 When initialising $\Gamma$ with a warm start from SCAD preferring models with higher likelihood,
@@ -318,15 +327,6 @@ higher likelihood models preferred. $K=20, 50, 100$ respectively}
 \includegraphics[scale=0.33]{code/QLT/results/20_generate_data_high_dimensional_warm_start_likelihood_log_prob1.pdf}
 \includegraphics[scale=0.33]{code/QLT/results/50_generate_data_high_dimensional_warm_start_likelihood_log_prob1.pdf}
 \includegraphics[scale=0.33]{code/QLT/results/100_generate_data_high_dimensional_warm_start_likelihood_log_prob1.pdf}
-\end{figure}
-
-Initialising $\Gamma$ randomly, CVA performed poorly by comparison with either of the warm start methods
-above, as can be seen from \ref{fig:QLT_cold_start}.
-\begin{figure}\label{fig:QLT_cold_start}
-\caption{$F_1$ scores for CVA on the simulated QLT data with $\Gamma$ initialised randomly. $K=20, 50, 100$ respectively}
-% \includegraphics{code/QLT/results/20_generate_data_QTL_cold_start_log_prob1.pdf}
-% \includegraphics{code/QLT/results/50_generate_data_QTL_cold_start_log_prob1.pdf}
-\includegraphics[scale=0.33]{code/QLT/results/100_generate_data_QTL_cold_start_log_prob1.pdf}
 \end{figure}
 
 \section{Implementation techniques}
