@@ -11,6 +11,7 @@
 #include <boost/functional/hash.hpp>
 // [[Rcpp::depends(RcppGSL)]]
 #include <gsl/gsl_sf_hyperg.h>
+#include <gsl/gsl_errno.h>
 #include "graycode.h"
 #include "correlation.h"
 
@@ -83,7 +84,7 @@ double BIC(const int n, const int p, double R2, int vp_gamma)
 	Rcpp::Rcout << "n * log(1 - R2) " << n * log(1 - R2) << std::endl;
 	Rcpp::Rcout << "vp_gamma * log(n) " << vp_gamma * log(n) << std::endl;
 	#endif
-	return BIC;
+	return -0.5 * BIC;
 }
 
 
@@ -96,7 +97,7 @@ double ZE(const int n, const int p, double R2, int p_gamma)
 
 	auto log_p = -(b+1)*log(1 - R2) + Rf_lbeta(d+1,b+1) - Rf_lbeta(a+1,b+1);
 	auto ZE = -2*log_p;
-	return ZE;
+	return log_p;
 }
 
 
@@ -112,14 +113,14 @@ double log_hyperg_2F1(double b, double c, double x)
 	val += Rf_pbeta(x, (c-1), (b-c+1), true, true);
 	return val;
 }
-	
+
 
 double log_hyperg_2F1_naive(double b, double c, double x)
 {
 	auto val = log(gsl_sf_hyperg_2F1( b, 1, c, x));
 	return val;
-}	
-	
+}
+
 
 double log_var_prob3(const int n, const int p, double R2, int p_gamma)
 {
@@ -127,7 +128,7 @@ double log_var_prob3(const int n, const int p, double R2, int p_gamma)
 	double log_p_g;
 	log_p_g = log(a - 2) - log(p_gamma + a - 2) + log(gsl_sf_hyperg_2F1(0.5*(n-1), 1, 0.5*(p_gamma + a), R2));
 	return log_p_g;
-}	
+}
 
 
 double log_var_prob4(const int n, const int p, double R2, int p_gamma)
@@ -147,7 +148,14 @@ double log_var_prob5(const int n, const int p, double R2, int p_gamma)
 	log_vp_gprior5 += 0.5*p_gamma*log(p_gamma+1);
 	log_vp_gprior5 -= 0.5*(n - 1)*log(R2);
 	log_vp_gprior5 -= log(p_gamma+1);
-	log_vp_gprior5 += log(gsl_sf_hyperg_2F1( 0.5*(p_gamma+1), 0.5*(n-1), 0.5*(p_gamma+3), (1-1/R2)*(p_gamma+1)/(n+1)));
+	// Check for errors
+	gsl_sf_result result;
+	int error_code = gsl_sf_hyperg_2F1_e( 0.5*(p_gamma+1), 0.5*(n-1), 0.5*(p_gamma+3), (1-1/R2)*(p_gamma+1)/(n+1), &result);
+	if (error_code == GSL_EMAXITER) {
+		log_vp_gprior5 = -INFINITY;
+	}	else {
+		log_vp_gprior5 += log(result.val);
+	}
 	return log_vp_gprior5;
 }
 
@@ -163,7 +171,7 @@ double log_var_prob6(const int n, const int p, double R2, int p_gamma)
 	auto L = (1. + n)/(1. + p_gamma) - 1.;
 	auto sigma2 = 1. - R2;
 	auto z = R2/(1. + L*sigma2);
-	
+
 	double log_vp_gprior6;
 
 	if (p_gamma == 0)
@@ -289,14 +297,14 @@ void gamma_to_NumericMatrix(const vector< dbitset >& gamma, NumericMatrix& nm)
 //' @param mX Matrix of covariates
 //' @param K The number of particles in the population
 //' @param lambda The weighting factor for the entropy in f_lambda. Defaults to 1.
-//' @param log_lik The log likelihood function to use in ranking models. One of 
+//' @param log_lik The log likelihood function to use in ranking models. One of
 //' 							 "log_prob1" "BIC" "ZE" "3" "4" "5" "6" "7".
 //' @return A list containing the named element models, which is a K by p matrix of the models
 //'					selected by the algorithm, and the named element trajectory, which includes a list
 //'					of the populations of models for each iteration of the algorithm until it converged
 //' @export
 // [[Rcpp::export]]
-List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, const int K, 
+List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, const int K,
 				 const double lambda = 1., std::string log_lik = "log_prob1")
 {
 	VectorXd vy(vy_in.length());   // = Rcpp::as<Eigen::Map<Eigen::VectorXd>>(vy_in);
