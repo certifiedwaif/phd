@@ -50,6 +50,85 @@ errors, which have associated variance. The data is modelled as a combination of
 random errors. In the Bayesian paradigm, the uncertainty enters the model by assuming parameters are random
 variables, while the data is fixed.
 
+\subsection{Definitions}
+
+Let $p$ be the dimension of the space of fixed effects, $m$ be the number of individuals in the random effects
+and $b$ be the block size for each of those individuals. We use $\vone_p$ and $\vzero_p$ to denote the $p
+\times 1$ column vectors with all entries equal to 1 or 0, respectively.
+
+Let $\vy$ be the $n \times 1$ vector. The norm of a column vector $\vv$, defined to be $\sqrt{\vv^\top \vv}$,
+is  denoted by $\|\vv\|$. For a $p \times 1$ vector $\va$, we let $\diag{(\va)}$ denote the $p \times p$
+matrix with the elements of $\va$ along its' diagonal.
+
+We denote the design matrix of fixed effects with dimensions $n \times p$ as $\mX$ is , and the design matrix
+of random  effects with dimensions $n \times m b$ as $\mZ$. The combined design matrix $\mC$ is formed by
+appending the columns of $\mX$ to the columns of $\mZ$, giving $\mC = [ \mX, \mZ ]$.
+
+Let $\vtheta$ is the vector of all parameters.
+Let $\vbeta$ be the $p \times 1$ column vector of fixed
+effects, and $\vu$ the $m b \times 1$ column vector of random effects. $\vnu$ is the
+concatenation of these vectors $[\vbeta^\top, \vu^\top]$.
+% Let $\vp$ be the $n \times 1$ column vector of probabilities that each observation in $\vy$ is
+% non-zero.
+
+Let $\mSigma$ be the covariance matrix of the random effects $\vu$,
+and 
+$\mPsi$ the covariance matrix prior on $\mSigma$.
+These matrices are all of dimension $(p + m b) \times (p + m b)$.
+
+
+$\expit(x)$ denotes the function $\tfrac{1}{1 + \exp(-x)}$ which is the inverse of the logit
+function.
+
+$\text{Bernoulli}(\pi)$ denotes the probability distribution $\pi^k (1 - \pi)^{1-k}$ and
+$\text{Inverse Wishart}(\mPsi, v)$ denotes the probability distribution
+$$\tfrac{|\mPsi|^\frac{v}{2}}{2^{\frac{vp}{2}} \Gamma_p{(\tfrac{v}{2})}} |\mX|^{-\tfrac{v + p + 1}{2}}
+\exp{[-\half \tr{(\mPsi \mX^{-1})}]}$$ where $\Gamma_p{(x)}$ denotes the multivariate gamma function and $\tr$
+is the trace function.
+
+\section{Generalised Linear Mixed models}
+All of the models considered in this thesis belong to the family of generalised linear mixed models - a
+flexible set of models which can model continuous or discrete responses and incorporate both fixed and
+random effects.
+
+\subsection{Exponential family}
+
+An exponential family is a set of probability distributions of the form
+\[
+	f_X(x|\vtheta) = h(x) g(\theta) \exp(\eta(\theta)^\top T(x)).
+\]
+
+Most commonly used probability distributions in statistics such as the normal, exponential, gamma,
+chi-squared, beta, Dirichlet, Bernoulli, categorical, Poisson, Wishart and Inverse Wishart distributions can
+be represented in this form.
+
+\subsubsection{Canonical form}
+\[
+	\log p(\vnu; \vy) = \vy^\top \mC \vnu - b(\mC \vnu)
+\]
+
+Different choices of the function $b:\R \to \R$ lead to different generalised linear mixed models. A set
+of available functions and corresponding distributions is presented in Table \ref{tab:b_functions}.
+
+\begin{table}
+	\caption{Table of b functions}
+	\label{tab:b_functions}
+	\begin{tabular}{|l|lll|}
+		\hline
+		Distribution                         & Parameter & Natural parameter       & Inverse parameter mapping \\
+		\hline
+		Bernoulli distribution               & $p$       & $\log{\frac{p}{1 - p}}$ & $\frac{1}{1 + e^\eta}$    \\
+		Poisson distribution                 & $\lambda$ & $\log \lambda$          & $e^\eta$                  \\
+		Normal distribution (known variance) & $\mu$     & $\frac{\mu}{\sigma}$    & $\sigma \eta$             \\
+		\hline
+	\end{tabular}
+\end{table}
+
+\subsection{Bias of MLE}
+
+How does this relate to Bayesian estimation? Maybe it's just interesting background.
+Bernstein-von Mises Theorem
+
 \section{Zero--inflated models}
 Count data with a large number of zero counts arises in many areas of application, such as data arising from
 physical activity studies, insurance claims, hospital visits or defects in manufacturing processes. Zero
@@ -135,9 +214,6 @@ be combined, as in \citep{Geweke1996}. Variable selection can also be accomplish
 probability model, consisting of those models whose posterior inclusion probability is at least $1/2$, as in
 \citep{Barbieri2004}.
 
-
-\mgc{You have so much work to do on this chapter.}
-
 \section{Models and Assumptions}
 
 \section{Frequentist Approaches to Model Selection}
@@ -146,16 +222,11 @@ probability model, consisting of those models whose posterior inclusion probabil
 
 In a frequentist context, there are many functions which can be used to judge which model is best,
 such as AIC, BIC etc. These are functions $f: \gamma \to \R^+$ which allow the models under consideration to
-be ranked, and the best model chosen from those available. Thus the optimal model under such a measure
-f is
-\[
-	\gamma^* = \max_\gamma f(\gamma)
-\]
-These functions typically attempt to balance log likelihood against the complexity of the model, achieving
-a compromise between each.
+be ranked, and the best model chosen from those available. Thus the optimal model selected by an information
+criteria is	$\gamma^* = \min_\gamma f(\gamma)$. These functions typically attempt to balance log likelihood 
+against the complexity of the model, achieving a compromise between each.
 
 \mgc{AIC, BIC, DIC, Mallow's $C_p$}
-
 
 Information criteria are frequently used to compare amongst models. Let $\vgamma$ denote the candidate model.
 The Information Criteria are of the form
@@ -366,22 +437,25 @@ The Hessian matrix is a $d \times d$ matrix whose $(i, j)$-th entry is equal to
 and is denoted by $\mH f(\vx)$.
 
 \section{Optimisation}
+Fitting a statistical model to data is often done by finding the parameters which maximise the likelihood
+function for that data. If the model is simple, and there are no interdependencies between the parameters,
+then the parameters which maximise the likelihood may be available in closed form. In general, however, this
+is not possible, and the likelihood must be maximised using an iterative optimisation algorithm. A thorough 
+and comprehensive introduction to the subject of multivariate optimisation is \cite{Nocedal2006}.
+
 \subsection{Newton-Raphson}
-\cite{Nocedal2006}
 
 \subsubsection{Definition}
 
 Consider the second order Taylor expansion of $f(\vtheta)$ around $\vtheta_{n}$
-
-$$
-f(\vtheta) \approx f(\vtheta_{n}) + \nabla f(\vtheta_{n}) \Delta \vtheta_{n} + \half \Delta x^\top \mH_f(\vtheta_{n}) \Delta x + \sO((\Delta \vtheta_{n})^3).
-$$
+\[
+	f(\vtheta) \approx f(\vtheta_{n}) + \nabla f(\vtheta_{n}) \Delta \vtheta_{n} + \half \Delta x^\top \mH_f(\vtheta_{n}) \Delta x + \sO((\Delta \vtheta_{n})^3).
+\]
 
 This expression attains its' maxima with respect to $\Delta x$ when
-
-$$
-\vzero = \mD_{\Delta \vtheta} [f(\vtheta_{n}) + \nabla f(\vtheta_{n}) \Delta \vtheta_{n} + \half \Delta \vtheta^\top \mH_f(\vtheta_{n}) \Delta \vtheta] = \nabla f(\vtheta_n) + \mH_f(\vtheta_n) \Delta \vtheta.
-$$
+\[
+	\vzero = \mD_{\Delta \vtheta} [f(\vtheta_{n}) + \nabla f(\vtheta_{n}) \Delta \vtheta_{n} + \half \Delta \vtheta^\top \mH_f(\vtheta_{n}) \Delta \vtheta] = \nabla f(\vtheta_n) + \mH_f(\vtheta_n) \Delta \vtheta.
+\]
 
 Thus taking $\Delta \vtheta = -\nabla f(\vtheta_n) [\mH_f(\vtheta_n)]^{-1}$, we hope that choosing
 $\vtheta_{n + 1} = \vtheta_{n} - \nabla f(\vtheta_n) [\mH_f(\vtheta_n)]^{-1}$ will be closer to the stationary 
@@ -496,7 +570,7 @@ This is a Gaussian integral, and thus we find that
 Thus we have approximated our integral by a closed form expression.
 
 \subsubsection{Relative error} % What to write about this? Include the justification/proof?
-The approximation above is $O(1/\sqrt{M})$. % See the Relative error section of the Wikipedia page, for instance.
+The approximation above is $O(1/M)$. % See the Relative error section of the Wikipedia page, for instance.
 The approximation can be made more accurate by using a Taylor
 expansion beyond second order.
 
@@ -523,17 +597,28 @@ If an integral cannot be approximated well using Laplace's method or some other 
 it can often be evaluated numerically using a quadrature scheme. Trapezoidal integration is a method of
 numerically computing the integral of a function $f: \R \to \R$ over the interval $(a, b)$. First, the
 interval is partitioned into $x_1, x_2, \ldots, x_{n-1}, x_n$, and then
+% Diagram?
 \[
-	\int_a^b f(x) dx \approx \sum_{i=1}^{n-1} \frac{1}{2} \frac{f(x_i) + f(x_{i+1})}{x_{i+1} - x_i}
+	\int_a^b f(x) dx \approx \sum_{i=1}^{n-1} \frac{1}{2} \frac{f(x_i) + f(x_{i+1})}{x_{i+1} - x_i}.
 \]
 
 Note that the points $x_i$ can be chosen arbitrarily within the interval $(a, b)$, and do not need to be
-evenly spaced. \mgc{What's the error bound? Error analysis using Taylor's theorem?}
+evenly spaced.
+
+\subsubsection{Error}
+% See https://en.wikipedia.org/wiki/Trapezoidal_rule#Error_analysis
+The error can be shown to be
+\[
+	\text{error} = -\frac{(b - a)^2}{12 n^2}[f'(b) - f'(a)] + \BigO{(n^{-3})}.
+\]
+See \cite{Cruz-Uribe2002}.
 
 \section{Numerical computation}
 
-In this section, I'd like to talk about floating point representation and its' consequences, numerical
-analysis/error bounds and in particular their relevance to numerical linear algebra.
+% In this section, I'd like to talk about floating point representation and its' consequences, numerical
+% analysis/error bounds and in particular their relevance to numerical linear algebra.
+
+% But most of this is overkill, only interesting to you.
 
 % \subsection{Floating point numbers}
 
@@ -712,10 +797,10 @@ or solution of the linear system will be highly numerically unstable. In our ZIP
 at least $10^5$ on the diagonals of our Cholesky factors until we changed the parameterisation to the safe
 exponential parameterisation.
 
-\subsubsection{Sparsity of the inverse}
-We often wish to work with sparse matrices due to the computational advantages and increased numerical
-stability they provide. But sparse matrices do not necessarily have sparse inverses as will be demonstrated
-below. Consider a block matrix
+\subsection{The block inverse formula}
+
+% General introduction, computational advantages, consequences
+Consider a block matrix
 \[
 	\begin{pmatrix}
 		\mA & \mB \\
@@ -748,8 +833,20 @@ Then the inverse of this matrix is given by the block-matrix inverse formula
 	\end{pmatrix}
 \]
 
-An immediate consequence of this formula is that if any of the blocks of the original matrix is not sparse,
-then the inverse will not be sparse in \emph{any} of the corresponding blocks.
+This is frequently useful if the blocks $\mA$ and $\mD$ are substantially easier to invert than the entire
+matrix. This is usually the case because $\mA$ and $\mD$ are smaller in dimension than the original matrix,
+and matrix inversion is in general a $\BigO(p^3)$ process, where $p$ is the dimension of the square matrix
+being inverted. But in the case where $\mA$ or $\mD$ is of a special known form, such as a sparse, triangular
+or banded matrix, then the computational advantage obtained from exploiting this knowledge may be even
+greater.
+
+\subsubsection{Sparsity of the inverse}
+We often wish to work with sparse matrices due to the computational advantages and increased numerical
+stability they provide. But sparse matrices do not necessarily have sparse inverses. 
+
+Consider the block inverse formula presented in the previous section. An immediate consequence of this formula
+is that if any of the blocks of the matrix being inverted is not sparse, then the inverse will not be sparse
+in \emph{any} of the blocks in the computed inverse.
 
 \section{Positive semi-definite matrices}
 A positive semidefinite matrix $\mLambda$ is a square matrix of size $n \times n$ such that for any vector
@@ -848,46 +945,6 @@ defined as $\mH = \mX (\mX^\top\mX)^{-1} \mX^\top$ then
 which is the number of parameters in the fixed effects model. Thus we use the trace of the hat matrix as
 the definition of the effective degrees of freedom of the model. This definition then naturally extends to
 more general smoother matrices which can be used to fit models involving splines or other kinds of smoothing.
-
-\section{Generalised Linear Mixed models}
-
-\subsection{Exponential family}
-
-An exponential family is a set of probability distributions of the form
-$$
-f_X(x|\vtheta) = h(x) g(\theta) \exp(\eta(\theta) \dot T(x)).
-$$
-
-Most commonly used probability distributions in statistics such as normal, exponential, gamma,
-chi-squared, beta, Dirichlet, Bernoulli, categorical, Poisson, Wishart and Inverse Wishart can
-be represented in this form.
-
-Canonical form
-$$
-\log p(\vnu; \vy) = \vy^\top \mC \vnu - b(\mC \vnu)
-$$
-
-Different choices of the function $b:\R \to \R$ lead to different generalised linear mixed models. A set
-of available functions and corresponding distributions is presented in Table \ref{tab:b_functions}.
-
-\begin{table}
-	\caption{Table of b functions}
-	\label{tab:b_functions}
-	\begin{tabular}{|l|lll|}
-		\hline
-		Distribution                         & Parameter & Natural parameter       & Inverse parameter mapping \\
-		\hline
-		Bernoulli distribution               & $p$       & $\log{\frac{p}{1 - p}}$ & $\frac{1}{1 + e^\eta}$    \\
-		Poisson distribution                 & $\lambda$ & $\log \lambda$          & $e^\eta$                  \\
-		Normal distribution (known variance) & $\mu$     & $\frac{\mu}{\sigma}$    & $\sigma \eta$             \\
-		\hline
-	\end{tabular}
-\end{table}
-
-\subsection{Bias of MLE}
-
-How does this relate to Bayesian estimation? Maybe it's just interesting background.
-Bernstein-von Mises Theorem
 
 \bibliographystyle{elsarticle-harv}
 % \bibliography{Chapter_0_preliminary}
