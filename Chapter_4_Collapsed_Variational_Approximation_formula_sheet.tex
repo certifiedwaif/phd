@@ -1,0 +1,97 @@
+% Chapter_3_collapsed_variational_bayes_formula_sheet.tex
+\documentclass{amsart}[12pt]
+
+\addtolength{\oddsidemargin}{-.75in}%
+\addtolength{\evensidemargin}{-.75in}%
+\addtolength{\textwidth}{1.5in}%
+\addtolength{\textheight}{1.3in}%
+\addtolength{\topmargin}{-.8in}%
+\addtolength{\marginparpush}{-.75in}%
+% \setlength\parindent{0pt}
+% \setlength{\bibsep}{0pt plus 0.3ex}
+
+\usepackage[authoryear]{natbib}
+\usepackage{graphicx}
+\usepackage{algorithm,algorithmic}
+\usepackage{cancel}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{algorithm,algorithmic}
+\usepackage{microtype}
+
+\theoremstyle{definition}
+\newtheorem{defn}{Definition}%[chapter]
+\newtheorem{thm}{Theorem}%[chapter]
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{res}{Result}%[chapter]
+
+\title{Chapter 3 Collapsed Variational Bayes}
+\author{Mark Greenaway, John T. Ormerod}
+
+\input{include.tex}
+\input{Definitions.tex}
+
+\begin{document}
+
+\section{$p(\vy | g, \vgamma)$}
+
+Consider the linear model
+
+\[
+	\vy | \alpha, \vbeta, \sigma^2, \vgamma \sim \N_n(\vone \alpha + \mX \vbeta, \sigma^2)
+\]
+
+with priors
+\[
+	\alpha | \sigma^2, g \sim \N(0, g \sigma^2),
+	\vbeta_\vgamma | \sigma^2, g, \vgamma \sim \N_p(\vzero, g \sigma^2 (\mX_\vgamma^\top \mX_\vgamma)^{-1}),
+	p(\vbeta_{-\vgamma}) = \sum_{j=1}^p \delta(\vbeta_j; 0)^{1 - \vgamma_i}, \text{ and }
+	p(\sigma^2) = \sigma^{-2} \I(\sigma^2 > 0)
+\]
+leaving the prior on $g$ unspecified.
+
+Then
+\begin{align*}
+	p(\vy | g, \vgamma) =& \int \exp{(\log p(\vy | \alpha, \vbeta, \sigma^2) + \log p(\alpha | \sigma^2, g)
+														+ \log p(\vbeta_\vgamma | \sigma^2, g, \vgamma) + \log p(\sigma^2))} d \alpha d \vbeta d \sigma^2 \\
+		=& \int \exp{-\frac{1}{2} \log |2 \pi \sigma^2 \mI_n| - \frac{1}{2} (\vy - \vone_n \alpha - \mX \vbeta)^\top \sigma^{-2} \mI_n (\vy - \vone_n \alpha - \mX \vbeta) } \\
+		&-\frac{1}{2} \log{(2 \pi g \sigma^2)} - \frac{\alpha^2}{2 g \sigma^2} \\
+		&-\frac{1}{2} \log{|2\pi g \sigma^2 \mX_\vgamma^\top \mX_\vgamma|} - \frac{1}{2} \vbeta^\top g^{-1} \sigma^{-2} (\mX_\vgamma^\top \mX_\vgamma)^{-1} \vbeta \\
+		&- \log{\sigma^2} d \alpha d \vbeta d \sigma^2 \\
+		=& \int (2 \pi)^{-\frac{n + p + 1}{2}} (\sigma^2)^{-\frac{n + p + 2}{2}} - \frac{1}{2} \log |\mX_\vgamma^\top \mX_\vgamma| \\
+		&-\frac{1}{2}\sigma^{-2}[(\vy - \vone_n \alpha - \mX \vbeta)^\top (\vy - \vone_n \alpha - \mX \vbeta)
+		+ g^{-1} \vbeta^\top (\mX_\vgamma^\top \mX_\vgamma)^{-1} \vbeta
+		+ g^{-1} \alpha^\top \alpha] d \alpha d \vbeta d \sigma^2
+\end{align*}
+
+Firstly, we integrate out $\alpha$ to obtain
+\begin{align*}
+&\int (2 \pi)^{-\frac{n + p + 2}{2}} (\sigma^2)^{-\frac{n + p + 3}{2}} - \frac{1}{2} \log |\mX_\vgamma^\top \mX_\vgamma| \\
+		&-\frac{1}{2}\sigma^{-2}[(\vy - \mX \vbeta)^\top (\vy - \mX \vbeta)
+		+ g^{-1} \vbeta^\top (\mX_\vgamma^\top \mX_\vgamma)^{-1} \vbeta
+		] g^{\frac{1}{2}}d \vbeta d \sigma^2
+\end{align*}
+using the facts that $\vy^\top \vone_n = 0$, $\vone_n^\top \mX = 0$ and $\int \exp{-\frac{1}{2} g^{-1} \sigma^{-2} \alpha^\top \alpha} d \alpha = |2 \pi g \sigma^2|^{\frac{1}{2}}$.
+Next, we integrate out $\vbeta$
+\begin{align*}
+	&\int (2 \pi)^{-\frac{n + p + 3}{2}} (\sigma^2)^{-\frac{n + p + 3}{2}} \\
+	&\exp \{-\frac{1}{2} \sigma^{-2} \frac{g}{1 + g} \vy^\top \mX_\vgamma (\mX_\vgamma^\top \mX_\vgamma)^{-1} \mX_\vgamma^\top \vy\} g^{\frac{p + 1}{2}} (1 + g)^{-\frac{p}{2}} d \sigma^2 \\
+	=&\int (2 \pi)^{-\frac{n + p + 3}{2}} (\sigma^2)^{-\frac{n + p + 3}{2}} \exp \{-\frac{1}{2} \sigma^{-2} \frac{g}{1 + g} n R^2_\vgamma \} g^{\frac{p + 1}{2}} (1 + g)^{-\frac{p}{2}} d \sigma^2 \\
+\end{align*}
+
+Finally, we integrate out $\sigma^2$. Noting that the function involving $\sigma^2$ is almost the pdf of an
+Inverse Gamma distribution, and hence
+$\int (\sigma^2)^{-\frac{n + p + 3}{2}} \exp (-\sigma^{-2} n R^2_\vgamma \frac{g}{1 + g}) d \sigma^2
+= \frac{\Gamma(n + 5)/2}{n R^2_\vgamma (\frac{g}{1 + g})^{(n + p + 5)/2}}$,
+we obtain
+\begin{align*}
+	&\int (2 \pi)^{-\frac{n + p + 3}{2}} (\sigma^2)^{-\frac{n + p + 3}{2}} \\
+	&\exp \{-\frac{1}{2} \sigma^{-2} \frac{g}{1 + g} \vy^\top \mX_\vgamma (\mX_\vgamma^\top \mX_\vgamma)^{-1} \mX_\vgamma^\top \vy\} g^{\frac{p + 1}{2}} (1 + g)^{-\frac{p}{2}} d \sigma^2 \\
+	=&(2 \pi)^{-\frac{n + p + 3}{2}} \frac{\Gamma(n + 5)/2}{n R^2_\vgamma} g^{-n/2 - 2} (1 + g)^{(n + 5)/2}   \\
+\end{align*}
+
+\bibliographystyle{elsarticle-harv}
+\bibliography{references_mendeley}
+
+\end{document}
