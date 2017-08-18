@@ -93,9 +93,21 @@ Inverse Gamma distribution with $\alpha = n/2$, $\beta = \left(\frac{n}{2}\right
 		= &\exp{\left[- \frac{1}{2} \log{(n + g^{-1})}
 		- \frac{(p + 1)}{2} \log{(g)} - \frac{p}{2} \log (1 + g^{-1})
 		+ \log \Gamma\left(\frac{n}{2}\right) - \frac{n}{2} \log(1 - R^2_{g, \vgamma}) \right]} \\
-		= &\frac{\Gamma(\frac{n}{2})}{(1 + g)^{p/2} (1 + ng)^{1/2} (1 - \frac{g}{1 + g} R^2_\vgamma)}
+		= &\frac{\Gamma(\frac{n}{2})}{(1 + g)^{p/2} (1 + ng)^{1/2} (1 - \frac{g}{1 + g} R^2_\vgamma)^{n/2}}
+		= \frac{\Gamma(\frac{n}{2})}{(1 + g)^{p/2} (1 + ng)^{1/2} (1 + (1 - R^2_\vgamma) g)^{n/2}}
 \end{align*}
 
+\section{Priors on $g$}
+
+\subsection{Liang et al 2008}
+Hyper-g prior
+$$\pi(g) = \frac{a - 2}{2} (1 + g)^{-a/2}, a > 0$$
+Hyper-g/n prior
+$$\pi(g) = \frac{a - 2}{2n} (1 + g/n)^{-a/2}$$
+\subsection{Maruyama and George 2011}
+$$\pi(g) = \frac{g^b (1 + g)^{-a-b-2}}{\Beta(a + 1, b + 1)}$$
+\subsection{Bayarri 2012}
+$$p_i^R(g) = \frac{1}{2} \left[ \frac{(1 + n)}{(k_i + k_0)} \right]^{1/2} (1 + g)^{-3/2} 1_{\{ g > (k_i + k_0)^{-1} (1 + n) - 1 \}}$$
 \bibliographystyle{elsarticle-harv}
 \bibliography{references_mendeley}
 
