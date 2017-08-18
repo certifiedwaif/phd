@@ -100,13 +100,17 @@ Inverse Gamma distribution with $\alpha = n/2$, $\beta = \left(\frac{n}{2}\right
 \section{Priors on $g$}
 
 \subsection{Liang et al 2008}
+\citep{Liang2008}
 Hyper-g prior
 $$\pi(g) = \frac{a - 2}{2} (1 + g)^{-a/2}, a > 0$$
 Hyper-g/n prior
 $$\pi(g) = \frac{a - 2}{2n} (1 + g/n)^{-a/2}$$
 \subsection{Maruyama and George 2011}
+\citep{Maruyama2011}
 $$\pi(g) = \frac{g^b (1 + g)^{-a-b-2}}{\Beta(a + 1, b + 1)}$$
 \subsection{Bayarri 2012}
+\citep{Bayarri2012}
+Robust prior
 $$p_i^R(g) = \frac{1}{2} \left[ \frac{(1 + n)}{(k_i + k_0)} \right]^{1/2} (1 + g)^{-3/2} 1_{\{ g > (k_i + k_0)^{-1} (1 + n) - 1 \}}$$
 \bibliographystyle{elsarticle-harv}
 \bibliography{references_mendeley}
