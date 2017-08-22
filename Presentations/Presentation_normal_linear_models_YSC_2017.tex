@@ -1,12 +1,3 @@
-Only have ten minutes
-Introduce problem
-Introduce model
-Discuss Bartlett's and Information Paradox
-Choice of g prior
-Things we derived
-Graphs of functions
-Look at past presentations as a starting point
-
 \documentclass{beamer}
 
 \usetheme{Warsaw}
@@ -16,8 +7,9 @@ Look at past presentations as a starting point
 \usetikzlibrary{shapes,arrows}
 \usepackage{subcaption}
 \usepackage{algorithm,algorithmic}
-\input{include.tex}
-\input{Definitions.tex}
+\usepackage{natbib}
+\input{../include.tex}
+\input{../Definitions.tex}
 
 \usefonttheme{serif}
 
@@ -27,6 +19,7 @@ Look at past presentations as a starting point
 \mode<presentation>
 { \usetheme{boxes} }
 
+
 \begin{document}
 % 1. Front slide
 \begin{frame}
@@ -34,11 +27,60 @@ Look at past presentations as a starting point
 	% Details about myself here?
 \end{frame}
 			
+% Only have ten minutes
+% Introduce problem
+% Introduce model
+\begin{frame}
+	\frametitle{Model}
+	Consider the linear model
+	\begin{align*}
+		\vy | \vbeta, \sigma^2 \sim \N_n(\mX \vbeta, \sigma^2 \mI) 
+	\end{align*}
+	with priors
+	\begin{align*}
+		\vbeta | \sigma^2, g & \sim \N_p(\vzero, g \sigma^2 (\mX^T \mX)^{-1}),                     \\
+		p(\sigma^2)          & = (\sigma^2)^{-1} \I(\sigma^2 > 0), \text{ and }                    \\
+		p(g)                 & = \frac{g^b (1 + g)^{-(a + b + 2)}}{\Beta(a + 1, b + 1)} \I(g > 0), 
+	\end{align*}
+	choosing $a = -3/4$ and $b = (n-p)/2 - a - 2$, following \citep{Maruyama2011}.
+	Then the posterior distribution of $\vbeta$ is
+	\[
+		\vbeta \sim \N\left(\frac{g}{1 + g} \vbeta_{\text{LS}}, g \sigma^2 (\mX^\top \mX)^{-1}\right)
+	\]
+	I like to think of the mean as a mixture of the null model $0$ and the least squares estimate $\vbeta_{\text{LS}}$
+	\[
+		\frac{1}{1 + g} \vzero + \frac{g}{1 + g} \vbeta_{\text{LS}}
+	\]
+\end{frame}
+
+% Discuss Bartlett's and Information Paradox
+\begin{frame}
+	\frametitle{Bartlett's Paradox and the Information Paradox}
+	The Bayes Factor for comparing a non-null model to the null model is
+	\[
+		\text{BF}(\mathcal{M}_\vgamma : \mathcal{M}_0) = \frac{(1 + g)^{(n - p_\vgamma - 1)/2}}{[1 + g (1 - R_\vgamma^2)]^{(n - 1)/2}}
+	\]
+	But this Bayes Factor exhibits some paradoxes.
+	\begin{itemize}
+		\item As $g \to \infty$, $\text{BF}(\mathcal{M}_\vgamma : \mathcal{M}_0) \to 0$. This is in spite of the fact
+					that $\frac{g}{1 + g} \vbeta_{\text{LS}}$
+		\item As $R_\vgamma^2 \to 1$, then 
+					$\text{BF}(\mathcal{M}_\vgamma : \mathcal{M}_0) \to (1 + g)^{(n - p_\vgamma - 1)/2}$, a fixed constant.
+					As the model fit is essentially perfect, we would expect the Bayes Factor to go to $\infty$.
+	\end{itemize}
+
+\end{frame}
+
+% Mixture of g, choice of g prior
+% Things we derived
+% Graphs of functions
+% Look at past presentations as a starting point
+
+
 \begin{frame}
 	\frametitle{References}
 	\bibliographystyle{elsarticle-harv}
-	\bibliography{references_mendeley}
+	\bibliography{../references_mendeley}
 \end{frame}
-
 			
 \end{document}
