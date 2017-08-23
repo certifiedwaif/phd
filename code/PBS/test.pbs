@@ -1,0 +1,6 @@
+#!/bin/bash
+#PBS -P RDS-FSC-ZIPVB-RW
+#PBS -l nodes=1:ppn=1
+#PBS -l walltime=00:00:05
+cd /project/RDS-FSC-ZIPVB-RW/
+echo "Wood goblins!" > test.txt

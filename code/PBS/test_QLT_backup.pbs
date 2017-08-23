@@ -1,0 +1,8 @@
+#!/bin/bash
+#PBS -P RDS-FSC-ZIPVB-RW
+#PBS -l select=1:ncpus=1:mem=16GB
+#PBS -l walltime=00:20:00
+#PBS -v k,data_fn,prior,start_type
+cd /project/RDS-FSC-ZIPVB-RW/phd/code/QLT
+module load rstudio gsl eigen
+Rscript test_QLT.R --k $k --data $data_fn --prior $prior --start $start_type
