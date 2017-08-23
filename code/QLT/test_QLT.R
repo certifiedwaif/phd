@@ -6,10 +6,12 @@ source("QLT.R")
 
 generate_F_1_data <- function(K, data_fn, start, prior)
 {
-  if (data_fn == "generate_data_QTL") {
-    dat <- QLT(K, generate_data_QTL, start, prior)
-  } else {
+  if (data_fn == "generate_data_QLT") {
+    dat <- QLT(K, generate_data_QLT, start, prior)
+  } else if (data_fn == "generate_data_high_dimensional") {
     dat <- QLT(K, generate_data_high_dimensional, start, prior)
+  } else {
+  	stop("data_fn unknown")
   }
   # save(dat, file = sprintf("results/%s_%s_%s_%s.dat", K, data_fn, start, prior))
   return(dat)
