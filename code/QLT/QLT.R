@@ -16,13 +16,13 @@ library(varbvs)
  
 ################################################################################
 
-dataset <- "QTL"
+dataset <- "QLT"
 print(dataset)
 
 ################################################################################
 
 
-generate_data_QTL <- function()
+generate_data_QLT <- function()
 {
 	response <- read.table("phe_simulat.csv",header=FALSE,sep=",")
 	covariates <- read.table("gen_simulat.csv",header=FALSE,sep=",")
@@ -290,16 +290,16 @@ QLT <- function(K, data_fn, start, prior)
 
 	vnum <- c()
 
-	doBAS <- FALSE
+	doBAS <- TRUE
 	doBMS <- TRUE
 	doEMVS <- FALSE
-	doVARBVS <- FALSE
+	doVARBVS <- TRUE
 	doVB <- TRUE
 	doVBscreen <- TRUE
 	doCVA <- TRUE
 
-
-	for (trials in start:TRIALS) 
+	start_iter <- 1
+	for (trials in start_iter:TRIALS) 
 	{
 		#############################################################################
 	  set.seed(trials)
@@ -564,7 +564,7 @@ QLT <- function(K, data_fn, start, prior)
 					as.numeric(SCORES.mcp[10,] ),
 					# as.numeric(SCORES.emvs[10,] ),
 					as.numeric(SCORES.bms[10,] ),
-					# as.numeric(SCORES.varbvs[10,] ),
+					as.numeric(SCORES.varbvs[10,] ),
 					as.numeric(SCORES.cva[10,] )
 					)
 					
