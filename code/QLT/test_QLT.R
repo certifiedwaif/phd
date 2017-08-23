@@ -82,6 +82,6 @@ main <- function()
   										make_option("--start"))
   opt <- parse_args(OptionParser(option_list=option_list))
   print(str(opt))
-  generate_F_1_data(opt$k, opt$data, opt$prior, opt$start)
+  generate_F_1_data(opt$k, opt$data, opt$start, opt$prior)
 }
 main()
