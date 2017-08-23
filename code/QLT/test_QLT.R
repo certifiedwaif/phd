@@ -11,7 +11,8 @@ generate_F_1_data <- function(K, data_fn, start, prior)
   } else {
     dat <- QLT(K, generate_data_high_dimensional, start, prior)
   }
-  write(dat, file = sprintf("results/%s_%s_%s_%s.dat", K, data_fn, start, prior))
+  # save(dat, file = sprintf("results/%s_%s_%s_%s.dat", K, data_fn, start, prior))
+  return(dat)
 }
 
 
@@ -37,6 +38,39 @@ generate_boxplots <- function(dat)
 	ggplot(dat3, aes(x=method, y=F_1)) + geom_boxplot() + ggtitle("Something")
 }
 
+
+build_db <- function()
+{
+	library(tidyverse)
+
+	orig_fnames = list.files(pattern = "*.dat$")
+	fnames <- orig_fnames %>%
+							str_replace("generate_data_", "") %>%
+							str_replace("high_dimensional", "highdimensional") %>%
+							str_replace("warm_start_", "") %>%
+							str_replace("cold_start", "cold") %>%
+							str_replace("log_prob1", "logprob1")
+	pattern <- "^(.*)_(.*)_(.*)_(.*).dat$"
+	db <- str_match(fnames, pattern)
+	tbl <- tibble(fname = orig_fnames, k = as.numeric(db[, 2]), data = db[, 3], start = db[, 4], prior = db[, 5], f_1 = NA)
+
+	path <- "~/Dropbox/phd/code/QLT/results/"
+	for (i in 1:nrow(tbl)) {
+		load(str_c(path, tbl$fname[i]))
+		tbl$f_1[i] <- list(dat)
+	}
+	tbl <- tbl %>%
+					mutate(f_1_mean = map_dbl(tbl$f_1, mean),
+									f_1_median = map_dbl(tbl$f_1, median),
+									f_1_sd = map_dbl(tbl$f_1, sd))
+
+	return(tbl)
+}
+
+# tbl %>% filter(f_1_median < .5) %>% group_by(k, prior) %>% arrange(k, prior) %>% summarise(count = n())
+# tbl %>% filter(f_1_median < .5) %>% group_by(data, prior) %>% arrange(k, prior) %>% summarise(count = n())
+# tbl %>% filter(f_1_median >= .5) %>% group_by(k, prior) %>% arrange(k, prior) %>% summarise(count = n())
+# tbl %>% filter(f_1_median >= .5) %>% group_by(data, prior) %>% arrange(k, prior) %>% summarise(count = n())
 
 main <- function()
 {
