@@ -1,7 +1,7 @@
 doBAS <- FALSE
-doBMS <- TRUE
-doEMVS <- TRUE
-doVARBVS <- TRUE
+doBMS <- FALSE
+doEMVS <- FALSE
+doVARBVS <- FALSE
 
 library(ncvreg)
 if (doBAS) {
@@ -11,7 +11,7 @@ if (doBMS) {
 	library(BMS)
 }
 library(Matrix)
-library(EMVS)
+#library(EMVS)
 library(varbvs)
  
 ################################################################################
@@ -222,11 +222,13 @@ fill_in <- function(initial_gamma, lower, upper, proportion = 0.05)
 
 QLT <- function(K, data_fn, start, prior)
 {
+	cat(K, start, prior, "\n")
 	# Check parameters
 	if (!(is.numeric(K) && K > 0)) {
 		stop("K must be a positive number")
 	}
 
+	cat("start", start, "\n")
 	if (!(start %in% c("cold_start", "warm_start_covariates", "warm_start_likelihood"))) {
 		stop("start must be one of cold_start, warm_start_covariates or warm_start_likelihood")
 	}
@@ -559,16 +561,18 @@ QLT <- function(K, data_fn, start, prior)
 		}
 
 		dat <- cbind(
-					as.numeric(SCORES.lasso[10,] ),
-					as.numeric(SCORES.scad[10,] ),
-					as.numeric(SCORES.mcp[10,] ),
+					# as.numeric(SCORES.lasso[10,] ),
+					# as.numeric(SCORES.scad[10,] ),
+					# as.numeric(SCORES.mcp[10,] ),
 					# as.numeric(SCORES.emvs[10,] ),
 					as.numeric(SCORES.bms[10,] ),
 					as.numeric(SCORES.varbvs[10,] ),
+					# as.numeric(SCORES.bms[10,] ),
+					# as.numeric(SCORES.varbvs[10,] ),
 					as.numeric(SCORES.cva[10,] )
 					)
 					
-		dev.off()
+		#dev.off()
 		
 	 
 	}
