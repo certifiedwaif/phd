@@ -13,8 +13,8 @@ generate_F_1_data <- function(K, data_fn, start, prior)
   } else {
   	stop("data_fn unknown")
   }
-  # save(dat, file = sprintf("results/%s_%s_%s_%s.dat", K, data_fn, start, prior))
-  return(dat)
+  save(dat, file = sprintf("results/%s_%s_%s_%s.dat", K, data_fn, start, prior))
+  # return(dat)
 }
 
 
