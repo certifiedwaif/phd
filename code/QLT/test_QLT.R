@@ -10,21 +10,38 @@ generate_F_1_data <- function(K, data_fn, start, prior)
     dat <- QLT(K, generate_data_QLT, start, prior)
   } else if (data_fn == "high_dimensional") {
     dat <- QLT(K, generate_data_high_dimensional, start, prior)
-  } else if (data_fn == "Hitters") {
-    dat <- QLT(K, generate_data_Hitters, start, prior)
-  } else if (data_fn == "Bodyfat") {
-    dat <- QLT(K, generate_data_Bodyfat, start, prior)
-  } else if (data_fn == "Wage") {
-    dat <- QLT(K, generate_data_Wage, start, prior)
-  } else if (data_fn == "College") {
-    dat <- QLT(K, generate_data_College, start, prior)
-  } else if (data_fn == "USCrime") {
-    dat <- QLT(K, generate_data_USCrime, start, prior)
   } else {
   	stop("data_fn unknown")
   }
-  save(dat, file = sprintf("results/%s_%s_%s_%s.dat", K, data_fn, start, prior))
-  # return(dat)
+  # save(dat, file = sprintf("results/%s_%s_%s_%s.dat", K, data_fn, start, prior))
+  return(dat)
+}
+
+
+variable_inclusion <- function(K, data_fn, start, prior)
+{
+  if (data_fn == "Hitters") {
+    dat <- generate_data_Hitters()
+  } else if (data_fn == "Bodyfat") {
+    dat <- generate_data_Bodyfat()
+  } else if (data_fn == "Wage") {
+    dat <- generate_data_Wage()
+  } else if (data_fn == "College") {
+    dat <- generate_data_College()
+  } else if (data_fn == "USCrime") {
+    dat <- generate_data_USCrime()
+  }
+
+  p <- dat$p
+  vy <- dat$vy
+  mX <- dat$mX
+
+  initial_gamma <- initialise_gamma(start, K, p, vy, mX, models=NULL)
+  library(correlation)
+  cva.res <- cva(initial_gamma, vy, mX, K, 1, prior)
+  variable_inclusion <- apply(cva.res$models, 2, sum) / K
+
+  return(variable_inclusion)
 }
 
 

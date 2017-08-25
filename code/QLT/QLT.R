@@ -14,10 +14,6 @@ library(Matrix)
 #library(EMVS)
 library(varbvs)
  
-################################################################################
-
-dataset <- "QLT"
-print(dataset)
 
 ################################################################################
 
@@ -231,7 +227,7 @@ generate_data_College <- function()
 }
 
 
-generate_USCrime <- function()
+generate_data_USCrime <- function()
 {
 	# Famous example, used in most papers.
 
@@ -352,7 +348,7 @@ CalcSelectionScores <- function(vgamma,vgamma.hat)
 		BER=BER))
 }
 
- 
+
 log_p <- function(n, p, vR2, vp_gamma)
 {
   a <- 1
@@ -393,6 +389,39 @@ fill_in <- function(initial_gamma, lower, upper, proportion = 0.05)
 		}
 	}
 	return(initial_gamma)
+}
+
+
+initialise_gamma <- function(start, K, p, y.n, mX.n, models=NULL)
+{
+  if (start == "cold_start") {
+    initial_gamma <- matrix(0, K, p)
+    initial_gamma <- fill_in(initial_gamma, 1, K, 10/ncol(mX.n))
+  } else {
+  	initial_gamma <- matrix(0, K, ncol(mX.n))
+    models_dedup <- models[!duplicated(models), ]
+    # Remove null model
+    models_dedup <- models_dedup[2:nrow(models_dedup), 2:ncol(models_dedup)]
+    if (start == "warm_start_covariates") {
+      cov_count <- apply(models_dedup, 1, sum)
+      cov_order <- order(cov_count, decreasing = TRUE, na.last = NA)
+      initial_gamma[1:min(K, length(cov_order)), ] <- models_dedup[1:min(K, length(cov_order)), ]
+      if (length(cov_order) < K) {
+      	initial_gamma <- fill_in(initial_gamma, length(cov_order) + 1, K)
+    	}
+    } else if (start == "warm_start_likelihood") {
+      models_vlogp <- model_likelihood(models_dedup, y.n, mX.n)
+      vlogp_order <- order(models_vlogp, decreasing = TRUE, na.last = NA)
+      initial_gamma[1:min(K, length(vlogp_order)), ] <- models_dedup[1:min(K, length(vlogp_order)), ]
+      if (length(vlogp_order) < K) {
+      	initial_gamma <- fill_in(initial_gamma, length(vlogp_order) + 1, K)
+    	}
+    }
+    if (K == 1) {
+      initial_gamma <- matrix(initial_gamma, 1, p)
+    }
+  }
+  return(initial_gamma)
 }
 
 
@@ -566,34 +595,8 @@ QLT <- function(K, data_fn, start, prior)
         mX.n[,j] <- (mX[,j] - mean(mX[,j]))/sd(mX[,j])
       } 
       
-      if (start == "cold_start") {
-        initial_gamma <- matrix(0, K, p)
-        initial_gamma <- fill_in(initial_gamma, 1, K, 10/ncol(mX.n))
-      } else {
-      	initial_gamma <- matrix(0, K, ncol(mX.n))
-        scad_models <- ifelse(t(res.scad$res$beta) != 0, 1, 0)
-        scad_models_dedup <- scad_models[!duplicated(scad_models), ]
-        # Remove null model
-        scad_models_dedup <- scad_models_dedup[2:nrow(scad_models_dedup), 2:ncol(scad_models_dedup)]
-        if (start == "warm_start_covariates") {
-          cov_count <- apply(scad_models_dedup, 1, sum)
-          cov_order <- order(cov_count, decreasing = TRUE, na.last = NA)
-          initial_gamma[1:min(K, length(cov_order)), ] <- scad_models_dedup[1:min(K, length(cov_order)), ]
-          if (length(cov_order) < K) {
-          	initial_gamma <- fill_in(initial_gamma, length(cov_order) + 1, K)
-        	}
-        } else if (start == "warm_start_likelihood") {
-          scad_models_vlogp <- model_likelihood(scad_models_dedup, y.n, mX.n)
-          vlogp_order <- order(scad_models_vlogp, decreasing = TRUE, na.last = NA)
-          initial_gamma[1:min(K, length(vlogp_order)), ] <- scad_models_dedup[1:min(K, length(vlogp_order)), ]
-          if (length(vlogp_order) < K) {
-          	initial_gamma <- fill_in(initial_gamma, length(vlogp_order) + 1, K)
-        	}
-        }
-        if (K == 1) {
-          initial_gamma <- matrix(initial_gamma, 1, p)
-        }
-      }
+      scad_models <- ifelse(t(res.scad$res$beta) != 0, 1, 0)
+      initial_gamma <- initialise_gamma(start, K, p, y.n, mX.n, models=scad_models)
 
       # If K > nrow(warm_start), generate the rest of the rows by randomly selecting covariates from
       # t(res.scad$res$beta) != 0. Must ensure uniqueness.
