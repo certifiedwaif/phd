@@ -6,10 +6,20 @@ source("QLT.R")
 
 generate_F_1_data <- function(K, data_fn, start, prior)
 {
-  if (data_fn == "generate_data_QLT") {
+  if (data_fn == "QLT") {
     dat <- QLT(K, generate_data_QLT, start, prior)
-  } else if (data_fn == "generate_data_high_dimensional") {
+  } else if (data_fn == "high_dimensional") {
     dat <- QLT(K, generate_data_high_dimensional, start, prior)
+  } else if (data_fn == "Hitters") {
+    dat <- QLT(K, generate_data_Hitters, start, prior)
+  } else if (data_fn == "Bodyfat") {
+    dat <- QLT(K, generate_data_Bodyfat, start, prior)
+  } else if (data_fn == "Wage") {
+    dat <- QLT(K, generate_data_Wage, start, prior)
+  } else if (data_fn == "College") {
+    dat <- QLT(K, generate_data_College, start, prior)
+  } else if (data_fn == "USCrime") {
+    dat <- QLT(K, generate_data_USCrime, start, prior)
   } else {
   	stop("data_fn unknown")
   }

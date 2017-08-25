@@ -106,6 +106,182 @@ generate_data_high_dimensional <- function(n=150, K=50)
   return(list(vbeta=vbeta, n=n, p=p, vf=vf, vy=vy, mX=mX, K=K, initial_gamma=initial_gamma))
 }
 
+
+generate_data_Hitters <- function()
+{
+	library(ISLR)
+	Hitters <- na.omit(Hitters)
+	
+	# Get y vector and X matrix
+	y.t <- Hitters$Salary
+	X.f <- model.matrix(Salary~.,Hitters)[,-1] 
+	varnames <- colnames(X.f)
+
+	n <- nrow(X.f)
+	p <- ncol(X.f)
+
+	# Normalise
+	y.n <- (y.t - mean(y.t))/sd(y.t)
+	X.n <- matrix(0,n,p)
+	for (j in 1:p) {
+		X.n[,j] <- (X.f[,j] - mean(X.f[,j]))/sd(X.f[,j])
+	} 
+
+	vy <- y.n
+	mX <- X.n
+
+	return(list(vy=vy, mX=mX, n=n, p=p))
+} 
+
+
+generate_data_Bodyfat <- function()
+{
+	# Read the bodyfat data
+	dat  = read.table(file="bodyfat.txt",header=TRUE)
+		
+	# delete a number of obs with errors or otherwise extreme
+	s.i  = c(39,42,48,96,76,182,31,86) 
+	dat2 = dat[-s.i,-1]
+	dat2$Weight  = round(0.45359237*dat2$Weight,2) # convert lbs into kg
+	
+	# Get y vector and X matrix
+	y.t <- matrix(dat2$Bodyfat)
+	X.f <- as.matrix(dat2[,-1]) # note: includes intercept
+
+	varnames <- colnames(X.f)
+
+	n <- nrow(X.f)
+	p <- ncol(X.f)
+
+	# Normalise
+	y.n <- (y.t - mean(y.t))/sd(y.t)
+	X.n <- matrix(0,n,p)
+	for (j in 1:p) {
+		X.n[,j] <- (X.f[,j] - mean(X.f[,j]))/sd(X.f[,j])
+	} 
+
+	vy <- y.n
+	mX <- X.n
+	return(list(vy=vy, mX=mX, n=n, p=p))
+}
+
+
+generate_data_Wage <- function()
+{
+	library(ISLR)
+	Wage <- na.omit(Wage) 
+		
+	# Get y vector and X matrix
+	y.t <- Wage$wage
+	X.f <- model.matrix(wage~.,Wage)[,-1]
+	
+	# Remove some columns (I think because of a lack of information from memory)
+	X.f <- X.f[,-which(colnames(X.f)%in%c("sex2. Female",
+	"region2. Middle Atlantic",
+	"region3. East North Central",
+	"region4. West North Central",     
+	"region5. South Atlantic", 
+	"region6. East South Central", 
+	"region7. West South Central",           
+	"region8. Mountain",
+	"region9. Pacific"))]
+ 
+	varnames <- colnames(X.f)
+
+	n <- nrow(X.f)
+	p <- ncol(X.f)
+
+	# Normalise
+	y.n <- (y.t - mean(y.t))/sd(y.t)
+	X.n <- matrix(0,n,p)
+	for (j in 1:p) {
+		X.n[,j] <- (X.f[,j] - mean(X.f[,j]))/sd(X.f[,j])
+	} 
+
+	vy <- y.n
+	mX <- X.n
+	return(list(vy=vy, mX=mX, n=n, p=p))
+}
+
+
+generate_data_College <- function()
+{
+	library(ISLR)
+	College <- na.omit(College)
+	
+	# Get y vector and X matrix
+	y.t <- College$Grad.Rate
+	X.f <- model.matrix(Grad.Rate~.,College)[,-1]
+ 
+	varnames <- colnames(X.f)
+
+	n <- nrow(X.f)
+	p <- ncol(X.f)
+
+	# Normalise
+	y.n <- (y.t - mean(y.t))/sd(y.t)
+	X.n <- matrix(0,n,p)
+	for (j in 1:p) {
+		X.n[,j] <- (X.f[,j] - mean(X.f[,j]))/sd(X.f[,j])
+	} 
+
+	vy <- y.n
+	mX <- X.n
+	return(list(vy=vy, mX=mX, n=n, p=p))
+}
+
+
+generate_USCrime <- function()
+{
+	# Famous example, used in most papers.
+
+	library(MASS)
+	
+	mD <- UScrime
+	notlog <- c(2,ncol(UScrime))
+	mD[,-notlog] <- log(mD[,-notlog])
+	
+	for (j in 1:ncol(mD)) {
+		mD[,j] <- (mD[,j] - mean(mD[,j]))/sd(mD[,j])
+	}
+	
+	varnames <- c(
+	"log(AGE)",
+	"S",
+	"log(ED)",
+	"log(Ex0)",
+	"log(Ex1)",
+	"log(LF)",
+	"log(M)",
+	"log(N)",
+	"log(NW)",
+	"log(U1)",
+	"log(U2)",
+	"log(W)",
+	"log(X)",
+	"log(prison)",
+	"log(time)")
+	
+	y.t <- mD$y
+	X.f <- data.matrix(cbind(mD[1:15]))
+	colnames(X.f) <- varnames 
+
+	n <- nrow(X.f)
+	p <- ncol(X.f)
+
+	# Normalise
+	y.n <- (y.t - mean(y.t))/sd(y.t)
+	X.n <- matrix(0,n,p)
+	for (j in 1:p) {
+		X.n[,j] <- (X.f[,j] - mean(X.f[,j]))/sd(X.f[,j])
+	} 
+
+	vy <- y.n
+	mX <- X.n
+	return(list(vy=vy, mX=mX, n=n, p=p))
+}
+
+
 ################################################################################
 
 ebic.ncvreg <- function(vy,mX,penalty)
