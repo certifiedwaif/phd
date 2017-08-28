@@ -125,7 +125,8 @@ generate_data_Hitters <- function()
 
 	vy <- y.n
 	mX <- X.n
-
+	colnames(mX) <- varnames
+	
 	return(list(vy=vy, mX=mX, n=n, p=p))
 } 
 
@@ -158,6 +159,8 @@ generate_data_Bodyfat <- function()
 
 	vy <- y.n
 	mX <- X.n
+	colnames(mX) <- varnames
+	
 	return(list(vy=vy, mX=mX, n=n, p=p))
 }
 
@@ -196,6 +199,8 @@ generate_data_Wage <- function()
 
 	vy <- y.n
 	mX <- X.n
+	colnames(mX) <- varnames
+	
 	return(list(vy=vy, mX=mX, n=n, p=p))
 }
 
@@ -223,6 +228,8 @@ generate_data_College <- function()
 
 	vy <- y.n
 	mX <- X.n
+	colnames(mX) <- varnames
+	
 	return(list(vy=vy, mX=mX, n=n, p=p))
 }
 
@@ -274,6 +281,8 @@ generate_data_USCrime <- function()
 
 	vy <- y.n
 	mX <- X.n
+	colnames(mX) <- varnames
+	
 	return(list(vy=vy, mX=mX, n=n, p=p))
 }
 
@@ -377,7 +386,6 @@ model_likelihood <- function(models, y.n, mX.n)
 
 fill_in <- function(initial_gamma, lower, upper, proportion = 0.05)
 {
-  cat("Filling in ...")
 	for (k in lower:upper) {
 		valid <- FALSE
 		while (!valid) {
@@ -425,7 +433,7 @@ initialise_gamma <- function(start, K, p, y.n, mX.n, models=NULL)
 }
 
 
-QLT <- function(K, data_fn, start, prior)
+QLT <- function(K, data_fn, start, prior, bUnique=TRUE)
 {
 	cat(K, start, prior, "\n")
 	# Check parameters
@@ -438,8 +446,8 @@ QLT <- function(K, data_fn, start, prior)
 		stop("start must be one of cold_start, warm_start_covariates or warm_start_likelihood")
 	}
 
-	if (!(prior %in% c("log_prob1", "BIC", "ZE", "3", "4", "5", "6", "7"))) {
-		stop("start must be one of BIC, ZE, 3, 4, 5, 6 and 7")
+	if (!(prior %in% c("maruyama", "BIC", "ZE", "liang_g1", "liang_g2", "liang_g3", "robust_bayarri1", "robust_bayarri2"))) {
+		stop("prior must be one of BIC, ZE, 3, 4, 5, 6 and 7")
 	}
 
 	TRIALS <- 50
@@ -615,8 +623,8 @@ QLT <- function(K, data_fn, start, prior)
       # cat("Generating data ...")
       # initial_gamma <- matrix(0, K, ncol(mX.til))
       a4 <- proc.time()[3]
-      cat(c(K, 1, as.character(prior)), "\n")
-      cva.res <- cva (initial_gamma, y.n, mX.n, K, 1, as.character(prior))
+      cat(c(K, 1, prior, "\n"))
+      cva.res <- cva (initial_gamma, y.n, mX.n, K, 1, prior, bUnique)
       cat("covariates in models ", apply(cva.res$models, 1, sum), "\n")
       
       vlog_p <- model_likelihood(cva.res$models, y.n, mX.n)

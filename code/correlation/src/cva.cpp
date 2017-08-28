@@ -304,13 +304,14 @@ void gamma_to_NumericMatrix(const vector< dbitset >& gamma, NumericMatrix& nm)
 //' @param lambda The weighting factor for the entropy in f_lambda. Defaults to 1.
 //' @param log_lik The log likelihood function to use in ranking models. One of
 //' 							 "log_prob1" "BIC" "ZE" "3" "4" "5" "6" "7".
+//' @param bUnique Whether to ensure uniqueness in the population of particles or not. Defaults to true.
 //' @return A list containing the named element models, which is a K by p matrix of the models
 //'					selected by the algorithm, and the named element trajectory, which includes a list
 //'					of the populations of models for each iteration of the algorithm until it converged
 //' @export
 // [[Rcpp::export]]
 List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, const int K,
-				 const double lambda = 1., std::string log_lik = "log_prob1")
+				 const double lambda = 1., std::string log_lik = "maruyama", const bool bUnique = true)
 {
 	VectorXd vy(vy_in.length());   // = Rcpp::as<Eigen::Map<Eigen::VectorXd>>(vy_in);
 	for (auto i = 0; i < vy_in.length(); i++) vy[i] = vy_in[i];
@@ -396,7 +397,9 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 		#ifdef DEBUG
 		Rcpp::Rcout << "gamma[" << k << "] " << gamma[k] << std::endl;
 		#endif
-		hash.insert({boost::hash_value(gamma[k]), true});
+		if (bUnique) {
+			hash.insert({boost::hash_value(gamma[k]), true});
+		}
 	}
 
 	// Initialise mXTX_inv
@@ -445,12 +448,14 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 				bool bUpdate = !gamma[k][j];
 
 				// If we've seen this bitstring before, don't do the update
-				auto h = boost::hash_value(gamma_prime);
-				auto search = hash.find(h);
-				if (search != hash.end()) {
-					continue;
-				}	else {
-					hash.insert({h, true});
+				if (bUnique) {
+					auto h = boost::hash_value(gamma_prime);
+					auto search = hash.find(h);
+					if (search != hash.end()) {
+						continue;
+					}	else {
+						hash.insert({h, true});
+					}
 				}
 				#ifdef DEBUG
 				if (bUpdate)
@@ -545,9 +550,13 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 				Rcpp::Rcout << " log_p_1 " << log_p_1 << std::endl;
 				#endif
 				if ((log_p_0 > log_p_1 && !bUpdate) || (log_p_1 > log_p_0 && bUpdate)) {
-					hash.erase(boost::hash_value(gamma[k]));
+					if (bUnique) {
+						hash.erase(boost::hash_value(gamma[k]));
+					}
 					gamma[k][j] = bUpdate;
-					hash.insert({boost::hash_value(gamma[k]), true});
+					if (bUnique) {
+						hash.insert({boost::hash_value(gamma[k]), true});
+					}
 					#ifdef DEBUG
 					if (bUpdate)
 						Rcpp::Rcout << "Keep update" << std::endl;

@@ -1,15 +1,16 @@
 # test_QLT.R
 
+library(tidyverse)
 library(optparse)
 source("QLT.R")
 
 
-generate_F_1_data <- function(K, data_fn, start, prior)
+generate_F_1_data <- function(K, data_fn, start, prior, bUnique)
 {
   if (data_fn == "QLT") {
-    dat <- QLT(K, generate_data_QLT, start, prior)
+    dat <- QLT(K, generate_data_QLT, start, prior, bUnique=bUnique)
   } else if (data_fn == "high_dimensional") {
-    dat <- QLT(K, generate_data_high_dimensional, start, prior)
+    dat <- QLT(K, generate_data_high_dimensional, start, prior, bUnique=bUnique)
   } else {
   	stop("data_fn unknown")
   }
@@ -18,7 +19,97 @@ generate_F_1_data <- function(K, data_fn, start, prior)
 }
 
 
-variable_inclusion <- function(K, data_fn, start, prior)
+calc_var_probs <- function(vy, mX, mGamma, vR2)
+{
+  library(gsl)
+  calcVarProbs <- function(score,mGamma) {
+    model.prob = exp(score - max(score))/sum(exp(score - max(score)))
+    var.prob = t(mGamma)%*%model.prob
+    return(var.prob)
+  }
+  
+  n <- length(vy)
+  p <- ncol(mX)
+  M = length(vR2)
+  vq = mGamma%*%matrix(1,p,1)
+  
+  vBIC = n*log(1 - vR2) + vq*log(n) 
+  var.prob1 = calcVarProbs(-0.5*vBIC,mGamma) 
+  
+  a  = -0.75
+  vb = 0.5*(n - vq - 5) - a
+  c  = 0.5*(n - 1)
+  vd = 0.5*vq + a
+  
+  log.vp = -(vb+1)*log(1 - vR2) + lbeta(vd+1,vb+1) - lbeta(a+1,vb+1)
+  vZE <- -2*log.vp
+  
+  var.prob2 = calcVarProbs(log.vp,mGamma) 
+  
+  log.hyperg_2F1 = function(b,c,x) {
+    val = 0 
+    val = val + log(c-1) 
+    val = val + (1-c)*log(x) 
+    val = val + (c-b-1)*log(1-x) 
+    val = val + lbeta(c-1,b-c+1) 
+    val = val + pbeta(x,shape1=(c-1),shape2=(b-c+1),log=TRUE)
+    return(val)
+  }
+  
+  log.hyperg_2F1.naive = function(b,c,x) {
+    val = log( hyperg_2F1( b, 1, c, x, give=FALSE, strict=TRUE) )
+    return(val)
+  } 
+  
+  a = 3
+  log.vp.g = log(a - 2) - log(vq + a - 2) + log( hyperg_2F1(0.5*(n-1), 1, 0.5*(vq+a), vR2, give=FALSE, strict=TRUE) )
+  var.prob3 = calcVarProbs(log.vp.g,mGamma) 
+  
+  a = 3
+  log.vp.g2 = log(a - 2) - log(vq + a - 2) + log.hyperg_2F1( 0.5*(n-1), 0.5*(vq+a), vR2 )
+  var.prob4 = calcVarProbs(log.vp.g2,mGamma) 
+  
+  log.vp.gprior5 = rep(0,M)
+  log.vp.gprior5[-1] = log.vp.gprior5[-1] - 0.5*vq[-1]*log(n+1)
+  log.vp.gprior5[-1] = log.vp.gprior5[-1] + 0.5*vq[-1]*log(vq[-1]+1)
+  log.vp.gprior5[-1] = log.vp.gprior5[-1] - 0.5*(n - 1)*log(vR2[-1])
+  log.vp.gprior5[-1] = log.vp.gprior5[-1] - log(vq[-1]+1)
+  log.vp.gprior5[-1] = log.vp.gprior5[-1] + log( hyperg_2F1( 0.5*(vq[-1]+1), 0.5*(n-1), 0.5*(vq[-1]+3), (1-1/vR2[-1])*(vq[-1]+1)/(n+1), give=FALSE, strict=TRUE) )
+  
+  model.prob5 = exp(log.vp.gprior5 - max(log.vp.gprior5))/sum(exp(log.vp.gprior5 - max(log.vp.gprior5)))
+  var.prob5 = t(mGamma)%*%model.prob5
+  
+  vL = (1 + n)/(1 + vq) - 1
+  vsigma2 = 1 - vR2
+  vz = vR2/(1 + vL*vsigma2)
+  
+  log.vp.gprior6 = rep(0,M)
+  log.vp.gprior6[-1] = log.vp.gprior6[-1] + 0.5*(n - vq[-1] - 1)*log( n + 1 )
+  log.vp.gprior6[-1] = log.vp.gprior6[-1] - 0.5*(n - vq[-1] - 1)*log( vq[-1] + 1)
+  log.vp.gprior6[-1] = log.vp.gprior6[-1] - 0.5*(n - 1)*log(1 + vL[-1]*vsigma2[-1])
+  log.vp.gprior6[-1] = log.vp.gprior6[-1] - log (vq[-1] + 1)
+  log.vp.gprior6[-1] = log.vp.gprior6[-1] + log.hyperg_2F1( 0.5*(n-1), 0.5*(vq[-1]+3), vz[-1] )
+  
+  model.prob6 = exp(log.vp.gprior6 - max(log.vp.gprior6))/sum(exp(log.vp.gprior6 - max(log.vp.gprior6)))
+  var.prob6 = t(mGamma)%*%model.prob6
+  
+  log.vp.gprior7 = rep(0,M)
+  log.vp.gprior7[-1] = log.vp.gprior7[-1] + 0.5*(n - vq[-1] - 1)*log( n + 1 )
+  log.vp.gprior7[-1] = log.vp.gprior7[-1] - 0.5*(n - vq[-1] - 1)*log( vq[-1] + 1)
+  log.vp.gprior7[-1] = log.vp.gprior7[-1] - 0.5*(n - 1)*log(1 + vL[-1]*vsigma2[-1])
+  log.vp.gprior7[-1] = log.vp.gprior7[-1] - log (vq[-1] + 1)
+  log.vp.gprior7[-1] = log.vp.gprior7[-1] + log( hyperg_2F1( 0.5*(n-1), 1, 0.5*(vq[-1] + 3), vz[-1], give=FALSE, strict=TRUE) )
+  
+  model.prob7 = exp(log.vp.gprior7 - max(log.vp.gprior7))/sum(exp(log.vp.gprior7 - max(log.vp.gprior7)))
+  var.prob7 = t(mGamma)%*%model.prob7
+  
+  tab4 <- cbind(var.prob1,var.prob2,var.prob3,var.prob4,var.prob5,var.prob6,var.prob7)
+  colnames(tab4) = c("BIC","ZE","g.naive","g.safe","Robust.naive","Robust","Robust.safe")
+  return(tab4)
+}
+
+
+variable_inclusion <- function(K, data_fn, start, prior, bUnique=TRUE)
 {
   if (data_fn == "Hitters") {
     dat <- generate_data_Hitters()
@@ -35,15 +126,90 @@ variable_inclusion <- function(K, data_fn, start, prior)
   p <- dat$p
   vy <- dat$vy
   mX <- dat$mX
+  n <- length(vy)
 
   initial_gamma <- initialise_gamma(start, K, p, vy, mX, models=NULL)
   library(correlation)
-  cva.res <- cva(initial_gamma, vy, mX, K, 1, prior)
-  variable_inclusion <- apply(cva.res$models, 2, sum) / K
+  cva.res <- cva(initial_gamma, vy, mX, K, 1, prior, bUnique)
 
-  return(variable_inclusion)
+	vR21 = correlation::all_correlations_mX(vy, mX)$vR2
+	mGamma1 = graycode(p,0)
+	tab1 <- calc_var_probs(vy, mX, mGamma1, vR21)
+	tab_to_tbl <- function(tab, mX)
+	{
+    # Rows are covariates, columns are priors
+  	varnames <- colnames(mX)
+  	priors <- colnames(tab)
+  	# I'm sure there's some clever tidyverse way of doing this
+    var <- rep(NA, length(varnames) * length(priors))
+    prior <- rep(NA, length(varnames) * length(priors))
+    prob <- rep(NA, length(varnames) * length(priors))
+    counter <- 1
+    for (row in 1:nrow(tab)) {
+  	  for (col in 1:ncol(tab)) {
+  	    var[counter] <- varnames[row]
+  	    prior[counter] <- priors[col]
+  	    prob[counter] <- tab[row, col]
+  	    counter <- counter + 1
+  	  }
+  	}
+  	tibble(covariate=var, var_prior=prior, inclusion_probability=prob)
+	}
+	tbl1 <- tab_to_tbl(tab1, mX)
+	
+	mGamma2 = cva.res$models
+	vR22 = apply(mGamma2, 1, function(vGamma) {
+	  mX <- mX[, which(vGamma == 1)]
+	  (t(vy) %*% mX %*% solve(t(mX) %*% mX) %*% t(mX) %*% vy) / n
+	})
+	tab2 <- calc_var_probs(vy, mX, mGamma2, vR22)
+	tbl2 <- tab_to_tbl(tab2, mX)
+	tbl <- rbind(tbl1 %>% mutate(source="Exact"),
+	             tbl2 %>% mutate(source="CVA"))
+	
+	return(tbl %>% mutate(K=K, start=start, cva_prior=prior, data_set=data_fn))
 }
 
+
+variable_inclusion_graph <- function(tbl)
+{
+	ggplot(tbl, aes(x=covariate, y=inclusion_probability)) + facet_grid(var_prior~source) + geom_col() +
+		xlab("Covariate") + ylab("Inclusion probability") + ggtitle(sprintf("%s, K=%s", tbl$data_set, tbl$K))
+}
+
+
+variable_inclusion_graphs <- function()
+{
+  pdf("/tmp/variable_inclusion.pdf")
+  
+  a1 <- proc.time()[3]
+  variable_inclusion(20, "Hitters", "cold_start", "log_prob1", bUnique=TRUE) %>% variable_inclusion_graph
+  b1 <- proc.time()[3]
+  print(b1 - a1)
+  
+  a2 <- proc.time()[3]
+  variable_inclusion(20, "Hitters", "cold_start", "log_prob1", bUnique=FALSE) %>% variable_inclusion_graph
+  b2 <- proc.time()[3]
+  print(b2 - a2)
+
+    variable_inclusion(20, "Bodyfat", "cold_start", "log_prob1") %>% variable_inclusion_graph
+  variable_inclusion(20, "Wage", "cold_start", "log_prob1") %>% variable_inclusion_graph
+  variable_inclusion(20, "College", "cold_start", "log_prob1") %>% variable_inclusion_graph
+  variable_inclusion(20, "USCrime", "cold_start", "log_prob1") %>% variable_inclusion_graph
+  
+  variable_inclusion(50, "Hitters", "cold_start", "log_prob1") %>% variable_inclusion_graph
+  variable_inclusion(50, "Bodyfat", "cold_start", "log_prob1") %>% variable_inclusion_graph
+  variable_inclusion(50, "Wage", "cold_start", "log_prob1") %>% variable_inclusion_graph
+  variable_inclusion(50, "College", "cold_start", "log_prob1") %>% variable_inclusion_graph
+  variable_inclusion(50, "USCrime", "cold_start", "log_prob1") %>% variable_inclusion_graph
+  
+  variable_inclusion(100, "Hitters", "cold_start", "log_prob1") %>% variable_inclusion_graph
+  variable_inclusion(100, "Bodyfat", "cold_start", "log_prob1") %>% variable_inclusion_graph
+  variable_inclusion(100, "Wage", "cold_start", "log_prob1") %>% variable_inclusion_graph
+  variable_inclusion(100, "College", "cold_start", "log_prob1") %>% variable_inclusion_graph
+  variable_inclusion(100, "USCrime", "cold_start", "log_prob1") %>% variable_inclusion_graph
+  dev.off()
+}
 
 generate_boxplots <- function(dat)
 {
