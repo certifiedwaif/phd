@@ -30,7 +30,8 @@ namespace boost
 }
 
 
-double log_prob1(const int n, const int p, const double R2, int p_gamma)
+// Which one was this one again? Maruyama?
+double maruyama(const int n, const int p, const double R2, int p_gamma)
 {
 	const auto sigma2 = 1. - R2;
 	const auto a = 1.;
@@ -122,7 +123,8 @@ double log_hyperg_2F1_naive(double b, double c, double x)
 }
 
 
-double log_var_prob3(const int n, const int p, double R2, int p_gamma)
+// Liang's hyper g-prior
+double liang_g1(const int n, const int p, double R2, int p_gamma)
 {
 	auto a = 3.;
 	double log_p_g;
@@ -131,7 +133,8 @@ double log_var_prob3(const int n, const int p, double R2, int p_gamma)
 }
 
 
-double log_var_prob4(const int n, const int p, double R2, int p_gamma)
+// Liang's g prior
+double liang_g2(const int n, const int p, double R2, int p_gamma)
 {
 	auto a = 3.;
 	auto log_vp_g2 = log(a - 2) - log(p_gamma + a - 2) + log_hyperg_2F1( 0.5*(n-1), 0.5*(p_gamma+a), R2);
@@ -139,7 +142,8 @@ double log_var_prob4(const int n, const int p, double R2, int p_gamma)
 }
 
 
-double log_var_prob5(const int n, const int p, double R2, int p_gamma)
+// Liang's g prior
+double liang_g3(const int n, const int p, double R2, int p_gamma)
 {
 	double log_vp_gprior5;
 	if (p_gamma == 0)
@@ -160,7 +164,8 @@ double log_var_prob5(const int n, const int p, double R2, int p_gamma)
 }
 
 
-double log_var_prob6(const int n, const int p, double R2, int p_gamma)
+// Robust Bayarri
+double robust_bayarri1(const int n, const int p, double R2, int p_gamma)
 {
 	#ifdef DEBUG
 	Rcpp::Rcout << "n " << n;
@@ -188,7 +193,7 @@ double log_var_prob6(const int n, const int p, double R2, int p_gamma)
 }
 
 
-double log_var_prob7(const int n, const int p, double R2, int p_gamma)
+double robust_bayarri2(const int n, const int p, double R2, int p_gamma)
 {
 	auto sigma2 = 1. - R2;
 	auto L = (1. + n)/(1. + p_gamma) - 1.;
@@ -333,25 +338,25 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 	const auto EPSILON = 1e-8;
 
 	std::function<double (const int n, const int p, double vR2, int vp_gamma)> log_prob;
-	if (log_lik == "log_prob1") {
-		log_prob = log_prob1;
+	if (log_lik == "maruyama") {
+		log_prob = maruyama;
 	} else if (log_lik == "BIC") {
 		log_prob = BIC;
 	}
 	else if (log_lik == "ZE") {
 		log_prob = ZE;
-	} else if (log_lik == "3") {
-		log_prob = log_var_prob3;
-	} else if (log_lik == "4") {
-		log_prob = log_var_prob4;
-	} else if (log_lik == "5") {
-		log_prob = log_var_prob5;
-	} else if (log_lik == "6") {
-		log_prob = log_var_prob6;
-	} else if (log_lik == "7") {
-		log_prob = log_var_prob7;
+	} else if (log_lik == "liang_g1") {
+		log_prob = liang_g1;
+	} else if (log_lik == "liang_g2") {
+		log_prob = liang_g2;
+	} else if (log_lik == "liang_g3") {
+		log_prob = liang_g3;
+	} else if (log_lik == "robust_bayarri1") {
+		log_prob = robust_bayarri1;
+	} else if (log_lik == "robust_bayarri2") {
+		log_prob = robust_bayarri2;
 	} else {
-		log_prob = log_prob1;
+		log_prob = maruyama;
 	}
 	// Initialise population of K particles randomly
 	// Rcpp::Rcout << "Generated" << std::endl;
