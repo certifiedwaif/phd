@@ -109,7 +109,7 @@ calc_var_probs <- function(vy, mX, mGamma, vR2)
 }
 
 
-variable_inclusion <- function(K, data_fn, start, prior, bUnique=TRUE)
+variable_inclusion_tbl <- function(K, data_fn, start, prior, bUnique=TRUE)
 {
   if (data_fn == "Hitters") {
     dat <- generate_data_Hitters()
@@ -192,24 +192,76 @@ variable_inclusion_graphs <- function()
   b2 <- proc.time()[3]
   print(b2 - a2)
 
-    variable_inclusion(20, "Bodyfat", "cold_start", "log_prob1") %>% variable_inclusion_graph
-  variable_inclusion(20, "Wage", "cold_start", "log_prob1") %>% variable_inclusion_graph
-  variable_inclusion(20, "College", "cold_start", "log_prob1") %>% variable_inclusion_graph
-  variable_inclusion(20, "USCrime", "cold_start", "log_prob1") %>% variable_inclusion_graph
+  variable_inclusion_tbl(20, "Bodyfat", "cold_start", "log_prob1") %>% variable_inclusion_graph
+  variable_inclusion_tbl(20, "Wage", "cold_start", "log_prob1") %>% variable_inclusion_graph
+  variable_inclusion_tbl(20, "College", "cold_start", "log_prob1") %>% variable_inclusion_graph
+  variable_inclusion_tbl(20, "USCrime", "cold_start", "log_prob1") %>% variable_inclusion_graph
   
-  variable_inclusion(50, "Hitters", "cold_start", "log_prob1") %>% variable_inclusion_graph
-  variable_inclusion(50, "Bodyfat", "cold_start", "log_prob1") %>% variable_inclusion_graph
-  variable_inclusion(50, "Wage", "cold_start", "log_prob1") %>% variable_inclusion_graph
-  variable_inclusion(50, "College", "cold_start", "log_prob1") %>% variable_inclusion_graph
-  variable_inclusion(50, "USCrime", "cold_start", "log_prob1") %>% variable_inclusion_graph
+  variable_inclusion_tbl(50, "Hitters", "cold_start", "log_prob1") %>% variable_inclusion_graph
+  variable_inclusion_tbl(50, "Bodyfat", "cold_start", "log_prob1") %>% variable_inclusion_graph
+  variable_inclusion_tbl(50, "Wage", "cold_start", "log_prob1") %>% variable_inclusion_graph
+  variable_inclusion_tbl(50, "College", "cold_start", "log_prob1") %>% variable_inclusion_graph
+  variable_inclusion_tbl(50, "USCrime", "cold_start", "log_prob1") %>% variable_inclusion_graph
   
-  variable_inclusion(100, "Hitters", "cold_start", "log_prob1") %>% variable_inclusion_graph
-  variable_inclusion(100, "Bodyfat", "cold_start", "log_prob1") %>% variable_inclusion_graph
-  variable_inclusion(100, "Wage", "cold_start", "log_prob1") %>% variable_inclusion_graph
-  variable_inclusion(100, "College", "cold_start", "log_prob1") %>% variable_inclusion_graph
-  variable_inclusion(100, "USCrime", "cold_start", "log_prob1") %>% variable_inclusion_graph
+  variable_inclusion_tbl(100, "Hitters", "cold_start", "log_prob1") %>% variable_inclusion_graph
+  variable_inclusion_tbl(100, "Bodyfat", "cold_start", "log_prob1") %>% variable_inclusion_graph
+  variable_inclusion_tbl(100, "Wage", "cold_start", "log_prob1") %>% variable_inclusion_graph
+  variable_inclusion_tbl(100, "College", "cold_start", "log_prob1") %>% variable_inclusion_graph
+  variable_inclusion_tbl(100, "USCrime", "cold_start", "log_prob1") %>% variable_inclusion_graph
+  dev.off()
+  
+  pdf("/tmp/variable_inclusion_model_selection.pdf")
+  variable_inclusion_tbl(50, "Hitters", "cold_start", "log_prob1") %>% variable_inclusion_graph
+  variable_inclusion_tbl(50, "Hitters", "cold_start", "BIC") %>% variable_inclusion_graph
+  variable_inclusion_tbl(50, "Hitters", "cold_start", "ZE") %>% variable_inclusion_graph
+  variable_inclusion_tbl(50, "Hitters", "cold_start", "liang_g1") %>% variable_inclusion_graph
+  variable_inclusion_tbl(50, "Hitters", "cold_start", "liang_g2") %>% variable_inclusion_graph
+  variable_inclusion_tbl(50, "Hitters", "cold_start", "liang_g3") %>% variable_inclusion_graph
+  variable_inclusion_tbl(50, "Hitters", "cold_start", "robust_bayarri1") %>% variable_inclusion_graph
+  variable_inclusion_tbl(50, "Hitters", "cold_start", "robust_bayarri2") %>% variable_inclusion_graph
   dev.off()
 }
+
+
+relative_error_table <- function(data_set)
+{
+  tbl <- bind_rows(map(.x = c(20, 50, 100),
+  											.f = ~ variable_inclusion_tbl(.x, data_set, "cold_start", "log_prob1")))
+  exact_tbl <- tbl %>% 
+  							filter(source == "Exact") %>%
+  							rename(exact_prob = inclusion_probability) %>%
+  							dplyr::select(-source)
+  cva_tbl <- tbl %>%
+  						filter(source == "CVA") %>%
+  						rename(est_prob = inclusion_probability) %>%
+  						dplyr::select(-source)
+  rel_error_tbl <- exact_tbl %>%
+								  	full_join(cva_tbl) %>%
+								  	mutate(relative_error = round((exact_prob - est_prob) / exact_prob, 2)) %>%
+								  	dplyr::select(data_set, var_prior, covariate, K, relative_error) %>%
+								  	arrange(data_set, var_prior, covariate, K)
+	
+	return(rel_error_tbl)
+}
+
+
+relative_error_plot <- function(tbl)
+{
+	 tbl %>% ggplot(aes(x=K, y=relative_error, col=var_prior)) + geom_line() + facet_grid(~covariate) + ylab("Relative error")
+}
+
+
+relative_error_plots <- function()
+{
+	pdf("relative_error_plots.pdf")
+	relative_error_table("Hitters") %>% relative_error_plot
+	relative_error_table("Bodyfat") %>% relative_error_plot
+	relative_error_table("Wage") %>% relative_error_plot
+	relative_error_table("College") %>% relative_error_plot
+	relative_error_table("USCrime") %>% relative_error_plot
+	dev.off()
+}
+
 
 generate_boxplots <- function(dat)
 {
@@ -236,8 +288,6 @@ generate_boxplots <- function(dat)
 
 build_db <- function()
 {
-	library(tidyverse)
-
 	orig_fnames = list.files(pattern = "*.dat$")
 	fnames <- orig_fnames %>%
 							str_replace("generate_data_", "") %>%
