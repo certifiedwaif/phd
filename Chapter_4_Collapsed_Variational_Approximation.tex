@@ -100,7 +100,7 @@ Difficulty of implementation -- practical model selection
 % Dirichlet Allocation \cite{Teh2007}
 Our variational approximation is a fixed form parametric approximation which places a weight on each covariate
 \[
-	q(\vgamma) = \sum_{k=1}^K w_k \I(\vgamma_i)
+	q(\vgamma) = \sum_{k=1}^K w_k \I(\vgamma_k)
 \]
 
 % Population-based MCMC approaches
@@ -111,7 +111,8 @@ i) Our algorithm searches over the binary strings $\vgamma$ directly, as the est
 in closed form once $\vgamma$ is known.
 
 ii) We make use of a population--based optimisation scheme to search the model space. We take advantage of the
-population of solutions by incorporating a penalty for lack of entropy.
+population of solutions by incorporating a penalty for lack of entropy, which ensures diversity in the
+population of solutions.
 
 iii) The entire trajectory of particles gives far more information about variable selection than a single
 snapshot of the final best decision.
@@ -126,7 +127,43 @@ discuss our results.
 
 \section{Method}
 
-Base on John's CVB for Mark document.
+\subsection{Collapsed Variational Approximation}
+
+Suppose that
+\[
+	q(\vgamma) = \sum_{i=1}^K w_k I(\vgamma = \vgamma_k)
+\]
+where $0 < w_k < 1$, $\vone^\top \vw = 1$ and $\mGamma = [\vgamma_1, \ldots, \vgamma_K]$ are a population of
+models. A variational lower bound for $\log p(\vy; \vw, \mGamma)$ is given by
+\begin{align*}
+	\log \underline{p}(\vy; \vw, \mGamma) &= \int \exp\left[ \bE_q \log \left\{ \frac{p(\vy, \vtheta, \vgamma)}{q(\vgamma)} \right\} \right] d \vtheta dg \\
+	&= \sum_{k=1}^K w_k \log p(\vy, \vgamma_k) - w_k \log w_k
+\end{align*}
+
+under the assumption that each of the $\vgamma_1, \ldots, \vgamma_K$ are unique where
+\[
+	p(\vy, \vgamma_k; h) = \int p(\vy, \vtheta, \vgamma_k) d \vtheta.
+\]
+
+Since $\log \underline{p}(\vy; \vw, \mGamma)$ is a lower bound we can maximise this bound with respect to
+$\vw$ and $\mGamma$ to make the bound as tight as possible. The optimal value of the $w_k$ satisfy
+\begin{align*}
+	w_k = \frac{p(\vy, \vgamma_k)}{\sum_{j=1}^K p(\vy, \vgamma_j)} = \frac{p(\vgamma_k) \text{BF}_{\vgamma_k}}{\sum_{j=1}^K p(\vgamma_j) \text{BF}_{\vgamma_j}}.
+\end{align*}
+
+Let $\vgamma_{jk}^{i} = (\vgamma_{1k, }, \ldots, \vgamma_{j-1, k}, i, \vgamma_{j+1, k}, \ldots, \vgamma_{pk})^\top$. The algorithm to fit the approximation is given below.
+% Re-type this using algorithmic environment
+\begin{enumerate}
+	\item Loop until convergence.
+	\item For $k = 1, \ldots, K$ \\
+	For $j = 1, \ldots, p$
+	$\vgamma_{jk} = \begin{cases}
+	1 &\text{ if } p(\vy, \vgamma_{jk}^{(1)}) > p(\vy, \vgamma_{jk}^{(0)}) \\
+	0 & \text{ otherwise}.
+	\end{cases}$ \\
+	$w_k = p(\vy, \vgamma_k) / \sum_{j=1}^K p(\vy, \vgamma_j)$
+\end{enumerate}
+In order to make the updates efficiently we need to be able to perform rank-one updates and rank-one downdates for the calculation of $\hat{\sigma}_\vgamma^2$.
 
 The main body of the algorithm is a two--stage process. In the first stage, we iterate through the population of
 bitstrings, using a greedy search strategy to attempt to alter each bit in the model bitstring to increase the log likelihood. If the log likelihood for the new bitstring is no higher than the previous bitstring, then the
@@ -280,14 +317,14 @@ initialised from another method than by being initialised randomly:
 a warm start from SCAD where models with more covariates were preferred, and
 a warm start from SCAD where models with higher likelihood were preferred.
 
-A number of priors were also tried: \ldots
-The choice of prior made an enormous difference to the performance of the algorithm.
-For each combination of population size K, data set, and prior the experiment was repeated 50 times.
+The experiments were repeated with Maruyama's prior, Liang's hyper-g prior and Bayarri's robust prior.
+The results of the algorithm were found to be insensitive to the choice of prior.
+For each combination of population size, data set, and prior the experiment was repeated 50 times.
 
 \subsubsection{QTL example}
 The QTL example is taken from \cite{Xu2007}. A BC population of $n=600$ was simulated for a single large
 chromosome of $1800$ cM. This chromosome was covered by 121 evenly spaced markers. Nine of the markers
-overlapped with QTL of the main effects and 13 out of the $\binom{121, 2} = 7,260$ possible marker pairs had
+overlapped with QTL of the main effects and 13 out of the $\binom{121} 2 = 7,260$ possible marker pairs had
 interaction effects.
 
 consistently achieving higher $F_1$ scores than the competing methods that we examined
@@ -333,7 +370,15 @@ higher likelihood models preferred. $K=20, 50, 100$ respectively}
 \section{Variable inclusion for small data sets}
 
 We compared variable selection using CVA against exact variable selection on five small data sets,
-Hitters, Bodyfat, Wage, College and US Crime. The number of particles in the population $K$ affected the
+Hitters, Bodyfat, Wage, College and US Crime. 
+The variable inclusion probabilities were estimated by taking the sum of the columns of the population
+of models selected $\mGamma$
+weighted by marginal likelihood of each model.
+The exact variable inclusion probabilities were calculated by summing the columns of the matrix of all possible
+models $\mGamma$ weighted by marginal likelihood of each model.
+The total relative error of the variable inclusion probabilities
+estimated by CVA. The results of these comparisons are presented in Table \ref{tab:variable_inclusion_rel_error}.
+The number of particles in the population $K$ affected the
 variable inclusion probability in the variables selected by CVA, while the marginal probability
 $p(\vgamma | \vy)$ used to weight models in $\Gamma$ seemed to have only a very minor impact.
 When the robust Bayarri prior is chosen to rank models in CVA,
@@ -343,7 +388,10 @@ marginal had a large impact on the $F_1$ score obtained.
 Variables with low posterior probability are truncated to 0, as CVA seeks higher posterior probability models,
 ignoring the lower posterior probability models.
 
-\begin{table}
+\begin{table}\label{tab:variable_inclusion_rel_error}
+\caption{Relative error of the variable inclusion probability estimated by CVA to the
+					exact variable inclusion probability, partitioned by exact probability under or equal to $0.5$ and
+					over $0.5$}
 \begin{tabular}{|ll|rrr|rrr|}
 	\hline
 	Dataset & Prior & & $<=0.5$ & & & $>0.5$ &\\
