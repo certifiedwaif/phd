@@ -8,6 +8,7 @@
 \usepackage{subcaption}
 \usepackage{algorithm,algorithmic}
 \usepackage{natbib}
+\usepackage{cancel}
 \input{../include.tex}
 \input{../Definitions.tex}
 
@@ -38,19 +39,12 @@
 	\end{align*}
 	with priors
 	\begin{align*}
+		\alpha & \propto 1 \\
 		\vbeta | \sigma^2, g & \sim \N_p(\vzero, g \sigma^2 (\mX^T \mX)^{-1}),                     \\
 		p(\sigma^2)          & = (\sigma^2)^{-1} \I(\sigma^2 > 0), \text{ and }                    \\
 		p(g)                 & = \frac{g^b (1 + g)^{-(a + b + 2)}}{\Beta(a + 1, b + 1)} \I(g > 0), 
 	\end{align*}
 	choosing $a = -3/4$ and $b = (n-p)/2 - a - 2$, following \citep{Maruyama2011}.
-	Then the posterior distribution of $\vbeta$ is
-	\[
-		\vbeta \sim \N\left(\frac{g}{1 + g} \vbeta_{\text{LS}}, g \sigma^2 (\mX^\top \mX)^{-1}\right)
-	\]
-	I like to think of the mean as a mixture of the null model $0$ and the least squares estimate $\vbeta_{\text{LS}}$
-	\[
-		\frac{1}{1 + g} \vzero + \frac{g}{1 + g} \vbeta_{\text{LS}}
-	\]
 \end{frame}
 
 % Discuss Bartlett's and Information Paradox
@@ -62,11 +56,8 @@
 	\]
 	But this Bayes Factor exhibits some paradoxes.
 	\begin{itemize}
-		\item As $g \to \infty$, $\text{BF}(\mathcal{M}_\vgamma : \mathcal{M}_0) \to 0$. This is in spite of the fact
-					that $\frac{g}{1 + g} \vbeta_{\text{LS}}$
-		\item As $R_\vgamma^2 \to 1$, then 
-					$\text{BF}(\mathcal{M}_\vgamma : \mathcal{M}_0) \to (1 + g)^{(n - p_\vgamma - 1)/2}$, a fixed constant.
-					As the model fit is essentially perfect, we would expect the Bayes Factor to go to $\infty$.
+		\item Problem 1) Bartlett's paradox: $p(\vzero | \vy) \to 1$ as $g \to \infty$ \\
+		\item Problem 2) Information paradox: $p(\vgamma^* | \vy) \cancel{\to} 1$ as $n \to \infty$
 	\end{itemize}
 
 \end{frame}
@@ -84,20 +75,34 @@
 % Things we derived
 \begin{frame}
 	\frametitle{Things we derived}
-	
+	$$\log p(\vy, \vgamma) = \int p(\vy | \alpha, \vbeta, \sigma^2) p(\alpha) p(\vbeta) p(\sigma^2) d \alpha d \vbeta d \sigma^2$$
+	\begin{itemize}
+		\item We choose our priors so that this integral is tractable. Each choice of prior like a fancy version of BIC
+		\item Liang et al. 2008 hyper-$g$ prior \citep{Liang2008}
+			$p(\vy | \vgamma) = \frac{K(n) (a - 2)}{p_\vgamma + a  - 2} {}_2 F_1 \left( \frac{n-1}{2}, 1; \frac{p_\vgamma + a}{2}; R_\vgamma^2 \right)$
+		\item Liang et al. 2008 hyper-$g/n$ prior \citep{Liang2008}
+			$p(\vy | \vgamma) = \frac{K(n) (a - 2)}{n (p_\vgamma + a  - 2)} F_1 \left( 1, \frac{a}{2}, \frac{n-1}{2}; \frac{p_\vgamma + a}{2}; 1 - \frac{1}{n}, R_\vgamma^2 \right)$
+		\item Robust Bayarri et al. (2012) \citep{Bayarri2012}
+			$p(\vy | \vgamma) = K(n) \left(\frac{n + 1}{1 + p_\vgamma}\right)^{-p_\vgamma/2} \frac{(\hat{\sigma_\vgamma^2})^{-(n-1)/2}}{p_\vgamma + 1} {}_2 F_1 \left[ \frac{n-1}{2}, \frac{p_\vgamma+1}{2}; \frac{p_\vgamma + 3}{2}; \frac{(1 - 1/\hat{\sigma_\vgamma^2})(p_\vgamma + 1)}{1 + n} \right]$
+	\end{itemize}
 \end{frame}
 
-% Graphs of functions
+% Results
 \begin{frame}
-	\frametitle{Graphs of functions}
+	\frametitle{Results}
 	$\tau_g$ is a function of $n$, $p$ and $R^2$.
 \end{frame}
 % Look at past presentations as a starting point
 
 \begin{frame}
-	\frametitle{References}
+	\frametitle{References / Contact details}
+	\begin{itemize}
+		\item Mark Greenaway
+		\item markg@maths.usyd.edu.au
+		\item Twitter: @certifiedwaif	
+	\end{itemize}
 	\bibliographystyle{elsarticle-harv}
 	\bibliography{../references_mendeley}
 \end{frame}
-			
+
 \end{document}
