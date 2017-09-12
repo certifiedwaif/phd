@@ -2,6 +2,7 @@
 
 library(tidyverse)
 library(optparse)
+library(latex2exp)
 source("QLT.R")
 
 
@@ -192,6 +193,13 @@ variable_inclusion_graphs <- function()
   b2 <- proc.time()[3]
   print(b2 - a2)
 
+  expand.grid(K = c(20, 50, 100),
+  						data_set = c("Hitters", "Bodyfat", "Wage", "College", "USCrime")) %>%
+  						as_tibble %>%
+  						map2(K, data_set,
+  									~variable_inclusion_tbl(.x, .y, "cold_start", "log_prob1")) %>%
+  						variable_inclusion_graph
+  variable_inclusion_tbl(20, "Hitters", "cold_start", "log_prob1") %>% variable_inclusion_graph
   variable_inclusion_tbl(20, "Bodyfat", "cold_start", "log_prob1") %>% variable_inclusion_graph
   variable_inclusion_tbl(20, "Wage", "cold_start", "log_prob1") %>% variable_inclusion_graph
   variable_inclusion_tbl(20, "College", "cold_start", "log_prob1") %>% variable_inclusion_graph
@@ -223,7 +231,7 @@ variable_inclusion_graphs <- function()
 }
 
 
-relative_error_table <- function(data_set)
+relative_error_tbl <- function(data_set)
 {
   tbl <- bind_rows(map(.x = c(20, 50, 100),
   											.f = ~ variable_inclusion_tbl(.x, data_set, "cold_start", "log_prob1")))
@@ -237,17 +245,42 @@ relative_error_table <- function(data_set)
   						dplyr::select(-source)
   rel_error_tbl <- exact_tbl %>%
 								  	full_join(cva_tbl) %>%
-								  	mutate(relative_error = round((exact_prob - est_prob) / exact_prob, 2)) %>%
-								  	dplyr::select(data_set, var_prior, covariate, K, relative_error) %>%
+								  	mutate(relative_error = round(abs((exact_prob - est_prob)) / exact_prob, 2)) %>%
+								  	dplyr::select(data_set, var_prior, covariate, K, exact_prob, relative_error) %>%
 								  	arrange(data_set, var_prior, covariate, K)
 	
 	return(rel_error_tbl)
 }
 
 
+relative_error_tables <- function()
+{
+	hitters_re_tbl <- relative_error_table("Hitters")
+	bodyfat_re_tbl <- relative_error_table("Bodyfat")
+	wage_re_tbl <- relative_error_table("Wage")
+	college_re_tbl <- relative_error_table("College")
+	uscrime_re_tbl <- relative_error_table("USCrime")
+
+	bind_rows(hitters_re_tbl,
+						bodyfat_re_tbl,
+						wage_re_tbl,
+						college_re_tbl,
+						uscrime_re_tbl) %>%
+				mutate(greater_than_half = ifelse(exact_prob >= 0.5, ">0.5", "<=0.5")) %>%
+				filter(var_prior != "Robust.naive" & var_prior != "g.naive" & var_prior != "Robust.safe") %>%
+				mutate(K=sprintf("%03d", K)) %>%
+				group_by(data_set, K, var_prior, greater_than_half) %>%
+				summarise(relative_error = sum(relative_error)) %>%
+				unite(greater_than_half_K, greater_than_half, K) %>%
+		 		spread(greater_than_half_K, relative_error) %>%
+		 		write_csv("/tmp/summarised_relative_error_table.csv")
+}
+
+
 relative_error_plot <- function(tbl)
 {
-	 tbl %>% ggplot(aes(x=K, y=relative_error, col=var_prior)) + geom_line() + facet_grid(~covariate) + ylab("Relative error")
+	 tbl %>% ggplot(aes(x=K, y=relative_error, col=var_prior)) +
+	 					ggtitle(tbl$data_set) + geom_line() + facet_grid(~covariate) + ylab("Relative error")
 }
 
 
@@ -263,32 +296,14 @@ relative_error_plots <- function()
 }
 
 
-generate_boxplots <- function(dat)
+#' Build a database of the F_1 scores produced by various experiments
+build_f_1_db <- function()
 {
-	# Base
-  pdf(sprintf("results/%s_%s_%s_%s.pdf", K, data_fn, start, prior))
-  boxplot(dat,names=c("lasso","scad","mcp",
-                      # "emvs",
-                      "bms",
-                      #"varbvs",
-                      "cva"),ylim=c(0,1))
-  dev.off()
+	library(stringr)
+	path <- "~/Dropbox/phd/code/QLT/results/"
 
-  # Ggplot
-	library(tidyverse)
-	library(forcats)
-	dat2 <- data.frame(dat)
-	colnames(dat2) <- c("lasso", "scad", "mcp", "bms", "varbvs", "cva")
-	dat3 <- dat2 %>%
-	  gather(method, F_1, lasso:cva) %>%
-	  mutate(method = parse_factor(method, c("lasso", "scad", "mcp", "bms", "varbvs", "cva")))
-	ggplot(dat3, aes(x=method, y=F_1)) + geom_boxplot() + ggtitle("Something")
-}
-
-
-build_db <- function()
-{
-	orig_fnames = list.files(pattern = "*.dat$")
+	# Load CVA F_1 data
+	orig_fnames = list.files(path = path, pattern = "*.dat$")
 	fnames <- orig_fnames %>%
 							str_replace("generate_data_", "") %>%
 							str_replace("high_dimensional", "highdimensional") %>%
@@ -297,25 +312,133 @@ build_db <- function()
 							str_replace("log_prob1", "logprob1")
 	pattern <- "^(.*)_(.*)_(.*)_(.*).dat$"
 	db <- str_match(fnames, pattern)
-	tbl <- tibble(fname = orig_fnames, k = as.numeric(db[, 2]), data = db[, 3], start = db[, 4], prior = db[, 5], f_1 = NA)
-
-	path <- "~/Dropbox/phd/code/QLT/results/"
-	for (i in 1:nrow(tbl)) {
-		load(str_c(path, tbl$fname[i]))
-		tbl$f_1[i] <- list(dat)
+	cva_tbl <- tibble(fname = orig_fnames, k = as.numeric(db[, 2]), data = db[, 3], start = db[, 4], prior = db[, 5], f_1 = NA)
+	cva_tbl <- cva_tbl %>% filter(!is.na(k)) # Remove comparison/non-matching data sets
+	for (i in 1:nrow(cva_tbl)) {
+		load(str_c(path, cva_tbl$fname[i]))
+		cva_tbl$f_1[i] <- list(dat)
 	}
-	tbl <- tbl %>%
-					mutate(f_1_mean = map_dbl(tbl$f_1, mean),
-									f_1_median = map_dbl(tbl$f_1, median),
-									f_1_sd = map_dbl(tbl$f_1, sd))
+	cva_tbl$f_1 <- map(cva_tbl$f_1, function(x) {
+	  if (is.vector(x)) {
+	    x
+	  } else if (is.matrix(x)) {
+	    x[, ncol(x)]
+	  } else {
+	    x
+	  }
+	})
+	
+	# Load acomparison data
+	load("~/Dropbox/phd/code/QLT/results/QLT_comparison.dat")
+	QLT_dat <- dat[, 1:5]
+	loaded <- load("~/Dropbox/phd/code/QLT/results/high_dimensional_comparison.dat")
+	high_dimensional_dat <- dat[, 1:5]
+	columns <- c("Lasso", "Scad", "Mcp", "Bms", "Varbvs")
+	colnames(QLT_dat) <- columns
+	QLT_list <- map(.x=columns, ~QLT_dat[,.x])
+	colnames(high_dimensional_dat) <- columns
+	high_dim_list <- map(.x=columns, ~high_dimensional_dat[,.x])
+	QLT_tbl <- tibble(data="QLT", method=columns, f_1=QLT_list)
+	high_dim_tbl <- tibble(data="highdimensional", method=columns, f_1=high_dim_list)
+	comparison_tbl <- QLT_tbl %>% bind_rows(high_dim_tbl)
 
-	return(tbl)
+	# Some CVA data got mixed in with this, so seperate that out and combine with the rest of the CVA data
+	#cva_k1000_tbl <- comparison_tbl %>% filter(method == "CVA_K1000") %>% dplyr::select(-method)
+	#comparison_no_cva_tbl <- comparison_tbl %>% filter(method != "CVA_K1000")
+	#cva_k1000_tbl <- cva_k1000_tbl %>%
+	#									mutate(k=1000, 
+	#												 fname=str_c(data, "_comparison.dat"),
+	#												 start="cold",
+	#												 prior="BIC")
+	#cva_tbl <- cva_tbl %>% bind_rows(cva_k1000_tbl)
+
+	return(list(comparison_tbl=comparison_tbl, cva_tbl=cva_tbl))
 }
 
+
+generate_boxplot <- function(data_set, prior_, start_, cva_tbl, comparison_tbl)
+{
+	# Comparison F_1 scores are always the same
+	# Compare against CVA for different values of K, start, prior
+  cva_plot_tbl <- cva_tbl %>%
+										filter(data == data_set & prior == prior_ & start == start_) %>%
+										mutate(method = sprintf("CVA: K=%04d", k))
+  # I don't know how this happened, but some of the f_1 data files contain 50 by c
+  # matrices. We only want the last column.
+  cva_plot_tbl$f_1 <- map(cva_plot_tbl$f_1, function(x) {
+    if (is.vector(x)) {
+      x
+    } else {
+      x[, 4]
+    }
+  })
+  method_levels <- c(unique(comparison_tbl$method), sort(unique(cva_plot_tbl$method)))
+  bind_rows(comparison_tbl %>% filter(data == data_set) %>% select(method, f_1),
+						cva_plot_tbl %>% select(method, f_1)) %>%
+    unnest %>%
+		ggplot(aes(x=factor(method, levels=method_levels, ordered=TRUE), y=f_1)) + 
+    geom_boxplot() + ylim(low=0, high=1) + xlab("Method") + ylab(TeX("F_1"))
+}
+
+
+generate_boxplots <- function()
+{
+  dbs <- build_f_1_db()
+  
+  setwd("~/Dropbox/phd/code/QLT")
+  pdf("results/QTL_cold_maruyama.pdf")
+  generate_boxplot("QLT", "maruyama", "cold", dbs$cva_tbl, dbs$comparison_tbl)
+  dev.off()
+  
+  pdf("results/QTL_likelihood_maruyama.pdf")
+  generate_boxplot("QLT", "maruyama", "likelihood", dbs$cva_tbl, dbs$comparison_tbl)
+  dev.off()
+  
+  pdf("results/QTL_covariates_maruyama.pdf")
+  generate_boxplot("QLT", "maruyama", "covariates", dbs$cva_tbl, dbs$comparison_tbl)
+  dev.off()
+  
+  pdf("results/highdimensional_cold_logprob1.pdf")
+  generate_boxplot("highdimensional", "logprob1", "cold", dbs$cva_tbl, dbs$comparison_tbl)
+  dev.off()
+  
+  pdf("results/highdimensional_likelihood_logprob1.pdf")
+  generate_boxplot("highdimensional", "logprob1", "likelihood", dbs$cva_tbl, dbs$comparison_tbl)
+  dev.off()
+  
+  pdf("results/highdimensional_covariates_logprob1.pdf")
+  generate_boxplot("highdimensional", "logprob1", "covariates", dbs$cva_tbl, dbs$comparison_tbl)
+  dev.off()
+}
+
+# # Base
+ #  pdf(sprintf("results/%s_%s_%s_%s.pdf", K, data_fn, start, prior))
+ #  boxplot(dat,names=c("lasso","scad","mcp",
+ #                      # "emvs",
+ #                      "bms",
+ #                      #"varbvs",
+ #                      "cva"),ylim=c(0,1))
+ #  dev.off()
+
+	# tbl <- tbl %>%
+	# 				mutate(f_1_mean = map_dbl(tbl$f_1, mean),
+	# 								f_1_median = map_dbl(tbl$f_1, median),
+	# 								f_1_sd = map_dbl(tbl$f_1, sd))
+
+ #  # Ggplot
+	# library(tidyverse)
+	# library(forcats)
+	# dat2 <- data.frame(dat)
+	# colnames(dat2) <- c("lasso", "scad", "mcp", "bms", "varbvs", "cva")
+	# dat3 <- dat2 %>%
+	#   gather(method, F_1, lasso:cva) %>%
+	#   mutate(method = parse_factor(method, c("lasso", "scad", "mcp", "bms", "varbvs", "cva")))
+	# ggplot(dat3, aes(x=method, y=F_1)) + geom_boxplot() + ggtitle("Something")
 # tbl %>% filter(f_1_median < .5) %>% group_by(k, prior) %>% arrange(k, prior) %>% summarise(count = n())
 # tbl %>% filter(f_1_median < .5) %>% group_by(data, prior) %>% arrange(k, prior) %>% summarise(count = n())
 # tbl %>% filter(f_1_median >= .5) %>% group_by(k, prior) %>% arrange(k, prior) %>% summarise(count = n())
 # tbl %>% filter(f_1_median >= .5) %>% group_by(data, prior) %>% arrange(k, prior) %>% summarise(count = n())
+
 
 main <- function()
 {
