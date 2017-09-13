@@ -42,48 +42,62 @@
 		\alpha & \propto 1 \\
 		\vbeta | \sigma^2, g & \sim \N_p(\vzero, g \sigma^2 (\mX^T \mX)^{-1}),                     \\
 		p(\sigma^2)          & = (\sigma^2)^{-1} \I(\sigma^2 > 0), \text{ and }                    \\
-		p(g)                 & = \frac{g^b (1 + g)^{-(a + b + 2)}}{\Beta(a + 1, b + 1)} \I(g > 0), 
+		p(g)                 & = \text{undefined}
 	\end{align*}
-	choosing $a = -3/4$ and $b = (n-p)/2 - a - 2$, following \citep{Maruyama2011}.
 \end{frame}
 
 % Discuss Bartlett's and Information Paradox
 \begin{frame}
-	\frametitle{Bartlett's Paradox and the Information Paradox}
-	The Bayes Factor for comparing a non-null model to the null model is
-	\[
-		\text{BF}(\mathcal{M}_\vgamma : \mathcal{M}_0) = \frac{(1 + g)^{(n - p_\vgamma - 1)/2}}{[1 + g (1 - R_\vgamma^2)]^{(n - 1)/2}}
-	\]
-	But this Bayes Factor exhibits some paradoxes.
+	\frametitle{How should we choose $g$?}
+
+	If we simply let $g \to \infty$ or make a fixed choice of $g$, \citep{Liang2008} showed that we will
+	encounter a few model selection paradoxes.
+	Let $\vzero$ denote the null model and $\vgamma^*$ denote the true model.
+
 	\begin{itemize}
-		\item Problem 1) Bartlett's paradox: $p(\vzero | \vy) \to 1$ as $g \to \infty$ \\
-		\item Problem 2) Information paradox: $p(\vgamma^* | \vy) \cancel{\to} 1$ as $n \to \infty$
+		\setlength{\itemindent}{3.0em}
+		\item[Paradox 1] Bartlett's paradox: $p(\vzero | \vy) \to 1$ as $g \to \infty$ \\
+					As $g$ increases, the probability of selecting the null model goes to $1$
+		\item[Paradox 2] Information paradox: $p(\vgamma^* | \vy) \cancel{\to} 1$ as $n \to \infty$ \\
+					No matter how large the sample size, the probability that we select the true model never
+					reaches $1$
 	\end{itemize}
 
 \end{frame}
 
 % Mixture of g, choice of g prior
 \begin{frame}
-	\frametitle{Mixture of $g$}
-	\citep{Liang2008} suggested we avoid these paradoxes by using a mixture of $g$.
-	We choose a Beta-Prime prior on $g$, following \citep{Maruyama2011}.
-	\[
-		p(g) = \frac{g^b (1 + g)^{-(a + b + 2)}}{\Beta(a + 1, b + 1)} \I(g > 0)
-	\]
+	\frametitle{We should choose a mixture of $g$}
+	\citep{Liang2008} suggested we avoid these paradoxes by using a mixture of $g$. Several choices of prior
+	for $g$	have been proposed.
+	\small
+	\begin{itemize}
+		\item hyper-$g$ prior $p(g) = \frac{a-2}{2} (1 + g)^{-a/2} I(g > 0)$, $a > 2$ \citep{Liang2008}
+		\item hyper-$g/n$ prior $p(g) = \frac{a-2}{2n} (1 + g/n)^{-a/2} I(g > 0)$, $a > 2$ \citep{Liang2008}
+		\item Bayarri's robust prior on $g$,
+					$p(g) = \frac{1}{2} \left(  \frac{1 + n}{1 + p_\vgamma} \right)^{1/2} (1 + g)^{-3/2} I(g > L)$
+					where $L = (1 + n)/(1 + p_\vgamma) - 1$
+		\item Beta-Prime prior on $g$ 
+		$p(g) = \frac{g^b (1 + g)^{-(a + b + 2)}}{\Beta(a + 1, b + 1)} \I(g > 0)$
+		\citep{Maruyama2011}
+	\end{itemize}
 \end{frame}
 
 % Things we derived
 \begin{frame}
-	\frametitle{Things we derived}
-	$$\log p(\vy, \vgamma) = \int p(\vy | \alpha, \vbeta, \sigma^2) p(\alpha) p(\vbeta) p(\sigma^2) d \alpha d \vbeta d \sigma^2$$
+	\frametitle{$p(\vy | \vgamma)$}
+	We need to calculate
+	$$p(\vy, \vgamma) = \int p(\vy | \alpha, \vbeta, \sigma^2) p(\alpha) p(\vbeta) p(\sigma^2) d \alpha d \vbeta d \sigma^2.$$
+	We choose our priors so that this integral is tractable. Each choice of prior like a fancy version of BIC
+	\small
 	\begin{itemize}
-		\item We choose our priors so that this integral is tractable. Each choice of prior like a fancy version of BIC
 		\item Liang et al. 2008 hyper-$g$ prior \citep{Liang2008}
 			$p(\vy | \vgamma) = \frac{K(n) (a - 2)}{p_\vgamma + a  - 2} {}_2 F_1 \left( \frac{n-1}{2}, 1; \frac{p_\vgamma + a}{2}; R_\vgamma^2 \right)$
 		\item Liang et al. 2008 hyper-$g/n$ prior \citep{Liang2008}
 			$p(\vy | \vgamma) = \frac{K(n) (a - 2)}{n (p_\vgamma + a  - 2)} F_1 \left( 1, \frac{a}{2}, \frac{n-1}{2}; \frac{p_\vgamma + a}{2}; 1 - \frac{1}{n}, R_\vgamma^2 \right)$
-		\item Robust Bayarri et al. (2012) \citep{Bayarri2012}
-			$p(\vy | \vgamma) = K(n) \left(\frac{n + 1}{1 + p_\vgamma}\right)^{-p_\vgamma/2} \frac{(\hat{\sigma_\vgamma^2})^{-(n-1)/2}}{p_\vgamma + 1} {}_2 F_1 \left[ \frac{n-1}{2}, \frac{p_\vgamma+1}{2}; \frac{p_\vgamma + 3}{2}; \frac{(1 - 1/\hat{\sigma_\vgamma^2})(p_\vgamma + 1)}{1 + n} \right]$
+		\item Robust Bayarri et al. (2012) \citep{Bayarri2012} 
+			\tiny
+			$p(\vy | \vgamma) = K(n) \left(\frac{n + 1}{1 + p_\vgamma}\right)^{-p_\vgamma/2} \frac{(\hat{\sigma}_\vgamma^2)^{-(n-1)/2}}{p_\vgamma + 1} {}_2 F_1 \left[ \frac{n-1}{2}, \frac{p_\vgamma+1}{2}; \frac{p_\vgamma + 3}{2}; \frac{(1 - 1/\hat{\sigma}_\vgamma^2)(p_\vgamma + 1)}{1 + n} \right]$
 	\end{itemize}
 \end{frame}
 
