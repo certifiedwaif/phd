@@ -19,9 +19,10 @@
 \usepackage{algorithm,algorithmic}
 % \usepackage[inner=2.5cm,outer=1.5cm,bottom=2cm]{geometry}
 \usepackage{setspace}
-\onehalfspacing
+\doublespacing
 \usepackage{microtype}
 \usepackage{color}
+\usepackage{natbib}
 
 \newtheorem{theorem}{Theorem}[section]
 
@@ -73,36 +74,36 @@ Model selection attempts to balance goodness of fit against model complexity, ne
 underfitting. Many approaches to model selection have been investigated, with various model selection criteria
 proposed to attempt to balance model likelihood against model complexity. One approach to model selection is
 to select between entire models, using a model selection criterion. These criterion may have a fixed penalty
-for model complexity, such as Akaike's Information Criterion \cite{Akaike1974}, the Risk Inflation Criterion
-\cite{Foster1994}, the Schwarz criterion or Bayesian Information Criterion \cite{Schwarz1978}, the Deviance
-Information Criterion \cite{Spiegelhalter2016} or the Principle of Minimum Description Length
-\cite{Hansen2001}. Alternatively, the penalty may be adaptive/data--dependent as in \cite{George2000}. An
+for model complexity, such as Akaike's Information Criterion \citep{Akaike1974}, the Risk Inflation Criterion
+\citep{Foster1994}, the Schwarz criterion or Bayesian Information Criterion \citep{Schwarz1978}, the Deviance
+Information Criterion \citep{Spiegelhalter2016} or the Principle of Minimum Description Length
+\citep{Hansen2001}. Alternatively, the penalty may be adaptive/data--dependent as in \citep{George2000}. An
 alternative to model selection criterion is to select models based on their posterior probability, such as by
-selecting the median probability model as in \cite{Barbieri2004}. In a Bayesian context is to use Bayes
+selecting the median probability model as in \citep{Barbieri2004}. In a Bayesian context is to use Bayes
 factors to compare the posterior likelihoods of the candidate models to see which is most probable given the
-observed data. This can be done, for example, by using Bayes Factors as in \cite{Kass1993}. Rather than
+observed data. This can be done, for example, by using Bayes Factors as in \citep{Kass1993}. Rather than
 selecting one candidate model, several models can be combined together using Bayesian model  averaging, as in
-\cite{Hoeting1999}, \cite{Raftery1997}, \cite{Fernandez2001} or \cite{Papaspiliopoulos2016}. Or model
-selection can be made implicit in the model fitting process itself, as in ridge regression \cite{Casella1980},
-of which the well-known lasso is a special case \cite{Tibshirani1996}. As \cite{Breiman1996} and
-\cite{Efron2013} showed, while  the standard formulation of a linear model is unbiased, the goodness of fit of
+\citep{Hoeting1999}, \citep{Raftery1997}, \citep{Fernandez2001} or \citep{Papaspiliopoulos2016}. Or model
+selection can be made implicit in the model fitting process itself, as in ridge regression \citep{Casella1980},
+of which the well-known lasso is a special case \citep{Tibshirani1996}. As \citep{Breiman1996} and
+\citep{Efron2013} showed, while  the standard formulation of a linear model is unbiased, the goodness of fit of
 these models is numerically  unstable. Breiman showed that by introducing a penalty on the size of the
 regression co- efficients such as  in ridge regression, this numerical instability can be avoided. This
 reduces the variances of the co-efficient estimates, at the expense of introducing some bias --- the bias--
 variance trade--off.
 
 Another approach to model selection is to focus on selecting individual covariates, rather than entire
-models. This approach can either be Fully Bayesian or Empirically Bayesian as in \cite{Cui2008}. Variable
+models. This approach can either be Fully Bayesian or Empirically Bayesian as in \citep{Cui2008}. Variable
 selection approaches involve a stochastic search over the variables in the model space. This search can be
-driven by posterior probabilities, as in \cite{Casella2006}, or by Gibbs sampling approaches such as in
-\cite{George1993}. These two approaches of model selection and variable selection can be combined, as in
-\cite{Geweke1996}.
+driven by posterior probabilities, as in \citep{Casella2006}, or by Gibbs sampling approaches such as in
+\citep{George1993}. These two approaches of model selection and variable selection can be combined, as in
+\citep{Geweke1996}.
 
 
-\cite{Zellner1980} suggested a particular form of conjugate Normal-Gamma family where the Bayes factors have a
+\citep{Zellner1980} suggested a particular form of conjugate Normal-Gamma family where the Bayes factors have a
 relatively simple form, incorporating a parameter $g$ to control mixing between the model fit from the data
 and a prior specification of model fit. This immediately raises the question of how $g$ should be chosen, and
-whether it should be fixed or have a prior specification. \cite{Liang2008} showed that fixed choices of $g$
+whether it should be fixed or have a prior specification. \citep{Liang2008} showed that fixed choices of $g$
 lead to paradoxes such as Bartlett's Paradox and the Information Paradox, and so a prior specification should
 be preferred. There are many ways of choosing a prior on $g$. Using a mixture of $g$-priors has the advantage
 of adapting the degree of shrinkage to the prior model dependent on the data.
@@ -114,7 +115,7 @@ of adapting the degree of shrinkage to the prior model dependent on the data.
 A challenge to applying this method of model selection is that exact model fitting may be computationally
 infeasible for models involving even moderate numbers of observations and covariates, and popular alternatives
 for fitting Bayesian models such as Monte Carlo Markov Chains (henceforth referred to as MCMC) are still
-extremely computationally intensive. Variational Bayes (see \cite{Ormerod2010}) is a computationally
+extremely computationally intensive. Variational Bayes (see \citep{Ormerod2010}) is a computationally
 efficient, deterministic method of fitting Bayesian models to data. Variational Bayes approximates the true
 posterior $p(\vy, \vtheta)$ by minimising the KL divergence between the posterior and the  approximating
 distribution $q(\vtheta)$.
@@ -127,7 +128,7 @@ in closed form in these situations.
 
 
 % Structured Variational Bayes for model selection, Wand and Ormerod Variational Bayes for Elaborate 
-% Distributions (\cite{Wand2011})
+% Distributions (\citep{Wand2011})
 
 
 % Application
@@ -136,7 +137,7 @@ in closed form in these situations.
 
 % Our main contribution
 In this paper, we develop Variational Bayes approximations to model selection of linear models using Zellner's
-g prior as in \cite{Liang2008}. We show that in this situation, our variational approximation is almost exact
+g prior as in \citep{Liang2008}. We show that in this situation, our variational approximation is almost exact
 -- that is, the variational approximation of the Bayesian linear model gives almost perfect estimates.
 
 % By searching of the model space as one covariate changes between each sub-model and  using rank-1 updates on
@@ -151,8 +152,8 @@ in Section \ref{sec:conclusion}, we provide a Conclusion and Discussion.
 
 Consider a normal linear model on $\vy$ with conjugate normal prior on $\vbeta$ with mean centred at $\vzero$,
 and covariance $g \sigma^2 (\mX^\top \mX)^{-1}$ where the prior on $g$ is Zellner's g-prior on the covariance
-matrices (Zellner 1986), as this yields a tractable posterior for $\vbeta$ as shown by \cite{Liang2008}. We
-choose $a$  and $b$ to be $-3/4$ and $(n - p)/2 - a - 2$ respectively, following \cite{Maruyama2011}.
+matrices (Zellner 1986), as this yields a tractable posterior for $\vbeta$ as shown by \citep{Liang2008}. We
+choose $a$  and $b$ to be $-3/4$ and $(n - p)/2 - a - 2$ respectively, following \citep{Maruyama2011}.
 
 \section{Methodology}
 \label{sec:methodology}
@@ -172,10 +173,10 @@ approximating probability distribution.
 
 Zellner constructed a family of priors for a Gaussian regression model using a particular form of conjugate
 Normal-Gamma model, where the prior covariance matrix of $\vbeta$ is taken to be a multiple of the Fisher
-information  matrix by the parameter $g$ \cite{Goel1986}. This places the most prior mass for $\vbeta$ on the
+information  matrix by the parameter $g$ \citep{Goel1986}. This places the most prior mass for $\vbeta$ on the
 section of the parameter space where the data is least informative.
 
-We consider a linear model with a g-prior, as in \cite{Liang2008}. Consider the linear model
+We consider a linear model with a g-prior, as in \citep{Liang2008}. Consider the linear model
 
 \begin{align*}
 	\vy | \vbeta, \sigma^2 \sim \N_n(\mX \vbeta, \sigma^2 \mI) 
@@ -194,7 +195,7 @@ with priors
 
 This leads to the posterior distribution
 \[
-	\vbeta | \vy \sim \N\left(\frac{g}{1+g} \vbetahatls, g \sigma^2 (\mX^\top \mX)^{-1} \right).
+	\vbeta | \vy \sim \N_p\left(\frac{g}{1+g} \vbetahatls, g \sigma^2 (\mX^\top \mX)^{-1} \right).
 \]
 
 \section{Fully Bayesian inference}
@@ -219,12 +220,12 @@ If $\vone^T\vy=0$ the $R$-squared statistic can be expressed
 \end{equation}
 where $R^2$ is the usual $R$-squared statistic associated with least squares regression.
 
-Equation 3.194 (iii) of \cite{Gradshteyn1988} is
+Equation 3.194 (iii) of \citep{Gradshteyn1988} is
 \begin{equation}\label{res:03}
 	\int_0^\infty \frac{ x^{\mu - 1} }{(1 + \beta x)^\nu} dx = \beta^{-\mu} \mbox{Beta}(\mu,\nu - \mu) \quad \quad \mbox{(assuming $\mu,\nu>0$ and $\nu>\mu$).}
 \end{equation}
 
-Equation 3.385 of \cite{Gradshteyn1988} is
+Equation 3.385 of \citep{Gradshteyn1988} is
 \begin{equation} \label{res:04}
 	\int_{0}^1 x^{\nu - 1} (1 - x)^{\lambda - 1}(1 - \beta x)^{\varrho} e^{-\mu x} dx = \mbox{Beta}(\nu,\lambda) \Phi_1(\nu,\varrho,\lambda+\nu,-\mu,\beta)
 \end{equation}
@@ -298,7 +299,7 @@ $$
 
 \noindent where the third and last lines follow from
 Equation \ref{res:01} and Equation \ref{res:02} respectively.
-We also used $\|\vy\|^2 = n$ and the property of determinants that $|c\mA| = c^d|\mA|$ and $|\mA^{-1}| = |\mA|^{-1}$ when $\mA \in\bR^{d\times d}$.
+We also make use of the fact that $\|\vy\|^2 = n$ and the property of determinants that $|c\mA| = c^d|\mA|$ and $|\mA^{-1}| = |\mA|^{-1}$ when $\mA \in\bR^{d\times d}$.
 
 %\medskip 
 %\noindent {\bf Result 4:}
@@ -464,7 +465,7 @@ $1 - h = \frac{1}{(1 + g)}$,
 and
 $\frac{dh}{dg} = \frac{1}{1+g} - \frac{g}{(1 +g)^2} = \frac{1}{(1+g)^2} = (1 - h)^2$.
 
-\noindent From Equation 3.383(i) of \cite{Gradshteyn1988},
+\noindent From Equation 3.383(i) of \citep{Gradshteyn1988},
 $$
 \int_{0}^u x^{\nu - 1} (u - x)^{\mu - 1}  e^{\beta x} dx = \mbox{Beta}(\nu,\mu) {}_1 F_1(\nu;\mu+\nu;\beta u)
 $$
@@ -498,7 +499,7 @@ $$
 \end{array}
 $$
 
-\noindent Calculating the integral using the result from \cite{Gradshteyn1988} above we have
+\noindent Calculating the integral using the result from \citep{Gradshteyn1988} above we have
 $$
 \int_0^\infty \tau^{n/2 - 1}\exp\left\{ -  \tfrac{n}{2} \tau \right\}{}_1 F_1\left(
 b + 1; \frac{n}{2}; \frac{nR^2}{2} \tau \right) d \tau = 
@@ -570,7 +571,7 @@ To calculate $G_1$, we evaluate the integral
 	                                           & = \frac{\Beta(p/2 + a + 1, b + 2)}{\Beta(p /2 + a + 1, b + 1)} {}_2 F_1(p/2 + a + 1, 1; n/2 + 1; R^2)              
 \end{align*}
 
-using \cite{Gradshteyn1988} 3.197 Equation 5,
+using \citep{Gradshteyn1988} 3.197 Equation 5,
 
 \[
 	\int_0^\infty x^{\lambda-1} (1+x)^\nu (1 + \alpha x)^{\mu} dx = \Beta(\lambda, -\mu-\nu-\lambda) {}_2 F_1 (\mu, \lambda; -\mu-\nu; 1 - \alpha)
@@ -929,7 +930,7 @@ variational approximation and exact posterior likelihood are more conservative.
 \subsubsection{Hitters}
 
 The Hitters data set was taken from the StatLib library maintained by Carnegie Mellon University, and used in
-\cite{James:2014:ISL:2517747}. The data was gathered from the the performance of players during the Major
+\citep{James:2014:ISL:2517747}. The data was gathered from the the performance of players during the Major
 League Baseball seasons for 1986 and 1987, and includes the following covariates:
 
 \begin{tabular}{|ll|}
@@ -978,7 +979,7 @@ The model ranking scatterplots are presented in Figure \ref{fig:Hitters_model_ra
 \end{figure}
 
 \subsubsection{Body Fat}
-The Body Fat data set was taken from \cite{Tarr2015}, and is on the relationship between percentage of body
+The Body Fat data set was taken from \citep{Tarr2015}, and is on the relationship between percentage of body
 fat and simple body measurements. The data set consists of 128 observations, and the covariates in the data set
 are:
 
@@ -1029,7 +1030,7 @@ The model ranking scatterplots are presented in Figure \ref{fig:bodyfat_model_ra
 
 \subsubsection{Wage}
 
-The Wage gap data set was taken from \cite{James:2014:ISL:2517747}, on 3000 workers in the Mid-Atlantic
+The Wage gap data set was taken from \citep{James:2014:ISL:2517747}, on 3000 workers in the Mid-Atlantic
 region. The data set includes 12 covariates:
 
 \begin{tabular}{|ll|}
@@ -1079,7 +1080,7 @@ The model ranking scatterplots are presented in Figure \ref{fig:Wage_model_ranki
 
 \subsubsection{Graduation Rate}
 
-The Graduation Rate data set was taken from \cite{James:2014:ISL:2517747}. The data is drawn from the 1995
+The Graduation Rate data set was taken from \citep{James:2014:ISL:2517747}. The data is drawn from the 1995
 issue of US News and World Report, and is on a large number of US Colleges. The data set consists of 777
 observations, and includes the following covariates:
 
@@ -1132,7 +1133,7 @@ The model ranking scatterplots are presented in Figure \ref{fig:GradRate_model_r
 \end{figure}
 
 \subsubsection{US Crime}
-The US Crime data set was taken from the \texttt{MASS} package \cite{Venables2002}, and is on the effect of
+The US Crime data set was taken from the \texttt{MASS} package \citep{Venables2002}, and is on the effect of
 punishment regimes on crime rates. The data set includes 47 states of the United States of America. The
 variables have been re-scaled for convenience, and include the following covariates:
 

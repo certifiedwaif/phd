@@ -10,6 +10,8 @@
 % \setlength\parindent{0pt}
 % \setlength{\bibsep}{0pt plus 0.3ex}
 
+\usepackage[doublespacing]{setspace}
+
 \input{include.tex}
 \input{Definitions.tex}
 
@@ -93,7 +95,7 @@ First, we find the approximation for $\lambda$. Assuming that $q(r_i) \sim \Bern
 \[
 \begin{array}{rl}
 	\ds p_i                                               
-	= \frac{\exp{(\eta_i)}}{I(y_i = 0) + \exp{(\eta_i)}}  
+	= \frac{\exp{(\eta_i)}}{\I(y_i = 0) + \exp{(\eta_i)}}  
 	= \text{expit}(\eta_i), \quad \mbox{(when $y_i = 0$)} 
 \end{array}
 \]
@@ -150,9 +152,9 @@ $$
 \noindent where
 \begin{align*}
 	q(\vtheta) &= q(\lambda) q(\rho) \prod_{i=1}^n q(r_i), \\
-	q(\lambda) &\sim \text{Gamma}{(\alpha_{q(\lambda)}, \beta_{q(\lambda)})}, \\
+	q(\lambda) &\sim \text{Gamma}{(\alpha_{q(\lambda)}, \beta_{q(\lambda))}}, \\
 	q(\rho) &\sim \text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)}) \text{ and } \\
-	q(r_i) &= 1 \text{ if } y_i \ne 0$,\text{ and } p_i \text{ if } y_i = 0,
+	q(r_i) &= 1 \text{ if } y_i \ne 0,\text{ and } p_i \text{ if } y_i = 0,
 \end{align*}
 where $p_i$ is calculated for each iteration as specified in Algorithm \ref{algorithm1}.
 

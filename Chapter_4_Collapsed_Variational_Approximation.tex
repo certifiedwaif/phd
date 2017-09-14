@@ -200,24 +200,27 @@ $\vepsilon \sim \N_n(\vzero, \mI_n)$.
 
 \begin{figure}\label{fig:highdim_warm_start_covariates}
 \caption{$F_1$ scores for CVA on the simulated high dimensional data with $\Gamma$ initialised from the SCAD models, with models with more covariates preferred. $K=20, 50, 100$ respectively}
-\includegraphics[scale=0.33]{code/QLT/results/20_generate_data_high_dimensional_warm_start_covariates_log_prob1.pdf}
-\includegraphics[scale=0.33]{code/QLT/results/50_generate_data_high_dimensional_warm_start_covariates_log_prob1.pdf}
-\includegraphics[scale=0.33]{code/QLT/results/100_generate_data_high_dimensional_warm_start_covariates_log_prob1.pdf}
+% \includegraphics[scale=0.33]{code/QLT/results/20_generate_data_high_dimensional_warm_start_covariates_log_prob1.pdf}
+% \includegraphics[scale=0.33]{code/QLT/results/50_generate_data_high_dimensional_warm_start_covariates_log_prob1.pdf}
+% \includegraphics[scale=0.33]{code/QLT/results/100_generate_data_high_dimensional_warm_start_covariates_log_prob1.pdf}
+\includegraphics[scale=0.5]{code/QLT/results/highdimensional_covariates_logprob1.pdf}
 \end{figure}
 
 \begin{figure}\label{fig:highdim_warm_start_likelihood}
 \caption{$F_1$ scores for CVA on the simulated high dimensional data with $\Gamma$ initialised from the SCAD models, with models with higher likelihood preferred. $K=20, 50, 100$ respectively}
-\includegraphics[scale=0.33]{code/QLT/results/20_generate_data_high_dimensional_warm_start_likelihood_log_prob1.pdf}
-\includegraphics[scale=0.33]{code/QLT/results/50_generate_data_high_dimensional_warm_start_likelihood_log_prob1.pdf}
-\includegraphics[scale=0.33]{code/QLT/results/100_generate_data_high_dimensional_warm_start_likelihood_log_prob1.pdf}
+% \includegraphics[scale=0.33]{code/QLT/results/20_generate_data_high_dimensional_warm_start_likelihood_log_prob1.pdf}
+% \includegraphics[scale=0.33]{code/QLT/results/50_generate_data_high_dimensional_warm_start_likelihood_log_prob1.pdf}
+% \includegraphics[scale=0.33]{code/QLT/results/100_generate_data_high_dimensional_warm_start_likelihood_log_prob1.pdf}
+\includegraphics[scale=0.5]{code/QLT/results/highdimensional_likelihood_logprob1.pdf}
 \end{figure}
 
 \begin{figure}\label{fig:highdim_cold_start}
 \caption{$F_1$ scores for CVA on the simulated high-dimensional data with $\Gamma$ initialised randomly.
 					K=20, 50 and 100 respectively}
-\includegraphics[scale=0.33]{code/QLT/results/20_generate_data_high_dimensional_cold_start_log_prob1.pdf}
-\includegraphics[scale=0.33]{code/QLT/results/50_generate_data_high_dimensional_cold_start_log_prob1.pdf}
-\includegraphics[scale=0.33]{code/QLT/results/100_generate_data_high_dimensional_cold_start_log_prob1.pdf}
+% \includegraphics[scale=0.33]{code/QLT/results/20_generate_data_high_dimensional_cold_start_log_prob1.pdf}
+% \includegraphics[scale=0.33]{code/QLT/results/50_generate_data_high_dimensional_cold_start_log_prob1.pdf}
+% \includegraphics[scale=0.33]{code/QLT/results/100_generate_data_high_dimensional_cold_start_log_prob1.pdf}
+\includegraphics[scale=0.5]{code/QLT/results/highdimensional_cold_logprob1.pdf}
 \end{figure}
 
 \subsection{Exploration of the posterior model space}
@@ -251,7 +254,7 @@ of success $1/2$.
 	\caption{Posterior model probabilities when $p = 12$. Red triangles denote models visited by the CVA
 						algorithm, while black triangles are models that were not visited.}
 	\label{fig:cva_posterior_models}
-	\includegraphics[scale=0.33]{code/correlation/cva_low_dimensional.pdf}
+	\includegraphics[scale=0.5]{code/correlation/cva_low_dimensional.pdf}
 \end{figure}
 
 \subsection{$p > n$}
@@ -339,18 +342,29 @@ also does poorly comparatively with a warm start from SCAD, although still bette
 \begin{figure}\label{fig:QLT_warm_start_covariates}
 \caption{$F_1$ scores for CVA on the simulated QLT data with $\Gamma$ initialised from the SCAD models, with
 models with more covariates preferred. $K=20, 50, 100$ respectively}
-\includegraphics[scale=0.33]{code/QLT/results/20_generate_data_QTL_warm_start_covariates_log_prob1.pdf}
-\includegraphics[scale=0.33]{code/QLT/results/50_generate_data_QTL_warm_start_covariates_log_prob1.pdf}
-\includegraphics[scale=0.33]{code/QLT/results/100_generate_data_QTL_warm_start_covariates_log_prob1.pdf}
+\includegraphics[scale=0.5]{code/QLT/results/QTL_covariates_maruyama.pdf}
+
+% \includegraphics[scale=0.33]{code/QLT/results/20_generate_data_QTL_warm_start_covariates_log_prob1.pdf}
+% \includegraphics[scale=0.33]{code/QLT/results/50_generate_data_QTL_warm_start_covariates_log_prob1.pdf}
+% \includegraphics[scale=0.33]{code/QLT/results/100_generate_data_QTL_warm_start_covariates_log_prob1.pdf}
 \end{figure}
+
+\begin{figure}\label{fig:QLT_warm_start_covariates}
+\caption{$F_1$ scores for CVA on the simulated QLT data with $\Gamma$ initialised from the SCAD models, with
+models with higher likelihood preferred. $K=20, 50, 100$ respectively}
+\includegraphics[scale=0.5]{code/QLT/results/QTL_likelihood_maruyama.pdf}
+\end{figure}
+
 
 Initialising $\Gamma$ randomly, CVA performed poorly by comparison with either of the warm start methods
 above, as can be seen from \ref{fig:QLT_cold_start}.
 \begin{figure}\label{fig:QLT_cold_start}
 \caption{$F_1$ scores for CVA on the simulated QLT data with $\Gamma$ initialised randomly. $K=20, 50, 100$ respectively}
-\includegraphics[scale=0.33]{code/QLT/results/20_generate_data_QTL_cold_start_log_prob1.pdf}
-\includegraphics[scale=0.33]{code/QLT/results/50_generate_data_QTL_cold_start_log_prob1.pdf}
-\includegraphics[scale=0.33]{code/QLT/results/100_generate_data_QTL_cold_start_log_prob1.pdf}
+\includegraphics[scale=0.5]{code/QLT/results/QTL_cold_maruyama.pdf}
+
+% \includegraphics[scale=0.33]{code/QLT/results/20_generate_data_QTL_cold_start_log_prob1.pdf}
+% \includegraphics[scale=0.33]{code/QLT/results/50_generate_data_QTL_cold_start_log_prob1.pdf}
+% \includegraphics[scale=0.33]{code/QLT/results/100_generate_data_QTL_cold_start_log_prob1.pdf}
 \end{figure}
 
 
@@ -359,13 +373,6 @@ When initialising $\Gamma$ with a warm start from SCAD preferring models with hi
 CVA performed less well on the QTL example than SCAD preferring models with more covariates, but still
 better than other competing methods except for MCP,
 as can be seen from Figure \ref{fig:QLT_warm_start_likelihood}
-\begin{figure}\label{fig:QLT_warm_start_likelihood}
-\caption{$F_1$ scores for CVA on the simulated QLT data with $\Gamma$ initialised from the SCAD models, with
-higher likelihood models preferred. $K=20, 50, 100$ respectively}
-\includegraphics[scale=0.33]{code/QLT/results/20_generate_data_high_dimensional_warm_start_likelihood_log_prob1.pdf}
-\includegraphics[scale=0.33]{code/QLT/results/50_generate_data_high_dimensional_warm_start_likelihood_log_prob1.pdf}
-\includegraphics[scale=0.33]{code/QLT/results/100_generate_data_high_dimensional_warm_start_likelihood_log_prob1.pdf}
-\end{figure}
 
 \section{Variable inclusion for small data sets}
 
@@ -376,8 +383,8 @@ of models selected $\mGamma$
 weighted by marginal likelihood of each model.
 The exact variable inclusion probabilities were calculated by summing the columns of the matrix of all possible
 models $\mGamma$ weighted by marginal likelihood of each model.
-The total relative error of the variable inclusion probabilities
-estimated by CVA. The results of these comparisons are presented in Table \ref{tab:variable_inclusion_rel_error}.
+The mean relative error of the variable inclusion probabilities estimated by CVA was calculated,
+and the results of these comparisons are presented in Table \ref{tab:variable_inclusion_rel_error}.
 The number of particles in the population $K$ affected the
 variable inclusion probability in the variables selected by CVA, while the marginal probability
 $p(\vgamma | \vy)$ used to weight models in $\Gamma$ seemed to have only a very minor impact.
@@ -397,26 +404,26 @@ ignoring the lower posterior probability models.
 	Dataset & Prior & & $<=0.5$ & & & $>0.5$ &\\
 	& & $K = 20$ & $K = 50$ & $K = 100$ & $K = 20$ & $K = 50$ & $K = 100$ \\
 	\hline
-	Bodyfat & BIC & 6.22 & 5.52 & 3.54 & 0.13 & 0.08 & 0.14 \\
-	 & hyper-g & 6.57 & 5.84 & 4.00 & 0.14 & 0.08 & 0.14 \\
-	 & Robust & 6.47 & 4.29 & 3.84 & 0.15 & 0.23 & 0.09 \\
-	 & ZE & 6.38 & 5.73 & 3.79 & 0.14 & 0.07 & 0.15 \\
-	College & BIC & 6.44 & 6.19 & 4.67 & 0.29 & 0.22 & 0.19 \\
-	 & hyper-g & 6.15 & 5.73 & 5.67 & 1.36 & 0.75 & 0.40 \\
-	 & Robust & 6.15 & 5.75 & 5.65 & 1.34 & 0.75 & 0.39 \\
-	 & ZE & 6.78 & 5.98 & 5.39 & 0.45 & 0.47 & 0.32 \\
-	Hitters & BIC & 10.59 & 8.10 & 6.64 & 0.86 & 0.31 & 0.57 \\
-	 & hyper-g & 7.80 & 7.41 & 7.10 & 3.80 & 2.22 & 0.55 \\
-	 & Robust & 8.38 & 7.89 & 7.16 & 3.22 & 1.74 & 0.48 \\
-	 & ZE & 8.91 & 7.94 & 6.91 & 2.78 & 1.35 & 0.48 \\
-	USCrime & BIC & 7.09 & 5.64 & 5.23 & 2.31 & 1.71 & 1.33 \\
-	 & hyper-g & 6.69 & 5.67 & 5.19 & 2.29 & 1.63 & 1.31 \\
-	 & Robust & 7.14 & 6.25 & 5.60 & 1.82 & 1.02 & 0.83 \\
-	 & ZE & 6.69 & 5.65 & 5.15 & 2.36 & 1.68 & 1.36 \\
-	Wage & BIC & 8.89 & 6.44 & 5.39 & 0.00 & 0.00 & 0.00 \\
-	 & hyper-g & 8.83 & 6.24 & 4.92 & 0.00 & 0.00 & 0.00 \\
-	 & Robust & 8.83 & 6.47 & 5.17 & 0.00 & 0.00 & 0.00 \\
-	 & ZE & 8.78 & 6.15 & 4.80 & 0.00 & 0.00 & 0.00 \\
+	Bodyfat&BIC&0.63&0.48&0.37&0.07&0.01&0.02\\
+	&g.safe&0.66&0.52&0.42&0.07&0.01&0.02\\
+	&Robust&0.65&0.52&0.4&0.07&0.01&0.02\\
+	&ZE&0.65&0.51&0.39&0.06&0.01&0.02\\
+	College&BIC&0.7&0.58&0.49&0.03&0.02&0.03\\
+	&g.safe&0.9&0.78&0.64&0.06&0.06&0.06\\
+	&Robust&0.88&0.78&0.63&0.06&0.06&0.06\\
+	&ZE&0.82&0.66&0.57&0.03&0.06&0.06\\
+	Hitters&BIC&0.74&0.64&0.5&0.12&0.07&0.06\\
+	&g.safe&NA&0.81&0.83&NA&0.17&0.07\\
+	&Robust&0.84&0.81&0.75&0.29&0.17&0.07\\
+	&ZE&0.79&0.72&0.67&0.27&0.13&0.05\\
+	USCrime&BIC&0.82&0.7&0.64&0.47&0.15&0.12\\
+	&g.safe&0.76&0.71&0.64&0.45&0.16&0.12\\
+	&Robust&0.79&0.7&0.61&0.35&0.14&0.08\\
+	&ZE&0.76&0.7&0.64&0.45&0.16&0.13\\
+	Wage&BIC&0.67&0.49&0.35&0&0&0\\
+	&g.safe&0.69&0.47&0.33&0&0&0\\
+	&Robust&0.69&0.47&0.32&0&0&0\\
+	&ZE&0.69&0.47&0.32&0&0&0\\
 	\hline
 \end{tabular}
 \end{table}

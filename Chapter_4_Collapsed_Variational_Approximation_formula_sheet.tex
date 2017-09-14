@@ -17,6 +17,7 @@
 \usepackage{amsthm}
 \usepackage{mathtools}
 \usepackage{algorithm,algorithmic}
+\usepackage[doublespacing]{setspace}
 \usepackage{microtype}
 
 \theoremstyle{definition}
@@ -87,15 +88,20 @@ Marginalising over $\vbeta_{-\vgamma}$ gives
 \noindent Finally, we integrate out $\sigma^2$. Noting that the expression involving $\sigma^2$ is an
 Inverse Gamma distribution with $\alpha = n/2$, $\beta = \left(\frac{n}{2}\right) (1 - R^2_{\vgamma, g})$
 \begin{align*}
-		& \exp{\left[- \frac{1}{2} \log{(n + g^{-1})}
+		& \exp{\left[-\frac{n}{2} \log{(2 \pi)} -\frac{1}{2} \log{(n + g^{-1})}
 		- \frac{(p + 1)}{2} \log{g} - \frac{p}{2} \log (1 + g^{-1}) \right]}
 		 \int (\sigma^{2})^{-n/2 - 1} \exp{\left[-\left(\frac{n}{2}\right) (1 - R^2_{\vgamma, g}) / \sigma^{2}\right]} d \sigma^2 \\
-		= &\exp{\left[- \frac{1}{2} \log{(n + g^{-1})}
+		= &\exp{\left[-\frac{n}{2} \log{(\pi n)} - \frac{1}{2} \log{(n + g^{-1})}
 		- \frac{(p + 1)}{2} \log{(g)} - \frac{p}{2} \log (1 + g^{-1})
 		+ \log \Gamma\left(\frac{n}{2}\right) - \frac{n}{2} \log(1 - R^2_{g, \vgamma}) \right]} \\
-		= &\frac{\Gamma(\frac{n}{2})}{(1 + g)^{p/2} (1 + ng)^{1/2} (1 - \frac{g}{1 + g} R^2_\vgamma)^{n/2}}
-		= \frac{\Gamma(\frac{n}{2})}{(1 + g)^{p/2} (1 + ng)^{1/2} (1 + (1 - R^2_\vgamma) g)^{n/2}}
+		= &\frac{\Gamma(\frac{n}{2})}{(n \pi)^{n/2} (1 + g)^{p/2} (1 + ng)^{1/2} (1 - \frac{g}{1 + g} R^2_\vgamma)^{n/2}} \\
+		= &\frac{\Gamma(\frac{n}{2})}{(n \pi)^{n/2}} \frac{(1 + g)^{(n-p)/2}}{(1 + g \hat{\sigma^2_\vgamma})^{n/2} (1 + ng)^{1/2}}
 \end{align*}
+
+Now, we apply the cake prior $\delta(g; h^{1/(1 + p_\vgamma)})$ to obtain
+\[
+	\frac{\Gamma(\frac{n}{2})}{(n \pi)^{n/2}} \frac{(1 + h^{1/(1 + p_\vgamma)})^{(n-p)/2}}{(1 + h^{1/(1 + p_\vgamma)} \hat{\sigma^2_\vgamma})^{n/2} (1 + nh^{1/(1 + p_\vgamma)})^{1/2}}
+\]
 
 \section{Priors on $g$}
 

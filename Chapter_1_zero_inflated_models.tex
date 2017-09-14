@@ -11,6 +11,7 @@
 % \setlength\parindent{0pt}
 % \setlength{\bibsep}{0pt plus 0.3ex}
 
+\usepackage[doublespacing]{setspace}
 % \usepackage[authoryear]{natbib}
 \usepackage{graphicx}
 \usepackage{algorithm,algorithmic}
@@ -1041,11 +1042,11 @@ for the regression parameters do not have closed form expressions. But these mod
 			the prior $a_\rho = 3$, $b_\rho = 1$ on $\rho$. Accuracy of the approximation was assessed by comparing the
 			fitted distribution for each parameter to a kernel density estimate of the parameter's distribution from
 			1 million samples from the equivalent model fitted using Stan. The results are presented in Table
-			\ref{tab:application_police_stops}.
+			\ref{tab:application_police_stops}. Figure \ref{fig:police_stops}
 			
 			\begin{figure}\label{fig:police_stops}
-			\caption{}
-			\includegraphics[scale=0.3]{}
+			\caption{Accuracy of parameter estimates for police stops}
+			\includegraphics[scale=0.3]{code/results/accuracy_plots_application2_GVA_inv_par-highlights-nup.pdf}
 			\end{figure}
 
 			% Table of results
@@ -1056,20 +1057,33 @@ for the regression parameters do not have closed form expressions. But these mod
 					\hline
 					Covariate                     & Posterior Mean & Lower 95\% CI & Upper 95\% CI & Accuracy \\
 					\hline
-					Intercept [African-Americans] & 4.04           & 4.03          & 4.042         & 82.4\%   \\
-					$\beta_2$ [hispanics]         & -0.445         & -0.445        & -0.445        & 98.1\%   \\
-					$\beta_3$ [whites]            & -1.380         & -1.380        & -1.380        & 98.5\%   \\
-					$\alpha_1$ [weapons crimes]   & 0.580          & 0.580         & 0.580         & 89.2\%   \\
-					$\alpha_2$ [property crimes]  & -0.191         & -0.191        & -0.191        & 92.2\%   \\
-					$\alpha_3$ [drug crimes]      & -0.750         & -0.750        & -0.750        & 94.9\%   \\
-					Random intercept              & 1.321          & -0.190        & 2.202         & 86.7\%   \\
-					$\sigma^2_{\vu}$              & 2.095          & 1.585         & 3.26          & 40\%     \\
+					Intercept [African-Americans] & 4.04          & 3.98           & 4.07          & 82.4\%   \\
+					$\beta_2$ [hispanics]         & -0.45         & -0.46          & -0.43         & 98.1\%   \\
+					$\beta_3$ [whites]            & -1.38         & -1.40          & -1.37         & 98.5\%   \\
+					$\alpha_1$ [weapons crimes]   & 0.58          & 0.57           & 0.59          & 89.2\%   \\
+					$\alpha_2$ [property crimes]  & -0.19         & -0.21          & -0.17         & 92.2\%   \\
+					$\alpha_3$ [drug crimes]      & -0.750        & -0.77          & -0.73         & 94.9\%   \\
+					Random intercept              & 1.321         & -0.190         & 2.202         & 86.7\%   \\
+					$\sigma^2_{\vu}$              & 8.57          & 1.02           & 24.35         & 49\%     \\
 					\hline
 				\end{tabular}
 			\end{table}
 			
 			% Table of speeds
-			
+			\begin{table}
+				\caption{Table of speeds - Police stops}
+				\label{tab:police_stop_speeds}
+				\begin{tabular}{|ll|}
+					\hline
+					Algorithm & Time  in seconds \\
+					\hline
+					Laplace & 0.24 \\
+					GVA covariance parameterisation & 6.02 \\
+					GVA inverse paramaterisation & 3.92 \\
+					GVA fixed point & 0.18 \\
+					\hline
+				\end{tabular}
+			\end{table}
 			
 			% TODO: You need to describe the data set and the model.
 			\subsection{Zero--inflated example -- Cockroaches in Apartments data set from Gelman}
@@ -1205,11 +1219,11 @@ for the regression parameters do not have closed form expressions. But these mod
 				\hline
 				Covariate          & Posterior Mean & Lower 95\% CI & Upper 95\% CI & Accuracy \\
 				\hline
-				Intercept & \\
-				Female & \\
-				Married & \\
-				Children under age 6 & \\
-				PhD & \\
+				Intercept & 0.86 & 0.65 & 1.06 & \\
+				Female & -0.18 & -0.29 & -0.08 &  \\
+				Married & 0.06 & -0.05 & 0.18 & \\
+				Children under age 6 & -0.08 & -0.15 & -0.01 & \\
+				PhD & 0.03 & -0.02 & -0.01 & \\
 				\hline
 			\end{tabular}			
 			\end{table}
