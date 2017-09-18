@@ -14,7 +14,7 @@
 
 \usefonttheme{serif}
 
-\title{Normal linear model selection}
+\title{Bayesian linear model selection}
 \author{Mark Greenaway, Dr John Ormerod}
 
 \mode<presentation>
@@ -32,30 +32,35 @@
 % Introduce problem
 % Introduce model
 \begin{frame}
-	\frametitle{Model}
-	Consider the linear model
-	\begin{align*}
-		\vy | \vbeta, \sigma^2 \sim \N_n(\mX \vbeta, \sigma^2 \mI) 
-	\end{align*}
-	with priors
-	\begin{align*}
-		\alpha & \propto 1 \\
-		\vbeta | \sigma^2, g & \sim \N_p(\vzero, g \sigma^2 (\mX^T \mX)^{-1}),                     \\
-		p(\sigma^2)          & = (\sigma^2)^{-1} \I(\sigma^2 > 0), \text{ and }                    \\
-		p(g)                 & = \text{undefined}
-	\end{align*}
+	\frametitle{Model selection using $g$}
+	\begin{itemize}
+		\item Consider the linear model
+		\begin{align*}
+			\vy | \alpha, \vbeta, \sigma^2 \sim \N_n(\vone_n \alpha + \mX \vbeta, \sigma^2 \mI) 
+		\end{align*}
+		with priors
+		\begin{align*}
+			\alpha & \propto 1, \\
+			\vbeta | \sigma^2, g & \sim \N_p(\vzero, g \sigma^2 (\mX^T \mX)^{-1}),                     \\
+			p(\sigma^2)          & = (\sigma^2)^{-1} \I(\sigma^2 > 0), \text{ and }                    \\
+			p(g)                 & = \text{unspecified for now}.
+		\end{align*}
+		\item We introduce a parameter $g \in [0, \infty)$ controls the mixing between the null and full models.
+		\item If $g$ is $0$, we
+		choose the null model. If $g$ is $\infty$ we choose $\hat{\vbeta}$.
+	\end{itemize}
 \end{frame}
 
 % Discuss Bartlett's and Information Paradox
 \begin{frame}
 	\frametitle{How should we choose $g$?}
 
-	If we simply let $g \to \infty$ or make a fixed choice of $g$, \citep{Liang2008} showed that we will
-	encounter a few model selection paradoxes.
-	Let $\vzero$ denote the null model and $\vgamma^*$ denote the true model.
-
 	\begin{itemize}
-		\setlength{\itemindent}{3.0em}
+		\item If we simply let $g \to \infty$ or make a fixed choice of $g$, \citep{Liang2008} showed that we will
+		encounter a few model selection paradoxes.
+		\item Let $\vzero$ denote the null model and $\vgamma^*$ denote the true model.
+
+		\setlength{\itemindent}{4.8em}
 		\item[Paradox 1] Bartlett's paradox: $p(\vzero | \vy) \to 1$ as $g \to \infty$ \\
 					As $g$ increases, the probability of selecting the null model goes to $1$
 		\item[Paradox 2] Information paradox: $p(\vgamma^* | \vy) \cancel{\to} 1$ as $n \to \infty$ \\
@@ -72,12 +77,15 @@
 	for $g$	have been proposed.
 	\small
 	\begin{itemize}
-		\item hyper-$g$ prior $p(g) = \frac{a-2}{2} (1 + g)^{-a/2} I(g > 0)$, $a > 2$ \citep{Liang2008}
-		\item hyper-$g/n$ prior $p(g) = \frac{a-2}{2n} (1 + g/n)^{-a/2} I(g > 0)$, $a > 2$ \citep{Liang2008}
-		\item Bayarri's robust prior on $g$,
-					$p(g) = \frac{1}{2} \left(  \frac{1 + n}{1 + p_\vgamma} \right)^{1/2} (1 + g)^{-3/2} I(g > L)$
-					where $L = (1 + n)/(1 + p_\vgamma) - 1$
-		\item Beta-Prime prior on $g$ 
+		\item hyper-$g$ prior \\
+		$p(g) = \frac{a-2}{2} (1 + g)^{-a/2} I(g > 0)$, $a > 2$ \citep{Liang2008}
+		\item hyper-$g/n$ prior \\
+		$p(g) = \frac{a-2}{2n} (1 + g/n)^{-a/2} I(g > 0)$, $a > 2$ \citep{Liang2008}
+		\item Bayarri's robust prior on $g$ \\
+		$p(g) = \frac{1}{2} \left(  \frac{1 + n}{1 + p_\vgamma} \right)^{1/2} (1 + g)^{-3/2} I(g > L)$
+		where $L = (1 + n)/(1 + p_\vgamma) - 1$
+		\citep{Bayarri2012}
+		\item Beta-Prime prior on $g$ \\
 		$p(g) = \frac{g^b (1 + g)^{-(a + b + 2)}}{\Beta(a + 1, b + 1)} \I(g > 0)$
 		\citep{Maruyama2011}
 	\end{itemize}
@@ -85,10 +93,12 @@
 
 % Things we derived
 \begin{frame}
-	\frametitle{$p(\vy | \vgamma)$}
-	We need to calculate
-	$$p(\vy, \vgamma) = \int p(\vy | \alpha, \vbeta, \sigma^2) p(\alpha) p(\vbeta) p(\sigma^2) d \alpha d \vbeta d \sigma^2.$$
-	We choose our priors so that this integral is tractable. Each choice of prior like a fancy version of BIC
+	\frametitle{Calculating $p(\vy | \vgamma)$}
+	We want to calculate the marginal likelihood of $\vy$ given a model $\vgamma$.
+	To do this, we need to calculate
+	$$p(\vy, \vgamma) = \int p(\vy | \alpha, \vbeta, \sigma^2) p(\alpha) p(\vbeta | g) p(\sigma^2) p(g) d \alpha d \vbeta d \sigma^2 d g.$$
+	We choose our priors so that this integral is tractable, with help from \citep{Gradshteyn1988}.
+	The marginal likelihoods behave like BIC.
 	\small
 	\begin{itemize}
 		\item Liang et al. 2008 hyper-$g$ prior \citep{Liang2008}
@@ -101,12 +111,77 @@
 	\end{itemize}
 \end{frame}
 
-% Results
+% Exact posterior distributions using special functions
 \begin{frame}
-	\frametitle{Results}
-	$\tau_g$ is a function of $n$, $p$ and $R^2$.
+	\frametitle{Exact posterior distributions of $\alpha$, $u$ and $\sigma^2$ using special functions}
+
+	Choosing a Beta-Prime prior on g, we were able to derive closed form expressions for the posterior
+	distributions. \\
+	Here $u = g/(1 + g)$.
+	\small
+	\begin{align*}
+		p(u | \vy) &= \frac{(1 - R^2)^{b + 1}}{\text{Beta}(b + 1, d + 1)} u^b (1 - u)^d (1 - u R^2)^{-(b + d + 2)} \\
+		p(\alpha | \vy) &= \frac{\Gamma(c + \frac{1}{2}) (1 - R^2)^{b + 1}}{\Gamma(c) \sqrt{\pi}} (1 + \alpha^2)^{-n/2}
+		{}_2 F_1 \left(b + 1, c + \frac{1}{2}; c; \frac{R^2}{1 + \alpha^2}\right) \\
+		p(\sigma^2 | \vy) &= \frac{\frac{n}{2} (\hat{\sigma}^2)^{b + 1}}{\Gamma(c)} (\hat{\sigma}^2)^{-(c + 1)}
+												\exp{\left( -\frac{n}{2 \sigma^2} \right)} {}_1 F_1 \left(b + 1; c; \frac{n R^2}{2 \sigma^2}\right) \\
+	\end{align*}
 \end{frame}
-% Look at past presentations as a starting point
+
+\begin{frame}
+	\frametitle{Exact first and second moments of $\vbeta$}
+	% We weren't able to find a closed form expression for $\vbeta | \vy$, but 
+	We weren't able to find a closed form expression for $\vbeta | \vy$, but we were able to find closed form
+	expressions for the first and second moments of $\vbeta | \vy$.
+	\small
+	\begin{align*}
+		\E[\vbeta | \vy] &= M_1 \hat{\vbeta} \\
+		\Cov[\vbeta | \vy] &= \frac{n}{n - 3} (M_1 - M_2 R^2)(\mX^\top \mX)^{-1} + (M_2 - M_1^2) \hat{\vbeta} \hat{\vbeta}^\top
+	\end{align*}
+	where
+	\small
+	\begin{align*}
+		M_1 &= \frac{b + 1}{c} {}_2 F_1 (d + 1, 1; c + 1; R^2) \text{ and } \\
+		M_2 &= \frac{(b + 1)(b + 2)}{c(c + 1)} {}_2 F_1 (d + 1, 2; c + 2; R^2).
+	\end{align*}
+\end{frame}
+
+% Say sopmething about the Rao-Blackwellisation?
+
+% Graphs of posterior functions
+\begin{frame}
+	\frametitle{Comparing exact results to Monte Carlo sampling}
+	We checked our results by comparing against Monte Carlo sampling and found that they matched closely.
+	\begin{figure}
+		\caption{$u | \vy$}
+		\includegraphics[scale=.33]{uGivenY.pdf}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Comparing exact results to Monte Carlo sampling}
+	We were also able to come up with a more efficient sampling scheme using Rao-Blackwellization.
+	\begin{figure}
+		\caption{$\sigma^2 | \vy$}
+		\includegraphics[scale=.33]{sigma2GivenY.pdf}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Comparing exact results to Monte Carlo sampling}
+	\begin{figure}
+		\caption{$\alpha | \vy$}
+		\includegraphics[scale=.33]{alphaGivenY.pdf}
+	\end{figure}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Comparing exact results to Monte Carlo sampling}
+	\begin{figure}
+		\caption{Example model fit to the US Crime data}
+		\includegraphics[scale=.33]{BetaUSCrime.pdf}
+	\end{figure}
+\end{frame}
 
 \begin{frame}
 	\frametitle{References / Contact details}
@@ -115,6 +190,8 @@
 		\item markg@maths.usyd.edu.au
 		\item Twitter: @certifiedwaif	
 	\end{itemize}
+
+	\small
 	\bibliographystyle{elsarticle-harv}
 	\bibliography{../references_mendeley}
 \end{frame}
