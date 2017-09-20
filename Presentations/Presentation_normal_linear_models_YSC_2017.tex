@@ -1,4 +1,4 @@
-\documentclass{beamer}
+\documentclass[notes=only]{beamer}
 
 \usetheme{Warsaw}
 \usepackage{graphicx}
@@ -14,7 +14,7 @@
 
 \usefonttheme{serif}
 
-\title{Bayesian linear model selection}
+\title{Exact expressions for parameter posteriors in Bayesian linear model selection}
 \author{Mark Greenaway, Dr John Ormerod}
 
 \mode<presentation>
@@ -27,6 +27,10 @@
 	\titlepage
 	% Details about myself here?
 \end{frame}
+
+\note{Hello everyone, I'm Mark Greenaway and I'm a PhD candidate from the University of Sydney.
+			I'll be presenting on exact expressions for parameter posteriors
+			in Bayesian linear model selection. This is joint work with Dr John Ormerod.}
 			
 % Only have ten minutes
 % Introduce problem
@@ -39,28 +43,40 @@
 		\item Less work has been done on the parameter posteriors, so we chose to explore this area in our
 					research.
 		\item We derive several new exact closed form expressions for the posterior parameters using special
-					functions. Our expressions are numerically stable.
+					functions. These expressions are numerically well-behaved.
 	\end{itemize}
-
 \end{frame}
+
+\note{Linear model selection is a well-studied problem. A lot of work has been done on studying parameter priors
+			for model selection. The parameter posteriors are less well-studied, so we chose to explore this area in
+			our research. We derive several new exact closed form expressions for the posterior parameters using
+			special functions. These expressions are numerically well-behaved, and can be evaluated with widely 
+			available	libraries.}
 
 \begin{frame}
 	\frametitle{Notation}
 	\begin{itemize}
 		\item Let $\vy$ be the vector of responses of length $n$, and $\mX$ be the $n \times p$ covariate matrix.
-		\item We seek the best model $\vgamma$, a vector of length $p$ where
+		\item We denote our models by $\vgamma$, vectors of length $p$ where
 					\[
 						\vgamma_i =
 						\begin{cases}
 							1 & \text{ if the $i$th column of $\mX$ is included in the model} \\
-							0 & \text{otherwise}
+							0 & \text{otherwise}.
 						\end{cases}
 					\]
-		e.g. $\vgamma = (1, 0, 0, 1, 1)$ includes the first, fourth and fifth covariates from $\mX$.
-		\item Then $\mX_\vgamma$ is the matrix formed by taking the columns for which $\vgamma_i = 1$ from X,
+		e.g. $\vgamma = (1, 0, 0, 1, 1)^\top$ includes the first, fourth and fifth covariates from $\mX$.
+		\item Then $\mX_\vgamma$ is the matrix formed by taking the columns for which $\vgamma_i = 1$ from $\mX$,
 					and $p_\vgamma$ is the number of covariates in the model $\vgamma$.
 	\end{itemize}
 \end{frame}
+
+\note{I want to introduce some notation. Let $\vy$ denote the vector of responses, and $\mX$ be the
+			$n \times p$ covariate matrix as usual. We dnote our models by $\vgamma$, vectors of length $p$ where
+			each element indicates whether that covariate is included or not. So a model $\vgamma$ equals
+			$(1, 0, 0, 1, 1)^\top$ contains the first, fourth and fifth covariates, but excludes the second and
+			third. $\mX_\vgamma$ is the matrix formed by taking the columns for which $\vgamma_i = 1$ from $\mX$,
+			and $p_\vgamma$ is the number of covariates in the model $\vgamma$.}
 
 % Introduce model
 \begin{frame}
@@ -88,6 +104,9 @@
 	\end{itemize}
 \end{frame}
 
+\note{Consider a linear model with standard normal priors. We introduce a new shrinkage parameter $g$.
+			$g$ shrinks $\vbeta$ according to $n$, $p_\vgamma$ and $R_\vgamma^2$.}
+
 % Discuss Bartlett's and Information Paradox
 \begin{frame}
 	\frametitle{How should we choose $g$?}
@@ -102,8 +121,14 @@
 					where $\vgamma^*$ is the true model (Information Paradox)
 		\item So we need another approach.
 	\end{itemize}
-
 \end{frame}
+
+\note{So how should we choose $g$? There are a few approaches we could take. We could let $g$ go to infinity.
+			But Liang showeed in 2008 that if you do this, you'll select the null model with probability $1$, which
+			is an example of Bartlett's Paradox.
+			We could use Empirical Bayes to choose $g$, but Liang showed that this was not model selection
+			consistent, which is an example of the Information Paradox.
+			So we need another approach.}
 
 % Mixture of g, choice of g prior
 \begin{frame}
@@ -122,6 +147,11 @@
 		$p(g) = \frac{g^b (1 + g)^{-(a + b + 2)}}{\Beta(a + 1, b + 1)} \I(g > 0)$
 	\end{itemize}
 \end{frame}
+
+\note{Liang argued that we should avoid these paradoxes by using a mixture of $g$. Several choices of prior
+			for $g$ have been proposed in the literature.
+			These all place most of the prior probability on lower values of $g$, adjusting the shrinkage according
+			to the sample size and number of covariates in the model.}
 
 % Things we derived
 \begin{frame}
@@ -142,6 +172,13 @@
 	These expressions are numerically stable to evaluate.
 \end{frame}
 
+\note{We want to be able to calculate the marginal likelihood of the data given $\vgamma$, so that we can
+			calculate the posterior probability of $\vgamma$ and rank models against one another. To do this, we
+			need to calculate the following integral.
+			We choose our priors so that this integral is tractable, with help from the book Table of Integrals and
+			Series by Gradshteyn. The marginal likelihoods behave like BIC.
+			We found closed form expressions for the marginal likelihood for the hyper-$g$ and hyper-$g/n$ priors.}
+
 \begin{frame}
 	\frametitle{Calculating $p(\vy | \vgamma)$ for Bayarri's robust prior}
 	\begin{itemize}
@@ -159,9 +196,13 @@
 			\frac{R^2_\vgamma}{1 + L(1 - R^2_\vgamma)} \right]$ \\
 			\small
 			where $L = (1 + n)/(1 + p_\vgamma) - 1$.
-
 	\end{itemize}
 \end{frame}
+
+\note{Bayarri calculated the marginal likelihood given $\vgamma$ for the Robust Bayarri prior.
+			But this expression is not numerically well-behaved.
+			We used Euler's transformation and properties of the hypergeometric function to derive a new,
+			numerically stable function.}
 
 % Exact posterior distributions using special functions
 \begin{frame}
@@ -180,6 +221,10 @@
 	where $u = g/(1 + g)$, $a = 1$ and $b = p_\vgamma$.
 \end{frame}
 
+\note{We derived exact expressions for the posteriors of $\alpha$, $u$ which is a transformation of $g$ and
+			$\sigma^2$ under the Beta-Prime prior. We focused on the Beta-Prime prior, because it is numerically
+			stable.}
+
 \begin{frame}
 	\frametitle{Exact first and second moments of $\vbeta$}
 	% We weren't able to find a closed form expression for $\vbeta | \vy$, but 
@@ -197,6 +242,9 @@
 		M_2 &= \frac{(b + 1)(b + 2)}{c(c + 1)} {}_2 F_1 (d + 1, 2; c + 2; R^2).
 	\end{align*}
 \end{frame}
+
+\note{We weren't able to find a closed form expression for the posterior of $\vbeta$, so instead we focused on
+			the first and second moments.}
 
 % Say sopmething about the Rao-Blackwellisation?
 
@@ -225,6 +273,9 @@
 	\end{figure}
 \end{frame}
 
+\note{We checked that our exact expressions were correct by checking them against a Monte Carlo sampling
+			scheme that we developed. We found that they matched very closely for a range of parameter settings.}
+
 \begin{frame}
 	\frametitle{Application: US Crime data}
 	\begin{figure}
@@ -232,6 +283,9 @@
 		\includegraphics[scale=.33]{BetaUSCrime.pdf}
 	\end{figure}
 \end{frame}
+
+\note{We applied our model fitting software to the US Crime data set, and found that our
+			first and second moments fit well.}
 
 \begin{frame}
 	\frametitle{References / Contact details}
@@ -245,5 +299,7 @@
 	\bibliographystyle{elsarticle-harv}
 	\bibliography{../references_mendeley}
 \end{frame}
+
+\note{Thank you for your attention! Any questions?}
 
 \end{document}
