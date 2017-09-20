@@ -30,42 +30,77 @@
 			
 % Only have ten minutes
 % Introduce problem
+\begin{frame}
+	\frametitle{Posterior parameters in Bayesian linear model selection}
+	\begin{itemize}
+		\item Motivation: The problem of selecting linear models is well-studied, in the frequentist and Bayesian
+					contexts.
+		\item A lot of work has been done on parameter priors for Bayesian model selection.
+		\item Less work has been done on the parameter posteriors, so we chose to explore this area in our
+					research.
+		\item We derive several new exact closed form expressions for the posterior parameters using special
+					functions. Our expressions are numerically stable.
+	\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{Notation}
+	\begin{itemize}
+		\item Let $\vy$ be the vector of responses of length $n$, and $\mX$ be the $n \times p$ covariate matrix.
+		\item We seek the best model $\vgamma$, a vector of length $p$ where
+					\[
+						\vgamma_i =
+						\begin{cases}
+							1 & \text{ if the $i$th column of $\mX$ is included in the model} \\
+							0 & \text{otherwise}
+						\end{cases}
+					\]
+		e.g. $\vgamma = (1, 0, 0, 1, 1)$ includes the first, fourth and fifth covariates from $\mX$.
+		\item Then $\mX_\vgamma$ is the matrix formed by taking the columns for which $\vgamma_i = 1$ from X,
+					and $p_\vgamma$ is the number of covariates in the model $\vgamma$.
+	\end{itemize}
+\end{frame}
+
 % Introduce model
 \begin{frame}
 	\frametitle{Model selection using $g$}
 	\begin{itemize}
 		\item Consider the linear model
 		\begin{align*}
-			\vy | \alpha, \vbeta, \sigma^2 \sim \N_n(\vone_n \alpha + \mX \vbeta, \sigma^2 \mI) 
+			\vy | \alpha, \vbeta, \sigma^2, \vgamma \sim \N_n(\vone_n \alpha + \mX_\vgamma \vbeta, \sigma^2 \mI) 
 		\end{align*}
 		with priors
 		\begin{align*}
-			\alpha & \propto 1, \\
-			\vbeta | \sigma^2, g & \sim \N_p(\vzero, g \sigma^2 (\mX^T \mX)^{-1}),                     \\
-			p(\sigma^2)          & = (\sigma^2)^{-1} \I(\sigma^2 > 0), \text{ and }                    \\
-			p(g)                 & = \text{unspecified for now}.
+			\alpha \quad & \propto \quad 1, \\
+			\vbeta | \sigma^2, g, \vgamma \quad & \sim \quad \N_p(\vzero, g \sigma^2 (\mX_\vgamma^\top \mX_\vgamma)^{-1}),                     \\
+			p(\sigma^2)          \quad & = \quad (\sigma^2)^{-1} \I(\sigma^2 > 0), \text{ and }                    \\
+			p(g)                 \quad & = \quad \text{unspecified for now}.
 		\end{align*}
-		\item We introduce a parameter $g \in [0, \infty)$ controls the mixing between the null and full models.
-		\item If $g$ is $0$, we
-		choose the null model. If $g$ is $\infty$ we choose $\hat{\vbeta}$.
+		\item We introduce a hyperparameter $g \in [0, \infty)$, as a shrinkage parameter.
+					$g$ shrinks $\vbeta$ according to the sample size $n$, the number of covariates in the model $p_\vgamma$
+					and the quality of the model fit $R^2_\vgamma$.
+					$g$ deserves special consideration.
+		\item This prior structure on $\vbeta$ is called the Zellner-Siow prior, introduced in \cite{Zellner1980}.
+		% that controls the mixing between the null and full models.
+		% \item If $g$ is $0$, we
+		% choose the null model. If $g$ is $\infty$ we choose $\hat{\vbeta}$.
 	\end{itemize}
 \end{frame}
 
 % Discuss Bartlett's and Information Paradox
 \begin{frame}
 	\frametitle{How should we choose $g$?}
-
+	There are a few approaches we could take.
 	\begin{itemize}
-		\item If we simply let $g \to \infty$ or make a fixed choice of $g$, \citep{Liang2008} showed that we will
-		encounter a few model selection paradoxes.
-		\item Let $\vzero$ denote the null model and $\vgamma^*$ denote the true model.
-
-		\setlength{\itemindent}{4.8em}
-		\item[Paradox 1] Bartlett's paradox: $p(\vzero | \vy) \to 1$ as $g \to \infty$ \\
-					As $g$ increases, the probability of selecting the null model goes to $1$
-		\item[Paradox 2] Information paradox: $p(\vgamma^* | \vy) \cancel{\to} 1$ as $n \to \infty$ \\
-					No matter how large the sample size, the probability that we select the true model never
-					reaches $1$
+		\item Approach 1: We could simply let $g \to \infty$.
+		\item \cite{Liang2008} showed that\\
+		$p(\vgamma = \vzero | \vy) \to 1$ as $g \to \infty$ (Bartlett's paradox).
+		\item Approach 2: We could do Empirical Bayes on $g$, or otherwise make a fixed choice of $g$.
+		\item \cite{Liang2008} showed that this was not model selection consistent. \\
+					$p(\vgamma = \vgamma^* | \vy) \cancel{\to} 1$ as $n \to \infty$,
+					where $\vgamma^*$ is the true model (Information Paradox)
+		\item So we need another approach.
 	\end{itemize}
 
 \end{frame}
@@ -73,59 +108,76 @@
 % Mixture of g, choice of g prior
 \begin{frame}
 	\frametitle{We should choose a mixture of $g$}
-	\citep{Liang2008} suggested we avoid these paradoxes by using a mixture of $g$. Several choices of prior
-	for $g$	have been proposed.
+	\cite{Liang2008} argued that we avoid should these paradoxes by using a mixture of $g$. \\
+	Several choices of prior for $g$	have been proposed.
 	\small
 	\begin{itemize}
-		\item hyper-$g$ prior \\
-		$p(g) = \frac{a-2}{2} (1 + g)^{-a/2} I(g > 0)$, $a > 2$ \citep{Liang2008}
-		\item hyper-$g/n$ prior \\
-		$p(g) = \frac{a-2}{2n} (1 + g/n)^{-a/2} I(g > 0)$, $a > 2$ \citep{Liang2008}
-		\item Bayarri's robust prior on $g$ \\
-		$p(g) = \frac{1}{2} \left(  \frac{1 + n}{1 + p_\vgamma} \right)^{1/2} (1 + g)^{-3/2} I(g > L)$
-		where $L = (1 + n)/(1 + p_\vgamma) - 1$
-		\citep{Bayarri2012}
-		\item Beta-Prime prior on $g$ \\
+		\item hyper-$g$ prior, \cite{Liang2008}\\
+		$p(g) = \frac{a-2}{2} (1 + g)^{-a/2} I(g > 0)$, $a > 2$
+		\item hyper-$g/n$ prior, \cite{Liang2008}\\
+		$p(g) = \frac{a-2}{2n} (1 + g/n)^{-a/2} I(g > 0)$, $a > 2$ 
+		\item Bayarri's robust prior on $g$, \cite{Bayarri2012} \\
+		$p(g) = \frac{1}{2} \left(  \frac{1 + n}{1 + p_\vgamma} \right)^{1/2} (1 + g)^{-3/2} I(g > (1 + n)/(1 + p_\vgamma) - 1)$
+		\item Beta-Prime prior on $g$, \cite{Maruyama2011} \\
 		$p(g) = \frac{g^b (1 + g)^{-(a + b + 2)}}{\Beta(a + 1, b + 1)} \I(g > 0)$
-		\citep{Maruyama2011}
 	\end{itemize}
 \end{frame}
 
 % Things we derived
 \begin{frame}
 	\frametitle{Calculating $p(\vy | \vgamma)$}
-	We want to calculate the marginal likelihood of $\vy$ given a model $\vgamma$.
+	We want to calculate $p(\vy | \vgamma)$ so that we can calculate $p(\vgamma | \vy)$ using Bayes' Rule and rank models against	one another. \\
 	To do this, we need to calculate
-	$$p(\vy, \vgamma) = \int p(\vy | \alpha, \vbeta, \sigma^2) p(\alpha) p(\vbeta | g) p(\sigma^2) p(g) d \alpha d \vbeta d \sigma^2 d g.$$
-	We choose our priors so that this integral is tractable, with help from \citep{Gradshteyn1988}.
-	The marginal likelihoods behave like BIC.
+	$$p(\vy | \vgamma) = \int p(\vy | \alpha, \vbeta, \sigma^2, \vgamma) p(\alpha) p(\vbeta | g, \vgamma) p(\sigma^2) p(g) d \alpha d \vbeta d \sigma^2 d g.$$
+	We choose our priors so that this integral is tractable, with help from \cite{Gradshteyn1988}.
+	The marginal likelihoods behave like BIC. \\
+	We found the following closed form expressions.
 	\small
 	\begin{itemize}
-		\item Liang et al. 2008 hyper-$g$ prior \citep{Liang2008}
+		\item Liang et al. 2008 hyper-$g$ prior \cite{Liang2008}
 			$p(\vy | \vgamma) = \frac{K(n) (a - 2)}{p_\vgamma + a  - 2} {}_2 F_1 \left( \frac{n-1}{2}, 1; \frac{p_\vgamma + a}{2}; R_\vgamma^2 \right)$
-		\item Liang et al. 2008 hyper-$g/n$ prior \citep{Liang2008}
+		\item Liang et al. 2008 hyper-$g/n$ prior \cite{Liang2008}
 			$p(\vy | \vgamma) = \frac{K(n) (a - 2)}{n (p_\vgamma + a  - 2)} F_1 \left( 1, \frac{a}{2}, \frac{n-1}{2}; \frac{p_\vgamma + a}{2}; 1 - \frac{1}{n}, R_\vgamma^2 \right)$
-		\item Robust Bayarri et al. (2012) \citep{Bayarri2012} 
+	\end{itemize}
+	These expressions are numerically stable to evaluate.
+\end{frame}
+
+\begin{frame}
+	\frametitle{Calculating $p(\vy | \vgamma)$ for Bayarri's robust prior}
+	\begin{itemize}
+		\item Bayarri calculated the marginal likelihood given $\vgamma$ for the Robust Bayarri prior
+		 	in \cite{Bayarri2012} 
 			\tiny
-			$p(\vy | \vgamma) = K(n) \left(\frac{n + 1}{1 + p_\vgamma}\right)^{-p_\vgamma/2} \frac{(\hat{\sigma}_\vgamma^2)^{-(n-1)/2}}{p_\vgamma + 1} {}_2 F_1 \left[ \frac{n-1}{2}, \frac{p_\vgamma+1}{2}; \frac{p_\vgamma + 3}{2}; \frac{(1 - 1/\hat{\sigma}_\vgamma^2)(p_\vgamma + 1)}{1 + n} \right]$
+			$p(\vy | \vgamma) = K(n) \left(\frac{n + 1}{1 + p_\vgamma}\right)^{-p_\vgamma/2} \frac{(1 - R^2_\vgamma)^{-(n-1)/2}}{p_\vgamma + 1} {}_2 F_1 \left[ \frac{n-1}{2}, \frac{p_\vgamma+1}{2}; \frac{p_\vgamma + 3}{2}; \frac{[1 - 1/(1 - R^2_\vgamma)](p_\vgamma + 1)}{1 + n} \right]$.
+		\small
+		\item But this expression is not numerically well-behaved, because the second argument of the
+					${}_2 F_1$ function is greater than $1$.
+		\item Using Euler's transformation on ${}_2 F_1$ and the fact that ${}_2 F_1(., 1; .; .)$ is numerically
+					well-behaved, we derived the new expression
+			\tiny
+			$p(\vy | \vgamma) = K(n) \left(\frac{n + 1}{1 + p_\vgamma}\right)^{(n-p_\vgamma-1)/2} \frac{[1 + L (1 - R^2_\vgamma)]^{-(n-1)/2}}{p_\vgamma + 1} {}_2 F_1 \left[ \frac{n-1}{2}, 1; \frac{p_\vgamma + 3}{2}; 
+			\frac{R^2_\vgamma}{1 + L(1 - R^2_\vgamma)} \right]$ \\
+			\small
+			where $L = (1 + n)/(1 + p_\vgamma) - 1$.
+
 	\end{itemize}
 \end{frame}
 
 % Exact posterior distributions using special functions
 \begin{frame}
 	\frametitle{Exact posterior distributions of $\alpha$, $u$ and $\sigma^2$ using special functions}
-
-	Choosing a Beta-Prime prior on g, we were able to derive closed form expressions for the posterior
-	distributions. \\
-	Here $u = g/(1 + g)$.
+	When deriving exact posterior distributions on the parameters of the model,
+	we focused on the Beta-Prime prior on $g$, as it is the most numerically well-behaved. \\
+	We were able to derive closed form expressions for the posterior distributions.
 	\small
 	\begin{align*}
-		p(u | \vy) &= \frac{(1 - R^2)^{b + 1}}{\text{Beta}(b + 1, d + 1)} u^b (1 - u)^d (1 - u R^2)^{-(b + d + 2)} \\
-		p(\alpha | \vy) &= \frac{\Gamma(c + \frac{1}{2}) (1 - R^2)^{b + 1}}{\Gamma(c) \sqrt{\pi}} (1 + \alpha^2)^{-n/2}
-		{}_2 F_1 \left(b + 1, c + \frac{1}{2}; c; \frac{R^2}{1 + \alpha^2}\right) \\
-		p(\sigma^2 | \vy) &= \frac{\frac{n}{2} (\hat{\sigma}^2)^{b + 1}}{\Gamma(c)} (\hat{\sigma}^2)^{-(c + 1)}
-												\exp{\left( -\frac{n}{2 \sigma^2} \right)} {}_1 F_1 \left(b + 1; c; \frac{n R^2}{2 \sigma^2}\right) \\
+		p(u | \vy) &= \frac{(1 - R_\vgamma^2)^{b + 1}}{\text{Beta}(b + 1, d + 1)} u^b (1 - u)^d (1 - u R_\vgamma^2)^{-(b + d + 2)} \\
+		p(\alpha | \vy) &= \frac{\Gamma(c + \frac{1}{2}) (1 - R_\vgamma^2)^{b + 1}}{\Gamma(c) \sqrt{\pi}} (1 + \alpha^2)^{-n/2}
+		{}_2 F_1 \left(b + 1, c + \frac{1}{2}; c; \frac{R_\vgamma^2}{1 + \alpha^2}\right) \\
+		p(\sigma^2 | \vy) &= \frac{\frac{n}{2} (1 - R_\vgamma^2)^{b + 1}}{\Gamma(c)} (1 - R_\vgamma^2)^{-(c + 1)}
+												\exp{\left( -\frac{n}{2 \sigma^2} \right)} {}_1 F_1 \left(b + 1; c; \frac{n R_\vgamma^2}{2 \sigma^2}\right)
 	\end{align*}
+	where $u = g/(1 + g)$, $a = 1$ and $b = p_\vgamma$.
 \end{frame}
 
 \begin{frame}
@@ -152,31 +204,29 @@
 \begin{frame}
 	\frametitle{Comparing exact results to Monte Carlo sampling}
 	We checked our results by comparing against Monte Carlo sampling and found that they matched closely.
-	\begin{figure}
-		\caption{$u | \vy$}
-		\includegraphics[scale=.33]{uGivenY.pdf}
+	\begin{figure}[htp]
+		\centering
+		\begin{center}$
+			\begin{array}{ll}
+				% \caption{$u | \vy$}
+				\includegraphics[width=.5\textwidth]{uGivenY.pdf} &
+				% \caption{$\sigma^2 | \vy$}
+				\includegraphics[width=.5\textwidth]{sigma2GivenY.pdf} \\
+				% \caption{$g | \vy$}
+				\includegraphics[width=.5\textwidth]{gGivenY.pdf} &
+				% \caption{$\alpha | \vy$}
+				\includegraphics[width=.5\textwidth]{alphaGivenY.pdf}
+			\end{array}$
+		\end{center}
+		\includegraphics[width=.5\textwidth]{uGivenY.pdf}
+		\includegraphics[width=.5\textwidth]{sigma2GivenY.pdf}
+		\includegraphics[width=.5\textwidth]{gGivenY.pdf}
+		\includegraphics[width=.5\textwidth]{alphaGivenY.pdf}
 	\end{figure}
 \end{frame}
 
 \begin{frame}
-	\frametitle{Comparing exact results to Monte Carlo sampling}
-	We were also able to come up with a more efficient sampling scheme using Rao-Blackwellization.
-	\begin{figure}
-		\caption{$\sigma^2 | \vy$}
-		\includegraphics[scale=.33]{sigma2GivenY.pdf}
-	\end{figure}
-\end{frame}
-
-\begin{frame}
-	\frametitle{Comparing exact results to Monte Carlo sampling}
-	\begin{figure}
-		\caption{$\alpha | \vy$}
-		\includegraphics[scale=.33]{alphaGivenY.pdf}
-	\end{figure}
-\end{frame}
-
-\begin{frame}
-	\frametitle{Comparing exact results to Monte Carlo sampling}
+	\frametitle{Application: US Crime data}
 	\begin{figure}
 		\caption{Example model fit to the US Crime data}
 		\includegraphics[scale=.33]{BetaUSCrime.pdf}
