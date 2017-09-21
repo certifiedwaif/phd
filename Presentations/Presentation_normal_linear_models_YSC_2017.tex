@@ -1,4 +1,4 @@
-\documentclass[notes=only]{beamer}
+\documentclass{beamer}
 
 \usetheme{Warsaw}
 \usepackage{graphicx}
@@ -51,7 +51,13 @@
 			for model selection. The parameter posteriors are less well-studied, so we chose to explore this area in
 			our research. We derive several new exact closed form expressions for the posterior parameters using
 			special functions. These expressions are numerically well-behaved, and can be evaluated with widely 
-			available	libraries.}
+			available	libraries.
+
+			People have looked at particular combinations of models and priors, calculating the marginal
+			likelihoods.
+			The next step in the process would be to look at the posteriors of individual parameters.
+			We also want to look at the numerical properties of these expressions, as we want them to be numerically
+			stable and easy to evaluate.}
 
 \begin{frame}
 	\frametitle{Notation}
@@ -72,8 +78,8 @@
 \end{frame}
 
 \note{I want to introduce some notation. Let $\vy$ denote the vector of responses, and $\mX$ be the
-			$n \times p$ covariate matrix as usual. We dnote our models by $\vgamma$, vectors of length $p$ where
-			each element indicates whether that covariate is included or not. So a model $\vgamma$ equals
+			$n \times p$ covariate matrix as usual. $\vgamma$ represents a particular model choice, where
+			each element of the vector indicates whether that covariate is included or not. So a model $\vgamma$ equals
 			$(1, 0, 0, 1, 1)^\top$ contains the first, fourth and fifth covariates, but excludes the second and
 			third. $\mX_\vgamma$ is the matrix formed by taking the columns for which $\vgamma_i = 1$ from $\mX$,
 			and $p_\vgamma$ is the number of covariates in the model $\vgamma$.}
@@ -82,7 +88,8 @@
 \begin{frame}
 	\frametitle{Model selection using $g$}
 	\begin{itemize}
-		\item Consider the linear model
+		\item We adopt the prior structure on $\vbeta$ is called the Zellner-Siow prior, introduced in \cite{Zellner1980}.
+		\item Model
 		\begin{align*}
 			\vy | \alpha, \vbeta, \sigma^2, \vgamma \sim \N_n(\vone_n \alpha + \mX_\vgamma \vbeta, \sigma^2 \mI) 
 		\end{align*}
@@ -93,41 +100,46 @@
 			p(\sigma^2)          \quad & = \quad (\sigma^2)^{-1} \I(\sigma^2 > 0), \text{ and }                    \\
 			p(g)                 \quad & = \quad \text{unspecified for now}.
 		\end{align*}
-		\item We introduce a hyperparameter $g \in [0, \infty)$, as a shrinkage parameter.
-					$g$ shrinks $\vbeta$ according to the sample size $n$, the number of covariates in the model $p_\vgamma$
-					and the quality of the model fit $R^2_\vgamma$.
-					$g$ deserves special consideration.
-		\item This prior structure on $\vbeta$ is called the Zellner-Siow prior, introduced in \cite{Zellner1980}.
+		\item We introduce a parameter $g$ which controls the shrinkage: if $g$ is high there is not much shrinkage,
+					and if $g$ is low there is a lot of shrinkage.
 		% that controls the mixing between the null and full models.
 		% \item If $g$ is $0$, we
 		% choose the null model. If $g$ is $\infty$ we choose $\hat{\vbeta}$.
 	\end{itemize}
 \end{frame}
 
-\note{Consider a linear model with standard normal priors. We introduce a new shrinkage parameter $g$.
-			$g$ shrinks $\vbeta$ according to $n$, $p_\vgamma$ and $R_\vgamma^2$.}
+\note{We adopt a linear model with the following structure.
+			This structure is chosen with great care so that the the parameters can be integrated out analytically.
+			We introduce a parameter $g$ which controls the shrinkage: if $g$ is high there is not much shrinkage,
+			and if $g$ is low there is a lot of shrinkage.}
 
 % Discuss Bartlett's and Information Paradox
 \begin{frame}
 	\frametitle{How should we choose $g$?}
 	There are a few approaches we could take.
 	\begin{itemize}
-		\item Approach 1: We could simply let $g \to \infty$.
-		\item \cite{Liang2008} showed that\\
+		\item We could simply let $g \to \infty$.
+		\item \cite{Liang2008} discussed that\\
 		$p(\vgamma = \vzero | \vy) \to 1$ as $g \to \infty$ (Bartlett's paradox).
-		\item Approach 2: We could do Empirical Bayes on $g$, or otherwise make a fixed choice of $g$.
-		\item \cite{Liang2008} showed that this was not model selection consistent. \\
-					$p(\vgamma = \vgamma^* | \vy) \cancel{\to} 1$ as $n \to \infty$,
+		\item We could make a fixed choice of $g$. \\
+		\item \cite{Liang2008} discussed that \\
+					$p(\vgamma = \vgamma^* | \vy) \cancel{\to} 1$ as $R_\vgamma^2 \to 1$, \\
 					where $\vgamma^*$ is the true model (Information Paradox)
+		\item We could choose $g$ adaptively, using Empirical Bayes
+		\item \cite{Liang2008} showed that this was not model selection consistent if the true model is the null
+					model.
 		\item So we need another approach.
 	\end{itemize}
 \end{frame}
 
-\note{So how should we choose $g$? There are a few approaches we could take. We could let $g$ go to infinity.
-			But Liang showeed in 2008 that if you do this, you'll select the null model with probability $1$, which
-			is an example of Bartlett's Paradox.
-			We could use Empirical Bayes to choose $g$, but Liang showed that this was not model selection
-			consistent, which is an example of the Information Paradox.
+\note{So how should we choose $g$?
+			We could let $g$ go to infinity.
+			If we have $g$ large, we have a diffuse prior on the coefficients. This places a lot of weight on the
+			null model, which is an example of Bartlett's Paradox.
+			We could make a fixed choice of $g$, but then we don't necessarily select the true model, even if the
+			sample size goes to infinity, which is an example of the Information Paradox.
+			We could use Empirical Bayes to choose $g$ adaptively, but Liang showed that this was not model selection
+			consistent
 			So we need another approach.}
 
 % Mixture of g, choice of g prior
@@ -141,94 +153,78 @@
 		$p(g) = \frac{a-2}{2} (1 + g)^{-a/2} I(g > 0)$, $a > 2$
 		\item hyper-$g/n$ prior, \cite{Liang2008}\\
 		$p(g) = \frac{a-2}{2n} (1 + g/n)^{-a/2} I(g > 0)$, $a > 2$ 
-		\item Bayarri's robust prior on $g$, \cite{Bayarri2012} \\
-		$p(g) = \frac{1}{2} \left(  \frac{1 + n}{1 + p_\vgamma} \right)^{1/2} (1 + g)^{-3/2} I(g > (1 + n)/(1 + p_\vgamma) - 1)$
 		\item Beta-Prime prior on $g$, \cite{Maruyama2011} \\
 		$p(g) = \frac{g^b (1 + g)^{-(a + b + 2)}}{\Beta(a + 1, b + 1)} \I(g > 0)$
+		\item Bayarri's robust prior on $g$, \cite{Bayarri2012} \\
+		$p(g) = \frac{1}{2} \left(  \frac{1 + n}{1 + p_\vgamma} \right)^{1/2} (1 + g)^{-3/2} I(g > (1 + n)/(1 + p_\vgamma) - 1)$
 	\end{itemize}
 \end{frame}
 
-\note{Liang argued that we should avoid these paradoxes by using a mixture of $g$. Several choices of prior
-			for $g$ have been proposed in the literature.
+\note{In order to avoid the problems in the previous slide, Liang argued we should put a prior on $g$.
+			Several choices of prior for $g$ have been proposed in the literature.
 			These all place most of the prior probability on lower values of $g$, adjusting the shrinkage according
 			to the sample size and number of covariates in the model.}
 
-% Things we derived
 \begin{frame}
-	\frametitle{Calculating $p(\vy | \vgamma)$}
-	We want to calculate $p(\vy | \vgamma)$ so that we can calculate $p(\vgamma | \vy)$ using Bayes' Rule and rank models against	one another. \\
-	To do this, we need to calculate
-	$$p(\vy | \vgamma) = \int p(\vy | \alpha, \vbeta, \sigma^2, \vgamma) p(\alpha) p(\vbeta | g, \vgamma) p(\sigma^2) p(g) d \alpha d \vbeta d \sigma^2 d g.$$
-	We choose our priors so that this integral is tractable, with help from \cite{Gradshteyn1988}.
-	The marginal likelihoods behave like BIC. \\
-	We found the following closed form expressions.
-	\small
+	\frametitle{Special functions}
 	\begin{itemize}
-		\item Liang et al. 2008 hyper-$g$ prior \cite{Liang2008}
-			$p(\vy | \vgamma) = \frac{K(n) (a - 2)}{p_\vgamma + a  - 2} {}_2 F_1 \left( \frac{n-1}{2}, 1; \frac{p_\vgamma + a}{2}; R_\vgamma^2 \right)$
-		\item Liang et al. 2008 hyper-$g/n$ prior \cite{Liang2008}
-			$p(\vy | \vgamma) = \frac{K(n) (a - 2)}{n (p_\vgamma + a  - 2)} F_1 \left( 1, \frac{a}{2}, \frac{n-1}{2}; \frac{p_\vgamma + a}{2}; 1 - \frac{1}{n}, R_\vgamma^2 \right)$
-	\end{itemize}
-	These expressions are numerically stable to evaluate.
-\end{frame}
-
-\note{We want to be able to calculate the marginal likelihood of the data given $\vgamma$, so that we can
-			calculate the posterior probability of $\vgamma$ and rank models against one another. To do this, we
-			need to calculate the following integral.
-			We choose our priors so that this integral is tractable, with help from the book Table of Integrals and
-			Series by Gradshteyn. The marginal likelihoods behave like BIC.
-			We found closed form expressions for the marginal likelihood for the hyper-$g$ and hyper-$g/n$ priors.}
-
-\begin{frame}
-	\frametitle{Calculating $p(\vy | \vgamma)$ for Bayarri's robust prior}
-	\begin{itemize}
-		\item Bayarri calculated the marginal likelihood given $\vgamma$ for the Robust Bayarri prior
-		 	in \cite{Bayarri2012} 
-			\tiny
-			$p(\vy | \vgamma) = K(n) \left(\frac{n + 1}{1 + p_\vgamma}\right)^{-p_\vgamma/2} \frac{(1 - R^2_\vgamma)^{-(n-1)/2}}{p_\vgamma + 1} {}_2 F_1 \left[ \frac{n-1}{2}, \frac{p_\vgamma+1}{2}; \frac{p_\vgamma + 3}{2}; \frac{[1 - 1/(1 - R^2_\vgamma)](p_\vgamma + 1)}{1 + n} \right]$.
-		\small
-		\item But this expression is not numerically well-behaved, because the second argument of the
-					${}_2 F_1$ function is greater than $1$.
-		\item Using Euler's transformation on ${}_2 F_1$ and the fact that ${}_2 F_1(., 1; .; .)$ is numerically
-					well-behaved, we derived the new expression
-			\tiny
-			$p(\vy | \vgamma) = K(n) \left(\frac{n + 1}{1 + p_\vgamma}\right)^{(n-p_\vgamma-1)/2} \frac{[1 + L (1 - R^2_\vgamma)]^{-(n-1)/2}}{p_\vgamma + 1} {}_2 F_1 \left[ \frac{n-1}{2}, 1; \frac{p_\vgamma + 3}{2}; 
-			\frac{R^2_\vgamma}{1 + L(1 - R^2_\vgamma)} \right]$ \\
-			\small
-			where $L = (1 + n)/(1 + p_\vgamma) - 1$.
+		\item When $|z| < 1$, the hypergeometric function is defined by the power series
+					\[
+						{}_2 F_1 (a, b; c; z) = \sum_{n=0}^\infty \frac{(a)_n (b)_n}{(c)_n} \frac{z^n}{n!}
+					\]
+					where
+					$(q)_n = \begin{cases}
+						1 & n = 0 \\
+						q (q + 1) \ldots (q + n - 1) & n > 0
+					\end{cases}$
+		\item The confluent hypergeometric function is defined by the power series
+					\[
+						{}_1 F_1 (a; b; z) = \sum_{n=0}^\infty \frac{(a)_n}{(b)_n} \frac{z^n}{n!}
+					\]
+		\item These functions can be difficult to numerically evaluate in practice, \cite{Press:2007:NRE:1403886}.
+					We must be careful!
 	\end{itemize}
 \end{frame}
 
-\note{Bayarri calculated the marginal likelihood given $\vgamma$ for the Robust Bayarri prior.
-			But this expression is not numerically well-behaved.
-			We used Euler's transformation and properties of the hypergeometric function to derive a new,
-			numerically stable function.}
+\note{At this point, I'll to introduce the hypergeometric function, which is defined by
+			the following power series within the unit circle.
+			The confluent hypergeometric function is defined by the somewhat simpler power series at the bottom of
+			the slide.
+			The series is divergent as $z \to 1$, which is going to come back to haunt us.
+			There is no known numerical routine that will evaluate these functions for every possible parameter, and
+			so we need to take care.}
 
 % Exact posterior distributions using special functions
 \begin{frame}
 	\frametitle{Exact posterior distributions of $\alpha$, $u$ and $\sigma^2$ using special functions}
-	When deriving exact posterior distributions on the parameters of the model,
-	we focused on the Beta-Prime prior on $g$, as it is the most numerically well-behaved. \\
+	% When deriving exact posterior distributions on the parameters of the model,
+	We focused on the Beta-Prime prior on $g$, as it is the most numerically well-behaved.
 	We were able to derive closed form expressions for the posterior distributions.
 	\small
 	\begin{align*}
-		p(u | \vy) &= \frac{(1 - R_\vgamma^2)^{b + 1}}{\text{Beta}(b + 1, d + 1)} u^b (1 - u)^d (1 - u R_\vgamma^2)^{-(b + d + 2)} \\
+		p(g | \vy) &= \frac{(1 - R_\vgamma^2)^{b + 1} g^b [1 + g (1 - R_\vgamma^2)]^{-(b + d + 2)}}{\text{Beta}(b + 1, d + 1)} I(g > 0)\\
+		% p(u | \vy) &= \frac{(1 - R_\vgamma^2)^{b + 1}}{\text{Beta}(b + 1, d + 1)} u^b (1 - u)^d (1 - u R_\vgamma^2)^{-(b + d + 2)} \\
 		p(\alpha | \vy) &= \frac{\Gamma(c + \frac{1}{2}) (1 - R_\vgamma^2)^{b + 1}}{\Gamma(c) \sqrt{\pi}} (1 + \alpha^2)^{-n/2}
-		{}_2 F_1 \left(b + 1, c + \frac{1}{2}; c; \frac{R_\vgamma^2}{1 + \alpha^2}\right) \\
+		{}_2 F_1 \left(d + 1, -\frac{1}{2}; c; \frac{R_\vgamma^2}{1 + \alpha^2}\right) \\
 		p(\sigma^2 | \vy) &= \frac{\frac{n}{2} (1 - R_\vgamma^2)^{b + 1}}{\Gamma(c)} (1 - R_\vgamma^2)^{-(c + 1)}
 												\exp{\left( -\frac{n}{2 \sigma^2} \right)} {}_1 F_1 \left(b + 1; c; \frac{n R_\vgamma^2}{2 \sigma^2}\right)
 	\end{align*}
-	where $u = g/(1 + g)$, $a = 1$ and $b = p_\vgamma$.
+	where $a = 1$, $b = p_\vgamma$, $c=(n - 1)/2$ and $d = c - b - 2 = p_\vgamma / 2 + a$.
 \end{frame}
 
-\note{We derived exact expressions for the posteriors of $\alpha$, $u$ which is a transformation of $g$ and
-			$\sigma^2$ under the Beta-Prime prior. We focused on the Beta-Prime prior, because it is numerically
-			stable.}
+\note{We focused on the Beta-Prime prior, because it is numerically stable.
+			We derived exact expressions for the posteriors of $g$, $\alpha$ and $\sigma^2$ under the Beta-Prime
+			prior.
+			$g | \vy$ is a generalised Beta-Prime distribution.
+			We came up with two expressions for $\alpha | \vy$. I've presented the second of these which is using the 
+			Euler identity so that the first two arguments are small in magnitude. This causes the series to converge quickly. This looks complicated, but is actually a fancy $t$-distribution.
+			$\sigma^2 | \vy$ is pretty close to an inverse gamma distribution.
+			These expressions depend only on $n$, $p_\vgamma$ and $R_\vgamma^2$.}
 
 \begin{frame}
 	\frametitle{Exact first and second moments of $\vbeta$}
 	% We weren't able to find a closed form expression for $\vbeta | \vy$, but 
-	We weren't able to find a closed form expression for $\vbeta | \vy$, but we were able to find closed form
+	We were able to find closed form
 	expressions for the first and second moments of $\vbeta | \vy$.
 	\small
 	\begin{align*}
@@ -238,13 +234,18 @@
 	where
 	\small
 	\begin{align*}
-		M_1 &= \frac{b + 1}{c} {}_2 F_1 (d + 1, 1; c + 1; R^2) \text{ and } \\
-		M_2 &= \frac{(b + 1)(b + 2)}{c(c + 1)} {}_2 F_1 (d + 1, 2; c + 2; R^2).
+		M_1 &= \frac{b + 1}{c} {}_2 F_1 (d + 1, 1; c + 1; R_\vgamma^2) \text{ and } \\
+		M_2 &= \frac{(b + 1)(b + 2)}{c(c + 1)} {}_2 F_1 (d + 1, 2; c + 2; R_\vgamma^2).
+	\end{align*}
+	Using the delta method, we were able to get the approximation
+	\begin{align*}
+		\vbeta | \vy \stackrel{approx}{\sim} t_{n-1} \left[M_1 \vbeta_\vgamma, \left(\frac{n}{n - 1}\right) M_1 (1 - M_1 R_\vgamma^2)(\mX_\vgamma^\top \mX_\vgamma)^{-1}\right].
 	\end{align*}
 \end{frame}
 
 \note{We weren't able to find a closed form expression for the posterior of $\vbeta$, so instead we focused on
-			the first and second moments.}
+			the first and second moments. The mean and covariance are given in terms of $M_1$ and $M_2$ and these
+			can be expressed in terms of the hypergeometric function.}
 
 % Say sopmething about the Rao-Blackwellisation?
 
@@ -257,24 +258,23 @@
 		\begin{center}$
 			\begin{array}{ll}
 				% \caption{$u | \vy$}
-				\includegraphics[width=.5\textwidth]{uGivenY.pdf} &
+				% \includegraphics[width=.5\textwidth]{uGivenY.pdf} &
 				% \caption{$\sigma^2 | \vy$}
-				\includegraphics[width=.5\textwidth]{sigma2GivenY.pdf} \\
+				\includegraphics[width=.5\textwidth]{gGivenY.pdf} \\
 				% \caption{$g | \vy$}
-				\includegraphics[width=.5\textwidth]{gGivenY.pdf} &
+				\includegraphics[width=.5\textwidth]{alphaGivenY.pdf} &
 				% \caption{$\alpha | \vy$}
-				\includegraphics[width=.5\textwidth]{alphaGivenY.pdf}
+				\includegraphics[width=.5\textwidth]{sigma2GivenY.pdf}
 			\end{array}$
 		\end{center}
-		\includegraphics[width=.5\textwidth]{uGivenY.pdf}
-		\includegraphics[width=.5\textwidth]{sigma2GivenY.pdf}
-		\includegraphics[width=.5\textwidth]{gGivenY.pdf}
-		\includegraphics[width=.5\textwidth]{alphaGivenY.pdf}
 	\end{figure}
 \end{frame}
 
-\note{We checked that our exact expressions were correct by checking them against a Monte Carlo sampling
-			scheme that we developed. We found that they matched very closely for a range of parameter settings.}
+\note{We checked that our exact expressions were correct by checking them against a Rao-Blackwellisation sampling
+			scheme that we developed, which can be considered the gold standard.
+			We found that they matched very closely for a range of parameter settings. The inexactness of the Monte
+			Carlo densities came about because of sampling error. Our expressions are much faster to evaluate and
+			more accurate. In the event that we run into numerical problems, we can fall back on the MC scheme.}
 
 \begin{frame}
 	\frametitle{Application: US Crime data}
