@@ -1,0 +1,3077 @@
+\documentclass{article}[12pt]
+% \documentclass[times, doublespace]{anzsauth}
+
+\addtolength{\oddsidemargin}{-.75in}%
+\addtolength{\evensidemargin}{-.75in}%
+\addtolength{\textwidth}{1.5in}%
+\addtolength{\textheight}{1.3in}%
+\addtolength{\topmargin}{-.8in}%
+\addtolength{\marginparpush}{-.75in}%
+% \setlength\parindent{0pt}
+% \setlength{\bibsep}{0pt plus 0.3ex}
+
+\usepackage{amsthm}
+\usepackage[authoryear]{natbib}
+\usepackage{graphicx}
+\usepackage{algorithm,algorithmic}
+\usepackage{cancel}
+%\usepackage{mathtools}
+\usepackage{algorithm,algorithmic}
+\usepackage[inner=2.5cm,outer=1.5cm,bottom=2cm]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{microtype}
+\usepackage{color}
+\usepackage{relsize}
+ 
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{res}{Result}%[chapter]
+
+ 
+
+%\input{include.tex}
+\input{Definitions.tex}
+
+\def\I{\mI}
+\def\N{N}
+\def\E{{\mathbb E}}
+\def\R{{\mathbb R}}
+
+\def\bR{{\mathbb R}}
+\def\bC{{\mathbb C}}
+\def\bZ{{\mathbb Z}}
+
+\def\Beta{\mbox{Beta}}
+\def\BigO{\mbox{O}}
+
+\makeatletter
+\DeclareRobustCommand{\prodK}{%
+	\mathop{\vphantom{\sum}\mathpalette\bigstar@\relax}\slimits@
+}
+ 
+\newcommand{\bigstar@}[2]{%
+ 	\vcenter{%
+ 		\sbox\z@{$#1\sum$}%
+ 		\hbox{\resizebox{.9\dimexpr\ht\z@+\dp\z@}{!}{\mbox{K}}}%
+ 	}%
+}
+\makeatother
+ 
+%\newcommand{}{\mathlarger{\operatorname{K}}}
+
+\newcommand{\mgc}[1]{{\color{blue}#1}}
+\newcommand{\joc}[1]{{\color{red}#1}}
+
+\begin{document}
+
+%\maketitle
+
+
+\title{Full Bayesian inference for linear model selection \\ using a generalized $g$-pior}
+
+\author{Mark Greenaway
+	%\addressnum{1},   
+	and
+	John T. Ormerod
+	%\addressnum{1}\corrauth}
+	%\affiliation{University of Sydney
+}
+% Specifying address(es) in the manner required by the Journal.
+%\address{
+%\addressnum{1}  School of Mathematics and Statistics Carslaw Building (F07), University of Sydney, Sydney, NSW 2006, Australia.
+%\hspace*{1ex} Email: \texttt{john.ormerod@sydney.edu.au}
+%}
+% Note that the Journal requires that a paper must begin with a
+% "Summary" not an "Abstract".  This is automatically taken care
+% of by the anzsauth document style.  So even though the following
+% says "\begin{abstract}" the heading "Summary" will appear in
+% the processed version.
+
+% Note that "keywords" should not include words and phrases
+% that form part of the title of the paper.
+% Also keywords (with the exception of proper names and
+% certain abbreviations that conventionally appear all in
+% capital letters) should *not* be capitalised.
+%\keywords{Generalized $g$-prior (X); Approximate Bayesian Inference; Model Section (X); Special functions; model averaging}
+
+% This shows how acknowledgements should appear in the Journal.
+% Note that if you are acknowledging financial support, grant
+% numbers should *not* usually be specified.
+%\ack{....}
+
+\maketitle
+
+
+\begin{abstract}
+\noindent 
+We consider linear models with a special case of the prior structure proposed in \cite{Maruyama2011} and numerically analyse the parameter posterior distributions corresponding to this setting.  
+We derive Monte Carlo sampling schemes, exact expressions in terms of special functions, and convenient asymptotic approximations of the parameter posterior distributions. 
+Implementation issues of Bayesian model averaging under the proposed prior structure is also discussed 
+and R software is made available for this purpose. Our methodology is illustrated on several datasets.
+\end{abstract}
+
+
+\section{Introduction}
+
+The problem of variable selection in the context of linear models is a well trodden one. 
+
+\begin{itemize}
+	\item Zellnor $g$-prior
+	
+	\item Spike and slab
+	
+	\item George and McCulloch 1993
+	
+	\item Model averaging
+	
+	\item MCMC
+	
+	\item Bartlett's paradox and the information paradox. Jeffreys 1961; Berger and Pericchi 2001
+	
+	\item \cite{Liang2008} different priors on $g$
+	
+	\item \cite{Maruyama2011} 
+	
+	\item Bayarri et al. (2012).
+	
+	\item Li and Clyde (????)
+	
+	\item Parameter Posterior Distributions
+\end{itemize}
+
+
+
+In particular
+in the Bayesian inferential paradigm the prior structure needs to be exquisitely carefully chosen.
+
+\joc{ 
+Bayesian variable selection has a long history (Zellner 1971, sec 10.4; Leamer 1978a,b; Mitchell and 
+Beauchamp 1988), the advent of Markov chain Monte Carlo methods catalyzed Bayesian model selection and 
+averaging in regression models (George and McCulloch 1993, 1997; Geweke 1996; Smith and Kohn 1996; 
+Raftery, Madigan, and Hoeting 1997; Hoeting, Madigan, Raftery, and Volinsky 1999; Clyde and George 2004). 
+
+Prior density choice for Bayesian model selection and model averaging, however, remains an open area
+(Berger and Pericchi 2001; Clyde and George 2004). Subjective elicitation of priors for model-specific 
+coefficients is often precluded, particularly in high-dimensional model spaces, such as in nonparametric 
+regression using spline and wavelet bases. Thus, it is often necessary to resort to specification of
+priors using some formal method (Kass and Wasserman 1996; Berger and Pericchi 2001). In general, the 
+use of improper priors for model-specific parameters is not permitted in the context of model selection, 
+as improper priors are determined only up to an arbitrary multiplicative constant. In inference for a 
+given model, these arbitrary multiplicative constants cancel in the posterior distribution of the 
+model-specific parameters. However, these constants remain in marginal likelihoods leading to 
+indeterminate model probabilities and Bayes factors (Jeffreys 1961; Berger and Pericchi 2001). To avoid 
+indeterminacies in posterior model probabilities, proper priors for βγ under each model are usually 
+required.
+}
+
+
+In recent times there has been a lot of attention paid to specifying the hyperprior on
+the parameter $g$ of the $g$-prior. 
+
+It was Liang et al (2008) who showed that many of the previous specifications for $g$
+were inadequate and argued that a hyperprior should be placed on $g$. \cite{Liang2008}
+was able to 
+
+ 
+Our main contributions are:
+\begin{enumerate}
+	\item We derive Monte Carlo schemes for drawing samples from the parameter posterior distributions and their corresponding Rao-Blackwellized estimators;
+	
+	\item We derive exact expressions for all of the parameter posteriors, except for the regression coefficient vector where we instead derive exact expressions for the first and
+	second posterior moments;
+	
+	\item We derive convenient analytic approximations for the parameter posterior distributions and analyse conditions when these approximations are accurate;
+	
+	\item We show, under a particular asymptotic setting, that model averaging using the chosen prior structure is asymptotically equivalent to model averaging using the Bayesian Information Criterion (BIC); and
+	
+	\item We implement an {\tt R} package for efficient model averaging under this prior structure.
+\end{enumerate}
+
+\noindent Throughout the article numerical issues are discussed.
+
+The article is organised as follows. Section \ref{sec:model} outlines and justifies our chosen model 
+and prior structure. Section \ref{sec:MarginalLikelihood} derives the marginal likelihood. Section 
+\ref{sec:MonteCarlo} derives our Monte Carlo approaches. Section \ref{sec:Exact} derives exact expressions
+for the posterior distributions. Section \ref{sec:approximations} derives analytic approximations
+and compares model averaging using our chosen prior structure with model averaging using the BIC.
+In Section \ref{sec:implementation}, we discuss details of our implementation which made our approach 
+computationally feasible.
+In Section \ref{sec:numerical} we perform a series of numerical experiments to show the accuracy of our approach. 
+Finally, in Section \ref{sec:conclusion}, we provide a conclude.
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+ 
+
+
+
+ 
+
+
+
+
+
+\newpage 
+\section{The base model}
+\label{sec:model}
+
+Suppose $\vy = (y_1,\ldots,y_n)^T$ is a response vector of length $n$, $\mX$ is an $n$ by $p$ matrix 
+of covariates. We consider the linear model for predicting $\vy$ with predicturs $\mX$ via
+\begin{equation}
+\label{eq:linearModel}
+\vy | \alpha, \vbeta, \sigma^2 \sim N(\vone_n\alpha + \mX \vbeta, \sigma^2 \mI_n),
+\end{equation} 
+
+
+\noindent where $\alpha$ is the model intercept, $\vbeta$ is a coefficient vector of length $p$, 
+$\sigma^2$ is the residual variance, and $\mI_n$ is the $n \times n$ identity matrix. 
+Without loss of generality, to simplify later calculations, we will transform $\vy$ and $\mX$ 
+so that $\vy$ and the columns of $\mX$ are standardized so that $\overline{y} = 0$, 
+$\|\vy\|^2 = \vy^T\vy = n$, $\mX_j^T\vone = 0$,  and $\|\mX_j\|^2 = n$ where $\mX_j$ is the $j$th  column of $\mX$. 
+
+Suppose that we wish to perform Bayesian model selection, model averaging or hypothesis 
+testing. Let $\vgamma \in \{0, 1\}^p$ be a binary vector of indicators
+for the inclusion of the $p$th column of $\mX$ in the model where $\mX_\vgamma$ 
+denotes the design matrix formed by including only the columns of $\mX$ with 
+$\gamma_j = 1$. We will adopt the following prior structure
+\begin{equation}
+\label{eq:priorStructure}
+\begin{array}{c}
+\ds p(\alpha) \propto 1,  
+\qquad 
+\ds p(\sigma^2) \propto (\sigma^2)^{-1} I(\sigma^2 > 0),                      
+\\ [2ex]
+\vbeta_\vgamma | \sigma^2, g, \vgamma \sim \N_p(\vzero, g \sigma^2 (\mX_\vgamma^T \mX_\vgamma)^{-1}),
+\quad \text{ and }  \quad 
+p(\vbeta_{-\vgamma}|\vgamma) = \prod_{j=1}^p \delta(\beta_j;0)^{1-\gamma_j},
+\end{array}
+\end{equation} 
+
+\noindent where $\delta(x;a)$ is the Dirac delta function with location $a$. 
+For the time being we will defer specification of $p(g)$ and $p(\vgamma)$.
+We will now justify each element of our chosen prior structure.
+
+The priors on $\alpha$ and $\sigma^2$ are improper Jeffreys priors and have been formally justified 
+in \cite{Berger2012}. In the context Bayesian model selection, model averaging or hypothesis 
+testing $\alpha$ and $\sigma^2$ appear in all models 
+so that when comparing models the proportionality constants in the corresponding
+Bayes factors cancel.
+
+The prior on $\vbeta_\vgamma$ is Zellner's $g$-prior \citep[see for example,][]{Zellner1986} with prior 
+hyperparameter $g$. This family of priors for Gaussian regression model where the prior covariance 
+matrix of $\vbeta_\vgamma$ is taken to be a multiple of $g$ with the Fisher information matrix for $\vbeta$. 
+This places the most prior mass for $\vbeta_\vgamma$ on the section of the parameter space where the data is 
+least informative, and makes the marginal likelihood of the model scale-invariant. Furthermore, this 
+choice of prior removes a log-determinant of $\mX_\vgamma^T\mX_\vgamma$ term from the expression for the marginal 
+likelihood, which is an additional computational burden to calculate.
+
+The prior on $\vbeta_\vgamma$ combined with the prior on $\vbeta_{-\vgamma}$
+in (\ref{eq:priorStructure}) is referred to as a spike and slab prior
+which was initially used in
+\cite{Mitchell1988}
+but was later refined in
+\cite{Madigan1994},
+\cite{George1993}, and
+\cite{Ishwaran2005}. 
+Initial  spike and slab priors considered the 
+case where the Dirac delta functions in (\ref{eq:priorStructure}) 
+were replaced
+by a Gaussian density with small variance. The above structure implies 
+that $p(\vbeta_\vgamma|\vy)$ is a point mass at $\vzero$ leading to
+algebraic and computational simplifications. 
+
+An alternative choice of prior on $\vbeta_\vgamma$ was proposed by \cite{Maruyama2011}. Let
+$p_{\vgamma} = |\vgamma|$. We will now describe their prior on $\vbeta_\vgamma$ for the case where for the case
+$p_{\vgamma} < n - 1$. Let $\mU\mLambda\mU^T$ be an eigenvalue decomposition of $\mX_\vgamma^T\mX_\vgamma$
+where $\mU$ is an orthonormal $p_{\vgamma} \times p_{\vgamma}$ matrix, $\mLambda = \mbox{diag}(\lambda_1,\ldots,\lambda_{p_{\vgamma}})$ 
+is a diagonal matrix of eigenvalues with $\lambda_1\ge\ldots,\ge \lambda_{p_{\vgamma}}>0$. Then \cite{Maruyama2011} 
+propose a prior for $\vbeta_\vgamma$ of the form
+\begin{equation}
+\label{eq:priorBetaMG}
+\vbeta_\vgamma | \sigma^2, g \sim N(\vzero, \sigma^2 (\mU\mW\mU^T)^{-1}),   
+\end{equation} 
+
+\noindent where $\mW = \mbox{diag}(w_1,\ldots,w_{p_{\vgamma}})$ with $ w_j = \lambda_j/[\nu_j(1 + g) - 1]$ for 
+some prior hyperparameters $\nu_1 \ge \ldots \ge \nu_q$. \cite{Maruyama2011} suggest as a default 
+choice for the $\nu_j$'s to use $\nu_j = \lambda_j/\lambda_{p_{\vgamma}}$, for $1\le j \le p_{\vgamma}$. 
+This choice down-weights the prior on the rotated parameter space of $(\mU \vbeta)_j$ when the 
+corresponding eigenvalue $\lambda_j$ is large and consequently prior standard errors are 
+approximately the same size. Note that when $\nu_1 = \ldots = \nu_{p_{\vgamma}} = 1$ the prior 
+(\ref{eq:priorBetaMG}) reduces to the prior for $\vbeta$ in (\ref{eq:priorStructure}). 
+
+The choice between (\ref{eq:priorBetaMG}) and the prior for $\vbeta$ in (\ref{eq:priorStructure}) 
+represents a trade-off over computational efficiency and desirable statistical properties. The choice
+(\ref{eq:priorStructure}) avoids the computational burden of calculating an eigenvalue or a singular 
+value decomposition of a $q\times q$ matrix for each model considered. It also means that we can 
+exploit efficient matrix updates to traverse the entire model space in a computationally efficient 
+manner allowing this to be done feasibly when $p$ is less than around 30 on a standard 2017 laptop 
+(see Section \ref{sec:implementation} for details).
+
+
+The marginal likelihood for the
+model  (\ref{eq:linearModel}) and under prior structure
+(\ref{eq:priorStructure}). 
+Integrating out $\alpha$ and $\vbeta$ from 
+$p(\vy,\alpha,\vbeta|\sigma^2,g)$ we find
+\begin{equation}\label{eq:yGivenSigma2andG}
+\begin{array}{rl}
+\ds p(\vy|\sigma^2,g)
+& \ds = \int \exp\left[
+- \tfrac{n}{2}\log(2\pi\sigma^2) 
+- \tfrac{1}{2\sigma^2}\|\vy - \vone\alpha - \mX\vbeta\|^2
+- \tfrac{p}{2}\log(2\pi g\sigma^2) 
++ \tfrac{1}{2}\log|\mX^T\mX|
+- \tfrac{1}{2g\sigma^2}\vbeta^T\mX^T\mX\vbeta  
+\right] d\alpha d\vbeta
+\\
+& \ds = \int \exp\left[
+- \tfrac{n}{2}\log(2\pi\sigma^2) 
+- \tfrac{n}{2\sigma^2}
+- \tfrac{n\alpha^2}{2\sigma^2} 
++ \sigma^{-2}\vy^T\mX\vbeta
+- \tfrac{1}{2\sigma^2}(1 + g^{-1})\vbeta^T\mX^T\mX\vbeta 
+- \tfrac{p}{2}\log(2\pi g\sigma^2) 
++ \tfrac{1}{2}\log|\mX^T\mX|
+\right] d\alpha d\vbeta
+\\
+& \ds = \int \exp\left[
+- \tfrac{n-1}{2}\log(2\pi\sigma^2) 
+- \tfrac{1}{2}\log(n)
+- \tfrac{n}{2\sigma^2}
++ \sigma^{-2}\vy^T\mX\vbeta
+- \tfrac{1}{2\sigma^2}(1 + g^{-1})\vbeta^T\mX^T\mX\vbeta 
+- \tfrac{p}{2}\log(2\pi g\sigma^2) 
++ \tfrac{1}{2}\log|\mX^T\mX|
+\right]  d\vbeta
+\\
+& 
+\ds = \exp\left[
+- \tfrac{n-1}{2}\log(2\pi\sigma^2) 
+- \tfrac{1}{2}\log(n)
+- \tfrac{p}{2}\log(1 + g)
+- \tfrac{n}{2 \sigma^2} \left( 1 - \tfrac{g}{1 + g} R^2 \right)  
+\right],
+\end{array} 
+\end{equation}
+
+\noindent 
+%\joc{
+	Derivation of the above expression uses the identity
+	$
+	\int \exp\left\{ -\tfrac{1}{2}\vx^T\mA\vx + \vb^T\vx \right\} d \vx = |2\pi\mSigma|^{1/2} \exp\left\{ \tfrac{1}{2}\vmu^T\mSigma^{-1}\vmu \right\}
+	$
+	where $\vmu = \mA^{-1}\vb$, and $\mSigma = \mA^{-1}$.
+	It also uses the identities: $|c\mA| = c^d|\mA|$ and $|\mA^{-1}| = |\mA|^{-1}$ when $\mA \in\R^{d\times d}$.
+%}
+Integrating out $\alpha$, $\vbeta$, and $\sigma^2$ from $p(\vy,\alpha,\vbeta,\sigma^2|g,\vgamma)$ we
+obtain
+\begin{equation}\label{eq:yGivenG}
+\begin{array}{rl}
+\ds p(\vy|g,\vgamma)
+& \ds = \int \exp\left[
+- \tfrac{n-1}{2}\log(2\pi) 
+- \tfrac{1}{2}\log(n)
+- \tfrac{p}{2}\log(1 + g)
+- \left( \tfrac{n-1}{2} + 1\right)\log(\sigma^2) 
+- \left( \tfrac{n}{2} \tfrac{1 + g(1-R^2)}{1 + g} \right)\sigma^{-2} 
+\right]  d\sigma^2
+\\
+& 
+\ds = K(n)
+(1 + g)^{(n - p_\vgamma - 1)/2}(1 + g \widehat{\sigma}_\vgamma^2)^{-(n-1)/2},
+\end{array} 
+\end{equation}
+
+\noindent where $K(n) = [\Gamma( (n-1)/2 )]/[\sqrt{n}(n\pi)^{(n-1)/2}]$, 
+$\widehat{\sigma}_\vgamma^2 = 1 - R_\vgamma^2$, 
+$R_\vgamma^2 = \vy^T\mX_\vgamma^T(\mX_\vgamma^T\mX_\vgamma)^{-1}\mX_\vgamma^T\vy/n$ is the MLE of $\sigma^2$ for model
+$\vgamma$ when $\overline{y}=0$ and $\|\vy\|^2 = n$
+($R_\vgamma^2$
+being the the usual R-squared statistic).
+This is the same expression as \cite{Liang2008} Equation (5) 
+after simplification. Note that
+when $\vgamma = \vzero$, i.e., the null model, then $p_\vgamma = 0$, and
+$R_\vgamma^2 = 0$ leading to the simplification $p(\vy|g,\vzero) = K(n)$. 
+
+We will now discuss the specification of $g$.
+
+
+
+
+\section{Dealing with $g$}
+\label{sec:MarginalLikelihood}
+Further criteria are discussed in  Bayarri et al. (2012).
+
+The prior hyperparameter $g$ needs to be specified with exquisite care. 
+In the following discussion let $\vgamma^*$ be the true model from which the data was generated. 
+Selecting $g$ using a subjective elicitation of priors is usually criticized in the context of 
+hypothesis testing. Diffuse problems, i.e., setting $g$ to a large constant, are also problematic 
+due to Bartlett's paradox. 
+\begin{description}
+	\item[Problem 1.] Bartlett's paradox: $p(\vzero|\vy) \to 1$ as $g\to\infty$.
+\end{description}
+
+\noindent Bartlett's paradox is paradoxical in the sense that as the prior for $\vbeta_\vgamma$
+is made increasingly uninformative the null model becomes increasingly preferred.
+
+If $g$ cannot be made arbitrarily large one might consider setting $g$ to be some constant
+value. The unit information prior of Kass \& Wasserman (1995), risk inflation criterion prior of 
+Foster \& George (1994), and the benchmark prior of Fern\'andez et al. (2001) set $g$ to $g=n$, 
+$g=p_\vgamma^2$ and $g = \max(n,p_\vgamma^2)$ respectively. 
+However, these choices lead to the information paradox. 
+\begin{description}
+	\item[Problem 2.] Information paradox: $p(\vgamma^*|\vy) \not\to 1$ as $n\to\infty$.
+\end{description}
+
+\noindent  
+\cite{Liang2008} showed that these choices
+are also problematic since using any particular constant $g$ will lead to the information paradox.
+
+A third approach might to be to select $g$ adaptively using an empirical Bayes procedure.
+Selecting $g$ via an empirical Bayes procedure. 
+\cite{Liang2008} considers two such procedures, a local and a global procedure.
+For the local empirical Bayes for each model $\vgamma$
+the value 
+$$
+\ds \widehat{g}_{\mbox{\scriptsize EBL}} = \argmax_{g>0} \{ p(\vy|g,\vgamma) \}
+$$ 
+
+\noindent 
+is used. For the 
+global empirical Baye procedure, one value of $g$ is used for all models which is 
+given by
+$$
+\ds \widehat{g}_{\mbox{\scriptsize EBG}} = \argmax_{g>0} \left\{ \sum_{\vgamma}  p(\vy,\vgamma|g) = p(\vy|g) \right\}.
+$$
+
+\noindent 
+However, \cite{Liang2008} show that setting
+$g = \widehat{g}_{\mbox{\scriptsize EBL}}$ or 
+$g = \widehat{g}_{\mbox{\scriptsize EBG}}$
+are only partially model selection consistent in the following sense.
+\begin{description}
+	\item[Problem 3.] Partial model selection consistency: $p(\vgamma^*|\vy) \to 1$ as $n\to\infty$ except
+	when $\vgamma^* = \vzero$.
+\end{description}
+
+Given the problems above one might consider placing a hyperprior on the parameter $g$. 
+Initially, \cite{Liang2008} suggest the hyper $g$-prior where
+\begin{equation}\label{eq:hyperG}
+\ds p(g) = \frac{a - 2}{2}(1 + g)^{-a/2}I(g>0),
+\end{equation}
+
+\noindent for $a>2$. Combining (\ref{eq:yGivenG}) with the above prior and applying 
+3.197(5) of \cite{Gradshteyn2007} leads to
+\begin{equation}\label{eq:hyperGmarginal}
+\ds p_{g}(\vy|\vgamma) =  \frac{K(n)(a - 2)}{p_\vgamma + a - 2} {}_2F_1\left( \frac{n-1}{2}, 1; \frac{p_\vgamma + a}{2}; R_\vgamma^2 \right),
+\end{equation}
+
+\noindent where ${}_2F_1(\cdot,\cdot;\cdot;\cdot)$ is the Gaussian hypergeometric function.
+Gaussian hypergeometric function which are notoriously prone 
+to overflow and numerical instability \citep{Pearson2014}. When such numerical issues arise 
+\cite{Liang2008} resorted to Laplace approximation. However, recent work of Nadarajah 
+(2015) showed the numerical issues associated with (\ref{eq:hyperG}) can be avoided by using properties of the 
+Gaussian hypergeometric function based on the identity 
+\begin{equation}\label{eq:logGuassHypergeometric}
+\ds {}_2F_1(b,1;c;x) = (c-1) x^{1-c} (1-x)^{c-b-1} B_x (c-1, b-c+1),
+\end{equation}
+
+\noindent from Prudnikov, Brychkov, \& Marichev (1986 vol. 3, sec. 7.3), where $B_x(\cdot,\cdot)$
+is the incomplete beta function. Note that the case where $x=0$ is not handled by 
+(\ref{eq:logGuassHypergeometric}) and the value $\ds {}_2F_1(b,1;c;0) = 1$ should be used instead.
+Since standard libraries exist for evaluating $B_x(\cdot,\cdot)$
+on the log scale numerical overflow can be avoided.
+However, while \cite{Liang2008} showed that while (\ref{eq:hyperG}) leads to a closed form for 
+$p(\vy|\vgamma)$ and Nadarajah (2015) showed that the numerical problems associated with
+evaluating (\ref{eq:hyperGmarginal}) can be avoided, \cite{Liang2008} also showed that
+(\ref{eq:hyperG}) leads to Problem 3.
+
+\cite{Liang2008} also considered
+the Zellner-Siow prior structure \citep{Zellner1980} which is
+equivalent to using $g\sim \mbox{IG}(1/2,n/2)$. However, this choice of prior does not
+lead to closed form expressions for $p(\vy|\vgamma)$. Bayarri \& Garc\'ia-Donato (2005)
+suggest univariate quadrature or Monte Calro integration to approximate $p(\vy|\vgamma)$. \cite{Liang2008} suggest Laplace approximation this choice
+which they also show avoids Problem 3. However, whatever method is used to 
+approximate $p(\vy|\vgamma)$ will lead to a computational overhead and potential
+numerical issues we would like to avoid.
+
+Finally, \cite{Liang2008} proposed the hyper-$g/n$ prior given by
+\begin{equation}\label{eq:hyperGonN}
+\ds p(g) = \frac{a - 2}{2n}\left( 1 + \frac{g}{n} \right)^{-a/2}I(g>0),
+\end{equation}
+
+\noindent where again $a>2$. 
+
+
+$$
+\begin{array}{rl}
+p(\vy|\vgamma) 
+& \ds 
+= K(n) \frac{a - 2}{2n}  \int_0^\infty 
+\left( 1 + \frac{g}{n} \right)^{-a/2}
+(1 + g)^{(n-p_\vgamma-1)/2} \left[ 1 + g (1 - R_\vgamma^2) \right]^{-(n-1)/2}  dg
+\\
+& \ds = K(n) \frac{a - 2}{2n}  \int_0^1 
+(1 - u)^{p/2 + a/2 - 2  } \left[ 1 - u \left(1  -  \tfrac{1}{n} \right) \right]^{-a/2} \left(  1 - u R^2\right)^{-(n-1)/2} du
+
+%\\
+%& \ds \approx K(n) \frac{a - 2}{2n}  \int_0^\infty 
+%(1 + g)^{(n-p_\vgamma-1)/2} \left[ 1 + g (1 - R_\vgamma^2) \right]^{-(n-1)/2}  dg
+%\\
+%& \ds =  K(n) \frac{a - 2}{n p_\vgamma}  
+%{}_2F_1\left[
+%\frac{n-1}{2},1; \frac{p_\vgamma}{2} ; R_\vgamma^2
+%\right]
+\end{array} 
+$$
+
+\noindent Employing 
+Equation 3.211 of \cite{Gradshteyn2007} (see Appendix A) leads to
+\begin{equation}\label{eq:hyperGonNmarginal}
+\ds p_{g/n}(\vy|\vgamma) =  \frac{K(n)(a - 2)}{n(p_\vgamma + a - 2)} F_1\left( 1, \frac{a}{2}, \frac{n-1}{2}; \frac{p_\vgamma + a}{2}; 1  -  \frac{1}{n}, R_\vgamma^2 \right).
+\end{equation}
+
+ 
+\noindent While \cite{Liang2008} showed that the hyper-$g/n$ prior is model
+selection consistent, the expression (\ref{eq:hyperGonNmarginal}) is extremely
+difficult to evaluate numerically since the second last argument of the above 
+$F_1$ is asymptotically close to the radius of convergence of the $F_1$
+function.
+
+Suppose that we treat the second last argument as equal to 1. Then
+$$
+\begin{array}{rl}
+F_1\left( 1, \frac{a}{2}, \frac{n-1}{2}; \frac{p_\vgamma + a}{2}; \frac{n - 1}{n}, R_\vgamma^2 \right) 
+& \ds \approx F_1\left( 1, \frac{a}{2}, \frac{n-1}{2}; \frac{p_\vgamma + a}{2}; 1, R_\vgamma^2 \right)
+\\
+& \ds = \frac{\Gamma(\frac{p_\vgamma + a}{2})\Gamma(\frac{p_\vgamma}{2} - 1)}{\Gamma(\frac{p_\vgamma + a}{2} - 1)\Gamma(\frac{p_\vgamma}{2})} {}_2F_1\left( \frac{n-1}{2}, 1; \frac{p_\vgamma}{2};  R_\vgamma^2 \right)
+\end{array} 
+$$
+
+\noindent which follows from Schlosser (2013) Equation 36.
+
+\cite{Liang2008} again suggest Laplace approximation 
+for this choice of prior. 
+
+Given the closeness of the 2nd last argument above
+we will approximate the marginal by
+$$
+\begin{array}{rl}
+p(\vy|\vgamma) 
+
+\end{array} 
+$$ 
+
+\noindent  3.197(3)
+$$
+\begin{array}{rl}
+p(\vy|\vgamma) 
+& \ds \approx K(n) \frac{a - 2}{2n}  \int_0^1 
+(1 - u)^{p/2 - 2} \left(  1 - u R_\vgamma^2\right)^{-c} du
+\\
+& \ds = K(n) \frac{a - 2}{n(p - 2)} {}_2 F_1\left[
+\frac{n-1}{2}, 1; \frac{p}{2}; R_\vgamma^2
+\right]
+\end{array} 
+$$ 
+
+
+
+
+Next we will consider the prior 
+\begin{equation}\label{eq:betaPrime}
+\ds p(g) = \frac{g^{b}(1 + g)^{-(a+b+2)}}{\mbox{Beta}(a+1,b+1)} I(g>0),
+\end{equation}
+
+\noindent proposed by \cite{Maruyama2011} where $a>-1$ and $b>-1$. 
+This is a Pearson Type VI or beta-prime distribution. More specifically, 
+$g\sim \mbox{Beta-prime}(b+1,a+1)$ using the typical parametrization of 
+the beta-prime distribution (see Keeping, 1962; Johnson et al., 1995).
+Then
+$$
+%\begin{array}{rl}
+\ds p(\vy|\vgamma) 
+%& \ds = \int_0^\infty                                         
+%\frac{g^{b}(1 + g)^{-a-b-2}}{\mbox{Beta}(a+1,b+1)}
+%K(n) (1 + g)^{(n - p - 1)/2}\left[ 1 + g(1-R^2) \right]^{-(n-1)/2}
+%dg
+%\\
+%& \ds 
+=
+\frac{K(n)}{\mbox{Beta}(a+1,b+1)}
+\int_0^\infty             
+g^{b}(1 + g)^{(n - p_\vgamma - 1)/2 - (a + b + 2)}  (1 + g \widehat{\sigma}_\vgamma^2 )^{-(n-1)/2}  
+dg.
+%\end{array}
+$$
+
+\noindent If we choose $b$ such that
+$a+b+2 = (n - p_\vgamma - 1)/2$, implying
+$b = (n - p_\vgamma - 5)/2 - a$, then the exponent of the $(1 + g)$ term in the equation above is zero.
+Using Equation 3.194 (iii) of \cite{Gradshteyn2007}
+(see Appendix A) we obtain
+\begin{equation}\label{eq:marginalLikelihood}
+\begin{array}{rl}
+\ds p(\vy) 
+%& \ds =
+%\frac{K(n)}{\mbox{Beta}(a+1,b+1)}
+%\int_0^\infty g^{b} \left[ 1 + g(1-R^2) \right]^{-(n-1)/2}  
+%dg
+%\\ [2ex]
+& \ds 
+=  K(n)
+\frac{\mbox{Beta}(p/2 + a + 1,b + 1)}{\mbox{Beta}(a+1,b+1)} (\widehat{\sigma}^2)^{-(b + 1)}
+\\ [2ex]
+& \ds = \widetilde{K}(n,a)
+
+\Gamma(p/2 + a + 1)\Gamma(a + b + 2)
+(\widehat{\sigma}^2)^{-(b + 1)}
+\end{array}
+\end{equation}
+
+\noindent where
+$\widetilde{K}(n,a) = 
+K(n)/[\Gamma( (n-1)/2 )\Gamma(a + 1)]$
+is a common factor for all models for the purpose of model comparison.
+
+Note that (\ref{eq:marginalLikelihood}) proportional
+to a special case of the prior structure considered by \cite{Maruyama2011}
+who refer to this special case as ZE as a model selection criterion (after Zellner's $g$ prior). This choice of $b$ also ensures that $g = \BigO(n)$ so that $\tr\{\Var(\vbeta | g, \sigma^2)\} = \BigO(1)$, preventing Bartlett's paradox. 
+Note that in comparison to previously discussed priors
+marginal likelihood only involves gamma functions which
+are well behaved from a numerical analysis perspective. 
+\cite{Maruyama2011} showed the prior (\ref{eq:betaPrime}) leads to model
+selection consistency.
+For derivation of the above properties and further discussion see \cite{Maruyama2011}. 
+
+Finally, the robust prior of Bayarri et al. (2012) using the default
+choices of the prior hyperparameters uses 
+$$
+p(g) = \frac{1}{2}\left(\frac{1+n}{1 + p_\vgamma}  \right)^{1/2} (1 + g)^{-3/2}I(g > L)
+$$
+ 
+\noindent where $L = (1 + n)/(1 + p_\vgamma) - 1$. This leads to 
+\begin{equation}\label{eq:yGivenG}
+\ds p(\vy|\vgamma)
+\ds = \frac{K(n)}{2}\left(\frac{1+n}{1 + p_\vgamma}  \right)^{1/2} 
+\int_L^\infty  (1 + g)^{(n - p_\vgamma)/2 - 2}(  1 + g \widehat{\sigma}_\vgamma^2)^{-(n-1)/2} dg.
+\end{equation}
+
+\noindent Using the substitution 
+$x = (1 + L)/(g - L)$ followed by Equation 3.197(5) of \cite{Gradshteyn2007}
+(see Appendix A) leads to
+\begin{equation}\label{eq:yGivenGammaRobust}
+\ds p(\vy|\vgamma)
+ \ds = K(n) \left( \frac{n + 1}{ p_\vgamma + 1} \right)^{ - p_\vgamma/2} \frac{(\widehat{\sigma}_\vgamma^2)^{-(n-1)/2}}{p_\vgamma+1}
+{}_2F_1\left[ \frac{n-1}{2}, \frac{p_\vgamma+1}{2}; \frac{p_\vgamma+3}{2}  ; 
+\frac{(1  - 1/\widehat{\sigma}_\vgamma^2)(p_\vgamma + 1)}{1 + n} \right],
+\end{equation}
+
+\noindent which is the same expression as Equation 26. of Bayarri et al. (2012) modulo notation
+and division by $K(n)$.
+This is difficult to deal with numerically for two reasons. Firstly, either of the first 
+two arguments of the ${}_2F_1$ function are large relative to the third will often lead to numerical overflow problems. Secondly,
+and more problematically, when $\widehat{\sigma}_\vgamma^2$ becomes small the last argument
+of ${}_2F_1$ function can become less than $-1$ which falls outside the radius of convergence
+of the ${}_2F_1$ function. The {\tt BayesVarSel} package deals with these problems using numerical
+integration.
+ 
+Instead suppose we begin with $x = g - L$ then
+$$
+\ds p(\vy|\vgamma)
+\ds = \frac{K(n)}{2}\left(\frac{1+n}{1 + p_\vgamma}  \right)^{1/2} (\widehat{\sigma}_\vgamma^2)^{-(n-1)/2}
+\int_0^\infty  (1 + L + h)^{(n - p_\vgamma)/2 - 2}\left[  \frac{1 + L\widehat{\sigma}_\vgamma^2}{\widehat{\sigma}_\vgamma^2} + h \right]^{-(n-1)/2} dh.
+$$
+
+\noindent Use of Equation 3.197(1) of \cite{Gradshteyn2007} leads to
+\begin{equation}\label{eq:yGivenGammaRobust2}
+\ds p(\vy|\vgamma)
+\ds = K(n) \left( \frac{1 + n}{1 + p_\vgamma} \right)^{(n - p_\vgamma - 1)/2} \frac{\left( 1 + L\widehat{\sigma}_\vgamma^2 \right)^{-(n - 1)/2}}{1 + p_\vgamma}
+{}_2F_1\left[
+\frac{n-1}{2}, 1; \frac{p_\vgamma+3}{2}; \frac{1 - \widehat{\sigma}_\vgamma^2}{1 + L\widehat{\sigma}_\vgamma^2}
+\right].
+\end{equation}
+
+\noindent This expression is numerically far more stable to evaluate. Due to simplifications
+we have $0\le \widehat{\sigma}_\vgamma^2<1$, we also have $L>0$ so that the last argument
+of the ${}_2F_1$ above is bounded in the unit interval. Furthermore, using
+(\ref{eq:logGuassHypergeometric}) means that (\ref{eq:yGivenGammaRobust2}) can be evaluated
+on the log scale, avoiding numerical overflow.
+
+
+%$$
+%\int_0^\infty x^{\nu - 1}(\beta + x)^{-\mu}(x + \gamma)^{-\varrho} dx
+%= \beta^{-\mu}\gamma^{\nu - \varrho}\mbox{Beta}(\nu,\mu-\nu + \varrho)
+%{}_2F_1(\mu,\nu;\mu + \varrho; 1 - \gamma/\beta)
+%$$
+
+%$$
+%\beta = \frac{1 + L\widehat{\sigma}_\vgamma^2}{\widehat{\sigma}_\vgamma^2}
+%$$
+%$$
+%\gamma = 1 + L
+%$$
+%$$
+%\nu = 1
+%$$
+%$$
+%\mu = \frac{n-1}{2}
+%$$
+%$$
+%\varrho = - (n - p_\vgamma - 4)/2
+%$$
+
+\newpage 
+
+\section{Variational Bayes}
+
+\noindent We will consider VB with factorization
+$$
+q(\alpha,\vbeta,\sigma^2,g) = q(\alpha,\vbeta,\sigma^2) q(g) 
+$$
+
+\noindent Let
+$$
+m = \bE_q(\alpha),
+\quad 
+s^2 = \mbox{Var}_q(\alpha),
+\quad 
+\vmu = \bE_q(\vbeta), 
+\quad 
+\mSigma = \mbox{Cov}_q(\vbeta),
+\quad 
+\tau_\sigma = \bE_q(\sigma^{-2}),
+\quad 
+\mbox{and}
+\quad 
+\tau_g = \bE_q(g^{-1}).
+$$
+
+\noindent Let
+$$
+\begin{array}{rl}
+\ds \log \underline{p}(\vy,\alpha,\vbeta,\sigma^2) 
+& \ds = \bE_q\left[ \log\left( \frac{p(\vy,\alpha,\vbeta,\sigma^2)}{q(g)} \right) \right]
+\\ [2ex]
+& \ds = \bE_q\left[ \log p(\vy,\alpha,\vbeta,\sigma^2) \right] + E
+\\
+& \ds = 
+- \tfrac{n}{2}\log(2\pi)
+- \left( \tfrac{n}{2} + 1 \right) \log(\sigma^2)
+- \tfrac{1}{2\sigma^2}\|\vy - \vone\alpha - \mX\vbeta\|^2
+\\
+& \ds \qquad 
+- \tfrac{p}{2}\log(2\pi\sigma^2)
+- \tfrac{p}{2}\bE_q[\log(g)]
++ \tfrac{1}{2}\log|\mX^T\mX|
+- \tfrac{\tau_g}{2\sigma^2} \vbeta^T\mX^T\mX\vbeta 
+ + E
+\end{array}
+$$
+
+\noindent where $E = - \bE_q\left[ \log q(g) \right]$. 
+$$
+\ds \underline{p}(\alpha|\vy,\sigma^2) \sim N(0,\sigma^2/n)
+$$
+
+\noindent 
+Then
+$$
+\begin{array}{rl}
+\ds \underline{p}(\vy,\vbeta,\sigma^2) 
+& \ds = \int \exp\Big[
+- \tfrac{n}{2}\log(2\pi)
+- \left( \tfrac{n}{2} + 1 \right) \log(\sigma^2)
+- \tfrac{n\alpha^2}{2\sigma^2}
+- \tfrac{1}{2\sigma^2}\|\vy - \mX\vbeta\|^2
+\\
+& \ds \qquad 
++ \tfrac{1}{2}\log|\mX^T\mX|
+- \tfrac{\tau_g}{2\sigma^2} \vbeta^T\mX^T\mX\vbeta 
+- \tfrac{p}{2}\log(2\pi\sigma^2)
+- \tfrac{p}{2}\bE_q[\log(g)] + E
+\Big] d\alpha 
+\\
+& \ds = \exp\Big[
+- \tfrac{n-1}{2}\log(2\pi)
+- \left( \tfrac{n-1}{2} + 1 \right) \log(\sigma^2)
+- \tfrac{1}{2}\log(n)
+- \tfrac{1}{2\sigma^2}\|\vy - \mX\vbeta\|^2
+\\
+& \ds \qquad 
++ \tfrac{1}{2}\log|\mX^T\mX|
+- \tfrac{\tau_g}{2\sigma^2} \vbeta^T\mX^T\mX\vbeta 
+- \tfrac{p}{2}\log(2\pi\sigma^2)
+- \tfrac{p}{2}\bE_q[\log(g)] + E
+\Big]   
+\end{array}
+$$
+
+\noindent So that
+$$
+\ds \underline{p}(\vbeta|\vy,\sigma^2) \sim N\left[
+(1 + \tau_g)^{-1}\widehat{\vbeta},
+\sigma^2 (1 + \tau_g)^{-1} \left( \mX^T\mX \right)^{-1}
+\right]
+$$
+
+\noindent Next,
+$$
+\begin{array}{rl}
+\ds \underline{p}(\vy,\sigma^2) 
+& \ds = \frac{1}{\sqrt{n}(2\pi)^{(n-1)/2}} \int \exp\Big[
+- \left( \tfrac{n-1}{2} + 1 \right) \log(\sigma^2)
+- \tfrac{n}{2\sigma^2} 
++ \tfrac{1}{\sigma^2}\vy^T\mX\vbeta
+- \tfrac{1}{2\sigma^2}(1 + \tau_g) \vbeta^T\mX^T\mX\vbeta
+\\
+& \ds \qquad  
++ \tfrac{1}{2}\log|\mX^T\mX|
+- \tfrac{p}{2}\log(2\pi\sigma^2)
+- \tfrac{p}{2}\bE_q[\log(g)] + E
+\Big] d\vbeta 
+\\
+& \ds = \frac{1}{\sqrt{n}(2\pi)^{(n-1)/2}} \exp\Big[
+- \left( \tfrac{n-1}{2} + 1 \right) \log(\sigma^2)
+- \tfrac{n}{2\sigma^2} 
+\\
+& \ds \qquad 
++ \tfrac{1}{2}\log|\mX^T\mX|
++ \tfrac{1}{2}\log|2\pi\widetilde{\mSigma}|
++ \tfrac{1}{2}\widetilde{\vmu}^T\widetilde{\mSigma}^{-1}\widetilde{\vmu}
+- \tfrac{p}{2}\log(2\pi\sigma^2)
+- \tfrac{p}{2}\bE_q[\log(g)] + E
+\Big] 
+\\
+& \ds = \frac{1}{\sqrt{n}(2\pi)^{(n-1)/2}} \exp\Big[
+- \left( \tfrac{n-1}{2} + 1 \right) \log(\sigma^2)
+- \tfrac{p}{2}\log(1 + \tau_g)
+- \tfrac{p}{2}\bE_q[\log(g)]
+- \tfrac{n}{2\sigma^2} \left\{ 1 - (1 + \tau_g)^{-1}  R^2
+\right\} + E
+\Big] 
+\end{array}
+$$
+
+\noindent where
+$$
+\begin{array}{rl}
+\ds \widetilde{\mSigma} 
+& \ds = \left[ (1 + \tau_g)\sigma^{-2} \mX^T\mX \right]^{-1} 
+\\
+& \ds = \sigma^2 (1 + \tau_g)^{-1} \left( \mX^T\mX \right)^{-1}
+\\
+\ds \widetilde{\vmu} 
+& \ds = \mSigma\mX^T\vy\sigma^{-2} 
+\\
+& \ds = (1 + \tau_g)^{-1} \left( \mX^T\mX \right)^{-1}\mX^T\vy 
+\\
+& \ds = (1 + \tau_g)^{-1}\widehat{\vbeta}
+\end{array}
+$$
+
+\noindent Then
+$$
+\underline{p}(\sigma^2|\vy) \sim \mbox{IG}\left[
+\tfrac{n-1}{2},
+\tfrac{n}{2} \left\{ 1 - (1 + \tau_g)^{-1}  R^2
+\right\}
+\right]
+$$
+
+\noindent 
+If $\vx|z \sim N(\vmu,z\mV)$ and $z\sim \mbox{IG}(a,b)$ then
+$\vx \sim t_{2a}( \vmu, (b/a)\mV)$. 
+Hence,
+$$
+\ds \underline{p}(\alpha|\vy) \sim t_{n-1}\left[ 0, \tfrac{1}{n-1} \left\{ 1 - (1 + \tau_g)^{-1}  R^2
+\right\}
+\right]
+$$
+$$
+\ds \underline{p}(\vbeta|\vy) \sim t_{n-1}\left[
+(1 + \tau_g)^{-1}\widehat{\vbeta},
+\tfrac{n}{n-1} (1 + \tau_g)^{-1} \left\{ 1 - (1 + \tau_g)^{-1}  R^2 \right\}  \left( \mX^T\mX \right)^{-1}
+\right]
+$$
+
+\noindent Hence,
+$$
+\ds \tau_\sigma = \frac{n-1}{n \left\{ 1 - (1 + \tau_g)^{-1}  R^2 \right\}}
+$$
+$$
+\vmu = (1 + \tau_g)^{-1}\widehat{\vbeta}
+$$
+$$
+\mSigma = \tfrac{n}{n-1} (1 + \tau_g)^{-1} \left\{ 1 - (1 + \tau_g)^{-1}  R^2 \right\}  \left( \mX^T\mX \right)^{-1}
+$$
+
+\noindent The $q$-density for $g$ has the form
+$$
+q(g) \sim \mbox{IG}\left[
+\frac{p+1}{2}, 
+\frac{n}{2} + \frac{\tau_\sigma}{2}\left( \vmu^T\mX^T\mX\vmu + \mbox{tr}(\mSigma\mX^T\mX) 
+\right)
+\right]
+$$
+
+\noindent Now we have
+$$
+\vmu^T\mX^T\mX\vmu = (1 + \tau_g)^{-2} nR^2
+$$
+$$
+\mbox{tr}(\mSigma\mX^T\mX)  = 
+\tfrac{n}{n-1} (1 + \tau_g)^{-1} \left\{ 1 - (1 + \tau_g)^{-1}  R^2 \right\} p = (1 + \tau_g)^{-1} \tau_\sigma^{-1} p
+$$
+
+$$
+\begin{array}{rl}
+\ds \tau_g 
+& \ds = \frac{p+1}{n + \tau_\sigma\left( \vmu^T\mX^T\mX\vmu + \mbox{tr}(\mSigma\mX^T\mX) \right) }
+\\ [2ex]
+& \ds = \frac{p+1}{n + \tau_\sigma (1 + \tau_g)^{-2} nR^2 + (1 + \tau_g)^{-1} p }
+\end{array}
+$$
+
+
+$$
+\tau_g\tau_\sigma (1 + \tau_g)^{-1} nR^2 = \tau_g(\tau_\sigma n  + 1 - n) 
+$$
+$$
+ \tau_g \tau_\sigma (1 + \tau_g)^{-1} nR^2    = (n - 1 - \tau_g n)(1 + \tau_g) - \tau_g p
+$$
+
+
+$$
+\tau_g\tau_\sigma n  + \tau_g   = n - 1  + n\tau_g - \tau_g - \tau_g^2 n - \tau_g p
+$$
+ 
+\section{Monte Carlo methods}
+\label{sec:MonteCarlo}
+
+We now develop  
+Monte Carlo (MC) and Rao-Blackwellization
+schemes for parameter posterior estimation.
+In Section \ref{sec:Exact} we derive
+exact expressions for most posterior quantities of interest in terms of special
+functions. However, such special functions can suffer from numerical instability.
+The following Monte Carlo schemes can be applied when numerical instability
+issues arise in the evaluation of special functions or when
+asymptotic approximations fail. 
+
+We will now show how to obtain direct Monte Carlo samples of the posterior distribution.
+Combining Equation (\ref{eq:yGivenG}), the prior for $g$ in
+(\ref{eq:priorStructure}) and (\ref{eq:marginalLikelihood})
+obtain
+\begin{equation}\label{res:06}
+p(g|\vy) = \frac{(\widehat{\sigma}^2)^{b+1} g^{b} \left[  1 + g \widehat{\sigma}^2 \right]^{-(b + d + 2)}}{\mbox{Beta}(b + 1,d+1)}I(g>0),
+\end{equation}
+
+\noindent where $c = (n-1)/2$ and $d = c - b - 2 = p/2 + a$. 
+This is a generalized beta prime distribution 
+or generalized beta distribution of the second kind and
+is a special case of the compound gamma distribution
+(see Dubey, 1970; McDonald, 1984). [{\bf Mark, can you check the previous sentence?}] The fact that $\widetilde{g} = g \widehat{\sigma}^2 \sim \mbox{Beta-prime}(b+1,d+1)$,
+and
+if $B\sim \mbox{Beta}(s,t)$ then $B/(1 - B)\sim \mbox{Beta-prime}(s,t)$, allow us to easily draw samples from
+$g|\vy$. \\
+
+
+McDonald, J.B. (1984) Some generalized functions for the size distributions of income, Econometrica 52, 647--663. \\
+
+Dubey, Satya D. (December 1970). Compound gamma, beta and F distributions. Metrika. 16: 27--31.  \\
+
+
+
+
+
+%\joc{ 
+%	$$
+%	u = \frac{g}{1+g},
+%	\quad 
+%	g = \frac{u}{1-u},
+%	\quad 
+%	1 - u = \frac{1}{(1 + g)},
+%	\quad 
+%	(1 - u)^{-1} = (1 + g),
+%	\quad \mbox{and}\quad 
+%	\frac{du}{dg} = \frac{1}{1+g} - \frac{g}{(1 +g)^2} 
+%	= \frac{1}{(1+g)^2} = (1 - u)^2.
+%	$$
+%}
+
+The quantity $u=g/(1+g)$ will occur frequently in the coming text and so it will be useful to derive $p(u|\vy)$.
+Via a change of variables we have
+\begin{equation}\label{eq:uGiveY}
+p(u|\vy) = \frac{(1 -  R^2)^{b+1}}{\mbox{Beta}(b + 1,d+1)} 
+u^{b}  (1 - u)^d (  1 -  uR^2 )^{-(b + d + 2)}, \quad 0<u<1.
+\end{equation}
+
+\noindent This is a special case of the
+Gauss hypergeometric (GH) distribution
+of Armero and Bayarri (1994).
+More specifically,
+$u|\vy \sim GH(b+1,d+1,b+d+2,-R^2)$
+where if $x \sim GH(p,q,r,\lambda)$
+then the density of $x$ is
+$$
+p(x) = \frac{x^{p-1}(1 - x)^{q-1}(1 + \lambda x)^{-r}}{\mbox{Beta}(p,q){}_2F_1(r,p;p+q; -\lambda)}
+$$
+
+\noindent To show (\ref{eq:uGiveY}) is a special case
+of the GH distribution, we use the
+Euler's identity 
+${}_{2}F_{1}(a,b;c;z)=(1-z)^{c-a-b}\,{}_{2}F_{1}(c-a,c-b;c;z)$
+and the fact that
+${}_2F_1(0,b;c;z) = {}_2F_1(a,0;c;z) = 1$
+to obtain 
+${}_2F_1(b+d+2,b+1;b+d+2; R^2) = (1 -  R^2)^{-(b+1)}$.
+We can sample from $u|\vy$ by sampling instead from
+$g|\vy$ and then applying the transformation $u=g/(1+g)$.
+
+
+
+
+ 
+In order to sample from $\sigma^2|\vy$ 
+we first sample $g^* \sim g|\vy$ and then obtain
+a  sample from $\sigma^2|\vy,g^*$.
+We obtain $\sigma^2|\vy,g$
+by combining (\ref{eq:yGivenSigma2andG}) with the prior for $\sigma^2$
+in (\ref{eq:priorStructure}) and normalizing to obtain
+\begin{equation}\label{eq:sigma2GivenYandG}
+\ds \sigma^2|\vy,g 
+\sim \mbox{IG}\left( \tfrac{n-1}{2},\tfrac{n}{2}\left( 1 - \tfrac{g}{1+g} R^2\right) \right).
+\end{equation}
+
+%\noindent For a given $g$ it is straightforward
+%to sample from $\sigma^2|\vy,g$. 
+
+Next, it is straightforward to show that 
+\begin{equation}\label{eq:coefficientsGivenYandG}
+\alpha|\vy,\sigma^2 \sim N\left( 0, \sigma^2/n \right), 
+\qquad  \mbox{and} \qquad 
+\vbeta|\vy,\sigma^2,g \sim \N\left(         
+\tfrac{g}{1+g}\widehat{\vbeta},    
+\tfrac{g}{1+g} \sigma^2 \left( \mX^T\mX \right)^{-1} 
+\right),                              
+\end{equation}
+
+\noindent where $\widehat{\vbeta} = \left( \mX^T\mX \right)^{-1} \mX^T\vy$ is the least squares 
+estimate for $\vbeta$.
+
+
+Using the fact that $p(\vbeta|\vy,g) = \int p(\vbeta|\vy,\sigma^2,g)p(\sigma^2|\vy,g) d \sigma^2$ 
+along with standard calculations leads to
+$$
+\alpha|\vy,g \sim t_{n-1}\left[ 0, \tfrac{n}{n-1}  \left( 1 - \tfrac{g}{1+g} R^2\right) (\mX^T\mX)^{-1} \right]
+$$
+\begin{equation}\label{eq:betaGivenYandU}
+\ds \vbeta|\vy,g \sim t_{n-1}\left[
+\tfrac{g}{1+g} \widehat{\vbeta},
+ \tfrac{n}{n-1}  \tfrac{g}{1+g} \left( 1 - \tfrac{g}{1+g} R^2\right) (\mX^T\mX)^{-1}
+\right].
+\end{equation}
+
+We now have all of the ingredients to generate Monte Carlo samples from the full posterior distribution of all model parameters. 
+To do so we use the following steps 
+\begin{enumerate}
+	\item Sample $B \sim \mbox{Beta}(b+1,d+1)$.
+	
+	\item Calculate $\widetilde{g} = B/(1 - B)$. (Noting that $\widetilde{g} = g \widehat{\sigma}^2 \sim \mbox{Beta-prime}(b+1,d+1)$).
+	
+	\item Calculate $g = \widetilde{g}/\widehat{\sigma}^2$. (Noting that this value of $g$ is a sample from $g|\vy$).
+	
+	\item Sample $\sigma^2|\vy,g$ using  (\ref{eq:sigma2GivenYandG}).
+	
+	\item Sample from $\alpha|\vy,\sigma^2$ and 
+	$\vbeta|\vy,\sigma^2,g$ using (\ref{eq:coefficientsGivenYandG}).
+	
+	%\item Sample from $\vbeta|\vy,g$ using (\ref{eq:betaGivenYandU}).
+\end{enumerate}
+
+Note we only require the summary 
+statistics $\widehat{\vbeta}$, $\left( \mX^T\mX \right)^{-1}$, $n$, $p$ and $R^2$
+to sample from the posterior distribution for all model parameters. Once these quantities are calculated the cost of drawing samples
+from the posterior distribution is minimal. However, calculation
+of credible intervals requires dealing with mixtures of distributions.
+
+Instead of performing inferences based on MC samples
+we can exploit Rao-Blackwellization leading to more
+efficient estimators of the parameter posterior distributions. Let $g_1,\ldots,g_N$ be $N$ independent draws 
+obtained from performing steps 1. to 3. above $N$ times. Then
+the Rao-Blackwellized estimator for $p(\sigma^2|\vy)$ is
+$$
+\ds 
+p_{\mbox{\scriptsize RB}}(\sigma^2|\vy)
+= \frac{1}{N} \sum_{i=1}^{N} p(\sigma^2|\vy,g_i).
+$$
+
+\noindent Similarly let $\sigma_1^2,\ldots,\sigma_N^2$ be $N$ draws
+obtained from performing steps 1. to 4. $N$ times.
+Then the Rao-Blackwellized estimator for $p(\alpha|\vy)$ is
+$$
+\ds 
+p_{\mbox{\scriptsize RB}}(\alpha|\vy)
+= \frac{1}{N} \sum_{i=1}^{N} p(\alpha|\vy,\sigma_i^2).
+$$
+
+\noindent We have two potential Rao-Blackwellized
+estimators for $\vbeta|\vy$. These are
+$$
+p(\vbeta|\vy) \approx
+p_{\mbox{\scriptsize RB,1}}(\vbeta|\vy)
+= \frac{1}{N} \sum_{i=1}^{N} p(\vbeta|\vy,\sigma_i^2,g_i)
+\qquad \mbox{and} \qquad
+p(\vbeta|\vy) \approx
+p_{\mbox{\scriptsize RB,2}}(\vbeta|\vy)
+= \frac{1}{N} \sum_{i=1}^{N} p(\vbeta|\vy,g_i),
+$$
+
+\noindent where $p_{\mbox{\scriptsize RB,2}}(\vbeta|\vy)$ has a smaller Monte Carlo error compared to 
+$p_{\mbox{\scriptsize RB,1}}(\vbeta|\vy)$.
+
+%Note we only require the summary 
+%statistics $\widehat{\vbeta}$, $\left( \mX^T\mX \right)^{-1}$, $n$, $p$ and $R^2$
+%to sample from the posterior distribution for all model parameters. Once these quantities %are calculated the cost of drawing samples
+%from the posterior distribution is minimal. However, calculation
+%of credible intervals requires dealing with mixtures of distributions.
+
+
+\section{Exact posterior distributions in terms of special functions}
+\label{sec:Exact}
+ 
+In this section we derive the exact expressions for most Bayesian inferential quantities
+of interest based on the model presented in Section 2. An exception is
+the exact expression for the posterior density for $\vbeta|\vy$ for this quantity we
+instead derive the first and second moments.
+
+
+First, we use the fact that $p(\sigma^2|\vy) = \int_0^\infty p(\sigma^2|\vy,u) p(u|\vy)dg$ so that the density
+$\sigma^2|\vy$ may be expressed as
+$$
+\begin{array}{rl}
+\ds p(\sigma^2|\vy) 
+%& \ds = 
+%\left[ \frac{\left(\tfrac{n}{2}\right)^c}{\Gamma(c)} (\sigma^2)^{-(c+1)} \exp\left\{ - \frac{n}{2\sigma^2} \right\} \right] 
+%\left[ \frac{(1 -  R^2)^{b+1} }{\mbox{Beta}(d + 1,b+1)} %\right] \int_0^\infty 
+% g^{b} (1 + g)^{-c}  \exp\left(   \frac{g}{1+g} \frac{nR^2}{2\sigma^2} \right) dg.
+%\\
+& \ds = 
+\left[ \frac{\left(\tfrac{n}{2}\right)^c}{\Gamma(c)} (\sigma^2)^{-(c+1)} \exp\left\{ - \frac{n}{2\sigma^2} \right\} \right] 
+\left[ \frac{(\widehat{\sigma}^2)^{b+1} }{\mbox{Beta}(d + 1,b+1)} \right]
+\int_0^1
+u^{b} (1 - u)^d  \exp\left(  \frac{nR^2}{2\sigma^2} u \right) du.
+\end{array}
+$$
+
+%\noindent \joc{
+%$$
+%u = \frac{g}{1+g},
+%\quad 
+%g = \frac{u}{1-u},
+%\quad 
+%1 - u = \frac{1}{(1 + g)},
+%\quad 
+%(1 - u)^{-1} = (1 + g),
+%\quad \mbox{and}\quad 
+%\frac{du}{dg} = \frac{1}{1+g} - \frac{g}{(1 +g)^2} 
+%= \frac{1}{(1+g)^2} = (1 - u)^2.
+%$$
+%
+%\noindent Using the change of variables $u = g/(1 + g)$ the integral
+%above is  
+%$$
+%\ds \int_0^1 u^{b} (1 - u)^d  \exp\left(  %\frac{nR^2}{2\sigma^2} u \right) du
+%= \mbox{Beta}(d+1,b+1) {}_1 F_1\left(b + 1; c; %\frac{nR^2}{2\sigma^2} \right)
+%$$
+%
+%$$
+%	\int_{0}^u x^{\nu - 1} (u - x)^{\mu - 1}  e^{\beta x} dx = \mbox{Beta}(\nu,\mu) {}_1 F_1(\nu;\mu+\nu;\beta u) \quad   \mbox{(assuming $\mbox{Re}(\mu)>0$ and $\mbox{Re}(\nu)>0$).}
+%$$
+%\noindent with $u = 1$, $\nu = b + 1$, $\mu = a + p/2 + 1 >0$, and $\beta = nR^2/(2\sigma^2)$.
+%}
+
+\noindent 
+Utilising Equation 3.383(i) of \cite{Gradshteyn2007} (see Appendix A) we obtain  
+$$
+%\begin{array}{rl}
+\ds p(\sigma^2|\vy) 
+%& 
+\ds = 
+\frac{\left(\tfrac{n}{2}\right)^c (\widehat{\sigma}^2)^{b+1}}{\Gamma(c)} (\sigma^2)^{-(c+1)} \exp\left(  - \frac{n}{2\sigma^2} \right)
+{}_1 F_1\left(b + 1; c; \frac{nR^2}{2\sigma^2} \right),
+%\end{array}
+$$
+
+\noindent where 
+${}_1 F_1(\alpha;\gamma;z)$ 
+is the confluent hypergeometric function (also called
+Kummer's function of the first kind).
+To the best of our knowledge, this is a new positive valued continuous distribution.
+An alternative representation using the identity ${}_1F_1(a;b;z) = e^z {}_1F_1(b-a;b;-z)$ results in
+$$
+%\begin{array}{rl}
+\ds p(\sigma^2|\vy) 
+%& 
+\ds = 
+\frac{\left(\tfrac{n}{2}\right)^c (\widehat{\sigma}^2)^{b+1}}{\Gamma(c)} (\sigma^2)^{-(c+1)} \exp\left(  - \frac{n \widehat{\sigma}^2}{2\sigma^2} \right)
+{}_1 F_1\left( d + 1; c; -\frac{nR^2}{2\sigma^2} \right),
+%\end{array}
+$$
+
+\noindent which is much more amenable to numerical evaluation. 
+ 
+ 
+Next we have
+$p(\alpha|\vy) = \int_0^\infty p(\alpha|\vy,\sigma^2)p(\sigma^2|\vy) d\sigma^2$.
+% where $\alpha|\vy,\sigma^2 \sim N(0,\sigma^2/n)$. 
+After we apply the change of variables $\sigma^2 = 1/\tau$
+we obtain
+$$
+\begin{array}{rl}
+\ds p(\alpha|\vy) 
+%& \ds =
+%\joc{ \frac{\left(\tfrac{n}{2}\right)^c (1 -  R^2)^{b+1}  }{\Gamma(c)\sqrt{2\pi/n}}
+%\int_0^\infty 
+%(\sigma^2)^{-1/2} \exp\left( -\frac{n\alpha^2}{2\sigma^2} \right) 
+%(\sigma^2)^{-(c + 1)}\exp\left( -\frac{n}{2\sigma^2}  \right)  {}_1 F_1\left( b + 1; c; %\frac{nR^2}{2\sigma^2} \right)  d\sigma^2
+%}
+%\\ [2ex]
+%& \ds =  \frac{\left(\tfrac{n}{2}\right)^c (1 -  R^2)^{b+1}  }{\Gamma(c)\sqrt{2\pi/n}} 
+%\times 
+%\int_0^\infty 
+%(\sigma^2)^{-c -3/2} \exp\left( -\frac{n(1+\alpha^2)}{2\sigma^2} \right)   {}_1 F_1\left( b + %1; c; \frac{nR^2}{2\sigma^2} \right) d\sigma^2
+%\\
+& \ds = \frac{\left(\tfrac{n}{2}\right)^c (1 -  R^2)^{b+1}  }{\Gamma(c)\sqrt{2\pi/n}} 
+\times 
+\int_0^\infty 
+\tau^{c - 1/2} \exp\left( -\frac{n(1+\alpha^2)}{2} \tau \right)   {}_1 F_1\left( b + 1; c; \frac{nR^2}{2} \tau \right) d \tau.
+\end{array}
+$$
+
+
+%$$
+%\begin{array}{rll}
+%\ds \int_0^\infty e^{-st} t^{b-1} {}_1F_1(a,c,kt) dt
+%& \ds = \Gamma(b)s^{-b} F(a,b,c,k s^{-1}) 
+%& \mbox{(if $|s| > |k|$)}
+%\\
+%& \ds = \Gamma(b)(s - k)^{-b} F\left(c - a, b; c; \frac{k}{k - s} %\right)
+%& \mbox{(if $|s - k| > |k|$)}
+%\end{array} 
+%$$
+
+%\noindent assuming that $\mbox{Re}(b)>0$, $\mbox{Re}(s) > %\max(0,\mbox{Re}(k))$. 
+%In the above case
+%$$
+%b \leftrightarrow c + 1/2, \quad 
+%s \leftrightarrow \frac{n(1+\alpha^2)}{2} , \quad
+%a \leftrightarrow b + 1, \quad 
+%c \leftrightarrow c, \quad \mbox{and} \quad
+%k \leftrightarrow  \frac{nR^2}{2}.
+%$$
+
+
+%\noindent where the second line above follows from the 
+%change of variables $\sigma^2 = 1/\tau$.
+
+%\joc{
+%\noindent Equation 7.621 (4) of \cite{Gradshteyn2007} 
+%(the second line corrected from EH I, 269(5))
+%is
+
+%
+%\noindent The first holds since
+%$$
+%|s| = \frac{n(1+\alpha^2)}{2}  > |k| = \frac{nR^2}{2} \qquad %\mbox{(since $R^2 \in [0,1]$ and $\alpha^2\ge 0$)},
+%$$
+%
+%\noindent Checking the other conditions
+%$$
+%b \leftrightarrow c + 1/2 = (n-1)/2 + 1/2 = n/2 > 0.
+%$$
+%}
+
+\noindent 
+Utilizing  Equation 7.621 (4) of \cite{Gradshteyn2007} we obtain
+\begin{equation}\label{eq:alphaGivenY}
+\begin{array}{rl}
+\ds p(\alpha|\vy) 
+& \ds = \frac{ \Gamma\left( c + \tfrac{1}{2} \right) (1 -  R^2)^{b+1}  }{ \Gamma(c)\sqrt{\pi}} 
+\left( 1+\alpha^2 \right)^{-n/2} {}_2F_1\left( b+1, c + \frac{1}{2}; c; \frac{R^2}{1+\alpha^2}  \right),
+\end{array}
+\end{equation}
+
+\noindent where ${}_2F_1$ is the Gaussian hypergeometric function.
+
+The first three arguments of the ${}_2F_1$ function in (\ref{eq:alphaGivenY}) are $O(n)$. This makes 
+numerical evaluation of (\ref{eq:alphaGivenY}) difficult in general. In order to handle this difficulty
+we will first use the Euler transform
+Euler's identity 
+${}_{2}F_{1}(a,b;c;z)=(1-z)^{c-a-b}\,{}_{2}F_{1}(c-a,c-b;c;z)$ leading to
+\begin{equation}\label{eq:alphaGivenY_2}
+	\begin{array}{rl}
+		\ds p(\alpha|\vy) 
+		& \ds = \frac{ \Gamma\left( c + \tfrac{1}{2} \right)   }{ \Gamma(c)\sqrt{\pi}} 
+		\frac{(1 -  R^2)^{b+1}}{(  \alpha^2 + 1 - R^2 )^{b+3/2}}
+		\left( 1+\alpha^2 \right)^{ - (d+1) }   
+		
+		 {}_2F_1\left( d + 1,  - \frac{1}{2}; c; \frac{R^2}{1+\alpha^2}  \right),
+	\end{array}
+\end{equation}
+
+\noindent which is again more numerically stable to evaluate
+when $n$ is large.
+ 
+Unfortunately, we have not been able to find a closed form expression
+for $\vbeta|\vy$ in terms of known special functions. However,
+it is possible, for fixed $\vbeta$ to integrate $\int p(\vbeta|\vy,u)p(u|\vy)du$
+using  (\ref{eq:uGiveY})  and (\ref{eq:betaGivenYandU})
+%, i.e.,
+%$$
+%\begin{array}{rl}
+%\ds p(\vbeta|\vy)
+%& \ds =  \frac{(1 -  R^2)^{b+1} \Gamma\left( \tfrac{n+p-1}{2}\right)
+%	|\mX^T\mX|^{1/2} n^{(n+p-1)/2} }{\mbox{Beta}(b + 1,d+1) \Gamma\left( \tfrac{n-1}{2} \right) n^{p/2}\pi^{p/2}  } \\
+%& \ds \quad \times \int_0^1
+%u^{b - p/2 + (n+p-1)/2}  (1 - u)^d (  1 -  uR^2 )^{-(b + d + 2)-p/2 + (n+p-1)/2}  
+%\left[ n u \left( 1 - u R^2\right) + (\vbeta - u\widehat{\vbeta})^T
+%\mX^T\mX
+%(\vbeta - u\widehat{\vbeta}) \right]^{-(n+p-1)/2} du
+%\end{array}
+%$$ 
+via univariate numerical integration methods.
+Instead we will concentrate on deriving the first and second moments of $\vbeta|\vy$.
+
+
+In order to calculate the first and second posterior moments for $\vbeta$
+we use the laws of total expectation and variance respectively, i.e.,
+%$\bE(\vbeta|\vy) = \bE_{g|\vy}\left[ \vbeta|\vy,g \right]$, and
+%$\mbox{Cov}(\vbeta|\vy)  = \bE_{g|\vy}\left[
+%\mbox{Cov}(\vbeta|\vy,g)
+%\right] + \mbox{Cov}_{g|\vy}\left[
+%\bE(\vbeta|\vy,g)
+%\right]$ 
+%or equivalently 
+$\bE(\vbeta|\vy) = \bE\left[ \bE(\vbeta|\vy,u) |\vy \right]$, and
+$\mbox{Cov}(\vbeta|\vy)  = \bE\left[
+\mbox{Cov}(\vbeta|\vy,g)|\vy
+\right] + \mbox{Cov}\left[
+\bE(\vbeta|\vy,u)|\vy
+\right]$ 
+to obtain
+$$
+\begin{array}{rll}
+\ds \bE(\vbeta|\vy) 
+& \ds = M_1 \widehat{\vbeta}
+\\ %[1ex]
+\ds \mbox{Cov}(\vbeta|\vy) 
+%& \ds = \bE_{u|\vy}\left[ \frac{n - 1}{n - 3}
+%\left(\frac{n}{n-1}\right) u \left( 1 - u R^2\right) %(\mX^T\mX)^{-1}
+%\right] + \mbox{Cov}_{u|\vy}\left[
+%u \widehat{\vbeta} \right] 
+%\\ [2ex]
+& \ds = \tfrac{n}{n - 3} 
+\left( M_1 - M_2 R^2\right) (\mX^T\mX)^{-1}
++ (M_2 - M_1^2) \widehat{\vbeta}  \widehat{\vbeta}^T
+\end{array}
+$$
+
+\noindent where
+$M_1 
+%= \bE\left[  \left. \frac{g}{1 + g}  \right| \vy\right] 
+= \bE(u|\vy)$
+and
+%\qquad \mbox{and} \qquad 
+$M_2 
+%= \bE\left[ \left. \left(\frac{g}{1 + g}\right)^2   \right| \vy \right]
+= \bE(u^2|\vy)$.
+
+
+Using the normalizing constant for the GH distribution,
+Euler's identity and properties of the Beta function we obtain
+\begin{equation}\label{eq:M1}
+\begin{array}{rl}
+\ds M_1 
+%& \ds \joc{ = \frac{\mbox{Beta}(b + 2,d+1)}{\mbox{Beta}(b + 1,d + 1)} (1 -  R^2)^{b+1} {}_2F_1(b+d+2,b+2;b+d+3; R^2)
+%}
+%\\
+%& \ds \joc{= 
+%	\frac{\mbox{Beta}(d+1, b+2)}{\mbox{Beta}(d + 1, b + 1)} 
+%	(1 - R^2)^{b+1}
+%	{}_2 F_1 (c, b + 2; c + 1; R^2)
+%}
+%\\ [2ex]
+%& \ds  \joc{=    \frac{\mbox{Beta}(d+1, b+2)}{\mbox{Beta}(d + %1, b + 1)} 
+%	(1 - R^2)^{b+1}
+%	\times (1 - R^2)^{c + 1 - c - (b+2)}
+%	{}_2 F_1 (c + 1 - c, c + 1 - (b + 2); c + 1; R^2)        
+%}
+%\\ [2ex]
+%& \ds  \joc{=    
+%	\frac{\Gamma(b+2)}{\Gamma(c + 1)}
+%	\frac{\Gamma(c)}{\Gamma(b+1)}
+%	{}_2 F_1 (d + 1, 1; c + 1; R^2)        
+%}
+%\\ [2ex]
+& \ds  =    
+\frac{b + 1}{c}
+{}_2 F_1 (d + 1, 1; c + 1; R^2)    
+\end{array} 
+\end{equation}
+
+%\noindent Note that the same results can be obtained using 
+%\cite{Gradshteyn2007} Equation 3.197 (5).
+
+\noindent 
+and,
+\begin{equation}\label{eq:M2}
+\begin{array}{rl}
+\ds M_2
+%& \ds \joc{ = \frac{(1 - R^2)^{b+1}}{\mbox{Beta}(d + 1, b + 1)} 
+%	\int_0^\infty g^{b+2} (1 + g)^{-2} [1 + g (1 - R^2)]^{-c} dg 
+%}
+%\\ [2ex]
+%& \ds \joc{= 
+%\frac{\mbox{Beta}(d + 1, b+3) }{\mbox{Beta}(d + 1, b + 1)} 
+%(1 - R^2)^{b+1} {}_2 F_1 (c, b+3; c + 2; R^2)
+%}
+%\\
+%& \ds \joc{= 
+%\frac{\Gamma(b+3)}{\Gamma(c + 2)}
+%\frac{\Gamma(c)}{\Gamma(b+1)}
+%{}_2 F_1(d+1, 2; c+ 2; R^2)    
+%}
+%\\
+& \ds =
+\frac{(b+1)(b+2)}{c(c+1)}    {}_2 F_1(d+1, 2; c+ 2; R^2).    
+\end{array} 
+\end{equation}
+
+ 
+%\newpage 
+
+\section{Approximations}
+\label{sec:approximations}
+
+While the results in the previous section are exact, they are not particularly intuitive since these results depend on special functions. We will use asymptotic approximations to gain a better understanding of results from previous sections.
+The asymptotic framework that we will use assumes that $R^2$ is a
+fixed constant, and $p/n \to 0$ as $n$ diverges.
+First, we will show how model averaging using prior structure (\ref{eq:priorStructure}) 
+is asymptotically equivalent to model averaging using BIC. Second, we will show 
+asymptotically that the parameter posteriors take simple parametric forms.
+
+
+
+
+
+\subsection{Asymptotic forms of parameter posterior distributions}
+
+We will now provide asymptotic approximations for $p(\alpha|\vy)$,
+$p(\vbeta|\vy)$, and $p(\sigma^2|\vy)$. We will start with $p(\sigma^2|\vy)$.
+To give some intuition behind how $p(\sigma^2|\vy)$ behaves asymptotically 
+note that $b + 1 = c \left[ 1 - (p + 2a + 2)/(n-1) \right]$ so that
+$b + 1 = c + O(p/n)$. Hence, if $p/n$ is small then  
+$$
+\begin{array}{rl}
+\ds p(\sigma^2|\vy) 
+%& 
+%\ds \approx
+%\frac{\left(\tfrac{n}{2}\right)^c (1 -  R^2)^{c}}{\Gamma(c)} %(\sigma^2)^{-(c+1)} \exp\left(  - \frac{n}{2\sigma^2} \right)
+%{}_1 F_1\left(c; c; \frac{nR^2}{2\sigma^2} \right)
+%\\
+& \ds 
+\approx \frac{\left(\tfrac{n}{2}\right)^c (1 -  R^2)^{c}}{\Gamma(c)} (\sigma^2)^{-(c+1)} \exp\left(  - \frac{n(1 - R^2)}{2\sigma^2} \right)
+\end{array}
+$$
+
+\noindent which follows from the identity ${}_1 F_1(a,a,x) = e^x$, i.e.,
+\begin{equation}\label{eq:sigma2givenYapprox}
+\ds \sigma^2|\vy \stackrel{\mbox{\scriptsize approx.}}{\sim} \mbox{IG}\left( \tfrac{n-1}{2}, \tfrac{n}{2}\widehat{\sigma}^2 \right)
+\end{equation}
+
+\noindent where $\widehat{\sigma}^2 = 1 - R^2$ is the typical MLE for $\sigma^2$ under the 
+simplifying assumptions on $\vy$ and $\mX$ stated in Section 2. 
+%From the above expression we
+%clearly see Bernstien von Mises Theorem come into effect.
+
+Next, consider the series expansion for the Gaussian hypergeometric function 
+given by
+$$
+{}_2 F_1 (a, b; c; z)        
+= 1 + \frac{ab}{c} z + \frac{a(a + 1)b(b+1)}{c(c+1)} \frac{z^2}{2} + \ldots
+$$
+
+\noindent In the context of the expressions for $M_1$,
+$$
+M_1 = \frac{b + 1}{c}
+\left[ 
+1 + \frac{d+1}{c+1} R^2 + \frac{ (d+1)(d + 2) }{(c+1)(c+2)} R^4 + \ldots
+\right].  
+$$
+
+\noindent 
+We have $d+1 = O(1)$ and $c = O(n)$ the series expansion converges rapidly when either 
+$p/n$ or $R^2$ is small. Since each term in the expansion is positive it follows
+that $M_1$ is a
+strictly monotonic increasing function of $R^2$. Using the fact that 
+$$
+{}_2F_1 (a,b;c;1)= \frac{\Gamma(c)\Gamma(c-a-b)}{\Gamma(c-a)\Gamma(c-b)}, \qquad   
+$$
+
+\noindent provided $c>a+b$. By using properties of the gamma function
+ for the special case that $R^2 = 0$ and 
+$R^2=1$ we have
+$$
+{}_2 F_1 (d + 1, 1; c + 1; 0) = 1 \quad \mbox{and} \quad  
+{}_2 F_1 (d + 1, 1; c + 1; 1) = \frac{c}{b + 1}.
+$$
+
+\noindent Hence and similarly,
+$$
+\ds \frac{b + 1}{c} \le M_1 \le 1, \qquad \mbox{and} \qquad \frac{(b+1)(b+2)}{c(c+1)} \le M_2 \le 1.
+$$
+
+\noindent Hence,
+$$
+\begin{array}{rl}
+0 \le \mbox{Var}(u|\vy) 
+& \ds \le 1 - \frac{(b+1)^2}{c^2}
+\\
+& \ds = \frac{(n - 1)^2 - [(n - 1) - (p  + 2a + 4)]^2}{(n - 1)^2}
+\\
+& \ds 
+= \frac{2(p  + 2a + 4)}{n - 1} - \frac{(p  + 2a + 4)^2}{(n - 1)^2}
+\\
+& \ds = O(p/n)
+\end{array} 
+$$
+
+\noindent It then follows that $M_1 \to 1$ and $M_2\to 1$ either
+as $n\to \infty$ or as $R^2 \to 1$. Furthermore, as $n\to \infty$ or as $R^2 \to 1$ 
+we have $\mbox{Var}(u|\vy) \to 0$.
+
+$$
+p(u) = \exp(f(u))
+$$
+$$
+p'(u) = f'(u)\exp(f(u))
+$$
+$$
+p''(u) = [f''(u) + f'(u)^2]\exp(f(u))
+$$
+
+$$
+\bE( g(u) ) \approx g(\widehat{u})  + \tfrac{1}{2} \mbox{Var}(u) g''(\widehat{u}) 
+$$
+
+
+$$
+\begin{array}{rll}
+\log p(\sigma^2|\vy,u) 
+& \ds = \left( \tfrac{n-1}{2} \right) \log\left[
+\tfrac{n}{2}\left( 1 - u R^2\right) \right]
+- \log\Gamma\left[ \frac{n-1}{2} \right]
+- \left( \frac{n-1}{2} + 1\right) \log(\sigma^2)
+- \tfrac{n}{2}\left( 1 - u R^2\right)   \sigma^{-2}
+\\
+& \ds = \left( \tfrac{n-1}{2} \right) \log
+\left( 1 - u R^2\right) 
+- \tfrac{n}{2}\left( 1 - u R^2\right)   \sigma^{-2}
++ \mbox{constants in $u$}
+\end{array}
+$$ 
+ 
+$$
+\begin{array}{rll}
+p(\sigma^2|\vy) 
+& \ds = \int p(\sigma^2|\vy,u) p(u|\vy) du 
+\\
+& \ds = 
+\bE[p(\sigma^2|\vy,u)|\vy]
+\\
+& \ds 
+\approx p(\sigma^2|\vy,\bE(u|\vy))
++ \tfrac{1}{2}\mbox{Var}(u|\vy) \left[ \frac{\d^2 p(\sigma^2|\vy,u)}{d u^2} \right]_{u = \bE(u|\vy)}
+\\
+& \ds \approx
+\mbox{IG}\left( \tfrac{n-1}{2},\tfrac{n}{2}\left( 1 - M_1 R^2\right) \right)
+\qquad \mbox{(First order delta method)}
+\\
+& \ds 
+\approx p(\sigma^2|\vy,u=M_1)
++ \tfrac{1}{2}(M_2 - M_1^2) \left[ 
+\left\{
+\frac{\d^2 \log p(\sigma^2|\vy,u)}{\d u^2}
++ \left( \frac{\d \log p(\sigma^2|\vy,u)}{\d u} \right)^2
+\right\}
+p(\sigma^2|\vy,u) \right]_{u = M_1}
+\\
+& \ds 
+\propto \mbox{IG}\left( \tfrac{n-1}{2},\tfrac{n}{2}\left( 1 - M_1 R^2\right) \right)
++ \tfrac{1}{2}(M_2 - M_1^2)  
+\tfrac{n^2 R^4}{2} (\sigma^2)^{-2}
+p(\sigma^2|\vy,M_1) 
+\\
+& \ds 
+= \mbox{IG}\left( \tfrac{n-1}{2},\tfrac{n}{2}\left( 1 - M_1 R^2\right) \right)
++ \tfrac{1}{2}(M_2 - M_1^2)  
+\tfrac{n^2 R^4}{2} \mbox{IG}\left( \tfrac{n+1}{2},\tfrac{n}{2}\left( 1 - M_1 R^2\right) \right)
+\end{array}
+$$
+
+
+$$
+\ds \sigma^2|\vy  
+\stackrel{\mbox{\scriptsize approx.}}{\sim} 
+\mbox{IG}\left( \tfrac{n-1}{2},\tfrac{n}{2}\left( 1 - M_1 R^2\right) \right)
+$$
+
+%\begin{itemize}
+%	\item $\ds \bE\left[ \frac{g}{g+1} \Big| \vy \right] = \bE(u|\vy) = M_1 \to 1$; and
+%	
+%	
+%	\item $\ds \mbox{Var}\left[ \frac{g}{g+1} \Big| \vy \right] = \mbox{Var}(u|\vy) = M_2 - M_1^2 \to 0$.
+%	
+%\end{itemize}
+%
+\noindent Hence, the posterior distribution for $u$ behaves like a point mass
+as $n\to \infty$ or as $R^2 \to 1$. In the context of $\sigma^2|\vy,g$ 
+if we were to simply substitute $g/(1+g) = 1$ into Equation 
+(\ref{eq:sigma2GivenYandG}) we would obtain Equation (\ref{eq:sigma2givenYapprox}).
+
+
+If $\vx|z \sim N(\vmu,z\mV)$ and $z\sim \mbox{IG}(a,b)$ then
+$\vx \sim t_{2a}( \vmu, (b/a)\mV)$. 
+We have $a = (n - 1)/2$, $b = (n/2)\left( 1 - M_1 R^2\right)$, $\vmu = 0$, and $\mV = \sigma^2/n$. Hence,
+$$
+\alpha|\vy \stackrel{\mbox{\scriptsize approx.}}{\sim} t_{n-1}\left( 0, \frac{1 - M_1 R^2}{n-1} \right)
+$$
+
+Similarly, using the delta method on (\ref{eq:betaGivenYandU}) leads to
+\begin{equation}\label{eq:betaGivenYandU}
+\ds \vbeta|\vy \stackrel{\mbox{\scriptsize approx.}}{\sim} t_{n-1}\left[
+M_1 \widehat{\vbeta},
+\left(\tfrac{n}{n-1}\right) M_1  \left( 1 - M_1  R^2\right) (\mX^T\mX)^{-1}
+\right].
+\end{equation}
+%\noindent Again, we see a Bernstein von Mises theorem coming into effect.
+
+ 
+
+
+
+
+ 
+\subsection{Asymptotic equivalence of model averaging via BIC and via prior structure (\ref{eq:priorStructure})}
+
+
+\noindent We will now cast all of our previous results into the context of model averaging.
+In order to do so we introduce some notation.
+We index the space of models by a $p$-dimensional vector of indicator variables for each variable considered. 
+
+
+\noindent where the priors placed on $\alpha$ and $\sigma^2$ remain unchanged, and
+the hyperparameter $b$ for the prior on $g$ is replaced with $b=(n - q - 5)/2 - a$
+where $q = |\vgamma|$, and $\delta(x;a)$ is the Dirac delta function for $x$ with
+location $a$. 
+
+For the purposes of this paper we will assume a flat prior of $\vgamma$, i.e., 
+$p(\vgamma) = 2^{-p}$, although extension to other priors on $\vgamma$ is
+straightforward.
+
+All previous results concerning posterior distributions for $\alpha$, $\vbeta$, $\sigma^2$ and $g$ conditioned on a particular model $\vgamma$ require small changes, i.e.,
+by replacing $\widehat{\vbeta}$ with $\widehat{\vbeta}_\vgamma$ (the MLE under model
+$\vgamma$), $(\mX^T\mX)^{-1}$ with $(\mX_\vgamma^T\mX_\vgamma)^{-1}$ , $p$ with $q = |\vgamma|$, and $R^2$ with $R_\vgamma^2$ (the R-squared value
+under model $\vgamma$). Further, all previous expressions would be conditioned on
+$\vgamma$.
+
+The marginal likelihood is given by
+$p(\vy) = \sum_{\vgamma} p(\vy|\vgamma)p(\vgamma)$
+where $\sum_{\vgamma}$ denotes summation over all possible models $\vgamma$.
+The posterior probability for model $\vgamma$ is given by
+$$
+\ds p(\vgamma|\vy) = \frac{p(\vy|\vgamma)p(\vgamma)}{\sum_{\vgamma'} p(\vy|\vgamma')p(\vgamma')}
+$$
+
+\noindent and the parameter posterior distributions are then given by
+$$
+p(\alpha|\vy) = \sum_{\vgamma} p(\alpha|\vy,\vgamma)p(\vgamma|\vy),
+\quad
+p(\vbeta|\vy) = \sum_{\vgamma} p(\vbeta|\vy,\vgamma)p(\vgamma|\vy) 
+\quad \mbox{and} \quad 
+p(\sigma^2|\vy) = \sum_{\vgamma} p(\sigma^2|\vy,\vgamma)p(\vgamma|\vy). 
+$$
+
+\noindent An alternative representation for $p(\vgamma|\vy)$ under a flat prior is
+$$
+\ds p(\vgamma|\vy) = \frac{
+\exp\left[
+-\tfrac{1}{2} \left\{ 
+\widetilde{\mbox{BIC}}(\vgamma) - \widetilde{\mbox{BIC}}(\vgamma^*) 
+\right\} \right]
+}{
+\sum_{\vgamma'} \exp\left[
+-\tfrac{1}{2} \left\{ \widetilde{\mbox{BIC}}(\vgamma') - \widetilde{\mbox{BIC}}(\vgamma^*) \right\} \right]
+}
+$$
+
+\noindent where $\widetilde{\mbox{BIC}}(\vgamma) = - 2\log p(\vy|\vgamma)$ and
+$\vgamma^* \in \{0,1\}^p$ corresponds to any model in the model space.
+
+Consider two such models indexed by $\vgamma_1$ and $\vgamma_2$ respectively.
+Let $\widehat{\sigma}_k^2$, $R_k^2$, $q_k$, $\mbox{BIC}_k$ be the MLEs for $\sigma^2$, 
+R-squared values, model sizes and BIC scores corresponding to $k\in\{1,2\}$.
+Then treating the $R^2$ values and $q$'s constant and letting $n$ diverge we have
+$$
+\begin{array}{rl}
+\widetilde{\mbox{BIC}}(\vgamma_2) - \widetilde{\mbox{BIC}}(\vgamma_1)
+& \ds = 
+- 2(b_1 + 1)\log(1 - R_1^2) 
+- 2\log\left( \Gamma(d_1 + 1)\Gamma(c + q_1/2) \right)
+\\
+& \ds \qquad + 2(b_1 + 1)\log(1 - R_2^2) + 2\log\left( \Gamma(d_2 + 1)\Gamma(c + q_2/2) \right)
+\\ [1ex]
+& \ds = n\log(1 - R_2^2) - n\log(1 - R_1^2)  + 2\log\left( \frac{\Gamma(c + q_2/2
+)}{\Gamma(c + q_1/2)} \right) 
++ 2\log\left( \frac{\Gamma(d_2 + 1)}{\Gamma(d_1 + 1)} \right)
+ \\
+& \ds \qquad + 
+(q_1 - 3 + 2a)\log(1 - R_1^2) - (q_2 - 3 + 2a)\log(1 - R_2^2)
+
+\end{array} 
+$$
+
+$$
+b = \frac{n - q - 5}{2} - a
+$$
+$$
+a + b + 2 = \frac{n - q - 1}{2} = c + q/2
+$$
+$$
+d = q/2 + a
+$$
+
+\noindent where the second line is obtained by absorbing terms only depending on $q_1$, $q_2$, $R_1$, $R_2$ and $a$ into 
+the $O(1)$ term. Using Stirling's asymptotic expansion
+of $\ln\Gamma(z)$ for large
+$z$, i.e.,
+$\ln \Gamma (z) = z\ln(z)-z -(1/2)\ln(z) + (1/2)\log(2\pi) + O(z^{-1})$ \citep[see for example Equation 6.1.37 of][]{Abramowitz1972},
+we obtain  
+$$
+\begin{array}{rl}
+\ds \log\left( \frac{\Gamma(a + b_2 + 2)}{\Gamma(a + b_1 + 2)} \right)
+& \ds = (a + b_2 + 2)\log(a + b_2 + 2) - (a + b_1 + 2)\log(a + b_1 + 2)
++ \log\left( \frac{a + b_1 + 2}{a + b_2 + 2} \right) + O(n^{-1})
+\\
+& \ds = (a + b_2 + 2)\log\left[ n \left( \frac{1}{2} - \frac{q_2 + 1}{2n}  \right) \right] - (a + b_1 + 2)\log\left[ n \left( \frac{1}{2} - \frac{q_1 + 1}{2n}  \right) \right] \\
+& \ds \qquad 
++ \log\left( 1 +  \frac{b_1 - b_2}{a + b_2 + 2} \right) + O(n^{-1})
+\\
+& \ds = \tfrac{1}{2} (q_2 - q_1)\log(n) 
++ (a + b_2 + 2)\log\left( \frac{1}{2} - \frac{q_2 + 1}{2n}  \right)
+\\
+& \ds \qquad 
+- (a + b_1 + 2)\log\left( \frac{1}{2} - \frac{q_1 + 1}{2n}  \right)
++ \log\left( 1 +  \frac{b_1 - b_2}{a + b_2 + 2} \right) + O(1).
+\end{array} 
+$$
+
+\noindent For the second, third and fourth terms above
+using Taylor series expansions around the $O(n^{-1})$ terms inside
+the log functions it is easy to see that the 
+second, third and fourth terms above are $O(1)$, $O(1)$ and $O(n^{-1})$
+respectively. Hence,
+$$
+\begin{array}{rl}
+\widetilde{\mbox{BIC}}(\vgamma_2) - \widetilde{\mbox{BIC}}(\vgamma_1)
+& \ds = n\log(1 - R_2^2) - n\log(1 - R_1^2) +  (q_2 - q_1)\log(n)   + O(1)
+\\
+& \ds = \mbox{BIC}(\vgamma_2) - \mbox{BIC}(\vgamma_1) + O(1),
+\end{array} 
+$$
+
+\noindent where $\mbox{BIC}(\vgamma) = n\log(1 - R_\vgamma^2)  + p\log(n)$ is
+the BIC under model $\vgamma$.
+
+Hence, using $\log p(\vy)$ as a model selection criterion is
+first order equivalent to BIC and shares all first order optimality properties
+of the BIC (see for example, Yang, 2005). Furthermore, when using a uniform
+prior on the model space, i.e., $p(\vgamma) = 1/2^p$, Bayesian model averaging 
+via the prior structure (\ref{eq:priorStructure}) is asymptotically equivalent
+to model averaging via BIC.
+
+ 
+
+ 
+
+
+
+ 
+ 
+\newpage 
+ 
+
+ 
+\section{Implementation}
+\label{sec:implementation}
+
+Key to the feasibility of the model selection and averaging is an efficient implementation of the procedures. We employ two main 
+strategies to achieve computational efficiency (i) efficient software implementation using
+highly optimized software libraries; and (ii) efficient calculation of
+$R$-squared values for all models based on using a Gray code and appropriate
+matrix algebraic simplifications.
+For ease of use we 
+implemented an {\tt R} package called {\tt BLAH}.
+This internals of {\tt BLAH} is implemented
+in {\tt C++} and uses the {\tt R} packages \texttt{Rcpp} and \texttt{RcppEigen} to enhance
+computational performance.  
+
+\subsection{Gray code} 
+\label{sec:GrayCode}
+
+
+The Gray code was originally developed to aid in detecting errors in analog to digital conversions in
+communications systems by Frank Gray in 1947. It is a sequence of binary numbers whose key feature is that
+one and only one binary digit is different between binary numbers in the sequence. 
+Suppose we index the space of models $\mGamma \in \{0,1\}^{2^p \times p}$ using binary numbers and let $\vgamma_i$ and $\vgamma_{i+1}$ be any two consecutive rows of $\mGamma$,
+then
+$$
+\| \vgamma_i - \vgamma_{i+1} \| = 1
+$$
+
+\noindent for most standard vector norms.
+ 
+Gray codes can be constructed using a sequence of ``reflect'' and ``prefix'' steps.
+Let $\mGamma_1 = (0,1)^T \in \{0,1\}^{2\times 1}$ be the first Gray code matrix matrix and let $\mGamma_k$ be the $k$th Gray code matrix. Then we can obtain the $k+1$th Gray code matrix given $\mGamma_k$ via 
+$$
+\ds \mGamma_{k+1} = \left[\begin{array}{cc}
+\vzero & \mGamma_k \\
+\vone  & \mbox{reflect}(\mGamma_k)
+\end{array} \right]
+$$ 
+
+\noindent where $\mbox{reflect}(\mGamma_k)$ is the matrix obtained by reversing the order of rows of $\mGamma_k$, and the $\vzero$ and $\vone$ are vectors of zeros and ones
+of length $2^k$ respectively. In {\tt C++} this Gray codes can be efficiently constructed
+using bit-shit operations on binary strings.
+
+Gray codes allows the enumeration of the entire model space in an order which only adds
+or removes one covariate from the previous model at a time. We can then use standard matrix
+inverse results to perform rank
+one updates and downdates in the calculation of the $R^2$, $(\mX^T\mX)^{-1}$ and
+$\widehat{\vbeta}$ values for each model in the
+model space.
+
+\subsection{Updates and downdates} 
+
+Both updates and downdates depend on the fact that
+the inverse of a real symmetric matrix can be written as
+\begin{eqnarray}
+\ds \left[ \begin{array}{cc}
+\mA   & \mB \\
+\mB^T & \mC
+\end{array} \right]^{-1}
+&  = &
+\ds \left[ \begin{array}{cc}
+\mI & \vzero \\
+-\mC^{-1}\mB^T &  \mI
+\end{array} \right]
+\left[ \begin{array}{cc}
+\widetilde{\mA} & \vzero \\
+\vzero & \mC^{-1}
+\end{array} \right]
+\left[ \begin{array}{cc}
+\mI    & -\mB\mC^{-1}\\
+\vzero & \mI
+\end{array} \right] \label{eq:blockdiag1}\\
+&  = &
+\ds\left[
+\begin{array}{cc}
+\widetilde{\mA}
+& - \widetilde{\mA}\mB\mC^{-1} \\
+-\mC^{-1}\mB^T\widetilde{\mA}
+& \mC^{-1} + \mC^{-1}\mB^T\widetilde{\mA}\mB\mC^{-1}
+\end{array}\right]\label{eq:blockdiag2}
+\end{eqnarray}
+
+\noindent where $\widetilde{\mA} = \left(\mA-\mB\mC^{-1}\mB^T\right)^{-1}$
+provided all inverses in (\ref{eq:blockdiag1}) and
+(\ref{eq:blockdiag2}) exist. 
+For both the update and downdate formula we assume that the quantities
+$\mX^T\vy$, $\mX^T\mX$, $(\mX_{\vgamma_i}^T\mX_{\vgamma_i})^{-1}$, 
+$\widehat{\vbeta}_{\vgamma_i}$ and $R_{\vgamma_i}^2$ values have been computed from the previous step.
+
+We want to update the model inverse matrix, coefficient vector and $R^2$ values for the model $\vgamma_{i+1}$ where $\mX_{\vgamma_{i+1}}$ is the matrix given by $\mX_{\vgamma_i}$ with a column $\vz$ inserted into the appropriate position.
+For clarity of exposition we will assume that the column $\vz$ is inserted into the lasts position, i.e., $\mX_{\vgamma_{i+1}} = [\mX_{\vgamma_{i}},\vz]$.
+Then the updates for the model inverse matrix, coefficient estimates, and $R^2$ values can be obtained by following the steps bellow.
+\begin{enumerate}
+	\item Calculate $\widehat{\vz} = (\mX_{\vgamma_i}^T\mX_{\vgamma_i})^{-1}\mX_{\vgamma_i}^T\vz$, 
+	$\kappa 
+	%= 
+	%1/(\vz^T(\mI - \mX_{\vgamma_i}(\mX_{\vgamma_i}^T\mX_{\vgamma_i})^{-1}\mX_{\vgamma_i}^T)\vz) 
+	= 1/(n - \vz^T\widehat{\vz})$, and  $s = \vy^T(\vz - \widehat{\vz})$.
+	
+	\item The model inverse matrix can be updated via  
+	%The update for the $(\mX_{\vgamma_{i+1}}^T\mX_{\vgamma_{i+1}})^{-1}$ using $(\mX_{\vgamma_{i}}^T\mX_{\vgamma_{i}})^{-1}$ is
+	%given by the following. 
+	$$
+	\begin{array}{rl}
+	%\left[ \begin{array}{cc}
+	%\mX^T\mX & \mX^T\vz \\
+	%\vz^T\mX & \vz^T\vz \\
+	%\end{array} \right]^{-1}
+	(\mX_{\vgamma_{i+1}}^T\mX_{\vgamma_{i+1}})^{-1}
+	%& \ds = 
+	%\left[ \begin{array}{cc}
+	%(\mX^T\mX)^{-1} + c(\mX^T\mX)^{-1}\mX^T\vz\vz^T\mX(\mX^T\mX)^{-1}  & -(\mX^T\mX)^{-1}\mX^T\vz c \\
+	%-c\vz^T\mX(\mX^T\mX)^{-1}              
+	%& c
+	%\end{array} \right]
+	%\\
+	%& \ds = 
+	%\left[ \begin{array}{cc}
+	%(\mX^T\mX)^{-1} + c\widehat{\vz}\widehat{\vz}^T  & - \widehat{\vz} c \\
+	%-c\widehat{\vz}^T             
+	%& c
+	%\end{array} \right]
+	
+	\ds = 
+	\left[ \begin{array}{cc}
+	(\mX_{\vgamma_{i}}^T\mX_{\vgamma_{i}})^{-1}    & \vzero \\
+	\vzero             
+	& 0
+	\end{array} \right] + \kappa \left[ \begin{array}{r}
+	\widehat{\vz} \\
+	-1 \\
+	\end{array} \right] \left[ \begin{array}{r}
+	\widehat{\vz} \\
+	-1 \\
+	\end{array} \right]^T.
+	\end{array} 
+	$$
+	
+	\item
+	The coefficient estimators 
+	%are given by
+	%$ 
+	%\ds \widehat{\vbeta}_{\vgamma_{i}} = %(\mX_{\vgamma_{i}}^T\mX_{\vgamma_{i}})^{-1}\mX_{\vgamma_{i}}^T\vy$,
+	%and $\ds \widehat{\vbeta}_{\mbox{\scriptsize update}}  = (\mX_{\vgamma_{i+1}}^T\mX_{\vgamma_{i+1}})^{-1}\mX_{\vgamma_{i+1}}^T\vy$.  
+	%Then using the block inverse formula we have
+	can be updated via
+	$$
+	\begin{array}{rl}
+	\ds \widehat{\vbeta}_{\vgamma_{i+1}}
+	%& \ds = \left[ \begin{array}{c}
+	%\widehat{\vbeta} \\
+	%0 
+	%\end{array} \right] + c \left[ \begin{array}{cc}
+	%(\mX^T\mX)^{-1}\mX^T\vz \left\{ \vz^T\mX(\mX^T\mX)^{-1}\mX^T\vy - %\vz^T\vy\right\}  \\
+	%\vz^T\vy - \vz^T\mX(\mX^T\mX)^{-1}\mX^T\vy
+	%\end{array} \right]
+	%\\
+	%& \ds 
+	= \left[ \begin{array}{c}
+	\widehat{\vbeta}_{\vgamma_{i}} \\
+	0 
+	\end{array} \right] - \kappa s  \left[ \begin{array}{r}
+	\widehat{\vz}   \\
+	- 1
+	\end{array} \right].
+	\end{array} 
+	$$
+	
+	\item The $R^2$ value van be update via
+	% for each model (under the 
+	%standardization given in Section \ref{sec:model}) are given by
+	%$R_{\vgamma_{i}}^2 = \tfrac{1}{n} \vy^T\mX_{\vgamma_{i}}(\mX_{\vgamma_{i}}^T\mX_{\vgamma_{i}})^{-1}\mX_{\vgamma_{i}}^T\vy$
+	%and
+	%$R_{\vgamma_{i+1}}^2 = \tfrac{1}{n}\vy^T\mX_{\vgamma_{i+1}}(\mX_{\vgamma_{i+1}}^T\mX_{\vgamma_{i+1}})^{-1}\mX_{\vgamma_{i+1}}^T\vy$.
+	%Then using the block inverse formula
+	$$
+	\begin{array}{rl}
+	\ds 
+	R_{\vgamma_{i+1}}^2 
+	%& \ds = \tfrac{1}{n} \vy^T\mX(\mX^T\mX)^{-1}\mX^T\vy
+	%+ \tfrac{c}{n}\left[ 
+	%\widehat{\vy}\vz\vz^T\widehat{\vy}
+	%- 2\widehat{\vy}\vz\vz^T\vy 
+	%+ \vy^T\vz\vz^T\vy 
+	%\right]
+	= R_{\vgamma_{i}}^2
+	+ \frac{\kappa s^2}{n}.
+	
+	\end{array}
+	$$
+	
+	%\item
+	%\noindent The model determinants are given by
+	%$D = |\mX^T\mX|$
+	%and
+	%$D_{\mbox{\tiny update}} = |\mC^T\mC|$.
+	%Using the block determinant formula we have
+	%$D_{\mbox{\tiny update}} = D/c$.
+\end{enumerate}
+
+\noindent Presuming  have been precomputed
+the above updates costs $O(|\vgamma_{i}|^2 + n)$ time.
+
+Suppose want to downdate the model summary quantities for the model
+$\vgamma_{i+1}$ where $\mX_{\vgamma_{i+1}}$ is the matrix given by 
+$\mX_{\vgamma_i}$ with a column $\vz$ removed from the appropriate position.
+Similarly as for updates for clarity of exposition we will assume that
+$\vz$ will be removed from the last column of $\mX_{\vgamma_i}$, i.e., 
+$\mX_{\vgamma_{i}} = [\mX_{\vgamma_{i+1}}, \vz]$. 
+Then the downdates for model summary values are given by the following steps.
+\begin{enumerate}
+	\item 
+	%The downdate for the model inverse matrix to obtain $(\mX_{\vgamma_{i+1}}^T\mX_{\vgamma_{i+1}})^{-1}$
+	%from $(\mX_{\vgamma_{i}}^T\mX_{\vgamma_{i}})^{-1}$ can be found using the block-inverse formula.
+	Suppose we partition the matrix
+	 $(\mX_{\vgamma_{i+1}}^T\mX_{\vgamma_{i+1}})^{-1}$ so that
+	$$
+	\ds (\mX_{\vgamma_{i}}^T\mX_{\vgamma_{i}})^{-1} 
+	= \left[ \begin{array}{cc}
+	\mA   & \vb \\
+	\vb^T & c \\
+	\end{array} \right].
+	%= 
+	%\left[ \begin{array}{cc}
+	%\mX^T\mX & \mX^T\vz \\
+	%\vz^T\mX & \vz^T\vz \\
+	%\end{array} \right]^{-1}
+	$$
+	
+	\noindent The model inverse matrix downdate can be obtained
+	via   $(\mX_{\vgamma_{i+1}}^T\mX_{\vgamma_{i+1}})^{-1} = \mA - c^{-1}\vb\vb^T$.
+	
+	\item Calculate
+	$\widehat{\vz} = (\mX_{\vgamma_{i+1}}^T\mX_{\vgamma_{i+1}})^{-1}\mX_{\vgamma_{i+1}}^T\vz$ using step 1.,
+	$\kappa = 1/(n - \vz^T\widehat{\vz})$,
+	and $s = \vy^T(\vz - \widehat{\vz})$.
+	
+	\item 
+	%Let $\widehat{\vbeta}_{\vgamma_{i+1}} = (\mX_{\vgamma_{i+1}}^T\mX)^{-1}\mX_{\vgamma_{i+1}}^T\vy$
+	%and $\widehat{\vbeta}_{\vgamma_{i}} = %(\mX_{\vgamma_{i}}^T\mX_{\vgamma_{i}})^{-1}\mX_{\vgamma_{i}}^T\vy$.
+	%Then
+	The coefficient estimates downdate can be obtained
+	via
+	$$
+	\widehat{\vbeta}_{\vgamma_{i+1}} = \left[ \widehat{\vbeta}_{\vgamma_{i}} \right]_{-|{\vgamma_{i}}|} + \kappa s\widehat{\vz},
+	$$
+	
+	\noindent where $[ \widehat{\vbeta}_{\vgamma_{i}}]_{-|{\vgamma_{i}}|}$
+	removes the last column from $\widehat{\vbeta}_{\vgamma_{i}}$.
+	
+	\item 
+	%Let $R_{\vgamma_{i}}^2 = \tfrac{1}{n}\vy^T\mX_{\vgamma_{i}}(\mX_{\vgamma_{i}}^T\mX_{\vgamma_{i}})^{-1}\mX_{\vgamma_{i}}^T\vy$
+	%and $R_{\vgamma_{i+1}}^2 = \tfrac{1}{n} \vy^T\mX_{\vgamma_{i+1}}(\mX_{\vgamma_{i+1}}^T\mX_{\vgamma_{i+1}})^{-1}\mX_{\vgamma_{i+1}}^T\vy$.
+	The $R^2$ downdate can be obtained
+	via
+	$$
+	R_{\vgamma_{i+1}}^2 = R_{\vgamma_{i}}^2 - \frac{\kappa s^2}{n}.
+	$$
+	
+	
+	%\item Let  $D = |\mC^T\mC|$ and $D_{\mbox{\tiny downdate}} = |\mX^T\mX|$ then
+	%$D_{\mbox{\tiny downdate}} = cD$.
+\end{enumerate}
+
+\noindent Again, presuming relevant summary quantities have been precomputed
+the updates for all of the above quantities costs $O(|\vgamma_{i}|^2 + n)$ time.
+
+\subsection{Special functions}
+
+Several special functions appear in the expressions of various inferential
+quantities of interest in this paper. The main special functions used 
+were (Kummer's) confluent hypergeometric function (of the first kind),
+denoted ${}_1F_1$, and the Gaussian hypergeometric function, denoted
+${}_2 F_1$. Great care is required to implement these functions. During the 
+implementation process we tried several packages which implemented these
+functions. We found that the {\tt R} package {\tt gsl} was the best performing
+implementation amongst the packages we tried
+[{\bf CITE:} gsl].
+ 
+
+\section{Numerical results}
+\label{sec:numerical}
+
+\begin{table}
+	\label{tab:numerical_results_hitters}
+	\caption{Top 10 models selected for the Hitters data set ranked by posterior model probability, the difference
+		in log probabilities $\log p(\vy|\vgamma)$ between the best model and this model and the difference
+		between the Bayesian Information Criteria for this model and the best model}
+	\begin{center}
+		\begin{tabular}{r|l|l|c|r|r}
+			rank & $\vgamma$ (base: 1, 2, 6, 15, 16) & $p(\vgamma|\vy)$ & $R^2$ & $\widetilde{\text{BIC}}_\text{Best} - \widetilde{\text{BIC}}$ & $\text{BIC}_\text{Best} - \text{BIC}$ \\
+			\hline
+			1  &  +10, +11, +13&  2.56\%&  0.53&  0.00&  0.00\\
+			2  &  +11, +12, +13&  2.29\%&  0.53&  0.22&  0.23\\
+			3  &  +8, +11, +12, +13&  1.60\%&  0.53&  0.94&  2.17\\
+			4  &  +8, +9, +10&  1.23\%&  0.53&  1.47&  1.53\\
+			5  &  +10, +11, +13, +17&  1.10\%&  0.53&  1.69&  2.95\\
+			6  &  +12&  1.10\%&  0.51&  1.70&  $-$0.30\\
+			7  &  +7, +11, +12, +13,&  1.07\%&  0.53&  1.75&  3.02\\
+			8  &  +8, +11, +12, +13, +17&  1.03\%&  0.54&  1.83&  4.40\\
+			9  &  +9, +11, +12, +13&  0.67\%&  0.53&  2.68&  3.99\\
+			10 &  +8, +9, +12&  0.64\%&  0.52&  2.78&  2.89\\
+		\end{tabular}
+	\end{center}
+\end{table}
+\begin{table}
+	\label{tab:numerical_results_bodyfat}
+	\caption{Top 10 models selected for the Body fat data set ranked by posterior model probability, the difference
+		in log probabilities $\log p(\vy|\vgamma)$ between the best model and this model and the difference
+		between the Bayesian Information Criteria for this model and the best model}
+	\begin{center}
+		\begin{tabular}{r|l|r|c|r|r}
+			rank & $\vgamma$ (base: 6, 13) & $p(\vgamma|\vy)$ & $R^2$ & $\widetilde{\text{BIC}}_\text{Best} - \widetilde{\text{BIC}}$ & $\text{BIC}_\text{Best} - \text{BIC}$ \\
+			\hline
+			1  &  +2&  17.64\%&  0.73&  0.00&  0.00\\
+			2 &  +3&  5.85\%&  0.73&  2.21&  2.25\\
+			3 &  +2, +11&  5.74\%&  0.74&  2.25&  1.98\\
+			4 &  +2, +12&  3.56\%&  0.74&  3.20&  2.95\\
+			5 &  +1, +3&  2.83\%&  0.74&  3.66&  3.42\\
+			6 &  +1&  2.69\%&  0.73&  3.76&  3.84\\
+			7 &  +2, +3&  2.07\%&  0.74&  4.28&  4.06\\
+			8 &  +3, +5&  2.03\%&  0.74&  4.33&  4.11\\
+			9 &  +2, +8&  1.96\%&  0.74&  4.40&  4.18\\
+			10 &  +1, +2&  1.81\%&  0.74&  4.55&  4.33\\
+		\end{tabular}
+	\end{center}
+\end{table}
+
+\begin{table}
+	\label{tab:numerical_results_wage}
+	\caption{Top 10 models selected for the Wage data set ranked by posterior model probability, the difference
+		in log probabilities $\log p(\vy|\vgamma)$ between the best model and this model and the difference
+		between the Bayesian Information Criteria for this model and the best model}
+	\begin{center}
+		\begin{tabular}{r|l|r|c|r|r}
+			rank & $\vgamma$ (base: 13, 16, 17) & $p(\vgamma|\vy)$ & $R^2$ & $\widetilde{\text{BIC}}_\text{Best} - \widetilde{\text{BIC}}$ & $\text{BIC}_\text{Best} - \text{BIC}$ \\
+			\hline
+			1 &  &  67.57\%&  0.91&  0.00&  0.00\\
+			2 &  +11&  5.57\%&  0.91&  4.99&  3.70\\
+			3 &  +12&  3.99\%&  0.91&  5.66&  4.37\\
+			4 &  +3&  3.88\%&  0.91&  5.71&  4.43\\
+			5 &  +2&  2.86\%&  0.91&  6.32&  5.04\\
+			6 &  +1&  2.18\%&  0.91&  6.86&  5.58\\
+			7 &  +14&  1.56\%&  0.91&  7.54&  6.25\\
+			8 &  +10&  0.92\%&  0.91&  8.59&  7.31\\
+			9 &  +4&  0.91\%&  0.91&  8.61&  7.33\\
+			10 &  +6&  0.85\%&  0.91&  8.75&  7.47\\
+		\end{tabular}
+	\end{center}
+\end{table}
+
+\begin{table}
+	\label{tab:numerical_results_gradrate}
+	\caption{Top 10 models selected for the Graduation Rate data set ranked by posterior model probability, the
+		difference in log probabilities $\log p(\vy|\vgamma)$ between the best model and this model and the difference between the Bayesian Information Criteria for this model and the best model}
+	\begin{center}
+		\begin{tabular}{r|l|r|c|r|r}
+			rank & $\vgamma$ (base: 2, 8, 9, 10, 16, 17) & $p(\vgamma|\vy)$ & $R^2$ & $\widetilde{\text{BIC}}_\text{Best} - \widetilde{\text{BIC}}$ & $\text{BIC}_\text{Best} - \text{BIC}$ \\
+			\hline
+			1 &  +6, +12&  7.62\%&  0.45&  0.00&  0.00\\
+			2 &  +1, +6, +12&  6.80\%&  0.46&  0.23&  1.65\\
+			3 &  +6&  4.88\%&  0.45&  0.89&  $-$0.40\\
+			4 &  +1, +6&  4.46\%&  0.45&  1.07&  1.08\\
+			5 &  +6, +7&  2.43\%&  0.45&  2.28&  2.31\\
+			6 &  +6, +7, +12&  2.37\%&  0.45&  2.33&  3.79\\
+			7 &  +5, +12&  2.29\%&  0.45&  2.41&  2.43\\
+			8 &  +3, +6, +12&  1.56\%&  0.45&  3.17&  4.63\\
+			9 &  +5, +6, +12&  1.52\%&  0.45&  3.22&  4.69\\
+			10 &  +5&  1.32\%&  0.45&  3.50&  2.24\\
+		\end{tabular}
+	\end{center}
+\end{table}
+
+\begin{table}
+	\label{tab:numerical_results_uscrime}
+	\caption{Top 10 models selected for the US Crime data set ranked by posterior model probability, the
+		difference in log probabilities $\log p(\vy|\vgamma)$ between the best model and this model and the difference between the Bayesian Information Criteria for this model and the best model}
+	\begin{center}
+		\begin{tabular}{r|l|r|l|r|r}
+			rank & $\vgamma$ (base: 1, 3, 4, 13)& $p(\vgamma|\vy)$ & $R^2$ & $\widetilde{\text{BIC}}_\text{Best} - \widetilde{\text{BIC}}$ & $\text{BIC}_\text{Best} - \text{BIC}$ \\
+			\hline
+			1 &  +11, +14&  2.48\%&  0.77&  0.00&  0.00\\
+			2 & +14&  1.47\%&  0.74&  1.05&  1.45\\
+			3 & +11, +12, +14&  0.99\%&  0.77&  1.85&  2.07\\
+			4 & +10, +11, +14&  0.93\%&  0.77&  1.97&  2.22\\
+			5 &  +8, +11, +14&  0.89\%&  0.77&  2.06&  2.33\\
+			6 &  +11&  0.78\%&  0.73&  2.31&  2.91\\
+			7 &  +12, +14&  0.71\%&  0.75&  2.51&  2.99\\
+			8 &  +7, +14&  0.69\%&  0.75&  2.56&  3.04\\
+			9 &  +7, +11, +14&  0.69\%&  0.77&  2.56&  2.94\\
+			10 &  +7, +10, +11, +14&  0.69\%&  0.79&  2.56&  2.85\\
+		\end{tabular}
+	\end{center}
+\end{table}
+
+
+\subsection{Parameter posterior distributions}
+
+
+% alpha
+
+% beta
+
+% sigma2
+
+% g
+
+% u
+
+
+
+\section{Conclusion}
+\label{sec:conclusion}
+
+\bibliographystyle{anzsj}
+\bibliography{references_mendeley}
+
+\newpage 
+
+\section*{Appendix A: Useful integrals}
+
+The following integrals appear in \cite{Gradshteyn2007}.
+\begin{itemize}
+\item 
+Equation 3.194 (iii):
+$$
+\int_0^\infty \frac{ x^{\mu - 1} }{(1 + \beta x)^\nu} dx = \beta^{-\mu} \mbox{Beta}(\mu,\nu - \mu) \quad   \mbox{(assuming $\mu,\nu>0$ and $\nu>\mu$).}
+$$
+
+\item 
+$$
+U(a,b,z) = \frac{1}{\Gamma(a)}\int_0^\infty e^{-zt} t^{a - 1} (1 + t)^{b - a - 1} dt, 
+\qquad \mbox{(for $\mbox{Re}(a)>0$, $\mbox{Re}(z)>0$)}.
+$$
+
+
+\item 
+Equation 3.383 (i):
+$$
+\int_{0}^u x^{\nu - 1} (u - x)^{\mu - 1}  e^{\beta x} dx = \mbox{Beta}(\nu,\mu) {}_1 F_1(\nu;\mu+\nu;\beta u) \quad   \mbox{(assuming $\mbox{Re}(\mu)>0$ and $\mbox{Re}(\nu)>0$).}
+$$
+
+
+\item 3.197(5) of G\&R given by
+$$
+\int_0^\infty x^{\lambda - 1}(1 + x)^\nu (1 + \alpha x)^\mu dx
+=\mbox{Beta}(\lambda,-\mu-\nu-\lambda){}_2F_1(-\mu,\lambda;-\mu-\nu; 1 - \alpha)
+$$
+
+\noindent provided $-(\mu  + \nu) > \lambda > 0$.
+ 
+
+\item Equation 7.621 (4) 
+(the second line below is corrected using EH I, 269(5))
+is
+$$
+\begin{array}{rll}
+\ds \int_0^\infty e^{-st} t^{b-1} {}_1F_1(a,c,kt) dt
+& \ds = \Gamma(b)s^{-b} F(a,b,c,k s^{-1}) 
+& \mbox{(if $|s| > |k|$)}
+\\
+& \ds = \Gamma(b)(s - k)^{-b} F\left(c - a, b; c; \frac{k}{k - s} \right)
+& \mbox{(if $|s - k| > |k|$)}
+\end{array} 
+$$
+
+\noindent assuming that $\mbox{Re}(b)>0$, $\mbox{Re}(s) > \max(0,\mbox{Re}(k))$.
+
+\item Equation 3.385  of \citep{Gradshteyn2007} is
+\begin{equation} \label{res:04}
+\int_{0}^1 x^{\nu - 1} (1 - x)^{\lambda - 1}(1 - \beta x)^{\varrho} e^{-\mu x} dx 
+= \mbox{Beta}(\nu,\lambda) {}_1 F_1(\nu,\varrho,\lambda+\nu,-\mu,\beta)
+\end{equation}
+
+\noindent provided $\mbox{Re}(\lambda)>0$, $\mbox{Re}(\nu)>0$ and $|\mbox{arg}(1-\beta)|<\pi$.
+
+
+ 
+
+\item Equation X.XXX (X) 
+$$
+\begin{array}{l}
+\ds \int_0^\infty x^{\rho_n - 1}e^{-\mu x} {}_mF_n(a_1,\ldots,a_m;\rho_1,\ldots,\rho_n,\lambda x) dx
+=
+\Gamma(\rho_n)\mu^{-\rho_n} {}_mF_{n-1}(a_1,\ldots,a_m;\rho_1,\ldots,\rho_n,\lambda/\mu)
+\end{array}
+$$
+
+\noindent Hence,
+$$
+\begin{array}{l}
+\ds \int_0^\infty x^{\rho_1 - 1}e^{-\mu x} {}_1F_1(a_1;\rho_1,\lambda x) dx
+=
+\Gamma(\rho_1)\mu^{-\rho_1} {}_1F_{0}(a_1; ;\lambda/\mu)
+=
+\Gamma(\rho_1)\mu^{-\rho_1} (1 - \lambda/\mu)^{-a_1}
+\end{array}
+$$
+
+\noindent where we have used the identity ${}_1F_{0}(a; ;z) = (1 - z)^{-a}$ for generalized hypergeometric functions.
+
+\end{itemize}
+
+\noindent This is a special case of the normalizing constant for the compound confluent hypergeometric
+distribution of Gordy (1998) given by
+$$
+\mbox{CCH}(x;p,q,r,s,\nu,\theta) = \frac{ x^{p-1}(1 - \nu x)^{q-1} (\theta + (1-\theta)\nu x)^{-r}\exp(-s x)}{\mbox{Beta}(p,q)\nu^{-p}\exp(-s/\nu)\Phi_1(q,r,p+q,s/\nu,1-\theta)}, \qquad 0< x < 1/\nu, 
+$$
+
+\noindent where $p>0$, $q>0$, $s\in\bR$, $0\le \nu\le 1$ and $\theta\in(0,1)$. 
+
+
+
+\section*{Appendix B: Markov chain Monte Carlo}
+
+Here we will find the full conditional distributions which can be used to perform Bayesian
+inference via Gibbs sampling. The full conditional distributions for $\alpha$, $\vbeta$, and
+$\sigma^2$ are given by
+$$
+\begin{array}{ll}
+\ds \alpha|\vy,\sigma^2
+& \ds \sim N(0,\sigma^2/n),
+\\ [1ex]
+\ds \vbeta|\vy,\sigma^2,g 
+& \ds \sim N\left(                  
+\tfrac{g}{1+g}\widehat{\vbeta},    
+\tfrac{g}{1+g} \sigma^2 \left( \mX^T\mX \right)^{-1} 
+\right), \qquad \mbox{and}
+\\ [1ex]
+\ds \sigma^2|\vy,\valpha,\vbeta,g
+& \ds \sim \mbox{IG}\left( 
+\frac{n+p}{2}, \frac{\|\vy - \vone_n\alpha - \mX\vbeta\|^2}{2}
++ \frac{\vbeta^T\mX^T\mX\vbeta}{2g}
+\right), 
+%\propto 
+%\exp\left[
+%- \left( \frac{n+p}{2} + 1 \right)\log(\sigma^2)
+%- \frac{\|\vy - \vone_n\alpha - \mX\vbeta\|^2}{2\sigma^2}
+%- \frac{\vbeta^T\mX^T\mX\vbeta}{2g\sigma^2}
+%\right]
+\end{array}
+$$
+
+\noindent 
+where $\widehat{\vbeta} = (\mX^T\mX)^{-1}\mX^T\vy$.
+These are all standard distributions that can be easily sampled from.
+
+
+
+The full conditional distribution for $g$ is proportional to
+\begin{equation}
+\label{eq:fullCondG}
+\ds p(g|\vy,\vbeta,\sigma^2) \propto g^{A-1} (1 + g)^{-B}\exp( - C/g),
+\end{equation}
+
+\noindent where $A = b - p/2 + 1$, $B = a + b + 2$, and $C = \vbeta^T\mX^T\mX\vbeta/(2\sigma^2)$. 
+Using the change of variables $h = 1/g$ we have
+\begin{equation}
+\label{eq:fullCondH}
+p(h|\vy,\vbeta,\sigma^2)\propto h^{D-1}  (1 + h)^{-B}\exp( - Ch),
+\end{equation}
+
+
+\noindent 
+where $D = B - A = a  + 1  + p/2$. If $a > - 1$ then $D>0$ since $p\ge 1$.
+% Note that the full conditional distribution for $g$ (or alternatively $h$) is 
+%non-standard.
+We recognize (\ref{eq:fullCondH}) as 
+the confluent hypergeometric U distribution of
+Gordy (1998), we will call the CHU distribution for short, with
+$h |\vy,\vbeta,\sigma^2 \sim \mbox{CHU}(D,B,C,1)$
+where if $x\sim\mbox{UH}(p,r,s,\lambda)$ then $x$ has the density function
+$$
+p(x) = \frac{x^{p-1}(1 + \lambda x)^{-r}\exp(-sx)}{\Gamma(p)U(p,p+1-r,s/\lambda)}, \qquad x>0; \quad p>0, \quad r, s\in \bR  \quad \mbox{and} \quad 
+s/\lambda\ge 0. 
+$$
+
+\noindent Here $U(a,b,z)$ is the 
+U confluent hypergeometric function defined in Abramowitz \& Stegun (1972), denoted by $\Psi$ in \cite{Gradshteyn2007}, and is defined in Appendix A.
+%The distribution is defined for $p>0$,
+%$r\in\bR$, $s\in\bR$ and $s/\lambda\ge 0$. 
+The full conditional distribution (\ref{eq:fullCondG}) 
+is what we call the inverse
+UH distribution and use the notation
+$$
+\ds g |\vy,\vbeta,\sigma^2 \sim \mbox{ICHU}(D,B,C,1)
+$$
+
+\noindent where if
+$x\sim\mbox{ICHU}(p,r,s,\lambda)$ then it has the
+density
+$$
+p(x) = \frac{x^{-(p+r+1)}(x + \lambda)^{-r}\exp(-s/x)}{\Gamma(p)U(p,p+1-r,s/\lambda)},\qquad x>0; \quad p>0, \quad r, s\in \bR  \quad \mbox{and} \quad 
+s/\lambda\ge 0. 
+$$
+
+\noindent While we have identified the full conditional distribution for $g$ it is not a standard distribution from which can be easily sample. A Metropolis-Hastings or rejection sampling approach could be used to sample from
+$g |\vy,\vbeta,\sigma^2$. 
+
+
+\newpage 
+
+\section*{Appendix C}
+
+
+$$
+\ds p(\vy|g)
+= K(n)
+(1 + g)^{(n-p-1)/2}\left[ 1 + g (1 - R^2) \right]^{-c},
+$$
+
+
+
+\subsection*{$g$-prior}
+
+Liang et al (2008) propose the $g$-prior
+$$
+p(g) = \frac{(a - 2)}{2}(1 + g)^{-a/2}
+$$
+
+\noindent where $a > 2$. The marginal likelihood is given by
+$$
+\begin{array}{rl}
+p(\vy) 
+& \ds = \int_0^\infty K(n)\frac{(a - 2)}{2} 
+(1 + g)^{(n-p-1 - a)/2}\left[ 1 + g (1 - R^2) \right]^{-c}  dg
+\\ [2ex]
+& \ds = K(n) \frac{(a - 2)}{2} \mbox{Beta}(1,(p + a)/2 - 1){}_2F_1( c, 1; (p + a)/2; R^2)
+\\
+%& \ds = K(n) \frac{(a - 2)}{2} \frac{\Gamma((p + a)/2 - 1)}{\Gamma((p + a)/2)} {}_2F_1( c, 1; (p + a)/2; R^2)
+\\
+& \ds = K(n) \frac{(a - 2)}{p + a - 2} {}_2F_1( c, 1; (p + a)/2; R^2).
+\end{array} 
+$$
+
+\noindent where we have used 3.197(5) of G\&R given by
+$$
+\int_0^\infty x^{\lambda - 1}(1 + x)^\nu (1 + \alpha x)^\mu dx
+=\mbox{Beta}(\lambda,-\mu-\nu-\lambda){}_2F_1(-\mu,\lambda;-\mu-\nu; 1 - \alpha)
+$$
+
+\noindent provided $-(\mu  + \nu) > \lambda > 0$ with
+$$
+\lambda \leftrightarrow 1, \quad \nu \leftrightarrow (n-p-1 + a)/2, \quad \mu \leftrightarrow -c, \quad \alpha \leftrightarrow 1- R^2.
+$$
+
+\noindent Note that when $R^2 = 0$ (which occurs under the null model),
+${}_2F_1( c, 1; (p + a)/2; R^2) = 1$ and $p = 0$ resulting in
+$p(\vy) = K(n)$. Hence, the null based Bayes factor is
+$$
+\mbox{BF}_{\gamma 0} = \frac{(a - 2)}{p + a - 2} {}_2F_1( c, 1; (p + a)/2; R^2).
+$$
+
+\newpage 
+\subsection*{$g/n$-prior}
+
+Liang et al (2008) propose the $g/n$-prior
+$$
+p(g) = \frac{a - 2}{2n}\left(1 + \frac{g}{n}\right)^{-a/2}
+$$
+
+\noindent Then
+$$
+\begin{array}{rl}
+p(\vy) 
+& \ds = K(n) \frac{a - 2}{2n}  \int_0^\infty 
+(1 + g)^{(n-p-1)/2} \left(1 + \frac{g}{n}\right)^{-a/2} \left[ 1 + g (1 - R^2) \right]^{-c}  dg
+\end{array} 
+$$
+
+%\noindent \joc{
+%$$
+%u = \frac{g}{1+g},
+%\quad 
+%g = \frac{u}{1-u},
+%\quad 
+%1 - u = \frac{1}{(1 + g)},
+%\quad 
+%(1 - u)^{-1} = (1 + g),
+%\quad \mbox{and}\quad 
+%\frac{du}{dg} = \frac{1}{1+g} - \frac{g}{(1 +g)^2} 
+%= \frac{1}{(1+g)^2} = (1 - u)^2.
+%$$
+
+\noindent Using th change of variables $u = g/(1 + g)$ we have
+$$
+\begin{array}{rl}
+p(\vy) 
+& \ds = K(n) \frac{(a - 2)}{2n}  \int_0^1 
+(1 - u)^{-(n-p-1)/2 - 2} \left(1 +  \frac{u/n}{1-u} \right)^{-a/2} \left[ 1 + \frac{u}{1-u} (1 - R^2) \right]^{-c} du
+\\ [2ex]
+& \ds = K(n) \frac{a - 2}{2n}  \int_0^1 
+(1 - u)^{p/2 + a/2 - 2  } \left(1 - u (1  -  1/n) \right)^{-a/2} \left(  1 - u R^2\right)^{-c} du
+\\ [2ex]
+& \ds = \frac{K(n)}{n} \frac{a - 2}{p + a - 2}  F_1(1,a/2,c,(p + a)/2; (1  -  1/n), R^2) 
+\end{array} 
+$$
+
+\noindent where we have used the result of \'Emile (1881) who showed that
+$$
+\int_0^1 t^{a-1} (1-t)^{c-a-1} (1-xt)^{-b_1} (1-yt)^{-b_2} dt
+= \mbox{Beta}(a,c - a) F_1(a,b_1,b_2,c; x,y) 
+$$
+
+\noindent for $c>a>0$  with
+$F_1$ being the Appell hypergeometric function in two variables, and
+$$
+a\leftrightarrow 1,
+\quad 
+c  \leftrightarrow (p + a)/2 
+\quad 
+x \leftrightarrow (1  -  1/n)
+\quad 
+b_1 \leftrightarrow a/2
+\quad 
+y \leftrightarrow R^2
+\quad 
+b_2 \leftrightarrow c
+$$
+
+
+\'Emile, Picard  (1881). Sur une extension aux fonctions de deux variables du probl\'eme de Riemann relativ aux fonctions hyperg\'eom\'etriques. Annales scientifiques de l'\'Ecole Normale Sup\'erieure. (2\'eme s\'erie) (in French). 10: 305--322.
+
+
+\bigskip 
+\noindent When the null is true $R^2 = 0$ and $p=0$. In this case $p(\vy) =  K(n)$. Hence,
+$$
+\mbox{BF}_{\gamma 0} = \frac{a - 2}{n(p + a - 2)}  F_1(1,a/2,c,(p + a)/2; (1  -  1/n), R^2) .
+$$
+
+\newpage 
+\subsection*{Zellner-Siow prior}
+
+$$
+p(g) = \frac{(n/2)^{1/2}}{\Gamma(1/2)} g^{-3/2} \exp\left( -\frac{n}{2g} \right)
+$$
+
+
+$$
+\ds p(\vy)
+= K(n) \frac{(n/2)^{1/2}}{\Gamma(1/2)}
+\int_0^\infty g^{-3/2}
+(1 + g)^{(n-p-1)/2}\left[ 1 + g (1 - R^2) \right]^{-c}  \exp\left( -\frac{n}{2g} \right) dg
+$$
+
+
+$$
+\ds p(\vy)
+= K(n) \frac{(n/2)^{1/2}}{\Gamma(1/2)}
+\int_0^1  u^{-3/2}
+(1 - u)^{ (p-1)/2}\left(  1   - uR^2 \right)^{-c}  \exp\left( -\frac{n}{2u}  + \frac{n}{2} \right) du
+$$
+
+$$
+p(h) = \frac{(n/2)^{1/2}}{\Gamma(1/2)} h^{-1/2} \exp\left( -\frac{n}{2}h \right)
+$$
+
+
+$$
+\begin{array}{rl} 
+\ds p(\vy)
+& \ds = K(n) \frac{(n/2)^{1/2}}{\Gamma(1/2)}
+\int_0^\infty h^{(p-1)/2 }
+(1 + h)^{(n-p-1)/2}\left[ h +  (1 - R^2) \right]^{-c}  \exp\left( -\frac{n}{2}h \right) dg
+\\
+& \ds = K(n) \frac{(n/2)^{1/2}}{\Gamma(1/2)} (1 - R^2)^{-c}
+\sum_{k=0}^\infty \frac{1}{k!} \left( -\frac{n}{2} \right)^k \int_0^\infty h^{k + (p - 1)/2 }
+(1 + h)^{(n-p-1)/2} \left[ 1 + h/(1 - R^2) \right]^{-c}   dh
+ 
+\end{array} 
+$$
+
+\noindent Now we use 3.197(5) of G\&R
+$$
+\int_0^\infty x^{\lambda-1} (1 + x)^{\nu}(1 + \alpha x)^{\mu} dx
+= \mbox{Beta}(\lambda,-\mu-\nu-\lambda) {}_2 F_1(-\mu,\lambda;-\mu-\nu;1-\alpha)
+$$
+
+\noindent provided $-(\mu+\nu) > \lambda > 0$. Above we have
+$$
+\lambda \leftrightarrow k + p/2 + 1/2 >0
+$$
+$$
+\nu \leftrightarrow (n-p-1)/2
+$$
+$$
+\alpha \leftrightarrow 1/(1 - R^2)
+$$
+$$
+\mu \leftrightarrow - c
+$$
+
+\noindent Checking the conditions
+$$
+p/2 >   k + p/2 + 1/2 
+$$
+
+%\noindent 
+%Now we use 3.197(1) of G\&R
+%$$
+%\int_0^\infty x^{\nu-1} (\beta + x)^{-\mu}(x + \gamma)^{-\varrho} dx
+%= \mbox{Beta}(\nu,\mu - \nu + \varrho){}_2F_1(\mu,\nu;\mu + \varrho; 1 - \gamma/\beta)
+%$$
+
+%\noindent provided $\nu>0$, $\mu > \nu - \varrho$.
+
+%Above we have
+%$$
+%\nu \leftrightarrow k + (p + 1)/2 > 0
+%$$
+
+%\noindent We then either have
+%$$
+%\beta \leftrightarrow 1, \quad \mu \leftrightarrow - (n-p-1)/2, \quad \gamma \leftrightarrow 1 - R^2, \quad \varrho  \leftrightarrow c
+%$$
+
+%\noindent In this case
+%$$
+%0 > k  + 1/2  
+%$$
+
+
+%\noindent Or
+%$$
+%\gamma \leftrightarrow 1, \quad \varrho \leftrightarrow - (n-p-1)/2, \quad \beta %\leftrightarrow 1 - R^2, \quad \mu  \leftrightarrow c
+%$$
+
+%$$
+%0 > k  + 1/2  
+%$$
+
+
+
+
+\newpage 
+This leads to 
+\begin{equation}\label{eq:yGivenG}
+\ds p(\vy|\vgamma)
+\ds = \frac{K(n)}{2}\left(\frac{1+n}{1 + p_\vgamma}  \right)^{1/2} 
+\int_L^\infty  (1 + g)^{(n - p_\vgamma)/2 - 2}(  1 + g \widehat{\sigma}_\vgamma^2)^{-(n-1)/2} dg,
+\end{equation}
+
+
+$$
+h = g - L
+$$
+
+$$
+g = h + L
+$$
+
+$$
+dg = dh
+$$
+
+$$
+\ds p(\vy|\vgamma)
+\ds = \frac{K(n)}{2}\left(\frac{1+n}{1 + p_\vgamma}  \right)^{1/2} 
+\int_0^\infty  (1 + L + h)^{(n - p_\vgamma)/2 - 2}(  1 + L\widehat{\sigma}_\vgamma^2 + h\widehat{\sigma}_\vgamma^2)^{-(n-1)/2} dh,
+$$
+
+$$
+x = 1/h
+$$
+
+$$
+h = 1/x
+$$
+
+$$
+dh = - x^{-2} dx
+$$
+
+
+$$
+\begin{array}{rl} 
+\ds p(\vy|\vgamma)
+& \ds = \frac{K(n)}{2}\left(\frac{1+n}{1 + p_\vgamma}  \right)^{1/2} 
+\int_0^\infty x^{-2} (1 + L + 1/x)^{(n - p_\vgamma)/2 - 2}(  1 + L\widehat{\sigma}_\vgamma^2 + \widehat{\sigma}_\vgamma^2/x)^{-(n-1)/2} dx,
+\\
+& \ds = \frac{K(n)}{2}\left(\frac{1+n}{1 + p_\vgamma}  \right)^{1/2} 
+\int_0^\infty   x^{(p_\vgamma-1)/2} [1 + (1 + L)x]^{(n - p_\vgamma)/2 - 2}[\widehat{\sigma}_\vgamma^2 +  (1 + L\widehat{\sigma}_\vgamma^2)x]^{-(n-1)/2} dx,
+\end{array}
+$$
+
+
+$$
+z = (1 + L)x
+$$
+
+$$
+x = z/(1 + L)
+$$
+
+$$
+dx = dz/(1 + L)
+$$
+
+
+$$
+\begin{array}{rl} 
+\ds p(\vy|\vgamma)
+& \ds = \frac{K(n)}{2}\left(\frac{1+n}{1 + p_\vgamma}  \right)^{1/2} 
+\int_0^\infty 
+\left( \frac{z}{1+L} \right)^{(p_\vgamma-1)/2}
+\left( 1 + z\right)^{(n - p_\vgamma)/2 - 2}
+\left[ \widehat{\sigma}_\vgamma^2 +  \left( \frac{1 + L\widehat{\sigma}_\vgamma^2}{1 + L} \right)z \right]^{-(n-1)/2} (1 + L)^{-1} dz
+\\
+& \ds = \frac{K(n)}{2}\left(\frac{1+n}{1 + p_\vgamma}  \right)^{1/2} (1 + L)^{ - (p_\vgamma+1)/2} (\widehat{\sigma}_\vgamma^2)^{-(n-1)/2}
+\\ 
+& \ds \quad \times
+\int_0^\infty 
+z^{(p_\vgamma+1)/2-1}
+\left( 1 + z\right)^{(n - p_\vgamma)/2 - 2}
+\left[ 1 +  \left( \frac{1 + L\widehat{\sigma}_\vgamma^2}{\widehat{\sigma}_\vgamma^2(1 + L)} \right)z \right]^{-(n-1)/2}  dz
+
+\end{array}
+$$
+
+\noindent 
+3.197(5) of G\&R given by
+$$
+\int_0^\infty x^{\lambda - 1}(1 + x)^\nu (1 + \alpha x)^\mu dx
+=\mbox{Beta}(\lambda,-\mu-\nu-\lambda){}_2F_1(-\mu,\lambda;-\mu-\nu; 1 - \alpha)
+$$
+
+\noindent 
+provided $-(\mu  + \nu) > \lambda > 0$.
+
+$$
+\lambda \leftrightarrow (p_\vgamma+1)/2
+$$
+$$
+\nu \leftrightarrow (n - p_\vgamma)/2 - 2
+$$
+$$
+\alpha \leftrightarrow \frac{1 + L\widehat{\sigma}_\vgamma^2}{\widehat{\sigma}_\vgamma^2(1 + L)}
+$$
+$$
+\mu \leftrightarrow -(n-1)/2
+$$
+
+\noindent Checking
+$$
+(p_\vgamma+1)/2 > 0
+$$
+
+$$
+(p_\vgamma + 3)/2 > (p_\vgamma+1)/2
+$$
+
+$$
+- \mu - \nu = (p_\vgamma+3)/2 
+$$
+
+\noindent Hence,
+$$
+\begin{array}{rl} 
+\ds p(\vy|\vgamma)
+& \ds = \frac{K(n)}{2}\left(\frac{1+n}{1 + p_\vgamma}  \right)^{1/2} (1 + L)^{ - (p_\vgamma+1)/2} (\widehat{\sigma}_\vgamma^2)^{-(n-1)/2}
+\\ 
+& \ds \quad \times
+\mbox{Beta}\left[ \frac{p_\vgamma+1}{2}, 1 \right]
+{}_2F_1\left[ \frac{n-1}{2}, \frac{p_\vgamma+1}{2}; \frac{p_\vgamma+3}{2}  ; 1 - \frac{1 + L\widehat{\sigma}_\vgamma^2}{\widehat{\sigma}_\vgamma^2(1 + L)} \right]
+
+\\
+
+& \ds = \frac{K(n)}{p_\vgamma+1}\left(\frac{1+n}{1 + p_\vgamma}  \right)^{1/2} (1 + L)^{ - (p_\vgamma+1)/2} (\widehat{\sigma}_\vgamma^2)^{-(n-1)/2}
+{}_2F_1\left[ \frac{n-1}{2}, \frac{p_\vgamma+1}{2}; \frac{p_\vgamma+3}{2}  ; 
+\frac{1  - 1/\widehat{\sigma}_\vgamma^2}{ 1 + L} \right]
+
+
+\end{array}
+$$
+
+Now we use 
+$$
+1 + L = \frac{n + 1}{ 1 + p_\vgamma}
+$$
+
+$$
+\begin{array}{rl} 
+\ds p(\vy|\vgamma)
+& \ds = \left( \frac{n + 1}{ p_\vgamma + 1} \right)^{ - p_\vgamma/2} \frac{(\widehat{\sigma}_\vgamma^2)^{-(n-1)/2}}{p_\vgamma+1}
+{}_2F_1\left[ \frac{n-1}{2}, \frac{p_\vgamma+1}{2}; \frac{p_\vgamma+3}{2}  ; 
+\frac{(1  - 1/\widehat{\sigma}_\vgamma^2)(p_\vgamma + 1)}{1 + n} \right]
+
+
+\end{array}
+$$
+
+\newpage 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+$$
+\ds p(\vy|\vgamma)
+\ds = \frac{K(n)}{2}\left(\frac{1+n}{1 + p_\vgamma}  \right)^{1/2} (\widehat{\sigma}_\vgamma^2)^{-(n-1)/2}
+\int_0^\infty  (1 + L + h)^{(n - p_\vgamma)/2 - 2} \left(  \frac{1 + L\widehat{\sigma}_\vgamma^2}{\widehat{\sigma}_\vgamma^2} + h \right)^{-(n-1)/2} dh,
+$$
+
+Using 3.197 of G\&R which is
+$$
+\int_0^\infty x^{\nu - 1}(\beta + x)^{-\mu}(x + \gamma)^{-\varrho} dx
+= \beta^{-\nu}
+\gamma^{\nu - \varrho} 
+\mbox{Beta}(\nu,\mu - \nu + \varrho)
+{}_2F_1(\mu,\nu;\mu+\varrho; 1 - \gamma/\beta)
+$$
+
+\noindent provided $\nu>0$, $\mu > \nu - \varrho$.
+
+
+$$
+\nu \leftrightarrow 1
+$$ 
+$$
+\mu \leftrightarrow - (n - p_\vgamma)/2 + 2
+$$
+$$
+\varrho \leftrightarrow (n-1)/2
+$$
+
+\noindent Checking
+$$
+- n/2 + p_\vgamma/2 + 2 > 1 - n/2 + 1/2
+$$
+$$
+p_\vgamma/2 + 2 > 1  + 1/2
+$$
+$$
+p_\vgamma > -1
+$$
+
+$$
+\beta \leftrightarrow 1 + L
+$$
+
+$$
+\gamma \leftrightarrow \frac{1 + L\widehat{\sigma}_\vgamma^2}{\widehat{\sigma}_\vgamma^2}
+$$
+
+
+$$
+\begin{array}{rl}
+\ds p(\vy|\vgamma)
+\ds 
+& \ds = K(n)\left(\frac{1+n}{1 + p_\vgamma}  \right)^{1/2} 
+\frac{ (\widehat{\sigma}_\vgamma^2)^{-1} }{p_\vgamma+1} 
+(1 + L)^{-1}
+\left( 1 + L\widehat{\sigma}_\vgamma^2 \right)^{1 - (n-1)/2} 
+\\
+& \ds \qquad 
+{}_2F_1\left( - \frac{n - p_\vgamma + 4}{2}, 1;  \frac{ p_\vgamma+3}{2} ; 
+\frac{(1 - 1/\widehat{\sigma}_\vgamma^2)(1 + p_\vgamma)}{1 + n} \right)
+\end{array} 
+$$
+
+
+\end{document}
+
+
+
+Note that
+Theorem 2.1 of Nadarajah (2015)
+does not apply here since the resulting
+expression involves incomplete beta functions with negative
+arguments.
+
+\joc{ 
+	$$
+	{}_2 F_1(b, 1; c; x)
+	= (c-1) x^{1-c}(1-x)^{c-b-1}B_x(c - 1, b - c + 1),
+	$$
+	
+	$$
+	\begin{array}{rl}
+	\ds M_1
+	& \ds =    
+	\frac{b + 1}{c}
+	%	{}_2 F_1 (d + 1, 1; c + 1; R^2)        
+	c x^{-c}(1-x)^{b + 1}B_x(c, - b - 1)
+	\end{array} 
+	$$
+	
+	$$
+	\begin{array}{rl} 
+	\ds {}_2F_1(b, 2; c; x) 
+	& \ds = 
+	- \frac{(c-1)(c-2)^2}{b-1} x^{1-c} (1-x)^{c-b-1} \mbox{Beta}_x(c-2,b-c+1) \\
+	& \ds \qquad - \frac{(c-1)(c-2)(c-b-1)}{b-1} x^{-c} (1-x)^{c-b-2} \mbox{Beta}_x(c-2,b-c+1) \\
+	& \ds \qquad + \frac{(c-1)(c-2)}{(b-1) \mbox{Beta}(c-2,b-c+1)}x^{-1}(1-x)^{-1}
+	\end{array} 
+	$$
+	
+}
+
+
+
+
+
+
+
+  
+
+
+\joc{
+	\subsection{Calculating mode of $p(g)$}
+	
+	\noindent To find the mode of $p(g)$ consider
+	$$
+	f(g) = \log p(g) = b\log(g) - (a + b + 2)\log(1 + g) + \mbox{constants in $g$}
+	$$ 
+	
+	\noindent Then
+	$$
+	f'(g) = \frac{b}{g} - \frac{a + b + 2}{g + 1} = 0
+	$$
+	
+	$$
+	b - (a  + 2)g = 0
+	$$
+	
+	\noindent So the mode is
+	$$
+	\mbox{[mode of $p(g)$]} = \frac{b}{a+2} = O(n)
+	$$
+	
+	\noindent so that at least this is right.
+	
+	
+	\subsection{Calculating of $E(g)$}
+	
+	$$
+	\int_0^\infty g^{b + 1} (1 + g)^{-a-b-2} dg = \mbox{Beta}(b + 2,a)
+	$$
+	
+	\noindent Then
+	$$
+	E(g) = \frac{\mbox{Beta}(a,b + 2)}{\mbox{Beta}(a + 1,b + 1)} 
+	= \frac{\Gamma(a)\Gamma(b+2)}{\Gamma(a + b + 2)} \frac{\Gamma(a+1)\Gamma(b+1)}{\Gamma(a + b + 2)}
+	= \frac{\Gamma(a)\Gamma(b+2)}{\Gamma(a+1)\Gamma(b+1)}
+	= \frac{b + 1}{a}
+	$$
+	
+	\noindent so that the mean does not exist as claimed.
+	
+	\subsection{Calculating of $E(g^{-1})$}
+	
+	$$
+	\int_0^\infty g^{b - 1} (1 + g)^{-a-b-2} dg = \mbox{Beta}(b,a + 2)
+	$$
+	
+	
+	
+	$$
+	E(g^{-1}) = \frac{\mbox{Beta}(b,a + 2)}{\mbox{Beta}(a + 1,b + 1)} 
+	= \frac{\Gamma(a+2)\Gamma(b)}{\Gamma(a + b + 2)} \frac{\Gamma(a+1)\Gamma(b+1)}{\Gamma(a + b + 2)}
+	= \frac{\Gamma(a+2)\Gamma(b)}{\Gamma(a+1)\Gamma(b+1)}
+	= \frac{a + 1}{b}
+	$$
+	
+	\noindent so that
+	$$
+	1/E(g^{-1}) = \frac{b}{a + 1}
+	$$
+	
+	\noindent as claimed.
+}
+
+
+
+
+
+
+
+
+
+
+As is happens we can perform step 2 of the algorithm in Section 2 efficiently if we reuse calculations from each step.
+In each step only a single variable is added or removed from a
+model $\vgamma_k$ at a time. 
+Suppose that the current model to be changed is $\vgamma_k$ and that we
+want to change the $j$th element of $\vgamma_k$. Let
+$$
+\vgamma_{jk}^{(i)} = (\gamma_{1k},\ldots,\gamma_{j-1,k},i,\gamma_{j+1,k},\ldots,\gamma_{pk})^T,
+$$
+
+\noindent be the vector $\vgamma_k$ where the $j$th element of $\vgamma_k$ is set to $i$.
+For an update the current value of $\gamma_{jk}$ is 0 and want to set this value to 1. 
+
+In this case we will employ the following shift in notation.
+\begin{itemize}
+	\item Let $\mX$ correspond to $\mX_{\vgamma}$; and
+	\item Let $\vz$ correspond to $\mX_j$.
+\end{itemize}
+
+\noindent 
+For an downdate the current value of $\gamma_{jk}$ is 1 and want to set this value to 0. 
+In this case we will employ the following shift in notation.
+\begin{itemize}
+	\item Let $\mX$ correspond to $\mX_{\vgamma_{jk}^{(0)}}$; and
+	\item Let $\vz$ correspond to $\mX_j$.
+\end{itemize}
+
+\noindent In both cases we let $\mC = [\mX,\vz]$ where $\mX$ is a $n\times d$
+matrix, $\vz$ is a $n$ vector and $\mC$ is a $n\times (d+1)$ matrix. Throughout
+we will assume that the quantities $\mX^T\mX$, $\mX^T\vz$, $\vz^T\vz$, $\mX^T\vy$
+and $\vz^T\vy$ have been previously calculated. The update and downdate equations
+are based on the following matrix block-inverse formula.
+
+
+
+%\bigskip
+%\noindent We will also use the following block determinant lemma.
+
+%\bigskip 
+%\noindent {\bf Lemma 2:} The block determinant formula is:
+%$$
+%\left|\begin{array}{cc}
+%\mA & \mB \\
+%\mC & \mD 
+%\end{array}\right| = |\mA||\mD - \mC\mA^{-1}\mB|.
+%$$
+
+
+
+\bigskip 
+\noindent We will use the above formula for efficient updates/downdates
+of the model ``inverse'' matrices, coefficient vector, and 
+$R$-squared 
+%and model ``determinant'' 
+values.
