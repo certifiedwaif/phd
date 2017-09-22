@@ -1,4 +1,4 @@
-\documentclass{beamer}
+\documentclass[notes=only]{beamer}
 
 \usetheme{Warsaw}
 \usepackage{graphicx}
@@ -37,13 +37,23 @@
 \begin{frame}
 	\frametitle{Posterior parameters in Bayesian linear model selection}
 	\begin{itemize}
-		\item Motivation: The problem of selecting linear models is well-studied, in the frequentist and Bayesian
-					contexts.
-		\item A lot of work has been done on parameter priors for Bayesian model selection.
-		\item Less work has been done on the parameter posteriors, so we chose to explore this area in our
-					research.
-		\item We derive several new exact closed form expressions for the posterior parameters using special
-					functions. These expressions are numerically well-behaved.
+		\item Motivation: The problem of selecting linear models is well-studied, in both the frequentist and Bayesian contexts.
+		
+		\item A lot of work has been done on specifying
+		parameter priors for Bayesian model selection.
+		
+		\item Less work has been done on the parameter posteriors. 
+		%Here we explore this area in our
+		%			research.
+					
+		\item Typical approaches to finding these posterior distributions would require slow Monte Carlo methods, or crude
+		normal approximations.
+					
+		\item We derive several new exact closed form expressions for the parameter posteriors for
+		a popular choice of priors for linear models.
+		
+		\item These expressions are in terms of 
+		special functions and  are numerically well-behaved, accurate, and fast to evaluate.		
 	\end{itemize}
 \end{frame}
 
@@ -59,48 +69,27 @@
 			We also want to look at the numerical properties of these expressions, as we want them to be numerically
 			stable and easy to evaluate.}
 
-\begin{frame}
-	\frametitle{Notation}
-	\begin{itemize}
-		\item Let $\vy$ be the vector of responses of length $n$, and $\mX$ be the $n \times p$ covariate matrix.
-		\item We denote our models by $\vgamma$, vectors of length $p$ where
-					\[
-						\vgamma_i =
-						\begin{cases}
-							1 & \text{ if the $i$th column of $\mX$ is included in the model} \\
-							0 & \text{otherwise}.
-						\end{cases}
-					\]
-		e.g. $\vgamma = (1, 0, 0, 1, 1)^\top$ includes the first, fourth and fifth covariates from $\mX$.
-		\item Then $\mX_\vgamma$ is the matrix formed by taking the columns for which $\vgamma_i = 1$ from $\mX$,
-					and $p_\vgamma$ is the number of covariates in the model $\vgamma$.
-	\end{itemize}
-\end{frame}
-
-\note{I want to introduce some notation. Let $\vy$ denote the vector of responses, and $\mX$ be the
-			$n \times p$ covariate matrix as usual. $\vgamma$ represents a particular model choice, where
-			each element of the vector indicates whether that covariate is included or not. So a model $\vgamma$ equals
-			$(1, 0, 0, 1, 1)^\top$ contains the first, fourth and fifth covariates, but excludes the second and
-			third. $\mX_\vgamma$ is the matrix formed by taking the columns for which $\vgamma_i = 1$ from $\mX$,
-			and $p_\vgamma$ is the number of covariates in the model $\vgamma$.}
+ 
 
 % Introduce model
 \begin{frame}
 	\frametitle{Model selection using $g$}
 	\begin{itemize}
-		\item We adopt the prior structure on $\vbeta$ is called the Zellner-Siow prior, introduced in \cite{Zellner1980}.
-		\item Model
-		\begin{align*}
-			\vy | \alpha, \vbeta, \sigma^2, \vgamma \sim \N_n(\vone_n \alpha + \mX_\vgamma \vbeta, \sigma^2 \mI) 
-		\end{align*}
-		with priors
+		\item 	 Let $\vy$ be the vector of responses of length $n$, and $\mX$ be the $n \times p$ covariate matrix with linear model
+		
+			\begin{align*}
+	\vy | \alpha, \vbeta, \sigma^2 \sim \N(\vone \alpha + \mX \vbeta, \sigma^2 \mI) 
+	\end{align*}	
+		
+		\item We adopt the prior structure on $\vbeta$ called a $g$-prior on $\vbeta$, introduced in
+		\cite{Zellner1986}.
 		\begin{align*}
 			\alpha \quad & \propto \quad 1, \\
-			\vbeta | \sigma^2, g, \vgamma \quad & \sim \quad \N_p(\vzero, g \sigma^2 (\mX_\vgamma^\top \mX_\vgamma)^{-1}),                     \\
+			\vbeta | \sigma^2, g \quad & \sim \quad \N_p(\vzero, g \sigma^2 (\mX^\top \mX)^{-1}),                     \\
 			p(\sigma^2)          \quad & = \quad (\sigma^2)^{-1} \I(\sigma^2 > 0), \text{ and }                    \\
 			p(g)                 \quad & = \quad \text{unspecified for now}.
 		\end{align*}
-		\item We introduce a parameter $g$ which controls the shrinkage: if $g$ is high there is not much shrinkage,
+		\item $g$ controls the shrinkage of $\vbeta$: if $g$ is high there is not much shrinkage,
 					and if $g$ is low there is a lot of shrinkage.
 		% that controls the mixing between the null and full models.
 		% \item If $g$ is $0$, we
@@ -114,23 +103,23 @@
 			and if $g$ is low there is a lot of shrinkage.}
 
 % Discuss Bartlett's and Information Paradox
-\begin{frame}
-	\frametitle{How should we choose $g$?}
-	There are a few approaches we could take.
-	\begin{itemize}
-		\item We could simply let $g \to \infty$.
-		\item \cite{Liang2008} discussed that\\
-		$p(\vgamma = \vzero | \vy) \to 1$ as $g \to \infty$ (Bartlett's paradox).
-		\item We could make a fixed choice of $g$. \\
-		\item \cite{Liang2008} discussed that \\
-					$p(\vgamma = \vgamma^* | \vy) \cancel{\to} 1$ as $R_\vgamma^2 \to 1$, \\
-					where $\vgamma^*$ is the true model (Information Paradox)
-		\item We could choose $g$ adaptively, using Empirical Bayes
-		\item \cite{Liang2008} showed that this was not model selection consistent if the true model is the null
-					model.
-		\item So we need another approach.
-	\end{itemize}
-\end{frame}
+%\begin{frame}
+%	\frametitle{How should we choose $g$?}
+%	There are a few approaches we could take.
+%	\begin{itemize}
+%		\item We could simply let $g \to \infty$.
+%		\item \cite{Liang2008} discussed that\\
+%		$p(\vgamma = \vzero | \vy) \to 1$ as $g \to \infty$ (Bartlett's paradox).
+%		\item We could make a fixed choice of $g$. \\
+%		\item \cite{Liang2008} discussed that \\
+%					$p(\vgamma = \vgamma^* | \vy) \cancel{\to} 1$ as $R_\vgamma^2 \to 1$, \\
+%					where $\vgamma^*$ is the true model (Information Paradox)
+%		\item We could choose $g$ adaptively, using Empirical Bayes
+%		\item \cite{Liang2008} showed that this was not model selection consistent if the true model is the null
+%					model.
+%		\item So we need another approach.
+%	\end{itemize}
+%\end{frame}
 
 \note{So how should we choose $g$?
 			We could let $g$ go to infinity.
@@ -145,19 +134,33 @@
 % Mixture of g, choice of g prior
 \begin{frame}
 	\frametitle{We should choose a mixture of $g$}
-	\cite{Liang2008} argued that we avoid should these paradoxes by using a mixture of $g$. \\
-	Several choices of prior for $g$	have been proposed.
-	\small
-	\begin{itemize}
-		\item hyper-$g$ prior, \cite{Liang2008}\\
-		$p(g) = \frac{a-2}{2} (1 + g)^{-a/2} I(g > 0)$, $a > 2$
-		\item hyper-$g/n$ prior, \cite{Liang2008}\\
-		$p(g) = \frac{a-2}{2n} (1 + g/n)^{-a/2} I(g > 0)$, $a > 2$ 
-		\item Beta-Prime prior on $g$, \cite{Maruyama2011} \\
-		$p(g) = \frac{g^b (1 + g)^{-(a + b + 2)}}{\Beta(a + 1, b + 1)} \I(g > 0)$
-		\item Bayarri's robust prior on $g$, \cite{Bayarri2012} \\
-		$p(g) = \frac{1}{2} \left(  \frac{1 + n}{1 + p_\vgamma} \right)^{1/2} (1 + g)^{-3/2} I(g > (1 + n)/(1 + p_\vgamma) - 1)$
-	\end{itemize}
+	\cite{Liang2008} argued that    
+	technical issues with the specification of $g$ can {\bf only}
+	be avoided by specifying a hyper-prior for $g$.
+	A popular choice of prior is
+	$$
+	p(g) = \frac{g^b (1 + g)^{-(a + b + 2)}}{\Beta(a + 1, b + 1)} \I(g > 0)
+	$$
+	
+	by \cite{Maruyama2011}.
+
+
+Model selection can be performed by comparing the marginal likelihoods $p(\vy)$ for different models where
+$$
+\begin{array}{rl}
+p(\vy) 
+& \ds = \int p(\vy|\alpha,\vbeta,\sigma^2,g)p(\alpha)p(\vbeta|\sigma^2,g)p(\sigma^2)p(g) d\alpha d\vbeta d\sigma^2 dg.
+\\
+& \ds 
+=  K(n)
+\frac{\mbox{Beta}(p/2 + a + 1,b + 1)}{\mbox{Beta}(a+1,b+1)} (1 - R^2)^{-(b + 1)}
+\end{array} 
+$$
+
+\noindent where $K(n)$ is common to all models.
+This is numerically stable to evaluate
+and asymptotically equivalent to using BIC.
+
 \end{frame}
 
 \note{In order to avoid the problems in the previous slide, Liang argued we should put a prior on $g$.
@@ -196,20 +199,21 @@
 
 % Exact posterior distributions using special functions
 \begin{frame}
-	\frametitle{Exact posterior distributions of $\alpha$, $u$ and $\sigma^2$ using special functions}
+	\frametitle{Exact posterior distributions of $\alpha$, $\sigma^2$ and $g$ using special functions}
 	% When deriving exact posterior distributions on the parameters of the model,
 	We focused on the Beta-Prime prior on $g$, as it is the most numerically well-behaved.
 	We were able to derive closed form expressions for the posterior distributions.
 	\small
 	\begin{align*}
-		p(g | \vy) &= \frac{(1 - R_\vgamma^2)^{b + 1} g^b [1 + g (1 - R_\vgamma^2)]^{-(b + d + 2)}}{\text{Beta}(b + 1, d + 1)} I(g > 0)\\
 		% p(u | \vy) &= \frac{(1 - R_\vgamma^2)^{b + 1}}{\text{Beta}(b + 1, d + 1)} u^b (1 - u)^d (1 - u R_\vgamma^2)^{-(b + d + 2)} \\
-		p(\alpha | \vy) &= \frac{\Gamma(c + \frac{1}{2}) (1 - R_\vgamma^2)^{b + 1}}{\Gamma(c) \sqrt{\pi}} (1 + \alpha^2)^{-n/2}
-		{}_2 F_1 \left(d + 1, -\frac{1}{2}; c; \frac{R_\vgamma^2}{1 + \alpha^2}\right) \\
-		p(\sigma^2 | \vy) &= \frac{\frac{n}{2} (1 - R_\vgamma^2)^{b + 1}}{\Gamma(c)} (1 - R_\vgamma^2)^{-(c + 1)}
-												\exp{\left( -\frac{n}{2 \sigma^2} \right)} {}_1 F_1 \left(b + 1; c; \frac{n R_\vgamma^2}{2 \sigma^2}\right)
+		p(\alpha | \vy) &= \frac{\Gamma(c + \frac{1}{2}) (1 - R^2)^{b + 1}}{\Gamma(c) \sqrt{\pi}} (1 + \alpha^2)^{-n/2}
+		{}_2 F_1 \left(d + 1, -\frac{1}{2}; c; \frac{R^2}{1 + \alpha^2}\right) \\
+		p(\sigma^2 | \vy) &= \frac{\frac{n}{2} (1 - R^2)^{b + 1}}{\Gamma(c)} (1 - R^2)^{-(c + 1)}
+												\exp{\left( -\frac{n}{2 \sigma^2} \right)} {}_1 F_1 \left(b + 1; c; \frac{n R^2}{2 \sigma^2}\right)
+												\\
+		p(g | \vy) &= \frac{(1 - R^2)^{b + 1} g^b [1 + g (1 - R^2)]^{-(b + d + 2)}}{\text{Beta}(b + 1, d + 1)}  \\		
 	\end{align*}
-	where $a = 1$, $b = p_\vgamma$, $c=(n - 1)/2$ and $d = c - b - 2 = p_\vgamma / 2 + a$.
+	where $a = 1$, $b = p$, $c=(n - 1)/2$ and $d = c - b - 2 = p / 2 + a$.
 \end{frame}
 
 \note{We focused on the Beta-Prime prior, because it is numerically stable.
@@ -228,18 +232,20 @@
 	expressions for the first and second moments of $\vbeta | \vy$.
 	\small
 	\begin{align*}
-		\E[\vbeta | \vy] &= M_1 \hat{\vbeta} \\
-		\Cov[\vbeta | \vy] &= \frac{n}{n - 3} (M_1 - M_2 R^2)(\mX^\top \mX)^{-1} + (M_2 - M_1^2) \hat{\vbeta} \hat{\vbeta}^\top
+		\E[\vbeta | \vy] &= M_1 \widehat{\vbeta} \\
+		\Cov[\vbeta | \vy] &= \frac{n}{n - 3} (M_1 - M_2 R^2)(\mX^\top \mX)^{-1} + (M_2 - M_1^2) \widehat{\vbeta} \widehat{\vbeta}^\top
 	\end{align*}
-	where
+	where $\widehat{\vbeta}$ is the MLE for $\vbeta$, 
 	\small
 	\begin{align*}
-		M_1 &= \frac{b + 1}{c} {}_2 F_1 (d + 1, 1; c + 1; R_\vgamma^2) \text{ and } \\
-		M_2 &= \frac{(b + 1)(b + 2)}{c(c + 1)} {}_2 F_1 (d + 1, 2; c + 2; R_\vgamma^2).
+		M_1 &= \frac{b + 1}{c} {}_2 F_1 (d + 1, 1; c + 1; R^2) \text{ and } \\
+		M_2 &= \frac{(b + 1)(b + 2)}{c(c + 1)} {}_2 F_1 (d + 1, 2; c + 2; R^2).
 	\end{align*}
+	Note $M_1$ and $M_2$ approach 1 as $n\to\infty$.
+	
 	Using the delta method, we were able to get the approximation
 	\begin{align*}
-		\vbeta | \vy \stackrel{approx}{\sim} t_{n-1} \left[M_1 \vbeta_\vgamma, \left(\frac{n}{n - 1}\right) M_1 (1 - M_1 R_\vgamma^2)(\mX_\vgamma^\top \mX_\vgamma)^{-1}\right].
+		\vbeta | \vy \stackrel{approx}{\sim} t_{n-1} \left[M_1 \vbeta, \left(\frac{n}{n - 1}\right) M_1 (1 - M_1 R^2)(\mX^\top \mX)^{-1}\right].
 	\end{align*}
 \end{frame}
 
