@@ -1,4 +1,4 @@
-\documentclass[notes=only]{beamer}
+\documentclass{beamer}
 
 \usetheme{Warsaw}
 \usepackage{graphicx}
@@ -39,8 +39,7 @@
 	\begin{itemize}
 		\item Motivation: The problem of selecting linear models is well-studied, in both the frequentist and Bayesian contexts.
 		
-		\item A lot of work has been done on specifying
-		parameter priors for Bayesian model selection.
+		\item A lot of work has been done on specifying parameter priors for Bayesian model selection.
 		
 		\item Less work has been done on the parameter posteriors. 
 		%Here we explore this area in our
@@ -49,11 +48,9 @@
 		\item Typical approaches to finding these posterior distributions would require slow Monte Carlo methods, or crude
 		normal approximations.
 					
-		\item We derive several new exact closed form expressions for the parameter posteriors for
-		a popular choice of priors for linear models.
+		\item We derive several new exact closed form expressions for the parameter posteriors for a popular choice of priors for linear models.
 		
-		\item These expressions are in terms of 
-		special functions and  are numerically well-behaved, accurate, and fast to evaluate.		
+		\item These expressions are in terms of special functions and  are numerically well-behaved, accurate, and fast to evaluate.
 	\end{itemize}
 \end{frame}
 
@@ -75,8 +72,7 @@
 \begin{frame}
 	\frametitle{Model selection using $g$}
 	\begin{itemize}
-		\item 	 Let $\vy$ be the vector of responses of length $n$, and $\mX$ be the $n \times p$ covariate matrix with linear model
-		
+		\item 	 Let $\vy$ be the vector of responses of length $n$, and $\mX$ be the $n \times p$ covariate matrix with linear model		
 			\begin{align*}
 	\vy | \alpha, \vbeta, \sigma^2 \sim \N(\vone \alpha + \mX \vbeta, \sigma^2 \mI) 
 	\end{align*}	
@@ -89,6 +85,8 @@
 			p(\sigma^2)          \quad & = \quad (\sigma^2)^{-1} \I(\sigma^2 > 0), \text{ and }                    \\
 			p(g)                 \quad & = \quad \text{unspecified for now}.
 		\end{align*}
+		% FIXME: Can you rewrite this so that it's more clearly expressed?
+		% shrinkage of prior controlled by g, how diffuse it is
 		\item $g$ controls the shrinkage of $\vbeta$: if $g$ is high there is not much shrinkage,
 					and if $g$ is low there is a lot of shrinkage.
 		% that controls the mixing between the null and full models.
@@ -137,30 +135,35 @@
 	\cite{Liang2008} argued that    
 	technical issues with the specification of $g$ can {\bf only}
 	be avoided by specifying a hyper-prior for $g$.
+
 	A popular choice of prior is
 	$$
-	p(g) = \frac{g^b (1 + g)^{-(a + b + 2)}}{\Beta(a + 1, b + 1)} \I(g > 0)
+	p(g) = \frac{g^b (1 + g)^{-(a + b + 2)}}{\text{Beta}(a + 1, b + 1)} \I(g > 0)
 	$$
 	
-	by \cite{Maruyama2011}.
+	by \cite{Maruyama2011}, where
+	$a = -3/4$, and
+	$b = (n - p)/2 - a - 2$.	
+\end{frame}
 
 
-Model selection can be performed by comparing the marginal likelihoods $p(\vy)$ for different models where
-$$
-\begin{array}{rl}
-p(\vy) 
-& \ds = \int p(\vy|\alpha,\vbeta,\sigma^2,g)p(\alpha)p(\vbeta|\sigma^2,g)p(\sigma^2)p(g) d\alpha d\vbeta d\sigma^2 dg.
-\\
-& \ds 
-=  K(n)
-\frac{\mbox{Beta}(p/2 + a + 1,b + 1)}{\mbox{Beta}(a+1,b+1)} (1 - R^2)^{-(b + 1)}
-\end{array} 
-$$
+\begin{frame}
+	\frametitle{Model selection using $p(\vy)$}
+	Model selection can be performed by comparing the marginal likelihoods $p(\vy)$ for different models with
+	$$
+	\begin{array}{rl}
+	p(\vy) 
+	& \ds = \int p(\vy|\alpha,\vbeta,\sigma^2,g)p(\alpha)p(\vbeta|\sigma^2,g)p(\sigma^2)p(g) d\alpha d\vbeta d\sigma^2 dg
+	\\
+	& \ds 
+	=  K(n)
+	\frac{\mbox{Beta}(p/2 + a + 1,b + 1)}{\mbox{Beta}(a+1,b+1)} (1 - R^2)^{-(b + 1)}
+	\end{array} 
+	$$
 
-\noindent where $K(n)$ is common to all models.
-This is numerically stable to evaluate
-and asymptotically equivalent to using BIC.
-
+	\noindent where $K(n)$ common to all models.
+	This is numerically stable to evaluate
+	and asymptotically equivalent to using BIC.
 \end{frame}
 
 \note{In order to avoid the problems in the previous slide, Liang argued we should put a prior on $g$.
@@ -184,25 +187,24 @@ and asymptotically equivalent to using BIC.
 					\[
 						{}_1 F_1 (a; b; z) = \sum_{n=0}^\infty \frac{(a)_n}{(b)_n} \frac{z^n}{n!}
 					\]
-		\item These functions can be difficult to numerically evaluate in practice, \cite{Press:2007:NRE:1403886}.
-					We must be careful!
+		\item These functions can be difficult to numerically evaluate in practice, \S 5.14 \cite{Press:2007:NRE:1403886}.
+					We must choose our expressions involving ${}_2 F_1$ carefully!
 	\end{itemize}
 \end{frame}
 
-\note{At this point, I'll to introduce the hypergeometric function, which is defined by
+\note{At this point, I'll introduce the hypergeometric function, which is defined by
 			the following power series within the unit circle.
 			The confluent hypergeometric function is defined by the somewhat simpler power series at the bottom of
 			the slide.
 			The series is divergent as $z \to 1$, which is going to come back to haunt us.
-			There is no known numerical routine that will evaluate these functions for every possible parameter, and
-			so we need to take care.}
+			There is no known numerical routine that will evaluate these functions for every possible combination
+			of parameters, so they can be difficult to numerically evaluate in practice.}
 
 % Exact posterior distributions using special functions
 \begin{frame}
 	\frametitle{Exact posterior distributions of $\alpha$, $\sigma^2$ and $g$ using special functions}
 	% When deriving exact posterior distributions on the parameters of the model,
-	We focused on the Beta-Prime prior on $g$, as it is the most numerically well-behaved.
-	We were able to derive closed form expressions for the posterior distributions.
+	With a Beta-Prime prior on $g$, we were able to derive closed form expressions for the posterior distributions.
 	\small
 	\begin{align*}
 		% p(u | \vy) &= \frac{(1 - R_\vgamma^2)^{b + 1}}{\text{Beta}(b + 1, d + 1)} u^b (1 - u)^d (1 - u R_\vgamma^2)^{-(b + d + 2)} \\
@@ -211,18 +213,21 @@ and asymptotically equivalent to using BIC.
 		p(\sigma^2 | \vy) &= \frac{\frac{n}{2} (1 - R^2)^{b + 1}}{\Gamma(c)} (1 - R^2)^{-(c + 1)}
 												\exp{\left( -\frac{n}{2 \sigma^2} \right)} {}_1 F_1 \left(b + 1; c; \frac{n R^2}{2 \sigma^2}\right)
 												\\
-		p(g | \vy) &= \frac{(1 - R^2)^{b + 1} g^b [1 + g (1 - R^2)]^{-(b + d + 2)}}{\text{Beta}(b + 1, d + 1)}  \\		
+		p(g | \vy) &= \frac{(1 - R^2)^{b + 1} g^b [1 + g (1 - R^2)]^{-(b + d + 2)}}{\text{Beta}(b + 1, d + 1)}
 	\end{align*}
-	where $a = 1$, $b = p$, $c=(n - 1)/2$ and $d = c - b - 2 = p / 2 + a$.
+	where
+	$a = -3/4$,
+	$b = (n - p)/2 - a - 2$,
+	$c = (n - 1)/2$, and
+	$d = c - b - 2 = p / 2 + a$.
 \end{frame}
 
-\note{We focused on the Beta-Prime prior, because it is numerically stable.
-			We derived exact expressions for the posteriors of $g$, $\alpha$ and $\sigma^2$ under the Beta-Prime
-			prior.
-			$g | \vy$ is a generalised Beta-Prime distribution.
+\note{With a Beta-Prime prior on $g$, we derived exact expressions for the posteriors of $g$, $\alpha$ and
+			$\sigma^2$ under the Beta-Prime prior. \\
+			$g | \vy$ is a generalised Beta-Prime distribution. \\
 			We came up with two expressions for $\alpha | \vy$. I've presented the second of these which is using the 
-			Euler identity so that the first two arguments are small in magnitude. This causes the series to converge quickly. This looks complicated, but is actually a fancy $t$-distribution.
-			$\sigma^2 | \vy$ is pretty close to an inverse gamma distribution.
+			Euler identity so that the first two arguments are small in magnitude. This causes the series to converge quickly. This looks complicated, but is actually a fancy $t$-distribution. \\
+			$\sigma^2 | \vy$ is pretty close to an Inverse Gamma distribution. \\
 			These expressions depend only on $n$, $p_\vgamma$ and $R_\vgamma^2$.}
 
 \begin{frame}
@@ -241,7 +246,7 @@ and asymptotically equivalent to using BIC.
 		M_1 &= \frac{b + 1}{c} {}_2 F_1 (d + 1, 1; c + 1; R^2) \text{ and } \\
 		M_2 &= \frac{(b + 1)(b + 2)}{c(c + 1)} {}_2 F_1 (d + 1, 2; c + 2; R^2).
 	\end{align*}
-	Note $M_1$ and $M_2$ approach 1 as $n\to\infty$.
+	Note that $M_1$ and $M_2$ approach 1 as $n \to \infty$.
 	
 	Using the delta method, we were able to get the approximation
 	\begin{align*}
@@ -251,7 +256,11 @@ and asymptotically equivalent to using BIC.
 
 \note{We weren't able to find a closed form expression for the posterior of $\vbeta$, so instead we focused on
 			the first and second moments. The mean and covariance are given in terms of $M_1$ and $M_2$ and these
-			can be expressed in terms of the hypergeometric function.}
+			can be expressed in terms of the hypergeometric function. \\
+			Note that $M_1$ and $M_2$ approach 1 as $n \to \infty$, so the posterior expectation and covariance
+			asymptotically approach the maximum likelihood estimates in the limit. \\
+			Using the Delta method, we were able to derive  that the posterior distribution of $\vbeta$ is
+			approximately $t$-distributed.}
 
 % Say sopmething about the Rao-Blackwellisation?
 
@@ -278,20 +287,36 @@ and asymptotically equivalent to using BIC.
 
 \note{We checked that our exact expressions were correct by checking them against a Rao-Blackwellisation sampling
 			scheme that we developed, which can be considered the gold standard.
-			We found that they matched very closely for a range of parameter settings. The inexactness of the Monte
-			Carlo densities came about because of sampling error. Our expressions are much faster to evaluate and
-			more accurate. In the event that we run into numerical problems, we can fall back on the MC scheme.}
+			We found that they matched very closely for a range of parameter settings.
+
+			The inexactness of the Monte Carlo densities came about because of sampling error. Our expressions are much faster to evaluate and more accurate.
+
+			In the event that we run into numerical problems, we can fall back on the MC scheme.}
 
 \begin{frame}
-	\frametitle{Application: US Crime data}
+	\frametitle{Application: Hitters data}
 	\begin{figure}
-		\caption{Example model fit to the US Crime data}
-		\includegraphics[scale=.33]{BetaUSCrime.pdf}
+		\caption{Example model fit to the Hitters data}
+		\includegraphics[scale=.33]{BetaHitters.pdf}
 	\end{figure}
 \end{frame}
 
-\note{We applied our model fitting software to the US Crime data set, and found that our
+\note{We applied our model fitting software to the Hitters data set, and found that our
 			first and second moments fit well.}
+
+\begin{frame}
+	\frametitle{Conclusion/Future work}
+	\begin{itemize}
+		\item We found exact expressions for posterior distributions which were accurate, fast and numerically
+					stable.
+		\item These expressions are for a single model. When using these expressions for many models, we are able
+					to perform Bayesian model averaging quickly.
+		\item This is just one part of the work we're doing, which includes efficient model averaging, different
+					priors on $g$ and alternatives MCMC for model selection.
+		\item This work will be made available in an \texttt{R} package on CRAN.
+	\end{itemize}
+
+\end{frame}
 
 \begin{frame}
 	\frametitle{References / Contact details}
