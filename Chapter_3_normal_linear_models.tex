@@ -51,84 +51,8 @@ our method performs well on real-world data.
 
 \section{Introduction}
 
-\subsection{Background}
-
-% Problem in general
-
-The problem of model selection is one of the most important problems encountered in practice by applied
-statistical practitioners. There are many approaches to model selection including approaches based on
-functions of the residual sum of squares, lasso and L1 regression and Bayesian modelling approaches. A major
-motivation for this field of research is the need for a computationally feasible approach to performing model
-selection on large scale problems where the number of covariates is large.
-
-The bias-variance trade-off is one of the central problems in statistical learning. The guise this problem
-takes in model selection is balancing the quality of the model fit against the complexity of the model, in an
-attempt to find a compromise between over-fitting and under-fitting, in the hope that the model fit will
-generalise well beyond the training data we have observed to the general population and that we haven't simply
-learned the noise in the training set.
-
-% Non-Bayesian
-
-Model selection attempts to balance goodness of fit against model complexity, neither overfitting nor
-underfitting. Many approaches to model selection have been investigated, with various model selection criteria
-proposed to attempt to balance model likelihood against model complexity. One approach to model selection is
-to select between entire models, using a model selection criterion. These criterion may have a fixed penalty
-for model complexity, such as Akaike's Information Criterion \citep{Akaike1974}, the Risk Inflation Criterion
-\citep{Foster1994}, the Schwarz criterion or Bayesian Information Criterion \citep{Schwarz1978}, the Deviance
-Information Criterion \citep{Spiegelhalter2016} or the Principle of Minimum Description Length
-\citep{Hansen2001}. Alternatively, the penalty may be adaptive/data--dependent as in \citep{George2000}. An
-alternative to model selection criterion is to select models based on their posterior probability, such as by
-selecting the median probability model as in \citep{Barbieri2004}. In a Bayesian context is to use Bayes
-factors to compare the posterior likelihoods of the candidate models to see which is most probable given the
-observed data. This can be done, for example, by using Bayes Factors as in \citep{Kass1993}. Rather than
-selecting one candidate model, several models can be combined together using Bayesian model  averaging, as in
-\citep{Hoeting1999}, \citep{Raftery1997}, \citep{Fernandez2001} or \citep{Papaspiliopoulos2016}. Or model
-selection can be made implicit in the model fitting process itself, as in ridge regression \citep{Casella1980},
-of which the well-known lasso is a special case \citep{Tibshirani1996}. As \citep{Breiman1996} and
-\citep{Efron2013} showed, while  the standard formulation of a linear model is unbiased, the goodness of fit of
-these models is numerically  unstable. Breiman showed that by introducing a penalty on the size of the
-regression co- efficients such as  in ridge regression, this numerical instability can be avoided. This
-reduces the variances of the co-efficient estimates, at the expense of introducing some bias --- the bias--
-variance trade--off.
-
-Another approach to model selection is to focus on selecting individual covariates, rather than entire
-models. This approach can either be Fully Bayesian or Empirically Bayesian as in \citep{Cui2008}. Variable
-selection approaches involve a stochastic search over the variables in the model space. This search can be
-driven by posterior probabilities, as in \citep{Casella2006}, or by Gibbs sampling approaches such as in
-\citep{George1993}. These two approaches of model selection and variable selection can be combined, as in
-\citep{Geweke1996}.
-
-
-\citep{Zellner1980} suggested a particular form of conjugate Normal-Gamma family where the Bayes factors have a
-relatively simple form, incorporating a parameter $g$ to control mixing between the model fit from the data
-and a prior specification of model fit. This immediately raises the question of how $g$ should be chosen, and
-whether it should be fixed or have a prior specification. \citep{Liang2008} showed that fixed choices of $g$
-lead to paradoxes such as Bartlett's Paradox and the Information Paradox, and so a prior specification should
-be preferred. There are many ways of choosing a prior on $g$. Using a mixture of $g$-priors has the advantage
-of adapting the degree of shrinkage to the prior model dependent on the data.
-
-% Variational Bayes, Explaining Variational Approximations 2010
-
-% VB in general
-
-A challenge to applying this method of model selection is that exact model fitting may be computationally
-infeasible for models involving even moderate numbers of observations and covariates, and popular alternatives
-for fitting Bayesian models such as Monte Carlo Markov Chains (henceforth referred to as MCMC) are still
-extremely computationally intensive. Variational Bayes (see \citep{Ormerod2010}) is a computationally
-efficient, deterministic method of fitting Bayesian models to data. Variational Bayes approximates the true
-posterior $p(\vy, \vtheta)$ by minimising the KL divergence between the posterior and the  approximating
-distribution $q(\vtheta)$.
-
-A linear model with normal priors allows exact inference on the regression and model selection parameters in
-closed form, which might appear to negate the beenfits of a variational approximation to the model. However,
-the performance of our variational approximation should remain simil.iar if the priors are altered to cater
-for complications such as robustness, while exact Bayesian inference calculations are no longer possible
-in closed form in these situations.
-
-
 % Structured Variational Bayes for model selection, Wand and Ormerod Variational Bayes for Elaborate 
 % Distributions (\citep{Wand2011})
-
 
 % Application
 
@@ -202,6 +126,18 @@ This leads to the posterior distribution
 	\vbeta | \vy \sim \N_p\left(\frac{g}{1+g} \vbetahatls, g \sigma^2 (\mX^\top \mX)^{-1} \right).
 \]
 which is a mixture between the null model and the least squares fit, with the degree of mixing controlled by controlled by $g/(1 + g)$.
+
+\subsection{Model Selection}
+
+Let $\vgamma \in \{0, 1\}^p$ be the vector of indicators of inclusion of the $p$th column of $\mX$ in the
+model $\vgamma$. Then $\mX_\vgamma$ is the covariate matrix formed by including only the columns of $\mX$
+indicated by $\vgamma$.
+
+We index the space of models by a $p$-dimensional vector of indicator variables for each variable considered 
+for inclusion, $\vgamma$. For each model $\mathcal{M}_\vgamma$, the response vector $\vy$ is modelled by
+\begin{equation*}
+	\mathcal{M}_\vgamma: \vmu_\vgamma = \vone_n \alpha + \mX_\vgamma \vbeta_\vgamma.
+\end{equation*}
 
 \section{Fully Bayesian inference}
 
@@ -724,17 +660,7 @@ be calculated from it as shown in Algorithm \ref{alg:algorithm_two}.
 	\end{algorithmic}
 \end{algorithm}
 
-\subsection{Model Selection}
-
-Let $\vgamma \in \{0, 1\}^p$ be the vector of indicators of inclusion of the $p$th column of $\mX$ in the
-model $\vgamma$. Then $\mX_\vgamma$ is the covariate matrix formed by including only the columns of $\mX$
-indicated by $\vgamma$.
-
-We index the space of models by a $p$-dimensional vector of indicator variables for each variable considered 
-for inclusion, $\vgamma$. For each model $\mathcal{M}_\vgamma$, the response vector $\vy$ is modelled by
-\begin{equation*}
-	\mathcal{M}_\vgamma: \vmu_\vgamma = \vone_n \alpha + \mX_\vgamma \vbeta_\vgamma.
-\end{equation*}
+\subsection{Model Selection in Variational Bayes}
 
 We perform model selection by using the above Variational Bayes approximation to each
 candidate linear model and averaging over the space of available models.
@@ -758,7 +684,7 @@ the model.
 This allows us to use Rank-1 updates and downdates of $(\mX^\top \mX)^{-1}$ to greatly decrease the
 computational cost of calculating $R_\vgamma^2$ from $\BigO(np^3)$ to $\BigO(np^2)$.
 Special care was taken to minimise memory allocation and deallocation.
-Rcpp, RcppEigen.
+The \texttt{Rcpp} and \texttt{RcppEigen} libraries were used to ensure the implementation was performant.
 
 Initially, $\vgamma = (1, 0, 0, \ldots, 0, 0)^\top$. So $(\mX_\vgamma^\top \mX_\vgamma)^{-1} =
 (\vx_\vgamma^\top \vx_\vgamma)^{-1}$ which is a scalar, and so can be computed in $\BigO(n)$. Then the set of
