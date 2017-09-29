@@ -1,5 +1,6 @@
 \documentclass{beamer}
-
+\usepackage{beamerthemesplit}
+\usepackage{color,xcolor,ucs}
 \usetheme{Warsaw}
 \usepackage{graphicx}
 \usepackage{ulem}
@@ -54,15 +55,18 @@
 	\end{itemize}
 \end{frame}
 
-\note{Linear model selection is a well-studied problem. A lot of work has been done on studying parameter priors
-			for model selection. The parameter posteriors are less well-studied, so we chose to explore this area in
-			our research. We derive several new exact closed form expressions for the posterior parameters using
-			special functions. These expressions are numerically well-behaved, and can be evaluated with widely 
-			available	libraries.
+\note{%Linear model selection is a well-studied problem. A lot of work has been done on studying parameter priors
+			%for model selection. The parameter posteriors are less well-studied, so we chose to explore this area in
+			%our research. We derive several new exact closed form expressions for the posterior parameters using
+			%special functions. These expressions are numerically well-behaved, and can be evaluated with widely 
+			%available	libraries.
 
 			People have looked at particular combinations of models and priors, calculating the marginal
 			likelihoods.
 			The next step in the process would be to look at the posteriors of individual parameters.
+			We derive several new exact closed form expressions for the posterior parameters using
+			special functions. These expressions are numerically well-behaved, and can be evaluated with widely 
+			available	libraries.
 			We also want to look at the numerical properties of these expressions, as we want them to be numerically
 			stable and easy to evaluate.}
 
@@ -307,23 +311,24 @@
 \begin{frame}
 	\frametitle{Conclusion/Future work}
 	\begin{itemize}
-		\item We found exact expressions for posterior distributions which were accurate, fast and numerically
+		\item We found exact expressions for the posterior distributions which were accurate, fast and numerically
 					stable.
 		\item These expressions are for a single model. When using these expressions for many models, we are able
 					to perform Bayesian model averaging quickly.
 		\item This is just one part of the work we're doing, which includes efficient model averaging, different
-					priors on $g$ and alternatives MCMC for model selection.
+					priors on $g$ and alternatives to MCMC for model selection.
 		\item This work will be made available in an \texttt{R} package on CRAN.
 	\end{itemize}
-
 \end{frame}
 
 \begin{frame}
 	\frametitle{References / Contact details}
+	Thank you for your attention. Are there any questions?
 	\begin{itemize}
 		\item Mark Greenaway
-		\item markg@maths.usyd.edu.au
-		\item Twitter: @certifiedwaif	
+		\item Email: \texttt{markg@maths.usyd.edu.au}
+		\item Twitter: \texttt{@certifiedwaif}
+		\item GitHub: \texttt{github.com/certifiedwaif}
 	\end{itemize}
 
 	\small
