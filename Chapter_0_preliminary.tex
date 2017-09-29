@@ -129,73 +129,34 @@ of available functions and corresponding distributions is presented in Table \re
 How does this relate to Bayesian estimation? Maybe it's just interesting background.
 Bernstein-von Mises Theorem
 
-\section{Zero--inflated models}
-Count data with a large number of zero counts arises in many areas of application, such as data arising from
-physical activity studies, insurance claims, hospital visits or defects in manufacturing processes. Zero
-inflation is a frequent cause of overdispersion in Poisson data, and not accounting for the extra zeroes
-may lead to biased parameter estimates. These models have been used for many applications, including defects
-in manufacturing in \citep{lambert1992}, horticulture in \citep{BIOM:BIOM1030}, length of
-stay data from hospital admissions in \citep{BIMJ:BIMJ200390024}, psychology in \citep{JOFP:rethink},
-pharmaceutical studies in \citep{Min01042005}, traffic accidents on roadways in \citep{Shankar1997829} and
-longitudinal studies in \citep{LeeWangScottYauMcLachlan2006}.
-
-The strength of this approach derives from modelling the zero and non-zero count data seperately as a mixture
-of distributions for the zero and non-zero components, allowing analysis of both the proportion of zeroes in
-the data set and the conditions for the transition from zero observations to non-zero observations. When
-combined with a multivariate mixed model regression framework, an extremely rich class of models can be fit
-allowing a broad range of applications to be addressed. Often the transition from zero to non-zero has a
-direct interpretation in the area of application, and is interesting in its' own right.
-
-Bayesian estimation methods for zero-inflated models was developed in \citep{Ghosh2006} using MCMC 
-implemented with WinBUGS, and in \citep{Vatsa2014} using a Variational Bayes solution to the inverse
-zero-inflated Poisson regression problem. While simple forms of these models are easy to fit with standard 
-maximum likelihood techniques, more general models incorporating random effects, splines and missing data 
-typically have no closed form solutions and hence present a greater computational challenge to fit.
-
-Fitting these models is typically done with Monte Carlo Markov Chain techniques, but these can be slow and
-prone to convergence problems. Other fitting methods such as the Variational Bayes approach above can be
-inflexible, not allowing general models incorporating random effects and so on. 
-We build upon a latent variable representation of these models to allow a
-tractable semiparametric mean field Variational Bayes approximation to be derived. Semiparametric mean field
-Variational Bayes is an approximate Bayesian inference method as detailed in \citep{Ormerod2010} and
-\citep{Rohde2015}, which allows us to fit close approximations to these models using a deterministic algorithm
-which converges much more quickly.
-
-We allow a flexible regression modelling approach by using a Gaussian Variational Approximation as defined in
-\citep{Ormerod2012} on the regression parameters to allow a non-conjugate Gaussian prior to be used, making the
-resulting Gaussian posterior of the regression parameters easy to interpret. We adopt a Mean Field Variational
-Bayes (VB) approach on the other parameters in the model to derive the rest of the approximation.
-
 \section{Model selection}
 % Given a full data matrix $\mX \in \R^{n \times p}$, we may wish to find the subset of variables $\gamma \in \{
 % 1 \ldots p \}$ such that $\mX_\gamma \vbeta_\gamma$ describe the data in $\vy$ best.
 
-The task of selecting a statistical model from a set of candidate models given a data set is one
-of the fundamental tasks of scientific inquiry. It is one of the central tasks of applied statistical
-analysis, and there is a correspondingly large literature on the subject. The problem of model selection for
-normal linear models is particularly well studied, owing to the popularity and importance of normal linear
-models in applications.
-There are many approaches to model selection, including criteria based approaches,
-variable selection,
-penalised regression,
-and Bayesian modelling approaches. Model selection is a difficult problem in high--dimensional space in general
-because as the dimension of the space increases, the number of possible models increases combinatorially.
-Many model selection algorithms use heuristics in an attempt to search the model space more efficiently but
-still find an optimal or near-optimal model.
+The task of selecting a statistical model from a set of candidate models given a data set is one of the
+fundamental tasks of scientific inquiry. It is one of the central tasks of applied statistical analysis, and
+there is a correspondingly large literature on the subject. The problem of model selection for normal linear
+models is particularly well studied, owing to the popularity and importance of normal linear models in
+applications. There are many approaches to model selection, including criteria based approaches, variable
+selection, penalised regression, and Bayesian modelling approaches. Model selection is a difficult problem in
+high--dimensional space in general because as the dimension of the space increases, the number of possible
+models increases combinatorially. Many model selection algorithms use heuristics in an attempt to search the
+model space more efficiently but still find an optimal or near-optimal model.
 
-Many approaches to model selection have been investigated, with various model selection criteria
-proposed to attempt to balance model likelihood against model complexity. One approach to model selection is
-to select between entire models, using a model selection criterion. These criterion may have a fixed penalty
-for model complexity, such as Akaike's Information Criterion \citep{Akaike1974}, the Risk Inflation Criterion
+Many approaches to model selection have been investigated, with various model selection criteria proposed to
+attempt to balance model likelihood against model complexity. One approach to model selection is to select
+between entire models, using a model selection criterion. These criterion may have a fixed penalty for model
+complexity, such as Akaike's Information Criterion \citep{Akaike1974}, the Risk Inflation Criterion
 \citep{Foster1994}, the Schwarz criterion or Bayesian Information Criterion \citep{Schwarz1978}, the Deviance
 Information Criterion \citep{Spiegelhalter2016} or the Principle of Minimum Description Length
 \citep{Hansen2001}. Alternatively, the penalty may be adaptive/data--dependent as in \citep{George2000}.
 
-An alternative to model selection criterion is to select models based on their posterior probability. In a Bayesian context, this can be
-accomplished by comparing the posterior likelihoods of the candidate models to see which is most probable
-given the observed data. This can be done, for example, by using Bayes Factors as in \citep{Kass1993}. Rather
-than selecting one candidate model, several models can be combined together using Bayesian model  averaging,
-as in \citep{Hoeting1999}, \citep{Raftery1997}, \citep{Fernandez2001} or \citep{Papaspiliopoulos2016}.
+An alternative to model selection criterion is to select models based on their posterior probability. In a
+Bayesian context, this can be accomplished by comparing the posterior likelihoods of the candidate models to
+see which is most probable given the observed data. This can be done, for example, by using Bayes Factors as
+in \citep{Kass1993}. Rather than selecting one candidate model, several models can be combined together using
+Bayesian model  averaging, as in \citep{Hoeting1999}, \citep{Raftery1997}, \citep{Fernandez2001} or
+\citep{Papaspiliopoulos2016}.
 
 Model selection can be made implicit in the model fitting process itself, as in ridge regression
 \citep{Casella1980}, of which the well-known lasso is a special case \citep{Tibshirani1996}. As shown in
@@ -214,11 +175,81 @@ be combined, as in \citep{Geweke1996}. Variable selection can also be accomplish
 probability model, consisting of those models whose posterior inclusion probability is at least $1/2$, as in
 \citep{Barbieri2004}.
 
+% Problem in general
+
+The problem of model selection is one of the most important problems encountered in practice by applied
+statistical practitioners. There are many approaches to model selection including approaches based on
+functions of the residual sum of squares, lasso and L1 regression and Bayesian modelling approaches. A major
+motivation for this field of research is the need for a computationally feasible approach to performing model
+selection on large scale problems where the number of covariates is large.
+
+The bias-variance trade-off is one of the central problems in statistical learning. The guise this problem
+takes in model selection is balancing the quality of the model fit against the complexity of the model, in an
+attempt to find a compromise between over-fitting and under-fitting, in the hope that the model fit will
+generalise well beyond the training data we have observed to the general population and that we haven't simply
+learned the noise in the training set.
+
+% Non-Bayesian
+
+Model selection attempts to balance goodness of fit against model complexity, neither overfitting nor
+underfitting. Many approaches to model selection have been investigated, with various model selection criteria
+proposed to attempt to balance model likelihood against model complexity. One approach to model selection is
+to select between entire models, using a model selection criterion. These criterion may have a fixed penalty
+for model complexity, such as Akaike's Information Criterion \citep{Akaike1974}, the Risk Inflation Criterion
+\citep{Foster1994}, the Schwarz criterion or Bayesian Information Criterion \citep{Schwarz1978}, the Deviance
+Information Criterion \citep{Spiegelhalter2016} or the Principle of Minimum Description Length
+\citep{Hansen2001}. Alternatively, the penalty may be adaptive/data--dependent as in \citep{George2000}. An
+alternative to model selection criterion is to select models based on their posterior probability, such as by
+selecting the median probability model as in \citep{Barbieri2004}. In a Bayesian context is to use Bayes
+factors to compare the posterior likelihoods of the candidate models to see which is most probable given the
+observed data. This can be done, for example, by using Bayes Factors as in \citep{Kass1993}. Rather than
+selecting one candidate model, several models can be combined together using Bayesian model  averaging, as in
+\citep{Hoeting1999}, \citep{Raftery1997}, \citep{Fernandez2001} or \citep{Papaspiliopoulos2016}. Or model
+selection can be made implicit in the model fitting process itself, as in ridge regression \citep{Casella1980},
+of which the well-known lasso is a special case \citep{Tibshirani1996}. As \citep{Breiman1996} and
+\citep{Efron2013} showed, while  the standard formulation of a linear model is unbiased, the goodness of fit of
+these models is numerically  unstable. Breiman showed that by introducing a penalty on the size of the
+regression co- efficients such as  in ridge regression, this numerical instability can be avoided. This
+reduces the variances of the co-efficient estimates, at the expense of introducing some bias --- the bias--
+variance trade--off.
+
+Another approach to model selection is to focus on selecting individual covariates, rather than entire
+models. This approach can either be Fully Bayesian or Empirically Bayesian as in \citep{Cui2008}. Variable
+selection approaches involve a stochastic search over the variables in the model space. This search can be
+driven by posterior probabilities, as in \citep{Casella2006}, or by Gibbs sampling approaches such as in
+\citep{George1993}. These two approaches of model selection and variable selection can be combined, as in
+\citep{Geweke1996}.
+
+\citep{Zellner1986} suggested a particular form of conjugate Normal-Gamma family where the Bayes factors have a
+relatively simple form, incorporating a parameter $g$ to control mixing between the model fit from the data
+and a prior specification of model fit. This immediately raises the question of how $g$ should be chosen, and
+whether it should be fixed or have a prior specification. \citep{Liang2008} showed that fixed choices of $g$
+lead to paradoxes such as Bartlett's Paradox and the Information Paradox, and so a prior specification should
+be preferred. There are many ways of choosing a prior on $g$. Using a mixture of $g$-priors has the advantage
+of adapting the degree of shrinkage to the prior model dependent on the data.
+
+% Variational Bayes, Explaining Variational Approximations 2010
+
+% VB in general
+
+A challenge to applying this method of model selection is that exact model fitting may be computationally
+infeasible for models involving even moderate numbers of observations and covariates, and popular alternatives
+for fitting Bayesian models such as Monte Carlo Markov Chains (henceforth referred to as MCMC) are still
+extremely computationally intensive. Variational Bayes (see \citep{Ormerod2010}) is a computationally
+efficient, deterministic method of fitting Bayesian models to data. Variational Bayes approximates the true
+posterior $p(\vy, \vtheta)$ by minimising the KL divergence between the posterior and the  approximating
+distribution $q(\vtheta)$.
+
+A linear model with normal priors allows exact inference on the regression and model selection parameters in
+closed form, which might appear to negate the beenfits of a variational approximation to the model. However,
+the performance of our variational approximation should remain similiar if the priors are altered to cater for
+complications such as robustness, while exact Bayesian inference calculations are no longer possible in closed
+form in these situations.
+
 \section{Models and Assumptions}
 
 \section{Frequentist Approaches to Model Selection}
 \subsection{Information criteria}
-
 
 In a frequentist context, there are many functions which can be used to judge which model is best,
 such as AIC, BIC etc. These are functions $f: \gamma \to \R^+$ which allow the models under consideration to
