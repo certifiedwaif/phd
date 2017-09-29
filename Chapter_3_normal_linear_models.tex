@@ -46,9 +46,8 @@
 We develop mean field and structured variational Bayes approximations for Bayesian model selection on linear
 models using Zellner's g prior. Our mean field updates only depend on a single variational parameter $\tau_g$
 and other values which are fixed for each model considered. An algorithm is developed which allows these
-models to be fit in parallel. Applications to a range of data sets are presented, showing  empirically that
-our method performs well on real-world data. Our method is computationally more efficient  than the exact
-Bayesian model.
+models to be fit. Applications to a range of data sets are presented, showing  empirically that
+our method performs well on real-world data.
 
 \section{Introduction}
 
@@ -150,11 +149,6 @@ In Section \ref{sec:methodology} we develop our approach. In Section
 \ref{sec:num_exp} we perform a series of numerical experiments to show the accuracy of our approach. Finally,
 in Section \ref{sec:conclusion}, we provide a Conclusion and Discussion.
 
-Consider a normal linear model on $\vy$ with conjugate normal prior on $\vbeta$ with mean centred at $\vzero$,
-and covariance $g \sigma^2 (\mX^\top \mX)^{-1}$ where the prior on $g$ is Zellner's g-prior on the covariance
-matrices (Zellner 1986), as this yields a tractable posterior for $\vbeta$ as shown by \citep{Liang2008}. We
-choose $a$  and $b$ to be $-3/4$ and $(n - p)/2 - a - 2$ respectively, following \citep{Maruyama2011}.
-
 \section{Methodology}
 \label{sec:methodology}
 
@@ -171,13 +165,23 @@ approximating probability distribution.
 \subsection{Model}
 \label{sec:model}
 
-Zellner constructed a family of priors for a Gaussian regression model using a particular form of conjugate
-Normal-Gamma model, where the prior covariance matrix of $\vbeta$ is taken to be a multiple of the Fisher
-information  matrix by the parameter $g$ \citep{Goel1986}. This places the most prior mass for $\vbeta$ on the
-section of the parameter space where the data is least informative.
+Zellner constructed the $g$-prior family of priors for a Gaussian regression model using a particular form of
+conjugate Normal-Gamma model, where the prior covariance matrix of $\vbeta$ is taken to be a multiple of the
+Fisher information  matrix by the parameter $g$ \citep{Zellner1986}. This could be thought of as regularisation
+in the principle components of the estimated covariance matrix. This places the most prior mass for $\vbeta$
+on the section of the parameter space where the data is least informative.
 
-We consider a linear model with a g-prior, as in \citep{Liang2008}. Consider the linear model
-
+We consider a normal linear model on $\vy$ with conjugate normal prior on $\vbeta$, and covariance $g \sigma^2
+(\mX^\top \mX)^{-1}$ where the prior on $g$ is Zellner's g-prior on the covariance matrices, 
+We consider a normal linear model with a $g$-prior on the regression co-efficients $\vbeta$.
+This introduces a hyperparameter $g$ which controls the shrinkage of the regressions co-efficients.
+The prior on $g$ can be carefully chosen so that the other parameters in the model can be integrated out
+analytically, yielding tractable marginal and posterior distributions for $g$, as shown by \citep{Liang2008}.
+Several priors on $g$ have been considered in the literature, including the hyper-$g$ and hyper-$g/n$ priors
+\cite{Liang2008}, Bayarri's robust prior \cite{Bayarri2012} and the Beta-Prime prior introduced by
+\citep{Maruyama2011}. We choose the popular Beta-Prime prior, as it is numerically well-behaved. 
+We choose $a$  and $b$ to be $-3/4$ and $(n - p)/2 - a - 2$ respectively, following \citep{Maruyama2011}.
+Our model is thus
 \begin{align*}
 	\vy | \vbeta, \sigma^2 \sim \N_n(\mX \vbeta, \sigma^2 \mI) 
 \end{align*}
@@ -197,41 +201,13 @@ This leads to the posterior distribution
 \[
 	\vbeta | \vy \sim \N_p\left(\frac{g}{1+g} \vbetahatls, g \sigma^2 (\mX^\top \mX)^{-1} \right).
 \]
+which is a mixture between the null model and the least squares fit, with the degree of mixing controlled by controlled by $g/(1 + g)$.
 
 \section{Fully Bayesian inference}
 
 In this section, we derive the expression required for fully Bayesian inference for the model presented in
 Section \ref{sec:model}. Throughout the rest of this article, we will assume that assume without loss of
 generality that $\vy^\top\vone = 0$ and that $\|\vy\|^2 = n$.
-
-\subsection{Useful Results}	
-
-We first present the following results which will aid us in deriving the expressions required for fully Bayesian
-inference over the parameters in the model.
-
-\begin{equation}\label{res:01}
-	\int \exp\left\{ -\tfrac{1}{2}\vx^T\mA\vx + \vb^T\vx \right\} d \vx = |2\pi\mSigma|^{1/2} \exp\left\{ \tfrac{1}{2}\vmu^T\mSigma^{-1}\vmu \right\}
-\end{equation}
-where $\vmu = \mA^{-1}\vb$ and $\mSigma = \mA^{-1}$.
- 
-If $\vone^T\vy=0$ the $R$-squared statistic can be expressed
-\begin{equation} \label{res:02}
-	R^2 = \frac{\vy^T\mX(\mX^T\mX)^{-1}\mX^T\vy}{\|\vy\|^2}
-\end{equation}
-where $R^2$ is the usual $R$-squared statistic associated with least squares regression.
-
-Equation 3.194 (iii) of \citep{Gradshteyn1988} is
-\begin{equation}\label{res:03}
-	\int_0^\infty \frac{ x^{\mu - 1} }{(1 + \beta x)^\nu} dx = \beta^{-\mu} \mbox{Beta}(\mu,\nu - \mu) \quad \quad \mbox{(assuming $\mu,\nu>0$ and $\nu>\mu$).}
-\end{equation}
-
-Equation 3.385 of \citep{Gradshteyn1988} is
-\begin{equation} \label{res:04}
-	\int_{0}^1 x^{\nu - 1} (1 - x)^{\lambda - 1}(1 - \beta x)^{\varrho} e^{-\mu x} dx = \mbox{Beta}(\nu,\lambda) \Phi_1(\nu,\varrho,\lambda+\nu,-\mu,\beta)
-\end{equation}
-\noindent provided $\mbox{Re}(\lambda)>0$, $\mbox{Re}(\nu)>0$ and $|\mbox{arg}(1-\beta)|<\pi$.
-
-
 
 
 \subsection{Derivation of the marginal likelihood}
@@ -263,13 +239,13 @@ $$
 	  & \ds = \exp\left\{      
 	-\tfrac{n}{2}\log(2\pi\sigma^2) - \tfrac{1}{2\sigma^2}\|\vy\|^2 -\tfrac{p}{2}\log(2\pi g\sigma^2) + \tfrac{1}{2}\log|\mX^T\mX| \right\}
 	\\
-	  & \ds \qquad \times \int 
+	  & \ds \quad \times \int 
 	\exp\left\{ - \tfrac{1}{2}\vbeta^T \left[ \sigma^{-2}(1+g^{-1})\mX^T\mX \right]\vbeta + \sigma^{-2}\vbeta^T\mX^T\vy
 	\right\} d\vbeta \\ [2ex]
 	  & \ds = \exp\left\{      
 	-\tfrac{n}{2}\log(2\pi\sigma^2) - \tfrac{1}{2\sigma^2}\|\vy\|^2 -\tfrac{p}{2}\log(2\pi g\sigma^2) + \tfrac{1}{2}\log|\mX^T\mX| \right\}
 	\\
-	  & \ds \qquad \times      
+	  & \ds \quad \times      
 	|2\pi \left[ \sigma^{-2}(1+g^{-1})\mX^T\mX \right]^{-1}|^{1/2}\exp\left\{  \tfrac{1}{2\sigma^2}  \vy^T\mX\left[ (1+g^{-1})\mX^T\mX \right]^{-1}\mX^T\vy
 	\right\}
 	\\ [2ex]
@@ -279,7 +255,7 @@ $$
 	-\tfrac{p}{2}\log(2\pi g\sigma^2) 
 	+ \tfrac{1}{2}\log|\mX^T\mX| \right\}
 	\\
-	  & \ds \qquad \times      
+	  & \ds \quad \times      
 	\exp\left\{ 
 	\tfrac{p}{2}\log(2\pi) 
 	+ \tfrac{p}{2}\log(\sigma^2)
@@ -309,12 +285,12 @@ Next, we obtain the likelihood of $\vy$ conditional on $g$ by integrating out $\
 $$
 \begin{array}{rl}
 	\ds p(\vy|g) 
-	  & \ds = \exp\left\{                                                                                 
+	  & \ds = \exp\left\{
 	- \tfrac{n}{2}\log(2\pi) - \tfrac{p}{2}\log(1+g) 
 	- \tfrac{1}{2\sigma^2}n
 	\right\}
 	\\ [1ex]
-	  & \ds \qquad \times                                                                                 
+	  & \ds \quad \times                                                                                 
 	\int_0^\infty (\sigma^2)^{-(n/2 + 1)}
 	\exp\left\{
 	- \sigma^{-2} \left[ \tfrac{n}{2} - \tfrac{g}{2(1+g)} nR^2 \right] 
@@ -357,12 +333,9 @@ $$
 \subsection{Posterior distributions of the parameters}
 We now derive the expressions for the posterior distributions of each of the parameters. Using Equation
 \ref{res:03} and Equation \ref{res:04} we have
-
-\begin{equation}\label{res:06}
-	p(g|\vy) = \frac{(1 -  R^2)^{b+1} g^{b} \left[  1 + g(1 -  R^2) \right]^{-n/2}}{\mbox{Beta}(p/2 + a + 1,b+1)} \text{ and }
-\end{equation}
-$$
-\begin{array}{rl}
+\begin{equation}
+\begin{array}{rl}\label{res:06}
+	p(g|\vy) & = \frac{(1 -  R^2)^{b+1} g^{b} \left[  1 + g(1 -  R^2) \right]^{-n/2}}{\mbox{Beta}(p/2 + a + 1,b+1)} \text{ and } \\
 	\ds \frac{\mbox{Beta}(p/2 + a + 1,b)}{\mbox{Beta}(p/2 + a + 1,b+1)}
 	  & \ds = \frac{\Gamma(p/2 + a + 1)\Gamma(b)}{\Gamma(p/2 + a + 1 + b)} 
 	\frac{\Gamma(p/2 + a + 1 + b + 1)}{\Gamma(p/2 + a + 1)\Gamma(b+1)}
@@ -374,16 +347,14 @@ $$
 	\\
 	  & \ds = 1 + \frac{p/2 + a + 1}{b}.                                   
 \end{array}
-$$
-
+\end{equation}
 \noindent Using the change of variables $h=g/(1+g)$ we have
-
 \begin{equation}
 	p(h|\vy) = \frac{(1 -  R^2)^{b+1}}{\mbox{Beta}(p/2 + a + 1,b+1)} h^{b}(1 - h)^{2-b+n/2}  (1  - h R^2)^{-n/2}.
 \end{equation}
  
 
-The full conditional for $\vbeta$ is given by
+\noindent The full conditional for $\vbeta$ is given by
 \begin{equation}
 	\begin{array}{rl}
 		\vbeta|\vy,\sigma^2,g \sim \N\left[                  
@@ -394,7 +365,7 @@ The full conditional for $\vbeta$ is given by
 \end{equation}
 \noindent where $\widehat{\vbeta}_{\mbox{\tiny LS}} = \left( \mX^T\mX \right)^{-1}\mX^T\vy$.
 
-The full conditional for $\sigma^2$ is obtained by integrating out $\vbeta$ is
+The full conditional for $\sigma^2$ obtained by integrating out $\vbeta$ is
 \begin{equation}
 	\sigma^2|\vy,g \sim \mbox{IG}\left[\tfrac{n}{2},\tfrac{n}{2}\left( 
 		1 -
@@ -416,7 +387,7 @@ $$
 	1 -
 	\tfrac{g}{1+g} R^2\right) \right\} \right]
 	\\ [2ex]
-	  & \ds \qquad \times \left[                                                                                                                                                           
+	  & \ds \quad \times \left[                                                                                                                                                           
 	\frac{(1 -  R^2)^{b+1} g^{b} \left[  1 + g(1 -  R^2) \right]^{-n/2}}{\mbox{Beta}(p/2 + a + 1,b+1)}
 	\right] dg
 	    
@@ -458,23 +429,24 @@ $$
 % -b-2+n/2 = p/2 + a  
 % $$
 
-\noindent where
-$h = \frac{g}{1+g}$,
-$g = \frac{h}{1-h}$,
-$1 - h = \frac{1}{(1 + g)}$,
-and
-$\frac{dh}{dg} = \frac{1}{1+g} - \frac{g}{(1 +g)^2} = \frac{1}{(1+g)^2} = (1 - h)^2$.
-
-\noindent From Equation 3.383(i) of \citep{Gradshteyn1988},
+\noindent using the substitution $h = g/(1 + g)$, to transform the integral to be over the interval $[0, 1]$
+and into a form where we are able to use
+% $g = \frac{h}{1-h}$,
+% $1 - h = \frac{1}{(1 + g)}$,
+% and
+% $\frac{dh}{dg} = \frac{1}{1+g} - \frac{g}{(1 +g)^2} = \frac{1}{(1+g)^2} = (1 - h)^2$.
+Equation 3.383(i) of \citep{Gradshteyn1988},
 $$
 \int_{0}^u x^{\nu - 1} (u - x)^{\mu - 1}  e^{\beta x} dx = \mbox{Beta}(\nu,\mu) {}_1 F_1(\nu;\mu+\nu;\beta u)
 $$
+to complete the resulting integral.
 
 \noindent provided $\mbox{Re}(\mu)>0$, $\mbox{Re}(\nu)>0$.
 
 \noindent We have
 $u = 1$, $\nu = b + 1 = \frac{n-p}{2} - a - 1 >0$, $\mu = a + p/2 + 1 >0$, and 
-$\beta = \frac{nR^2}{2\sigma^2}$, so $\nu + \mu = \frac{n}{2}$. Hence
+$\beta = \frac{nR^2}{2\sigma^2}$, so $\nu + \mu = \frac{n}{2}$. Hence the above integral evaluates to the
+expression
 $$
 \begin{array}{rl}
 	\ds p(\sigma^2|\vy) 
@@ -489,28 +461,30 @@ is the
 degenerate hypergeometric function or
 confluent hypergeometric function. To the best of our knowledge, this is a new distribution.
 
-\noindent Using the change of variables $\tau= 1/\sigma^2$ we have
+\noindent Parameterising the distribution on $\sigma^2$ in terms of the precision $\tau= 1/\sigma^2$ we obtain
+the expression
 $$
 \begin{array}{rl}
 	\ds p(\tau|\vy) 
 	  & \ds = \frac{(1 -  R^2)^{b+1} ( n/2)^{n/2}}{\Gamma(n/2)} 
 	\tau^{n/2 - 1}\exp\left\{ -  \frac{n}{2} \tau \right\} {}_1 F_1\left(
-	b + 1; \frac{n}{2}; \frac{nR^2}{2} \tau \right)
+	b + 1; \frac{n}{2}; \frac{nR^2}{2} \tau \right).
 \end{array}
 $$
 
-\noindent Calculating the integral using the result from \citep{Gradshteyn1988} above we have
+\noindent
+This expression is integrable, and we are able to evaluate the integral
+using the result from \citep{Gradshteyn1988}. \mgc{Which result, Mark?}
 $$
 \int_0^\infty \tau^{n/2 - 1}\exp\left\{ -  \tfrac{n}{2} \tau \right\}{}_1 F_1\left(
 b + 1; \frac{n}{2}; \frac{nR^2}{2} \tau \right) d \tau = 
 \frac{\Gamma(n/2)}{(n/2)^{n/2}\left( 1 - R^2\right)^{b+1}}
 $$
+\noindent with $\rho_1 = n/2$, $\mu = n/2$, $a_1 = b+1$, $\lambda = nR^2/2$. Hence, $p(\sigma|\vy)$ and $p(\tau|\vy)$ are indeed probability density functions.
 
-\noindent with $\rho_1 = n/2$, $\mu = n/2$, $a_1 = b+1$, $\lambda = nR^2/2$. Hence, $p(\sigma|\vy)$ and $p(\tau|\vy)$ are indeed densities.
 
-
+\subsection{Posterior moments of the $\vbeta$ and $\sigma^2$}
 We now calculate the posterior expectation of the precision, $\bE(\sigma^{-2}|\vy)$
-
 $$
 \begin{array}{rl}
 	\ds \int_0^\infty \sigma^{-2} p(\sigma^2|\vy) d\sigma^2 
@@ -552,15 +526,15 @@ $$
 
 % $C = n/2$
 
-Using the Law of Total Expectation,
+\noindent Using the Law of Total Expectation,
 \begin{align*}
 	\Var(\vbeta | \vy) & = \E_g[\Var(\vbeta | \vy)] + \Var_g[\E(\vbeta|\vy, g)]                                                                                                                                                 \\
 	                   & = \E_g\left[\frac{g}{1 + g} \E[\sigma^2|\vy, g] (\mX^\top \mX)^{-1} \Bigm| \vy \right] + \Var_g\left[\frac{g}{1 + g} \vbetahatls \vbetahatls^\top \Bigm| \vy \right]                                   \\
 	                   & = \frac{n}{n - 2} \E_g\left[\frac{g}{1 + g} \left(1 - \frac{g}{1 + g} R^2 \right) \Bigm| \vy \right] (\mX^\top \mX)^{-1} + \Var_g\left[\frac{g}{1 + g} \Bigm| \vy \right] \vbetahatls \vbetahatls^\top \\
-	                   & = \left( \frac{n}{n - 2} \right) (G_1 - G_2 R^2) (\mX^\top \mX)^{-1} + (G_2 - G_1^2) \vbetahatls \vbetahatls^\top                                                                                      
+	                   & = \left( \frac{n}{n - 2} \right) (M_1 - M_2 R^2) (\mX^\top \mX)^{-1} + (M_2 - M_1^2) \vbetahatls \vbetahatls^\top                                                                                      
 \end{align*}
 
-where $G_1 = \E\left[\frac{g}{1 + g} \Bigm| \vy \right]$ and $G_2 = \E\left[ \left(\frac{g}{1 + g} \right)^2 \Bigm| \vy \right]$. We will calculate these expectations below.
+\noindent where $G_1 = \E\left[\frac{g}{1 + g} \Bigm| \vy \right]$ and $G_2 = \E\left[ \left(\frac{g}{1 + g} \right)^2 \Bigm| \vy \right]$. We will calculate these expectations below.
 
 To calculate $G_1$, we evaluate the integral
 
@@ -571,19 +545,17 @@ To calculate $G_1$, we evaluate the integral
 	                                           & = \frac{\Beta(p/2 + a + 1, b + 2)}{\Beta(p /2 + a + 1, b + 1)} {}_2 F_1(p/2 + a + 1, 1; n/2 + 1; R^2)              
 \end{align*}
 
-using \citep{Gradshteyn1988} 3.197 Equation 5,
+\noindent using 3.197 Equation 5 from \citep{Gradshteyn1988},
 
 \[
 	\int_0^\infty x^{\lambda-1} (1+x)^\nu (1 + \alpha x)^{\mu} dx = \Beta(\lambda, -\mu-\nu-\lambda) {}_2 F_1 (\mu, \lambda; -\mu-\nu; 1 - \alpha)
 \]
 
-when $[|\arg \alpha| < \pi], -\Re(\mu + \mu) > \Re \lambda > 0$ to obtain a closed form for the integral,  and
-using Euler's identity
+\noindent when $[|\arg \alpha| < \pi], -\Re(\mu + \mu) > \Re \lambda > 0$ to obtain a closed form for the integral, and using Euler's identity
 \[
 	{}_2 F_1(a, b; c; d) = (1 - d)^{c - a -  b} {}_2 F_1(c - a, c - b; c; d)
 \]
-
-to simplify the expression further.
+\noindent to simplify the expression further.
 
 Similiarly, we compute $G_2$ by evaluating
 
@@ -591,14 +563,16 @@ Similiarly, we compute $G_2$ by evaluating
 	\E\left[ \left(\frac{g}{1 + g} \right)^2 \Bigm| \vy \right] = \frac{\Beta(p/2 + a + 1, b + 2)}{\Beta(p /2 + a + 1, b + 1)} (1 - R^2)^{b+2} {}_2 F_1(p/2 + a + 1, 1; n/2 + 1; R^2).
 \]
 
-Thus we obtain
+\noindent Thus we obtain expressions for $M_1$ and $M_2$ in terms of the hypergeometric function.
 \begin{align*}
-	G_1 & = \frac{\Beta(p/2 + a + 1, b + 2)}{\Beta(p /2 + a + 1, b + 1)} (1 - R^2)^{b+1} {}_2 F_1(n/2, b + 1; n/2 + 1; R^2), \text{ and } \\
-	G_2 & = \frac{\Beta(p/2 + a + 1, b + 3)}{\Beta(p /2 + a + 1, b + 1)} (1 - R^2)^{b+1} {}_2 F_1(n/2, b + 3; n/2 + 2; R^2).              
+	M_1 & = \frac{\Beta(p/2 + a + 1, b + 2)}{\Beta(p /2 + a + 1, b + 1)} (1 - R^2)^{b+1} {}_2 F_1(n/2, b + 1; n/2 + 1; R^2), \text{ and } \\
+	M_2 & = \frac{\Beta(p/2 + a + 1, b + 3)}{\Beta(p /2 + a + 1, b + 1)} (1 - R^2)^{b+1} {}_2 F_1(n/2, b + 3; n/2 + 2; R^2).              
 \end{align*}
 
+% TODO: Posterior distributions of regression parameters
+% TODO: Posterior distributions of g for different specifications of priors on g
 
-\subsection{Variational Bayes}
+\section{Variational Bayes}
 
 Let $\KL(q||p) = \int q(\vtheta) \log{\left( \frac{q(\vtheta)}{p(\vtheta|\vy)} \right)} d \vtheta$ be the
 Kuhlback-Leibner divergence between $q$ and $p$, a measure of the distance between the probability
@@ -632,23 +606,21 @@ increases. By the above derivation, this can be seen to be equivalent to the KL 
 A popular form of approximation is to restrict $q(\vtheta)$ to a subclass of product densities by partitioning
 $\vtheta = (\vtheta_1, \vtheta_2, \ldots, \vtheta_{M-1}, \vtheta_M)$ and assuming independence between the
 partitioned parameters:
-
 \begin{equation*}
 	q(\vtheta) \equiv q(\vtheta_1) q(\vtheta_2) \ldots q(\vtheta_{n-1}) q(\vtheta_n).
 \end{equation*}
 
-This allows the calculation of the optimal approximating densities $q_i^*(\vtheta_i)$ as
-
+\noindent This allows the calculation of the optimal approximating densities $q_i^*(\vtheta_i)$ as
 \begin{equation*}
 	q_i^*(\vtheta_i) \propto \exp \left \{ \E_{-\vtheta_i} \log p(\vy, \vtheta) \right \}, 1 \leq i \leq M,
 \end{equation*}
 
-We choose a factored Variational Bayes approximation of the form
+\noindent We choose a factored Variational Bayes approximation of the form
 \begin{align*}
 	q(\vtheta) = q(\vbeta) q(\sigma^2) q(g). 
 \end{align*}
 
-Then $q(\vbeta) = \N(\vmu_{q(\vbeta)}, \mSigma_{q(\vbeta)})$, $q(\sigma^2) = \IG(\alpha_{q(\vbeta)}, \beta_{q(\vbeta)})$ and $q(g) = \text{Beta Prime}(\alpha_{q(g)}, \beta_{q(g)})$.
+\noindent Then $q(\vbeta) = \N(\vmu_{q(\vbeta)}, \mSigma_{q(\vbeta)})$, $q(\sigma^2) = \IG(\alpha_{q(\vbeta)}, \beta_{q(\vbeta)})$ and $q(g) = \text{Beta Prime}(\alpha_{q(g)}, \beta_{q(g)})$.
 
 \subsection{Naive mean field update}
 \label{sec:naive_mean_field_updates}
@@ -674,7 +646,8 @@ define
 \end{align*}
 
 \noindent where $\tau_{\sigma^2} = [1 - (1 + \tau_g^{(i)})^{-1} R^2]^{-1}$. This integral can be calculated
-numerically using Laplace's approximation. This process is repeated until convergence.
+numerically using Laplace's approximation. % TODO: You need to detail how this was done.
+This process is repeated until convergence.
 
 Let $\nu - 1 = b - \frac{p}{2}$, 
 $\beta = \frac{1}{2} (1 + \tau_g)^{-1} (\tau_{\sigma^2} n R^2 + p)$, 
@@ -703,27 +676,26 @@ obtained from Algorithm \ref{alg:algorithm_one} by utlising the following identi
 First, we note that when assuming that $\vy^\top \vy / n = 1$,
 \[\vy^\top \mX (\mX^\top \mX)^{-1} \mX^\top \vy =\|\vy\|^2 R^2 = n R^2.\]
 
-Second, observe that when $\vmu = (1 + \tau_g)^{-1} \vbetahatls$ and $\mSigma = \tau_{\sigma^2}^{-1} (1 + \tau_g)^{-1} (\mX^\top \mX)^{-1}$,
+\noindent Second, observe that when $\vmu = (1 + \tau_g)^{-1} \vbetahatls$ and $\mSigma = \tau_{\sigma^2}^{-1} (1 + \tau_g)^{-1} (\mX^\top \mX)^{-1}$,
 \begin{align*}
 	\vmu^\top \mX^\top \mX \vmu & = (1 + \tau_g)^{-2} \vbetahatls^\top \mX^\top \mX \vbetahatls                                                        \\
 	                            & = (1 + \tau_g)^{-2} \vy^\top \mX (\mX^\top \mX)^{-1} \cancel{\mX^\top \mX} \cancel{(\mX^\top \mX)^{-1}} \mX^\top \vy \\
 	                            & = (1 + \tau_g)^{-2} n R^2.                                                                                           
 \end{align*}
 
-Third, utilising the above two identities, $s$ can be simplified to
+\noindent Third, utilising the above two identities, $s$ can be simplified to
 \begin{align*}
 	s & = \frac{1}{2} [\|\vy\|^2 - 2 \vmu^\top \mX^\top \vy + (1 + \tau_g) \vmu^\top \mX^\top \mX \vmu (1 + \tau_g) +  \tr (\mX^\top \mX \mSigma)]                 \\
 	  & = \frac{1}{2} [n - \cancel{2} (1 + \tau_g) n R ^2 + \cancel{(1 + \tau_g) n R^2} + \tau_{\sigma^2} \tr (\cancel{\mX\top \mX} \cancel{(\mX^\top \mX)^{-1}})] \\
 	  & = \frac{1}{2} \{ n[1 - (1 + \tau_g)^{-1} R^2] + p \tau_{\sigma^2}^{-1} \}.                                                                                 
 \end{align*}
 
-Fourth, recalling that $\tau_{\sigma^2} = \E_q [\sigma^{-2}] = r/s = \frac{n+p}{n[1 - (1 + \tau_g)^{-1} R^2] + p \tau_{\sigma^2}^{-1}}$, we can solve for $\tau_{\sigma^2}$ in terms of $\tau_g$ to obtain
+\noindent Fourth, recalling that $\tau_{\sigma^2} = \E_q [\sigma^{-2}] = r/s = \frac{n+p}{n[1 - (1 + \tau_g)^{-1} R^2] + p \tau_{\sigma^2}^{-1}}$, we can solve for $\tau_{\sigma^2}$ in terms of $\tau_g$ to obtain
 \[
 	\tau_{\sigma^2} = [1 + (1 + \tau_g)^{-1}]^{-1}.
 \]
 
-Hence
-
+\noindent Hence
 \begin{align*}
 	s & = \frac{r}{\tau_{\sigma^2}} = \frac{1}{2} (n + p) [1 - (1 + \tau_g)^{-1} R^2], \text{ and }                \\
 	c & = \frac{\tau_{\sigma^2}}{2}[\vmu^\top \mX^\top \mX \vmu + \tr (\mX^\top \mX \mSigma)]                      \\
@@ -732,7 +704,7 @@ Hence
 	  & = \frac{1}{2} \{ [1 + (1 + \tau_g)^{-1}]^{-1} (1 + \tau_g)^{-2} n R^2 + (1 + \tau_g)^{-1} p\}.             
 \end{align*}
 
-\noindent Hence all of the variational parameter updates in Algorithm \ref{alg:algorithm_one} can be expressed as functions
+\noindent It follows that all of the variational parameter updates in Algorithm \ref{alg:algorithm_one} can be expressed as functions
 of $n$, $p$, $R^2$ and $\tau_g$. Thus optimisation can be performed on $\tau_g$ alone by repeatedly using the
 scheme presented in \ref{sec:num_int}. Once $\tau_g$ is fully optimised, the other variational parameters can
 be calculated from it as shown in Algorithm \ref{alg:algorithm_two}.
@@ -780,20 +752,21 @@ Let $\kappa$ be the inflation factor such that for the examples under considerat
 \subsection{Implementation details}
 \label{sec:implementation}
 
-Rank 1 updates of $(\mX^\top \mX)^{-1}$ in $\BigO(np)$.
-Graycode traversal such that only one bit changes at a time.
+We traverse the models in $\Gamma$ in Graycode order.
+This ensures that as the algorithm moves from one model to another, only one covariate either enters or leaves
+the model.
+This allows us to use Rank-1 updates and downdates of $(\mX^\top \mX)^{-1}$ to greatly decrease the
+computational cost of calculating $R_\vgamma^2$ from $\BigO(np^3)$ to $\BigO(np^2)$.
 Special care was taken to minimise memory allocation and deallocation.
 Rcpp, RcppEigen.
 
-Initially, $\vgamma = (1, 0, 0, \ldots, 0, 0)^\top$. So
-$(\mX_\vgamma^\top \mX_\vgamma)^{-1} = (\vx_\vgamma^\top \vx_\vgamma)^{-1}$ which is a scalar, and so can be
-computed in $\BigO(n)$.
-
-Then the set of possible models $\vgamma$ is iterated through in graycode order. This ensures that only one
-entry of $\vgamma$ changes as each model is visited, allowing the new $(\mX_\vgamma^\top \mX_\vgamma)^{-1}$ to
-be calculated using the previous $(\mX_\vgamma^\top \mX_\vgamma)^{-1}$ and a rank-1 update. This allows us to
-avoid directly computing the new $\mX_\vgamma^\top \mX_\vgamma$ and then performing a full inversion, reducing
-a $\BigO(n p^3)$ operation to $\BigO(n p^3)$.
+Initially, $\vgamma = (1, 0, 0, \ldots, 0, 0)^\top$. So $(\mX_\vgamma^\top \mX_\vgamma)^{-1} =
+(\vx_\vgamma^\top \vx_\vgamma)^{-1}$ which is a scalar, and so can be computed in $\BigO(n)$. Then the set of
+possible models $\vgamma$ is iterated through in graycode order. This ensures that only one entry of $\vgamma$
+changes as each model is visited, allowing the new $(\mX_\vgamma^\top \mX_\vgamma)^{-1}$ to be calculated
+using the previous $(\mX_\vgamma^\top \mX_\vgamma)^{-1}$ and a rank-1 update. This allows us to avoid directly
+computing the new $\mX_\vgamma^\top \mX_\vgamma$ and then performing a full inversion, reducing a $\BigO(n
+p^3)$ operation to $\BigO(n p^2)$.
 
 \mgc{Think about distribution of bit strings. What is the expectation of $p$? I think it's simply $p/2$}
 
@@ -1202,6 +1175,34 @@ paramount, such as model selection via structured Variational Bayes.
 \bibliography{references_mendeley}
 
 \appendix
+\subsection{Useful Results}	
+
+We first present the following results which will aid us in deriving the expressions required for fully Bayesian
+inference over the parameters in the model.
+
+\begin{equation}\label{res:01}
+	\int \exp\left\{ -\tfrac{1}{2}\vx^T\mA\vx + \vb^T\vx \right\} d \vx = |2\pi\mSigma|^{1/2} \exp\left\{ \tfrac{1}{2}\vmu^T\mSigma^{-1}\vmu \right\}
+\end{equation}
+where $\vmu = \mA^{-1}\vb$ and $\mSigma = \mA^{-1}$.
+ 
+If $\vone^T\vy=0$ the $R$-squared statistic can be expressed
+\begin{equation} \label{res:02}
+	R^2 = \frac{\vy^T\mX(\mX^T\mX)^{-1}\mX^T\vy}{\|\vy\|^2}
+\end{equation}
+where $R^2$ is the usual $R$-squared statistic associated with least squares regression.
+
+Equation 3.194 (iii) of \citep{Gradshteyn1988} is
+\begin{equation}\label{res:03}
+	\int_0^\infty \frac{ x^{\mu - 1} }{(1 + \beta x)^\nu} dx = \beta^{-\mu} \mbox{Beta}(\mu,\nu - \mu) \quad \quad \mbox{(assuming $\mu,\nu>0$ and $\nu>\mu$).}
+\end{equation}
+
+Equation 3.385 of \citep{Gradshteyn1988} is
+\begin{equation} \label{res:04}
+	\int_{0}^1 x^{\nu - 1} (1 - x)^{\lambda - 1}(1 - \beta x)^{\varrho} e^{-\mu x} dx = \mbox{Beta}(\nu,\lambda) \Phi_1(\nu,\varrho,\lambda+\nu,-\mu,\beta)
+\end{equation}
+
+\noindent provided $\mbox{Re}(\lambda)>0$, $\mbox{Re}(\nu)>0$ and $|\mbox{arg}(1-\beta)|<\pi$.
+
 \section{Derivation of Naive Mean Field Updates}
 \label{sec:appendix}
 
