@@ -133,66 +133,28 @@ Bernstein-von Mises Theorem
 % Given a full data matrix $\mX \in \R^{n \times p}$, we may wish to find the subset of variables $\gamma \in \{
 % 1 \ldots p \}$ such that $\mX_\gamma \vbeta_\gamma$ describe the data in $\vy$ best.
 
-The task of selecting a statistical model from a set of candidate models given a data set is one of the
-fundamental tasks of scientific inquiry. It is one of the central tasks of applied statistical analysis, and
-there is a correspondingly large literature on the subject. The problem of model selection for normal linear
-models is particularly well studied, owing to the popularity and importance of normal linear models in
-applications. There are many approaches to model selection, including criteria based approaches, variable
-selection, penalised regression, and Bayesian modelling approaches. Model selection is a difficult problem in
-high--dimensional space in general because as the dimension of the space increases, the number of possible
-models increases combinatorially. Many model selection algorithms use heuristics in an attempt to search the
-model space more efficiently but still find an optimal or near-optimal model.
+The problem of selecting a statistical model from a set of candidate models given a data set, hence referred
+to as \emph{model selection}, is one of the most important problems encountered in practice by applied
+statistical practitioners. It is one of the central tasks of applied statistical analysis, and there is a
+correspondingly large literature on the subject.The problem of model selection for normal linear models is
+particularly well studied, owing to the popularity and importance of normal linear models in applications.
 
-Many approaches to model selection have been investigated, with various model selection criteria proposed to
-attempt to balance model likelihood against model complexity. One approach to model selection is to select
-between entire models, using a model selection criterion. These criterion may have a fixed penalty for model
-complexity, such as Akaike's Information Criterion \citep{Akaike1974}, the Risk Inflation Criterion
-\citep{Foster1994}, the Schwarz criterion or Bayesian Information Criterion \citep{Schwarz1978}, the Deviance
-Information Criterion \citep{Spiegelhalter2016} or the Principle of Minimum Description Length
-\citep{Hansen2001}. Alternatively, the penalty may be adaptive/data--dependent as in \citep{George2000}.
-
-An alternative to model selection criterion is to select models based on their posterior probability. In a
-Bayesian context, this can be accomplished by comparing the posterior likelihoods of the candidate models to
-see which is most probable given the observed data. This can be done, for example, by using Bayes Factors as
-in \citep{Kass1993}. Rather than selecting one candidate model, several models can be combined together using
-Bayesian model  averaging, as in \citep{Hoeting1999}, \citep{Raftery1997}, \citep{Fernandez2001} or
-\citep{Papaspiliopoulos2016}.
-
-Model selection can be made implicit in the model fitting process itself, as in ridge regression
-\citep{Casella1980}, of which the well-known lasso is a special case \citep{Tibshirani1996}. As shown in
-papers by \citep{Breiman1996} and \citep{Efron2013} showed, while  the standard formulation of a linear model
-is unbiased, the goodness of fit of these models is numerically  unstable. Breiman showed that by introducing
-a penalty on the size of the regression co- efficients such as  in ridge regression, this numerical
-instability can be avoided. This reduces the variances of the co-efficient estimates, at the expense of
-introducing some bias --- the bias-- variance trade--off.
-
-A special case of model selection is variable selection, where the focus is on selecting individual
-covariates, rather than entire models. This approach can either be Fully Bayesian or Empirically Bayesian as
-in \citep{Cui2008}. Variable selection approaches involve a stochastic search over the variables in the model
-space. This search can be driven by posterior probabilities, as in \citep{Casella2006}, or by Gibbs sampling
-approaches such as in \citep{George1993}. These two approaches of model selection and variable selection can
-be combined, as in \citep{Geweke1996}. Variable selection can also be accomplished by selecting the median
-probability model, consisting of those models whose posterior inclusion probability is at least $1/2$, as in
-\citep{Barbieri2004}.
-
-% Problem in general
-
-The problem of model selection is one of the most important problems encountered in practice by applied
-statistical practitioners. There are many approaches to model selection including approaches based on
-functions of the residual sum of squares, lasso and L1 regression and Bayesian modelling approaches. A major
-motivation for this field of research is the need for a computationally feasible approach to performing model
-selection on large scale problems where the number of covariates is large.
-
-The bias-variance trade-off is one of the central problems in statistical learning. The guise this problem
-takes in model selection is balancing the quality of the model fit against the complexity of the model, in an
+The bias-variance trade-off is one of the central issues in statistical learning. The guise this issue takes
+in model selection is balancing the quality of the model fit against the complexity of the model, in an
 attempt to find a compromise between over-fitting and under-fitting, in the hope that the model fit will
 generalise well beyond the training data we have observed to the general population and that we haven't simply
 learned the noise in the training set.
 
-% Non-Bayesian
+There have been many approaches to model selection proposed, including criteria based approaches, variable
+selection, approaches based on functions of the residual sum of squares, penalised regression such as the
+lasso and $L_1$ regression, and Bayesian modelling approaches. Model selection is a difficult problem in high
+--dimensional spaces in general because as the dimension of the space increases, the number of possible models
+increases combinatorially. Many model selection algorithms use heuristics in an attempt to search the model
+space more efficiently but still find an optimal or near-optimal model within a reasonable period of time. A
+major motivation for this field of research is the need for a computationally feasible approach to performing
+model selection on large scale problems where the number of covariates is large.
 
-Model selection attempts to balance goodness of fit against model complexity, neither overfitting nor
-underfitting. Many approaches to model selection have been investigated, with various model selection criteria
+Many approaches to model selection have been investigated, with various model selection criteria
 proposed to attempt to balance model likelihood against model complexity. One approach to model selection is
 to select between entire models, using a model selection criterion. These criterion may have a fixed penalty
 for model complexity, such as Akaike's Information Criterion \citep{Akaike1974}, the Risk Inflation Criterion
@@ -210,8 +172,40 @@ of which the well-known lasso is a special case \citep{Tibshirani1996}. As \cite
 \citep{Efron2013} showed, while  the standard formulation of a linear model is unbiased, the goodness of fit of
 these models is numerically  unstable. Breiman showed that by introducing a penalty on the size of the
 regression co- efficients such as  in ridge regression, this numerical instability can be avoided. This
-reduces the variances of the co-efficient estimates, at the expense of introducing some bias --- the bias--
-variance trade--off.
+reduces the variances of the co-efficient estimates, at the expense of introducing some bias --- 
+which is another instance of the bias--variance trade--off.
+
+Many approaches to model selection have been investigated, with various model selection criteria proposed to
+attempt to balance model likelihood against model complexity. One approach to model selection is to select
+between entire models, using a model selection criterion. These criterion may have a fixed penalty for model
+complexity, such as Akaike's Information Criterion \citep{Akaike1974}, the Risk Inflation Criterion
+\citep{Foster1994}, the Schwarz criterion or Bayesian Information Criterion \citep{Schwarz1978}, the Deviance
+Information Criterion \citep{Spiegelhalter2016} or the Principle of Minimum Description Length
+\citep{Hansen2001}. Alternatively, the penalty may be adaptive/data--dependent as in \citep{George2000}.
+
+An alternative to model selection criterion is to select models based on their posterior probability. In a
+Bayesian context, this can be accomplished by comparing the posterior likelihoods of the candidate models to
+see which is most probable given the observed data. This can be done, for example, by using Bayes Factors as
+in \citep{Kass1993}. Alternately, rather than selecting one candidate model, several models can be combined together using Bayesian model  averaging, as in \citep{Hoeting1999}, \citep{Raftery1997}, \citep{Fernandez2001} or \citep{Papaspiliopoulos2016}.
+
+Model selection can also be made implicit in the model fitting process itself, as in ridge regression
+\citep{Casella1980}, of which the well-known lasso is a special case \citep{Tibshirani1996}.
+
+As shown in
+papers by \citep{Breiman1996} and \citep{Efron2013} showed, while  the standard formulation of a linear model
+is unbiased, the goodness of fit of these models is numerically  unstable. Breiman showed that by introducing
+a penalty on the size of the regression co- efficients such as  in ridge regression or the lasso, this numerical
+instability can be avoided. This reduces the variances of the co-efficient estimates, at the expense of
+introducing some bias --- the bias-- variance trade--off.
+
+A special case of model selection is variable selection, where the focus is on selecting individual
+covariates, rather than entire models. This approach can either be Fully Bayesian or Empirically Bayesian as
+in \citep{Cui2008}. Variable selection approaches involve a stochastic search over the variables in the model
+space. This search can be driven by posterior probabilities, as in \citep{Casella2006}, or by Gibbs sampling
+approaches such as in \citep{George1993}. These two approaches of model selection and variable selection can
+be combined, as in \citep{Geweke1996}. Variable selection can also be accomplished by selecting the median
+probability model, consisting of those models whose posterior inclusion probability is at least $1/2$, as in
+\citep{Barbieri2004}.
 
 Another approach to model selection is to focus on selecting individual covariates, rather than entire
 models. This approach can either be Fully Bayesian or Empirically Bayesian as in \citep{Cui2008}. Variable
@@ -220,22 +214,12 @@ driven by posterior probabilities, as in \citep{Casella2006}, or by Gibbs sampli
 \citep{George1993}. These two approaches of model selection and variable selection can be combined, as in
 \citep{Geweke1996}.
 
-\citep{Zellner1986} suggested a particular form of conjugate Normal-Gamma family where the Bayes factors have a
-relatively simple form, incorporating a parameter $g$ to control mixing between the model fit from the data
-and a prior specification of model fit. This immediately raises the question of how $g$ should be chosen, and
-whether it should be fixed or have a prior specification. \citep{Liang2008} showed that fixed choices of $g$
-lead to paradoxes such as Bartlett's Paradox and the Information Paradox, and so a prior specification should
-be preferred. There are many ways of choosing a prior on $g$. Using a mixture of $g$-priors has the advantage
-of adapting the degree of shrinkage to the prior model dependent on the data.
-
-% Variational Bayes, Explaining Variational Approximations 2010
-
-% VB in general
-
 A challenge to applying this method of model selection is that exact model fitting may be computationally
 infeasible for models involving even moderate numbers of observations and covariates, and popular alternatives
 for fitting Bayesian models such as Monte Carlo Markov Chains (henceforth referred to as MCMC) are still
-extremely computationally intensive. Variational Bayes (see \citep{Ormerod2010}) is a computationally
+extremely computationally intensive.
+
+Variational Bayes (see \citep{Ormerod2010}) is a computationally
 efficient, deterministic method of fitting Bayesian models to data. Variational Bayes approximates the true
 posterior $p(\vy, \vtheta)$ by minimising the KL divergence between the posterior and the  approximating
 distribution $q(\vtheta)$.
@@ -245,6 +229,14 @@ closed form, which might appear to negate the beenfits of a variational approxim
 the performance of our variational approximation should remain similiar if the priors are altered to cater for
 complications such as robustness, while exact Bayesian inference calculations are no longer possible in closed
 form in these situations.
+
+\citep{Zellner1986} suggested a particular form of conjugate Normal-Gamma family where the Bayes factors have a
+relatively simple form, incorporating a parameter $g$ to control mixing between the model fit from the data
+and a prior specification of model fit. This immediately raises the question of how $g$ should be chosen, and
+whether it should be fixed or have a prior specification. \citep{Liang2008} showed that fixed choices of $g$
+lead to paradoxes such as Bartlett's Paradox and the Information Paradox, and so a prior specification should
+be preferred. There are many ways of choosing a prior on $g$. Using a mixture of $g$-priors has the advantage
+of adapting the degree of shrinkage to the prior model dependent on the data.
 
 \section{Models and Assumptions}
 
@@ -260,9 +252,10 @@ against the complexity of the model, achieving a compromise between each.
 \mgc{AIC, BIC, DIC, Mallow's $C_p$}
 
 Information criteria are frequently used to compare amongst models. Let $\vgamma$ denote the candidate model.
-The Information Criteria are of the form
+The Information Criteria take the form "-2 times the log-likelihood plus a term penalising for complexity of
+the model"
 \[
-	\text{Information Criteria} = -2 \log p(\vy | \hat{\vtheta_\vgamma}) + \text{complexity penalty}
+	\text{Information Criteria} = -2 \log p(\vy | \hat{\vtheta}_\vgamma) + \text{complexity penalty}
 \]
 
 where $\log p(\vy | \hat{\vtheta_\gamma})$ is the log-likelihood of the model and the complexity penalty is
@@ -274,7 +267,7 @@ calculates an estimate of the information lost when a given model is used to rep
 generates the data and so is an estimator of the Kullback-Leibler divergence of the true model from the fitted
 model. The AIC of the model $\vgamma$ is defined as
 \[
-	\text{AIC}(\vgamma) = -2 \log p(\vy | \hat{\vtheta_\vgamma}) + 2 |\vgamma|
+	\text{AIC}(\vgamma) = -2 \log p(\vy | \hat{\vtheta}_\vgamma) + 2 p_\vgamma
 \]
 
 where $|\vgamma|$ is the number of parameters in the model $\vgamma$. The model with the lowest AIC is selected
@@ -283,19 +276,12 @@ as the `best`.
 Of a similiar form as the AIC, but derived via a more Bayesian framework is the Bayesian Information Criterion
 or BIC. The BIC approximates the posterior probability of the candidate model $\vgamma$. The BIC is defined as
 \[
-	\text{BIC}(\vgamma) = -2 \log p(\vy | \hat{\vtheta_\vgamma}) + |\vgamma| \log(n)
+	\text{BIC}(\vgamma) = -2 \log p(\vy | \hat{\vtheta}_\vgamma) + p_\vgamma \log(n).
 \]
 
 This is a more severe penalty for model complexity than in the Akaike's Information Criteria when $n$ is
 greater than $8$. BIC can be shown to be approximately equivalent to model selection using Bayes Factors
-in certain contexts \cite{Kass1993}.
-
-\subsection{Existing literature}
-The problem of model selection is one of the most important problems encountered in practice by applied
-statistical practitioners. There are many approaches to model selection including approaches based on
-functions of the model selection criterion, penalized regression and Bayesian modelling approaches. A major
-motivation for this field of research is the need for a computationally feasible approach to performing model
-selection on large scale problems where the number of covariates is large.
+in certain contexts, as shown by \cite{Kass1993}.
 
 % Non-Bayesian
 \subsection{Frequentist Approachs to Model Selection}
@@ -339,6 +325,57 @@ selection can be combined, as in \citep{Geweke1996}. Variable selection can also
 the median probability model, consisting of those models whose posterior inclusion probability is at least
 $1/2$, as in \citep{Barbieri2004}.
 
+\section{Variational approximations}
+
+\subsection{Definition}
+
+Consider a model $p(\vtheta|\vy)$ which is of interest to us but computationally difficult or intractable to 
+fit. We may be able to gain much of the same insight from a given data set by fitting an accurate approximation 
+of the model, allowing us to summarise the data and perform statistical inference.
+
+Call the approximating model $q(\theta)$. Then we seek a $q(\theta)$ which approximates $p(\vtheta|\vy)$
+as closely as possible in some sense. A useful measure of distance between probability distributions is the
+Kullback-Leibler divergence, which is defined as
+\[
+	\KL(q || p) \equiv \int q(\vtheta) \log{\frac{q(\theta)}{p(\theta)}} d \vtheta.
+\]
+
+We may seek a best approximating distribution $q^*(\vtheta)$ to a given posterior distribution
+$p(\vtheta|\vy)$ from a parameteric family of approximating distributions $Q$ by finding
+\[
+	q^*(\vtheta) = \argmin_{q \in Q} \KL \{ {q(\vtheta) || p(\vtheta|\vy)} \}.
+\]
+
+If $\vtheta$ is partitioned into $M$ partitions $\vtheta_1$, $\vtheta_2$, \ldots, $\vtheta_M$ then a 
+simple form of approximation to adopt is the factored approximation of the form
+\[
+	q(\vtheta) = \Pi_{i=1}^M q(\vtheta_i)
+\]
+
+where each of the density $q(\vtheta_i)$ is a member of a parametric family of density functions. This form of
+approximation is computationally convenient, but assumes that the partitions of $\vtheta$ are completely
+independent of one another.
+
+The optimal mean field update for each of the parameters $\vtheta_i$ can be shown to be
+\[
+	q^*(\vtheta_i) \propto \exp \{ \E [\log p(\vy; \vtheta)] \}.
+\]
+
+For details of the proof, and a more thorough introduction to the topic of variational approximations, see
+\cite{Ormerod2010}.
+
+\subsection{Gaussian Variational Approximation}
+
+In cases where there is a strong dependence between partitions of $\vtheta$, such as between the parameters
+$\vmu$ and $\mSigma$ in a hierarchical Gaussian model, a factored approximation may not approximate the true
+distribution accurately. In this case, an alternate form of approximation may be used with the parameters
+considered together to take their dependence into account. One such form of approximation is the Gaussian
+Variational Approximation \cite{Ormerod2012}, which assumes that the distribution of the parameters being 
+approximated is multivariate Gaussian. The covariance matrix of the Gaussian allows the approximation to
+capture the dependence amongst the elements of $\vtheta$, which increases the accuracy of the variational
+approximation relative to the factored approximation.
+
+% TODO: Does this need to be here?
 \section{Hamiltonian Monte Carlo}
 
 % Basic idea: Sample the typical set efficiently by following a contour/level set of the likelihood surface
@@ -396,57 +433,7 @@ than as the square root as with other sampling methods.
 For an introduction to Hamiltonian Monte Carlo, see the chapter in \cite{MacKay:2002:ITI:971143}. A deeper
 and more thorough introduction is provided in \cite{Betancourt2017}.
 
-
-\section{Variational approximations}
-
-\subsection{Definition}
-
-Consider a model $p(\vtheta|\vy)$ which is of interest to us but computationally difficult or intractable to 
-fit. We may be able to gain much of the same insight from a given data set by fitting an accurate approximation 
-of the model, allowing us to summarise the data and perform statistical inference.
-
-Call the approximating model $q(\theta)$. Then we seek a $q(\theta)$ which approximates $p(\vtheta|\vy)$
-as closely as possible in some sense. A useful measure of distance between probability distributions is the
-Kullback-Leibler divergence, which is defined as
-\[
-	\KL(q || p) \equiv \int q(\vtheta) \log{\frac{q(\theta)}{p(\theta)}} d \vtheta.
-\]
-
-We may seek a best approximating distribution $q^*(\vtheta)$ to a given posterior distribution
-$p(\vtheta|\vy)$ from a parameteric family of approximating distributions $Q$ by finding
-\[
-	q^*(\vtheta) = \argmin_{q \in Q} \KL \{ {q(\vtheta) || p(\vtheta|\vy)} \}.
-\]
-
-If $\vtheta$ is partitioned into $M$ partitions $\vtheta_1$, $\vtheta_2$, \ldots, $\vtheta_M$ then a 
-simple form of approximation to adopt is the factored approximation of the form
-\[
-	q(\vtheta) = \Pi_{i=1}^M q(\vtheta_i)
-\]
-
-where each of the density $q(\vtheta_i)$ is a member of a parametric family of density functions. This form of
-approximation is computationally convenient, but assumes that the partitions of $\vtheta$ are completely
-independent of one another.
-
-The optimal mean field update for each of the parameters $\vtheta_i$ can be shown to be
-\[
-	q^*(\vtheta_i) \propto \exp \{ \E [\log p(\vy; \vtheta)] \}.
-\]
-
-For details of the proof, and a more thorough introduction to the topic of variational approximations, see
-\cite{Ormerod2010}.
-
-\subsection{Gaussian Variational Approximation}
-
-In cases where there is a strong dependence between partitions of $\vtheta$, such as between the parameters
-$\vmu$ and $\mSigma$ in a hierarchical Gaussian model, a factored approximation may not approximate the true
-distribution accurately. In this case, an alternate form of approximation may be used with the parameters
-considered together to take their dependence into account. One such form of approximation is the Gaussian
-Variational Approximation \cite{Ormerod2012}, which assumes that the distribution of the parameters being 
-approximated is multivariate Gaussian. The covariance matrix of the Gaussian allows the approximation to
-capture the dependence amongst the elements of $\vtheta$, which increases the accuracy of the variational
-approximation relative to the factored approximation.
-
+% TODO: I think this section is unnecessary.
 \section{Matrix calculus}
 
 Matrix calculus is a very elegant and compact notation for the derivatives of functions of vectors and matrices.
@@ -467,20 +454,22 @@ The Hessian matrix is a $d \times d$ matrix whose $(i, j)$-th entry is equal to
 
 and is denoted by $\mH f(\vx)$.
 
+% TODO: Rewrite.
 \section{Optimisation}
 Fitting a statistical model to data is often done by finding the parameters which maximise the likelihood
 function for that data. If the model is simple, and there are no interdependencies between the parameters,
 then the parameters which maximise the likelihood may be available in closed form. In general, however, this
 is not possible, and the likelihood must be maximised using an iterative optimisation algorithm. A thorough 
-and comprehensive introduction to the subject of multivariate optimisation is \cite{Nocedal2006}.
+and comprehensive introduction to the subject of multivariate optimisation is given in \cite{Nocedal2006}.
 
+% TODO: This is technically correct, but so terse. Rewrite.
 \subsection{Newton-Raphson}
 
 \subsubsection{Definition}
 
 Consider the second order Taylor expansion of $f(\vtheta)$ around $\vtheta_{n}$
 \[
-	f(\vtheta) \approx f(\vtheta_{n}) + \nabla f(\vtheta_{n}) \Delta \vtheta_{n} + \half \Delta x^\top \mH_f(\vtheta_{n}) \Delta x + \sO((\Delta \vtheta_{n})^3).
+	f(\vtheta) \approx f(\vtheta_{n}) + \nabla f(\vtheta_{n}) \Delta \vtheta_{n} + \half \Delta \vx^\top \mH_f(\vtheta_{n}) \Delta \vx + \sO((\Delta \vtheta_{n})^3).
 \]
 
 This expression attains its' maxima with respect to $\Delta x$ when
@@ -488,13 +477,13 @@ This expression attains its' maxima with respect to $\Delta x$ when
 	\vzero = \mD_{\Delta \vtheta} [f(\vtheta_{n}) + \nabla f(\vtheta_{n}) \Delta \vtheta_{n} + \half \Delta \vtheta^\top \mH_f(\vtheta_{n}) \Delta \vtheta] = \nabla f(\vtheta_n) + \mH_f(\vtheta_n) \Delta \vtheta.
 \]
 
-Thus taking $\Delta \vtheta = -\nabla f(\vtheta_n) [\mH_f(\vtheta_n)]^{-1}$, we hope that choosing
-$\vtheta_{n + 1} = \vtheta_{n} - \nabla f(\vtheta_n) [\mH_f(\vtheta_n)]^{-1}$ will be closer to the stationary 
-point $\vtheta^*$ of $f$. This choice of $\vtheta_{n+1}$ establishes an iterative algorithm for finding the 
-maxima/minima of $f$.
+Thus taking $\Delta \vtheta = -\nabla f(\vtheta_n) [\mH_f(\vtheta_n)]^{-1}$, we perform a Newton-Rapshon
+Iteration by setting $\vtheta_{n + 1} = \vtheta_{n} - \nabla f(\vtheta_n) [\mH_f(\vtheta_n)]^{-1}$ as it will
+be closer to the  stationary point $\vtheta^*$ of $f$. This choice of $\vtheta_{n+1}$ establishes an iterative
+algorithm for finding the  maxima/minima of $f$.
 
-Convergence is achieved when the step length $\| \vtheta_{n+1} - \vtheta_{n} \| < \epsilon$, for some
-suitably small choice of $\epsilon$, such as $\epsilon = 10^{-8}$.
+We continue until the step length $\| \vtheta_{n+1} - \vtheta_{n} \| < \epsilon$, for some suitably small
+choice of $\epsilon$, such as $\epsilon = 10^{-8}$, indicating that convergence has been achieved.
 
 \subsubsection{Time and memory complexity}
 
@@ -541,7 +530,6 @@ ensures that the slope had been sufficiently reduced.
 The rationale for imposing the Wolfe conditions in an optimisation algorithm where
 $\vx_{k+1} = x_k + \alpha \vp_k$ is to ensure the convergence of the gradient to zero. In particular, if the
 cosine of the angle between $\vp_k$ and the gradient,
-
 $$
 \cos \theta_k = \frac{\nabla f(\vx_k)^\top \vp_k}{\|\nabla f(\vx_k)\| \|\vp_k\|}
 $$
@@ -554,7 +542,12 @@ implies $\mB_{k+1}$ is also positive definite.
 
 \subsubsection{Time and memory complexity}
 
-\section{Integrals}
+\section{Approximations and Numerical Methods for Evaluating Integrals}
+In many areas of mathematical statistics, and particularly in Bayesian statistics, many quantities of interest
+are expressed as integrals such as expectations of parameters or posterior probabilities. Frequently, these
+integrals cannot be evaluated analytically and so must be evaluated using other methods, such as by
+approximating the integral or evaluating it numerically by repeatedly evaluating the integrand.
+
 \subsection{Laplace's Method of approximation}
 
 Laplace's method of approximation is used to approximate integrals of a unimodal function with negative second
@@ -564,7 +557,7 @@ will be within a neighbourhood of the mode. Thus the integral of the function ca
 integral over the neighbourhood of the mode. How large that neighbourhood needs to be is estimated using
 how fast the function is changing at the mode, which is estimated by $|f''(x_0)|$.
 
-Consider
+Consider an exponential integral of the form
 \[
 	\int_a^b e^{M f(x)} dx
 \]
@@ -586,13 +579,13 @@ may be approximated by
 \]
 
 for $x$ sufficiently close to $x_0$, as the second derivative is negative at $x_0$. This ensures the
-accuracy of
+the approximation of the integral
 
 \[
-	\int_a^b e^{M f(x)} dx \approx e^{M f(x_0)} \int_a^b e^{-M |f''(x_0)|(x - x_0)^2} dx.
+	\int_a^b e^{M f(x)} dx \approx e^{M f(x_0)} \int_a^b e^{-M |f''(x_0)|(x - x_0)^2} dx
 \]
 
-This is a Gaussian integral, and thus we find that
+is accurate. This is a Gaussian integral, and thus we find that
 
 \[
 	\int_a^b e^{M f(x)} dx \approx \sqrt{\frac{2 \pi}{M |f''(x_0)|}} e^{M f(x_0)}
@@ -737,6 +730,23 @@ solving linear systems is the \emph{condition number} of A. It depends on the ma
 This is a useful tool in characterising the accuracy and stability of numerical linear algebra algorithms.
 \cite{Golub:1996:MC:248979} \S 2.
 
+\subsubsection{Positive definite matrices}
+
+A matrix $\mA \in \mathcal{R}^{p \times p}$ is \emph{positive semidefinite} if for any $\vx \in \mathcal{R} \ \vzero$,
+$\vx^\top \mA \vx > 0$. Equivalently, all eigenvalues of $\mA$ are strictly positive. Covariance matrices
+$\mSigma = \E[X - \mu_X][X - \mu_X]^\top$ are positive definite, as
+$\vx^\top \E[X - \mu_X][X - \mu_X]^\top \vx = \vu^\top \vu > 0$ for $\vu = \E[(X - \mu_X)^\top \vx]$.
+
+A problem which arises frequently in fitting statistical models with dependence amongst the responses such as mixed
+models is maximising a likelihood function over the set of covariance matrices. This problem can be difficult not
+just because of the high dimension of the parameter space involved, but also due to the constraints upon the
+parameters to ensure that the resulting matrix is still positive definite, and hence a valid covariance matrix. This
+problem can be dealt with through several methods, such as semidefinite programming \citep{Boyd2010}, or parameterising the covariance
+matrix $\mSigma$ in terms of a matrix factorisation such as
+$\mSigma = \mB \mB^\top$ for any unconstrainted matrix $\mB$ or it's Cholesky factors $\mSigma = \mL \mL^\top$.
+The Cholesky factor approach has the advantage that the Cholesky factors are lower triangular, and so quicker to
+compute with.
+
 \subsubsection{LDU decomposition}
 
 If a matrix $\mA$ is square, it can be factored into the product of a lower triangular matrix and an upper 
@@ -748,7 +758,7 @@ triangular matrix
 \subsection{Cholesky decomposition}
 
 If a matrix $\mA$ is square $p \times p$, symmetric and positive definite then it can be factored into the
-product a lower triangular matrix and its' transpose
+product of a lower triangular matrix and its' transpose
 \[
 	\mA = \mL \mL^\top
 \]
