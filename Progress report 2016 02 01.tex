@@ -1,0 +1,60 @@
+\documentclass{beamer}
+
+\usetheme{Warsaw}
+\usepackage{graphicx}
+\usepackage{ulem}
+\input{include.tex}
+\input{Definitions.tex}
+
+\usefonttheme{serif}
+
+\title{Progress report - 18/01/2016}
+\author{Mark Greenaway\\PhD candidate\\markg@maths.usyd.edu.au}
+
+\mode<presentation>
+{ \usetheme{boxes} }
+
+\begin{document}
+\begin{frame}
+\maketitle
+\end{frame}
+
+\begin{frame}{No C++ is best C++ ...}
+\begin{itemize}
+\item We're R programmers. The best pay-off for effort spent is to speed up R code
+\item If we solve speed problems by using C++, I'm the ``only'' person who can do that and that makes me
+			the bottleneck. Not very smart from a project management point of view
+\item Let's look at this web page: http://www.statsblogs.com/2016/01/21/parallel-blas-in-r/
+\item Conclusion: Don't use reference BLAS if something better is available. You're wasting time
+			\emph{unnecessarily}
+\item If you need help, ask me. If my supervisor says it's okay, I'll upgrade your R installation myself.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Tools I like, and would recommend}
+\begin{itemize}
+\item Sublime Text - my favorite text editor of all time. For people who like need to see more code.
+\item Trello - multi-user to do lists
+\item Slack - Like Facebook chat for people with work to do
+\item GitHub
+\item All of these tools integrate with each other
+\item Twitter/IRC - Useful social media
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Progress in the past week or two}
+\begin{itemize}
+\item Not as much as I'd like. Life took a dramatic turn
+\item Drama is quite tedious actually. It stops you from doing things. I've moved in with my brother, and
+			the focus is on drama minimisation
+\item Zero-inflated model code is now packaged - zipvb
+\item Progress on rank-one updates and downdates, and a black belt in Sherman-Woodbury
+\begin{equation*}
+(\mA + \vu \otimes \vv)^{-1} = \mA^{-1} - \frac{(\mA^{-1} . \vu) \otimes (\vv . \mA^{-1})}{1 + \lambda}
+\end{equation*}
+where $\lambda = \vv . \mA^{-1} . \vu$ and $(\vu \otimes \vv)_{ij} = \vu_i \vv_j$
+\item But I'd like to talk to John about this. There are many approaches, and this might not be the best
+\end{itemize}
+\end{frame}
+
+\end{document}

@@ -1,0 +1,90 @@
+\documentclass{amsart}
+\usepackage{tikz}
+\title{Meeting with Dr John Ormerod - 16/02/2016}
+
+\input{Definitions.tex}
+
+\begin{document}
+
+\maketitle
+
+Time: 11:45am to 12:30pm \\
+Attendees: Dr John Ormerod, Mark Greenaway \\
+ \\
+Refine propject plan, track progress. \\
+Code $\mC = [\mX, \mZ]$. \\
+Start calculating mean field updates for VB approximation. \\
+Code to calculate $D_{ij}$ matrix should be written in the future. We need it for CVB, not now. \\
+
+\section{Testing}
+Correlations code \\
+ \\
+minimal test case passes \\
+if we matched Hitters.Rs, that would be an acceptable black box test. \\
+\texttt{ZE.exact.slow}'s $R^2$ would be the best test, as it's using lm(), not any of our code. \\
+unit test rank one updates and downdates \\
+\texttt{ZE.exact.fast} avoids re-allocating matrices for $A$ matrix, approximately 8 times faster. \\
+The closer $R^2$ gets to 1, the more accuracy matters, as we're going to be calculating $\log (1 - R^2)$. \\
+4 decimal places. \\
+
+\section{Literature to read this week}
+\begin{enumerate}
+\item Read ``Mixtures of g priors for Bayesian Variable Selection''. \\
+Priors avoid Bartlett's paradox and the information paradox. \\
+Lack of consistency under the null model mentioned \\
+g controls model selection \\
+g controls model selection \\
+Consistent, as $n \to \infty$ true model will dominate the posterior \\
+Look at Numerical Recipes Gaussian hypergeometric function section \\
+Recent paper in The American Statistician on hypergeometric functions / closed forms (?) \\
+But John says use beta fns instead - logs of gamma fns behave perfectly numerically \\
+Method with computational advantage should win out \\
+
+\item Read Maruyama and George (2011)
+\end{enumerate}
+
+Regress $x_{ij} = \sum_{k \ne j} \vbeta_k x_{ik} + \epsilon_{ij}$ to fit network
+
+John cautioned that we may run into the following problem: if two covariates $x_1$ and $x_2$ have
+no relationship i.e. $\text{cor}(x_1, x_2) = 0$, as graphically depicted below
+
+\begin{tikzpicture}
+\draw[->] (0, -1) -- (0, 4);
+\draw[->] (-1, 0) -- (4, 0);
+\node [above] at (0, 4) {$x_2$};
+\node [below] at (4, 0) {$x_1$};
+\draw [ultra thick] (-1, 0) -- (3.5, 0);
+\foreach \x in {0, ..., 3}
+	{\draw[fill, red] (\x - .5, 0) circle [radius=2pt];}
+\end{tikzpicture}
+
+then when the roles of $x_1$ and $x_2$ are interchanged
+
+\begin{tikzpicture}
+\draw[->] (0, -1) -- (0, 4);
+\draw[->] (-1, 0) -- (4, 0);
+\node [above] at (0, 4) {$x_1$};
+\node [below] at (4, 0) {$x_2$};
+\draw [ultra thick] (0, -1) -- (0, 3.5);
+\foreach \y in {0, ..., 3}
+	{\draw[fill, red] (0, \y - .5) circle [radius=2pt];}
+\end{tikzpicture}
+
+the correlation will not exist, as $R^2 = \frac{\vy \mX (\mX^\top \mX)^{-1} \mX \vy}{\vy^\top \vy}$ and
+$x_{i1} = 0$ for all $1 \leq i \leq n$. Hence, $(\mX^\top \mX)$ is singular, and the inverse does not exist.
+
+John said that we should check for this case. Using the Singular Value Decomposition (SVD) helps, as it
+downweights the eigenvalues of the $\mX^\top \mX$ matrix which are close to 0.
+
+\section{To Do this week \ldots}
+\begin{itemize}
+\item Test that the \texttt{correlations.cpp} code matches the \texttt{Hitters.Rs} output
+\item Implement code with a fixed and a varying component, as this helps John $\mC = [\mX, \mZ]$
+\item VB approximation
+\item Read literature, and re-read John's research grant application
+\item Another paper in JCGS - posterior consistency, ugly expression
+\end{itemize}
+
+John requested that we re-schedule our next meeting until Thursday, as he has a research grant application
+due next Wednesday.
+\end{document}

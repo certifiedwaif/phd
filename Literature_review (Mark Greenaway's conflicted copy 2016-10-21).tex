@@ -1,0 +1,183 @@
+% Literature_review.tex
+\documentclass{amsart}[12pt]
+
+\addtolength{\oddsidemargin}{-.75in}%
+\addtolength{\evensidemargin}{-.75in}%
+\addtolength{\textwidth}{1.5in}%
+\addtolength{\textheight}{1.3in}%
+\addtolength{\topmargin}{-.8in}%
+\addtolength{\marginparpush}{-.75in}%
+% \setlength\parindent{0pt}
+% \setlength{\bibsep}{0pt plus 0.3ex}
+
+\usepackage[authoryear]{natbib}
+\usepackage{graphicx}
+\usepackage{algorithm,algorithmic}
+\usepackage{cancel}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{algorithm,algorithmic}
+\usepackage[inner=2.5cm,outer=1.5cm,bottom=2cm]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{microtype}
+
+\newtheorem{theorem}{Theorem}[section]
+
+\title{Literature review}
+\author{Mark Greenaway, John T. Ormerod}
+
+\input{include.tex}
+\input{Definitions.tex}
+
+\begin{document}
+
+\maketitle
+
+\section{Chapter 1 -- Zero-Inflated Models}
+
+Ormerod and Wand 2010
+
+Explaining Variational Approximations
+
+Highly cited paper explaining variational approximations using a number of examples.
+Defines basic terms, and gives proofs of lower bound and optimal mean field update.
+
+Starts by proving that the variational lower bound  bounds the true marginal log probability $\log p(\vy)$
+from below. Then shows that assuming a product form for the approximating distribution $q(\vtheta)$, the
+optimal approximating distribution for each $\vtheta_i$ has the form
+
+\[
+	q_i^*(\vtheta_i) \equiv \exp{\{\E_{-\vtheta_i}[\log p(\vy, \vtheta)]\}}
+\]
+
+Points out that only nodes in the Markov blanket of $\vtheta_i$ need to be considered, which helps reduce the
+amount of work needed to calculate $q^*(\vtheta_i)$.
+
+Gaussian Variational Approximations
+
+Gives the derivations that allow the variational lower bound of a mixed effects model to be found. Approximate
+mean and covariance of mixed models using multivariate normal with mean $\vmu$ and covariance matrix
+$\mSigma$, using convex optimsation algorithms to optimise the variational lower bound directly.
+
+B-Splines
+
+Approximate functions with piecewise cubic polynomials.
+
+The O'Sullivan splines paper shows that the integrals involved in calculating the penalty matrix using Simpson's Rule are exact, when the polynomials being integrated are cubic.
+
+Zero-inflated and Bayesian models
+
+\section{Chapter 3 -- Variational Bayes for Linear Model Selection Using Mixtures of g-Priors}
+
+Zellner 1980
+
+'Although Zellner and Siow 1980 did not explicitly use a $g$-prior formulation with a prior on $g$,
+their recommendation of a multivariate Cauchy form for $p(\beta|\sigma^2)$ implicitly corresponds to using a
+$g$-prior with an inverse Gamma prior'
+
+Proposed Normal-Gamma conjugate model which includes $g$, with $g$ controlling the degree of shrinkage
+from the fitted mean towards the prior mean.
+
+George and Foster 2000
+
+Proposed selecting the model maximising the posterior probability of model $\gamma$ based on empirical
+Bayes estimates of $g$ and the standard unbiased estimate of $\sigma^2$
+
+Cui and George 2008
+
+Proposed marginning out $g$ with respect to a prior
+
+Liang 2008
+
+Builds on Zellner 1980, by proving that any fixed choice of $g$ leads to various kinds of paradoxes e.g.
+Information Paradox, Bartlett's Paradox.
+Proposed marginning out $g$ and $\sigma^2$ with respect to priors.
+
+Full of good information, and serves as a great introduction to fitting normal linear models with a g-prior.
+It discusses:
+\begin{itemize}
+\item $g$--priors, the simplified form of the Bayes Factor $BF[\mathcal{M}_\gamma : \mathcal{M}_b]$ and the definition of $BF[\mathcal{M}_\gamma : \mathcal{M}_{\gamma'}]$.
+\item the paradoxes that arises from fixed choices of $g$.
+\item the benefits of using a mixture of g--priors, analytic expressions are available for the posterior
+distribution of $g$, $p(g|\vy)$ etc. etc. I should do a careful literature review of this paper.
+\end{itemize}
+
+Murayama and George 2011
+
+Fully Bayes Factors with a Generalised $g$-Prior
+Normal linear model, model selection based on a fully Bayes formulation with a generalisation of Zellner's
+$g$-prior which allows for $p > n$
+
+This is a more theoretical paper, which proposes a selection criteria based on a fully Bayesian formulation
+with a generalisation of Zellner's $g$--prior, which allows for $p > n$. A special case of the prior
+formulation is seen to yield tractable closed forms for marginal densities and Bayes factors which reveal new
+model evaluation characteristics of potential interest.
+
+Uses a Beta-Prime prior
+\[
+p(g) = \frac{g^b (1 + g)^{-a-b-2}}{\Beta(a + 1, b + 1)} \I_{(0, \infty)}(g)
+\]
+
+Makes special choices of $a = -3/4$ and $b = (n - q - 5)/2 - a$.
+
+Model selection consistency is shown, which is an important property for model selection criteria to have. Do
+we have this? I think we do, or can show it.
+
+They then do some simulations to show that their approach works.
+
+Bayorri, Berger, Forte and Garci\'{a} 2012
+
+Criteria for Bayesian Model Choice with Application to Variable Selection
+
+Has many good references for model selection in a Bayesian framework. I should probably go through all of them
+to make sure I've made a thorough survey of the field:
+
+Jeffreys (1961)
+Zellner and Siox (1980, 1984)
+Laud and Ibrahim (1995) Criterion-Based Methods for Bayesian Model Assessment
+Kass and Wasserman (1995)
+Berger and Pericchi (1996)
+Moreno, Bertolino and Racugno (1998) Can't find
+De Santis and Spezzaferri (1999)
+Perez and Berger (2002)
+Bayorri and Garci\'{a}--Donato (2008)
+Liang et al. (2008)
+Cui and Goerge (2008)
+Maruyama and George (2008)
+Maruyama and Strawderman (2010)
+
+Laud and Ibrahim (1995) offers another criterion for Bayesian model assessment. The normal linear model case
+gives a closed form. Some simulation studies.
+
+Kass and Wasserman (1995) A Reference Bayesian Test for Nested Hypothesis and its Relationship to the
+Schwarz Criterion. log of the Bayes Factor is approximately the Schwarz criterion $O_P(n^{-1/2})$. The
+Schwarz Criterion is another name for the BIC.
+
+Berger and Pericchi (1996) The Intrinsic Bayes Factor for Model Selection and Prediction
+Yet another model selection criterion, with some claimed advantages. Advocates automatic methods of model 
+selection, as "analysis of nonnested and/or multiplemodels or hypotheses is very difficult in a frequentist
+framework".
+
+De Santis and Spezzaferri (1999) Automatic and robust methods for model comparison using fractional Bayes
+Factors, an alternative to Bayes Factors. Points out that Bayes Factors are very sensitive to prior
+distributions. Problem in the presence of weak prior information, does not work at all in the case of improper
+priors (isn't defined).
+
+Bayorri and Garci\'{a}--Donato (2008) Divergence Based Priors for Bayesian Hypothesis Testing.
+
+Cui and George (2008) Empirical Bayes versus fully Bayes variable selection.
+
+Maruyama and Strawderman (2010). A New Class of Generalised Bayes Minimax Ridge Regression Estimators.
+
+Natural Gradient Works Efficiently in Learning, Shun-ichi Amari
+
+Many optimisation problems have parameter spaces with a non-Euclidean structure, so the standard Euclidean
+metric is incompatible with the problem. As such, Newton-Raphson is not necessarily the optimal gradient
+descent/ascent method to use. This paper instead borrows ideas from differential geometry/information geometry
+to propose a new Riemannian metric, the Fisher information metric, based on the curvature of the log-
+likelihood at the current point $\vtheta$, and a modified approach to quasi-Newton Raphson optimisation
+methods. This is a theoretical differential geometry/paper, which shows that for several theoretical examples
+this method of learning is optimal in some sense.
+
+\end{document}

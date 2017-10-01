@@ -1,0 +1,64 @@
+\documentclass{beamer}
+
+\usetheme{Warsaw}
+\usepackage{graphicx}
+\usepackage{ulem}
+\input{include.tex}
+\input{Definitions.tex}
+
+\usefonttheme{serif}
+
+\title{Progress report - 29/08/2016}
+\author{Mark Greenaway}
+
+\mode<presentation>
+{ \usetheme{boxes} }
+
+\begin{document}
+\begin{frame}
+\maketitle
+\end{frame}
+
+\begin{frame}{Progress update -- packaging}
+\begin{itemize}
+\item My \texttt{correlation} package builds on Linux and Windows
+\item John immediately starting using it, and found some bugs. That's a good sign -- if people
+find bugs in your code, that means they care enough to actually run it!
+\item I've created a new \texttt{taug} package which will calculate values of $\tau_g$ so that we
+can do VB fits of linear regression models
+\item Working in R and C++ is really nice for me -- the best of both worlds
+\item I would recommend this path if you have an adventurous spirit
+\end{itemize}
+\end{frame}
+
+\begin{frame}{rgl}
+\begin{itemize}
+\item The \texttt{rgl} package allows you to create 3D graphics in R
+\item
+\begin{figure}
+\includegraphics[scale=.3]{rgl_taug.png}
+\end{figure}
+\item Supported in \texttt{shiny} through the \texttt{shinyRGL} package, and in \texttt{knitr} as well
+\end{itemize}
+\end{frame}
+
+\begin{frame}{ICT -- what's going on?!?}
+I got this email last week:\\
+\footnotesize
+``Dear colleagues
+
+The School of Mathematic and Statistics and ICT are exploring options for collaboration. Together we will identify opportunities to:
+
+* improve consistency with other Schools in the Faculty and the University, simplifying and enhancing the student and staff experience\\
+* free the School’s IT resources to prioritise high value, specialised services rather than duplicating services already provided by ICT
+
+Over the next four weeks, ICT will undertake a discovery phase, and you will be contacted by ICT Relationship Manager Allen Janssens. This phase will help ICT understand how technology and digital resources are utilised by the School, and give the ICT team the opportunity to identify areas in which they could potentially provide equivalent or improved services.
+
+If you have any questions about this initiative, please contact Allen Janssens or myself.
+
+Jacqui''\\
+\normalsize
+What does it mean?
+\end{frame}
+
+\end{document}

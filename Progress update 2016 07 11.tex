@@ -1,0 +1,76 @@
+\documentclass{beamer}
+
+\usetheme{Warsaw}
+\usepackage{graphicx}
+\usepackage{ulem}
+\input{include.tex}
+\input{Definitions.tex}
+
+\usefonttheme{serif}
+
+\title{Progress update}
+\author{Mark Greenaway}
+
+\mode<presentation>
+{ \usetheme{boxes} }
+
+\begin{document}
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}{Mean field updates}
+\begin{itemize}
+\item I believe the mean field updates are completed and correct.
+\item I've checked them against John's working and they match.
+
+\begin{align*}
+\E\left[\frac{1}{\sigma^2}\right] &= \frac{n}{\left(1 - \E\left[\frac{g}{1 + g}\right]\right) n R^2} \\
+\beta_{q(g)} &= \left(\frac{n \E\left[\frac{g}{1 + g}\right]}{[1 - \E\left[\frac{g}{1 + g}\right]]} + p \right) \\
+\vmu_{q(\vbeta)} &= \E\left[\frac{g}{1 + g}\right] (\mX^\top \mX)^{-1} \mX^\top \vy \\
+\mSigma_{q(\vbeta)} &= \E\left[\frac{1}{\sigma^2}\right] \E\left[\frac{g}{1 + g}\right](\mX^\top \mX)^{-1} \\
+\end{align*}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Much like the posterior means, as one would hope}
+\begin{itemize}
+\item They look a lot like the posterior means from Michael Jordan's lecture notes on Bayesian
+statistics.
+\item \begin{figure}
+\includegraphics[scale=.3]{Michael_Jordan_Linear_model_with_g_prior_posterior.png}
+\end{figure}
+\item So that's exciting, and a nice correspondence.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Coding for mean field updates -- the easy part}
+\begin{itemize}
+\item I've translated John's R code to C++ 11.
+\item Because John's code is nice and clean, well--commented 
+and broken into functions in a sensible way, this was quite straightforward.
+\item It compiles, but it's not tested. I think it's going to perform fine.
+\item To get good performance, write good code with sensible algorithms, give it to the compiler and then
+get out of the way.
+\item The object file for the new code is only 44k. That bodes well -- fits in L1 cache.
+\item And it'll vectorise.
+\item So I'm not going to put any effort into optimising this at all. No need.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Coding for mean field updates -- the hard part}
+\begin{itemize}
+\item Numerical software that produces the wrong answer is worthless, so I'm going to devote some of this week
+to testing.
+\item We test our software stringently, so I'm not expecting that to be
+as straight--forward or easy.
+\item John and I will discuss a test--plan, and then I'll run through it and find 
+out what breaks.
+\item Because something \emph{always} breaks.
+\item I had to implement Whittaker's W function using the Wikipedia definition and the GNU Scientific
+Library. I don't know anything about that. Bet you it doesn't work first go.
+\item Apart from that more papers to read, more writing to do, and an abstract to prepare for ASC.
+\end{itemize}
+\end{frame}
+
+\end{document}

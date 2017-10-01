@@ -1,0 +1,40 @@
+\documentclass{article}[12pt]
+\usepackage{amsmath}
+\input{include.tex}
+\input{Definitions.tex}
+\title{Meeting notes - 13/4/2015}
+
+\begin{document}
+Laplace's Method and NR can be unstable. John discussed that other research
+groups had not found the NR style algorithms to be unstable. I mentioned that I
+could easily come up with examples that wouldn't converge using Laplace's Method
+or NR.
+
+I discussed with John that the inverse parameterisation algorithm can get stuck
+in a bad part of the parameter space if it's initialised poorly. The current fix
+I'm using is to run GVA with the $\mR \mR^T$ parameterisation for two
+iterations, then switch to the Laplace's Method/$(\mR \mR^T)^{-1}$ algorithm.
+This is still faster than the previous algorithm.
+
+John and I agreed that the performance problems in the code are essentially
+solved or can be easily solved, and that it's time to move on. We should
+concentrate on splines now.
+
+John talked about the various kinds of splines, including B splines and
+O'Sullivan splines. John suggested I review his 2008 paper on O'Sullivan
+splines.
+
+John suggested I review Challis's papers on alternative parameterisations
+for variational approximations.
+
+Diagnostic $x_i^T (\mX^T \mW \mX + D)^{-1} x_i$ high $to$ high influence.
+
+We discussed applying the approximation to the physical activity data
+from Panorg. John asked whether I had permission to use the data. I said
+that I was still on good terms with the Panorg staff, and would be able to
+talk to them and get permission to use the data.
+
+John also mentioned that we need to be careful about overflow and underflow.
+The principal issue is the weighting matrix $\vw = \exp{\mX \vmu}$. If $\vmu$
+becomes even moderately large, then $\vw$ can diverge.
+\end{document}

@@ -1,0 +1,1393 @@
+\documentclass{article}
+
+\usepackage{amsmath,amssymb,amsfonts,amsthm,latexsym,color,url}
+
+\usepackage{graphicx}
+\usepackage{graphics}
+\usepackage{geometry}
+\geometry{verbose,a4paper,tmargin=5.5mm,bmargin=5.5mm,lmargin=5.5mm,rmargin=5.5mm}
+
+
+\newtheorem{Lemma}{Lemma}
+ 
+% special symbols and abbreviations
+% Sets or statistical values
+\def\sI{{\mathcal I}}                            % Current Index set
+\def\sJ{{\mathcal J}}                            % Select Index set
+\def\sL{{\mathcal L}}                            % Likelihood
+\def\sl{{\ell}}                                  % Log-likelihood
+\def\sN{{\mathcal N}}                            
+\def\sS{{\mathcal S}}                            
+\def\sP{{\mathcal P}}                            
+\def\sQ{{\mathcal Q}}                            
+\def\sB{{\mathcal B}}                            
+\def\sD{{\mathcal D}}                            
+\def\sT{{\mathcal T}}
+\def\sE{{\mathcal E}}                            
+\def\sF{{\mathcal F}}                            
+\def\sC{{\mathcal C}}                            
+\def\sO{{\mathcal O}}                            
+\def\sH{{\mathcal H}} 
+\def\sR{{\mathcal R}}                            
+\def\sJ{{\mathcal J}}                            
+\def\sCP{{\mathcal CP}}                            
+\def\sX{{\mathcal X}}                            
+\def\sA{{\mathcal A}} 
+\def\sZ{{\mathcal Z}}                            
+\def\sM{{\mathcal M}}                            
+\def\sK{{\mathcal K}}     
+\def\sG{{\mathcal G}}                         
+\def\sY{{\mathcal Y}}                         
+\def\sU{{\mathcal U}}  
+
+
+\def\sIG{{\mathcal IG}}                            
+
+
+\def\cD{{\sf D}}
+\def\cH{{\sf H}}
+\def\cI{{\sf I}}
+
+% Vectors
+\def\vectorfontone{\bf}
+\def\vectorfonttwo{\boldsymbol}
+\def\va{{\vectorfontone a}}                      %
+\def\vb{{\vectorfontone b}}                      %
+\def\vc{{\vectorfontone c}}                      %
+\def\vd{{\vectorfontone d}}                      %
+\def\ve{{\vectorfontone e}}                      %
+\def\vf{{\vectorfontone f}}                      %
+\def\vg{{\vectorfontone g}}                      %
+\def\vh{{\vectorfontone h}}                      %
+\def\vi{{\vectorfontone i}}                      %
+\def\vj{{\vectorfontone j}}                      %
+\def\vk{{\vectorfontone k}}                      %
+\def\vl{{\vectorfontone l}}                      %
+\def\vm{{\vectorfontone m}}                      % number of basis functions
+\def\vn{{\vectorfontone n}}                      % number of training samples
+\def\vo{{\vectorfontone o}}                      %
+\def\vp{{\vectorfontone p}}                      % number of unpenalized coefficients
+\def\vq{{\vectorfontone q}}                      % number of penalized coefficients
+\def\vr{{\vectorfontone r}}                      %
+\def\vs{{\vectorfontone s}}                      %
+\def\vt{{\vectorfontone t}}                      %
+\def\vu{{\vectorfontone u}}                      % Penalized coefficients
+\def\vv{{\vectorfontone v}}                      %
+\def\vw{{\vectorfontone w}}                      %
+\def\vx{{\vectorfontone x}}                      % Covariates/Predictors
+\def\vy{{\vectorfontone y}}                      % Targets/Labels
+\def\vz{{\vectorfontone z}}                      %
+
+\def\vone{{\vectorfontone 1}}
+\def\vzero{{\vectorfontone 0}}
+
+\def\valpha{{\vectorfonttwo \alpha}}             %
+\def\vbeta{{\vectorfonttwo \beta}}               % Unpenalized coefficients
+\def\vgamma{{\vectorfonttwo \gamma}}             %
+\def\vdelta{{\vectorfonttwo \delta}}             %
+\def\vepsilon{{\vectorfonttwo \epsilon}}         %
+\def\vvarepsilon{{\vectorfonttwo \varepsilon}}   % Vector of errors
+\def\vzeta{{\vectorfonttwo \zeta}}               %
+\def\veta{{\vectorfonttwo \eta}}                 % Vector of natural parameters
+\def\vtheta{{\vectorfonttwo \theta}}             % Vector of combined coefficients
+\def\vvartheta{{\vectorfonttwo \vartheta}}       %
+\def\viota{{\vectorfonttwo \iota}}               %
+\def\vkappa{{\vectorfonttwo \kappa}}             %
+\def\vlambda{{\vectorfonttwo \lambda}}           % Vector of smoothing parameters
+\def\vmu{{\vectorfonttwo \mu}}                   % Vector of means
+\def\vnu{{\vectorfonttwo \nu}}                   %
+\def\vxi{{\vectorfonttwo \xi}}                   %
+\def\vpi{{\vectorfonttwo \pi}}                   %
+\def\vvarpi{{\vectorfonttwo \varpi}}             %
+\def\vrho{{\vectorfonttwo \rho}}                 %
+\def\vvarrho{{\vectorfonttwo \varrho}}           %
+\def\vsigma{{\vectorfonttwo \sigma}}             %
+\def\vvarsigma{{\vectorfonttwo \varsigma}}       %
+\def\vtau{{\vectorfonttwo \tau}}                 %
+\def\vupsilon{{\vectorfonttwo \upsilon}}         %
+\def\vphi{{\vectorfonttwo \phi}}                 %
+\def\vvarphi{{\vectorfonttwo \varphi}}           %
+\def\vchi{{\vectorfonttwo \chi}}                 %
+\def\vpsi{{\vectorfonttwo \psi}}                 %
+\def\vomega{{\vectorfonttwo \omega}}             %
+
+
+% Matrices
+%\def\matrixfontone{\sf}
+%\def\matrixfonttwo{\sf}
+\def\matrixfontone{\bf}
+\def\matrixfonttwo{\boldsymbol}
+\def\mA{{\matrixfontone A}}                      %
+\def\mB{{\matrixfontone B}}                      %
+\def\mC{{\matrixfontone C}}                      % Combined Design Matrix
+\def\mD{{\matrixfontone D}}                      % Penalty Matrix for \vu_J
+\def\mE{{\matrixfontone E}}                      %
+\def\mF{{\matrixfontone F}}                      %
+\def\mG{{\matrixfontone G}}                      % Penalty Matrix for \vu
+\def\mH{{\matrixfontone H}}                      %
+\def\mI{{\matrixfontone I}}                      % Identity Matrix
+\def\mJ{{\matrixfontone J}}                      %
+\def\mK{{\matrixfontone K}}                      %
+\def\mL{{\matrixfontone L}}                      % Lower bound
+\def\mM{{\matrixfontone M}}                      %
+\def\mN{{\matrixfontone N}}                      %
+\def\mO{{\matrixfontone O}}                      %
+\def\mP{{\matrixfontone P}}                      %
+\def\mQ{{\matrixfontone Q}}                      %
+\def\mR{{\matrixfontone R}}                      %
+\def\mS{{\matrixfontone S}}                      %
+\def\mT{{\matrixfontone T}}                      %
+\def\mU{{\matrixfontone U}}                      % Upper bound
+\def\mV{{\matrixfontone V}}                      %
+\def\mW{{\matrixfontone W}}                      % Variance Matrix i.e. diag(b'')
+\def\mX{{\matrixfontone X}}                      % Unpenalized Design Matrix/Nullspace Matrix
+\def\mY{{\matrixfontone Y}}                      %
+\def\mZ{{\matrixfontone Z}}                      % Penalized Design Matrix/Kernel Space Matrix
+
+\def\mGamma{{\matrixfonttwo \Gamma}}             %
+\def\mDelta{{\matrixfonttwo \Delta}}             %
+\def\mTheta{{\matrixfonttwo \Theta}}             %
+\def\mLambda{{\matrixfonttwo \Lambda}}           % Penalty Matrix for \vnu
+\def\mXi{{\matrixfonttwo \Xi}}                   %
+\def\mPi{{\matrixfonttwo \Pi}}                   %
+\def\mSigma{{\matrixfonttwo \Sigma}}             %
+\def\mUpsilon{{\matrixfonttwo \Upsilon}}         %
+\def\mPhi{{\matrixfonttwo \Phi}}                 %
+\def\mOmega{{\matrixfonttwo \Omega}}             %
+\def\mPsi{{\matrixfonttwo \Psi}}                 %
+
+\def\mone{{\matrixfontone 1}}
+\def\mzero{{\matrixfontone 0}}
+
+% Fields or Statistical
+\def\bE{{\mathbb E}}                             % Expectation
+\def\bP{{\mathbb P}}                             % Probability
+\def\bR{{\mathbb R}}                             % Reals
+\def\bI{{\mathbb I}}                             % Reals
+\def\bV{{\mathbb V}}                             % Reals
+\def\bN{{\mathbb N}}
+
+\def\d{\partial}
+\def\ds{\displaystyle}
+
+
+\theoremstyle{definition}
+\newtheorem{defn}{Definition}%[chapter]
+\newtheorem{thm}{Theorem}%[chapter]
+\newtheorem{cor}[thm]{Corollary}
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{res}{Result}%[chapter]
+
+\begin{document}
+	
+\section{Bayesian Linear Regression}
+ 
+
+Consider the model
+$$
+\ds \vy|\vbeta,\sigma^2 \sim N_n(\mX\vbeta,\sigma^2\mI) 
+$$
+
+\noindent with priors
+\begin{equation}\label{eq:model}
+\begin{array}{rl}
+\ds \vbeta|\sigma^2,g   & \ds \sim N_p(\vzero,g\sigma^2(\mX^T\mX)^{-1}) \\ [1ex]
+\ds p(\sigma^2) & \ds = (\sigma^2)^{-1} \bI(\sigma^2>0) \\ [1ex]
+\ds p(g) & \ds = \frac{g^{b}(1 + g)^{-a-b-2}}{\mbox{Beta}(a+1,b+1)}  \bI(g>0)
+\end{array}
+\end{equation}
+
+\noindent where $\vy\in\bR^n$, $\vbeta\in\bR^p$, $\sigma^2\in \bR_+$,
+$\mX\in\bR^{n\times  p}$, $\mI$ is the $n\times n$ identity matrix,
+$g\in \bR_+$, $a>-1$ and $b>-1$. Here $\mbox{Beta}(\cdot,\cdot)$ is the
+Beta function and the prior on $g$ is called a Pearson Type VI or Beta prime
+distribution. Assume that $\vy^T\vone = \vzero$ 
+and $\vy^T\vy/n = 1$ (or $\|\vy\|^2 = n$). 
+Finally, assume that $n>p$ and $(\mX^T\mX)^{-1}$ exists.
+
+\medskip
+\noindent To simplify upcoming expressions we further assume that
+$b= (n-p)/2 - 2 - a$ which has $b>-1$ provided $n>p$.
+
+
+\subsection{Summary of marginal posterior distributions and some of their expectations}
+
+The marginal likelihood is given by
+\begin{equation}\label{eq:marginal}
+\ds p(\vy) 
+= \frac{\Gamma(n/2) }{\pi^{n/2} \|\vy\|^n } 
+\frac{\mbox{Beta}( p/2 + a + 1,b+1)}{\mbox{Beta}(a+1,b+1)}
+(1 -  R^2)^{-(b+1)}.
+\end{equation}
+
+\noindent The marginal posterior distribution of $g$ is given by
+\begin{equation}\label{eq:marginalOfG}
+p(g|\vy) = \frac{(1 -  R^2)^{b+1} g^{b} \left[  1 + g(1 -  R^2) \right]^{-n/2}}{\mbox{Beta}(p/2 + a + 1,b+1)}  \bI(g>0).
+\end{equation}
+
+\noindent Note that when $R^2=1$ this is no longer a proper distribution. Some posterior expectations
+of functions of $g$ are $\bE(g^{-1}|\vy) = (1 -  R^2)[ 1 + (p/2 + a + 1)/b ]$,
+\begin{equation}\label{eq:marginalExpectation1}
+\bE\left( \left. \frac{g}{1+g}  \right| \vy \right)
+=  \frac{ \mbox{Beta}(p/2 + a + 1,b + 2) }{\mbox{Beta}(p/2 + a + 1,b+1)}  {}_2 F_1(p/2 + a + 1,1;n/2 + 1;R^2)
+\end{equation}
+
+\noindent and 
+\begin{equation}\label{eq:marginalExpectation2}
+\bE\left[ \left. \left(\frac{g}{1+g}\right)^2  \right| \vy \right]
+=
+\frac{\mbox{Beta}(p/2 + a+ 1,b + 3) 
+}{\mbox{Beta}(p/2 + a + 1,b+1)} 
+{}_2 F_1(p/2 + a + 1,2;n/2 + 2; R^2).
+\end{equation}
+ 
+\noindent \noindent Note that $\bE[ g/(1+g)  | \vy] \to 1$ as $R^2 \to 1$.
+
+\medskip 
+\noindent The marginal posterior distribution of $\sigma^2$ is given by
+\begin{equation}\label{eq:marginalOfSigma2}
+\begin{array}{rl}
+\ds p(\sigma^2|\vy) 
+& \ds = \frac{(1 -  R^2)^{b+1} ( n/2)^{n/2}}{\Gamma(n/2)}
+(\sigma^2)^{-(n/2 + 1)}\exp\left\{ -  \frac{n}{2\sigma^2} \right\}  {}_1 F_1\left(
+b+1; \frac{n}{2}; \frac{nR^2}{2\sigma^2} \right)  \bI(\sigma^2>0).
+\end{array}
+\end{equation}
+
+\noindent For large $nR^2$ this behaves asymptotically like
+\begin{equation}\label{eq:marginalOfSigma2asympotic}
+\ds p(\sigma^2|\vy) 
+\sim  \mbox{IG}\left( \sigma^2 ; b+1, \tfrac{n}{2}(1 - R^2) \right).
+\end{equation}
+
+\noindent and as $R^2 \to 0$ we have
+\begin{equation}\label{eq:marginalOfSigma2asRtoZero}
+\ds p(\sigma^2|\vy) 
+\to  \mbox{IG}\left( \sigma^2 ; \tfrac{n}{2},  \tfrac{n}{2} \right).
+\end{equation}
+
+\medskip 
+\noindent The marginal posterior distribution of $\vbeta$ given $g$ is given by
+$$
+\vbeta|\vy,g \sim t_n\left( \tfrac{g}{1+g}\widehat{\vbeta}_{\mbox{\tiny LS}},  \tfrac{g}{1+g} \left( 
+1 -
+\tfrac{g}{1+g} R^2\right)  \left( \mX^T\mX \right)^{-1} \right)
+$$
+
+\noindent where $\widehat{\vbeta}_{\mbox{\tiny LS}} = \left( \mX^T\mX \right)^{-1}\mX^T\vy$
+and
+$p(\vbeta|\vy) = \int_{0}^\infty p(\vbeta|\vy,g)p(g|\vy) dg$, although we have not been able to 
+find a closed form expression for $p(\vbeta|\vy)$. However, the marginal posterior mean and covariance 
+for $\vbeta$ are given by
+$$
+\ds \bE(\vbeta|\vy) 
+= \bE\left( \left. \frac{g}{1+g}  \right| \vy \right) \widehat{\vbeta}_{\mbox{\tiny LS}}
+$$
+
+\noindent and
+$$
+\mbox{Cov}(\vbeta|\vy)
+= \mbox{Var}\left( \frac{g}{1 + g} \Big| \vy \right) \widehat{\vbeta}_{\mbox{\tiny LS}}\widehat{\vbeta}_{\mbox{\tiny LS}}^T
++ \left( \frac{n}{n - 2} \right) \bE \left[ \frac{g}{1+g} \left( 
+1 -
+\frac{g}{1+g} R^2\right) \Big|\vy \right] (\mX^T\mX)^{-1}
+$$
+
+\noindent respectively. This last expression can be calculated using
+(\ref{eq:marginalExpectation1}) and (\ref{eq:marginalExpectation2}).
+
+
+\section{Derivations}
+
+
+\subsection{Useful Results}	
+
+\begin{res}\label{res:01}
+$
+\ds \int \exp\left\{ -\tfrac{1}{2}\vx^T\mA\vx + \vb^T\vx \right\} = |2\pi\mSigma|^{1/2} \exp\left\{ \tfrac{1}{2}\vmu^T\mSigma^{-1}\vmu \right\}
+$ where $\vmu = \mA^{-1}\vb$ and $\mSigma = \mA^{-1}$.
+\end{res}
+ 
+\begin{res} \label{res:02}
+If $\vone^T\vy=0$ the $R$-squared statistic can be expressed
+$$
+\ds R^2 = \frac{\vy^T\mX(\mX^T\mX)^{-1}\mX^T\vy}{\|\vy\|^2}
+$$
+
+\noindent 
+where $R^2$ is the usual $R$-squared statistic associated with least squares regression.
+\end{res}
+
+\begin{res} \label{res:03}
+Equation XXX of G\&R is
+$$
+\int_0^\infty \frac{ x^{\mu - 1} }{(1 + \beta x)^\nu} dx = \beta^{-\mu} \mbox{Beta}(\mu,\nu - \mu) \quad \quad \mbox{(assuming $\mu,\nu>0$ and $\nu>\mu$).}
+$$
+\end{res}
+
+\begin{res} \label{res:04}
+Equation 3.385 of G\&R is
+$$
+\int_{0}^1 x^{\nu - 1} (1 - x)^{\lambda - 1}(1 - \beta x)^{\varrho} e^{-\mu x} dx = \mbox{Beta}(\nu,\lambda) \Phi_1(\nu,\varrho,\lambda+\nu,-\mu,\beta)
+$$
+
+\noindent provided $\mbox{Re}(\lambda)>0$, $\mbox{Re}(\nu)>0$ and $|\mbox{arg}(1-\beta)|<\pi$.
+\end{res}
+
+
+
+
+\subsection{Derivation of the marginal likelihood}
+
+
+%\medskip 
+%\noindent {\bf Result 4:}
+%$\begin{array}{rl}
+%\ds p(\vy|\sigma^2,g)  = \exp\left\{
+%-\tfrac{n}{2}\log(2\pi\sigma^2) 
+%- \tfrac{p}{2}\log(1+g)
+%- \sigma^{-2} \tfrac{n}{2}\left( 
+%1 -
+% \tfrac{g}{1+g} R^2  \right)
+%\right\}
+%\end{array}$
+
+
+ 
+\noindent First we derive $p(\vy|\sigma^2,g)$ via
+$$
+\begin{array}{rl}
+\ds p(\vy|\sigma^2,g) 
+    & \ds = \int \exp\left\{
+    -\tfrac{n}{2}\log(2\pi\sigma^2) - \tfrac{1}{2\sigma^2}\|\vy - \mX\vbeta\|^2
+    -\tfrac{p}{2}\log(2\pi g\sigma^2) + \tfrac{1}{2}\log|\mX^T\mX| - \tfrac{1}{2g\sigma^2}\vbeta^T\mX^T\mX\vbeta
+    \right\} d\vbeta
+    \\ [2ex]
+    & \ds = \exp\left\{
+    -\tfrac{n}{2}\log(2\pi\sigma^2) - \tfrac{1}{2\sigma^2}\|\vy\|^2 -\tfrac{p}{2}\log(2\pi g\sigma^2) + \tfrac{1}{2}\log|\mX^T\mX| \right\}
+    \\
+    & \ds \qquad \times \int 
+    \exp\left\{ - \tfrac{1}{2}\vbeta^T \left[ \sigma^{-2}(1+g^{-1})\mX^T\mX \right]\vbeta + \sigma^{-2}\vbeta^T\mX^T\vy
+    \right\} d\vbeta \\ [2ex]
+    & \ds = \exp\left\{
+    -\tfrac{n}{2}\log(2\pi\sigma^2) - \tfrac{1}{2\sigma^2}\|\vy\|^2 -\tfrac{p}{2}\log(2\pi g\sigma^2) + \tfrac{1}{2}\log|\mX^T\mX| \right\}
+    \\
+    & \ds \qquad \times 
+    |2\pi \left[ \sigma^{-2}(1+g^{-1})\mX^T\mX \right]^{-1}|^{1/2}\exp\left\{  \tfrac{1}{2\sigma^2}  \vy^T\mX\left[ (1+g^{-1})\mX^T\mX \right]^{-1}\mX^T\vy
+    \right\}
+    \\ [2ex]
+    & \ds = \exp\left\{
+    -\tfrac{n}{2}\log(2\pi\sigma^2) 
+    - \tfrac{1}{2\sigma^2}\|\vy\|^2 
+    -\tfrac{p}{2}\log(2\pi g\sigma^2) 
+    + \tfrac{1}{2}\log|\mX^T\mX| \right\}
+    \\
+    & \ds \qquad \times 
+    \exp\left\{ 
+    \tfrac{p}{2}\log(2\pi) 
+    + \tfrac{p}{2}\log(\sigma^2)
+    - \tfrac{p}{2}\log(1+g^{-1})
+    - \tfrac{1}{2}\log|\mX^T\mX| 
+    + \tfrac{1}{2\sigma^2}  \vy^T\mX\left[ (1+g^{-1})\mX^T\mX \right]^{-1}\mX^T\vy
+    \right\}
+    \\ [2ex]
+& \ds = \exp\left\{
+-\tfrac{n}{2}\log(2\pi\sigma^2) 
+- \tfrac{p}{2}\log(1+g)
+- \tfrac{n}{2\sigma^2} 
++ \tfrac{g}{2\sigma^2(1+g)} n R^2
+\right\}
+\end{array}
+$$
+
+\noindent were the third and last lines follow from
+Result \ref{res:01} and Result  \ref{res:02} respectively.
+We also used $\|\vy\|^2 = n$ and the property of determinants $|c\mA| = c^d|\mA|$ and $|\mA^{-1}| = |\mA|^{-1}$ when $\mA \in\bR^{d\times d}$.
+
+%\medskip 
+%\noindent {\bf Result 4:}
+%$\ds p(\vy|g) = \frac{\Gamma(n/2)}{\pi^{n/2} \|\vy\|^n} (1 + g)^{(n-p)/2} \left[  1 + g(1 -  R^2) \right] ^{-n/2}$.
+
+Next we integrate out $\sigma^2$ via
+$$
+\begin{array}{rl}
+\ds p(\vy|g) 
+    & \ds = \exp\left\{
+    - \tfrac{n}{2}\log(2\pi) - \tfrac{p}{2}\log(1+g) 
+    - \tfrac{1}{2\sigma^2}n
+    \right\}
+    \\ [1ex]
+    & \ds \qquad \times 
+    \int_0^\infty (\sigma^2)^{-(n/2 + 1)}
+    \exp\left\{
+    - \sigma^{-2} \left[ \tfrac{n}{2} - \tfrac{g}{2(1+g)} nR^2 \right] 
+    \right\} d\sigma^2
+    \\ [2ex]
+    & \ds = \exp\left\{
+    - \tfrac{n}{2}\log(2\pi) - \tfrac{p}{2}\log(1+g)
+    \right\}
+   \times 
+    \frac{\Gamma(n/2)}{\ds \left[ \tfrac{1}{2}\|\vy\|^2 - \tfrac{g}{2(1+g)}nR^2 \right] ^{n/2}}
+    \\ [2ex]
+%    & \ds = \frac{\Gamma(n/2)}{(n\pi)^{n/2}} (1 + g)^{-p/2} \left[  1 - \frac{g}{(1+g)}  R^2 \right] ^{-n/2}
+%    \\ [2ex]
+& \ds = \frac{\Gamma(n/2)}{(n\pi)^{n/2}} (1 + g)^{(n-p)/2} \left[  1 + g(1 -  R^2) \right] ^{-n/2}.
+\end{array}
+$$
+
+\noindent Finally, and using $b= (n-p)/2 - 2 - a$ we have
+$$
+\begin{array}{rl}
+\ds p(\vy) 
+& \ds = \int_0^\infty
+\frac{g^{b}(1 + g)^{-a-b-2}}{\mbox{Beta}(a+1,b+1)}
+\frac{\Gamma(n/2)}{(n\pi)^{n/2}} (1 + g)^{(n-p)/2} \left[  1 + g(1 -  R^2) \right]^{-n/2}
+dg
+\\ [2ex]
+& \ds = \frac{\Gamma(n/2)}{(n\pi)^{n/2} \mbox{Beta}(a+1,b+1)} 
+\int_0^\infty g^{b} \left[  1 + g(1 -  R^2) \right]^{-n/2}
+\\ [2ex]
+& \ds = \frac{\Gamma(n/2) }{(n\pi)^{n/2}} 
+\frac{\mbox{Beta}( p/2 + a + 1,b+1)}{\mbox{Beta}(a+1,b+1)}
+(1 -  R^2)^{-(b+1)}.
+\\ [2ex]
+& \ds  
+= \frac{\Gamma( p/2 + a + 1)}{(n\pi)^{n/2}} 
+\frac{\Gamma((n-p)/2)}{\Gamma(a+1)} (1 -  R^2)^{-((n-p)/2 - a - 1)} \\
+\end{array}
+$$
+
+\noindent Assuming that $p/n\to 0$ as $n\to \infty$ we have
+$$
+\begin{array}{rl}
+-2\log p(\vy) 
+    %& \ds = ( n-p - 2a - 2) \log(RSS/n) 
+    
+    %-2\log\Gamma(p/2 + a + 1) + 2\log\Gamma\left( \frac{n-p}{2}\right) + \mbox{``Constants %in $\vy$ and $n$''}
+
+    %\\
+    %& \ds = n(1 + o(1)) \log(RSS/n) -p\log(n(1 + o(1))
+    %+ n\log(n(1 + o(1))
+    %+ o(1)  + \mbox{``Constants in $\vy$ and $n$''}
+    
+    %\\
+    
+    & \ds = n\log(RSS/n) + p\log(n) + \mbox{``ignorable constants''} = \mbox{BIC} + \mbox{``ignorable constants''}
+\end{array}
+$$
+
+\noindent 
+%where $\mbox{RSS}=\|\vy\|^2 - \vy^T\mX(\mX^T\mX)^{-1}\mX^T\vy$
+%noting that $\|\vy\|^2 = n$. 
+Note    
+$$
+\log \Gamma(z) \sim z \ln (z) - z - \tfrac{1}{2} \ln \left (\frac{z}{2\pi} \right ) + \frac{1}{12z} - \frac{1}{360z^3} +\frac{1}{1260 z^5}
+$$
+
+ 
+
+
+
+
+\subsubsection{Expressions for 
+	parameter posteriors}
+
+
+\medskip 
+\noindent {\bf Result 6:} Using
+Result 4 and 5 we have
+$$
+p(g|\vy) = \frac{(1 -  R^2)^{b+1} g^{b} \left[  1 + g(1 -  R^2) \right]^{-n/2}}{\mbox{Beta}(p/2 + a + 1,b+1)}
+$$
+
+$$
+\begin{array}{rl}
+\ds \frac{\mbox{Beta}(p/2 + a + 1,b)}{\mbox{Beta}(p/2 + a + 1,b+1)}
+& \ds = \frac{\Gamma(p/2 + a + 1)\Gamma(b)}{\Gamma(p/2 + a + 1 + b)}
+\frac{\Gamma(p/2 + a + 1 + b + 1)}{\Gamma(p/2 + a + 1)\Gamma(b+1)}
+\\
+& \ds = \frac{\Gamma(b)}{\Gamma(p/2 + a + 1 + b)}
+\frac{\Gamma(p/2 + a + 1 + b + 1)}{\Gamma(b+1)}
+\\
+& \ds = \frac{p/2 + a + 1 + b}{b}
+\\
+& \ds = 1 + \frac{p/2 + a + 1}{b}
+\end{array}
+$$
+
+\noindent Note that when $R^2=1$ this is no longer a proper distribution.
+
+$$
+\begin{array}{rl}
+\bE(g^{-1}|\vy) 
+& \ds = (1 -  R^2)\left[ 1 + \frac{p/2 + a + 1}{b}   \right] \\
+& \ds = (1 -  R^2)(1 + O(p/n))
+\end{array}
+$$
+\medskip 
+\noindent {\bf Result 7:}
+\medskip 
+\noindent Using the change of variables $h=g/(1+g)$ we have
+$$
+p(h|\vy) = \frac{(1 -  R^2)^{b+1}}{\mbox{Beta}(p/2 + a + 1,b+1)} h^{b}(1 - h)^{2-b+n/2}  (1  - h R^2)^{-n/2}
+$$
+ 
+
+\medskip 
+\noindent {\bf Result 8:} The full conditional for $\vbeta$ is given by
+$$
+\begin{array}{rl}
+\vbeta|\vy,\sigma^2,g \sim N\left[
+\tfrac{g}{1+g}\widehat{\vbeta}_{\mbox{\tiny LS}},
+\tfrac{g}{1+g} \sigma^2 \left( \mX^T\mX \right)^{-1}
+\right] 
+\end{array} 
+$$
+
+\noindent where $\widehat{\vbeta}_{\mbox{\tiny LS}} = \left( \mX^T\mX \right)^{-1}\mX^T\vy$.
+
+\medskip 
+\noindent {\bf Result 8:} The full conditional for $\sigma^2$ after integrating out $\vbeta$ is: 
+Next,
+$$
+\sigma^2|\vy,g \sim \mbox{IG}\left[\tfrac{n}{2},\tfrac{n}{2}\left( 
+1 -
+\tfrac{g}{1+g} R^2\right) \right]
+$$
+
+\medskip 
+\noindent {\bf Result 9:} Potentially useful expressions
+$$
+\ds p(\sigma^2|\vy) = \int_0^\infty p(\sigma^2|\vy,g) p(g|\vy) dg
+$$
+$$
+\ds  p(\vbeta|\vy) = \int p(\vbeta|\vy,\sigma^2,g) p(\sigma^2|\vy,g) p(g|\vy) d\sigma^2 dg
+$$
+$$
+\ds p(\vbeta|\vy) = \int p(\vbeta|\vy,g) p(g|\vy) dg
+$$
+$$
+\ds  p(\vbeta|\vy,g) = \int p(\vbeta|\vy,\sigma^2,g) p(\sigma^2|\vy,g) d\sigma^2
+$$
+
+
+\subsubsection{Density for $p(\sigma^2|\vy)$}
+
+
+$$
+\begin{array}{rl}
+\ds p(\sigma^2|\vy) 
+    & \ds = \int_0^\infty p(\sigma^2|\vy,g) p(g|\vy) dg
+    
+    \\ [2ex]
+    
+    & \ds = \int_0^\infty 
+\left[ \frac{\left[\tfrac{n}{2}\left( 
+	1 -
+	\tfrac{g}{1+g} R^2\right) \right]^{n/2}}{\Gamma(n/2)} (\sigma^2)^{-(n/2 + 1)} \exp\left\{ - \sigma^{-2} \tfrac{n}{2}\left( 
+1 -
+\tfrac{g}{1+g} R^2\right) \right\} \right]
+    \\ [2ex]
+    & \ds \qquad \times \left[
+    \frac{(1 -  R^2)^{b+1} g^{b} \left[  1 + g(1 -  R^2) \right]^{-n/2}}{\mbox{Beta}(p/2 + a + 1,b+1)}
+    \right] dg
+    
+    \\ [2ex]
+    
+    
+    
+    & \ds = \frac{(1 -  R^2)^{b+1} \left( \frac{n}{2}\right)^{n/2}(\sigma^2)^{-(n/2 + 1)}\exp\left\{ -  \tfrac{n}{2\sigma^2} \right\}}{\Gamma(n/2)\mbox{Beta}(p/2 + a + 1,b+1)} 
+    \\ [2ex]
+    & \ds \quad \times \int_0^\infty 
+    \left( 
+    1 -
+    \tfrac{g}{1+g} R^2\right)^{n/2} g^{b} \left[  1 + g(1 -  R^2) \right]^{-n/2}
+\exp\left\{ 
+\frac{g}{1+g} \frac{nR^2}{2\sigma^2} \right\} dg
+
+\\ [2ex]
+
+    & \ds = \frac{(1 -  R^2)^{b+1} \left( \frac{n}{2}\right)^{n/2}(\sigma^2)^{-(n/2 + 1)}\exp\left\{ -  \tfrac{n}{2\sigma^2} \right\}}{\Gamma(n/2)\mbox{Beta}(p/2 + a + 1,b+1)} 
+    \\ [2ex]
+    & \ds \quad \times \int_0^1
+    \left( 
+    1 -
+    h R^2\right)^{n/2} \left( \frac{h}{1 - h}\right)^{b} \left[  1 + \frac{h}{1 - h}(1 -  R^2) \right]^{-n/2}
+    \exp\left\{ 
+    h \frac{nR^2}{2\sigma^2} \right\}\frac{1}{(1-h)^2} dh
+    
+	\\ [2ex]
+	
+	& \ds = \frac{ (1 -  R^2)^{b+1}\left( \frac{n}{2}\right)^{n/2}(\sigma^2)^{-(n/2 + 1)}\exp\left\{ -  \tfrac{n}{2\sigma^2} \right\}}{\Gamma(n/2)\mbox{Beta}(p/2 + a + 1,b+1)} \int_0^1
+	 h^{b}(1-h)^{a+p/2} 
+	\exp\left\{ 
+	h \frac{nR^2}{2\sigma^2} \right\}  dh    
+\end{array}
+$$
+
+$$
+-b-2+n/2 = p/2 + a  
+$$
+
+\noindent where
+$$
+h = \frac{g}{1+g},
+\quad 
+g = \frac{h}{1-h},
+\quad 
+1 - h = \frac{1}{(1 + g)},
+\quad \mbox{and}\quad 
+\frac{dh}{dg} = \frac{1}{1+g} - \frac{g}{(1 +g)^2} = \frac{1}{(1+g)^2} = (1 - h)^2.
+$$
+
+\noindent Equation 3.383(1) of G\&R is
+$$
+\int_{0}^u x^{\nu - 1} (u - x)^{\mu - 1}  e^{\beta x} dx = \mbox{Beta}(\nu,\mu) {}_1 F_1(\nu;\mu+\nu;\beta u)
+$$
+
+\noindent provided $\mbox{Re}(\mu)>0$, $\mbox{Re}(\nu)>0$.
+
+\medskip 
+\noindent We have
+$$
+u = 1, \quad \nu = b + 1 = \frac{n-p}{2} - a - 1 >0, \quad \mu = a + p/2 + 1 >0, \quad \mbox{and} \quad 
+\beta = \frac{nR^2}{2\sigma^2}
+$$
+
+$$
+\frac{n}{2}  
+$$
+
+
+\noindent Hence, (and this could be a new distribution)
+$$
+\begin{array}{rl}
+\ds p(\sigma^2|\vy) 
+& \ds = \frac{(1 -  R^2)^{b+1} ( n/2)^{n/2}}{\Gamma(n/2)}
+(\sigma^2)^{-(n/2 + 1)}\exp\left\{ -  \frac{n}{2} \sigma^{-2} \right\}  {}_1 F_1\left(
+b + 1; \frac{n}{2}; \frac{nR^2}{2} \sigma^{-2} \right)
+\end{array}
+$$
+
+\noindent where ${}_1 F_1(\alpha;\gamma;z) \equiv \Phi_1(\alpha;\gamma;z) = M(\alpha;\gamma;z)$ 
+is the
+degenerate hypergeometric function or
+confluent hypergeometric function.
+
+\noindent From Wikipedia we could have used the result
+$$
+M(a,b,z)= \frac{\Gamma(b)}{\Gamma(a)\Gamma(b-a)}\int_0^1 e^{zu}u^{a-1}(1-u)^{b-a-1}\,du
+$$
+
+\noindent Note that from G\&R 7.522(8) we have
+$$
+\begin{array}{l}
+\ds \int_0^\infty x^{\rho_n - 1}e^{-\mu x} {}_mF_n(a_1,\ldots,a_m;\rho_1,\ldots,\rho_n,\lambda x) dx
+=
+\Gamma(\rho_n)\mu^{-\rho_n} {}_mF_{n-1}(a_1,\ldots,a_m;\rho_1,\ldots,\rho_n,\lambda/\mu)
+\end{array}
+$$
+
+\noindent Hence,
+$$
+\begin{array}{l}
+\ds \int_0^\infty x^{\rho_1 - 1}e^{-\mu x} {}_1F_1(a_1;\rho_1,\lambda x) dx
+=
+\Gamma(\rho_1)\mu^{-\rho_1} {}_1F_{0}(a_1; ;\lambda/\mu)
+=
+\Gamma(\rho_1)\mu^{-\rho_1} (1 - \lambda/\mu)^{-a_1}
+\end{array}
+$$
+
+\noindent where from Wikipedia's page on
+generalized hypergeometric functions we have the identity
+$$
+{}_1F_{0}(a; ;z) = (1 - z)^{-a}.
+$$
+
+\noindent Using the change of variables $\tau= 1/\sigma^2$ we have
+$$
+\begin{array}{rl}
+\ds p(\tau|\vy) 
+& \ds = \frac{(1 -  R^2)^{b+1} ( n/2)^{n/2}}{\Gamma(n/2)} 
+\tau^{n/2 - 1}\exp\left\{ -  \frac{n}{2} \tau \right\} {}_1 F_1\left(
+b + 1; \frac{n}{2}; \frac{nR^2}{2} \tau \right)
+\end{array}
+$$
+
+\noindent Calculating the integral using the result from G\&R above we have
+$$
+\int_0^\infty \tau^{n/2 - 1}\exp\left\{ -  \tfrac{n}{2} \tau \right\}{}_1 F_1\left(
+b + 1; \frac{n}{2}; \frac{nR^2}{2} \tau \right) d \tau = 
+\frac{\Gamma(n/2)}{(n/2)^{n/2}\left( 1 - R^2\right)^{b+1}}
+$$
+
+\noindent with $\rho_1 = n/2$, $\mu = n/2$, $a_1 = b+1$, $\lambda = nR^2/2$. Hence, $p(\sigma|\vy)$ and $p(\tau|\vy)$ are indeed densities.
+
+
+\subsubsection{$\bE(\sigma^{-2}|\vy)$}
+
+$$
+\begin{array}{rl}
+\ds \int_0^\infty \sigma^{-2} p(\sigma^2|\vy) d\sigma^2 
+    & \ds = \int_0^\infty \int_0^\infty \sigma^{-2} p(\sigma^2|\vy,g) d\sigma^2 p(g|\vy) dg
+    \\ [2ex]
+    & \ds =  \int_0^\infty \frac{1}{\left( 
+    1 -
+    \tfrac{g}{1+g} R^2\right)} \frac{(1 -  R^2)^{b+1} g^{b} \left[  1 + g(1 -  R^2) \right]^{-n/2}}{\mbox{Beta}(p/2 + a + 1,b+1)} dg
+    \\ [2ex]
+    & \ds =  \frac{(1 -  R^2)^{b+1}}{\mbox{Beta}(p/2 + a + 1,b+1)}
+    \int_0^\infty \left( 
+    1 -
+    \tfrac{g}{1+g} R^2\right)^{-1} g^{b} \left[  1 + g(1 -  R^2) \right]^{-n/2}dg
+    \\ [2ex]
+    & \ds =  \frac{(1 -  R^2)^{b+1}}{\mbox{Beta}(p/2 + a + 1,b+1)}
+    \int_0^1 \left( 
+   	1 -
+    h R^2\right)^{-1} \left( \frac{h}{1 - h}\right)^{b} \left[  1 + \frac{h}{1 - h}(1 -  R^2) \right]^{-n/2} \frac{1}{(1 - h)^2} dh
+
+
+    \\ [2ex]
+    
+    & \ds =  \frac{(1 -  R^2)^{b+1}}{\mbox{Beta}(p/2 + a + 1,b+1)}
+    \int_0^1  h^b (1 - h)^{n/2 - b - 2} ( 1 -  hR^2)^{-(n/2+1)}  dh
+    
+    
+    \\ [2ex]
+    & \ds =  (1 -  R^2)^{b+1}
+    {}_1 F_2(n/2+1,b+1,n/2;R^2)  
+\end{array}
+$$
+
+$A = n/2 + 1$
+
+$B - 1 = b$
+
+$B = b + 1$
+
+$C = n/2$
+
+
+\subsubsection{Asymptotic behaviour of $p(\sigma^2|\vy)$}
+
+For large $|z|$ we have
+$$
+{}_1F_1(a,b,z) \sim \Gamma(b)\left( \frac{e^zz^{a-b}}{\Gamma(a)} + \frac{(-z)^{-a}}{\Gamma(b-a)} \right)
+$$
+
+$$
+\begin{array}{rl}
+{}_1F_1(b + 1,n/2,\sigma^{-2} nR^2/2) 
+& \ds \sim 
+\Gamma(n/2)\left( \frac{\exp\{\sigma^{-2}nR^2/2\}\left( \sigma^{-2}nR^2/2 \right)^{-(p/2 + a + 1)}}{\Gamma(b + 1)} + \frac{\left(- \sigma^{-2} nR^2/2 \right)^{-(b + 1)}}{\Gamma(p/2 + a + 1)} \right) 
+\\ [2ex]
+& \ds \sim 
+\Gamma(n/2) \frac{\exp\{\sigma^{-2}nR^2/2\}\left( \sigma^{-2}nR^2/2 \right)^{-(p/2 + a + 1)}}{\Gamma(b + 1)} 
+\end{array}
+$$
+
+\noindent since the first term dominates for large $n$.
+
+\noindent Then
+$$
+\begin{array}{rl}
+\ds p(\sigma^2|\vy) 
+& \ds \sim (R^2)^{-(p/2 + a + 1)} \left[ \frac{
+\left\{ \tfrac{n}{2}(1 -  R^2)\right\}^{b+1}   
+}{\Gamma(b + 1)}
+(\sigma^2)^{-(b + 1 + 1)} 
+\exp\{- \sigma^{-2}\tfrac{n}{2}\left(1 - R^2\right) \} \right]
+\\ [4ex]
+& \ds = \omega \mbox{IG}\left[ \sigma^2 ; b+1, \tfrac{n}{2}(1 - R^2) \right]
++ (1 - \omega) \mbox{IG}\left[ \sigma^2 ; p/2 + a + 1, \tfrac{n}{2} \right]
+\\ [2ex]
+& \ds \propto \mbox{IG}\left[ \sigma^2 ; \frac{n - p}{2} - a - 1, \tfrac{n}{2}(1 - R^2) \right]
+\end{array}
+$$
+
+\noindent for some weight $\omega$.
+
+
+\subsubsection{$p(\sigma^2|\vy)$ when $R^2=0$}
+
+$$
+{}_1F_1\left( b + 1; \frac{n}{2}; \frac{nR^2}{2} \sigma^{-2} \right)
+= \frac{\Gamma(n/2)}{\Gamma(b + 1)\Gamma(p/2 + a + 1)}\int_0^1 \exp\left\{ \frac{nR^2}{2\sigma^2} u \right\} u^{b}(1-u)^{p/2 + a}\,du
+$$
+
+\noindent \noindent For $R^2 = 0$ we have
+$$
+\begin{array}{rl}
+{}_1F_1\left( b + 1; \frac{n}{2}; \frac{nR^2}{2} \sigma^{-2} \right)
+& \ds = \frac{\Gamma(n/2)}{\Gamma(b + 1)\Gamma(p/2 + a + 1)}\int_0^1  u^{b}(1-u)^{p/2 + a}\,du
+\\ [2ex]
+& \ds = \frac{\Gamma(n/2)}{\Gamma(b + 1)\Gamma(p/2 + a + 1)}\mbox{Beta}(b + 1,p/2 + a+ 1)
+\\ [2ex]
+& \ds = 1
+\end{array}
+$$
+
+\noindent Then
+$$
+\begin{array}{rl}
+\ds p(\sigma^2|\vy) 
+& \ds = \frac{ ( n/2)^{n/2}}{\Gamma(n/2)}
+(\sigma^2)^{-(n/2 + 1)}\exp\left\{ -  \frac{n}{2} \sigma^{-2} \right\}  = \mbox{IG}(\sigma^2;n/2,n/2)
+\end{array}
+$$
+
+ 
+\subsection{Density for $p(\vbeta|\vy,g)$}
+
+
+
+$$
+\begin{array}{rl}
+\ds p(\vbeta|\vy,g) 
+& \ds = \int p(\vbeta|\vy,\sigma^2,g) p(\sigma^2|\vy,g) d\sigma^2
+
+\\[2ex]
+
+& \ds = \int
+\left|2\pi \tfrac{g}{1+g} \sigma^2 \left( \mX^T\mX \right)^{-1}\right|^{-1/2}
+\exp\left\{ 
+-\tfrac{1}{2\sigma^2}\left(\vbeta - \tfrac{g}{1+g}\widehat{\vbeta}_{\mbox{\tiny LS}}\right)
+\left[\tfrac{g}{1+g} \left( \mX^T\mX \right)^{-1}\right]^{-1}
+\left(\vbeta - \tfrac{g}{1+g}\widehat{\vbeta}_{\mbox{\tiny LS}}\right)
+\right\}
+\\[2ex]
+& \ds \qquad \times 
+\left[ \frac{\left[\tfrac{1}{2}\|\vy\|^2\left( 
+	1 -
+	\tfrac{g}{1+g} R^2\right) \right]^{n/2}}{\Gamma(n/2)} (\sigma^2)^{-(n/2 + 1)} \exp\left\{ - \sigma^{-2} \tfrac{1}{2}\|\vy\|^2\left( 
+1 -
+\tfrac{g}{1+g} R^2\right) \right\} \right] d\sigma^2
+
+\\[2ex]
+
+& \ds = 
+\left|2\pi \tfrac{g}{1+g} \left( \mX^T\mX \right)^{-1}\right|^{-1/2}
+\frac{\left[\tfrac{1}{2}\|\vy\|^2\left( 
+	1 -
+	\tfrac{g}{1+g} R^2\right) \right]^{n/2}}{\Gamma(n/2)}
+\\[2ex]
+& \ds \qquad \times \int
+(\sigma^2)^{-(n/2 + p/2 + 1)}
+\exp\left[ 
+-\sigma^{-2}
+\left\{ \tfrac{1}{2}\|\vy\|^2\left( 
+1 -
+\tfrac{g}{1+g} R^2\right) 
++
+\tfrac{1}{2}\left(\vbeta - \tfrac{g}{1+g}\widehat{\vbeta}_{\mbox{\tiny LS}}\right)
+\left[\tfrac{g}{1+g} \left( \mX^T\mX \right)^{-1}\right]^{-1}
+\left(\vbeta - \tfrac{g}{1+g}\widehat{\vbeta}_{\mbox{\tiny LS}}\right)
+\right\}
+\right] d\sigma^2
+
+\\[2ex]
+
+& \ds = 
+\left|2\pi \tfrac{g}{1+g} \left( \mX^T\mX \right)^{-1}\right|^{-1/2}
+\frac{\left[\tfrac{1}{2}\|\vy\|^2\left( 
+	1 -
+	\tfrac{g}{1+g} R^2\right) \right]^{n/2}}{\Gamma(n/2)}
+\\[2ex]
+& \ds \qquad \times \frac{\Gamma(n/2 + p/2)}{
+\left[ 
+\tfrac{1}{2}\|\vy\|^2\left( 
+1 -
+\tfrac{g}{1+g} R^2\right) 
++
+\tfrac{1}{2}\left(\vbeta - \tfrac{g}{1+g}\widehat{\vbeta}_{\mbox{\tiny LS}}\right)
+\left[\tfrac{g}{1+g} \left( \mX^T\mX \right)^{-1}\right]^{-1}
+\left(\vbeta - \tfrac{g}{1+g}\widehat{\vbeta}_{\mbox{\tiny LS}}\right)
+\right]^{(n/2 + p/2)}}
+
+\end{array}
+$$
+
+\noindent which is a $p$-variate Student's $t$-distribution with
+$$
+\vbeta|\vy,g \sim t_n\left( \tfrac{g}{1+g}\widehat{\vbeta}_{\mbox{\tiny LS}},  \tfrac{g}{1+g} \left( 
+1 -
+\tfrac{g}{1+g} R^2\right)  \left( \mX^T\mX \right)^{-1} \right)
+$$
+
+
+
+$$
+p(\vbeta|\vy,h) = \frac{\Gamma\left[(n+p)/2\right]}{\Gamma(n/2)n^{p/2}\pi^{p/2}\left|{\boldsymbol\Sigma}\right|^{1/2}\left[1+\frac{1}{n}(\vbeta-h\widehat{\vbeta}_{\mbox{\tiny LS}})^T\left[ h \left( 
+	1 -
+	h R^2\right)  \left( \mX^T\mX \right)^{-1} \right]^{-1}(\vbeta-h\widehat{\vbeta}_{\mbox{\tiny LS}})\right]^{(n+p)/2}}
+$$
+
+\subsection{Density for $p(\vbeta|\vy)$}
+
+
+$$
+\begin{array}{rl}
+p(\vbeta|\vy) 
+    & \ds 
+    = \frac{\Gamma\left[(n+p)/2\right] \left|  (\mX^T\mX) ^{-1} \right|^{1/2}}{\Gamma(n/2)n^{p/2}\pi^{p/2}}
+    \\
+    & \ds \quad \times \int 
+h^{p/2} ( 
+1 -
+h R^2)^{p/2}
+\left[1+\frac{1}{n}(\vbeta-h\widehat{\vbeta}_{\mbox{\tiny LS}})^T\left[ h \left( 
+	1 -
+	h R^2\right)  \left( \mX^T\mX \right)^{-1} \right]^{-1}(\vbeta-h\widehat{\vbeta}_{\mbox{\tiny LS}})\right]^{-(n+p)/2} p(h|\vy)dh
+	\\
+	& \ds 
+	= \mbox{Constant} \times \int 
+	h^{b+p/2}(1 - h)^{2 - b + n/2} ( 
+	1 -
+	h R^2)^{-(n-p)/2}
+	    \left[1+\frac{1}{n}(\vbeta-h\widehat{\vbeta}_{\mbox{\tiny LS}})^T\left[ h \left( 
+	    1 -
+	    h R^2\right)  \left( \mX^T\mX \right)^{-1} \right]^{-1}(\vbeta-h\widehat{\vbeta}_{\mbox{\tiny LS}})\right]^{-(n+p)/2}dh
+	    
+	\\
+	& \ds 
+	= \mbox{Constant} \times \int 
+	h^{b+p/2}(1 - h)^{2 - b + n/2} 
+	\left[ h(1 -h R^2) +\frac{1}{n}(\vbeta-h\widehat{\vbeta}_{\mbox{\tiny LS}})^T\mX^T\mX (\vbeta-h\widehat{\vbeta}_{\mbox{\tiny LS}})\right]^{-(n+p)/2}dh  
+		
+	\\  
+	& \ds 
+	= \mbox{Constant} \times \int_0^1
+	h^{n/2 - a - 2}(1 - h)^{p/2 + a + 4} (Ah^2 + Bh + C)^{-(n+p)/2}dh  
+\end{array}
+$$
+
+\subsubsection{Approximate density for $p(\vbeta|\vy,g)$}
+
+If $n$ is large then
+$$
+\vbeta|\vy,g \stackrel{\mbox{\tiny approx.}}{\sim} N\left( \tfrac{g}{1+g}\widehat{\vbeta}_{\mbox{\tiny LS}},  \tfrac{g}{1+g} \left( 
+1 -
+\tfrac{g}{1+g} R^2\right)  \left( \mX^T\mX \right)^{-1} \right)
+$$
+
+$$
+\ds p(\vbeta|\vy) \approx \mbox{Constant} 
+\times \int_0^\infty h^{b+p/2}(1 - h)^{2-b+n/2}  (1  - h R^2)^{-n/2} \exp\left\{  
+-\frac{Ah^2 + Bh + C}{2h(1-Rh)} 
+\right\} dh
+$$
+
+
+\subsubsection{Delta Method Approximation}
+
+
+$$
+p(\vbeta|\vy,g) = \frac{\Gamma\left[(n+p)/2\right]}{\Gamma(n/2)n^{p/2}\pi^{p/2}\left|{\boldsymbol\Sigma}\right|^{1/2}\left[1+\frac{1}{n}\left(\vbeta-\tfrac{g}{1+g}\widehat{\vbeta}_{\mbox{\tiny LS}}\right)^T\left[ \tfrac{g}{1+g} \left( 
+	1 -
+	\tfrac{g}{1+g} R^2\right)  \left( \mX^T\mX \right)^{-1} \right]^{-1}\left(\vbeta-\tfrac{g}{1+g}\widehat{\vbeta}_{\mbox{\tiny LS}}\right)\right]^{(n+p)/2}}
+$$
+
+\noindent where 
+$$
+\mSigma = \tfrac{g}{1+g} \left( 
+1 -
+\tfrac{g}{1+g} R^2\right)  \left( \mX^T\mX \right)^{-1}
+$$
+
+
+$$
+\begin{array}{rl}
+p(\vbeta|\vy) 
+& \ds = \int_0^\infty p(\vbeta|\vy,g)p(g|\vy) dg
+\\
+& \ds = \bE_{g|\vy} \left[ 
+p(\vbeta|\vy,g)
+\right]
+\\ 
+& \ds 
+\propto 
+\bE_{g|\vy} \left[ 
+\left\{1+\frac{1}{n}\left(\vbeta-\tfrac{g}{1+g}\widehat{\vbeta}_{\mbox{\tiny LS}}\right)^T\left[ \tfrac{g}{1+g} \left( 
+1 -
+\tfrac{g}{1+g} R^2\right)  \left( \mX^T\mX \right)^{-1} \right]^{-1}\left(\vbeta-\tfrac{g}{1+g}\widehat{\vbeta}_{\mbox{\tiny LS}}\right)\right\}^{-(n+p)/2}
+\right]
+\\ 
+& \ds \approx
+\left[ 
+\bE_{g|\vy} 
+\left\{1+\frac{1}{n}\left(\vbeta-\tfrac{g}{1+g}\widehat{\vbeta}_{\mbox{\tiny LS}}\right)^T\left[ \tfrac{g}{1+g} \left( 
+1 -
+\tfrac{g}{1+g} R^2\right)  \left( \mX^T\mX \right)^{-1} \right]^{-1}\left(\vbeta-\tfrac{g}{1+g}\widehat{\vbeta}_{\mbox{\tiny LS}}\right)\right\} \right]^{-(n+p)/2} 
+\end{array}
+$$
+
+\subsection{Expression for $\bE(\vbeta|\vy)$}
+
+ 
+$$
+\begin{array}{rl}
+\ds \bE(\vbeta|\vy) 
+    & \ds = \int \vbeta p(\vbeta|\vy,\sigma^2,g) p(\sigma^2|\vy,g) p(g|\vy) d\vbeta d\sigma^2 dg
+    
+    \\ [2ex]
+    
+    & \ds = \int \tfrac{g}{1+g}\widehat{\vbeta}_{\mbox{\tiny LS}} p(\sigma^2|\vy,g) p(g|\vy)  d\sigma^2 dg
+    
+        \\ [2ex]
+        
+    & \ds = \left[ \int \tfrac{g}{1+g} p(g|\vy) dg \right] \widehat{\vbeta}_{\mbox{\tiny LS}} 
+    
+    \\ [2ex]
+            
+    & \ds = \bE\left[ \left. \frac{g}{1+g}  \right| \vy \right] \widehat{\vbeta}_{\mbox{\tiny LS}} 
+\end{array}
+$$
+
+\noindent Next,
+$$
+\begin{array}{rl}
+\ds \bE\left[ \left. \frac{g}{1+g}  \right| \vy \right]
+& \ds = \int_0^\infty \left( \frac{g}{1+g} \right) p(g|\vy) dg 
+
+\\ [2ex]
+
+& \ds = \frac{(1 -  R^2)^{b+1}}{\mbox{Beta}(p/2 + a + 1,b+1)} 
+\int_0^\infty g^{b+1} (1 + g)^{-1} \left[  1 + g(1 -  R^2) \right]^{-n/2} dg
+\end{array}
+$$
+
+
+\noindent From G\&R 3.197 Equation 5 we have
+$$
+\int_0^\infty x^{\lambda - 1} (1 + x)^{\nu}  (1 + \alpha x)^{\mu} dx
+= \mbox{Beta}(\lambda,-\mu-\nu-\lambda) {}_2 F_1(-\mu,\lambda;-\mu-\nu;1-\alpha)
+$$  
+
+\noindent for $|\mbox{arg}(\alpha)|<\pi$, $-\mbox{Re}(\mu+\nu)>\mbox{Re}(\lambda)>0$.
+
+\medskip 
+\noindent In the above 
+$$
+\lambda = b + 2
+$$
+$$
+\nu = -1
+$$
+$$
+\alpha = 1 - R^2
+$$
+$$
+\mu = - n/2
+$$
+
+\noindent Now
+$$
+- (\mu + \nu) = - (- n/2 - 1) = n/2 + 1 
+$$
+$$
+\lambda = b + 2 = n/2 - p/2  - a
+$$
+
+\noindent Hence, $- (\mu + \nu) > \lambda$ and
+$\lambda >  0$ provided $n > p  - 2a$ and
+$$
+\begin{array}{rl}
+\ds \bE\left[ \left. \frac{g}{1+g}  \right| \vy \right]
+& \ds =  \frac{ \mbox{Beta}(p/2 + a + 1,b + 2) }{\mbox{Beta}(p/2 + a + 1,b+1)}  (1 -  R^2)^{b+1}
+ {}_2 F_1(n/2,b+2;n/2 + 1;R^2)
+\end{array}
+$$
+
+
+\noindent Using a Euler transform 
+$$
+{}_2 F_1(a,b;c;d) = (1 - d)^{c-a-b} {}_2 F_1(c-a,c-b;c;d)
+$$
+
+
+\noindent 
+and
+$$
+{}_2 F_1(a,b;c;d) = {}_2 F_1(b,a;c;d)
+$$
+
+
+$$
+\begin{array}{rl}
+{}_2 F_1(n/2,b+2;n/2 + 1;R^2) 
+& \ds = (1 - R^2)^{(n/2+1) - (n/2) - (b+2)} {}_2 F_1(1,n/2 - b - 1;n/2 + 1;R^2) \\
+& \ds = (1 - R^2)^{  -(b+1)} {}_2 F_1(n/2 - b - 1,1;n/2 + 1;R^2)
+\end{array}
+$$
+
+\noindent Hence,
+$$
+\begin{array}{rl}
+\ds \bE\left[ \left. \frac{g}{1+g}  \right| \vy \right]
+& \ds =  \frac{ \mbox{Beta}(p/2 + a + 1,b + 2) }{\mbox{Beta}(p/2 + a + 1,b+1)}  
+{}_2 F_1(p/2 + a + 1,1;n/2 + 1;R^2)
+\end{array}
+$$
+
+
+\noindent Note that
+$$
+{}_2 F_1(a,b;c;1) = \frac{\Gamma(c)\Gamma(c-a-b)}{\Gamma(c-a)\Gamma(c-b)}
+$$
+
+\noindent so that 
+$$
+{}_2 F_1(p/2 + a + 1,1;n/2 + 1;1) = 
+\frac{\Gamma(n/2+1)\Gamma(b+1)}{\Gamma(b+2)\Gamma(n/2)}
+$$
+
+
+\noindent Hence, when $R^2=1$ we have
+$$
+\begin{array}{rl}
+\ds \bE\left[ \left. \frac{g}{1+g}  \right| \vy \right]
+& \ds = 
+\frac{\Gamma(p/2+a+b+2)}{\Gamma(p/2+a+b+3)}    
+\frac{\Gamma(n/2+1)}{\Gamma(n/2)}
+\\
+& \ds = \frac{ n/2}{p/2+a+b+2}
+\\
+& \ds = \frac{ n/2}{n/2} = 1
+\end{array}
+$$
+
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.9\textwidth]{shrinkage.pdf}
+	%\begin{minipage}[t]{0.8\textwidth}
+	\caption{Black ($n=\lceil 1.1p \rceil$), Red ($n=\lceil 1.25p \rceil$), Green ($n=\lceil 1.5p \rceil$), Blue ($n= 2p$), Cyan ($n= 5p$), Pink ($n= 10p$)}
+	\label{fig:04}
+	%\end{minipage}
+\end{figure}
+
+
+
+ 
+
+
+
+%$$
+%\begin{array}{rl}
+%{}_2 F_1(p/2 + a + 1,1;n/2 + 1;R^2) 
+%& \ds = {}_2 F_1(1,p/2 + a + 1;n/2 + 1;R^2) \\
+%& \ds = (1-R^2)^{-(p/2 + a + 1)} {}_2 F_1\left(
+%b+2,1;n/2 + 1;\frac{ R^2}{R^2 - 1}\right) \\
+%& \ds = (n/2)  \left( \frac{ R^2}{R^2 - 1}\right)^{-n/2} \left( 1- \frac{ R^2}{R^2 - 1}\right)^{n/2+1-(b+2)- 1}\mbox{Beta}\left( \frac{ R^2}{R^2 - 1}, n/2, (n-p)/2 - a  - (n/2 + 1) \right)
+%\end{array}
+%$$
+
+
+
+
+
+\subsubsection{Simplifications using incomplete Beta functions}
+
+If we use the identity
+$$
+{}_2 F_1(p,1-q,p+1,x) = \frac{p}{x^p}\mbox{Beta}_x(p,q)
+$$
+
+\noindent then
+$$
+{}_2 F_1(n/2,b+2;n/2 + 1;R^2) = \frac{n}{(R^2)^n}\mbox{Beta}_{R^2}(n,-(b+1)) = \int_{0}^{R^2} \frac{ x^{n-1}}{ (1-x)^{(n-p)/2 - a}} dx
+$$
+
+\noindent which is finite provided $R^2\ne 1$.
+
+
+$$
+\int_{0}^{R^2} \left( \frac{x}{1-x}\right)^{n-1} (1-x)^{p/2 + a + 1}   dx
+$$
+
+Let $u = x/(1-x)$ then
+$$
+1 + u = (1 - x)/(1 - x) + x/(1-x) = 1/(1-x)
+$$
+
+\noindent When $x=0$ we have $u=0$. When $x=R^2$ then $u = R^2/(1-R^2)$.
+
+$$
+1/(1+u) = 1 - x
+$$
+
+$$
+x = 1 -1/(1+u) = (u+1)/(u+1) -1/(1+u) = u/(1+u)
+$$
+
+$$
+dx/du = 1/(1 + u) - u/(1+u)^2 = (1 + u)/(1 + u)^2 - u/(1+u)^2 = 1/(1 + u)^2
+$$
+
+$$
+\int_{0}^{z} u^{n-1} (1 + u)^{-(p/2 + a + 3)}   du
+$$
+
+
+$$
+\mbox{Beta}_{R^2}(n,-(b+1)) = \mbox{Beta}(n,-(b+1)) - \mbox{Beta}_{1-R^2}(-(b+1),1)
+$$
+
+
+\subsection{$\bE(\vbeta\vbeta^T|\vy)$}
+
+$$
+\sigma^2|\vy,g \sim \mbox{IG}\left[\tfrac{n}{2},\tfrac{n}{2}\left( 
+1 -
+\tfrac{g}{1+g} R^2\right) \right]
+$$
+
+$$
+\begin{array}{rl}
+\ds \bE(\vbeta\vbeta^T|\vy)
+& \ds = 
+\bE\left[ \left( \frac{g}{1+g} \right)^2 \Big| \vy  \right]  \widehat{\vbeta}\widehat{\vbeta}^T
++ \bE \left[ \frac{g}{1+g} \bE\left\{ \sigma^2 | g,\vy \right\} \Big|\vy \right] \left( \mX^T\mX \right)^{-1} 
+
+\\ [2ex]
+
+& \ds = 
+\bE\left[ \left( \frac{g}{1+g} \right)^2 \Big| \vy  \right]  \widehat{\vbeta}\widehat{\vbeta}^T
++ \frac{n}{n - 2} \bE \left[ \frac{g}{1+g} \left( 
+	1 -
+	\frac{g}{1+g} R^2\right) \Big|\vy \right] \left( \mX^T\mX \right)^{-1} 
+
+
+\end{array}
+$$
+
+
+
+$$
+\begin{array}{rl}
+\ds \bE\left[ \left(  \frac{g}{1+g} \right)^2  \Big| \vy \right]
+& \ds = \int_0^\infty \left( \frac{g}{1+g} \right)^2 p(g|\vy) dg 
+
+\\ [2ex]
+
+& \ds = \frac{(1 -  R^2)^{b+1}}{\mbox{Beta}(p/2 + a + 1,b+1)} 
+\int_0^\infty g^{b+2} (1 + g)^{-2} \left[  1 + g(1 -  R^2) \right]^{-n/2} dg
+\end{array}
+$$
+
+
+\noindent From G\&R 3.197 Equation 5 we have
+$$
+\int_0^\infty x^{\lambda - 1} (1 + x)^{\nu}  (1 + \alpha x)^{\mu} dx
+= \mbox{Beta}(\lambda,-\mu-\nu-\lambda) {}_2 F_1(-\mu,\lambda;-\mu-\nu;1-\alpha)
+$$  
+
+\noindent for $|\mbox{arg}(\alpha)|<\pi$, $-\mbox{Re}(\mu+\nu)>\mbox{Re}(\lambda)>0$.
+
+$$
+\lambda = b + 3
+$$ 
+$$
+\nu = -2
+$$
+$$
+\alpha = 1 - R^2
+$$
+$$
+\mu = - n/2
+$$
+
+\noindent Checking the conditions
+$$
+- (\mu + \nu) = n/2 + 2
+$$
+$$
+\lambda = \frac{n - p}{2} - a + 1
+$$
+
+$$
+n/2 + 2 - (\frac{n - p}{2} - a + 1) = p/2 + a + 1
+$$
+
+\noindent so $-(\mu + \nu)>\lambda$ always holds.
+
+\medskip 
+\noindent Hence,
+$$
+\begin{array}{rl}
+\ds \bE\left[ \left(  \frac{g}{1+g} \right)^2  \Big| \vy \right]
+& \ds = (1 -  R^2)^{b+1} 
+\frac{
+	\mbox{Beta}(p/2 + a+ 1,b + 3) 
+}{
+	\mbox{Beta}(p/2 + a + 1,b+1)
+} 
+{}_2 F_1(n/2,b+3;n/2+2; R^2)
+\end{array}
+$$
+
+
+
+$$
+{}_2 F_1(a,b;c;d) = (1 - d)^{c-a-b} {}_2 F_1(c-a,c-b;c;d)
+$$
+
+$$
+{}_2 F_1(n/2,b+3;n/2+2; R^2) = (1 - R^2)^{- (b+1)}
+{}_2 F_1(2,p/2 + a + 1;n/2 + 2; R^2)
+$$
+
+
+$$
+\begin{array}{rl}
+\ds \bE\left[ \left(  \frac{g}{1+g} \right)^2  \Big| \vy \right]
+& \ds =  
+\frac{
+	\mbox{Beta}(p/2 + a+ 1,b + 3) 
+}{
+\mbox{Beta}(p/2 + a + 1,b+1)
+} 
+{}_2 F_1(p/2 + a + 1,2;n/2 + 2; R^2)
+\end{array}
+$$
+
+\subsection{$\mbox{Cov}(\vbeta|\vy)$}
+
+
+$$
+\mbox{Cov}(\vbeta|\vy)
+= \mbox{Var}\left( \frac{g}{1 + g} \Big| \vy \right) \widehat{\vbeta}\widehat{\vbeta}^T
++ \frac{n}{n - 2} \bE \left[ \frac{g}{1+g} \left( 
+1 -
+\frac{g}{1+g} R^2\right) \Big|\vy \right] (\mX^T\mX)^{-1}
+$$
+
+
+$$
+\mbox{Cov}(\vbeta|\vy)
+= (G_2 - G_1^2) \widehat{\vbeta}\widehat{\vbeta}^T
++ \left( \frac{n}{n - 2} \right) \left(  
+G_1 - G_2 R^2\right) (\mX^T\mX)^{-1}
+$$
+
+$$
+\begin{array}{rl}
+\ds G_1
+& \ds =  \frac{ \mbox{Beta}(p/2 + a + 1,b + 2) }{\mbox{Beta}(p/2 + a + 1,b+1)}  
+{}_2 F_1(p/2 + a + 1,1;n/2 + 1;R^2)
+
+\\ [2ex]
+
+\ds G_2 
+& \ds =
+\frac{
+	\mbox{Beta}(p/2 + a+ 1,b + 3) 
+}{
+\mbox{Beta}(p/2 + a + 1,b+1)
+} 
+{}_2 F_1(p/2 + a + 1,2;n/2 + 2; R^2)
+\end{array}
+$$
+
+\end{document}
+ 

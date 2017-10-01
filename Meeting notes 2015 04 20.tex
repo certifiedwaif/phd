@@ -1,0 +1,47 @@
+\documentclass{article}[12pt]
+\usepackage{amsmath}
+\input{include.tex}
+\input{Definitions.tex}
+\title{Meeting notes - 20/4/2015}
+\begin{document}
+We basically dove straight into the modelling. The appraoch that we were going to take
+using auxillary variables in fact won't work, because there's no dependence between
+the $y_i$ variables and the regression co-efficients of the probit model.
+\[
+q(y_i) \propto \exp{
+	\{\bE_{-q(y_i)}\}
+		  y_i c_i (-\half \log{(2 \pi \sigma_1^2)} - \frac{1}{2 \sigma_1^2} (\log t_i - \mu_1)^2)
+		+ y_i (1 - c_i) (-\half \log{(2 \pi \sigma_1^2)} - \frac{1}{2 \sigma_1^2} (a_i - \mu_1)^2)
+		+ (1 - y_i) c_i (-\half \log{(2 \pi \sigma_0^2)} - \frac{1}{2 \sigma_0^2} (\log t_i - \mu_0)^2)
+		+ (1 - y_i) (1 - c_i) (-\half \log{(2 \pi \sigma_0^2)} - \frac{1}{2 \sigma_0^2} (a_i - \mu_0)^2)
+		+ y_i x_i^T \vbeta
+}
+\]
+
+Once you perform some factorisations, you end up with
+\[
+q(y_i) \propto \exp{
+	c_i \bE_q (-\half \log{\sigma_1^2} - \frac{1}{2 \sigma_1^2} (\log{t_i} - \mu_1)^2)
+	+ (1 - c_i) \bE_q (-\half \log{\sigma_1^2} - \frac{1}{2 \sigma_1^2} (a_i - \mu_1)^2)
+	- c_i \bE_q (-\half \log{\sigma_0^2} - \frac{1}{2 \sigma_0^2} (\log{t_i} - \mu_0)^2)
+	- (1 - c_i) \bE_q (-\half \log{\sigma_0^2} - \frac{1}{2 \sigma_0^2} (a_i - \mu_0)^2)
+}
+\]
+
+\[
+q(\vbeta) \propto \exp{\{\vp^T \mX \vbeta - \vone^T\log{(1 + \exp{(\mX \vbeta)})} - \frac{1}{2 \sigma_\vbeta^2}\|\vbeta\|^2\}}
+\]
+
+Integrating this to get the normalisation constant is difficult, so we adopt another approach. Use
+Laplace's method of approximation. If you have a log concave likelihood and your random variables
+are i.i.d., then our assumptions are met and we can use this method.
+
+Let $f(\vbeta) = \vp^T\mX \vbeta - \vone^T \log{(1 + e^{\mX \vbeta})} - \frac{1}{2 \sigma_\vbeta^2} \|\vbeta\|^2$. Then $\grad f(\vbeta) = g(\vbeta) = \mX^T(\vp - b'(\mX \vbeta) - \sigma_\vbeta^{-2} \vbeta$. Set $g(\vbeta) = 0$, to find the mode.
+\[
+b(x) = \log{(1+e^{x})}
+b'(x) = \frac{e^x}{1 + e^x} = (1 + e^{-x})^{-1}
+\mH f(\vbeta) = -mX^T \diag{(b''(\mX))} mX - \sigma_\vbeta^{-2} \mI
+\]
+
+Then Laplace's method of approximation is $\vbeta^{(t+1)} = \vbeta^{(t)} - \mH(\vbeta^{t})^{-1} g(\vbeta^{(t)})$. Stop when $\|g(\vbeta^{(t)})\| < \epsilon$
+\end{document}

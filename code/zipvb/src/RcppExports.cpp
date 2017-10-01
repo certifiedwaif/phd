@@ -43,3 +43,15 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+
+static const R_CallMethodDef CallEntries[] = {
+    {"zipvb_fastdiag", (DL_FUNC) &zipvb_fastdiag, 2},
+    {"zipvb_fastdiag2", (DL_FUNC) &zipvb_fastdiag2, 2},
+    {"zipvb_fastsolve", (DL_FUNC) &zipvb_fastsolve, 2},
+    {NULL, NULL, 0}
+};
+
+RcppExport void R_init_zipvb(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
+}

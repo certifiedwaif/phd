@@ -1,0 +1,35 @@
+\section{Introduction}
+
+Start off with a summary of the Particle Em for Variable Selection paper by Veronika Rockova
+
+Introduction
+EM vulnerable to local entrapment when likelihood is multi-modal, especially spike-and-slab posterior
+distributions for model selection
+non-parametric Variational Bayes, repulsive particles. These particles are geared towards unchartered areas of
+the posterior, providing a more comprehensive summary of its' topography than simple parallel EM deployments
+Report of a single model will be a misleading reflection of the model uncertainty in a highly multimodal
+posterior. Identify a collection of representative models
+What's our choice of prior?
+Hard to explore model space and escape local entrapment, especially in high dimensions
+Population-based methods, allow trajectories to ``communicate''
+
+Main contributions
+As a precursor to Particle Em, we propose the Reversed EMVS algorithm, a discrete optimisation approach for
+spike-and-slab variable selection. Treat $\vgamma$ as parameters of interest, and $\vbeta$ as missing data.
+Closed form updates, targeting the discrete model space.
+
+Population-based optimisation approach that exhibits both individual and social behaviour. Particles share a
+common goal (finding essential posterior modes) and realise it by exploring the posterior environment while
+mutually interacting. Social behaviour is mediated through entropy, which serves as a diversifying penalty.
+
+Entire trajectory of evolving posteriors is far more informative for variable selection
+
+By forging connections between Particle EM and sequential Monte Carlo (SMC) procedures, we propose a
+stochastic Particle EM variant
+
+Visualisation
+
+Approximate Bayesian inference
+Variational Approximation
+Variational Bayes
+Collapsed Variational Bayes

@@ -1,0 +1,214 @@
+\documentclass{beamer}
+
+\usetheme{Warsaw}
+\usepackage{graphicx}
+\usepackage{ulem}
+\input{include.tex}
+\input{Definitions.tex}
+
+\usefonttheme{serif}
+
+\title{Recent developments in the R ecosystem}
+\author{Mark Greenaway\\PhD candidate\\markg@maths.usyd.edu.au}
+
+\mode<presentation>
+{ \usetheme{boxes} }
+
+\begin{document}
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}
+\frametitle{About me}
+\begin{itemize}
+\item I did computer science first
+\item Then I got bored and switched to maths/statistics
+\item Now I'm somewhere in the intersection. I've spent a little bit of time working
+			as a data scientist, whatever that means
+\item Still have some ties to the tech industry
+\item Computer scientists and statisticians generally care about different things
+\item It's been interesting seeing these worlds converge, for better or for worse
+\item I've tried to focus on things that are generally useful, and keep the techno-babble to a
+			minimum
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{It's an R world \ldots}
+\begin{itemize}
+\item There's been an explosion of interest in data science in the last few years, which has 
+			lead to a lot of people from the tech. industry coming into the community
+\item The data science world has basically settled on two main languages: R and Python
+\item R is also an important programming language in Bioinformatics
+\item Most statisticians would rather not learn another language
+\item The good news is you don't have to: R is recognised as a first-class citizen in the data
+			science world, and everything is expected to integrate with it
+\item R's approach has been so successful that other languages have begun to copy it e.g. 					data frames, which is a clear signal that we're doing something right
+\item Other languages are a \emph{long} way behind us
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Why R won}
+\begin{itemize}
+\item Designed for interactive data analysis
+\item De facto standard in statistical research
+\item Designed by statisticians, for statisticians. Different mindset to
+			general programming
+\item Good data manipulation/cleaning, data frames, vector oriented
+\item Good graphing: base graphics, lattice, ggplot
+\item Formula syntax
+\item We understand the importance of missing data: NA/NULL
+\item Virtually every modelling approach is implemented in R. New ones are relatively easy
+			to add, building on existing work
+\item Can build on the existing work from the R community, and several thousand
+			CRAN packages
+\item Other languages are still catching up, although Python is rapidly gaining
+			ground. They're essentially re-inventing R. Meanwhile, we're forging ahead \ldots
+\end{itemize}
+\end{frame}
+
+% \begin{frame}
+% \frametitle{Text editors/Integrated Development Environments}
+% \begin{itemize}
+% \item Most of us use RStudio
+% \item Lots of other options depending on your needs: Emacs, Vim, Sublime
+% \item All have syntax highlighting, ability to run R commands, navigate R functions, code
+% 			folding etc.
+% \end{itemize}
+% \end{frame}
+
+\begin{frame}
+\frametitle{Hadley Wickham/RStudio's contributions \ldots}
+\begin{itemize}
+\item ggplot2 - Grammar of Graphics, now in maintenance mode (!)
+\item ggvis - Interactive Grammar of Graphics for R - the next version of ggplot2
+\item readr - Read flat files (CSV, TSV, FWF) into R up to 10x faster than base
+\item tidyr - Data cleaning with spread and gather functions
+\item dplyr - select/filter/mutate/summarise/arrange/group by; plyr for data frames
+\item magrittr - ``Ceci n'est pas un pipe'' Piping. Ideas from functional programming.
+			This library is becoming extremely popular.
+\item stringr - String handling
+\item lubridate - Date and time
+\item testthat - Regression testing framework
+\item Advanced R - the first few chapters are useful. The later chapters are perhaps a little
+			esoteric for most people
+\item R Packages - Learn to create R packages quickly
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Version control/GitHub}
+\begin{itemize}
+\item "Dropbox for code"
+\item Several popular version control systems: Git/GitHub, Subversion, Mercurial
+\item GitHub most popular in the wider tech. community, and within the R community
+\item Keep track of changes
+\item Collaborate with others
+\item Option of keeping repositories private if you don't want your code to be public yet
+\item All popular R environments and text editors integrate with version control, so using it
+			is not too much harder than saving files once it's set up
+\item Many packages are now released on GitHub first, before being released on CRAN
+\item Example: https://github.com/hadley/ggplot2
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Visualisation/Web applications}
+\begin{itemize}
+\item A lot of visualisation libraries are available in Javascript
+\item htmlwidgets - Integrates R with Javascript. The following packages are already
+			available:
+			\begin{itemize}
+			\item Leaflet - Geo-spatial mapping
+			\item dygraphs - Time series charting
+			\item MetricsGraphics - Scatterplots and line charts with D3
+			\item networkD3 - Graph data visualisation with D3
+			\item d3heatmap - Interactive heatmaps with D3
+			\item DataTables - Tabular data display
+			\item threejs - 3D scatterplots and globes
+			\item DiagrammeR - Diagrams and flowcharts
+			\end{itemize}
+\item shiny - Build a web application in R in five minutes
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{The cloud \ldots}
+\begin{itemize}
+\item The cloud is someone else's computer
+\item Cloud providers in Sydney: Amazon Web Services, Anchor, Rackspace etc.
+\item Choice of Windows, Linux or whatever you like. If you choose Windows, Microsoft's 
+			licencing fees will be included in your monthly bill
+\item Bioconductor is available as an AMI (Amazon Machine Image)
+\item You can rent a machine as powerful as verona on demand for ~$\$2.31$ an hour, if you 
+			just need the CPUs
+\item It'll cost you $\$6.96$ if you want 244 gig. of RAM and 24 2 gig. hard disks as well
+\item Assuming verona cost ~$\$30,000$, that's enough to rent the machine above for ~6 months
+\item Can also rent machines with a GPU, or several GPUs
+\item It still makes sense to buy machines. But it's also nice to be able to rent them for
+			short periods.
+\item It's good to have options.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Hadoop}
+\begin{itemize}
+\item Started the Big Data/data science revolution in tech.
+\item Based on Google's Map/Reduce - perform computation on multiple nodes, and then combine
+			the results.
+\item Imagine rewriting your entire program in terms of lapply() and Reduce().
+\item Designed to run on clusters
+\item Distributed file system - HDFS
+\item Batch-oriented
+\item Let's rewrite everything \emph{again}
+\item Debugging is a nightmare if something goes wrong
+\item Not necessarily well-suited to iterative algorithms
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Spark}
+\begin{itemize}
+\item Successor to Hadoop in some sense
+\item R support integrated into the main release: SparkR, MapR
+\item Resilient Distributed Datasets (RDDs), SparkR data frame
+\item Can be used interactively. Try to make distributed computing more
+			transparent to the user
+\item Designed to run iterative algorithms
+\item Run programs up to 100x faster than Hadoop in memory, or 10x faster on disk
+\item Let's rewrite everything \emph{again}
+\item I'm still wondering what happens if something goes wrong
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{MLlib - distributed machine learning framework for Spark}
+\begin{itemize}
+\item summary statistics, correlations, stratified sampling, hypothesis testing, random data generation
+\item classification and regression: SVMs, logistic regression, linear regression, decision trees, naive Bayes
+\item collaborative filtering: alternating least squares (ALS)
+\item clustering: k-means, Latent Dirichlet Allocation (LDA)
+\item dimensionality reduction: singular value decomposition (SVD), principal component analysis (PCA)
+\item feature extraction and transformation
+\item optimization primitives: stochastic gradient descent, limited-memory BFGS (L-BFGS)
+\end{itemize}
+Think about what's not here. Limited compared to what's in R already, but probably workable.
+Machine learning focus.
+\end{frame}
+
+\begin{frame}
+\frametitle{Keeping up with all this stuff \ldots}
+\begin{itemize}
+\item The pace of change in this area is \emph{relentless}
+\item Twitter - Hadley Wickham and many other prominent R developers are on Twitter. If you 
+			have a problem with something you can often ask them directly
+\item Blogs - http://www.r-bloggers.com/ is a good starting point. Manage with an RSS reader 				like Feedly
+\item If you're spending too much time on social media, you could try Leechblock.
+			I've found this helpful.
+\end{itemize}
+\end{frame}
+
+\end{document}

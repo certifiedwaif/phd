@@ -1,0 +1,19 @@
+\frametitle{Why is the MCMC so slow?}
+It might be because of the way I've coded the Stan file:
+\begin{verbatim}
+vector[B] u[M];
+...
+for (n in 1:N) {
+    eta <- dot_product(X[n], vbeta);
+    for (m in 1:M)
+      for (b in 1:B)
+        eta <- eta + Z[n,(m-1)*B+b]*u[m][b];
+\end{verbatim}
+
+Triple-nested hand-coded loops are generally not very fast. Stan is written using
+the popular Eigen library, which uses SIMD instructions to speed up calculations where
+possible e.g. \texttt{dot\_product} is fast.
+
+There's probably a better way to code this in Stan. But this might be a case of
+diminishing returns.
+

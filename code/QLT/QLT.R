@@ -511,7 +511,7 @@ QLT <- function(K, data_fn, start, prior, bUnique=TRUE)
 	doVARBVS <- TRUE
 	doVB <- TRUE
 	doVBscreen <- TRUE
-	doCVA <- TRUE
+	doCVA <- FALSE
 
 	start_iter <- 1
 	for (trials in start_iter:TRIALS) 
@@ -748,15 +748,15 @@ QLT <- function(K, data_fn, start, prior, bUnique=TRUE)
 		}
 
 		dat <- cbind(
-					# as.numeric(SCORES.lasso[10,] ),
-					# as.numeric(SCORES.scad[10,] ),
-					# as.numeric(SCORES.mcp[10,] ),
+					as.numeric(SCORES.lasso[10,] ),
+					as.numeric(SCORES.scad[10,] ),
+					as.numeric(SCORES.mcp[10,] ),
 					# as.numeric(SCORES.emvs[10,] ),
 					as.numeric(SCORES.bms[10,] ),
 					as.numeric(SCORES.varbvs[10,] ),
-					# as.numeric(SCORES.bms[10,] ),
-					# as.numeric(SCORES.varbvs[10,] ),
-					as.numeric(SCORES.cva[10,] )
+					as.numeric(SCORES.bms[10,] ),
+					as.numeric(SCORES.varbvs[10,] ),
+					#as.numeric(SCORES.cva[10,] )
 					)
 					
 		#dev.off()

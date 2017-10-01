@@ -1,0 +1,131 @@
+\documentclass{beamer}
+
+\usetheme{Warsaw}
+\usepackage{graphicx}
+\usepackage{ulem}
+\input{include.tex}
+\input{Definitions.tex}
+
+\usefonttheme{serif}
+
+\title{Progress update}
+\author{Mark Greenaway\\PhD candidate\\markg\@maths.usyd.edu.au}
+
+\mode<presentation>
+{ \usetheme{boxes} }
+
+\begin{document}
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}{Knuckling down \ldots}
+\begin{itemize}
+\item Focus: Clearing the decks. This year is about my PhD, and my brother.
+\item No time for part-time work, except maybe tutoring. Got part-time job offers from CBA, IAG and interest
+			from Phastar. Politely rejected them all, no time!
+\item Mathematical statistics + Working code + Writing = Progress on my PhD
+\item I need to be working on all of these things, at the same time
+\item With a laptop and a smartphone, you can work anywhere!
+\item Show visible progress on your PhD every week. Preferably every day
+\item Zero-inflated model fitting code is now packaged as \texttt{zipvb}. Will be up on GitHub when the
+			first paper is published
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Tools I'm using}
+\begin{itemize}
+\item \begin{tabular}{|l|l|p{3cm}|}
+\hline
+Tool & URL & Description \\
+\hline
+GitHub & \url{http://github.com} & Distributed version control \\
+Slack & \url{http://slack.com} & Work-oriented chat \\
+Trello & \url{http://trello.com} & Task list\\
+Mendeley & \url{http://mendeley.com} & Citation manager
+\hline
+\end{tabular}
+\item These tools are all multi-user, and integrate with one another. Happy to demonstrate them to you, but
+			not now
+\item They also help me account for my \emph{time}, and show progress immediately
+\item I also use a text editor, because I work with a lot of code. I like Sublime Text (\url{http://www.sublimetext.com/})
+\item If you're happy with RStudio, just use that. Or a text editor \emph{and} RStudio
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Block inverse formula}
+% Copy from meeting notes
+% Re-writing meeting notes to use in the paper and thesis
+% Discarded old code, writing better, cleaner code
+Let $\mA$ be a matrix partitioned into blocks,
+
+\small
+\begin{equation*}
+\mA = \begin{pmatrix}
+\mP & \mQ \\
+\mR & \mS
+\end{pmatrix}.
+\end{equation*}
+\normalsize
+
+Then $\mA^{-1}$ is
+
+\small
+\begin{equation*}
+\begin{pmatrix}
+\mP^{-1} + (\mP^{-1}.\mQ).(\mS - \mR.\mP^{-1}.\mQ)^{-1}.(\mR.\mP^{-1}) & -(\mP^{-1}.\mQ).(\mS - \mR.\mP^{-1}.\mQ)^{-1} \\
+-(\mS - \mR.\mP^{-1}.\mQ)^{-1}.(\mR.\mP^{-1}) & (\mS - \mR.\mP{^{-1}.\mQ}))^{-1}
+\end{pmatrix}
+\end{equation*}
+\normalsize
+
+If $\mS$ is a scalar, then the inversions involving $\mS$ become divisions.
+
+Thus if the inverse of $\mP$, $\mP^{-1}$ is available, we can calculate the inverse of $\mA$ using matrix
+multiplications in $O(p^2)$ time rather than $O(p^3)$, saving us a factor of $p$.
+
+\end{frame}
+
+\begin{frame}{Model selection correlations code}
+\begin{itemize}
+\item Writing correlation code in C++ using Eigen for linear algebra and Boost for bitstrings. 117
+			lines of code so far.
+			\url{https://github.com/certifiedwaif/phd/blob/master/code/correlation.cpp#L194-L311}
+\item How to write numerical software (compiled language version) 
+\begin{enumerate}
+\item Make it build
+\item Make it run
+\item Make it right (testing)
+\item Make it fast
+\end{enumerate}
+\item We're at Stage 2 right now. Initialisation works
+\item Rank 1 update and downdate works a couple of times
+\item Up to 5 iterations as of last week. About a million to go \ldots
+\item I have a tricky state bug, which I hope to track down early this week
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Hadley Wickham is coming to town!}
+\begin{itemize}
+\item Well, Melbourne.
+\item Close enough, right?
+\item Book now, to avoid disappointment. Places are going fast.
+\item \url{http://www.meetup.com/Data-Science-Melbourne/events/227234228/}
+\item I'm going.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Functional programming comes to the Hadleyverse \ldots}
+\begin{itemize}
+\item The R programming community is part of the wider programming community, whether you choose to
+			acknowledge this fact or not
+\item Over the past few years, there has been an explosion of interest in functional programming in the wider
+			programming community
+\item Hadley Wickham started a GitHub project for monads last week (\url{https://github.com/hadley/monads})
+\item We already have pipes in magrittr (\url{https://github.com/smbache/magrittr})
+\item These libraries make R more like Haskell
+\end{itemize}
+\end{frame}
+
+\end{document}

@@ -1,0 +1,203 @@
+\documentclass{beamer}
+
+\usetheme{Warsaw}
+\usepackage{graphicx}
+\usepackage{ulem}
+\usepackage{tikz}
+\input{include.tex}
+\input{Definitions.tex}
+
+\usefonttheme{serif}
+
+\title{Progress update}
+\author{Mark Greenaway\\PhD candidate\\markg@maths.usyd.edu.au}
+
+\mode<presentation>
+{ \usetheme{boxes} }
+
+\begin{document}
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}{Melbourne trip/Early last week}
+\begin{itemize}
+\item Met Hadley Wickham. The future of R is in good hands. \\
+	Key insight: Deep work \\
+	When I told him what I was doing, he responded ``I don't care about matrices.''. He cares 
+	about data frames/functional programming. \\
+\item A talk similiar to the talk he gave is available here \url{https://www.youtube.com/watch?v=hRNUgwAFZtQ}.
+\item Hung out with Charles Gray, PhD candidate at Latrobe working with Agus. I taught her some UNIX and Git.
+	She taught me some TikZ and LaTeX.
+	\tikz[scale=0.1]	{\draw (-0.75, 0.5) circle(10pt);	\draw (0.75, 0.5) circle(10pt);	\draw (-1, -0.75) to[out=-90, in=-90] (1, -0.75);}
+	
+\item Met with Lev Lafayette. Sys admin. Set up USyd HPC (1,500 cores), now working with NeCTAR (4,000 cores). 
+	\note{He's a nice guy, and we had a productive chat.}
+\item Gave a talk on floating point numbers at Functional Programming Special Interest Group Sydney.
+			Computer science/Haskell guys \ldots
+\end{itemize}
+\end{frame}
+
+\def\vGamma{{\boldsymbol{\Gamma}}}
+\begin{frame}{Focus this week: VB approximation for linear model selection}
+
+Consider the model $\vy | \vbeta, \sigma^2 \sim \text{N}_n(\mX \vGamma \vbeta, \sigma^2 \mI)$ 
+with priors
+\begin{equation*}
+\begin{array}{ll}
+\vbeta | \sigma^2, g &\sim \text{N}_p(\vzero, g \sigma^2(\mX^\top \vGamma \mX)^{-1}), \\
+\vgamma_i &\sim \text{Bernoulli}(\rho), 1 \leq i \leq n, 0 \leq \rho \leq 1, \\
+p(\sigma^2) &= (\sigma^2)^{-1} I(\sigma^2 > 0) \text{ and }\\
+p(g) &= \frac{g^b (1 + g)^{-a - b - 2}}{\text{Beta}(a + 1, b + 1)} I(g > 0)
+\end{array}
+\end{equation*}
+
+where $\vGamma = \diag (\vgamma)$.
+
+\begin{figure}
+\caption{Graphical model}
+\begin{tikzpicture}
+\node[draw, circle, double] (y) {$\vy$};
+\node[draw, circle, below left of=y] (beta) {$\vbeta$};
+\node[draw, circle, below of=y] (gamma) {$\vgamma$};
+\node[draw, circle, below right of=y] (sigma2) {$\sigma^2$};
+\node[draw, circle, below of=beta] (g) {$g$};
+\draw[<-] (y) -- (beta);
+\draw[<-] (y) -- (gamma);
+\draw[<-] (y) -- (sigma2);
+\draw[<-] (beta) -- (g);
+\end{tikzpicture}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Variational Bayes approximation}
+Assume a factored approximation of the form
+\begin{equation*}
+q(\vtheta) = q(\vbeta) q(\vgamma) q(\sigma^2) q(g)
+\end{equation*}
+where
+\begin{equation*}
+\begin{array}{ll}
+q^*(\vbeta) &= \text{N}(\vmu_{q(\vbeta), \mSigma_{q(\vbeta)}}), \\
+q^*(\vgamma) &= \text{Bernoulli}(p_{q(\vgamma)}), \\
+q^*(\sigma^2) &= \text{IG}(\alpha_{q(\sigma^2)}, \beta_{q(\sigma^2)}) \text{ and } \\
+q^*(g) &= \text{Beta Prime}(\alpha_{q(g)}, \beta_{q(g)})). \\
+\end{array}
+\end{equation*}
+Then
+\begin{equation*}
+\begin{array}{rl}
+&\quad \log{p(\vy, \vtheta)} \\
+=& \quad \log{p(\vy | \vbeta, \vgamma, \sigma^2)} + \log{p(\vbeta | \vgamma, \sigma^2, g)} + \log{p(\sigma^2)} + \log{p(g)} \\
+=& -\frac{n}{2} \log{2 \pi} -\half \log |\sigma^2 \mI_n| - \half (\vy - \mX \vGamma \vbeta)^\top \sigma^{-2} \mI_n (\vy - \mX \vGamma \vbeta) \\
+& -\frac{p}{2} \log{2 \pi} - \half \log |g \sigma^2 (\mX^\top \vGamma \mX)^{-1}| -
+	\half \vbeta^\top (g \sigma^2)^{-1} (\mX^\top \mX) \vbeta \\
+& + \vone^\top \vgamma \log(\rho) + \vone^\top (\vone - \vgamma) \log(1 - \rho)\\
+& - \log{(\sigma^2)} + \log \bI (\sigma^2 > 0) \\
+& + b \log g + (-a - b - 2) \log(1 + g) - \log \text{Beta}(a + 1,  b + 1) + \log \bI(g > 0).
+\end{array}
+\end{equation*}
+
+\small Find the optimal mean field updates with $q_{\vtheta_i} \propto \bE_{-\theta_i} [\log p(\vy, \vtheta)]$.
+
+\end{frame}
+
+\begin{frame}{Algebra and literature \ldots}
+
+\begin{itemize}
+\item It's been a while since undergrad/Honours, and I'm \emph{very} rusty on some things.
+\item I need to get my skills back up to scratch, particularly some linear algebra, vector calculus and
+			multivariate distribution theory.
+\item Need to focus on these things as used in a Bayesian/Variational Bayes context.
+\item The only way to get better is to practice!
+\item I'm tutoring third and second year subjects this year, which will also help.
+\item I need to read way more literature.
+\item The literature is very interesting.
+% \item \begin{quote}
+% \tiny
+% The day's approaching to give it your best, \\
+% and you've got to reach your prime \\
+% That's when you need to put yourself to the test, \\
+% and show us a passage of time \\
+% We're gonna need a montage! (MONTAGE !) \\
+% A sports training montage! (MONTAGE !) \\
+% Show a lot of things happening at once, \\
+% remind everyone of what's going on! (WHAT'S GOING ON!) \\
+% And with every shot show a little improvement, \\
+% to show it all would take too long! \\
+% That's called a montage! (MONTAGE !) \\
+% Even Rocky had a montage! (MONTAGE !) \\
+% In any sport if you want to go, \\
+% from just a beginner to a pro \\
+% You need a montage! (MONTAGE !) \\
+% A simple little montage! (MONTAGE !) \\
+% Always fade out in a montage \\
+% If you fade out it seems like more time has a passed in a montage
+% \end{quote}
+
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Optimisation: Making numerical software run faster}
+\begin{itemize}
+\item Getting numerical software right is much harder than making it run fast. Focus there. Numerical software
+			which	produces incorrect answers is \emph{worthless}!
+\item Once you have a program that produces the correct results, the game is: 
+\begin{enumerate}
+\item Measure/profile (don't guess!) to find out where time is being spent in your program
+\item Make a change
+\item Check your software still produces correct results and measure performance again. If it's slower, or the result is now wrong, revert the change
+\item Stop when your software is fast enough, or you reach a point of diminishing returns. Whichever comes first
+\end{enumerate}
+\item It's very tempting to skip steps, but this will end up costing you more time in the long run e.g.
+		my first project
+\item I used \texttt{valgrind}, which simulates the CPU and counts the number of instructions spent in each
+	  line of code. \note{It also simulates the cache, but I didn't go that far}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{So let's play \ldots}
+I combined some of John's ideas with some of my own.
+\begin{tabular}{|p{9cm}|r|}
+\hline
+Change & Time (s) \\
+& (1 core) \\
+\hline
+Unoptimised code which produces correct results & 33 \\
+Save common sub-expressions in rank-1 update & 18 \\
+Use references to avoid copying & 16 \\
+Pre-allocate memory for $\mX_\vgamma$ and $(\mX_\vgamma^\top \mX_\vgamma)^{-1}$ & 9 \\
+\hline
+\end{tabular}
+\begin{itemize}
+\item $0.472$ seconds for $p=13$ and $n=263$ on verona using all cores. Over a million models a second. Fast
+			enough for now!
+% \item Other tricks I could try, but for now, that's fast enough!
+\item OpenMP for parallelisation \\
+			\texttt{\#pragma omp parallel for}
+\item If you want to learn OpenMP more deeply, I can recommend ``Using OpenMP'' by Barbara Chapman \note{MIT},
+			Gabrielle Jost, and Ruud Van der Pas
+\begin{figure}
+\includegraphics[scale=0.1]{Using_OpenMP.jpeg}
+\end{figure}
+\note{The talks on Youtube by Tim Mattson (Intel) are also excellent. And you could talk to Andrew Stefan}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Next \ldots}
+So I've got some useful code, and I'm getting better at C++ and OpenMP. That's going to come in handy, 
+because it's nearly March, and there's a lot to do.
+\begin{itemize}
+\item R package
+\item Support model selection where some covariates are fixed, and some are allowed to be included or excluded
+i.e. $\mC = [\mX, \mZ_\vgamma]$
+\item MCMC. $\vgamma$ is discrete, so we can't use Stan
+\item Variational Bayes
+\item Collapsed Variational Bayes
+\item Some examples
+\item So much reading \ldots
+\item So much writing \ldots
+\end{itemize}
+\end{frame}
+
+\end{document}

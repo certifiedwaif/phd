@@ -1,0 +1,87 @@
+\documentclass{beamer}
+
+\usetheme{Warsaw}
+\usepackage{graphicx}
+\usepackage{ulem}
+\input{include.tex}
+\input{Definitions.tex}
+
+\usefonttheme{serif}
+
+\title{Progress report - 21/9/2015}
+\author{Mark Greenaway\\PhD candidate\\markg@maths.usyd.edu.au}
+
+\mode<presentation>
+{ \usetheme{boxes} }
+
+\begin{document}
+\begin{frame}
+\maketitle
+\end{frame}
+
+\begin{frame}{What I've been up to for the last couple of weeks}
+\begin{itemize}
+\item Calculating confidence intervals for splines.
+\item Assessing sensitivity of algorithms to starting points.
+\item Reading "Semiparametric Mean Field Variational Bayes: General Principles and Numerical Issues" paper
+			by Rohde and Wand.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Calculating confidence intervals for splines}
+\begin{itemize}
+\item We're examining the difference between the VB and MCMC fits. We expect the MCMC fit to have
+more variance.
+\item The spline model is $\hat{f}_x = \mC_x \vnu$.
+\item In this case, we model the function $f(x) = 3 + 3 \sin(\pi x)$ on the interval $[-1, 1]$.
+\item We calculate the appropriate $\mC_x$ for each value of $x$ within the range of the function.
+\item We then sample from $\mC_x \vnu$ where the distribution of $\vnu$ is taken from the MCMC and VB
+			model fits, and take the 95\% CI at each point $x$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\includegraphics[height=10cm, width=10cm]{code/results/accuracy_plots_spline_gva2.pdf}
+\end{frame}
+
+\begin{frame}{Sensitivity of algorithms to starting points.}
+\begin{itemize}
+\item I've been initialising $\vmu$ using glm.fit().
+\item We need to assess whether the algorithms are converging to local as opposed to global solutions.
+\item Method:
+\begin{itemize}
+\item Set up a model $\vy = \mX \vbeta + \mZ \vu$.
+\item $\mX$ has a fixed slope and intercept.
+\item Three groups for random intercepts.
+\item Set starting points for $\vmu$ to $(a, b, 0 \ldots, 0)^\top$ where $a, b \in [-3, 3]$.
+\item See where we end up!
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Initial results of sensitivity analysis.}
+\begin{table}
+\begin{tabular}{|l|p{6.5cm}|}
+\hline
+Algorithm & Result \\
+\hline
+Laplace's approximation & Stable, results sensitive to starting point. \\
+GVA & Unstable depending on the starting point. \\
+GVA2 & Stable, results not sensitive to starting point. \\
+GVA NR & Unstable depending on the starting point. \\
+\hline
+\end{tabular}
+\end{table}
+\end{frame}
+
+\begin{frame}{Reading Rohde and Wand 2015}
+\begin{itemize}
+\item There's a section of the paper which outlines using methods from information geometry to increase
+			the stability and speed of convergence of Variational Bayes algorithms.
+\item For the examples that they try, these methods perform much better than Newton-Raphson methods, particularly
+			with regards to their stability.
+\item The stability of our Quasi-Newton Raphson algorithm also seems good.
+\end{itemize}
+\end{frame}
+
+\end{document}

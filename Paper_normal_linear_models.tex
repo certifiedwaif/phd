@@ -1,4 +1,5 @@
 \documentclass{amsart}[12pt]
+% \documentclass{usydthesis}[12pt]
 % \documentclass[times, doublespace]{anzsauth}
 
 \addtolength{\oddsidemargin}{-.75in}%
@@ -37,7 +38,7 @@
 
 \begin{document}
 
-\maketitle
+% \maketitle
 
 \section*{Abstract}
 
@@ -72,14 +73,13 @@ for model complexity, such as Akaike's Information Criterion \citep{Akaike1974},
 Information Criterion \citep{Spiegelhalter2016} or the Principle of Minimum Description Length
 \citep{Hansen2001}. Alternatively, the penalty may be adaptive/data--dependent as in \citep{George2000}.
 
-An alternative to model selection criterion is to select models based on their posterior probability, such as
-by selecting the median probability model as in \citep{Barbieri2004}. In a Bayesian context, this can be
+An alternative to model selection criterion is to select models based on their posterior probability. In a Bayesian context, this can be
 accomplished by comparing the posterior likelihoods of the candidate models to see which is most probable
 given the observed data. This can be done, for example, by using Bayes Factors as in \citep{Kass1993}. Rather
 than selecting one candidate model, several models can be combined together using Bayesian model  averaging,
 as in \citep{Hoeting1999}, \citep{Raftery1997}, \citep{Fernandez2001} or \citep{Papaspiliopoulos2016}.
 
-Or model selection can be made implicit in the model fitting process itself, as in ridge regression
+Model selection can be made implicit in the model fitting process itself, as in ridge regression
 \citep{Casella1980}, of which the well-known lasso is a special case \citep{Tibshirani1996}. As shown in
 papers by \citep{Breiman1996} and \citep{Efron2013} showed, while  the standard formulation of a linear model
 is unbiased, the goodness of fit of these models is numerically  unstable. Breiman showed that by introducing
@@ -92,8 +92,9 @@ covariates, rather than entire models. This approach can either be Fully Bayesia
 in \citep{Cui2008}. Variable selection approaches involve a stochastic search over the variables in the model
 space. This search can be driven by posterior probabilities, as in \citep{Casella2006}, or by Gibbs sampling
 approaches such as in \citep{George1993}. These two approaches of model selection and variable selection can
-be combined, as in \citep{Geweke1996}.
-
+be combined, as in \citep{Geweke1996}. Variable selection can also be accomplished by selecting the median
+probability model, consisting of those models whose posterior inclusion probability is at least $1/2$, as in
+\citep{Barbieri2004}.
 
 \citep{Zellner1980} suggested a particular form of conjugate Normal-Gamma family where the Bayes factors have
 a relatively simple form, incorporating a parameter $g$ to control mixing between the model fit from the data
@@ -365,9 +366,7 @@ Next, we calculate the posterior variance of $\vbeta$. Using the Law of Total Ex
 	                   & = \left( \frac{n}{n - 2} \right) (G_1 - G_2 R^2) (\mX^\top \mX)^{-1} + (G_2 - G_1^2) \vbetahatls \vbetahatls^\top                                                                                      
 \end{align*}
 
-\noindent where $G_1 = \E\left[g/(1+g) \Bigm| \vy \right]$ and $G_2 = \E\left[ \left(g/(1+g) \right)^2 \Bigm| \vy \right]$.
-
-\noindent To calculate $G_1$, we evaluate the integral
+\noindent where $G_1 = \E\left[g/(1+g) \Bigm| \vy \right]$ and $G_2 = \E\left[ \left(g/(1+g) \right)^2 \Bigm| \vy \right]$. To calculate $G_1$, we evaluate the integral
 \begin{align*}
 	\E\left[\frac{g}{1 + g} \Bigm| \vy \right] & = \int_0^\infty \frac{g}{1 + g} p(g | \vy) dg                                                                      \\
 	                                           & = \frac{(1 - R^2)^{b+1}}{\Beta(p/2 + a + 1, b + 1)} \int_0^\infty g^{b+1} (1 + g)^{-1} [1 + g (1 - R^2)]^{-n/2} dg \\
@@ -375,7 +374,6 @@ Next, we calculate the posterior variance of $\vbeta$. Using the Law of Total Ex
 \end{align*}
 
 \noindent using \citep{Gradshteyn1988} 3.197 Equation 5,
-
 \[
 	\int_0^\infty x^{\lambda-1} (1+x)^\nu (1 + \alpha x)^{\mu} dx = \Beta(\lambda, -\mu-\nu-\lambda) {}_2 F_1 (\mu, \lambda; -\mu-\nu; 1 - \alpha)
 \]
@@ -432,11 +430,11 @@ $$
 	\frac{(1 -  R^2)^{b+1} g^{b} \left[  1 + g(1 -  R^2) \right]^{-n/2}}{\mbox{Beta}(p/2 + a + 1,b+1)}
 	\right] dg
 	    
-	\\ [2ex]
-	  & \ds = \frac{ (1 -  R^2)^{b+1}\left( \frac{n}{2}\right)^{n/2}(\sigma^2)^{-(n/2 + 1)}\exp\left\{ -  \tfrac{n}{2\sigma^2} \right\}}{\Gamma(n/2)\mbox{Beta}(p/2 + a + 1,b+1)} \int_0^1 
-	h^{b}(1-h)^{a+p/2} 
-	\exp\left\{ 
-	h \frac{nR^2}{2\sigma^2} \right\}  dh    
+	% \\ [2ex]
+	%   & \ds = \frac{ (1 -  R^2)^{b+1}\left( \frac{n}{2}\right)^{n/2}(\sigma^2)^{-(n/2 + 1)}\exp\left\{ -  \tfrac{n}{2\sigma^2} \right\}}{\Gamma(n/2)\mbox{Beta}(p/2 + a + 1,b+1)} \int_0^1 
+	% h^{b}(1-h)^{a+p/2} 
+	% \exp\left\{ 
+	% h \frac{nR^2}{2\sigma^2} \right\}  dh    
 \end{array}
 $$
 
@@ -445,12 +443,12 @@ $$
 % -b-2+n/2 = p/2 + a  
 % $$
 
-\noindent where
-$h = \frac{g}{1+g}$,
-$g = \frac{h}{1-h}$,
-$1 - h = \frac{1}{(1 + g)}$,
-and
-$\frac{dh}{dg} = \frac{1}{1+g} - \frac{g}{(1 +g)^2} = \frac{1}{(1+g)^2} = (1 - h)^2$.
+% \noindent where
+% $h = \frac{g}{1+g}$,
+% $g = \frac{h}{1-h}$,
+% $1 - h = \frac{1}{(1 + g)}$,
+% and
+% $\frac{dh}{dg} = \frac{1}{1+g} - \frac{g}{(1 +g)^2} = \frac{1}{(1+g)^2} = (1 - h)^2$.
 
 \noindent Utilising Equation 3.383(i) of \citep{Gradshteyn1988},
 $$
@@ -469,7 +467,7 @@ $$
 \end{array}
 $$
 
-To the best of our knowledge, this is a new distribution.
+\noindent To the best of our knowledge, this is a new distribution.
 % \end{res}
 
 % \noindent Using the change of variables $\tau= 1/\sigma^2$ we have

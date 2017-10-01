@@ -127,6 +127,58 @@ discuss our results.
 
 \section{Method}
 
+\subsection{Posterior distributions of $g$-priors in terms of special functions}
+% Things we derived
+
+
+\subsubsection{Calculating $p(\vy | \vgamma)$}
+We want to calculate $p(\vy | \vgamma)$ so that we can calculate $p(\vgamma | \vy)$ using Bayes' Rule and rank models against	one another. \\
+To do this, we need to calculate
+$$p(\vy | \vgamma) = \int p(\vy | \alpha, \vbeta, \sigma^2, \vgamma) p(\alpha) p(\vbeta | g, \vgamma) p(\sigma^2) p(g) d \alpha d \vbeta d \sigma^2 d g.$$
+We choose our priors so that this integral is tractable, with help from \cite{Gradshteyn1988}.
+The marginal likelihoods behave like BIC. \\
+We found the following closed form expressions.
+Include derivations in the appendices.
+\small
+\begin{itemize}
+	\item Liang et al. 2008 hyper-$g$ prior \cite{Liang2008}
+		$p(\vy | \vgamma) = \frac{K(n) (a - 2)}{p_\vgamma + a  - 2} {}_2 F_1 \left( \frac{n-1}{2}, 1; \frac{p_\vgamma + a}{2}; R_\vgamma^2 \right)$
+	\item Liang et al. 2008 hyper-$g/n$ prior \cite{Liang2008}
+		$p(\vy | \vgamma) = \frac{K(n) (a - 2)}{n (p_\vgamma + a  - 2)} F_1 \left( 1, \frac{a}{2}, \frac{n-1}{2}; \frac{p_\vgamma + a}{2}; 1 - \frac{1}{n}, R_\vgamma^2 \right)$
+\end{itemize}
+These expressions are numerically stable to evaluate.
+
+We want to be able to calculate the marginal likelihood of the data given $\vgamma$, so that we can
+calculate the posterior probability of $\vgamma$ and rank models against one another. To do this, we
+need to calculate the following integral.
+We choose our priors so that this integral is tractable, with help from the book Table of Integrals and
+Series by Gradshteyn. The marginal likelihoods behave like BIC.
+We found closed form expressions for the marginal likelihood for the hyper-$g$ and hyper-$g/n$ priors.
+
+\subsubsection{Calculating $p(\vy | \vgamma)$ for Bayarri's robust prior}
+\begin{itemize}
+	\item Bayarri calculated the marginal likelihood given $\vgamma$ for the Robust Bayarri prior
+	 	in \cite{Bayarri2012} 
+		\tiny
+		$p(\vy | \vgamma) = K(n) \left(\frac{n + 1}{1 + p_\vgamma}\right)^{-p_\vgamma/2} \frac{(1 - R^2_\vgamma)^{-(n-1)/2}}{p_\vgamma + 1} {}_2 F_1 \left[ \frac{n-1}{2}, \frac{p_\vgamma+1}{2}; \frac{p_\vgamma + 3}{2}; \frac{[1 - 1/(1 - R^2_\vgamma)](p_\vgamma + 1)}{1 + n} \right]$.
+	\small
+	\item But this expression is not numerically well-behaved, because the second argument of the
+				${}_2 F_1$ function is greater than $1$.
+	\item Using a trick that's available when ${}_2 F_1(., 1; .; .)$ ... is numerically
+				well-behaved, we derived the new expression
+		\tiny
+		$p(\vy | \vgamma) = K(n) \left(\frac{n + 1}{1 + p_\vgamma}\right)^{(n-p_\vgamma-1)/2} \frac{[1 + L (1 - R^2_\vgamma)]^{-(n-1)/2}}{p_\vgamma + 1} {}_2 F_1 \left[ \frac{n-1}{2}, 1; \frac{p_\vgamma + 3}{2}; 
+		\frac{R^2_\vgamma}{1 + L(1 - R^2_\vgamma)} \right]$ \\
+		\small
+		where $L = (1 + n)/(1 + p_\vgamma) - 1$.
+\end{itemize}
+
+Bayarri calculated the marginal likelihood given $\vgamma$ for the Robust Bayarri prior.
+But this expression is not numerically well-behaved.
+We used Euler's transformation and properties of the hypergeometric function to derive a new,
+numerically stable function.
+
+
 \subsection{Collapsed Variational Approximation}
 
 Suppose that

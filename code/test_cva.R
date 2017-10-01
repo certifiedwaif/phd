@@ -29,36 +29,6 @@ generate_data <- function(n=50, K=50)
 }
 
 
-generate_data_high_dimensional <- function(n=100, K=50)
-{
-  p <- 200
-  sigma2.true <- 1.
-  mX <- matrix(0, n, p)
-  mSigma_block <- matrix(0.999, 10, 10)
-  diag(mSigma_block) <- 1
-
-  mSigma <- as.matrix(do.call(bdiag, rep(list(mSigma_block), 20)))
-  chol_mSigma <- chol(mSigma)
-  for (i in 1:n) {
-    mX[i, 1:200] <- t(chol_mSigma) %*% rnorm(p)
-  }
-  mX <- scale(mX)
-  nonzero_locations <- c(1, 11, 21, 31)
-  nonzero_effects <- c(1.5, 2, 2.5, 3)
-  vbeta <- rep(0, p)
-  vbeta[nonzero_locations] <- nonzero_effects
-  vf <- vector("double", n)
-  for (i in 1:n) {
-    vf[i] <- sum(nonzero_effects * mX[i, nonzero_locations])
-  }
-  vy <- vf + rnorm(nrow(mX),0,sqrt(sigma2.true))
-  vy <- (vy - mean(vy))
-  vy <- sqrt(n) * vy / sqrt(sum(vy ^ 2))
-  initial_gamma <- matrix(rbinom(K * p, 1, .5), K, p)
-  return(list(vbeta=vbeta, n=n, p=p, vf=vf, vy=vy, mX=mX, K=K, initial_gamma=initial_gamma))
-}
-
-
 binary_to_model <- function(binary_vec)
 {
   acc <- 0

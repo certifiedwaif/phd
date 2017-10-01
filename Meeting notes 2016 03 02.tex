@@ -1,0 +1,61 @@
+\documentclass{amsart}
+\title{Meeting with Dr John Ormerod - 02/02/2016}
+
+\input{Definitions.tex}
+
+\begin{document}
+
+\maketitle
+
+\def \N {\text{N}}
+\def \I {\mathbb{I}}
+\def \Beta {\text{Beta}}
+\def \IG {\text{Inv. Gamma}}
+\[
+\begin{array}{rl}
+	p(\vy | \vbeta, \sigma^2) &= \N(\mX \vbeta, \sigma^2 \mI) \\
+	p(\sigma^2) &\propto \sigma^{-2} \I(\sigma^2 > 0) \\
+	p(\vbeta | \sigma^2, g) &= \N(\vzero, \sigma^2 g (\mX^\top \mX)^{-1})
+\end{array}
+\]
+
+\subsection{Look at different priors for $g$}
+
+\begin{enumerate}
+	\item Beta Prime $\frac{g^b (1 + g)^{-a-b-2}}{\Beta(a + 1, b + 1)}, b = \frac{n - p}{2} - a - b$
+	\item Liang g prior $\frac{a - 1}{2} (1 + g)^{-a/2}, 2 < a \leq 4$
+	\item Liang g / n prior $\frac{a - 1}{2n} (1 + \frac{g}{n})^{-a/2}$
+	\item Zellnor-Siza $\IG(\frac{1}{2}, \frac{1}{2})$
+	\item Guan \& Stephens $h = \frac{\delta g}{1 + \delta g} \sim \Beta(1, 1), \delta = p$
+\end{enumerate}
+
+John recommended that I focus on the top case first. We should look at
+
+\[
+	\text{Var}(\vbeta | g) \\
+	p(g | \vy) \\
+	p(\sigma^2 | \vy) \\
+	p(\vbeta | \vy) \\
+	p(y) \\
+	\bE [\vbeta | \vy] = \kappa \hat{\vbeta}_{\text{LS}}, \\
+\]
+
+where $\kappa$ dictates shrinkage as $R^2$ varies between $0$ and $1$.
+And also see what happens to $\kappa$ as $n \to \infty$ and as $p \to \infty$.
+
+\subsection{Variational Bayes}
+
+\[
+\begin{array}{l}
+	q(\vbeta) \\
+	q(\sigma^2) \\
+	q(g) \\
+\end{array}
+\]
+
+Exact versus trapezoidal integration.
+
+$h$ transform
+False Discovery Rate
+
+\end{document}

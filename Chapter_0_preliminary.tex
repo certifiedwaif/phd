@@ -457,13 +457,20 @@ and is denoted by $\mH f(\vx)$.
 % TODO: Rewrite.
 \section{Optimisation}
 Fitting a statistical model to data is often done by finding the parameters which maximise the likelihood
-function for that data. If the model is simple, and there are no interdependencies between the parameters,
-then the parameters which maximise the likelihood may be available in closed form. In general, however, this
-is not possible, and the likelihood must be maximised using an iterative optimisation algorithm. A thorough 
-and comprehensive introduction to the subject of multivariate optimisation is given in \cite{Nocedal2006}.
+function for that data -- an optimisation problem. If the model is simple, and there are no interdependencies
+between the parameters, then the parameters which maximise the likelihood may be available in closed form. In
+general, however, this is not possible, and the likelihood must be maximised using an iterative optimisation
+algorithm. The nature of the algorithm required depends on the difficult of the problem to be solved. If the
+likelihood is convex in the parameters being maximised, then convex optimisation can be used --
+see \citep{Boyd2010}. For likelihoods which are not convex in the parameters, more general optimisation
+procedures must be employed -- see \citep{Nocedal2006}. These procedures often optimise non-convex functions
+by repeatedly approximating them by convex functions and then using convex optimisation to optimise these.
 
-% TODO: This is technically correct, but so terse. Rewrite.
 \subsection{Newton-Raphson}
+
+The Newton-Raphson algorithm is a second-order method where the function to be minimised is approximated
+by a second order Taylor expansion of the function. The resulting quadratic form is convex, and thus can
+be optimised with a Newton-Raphson iteration.
 
 \subsubsection{Definition}
 
@@ -471,49 +478,53 @@ Consider the second order Taylor expansion of $f(\vtheta)$ around $\vtheta_{n}$
 \[
 	f(\vtheta) \approx f(\vtheta_{n}) + \nabla f(\vtheta_{n}) \Delta \vtheta_{n} + \half \Delta \vx^\top \mH_f(\vtheta_{n}) \Delta \vx + \sO((\Delta \vtheta_{n})^3).
 \]
-
-This expression attains its' maxima with respect to $\Delta x$ when
+which is a quadratic form in $\vtheta_n$. This expression attains its' maxima with respect to $\Delta x$ when
 \[
 	\vzero = \mD_{\Delta \vtheta} [f(\vtheta_{n}) + \nabla f(\vtheta_{n}) \Delta \vtheta_{n} + \half \Delta \vtheta^\top \mH_f(\vtheta_{n}) \Delta \vtheta] = \nabla f(\vtheta_n) + \mH_f(\vtheta_n) \Delta \vtheta.
 \]
 
 Thus taking $\Delta \vtheta = -\nabla f(\vtheta_n) [\mH_f(\vtheta_n)]^{-1}$, we perform a Newton-Rapshon
 Iteration by setting $\vtheta_{n + 1} = \vtheta_{n} - \nabla f(\vtheta_n) [\mH_f(\vtheta_n)]^{-1}$ as it will
-be closer to the  stationary point $\vtheta^*$ of $f$. This choice of $\vtheta_{n+1}$ establishes an iterative
-algorithm for finding the  maxima/minima of $f$.
-
-We continue until the step length $\| \vtheta_{n+1} - \vtheta_{n} \| < \epsilon$, for some suitably small
-choice of $\epsilon$, such as $\epsilon = 10^{-8}$, indicating that convergence has been achieved.
+be closer to the stationary point of the quadratic form, which will itself be closer to the stationary point
+$\vtheta^*$ of $f$. This calculation of choice of $\vtheta_{n+1}$ is called a Newton-Raphson iteration. By
+repeatedly calculating a sequence of these $\vtheta_n$ through Newton-Raphson iterations, each progressively
+closer to the minima of $f$, we establish an iterative algorithm for finding the minima of $f$. The algorithm
+continues until the step length $\| \vtheta_{n+1} - \vtheta_{n} \| < \epsilon$, for some suitably small choice
+of $\epsilon$, such as $\epsilon = 10^{-8}$, indicating that convergence has been achieved.
 
 \subsubsection{Time and memory complexity}
 
 Execution of this algorithm requires the calculation of a vector addition, dot product and solution of a
 linear system for each iteration. The vector addition and dot product can both be performed in $p$ flops,
-where $p$ is the dimension of the problem. The expensive part of the computation is the solution of the linear
-system $\mH_f(\vtheta_n) \Delta \vtheta$, which takes $\sO(p^3)$ flops. Even on modern computer systems, this
-can quickly become computationally intractable for problems of modest size. This motivates the development
-of Quasi-Newton algorithms, such as BFGS, L-BFGS and L-BFGS-B, discussed in Section \ref{sec:quasi_newton}.
+where $p$ is the dimension of the problem. The most expensive part of the computation is the solution of the
+linear system $\mH_f(\vtheta_n) \Delta \vtheta$, which takes $\sO(p^3)$ flops. Even on modern computer
+systems, this can quickly become computationally intractable for problems of modest size. This motivates the
+development of Quasi-Newton algorithms, such as BFGS, L-BFGS and L-BFGS-B, discussed in Section
+\ref{sec:quasi_newton}.
 
 \subsubsection{Radius of convergence and convergence to local solutions}
 
-\subsection{Quasi-Newton Raphson algorithms: L-BFGS-B}
+\subsection{Quasi-Newton Raphson algorithms: BFGS and L-BFGS-B}
 \label{sec:quasi_newton}
 
 \subsubsection{Definition}
 
 % Wolfe conditions
-The problem of interest is to find
-\[
-	\min_\vx f(\vx)
-\]
 
-for some smooth $f: \R^n \to \R$. Each step involves approximately solving the subproblem
-\[
-	\min_\alpha f(\vx_k + \alpha \vp_k)
-\]
+As in Newton-Raphson we seek to find $\min_\vtheta f(\vtheta)$ for some smooth $f: \R^p \to \R$.  Again, we
+calculate a sequence of steps $\theta_n$ with each step approximately solving the subproblem $\min_\alpha
+f(\vx_k + \alpha \vp_k)$
 
-where $\vx_k$ is the current best guess, $\vp_k \in \R^n$ is a search direction and $\alpha$ is the
+where $\vtheta_n$ is the current best guess, $\vp_n \in \R^p$ is a search direction and $\alpha$ is the
 step length.
+
+The modification to the Newton-Raphson algorithm is that rather than use a true second-order Taylor expansion
+of $f(\vtheta)$ around $\vtheta_n$, we instead approximate it using the model
+\[
+	m_n(\vtheta_n) = f(\vtheta_n) + \nabla f(\vtheta_n)^\top \vtheta_n + \tfrac{1}{2} \vtheta_n^\top \mB_n \vtheta_n
+\]
+where $\mB_n$ has taken the place of $\mH_f(\vtheta_n)$. This allows us to avoid having to calculate the complete 
+Hessian matrix $\mH_f$ for each $\vtheta_n$ at every iteration, instead using $\mB_k$ % TODO: Define B_k
 
 Denote a univariate function $\phi$ restricted to the direction $\vp_k$ as
 $\phi(\alpha) = f(\vx_k + \alpha \vp_k)$. A step length $\alpha_k$ is said to satisfy the \emph{Wolfe conditions}
@@ -730,23 +741,6 @@ solving linear systems is the \emph{condition number} of A. It depends on the ma
 This is a useful tool in characterising the accuracy and stability of numerical linear algebra algorithms.
 \cite{Golub:1996:MC:248979} \S 2.
 
-\subsubsection{Positive definite matrices}
-
-A matrix $\mA \in \mathcal{R}^{p \times p}$ is \emph{positive semidefinite} if for any $\vx \in \mathcal{R} \ \vzero$,
-$\vx^\top \mA \vx > 0$. Equivalently, all eigenvalues of $\mA$ are strictly positive. Covariance matrices
-$\mSigma = \E[X - \mu_X][X - \mu_X]^\top$ are positive definite, as
-$\vx^\top \E[X - \mu_X][X - \mu_X]^\top \vx = \vu^\top \vu > 0$ for $\vu = \E[(X - \mu_X)^\top \vx]$.
-
-A problem which arises frequently in fitting statistical models with dependence amongst the responses such as mixed
-models is maximising a likelihood function over the set of covariance matrices. This problem can be difficult not
-just because of the high dimension of the parameter space involved, but also due to the constraints upon the
-parameters to ensure that the resulting matrix is still positive definite, and hence a valid covariance matrix. This
-problem can be dealt with through several methods, such as semidefinite programming \citep{Boyd2010}, or parameterising the covariance
-matrix $\mSigma$ in terms of a matrix factorisation such as
-$\mSigma = \mB \mB^\top$ for any unconstrainted matrix $\mB$ or it's Cholesky factors $\mSigma = \mL \mL^\top$.
-The Cholesky factor approach has the advantage that the Cholesky factors are lower triangular, and so quicker to
-compute with.
-
 \subsubsection{LDU decomposition}
 
 If a matrix $\mA$ is square, it can be factored into the product of a lower triangular matrix and an upper 
@@ -889,11 +883,22 @@ Consider the block inverse formula presented in the previous section. An immedia
 is that if any of the blocks of the matrix being inverted is not sparse, then the inverse will not be sparse
 in \emph{any} of the blocks in the computed inverse.
 
-\section{Positive semi-definite matrices}
-A positive semidefinite matrix $\mLambda$ is a square matrix of size $n \times n$ such that for any vector
-$\vx \in \R^n$, $\vx^\top \mLambda \vx \geq 0$. Equivalently, all eigenvalues of $\mLambda$ are greater than or 
-equal to 0. A typical example arising in statistics is the covariance matrix of a random vector, which is
-positive definite by definition.
+\subsection{Positive semi-definite matrices}
+A matrix $\mA \in \mathcal{R}^{p \times p}$ is \emph{positive semidefinite} if for any $\vx \in \mathcal{R} \ \vzero$,
+$\vx^\top \mA \vx > 0$. Equivalently, all eigenvalues of $\mA$ are strictly positive. Covariance matrices
+$\mSigma = \E[X - \mu_X][X - \mu_X]^\top$ are positive definite, as
+$\vx^\top \E[X - \mu_X][X - \mu_X]^\top \vx = \vu^\top \vu > 0$ for $\vu = \E[(X - \mu_X)^\top \vx]$.
+
+A problem which arises frequently in fitting statistical models with dependence amongst the responses such as mixed
+models is maximising a likelihood function over the set of covariance matrices. This problem can be difficult not
+just because of the high dimension of the parameter space involved, but also due to the constraints upon the
+parameters to ensure that the resulting matrix is still positive definite, and hence a valid covariance matrix. This
+problem can be dealt with through several methods, such as semidefinite programming \citep{Boyd2010}, or parameterising the covariance
+matrix $\mSigma$ in terms of a matrix factorisation such as
+$\mSigma = \mB \mB^\top$ for any unconstrainted matrix $\mB$ or it's Cholesky factors $\mSigma = \mL \mL^\top$.
+The Cholesky factor approach has the advantage that the Cholesky factors are lower triangular, and so quicker to
+compute with.
+
 
 \section{Splines}
 The most general form of the univariate regression problem is

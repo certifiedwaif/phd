@@ -343,8 +343,7 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 		log_prob = maruyama;
 	} else if (log_lik == "BIC") {
 		log_prob = BIC;
-	}
-	else if (log_lik == "ZE") {
+	} else if (log_lik == "ZE") {
 		log_prob = ZE;
 	} else if (log_lik == "liang_g1") {
 		log_prob = liang_g1;

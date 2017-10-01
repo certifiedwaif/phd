@@ -1,0 +1,59 @@
+\documentclass{beamer}
+
+\usetheme{Warsaw}
+\usepackage{graphicx}
+\usepackage{ulem}
+\input{include.tex}
+\input{Definitions.tex}
+
+\usefonttheme{serif}
+
+\title{Taking advantage of sparsity in your matrices in R}
+\author{Mark Greenaway\\PhD candidate\\markg@maths.usyd.edu.au}
+
+\mode<presentation>
+{ \usetheme{boxes} }
+
+\begin{document}
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}
+\frametitle{tldr version - you (probably) don't have to do anything}
+\begin{itemize}
+\item Key phrase: \emph{"You don't need to be using a sparse matrix representation to be 
+												 benefitting from the sparsity in your matrices"}
+\item Reference BLAS checks for zeros and takes appropriate shortcuts when doing linear 
+			algebra
+\item If your matrices contain many zeros, you're probably already benefitting from this
+\item You don't have to do anything differently. You don't even have to know
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Slightly longer version - dense versus sparse matrix representations}
+\begin{itemize}
+\item Sparsity of a matrix refers to the proportion of non-zero elements it contains
+\item A dense matrix representation stores all matrix elements, zero or non-zero
+\item A sparse matrix representation stores only the non-zero elements
+\item This can lead to great benefits in speed and memory use if your matrices are large, 
+			say, 1000 by 1000
+\item Probably no benefit if your matrices are smaller than this. If your matrices are
+			small it can make the performance much worse
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{The Matrix library in R}
+\begin{itemize}
+\item The Matrix library by Douglas Bates of lme4 fame and Martin Maechler is very mature 
+			and has	a great implementation of both dense and sparse matrices if you'd like to try
+\item It was from getting puzzling performance and reading the Matrix library documentation 
+			that I came across this:
+			``Note that in newer versions of R and the BLAS library (as of summer 2007),
+				the R \%*\% is able to detect the many zeros in mm and shortcut many operations''
+\end{itemize}
+\end{frame}
+
+\end{document}

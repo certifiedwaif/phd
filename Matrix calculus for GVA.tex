@@ -1,8 +1,11 @@
 \documentclass{article}[12pt]
 \usepackage{amsmath}
+\usepackage{color}
 \input{include.tex}
 \input{Definitions.tex}
 \title{Differentiating the Gaussian Variational Lower Bound}
+
+\newcommand{\mgc}[1]{{\color{blue}#1}}
 
 \begin{document}
 \section{John's way}
@@ -74,7 +77,7 @@ Read Matrix Calculus with Applications to Econometrics and
 Statistics 3rd ed. Differentiate whole matrices.
 
 \begin{align*}
-	\log \underline{p}(\vmu, \mLambda; \vy, \vp) &= \vy^T \mP \mC \vmu - \vp B(\mC \vu, \diag{(\mC \mLambda \mC^T)}) - \half \vmu^T \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} \\
+	\log \underline{p}(\vmu, \mLambda; \vy, \vp) &= \quad \vy^T \mP \mC \vmu - \vp B(\mC \vu, \diag{(\mC \mLambda \mC^T)}) - \half \vmu^T \mSigma^{-1} \vmu - \half \tr{(\mSigma^{-1} \mLambda)} \\
 	&\quad - \frac{d}{2} \log(2 \pi) + \half \log(\mSigma^{-1}) + \frac{d}{2} \log{2 \pi} + \frac{d}{2} + \half \log |\mLambda| \\
 	&= -\vp B(\mC \vmu, \diag{(\mC \mLambda \mC^T)}) - \half \tr{(\mSigma^{-1} \mLambda)} + \half \log |\mLambda| + \text{terms not depending on $\mLambda$}
 \end{align*}
@@ -111,5 +114,23 @@ where
 \end{align*}
 
 \noindent Recall that the diagonals are exponentiated, so after these derivatives are
-calculated, the diagonal of $\mR$ should be multiplied by itself.
+calculated, the diagonal of $\mR$ should be multiplied by itself. That is,
+
+\[
+	\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy, \vp)}{\partial r_{ij}} = D_\mLambda \log \underline{p}(\vmu, \mLambda; \vy, \vp) D_\mR \mLambda \frac{\partial \mR}{\partial r_{ij}}
+\]
+
+where
+
+\[
+	\frac{\partial \mR}{\partial r_{ij}} =
+	\begin{cases}
+		e^{r_{ij}}, i = j \\
+		1, i \ne j
+	\end{cases}
+\]
+
+\mgc{The problem here is that there is no distinction between $\mR$ and $\overline{\mR}$, so it is frequently
+unclear what is being referred to. This ambiguity runs through the code in \texttt{gaussian.R} as well.}
+
 \end{document}

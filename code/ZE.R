@@ -67,7 +67,7 @@ ZE.constants <- function(n,p,pmax,LARGEP)
 	vpen <- c()
 	for (q in 0:pmax) 
 	{
-		con <- 0.5*(n-q) - 0.75
+		con <- 0.5*(n-q - 3) - 0.75
 		dof <- q
 		pen <- lbeta(0.5*q + 0.25,con) - lbeta(0.25,con)  
 		if (LARGEP) {

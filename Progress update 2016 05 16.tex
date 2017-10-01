@@ -1,0 +1,54 @@
+\documentclass{beamer}
+
+\usetheme{Warsaw}
+\usepackage{graphicx}
+\usepackage{ulem}
+\input{include.tex}
+\input{Definitions.tex}
+
+\usefonttheme{serif}
+
+\title{Progress update - 16/05/2016}
+\author{Mark Greenaway}
+
+\mode<presentation>
+{ \usetheme{boxes} }
+
+\begin{document}
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}{Reading/Writing/Thinking}
+\begin{itemize}
+\item I've been mostly focusing on reading papers and writing. The phrase ``Shut up and write!''
+			has entered my lexicon.
+\item I now feel that writing should come before coding, because you can't write a program about something you 
+			don't	understand.
+\item Modelling my writing on John's thesis chapter, Ormerod and Wand 2010 and Liang et al. 2008.
+\item My Mendeley is getting a workout.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}{Model selection using Structured Variational Bayes}
+
+We're going to do model selection using Structured VB.
+
+Let $\underline{p}(.)$ denote the lower bound. Then
+
+\begin{align*}
+\underline{p}(\vy) &= \sum_\vgamma \underline{p}(\vy|\vgamma) p(\vgamma) \\
+p(\vgamma|\vy) &\approx \frac{\underline{p}(\vy | \vgamma) p(\vy)}{\underline{p}(\vy)} \\
+p(\vbeta|\vy) &\approx \sum_{\vgamma} q(\beta | \vy) p(\vgamma | \vy) \\
+\end{align*}
+
+\textbf{Idea:} We don't have to calculate these sums in strict order of the bit strings $\vgamma$. We could
+visit them randomly. How quickly would they converge to the optimal answer? Stochastic Structured Variational
+Bayes?
+
+The only downside is that if we did this, we couldn't use rank one updates to calculate the correlations.
+
+\end{frame}
+
+\end{document}

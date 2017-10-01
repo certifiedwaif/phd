@@ -41,15 +41,16 @@ A variational lower bound is given by
 
 \begin{frame}{Algorithm}
 \begin{itemize}
-\item Loop until convergence\\
+\item Initialise population of K bitstrings, $\vgamma$ \\
+Loop until convergence\\
 \quad for $k = 1,  \ldots, K$\\
 \quad \quad for $j = 1, \ldots, p$\\
 \quad \quad \quad $\vgamma_{jk} = \begin{cases}
-1, \text{if } p(\vy, \vgamma_{jk}^{(1)}) > p(\vy, \vgamma_{jk}^{(1)}) \\
+1, \text{if } p(\vy, \vgamma_{jk}^{(1)}) > p(\vy, \vgamma_{jk}^{(0)}) \\
 0, \text{otherwise}
 \end{cases}$\\
-\quad \quad for $k = 1, \ldots, K$\\
-\quad \quad \quad $w_k = p(\vy, \vgamma_k) / \sum_{j=1}^K p(\vy, \vgamma_j)$
+\quad for $k = 1, \ldots, K$\\
+\quad \quad $w_k = p(\vy, \vgamma_k) / \sum_{j=1}^K p(\vy, \vgamma_j)$
 \item I've implemented this algorithm and done some preliminary tests
 \item John is implementing it now, and we'll test the results against each other's implementations
 \end{itemize}

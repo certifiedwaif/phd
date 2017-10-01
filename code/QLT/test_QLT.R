@@ -255,11 +255,11 @@ relative_error_tbl <- function(data_set)
 
 relative_error_tables <- function()
 {
-	hitters_re_tbl <- relative_error_table("Hitters")
-	bodyfat_re_tbl <- relative_error_table("Bodyfat")
-	wage_re_tbl <- relative_error_table("Wage")
-	college_re_tbl <- relative_error_table("College")
-	uscrime_re_tbl <- relative_error_table("USCrime")
+	hitters_re_tbl <- relative_error_tbl("Hitters")
+	bodyfat_re_tbl <- relative_error_tbl("Bodyfat")
+	wage_re_tbl <- relative_error_tbl("Wage")
+	college_re_tbl <- relative_error_tbl("College")
+	uscrime_re_tbl <- relative_error_tbl("USCrime")
 
 	bind_rows(hitters_re_tbl,
 						bodyfat_re_tbl,
@@ -270,7 +270,7 @@ relative_error_tables <- function()
 				filter(var_prior != "Robust.naive" & var_prior != "g.naive" & var_prior != "Robust.safe") %>%
 				mutate(K=sprintf("%03d", K)) %>%
 				group_by(data_set, K, var_prior, greater_than_half) %>%
-				summarise(relative_error = sum(relative_error)) %>%
+				summarise(relative_error = round(mean(relative_error), 2)) %>%
 				unite(greater_than_half_K, greater_than_half, K) %>%
 		 		spread(greater_than_half_K, relative_error) %>%
 		 		write_csv("/tmp/summarised_relative_error_table.csv")
@@ -287,11 +287,11 @@ relative_error_plot <- function(tbl)
 relative_error_plots <- function()
 {
 	pdf("relative_error_plots.pdf")
-	relative_error_table("Hitters") %>% relative_error_plot
-	relative_error_table("Bodyfat") %>% relative_error_plot
-	relative_error_table("Wage") %>% relative_error_plot
-	relative_error_table("College") %>% relative_error_plot
-	relative_error_table("USCrime") %>% relative_error_plot
+	relative_error_tbl("Hitters") %>% relative_error_plot
+	relative_error_tbl("Bodyfat") %>% relative_error_plot
+	relative_error_tbl("Wage") %>% relative_error_plot
+	relative_error_tbl("College") %>% relative_error_plot
+	relative_error_tbl("USCrime") %>% relative_error_plot
 	dev.off()
 }
 

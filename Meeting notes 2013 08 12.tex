@@ -1,0 +1,89 @@
+\documentclass{amsart}
+\begin{document}
+\section{Meeting with John Ormerod, August 12 2013}
+John had just returned from the JSM 2013 in Montreal.
+
+\subsection{In relation to splines}
+How to choose $\lambda$, the smoothing penalty? Why do we fit it as a variance
+component as it is estimated?
+
+There is a bias-variance trade off, and there is uncertainty in $\lambda$, which
+is estimated from the data. To account for this uncertainty, we fit it as a
+random effect. For more detail, see Semiparametric Regression by Rupert, Wand
+and Carroll. The copy in the library is currently out.
+
+\subsection{Vague priors}
+Vague priors give us confidence that we are not assuming too much when
+specifying Bayesian models, but priors are not invariant under transformation.
+This means that priors which are vague in one parameterisation may not be vague
+at all in another, and should make use cautious when specifying our Bayesian
+models. We can't be ``asleep at the wheel'' and assume that just because we've
+specified a vague prior, everything is okay.
+
+\subsection{Doubly intractable models}
+These are Bayesian models for which we don't know the normalising constant or
+joint distribution.
+
+% Insert diagram here. How do I do this?
+If we have a zero-inflated Poisson model, I was worried that there will probably
+be a strong dependence between the Bernoulli and Poisson r.v.s, and hence a
+product density approximation may perform poorly. John said that it may, but it's
+still the thing we're going to try first. John was not worried, because all of the
+Bernoulli trials are independent, and so the CLT kicks in and helps us estimate
+the mean of the proportion of zeroes well. The variance is another matter, but at
+least we're going to be very sure about the mean.
+
+\subsection{Model selection}
+MCMC explores model space, asymptotics helps as model space has peaks and
+valleys. The true model peak will get larger and larger as we continue to
+sample from the Markov chain. This is by the Law of Large Numbers.
+
+\subsection{How should I learn numerics}
+John recommended that I work through Chapters 1-5, 10 of Numerical Recipes
+in C.
+
+\subsection{Stop reading, start implementing OR mathematics is not a spectator sport}
+I showed John that I had worked through the example in Machine Learning: A
+Probabilistic Perspective on using Variational Bayes to fit a univariate
+Gaussian model. He said that everyone has to start somewhere, and that when
+he was doing his PhD, in order to figure out how to fit splines better he first
+had to understand how to fit splines!
+
+He said that I was right to start at the start, and that in order to understand
+how variational approximations work, I should implement every one of them in
+his Explaining Variational Approximations 2008 paper. And that I should also
+be calculating the lower bounds. I must admit that I'm not looking forward to
+the lower bounds part, because that algebra looks incredibly tedious! But I don't
+recall anyone saying that doing a PhD in mathematical statistics would be a
+walk in the park.
+
+\subsection{Send John your JAGS code}
+John thinks he asked for this before. But this time, he definitely asked for it.
+He wants to use JAGS instead of WinBUGS for his Monte Carlo methods part of the
+course.
+
+\subsection{pvalues are meaningless OR Santa Claus is your parents, and the tooth fairy will not put money under your pillow}
+John came up with the following rather disquieting example:
+
+Consider $x_i \sim N(\mu, \sigma^2)$. Let $H_0: \mu = \mu_0$ versus
+$H_1: \mu > \mu_0$. Use everyone's favorite test statistic
+\[
+t = \frac{\mu - \mu_0}{S/\sqrt{n}}
+\]
+
+Under $H_0$, $t \sim t_{n-1}$. Now, consider the case where the true value of 
+$\mu_0$ is not $\mu_0$, but in fact $\mu_0 + \epsilon$ for some fixed $\epsilon$. 
+As $n \to \infty$, the numerator goes to $\epsilon \sqrt{n} \to \infty$, while the
+denominator $S \to 0$. So $t \to \infty$, and the pvalue goes to $0$ as the sample 
+size increases.
+
+This has profound and disturbing implications -- you can prove any hypothesis you 
+like is statistically significant simply by making your sample size sufficiently 
+large. This casts doubt on, for example, most of the public health literature, 
+where sample sizes are typically in the tens or hundreds of thousands, and 
+borderline pvalues are used as a matter of routine.
+
+This also highlights the fact that pvalue fishing is at its worst a form of 
+scientific fraud.
+
+\end{document}

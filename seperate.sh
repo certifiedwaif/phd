@@ -1,0 +1,5 @@
+pdfseparate accuracy_plots_application_laplace.pdf accuracy_plots_application_laplace-%d.pdf
+pdfseparate accuracy_plots_application_gva_2.pdf accuracy_plots_application_gva_2-%d.pdf
+pdfseparate accuracy_plots_application_gva_3.pdf accuracy_plots_application_gva_3-%d.pdf
+pdfseparate accuracy_plots_application_gva_4.pdf accuracy_plots_application_gva_4-%d.pdf
+

@@ -1,0 +1,51 @@
+\documentclass{beamer}
+
+\usetheme{Warsaw}
+\usepackage{graphicx}
+\usepackage{ulem}
+\usepackage{tikz}
+\input{include.tex}
+\input{Definitions.tex}
+
+\usefonttheme{serif}
+
+\title{Progress update -- 30/05/2016}
+\author{Mark Greenaway}
+
+\mode<presentation>
+{ \usetheme{boxes} }
+
+\begin{document}
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}{What have I been doing}
+\begin{itemize}
+\item Reading
+	\begin{itemize}
+		\item Akaike -- definition of Akaike's Information Criterion
+		\item Breiman -- why model selection is unstable without a penalty
+		\item Efron -- estimation and accuracy after model selection
+		\item Liang -- Bayesian model selection, shrinkage using $\E \left[\frac{g}{1 + g}\right]$
+		\item Chong's paper -- reading through the references
+	\end{itemize}
+\item Writing
+	\begin{itemize}
+		\item Now that I've read more, I have more of an idea of what I'd like to write
+	\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Breiman 1996 -- Heuristics of instability in model selection}
+% Graph of RSS versus subset size
+\begin{figure}
+\includegraphics[scale=0.25]{Breiman_1996_PE_error_versus_number_of_variables.png}
+\end{figure}
+
+\begin{figure}
+\includegraphics[scale=0.25]{Breiman_1996_PE_error_versus_number_of_variables_ridge.png}
+\end{figure}
+\end{frame}
+
+\end{document}

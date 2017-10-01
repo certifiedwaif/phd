@@ -1,0 +1,896 @@
+\documentclass{amsart}[12pt]
+% \documentclass{usydthesis}[12pt]
+
+\addtolength{\oddsidemargin}{-.75in}%
+\addtolength{\evensidemargin}{-.75in}%
+\addtolength{\textwidth}{1.5in}%
+\addtolength{\textheight}{1.3in}%
+\addtolength{\topmargin}{-.8in}%
+\addtolength{\marginparpush}{-.75in}%
+%\setlength\parindent{0pt}
+%\setlength{\bibsep}{0pt plus 0.3ex}
+
+\usepackage[authoryear]{natbib}
+\usepackage[doublespacing]{setspace}
+\usepackage{graphicx}
+\usepackage{algorithm,algorithmic}
+\usepackage{color}
+
+\title{Preliminaries}
+\author{Mark Greenaway}
+\input{include.tex}
+\input{Definitions.tex}
+
+\newcommand{\mgc}[1]{{\color{blue}#1}}
+\newcommand{\joc}[1]{{\color{red}#1}}
+
+\begin{document}
+\setlength{\parindent}{0pt}
+\maketitle
+
+\section{Introduction}
+
+Linear and generalised linear regression models are the standard tools used by applied statisticians to
+explain the relationship between an outcome variable and one or more explanatory variables. They provide a
+general method  to analyse quantified relationships between variables within a data set in an easily
+interpretable way. A standard assumption is that the outcomes are independent, and that the effect of the
+explanatory variables on the outcome is fixed. But if the outcomes are dependent and this assumption is not
+met, then linear and generalised linear models can be extended to linear mixed models. These allow us to
+incorporate dependencies amongst the  observations via the assumption of a more complicated covariance
+structure, including random effects for  different subgroups or longitudinal data and other extensions such as
+splines, missing data and measurement error. This additional flexibility makes their application popular in
+many fields, such as public health, psychology and agriculture.
+
+While mixed models are very useful for gaining insight into a data set, fitting them can be computationally
+challenging. For all but the simplest situations, fitting these models involves computing high-dimensional
+integrals which are often analytically and computationally intractable. Thus, approximations must be used.
+
+In the frequentist paradigm, model parameters are fixed and uncertainty enters the model through random
+errors, which have associated variance. The data is modelled as a combination of these fixed parameters and
+random errors. In the Bayesian paradigm, the uncertainty enters the model by assuming parameters are random
+variables, while the data is fixed.
+
+\section{Zero--inflated models}
+Count data with a large number of zero counts arises in many areas of application, such as data arising from
+physical activity studies, insurance claims, hospital visits or defects in manufacturing processes. Zero
+inflation is a frequent cause of overdispersion in Poisson data, and not accounting for the extra zeroes
+may lead to biased parameter estimates. These models have been used for many applications, including defects
+in manufacturing in \citep{lambert1992}, horticulture in \citep{BIOM:BIOM1030}, length of
+stay data from hospital admissions in \citep{BIMJ:BIMJ200390024}, psychology in \citep{JOFP:rethink},
+pharmaceutical studies in \citep{Min01042005}, traffic accidents on roadways in \citep{Shankar1997829} and
+longitudinal studies in \citep{LeeWangScottYauMcLachlan2006}.
+
+The strength of this approach derives from modelling the zero and non-zero count data seperately as a mixture
+of distributions for the zero and non-zero components, allowing analysis of both the proportion of zeroes in
+the data set and the conditions for the transition from zero observations to non-zero observations. When
+combined with a multivariate mixed model regression framework, an extremely rich class of models can be fit
+allowing a broad range of applications to be addressed. Often the transition from zero to non-zero has a
+direct interpretation in the area of application, and is interesting in its' own right.
+
+Bayesian estimation methods for zero-inflated models was developed in \citep{Ghosh2006} using MCMC 
+implemented with WinBUGS, and in \citep{Vatsa2014} using a Variational Bayes solution to the inverse
+zero-inflated Poisson regression problem. While simple forms of these models are easy to fit with standard 
+maximum likelihood techniques, more general models incorporating random effects, splines and missing data 
+typically have no closed form solutions and hence present a greater computational challenge to fit.
+
+Fitting these models is typically done with Monte Carlo Markov Chain techniques, but these can be slow and
+prone to convergence problems. Other fitting methods such as the Variational Bayes approach above can be
+inflexible, not allowing general models incorporating random effects and so on. 
+We build upon a latent variable representation of these models to allow a
+tractable semiparametric mean field Variational Bayes approximation to be derived. Semiparametric mean field
+Variational Bayes is an approximate Bayesian inference method as detailed in \citep{Ormerod2010} and
+\citep{Rohde2015}, which allows us to fit close approximations to these models using a deterministic algorithm
+which converges much more quickly.
+
+We allow a flexible regression modelling approach by using a Gaussian Variational Approximation as defined in
+\citep{Ormerod2012} on the regression parameters to allow a non-conjugate Gaussian prior to be used, making the
+resulting Gaussian posterior of the regression parameters easy to interpret. We adopt a Mean Field Variational
+Bayes (VB) approach on the other parameters in the model to derive the rest of the approximation.
+
+\section{Model selection}
+% Given a full data matrix $\mX \in \R^{n \times p}$, we may wish to find the subset of variables $\gamma \in \{
+% 1 \ldots p \}$ such that $\mX_\gamma \vbeta_\gamma$ describe the data in $\vy$ best.
+
+The task of selecting a statistical model from a set of candidate models given a data set is one
+of the fundamental tasks of scientific inquiry. It is one of the central tasks of applied statistical
+analysis, and there is a correspondingly large literature on the subject. The problem of model selection for
+normal linear models is particularly well studied, owing to the popularity and importance of normal linear
+models in applications.
+There are many approaches to model selection, including criteria based approaches,
+variable selection,
+penalised regression,
+and Bayesian modelling approaches. Model selection is a difficult problem in high--dimensional space in general
+because as the dimension of the space increases, the number of possible models increases combinatorially.
+Many model selection algorithms use heuristics in an attempt to search the model space more efficiently but
+still find an optimal or near-optimal model.
+
+Many approaches to model selection have been investigated, with various model selection criteria
+proposed to attempt to balance model likelihood against model complexity. One approach to model selection is
+to select between entire models, using a model selection criterion. These criterion may have a fixed penalty
+for model complexity, such as Akaike's Information Criterion \citep{Akaike1974}, the Risk Inflation Criterion
+\citep{Foster1994}, the Schwarz criterion or Bayesian Information Criterion \citep{Schwarz1978}, the Deviance
+Information Criterion \citep{Spiegelhalter2016} or the Principle of Minimum Description Length
+\citep{Hansen2001}. Alternatively, the penalty may be adaptive/data--dependent as in \citep{George2000}.
+
+An alternative to model selection criterion is to select models based on their posterior probability. In a Bayesian context, this can be
+accomplished by comparing the posterior likelihoods of the candidate models to see which is most probable
+given the observed data. This can be done, for example, by using Bayes Factors as in \citep{Kass1993}. Rather
+than selecting one candidate model, several models can be combined together using Bayesian model  averaging,
+as in \citep{Hoeting1999}, \citep{Raftery1997}, \citep{Fernandez2001} or \citep{Papaspiliopoulos2016}.
+
+Model selection can be made implicit in the model fitting process itself, as in ridge regression
+\citep{Casella1980}, of which the well-known lasso is a special case \citep{Tibshirani1996}. As shown in
+papers by \citep{Breiman1996} and \citep{Efron2013} showed, while  the standard formulation of a linear model
+is unbiased, the goodness of fit of these models is numerically  unstable. Breiman showed that by introducing
+a penalty on the size of the regression co- efficients such as  in ridge regression, this numerical
+instability can be avoided. This reduces the variances of the co-efficient estimates, at the expense of
+introducing some bias --- the bias-- variance trade--off.
+
+A special case of model selection is variable selection, where the focus is on selecting individual
+covariates, rather than entire models. This approach can either be Fully Bayesian or Empirically Bayesian as
+in \citep{Cui2008}. Variable selection approaches involve a stochastic search over the variables in the model
+space. This search can be driven by posterior probabilities, as in \citep{Casella2006}, or by Gibbs sampling
+approaches such as in \citep{George1993}. These two approaches of model selection and variable selection can
+be combined, as in \citep{Geweke1996}. Variable selection can also be accomplished by selecting the median
+probability model, consisting of those models whose posterior inclusion probability is at least $1/2$, as in
+\citep{Barbieri2004}.
+
+
+\mgc{You have so much work to do on this chapter.}
+
+\section{Models and Assumptions}
+
+\section{Frequentist Approaches to Model Selection}
+\subsection{Information criteria}
+
+
+In a frequentist context, there are many functions which can be used to judge which model is best,
+such as AIC, BIC etc. These are functions $f: \gamma \to \R^+$ which allow the models under consideration to
+be ranked, and the best model chosen from those available. Thus the optimal model under such a measure
+f is
+\[
+	\gamma^* = \max_\gamma f(\gamma)
+\]
+These functions typically attempt to balance log likelihood against the complexity of the model, achieving
+a compromise between each.
+
+\mgc{AIC, BIC, DIC, Mallow's $C_p$}
+
+
+Information criteria are frequently used to compare amongst models. Let $\vgamma$ denote the candidate model.
+The Information Criteria are of the form
+\[
+	\text{Information Criteria} = -2 \log p(\vy | \hat{\vtheta_\vgamma}) + \text{complexity penalty}
+\]
+
+where $\log p(\vy | \hat{\vtheta_\gamma})$ is the log-likelihood of the model and the complexity penalty is
+a function of the sample size $n$ and the number of parameters $p$ of the model. Information criteria attempt
+to successfully compromise between goodness of fit and model complexity.
+
+The most popular of the information criteria is the Akaike Information Criterion (AIC) \cite{Akaike1974}. AIC
+calculates an estimate of the information lost when a given model is used to represent the process that
+generates the data and so is an estimator of the Kullback-Leibler divergence of the true model from the fitted
+model. The AIC of the model $\vgamma$ is defined as
+\[
+	\text{AIC}(\vgamma) = -2 \log p(\vy | \hat{\vtheta_\vgamma}) + 2 |\vgamma|
+\]
+
+where $|\vgamma|$ is the number of parameters in the model $\vgamma$. The model with the lowest AIC is selected
+as the `best`.
+
+Of a similiar form as the AIC, but derived via a more Bayesian framework is the Bayesian Information Criterion
+or BIC. The BIC approximates the posterior probability of the candidate model $\vgamma$. The BIC is defined as
+\[
+	\text{BIC}(\vgamma) = -2 \log p(\vy | \hat{\vtheta_\vgamma}) + |\vgamma| \log(n)
+\]
+
+This is a more severe penalty for model complexity than in the Akaike's Information Criteria when $n$ is
+greater than $8$. BIC can be shown to be approximately equivalent to model selection using Bayes Factors
+in certain contexts \cite{Kass1993}.
+
+\subsection{Existing literature}
+The problem of model selection is one of the most important problems encountered in practice by applied
+statistical practitioners. There are many approaches to model selection including approaches based on
+functions of the model selection criterion, penalized regression and Bayesian modelling approaches. A major
+motivation for this field of research is the need for a computationally feasible approach to performing model
+selection on large scale problems where the number of covariates is large.
+
+% Non-Bayesian
+\subsection{Frequentist Approachs to Model Selection}
+Many approaches to model selection have been investigated, with various model selection criteria proposed to
+attempt to balance model likelihood against model complexity. One approach to model selection is to select
+between entire models, using a model selection criterion. These criterion may have a fixed penalty for model
+complexity, such as Akaike's Information Criterion \citep{Akaike1974}, the Risk Inflation Criterion
+\citep{Foster1994}, the Schwarz criterion or Bayesian Information Criterion \citep{Schwarz1978}, the Deviance
+Information Criterion \citep{Spiegelhalter2016} or the Principle of Minimum Description Length
+\citep{Hansen2001}. Alternatively, the penalty may be adaptive/data--dependent as in \citep{George2000}.
+
+Model selection can also be made implicit in the model fitting process itself, as in ridge regression
+\citep{Casella1980}, of which the well-known lasso is a special case \citep{Tibshirani1996}. As shown in
+papers by \citep{Breiman1996} and \citep{Efron2013} showed, while  the standard formulation of a linear model
+is unbiased, the goodness of fit of these models is numerically  unstable. Breiman showed that by introducing
+a penalty on the size of the regression co- efficients such as  in ridge regression, this numerical
+instability can be avoided. This reduces the variances of the co-efficient estimates, at the expense of
+introducing some bias -- the bias- variance trade--off.
+
+\subsection{Bayesian Approaches to Model Selection}
+An alternative to model selection criterion is to select models based on their posterior probability. In a
+Bayesian context, this can be accomplished by comparing the posterior likelihoods of the candidate models to
+see which is most probable given the observed data. This can be done, for example, by using Bayes Factors as
+in \citep{Kass1993}. Rather than selecting one candidate model, several models can be combined together using
+Bayesian model averaging, as in \citep{Hoeting1999}, \citep{Raftery1997}, \citep{Fernandez2001} or
+\citep{Papaspiliopoulos2016}.
+
+The problem of model selection can also be considered within a Bayesian framework.
+Within this framework, candidate models can be selected by comparing their posterior likelihoods to see
+which is most probable given the observed data, as in \citep{Kass1993}. Bayesian model selection approaches
+can incorporate prior information, such as the prior probability of selecting each candidate model $\vgamma$.
+
+A special case of model selection is variable selection, where the focus is on selecting individual
+covariates, rather than entire models. Variable selection approaches search over the
+variables in the model space for the best covariates to include in the candidate model. Due to the large
+number of possible combinations of covariates -- typically $2^p$ where $p$ is the number of covariates, such
+searches are often stochastic. This approach can either be Fully Bayesian or Empirically Bayesian as in
+\citep{Cui2008}.  This search can be driven by posterior probabilities, as in \citep{Casella2006}, or by Gibbs
+sampling approaches such as in \citep{George1993}. These two approaches of model selection and variable
+selection can be combined, as in \citep{Geweke1996}. Variable selection can also be accomplished by selecting
+the median probability model, consisting of those models whose posterior inclusion probability is at least
+$1/2$, as in \citep{Barbieri2004}.
+
+\section{Hamiltonian Monte Carlo}
+
+% Basic idea: Sample the typical set efficiently by following a contour/level set of the likelihood surface
+% Hamiltonian is a mixture of the position and momentum
+% If you can't write any more clearly than this, then you don't understand well enough yet
+
+The Hamiltonian Monte Carlo algorithm was devised by Simon Duane, A. D. Kennedy, Brian Pendleton and Duncan
+Roweth in 1987 
+Duane, S., Kennedy,A. D., Pendleton, B. J., and Roweth, D. 1987. Hybrid Monte Carlo. Physics Letters B, 195:216–222.
+Earl,
+(found the reference in \cite{Neal2011}).
+
+The Hamiltonian Monte Carlo method is a Metropolis-Hasting method that makes use of gradient information to
+seek states of higher probability in the distribution being sampled from, reducing random walk behaviour. The method uses this information to spend a greater proportion of computational time sampling from the typical set of 
+the distribution.
+
+If the probability distribution that we are interested in sampling from can be written
+\[
+	P(\vx) = \frac{e^{E(\vx)}}{Z}
+\]
+
+then the state space $\vx$ can be considered the current position, and augmented by a momentum variable
+$\vp$. Then the algorithm proceeds by alternating between two types of proposal. The first proposal generates
+a sample for the momentum variable $\vp$, leaving the position variable $\vx$ unaltered. The second proposal
+generates a new position sample for $\vx$ and a new momentum sample $\vp$ using simulated Hamiltonian dynamics
+defined by the Hamiltonian
+\[
+	H(\vx, \vp) = E(\vx) + K(\vp),
+\]
+
+where $K(\vp)$ is the kinetic energy. These two proposals are used to sample from the joint density
+\[
+	P_H(\vx, \vp) = \frac{1}{Z_H} \exp{[-H(\vx, \vp)]} = \frac{1}{Z_H} \exp{[-E(\vx)]} \exp{[ -K(\vp)]}
+\]
+
+As this probability distribution factorises, the marginal distribution of $\vx$ is the distribution that we
+wish to sample from. So, by retaining the $\vx$ samples and discarding the $\vp$ samples, we obtain a sequence
+of samples $\{ \vx^{(t)} \}$ which asymptotically come from $P(x)$.
+
+\subsection{Details of Hamiltonian Monte Carlo}
+
+The first proposal, which can be considered a Gibbs sample, draws a new momentum from the Gaussian density
+$\exp{-K(\vp)}/Z_K$. This proposal is always accepted. During the second, dynamical proposal, the momentum
+variable determines the change in the state $\vx$, and the \emph{gradient} of $E(\vx)$ determines the change
+in the momentum $\vp$, using the equations
+\begin{align*}
+	\dot{\vx} & = \vp                                    \\
+	\dot{\vp} & = -\frac{\partial E(\vx)}{\partial \vx}. 
+\end{align*}
+
+As the change in $\vx$ is always in the direction of the momentum $\vp$ during each dynamical proposal, the
+state of the system tends to move a distance that varies \emph{linearly} with the computational time, rather
+than as the square root as with other sampling methods.
+
+For an introduction to Hamiltonian Monte Carlo, see the chapter in \cite{MacKay:2002:ITI:971143}. A deeper
+and more thorough introduction is provided in \cite{Betancourt2017}.
+
+
+\section{Variational approximations}
+
+\subsection{Definition}
+
+Consider a model $p(\vtheta|\vy)$ which is of interest to us but computationally difficult or intractable to 
+fit. We may be able to gain much of the same insight from a given data set by fitting an accurate approximation 
+of the model, allowing us to summarise the data and perform statistical inference.
+
+Call the approximating model $q(\theta)$. Then we seek a $q(\theta)$ which approximates $p(\vtheta|\vy)$
+as closely as possible in some sense. A useful measure of distance between probability distributions is the
+Kullback-Leibler divergence, which is defined as
+\[
+	\KL(q || p) \equiv \int q(\vtheta) \log{\frac{q(\theta)}{p(\theta)}} d \vtheta.
+\]
+
+We may seek a best approximating distribution $q^*(\vtheta)$ to a given posterior distribution
+$p(\vtheta|\vy)$ from a parameteric family of approximating distributions $Q$ by finding
+\[
+	q^*(\vtheta) = \argmin_{q \in Q} \KL \{ {q(\vtheta) || p(\vtheta|\vy)} \}.
+\]
+
+If $\vtheta$ is partitioned into $M$ partitions $\vtheta_1$, $\vtheta_2$, \ldots, $\vtheta_M$ then a 
+simple form of approximation to adopt is the factored approximation of the form
+\[
+	q(\vtheta) = \Pi_{i=1}^M q(\vtheta_i)
+\]
+
+where each of the density $q(\vtheta_i)$ is a member of a parametric family of density functions. This form of
+approximation is computationally convenient, but assumes that the partitions of $\vtheta$ are completely
+independent of one another.
+
+The optimal mean field update for each of the parameters $\vtheta_i$ can be shown to be
+\[
+	q^*(\vtheta_i) \propto \exp \{ \E [\log p(\vy; \vtheta)] \}.
+\]
+
+For details of the proof, and a more thorough introduction to the topic of variational approximations, see
+\cite{Ormerod2010}.
+
+\subsection{Gaussian Variational Approximation}
+
+In cases where there is a strong dependence between partitions of $\vtheta$, such as between the parameters
+$\vmu$ and $\mSigma$ in a hierarchical Gaussian model, a factored approximation may not approximate the true
+distribution accurately. In this case, an alternate form of approximation may be used with the parameters
+considered together to take their dependence into account. One such form of approximation is the Gaussian
+Variational Approximation \cite{Ormerod2012}, which assumes that the distribution of the parameters being 
+approximated is multivariate Gaussian. The covariance matrix of the Gaussian allows the approximation to
+capture the dependence amongst the elements of $\vtheta$, which increases the accuracy of the variational
+approximation relative to the factored approximation.
+
+\section{Matrix calculus}
+
+Matrix calculus is a very elegant and compact notation for the derivatives of functions of vectors and matrices.
+A useful introduction is \cite{Wand2002}, while a more comprehensive treatment can be found in
+\cite{magnus99}.
+
+\subsection{Notation}
+
+Given a function $f:\R^{n \times n} \to \R$ of a matrix $\mLambda$, we denote the matrix derivative of $f$ with 
+respect to $\mLambda$ as $\mD_\mLambda f$, and the Hessian of $f$ with respect to $\mLambda$ as
+$\mH_\mLambda f$ the Hessian with respect to $\mLambda$.
+
+The Hessian matrix is a $d \times d$ matrix whose $(i, j)$-th entry is equal to
+
+\[
+	\frac{\partial^2}{\partial x_i x_j} f(\vx)
+\]
+
+and is denoted by $\mH f(\vx)$.
+
+\section{Optimisation}
+\subsection{Newton-Raphson}
+\cite{Nocedal2006}
+
+\subsubsection{Definition}
+
+Consider the second order Taylor expansion of $f(\vtheta)$ around $\vtheta_{n}$
+
+$$
+f(\vtheta) \approx f(\vtheta_{n}) + \nabla f(\vtheta_{n}) \Delta \vtheta_{n} + \half \Delta x^\top \mH_f(\vtheta_{n}) \Delta x + \sO((\Delta \vtheta_{n})^3).
+$$
+
+This expression attains its' maxima with respect to $\Delta x$ when
+
+$$
+\vzero = \mD_{\Delta \vtheta} [f(\vtheta_{n}) + \nabla f(\vtheta_{n}) \Delta \vtheta_{n} + \half \Delta \vtheta^\top \mH_f(\vtheta_{n}) \Delta \vtheta] = \nabla f(\vtheta_n) + \mH_f(\vtheta_n) \Delta \vtheta.
+$$
+
+Thus taking $\Delta \vtheta = -\nabla f(\vtheta_n) [\mH_f(\vtheta_n)]^{-1}$, we hope that choosing
+$\vtheta_{n + 1} = \vtheta_{n} - \nabla f(\vtheta_n) [\mH_f(\vtheta_n)]^{-1}$ will be closer to the stationary 
+point $\vtheta^*$ of $f$. This choice of $\vtheta_{n+1}$ establishes an iterative algorithm for finding the 
+maxima/minima of $f$.
+
+Convergence is achieved when the step length $\| \vtheta_{n+1} - \vtheta_{n} \| < \epsilon$, for some
+suitably small choice of $\epsilon$, such as $\epsilon = 10^{-8}$.
+
+\subsubsection{Time and memory complexity}
+
+Execution of this algorithm requires the calculation of a vector addition, dot product and solution of a
+linear system for each iteration. The vector addition and dot product can both be performed in $p$ flops,
+where $p$ is the dimension of the problem. The expensive part of the computation is the solution of the linear
+system $\mH_f(\vtheta_n) \Delta \vtheta$, which takes $\sO(p^3)$ flops. Even on modern computer systems, this
+can quickly become computationally intractable for problems of modest size. This motivates the development
+of Quasi-Newton algorithms, such as BFGS, L-BFGS and L-BFGS-B, discussed in Section \ref{sec:quasi_newton}.
+
+\subsubsection{Radius of convergence and convergence to local solutions}
+
+\subsection{Quasi-Newton Raphson algorithms: L-BFGS-B}
+\label{sec:quasi_newton}
+
+\subsubsection{Definition}
+
+% Wolfe conditions
+The problem of interest is to find
+\[
+	\min_\vx f(\vx)
+\]
+
+for some smooth $f: \R^n \to \R$. Each step involves approximately solving the subproblem
+\[
+	\min_\alpha f(\vx_k + \alpha \vp_k)
+\]
+
+where $\vx_k$ is the current best guess, $\vp_k \in \R^n$ is a search direction and $\alpha$ is the
+step length.
+
+Denote a univariate function $\phi$ restricted to the direction $\vp_k$ as
+$\phi(\alpha) = f(\vx_k + \alpha \vp_k)$. A step length $\alpha_k$ is said to satisfy the \emph{Wolfe conditions}
+if the following two inequalities hold:
+
+\begin{enumerate}
+	\item[(i)] $f(\vx_k + \alpha_k \vp_k) \leq f(\vx_k) + c_1 \alpha_k \vp_k^\top \nabla f(\vx_k)$ \text{(Armijo rule)}
+	\item[(ii)] $\vp_k^\top \nabla f(\vx_k + \alpha_k \vp_k) \geq c_2 \vp_k^\top \nabla f(\vx_k)$ \text{(curvature condition)}
+\end{enumerate}
+
+The first condition ensures that the step length $\alpha_k$ decreases $f$ sufficiently, while the second condition
+ensures that the slope had been sufficiently reduced.
+
+The rationale for imposing the Wolfe conditions in an optimisation algorithm where
+$\vx_{k+1} = x_k + \alpha \vp_k$ is to ensure the convergence of the gradient to zero. In particular, if the
+cosine of the angle between $\vp_k$ and the gradient,
+
+$$
+\cos \theta_k = \frac{\nabla f(\vx_k)^\top \vp_k}{\|\nabla f(\vx_k)\| \|\vp_k\|}
+$$
+
+is bounded away from zero and the Wolfe conditions hold, then $\nabla f(\vx_k) \to 0$.
+
+An additional motivation, in the case of a quasi-Newton method is that if $\vp_k = - \mB_k^{-1} \nabla f(\vx_k)$,
+where the matrix $\mB_k$ is updated by the BFGS or DFP formula, then if $\mB_k$ is positive definite condition ii
+implies $\mB_{k+1}$ is also positive definite.
+
+\subsubsection{Time and memory complexity}
+
+\section{Integrals}
+\subsection{Laplace's Method of approximation}
+
+Laplace's method of approximation is used to approximate integrals of a unimodal function with negative second
+derivative at the mode, indicating that the function is decreasing rapidly away from this point. The essential
+idea is that if the function is decreasing rapidly away from the mode, the bulk of the area under the function
+will be within a neighbourhood of the mode. Thus the integral of the function can be well approximated by an
+integral over the neighbourhood of the mode. How large that neighbourhood needs to be is estimated using
+how fast the function is changing at the mode, which is estimated by $|f''(x_0)|$.
+
+Consider
+\[
+	\int_a^b e^{M f(x)} dx
+\]
+
+where $f(x)$ is twice differentiable and $f''(x_0) < 0$, $M \in \R$ and $a, b \in \R \cup \{-\infty, \infty\}$.
+
+Let $f(x)$ have a unique global maximum at $x_0$. Then, Taylor expanding about $x_0$, we have
+
+\[
+	f(x) = f(x_0) + f'(x_0) (x - x_0) + \frac{1}{2} f''(x_0) (x - x_0)^2 + R
+\]
+
+where $R = \BigO((x - x_0)^3)$.
+
+As $f$ has a global maximum at $x_0$, the first derivative of $f$ is zero at $x_0$. Thus, the function $f(x)$
+may be approximated by
+\[
+	f(x) \approx f(x_0) - \frac{1}{2} |f''(x_0)| (x - x_0)^2
+\]
+
+for $x$ sufficiently close to $x_0$, as the second derivative is negative at $x_0$. This ensures the
+accuracy of
+
+\[
+	\int_a^b e^{M f(x)} dx \approx e^{M f(x_0)} \int_a^b e^{-M |f''(x_0)|(x - x_0)^2} dx.
+\]
+
+This is a Gaussian integral, and thus we find that
+
+\[
+	\int_a^b e^{M f(x)} dx \approx \sqrt{\frac{2 \pi}{M |f''(x_0)|}} e^{M f(x_0)}
+\]
+
+Thus we have approximated our integral by a closed form expression.
+
+\subsubsection{Relative error} % What to write about this? Include the justification/proof?
+The approximation above is $O(1/\sqrt{M})$. % See the Relative error section of the Wikipedia page, for instance.
+The approximation can be made more accurate by using a Taylor
+expansion beyond second order.
+
+\subsubsection{Extending to multiple dimensions}
+This approach to approximating integrals extends naturally to multiple dimensions.
+Consider the second order Taylor expansion of $\log f(\vtheta)$ around the mode $\vtheta_m$
+$$
+\log f(\vtheta) \approx f(\vtheta_m) + (\vtheta - \vtheta_m) \nabla \log f(\vtheta) + \half (\vtheta - \vtheta_m)^\top \mH_{\log f}(\vtheta_m) (\vtheta - \vtheta_m) + \sO(\|\vtheta - \vtheta_m\|^3).
+$$
+
+Assuming that $\vtheta$ is a stationary point of $\log f$, then $\nabla f(\vtheta) = \vzero$ and so
+$$
+\log f(\vtheta) \approx f(\vtheta_m) + \half (\vtheta - \vtheta_m)^\top \mH_{\log f}(\vtheta_m) (\vtheta - \vtheta_m) + \sO(\|\vtheta - \vtheta_m\|^3)
+$$
+
+at such a point. The quadratic form in $\vtheta$ in the approximate expression for the log likelihood above
+leads to a Gaussian approximation for the likelihood $\N(\vtheta_m, \mH_{\log f}(\vtheta_m)^{-1})$.
+
+The approximation is crude but can be quite accurate if the likelihood is symmetric and unimodal.
+
+\subsection{Trapezoidal integration}
+
+If an integral cannot be approximated well using Laplace's method or some other method of approximation, then
+it can often be evaluated numerically using a quadrature scheme. Trapezoidal integration is a method of
+numerically computing the integral of a function $f: \R \to \R$ over the interval $(a, b)$. First, the
+interval is partitioned into $x_1, x_2, \ldots, x_{n-1}, x_n$, and then
+\[
+	\int_a^b f(x) dx \approx \sum_{i=1}^{n-1} \frac{1}{2} \frac{f(x_i) + f(x_{i+1})}{x_{i+1} - x_i}
+\]
+
+Note that the points $x_i$ can be chosen arbitrarily within the interval $(a, b)$, and do not need to be
+evenly spaced. \mgc{What's the error bound? Error analysis using Taylor's theorem?}
+
+\section{Numerical computation}
+
+In this section, I'd like to talk about floating point representation and its' consequences, numerical
+analysis/error bounds and in particular their relevance to numerical linear algebra.
+
+% \subsection{Floating point numbers}
+
+% $$\text{sign } \text{significand} \times \text{base}^\text{exponent}$$
+
+% IEEE 754: floating point in modern computers
+
+% On modern computers, IEEE 754 is ubiquitous, and the base is $2$.
+
+% Error bounds on $+, -, *, /, \sqrt{}$
+
+% $$
+% \text{fl}(a \text{ op } b) = (1 + \epsilon) (a \text{ op } b) \text{ provided $\text{fl}(a \text{ op } b)$ neither overflows nor underflows}
+% $$
+
+% where $\epsilon$ is the machine epsilon, the minimum difference between $1$ and the next representable
+% floating point number.
+
+% Exceptional values: $\pm \infty$, $\text{NaN}$
+
+% When doing arithmetic on computers, it is important to understand the full ramifications of this.
+
+% \begin{enumerate}
+% \item All numerical values are in fact approximations within an interval.
+% \item Every arithmetic operation has an associated amount of error, and these errors accumulate as more
+% 			arithmetic operations are performed.
+% \end{enumerate}
+
+% The field of numerical analysis (references Classical and Modern Numerical Analysis,
+% Demmel's course: http://www.cs.berkeley.edu/~demmel/cs267/lecture21/lecture21.html, Kahan) analyses numerical 
+% algorithms to assess their error bounds, and attempt to mitigate these problems as much as possible to allow
+% us to solve numerical problems on modern computers.
+
+% \subsection{Truncation and round-off error}
+% \subsection{Numerical stability}
+% \subsection{Numerical differentiation and integration}
+
+\subsection{Numerical linear algebra}
+\subsubsection{Matrix norms}
+We can define a norm on the space of matrices such that the matrix norms obey the following axioms
+\begin{align*}
+	\|\mA\|        & \geq 0                                                   \\
+	\|\mA\|        & = 0 iff \mA = 0                                          \\
+	\|\alpha \mA\| & = |\alpha| \|\mA\| \forall \alpha \in \R                 \\
+	\|\mA + \mB\|  & \leq \|\mA\| + \|\mB\|\text{ for all matrices } \mA, \mB 
+\end{align*}
+Additionally, for square matrices
+\[
+	\|\mA\mB\| \leq \|\mA\| \|\mB\|
+\]
+\subsubsection{Examples}
+
+\begin{enumerate}
+	\item{The Frobenius Norm:}
+	The Frobenius Norm (Euclidean norm) is a matrix norm on the matrix $\mA$ defined as the square root of the sum
+	of the absolute squares of its elements,
+	\[
+		\|\mA\|_F = \sqrt{\sum_{i=1}^m \sum_{j=1}^n |a_{ij}|^2}.
+	\]
+	
+	\item{The p norm:}
+	The p norm is a matrix norm on the matrix $\mA$ defined as the supremum of the ratio of the norm of
+	$\mA \vx$ divided by the norm of $\vx$ over the set of vectors $\vx \ne \vzero$.
+	\[
+		\|\mA\|_p = \sup_{\vx \ne 0} \frac{\|\mA \vx\|_p}{\|\vx\|_p}.
+	\]
+\end{enumerate}
+
+The $p$-norm of a matrix and its' singular values from its' SVD are connected in the following way.
+
+\cite{Golub:1996:MC:248979} Corollary 2.4.3 % Matrix Computations
+If $\sigma_1$, $\sigma_2$, \ldots, $\sigma_p$ are the ordered descending singular values of the SVD of $\mA
+\in \R^{m \times n}$ where $p = \min{(m, n)}$ then
+\[
+	\|\mA\|_F = \sqrt{\sigma_1^2 + \sigma_2^2 + \ldots + \sigma_p^2} \geq |\sigma_1|
+\]
+
+\subsubsection{Condition numbers}
+In numerical linear algebra, a useful measure for quantifying the sensitivity of numerical procedures such as
+solving linear systems is the \emph{condition number} of A. It depends on the matrix norm used and is defined by
+\[
+	\kappa(\mA) := \|\mA^{-1}\|.\|\mA\| = \frac{\sigma_{\text{max}}(\mA)}{\sigma_{\text{min}}(\mA)}.
+\]
+
+This is a useful tool in characterising the accuracy and stability of numerical linear algebra algorithms.
+\cite{Golub:1996:MC:248979} \S 2.
+
+\subsubsection{LDU decomposition}
+
+If a matrix $\mA$ is square, it can be factored into the product of a lower triangular matrix and an upper 
+triangular matrix
+\[
+	\mA = \mL \mU
+\]
+
+\subsection{Cholesky decomposition}
+
+If a matrix $\mA$ is square $p \times p$, symmetric and positive definite then it can be factored into the
+product a lower triangular matrix and its' transpose
+\[
+	\mA = \mL \mL^\top
+\]
+by noting that
+\begin{align*}
+	\mA = \mL^\top \mL &= \begin{pmatrix}
+	\mL_{11}          & 0                                     & 0                                    \\
+	\mL_{21}          & \mL_{22}                              & 0                                    \\
+	\mL_{31}          & \mL_{32}                              & \mL_{33}                             
+	\end{pmatrix}
+	\begin{pmatrix}
+	\mL_{11}          & \mL_{21}                              & \mL_{31}                             \\
+	0                 & \mL_{22}                              & \mL_{32}                             \\
+	0                 & 0                                     & \mL_{33}                             
+	\end{pmatrix}	\\
+	&= \begin{pmatrix}
+	\mL_{11}^2        &                                       & \text{symmetric}                     \\
+	\mL_{21} \mL_{11} & \mL_{21}^2 + \mL_{22}^2               &                                      \\
+	\mL_{31} \mL_{11} & \mL_{31} \mL_{21} + \mL_{32} \mL_{22} & \mL_{31}^2 + \mL_{32}^2 + \mL_{33}^2 
+	\end{pmatrix}
+\end{align*}
+and so
+\begin{align*}
+	\mL_{jj} & = \sqrt{\mA_{jj} - \sum_{k=1}^{j-1} \mL_{jk}^2} \text{ and}                               \\
+	\mL_{ij} & = \frac{1}{\mL_{jj}} (\mA_{ij} - \sum_{k=1}^{j-1} \mL_{ik} \mL_{jk}), \text{ for } i > j. 
+\end{align*}
+
+This can be computed in $\BigO(p^2)$ for a $p \times p$ matrix. Once this form is obtained, it has several
+computational advantages over working with the original matrix $\mA$. Firstly, as $\mL$ is lower triangular
+only the non-zero entries need to be stored. Secondly, the triangular form of $\mL$ allows matrix equations
+involving $\mL$ to be solved in $\BigO{(p^2)}$ using back-substitution and forward-substitution, without using
+Gaussian elmination or calculating a matrix inverse.
+
+\subsection{Difficulty of inverting matrices which are nearly singular}
+In computational statistics, the task of inverting matrices often arises when
+attempting to solve a statistical problem such as fitting a model. While theoretically this task can always be
+done successfully, in practice if the matrix or its' inverse being inverted is close to singular this can be
+difficult or even impossible. This can arise in numerical procedures which are prone to overflow, such as
+Poisson regression, which overflows due to the exponential link function in the formulation of the problem.
+
+\subsubsection{Sensitivity of solving linear systems}
+
+A precise measure of linear system sensitivity can be obtained by considering the parameterised system
+\[
+	(\mA + \epsilon \mF) \vx(\epsilon) = \vb + \epsilon + \vf,  \vx(0) = \vx
+\]
+where $\mF \in \R^{n \times n}$ and $\vf \in \R^n$. If $\mA$ is nonsingular, it is clear that $x(\epsilon)$ is
+differentiable in a neighbourhood of zero. Moreover, $\dot{x}(0) = \mA^{-1} (\vf - \mF \vx)$ and so the
+Taylor series expansion for $\vx$ has the form
+\[
+	x(\epsilon) = x + \epsilon \dot{\vx}(0) + \BigO(\epsilon^2).
+\]
+
+Using any vector norm and consistent matrix norm we obtain
+\[
+	\frac{\|\vx(\epsilon) - \vx\|}{\vx} \leq |\epsilon| \|\mA^{-1}\| \left\{\frac{\|\vf\|}{\|\vx\|} + \|\mF\|\right\} + \BigO(\epsilon^2)
+\]
+
+From \S 2.6.2 of \citep{Golub:1996:MC:248979}
+when solving linear equations in the form $\mA \vx = \vb$
+\[
+	\frac{\|\vx(\epsilon) - \vx\|}{\|\vx\|} \leq \kappa(\mA) (\rho_A + \rho_b) + \BigO(\epsilon^2)
+\]
+where $\rho_A = |\epsilon| \frac{\|\mF\|}{\|\mA\|}$ and $\rho_B = |\epsilon| \frac{\|f\|}{\|b\|}$ represent
+the relative errors in $\mA$ and $\vb$, respectively. Thus the relative error in $\vx$ can be $\kappa(\mA)$
+times the relative error in $\mA$ and $\vb$. In this sense, the condition number $\kappa(\mA)$ quantifies the
+sensitivity of the $\mA \vx = \vb$ problem.
+
+% From \cite{trefethen97}'s section on Conditioning and Condition Numbers, p91
+
+A problem is \emph{well-conditioned} if $\kappa$ is small (e.g. $1$, $10$, $10^2$) and \emph{ill-conditioned}
+if $\kappa$ is large (e.g. $10^6$, $10^{16}$) \cite{trefethen97}.  If a matrix is either close to singular or
+has very large singular values, then it will be ill-conditioned.
+
+An immediate consequence of this is that if either $\mA$ or its' inverse are ill-conditioned, then inversion
+or solution of the linear system will be highly numerically unstable. In our ZIP code, we routinely saw values of 
+at least $10^5$ on the diagonals of our Cholesky factors until we changed the parameterisation to the safe
+exponential parameterisation.
+
+\subsubsection{Sparsity of the inverse}
+We often wish to work with sparse matrices due to the computational advantages and increased numerical
+stability they provide. But sparse matrices do not necessarily have sparse inverses as will be demonstrated
+below. Consider a block matrix
+\[
+	\begin{pmatrix}
+		\mA & \mB \\
+		\mC & \mD 
+	\end{pmatrix}.
+\]
+Then the inverse of this matrix is given by the block-matrix inverse formula
+%Demonstrate this using
+%the block-inverse formula. Inverting a matrix is an inherently unstable operation. The number of floating
+%point operations involved leads to magnification of error.
+
+%Block inverse formula \\
+\[
+	\begin{pmatrix}
+		\mA & \mB \\
+		\mC & \mD 
+	\end{pmatrix}^{-1}
+	=
+	\begin{pmatrix}
+		\mI           & 0 \\
+		-\mD^{-1} \mC & I 
+	\end{pmatrix}
+	\begin{pmatrix}
+		(\mA - \mB^{-1}\mC)^{-1} & 0        \\
+		0                        & \mD^{-1} 
+	\end{pmatrix}
+	\begin{pmatrix}
+		\mI          & 0   \\
+		-\mB\mD^{-1} & \mI 
+	\end{pmatrix}
+\]
+
+An immediate consequence of this formula is that if any of the blocks of the original matrix is not sparse,
+then the inverse will not be sparse in \emph{any} of the corresponding blocks.
+
+\section{Positive semi-definite matrices}
+A positive semidefinite matrix $\mLambda$ is a square matrix of size $n \times n$ such that for any vector
+$\vx \in \R^n$, $\vx^\top \mLambda \vx \geq 0$. Equivalently, all eigenvalues of $\mLambda$ are greater than or 
+equal to 0. A typical example arising in statistics is the covariance matrix of a random vector, which is
+positive definite by definition.
+
+\section{Splines}
+The most general form of the univariate regression problem is
+
+\[
+	y_i = f(x_i)
+\]
+
+where $f: \R \to \R$ is unknown, and we wish to estimate it as $\hat{f}$. We treat the functional form of
+$f$ as unknown, and attempt to estimate it purely from the data available to us. Fully non-parametric regression
+is a difficult problem to solve, but the problem can be simplified by pre-specifying the points at which the
+function may change curvature, the so-called knots.
+
+\subsection{B-Splines}
+% This is taken from the Wikipedia page on the subject
+A B-Spline is a piecewise polynomial function of degree $< n$ in a variable $x$. It is defined over a
+domain $t_0 \leq x \leq t_m, m=n$. The points where $x = t_j$ are known as knots or break-points. The
+number of internal knots is equal to the degree of the polynomial if there are no knot multiplicities.
+The knots must be in ascending order. The number of knots is the minimum for the degree of the B-spline,
+which has a non-zero value in the range between the first and last knot. Each piece of the function is a
+polynomial of degree $< n$ between and including adjacent knots. A B-Spline is a continuous function at the
+knots. When all internal knots are distinct its derivatives are also continuous up to the derivative of degree
+$n - 1$. If internal knots are coincident at a given value of x, the continuity of derivative order is reduced
+by 1 for each additional knot.
+
+For any given set of knots, the B-spline is unique, hence the name, B being short for Basis. The usefulness
+of B-splines lies in the fact that any spline function of order $n$ on a given set of knots can be expressed
+as a linear combination of B-spline:
+
+% B-Splines
+$$
+S_{n, t}(x) = \sum_i \alpha_i B_{i, n}(x)
+$$
+
+where
+
+\begin{align*}
+	B_{i, 0}(x) & := \begin{cases}                                                                                                        
+	1           & \text{if } t_i \leq x < t_{i+1}                                                                                         \\
+	0           & \text{otherwise}                                                                                                        
+	\end{cases} \\
+	B_{i, k}(x) & := \frac{x - t_i}{t_{i + 1} - t_i} B_{i, k-1} (x) + \frac{t_{i + k + 1} - x}{t_{i + k + 1} - t_{i + 1}} B_{i, k-1} (x). 
+\end{align*}
+
+\subsection{O'Sullivan Splines}
+
+Let $B_1$, \ldots, $B_{K+4}$ be the cubic B-spline basis functions defined by the knots $\kappa_1$ to
+$\kappa_{K+4}$
+
+$B_{ik} = B_k (x)$
+$B_x = [B_1(x), \ldots, B_K+4(x)]$
+
+O'Sullivan splines are penalised splines which are penalised using the $\mOmega$ matrix.
+
+Let $\mOmega$ be the $(K+4) \times (K+4)$ matrix where the $(k, k')-th$ element is
+\[
+	\mOmega_{k k'} = \int_a^b B''_k(x) B''_{k'}(x) dx.
+\]
+Then the O'Sullivan spline estimate of the true function $f$ at the point $x$ is
+$\hat{f}_O(x; \lambda) = \mB_x \hat{\vnu}_O$, where
+$\hat{\vnu}_O = (\mB^\top \mB + \lambda \mOmega)^{-1} \mB^\top \vy$.
+
+$\mOmega$ is defined in this way to penalise oscillation, which is measured by the second derivative.
+
+The penalty differs from P-splines in that the P-spline penalty matrix is $\mD_2^\top \mD_2$ where $\mD_2$ is
+the second-order differencing matrix.
+
+% Divided difference notation?
+% Lagrange's interpolating polynomials?
+% Semiparametric regression / Connection to mixed models
+We follow the discussion of semiparametric regression in \cite{RuppertWandCarroll}.
+Using a mixed models setup to fit spline models protects against overfitting.
+Constructing an $\mZ$ matrix with the appropriate B-Spline function evaluations in each of the rows, where
+each column corresponds to a knot.
+
+\subsection{Degrees of freedom}
+
+% From Section 2.5.2, Semiparametric regression
+
+Consider the fixed effects model $\vy = \mX \vbeta$ where $\mX \in \R^{n \times p}$. If the hat matrix is
+defined as $\mH = \mX (\mX^\top\mX)^{-1} \mX^\top$ then
+
+\begin{align*}
+	\tr(\mH) & = \tr[\mX(\mX^\top\mX)^{-1}\mX^\top]  \\
+	         & = \tr[\mX^\top\mX (\mX^\top\mX)^{-1}] \\
+	         & = \tr(\mI_p)                          \\
+	         & = p                                   
+\end{align*}
+
+which is the number of parameters in the fixed effects model. Thus we use the trace of the hat matrix as
+the definition of the effective degrees of freedom of the model. This definition then naturally extends to
+more general smoother matrices which can be used to fit models involving splines or other kinds of smoothing.
+
+\section{Generalised Linear Mixed models}
+
+\subsection{Exponential family}
+
+An exponential family is a set of probability distributions of the form
+$$
+f_X(x|\vtheta) = h(x) g(\theta) \exp(\eta(\theta) \dot T(x)).
+$$
+
+Most commonly used probability distributions in statistics such as normal, exponential, gamma,
+chi-squared, beta, Dirichlet, Bernoulli, categorical, Poisson, Wishart and Inverse Wishart can
+be represented in this form.
+
+Canonical form
+$$
+\log p(\vnu; \vy) = \vy^\top \mC \vnu - b(\mC \vnu)
+$$
+
+Different choices of the function $b:\R \to \R$ lead to different generalised linear mixed models. A set
+of available functions and corresponding distributions is presented in Table \ref{tab:b_functions}.
+
+\begin{table}
+	\caption{Table of b functions}
+	\label{tab:b_functions}
+	\begin{tabular}{|l|lll|}
+		\hline
+		Distribution                         & Parameter & Natural parameter       & Inverse parameter mapping \\
+		\hline
+		Bernoulli distribution               & $p$       & $\log{\frac{p}{1 - p}}$ & $\frac{1}{1 + e^\eta}$    \\
+		Poisson distribution                 & $\lambda$ & $\log \lambda$          & $e^\eta$                  \\
+		Normal distribution (known variance) & $\mu$     & $\frac{\mu}{\sigma}$    & $\sigma \eta$             \\
+		\hline
+	\end{tabular}
+\end{table}
+
+\subsection{Bias of MLE}
+
+How does this relate to Bayesian estimation? Maybe it's just interesting background.
+Bernstein-von Mises Theorem
+
+\bibliographystyle{elsarticle-harv}
+% \bibliography{Chapter_0_preliminary}
+\bibliography{references_mendeley}
+
+\end{document}

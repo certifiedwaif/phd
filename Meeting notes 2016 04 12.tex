@@ -1,0 +1,77 @@
+\documentclass{amsart}
+
+\title{Meeting with Dr John Ormerod - 12/04/2016}
+
+\usepackage{amsmath}
+
+\input{Definitions.tex}
+
+\begin{document}
+
+\maketitle
+
+If we define
+
+\begin{align*}
+\tau_{\sigma^2} &= \E_q \left[\frac{1}{\sigma^2}\right] \\
+\tau_g &= \E_q \left[\frac{1}{g}\right]
+\end{align*}
+
+then the mean field update equations become much easier to work with, and many of the mean field updates
+simplify nicely.
+
+For install, the mean field update for $\vbeta$ becomes $(1 + \tau_g)^{-1} \hat{\vbeta}$. Further algebraic
+simplications lead to formula in terms of $\tau_g$ and other summary statistics which do not depend on
+variational parameters for their calculation: $\hat{\vbeta}_{\text{LS}}, R^2, n, p$ and $(\mX^\top \mX)^{-1}$.
+Thus the Variational Bayes iterations can be performed entirely in terms of the single unvariate parameter $g$
+and these fixed statistics. This reduces a high dimensional problem involving vectors and matrices into a
+univariate problem primarlily involving functions of a single variable.
+
+\section{Different Variational Bayes schemes}
+
+There are many different partitions of the parameter space that we could experiment with.
+
+\begin{align*}
+&q(\vbeta, \sigma^2, g, \vgamma) \\
+= &q(\vbeta) q(\sigma^2) q(g) q(\vgamma) \\
+= &q(\vbeta) q(\sigma^2) q(g) \prod_{j=1}^n q(\vgamma_j) \\
+= &q(\vbeta, \sigma^2, g) q(\vgamma) & \equiv \text{Full Bayes?} \\
+= &\underset{\BigO(p^2)}{q(\vbeta, \sigma^2, g)} \prod_{j=1}^p q(\vgamma_j) & \text{ Fast} \\
+= &\underset{\BigO(np)}{q(\vbeta_j, \vgamma_j)} q(\sigma^2, g) & \text{ Faster} \\
+= &q(\vbeta_s, \sigma^2, g) \\
+\end{align*}
+
+For the partitionings which include $\vgamma$ as a vector, we can estimate the posterior dependence between
+elements of $\vgamma$ by estimating a dependency matrix $\mD_{ij}$ using one of the standard bivariate
+dependendency estimators.
+
+\section{Variational Bayes versus Collapsed Variational Bayes}
+
+Collapsed Variational Bayes is very new. John estimates that there are only 10 or so papers on the subject in
+the literature, and the technique is not widely known outside of the Variational Bayes research community. By
+comparison, there are hundreds of papers using Variational Bayes.
+
+John thinks that Variational Bayes is more likely to become stuck in local optima than Collapsed Variational
+Bayes. His argument is that
+
+VB
+$$q(\vgamma_j) \propto \exp{ \{ \vgamma_j \eta_j \} } \text{ Mean field updates}$$
+
+CVB
+$$q(\vgamma_j) \propto \int q(\vy, \vbeta, \sigma^2, g, \vgamma) d \vtheta$$
+
+$$p(y, \vgamma_j = k) \vgamma_j\text{ not fixed}$$
+
+whereas in the VB approximation, a mean field estimate of $\vgamma_j$ is used. In the CVB approximation, both
+possible values of k are considered as we integrate $\vgamma_j$ out when marginalising. So in CVB, $\vgamma_j$
+is not fixed.
+
+\section{Writing style}
+More punctuation.
+Copy log likelihood lines to do mean field updates.
+
+Naive should probably have double dots above the a.
+
+Fully exponential Laplace approximation Luke Tierney 1989 Asymptotics, better than Laplace approximation.
+
+\end{document}

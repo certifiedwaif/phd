@@ -1,0 +1,63 @@
+\documentclass{amsart}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\title{Meeting notes -- 10/08/2016}
+\begin{document}
+\maketitle
+\begin{align*}
+&1-R^2 \\
+=& \frac{y^T y - y^T X (X^T X)^{-1} X^T y}{y^T y} \\
+=& \frac{\text{RSS}}{n} \\
+=& \hat{\sigma}^2_{\text{MLE}}
+\end{align*}
+
+MLE, translation invariant. This allows us to evade the paradoxes that often plague Bayesian models
+Model selection consistency George and Marayama
+Read Mixtures of g-priors in Generalised Linear Models paper closely:
+Information consistency
+Estimation consistency
+
+\newcommand {\N} {\text{N}}
+\begin{align*}
+&\N(0, \sigma^2 g^{-1} (X^T X)^{-1}) \\
+=&\N(0, \sigma^2 g^{-1}/n (X^T X/n)^{-1}) \\
+\end{align*}
+downarrow 0 downarrow C (correlation matrix)
+
+unless
+
+$g = O(n)$
+
+Recall that
+\begin{align*}
+&X^T X \\
+= &\sum x_i x_i^T = O_p(n)
+\end{align*}
+
+\begin{equation*}
+\|\hat{\beta} - \beta_0\|_2 = O_p(\sqrt{p/n}) \\
+\hat{\beta} = \beta_O + O^v_p (n^{-1/2}) \\
+\end{equation*}
+This implies the previous line, but the converse doesn't hold. An element--wise bound is a stronger
+condition.
+
+Score statistic equal to 0?
+
+\begin{equation*}
+(\hat{\beta} - \beta) / SE(\hat{\beta}) \sim t_{n-1}? \\
+(\beta - \hat{beta})^T I^{-1} (\beta) (\beta - \hat{\beta}) \sim \chi_1^2 \\
+\end{equation*}
+so
+
+$(\beta_j - \hat{\beta_j})^T I_{jj}^{-1} (\beta) (\beta_j - \hat{\beta_j}) \sim \chi_1^2$
+
+What should our software return?
+\begin{equation*}
+R^2 \\
+|X^T X| \\
+\hat{\beta} \\
+\end{equation*}
+
+I mentioned that permuting the results from Graycode order to standard binary order might be easier for
+people to understand.
+\end{document}

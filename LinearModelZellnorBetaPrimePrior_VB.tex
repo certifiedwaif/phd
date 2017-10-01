@@ -1,0 +1,1153 @@
+\documentclass{article}
+
+\usepackage{amsmath,amssymb,amsfonts,amsthm,latexsym,color,url}
+
+\usepackage{graphicx}
+\usepackage{graphics}
+\usepackage{geometry}
+\geometry{verbose,a4paper,tmargin=5.5mm,bmargin=5.5mm,lmargin=5.5mm,rmargin=5.5mm}
+
+
+\newtheorem{Lemma}{Lemma}
+ 
+% special symbols and abbreviations
+% Sets or statistical values
+\def\sI{{\mathcal I}}                            % Current Index set
+\def\sJ{{\mathcal J}}                            % Select Index set
+\def\sL{{\mathcal L}}                            % Likelihood
+\def\sl{{\ell}}                                  % Log-likelihood
+\def\sN{{\mathcal N}}                            
+\def\sS{{\mathcal S}}                            
+\def\sP{{\mathcal P}}                            
+\def\sQ{{\mathcal Q}}                            
+\def\sB{{\mathcal B}}                            
+\def\sD{{\mathcal D}}                            
+\def\sT{{\mathcal T}}
+\def\sE{{\mathcal E}}                            
+\def\sF{{\mathcal F}}                            
+\def\sC{{\mathcal C}}                            
+\def\sO{{\mathcal O}}                            
+\def\sH{{\mathcal H}} 
+\def\sR{{\mathcal R}}                            
+\def\sJ{{\mathcal J}}                            
+\def\sCP{{\mathcal CP}}                            
+\def\sX{{\mathcal X}}                            
+\def\sA{{\mathcal A}} 
+\def\sZ{{\mathcal Z}}                            
+\def\sM{{\mathcal M}}                            
+\def\sK{{\mathcal K}}     
+\def\sG{{\mathcal G}}                         
+\def\sY{{\mathcal Y}}                         
+\def\sU{{\mathcal U}}  
+
+
+\def\sIG{{\mathcal IG}}                            
+
+
+\def\cD{{\sf D}}
+\def\cH{{\sf H}}
+\def\cI{{\sf I}}
+
+% Vectors
+\def\vectorfontone{\bf}
+\def\vectorfonttwo{\boldsymbol}
+\def\va{{\vectorfontone a}}                      %
+\def\vb{{\vectorfontone b}}                      %
+\def\vc{{\vectorfontone c}}                      %
+\def\vd{{\vectorfontone d}}                      %
+\def\ve{{\vectorfontone e}}                      %
+\def\vf{{\vectorfontone f}}                      %
+\def\vg{{\vectorfontone g}}                      %
+\def\vh{{\vectorfontone h}}                      %
+\def\vi{{\vectorfontone i}}                      %
+\def\vj{{\vectorfontone j}}                      %
+\def\vk{{\vectorfontone k}}                      %
+\def\vl{{\vectorfontone l}}                      %
+\def\vm{{\vectorfontone m}}                      % number of basis functions
+\def\vn{{\vectorfontone n}}                      % number of training samples
+\def\vo{{\vectorfontone o}}                      %
+\def\vp{{\vectorfontone p}}                      % number of unpenalized coefficients
+\def\vq{{\vectorfontone q}}                      % number of penalized coefficients
+\def\vr{{\vectorfontone r}}                      %
+\def\vs{{\vectorfontone s}}                      %
+\def\vt{{\vectorfontone t}}                      %
+\def\vu{{\vectorfontone u}}                      % Penalized coefficients
+\def\vv{{\vectorfontone v}}                      %
+\def\vw{{\vectorfontone w}}                      %
+\def\vx{{\vectorfontone x}}                      % Covariates/Predictors
+\def\vy{{\vectorfontone y}}                      % Targets/Labels
+\def\vz{{\vectorfontone z}}                      %
+
+\def\vone{{\vectorfontone 1}}
+\def\vzero{{\vectorfontone 0}}
+
+\def\valpha{{\vectorfonttwo \alpha}}             %
+\def\vbeta{{\vectorfonttwo \beta}}               % Unpenalized coefficients
+\def\vgamma{{\vectorfonttwo \gamma}}             %
+\def\vdelta{{\vectorfonttwo \delta}}             %
+\def\vepsilon{{\vectorfonttwo \epsilon}}         %
+\def\vvarepsilon{{\vectorfonttwo \varepsilon}}   % Vector of errors
+\def\vzeta{{\vectorfonttwo \zeta}}               %
+\def\veta{{\vectorfonttwo \eta}}                 % Vector of natural parameters
+\def\vtheta{{\vectorfonttwo \theta}}             % Vector of combined coefficients
+\def\vvartheta{{\vectorfonttwo \vartheta}}       %
+\def\viota{{\vectorfonttwo \iota}}               %
+\def\vkappa{{\vectorfonttwo \kappa}}             %
+\def\vlambda{{\vectorfonttwo \lambda}}           % Vector of smoothing parameters
+\def\vmu{{\vectorfonttwo \mu}}                   % Vector of means
+\def\vnu{{\vectorfonttwo \nu}}                   %
+\def\vxi{{\vectorfonttwo \xi}}                   %
+\def\vpi{{\vectorfonttwo \pi}}                   %
+\def\vvarpi{{\vectorfonttwo \varpi}}             %
+\def\vrho{{\vectorfonttwo \rho}}                 %
+\def\vvarrho{{\vectorfonttwo \varrho}}           %
+\def\vsigma{{\vectorfonttwo \sigma}}             %
+\def\vvarsigma{{\vectorfonttwo \varsigma}}       %
+\def\vtau{{\vectorfonttwo \tau}}                 %
+\def\vupsilon{{\vectorfonttwo \upsilon}}         %
+\def\vphi{{\vectorfonttwo \phi}}                 %
+\def\vvarphi{{\vectorfonttwo \varphi}}           %
+\def\vchi{{\vectorfonttwo \chi}}                 %
+\def\vpsi{{\vectorfonttwo \psi}}                 %
+\def\vomega{{\vectorfonttwo \omega}}             %
+
+
+% Matrices
+%\def\matrixfontone{\sf}
+%\def\matrixfonttwo{\sf}
+\def\matrixfontone{\bf}
+\def\matrixfonttwo{\boldsymbol}
+\def\mA{{\matrixfontone A}}                      %
+\def\mB{{\matrixfontone B}}                      %
+\def\mC{{\matrixfontone C}}                      % Combined Design Matrix
+\def\mD{{\matrixfontone D}}                      % Penalty Matrix for \vu_J
+\def\mE{{\matrixfontone E}}                      %
+\def\mF{{\matrixfontone F}}                      %
+\def\mG{{\matrixfontone G}}                      % Penalty Matrix for \vu
+\def\mH{{\matrixfontone H}}                      %
+\def\mI{{\matrixfontone I}}                      % Identity Matrix
+\def\mJ{{\matrixfontone J}}                      %
+\def\mK{{\matrixfontone K}}                      %
+\def\mL{{\matrixfontone L}}                      % Lower bound
+\def\mM{{\matrixfontone M}}                      %
+\def\mN{{\matrixfontone N}}                      %
+\def\mO{{\matrixfontone O}}                      %
+\def\mP{{\matrixfontone P}}                      %
+\def\mQ{{\matrixfontone Q}}                      %
+\def\mR{{\matrixfontone R}}                      %
+\def\mS{{\matrixfontone S}}                      %
+\def\mT{{\matrixfontone T}}                      %
+\def\mU{{\matrixfontone U}}                      % Upper bound
+\def\mV{{\matrixfontone V}}                      %
+\def\mW{{\matrixfontone W}}                      % Variance Matrix i.e. diag(b'')
+\def\mX{{\matrixfontone X}}                      % Unpenalized Design Matrix/Nullspace Matrix
+\def\mY{{\matrixfontone Y}}                      %
+\def\mZ{{\matrixfontone Z}}                      % Penalized Design Matrix/Kernel Space Matrix
+
+\def\mGamma{{\matrixfonttwo \Gamma}}             %
+\def\mDelta{{\matrixfonttwo \Delta}}             %
+\def\mTheta{{\matrixfonttwo \Theta}}             %
+\def\mLambda{{\matrixfonttwo \Lambda}}           % Penalty Matrix for \vnu
+\def\mXi{{\matrixfonttwo \Xi}}                   %
+\def\mPi{{\matrixfonttwo \Pi}}                   %
+\def\mSigma{{\matrixfonttwo \Sigma}}             %
+\def\mUpsilon{{\matrixfonttwo \Upsilon}}         %
+\def\mPhi{{\matrixfonttwo \Phi}}                 %
+\def\mOmega{{\matrixfonttwo \Omega}}             %
+\def\mPsi{{\matrixfonttwo \Psi}}                 %
+
+\def\mone{{\matrixfontone 1}}
+\def\mzero{{\matrixfontone 0}}
+
+% Fields or Statistical
+\def\bE{{\mathbb E}}                             % Expectation
+\def\bP{{\mathbb P}}                             % Probability
+\def\bR{{\mathbb R}}                             % Reals
+\def\bI{{\mathbb I}}                             % Reals
+\def\bV{{\mathbb V}}                             % Reals
+\def\bN{{\mathbb N}}
+
+\def\d{\partial}
+\def\ds{\displaystyle}
+
+\begin{document}
+	
+
+\section{Variational Bayes for Linear Model with mixture of $g$-priors}
+
+Consider the linear model
+$$
+\ds \vy|\vbeta,\sigma^2 \sim N_n(\mX\vbeta,\sigma^2\mI) 
+$$
+
+\noindent with priors
+\begin{equation}\label{eq:model}
+\begin{array}{rl}
+\ds \vbeta|\sigma^2,g 
+& \ds \sim N_p(\vzero,g\sigma^2(\mX^T\mX)^{-1}) 
+\\ [1ex]
+\ds p(\sigma^2) 
+& \ds = (\sigma^2)^{-1} \bI(\sigma^2>0) 
+\\ [1ex]
+\ds p(g) 
+& \ds = \frac{g^{b}(1 + g)^{-a-b-2}}{\mbox{Beta}(a+1,b+1)}  \bI(g>0)
+\end{array}
+\end{equation}
+
+\noindent where $a= - 3/4$, $b = (n - p)/2 - a - 2$, 
+$\vy^T\vone = 0$
+and $\|\vy\|^2 = n$. Note that $b > 0$ provided $n > p + 5$. 
+
+\medskip 
+\noindent Writing the densities in full
+$$
+\begin{array}{rl}
+\ds \log p(\vy|\vbeta,\sigma^2)
+& \ds = - \frac{n}{2}\log(2\pi\sigma^2) - \frac{1}{2\sigma^2}\left[
+\|\vy\|^2  - 2\vbeta^T\mX^T\vy + \vbeta^T\mX^T\mX\vbeta \right] 
+\\ [1ex]
+\ds \log p(\vbeta|\sigma^2,g)
+& \ds = \frac{1}{2}\log|\mX^T\mX| - \frac{p}{2}\log(2\pi\sigma^2 g) - \frac{\vbeta^T\mX^T\mX\vbeta}{2\sigma^2 g}
+\\ [1ex]
+\ds \log p(\sigma^2)
+& \ds = -\log(\sigma^2)
+\\ [1ex]
+\log p(g) 
+& \ds = b\log(g) - (a+b+2)\log(1 + g) - \log\mbox{Beta}(a+1,b+1)
+\end{array}
+$$
+
+\medskip 
+\noindent Consider the VB approximation corresponding to the factorization
+$q(\vtheta) = q(\vbeta)q(\sigma^2)q(g)$
+where $\vtheta = (\vbeta,\sigma^2,g)$.
+
+\medskip 
+\noindent
+{\bf Result 1:} If $q(\vx) \propto \exp( -\vx^T\mA\vx/2 + \vx^T\vbeta)$ then $q(\vx)$ is a $N(\mA^{-1}\vb,\mA^{-1})$ density.
+
+\medskip 
+\noindent
+{\bf Result 2:} If $q(\vx)$ 
+is a $N(\vmu,\mSigma)$ density then
+$$
+\begin{array}{rl}
+\bE_q(\vx^T\mA\vx) 
+& \ds = \bE_q(\mbox{tr}(\mA\vx\vx^T))
+\\
+& \ds = \mbox{tr}(\mA\bE_q(\vx\vx^T))
+\\
+& \ds = \mbox{tr}(\mA(\vmu\vmu^T + \mSigma))
+\\
+& \ds = \mbox{tr}(\mA\vmu\vmu^T) + \mbox{tr}(\mA\mSigma)
+\\
+& \ds = \mbox{tr}(\vmu^T\mA\vmu) + \mbox{tr}(\mA\mSigma)
+\\
+& \ds = \vmu^T\mA\vmu + \mbox{tr}(\mA\mSigma).
+\end{array}
+$$
+
+
+\subsection{$q(\vbeta)$}
+
+\noindent The $q$-density for $\vbeta$ is given by
+$$
+\begin{array}{rl}
+\ds q(\vbeta)
+& \ds \propto \exp\left[ \bE_{-q(\vbeta)} \left\{ \log p(\vy,\vtheta) \right\} \right]
+\\ [2ex]
+& \ds \propto \exp\left[ \bE_{-q(\vbeta)} \left\{  \log p(\vy|\vbeta,\sigma^2) 
++ \log p(\vbeta|\sigma^2,g) 
+\right\} \right]
+\\ [2ex]
+& \ds \propto \exp\left[ \bE_{-q(\vbeta)} \left\{ - \frac{1}{2\sigma^2}\left( 
+2\vbeta^T\mX^T\vy + \vbeta^T\mX^T\mX\vbeta \right)  - \frac{\vbeta^T\mX^T\mX\vbeta}{2\sigma^2 g} \right\} \right]
+\\ [2ex]
+& \ds =\exp\left[
+-\frac{1}{2}\vbeta^T\left[ \tau_\sigma(1 + \tau_g)\mX^T\mX \right]\vbeta
++ \tau_\sigma\vbeta^T\mX^T\vy
+\right] 
+\end{array}
+$$
+
+\noindent so that $q(\vbeta)$ is a $N(\vbeta;\vmu,\mSigma)$ density where from Result 1 we have
+$$
+\mSigma = \tau_\sigma^{-1}(1 + \tau_g)^{-1}(\mX^T\mX)^{-1}
+\qquad \mbox{and} \qquad 
+\vmu 
+= (1 + \tau_g)^{-1}(\mX^T\mX)^{-1}\mX^T\vy 
+= (1 + \tau_g)^{-1}\widehat{\vbeta}_{\mbox{\tiny LS}}
+$$
+
+\noindent where $\widehat{\vbeta}_{\mbox{\tiny LS}} = (\mX^T\mX)^{-1}\mX^T\vy$,
+$\tau_\sigma = \bE_q(\sigma^{-2})$ and
+$\tau_g = \bE_q(g^{-1})$.
+
+\subsection{$q(\sigma^2)$}
+
+\noindent The $q$-density for $\sigma^2$ is given by
+$$
+\begin{array}{rl}
+q(\sigma^2) 
+& \ds \propto \exp\left[ \bE_{-q(\sigma^2)} \left\{ \log p(\vy,\vtheta) \right\} \right]
+\\ [2ex]
+& \ds \propto \exp\left[ \bE_{-q(\vbeta)} \left\{  \log p(\vy|\vbeta,\sigma^2) 
++ \log p(\vbeta|\sigma^2,g)
++ \log p(\sigma^2) \right\} \right]
+\\ [2ex]
+& \ds \propto
+\exp\Big[
+- \frac{n}{2}\log(\sigma^2) 
+- \frac{1}{2\sigma^2}\bE_q\left(
+\|\vy\|^2  - 2\vbeta^T\mX^T\vy + \vbeta^T\mX^T\mX\vbeta \right)
+- \frac{p}{2}\log(\sigma^2) 
+- \bE_q\Big( \tfrac{\vbeta^T\mX^T\mX\vbeta}{2\sigma^2 g}\Big)
+- \log(\sigma^2) 
+\Big]
+\\ [2ex]
+& \ds =
+\exp\left[
+- \left( \tfrac{n+p}{2} + 1 \right)\log(\sigma^2)
+- \sigma^{-2}\tfrac{1}{2}\left\{
+\|\vy\|^2 
+- 2\vmu^T\mX^T\vy 
++ (1 + \tau_g)\vmu^T\mX^T\mX\vmu  
++ (1 + \tau_g)\mbox{tr}(\mX^T\mX\mSigma)
+\right\}
+\right]
+\end{array}
+$$
+
+\noindent where we have used Result 2 twice to go from 
+the second last line to the last line.
+Hence, $q(\sigma^2)$ is a $\mbox{IG}(r,s)$ density where
+$$
+\ds r = \tfrac{n+p}{2}
+\qquad \mbox{and} \qquad 
+s  = \tfrac{1}{2}\left[ \|\vy\|^2 
+- 2\vmu^T\mX^T\vy 
++ (1 + \tau_g)\vmu^T\mX^T\mX\vmu  
++ (1 + \tau_g)\mbox{tr}(\mX^T\mX\mSigma)
+\right].
+$$
+
+\noindent Note that $\tau_\sigma = r/s$.
+
+%\noindent
+%Later we will show that
+%$$
+%s^* 
+%= \frac{ n^2 \left\{ 1
+%	- (1 + \tau_g)^{-1} R^2\right\}}{2(n - p)}
+%$$
+
+\subsection{$q(g)$}
+
+
+\noindent The $q$-density for $g$ is given by
+$$
+\begin{array}{rl}
+q(g)
+& \ds \propto \exp\left[ \bE_{-q(g)} \left\{ \log p(\vy,\vtheta) \right\} \right]
+\\ [2ex]
+& \ds \propto \exp\left[ \bE_{-q(g)} \left\{ 
+\log p(\vbeta|\sigma^2,g) 
++ \log p(g) 
+\right\} \right]
+\\ [2ex]
+& \ds \propto \exp\left[
+- \frac{p}{2}\log(g) 
+- \bE_q\left\{ \frac{\vbeta^T\mX^T\mX\vbeta}{2\sigma^2 g} \right\}
++ b\log(g) - (a+b+2)\log(1 + g)
+\right]
+\\ [3ex]
+& \ds = \exp\left[
+\left( b - \tfrac{p}{2}\right) \log(g) 
+- (a+b+2)\log(1 + g)
+- g^{-1}\tfrac{\tau_\sigma}{2}\left\{\vmu^T\mX^T\mX\vmu + \mbox{tr}(\mX^T\mX\mSigma) \right\} 
+\right]
+
+\\ [2ex]
+& \ds = Z^{-1} g^{n/2 - p - a - 2}(1 + g)^{-(n - p)/2}
+\exp(
+- c/g
+)
+\end{array}
+$$
+
+\noindent since $b - p/2 = n/2 - p - a - 2$ and $-a-b-2 = - (n-p)/2$
+where
+$$
+\ds c = \tfrac{\tau_\sigma}{2}\left\{ \vmu^T\mX^T\mX\vmu + \mbox{tr}(\mX^T\mX\mSigma)\right\},
+\qquad 
+Z = \int_0^\infty g^{n/2 - p - a - 2}(1 + g)^{-(n-p)/2}e^{-c/g} dg,
+$$
+
+\noindent  and
+$$
+\tau_g = \frac{\ds \int_0^\infty g^{n/2 - p - a - 3}(1 + g)^{-(n-p)/2}e^{-c/g} dg}{
+	\ds \int_0^\infty g^{n/2 - p - a - 2}(1 + g)^{-(n-p)/2}e^{-c/g} dg}.
+$$
+
+
+\subsection{ELBO}
+
+An expression of the $\log \underline{p}(\vy;q)$
+is given by
+$$
+\begin{array}{rl}
+\log \underline{p}(\vy;q)
+& \ds = \bE_q\left[ \log\left\{
+\frac{p(\vy,\vtheta)}{q(\vtheta)}
+\right\} 
+\right]
+\\ [2ex]
+& \ds = \bE_q\Big[ - \frac{n}{2}\log(2\pi\sigma^2) - \frac{1}{2\sigma^2}\left[
+\|\vy\|^2  - 2\vbeta^T\mX^T\vy + \vbeta^T\mX^T\mX\vbeta \right] 
+\\ [1ex]
+& \ds  \qquad  + \frac{1}{2}\log|\mX^T\mX| - \frac{p}{2}\log(2\pi\sigma^2 g) - \frac{\vbeta^T\mX^T\mX\vbeta}{2\sigma^2 g} - \log(\sigma^2)
+\\ [1ex]
+& \ds  \qquad  + b\log(g) - (a+b+2)\log(1 + g) - \log\mbox{Beta}(a+1,b+1)  
+\\ [1ex]
+& \ds  \qquad 
+- r\log(s) + \log\Gamma(r) + \left( r + 1\right)\log(\sigma^2) + \frac{s}{\sigma^2}
+\\ [1ex]
+& \ds  \qquad - (b - p/2)\log(g) + (a+b+2)\log(1 + g) + \tfrac{c}{g} + \log(Z) \Big]
+\\ [1ex]
+& \ds  \qquad  + \tfrac{1}{2}\log|2e\pi\mSigma|
+
+
+\\ [2ex]
+& \ds =  
+\frac{p}{2} 
+- \frac{n}{2}\log(2\pi)
++ \frac{1}{2}\log|\mX^T\mX| 
++  \bE_q\left\{ \frac{s}{\sigma^2} - \frac{1}{2\sigma^2}\left[
+\|\vy\|^2  - 2\vbeta^T\mX^T\vy + \vbeta^T\mX^T\mX\vbeta \right] 
+ - \frac{\vbeta^T\mX^T\mX\vbeta}{2 g\sigma^2}  \right\} 
+\\ [1ex]
+& \ds  \qquad  - \log\mbox{Beta}(a+1,b+1)  - \left(\tfrac{n+p}{2} \right)\log(s) + \log\Gamma\left(\tfrac{n+p}{2} \right)
++ c\tau_g + \log(Z)  + \tfrac{1}{2}\log|\mSigma| 
+\end{array}
+$$ 
+
+\noindent where
+$$
+\bE_q \log q(\vbeta) = -\tfrac{1}{2}\log|2e\pi\mSigma|.
+$$
+
+
+\noindent After the update for $q(\sigma^2)$ this simplifies to
+$$
+\begin{array}{rl}
+\log \underline{p}(\vy;q)
+& \ds =  
+\tfrac{p}{2} 
+- \tfrac{n}{2}\log(2\pi)
++ \tfrac{1}{2}\log|\mX^T\mX| 
+- \log\mbox{Beta}(a+1,b+1)  
+- \left(\tfrac{n+p}{2} \right)\log(s) 
++ \log\Gamma\left(\tfrac{n+p}{2} \right)
++ c\tau_g + \log(Z)  + \tfrac{1}{2}\log|\mSigma| 
+\end{array}
+$$ 
+ 
+
+
+\subsection{Naive updates}\label{sec:Naive}
+
+Inputs: $\vy$, $\mX$, $n$ and $p$. Initialize $\tau_\sigma>0$ and $\tau_g>0$.
+
+\medskip 
+\noindent 
+Set $a = -3/4$, $b = (n-p)/2 - a - 2$ and $r = (n+p)/2$.
+
+\medskip 
+\noindent 
+Calculate $\widehat{\vbeta}_{\mbox{\tiny LS}} = (\mX^T\mX)^{-1}\mX^T\vy$.
+
+\medskip 
+\noindent Loop:
+\begin{itemize}
+	\item $\mSigma = \tau_\sigma^{-1}(1 + \tau_g)^{-1}(\mX^T\mX)^{-1}$
+	
+	\item $\vmu = (1 + \tau_g)^{-1}\widehat{\vbeta}_{\mbox{\tiny LS}}$
+	
+	\item $s  = \tfrac{1}{2}\left[ \|\vy\|^2 
+	- 2\vmu^T\mX^T\vy 
+	+ (1 + \tau_g)\vmu^T\mX^T\mX\vmu  
+	+ (1 + \tau_g)\mbox{tr}(\mX^T\mX\mSigma)
+	\right]$
+	
+	\item $\tau_\sigma = r/s$
+	
+	\item $c 
+	= \tfrac{\tau_\sigma}{2}\left\{ \vmu^T\mX^T\mX\vmu + \mbox{tr}(\mX^T\mX\mSigma)\right\}$
+	
+	\item $\ds \tau_g = \frac{\ds \int_0^\infty g^{n/2 - p - a - 3}(1 + g)^{-(n-p)/2}
+		\exp( 
+		- c/g) dg
+	}{\ds \int_0^\infty g^{n/2 - p - a - 2}(1 + g)^{-(n-p)/2}
+	\exp( 
+	- c/g) dg}$
+\end{itemize}
+
+
+
+\newpage 
+
+\section{Simplifications}
+
+\noindent At convergence
+the equations inside the loop in Section 
+(\ref{sec:Naive}) hold simultaneously 
+for the optimal $q$-densities.
+
+\medskip 
+\noindent {\bf Simplification 1:} 
+$$
+\vy^T\mX(\mX^T\mX)^{-1}\mX^T\vy = \|\vy\|^2 R^2 = nR^2
+$$
+
+\noindent 
+which follows from using the identities for $R^2$ and the fact that $\|\vy\|^2 = \vy^T\vy = n$.  
+
+
+\medskip 
+\noindent {\bf Simplification 2:} 
+When $\vmu = (1 + \tau_g)^{-1}\widehat{\vbeta}_{\mbox{\tiny LS}}$
+and $\mSigma = \tau_\sigma^{-1}(1 + \tau_g)^{-1}(\mX^T\mX)^{-1}$ we have
+$$
+\begin{array}{rl}
+\ds \vmu^T\mX^T\mX\vmu  
+& \ds = (1 + \tau_g)^{-2}\widehat{\vbeta}_{\mbox{\tiny LS}}^T\mX^T\mX \widehat{\vbeta}_{\mbox{\tiny LS}} \\ [2ex]  
+& \ds = (1 + \tau_g)^{-2}\vy^T\mX(\mX^T\mX)^{-1}\mX^T\mX (\mX^T\mX)^{-1}\mX^T\vy \\ [2ex]  
+& \ds = (1 + \tau_g)^{-2} n R^2
+\end{array}
+$$
+
+\noindent and
+$\mbox{tr}(\mX^T\mX\mSigma) = \tau_\sigma^{-1}(1 + \tau_g)^{-1}p$.
+
+\medskip 
+\noindent {\bf Simplification 3:} When $\vmu = (1 + \tau_g)^{-1}\widehat{\vbeta}_{\mbox{\tiny LS}}$
+and $\mSigma = \tau_\sigma^{-1}(1 + \tau_g)^{-1}(\mX^T\mX)^{-1}$
+and using simplifications 1 and 2 we have
+$$
+\begin{array}{rl}
+s 
+& \ds 
+= \tfrac{1}{2}\left[ \|\vy\|^2 
+- 2\vmu^T\mX^T\vy 
++ (1 + \tau_g)\vmu^T\mX^T\mX\vmu  
++ (1 + \tau_g)\mbox{tr}(\mX^T\mX\mSigma)
+\right]
+\\ [2ex]
+& \ds = \tfrac{1}{2}\left\{ \|\vy\|^2 
+- 2(1 + \tau_g)^{-1} \vy^T\mX(\mX^T\mX)^{-1}\mX^T\vy 
++ (1 + \tau_g)^{-1}\vy^T\mX(\mX^T\mX)^{-1}\mX^T\vy 
++ p\tau_\sigma^{-1} \right\}
+\\ [2ex]
+& \ds = \tfrac{1}{2}\left\{ n
+- (1 + \tau_g)^{-1} nR^2
++ p\tau_\sigma^{-1}\right\}.
+\end{array}
+$$
+
+\noindent Now note that $\tau_\sigma = \bE_q(\sigma^{-2}) = r/s$. Hence,
+$$
+\tau_\sigma = \frac{n+p}{ n 
+	- (1 + \tau_g)^{-1} nR^2
+	+ p\tau_\sigma^{-1} }.
+$$
+
+\noindent Solving for $\tau_\sigma$ we have
+$$
+\tau_\sigma 
+= \frac{1}{1 - (1 + \tau_g)^{-1} R^2}.
+$$
+
+\noindent and
+$$
+s =  r/\tau_\sigma = \tfrac{1}{2}(n + p )( 1 - (1 + \tau_g)^{-1} R^2).
+$$
+
+
+\medskip 
+\noindent {\bf Simplification 4:} When $\vmu = (1 + \tau_g)^{-1}\widehat{\vbeta}_{\mbox{\tiny LS}}$
+and $\mSigma = \tau_\sigma^{-1}(1 + \tau_g)^{-1}(\mX^T\mX)^{-1}$
+and using simplifications 1-3 we have
+$$
+\begin{array}{rl}
+\ds c 
+& \ds = \frac{\tau_\sigma}{2}\left\{ \vmu^T\mX^T\mX\vmu + \mbox{tr}(\mX^T\mX\mSigma)\right\}
+\\ [2ex]
+& \ds = \frac{\tau_\sigma}{2}\left\{ (1 + \tau_g)^{-2} n R^2 + \tau_\sigma^{-1}(1 + \tau_g)^{-1}p \right\}
+\\ [2ex]
+& \ds = \frac{(1 + \tau_g)^{-2}nR^2}{2\left\{ 1
+	- (1 + \tau_g)^{-1} R^2\right\} } + (1 + \tau_g)^{-1}\frac{p}{2} 
+\\ [2ex]
+& \ds = \frac{nR^2}{2( 1 + \tau_g)( 1 + \tau_g
+	-   R^2)} + \frac{p}{2(1 + \tau_g)} 
+\\ [2ex]
+& \ds = \frac{nR^2}{2( 1 + \tau_g)( 1 + \tau_g
+	-   R^2)} + \frac{p( 1 + \tau_g
+	-   R^2)}{2(1 + \tau_g)( 1 + \tau_g
+	-   R^2)}
+\\ [2ex]
+& \ds = \frac{(n-p)R^2}{2( 1 + \tau_g)( 1 + \tau_g
+	-   R^2)} + \frac{p}{2( 1 + \tau_g
+	-   R^2)} 
+\end{array}
+$$
+
+\subsection{Simplified updates}
+
+Inputs: $\vy$, $\mX$, $n$ and $p$. Initialize $\tau_g$.
+
+\medskip 
+\noindent 
+Set $a=-3/4$, $b = (n-p)/2 - a - 2$ and $r = (n+p)/2$.
+
+\begin{itemize}
+\item Calculate the model summary
+	statistics 
+	$$\widehat{\vbeta}_{\mbox{\tiny LS}} = (\mX^T\mX)^{-1}\mX^T\vy \qquad \mbox{and} \qquad  R^2 = \vy^T\mX(\mX^T\mX)^{-1}\mX^T\vy/n.
+	$$
+	
+\item Solve
+$$\ds \tau_g = \frac{\ds \int_0^\infty g^{n/2 - p - a - 3}(1 + g)^{-(n-p)/2}
+		\exp( 
+		- c/g) dg
+	}{\ds \int_0^\infty g^{n/2 - p - a - 2}(1 + g)^{-(n-p)/2}
+	\exp( 
+	- c/g) dg}
+\quad \mbox{where} \quad 
+\ds c = \frac{nR^2}{2( 1 + \tau_g)( 1 + \tau_g
+	-   R^2)} + \frac{p}{2(1 + \tau_g)}
+$$
+
+\item $
+\ds \tau_\sigma 
+= \frac{1}{ 1
+	- (1 + \tau_g)^{-1} R^2}
+$
+
+\item
+$\mSigma = \tau_\sigma^{-1}(1 + \tau_g)^{-1}(\mX^T\mX)^{-1}$
+
+\item $\vmu = (1 + \tau_g)^{-1}\widehat{\vbeta}_{\mbox{\tiny LS}}$
+\end{itemize}
+ 
+
+\subsection{EBLO}
+
+Consider the above simplified algorithm.
+An expression of the $\log p(\vy;q)$
+is given by
+$$
+\begin{array}{rl}
+\log \underline{p}(\vy;q)
+& \ds =  
+\tfrac{p}{2} 
+- \tfrac{n}{2}\log(2\pi)
+- \log\mbox{Beta}(a+1,b+1)  
+- \tfrac{n}{2}\log(s) 
++ \log\Gamma\left(\tfrac{n+p}{2} \right)
++ c\tau_g + \log(Z)  
+- \tfrac{p}{2}\log\left(\tfrac{n+p}{2} \right)
+- \tfrac{p}{2}\log(1 + \tau_g)
+
+\\ [2ex]
+& \ds =  
+\tfrac{p}{2} 
+- \tfrac{n}{2}\log(2\pi)
+- \log\mbox{Beta}(a+1,b+1)  
++ \tfrac{n}{2}\log(\tau_\sigma)
+- \tfrac{n}{2}\log(r)
+\\ [2ex]
+& \ds \qquad 
++ \log\Gamma\left(\tfrac{n+p}{2} \right)
++ c\tau_g + \log(Z)  
+- \tfrac{p}{2}\log\left(\tfrac{n+p}{2} \right)
+- \tfrac{p}{2}\log(1 + \tau_g)
+
+
+\\ [2ex]
+& \ds =  
+\tfrac{p}{2} 
+- \tfrac{n}{2}\log(2\pi)
+- \log\mbox{Beta}(a+1,b+1)  
+- \tfrac{n}{2}\log(1 + \tau_g -  R^2)
+\\ [2ex]
+& \ds \qquad 
+- \left(\tfrac{n+p}{2}\right)\log\left(\tfrac{n+p}{2} \right)
++ \log\Gamma\left(\tfrac{n+p}{2} \right)
++ c\tau_g + \log(Z)  
++ \left( \tfrac{n-p}{2} \right) \log(1 + \tau_g)
+
+
+
+\end{array}
+$$ 
+
+\noindent Might try sometime to show this is approximately BIC.
+
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.9\textwidth]{LowerBound.pdf}
+	%\begin{minipage}[t]{0.8\textwidth}
+	\caption{VB lower bound versus exact lower bound}
+	\label{fig:06}
+	%\end{minipage}
+\end{figure}
+
+
+\section{Approximations for $Z$ and $\tau_g$}
+
+It will be useful to explore some alternatives for solving for $\tau_g$.
+Some include
+\begin{itemize}
+\item Exact expressions.
+
+\item Plug in $\bE(g^{-1}|\vy)$.
+	
+\item Laplace approximation.
+
+\item Fully exponential Laplace approximation.
+
+
+
+\item One dimensional quadrature.
+\end{itemize}
+
+\noindent Let 
+$$
+\ds I_1 =  \int_0^\infty g^{n/2 - p - a - 2}(1 + g)^{-(n-p)/2}
+\exp( - c/g) dg.
+$$
+
+\noindent and 
+$$
+I_2 = \ds \int_0^\infty g^{n/2 - p - a - 3}(1 + g)^{-(n-p)/2}\exp( - c/g) dg
+$$
+
+
+\subsection{Exact expression for $Z$ and $\tau_g$ -- when $n > 2p + 1/2$}
+
+\noindent From G\&R 3.471(7) we have
+\begin{equation}\label{eq:WhittakerIntegral}
+\int_0^\infty x^{\nu - 1} (\gamma + x)^{\mu - 1} e^{-\beta/x} dx 
+= \beta^{(\nu-1)/2}
+\gamma^{(\nu-1)/2}
+\Gamma(1 - \mu - \nu)
+e^{\beta/(2\gamma)}W_{(\nu-1)/2 + \mu,-\nu/2}(\beta/\gamma)
+\end{equation}
+
+\noindent provided $|\mbox{arg}(\gamma)|<\pi$, $\mbox{Re}(1 - \mu)>\mbox{Re}(\nu)>0$
+where $W_{\lambda,\mu}(z)$ is a Whittaker function.
+
+\medskip 
+\noindent 
+For our current case
+$$
+\nu_1 = \frac{n}{2} - p - a - 1, 
+\quad 
+1 - \mu = \frac{(n-p)}{2},
+\quad 
+\gamma = 1,
+\quad 
+\mbox{and}
+\quad 
+\beta = c.
+$$
+
+\noindent To apply (\ref{eq:WhittakerIntegral}) we need $n > 2p + 1/2$
+and  the condition $(1 - \mu)>\nu_1$ always holds.
+Under this condition
+$$
+I_1 = c^{n/2 - p - a - 2}
+\Gamma(p/2  + a + 1)
+e^{c/2}
+W_{(\nu_1-1)/2 + \mu,-\nu_1/2}(c)
+$$
+
+\medskip 
+\noindent 
+When calculating $I_2$ we have
+$$
+\nu_2 = \frac{n}{2} - p - a - 2, 
+$$
+
+\noindent and identical values for $\mu$, $\gamma$ and $\beta$.
+The condition $\nu_2>0$ implies
+$n >  2p + 5/2$ while the condition $(1 - \mu)>\nu_2$ always holds.
+Hence,
+$$
+I_2 = c^{n/2 - p - a - 3}
+\Gamma(p/2  + a + 2)
+e^{c/2}
+W_{(\nu_2-1)/2 + \mu_2,-\nu_2/2}(c)
+$$
+
+\noindent and
+$$
+\ds \tau_g
+= \frac{\ds c^{(n/2 - p - a - 3)/2}
+	\Gamma(p/2  + a + 2)
+	e^{c/2}
+	W_{(\nu_2-1)/2 + \mu,-\nu_2/2}(c)}{
+	\ds c^{(n/2 - p - a - 2)/2}
+	\Gamma(p/2  + a + 1)
+	e^{c/2}
+	W_{(\nu_1-1)/2 + \mu,-\nu_1/2}(c)}
+=  c^{-1/2} (p/2  + a + 1)\frac{\ds 
+	W_{(\nu_2-1)/2 + \mu,-\nu_2/2}(c)}{
+	W_{(\nu_1-1)/2 + \mu,-\nu_1/2}(c)}.
+$$
+
+\subsection{Alternative integral representations}
+
+\noindent It will be convenient to define
+$$
+\ds J_1(A,B,C) = \int_0^\infty g^A(1 + g)^{B}e^{-C/g} dg
+$$
+
+\noindent then
+$$
+Z = J_1(n/2 - p - a - 2,-(n-p)/2,c)
+$$
+
+\noindent and
+$$
+\tau_g = \frac{\ds \int_0^\infty g^{n/2 - p - a - 1}(1 + g)^{-(n-p)/2}e^{-c/g} dg}{
+	\ds \int_0^\infty g^{n/2 - p - a - 2}(1 + g)^{-(n-p)/2}e^{-c/g} dg} 
+= \frac{I_1(n/2 - p - a - 3,-(n-p)/2,c)}{I_1(n/2 - p - a - 2,-(n-p)/2,c)}
+$$
+
+\noindent Let $h = 1/g$ then
+$$
+dg = -1/h^2 dh
+$$
+
+$$
+\begin{array}{rl}
+\ds q(h) 
+    & \ds = Z^{-1}  (1/h)^{n/2 - p - a - 2}(1 + 1/h)^{-(n-p)/2}e^{-ch} h^{-2}
+    \\
+	& \ds = Z^{-1}  h^{-n/2 + p + a + 2}\left( \frac{1 +h}{h}\right)^{-(n-p)/2}e^{-ch} h^{-2}
+	\\
+	& \ds = Z^{-1}  h^{-n/2 + p + a + 2 + (n-p)/2 - 2}(1 + h)^{-(n-p)/2}e^{-ch} 
+	\\
+	& \ds = Z^{-1}  h^{p/2 + a}(1 + h)^{-(n-p)/2}e^{-ch} 
+\end{array}
+$$
+
+\noindent Let 
+$$
+J_2(A,B,C) = \int_0^\infty h^A(1 + h)^{B}e^{-Ch} dh 
+$$
+
+\noindent then
+$$
+Z = J_2(p/2 + a,-(n-p)/2,c)
+$$
+
+\noindent and
+$$
+\tau_g = \bE_{q(g)}(g^{-1}) = \bE_{q(h)}(h) = \frac{\ds \int_0^\infty h^{p/2 + a +1}(1 + h)^{-(n-p)/2}e^{-ch}  dh}{\ds 
+	\int_0^\infty h^{p/2 + a}(1 + h)^{-(n-p)/2}e^{-ch}  dh} 
+= \frac{J_2(p/2 + a+1,-(n-p)/2,c)}{J_2(p/2 + a,-(n-p)/2,c)}.
+$$
+
+\subsection{Using the trapezoid rule}
+
+This approach uses the iterations
+
+\begin{enumerate}
+	\item[(A)] $\ds c \leftarrow \frac{nR^2}{2( 1 + \tau_g)( 1 + \tau_g
+		-   R^2)} + \frac{p}{2(1 + \tau_g)}$
+	
+	\item[(B)] $\tau_g \leftarrow \frac{\ds \int_0^\infty g^{n/2 - p - a - 1}(1 + g)^{-(n-p)/2}e^{-c/g} dg}{
+		\ds \int_0^\infty g^{n/2 - p - a - 2}(1 + g)^{-(n-p)/2}e^{-c/g} dg} $.
+\end{enumerate}
+
+\noindent where the above integrals are approximated using the 
+composite trapezoid rule.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.9\textwidth]{Trapint.pdf}
+	%\begin{minipage}[t]{0.8\textwidth}
+	\caption{VB vs Exact shrinkage where VB uses an iterative trapezoidal rule approach}
+	\label{fig:01}
+	%\end{minipage}
+\end{figure}
+
+\subsection{Plug-in approximation for $\tau_g$ using exact inference}
+
+
+\noindent Using full Bayesian inference it can be shown that
+$$
+\ds \bE(g^{-1}|\vy) = (1 -  R^2)\left[ 1 + \frac{p/2 + a + 1}{b}   \right] \\
+$$
+
+\noindent Note that when $n < p + 5$ this value can produce undesirable results.
+This approximation then uses 
+$$
+\tau_g \approx (1 -  R^2)\left[ 1 + \frac{p/2 + a + 1}{b}   \right].
+$$.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.9\textwidth]{Plugin.pdf}
+	%\begin{minipage}[t]{0.8\textwidth}
+	\caption{VB vs Exact shrinkage where VB uses plug-in value from exact inference}
+	\label{fig:02}
+	%\end{minipage}
+\end{figure}
+
+
+
+ 
+
+\newpage
+
+\subsection{Fast iterative approximation using fully exponential Laplace
+	approximation}
+
+
+The fully exponential Laplace approximation is used to approximate 
+ratios of integrals and usually achieves a higher order rate of convergence
+compared to the Laplace approximation.
+Suppose that
+$$
+\ds \tau_g = \frac{\ds \int h f(h) dh}{\ds \int f(h) dh}
+$$
+
+\noindent where $f(h) = h^{p/2 + a}(1+h)^{-(n-p)/2}\exp(-ch)$.
+Then the fully exponential Laplace approximation uses
+$$
+\ds \tau_g \approx  \frac{\ds \sqrt{\sigma_1^2}\widehat{h}_1 f(\widehat{h}_1) }{\ds \sqrt{\sigma_0^2} f(\widehat{h}_0) } = \mbox{FEL}(p/2+a,-(n-p)/2,c)
+$$
+
+\noindent where
+$$
+\widehat{h}_1 = \mbox{argmax}_h \left\{\log(h) + \log f(h) \right\},
+\qquad 
+\widehat{h}_0 = \mbox{argmax}_h \left\{ \log f(h) \right\},
+$$
+$$
+\sigma_1^2 = \left[\left\{ - \frac{d^2 \log f(h)}{d h^2}\right\}_{h = \widehat{h}_1} \right]^{-1}
+\qquad \mbox{and} \qquad 
+\sigma_0^2 = \left[\left\{ - \frac{d^2 \log f(h)}{d h^2}\right\}_{h = \widehat{h}_0} \right]^{-1}.
+$$
+
+\noindent Then iterative method which uses 
+the fully exponential Laplace approximation iterates over the following
+two steps (for an initialized value of $\tau_g$)
+\begin{enumerate}
+\item[(A)] $\ds c \leftarrow \frac{nR^2}{2( 1 + \tau_g)( 1 + \tau_g
+	-   R^2)} + \frac{p}{2(1 + \tau_g)}$
+
+\item[(B)] $\tau_g \leftarrow \mbox{FEL}(p/2+a,-(n-p)/2,c)$.
+\end{enumerate}
+
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.9\textwidth]{FEL.pdf}
+	%\begin{minipage}[t]{0.8\textwidth}
+	\caption{VB vs Exact shrinkage where VB uses iterative fully exponential Laplace approximation}
+	\label{fig:03}
+	%\end{minipage}
+\end{figure}
+
+
+
+\newpage 
+
+
+
+
+\subsection{Plug-in approximation for $\tau_g$ based on $q(h)$ using Laplace's method}
+
+From above
+$$
+q(h) = Z^{-1} h^{p/2 + a}(1+h)^{-(n-p)/2}\exp(-ch) \bI(h>0).
+$$
+
+\noindent The Laplace approximation uses
+$$
+\tau_g =\bE_{q(g)}(g^{-1}) = \bE_{q(h)}(h) \approx \mbox{mode}\left\{ q(h) \right\}.
+$$
+
+\noindent Note that 
+$\mbox{mode}\left\{ q(h) \right\}$ is the maximizer of
+$$
+\log q(h) = \frac{A}{2}\log(h) - \frac{n-p}{2}\log(1 + h) - ch - \log(Z).
+$$
+
+\noindent where $A = p + 2a$.
+From first order optimality conditions
+$$
+\frac{A}{2h} - \frac{n-p}{2(1+h)} - c = 0
+$$
+
+\noindent Equating $\tau_g$ to the mode to the maximizer of $q(h)$
+and substituting $c$ as a function of $\tau_g$
+we have
+\begin{equation}\label{eq:solveTau}
+\begin{array}{l}
+\ds 0 = \frac{A}{2\tau_g} - \frac{n-p}{2(1+\tau_g)} - \left[
+\frac{nR^2}{2( 1 + \tau_g)( 1 + \tau_g
+	-   R^2)} + \frac{p}{2(1 + \tau_g)} 
+\right] 
+\\
+[2ex] 
+\ds \qquad \implies
+0 = \frac{A}{\tau_g} - \frac{n-p}{1+\tau_g} - \left[
+\frac{nR^2}{( 1 + \tau_g)( 1 + \tau_g
+	-   R^2)} + \frac{p}{1 + \tau_g}  \right] 
+\\
+[2ex] 
+\ds \qquad \implies
+0 = \frac{A}{\tau_g} - \frac{n}{1+\tau_g} - 
+\frac{nR^2}{( 1 + \tau_g)( 1 + \tau_g
+	-   R^2)}  
+
+
+\\
+[2ex] 
+\ds \qquad \implies
+0 = \frac{A}{\tau_g} - \left[ \frac{n( 1 + \tau_g
+	-   R^2) + nR^2}{(1+\tau_g)( 1 + \tau_g
+	-   R^2)}    \right]
+
+\\
+[2ex] 
+\ds \qquad \implies
+0 = \frac{A}{\tau_g} -  \frac{n(1 + \tau_g)
+	}{(1+\tau_g)( 1 + \tau_g
+	-   R^2)}    
+
+\\
+[2ex] 
+\ds \qquad \implies
+0 = \frac{A}{\tau_g} -  \frac{n
+}{ 1 + \tau_g -   R^2}   
+
+\\
+[2ex] 
+\ds \qquad \implies
+0 = A( 1 + \tau_g -   R^2) - n\tau_g 
+
+\\
+[2ex] 
+\ds \qquad \implies
+0 = (A - n)\tau_g  + A(1  -   R^2) 
+
+\\
+[2ex] 
+\ds \qquad \implies
+\tau_g = \frac{A(1  -   R^2)}{n - A} 
+
+\end{array}
+\end{equation}
+ 
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.9\textwidth]{PluginLaplace.pdf}
+	%\begin{minipage}[t]{0.8\textwidth}
+	\caption{VB vs Exact shrinkage where VB uses a plug-in Laplace approximation}
+	\label{fig:03}
+	%\end{minipage}
+\end{figure}
+
+\newpage 
+
+\section{Comparisons to be made}
+
+For fixed $R^2$, $n$ and $p$.
+\begin{itemize}
+\item Shrinkage (coefficient posterior mean).
+\item Coefficient posterior variance.
+\item $p(\sigma^2|\vy)$.
+\item $p(g|\vy)$
+\item $p(\vy)$
+\item Variable inclusion probabilities (on real data)
+\item Model ranking (on real data)
+\end{itemize}
+
+
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.5\textwidth]{g.pdf}
+	%\begin{minipage}[t]{0.8\textwidth}
+	\caption{Accuracies for $p(g|\vy)$ vs $q(g)$}
+	\label{fig:03}
+	%\end{minipage}
+\end{figure}
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.5\textwidth]{sigma2.pdf}
+	%\begin{minipage}[t]{0.8\textwidth}
+	\caption{Accuracies for $p(\sigma^2|\vy)$ vs $q(\sigma^2)$}
+	\label{fig:03}
+	%\end{minipage}
+\end{figure}
+
+
+
+$$
+q(h) = Z^{-1} h^{p/2 + a}(1+h)^{-(n-p)/2}\exp(-ch) \bI(h>0).
+$$
+
+$$
+I(A,B,C) = \int_0^\infty h^{A}(1+h)^{-B}\exp(-Ch) dh.
+$$
+
+$$
+(uv)' = v'u + u'v
+$$
+
+$$
+\int v'u dh = uv - int u'v  dh
+$$
+
+$$
+u = h^{A}\exp(-Ch) 
+$$
+$$
+u' = A h^{A - 1} \exp(-Ch) - Ch^{A}\exp(-Ch) 
+$$
+
+$$
+v' = (1 + h)^{-B}
+$$
+
+$$
+v = -\frac{1}{B-1} (1 + h)^{-B+1}
+$$
+
+$$
+\begin{array}{rl}
+\ds I(A,B,C) 
+& \ds = 
+\left[ -\frac{1}{B-1} (1 + h)^{-B+1} h^{A}\exp(-Ch)  \right]_0^\infty 
++ \frac{1}{B-1}[A I(A-1,B-1,C) - C I(A,B-1,C)]
+\\
+& \ds = \frac{A}{B-1}I(A-1,B-1,C) - \frac{C}{B-1} I(A,B-1,C) 
+\end{array}
+$$
+
+$$
+\bE_q(h) = \frac{I(A+1,B,C)}{I(A,B,C)} 
+$$
+
+
+\end{document}
+ 

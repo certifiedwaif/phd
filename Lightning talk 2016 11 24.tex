@@ -1,0 +1,59 @@
+\documentclass{beamer}
+
+\usetheme{Warsaw}
+\usepackage{graphicx}
+\usepackage{ulem}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows}
+\usepackage{subcaption}
+\usepackage{algorithm,algorithmic}
+\input{include.tex}
+\input{Definitions.tex}
+
+\usefonttheme{serif}
+
+\title{Gaussian Variational Bayes approximations to zero--inflated mixed models}
+\author{Mark Greenaway}
+
+\mode<presentation>
+{ \usetheme{boxes} }
+
+\begin{document}
+
+\begin{frame}
+\frametitle{Normal linear model selection with $g$--prior}
+Consider the linear model
+
+\begin{align*}
+	\vy | \vbeta, \sigma^2 \sim \N_n(\mX \vbeta, \sigma^2 \mI) 
+\end{align*}
+
+with priors
+
+\begin{align*}
+	\vbeta | \sigma^2, g & \sim \N_p(\vzero, g \sigma^2 (\mX^T \mX)^{-1})                             \\
+	p(\sigma^2)          & = (\sigma^2)^{-1} \I(\sigma^2 > 0)                                         \\
+	p(g)                 & = \frac{g^b (1 + g)^{-[(a + 1) + (b + 1)]}}{\Beta(a + 1, b + 1)} \I(g > 0) 
+\end{align*}
+
+Then
+
+\[
+	\vbeta | \vy, \sigma^2, g \sim \N\left(\frac{g}{1+g} \hat{\vbeta}_{\LS}, \frac{g}{1+g} \sigma^2 (\mX^\top \mX)^{-1}\right)
+\]
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Variational Bayes approximation}
+We choose a factored Variational Bayes approximation of the form
+
+\begin{align*}
+	q(\vtheta) = q(\vbeta) q(\sigma^2) q(g). 
+\end{align*}
+
+Then $q(\vbeta) = \N(\vmu_{q(\vbeta)}, \mSigma_{q(\vbeta)})$, $q(\sigma^2) = \IG(\alpha_{q(\vbeta)}, \beta_{q(\vbeta)})$ and $q(g) = \text{Beta Prime}(\alpha_{q(g)}, \beta_{q(g)})$.
+
+\end{frame}
+
+\end{document}

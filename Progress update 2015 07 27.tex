@@ -1,0 +1,46 @@
+\documentclass{beamer}
+
+\usetheme{Warsaw}
+\usepackage{graphicx}
+\usepackage{ulem}
+\input{include.tex}
+\input{Definitions.tex}
+
+\usefonttheme{serif}
+
+\title{Progress update - 27/07/2015}
+\author{Mark Greenaway\\PhD candidate\\markg@maths.usyd.edu.au}
+
+\mode<presentation>
+{ \usetheme{boxes} }
+
+\begin{document}
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}
+\frametitle{Progress in the last few weeks}
+\begin{itemize}
+\item GVA results match exactly for $\mLambda=\mR \mR^\top$ and $\mLambda=(\mR \mR^\top)^{-1}$
+		  parameterisations. This is strong evidence that the code is correct.
+\item Changed the Variational Bayes algorithm to terminate when the variational lower bound has
+			stopped increasing and the parameters no longer change.
+\item Spline median accuracy tests coded, which test the accuracy of the fitted functions.
+			Spline median accuracy tests run without crashing.
+\item Model selection code converted from 187 lines of R to 342 lines of C++ using the Armadillo
+			library from NICTA. Took about three days. Performance increased roughly tenfold.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{New things}
+\begin{itemize}
+\item New release of Stan, version 2.7.0 which supports Variational Bayes.
+\item Rcpp 0.12.0 now on CRAN, according to Dirk Eddelbuettel (@eddelbuetul).
+\item I'm avoiding upgrading in case anything breaks.
+\item We have a Digital Ocean server now.
+\end{itemize}
+\end{frame}
+
+\end{document}

@@ -1,0 +1,84 @@
+\documentclass{beamer}
+
+\usetheme{Warsaw}
+\usepackage{graphicx}
+\usepackage{ulem}
+\input{include.tex}
+\input{Definitions.tex}
+
+\usefonttheme{serif}
+
+\title{Progress update}
+\author{Mark Greenaway\\PhD candidate\\markg@maths.usyd.edu.au}
+
+\mode<presentation>
+{ \usetheme{boxes} }
+
+\begin{document}
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}{Reading and writing}
+\begin{itemize}
+\item My abstract for a fifteen minute talk on Gaussian Variational Approximations at ASC 2016 was accepted
+\item John asked me to write a page a day. So I'm trying to do that. I find this focuses me
+\item A lot of my time is spent writing, reading or looking for references for things
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Posterior covariance of $\vbeta$}
+\begin{itemize}
+\item 
+The exact posterior covariance of $\vbeta$ turns out to be
+\tiny
+\begin{align*}
+	\Cov(\vbeta|\vy) &=  \Var\left[\frac{g}{1+g} \Bigm| \vy\right] \vbetahatls \vbetahatls^\top + 
+	 \E\left[\frac{g}{1 + g} \left( 1 - \frac{g}{1 + g} R^2 \right) \Bigm| \vy\right] (\mX^\top \mX)^{-1}\\
+	&= (G_2 - G_1) \vbetahatls \vbetahatls^\top + \left( \frac{n}{n - 2} \right) (G_1 - G_2 R^2) (\mX^\top \mX)^{-1}
+\end{align*}
+\small where \tiny
+\begin{align*}
+G_1 &= \frac{\Beta(p/2 + a + 1, b + 2)}{\Beta(p /2 + a + 1, b + 1)} (1 - R^2)^{b+1} {}_2 F_1(n/2, b + 1; n/2 + 1; R^2) \\
+G_2 &= \frac{\Beta(p/2 + a + 1, b + 3)}{\Beta(p /2 + a + 1, b + 1)} (1 - R^2)^{b+1} {}_2 F_1(n/2, b + 3; n/2 + 2; R^2)
+\end{align*}
+\small
+which are univariate functions of $n$, $p$ and $R^2$.
+So we can compare the performance of the exact and approximate covariance by comparing these 
+functions
+\item I wrote the code for this on Saturday, and put it in the \texttt{taug} package. I'll get numerical 
+results this week, and think of a nice way to present them
+\end{itemize}
+\end{frame}
+
+\begin{frame}{ICT Review/IT committee meeting/HPC}
+\begin{itemize}
+\item ICT review: looking to reduce duplication of effort. I'm still not sure what that means \ldots
+\item IT Committee Meeting: Geoff Vasil and I asked for a queueing system, like we have on HPC
+\item Paul said this wasn't the right solution, and instead
+proposed a solution based on processor affinity
+\item I'll provide my \texttt{correlation} code to them as an example, so they can advise us
+\item My time is better spent on my own work
+\item HPC: Outsourced to Dell, whose admins are apparently pretty helpful
+\item Code repository: something like BitBucket or GitHub
+\item Dr Geoffrey Vasil talked about working in the open?
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Courses coming up}
+\begin{itemize}
+\item Matt Wand's Variational Bayes course -- 1 day
+\item AMSI Summer School 2017
+\begin{itemize}
+\item Bayesian Computing
+\item Big Data for Statistics
+\item Category Theory for Computer Science
+\item Numerical Analysis
+\end{itemize}
+Unfortunately, I don't have time to go to any of these
+\item HPC OpenMP or OpenMPI
+\item Any GPU programming course
+\end{itemize}
+\end{frame}
+
+\end{document}

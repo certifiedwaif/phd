@@ -1,0 +1,59 @@
+\documentclass{amsart}
+\begin{document}
+Meeting with Dr John Ormerod- 15/7/2013
+
+Attendees: Dr John Ormerod, Mark Greenaway
+
+Dr John Ormerod and I informally mapped out the structure of my PhD thesis project. Broadly, the currently proposed structure will
+be
+
+1 Response
+Year 1
+	No mixtures
+		Poisson
+		Negative binomial, two main parameterisations
+	Mixtures
+		Zero-Inflated (Truncated Poisson) Mixture
+		Mixtures of Poisson
+		Hurdle Methods
+
+2 Mean
+Spline smoothing
+AR(1)
+Random effects
+Spatial
+
+Year 2
+Model Selection
+If we are considering p covariates, then if we just restrict ourselves to the inclusion and exclusion of those
+p variables in any candidate model then there are $2^p$ candidate models.
+
+Bryman 96/97 Stepwise selection methods are inherently numerically unstable.
+
+Year 3
+Measurement Error
+Missing data
+
+Develop an R package implementing these techniques
+
+Algorithms
+- Maximum likelihood (Hard)
+- EM (``Posterior distribution'')
+- variation approximation, which can be seen as a generalisation of the EM algorithm
+- MCMC ``Exact''
+- Expectation propagation
+- Laplace-like methods
+- Hybrid
+- Interpolation
+
+First task
+Summarise Poisson
+Neg. Bin. - Poisson-Gamma, Poisson-Bessel?
+Zero inflated
+Hurdle methods, in terms of a probabilistic model. Describe in terms of a probability hierarchy.
+
+Summary of data set: Interesting variables. What are the models that we want to fit.
+
+Advice
+When programming, don't re-invent the wheel. Develop re-usable functions as much as possible.
+\end{document}

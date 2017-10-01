@@ -6,7 +6,7 @@ library(ISLR)
 
 # Choose a simulation setting
 
-SETTING <- 5
+SETTING <- 1
 # SETTING <- commandArgs(trailingOnly = TRUE)[1]
 
 if (SETTING==1) 
@@ -549,7 +549,7 @@ tau.g.IterativeLaplace  <- function(a,n,p,R2,ITER) {
 source("ZE.R")
 
 # Perform the fully Bayesian analysis
-res <- ZE.exact.Rcpp(vy,mX,LARGEP=FALSE) 
+res <- ZE.exact.fast(vy,mX,LARGEP=FALSE) 
 
 if (SETTING == 1) {
 	write.table(vy, file = "Hitters_vy.csv", col.names=FALSE, row.names = FALSE, sep=",")
@@ -730,3 +730,10 @@ if (SETTING == 5) {
 	write.table(pip.AIC, file = "USCrime_pip_AIC.csv", col.names=FALSE, row.names = FALSE, sep=",")
 	write.table(pip.BIC, file = "USCrime_pip_BIC.csv", col.names=FALSE, row.names = FALSE, sep=",")
 }
+
+# Use logpy to produce the tables that we need
+top_models <- head(order(logpy.til, decreasing=TRUE), 10)
+res$mA[top_models, ]
+vp[top_models]
+log(vp[top_models[1]]) - log(vp[top_models])
+vlog.BIC[top_models[1]] - vlog.BIC[top_models]

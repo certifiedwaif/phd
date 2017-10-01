@@ -1,3 +1,28 @@
+\documentclass{beamer}
+\usepackage{beamerthemesplit}
+\usepackage{color,xcolor,ucs}
+\usetheme{Warsaw}
+\usepackage{graphicx}
+\usepackage{ulem}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows}
+\usepackage{subcaption}
+\usepackage{algorithm,algorithmic}
+\usepackage{natbib}
+\usepackage{cancel}
+\input{../include.tex}
+\input{../Definitions.tex}
+
+\usefonttheme{serif}
+
+\title{Exact expressions for parameter posteriors in Bayesian linear model selection}
+\author{Mark Greenaway, Dr John Ormerod}
+
+\mode<presentation>
+{ \usetheme{boxes} }
+
+
+\begin{document}
 % Things we derived
 \begin{frame}
 	\frametitle{Calculating $p(\vy | \vgamma)$}
@@ -48,3 +73,5 @@
 			But this expression is not numerically well-behaved.
 			We used Euler's transformation and properties of the hypergeometric function to derive a new,
 			numerically stable function.}
+
+\end{document}

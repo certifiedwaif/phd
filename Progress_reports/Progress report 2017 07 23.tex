@@ -1,0 +1,115 @@
+\documentclass{beamer}
+
+\usetheme{Warsaw}
+\usepackage{graphicx}
+\usepackage{ulem}
+\input{../include.tex}
+\input{../Definitions.tex}
+
+\usefonttheme{serif}
+
+\title{Progress report - 24/07/2017}
+\author{Mark Greenaway}
+
+\mode<presentation>
+{ \usetheme{boxes} }
+
+\begin{document}
+\begin{frame}
+\maketitle
+\end{frame}
+
+
+\begin{frame}{CVA algorithm}
+\begin{itemize}
+\item We perform model selection on normal linear models, with the cake prior
+\item Initialise population of K bitstrings, $\Gamma$ \\
+Loop until convergence\\
+\quad for $k = 1,  \ldots, K$\\
+\quad \quad for $j = 1, \ldots, p$\\
+\quad \quad \quad $\vgamma_{jk} = \begin{cases}
+1, \text{if } p(\vy, \vgamma_{jk}^{(1)}) > p(\vy, \vgamma_{jk}^{(0)}) \\
+0, \text{otherwise}
+\end{cases}$\\
+\quad for $k = 1, \ldots, K$\\
+\quad \quad $w_k = p(\vy, \vgamma_k) / \sum_{j=1}^K p(\vy, \vgamma_j)$\\
+\quad \quad $F_\lambda = $
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Examples}
+
+\begin{enumerate}
+\item
+The QTL example is taken from \cite{Xu2007}. A BC population of $n=600$ was simulated for a single large
+chromosome of $1800$ cM. This chromosome was covered by 121 evenly spaced markers. Nine of the markers
+overlapped with QTL of the main effects and $13$ out of the ${121 \choose 2} = 7,260$ possible marker pairs had
+interaction effects.
+
+This leads to a model selection problem with a large number of covariates.
+
+\item
+The high dimemsional Particle EM example is taken from \cite{Rockova2016}.
+We assume $p = 200$, $n = 100$ and $\mSigma = \text{bdiag}(\mSigma_1, \ldots, \mSigma_1)$ with
+$\mSigma_1 = \sigma_{ij}$, $i, j = 1, \ldots, 10$ and $\sigma_{ij} = 0.99$, $i \ne j$ and $\sigma_ii = 1$.
+
+This leads to a model selection problem where the covariates are highly correlated.
+\end{enumerate}
+
+\end{frame}
+
+\begin{frame}{Evaluating our results, and the initialisation method}
+\begin{itemize}
+\item
+The quality of our model selection was assessed using
+\[
+	F_1 = \frac{2 \text{precision} \times \text{recall}}{\text{precision} + \text{recall}}
+\]
+where $\text{precision} = {\text{true positives}}/{|\hat{\gamma}|}$ and
+$\text{recall} = {\text{true positives}}/{\text{true positives} + \text{false negatives}}$.
+
+\item
+Three methods of initialising $\Gamma$ were used.
+\begin{enumerate}
+\item Cold start each $\gamma_{ij}$ in $\gamma_i$, $1 \leq i \leq K$ were initialised randomly from a
+$\text{Bernoulli}(p)$ distribution, with $p = 10 / K$
+\item Warm start from SCAD (Smoothly Clipped Absolute Deviation Penalty), preferring models with higher marginal likelihood
+\item Warm start from SCAD, preferring models with more covariates
+\end{enumerate}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{A warm start from scad preferring models with more covariates included did very well}
+
+\begin{figure}
+\includegraphics[scale=0.33]{QLT_warm_start_covariates.png}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Models with high marginal likelihood do quite well}
+
+\begin{figure}
+\includegraphics[scale=0.33]{QLT_warm_start_marginal_likelihood.png}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Cold start did better for the high-dimension example, which is interesting}
+\begin{figure}
+\includegraphics[scale=0.33]{Particle_EM_high_dimensional_cold_start.png}
+\end{figure}
+\end{frame}
+
+\begin{frame}{What's next?}
+\begin{itemize}
+\item Try a range of examples, varying the number of particles $K$ and initialisation methods
+\item Write up and incorporate results into last thesis chapter
+\end{itemize}
+\end{frame}
+
+\begin{frame}{References}
+\bibliographystyle{elsarticle-harv}
+\bibliography{references_mendeley}
+\end{frame}
+
+\end{document}

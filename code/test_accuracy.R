@@ -29,9 +29,9 @@ test_accuracies_intercept <- function(save=FALSE)
   #   # Save the results, because this takes such a long time to run.
     #save(mult, mcmc_samples, file="accuracy.RData")
     #save(mult, mcmc_samples, file="data/accuracy_int.RData")
-    save(mult, mcmc_samples, fit, file="data/accuracy_int_2015_05_27.RData")
+    save(mult, mcmc_samples, fit, file="data/accuracy_int_2017_05_30.RData")
   } else {
-    load(file="data/accuracy_int_2015_05_27.RData")
+    load(file="data/accuracy_int_2017_05_30.RData")
   }
   # load(file="data/accuracy_int_2015_02_17.RData")
   #mult$spline_dim = 0
@@ -92,16 +92,17 @@ test_accuracies_slope <- function(save=FALSE)
   if (save) {
     seed <- 3
     set.seed(seed)
-    mult <- generate_slope_test_data(m=20, ni=10)
-    result <-  mcmc(mult, iterations=3e5, warmup = 5e4)
+    mult <- generate_slope_test_data(m=50, ni=10)
+    result <-  mcmc(mult, iterations=1e5, warmup = 5e4)
     fit <- result$fit
     print(fit)
     mcmc_samples <- result$mcmc_samples
-    save(mult, mcmc_samples, fit, file="data/accuracy_slope_2015_06_22.RData")  
+    save(mult, mcmc_samples, fit, file="data/accuracy_slope_2017_05_26.RData")  
     # load(file="data/accuracy_slope_2015_05_04.RData")
     # load(file="data_macbook/accuracy_slope_2015_03_30.RData")
   } else {
-    load(file="data/accuracy_slope_2015_06_22.RData")  
+    # load(file="data/accuracy_slope_2017_05_26.RData")  
+    load(file="data/accuracy_slope_2017_05_24.RData")  
   }
   # m <- 20
   # mult$vmu <- c(2, 1, rep(0, (m-1) * 2))
@@ -125,7 +126,7 @@ test_accuracies_slope <- function(save=FALSE)
   print(var2_accuracy$rho_accuracy)
 
   now <- Sys.time()
-  var3_result <- zipvb(mult, method="gva2", verbose=TRUE)
+  var3_result <- zipvb(mult, method="gva2", verbose=FALSE)
   cat("GVA2", Sys.time() - now, "\n")
   var3_accuracy <- calculate_accuracies("slope", mult, mcmc_samples, var3_result, "gva2", print_flag=FALSE, plot_flag=TRUE)
   print(var3_accuracy$vbeta_accuracy)
@@ -262,11 +263,36 @@ test_accuracies_spline <- function(save=FALSE)
 }
 # test_accuracies_spline()
 
+test_stability <- function(save=FALSE)
+{
+  load(file="data/accuracy_int_2015_05_27.RData")
+  thresholds <- seq(from=0.01, to=0.3, by=0.01)
+  results <- matrix(NA, length(thresholds), 24)
+  for (i in 1:length(thresholds)) {
+    options(threshold=thresholds[i])
+    var3_result <- zipvb(mult, method="gva2", verbose=FALSE)
+    var3_accuracy <- calculate_accuracies("intercept", mult, mcmc_samples, var3_result, "gva2", plot_flag=TRUE)
+    results[i, ] <- c(thresholds[i], var3_accuracy$vbeta_accuracy, var3_accuracy$vu_accuracy, var3_accuracy$sigma2_vu_accuracy, var3_accuracy$rho_accuracy)
+  }
+  write.csv(results, file="stability_intercept.csv")
+  return()
+  load(file="data/accuracy_slope_2015_06_22.RData")
+  for (threshold in seq(from=0.1, to=5, by=0.1)) {
+    options(safe_exp=TRUE, threshold=threshold)
+    var3_result <- zipvb(mult, method="gva2", verbose=FALSE)
+    var3_accuracy <- calculate_accuracies("intercept", mult, mcmc_samples, var3_result, "gva2", plot_flag=TRUE)
+    cat(threshold, var3_accuracy$vbeta_accuracy, var3_accuracy$vu_accuracy, "\n")
+  }
+}
+
+
+
 main <- function()
 {
   option_list <- list(make_option(c("-t", "--test"), default="slope"),
                       make_option(c("-s", "--save"), action="store_true", default=FALSE))
   opt <- parse_args(OptionParser(option_list=option_list))
+  print(str(opt))
   test <- opt$test
   if (test == "intercept") {
     test_accuracies_intercept(opt$save)
@@ -276,6 +302,9 @@ main <- function()
   }
   if (test == "spline") {
     test_accuracies_spline(opt$save)
+  }
+  if (test == "stability") {
+    test_stability(opt$save)
   }
 }
 

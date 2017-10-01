@@ -1,0 +1,32 @@
+\documentclass{amsart}
+\title{Meeting with Dr John Ormerod - 11/02/2016}
+
+\input{Definitions.tex}
+
+\begin{document}
+
+\maketitle
+
+Time: 10:15am to 10:45am
+Attendees: Dr John Ormerod, Mark Greenaway
+
+\section{Testing}
+
+John admonished me on my haphazard black box approach to testing, and pointed out that testing whether
+the $R^2$ values were in range was ``worthless''. He suggested a much more systematic approach, whereby we
+would ensure that each and every $R^2$ value was exactly right.
+
+[\mX, \vy]
+\begin{enumerate}
+\item \texttt{cor}($\vy, \mX \hat{\vbeta}_{LS})^2 = R^2$) \text{ using \texttt{lm}} 
+\item $\frac{\vy^T \mX (\mX^T \mX)^{-1} \mX^T \vy}{\vy^T \vy}$
+\item Same as 1 with $\mX' \leftarrow [\mX, \vx]$
+\item Same as 2 with $\mX' \leftarrow [\mX, \vx]$
+\item Update formula
+\item Same as 1 with column renaming
+\end{enumerate}
+\section{Refactoring}
+
+He also suggested that we refactor the rank one update and downdate code into seperate functions.
+
+\end{document}

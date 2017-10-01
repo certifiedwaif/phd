@@ -2,13 +2,14 @@
 // Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 #include <RcppEigen.h>
+#include <RcppGSL.h>
 #include <Rcpp.h>
 
 using namespace Rcpp;
 
 // cva
-List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, const int K, const double lambda);
-RcppExport SEXP correlation_cva(SEXP gamma_initialSEXP, SEXP vy_inSEXP, SEXP mX_inSEXP, SEXP KSEXP, SEXP lambdaSEXP) {
+List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, const int K, const double lambda, std::string log_lik, const bool bUnique);
+RcppExport SEXP correlation_cva(SEXP gamma_initialSEXP, SEXP vy_inSEXP, SEXP mX_inSEXP, SEXP KSEXP, SEXP lambdaSEXP, SEXP log_likSEXP, SEXP bUniqueSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -17,7 +18,9 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericMatrix >::type mX_in(mX_inSEXP);
     Rcpp::traits::input_parameter< const int >::type K(KSEXP);
     Rcpp::traits::input_parameter< const double >::type lambda(lambdaSEXP);
-    rcpp_result_gen = Rcpp::wrap(cva(gamma_initial, vy_in, mX_in, K, lambda));
+    Rcpp::traits::input_parameter< std::string >::type log_lik(log_likSEXP);
+    Rcpp::traits::input_parameter< const bool >::type bUnique(bUniqueSEXP);
+    rcpp_result_gen = Rcpp::wrap(cva(gamma_initial, vy_in, mX_in, K, lambda, log_lik, bUnique));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -67,17 +70,4 @@ BEGIN_RCPP
     rcpp_result_gen = Rcpp::wrap(graycode(varying, fixed));
     return rcpp_result_gen;
 END_RCPP
-}
-
-static const R_CallMethodDef CallEntries[] = {
-    {"correlation_cva", (DL_FUNC) &correlation_cva, 5},
-    {"correlation_all_correlations_mX", (DL_FUNC) &correlation_all_correlations_mX, 7},
-    {"correlation_all_correlations_mX_mZ", (DL_FUNC) &correlation_all_correlations_mX_mZ, 8},
-    {"correlation_graycode", (DL_FUNC) &correlation_graycode, 2},
-    {NULL, NULL, 0}
-};
-
-RcppExport void R_init_correlation(DllInfo *dll) {
-    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
-    R_useDynamicSymbols(dll, FALSE);
 }

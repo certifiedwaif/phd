@@ -1,0 +1,455 @@
+\documentclass{amsart}[12pt]
+
+\addtolength{\oddsidemargin}{-.75in}%
+\addtolength{\evensidemargin}{-.75in}%
+\addtolength{\textwidth}{1.5in}%
+\addtolength{\textheight}{1.3in}%
+\addtolength{\topmargin}{-.8in}%
+\addtolength{\marginparpush}{-.75in}%
+% \setlength\parindent{0pt}
+% \setlength{\bibsep}{0pt plus 0.3ex}
+
+\usepackage[authoryear]{natbib}
+\usepackage{graphicx}
+\usepackage{algorithm,algorithmic}
+\usepackage{cancel}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{algorithm,algorithmic}
+\usepackage[inner=2.5cm,outer=1.5cm,bottom=2cm]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{microtype}
+
+\newtheorem{theorem}{Theorem}[section]
+
+\title{Chapter 3 Variational Bayes for Linear Model Selection using Mixtures of $g$-priors}
+\author{Mark Greenaway, John T. Ormerod}
+
+\input{include.tex}
+\input{Definitions.tex}
+
+\begin{document}
+
+\maketitle
+
+\section*{Abstract}
+
+% What is done in general
+
+We develop mean field and structured variational Bayes approximations for Bayesian model selection on linear
+models using Zellner's g prior. Our mean field updates only depend on a single variational parameter $\tau_g$
+and other values which are fixed for each model considered. An algorithm is developed which allows these
+models to be fit in parallel. Applications to a range of data sets are presented, showing  empirically that
+our method performs well on real-world data. Our method is computationally more efficient  than the exact
+Bayesian model.
+
+\section{Introduction}
+
+\subsection{Background}
+
+% Problem in general
+
+The problem of model selection is one of the most important problems encountered in practice by applied
+statistical practitioners. There are many approaches to model selection including approaches based on
+functions of the residual sum of squares, lasso and L1 regression and Bayesian modelling approaches. A major
+motivation for this field of research is the need for a computationally feasible approach to performing model
+selection on large scale problems where the number of covariates is large.
+
+The bias-variance trade-off is one of the central problems in statistical learning. The guise this problem
+takes in model selection is balancing the quality of the model fit against the complexity of the model, in an
+attempt to find a compromise between over-fitting and under-fitting, in the hope that our model fit will
+generalise well beyond the training data we have observed to the general population and that we haven't simply
+learned the noise in the training set.
+
+% Non-Bayesian
+
+Maximising the likelihood alone only maximises the quality of the model fit, without penalising the  model
+complexity. Many model selection criteria have been proposed to attempt to balance model likelihood and model
+complexity, including the Akaike Information Criteria AIC (\cite{DeLeeuw1992}), Bayesian Information Criterion
+BIC (\cite{Schwarz1978}), Deviance Information Criterion DIC (\cite{Spiegelhalter2016}) and Risk Inflation
+Criterion (\cite{Foster1994}).
+
+% Bayesian
+
+One approach to model selection in a Bayesian context is to use Bayes factors to compare the posterior
+likelihood of the candidate models to see which is most probable. \cite{Zellner1980} suggested a particular
+form of conjugate Normal-Gamma family where the Bayes factors have a relatively simple form, incorporating a
+parameter $g$ to control mixing between the model fit from the data and a prior specification of model fit.
+This immediately raises the question of how $g$ should be chosen, and whether it should be fixed or have a
+prior specification.  (\cite{Liang2008}) showed that fixed choices of $g$ lead to paradoxes such as Bartlett's
+Paradox and the Information Paradox, and so a prior specification should be preferred. There are many ways of
+choosing a prior on $g$. Using a mixture of $g$-priors has the advantage of adapting the degree of shrinkage
+to the prior model dependent on the data.
+
+% Variational Bayes, Explaining Variational Approximations 2010
+
+% VB in general
+
+A challenge to applying this method of model selection is that exact model fitting may be computationally
+infeasible for models involving even moderate numbers of observations and covariates, and popular alternatives
+for fitting Bayesian models such as Monte Carlo Markov Chains (henceforth referred to as MCMC) are still
+extremely computationally intensive. Variational Bayes (see \cite{Ormerod2010}) is a computationally
+efficient, deterministic method of fitting Bayesian models to data. Variational Bayes approximates the true
+posterior $p(\vy, \vtheta)$ by minimising the KL divergence between the posterior and the  approximating
+distribution $q(\vtheta)$.
+
+% Structured Variational Bayes for model selection, Wand and Ormerod Variational Bayes for Elaborate 
+% Distributions (\cite{Wand2011})
+
+
+% Application
+
+% VB theory
+
+% Our main contribution
+
+In this paper, we develop Variational Bayes approximations to model selection of linear models using Zellner's
+g prior as in \cite{Liang2008}. We show that in this situation, our variational approximation is almost exact
+-- that is, the variational approximation of the Bayesian linear model gives almost perfect estimates.
+
+% By searching of the model space as one covariate changes between each sub-model and  using rank-1 updates on
+% $(\mX^\top \mX)^{-1}$, we are able to exhaustively search the model space in $\BigO(2^p np^2)$ rather than
+% $\BigO(2^p np^3)$.
+
+This article is organised as follows. In Section \ref{sec:model_selection}, we review previous Bayesian
+approaches to model selection. In Section \ref{sec:methodology} we develop our approach. In Section
+\ref{sec:num_exp} we perform a series of numerical experiments to show the accuracy of our approach. Finally,
+in Section \ref{sec:conclusion}, we provide a Conclusion and Discussion.
+
+\section{Bayesian linear model selection}
+\label{sec:model_selection}
+
+Model selection attempts to balance goodness of fit against model complexity, neither overfitting nor
+underfitting. Several model selection criteria have been proposed to balance these competing concerns, such as
+AIC (\cite{DeLeeuw1992}), BIC (\cite{Schwarz1978}), Mallow's $C_p$ and DIC. As \cite{Breiman1996} and
+\cite{Efron2013} showed, while  the standard formulation of a linear model is unbiased, the goodness of fit of
+these models is numerically  unstable. Breiman showed that by introducing a penalty on the size of the
+regression co- efficients such as  in ridge regression, this numerical stability can be avoided. This reduces
+the variances of the co-efficient estimates, at the expense of introducing some bias --- the bias--variance
+trade--off.
+
+Consider a normal linear model on $\vy$ with conjugate normal prior on $\vbeta$ with mean centred at $\vzero$,
+and covariance $g \sigma^2 (\mX^\top \mX)^{-1}$ where the prior on $g$ is Zellner's g-prior on the covariance
+matrices (Zellner 1986), as this yields a tractable posterior for $\vbeta$ as shown by \cite{Liang2008}. We
+choose $a$  and $b$ to be $-3/4$ and $(n - p)/2 - a$ respectively, following \cite{Maruyama2011}.
+
+\section{Methodology}
+\label{sec:methodology}
+
+\subsection{Notation}
+
+% Definitions
+
+Let $n > 0$ be the number of observations and $p > 0$ be the number of covariates. Let $\vy \in \R^n$ be the
+vector of responses, $\vtheta \in \R^p$ be the vector of parameters and $\mX \in \R^{n \times p}$ be the
+matrix of covariates. Let $p(\vtheta)$ be the prior distribution of $\vtheta$, $p(\vy, \vtheta)$ be the full
+probability distribution of $\vy$, $p(\vtheta | \vy)$ the posterior distribution and $q(\vtheta)$ be the
+approximating probability distribution.
+
+\subsection{Model}
+
+Consider the model
+
+\begin{align*}
+	\vy|\vbeta, \sigma^2 & \sim \N(\mX \vbeta, \sigma^2 \mI) \\
+\end{align*}
+
+with priors
+
+\begin{align*}
+	\vbeta|g, \sigma^2 & \sim \N\left(\vzero, g\sigma^2 (\mX^\top \mX)^{-1}\right), \\
+	p(\sigma^2)        & \propto \sigma^{-2}.                                       
+\end{align*}
+
+\cite{Goel1986} constructed a family of priors for a Gaussian regression model using a particular form of
+conjugate Normal-Gamma model, where the prior covariance matrix of $\vbeta$ is taken to be a multiple of the
+Fisher information  matrix by the parameter $g$. This places the most prior mass on $\vbeta$ on the section of
+the parameter space where the data is least informative (expand on this? See STAT260 combined lecture notes,
+page 55). This leads to the posterior distribution
+
+\[
+	\vbeta | \vy \sim \N\left(\frac{g}{1+g} \vbetahatls, g \sigma^2 (\mX^\top \mX)^{-1} \right)
+\]
+
+We index the space of models by a $p$-dimensional vector of indicator variables for each variable considered 
+for inclusion, $\vgamma$. For each model $\mathcal{M}_\vgamma$, the response vector $\vy$ is modelled by
+\begin{equation*}
+	\mathcal{M}_\vgamma: \vmu_\vgamma = \vone_n \alpha + \mX_\vgamma \vbeta_\vgamma.
+\end{equation*}
+
+Let $\KL(q||p) = \int q(\vtheta) \log{\left( \frac{q(\vtheta)}{p(\vtheta|\vy)} \right)} d \vtheta$ be the
+Kuhlback-Leibner divergence between $q$ and $p$, a measure of the distance between the probability
+distributions $p$ and $q$.
+
+\subsection{Variational Bayes}
+
+The desired posterior distribution $p(\vtheta | \vy)$ typically requires the calculation of an analytically
+intractable integral for all but the simplest models with conjugate priors. Variational Bayes approximates the
+full posterior with a simplified approximating distribution $q(\vtheta)$. We relate the true and
+approximating distributions as follows:
+
+\begin{align*}
+	\log p(\vy) & = \log p(\vy) \int q(\vtheta) d \vtheta = \int q(\vtheta) \log p(\vy) d \vtheta                                    \\
+	            & = \int q(\vtheta) \log \left\{ \frac{p(\vy, \vtheta) / q(\vtheta)}{p(\vy|\vtheta) / q(\vtheta)} \right\} d \vtheta \\
+	            & = \int q(\vtheta) \log\left\{ \frac{p(\vy, \vtheta)}{q(\vtheta)} \right\} d \vtheta +                              
+	\int q(\vtheta) \log\left\{ \frac{q(\vtheta)}{p(\vtheta|\vy)} \right\} d \vtheta \\
+	            & = \int q(\vtheta) \log\left\{ \frac{p(\vy, \vtheta)}{q(\vtheta)} \right\} d \vtheta +                              
+	\KL(q||p) \\
+	            & \geq \int q(\vtheta) \log\left\{ \frac{p(\vy, \vtheta)}{q(\vtheta)} \right\} d \vtheta.                            
+\end{align*}
+
+as $\KL(q||p) \geq 0$ for all probability densities $p$ and $q$. The last quantity is the variational lower
+bound $\underline{p}(\vtheta) \equiv \int q(\vtheta) \log\left\{ \frac{p(\vy, \vtheta)}{q(\vtheta)} \right\}
+d\vtheta$. By the inequality above, this is guaranteed to bound the true probability distribution from below.
+
+The approximation is fit by iteratively maximising the variational lower bound using a sequence of mean field
+updates, with each update guaranteed to increase the variational lower bound relative to the previous
+iteration. This sequence of mean field updates reduces the KL divergence between the true probability
+distribution $p(\vy)$ and the $q(\vtheta)$. The process converges when the variational lower bound no longer
+increases, and the KL divergence between the posterior distribution and the approximating distribution is
+minimised.
+
+A popular form of approximation is to restrict $q(\vtheta)$ to a subclass of product densities by partitioning
+$\vtheta = (\vtheta_1, \vtheta_2, \ldots, \vtheta_{M-1}, \vtheta_M)$ and assuming independence between the
+partitioned parameters:
+
+\begin{equation*}
+	q(\vtheta) \equiv q(\vtheta_1) q(\vtheta_2) \ldots q(\vtheta_{n-1}) q(\vtheta_n).
+\end{equation*}
+
+This allows the calculation of the optimal approximating densities $q_i^*(\vtheta_i)$ as
+
+\begin{equation*}
+	q_i^*(\vtheta_i) \propto \exp \left \{ \E_{-\vtheta_i} \log p(\vy, \vtheta) \right \}, 1 \leq i \leq M,
+\end{equation*}
+
+\subsection{Structured Variational Bayes}
+
+Let $\vgamma \in \{0, 1\}^p$ be the vector of indicators of whether each of the $p$ covariates in our
+covariate matrix $\mX$ is included in the model $\vgamma$. We perform model selection by using the above
+Variational Bayes approximation to each  candidate linear model and averaging over the space of available
+models.
+
+\begin{align*}
+	\underline{p}(\vy) & = \sum_\vgamma \underline{p}(\vy|\vgamma) p(\vgamma)                     \\
+	p(\vgamma|\vy)     & \approx \frac{\underline{p}(\vy|\vgamma) p(\vgamma)}{\underline{p}(\vy)} \\
+	p(\vbeta|\vy)      & \approx \sum_\vgamma q(\vbeta|\vgamma) p(\vgamma|\vy)                    \\
+\end{align*}
+
+\subsection{Model}
+\label{sec:model}
+
+We consider a linear model with a g-prior, as in \cite{Liang2008}. Consider the linear model
+
+\begin{align*}
+	\vy | \vbeta, \sigma^2 \sim \N_n(\mX \vbeta, \sigma^2 \mI) 
+\end{align*}
+
+with priors
+
+\begin{align*}
+	\vbeta | \sigma^2, g & \sim \N_p(\vzero, g \sigma^2 (\mX^T \mX)^{-1})                     \\
+	p(\sigma^2)          & = (\sigma^2)^{-1} \I(\sigma^2 > 0)                                 \\
+	p(g)                 & = \frac{g^b (1 + g)^{-(a + b + 2)}}{\Beta(a + 1, b + 1)} \I(g > 0) 
+\end{align*}
+
+We choose a factored Variational Bayes approximation of the form
+
+\begin{align*}
+	q(\vtheta) = q(\vbeta) q(\sigma^2) q(g). 
+\end{align*}
+
+Then $q(\vbeta) = \N(\vmu_{q(\vbeta)}, \mSigma_{q(\vbeta)})$, $q(\sigma^2) = \IG(\alpha_{q(\vbeta)}, \beta_{q(\vbeta)})$ and $q(g) = \text{Beta Prime}(\alpha_{q(g)}, \beta_{q(g)})$.
+
+\subsection{Naive mean field update}
+\label{sec:naive_mean_field_updates}
+
+We first present an algorithm for optimising the model fit to the data using mean field updates performed
+iteratively on all variational parameters. The derivation of the naive mean field updates is presented in
+Appendix \ref{sec:appendix}.
+
+\subsubsection{Numerical integration of $\tau_g$}
+\label{sec:num_int}
+
+Define $\tau_{\sigma^2} \equiv \E_q \left[ \sigma^{-2} \right]$ and $\tau_g \equiv \E_q \left[ g^{-1}
+\right]$. We can calculate $\tau_g$ numerically using the following iterative numerical scheme.
+
+First, we choose an initial guess $\tau_g^{(1)} = \E_q [g^{-1}] = (1 - R^2) [1 + (p / 2 + a + 1)/b]$. Then
+define
+
+\begin{align*}
+	\tau_g^{(i+1)} \leftarrow \int_0^\infty g^{\left(b - \frac{p}{2} - 1\right)}                                   
+	(1 + g)^{- (a + b + 2)}                                                                                        
+	\exp \left \{- \frac{1}{2} g^{-1}  (1 + \tau_g^{(i)})^{-1} [\tau_{\sigma^2} (1 + \tau_g^{(i)})^{-1} n R^2 + p] 
+	\right \} dg                                                                                                   
+\end{align*}
+
+\noindent where $\tau_{\sigma^2} = [1 - (1 + \tau_g^{(i)})^{-1} R^2]^{-1}$. This integral can be calculated
+numerically using Laplace's approximation. This process is repeated until convergence.
+
+$\nu - 1 = b - \frac{p}{2}$, 
+$\beta = \frac{1}{2} (1 + \tau_g)^{-1} (\tau_{\sigma^2} n R^2 + p)$, 
+$\mu - 1 = (a + b + 2)$ and $\gamma = 1$. 
+
+\begin{algorithm}
+	\caption{Fit VB approximation of linear model}
+	\label{alg:algorithm_one}
+	\begin{algorithmic}
+		\REQUIRE $\alpha_{q(\sigma^2)} \leftarrow \frac{n + p}{2}, \nu_{q(g)} - 1 \leftarrow b - \frac{p}{2}$, $\mu_{q(g)} - 1 \leftarrow (a + b + 2)$
+		\WHILE{the increase in $\log{\underline{p}}(\vy;q)$ is significant}
+		\STATE $\vmu_{q(\vbeta)} \leftarrow (1 + \tau_g)^{-1} \vbetahatls$
+		\STATE $\mSigma_{q(\vbeta)} \leftarrow [\tau_{\sigma^2} (1 + \tau_g)]^{-1} (\mX^\top \mX)^{-1}$
+		\STATE $\beta_{q(\sigma^2)} \leftarrow  \frac{1}{2} {n[1 - (1 + \tau_g)^{-1} R^2] + \tau_{\sigma^2}^{-1} p}$
+		\STATE $\beta_{q(g)} \leftarrow \frac{1}{2} (1 + \tau_g)^{-1} [\tau_{\sigma^2} (1 + \tau_g)^{-1} n R^2 + p]$
+		\ENDWHILE
+	\end{algorithmic}
+\end{algorithm}
+
+\subsection{Mean field updates}
+\label{sec:mean_field_updates}
+
+Connections between Algorithm \ref{alg:algorithm_one} and Algorithm \ref{alg:algorithm_two}.
+
+A substantially simpler algorithm  which involves optimising over only one variational parameter can be
+obtained from Algorithm \ref{alg:algorithm_one} by utlising the following identities.
+
+First, we note that when assuming that $\vy^\top \vy / n = 1$,
+\[\vy^\top \mX (\mX^\top \mX)^{-1} \mX^\top \vy =\|\vy\|^2 R^2 = n R^2.\]
+
+Second, observe that when $\vmu = (1 + \tau_g)^{-1} \vbetahatls$ and $\mSigma = \tau_{\sigma^2}^{-1} (1 + \tau_g)^{-1} (\mX^\top \mX)^{-1}$,
+\begin{align*}
+	\vmu^\top \mX^\top \mX \vmu & = (1 + \tau_g)^{-2} \vbetahatls^\top \mX^\top \mX \vbetahatls                                                        \\
+	                            & = (1 + \tau_g)^{-2} \vy^\top \mX (\mX^\top \mX)^{-1} \cancel{\mX^\top \mX} \cancel{(\mX^\top \mX)^{-1}} \mX^\top \vy \\
+	                            & = (1 + \tau_g)^{-2} n R^2.                                    
+\end{align*}
+
+Third, utilising the above two identities, $s$ can be simplified to
+\begin{align*}
+	s & = \frac{1}{2} [\|\vy\|^2 - 2 \vmu^\top \mX^\top \vy + (1 + \tau_g) \vmu^\top \mX^\top \mX \vmu (1 + \tau_g) +  \tr (\mX^\top \mX \mSigma)]                 \\
+	  & = \frac{1}{2} [n - \cancel{2} (1 + \tau_g) n R ^2 + \cancel{(1 + \tau_g) n R^2} + \tau_{\sigma^2} \tr (\cancel{\mX\top \mX} \cancel{(\mX^\top \mX)^{-1}})] \\
+	  & = \frac{1}{2} \{ n[1 - (1 + \tau_g)^{-1} R^2] + p \tau_{\sigma^2}^{-1} \}.
+\end{align*}
+
+Fourth, recalling that $\tau_{\sigma^2} = \E_q [\sigma^{-2}] = r/s = \frac{n+p}{n[1 - (1 + \tau_g)^{-1} R^2] + p \tau_{\sigma^2}^{-1}}$, we can solve for $\tau_{\sigma^2}$ in terms of $\tau_g$ to obtain
+\[
+	\tau_{\sigma^2} = [1 + (1 + \tau_g)^{-1}]^{-1}.
+\]
+
+Hence
+\[
+	s = \frac{r}{\tau_{\sigma^2}} = \frac{1}{2} (n + p) [1 - (1 + \tau_g)^{-1} R^2].
+\]
+and
+\begin{align*}
+	c & = \frac{\tau_{\sigma^2}}{2}[\vmu^\top \mX^\top \mX \vmu + \tr (\mX^\top \mX \mSigma)]                      \\
+	  & = \frac{\tau_{\sigma^2}}{2}\left[(1 + \tau_g)^{-2} n R^2 + \tau_{\sigma^2}^{-1} (1 + \tau_g)^{-1} p\right] \\
+	  & = \frac{1}{2} [ \tau_{\sigma^2} (1 + \tau_g)^{-2} n R^2 + (1 + \tau_g)^{-1} p]                             \\
+	  & = \frac{1}{2} \{ [1 + (1 + \tau_g)^{-1}]^{-1} (1 + \tau_g)^{-2} n R^2 + (1 + \tau_g)^{-1} p\}.
+\end{align*}
+
+\noindent Hence all of the variational parameter updates in Algorithm \ref{alg:algorithm_one} can be expressed as functions
+of $n$, $p$, $R^2$ and $\tau_g$. Thus optimisation can be performed on $\tau_g$ alone by repeatedly using the
+scheme presented in \ref{sec:num_int}. Once $\tau_g$ is fully optimised, the other variational parameters can
+be calculated from it as shown in Algorithm \ref{alg:algorithm_two}.
+
+\begin{algorithm}
+	\caption{Fit VB approximation of linear model}
+	\label{alg:algorithm_two}
+	\begin{algorithmic}
+		\REQUIRE $\nu_{q(g)} - 1 \leftarrow b - \frac{p}{2}$, $\mu_{q(g)} - 1 \leftarrow (a + b + 2)$ \\
+		\WHILE{the increase in $\log{\underline{p}}(\vy;q)$ is significant}
+		\STATE Calculate $\tau_{g}$ using numerical integration in Section \ref{sec:num_int}
+		\ENDWHILE
+		\STATE $\tau_{\sigma^2} \leftarrow \{[1 - (1 + \tau_g)^{-1}] R^2\}^{-1}$
+		\STATE $\beta_{q(g)} \leftarrow \left(\frac{n (1 + \tau_g)^{-1}}{[1 - (1 + \tau_g)^{-1}]} + p \right)$
+		\STATE $\vmu_{q(\vbeta)} \leftarrow (1 + \tau_g)^{-1} (\mX^\top \mX)^{-1} \mX^\top \vy$
+		\STATE $\mSigma_{q(\vbeta)} \leftarrow \tau_{\sigma^2}^{-1} (1 + \tau_{g})^{-1}(\mX^\top \mX)^{-1}$
+	\end{algorithmic}
+\end{algorithm}
+
+
+\section{Numerical experiments}
+\label{sec:num_exp}
+
+Exact posterior and approximate shrinkage $\left( \frac{g}{1 + g} \right)$ were calculated for a range of
+values of $p$, $n$ and $R^2$ to compare their values. As can be seen from Figure $\ref{fig:shrinkage}$, the
+values of the exact posterior shrinkage and approximate shrinkage are almost the same over most of the range
+of these values, which deviation only noticeable in the $p=10$ and $p=20$ cases.
+
+Hitters
+Major League Baseball Data from the 1986 and 1987 seasons.
+An Introduction to Statistical Learning with Applications in R
+
+\begin{tabular}{|l|lllllllllllllllllll|}
+	\hline
+	$\vp$ & 0.137 & 0.130 & 0.257 & 0.982 & 0.921 & 0.173 & 0.633 & 0.562 & 0.623 & 0.480 & 0.441 & 0.499 & 0.197 & 0.926 & 0.131 & 0.174 & 0.128 & 0.901 & 0.851 \\
+	$\vq$ & 0.137 & 0.130 & 0.257 & 0.982 & 0.922 & 0.172 & 0.635 & 0.562 & 0.625 & 0.480 & 0.440 & 0.499 & 0.197 & 0.927 & 0.130 & 0.173 & 0.127 & 0.902 & 0.853 \\
+	\hline
+\end{tabular}
+
+Body Fat
+Source: ????
+
+\begin{tabular}{|l|lllllllllllll|}
+	\hline
+	$\vp$ & 0.938 & 0.136 & 0.182 & 0.072 & 0.071 & 0.108 & 0.147 & 1.000 & 0.134 & 0.141 & 0.323 & 0.619 & 0.221 \\
+	$\vq$ & 0.939 & 0.136 & 0.182 & 0.071 & 0.070 & 0.107 & 0.146 & 1.000 & 0.134 & 0.140 & 0.323 & 0.620 & 0.221 \\
+	\hline
+\end{tabular}
+
+Wage
+An Introduction to Statistical Learning with Applications in R
+
+\begin{tabular}{|l|lllllllllllllllll|}
+	\hline
+	$\vp$ & 1 & 1 & 0.010 & 0.024 & 1 & 0.054 & 0.083 & 0.019 & 0.011 & 0.010 & 0.013 & 0.014 & 0.011 & 0.014 & 0.057 & 0.042 & 0.033 \\
+	$\vq$ & 1 & 1 & 0.010 & 0.024 & 1 & 0.054 & 0.083 & 0.019 & 0.011 & 0.010 & 0.013 & 0.014 & 0.011 & 0.014 & 0.057 & 0.042 & 0.033 \\
+	\hline
+\end{tabular}
+
+Graduation Rate
+An Introduction to Statistical Learning with Applications in R
+
+\begin{tabular}{|l|lllllllllllllllll|}
+	\hline
+	$\vp$ & 0.913 & 1.000 & 0.090 & 0.108 & 0.110 & 0.602 & 0.127 & 0.945 & 0.999 & 0.999 & 0.201 & 0.864 & 0.262 & 0.105 & 0.146 & 0.977 & 0.437 \\
+	$\vq$ & 0.914 & 1.000 & 0.090 & 0.108 & 0.110 & 0.602 & 0.127 & 0.945 & 0.999 & 0.999 & 0.201 & 0.864 & 0.262 & 0.105 & 0.146 & 0.977 & 0.437 \\
+	\hline
+\end{tabular}
+
+US Crime
+
+\begin{tabular}{|l|lllllllllllllll|}
+	\hline
+	$\vp$ & 0.226 & 0.849 & 0.997 & 0.216 & 0.502 & 0.244 & 0.358 & 0.569 & 0.324 & 0.202 & 0.424 & 0.696 & 0.869 & 0.229 & 0.655 \\
+	$\vq$ & 0.220 & 0.856 & 0.997 & 0.210 & 0.507 & 0.240 & 0.358 & 0.573 & 0.318 & 0.196 & 0.418 & 0.699 & 0.876 & 0.224 & 0.661 \\
+	\hline
+\end{tabular}
+
+\begin{figure}
+	\caption{Comparison of exact and approximate shrinkage}
+	\label{fig:shrinkage}
+	\includegraphics[width=17cm, height=17cm]{Chapter_3_shrinkage.pdf}
+\end{figure}
+
+\section{Conclusion and Discussion}
+\label{sec:conclusion}
+
+The Variational Bayes approximation produces results which are almost exactly the same as the exact version.
+The VB metholodology extends naturally to new situations, such as robust model fitting, mixed effects, missing
+data, measurement error and splines. We are able to retain high accuracy with less computational overhead than
+exact or MCMC.
+
+Amenability to univariate optimisation depending only on $n$, $p$ and $R^2$ provides opportunities for
+application in many areas where speed and/or parallelisability is paramount, such as model selection via
+Structured Variational Bayes.
+
+\bibliographystyle{elsarticle-harv}
+\bibliography{references_mendeley}
+
+\appendix
+\section{Derivation of Naive Mean Field Updates}
+\label{sec:appendix}
+
+\end{document}

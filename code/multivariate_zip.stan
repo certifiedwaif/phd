@@ -51,7 +51,7 @@ model {
     // i.e. u <- to_vector(vu);
     for (m in 1:(M-1)) {
       for (b in 1:B) {
-        u[(m-1)*B+b] <- vu[m][b];
+        u[(m-1)*B+b] = vu[m][b];
       }
     }
 

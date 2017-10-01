@@ -1,0 +1,71 @@
+\documentclass{article}[12pt]
+\usepackage{amsmath}
+\input{include.tex}
+\input{Definitions.tex}
+\title{Meeting notes - 23/4/2015}
+\author{Mark Greenaway}
+
+\begin{document}
+\maketitle
+
+\noindent Our model is
+\begin{align*}
+	z_i &\sim \Poisson{\left(e^{F(x)}\right)} \\
+	r_i &\sim \Bernoulli{(\rho)} \\
+	y_i &\sim z_i r_i
+\end{align*}
+where $F(x) = 2 + sin(x)$.
+\[
+	\hat{F(x)} = X(x) \hat{\vbeta} + Z(x) \hat{u}
+\]
+
+\noindent For error-checking purposes, it's a good idea to plot $f(x)$ versus $\hat{f}(x)$ for both 
+the MCMC and VB methods, and see where exactly the error lies.
+
+\noindent Recall that we defined $\mR$ as
+\[
+	\mR = \begin{bmatrix}
+		e^{r_{11}} & r_{12} & \ldots & r_{1p} \\
+		& e^{r_{22}} & \ldots & r_{2p} \\
+		& & \ddots & r_{3p} \\
+		& & & e^{r_{pp}}
+	\end{bmatrix}
+\]
+
+\noindent We want to call \texttt{B.spline(x, knots, degree=3)} where \\
+\texttt{knots <- c(rep(a, 2), kappa, rep(b, 4))}. \\
+Not \\
+\texttt{knots <- c(rep(a, 4), kappa, rep(b, 4))} as we're current doing in \texttt{ZOSull}.
+
+% TODO: Insert diagram here
+
+
+\noindent The \texttt{ZOSull} function which I'm currently using to construct $\mZ$ includes the 
+basis $\left[ 1, x, x^2, x^3, (x - \kappa_1)_+^3, \ldots \right]$. Note the first two elements are
+$1$ and $x$, which are exactly the columns of $\mX$! That means that when we combine $\mX$ and
+$\mZ$ to form $\mC$, those columns are repeated and hence $\mC^T \mC$ is not of full rank $\implies$
+not invertible.
+
+\noindent I floated an idea I'd had of optimising the covariance matrices using constraints based
+on the fact that correlation matrices are constrained to have all elements between -1 and 1,
+and the Cholesky decomposition formulae
+
+\begin{align*}
+	L_{jj} &= \sqrt{A_{jj} - \sum_{k=1}^{j-1} L_{jk}^2} > 0 \\
+	L_{ij} &= \frac{1}{L_{jj}}\left(A_{ij} - \sum_{k=1}^{j-1} L_{ik} L_{jk}\right), \text{ for } i > j.
+\end{align*}
+
+\noindent John said this wasn't such a good idea, because the constraints involved become very
+complex, and you end up doing semi-definite programming. This is apparently a hard problem (?)
+because you end up with a very complicated parameter space to optimise over. He did, however, have a
+related idea that he wanted to pursue in the future. If instead of representing $\mLambda$ using
+Cholesky factors, you instead used the alternative parameterisation
+
+\begin{align*}
+	\mLambda_{ii} &= r_{ii} + \sum_{j \ne i} |r_{ij}| \\
+	\mLambda_{ij} &= r_{ii}, A_{ii} > \sum_{j \ne i} |A_{ij}|
+\end{align*}
+
+\noindent then you could instead optimise that, and he said the optimisation problem that results is
+not \emph{too} difficult.
+\end{document}

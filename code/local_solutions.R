@@ -3,6 +3,8 @@
 library(optparse)
 library(zipvb)
 
+DEBUG <- TRUE
+
 find_error_locations <- function(approximation)
 {
 	# Construct suitable mX, mZ and vy
@@ -43,29 +45,35 @@ find_error_locations <- function(approximation)
 	vmus <- matrix(NA, (10 * 1e2)^2, 2 + 9)
 
 	# Start fits from a range of points on a 2 dimensional grid
+	options(safe_exp=TRUE)
 	options(threshold=2)
 	GRID_SIZE <- 1e-1
 	error_locations <- c(-99, -99)
 	for (init_intercept in seq(- 4.5, 5, GRID_SIZE)) {
 		for (init_slope in seq(- 4.5, 5, GRID_SIZE)) {
-			cat("init_intercept", init_intercept, "")
-			cat("init_slope", init_slope, "")
-			cat("counter", counter, "")
-			cat("error_count", error_count, "\n")
+			if (DEBUG) {
+				cat("init_intercept", init_intercept, "")
+				cat("init_slope", init_slope, "")
+				cat("counter", counter, "")
+				cat("error_count", error_count, "\n")
+			}
 			mult$vmu[1] <- init_intercept
 			mult$vmu[2] <- init_slope
 			fit <- tryCatch(zipvb(mult, method=approximation, verbose=FALSE, glm_init=FALSE),
 											error = function(e) {
-												print(e)
+												# print(e)
 												return(NULL)
 											})
 			if (is.null(fit)) {
-				print("Caught error")
+				if (DEBUG) {
+					print("Caught error")
+				}
 				error_count <- error_count + 1
 				error_locations <- rbind(error_locations,
 																 c(init_intercept, init_slope))
 			} else {
-				# print(str(fit))
+				if (DEBUG)
+					print(str(fit))
 				vmus[counter, ] <- fit$vmu
 			}
 			counter <- counter + 1
@@ -83,15 +91,13 @@ find_error_locations <- function(approximation)
 	# mult$vmu[2] <- -0.17
 	# fit <- zipvb(mult, method="gva", verbose=TRUE, glm_init=FALSE)
 	
-	cat("Counter", counter, "\n")
-	cat("Error_count", error_count, "\n")
-	return(list(vmus=vmus[1:(counter - 1), ],
-							error_locations=error_locations[2:error_count, ]))
-}
+	if (DEBUG) {
+		cat("Counter", counter, "\n")
+		cat("Error_count", error_count, "\n")
+	}
 
-display_error_locations <- function(error_locations)
-{
-	plot(error_locations[, 1], error_locations[, 2])
+	return(list(vmus=vmus,
+							error_locations=error_locations))
 }
 
 main <- function()
@@ -102,7 +108,8 @@ main <- function()
   result <- find_error_locations(approximation)
   vmus <- result$vmus
   error_locations <- result$error_locations
-  write.csv(vmus, file=sprintf("results/local_solutions_%s_vmus.csv", approximation))
-  write.csv(error_locations, file=sprintf("results/local_solutions_%s_error_locations.csv", approximation))
+  # write.csv(vmus, file=sprintf("results/local_solutions_%s_vmus.csv", approximation))
+  # write.csv(error_locations, file=sprintf("results/local_solutions_%s_error_locations.csv", approximation))
+  write.csv(error_locations)
 }
 main()
