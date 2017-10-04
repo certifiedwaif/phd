@@ -37,19 +37,21 @@
 
 \section{$p(\vy | g, \vgamma)$}
 \noindent Consider the linear model
-
 \[
 	\vy | \alpha, \vbeta, \sigma^2, \vgamma \sim \N_n(\vone \alpha + \mX \vbeta, \sigma^2)
 \]
 
 \noindent with priors
-\[
-	\alpha | \sigma^2, g \sim \N(0, g \sigma^2),
-	\vbeta_\vgamma | \sigma^2, g, \vgamma \sim \N_p(\vzero, g \sigma^2 (\mX_\vgamma^\top \mX_\vgamma)^{-1}),
-	p(\vbeta_{-\vgamma}) = \sum_{j=1}^p \delta(\vbeta_j; 0)^{1 - \vgamma_i}, \text{ and }
-	p(\sigma^2) = \sigma^{-2} \I(\sigma^2 > 0)
-\]
-leaving the prior on $g$ unspecified. Then
+
+$$
+\begin{array}{rl}
+	\alpha | \sigma^2, g &\sim \N(0, g \sigma^2), \\
+	\vbeta_\vgamma | \sigma^2, g, \vgamma &\sim \N_p(\vzero, g \sigma^2 (\mX_\vgamma^\top \mX_\vgamma)^{-1}), \\
+	p(\vbeta_{-\vgamma}) &= \sum_{j=1}^p \delta(\vbeta_j; 0)^{1 - \vgamma_i}, \text{ and } \\
+	p(\sigma^2) &= \sigma^{-2} \I(\sigma^2 > 0)
+\end{array}
+$$
+leaving the prior on $g$ unspecified for now. Then
 $$
 \begin{array}{rl}
 	p(\vy | g, \vgamma) =&
@@ -74,6 +76,7 @@ $$
 	-\frac{(p + 1)}{2} \log{(2\pi g \sigma^2)}
 	+ \frac{1}{2} \log{|\mX_\vgamma^\top \mX_\vgamma|}
 	- \frac{(1 + g^{-1})\vbeta^\top (\mX_\vgamma^\top \mX_\vgamma) \vbeta - 2 \vy^\top \mX \vbeta}{2 \sigma^{2}}
+	-\log{(\sigma^2)}
 	\right]}  \\
 	&\times \left[ \prod_{j=1}^p \delta(\beta_j; 0)^{1 - \gamma_j} \right] d \vbeta_\vgamma d \vbeta_{-\vgamma} d \sigma^2
 \end{array}
@@ -88,7 +91,9 @@ $$
 		-\frac{n}{2 \sigma^2}
 		-\frac{p}{2} \log{2\pi \sigma^2} 
 		-\frac{(p + 1)}{2} \log{g} 
-		+\frac{1}{2} \log{|\mX_\vgamma^\top \mX_\vgamma|} \right]}\\
+		+\frac{1}{2} \log{|\mX_\vgamma^\top \mX_\vgamma|}
+		-\log{(\sigma^2)}
+		\right]}\\
 		\times&\exp{\left[
 		-\frac{(1 + g^{-1})\vbeta^\top (\mX_\vgamma^\top \mX_\vgamma) \vbeta - 2 \vy^\top \mX \vbeta}{2 \sigma^{2}} 
 		\right]} 
@@ -105,6 +110,7 @@ $$
 		-\frac{p}{2} \log{2\pi \sigma^2} 
 		- \frac{p + 1}{2} \log{g}
 		+ \frac{1}{2} \log{|\mX_\vgamma^\top \mX_\vgamma|} 
+		-\log{(\sigma^2)}
 		\right]} \\
 		\times&\exp{\left[
 		-\frac{n}{2 \sigma^2}
@@ -118,7 +124,8 @@ $$
 		- \frac{1}{2} \log{(n + g^{-1})}
 		- \frac{1}{2} \log{g}
 		-\frac{p}{2} \log{(1 + g)}
-		-\frac{n}{2} \log (2 \pi \sigma^2) 
+		-\frac{n}{2} \log (2 \pi)
+		-(\frac{n}{2} + 1) \log (\sigma^2) 
 		-\frac{n}{2 \sigma^2} \left(1 - \frac{g}{1 + g} R^2\right)
 		\right]}  d \sigma^2
 \end{array}
@@ -130,12 +137,18 @@ $$
 		&
 		\frac{\Gamma(n/2 + 1)
 		2^{(n/2 + 1)}}
-		{n^(n/2 + 1)}
+		{n^{n/2 + 1}}
 		\exp{\left[
 		- \frac{1}{2} \log{(1 + ng)}
 		+(\frac{n - p}{2} + 1) \log(1 + g)
-		-(n/2 + 1) \log(1 + \sigma^2 g)
-		\right]}
+		-(n/2 + 1) \log(1 + \widehat{\sigma}^2 g)
+		\right]} \\
+		=&\frac{\Gamma(n/2 + 1)
+		2^{(n/2 + 1)}}
+		{n^{n/2 + 1}}
+		(1 + ng)^{-\frac{1}{2}}
+		(1 + g)^{(\frac{n - p}{2} + 1)}
+		(1 + \widehat{\sigma}^2 g)^{-(n/2 + 1)}
 \end{array}
 $$
 
