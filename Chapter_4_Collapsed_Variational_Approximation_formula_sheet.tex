@@ -50,53 +50,94 @@
 	p(\sigma^2) = \sigma^{-2} \I(\sigma^2 > 0)
 \]
 leaving the prior on $g$ unspecified. Then
-\begin{align*}
-	p(\vy | g, \vgamma) =& \int \exp{(\log p(\vy | \alpha, \vbeta, \sigma^2) + \log p(\alpha | \sigma^2, g)
-														+ \log p(\vbeta_\vgamma | \sigma^2, g, \vgamma) + \log p(\vbeta_{-\vgamma} | \sigma^2, g, \vgamma) + \log p(\sigma^2))} d \alpha d \vbeta d \sigma^2 \\
-		=& \int \exp{\left[-\frac{n}{2} \log (2 \pi \sigma^2) - \frac{\|\vy - \vone_n \alpha - \mX \vbeta\|^2}{2} 
-		-\frac{(p + 1)}{2} \log{(2\pi g \sigma^2)} + \frac{1}{2} \log{|\mX_\vgamma^\top \mX_\vgamma|} - \frac{\alpha^2 + \vbeta^\top g^{-1} (\mX_\vgamma^\top \mX_\vgamma)^{-1} \vbeta}{2 \sigma^{2}} \right] d \alpha d \vbeta } \\
-		&\times \sigma^{-2} d \sigma^2 \left[ \prod_{j=1}^p \delta(\beta_j; 0)^{1 - \gamma_j} \right] \\
-		=& \int \exp{\left[ -\frac{(n + g^{-1}) \alpha^2}{2 \sigma^2} \right]} d \alpha \\
-		&  \int \exp{\left[-\frac{n}{2} \log (2 \pi \sigma^2) - \frac{\|\vy - \mX \vbeta\|^2}{2} 
-		-\frac{(p + 1)}{2} \log{2\pi g \sigma^2} + \frac{1}{2} \log{|\mX_\vgamma^\top \mX_\vgamma|} - \frac{\vbeta^\top (\mX_\vgamma^\top \mX_\vgamma)^{-1} \vbeta}{2 g \sigma^{2}} - \log(\sigma^2) -\log \sigma^2 \right]}  \\
-		&\times \left[ \prod_{j=1}^p \delta(\beta_j; 0)^{1 - \gamma_j} \right] d \vbeta_\vgamma d \vbeta_{-\vgamma} d \sigma^2
-\end{align*}
+$$
+\begin{array}{rl}
+	p(\vy | g, \vgamma) =&
+	\int \exp{(\log p(\vy | \alpha, \vbeta, \sigma^2)
+	+ \log p(\alpha | \sigma^2, g)
+	+ \log p(\vbeta_\vgamma | \sigma^2, g, \vgamma)
+	+ \log p(\vbeta_{-\vgamma} | \sigma^2, g, \vgamma)
+	+ \log p(\sigma^2))} d \alpha d \vbeta d \sigma^2 \\
+	=& \int \exp{\left[
+	-\frac{n}{2} \log (2 \pi \sigma^2)
+	- \frac{\|\vy - \vone_n \alpha - \mX \vbeta\|^2}{2 \sigma^2} 
+	-\frac{(p + 1)}{2} \log{(2\pi g \sigma^2)}
+	+ \frac{1}{2} \log{|\mX_\vgamma^\top \mX_\vgamma|}
+	- \frac{\alpha^2 + \vbeta^\top (\mX_\vgamma^\top \mX_\vgamma) \vbeta}{2 g \sigma^{2}} \right] d \alpha d \vbeta } \\
+	&\times \sigma^{-2} d \sigma^2
+	\left[ \prod_{j=1}^p \delta(\beta_j; 0)^{1 - \gamma_j} \right] \\
+	=& \int \exp{\left[
+	-\frac{(n + g^{-1})\alpha^2}{2 \sigma^2} \right]} d \alpha \\
+	&  \int \exp{\left[
+	-\frac{n}{2} \log (2 \pi \sigma^2)
+	-\frac{n}{2 \sigma^2} 
+	-\frac{(p + 1)}{2} \log{(2\pi g \sigma^2)}
+	+ \frac{1}{2} \log{|\mX_\vgamma^\top \mX_\vgamma|}
+	- \frac{(1 + g^{-1})\vbeta^\top (\mX_\vgamma^\top \mX_\vgamma) \vbeta - 2 \vy^\top \mX \vbeta}{2 \sigma^{2}}
+	\right]}  \\
+	&\times \left[ \prod_{j=1}^p \delta(\beta_j; 0)^{1 - \gamma_j} \right] d \vbeta_\vgamma d \vbeta_{-\vgamma} d \sigma^2
+\end{array}
+$$
 
 \noindent Firstly, we integrate out $\alpha$ to obtain
-\begin{align*}
-		\int & \exp{\left[-\frac{n}{2} \log (2 \pi \sigma^2) - \frac{1}{2} \log{(n + g^{-1})} - \frac{\|\vy - \mX \vbeta\|^2}{2} 
-		-\frac{p}{2} \log{2\pi \sigma^2} - \frac{(p + 1)}{2} \log{g} + \frac{1}{2} \log{|\mX_\vgamma^\top \mX_\vgamma|} \right]}\\
-		\times&\exp{\left[- \log{\sigma^2} - \frac{\vbeta^\top (\mX_\vgamma^\top \mX_\vgamma)^{-1} \vbeta}{2 g \sigma^{2}} - \log{\sigma^2}\right]} 
+$$
+\begin{array}{rl}
+		\ds \int & \exp{\left[
+		-\frac{(n - 1)}{2} \log (2 \pi \sigma^2) 
+		-\frac{1}{2} \log{(n + g^{-1})} 
+		-\frac{n}{2 \sigma^2}
+		-\frac{p}{2} \log{2\pi \sigma^2} 
+		-\frac{(p + 1)}{2} \log{g} 
+		+\frac{1}{2} \log{|\mX_\vgamma^\top \mX_\vgamma|} \right]}\\
+		\times&\exp{\left[
+		-\frac{(1 + g^{-1})\vbeta^\top (\mX_\vgamma^\top \mX_\vgamma) \vbeta - 2 \vy^\top \mX \vbeta}{2 \sigma^{2}} 
+		\right]} 
 		\times \left[ \prod_{j=1}^p \delta(\beta_j; 0)^{1 - \gamma_j} \right] d \vbeta_{\vgamma} d \vbeta_{-\vgamma} d \sigma^2
-\end{align*}
-using the facts that $\vy^\top \vone_n = 0$, $\vone_n^\top \mX = 0$ and $\int \exp{\left[-\frac{(n + g^{-1})\alpha^2}{2 \sigma^{2}} \right]} d \alpha = (2 \pi (n + g^{-1}) / \sigma^{2})^{\frac{1}{2}}$.
+\end{array}
+$$
+using the facts that $\vy^\top \vone_n = 0$, $\vone_n^\top \mX = \vzero$ and $\int \exp{\left[-\frac{(n + g^{-1})\alpha^2}{2 \sigma^{2}} \right]} d \alpha = (2 \pi \sigma^{2} / (n + g^{-1}))^{\frac{1}{2}}$.
 Marginalising over $\vbeta_{-\vgamma}$ gives
-\begin{align*}
-		\int &\exp{\left[-\frac{n}{2} \log (2 \pi \sigma^2) - \frac{1}{2} \log{(n + g^{-1})}
-		-\frac{p}{2} \log{2\pi \sigma^2} - \frac{p + 1}{2} \log{g}
-		+ \frac{1}{2} \log{|\mX_\vgamma^\top \mX_\vgamma|} - \log{\sigma^2} \right]} \\
-		\times&\exp{\left[- \frac{n}{2 \sigma^2}+ \frac{\vy^\top\mX_\vgamma \vbeta_\vgamma}{2 \sigma^2} - (1 + g^{-1})\frac{\vbeta_\vgamma^\top (\mX_\vgamma^\top \mX_\vgamma)^{-1} \vbeta_\vgamma}{2 \sigma^{2}} \right]} d \vbeta d \sigma^2
-\end{align*}
+$$
+\begin{array}{rl}
+		\ds \int &\exp{\left[
+		-\frac{n}{2} \log (2 \pi \sigma^2) 
+		- \frac{1}{2} \log{(n + g^{-1})}
+		-\frac{p}{2} \log{2\pi \sigma^2} 
+		- \frac{p + 1}{2} \log{g}
+		+ \frac{1}{2} \log{|\mX_\vgamma^\top \mX_\vgamma|} 
+		\right]} \\
+		\times&\exp{\left[
+		-\frac{n}{2 \sigma^2}
+		-\frac{(1 + g^{-1})\vbeta_\vgamma^\top (\mX_\vgamma^\top \mX_\vgamma) \vbeta_\vgamma - 2\vy^\top\mX_\vgamma \vbeta_\vgamma}{2 \sigma^{2}} \right]} d \vbeta d \sigma^2
+\end{array}
+$$
 \noindent Next, we integrate out $\vbeta_{\vgamma}$ to obtain
-\begin{align*}
-		& \int \exp{\left[-\frac{n}{2} \log (2 \pi \sigma^2) - \frac{1}{2} \log{(n + g^{-1})}
-		-\frac{p}{2} \log{(2\pi \sigma^2)} - \frac{(p + 1)}{2} \log{g} - \frac{p}{2} \log (1 + g^{-1}) -\log{\sigma^2} \right]} \\
-		&\times \exp{\left[-\frac{n}{2} (1 - R^2_{\vgamma, g})\right]} \sigma^{-2}
-		d \sigma^2
-\end{align*}
+$$
+\begin{array}{rl}
+		\ds \int &\exp{\left[
+		- \frac{1}{2} \log{(n + g^{-1})}
+		- \frac{1}{2} \log{g}
+		-\frac{p}{2} \log{(1 + g)}
+		-\frac{n}{2} \log (2 \pi \sigma^2) 
+		-\frac{n}{2 \sigma^2} \left(1 - \frac{g}{1 + g} R^2\right)
+		\right]}  d \sigma^2
+\end{array}
+$$
 
-\noindent Finally, we integrate out $\sigma^2$. Noting that the expression involving $\sigma^2$ is an
-Inverse Gamma distribution with $\alpha = n/2$, $\beta = \left(\frac{n}{2}\right) (1 - R^2_{\vgamma, g})$
-\begin{align*}
-		& \exp{\left[-\frac{n}{2} \log{(2 \pi)} -\frac{1}{2} \log{(n + g^{-1})}
-		- \frac{(p + 1)}{2} \log{g} - \frac{p}{2} \log (1 + g^{-1}) \right]}
-		 \int (\sigma^{2})^{-n/2 - 1} \exp{\left[-\left(\frac{n}{2}\right) (1 - R^2_{\vgamma, g}) / \sigma^{2}\right]} d \sigma^2 \\
-		= &\exp{\left[-\frac{n}{2} \log{(\pi n)} - \frac{1}{2} \log{(n + g^{-1})}
-		- \frac{(p + 1)}{2} \log{(g)} - \frac{p}{2} \log (1 + g^{-1})
-		+ \log \Gamma\left(\frac{n}{2}\right) - \frac{n}{2} \log(1 - R^2_{g, \vgamma}) \right]} \\
-		= &\frac{\Gamma(\frac{n}{2})}{(n \pi)^{n/2} (1 + g)^{p/2} (1 + ng)^{1/2} (1 - \frac{g}{1 + g} R^2_\vgamma)^{n/2}} \\
-		= &\frac{\Gamma(\frac{n}{2})}{(n \pi)^{n/2}} \frac{(1 + g)^{(n-p)/2}}{(1 + g \hat{\sigma^2_\vgamma})^{n/2} (1 + ng)^{1/2}}
-\end{align*}
+\noindent Finally, we integrate out $\sigma^2$ to obtain
+$$
+\begin{array}{rl}
+		&
+		\frac{\Gamma(n/2 + 1)
+		2^{(n/2 + 1)}}
+		{n^(n/2 + 1)}
+		\exp{\left[
+		- \frac{1}{2} \log{(1 + ng)}
+		+(\frac{n - p}{2} + 1) \log(1 + g)
+		-(n/2 + 1) \log(1 + \sigma^2 g)
+		\right]}
+\end{array}
+$$
 
 Now, we apply the cake prior $\delta(g; h^{1/(1 + p_\vgamma)})$ to obtain
 \[
