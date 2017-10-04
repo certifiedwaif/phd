@@ -105,7 +105,7 @@ Marginalising over $\vbeta_{-\vgamma}$ gives
 $$
 \begin{array}{rl}
 		\ds \int &\exp{\left[
-		-\frac{n}{2} \log (2 \pi \sigma^2) 
+		-\frac{n - 1}{2} \log (2 \pi \sigma^2) 
 		- \frac{1}{2} \log{(n + g^{-1})}
 		-\frac{p}{2} \log{2\pi \sigma^2} 
 		- \frac{p + 1}{2} \log{g}
@@ -124,8 +124,8 @@ $$
 		- \frac{1}{2} \log{(n + g^{-1})}
 		- \frac{1}{2} \log{g}
 		-\frac{p}{2} \log{(1 + g)}
-		-\frac{n}{2} \log (2 \pi)
-		-(\frac{n}{2} + 1) \log (\sigma^2) 
+		-\frac{n - 1}{2} \log (2 \pi)
+		-(\frac{n - 1}{2} + 1) \log (\sigma^2) 
 		-\frac{n}{2 \sigma^2} \left(1 - \frac{g}{1 + g} R^2\right)
 		\right]}  d \sigma^2
 \end{array}
@@ -134,21 +134,16 @@ $$
 \noindent Finally, we integrate out $\sigma^2$ to obtain
 $$
 \begin{array}{rl}
-		&
-		\frac{\Gamma(n/2 + 1)
-		2^{(n/2 + 1)}}
-		{n^{n/2 + 1}}
-		\exp{\left[
-		- \frac{1}{2} \log{(1 + ng)}
-		+(\frac{n - p}{2} + 1) \log(1 + g)
-		-(n/2 + 1) \log(1 + \widehat{\sigma}^2 g)
+		&\exp{\left[
+		- \frac{1}{2} \log{(n + g^{-1})}
+		- \frac{1}{2} \log{g}
+		-\frac{p}{2} \log{(1 + g)}
+		-\frac{n - 1}{2} \log (2 \pi)
+		+\log \Gamma(\frac{n-1}{2})
+		-\frac{n-1}{2}\log{[\frac{n}{2} (1 - \frac{g}{1 + g} R^2)]}
 		\right]} \\
-		=&\frac{\Gamma(n/2 + 1)
-		2^{(n/2 + 1)}}
-		{n^{n/2 + 1}}
-		(1 + ng)^{-\frac{1}{2}}
-		(1 + g)^{(\frac{n - p}{2} + 1)}
-		(1 + \widehat{\sigma}^2 g)^{-(n/2 + 1)}
+		=&\frac{\Gamma(\frac{n - 1}{2})}{(n \pi)^{(n-1)/2}}
+		(n + g^{-1})^{-1/2} g^{-1/2} (1 + g)^{(n - p - 1)/2} (1 + \widehat{\sigma}^2 g)^{-(n - 1)/2}
 \end{array}
 $$
 
