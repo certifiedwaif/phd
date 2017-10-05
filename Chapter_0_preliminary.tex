@@ -30,8 +30,27 @@
 
 % Outline that John suggested
 \section{Real world problems}
+The advent of digital computers and the Internet have lead to an explosion in the volume of data being
+collected. With technological progress marching on, this trend seems only set to continue and accelerate. But
+this data is only of value if it can be analysed and understood.  This incredible increase in the volume of data has lead to corresponding
+computational difficulties in processing and modelling such large amounts of data -- so-called Big Data which
+is so large that it is difficult to process on one computer. This data raises new challenges which modern
+statisticians must be ready to meet. This realisation has lead to an explosion of
+interest in data science, incorporating ideas from both statistics and computer science, in recent years.
+Machine learning, probabilistic basis, statistical machine learning.
+\citep{James:2014:ISL:2517747}
+\citep{MacKay:2002:ITI:971143}
+\citep{hastie01statisticallearning}
+\citep{Murphy:2012:MLP:2380985}
+
 \section{Motivation}
+Approaches to modelling data are needed which can handle large volumes of data in a computationally
+efficient manner while retaining the probabilistic underpinning of classical statistics and statistical machine
+learning that leads to a rigorous underlying theory for inference.
+
 \section{Approach (in broad terms)}
+Gaussian Variational approximation for linear mixed models.
+Exact inference for model selection for linear models with normal priors.
 
 \section{Why Bayesian?}
 The difference between frequentist and Bayesian approaches begins with a difference in philosophy.
@@ -50,6 +69,7 @@ fit under the frequentist paradigm, as the likelihood is difficult to maximise.
 Furthermore, as the Bayesian paradigm treats each of the parameters in a model as uncertain, the full
 uncertainty associated with all of the parameters can be estimated in the uncertainty in the posterior distribution.
 Avoid pitfalls such as significance testing, p-values.
+\citep{Janes2014}
 
 The ability to build a model a part at a time and have the uncertainty propagate makes Bayesian modelling 
 particularly appropriate for mixed and hierarchical models.
@@ -57,7 +77,17 @@ Uncertainty regarding model selection is taken into account
 
 \section{What problems in thesis}
 \subsection{GLMM}
+Generalised Linear Mixed Models, an extension of Generalised Linear Models to include both fixed and
+random effects, are flexible to many complicated modelling situations. The standard technique for fitting
+Bayesian versions of these models is to use Monte Carlo Markov Chains techniques such as Gibbs sampling.
+
 \subsection{Model selection}
+While new types of model are continually being developed, linear models with normal priors remain a popular
+and essential modelling tool owing to the ease of fitting these models, statistical inference on the
+parameters and, most importantly, the ease which which these models can be interpreted. But for a data set
+with a moderate or large number of parameters, the question is immediately raised of which covariates we should
+include in our model. One of the problems that we address in this thesis is \emph{model selection} on linear
+models with normal priors.
 
 \section{GLMM}
 Linear and generalised linear regression models are the standard tools used by applied statisticians to
@@ -613,9 +643,6 @@ is the trace function.
 
 How does this relate to Bayesian estimation? Maybe it's just interesting background.
 Bernstein-von Mises Theorem
-
-
-
 
 \bibliographystyle{elsarticle-harv}
 % \bibliography{Chapter_0_preliminary}
