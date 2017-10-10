@@ -285,8 +285,9 @@ B_{m, i}(x; \kappa),& \kappa_{i + m} > \kappa_i \\
 0 & \text{otherwise}.
 \end{cases}
 $$
+We define the BSpline basis this way to remain correct in the case where knots are repeated in $\vkappa$.
 We choose piecewise cubic splines as cubics are numerically well behaved while still capturing the curvature
-of functions we wish to approximate well. We select the knot sequence $\vkappa$
+of functions we wish to approximate well. Thus we select the knot sequence $\vkappa$
 $$
 a = \kappa_1 = \kappa_2 = \kappa_3 = \kappa_4 < \kappa_5 < \ldots < \kappa_{K+5} = \kappa_{K+6} = \kappa_{K+7} = \kappa_{K+8} = b
 $$
