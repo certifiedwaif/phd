@@ -282,14 +282,15 @@ $$
 Q_{m, i}(x; \kappa) =
 \begin{cases}
 B_{m, i}(x; \kappa),& \kappa_{i + m} > \kappa_i \\
-0 & \text{otherwise}.
+0, & \text{otherwise}.
 \end{cases}
 $$
-We define the BSpline basis this way to remain correct in the case where knots are repeated in $\vkappa$.
-We choose piecewise cubic splines as cubics are numerically well behaved while still capturing the curvature
-of functions we wish to approximate well. Thus we select the knot sequence $\vkappa$
+We define the BSpline basis this way to remain correct in the case where knots are repeated in $\vkappa$. We
+choose piecewise cubic splines as cubics are numerically well behaved while still capturing the curvature of
+functions we wish to approximate well \citep{Press:2007:NRE:1403886}. Thus we select the knot sequence
+$\vkappa$
 $$
-a = \kappa_1 = \kappa_2 = \kappa_3 = \kappa_4 < \kappa_5 < \ldots < \kappa_{K+5} = \kappa_{K+6} = \kappa_{K+7} = \kappa_{K+8} = b
+a = \kappa_1 = \kappa_2 = \kappa_3 = \kappa_4 < \kappa_5 < \ldots < \kappa_{K+5} = \kappa_{K+6} = \kappa_{K+7} = \kappa_{K+8} = b.
 $$
 
 \subsection{Crossed effects}
@@ -494,9 +495,42 @@ $1/2$, as in \citep{Barbieri2004}.
 \subsection{Criteria AIC/BIC}
 \subsection{Bayesian (Post model selection inference)}
 \subsection{Penalised regression}
-\subsubsection{Lasso}
-\subsubsection{Ridge}
+\subsubsection{Lasso regression}
+Lasso regression is a penalised regression method developed by \citep{Tibshirani1996}, which was directly
+inspired by ridge regression.
+$$
+\widehat{\vbeta}_{\text{lasso}} = \argmin_\vbeta \|\vy - \mX \vbeta\|_2^2 \text{ subject to } \|\vbeta\|_1 \leq \lambda
+$$
+It follows from Minkowski's inequality that this function is convex, and thus can be the optimisation problem
+is convex, and can be solved using standard methods from convex optimisation \citep{Boyd2010}.
+
+The constraint on the $l_1$ norm has the effect of shrinking the co-efficients, and setting some of them to
+zero. This forces the models fit by lasso regression to be sparse, providing model selection as part of the
+model-fitting process.
+
+A disadvantage of lasso regression are that the constraint on the regression co-efficients depends on the
+tuning parameter which must be selected a priori or through cross-validation. But a much greater issue is that
+the model selection process intrinsic to lasso regression does not take into account the uncertainty of the
+model selection process itself, as Bayesian model selection methods do.
+
+\begin{itemize}
+\item Sparsity
+\item Ease of interpretation from fewer regression co-efficients
+\item Computational convenience
+\item Convex optimisation problem
+\item Does not take model selection uncertainty into account
+\item Bias-Variance trade-off -- trade some bias in the estimator for a decrease in variance
+\end{itemize}
+
+\subsubsection{Ridge regression}
+Ridge regression is another penalised regression method, which predates lasso regression Ridge Regression: Biased Estimation for Nonorthogonal Problems 1970. The penalty on the regression co-efficients shrinks the estimated co-efficients towards
+zero, ensuring sparsity of the fitted model.
+$$
+\widehat{\vbeta}_{\text{lasso}} = \argmin_\vbeta \|\vy - \mX \vbeta\|_2^2 \text{ subject to } \|\vbeta\|_2 \leq \lambda
+$$
 \subsubsection{Why parsimony? Model selection and fitting}
+``Bet on sparsity''
+\citep{Hastie2015}
 
 \section{Approximate inference}
 \subsection{Variational Bayes}
