@@ -494,15 +494,30 @@ $1/2$, as in \citep{Barbieri2004}.
 
 \subsection{Criteria AIC/BIC}
 \subsection{Bayesian (Post model selection inference)}
+
 \subsection{Penalised regression}
+Penalised regression methods trade introducing some bias in the estimator for reducing the variance and thus
+fitting a more parsimonious model. The major advantages are that a model with fewer covariates will be
+correspondingly easier to interpret, and that the variance of the estimator will be less. In penalised
+regression, the regression co-efficients are subjected to a penalty or constraint.
+
+$$
+\widehat{\vbeta}_{\text{penalised}} = \argmin_\vbeta \|\vy - \mX \vbeta\|_2^2 + \text{penalty}(\vbeta)
+$$
+
+From a Bayesian perspective, the penalty can be considered as a prior distribution on the regression 
+co-efficients where smaller values of $\vbeta$ are given more weight than larger ones. Here the penalised
+estimate of the regression co-efficients is the mode of their posterior distribution.
+
 \subsubsection{Lasso regression}
 Lasso regression is a penalised regression method developed by \citep{Tibshirani1996}, which was directly
 inspired by ridge regression.
+It follows from Minkowski's inequality that this function is convex, and thus can be the optimisation problem
+is convex, and can be solved using standard methods from convex optimisation \citep{Boyd2010}.
+
 $$
 \widehat{\vbeta}_{\text{lasso}} = \argmin_\vbeta \|\vy - \mX \vbeta\|_2^2 \text{ subject to } \|\vbeta\|_1 \leq \lambda
 $$
-It follows from Minkowski's inequality that this function is convex, and thus can be the optimisation problem
-is convex, and can be solved using standard methods from convex optimisation \citep{Boyd2010}.
 
 The constraint on the $l_1$ norm has the effect of shrinking the co-efficients, and setting some of them to
 zero. This forces the models fit by lasso regression to be sparse, providing model selection as part of the
@@ -520,10 +535,12 @@ model selection process itself, as Bayesian model selection methods do.
 \item Convex optimisation problem
 \item Does not take model selection uncertainty into account
 \item Bias-Variance trade-off -- trade some bias in the estimator for a decrease in variance
+\item Deal with collinearity
 \end{itemize}
 
 \subsubsection{Ridge regression}
-Ridge regression is another penalised regression method, which predates lasso regression Ridge Regression: Biased Estimation for Nonorthogonal Problems 1970. The penalty on the regression co-efficients shrinks the estimated co-efficients towards
+Ridge regression is another penalised regression method, which predates lasso regression
+\cite{Hoerl2017}. The penalty on the regression co-efficients shrinks the estimated co-efficients towards
 zero, ensuring sparsity of the fitted model.
 $$
 \widehat{\vbeta}_{\text{lasso}} = \argmin_\vbeta \|\vy - \mX \vbeta\|_2^2 \text{ subject to } \|\vbeta\|_2 \leq \lambda
@@ -533,6 +550,18 @@ $$
 \citep{Hastie2015}
 
 \section{Approximate inference}
+When the prior and model chosen for a Bayesian model is conjugate, the posterior distribution is available in
+closed form and can be easily calculated.
+When the prior is non-conjugate, the integral to calculate the posterior distribution is typically intractable
+and so numerical methods must be used to calculate it approximately.
+The gold standard for Bayesian inference is to use Monte-Carlo Markov Chain methods such as Metropolis-Hastings
+or Gibbs sampling. But these methods are computationally intensive, to the point where they are simply
+impractical in Big Data situations where $n$ or $p$ are large. Moreover, they can be prone to convergence 
+problems.
+
+Thus there is a need for approximate Bayesian inference methods which are less computationally intensive while
+being almost as accurate.
+
 \subsection{Variational Bayes}
 \section{Variational approximations}
 
@@ -575,11 +604,11 @@ For details of the proof, and a more thorough introduction to the topic of varia
 
 \subsection{Gaussian Variational Approximation}
 
-In cases where there is a strong dependence between partitions of $\vtheta$, such as between the parameters
+In cases where there is a strong dependence between partitions of $\vtheta$,  such as between the parameters
 $\vmu$ and $\mSigma$ in a hierarchical Gaussian model, a factored approximation may not approximate the true
 distribution accurately. In this case, an alternate form of approximation may be used with the parameters
 considered together to take their dependence into account. One such form of approximation is the Gaussian
-Variational Approximation \cite{Ormerod2012}, which assumes that the distribution of the parameters being 
+Variational Approximation \cite{Ormerod2012}, which assumes that the distribution of the parameters being
 approximated is multivariate Gaussian. The covariance matrix of the Gaussian allows the approximation to
 capture the dependence amongst the elements of $\vtheta$, which increases the accuracy of the variational
 approximation relative to the factored approximation.
@@ -651,6 +680,25 @@ leads to a Gaussian approximation for the likelihood $\N(\vtheta_m, \mH_{\log f}
 
 The approximation is crude but can be quite accurate if the likelihood is symmetric and unimodal.
 \subsection{Other methods: Expectation Propagation (in broad terms)}
+Expectation Propagation is an approximate Bayesian inference method, first proposed in \citep{Minka2001}.
+It relies on minimising the reverse KL divergence $\text{KL}(p || q)$ between the true and approximaing
+disitrbutions $p$ and $q$. A factorised form of the distribution
+\[
+	q(\vtheta) = \Pi_{i=1}^n q(\vtheta_i)
+\]
+is assumed. In general, fully minimising the KL divergence between $p$ and $q$ is intractable, so Expectation
+Propagation approximates this by minimising the KL divergence of each of the factors individually.
+It does this by cycling through each of the factors matching the sufficient statistics of each, incorporating
+the information already in the other factors
+\[
+	\bE_{-q_i} [KL(p || q)]
+\]
+The factors are cycled through several times until convergence is achieved.
+
+While promising, Expectation Propagation is a relatively new technique.
+Unlike in Variatioal Bayes, there is no guarantee of convergence, and there is still much work to be done
+before it is as mature as other approximation methods like Variational Bayes and Laplace approximation.
+
 \section{My Contributions}
 \subsection{Outline}
 
