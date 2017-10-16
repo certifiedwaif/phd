@@ -361,6 +361,19 @@ bool& bLow)
 }
 
 
+double logp(int n, double R2, int p)
+{
+	auto a = -3./4.;
+	auto b = (n - 5.) / 2. - p / 2. - a;
+	auto result = 0.;
+
+	result = lgamma(p / 2. + a + 1.) + lgamma(a + b + 2.) - lgamma((n - 1.) / 2) - lgamma(a + 1.);
+	result += -(b + 1.) * log(1. - R2);
+
+	return 0.;
+}
+
+
 // Calculate the correlations for every subset of the covariates in mX
 List all_correlations_main(const Graycode& graycode, VectorXd vy, MatrixXd mX, const uint fixed,
 	const uint intercept_col, const uint max_iterations, const bool bNatural_Order = false,
@@ -376,7 +389,7 @@ List all_correlations_main(const Graycode& graycode, VectorXd vy, MatrixXd mX, c
 	uint diff_idx;														 // The covariate which is changing
 	uint min_idx;															 // The minimum bit which is set in gamma_prime
 	dbitset gamma(p);													 // The model gamma
-	dbitset gamma_prime(p);										 // The model gamma
+	dbitset gamma_prime(p);										 // The model gamma_prime
 	uint p_gamma_prime;												 // The number of columns in the matrix mX_gamma_prime
 	uint p_gamma;															 // The number of columns in the matrix mX_gamma
 	vector<MatrixXd> vec_mA(p);
@@ -511,18 +524,52 @@ List all_correlations_main(const Graycode& graycode, VectorXd vy, MatrixXd mX, c
 		// FIXME: How do you do this in a thread-safe way?
 		// Rcpp::checkUserInterrupt();
 	}
+
+	double R2_full = (mXTy.transpose() * mXTX.inverse() * mXTy).value() / yTy; // R2 of full model
+	auto p_star = 0; // Count of significant coefficients
+	VectorXd vbeta_hat = (mXTX.inverse()) * mXTy;
+	VectorXd se_beta_hat = (1 - R2_full) * mXTX.inverse().diagonal();
+	VectorXd t_beta = vbeta_hat.array() / se_beta_hat.array();
+	double threshold = ::Rf_qt(0.975, n - p, 1, 0);
+	for (int i = 1; i < p; i++) {
+		if (abs(t_beta(i)) > threshold) 
+			p_star++;
+	}
+	auto M = logp(n, R2_full, p_star); // Maximum log-likelihood
+
+	VectorXd vlogp_all(max_iterations);				 // Vector of model likelihoods
+	VectorXd vinclusion_prob(p);							 // Vector of variable inclusion likelihoods
+	for (auto i = 1; i < max_iterations; i++) {
+		vlogp_all(i) = logp(n, vR2_all(i), vpgamma_all(i)) - M;
+	}
+	for (auto p_idx = 0; p_idx < p; p_idx++) {
+		vinclusion_prob(p_idx) = 0.;
+		for (auto i = 1; i < max_iterations; i++) {
+			if (graycode[i][p_idx])
+				vinclusion_prob(p_idx) += exp(logp(n, vR2_all(i), vpgamma_all(i)) - M);
+		}
+	}
+	vinclusion_prob = vinclusion_prob.array() / vinclusion_prob.sum();
+
 	if (!bNatural_Order) {
 		return List::create(Named("vR2") = vR2_all,
-												Named("vp_gamma") = vpgamma_all);
+												Named("vp_gamma") = vpgamma_all,
+												Named("vlogp") = vlogp_all,
+												Named("vinclusion_prob") = vinclusion_prob);
 	} else {
 		VectorXd vR2(max_iterations);
 		VectorXi vp_gamma(max_iterations);
+		VectorXd vlogp(max_iterations);
 		for (auto i = 1; i < max_iterations; i++) {
 			vR2(i) = vR2_all(graycode.gray_to_binary(i));
 			vp_gamma(i) = vpgamma_all(graycode.gray_to_binary(i));
+			vlogp(i) = vlogp_all(graycode.gray_to_binary(i));
 		}
+
 		return List::create(Named("vR2") = vR2,
-												Named("vp_gamma") = vp_gamma);
+												Named("vp_gamma") = vp_gamma,
+												Named("vlogp") = vlogp,
+												Named("vinclusion_prob") = vinclusion_prob);
 	}
 }
 
