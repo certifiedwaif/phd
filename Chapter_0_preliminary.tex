@@ -701,6 +701,46 @@ before it is as mature as other approximation methods like Variational Bayes and
 
 \section{My Contributions}
 \subsection{Outline}
+\begin{itemize}
+	\item Gaussian Variational Approximation to Zero-Inflated Models. Parameterisation of the covariance structure.
+
+	In our first chapter, we present a Gaussian Variational Approximation to a Zero-Inflated Poisson mixed model
+	which can flexibly incorporate both fixed and random effects. This allows it to fit complicated models
+	to the data incorporating random intercepts and slopes and additive models using O'Sullivan-penalised splines.
+	The model is fit by optimising the conditional likelihood of the Gaussian component of the model given the
+	parameters governing zero-inflation and the covariance matrix $\mSigma$.
+	We present a new parameterisation for the covariance matrix of the Gaussian based on the Cholesky
+	factorisation of the precision matrix, and detail computation and numerical advantages of this
+	factorisation, owing to its sparsity when the form of the covariance matrix of the Gaussian is known due to
+	knowledge of the random effects in the model.
+
+	\item Exact inference for some regression parameters for regression model with Maruyama and George prior on $g$.
+
+	A popular choice of Bayesian model selection is to use regression models with $g$-priors. For the Maruyama
+	and George Beta Prime prior \citep{Maruyama2011} we were able to derive closed form expressions for the
+	posterior distributions of most of the parameters of the model in terms of the hypergeometric function.
+
+	\item Exact moments for $\vbeta$ for the regression model with the Maruyama and George prior.
+
+	We were unable to derive a closed expression for the non-intercept regression parameters $\vbeta$, so instead
+	we focused on the first and second moments. We were able to obtain closed form expressions for these,
+	again in terms of the hypergeometric function. We were also able to obtain an approximation for the
+	regression co-efficients which is multivariate normal using the Laplace approximation method, showing
+	that the first and second moments of $\vbeta$ characterise the posterior distribution well.
+
+	\item Posterior distribution of $g$ for different g-priors - Liang's hyper-$g$ prior, Liang's hyper-$g/n$ prior,
+	Bayarri's robust $g$ prior and the Maruyama and George Beta-Prime prior.
+
+	An important consideration in model selection is being able to compare models against one another.
+	Calculation of the Bayes Factors for comparing models requires being able to compute the posterior
+	distribution of $g$. We derive closed form expressions in terms of special functions for the posterior
+	distributions of $g$ for a number of choices of $g$ prior from the literature:
+	Liang's hyper-$g$ prior,
+	Liang's hyper-$g/n$ prior \citep{Liang2008},
+	Bayarri's robust $g$ prior \citep{Bayarri2012} and the 
+	Maruyama and George Beta-Prime \citep{Maruyama2011}prior.	
+
+\end{itemize}
 
 \section{Introduction}
 
