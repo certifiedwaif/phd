@@ -9,9 +9,12 @@
 #include <unordered_map>
 #define BOOST_DYNAMIC_BITSET_DONT_USE_FRIENDS
 #include <boost/functional/hash.hpp>
+
 // [[Rcpp::depends(RcppGSL)]]
 #include <gsl/gsl_sf_hyperg.h>
 #include <gsl/gsl_errno.h>
+
+
 #include "graycode.h"
 #include "correlation.h"
 

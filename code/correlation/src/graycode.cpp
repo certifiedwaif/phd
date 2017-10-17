@@ -2,6 +2,8 @@
 
 #include "graycode.h"
 
+// [[Rcpp::interfaces(r, cpp)]]
+
 Graycode::Graycode(uint _p) : fixed(0), varying(_p), size(fixed + varying)
 { 
 }

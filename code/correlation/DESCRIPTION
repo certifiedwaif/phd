@@ -13,7 +13,7 @@ Imports:
     RcppGSL,
     BH
 LinkingTo:
-		Rcpp (>= 0.12.5),
+    Rcpp (>= 0.12.5),
     RcppEigen,
     RcppGSL,
     BH
