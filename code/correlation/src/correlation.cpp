@@ -3,6 +3,8 @@
 
 // [[Rcpp::plugins(cpp11)]]
 
+// [[Rcpp::interfaces(r, cpp)]]
+
 #include "correlation.h"
 #include "graycode.h"
 
@@ -365,12 +367,10 @@ double logp(int n, double R2, int p)
 {
 	auto a = -3./4.;
 	auto b = (n - 5.) / 2. - p / 2. - a;
-	auto result = 0.;
-
-	result = lgamma(p / 2. + a + 1.) + lgamma(a + b + 2.) - lgamma((n - 1.) / 2) - lgamma(a + 1.);
+	auto result = lgamma(p / 2. + a + 1.) + lgamma(a + b + 2.) - lgamma((n - 1.) / 2) - lgamma(a + 1.);
 	result += -(b + 1.) * log(1. - R2);
 
-	return 0.;
+	return result;
 }
 
 
@@ -421,6 +421,9 @@ List all_correlations_main(const Graycode& graycode, VectorXd vy, MatrixXd mX, c
 			mX.col(i) = vcol;
 		}
 	}
+
+	vpgamma_all(0) = 0;
+	vR2_all(0) = 0.;
 
 	// Loop through models, updating and downdating mA as necessary
 	#pragma omp parallel for\
