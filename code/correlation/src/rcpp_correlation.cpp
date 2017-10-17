@@ -21,8 +21,11 @@ using namespace Rcpp;
 //' @param bIntercept Logical value indicating whether there is an intercept column or not
 //' @param bCentre Logical value indicating whether to centre the response vector and covariance matrix or not
 //' @param cores The number of cores to use
-//' @return A list containing vR2, the vector of correlations for each model and vp_gamma, the vector of
-//' number of covariates for each model
+//' @return A list containing 
+//' vR2, the vector of correlations for each model
+//' vp_gamma, the vector of number of covariates for each model
+//' vlogp, the vector of logs of the likelihoods of each model
+//' vinclusion_prob, the vector of inclusion probabilities for each of the covariates
 //' @export
 // [[Rcpp::export]]
 List all_correlations_mX(NumericVector vy, NumericMatrix mX, int intercept_col = 1,
@@ -47,8 +50,11 @@ List all_correlations_mX(NumericVector vy, NumericMatrix mX, int intercept_col =
 //' @param bIntercept Logical value indicating whether there is an intercept column or not
 //' @param bCentre Logical value indicating whether to centre the response vector and covariance matrix or not
 //' @param cores The number of cores to use
-//' @return A list containing vR2, the vector of correlations and vp_gamma, the vector of number of covariates
-//' for each model
+//' @return A list containing 
+//' vR2, the vector of correlations for each model
+//' vp_gamma, the vector of number of covariates for each model
+//' vlogp, the vector of logs of the likelihoods of each model
+//' vinclusion_prob, the vector of inclusion probabilities for each of the covariates
 //' @export
 // [[Rcpp::export]]
 List all_correlations_mX_mZ(NumericVector vy, NumericMatrix mX, NumericMatrix mZ,
