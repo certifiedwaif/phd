@@ -12,7 +12,6 @@
 // [[Rcpp::depends(RcppGSL)]]
 #include <gsl/gsl_sf_hyperg.h>
 #include <gsl/gsl_errno.h>
-// [[Rcpp::depends(correlation)]]
 #include "graycode.h"
 #include "correlation.h"
 
