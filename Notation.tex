@@ -1,0 +1,40 @@
+\subsection{Definitions}
+
+Let $p$ be the dimension of the space of fixed effects, $m$ be the number of individuals in the random effects
+and $b$ be the block size for each of those individuals. We use $\vone_p$ and $\vzero_p$ to denote the $p
+\times 1$ column vectors with all entries equal to 1 or 0, respectively.
+
+Let $\vy$ be the $n \times 1$ vector. The norm of a column vector $\vv$, defined to be $\sqrt{\vv^\top \vv}$,
+is  denoted by $\|\vv\|$. For a $p \times 1$ vector $\va$, we let $\diag{(\va)}$ denote the $p \times p$
+matrix with the elements of $\va$ along its' diagonal.
+
+We denote the design matrix of fixed effects with dimensions $n \times p$ as $\mX$ is , and the design matrix
+of random  effects with dimensions $n \times m b$ as $\mZ$. The combined design matrix $\mC$ is formed by
+appending the columns of $\mX$ to the columns of $\mZ$, giving $\mC = [ \mX, \mZ ]$.
+
+Let $\vtheta$ is the vector of all parameters.
+Let $\vbeta$ be the $p \times 1$ column vector of fixed
+effects, and $\vu$ the $m b \times 1$ column vector of random effects. $\vnu$ is the
+concatenation of these vectors $[\vbeta^\top, \vu^\top]$.
+% Let $\vp$ be the $n \times 1$ column vector of probabilities that each observation in $\vy$ is
+% non-zero.
+
+Let $\mSigma$ be the covariance matrix of the random effects $\vu$,
+and 
+$\mPsi$ the covariance matrix prior on $\mSigma$.
+These matrices are all of dimension $(p + m b) \times (p + m b)$.
+
+
+$\expit(x)$ denotes the function $\tfrac{1}{1 + \exp(-x)}$ which is the inverse of the logit
+function.
+
+$\text{Bernoulli}(\pi)$ denotes the probability distribution $\pi^k (1 - \pi)^{1-k}$ and
+$\text{Inverse Wishart}(\mPsi, v)$ denotes the probability distribution
+$$\tfrac{|\mPsi|^\frac{v}{2}}{2^{\frac{vp}{2}} \Gamma_p{(\tfrac{v}{2})}} |\mX|^{-\tfrac{v + p + 1}{2}}
+\exp{[-\half \tr{(\mPsi \mX^{-1})}]}$$ where $\Gamma_p{(x)}$ denotes the multivariate gamma function and $\tr$
+is the trace function.
+
+\subsection{Bias of MLE}
+
+How does this relate to Bayesian estimation? Maybe it's just interesting background.
+Bernstein-von Mises Theorem
