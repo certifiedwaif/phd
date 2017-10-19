@@ -18,7 +18,7 @@
 #include "graycode.h"
 #include "correlation.h"
 
-// #define DEBUG
+#define DEBUG
 
 using namespace std;
 using namespace Rcpp;
@@ -148,21 +148,48 @@ double liang_g2(const int n, const int p, double R2, int p_gamma)
 // Liang's g prior
 double liang_g3(const int n, const int p, double R2, int p_gamma)
 {
-	double log_vp_gprior5;
+	#ifdef DEBUG
+	Rcpp::Rcout << "n " << n << " p " << p << " R2 " << R2 << " p_gamma " << p_gamma << std::endl;
+	#endif
 	if (p_gamma == 0)
 		return 0.;
-	log_vp_gprior5 -= 0.5*p_gamma*log(n+1);
+	double log_vp_gprior5 = 0.5*p_gamma*log(n+1);
+	#ifdef DEBUG
+	Rcpp::Rcout << "log_vp_gprior5 1 " << log_vp_gprior5 << std::endl;
+	#endif
 	log_vp_gprior5 += 0.5*p_gamma*log(p_gamma+1);
+	#ifdef DEBUG
+	Rcpp::Rcout << "log_vp_gprior5 2 " << log_vp_gprior5 << std::endl;
+	#endif
 	log_vp_gprior5 -= 0.5*(n - 1)*log(R2);
+	#ifdef DEBUG
+	Rcpp::Rcout << "log_vp_gprior5 3 " << log_vp_gprior5 << std::endl;
+	#endif
 	log_vp_gprior5 -= log(p_gamma+1);
+	#ifdef DEBUG
+	Rcpp::Rcout << "log_vp_gprior5 4 " << log_vp_gprior5 << std::endl;
+	#endif
 	// Check for errors
 	gsl_sf_result result;
 	int error_code = gsl_sf_hyperg_2F1_e( 0.5*(p_gamma+1), 0.5*(n-1), 0.5*(p_gamma+3), (1-1/R2)*(p_gamma+1)/(n+1), &result);
+	#ifdef DEBUG
+	Rcpp::Rcout << "result.val " << result.val << " error_code " << error_code << std::endl;
+	#endif
 	if (error_code == GSL_EMAXITER) {
+		#ifdef DEBUG
+		Rcpp::Rcout << "Taking GSL_EMAXITER branch" << std::endl;
+		#endif
 		log_vp_gprior5 = -INFINITY;
 	}	else {
+		#ifdef DEBUG
+		Rcpp::Rcout << "Taking non-GSL_EMAXITER branch" << std::endl;
+		Rcpp::Rcout << "log(result.val) " << log(result.val) << std::endl;
+		#endif
 		log_vp_gprior5 += log(result.val);
 	}
+	#ifdef DEBUG
+	Rcpp::Rcout << "log_vp_gprior5 5" << log_vp_gprior5 << std::endl;
+	#endif
 	return log_vp_gprior5;
 }
 
@@ -180,17 +207,28 @@ double robust_bayarri1(const int n, const int p, double R2, int p_gamma)
 	auto sigma2 = 1. - R2;
 	auto z = R2/(1. + L*sigma2);
 
-	double log_vp_gprior6;
 
 	if (p_gamma == 0)
 		return 0.;
-	log_vp_gprior6 += 0.5*(n - p_gamma - 1)*log( n + 1 );
+	double log_vp_gprior6 = 0.5*(n - p_gamma - 1)*log( n + 1 );
+	#ifdef DEBUG
+	Rcpp::Rcout << " log_vp_gprior6 1 " << log_vp_gprior6 << std::endl;
+	#endif
 	log_vp_gprior6 -= 0.5*(n - p_gamma - 1)*log( p_gamma + 1);
+	#ifdef DEBUG
+	Rcpp::Rcout << " log_vp_gprior6 2 " << log_vp_gprior6 << std::endl;
+	#endif
 	log_vp_gprior6 -= 0.5*(n - 1)*log(1 + L*sigma2);
+	#ifdef DEBUG
+	Rcpp::Rcout << " log_vp_gprior6 3 " << log_vp_gprior6 << std::endl;
+	#endif
 	log_vp_gprior6 -= log (p_gamma + 1);
+	#ifdef DEBUG
+	Rcpp::Rcout << " log_vp_gprior6 4 " << log_vp_gprior6 << std::endl;
+	#endif
 	log_vp_gprior6 += log(gsl_sf_hyperg_1F1( 0.5*(n-1), 0.5*(p_gamma+3), z ));
 	#ifdef DEBUG
-	Rcpp::Rcout << " log_vp_gprior6 " << log_vp_gprior6 << std::endl;
+	Rcpp::Rcout << " log_vp_gprior6 5 " << log_vp_gprior6 << std::endl;
 	#endif
 	return log_vp_gprior6;
 }
@@ -198,18 +236,38 @@ double robust_bayarri1(const int n, const int p, double R2, int p_gamma)
 
 double robust_bayarri2(const int n, const int p, double R2, int p_gamma)
 {
+	#ifdef DEBUG
+	Rcpp::Rcout << "n " << n;
+	Rcpp::Rcout << " p " << p;
+	Rcpp::Rcout << " R2 " << R2;
+	Rcpp::Rcout << " p_gamma " << p_gamma;
+	#endif
 	auto sigma2 = 1. - R2;
 	auto L = (1. + n)/(1. + p_gamma) - 1.;
 	auto z = R2/(1. + L*sigma2);
 
 	if (p_gamma == 0)
 		return 0.;
-	double log_vp_gprior7;
-	log_vp_gprior7 += 0.5*(n - p_gamma - 1)*log( n + 1 );
+	double log_vp_gprior7 = 0.5*(n - p_gamma - 1)*log( n + 1 );
+	#ifdef DEBUG
+	Rcpp::Rcout << " log_vp_gprior7 1 " << log_vp_gprior7 << std::endl;
+	#endif
 	log_vp_gprior7 -= 0.5*(n - p_gamma - 1)*log( p_gamma + 1);
+	#ifdef DEBUG
+	Rcpp::Rcout << " log_vp_gprior7 1 " << log_vp_gprior7 << std::endl;
+	#endif
 	log_vp_gprior7 -= 0.5*(n - 1)*log(1 + L*sigma2);
+	#ifdef DEBUG
+	Rcpp::Rcout << " log_vp_gprior7 1 " << log_vp_gprior7 << std::endl;
+	#endif
 	log_vp_gprior7 -= log (p_gamma + 1);
+	#ifdef DEBUG
+	Rcpp::Rcout << " log_vp_gprior7 1 " << log_vp_gprior7 << std::endl;
+	#endif
 	log_vp_gprior7 += log(gsl_sf_hyperg_2F1( 0.5*(n-1), 1, 0.5*(p_gamma + 3), z));
+	#ifdef DEBUG
+	Rcpp::Rcout << " log_vp_gprior7 1 " << log_vp_gprior7 << std::endl;
+	#endif
 	return log_vp_gprior7;
 }
 
