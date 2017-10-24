@@ -567,17 +567,40 @@ being almost as accurate.
 
 \subsection{Definition}
 
+Much of Bayesian inference is based on the posterior distribution of a model's parameters given observed data 
+defined by $p(\vtheta|\vy) = p(\vy|\vtheta)p(\vtheta)/p(\vy)$ where $\vy$ is a vector of observed data,
+$\vtheta$ are the model parameters $p(\vy|\vtheta)$ is the model distribution, $p(\vtheta)$ is a prior 
+distribution on $\vtheta$ and $p(\vy)=\int p(\vy|\vtheta)p(\vtheta)d\vtheta$. Here the integral is performed
+over the domain of $\vtheta$. If a subset of $\vtheta$ are discrete random variables then the integral over
+these parameters is replaced with a combinatorial sum over all possible values of these discrete random 
+variables.
+
+The calculation of the true posterior distribution is often either computationally intractable or no closed form
+exists for the posterior distribution and so an approximation is required. Variational approximation is a
+class of methods for transforming the problem of approximating a distribution $p(x)$ by another more
+convenient distribution $q(x)$. Variational approximation can be viewed as minimising the Kullback- Leibler
+divergence between the true posterior $p(\vtheta|\vy)$ and an approximating distribution $q(\vtheta)$,
+sometimes called a $q$-density. Suppose that a class of candidate approximating distributions
+$q(\vtheta)$ is parameterised by $\vxi$ and write $q(\vtheta)\equiv q(\vtheta;\vxi)$. We attempt to find an 
+optimal approximating distribution $q^*(\vtheta)$ such that
+\[
+	\ds q^*(\vtheta) = \argmin_{\vxi \in \Xi} \text{KL} \{ {q(\vtheta;\vxi) || p(\vtheta|\vy)} \}.
+\]
+
+The density function of a random vector $\vu$ is denoted by $p(\vu)$.  The conditional density function of a
+random vector $\vu$ given $\vv$ is denoted by $p(\vu|\vv)$. Consider a generic Bayesian model with parameter
+vector $\vtheta \in \Theta$. Throughout this section we assume that $\vy$ and $\vtheta$ are continuous random
+vectors. The KL divergence between the probability distributions $p$ and $q$ is defined as
+\[
+	\KL(q || p) \equiv \int q(\vtheta) \log \left \{ \frac{q(\vtheta)}{p(\vtheta | \vy)} \right \} d \vtheta.
+\]
+
 Consider a model $p(\vtheta|\vy)$ which is of interest to us but computationally difficult or intractable to 
 fit. We may be able to gain much of the same insight from a given data set by fitting an accurate approximation 
 of the model, allowing us to summarise the data and perform statistical inference.
 
-Call the approximating model $q(\theta)$. Then we seek a $q(\theta)$ which approximates $p(\vtheta|\vy)$
-as closely as possible in some sense. A useful measure of distance between probability distributions is the
-Kullback-Leibler divergence, which is defined as
-\[
-	\KL(q || p) \equiv \int q(\vtheta) \log{\frac{q(\theta)}{p(\theta)}} d \vtheta.
-\]
-
+Let us denote the approximating model $q(\theta)$. Then we seek a $q(\theta)$ which approximates
+$p(\vtheta|\vy)$ as closely as possible in some sense. 
 We may seek a best approximating distribution $q^*(\vtheta)$ to a given posterior distribution
 $p(\vtheta|\vy)$ from a parameteric family of approximating distributions $Q$ by finding
 \[
@@ -601,6 +624,80 @@ The optimal mean field update for each of the parameters $\vtheta_i$ can be show
 
 For details of the proof, and a more thorough introduction to the topic of variational approximations, see
 \cite{Ormerod2010}.
+
+\noindent It can easily be shown that
+\[
+	\ds \log p(\vy) = \int q(\vtheta;\vxi)\frac{p(\vy|\vtheta)p(\vtheta)}{q(\vtheta;\vxi)} d\vtheta + \text{KL}(q(\vtheta;\vxi)||p(\vtheta|\vy)).
+\]
+
+\noindent As the Kullback-Leibler divergence is strictly positive, the first term on the right hand side
+is a lower bound on the marginal log-likelihood which we will define by
+$$
+\ds \log \underline{p}(\vy;\vxi) \equiv \int q(\vtheta;\vxi)\frac{p(\vy|\vtheta)p(\vtheta)}{q(\vtheta;\vxi)} d\vtheta
+$$
+
+\noindent and maximizing $\log \underline{p}(\vy;\vxi)$ with respect to $\vxi$ is eqivalent to minimizing
+$\text{KL}(q(\vtheta;\vxi)||p(\vtheta|\vy))$. $\log \underline{p}(\vy;\vxi)$ is referred to as the
+variational lower bound.
+
+\noindent When the optimal distributions for each $q_i^*(\theta_i)$ are calculated, they yield a set of
+equations, sometimes called the consistency conditions, which need to be  satisfied simultaneously. These
+yield a series of mean field updates for the parameters of each approximating distribution. By executing the
+mean field update equations in turn for each parameter in the model, the variational lower bound for the model
+$\underline{p}(\vtheta; \vy)$ is iteratively increased. It can be shown that by calculating $q_i^*(\theta_i)$ for 
+a particular $i$ with the remaining $q_j^*(\theta_j)$, $j\ne i$ fixed, results in a monotonic increase in the
+variational lower bound, and thus a monotonic decrease in the Kullback-Leibler divergence between
+$p(\vtheta|\vy)$ and $q(\vtheta)$.
+
+\noindent The variational lower bound is maximised iteratively. On each iteration, the value of each parameter
+in the model is calculated as the expectation of the full likelihood relative to the other parameters in the
+model, which is referred to as the mean field update:
+$$q_i^*(\theta_i) \propto \exp{\{ \bE_{-q(\theta_i)} \log p(\vy, \vtheta) \}}$$
+
+\noindent This is done for each parameter in the model in turn until the variational lower bound's increase is
+negligible and convergence is achieved.
+
+Note that a combination of (A) and (B) can be used which has recently been formalized by \cite{Rohde2015}.
+
+\noindent Variational Bayes aims to approximate a true, possibly intractable probability distribution $p(x)$
+by a simpler, more tractable distribution $q(x)$ of known form.
+
+This approach works well for classes of models where all of the parameters are conjugate. For more
+general classes of models, mean field updates are not analytically tractable and general gradient-based
+optimisation methods must be used, as for the Gaussian Variational Approximation (see \citep{Ormerod2012}) used
+in this paper. These methods are generally difficult to apply in practice, as the problems can involve the
+optimisation of many parameters over high-dimensional, constrained spaces whose constraints cannot be simply
+expressed.
+
+\section{Variational Bayes}
+\label{sec:vb}
+
+% General Design Bayesian Generalized Linear Mixed Model, as in \citep{zhao06}. This allows us to incorporate
+% within-subject correlation, and smoothing splines (as in \citep{Wand2008}) in our models.
+
+% Idea: We can use an approximation of the from q(\beta, \u, \Sigma) q(\rho) \Product q(r_i)
+% and use GVA on q(\beta, \u, \Sigma) and mean field updates on \rho and r_i
+
+\subsection{Semiparametric Mean Field Variational Bayes}
+
+\subsubsection{Definitions}
+
+Two strategies for selecting a suitable class of approximating distributions $q$ such that
+an optimal distribution $q^*(\vtheta)$ can be found are
+(A) specifying the parametric form of $q$; or 
+(B) choosing $q$ to be of the factored form $q(\vtheta) = \prod_{i=1}^M q(\theta_i)$.
+For the second alternative,
+it can be shown (see Ormerod \& Wand, 2010, for example) that the optimal form of the
+approximating distributions $q_i$ for each parameter are of the form
+\begin{equation}\label{eq:consistency}
+	q_i^*(\theta_i) \propto \exp{\{ \bE_{-q(\theta_i)} \log p(\vy, \vtheta) \}},  \quad 1\le i\le M.
+\end{equation}
+
+%This approach works well for classes of models where all of the parameters are conjugate. For more general
+%classes of models, mean field updates are not analytically tractable and general gradient-based optimisation
+%methods must be used, as for the Gaussian Variational Approximation (see \citep{ormerod09}) used in this paper.
+%These methods are generally difficult to apply in practice, as the problems can involve the optimisation of
+%many parameters over high-dimensional, constrained spaces whose constraints cannot be simply expressed.
 
 \subsection{Gaussian Variational Approximation}
 
@@ -741,50 +838,6 @@ before it is as mature as other approximation methods like Variational Bayes and
 	Maruyama and George Beta-Prime \citep{Maruyama2011}prior.	
 
 \end{itemize}
-
-\section{Introduction}
-
-
-\subsection{Definitions}
-
-Let $p$ be the dimension of the space of fixed effects, $m$ be the number of individuals in the random effects
-and $b$ be the block size for each of those individuals. We use $\vone_p$ and $\vzero_p$ to denote the $p
-\times 1$ column vectors with all entries equal to 1 or 0, respectively.
-
-Let $\vy$ be the $n \times 1$ vector. The norm of a column vector $\vv$, defined to be $\sqrt{\vv^\top \vv}$,
-is  denoted by $\|\vv\|$. For a $p \times 1$ vector $\va$, we let $\diag{(\va)}$ denote the $p \times p$
-matrix with the elements of $\va$ along its' diagonal.
-
-We denote the design matrix of fixed effects with dimensions $n \times p$ as $\mX$ is , and the design matrix
-of random  effects with dimensions $n \times m b$ as $\mZ$. The combined design matrix $\mC$ is formed by
-appending the columns of $\mX$ to the columns of $\mZ$, giving $\mC = [ \mX, \mZ ]$.
-
-Let $\vtheta$ is the vector of all parameters.
-Let $\vbeta$ be the $p \times 1$ column vector of fixed
-effects, and $\vu$ the $m b \times 1$ column vector of random effects. $\vnu$ is the
-concatenation of these vectors $[\vbeta^\top, \vu^\top]$.
-% Let $\vp$ be the $n \times 1$ column vector of probabilities that each observation in $\vy$ is
-% non-zero.
-
-Let $\mSigma$ be the covariance matrix of the random effects $\vu$,
-and 
-$\mPsi$ the covariance matrix prior on $\mSigma$.
-These matrices are all of dimension $(p + m b) \times (p + m b)$.
-
-
-$\expit(x)$ denotes the function $\tfrac{1}{1 + \exp(-x)}$ which is the inverse of the logit
-function.
-
-$\text{Bernoulli}(\pi)$ denotes the probability distribution $\pi^k (1 - \pi)^{1-k}$ and
-$\text{Inverse Wishart}(\mPsi, v)$ denotes the probability distribution
-$$\tfrac{|\mPsi|^\frac{v}{2}}{2^{\frac{vp}{2}} \Gamma_p{(\tfrac{v}{2})}} |\mX|^{-\tfrac{v + p + 1}{2}}
-\exp{[-\half \tr{(\mPsi \mX^{-1})}]}$$ where $\Gamma_p{(x)}$ denotes the multivariate gamma function and $\tr$
-is the trace function.
-
-\subsection{Bias of MLE}
-
-How does this relate to Bayesian estimation? Maybe it's just interesting background.
-Bernstein-von Mises Theorem
 
 \bibliographystyle{elsarticle-harv}
 % \bibliography{Chapter_0_preliminary}
