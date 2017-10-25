@@ -1,0 +1,387 @@
+% numerical_results_vb_normal_linear_models.tex
+
+\subsection{Results}
+
+To assess the accuracy of our variational approximations to the exact posteriors, we examined a number of
+measures. All of the measures that we examined were functions of $\kappa$, $p$ and $R^2$, and so serve to
+characterise the performance of our approximation on any possible data set with a number of observations
+$n$, number of covariates $p$ and correlation $R$ between the response $\vy$ and the covariate matrix $\mX$.
+
+\subsection{Shrinkage}
+
+Exact posterior and approximate shrinkage $\left( \frac{g}{1 + g} \right)$ were calculated for a range of
+values of $p$, $n$ and $R^2$ to compare their values. As can be seen from Figure $\ref{fig:shrinkage}$, the
+values of the exact posterior shrinkage and approximate shrinkage are almost the same over most of the range
+of these values, with deviation only noticeable in the $p=10$ and $p=20$ cases.
+
+\begin{figure}[p]
+	\includegraphics[width=17cm, height=17cm]{code/taug/Shrinkage.pdf}
+	\caption{The ratio $\frac{g}{1 + g} | \vy$ controls the degree to which the model fit tends back towards
+		the prior mean. This ratio is approximated in the variational approximation by $(1 + \tau_g^{-1})^{-1}$. We
+		compare these two quantities in the figure above for a range of numbers of covariates, sample sizes and $R^2$
+		values. Here $n = \kappa p$.}
+	\label{fig:shrinkage}
+\end{figure}
+
+Coefficient posterior variance \\
+
+We can see from Figure \ref{fig:variance} that as $p$ and $\kappa$ increase, the approximation to the
+posterior variance of \ldots becomes more and more accurate.
+
+\begin{figure}[p]
+	\includegraphics[width=17cm, height=17cm]{code/taug/Variance.pdf}
+	\caption{The posterior variance of the example model $p(\sigma^2 | \vy)$ is compared against the approximation
+		to the posterior variance $q(\sigma^2)$ across a range of numbers of covariates, sample sizes and $R^2$
+		values. Here $n = \kappa p$.}
+	\label{fig:variance}
+\end{figure}
+
+Accuracy of approximation to $p(\sigma^2 | \vy)$ \\
+
+We assessed the accuracy of the approximation to $p(\sigma^2 | \vy)$ by $q(\sigma^2)$ by numerically evaluating
+the integral
+\[
+	1 - \frac{1}{2} \int_0^\infty |p(\sigma^2 | \vy) - q(\sigma^2)| d \sigma^2
+\]
+for a range of values of $p$, $\kappa$ and $R^2$. The results are presented in Figure \ref{fig:accuracy_sigma2}.
+
+\begin{figure}[p]
+	\includegraphics[width=17cm, height=17cm]{code/taug/Accuracy_sigma2.pdf}
+	\caption{The accuracy of the approximation $q(\sigma^2)$ is assessed by computing the integral   $1 -
+		\frac{1}{2} \int_0^\infty |p(\sigma^2 | \vy) - q(\sigma^2)| d \sigma^2$ and graphing the result over a range
+		of numbers of covariates, sample sizes and $R^2$  values. Here $n = \kappa p$.}
+	\label{fig:accuracy_sigma2}
+\end{figure}
+
+Accuracy of approximation to $p(g | \vy)$ \\
+
+\begin{figure}[p]
+	\includegraphics[width=17cm, height=17cm]{code/taug/Accuracy_g.pdf}
+	\caption{The accuracy of the approximation $q(g)$ is assessed by computing the integral   $1 -
+		\frac{1}{2} \int_0^\infty |p(g | \vy) - q(g)| d g$ and graphing the result over a range
+		of numbers of covariates, sample sizes and $R^2$  values. Here $n = \kappa p$.}
+	\label{fig:accuracy_g}
+\end{figure}
+
+We assessed the accuracy of the approximation to $p(g | \vy)$ by $q(g)$ by numerically evaluating the integral
+\[
+	1 - \frac{1}{2} \int_0^\infty |p(g | \vy) - q(g)| d g
+\]
+for a range of values of $p$, $\kappa$ and $R^2$. The results are presented in Figure \ref{fig:accuracy_g}.
+
+
+$\log{p(\vy)}$ versus ELBO \\
+
+We assessed the accuracy of the variational lower bound by calculating the relative error of
+$\log{\underline{p}(\vy)}$ versus $\log{p(\vy)}$. The results are presented in Figure
+\ref{fig:relative_error}.
+
+\begin{figure}[p]
+	\includegraphics[width=17cm, height=17cm]{code/taug/Relative_error_log_p.pdf}
+	\caption{The accuracy of the variational lower bound was assessed by computing the relative error
+		$\frac{\log p(\vy) - \log \underline{p}(\vy)}{p(\sigma^2 | \vy)}$ over a range
+		of numbers of covariates, sample sizes and $R^2$  values. Here $n = \kappa p$.}
+	\label{fig:relative_error}
+\end{figure}
+
+Precision \\
+
+The accuracy of the precision was assessed by calculating the relative error of the approximate precision
+versus the exact posterior precision. The results are presented in Figure \ref{fig:precision}. As $p$ and
+$\kappa$ increase, we can see that the approximate precision is converging towards the exact precision for all
+values of $R^2$.
+
+\begin{figure}[p]
+	\includegraphics[width=17cm, height=17cm]{code/taug/Precision.pdf}
+	\caption{The accuracy of the approximation to the posterior precision was assessed by plotting
+		$p(\sigma^{-2} | \vy)$ against $q(\sigma^{-2})$ over a range
+		of numbers of covariates, sample sizes and $R^2$  values. Here $n = \kappa p$.}
+	\label{fig:precision}
+\end{figure}
+
+\subsection{Marginal covariate inclusion probabilities}
+
+The marginal covariate inclusion probabilities from the variational approximation match those from the the
+exact posterior likelihood very closely. Comparing these marginal covariate inclusion probabilities to those
+produced by weighting each model considered by AIC and BIC, we see that the probabilities produced by the
+variational approximation and exact posterior likelihood are more conservative.
+
+\begin{figure}[p]
+	\includegraphics[width=17cm, height=17cm]{code/taug/Log_of_Relative_error_of_Variance_of_g.pdf}
+	\caption{The accuracy of the approximation to the variance of $g$ was assessed by computing the relative
+		error of $q(g)$ relative to $p(g | \vy)$ over a range
+		of numbers of covariates, sample sizes and $R^2$  values. Here $n = \kappa p$.}
+	\label{fig:rel_error_var_g}
+\end{figure}
+
+
+% vw1 <- read.csv("Hitters_vw1.csv", header=FALSE)
+% r <- hist(as.matrix(vw1), breaks=19, axes=FALSE, prob=TRUE, main="", xlab="")
+% axis(1, r$mid, c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18"))
+
+% bodyfat
+% Major League Baseball Data from the 1986 and 1987 seasons.
+% An Introduction to Statistical Learning with Applications in R
+
+% \begin{tabular}{|l|lllllllllllllllllll|}
+% 	\hline
+% 	$\vp$ & 0.137 & 0.130 & 0.257 & 0.982 & 0.921 & 0.173 & 0.633 & 0.562 & 0.623 & 0.480 & 0.441 & 0.499 & 0.197 & 0.926 & 0.131 & 0.174 & 0.128 & 0.901 & 0.851 \\
+% 	$\vq$ & 0.137 & 0.130 & 0.257 & 0.982 & 0.922 & 0.172 & 0.635 & 0.562 & 0.625 & 0.480 & 0.440 & 0.499 & 0.197 & 0.927 & 0.130 & 0.173 & 0.127 & 0.902 & 0.853 \\
+% 	\hline
+% \end{tabular}
+
+\subsubsection{Hitters}
+
+The Hitters data set was taken from the StatLib library maintained by Carnegie Mellon University, and used in
+\citep{James:2014:ISL:2517747}. The data was gathered from the the performance of players during the Major
+League Baseball seasons for 1986 and 1987, and includes the following covariates:
+
+\begin{tabular}{|ll|}
+	\hline
+	Covariate & Description                                                                        \\
+	\hline
+	AtBat     & Number of times at bat in 1986                                                     \\
+	Hits      & Number of hits in 1986                                                             \\
+	HmRun     & Number of home runs in 1986                                                        \\
+	Runs      & Number of runs in 1986                                                             \\
+	RBI       & Number of runs batted in in 1986                                                   \\
+	Walks     & Number of walks in 1986                                                            \\
+	Years     & Number of years in the major leagues                                               \\
+	CAtBat    & Number of times at bat during his career                                           \\
+	CHits     & Number of hits during his career                                                   \\
+	CHmRun    & Number of home runs during his career                                              \\
+	CRuns     & Number of runs during his career                                                   \\
+	CRBI      & Number of runs batted in during his career                                         \\
+	CWalks    & Number of walks during his career                                                  \\
+	League    & A factor with levels A and N indicating player’s league at the end of 1986       \\
+	Division  & A factor with levels E and W indicating player’s division at the end of 1986     \\
+	PutOuts   & Number of put outs in 1986                                                         \\
+	Assists   & Number of assists in 1986                                                          \\
+	Errors    & Number of errors in 1986                                                           \\
+	Salary    & 1987 annual salary on opening day in thousands of dollars                          \\
+	NewLeague & A factor with levels A and N indicating player’s league at the beginning of 1987 \\
+	\hline
+\end{tabular}
+
+The marginal covariate inclusion probabilities are presented in Figure \ref{fig:Hitters_inclusion}.
+
+\begin{figure}[p]
+	\includegraphics[scale=.4]{Hitters_variable_selection.pdf}
+	\caption{Hitters marginal inclusion probablities}
+	\label{fig:Hitters_inclusion}
+\end{figure}
+
+The model ranking scatterplots are presented in Figure \ref{fig:Hitters_model_ranking}.
+
+
+
+\begin{figure}[p]
+	\includegraphics[scale=.4]{code/Model_selection_scatter_plot_1.pdf}
+	\caption{Hitters model ranking scatterplot}
+	\label{fig:Hitters_model_ranking}
+\end{figure}
+
+\subsubsection{Body Fat}
+The Body Fat data set was taken from \citep{Tarr2015}, and is on the relationship between percentage of body
+fat and simple body measurements. The data set consists of 128 observations, and the covariates in the data set
+are:
+
+\begin{tabular}{|ll|}
+	\hline
+	Covariate & Description                                                                  \\
+	\hline
+	Id        & Identifier                                                                   \\
+	Bodyfat   & Bodyfat percentage                                                           \\
+	Age       & Age (years)                                                                  \\
+	Weight    & Weight (kg)                                                                  \\
+	Height    & Height (inches)                                                              \\
+	Neck      & Neck circumference (cm)                                                      \\
+	Chest     & Chest circumference (cm)                                                     \\
+	Abdo      & Abdomen circumference (cm) "at the umbilicus and level with the iliac crest" \\
+	Hip       & Hip circumference (cm)                                                       \\
+	Thigh     & Thigh circumference (cm)                                                     \\
+	Knee      & Knee circumference (cm)                                                      \\
+	Ankle     & Ankle circumference (cm)                                                     \\
+	Bic       & Extended biceps circumference (cm)                                           \\
+	Fore      & Forearm circumference (cm)                                                   \\
+	Wrist     & Wrist circumference (cm) "distal to the styloid processes"                   \\
+	\hline
+\end{tabular}
+
+The marginal covariate inclusion probabilities are presented in Figure \ref{fig:bodyfat_inclusion}.
+
+% \begin{tabular}{|l|lllllllllllll|}
+% 	\hline
+% 	$\vp$ & 0.938 & 0.136 & 0.182 & 0.072 & 0.071 & 0.108 & 0.147 & 1.000 & 0.134 & 0.141 & 0.323 & 0.619 & 0.221 \\
+% 	$\vq$ & 0.939 & 0.136 & 0.182 & 0.071 & 0.070 & 0.107 & 0.146 & 1.000 & 0.134 & 0.140 & 0.323 & 0.620 & 0.221 \\
+% 	\hline
+% \end{tabular}
+
+\begin{figure}[p]
+	\includegraphics[scale=.4]{bodyfat_variable_selection.pdf}
+	\caption{bodyfat marginal inclusion probablities}
+	\label{fig:bodyfat_inclusion}
+\end{figure}
+
+The model ranking scatterplots are presented in Figure \ref{fig:bodyfat_model_ranking}.
+
+\begin{figure}[p]
+	\includegraphics[scale=.4]{code/Model_selection_scatter_plot_2.pdf}
+	\caption{bodyfat model ranking scatterplot}
+	\label{fig:bodyfat_model_ranking}
+\end{figure}
+
+\subsubsection{Wage}
+
+The Wage gap data set was taken from \citep{James:2014:ISL:2517747}, on 3000 workers in the Mid-Atlantic
+region. The data set includes 12 covariates:
+
+\begin{tabular}{|ll|}
+	\hline
+	Covariate        & Description                                                                           \\
+	\hline
+	Year             & Year that the wage information was recorded                                           \\
+	Age              & Age of worker                                                                         \\
+	Sex              & Gender                                                                                \\
+	Marital status   & Marital status -- Never Married, Married, Widowed, Divorced or Seperated              \\
+	Race             & White, Black, Asian or Other                                                          \\
+	Education        & Education level -- Did not graduate high school, Graduated high school, Some College, 
+	College Graduate \\
+	                 & or Advanced College Degree                                                            \\
+	Region           & Region of the country                                                                 \\
+	Job class        & Type of job                                                                           \\
+	Health           & Either Good or Less, or Very Good or Better                                           \\
+	Health insurance & Yes or No                                                                             \\
+	Log of wage      & The log of the worker's wage                                                          \\
+	Wage             & The worker's wage                                                                     \\
+	\hline
+\end{tabular}
+
+The marginal covariate inclusion probabilities are presented in Figure \ref{fig:Wage_inclusion}.
+
+% \begin{tabular}{|l|lllllllllllllllll|}
+% 	\hline
+% 	$\vp$ & 1 & 1 & 0.010 & 0.024 & 1 & 0.054 & 0.083 & 0.019 & 0.011 & 0.010 & 0.013 & 0.014 & 0.011 & 0.014 & 0.057 & 0.042 & 0.033 \\
+% 	$\vq$ & 1 & 1 & 0.010 & 0.024 & 1 & 0.054 & 0.083 & 0.019 & 0.011 & 0.010 & 0.013 & 0.014 & 0.011 & 0.014 & 0.057 & 0.042 & 0.033 \\
+% 	\hline
+% \end{tabular}
+
+\begin{figure}[p]
+	\includegraphics[scale=.4]{Wage_variable_selection.pdf}
+	\caption{Wage marginal inclusion probablities}
+	\label{fig:Wage_inclusion}
+\end{figure}
+
+The model ranking scatterplots are presented in Figure \ref{fig:Wage_model_ranking}.
+
+\begin{figure}[p]
+	\includegraphics[scale=.4]{code/Model_selection_scatter_plot_3.pdf}
+	\caption{Wage model ranking scatterplot}
+	\label{fig:Wage_model_ranking}
+\end{figure}
+
+
+\subsubsection{Graduation Rate}
+
+The Graduation Rate data set was taken from \citep{James:2014:ISL:2517747}. The data is drawn from the 1995
+issue of US News and World Report, and is on a large number of US Colleges. The data set consists of 777
+observations, and includes the following covariates:
+
+\begin{tabular}{|ll|}
+	\hline
+	Covariate   & Description                                                             \\
+	\hline
+	Private     & A factor with levels No and Yes indicating private or public university \\
+	Apps        & Number of applications received                                         \\
+	Accept      & Number of applications accepted                                         \\
+	Enroll      & Number of new students enrolled                                         \\
+	Top10perc   & Percentage of new students from top 10\% of H.S. class                  \\
+	Top25perc   & Percentage of new students from top 25\% of H.S. class                  \\
+	F.Undergrad & Number of fulltime undergraduates                                       \\
+	P.Undergrad & Number of parttime undergraduates                                       \\
+	Outstate    & Out-of-state tuition                                                    \\
+	Room.Board  & Room and board costs                                                    \\
+	Books       & Estimated book costs                                                    \\
+	Personal    & Estimated personal spending                                             \\
+	PhD         & Percentage of faculty with Ph.D.’s                                    \\
+	Terminal    & Percentage of faculty with terminal degree                              \\
+	S.F.Ratio   & Student/faculty ratio                                                   \\
+	perc.alumni & Percentage of alumni who donate                                         \\
+	Expend      & Instructional expenditure per student                                   \\
+	Grad.Rate   & Graduation rate                                                         \\
+	\hline
+\end{tabular}
+
+The marginal covariate inclusion probabilities are presented in Figure \ref{fig:GradRate_inclusion}.
+
+% \begin{tabular}{|l|lllllllllllllllll|}
+% 	\hline
+% 	$\vp$ & 0.913 & 1.000 & 0.090 & 0.108 & 0.110 & 0.602 & 0.127 & 0.945 & 0.999 & 0.999 & 0.201 & 0.864 & 0.262 & 0.105 & 0.146 & 0.977 & 0.437 \\
+% 	$\vq$ & 0.914 & 1.000 & 0.090 & 0.108 & 0.110 & 0.602 & 0.127 & 0.945 & 0.999 & 0.999 & 0.201 & 0.864 & 0.262 & 0.105 & 0.146 & 0.977 & 0.437 \\
+% 	\hline
+% \end{tabular}
+
+\begin{figure}[p]
+	\includegraphics[scale=.4]{GradRate_variable_selection.pdf}
+	\caption{GradRate marginal inclusion probablities}
+	\label{fig:GradRate_inclusion}
+\end{figure}
+
+The model ranking scatterplots are presented in Figure \ref{fig:GradRate_model_ranking}.
+
+\begin{figure}[p]
+	\includegraphics[scale=.4]{code/Model_selection_scatter_plot_4.pdf}
+	\caption{GradRate model ranking scatterplot}
+	\label{fig:GradRate_model_ranking}
+\end{figure}
+
+\subsubsection{US Crime}
+The US Crime data set was taken from the \texttt{MASS} package \citep{Venables2002}, and is on the effect of
+punishment regimes on crime rates. The data set includes 47 states of the United States of America. The
+variables have been re-scaled for convenience, and include the following covariates:
+
+\begin{tabular}{|ll|}
+	\hline
+	Covariate & Description                                                     \\
+	\hline
+	M         & percentage of males aged 14–24.                               \\
+	So        & indicator variable for a Southern state.                        \\
+	Ed        & mean years of schooling.                                        \\
+	Po1       & police expenditure in 1960.                                     \\
+	Po2       & police expenditure in 1959.                                     \\
+	LF        & labour force participation rate.                                \\
+	M.F       & number of males per 1000 females.                               \\
+	Pop       & state population.                                               \\
+	NW        & number of non-whites per 1000 people.                           \\
+	U1        & unemployment rate of urban males 14–24.                       \\
+	U2        & unemployment rate of urban males 35–39.                       \\
+	GDP       & gross domestic product per head.                                \\
+	Ineq      & income inequality.                                              \\
+	Prob      & probability of imprisonment.                                    \\
+	Time      & average time served in state prisons.                           \\
+	y         & rate of crimes in a particular category per head of population. \\
+	\hline
+\end{tabular}
+
+The marginal covariate inclusion probabilities are presented in Figure \ref{fig:USCrime_inclusion}.
+
+% \begin{tabular}{|l|lllllllllllllll|}
+% 	\hline
+% 	$\vp$ & 0.226 & 0.849 & 0.997 & 0.216 & 0.502 & 0.244 & 0.358 & 0.569 & 0.324 & 0.202 & 0.424 & 0.696 & 0.869 & 0.229 & 0.655 \\
+% 	$\vq$ & 0.220 & 0.856 & 0.997 & 0.210 & 0.507 & 0.240 & 0.358 & 0.573 & 0.318 & 0.196 & 0.418 & 0.699 & 0.876 & 0.224 & 0.661 \\
+% 	\hline
+% \end{tabular}
+
+\begin{figure}[p]
+	\includegraphics[scale=.4]{USCrime_variable_selection.pdf}
+	\caption{USCrime marginal inclusion probablities}
+	\label{fig:USCrime_inclusion}
+\end{figure}
+
+The model ranking scatterplots are presented in Figure \ref{fig:USCrime_model_ranking}.
+
+\begin{figure}[p]
+	\includegraphics[scale=.4]{code/Model_selection_scatter_plot_5.pdf}
+	\caption{USCrime model ranking scatterplot}
+	\label{fig:USCrime_model_ranking}
+\end{figure}
