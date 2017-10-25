@@ -1,0 +1,270 @@
+% Chapter_4_g_prior_posteriors
+\section{Hyperpriors on $g$}
+
+Here we outline some of the choices of hyperpriors for $g$ used in the literature, their
+properties, and where possible how to implement these in a efficiently and 
+accurately in
+numerically stable manner. We cover the 
+the hyper-$g$ and hyper-$g/n$ priors of \cite{Liang2008}, the beta-prime prior
+of \cite{Maruyama2011}, the robust prior of \cite{Bayarri2012}, and the cake
+prior of \cite{OrmerodEtal2017}.
+We also considered prior structure implied by \cite{Zellner1980}, but were able to make no
+meaningful progress for this case.
+
+
+\subsection{The hyper-$g$ prior}
+
+Initially, \cite{Liang2008} suggest the hyper $g$-prior where
+\begin{equation}\label{eq:hyperG}
+\ds p_{g}(g) = \frac{a - 2}{2}(1 + g)^{-a/2}I(g>0),
+\end{equation}
+
+\noindent for $a>2$. Combining (\ref{eq:yGivenG}) with (\ref{eq:hyperG}), we have
+\begin{equation}\label{eq:hyperGmarginalIntegral}
+p_{g}(\vy|\vgamma) = K(n) \frac{a - 2}{2}  \int_0^\infty 
+\left( 1 + g \right)^{-a/2}
+(1 + g)^{(n-p_\vgamma-1)/2} \left[ 1 + g (1 - R_\vgamma^2) \right]^{-(n-1)/2}  dg.
+\end{equation}
+
+\noindent After applying 
+3.197(5) of \cite{Gradshteyn2007} (see Appendix A) leads to
+\begin{equation}\label{eq:hyperGmarginal}
+\ds \mbox{BF}_{g}(\vgamma) = \frac{p_{g}(\vy|\vgamma)}{p_{g}(\vy|\vzero)} =  \left( \frac{a - 2}{p_\vgamma + a - 2} \right) \cdot {}_2F_1\left( \frac{n-1}{2}, 1; \frac{p_\vgamma + a}{2}; R_\vgamma^2 \right),
+\end{equation}
+
+\noindent where ${}_2F_1(\,\cdot\,,\,\cdot\,;\,\cdot\,;\,\cdot\,)$ is the Gaussian hypergeometric function.
+
+The Gaussian hypergeometric function is notoriously prone 
+to overflow and numerical instability \citep{Pearson2017}. When such numerical issues arise 
+\cite{Liang2008} uses Laplace's method to approximate $p(\vy|\vgamma)$. 
+However, recently \cite{Nadarajah2015}
+rendered such approximation unnecessary.
+\cite{Nadarajah2015} showed that the numerical issues associated with (\ref{eq:hyperGmarginal}) can be avoided 
+via identity 
+\begin{equation}\label{eq:logGuassHypergeometric}
+\ds {}_2F_1(b,1;c;x) = (c-1) x^{1-c} (1-x)^{c-b-1} B_x (c-1, b-c+1),
+\end{equation}
+
+\noindent derived in \cite{PrudnikovEtal1986} (vol. 3, sec. 7.3), where 
+$B_x(\,\cdot\,,\,\cdot\,)$
+is the incomplete beta function. Note that the case where $x=0$ is not handled by 
+(\ref{eq:logGuassHypergeometric}) and the value $\ds {}_2F_1(b,1;c;0) = 1$ should be used instead
+and also implicitly assumes that $c>1$. Numerical overflow can be avoided
+since standard libraries exist for evaluating $B_x(\,\cdot\,,\,\cdot\,)$
+on the log scale.
+Unfortunately, \cite{Liang2008} also showed that
+(\ref{eq:hyperGmarginal}) is not model selection consistent when the
+true model is the null model (the model only containing the intercept) and so alternative priors should be used.
+
+
+
+
+\subsection{The hyper-$g/n$ prior}
+
+Given the problems with the hyper-$g$ prior, \cite{Liang2008} 
+proposed a modified variation of the hyper-$g$ prior with
+\begin{equation}\label{eq:hyperGonN}
+\ds p_{g/n}(g) = \frac{a - 2}{2n}\left( 1 + \frac{g}{n} \right)^{-a/2}I(g>0),
+\end{equation}
+
+\noindent which they call the hyper-$g/n$ prior where again $a>2$.
+They show that this prior leads to model selection consistency.
+Combining (\ref{eq:yGivenG}) with (\ref{eq:hyperGonN}) the quantity $p(\vy|\vgamma)$ 
+can be expressed as the integral
+\begin{equation}\label{eq:hyperGonNmarginalIntegral}
+\begin{array}{rl}
+p_{g/n}(\vy|\vgamma) 
+& \ds 
+= K(n) \frac{a - 2}{2n}  \int_0^\infty 
+\left( 1 + \frac{g}{n} \right)^{-a/2}
+(1 + g)^{(n-p_\vgamma-1)/2} \left[ 1 + g (1 - R_\vgamma^2) \right]^{-(n-1)/2}  dg
+\\ [2ex]
+& \ds = K(n) \frac{a - 2}{2n}  \int_0^1 
+(1 - u)^{p/2 + a/2 - 2  } \left[ 1 - u \left(1  -  \tfrac{1}{n} \right) \right]^{-a/2} \left(  1 - u R^2\right)^{-(n-1)/2} du,
+\end{array} 
+\end{equation}
+
+\noindent where $u=g/(1+g)$. Employing 
+Equation 3.211 of \cite{Gradshteyn2007} 
+$$
+F_1(a,b_1,b_2,c; x,y) = \frac{\Gamma(c)} {\Gamma(a)\Gamma(c-a)} 
+\int_0^1 t^{a-1} (1-t)^{c-a-1} (1-xt)^{-b_1} (1-yt)^{-b_2} \, dt
+$$
+
+\noindent 
+leads to
+\begin{equation}\label{eq:hyperGonNmarginal}
+\ds \mbox{BF}_{g/n}(\vgamma) =  \frac{a - 2}{n(p_\vgamma + a - 2)} F_1\left( 1, \frac{a}{2}, \frac{n-1}{2}; \frac{p_\vgamma + a}{2}; 1  -  \frac{1}{n}, R_\vgamma^2 \right),
+\end{equation}
+
+\noindent where
+$F_1$ being the Appell hypergeometric function in two variables 
+\cite{Weisstein2009}. 
+
+
+
+
+
+
+Unfortunately, the expression (\ref{eq:hyperGonNmarginal}) is extremely
+difficult to evaluate numerically since the second last argument of the above 
+$F_1$ is asymptotically close to the radius of convergence of the $F_1$
+function.
+\cite{Liang2008} again suggest Laplace approximation 
+for this choice of prior. 
+
+ 
+\subsection{Beta-prime prior} 
+ 
+Next we will consider the prior 
+\begin{equation}\label{eq:betaPrime}
+\ds p_{bp}(g) = \frac{g^{b}(1 + g)^{-(a+b+2)}}{\mbox{Beta}(a+1,b+1)} I(g>0),
+\end{equation}
+
+\noindent proposed by \cite{Maruyama2011} where $a>-1$ and $b>-1$. 
+This is a Pearson Type VI or beta-prime distribution. More specifically, 
+$g\sim \mbox{Beta-prime}(b+1,a+1)$ using the usual parametrization of 
+the beta-prime distribution \citep{Johnson1995}.
+Then combining (\ref{eq:yGivenG}) with (\ref{eq:betaPrime}) the quantity $p(\vy|\vgamma)$ 
+can be expressed as the integral
+$$
+%\begin{array}{rl}
+\ds p_{bp}(\vy|\vgamma) 
+%& \ds = \int_0^\infty                                         
+%\frac{g^{b}(1 + g)^{-a-b-2}}{\mbox{Beta}(a+1,b+1)}
+%K(n) (1 + g)^{(n - p - 1)/2}\left[ 1 + g(1-R^2) \right]^{-(n-1)/2}
+%dg
+%\\
+%& \ds 
+=
+\frac{K(n)}{\mbox{Beta}(a+1,b+1)}
+\int_0^\infty             
+g^{b}(1 + g)^{(n - p_\vgamma - 1)/2 - (a + b + 2)}  (1 + g (1-R_\vgamma^2) )^{-(n-1)/2}  
+dg.
+%\end{array}
+$$
+
+\noindent If we choose 
+%$b$ such that
+%$a+b+2 = (n - p_\vgamma - 1)/2$, implying
+$b = (n - p_\vgamma - 5)/2 - a$, then the exponent of the $(1 + g)$ term in the equation above is zero.
+Using Equation 3.194 (iii) of \cite{Gradshteyn2007}
+(see Appendix A) we obtain
+\begin{equation}\label{eq:marginalLikelihoodBetaPrime}
+\begin{array}{rl}
+\ds \mbox{BF}_{bp}(\vy|\vgamma) 
+%& \ds =
+%\frac{K(n)}{\mbox{Beta}(a+1,b+1)}
+%\int_0^\infty g^{b} \left[ 1 + g(1-R^2) \right]^{-(n-1)/2}  
+%dg
+%\\ [2ex]
+& \ds 
+=   
+\frac{\mbox{Beta}(p/2 + a + 1,b + 1)}{\mbox{Beta}(a+1,b+1)} (1-R_\vgamma^2)^{-(b + 1)}
+%\\ [2ex]
+%& \ds = \widetilde{K}(n,a)
+%
+%\Gamma(p/2 + a + 1)\Gamma(a + b + 2)
+%(\widehat{\sigma}^2)^{-(b + 1)}
+\end{array}
+\end{equation}
+
+\noindent which is a simplification of the Bayes factor proposed by
+\cite{Maruyama2011}.
+
+
+Note that (\ref{eq:marginalLikelihoodBetaPrime}) proportional
+to a special case of the prior structure considered by \cite{Maruyama2011}
+who refer to this special case as ZE as a model selection criterion (after Zellner's $g$ prior). This choice of $b$ also ensures that $g = \BigO(n)$ so that $\tr\{\Var(\vbeta | g, \sigma^2)\} = \BigO(1)$, preventing Bartlett's paradox. 
+Note that in comparison to previously discussed priors
+marginal likelihood only involves gamma functions which
+are well behaved from a numerical analysis perspective. 
+\cite{Maruyama2011} showed the prior (\ref{eq:betaPrime}) leads to model
+selection consistency.
+For derivation of the above properties and further discussion see \cite{Maruyama2011}.
+
+
+\subsection{Robust prior}  
+
+Next we will consider the robust prior for $g$ as proposed by \cite{Bayarri2012}. Using the default
+choices of the prior hyperparameters \cite{Bayarri2012} uses the following hyperprior on $g$:
+\begin{equation}\label{eq:robustPrior}
+p_{{rob}}(g) = \frac{1}{2}\left(\frac{1+n}{1 + p_\vgamma}  \right)^{1/2} (1 + g)^{-3/2}I(g > L)
+\end{equation}
+ 
+\noindent where $L = (1 + n)/(1 + p_\vgamma) - 1$. 
+Combining (\ref{eq:yGivenG}) with (\ref{eq:robustPrior})
+leads to an expression for $p(\vy|\vgamma)$ of the form
+\begin{equation}\label{eq:marginalLikelihoodRobust}
+\ds p_{rob}(\vy|\vgamma)
+\ds = \frac{K(n)}{2}\left(\frac{1+n}{1 + p_\vgamma}  \right)^{1/2} 
+\int_L^\infty  (1 + g)^{(n - p_\vgamma)/2 - 2}(  1 + g \widehat{\sigma}_\vgamma^2)^{-(n-1)/2} dg,
+\end{equation}
+
+\noindent where $\widehat{\sigma}_\vgamma^2 = 1 - R_\vgamma^2$ is the MLE
+for $\sigma^2$ for model (\ref{eq:linearModel}) when $\mX$ is replaced with $\mX_\vgamma$ under the standardization described in Section 2.
+Using the substitution 
+$x = (1 + L)/(g - L)$ followed by Equation 3.197(5) of \cite{Gradshteyn2007}
+(see Appendix A) leads to
+\begin{equation}\label{eq:yGivenGammaRobust}
+\ds \mbox{BF}_{{rob}}(\vgamma)
+ \ds = \left( \frac{n + 1}{ p_\vgamma + 1} \right)^{ - p_\vgamma/2} \frac{(\widehat{\sigma}_\vgamma^2)^{-(n-1)/2}}{p_\vgamma+1}
+{}_2F_1\left( \frac{n-1}{2}, \frac{p_\vgamma+1}{2}; \frac{p_\vgamma+3}{2}  ; 
+\frac{(1  - 1/\widehat{\sigma}_\vgamma^2)(p_\vgamma + 1)}{1 + n}  \right),
+\end{equation}
+
+\noindent 
+which is the same expression as Equation 26. of \cite{Bayarri2012}
+ modulo notation.
+
+The expression (\ref{eq:yGivenGammaRobust}) is difficult to deal with numerically for two reasons. Firstly, either of the first 
+two arguments of the ${}_2F_1$ function are large relative to the third will often lead to numerical overflow problems. Secondly,
+and more problematically, when $\widehat{\sigma}_\vgamma^2$ becomes small the last argument
+of ${}_2F_1$ function can become less than $-1$ which falls outside the radius of convergence
+of the ${}_2F_1$ function. The {\tt BayesVarSel} package which implements
+this choice of prior deals with these problems using numerical
+integration.
+ 
+Instead suppose we begin with $x = g - L$ 
+%$$
+%\ds p_{{rob}}(\vy|\vgamma)
+%\ds = \frac{K(n)}{2}\left(\frac{1+n}{1 + p_\vgamma}  \right)^{1/2} %(\widehat{\sigma}_\vgamma^2)^{-(n-1)/2}
+%\int_0^\infty  (1 + L + h)^{(n - p_\vgamma)/2 - 2}\left[  \frac{1 + %L\widehat{\sigma}_\vgamma^2}{\widehat{\sigma}_\vgamma^2} + h \right]^{-(n-1)/2} dh.
+%$$
+and then  employ of Equation 3.197(1) of \cite{Gradshteyn2007} leading to
+\begin{equation}\label{eq:yGivenGammaRobust2}
+\ds \mbox{BF}_{{rob}}(\vgamma)
+\ds = \left( \frac{1 + n}{1 + p_\vgamma} \right)^{(n - p_\vgamma - 1)/2} \frac{\left( 1 + L\widehat{\sigma}_\vgamma^2 \right)^{-(n - 1)/2}}{1 + p_\vgamma}
+{}_2F_1\left(  
+\frac{n-1}{2}, 1; \frac{p_\vgamma+3}{2}; \frac{1 - \widehat{\sigma}_\vgamma^2}{1 + L\widehat{\sigma}_\vgamma^2}
+ \right).
+\end{equation}
+
+\noindent This expression is numerically far easier to evaluate efficiently and accurately in a numerically stable manner. Due to simplifications
+we have $0\le \widehat{\sigma}_\vgamma^2<1$, we also have $L>0$ so that the last argument
+of the ${}_2F_1$ above is bounded in the unit interval. Furthermore, using
+the identity (\ref{eq:logGuassHypergeometric}) means that (\ref{eq:yGivenGammaRobust2}) can be evaluated
+on the log scale, avoiding numerical overflow.
+
+
+%$$
+%\int_0^\infty x^{\nu - 1}(\beta + x)^{-\mu}(x + \gamma)^{-\varrho} dx
+%= \beta^{-\mu}\gamma^{\nu - \varrho}\mbox{Beta}(\nu,\mu-\nu + \varrho)
+%{}_2F_1(\mu,\nu;\mu + \varrho; 1 - \gamma/\beta)
+%$$
+
+%$$
+%\beta = \frac{1 + L\widehat{\sigma}_\vgamma^2}{\widehat{\sigma}_\vgamma^2}
+%$$
+%$$
+%\gamma = 1 + L
+%$$
+%$$
+%\nu = 1
+%$$
+%$$
+%\mu = \frac{n-1}{2}
+%$$
+%$$
+%\varrho = - (n - p_\vgamma - 4)/2
+%$$
