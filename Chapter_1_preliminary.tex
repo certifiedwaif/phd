@@ -1,32 +1,6 @@
-\documentclass{amsart}[12pt]
-% \documentclass{usydthesis}[12pt]
+\chapter{Preliminary material}
 
-\addtolength{\oddsidemargin}{-.75in}%
-\addtolength{\evensidemargin}{-.75in}%
-\addtolength{\textwidth}{1.5in}%
-\addtolength{\textheight}{1.3in}%
-\addtolength{\topmargin}{-.8in}%
-\addtolength{\marginparpush}{-.75in}%
-%\setlength\parindent{0pt}
-%\setlength{\bibsep}{0pt plus 0.3ex}
-
-\usepackage[authoryear]{natbib}
-\usepackage[doublespacing]{setspace}
-\usepackage{graphicx}
-\usepackage{algorithm,algorithmic}
-\usepackage{color}
-
-\title{Introduction}
-\author{Mark Greenaway}
-\input{include.tex}
-\input{Definitions.tex}
-
-\newcommand{\mgc}[1]{{\color{blue}#1}}
-\newcommand{\joc}[1]{{\color{red}#1}}
-
-\begin{document}
 \setlength{\parindent}{0pt}
-\maketitle
 
 % Outline that John suggested
 \section{Real world problems}
@@ -764,12 +738,12 @@ expansion beyond second order.
 This approach to approximating integrals extends naturally to multiple dimensions.
 Consider the second order Taylor expansion of $\log f(\vtheta)$ around the mode $\vtheta_m$
 $$
-\log f(\vtheta) \approx f(\vtheta_m) + (\vtheta - \vtheta_m) \nabla \log f(\vtheta) + \half (\vtheta - \vtheta_m)^\top \mH_{\log f}(\vtheta_m) (\vtheta - \vtheta_m) + \sO(\|\vtheta - \vtheta_m\|^3).
+\log f(\vtheta) \approx f(\vtheta_m) + (\vtheta - \vtheta_m) \nabla \log f(\vtheta) + \frac{1}{2} (\vtheta - \vtheta_m)^\top \mH_{\log f}(\vtheta_m) (\vtheta - \vtheta_m) + \sO(\|\vtheta - \vtheta_m\|^3).
 $$
 
 Assuming that $\vtheta$ is a stationary point of $\log f$, then $\nabla f(\vtheta) = \vzero$ and so
 $$
-\log f(\vtheta) \approx f(\vtheta_m) + \half (\vtheta - \vtheta_m)^\top \mH_{\log f}(\vtheta_m) (\vtheta - \vtheta_m) + \sO(\|\vtheta - \vtheta_m\|^3)
+\log f(\vtheta) \approx f(\vtheta_m) + \frac{1}{2} (\vtheta - \vtheta_m)^\top \mH_{\log f}(\vtheta_m) (\vtheta - \vtheta_m) + \sO(\|\vtheta - \vtheta_m\|^3)
 $$
 
 at such a point. The quadratic form in $\vtheta$ in the approximate expression for the log likelihood above
@@ -788,7 +762,7 @@ Propagation approximates this by minimising the KL divergence of each of the fac
 It does this by cycling through each of the factors matching the sufficient statistics of each, incorporating
 the information already in the other factors
 \[
-	\bE_{-q_i} [KL(p || q)]
+	\bE_{-q_i} [\text{KL}(p || q)]
 \]
 The factors are cycled through several times until convergence is achieved.
 
@@ -838,9 +812,3 @@ before it is as mature as other approximation methods like Variational Bayes and
 	Maruyama and George Beta-Prime \citep{Maruyama2011}prior.	
 
 \end{itemize}
-
-\bibliographystyle{elsarticle-harv}
-% \bibliography{Chapter_0_preliminary}
-\bibliography{references_mendeley}
-
-\end{document}

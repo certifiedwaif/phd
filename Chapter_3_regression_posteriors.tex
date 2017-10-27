@@ -1,16 +1,13 @@
-\chapter{Normal linear models}
-
-\section*{Abstract}
-
-% What is done in general
-
-We develop mean field and structured variational Bayes approximations for Bayesian model selection on linear
-models using Zellner's g prior. Our mean field updates only depend on a single variational parameter $\tau_g$
-and other values which are fixed for each model considered. An algorithm is developed which allows these
-models to be fit. Applications to a range of data sets are presented, showing  empirically that
-our method performs well on real-world data.
+\chapter{Posterior distributions of regression model parameters under Maruyama's Beta-Prime prior}
 
 \section{Introduction}
+
+In this chapter, we consider
+a linear model with $g$-priors used for model selection, as in \citep{Maruyama2011}. 
+In most cases, we derive exact expressions for the posterior distributions of the regression parameters of
+this model. Where this is analytically intractable, we derive exact expressions for the expectation and
+covariance of the regression parameters, and develop a Laplace approximation to the posterior distribution
+of the regression parameters.
 
 % Structured Variational Bayes for model selection, Wand and Ormerod Variational Bayes for Elaborate 
 % Distributions (\citep{Wand2011})
@@ -21,8 +18,7 @@ our method performs well on real-world data.
 
 % Our main contribution
 In this paper, we develop Variational Bayes approximations to model selection of linear models using Zellner's
-g prior as in \citep{Liang2008}. We show that in this situation, our variational approximation is almost exact
--- that is, the variational approximation of the Bayesian linear model gives almost perfect estimates.
+g prior as in \citep{Liang2008}.
 
 % By searching of the model space as one covariate changes between each sub-model and  using rank-1 updates on
 % $(\mX^\top \mX)^{-1}$, we are able to exhaustively search the model space in $\BigO(2^p np^2)$ rather than
@@ -66,44 +62,375 @@ Several priors on $g$ have been considered in the literature, including the hype
 \cite{Liang2008}, Bayarri's robust prior \cite{Bayarri2012} and the Beta-Prime prior introduced by
 \citep{Maruyama2011}. We choose the popular Beta-Prime prior, as it is numerically well-behaved. 
 We choose $a$  and $b$ to be $-3/4$ and $(n - p)/2 - a - 2$ respectively, following \citep{Maruyama2011}.
-Our model is thus
-\begin{align*}
-	\vy | \vbeta, \sigma^2 \sim \N_n(\mX \vbeta, \sigma^2 \mI) 
-\end{align*}
 
-with priors
+\section{The base model}
+\label{sec:model}
 
-\begin{align*}
-	\vbeta | \sigma^2, g & \sim \N_p(\vzero, g \sigma^2 (\mX^T \mX)^{-1}),                     \\
-	p(\sigma^2)          & = (\sigma^2)^{-1} \I(\sigma^2 > 0), \text{ and }                    \\
-	p(g)                 & = \frac{g^b (1 + g)^{-(a + b + 2)}}{\Beta(a + 1, b + 1)} \I(g > 0). 
-\end{align*}
+Suppose $\vy = (y_1,\ldots,y_n)^T$ is a response vector of length $n$, $\mX$ is an $n$ by $p$ matrix 
+of covariates. We consider the linear model for predicting $\vy$ with predicturs $\mX$ via
+\begin{equation}
+\label{eq:linearModel}
+\vy | \alpha, \vbeta, \sigma^2 \sim N(\vone_n\alpha + \mX \vbeta, \sigma^2 \mI_n),
+\end{equation} 
 
 
-% \mgc{expand on this? See STAT260 combined lecture notes, page 55}
+\noindent where $\alpha$ is the model intercept, $\vbeta$ is a coefficient vector of length $p$, 
+$\sigma^2$ is the residual variance, and $\mI_n$ is the $n \times n$ identity matrix. 
+Without loss of generality, to simplify later calculations, we will transform $\vy$ and $\mX$ 
+so that $\vy$ and the columns of $\mX$ are standardized so that $\overline{y} = 0$, 
+$\|\vy\|^2 = \vy^T\vy = n$, $\mX_j^T\vone = 0$,  and $\|\mX_j\|^2 = n$ where $\mX_j$ is the $j$th  column of $\mX$. 
 
-This leads to the posterior distribution
-\[
-	\vbeta | \vy \sim \N_p\left(\frac{g}{1+g} \vbetahatls, g \sigma^2 (\mX^\top \mX)^{-1} \right).
-\]
-which is a mixture between the null model and the least squares fit, with the degree of mixing controlled by controlled by $g/(1 + g)$.
+Suppose that we wish to perform Bayesian model selection, model averaging or hypothesis 
+testing. Let $\vgamma \in \{0, 1\}^p$ be a binary vector of indicators
+for the inclusion of the $p$th column of $\mX$ in the model where $\mX_\vgamma$ 
+denotes the design matrix formed by including only the columns of $\mX$ with 
+$\gamma_j = 1$. We will adopt the following prior structure
+\begin{equation}
+\label{eq:priorStructure}
+\begin{array}{c}
+\ds p(\alpha) \propto 1,  
+\qquad 
+\ds p(\sigma^2) \propto (\sigma^2)^{-1} I(\sigma^2 > 0),                      
+\\ [2ex]
+\vbeta_\vgamma | \sigma^2, g, \vgamma \sim \N_p(\vzero, g \sigma^2 (\mX_\vgamma^T \mX_\vgamma)^{-1}),
+\quad \text{ and }  \quad 
+p(\vbeta_{-\vgamma}|\vgamma) = \prod_{j=1}^p \delta(\beta_j;0)^{1-\gamma_j},
+\end{array}
+\end{equation} 
 
-\subsection{Model Selection}
+\noindent where $\delta(x;a)$ is the Dirac delta function with location $a$. 
+For the time being we will defer specification of $p(g)$ and $p(\vgamma)$.
+We will now justify each element of our chosen prior structure.
 
-Let $\vgamma \in \{0, 1\}^p$ be the vector of indicators of inclusion of the $p$th column of $\mX$ in the
-model $\vgamma$. Then $\mX_\vgamma$ is the covariate matrix formed by including only the columns of $\mX$
-indicated by $\vgamma$.
+The priors on $\alpha$ and $\sigma^2$ are improper Jeffreys priors and have been formally justified 
+in \cite{Berger2012}. In the context Bayesian model selection, model averaging or hypothesis 
+testing $\alpha$ and $\sigma^2$ appear in all models 
+so that when comparing models the proportionality constants in the corresponding
+Bayes factors cancel.
 
-We index the space of models by a $p$-dimensional vector of indicator variables for each variable considered 
-for inclusion, $\vgamma$. For each model $\mathcal{M}_\vgamma$, the response vector $\vy$ is modelled by
-\begin{equation*}
-	\mathcal{M}_\vgamma: \vmu_\vgamma = \vone_n \alpha + \mX_\vgamma \vbeta_\vgamma.
-\end{equation*}
+The prior on $\vbeta_\vgamma$ is Zellner's $g$-prior \citep[see for example,][]{Zellner1986} with prior 
+hyperparameter $g$. This family of priors for Gaussian regression model where the prior covariance 
+matrix of $\vbeta_\vgamma$ is taken to be a multiple of $g$ with the Fisher information matrix for $\vbeta$. 
+This places the most prior mass for $\vbeta_\vgamma$ on the section of the parameter space where the data is 
+least informative, and makes the marginal likelihood of the model scale-invariant. Furthermore, this 
+choice of prior removes a log-determinant of $\mX_\vgamma^T\mX_\vgamma$ term from the expression for the marginal 
+likelihood, which is an additional computational burden to calculate.
+
+\section{Exact posterior distributions in terms of special functions}
+\label{sec:Exact}
+ 
+In this section we derive the exact expressions for most Bayesian inferential quantities
+of interest based on the model presented in Section 2. An exception is
+the exact expression for the posterior density for $\vbeta|\vy$ for this quantity we
+instead derive the first and second moments.
+
+
+First, we use the fact that $p(\sigma^2|\vy) = \int_0^\infty p(\sigma^2|\vy,u) p(u|\vy)dg$ so that the density
+$\sigma^2|\vy$ may be expressed as
+$$
+\begin{array}{rl}
+\ds p(\sigma^2|\vy) 
+%& \ds = 
+%\left[ \frac{\left(\tfrac{n}{2}\right)^c}{\Gamma(c)} (\sigma^2)^{-(c+1)} \exp\left\{ - \frac{n}{2\sigma^2} \right\} \right] 
+%\left[ \frac{(1 -  R^2)^{b+1} }{\mbox{Beta}(d + 1,b+1)} %\right] \int_0^\infty 
+% g^{b} (1 + g)^{-c}  \exp\left(   \frac{g}{1+g} \frac{nR^2}{2\sigma^2} \right) dg.
+%\\
+& \ds = 
+\left[ \frac{\left(\tfrac{n}{2}\right)^c}{\Gamma(c)} (\sigma^2)^{-(c+1)} \exp\left\{ - \frac{n}{2\sigma^2} \right\} \right] 
+\left[ \frac{(\widehat{\sigma}^2)^{b+1} }{\mbox{Beta}(d + 1,b+1)} \right]
+\int_0^1
+u^{b} (1 - u)^d  \exp\left(  \frac{nR^2}{2\sigma^2} u \right) du.
+\end{array}
+$$
+
+%\noindent \joc{
+%$$
+%u = \frac{g}{1+g},
+%\quad 
+%g = \frac{u}{1-u},
+%\quad 
+%1 - u = \frac{1}{(1 + g)},
+%\quad 
+%(1 - u)^{-1} = (1 + g),
+%\quad \mbox{and}\quad 
+%\frac{du}{dg} = \frac{1}{1+g} - \frac{g}{(1 +g)^2} 
+%= \frac{1}{(1+g)^2} = (1 - u)^2.
+%$$
+%
+%\noindent Using the change of variables $u = g/(1 + g)$ the integral
+%above is  
+%$$
+%\ds \int_0^1 u^{b} (1 - u)^d  \exp\left(  %\frac{nR^2}{2\sigma^2} u \right) du
+%= \mbox{Beta}(d+1,b+1) {}_1 F_1\left(b + 1; c; %\frac{nR^2}{2\sigma^2} \right)
+%$$
+%
+%$$
+%	\int_{0}^u x^{\nu - 1} (u - x)^{\mu - 1}  e^{\beta x} dx = \mbox{Beta}(\nu,\mu) {}_1 F_1(\nu;\mu+\nu;\beta u) \quad   \mbox{(assuming $\mbox{Re}(\mu)>0$ and $\mbox{Re}(\nu)>0$).}
+%$$
+%\noindent with $u = 1$, $\nu = b + 1$, $\mu = a + p/2 + 1 >0$, and $\beta = nR^2/(2\sigma^2)$.
+%}
+
+\noindent 
+Utilising Equation 3.383(i) of \cite{Gradshteyn2007} (see Appendix A) we obtain  
+$$
+%\begin{array}{rl}
+\ds p(\sigma^2|\vy) 
+%& 
+\ds = 
+\frac{\left(\tfrac{n}{2}\right)^c (\widehat{\sigma}^2)^{b+1}}{\Gamma(c)} (\sigma^2)^{-(c+1)} \exp\left(  - \frac{n}{2\sigma^2} \right)
+{}_1 F_1\left(b + 1; c; \frac{nR^2}{2\sigma^2} \right),
+%\end{array}
+$$
+
+\noindent where 
+${}_1 F_1(\alpha;\gamma;z)$ 
+is the confluent hypergeometric function (also called
+Kummer's function of the first kind).
+To the best of our knowledge, this is a new positive valued continuous distribution.
+An alternative representation using the identity ${}_1F_1(a;b;z) = e^z {}_1F_1(b-a;b;-z)$ results in
+$$
+%\begin{array}{rl}
+\ds p(\sigma^2|\vy) 
+%& 
+\ds = 
+\frac{\left(\tfrac{n}{2}\right)^c (\widehat{\sigma}^2)^{b+1}}{\Gamma(c)} (\sigma^2)^{-(c+1)} \exp\left(  - \frac{n \widehat{\sigma}^2}{2\sigma^2} \right)
+{}_1 F_1\left( d + 1; c; -\frac{nR^2}{2\sigma^2} \right),
+%\end{array}
+$$
+
+\noindent which is much more amenable to numerical evaluation. 
+ 
+ 
+Next we have
+$p(\alpha|\vy) = \int_0^\infty p(\alpha|\vy,\sigma^2)p(\sigma^2|\vy) d\sigma^2$.
+% where $\alpha|\vy,\sigma^2 \sim N(0,\sigma^2/n)$. 
+After we apply the change of variables $\sigma^2 = 1/\tau$
+we obtain
+$$
+\begin{array}{rl}
+\ds p(\alpha|\vy) 
+%& \ds =
+%\joc{ \frac{\left(\tfrac{n}{2}\right)^c (1 -  R^2)^{b+1}  }{\Gamma(c)\sqrt{2\pi/n}}
+%\int_0^\infty 
+%(\sigma^2)^{-1/2} \exp\left( -\frac{n\alpha^2}{2\sigma^2} \right) 
+%(\sigma^2)^{-(c + 1)}\exp\left( -\frac{n}{2\sigma^2}  \right)  {}_1 F_1\left( b + 1; c; %\frac{nR^2}{2\sigma^2} \right)  d\sigma^2
+%}
+%\\ [2ex]
+%& \ds =  \frac{\left(\tfrac{n}{2}\right)^c (1 -  R^2)^{b+1}  }{\Gamma(c)\sqrt{2\pi/n}} 
+%\times 
+%\int_0^\infty 
+%(\sigma^2)^{-c -3/2} \exp\left( -\frac{n(1+\alpha^2)}{2\sigma^2} \right)   {}_1 F_1\left( b + %1; c; \frac{nR^2}{2\sigma^2} \right) d\sigma^2
+%\\
+& \ds = \frac{\left(\tfrac{n}{2}\right)^c (1 -  R^2)^{b+1}  }{\Gamma(c)\sqrt{2\pi/n}} 
+\times 
+\int_0^\infty 
+\tau^{c - 1/2} \exp\left( -\frac{n(1+\alpha^2)}{2} \tau \right)   {}_1 F_1\left( b + 1; c; \frac{nR^2}{2} \tau \right) d \tau.
+\end{array}
+$$
+
+
+%$$
+%\begin{array}{rll}
+%\ds \int_0^\infty e^{-st} t^{b-1} {}_1F_1(a,c,kt) dt
+%& \ds = \Gamma(b)s^{-b} F(a,b,c,k s^{-1}) 
+%& \mbox{(if $|s| > |k|$)}
+%\\
+%& \ds = \Gamma(b)(s - k)^{-b} F\left(c - a, b; c; \frac{k}{k - s} %\right)
+%& \mbox{(if $|s - k| > |k|$)}
+%\end{array} 
+%$$
+
+%\noindent assuming that $\mbox{Re}(b)>0$, $\mbox{Re}(s) > %\max(0,\mbox{Re}(k))$. 
+%In the above case
+%$$
+%b \leftrightarrow c + 1/2, \quad 
+%s \leftrightarrow \frac{n(1+\alpha^2)}{2} , \quad
+%a \leftrightarrow b + 1, \quad 
+%c \leftrightarrow c, \quad \mbox{and} \quad
+%k \leftrightarrow  \frac{nR^2}{2}.
+%$$
+
+
+%\noindent where the second line above follows from the 
+%change of variables $\sigma^2 = 1/\tau$.
+
+%\joc{
+%\noindent Equation 7.621 (4) of \cite{Gradshteyn2007} 
+%(the second line corrected from EH I, 269(5))
+%is
+
+%
+%\noindent The first holds since
+%$$
+%|s| = \frac{n(1+\alpha^2)}{2}  > |k| = \frac{nR^2}{2} \qquad %\mbox{(since $R^2 \in [0,1]$ and $\alpha^2\ge 0$)},
+%$$
+%
+%\noindent Checking the other conditions
+%$$
+%b \leftrightarrow c + 1/2 = (n-1)/2 + 1/2 = n/2 > 0.
+%$$
+%}
+
+\noindent 
+Utilizing  Equation 7.621 (4) of \cite{Gradshteyn2007} we obtain
+\begin{equation}\label{eq:alphaGivenY}
+\begin{array}{rl}
+\ds p(\alpha|\vy) 
+& \ds = \frac{ \Gamma\left( c + \tfrac{1}{2} \right) (1 -  R^2)^{b+1}  }{ \Gamma(c)\sqrt{\pi}} 
+\left( 1+\alpha^2 \right)^{-n/2} {}_2F_1\left( b+1, c + \frac{1}{2}; c; \frac{R^2}{1+\alpha^2}  \right),
+\end{array}
+\end{equation}
+
+\noindent where ${}_2F_1$ is the Gaussian hypergeometric function.
+
+The first three arguments of the ${}_2F_1$ function in (\ref{eq:alphaGivenY}) are $O(n)$. This makes 
+numerical evaluation of (\ref{eq:alphaGivenY}) difficult in general. In order to handle this difficulty
+we will first use the Euler transform
+Euler's identity 
+${}_{2}F_{1}(a,b;c;z)=(1-z)^{c-a-b}\,{}_{2}F_{1}(c-a,c-b;c;z)$ leading to
+\begin{equation}\label{eq:alphaGivenY_2}
+	\begin{array}{rl}
+		\ds p(\alpha|\vy) 
+		& \ds = \frac{ \Gamma\left( c + \tfrac{1}{2} \right)   }{ \Gamma(c)\sqrt{\pi}} 
+		\frac{(1 -  R^2)^{b+1}}{(  \alpha^2 + 1 - R^2 )^{b+3/2}}
+		\left( 1+\alpha^2 \right)^{ - (d+1) }   
+		
+		 {}_2F_1\left( d + 1,  - \frac{1}{2}; c; \frac{R^2}{1+\alpha^2}  \right),
+	\end{array}
+\end{equation}
+
+\noindent which is again more numerically stable to evaluate
+when $n$ is large.
+ 
+Unfortunately, we have not been able to find a closed form expression
+for $\vbeta|\vy$ in terms of known special functions. However,
+it is possible, for fixed $\vbeta$ to integrate $\int p(\vbeta|\vy,u)p(u|\vy)du$
+using  (\ref{eq:uGiveY})  and (\ref{eq:betaGivenYandU})
+%, i.e.,
+%$$
+%\begin{array}{rl}
+%\ds p(\vbeta|\vy)
+%& \ds =  \frac{(1 -  R^2)^{b+1} \Gamma\left( \tfrac{n+p-1}{2}\right)
+%	|\mX^T\mX|^{1/2} n^{(n+p-1)/2} }{\mbox{Beta}(b + 1,d+1) \Gamma\left( \tfrac{n-1}{2} \right) n^{p/2}\pi^{p/2}  } \\
+%& \ds \quad \times \int_0^1
+%u^{b - p/2 + (n+p-1)/2}  (1 - u)^d (  1 -  uR^2 )^{-(b + d + 2)-p/2 + (n+p-1)/2}  
+%\left[ n u \left( 1 - u R^2\right) + (\vbeta - u\widehat{\vbeta})^T
+%\mX^T\mX
+%(\vbeta - u\widehat{\vbeta}) \right]^{-(n+p-1)/2} du
+%\end{array}
+%$$ 
+via univariate numerical integration methods.
+Instead we will concentrate on deriving the first and second moments of $\vbeta|\vy$.
+
+
+In order to calculate the first and second posterior moments for $\vbeta$
+we use the laws of total expectation and variance respectively, i.e.,
+%$\bE(\vbeta|\vy) = \bE_{g|\vy}\left[ \vbeta|\vy,g \right]$, and
+%$\mbox{Cov}(\vbeta|\vy)  = \bE_{g|\vy}\left[
+%\mbox{Cov}(\vbeta|\vy,g)
+%\right] + \mbox{Cov}_{g|\vy}\left[
+%\bE(\vbeta|\vy,g)
+%\right]$ 
+%or equivalently 
+$\bE(\vbeta|\vy) = \bE\left[ \bE(\vbeta|\vy,u) |\vy \right]$, and
+$\mbox{Cov}(\vbeta|\vy)  = \bE\left[
+\mbox{Cov}(\vbeta|\vy,g)|\vy
+\right] + \mbox{Cov}\left[
+\bE(\vbeta|\vy,u)|\vy
+\right]$ 
+to obtain
+$$
+\begin{array}{rll}
+\ds \bE(\vbeta|\vy) 
+& \ds = M_1 \widehat{\vbeta}
+\\ %[1ex]
+\ds \mbox{Cov}(\vbeta|\vy) 
+%& \ds = \bE_{u|\vy}\left[ \frac{n - 1}{n - 3}
+%\left(\frac{n}{n-1}\right) u \left( 1 - u R^2\right) %(\mX^T\mX)^{-1}
+%\right] + \mbox{Cov}_{u|\vy}\left[
+%u \widehat{\vbeta} \right] 
+%\\ [2ex]
+& \ds = \tfrac{n}{n - 3} 
+\left( M_1 - M_2 R^2\right) (\mX^T\mX)^{-1}
++ (M_2 - M_1^2) \widehat{\vbeta}  \widehat{\vbeta}^T
+\end{array}
+$$
+
+\noindent where
+$M_1 
+%= \bE\left[  \left. \frac{g}{1 + g}  \right| \vy\right] 
+= \bE(u|\vy)$
+and
+%\qquad \mbox{and} \qquad 
+$M_2 
+%= \bE\left[ \left. \left(\frac{g}{1 + g}\right)^2   \right| \vy \right]
+= \bE(u^2|\vy)$.
+
+
+Using the normalizing constant for the GH distribution,
+Euler's identity and properties of the Beta function we obtain
+\begin{equation}\label{eq:M1}
+\begin{array}{rl}
+\ds M_1 
+%& \ds \joc{ = \frac{\mbox{Beta}(b + 2,d+1)}{\mbox{Beta}(b + 1,d + 1)} (1 -  R^2)^{b+1} {}_2F_1(b+d+2,b+2;b+d+3; R^2)
+%}
+%\\
+%& \ds \joc{= 
+%	\frac{\mbox{Beta}(d+1, b+2)}{\mbox{Beta}(d + 1, b + 1)} 
+%	(1 - R^2)^{b+1}
+%	{}_2 F_1 (c, b + 2; c + 1; R^2)
+%}
+%\\ [2ex]
+%& \ds  \joc{=    \frac{\mbox{Beta}(d+1, b+2)}{\mbox{Beta}(d + %1, b + 1)} 
+%	(1 - R^2)^{b+1}
+%	\times (1 - R^2)^{c + 1 - c - (b+2)}
+%	{}_2 F_1 (c + 1 - c, c + 1 - (b + 2); c + 1; R^2)        
+%}
+%\\ [2ex]
+%& \ds  \joc{=    
+%	\frac{\Gamma(b+2)}{\Gamma(c + 1)}
+%	\frac{\Gamma(c)}{\Gamma(b+1)}
+%	{}_2 F_1 (d + 1, 1; c + 1; R^2)        
+%}
+%\\ [2ex]
+& \ds  =    
+\frac{b + 1}{c}
+{}_2 F_1 (d + 1, 1; c + 1; R^2)    
+\end{array} 
+\end{equation}
+
+%\noindent Note that the same results can be obtained using 
+%\cite{Gradshteyn2007} Equation 3.197 (5).
+
+\noindent 
+and,
+\begin{equation}\label{eq:M2}
+\begin{array}{rl}
+\ds M_2
+%& \ds \joc{ = \frac{(1 - R^2)^{b+1}}{\mbox{Beta}(d + 1, b + 1)} 
+%	\int_0^\infty g^{b+2} (1 + g)^{-2} [1 + g (1 - R^2)]^{-c} dg 
+%}
+%\\ [2ex]
+%& \ds \joc{= 
+%\frac{\mbox{Beta}(d + 1, b+3) }{\mbox{Beta}(d + 1, b + 1)} 
+%(1 - R^2)^{b+1} {}_2 F_1 (c, b+3; c + 2; R^2)
+%}
+%\\
+%& \ds \joc{= 
+%\frac{\Gamma(b+3)}{\Gamma(c + 2)}
+%\frac{\Gamma(c)}{\Gamma(b+1)}
+%{}_2 F_1(d+1, 2; c+ 2; R^2)    
+%}
+%\\
+& \ds =
+\frac{(b+1)(b+2)}{c(c+1)}    {}_2 F_1(d+1, 2; c+ 2; R^2).    
+\end{array} 
+\end{equation}
 
 \section{Fully Bayesian inference}
 
-In this section, we derive the expression required for fully Bayesian inference for the model presented in
-Section \ref{sec:model}. Throughout the rest of this article, we will assume that assume without loss of
+In this section, we derive the expressions required for exact Bayesian inference for the model presented in
+Section \ref{sec:model}. Throughout the rest of this chapter, we will assume without loss of
 generality that $\vy^\top\vone = 0$ and that $\|\vy\|^2 = n$.
 
 \subsection{Derivation of the marginal likelihood}
@@ -129,20 +456,20 @@ $$
 	-\tfrac{p}{2}\log(2\pi g\sigma^2) + \tfrac{1}{2}\log|\mX^T\mX| - \tfrac{1}{2g\sigma^2}\vbeta^T\mX^T\mX\vbeta
 	\right\} d\vbeta
 	\\ [2ex]
-	  & \ds = \exp\left\{      
+	  & \ds = \quad \exp\left\{      
 	-\tfrac{n}{2}\log(2\pi\sigma^2) - \tfrac{1}{2\sigma^2}\|\vy\|^2 -\tfrac{p}{2}\log(2\pi g\sigma^2) + \tfrac{1}{2}\log|\mX^T\mX| \right\}
 	\\
 	  & \ds \quad \times \int 
 	\exp\left\{ - \tfrac{1}{2}\vbeta^T \left[ \sigma^{-2}(1+g^{-1})\mX^T\mX \right]\vbeta + \sigma^{-2}\vbeta^T\mX^T\vy
 	\right\} d\vbeta \\ [2ex]
-	  & \ds = \exp\left\{      
+	  & \ds = \quad \exp\left\{      
 	-\tfrac{n}{2}\log(2\pi\sigma^2) - \tfrac{1}{2\sigma^2}\|\vy\|^2 -\tfrac{p}{2}\log(2\pi g\sigma^2) + \tfrac{1}{2}\log|\mX^T\mX| \right\}
 	\\
 	  & \ds \quad \times      
 	|2\pi \left[ \sigma^{-2}(1+g^{-1})\mX^T\mX \right]^{-1}|^{1/2}\exp\left\{  \tfrac{1}{2\sigma^2}  \vy^T\mX\left[ (1+g^{-1})\mX^T\mX \right]^{-1}\mX^T\vy
 	\right\}
 	\\ [2ex]
-	  & \ds = \exp\left\{      
+	  & \ds = \quad \exp\left\{      
 	-\tfrac{n}{2}\log(2\pi\sigma^2) 
 	- \tfrac{1}{2\sigma^2}\|\vy\|^2 
 	-\tfrac{p}{2}\log(2\pi g\sigma^2) 
@@ -330,11 +657,11 @@ and into a form where we are able to use
 % $\frac{dh}{dg} = \frac{1}{1+g} - \frac{g}{(1 +g)^2} = \frac{1}{(1+g)^2} = (1 - h)^2$.
 Equation 3.383(i) of \citep{Gradshteyn1988},
 $$
-\int_{0}^u x^{\nu - 1} (u - x)^{\mu - 1}  e^{\beta x} dx = \mbox{Beta}(\nu,\mu) {}_1 F_1(\nu;\mu+\nu;\beta u)
+\int_{0}^u x^{\nu - 1} (u - x)^{\mu - 1}  e^{\beta x} dx = \mbox{Beta}(\nu,\mu) {}_1 F_1(\nu;\mu+\nu;\beta u), \text{ provided $\mbox{Re}(\mu)>0$, $\mbox{Re}(\nu)>0$}.
 $$
-to complete the resulting integral.
 
-\noindent provided $\mbox{Re}(\mu)>0$, $\mbox{Re}(\nu)>0$.
+\noindent to complete the resulting integral.
+
 
 \noindent We have
 $u = 1$, $\nu = b + 1 = \frac{n-p}{2} - a - 1 >0$, $\mu = a + p/2 + 1 >0$, and 
@@ -427,9 +754,7 @@ $$
 	                   & = \left( \frac{n}{n - 2} \right) (M_1 - M_2 R^2) (\mX^\top \mX)^{-1} + (M_2 - M_1^2) \vbetahatls \vbetahatls^\top                                                                                      
 \end{align*}
 
-\noindent where $G_1 = \E\left[\frac{g}{1 + g} \Bigm| \vy \right]$ and $G_2 = \E\left[ \left(\frac{g}{1 + g} \right)^2 \Bigm| \vy \right]$. We will calculate these expectations below.
-
-To calculate $G_1$, we evaluate the integral
+\noindent where $G_1 = \E\left[\frac{g}{1 + g} \Bigm| \vy \right]$ and $G_2 = \E\left[ \left(\frac{g}{1 + g} \right)^2 \Bigm| \vy \right]$. To calculate $G_1$, we evaluate the integral
 
 \begin{align*}
 	\E\left[\frac{g}{1 + g} \Bigm| \vy \right] & = \int_0^\infty \frac{g}{1 + g} p(g | \vy) dg                                                                      \\
@@ -468,7 +793,43 @@ Similiarly, we compute $G_2$ by evaluating
 \section{Numerical experiments}
 \label{sec:num_exp}
 
-Let $\kappa$ be the inflation factor such that for the examples under consideration $n = \kappa p$.
+We calculated the posterior distributions for $\alpha$, $\sigma^2$, $\vbeta$ and $g$ for a range  $p$ and
+$R^2$ values, and compared these exact posterior distributions against the approximations of the posterior
+distributions calculated using Monte Carlo Markov Chains. The comparison was made for $n = 120$,  and for all
+combinations of $p = 3$, $20$, or $100$ and $R^2 = 0.05$ or $0.95$.
+The results for $\alpha | \vy$ are presented in Figure \ref{fig:alphaGivenY},
+The results for $\sigma^2 | \vy$ are presented in Figure \ref{fig:sigma2GivenY},
+The results for $g | \vy$ are presented in Figure \ref{fig:gGivenY},
+
+The posterior distribution of the regression co-efficients $\vbeta$ was approximated using the Laplace 
+approximation presented above, and compared to % approximations
+The results of this comparison for the \texttt{Hitters} data set are presented in $\ref{fig:BetaHitters}$
+
+\begin{figure}
+	\includegraphics[scale=0.5]{code/alphaGivenY.pdf}
+	\label{fig:alphaGivenY}
+	\caption{The distribution of $\alpha | y$ for $n = 120$, $p = 3$, $20$ or $100$ and $R^2 = 0.05$ or $0.95$.}
+\end{figure}
+
+\begin{figure}
+	\includegraphics[scale=0.5]{code/sigma2GivenY.pdf}
+	\label{fig:sigma2GivenY}
+	\caption{The distribution of $\sigma^2 | y$ for $n = 120$, $p = 3$, $20$ or $100$ and $R^2 = 0.05$ or $0.95$.}
+\end{figure}
+
+\begin{figure}
+	\includegraphics[scale=0.5]{code/gGivenY.pdf}
+	\label{fig:gGivenY}
+	\caption{The distribution of $g | y$ for $n = 120$, $p = 3$, $20$ or $100$ and $R^2 = 0.05$ or $0.95$,
+					 when the prior on $g$ is the Beta Prime prior from \citep{Maruyama2011}.}
+\end{figure}
+
+\begin{figure}
+	\includegraphics[scale=0.5]{code/BetaHitters.pdf}
+	\label{fig:BetaHitters}
+	\caption{The distribution of the regression co-efficient posteriors for the Hitters data set.}
+\end{figure}
+
 
 \subsection{Implementation details}
 \label{sec:implementation}
@@ -491,395 +852,10 @@ p^3)$ operation to $\BigO(n p^2)$.
 
 \mgc{Think about distribution of bit strings. What is the expectation of $p$? I think it's simply $p/2$}
 
-\subsection{Results}
-
-To assess the accuracy of our variational approximations to the exact posteriors, we examined a number of
-measures. All of the measures that we examined were functions of $\kappa$, $p$ and $R^2$, and so serve to
-characterise the performance of our approximation on any possible data set with a number of observations
-$n$, number of covariates $p$ and correlation $R$ between the response $\vy$ and the covariate matrix $\mX$.
-
-\subsection{Shrinkage}
-
-Exact posterior and approximate shrinkage $\left( \frac{g}{1 + g} \right)$ were calculated for a range of
-values of $p$, $n$ and $R^2$ to compare their values. As can be seen from Figure $\ref{fig:shrinkage}$, the
-values of the exact posterior shrinkage and approximate shrinkage are almost the same over most of the range
-of these values, with deviation only noticeable in the $p=10$ and $p=20$ cases.
-
-\begin{figure}[p]
-	\includegraphics[width=17cm, height=17cm]{code/taug/Shrinkage.pdf}
-	\caption{The ratio $\frac{g}{1 + g} | \vy$ controls the degree to which the model fit tends back towards
-		the prior mean. This ratio is approximated in the variational approximation by $(1 + \tau_g^{-1})^{-1}$. We
-		compare these two quantities in the figure above for a range of numbers of covariates, sample sizes and $R^2$
-		values. Here $n = \kappa p$.}
-	\label{fig:shrinkage}
-\end{figure}
-
-Coefficient posterior variance \\
-
-We can see from Figure \ref{fig:variance} that as $p$ and $\kappa$ increase, the approximation to the
-posterior variance of \ldots becomes more and more accurate.
-
-\begin{figure}[p]
-	\includegraphics[width=17cm, height=17cm]{code/taug/Variance.pdf}
-	\caption{The posterior variance of the example model $p(\sigma^2 | \vy)$ is compared against the approximation
-		to the posterior variance $q(\sigma^2)$ across a range of numbers of covariates, sample sizes and $R^2$
-		values. Here $n = \kappa p$.}
-	\label{fig:variance}
-\end{figure}
-
-Accuracy of approximation to $p(\sigma^2 | \vy)$ \\
-
-We assessed the accuracy of the approximation to $p(\sigma^2 | \vy)$ by $q(\sigma^2)$ by numerically evaluating
-the integral
-\[
-	1 - \frac{1}{2} \int_0^\infty |p(\sigma^2 | \vy) - q(\sigma^2)| d \sigma^2
-\]
-for a range of values of $p$, $\kappa$ and $R^2$. The results are presented in Figure \ref{fig:accuracy_sigma2}.
-
-\begin{figure}[p]
-	\includegraphics[width=17cm, height=17cm]{code/taug/Accuracy_sigma2.pdf}
-	\caption{The accuracy of the approximation $q(\sigma^2)$ is assessed by computing the integral   $1 -
-		\frac{1}{2} \int_0^\infty |p(\sigma^2 | \vy) - q(\sigma^2)| d \sigma^2$ and graphing the result over a range
-		of numbers of covariates, sample sizes and $R^2$  values. Here $n = \kappa p$.}
-	\label{fig:accuracy_sigma2}
-\end{figure}
-
-Accuracy of approximation to $p(g | \vy)$ \\
-
-\begin{figure}[p]
-	\includegraphics[width=17cm, height=17cm]{code/taug/Accuracy_g.pdf}
-	\caption{The accuracy of the approximation $q(g)$ is assessed by computing the integral   $1 -
-		\frac{1}{2} \int_0^\infty |p(g | \vy) - q(g)| d g$ and graphing the result over a range
-		of numbers of covariates, sample sizes and $R^2$  values. Here $n = \kappa p$.}
-	\label{fig:accuracy_g}
-\end{figure}
-
-We assessed the accuracy of the approximation to $p(g | \vy)$ by $q(g)$ by numerically evaluating the integral
-\[
-	1 - \frac{1}{2} \int_0^\infty |p(g | \vy) - q(g)| d g
-\]
-for a range of values of $p$, $\kappa$ and $R^2$. The results are presented in Figure \ref{fig:accuracy_g}.
-
-
-$\log{p(\vy)}$ versus ELBO \\
-
-We assessed the accuracy of the variational lower bound by calculating the relative error of
-$\log{\underline{p}(\vy)}$ versus $\log{p(\vy)}$. The results are presented in Figure
-\ref{fig:relative_error}.
-
-\begin{figure}[p]
-	\includegraphics[width=17cm, height=17cm]{code/taug/Relative_error_log_p.pdf}
-	\caption{The accuracy of the variational lower bound was assessed by computing the relative error
-		$\frac{\log p(\vy) - \log \underline{p}(\vy)}{p(\sigma^2 | \vy)}$ over a range
-		of numbers of covariates, sample sizes and $R^2$  values. Here $n = \kappa p$.}
-	\label{fig:relative_error}
-\end{figure}
-
-Precision \\
-
-The accuracy of the precision was assessed by calculating the relative error of the approximate precision
-versus the exact posterior precision. The results are presented in Figure \ref{fig:precision}. As $p$ and
-$\kappa$ increase, we can see that the approximate precision is converging towards the exact precision for all
-values of $R^2$.
-
-\begin{figure}[p]
-	\includegraphics[width=17cm, height=17cm]{code/taug/Precision.pdf}
-	\caption{The accuracy of the approximation to the posterior precision was assessed by plotting
-		$p(\sigma^{-2} | \vy)$ against $q(\sigma^{-2})$ over a range
-		of numbers of covariates, sample sizes and $R^2$  values. Here $n = \kappa p$.}
-	\label{fig:precision}
-\end{figure}
-
-\subsection{Marginal covariate inclusion probabilities}
-
-The marginal covariate inclusion probabilities from the variational approximation match those from the the
-exact posterior likelihood very closely. Comparing these marginal covariate inclusion probabilities to those
-produced by weighting each model considered by AIC and BIC, we see that the probabilities produced by the
-variational approximation and exact posterior likelihood are more conservative.
-
-\begin{figure}[p]
-	\includegraphics[width=17cm, height=17cm]{code/taug/Log_of_Relative_error_of_Variance_of_g.pdf}
-	\caption{The accuracy of the approximation to the variance of $g$ was assessed by computing the relative
-		error of $q(g)$ relative to $p(g | \vy)$ over a range
-		of numbers of covariates, sample sizes and $R^2$  values. Here $n = \kappa p$.}
-	\label{fig:rel_error_var_g}
-\end{figure}
-
-
-% vw1 <- read.csv("Hitters_vw1.csv", header=FALSE)
-% r <- hist(as.matrix(vw1), breaks=19, axes=FALSE, prob=TRUE, main="", xlab="")
-% axis(1, r$mid, c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18"))
-
-% bodyfat
-% Major League Baseball Data from the 1986 and 1987 seasons.
-% An Introduction to Statistical Learning with Applications in R
-
-% \begin{tabular}{|l|lllllllllllllllllll|}
-% 	\hline
-% 	$\vp$ & 0.137 & 0.130 & 0.257 & 0.982 & 0.921 & 0.173 & 0.633 & 0.562 & 0.623 & 0.480 & 0.441 & 0.499 & 0.197 & 0.926 & 0.131 & 0.174 & 0.128 & 0.901 & 0.851 \\
-% 	$\vq$ & 0.137 & 0.130 & 0.257 & 0.982 & 0.922 & 0.172 & 0.635 & 0.562 & 0.625 & 0.480 & 0.440 & 0.499 & 0.197 & 0.927 & 0.130 & 0.173 & 0.127 & 0.902 & 0.853 \\
-% 	\hline
-% \end{tabular}
-
-\subsubsection{Hitters}
-
-The Hitters data set was taken from the StatLib library maintained by Carnegie Mellon University, and used in
-\citep{James:2014:ISL:2517747}. The data was gathered from the the performance of players during the Major
-League Baseball seasons for 1986 and 1987, and includes the following covariates:
-
-\begin{tabular}{|ll|}
-	\hline
-	Covariate & Description                                                                        \\
-	\hline
-	AtBat     & Number of times at bat in 1986                                                     \\
-	Hits      & Number of hits in 1986                                                             \\
-	HmRun     & Number of home runs in 1986                                                        \\
-	Runs      & Number of runs in 1986                                                             \\
-	RBI       & Number of runs batted in in 1986                                                   \\
-	Walks     & Number of walks in 1986                                                            \\
-	Years     & Number of years in the major leagues                                               \\
-	CAtBat    & Number of times at bat during his career                                           \\
-	CHits     & Number of hits during his career                                                   \\
-	CHmRun    & Number of home runs during his career                                              \\
-	CRuns     & Number of runs during his career                                                   \\
-	CRBI      & Number of runs batted in during his career                                         \\
-	CWalks    & Number of walks during his career                                                  \\
-	League    & A factor with levels A and N indicating player’s league at the end of 1986       \\
-	Division  & A factor with levels E and W indicating player’s division at the end of 1986     \\
-	PutOuts   & Number of put outs in 1986                                                         \\
-	Assists   & Number of assists in 1986                                                          \\
-	Errors    & Number of errors in 1986                                                           \\
-	Salary    & 1987 annual salary on opening day in thousands of dollars                          \\
-	NewLeague & A factor with levels A and N indicating player’s league at the beginning of 1987 \\
-	\hline
-\end{tabular}
-
-The marginal covariate inclusion probabilities are presented in Figure \ref{fig:Hitters_inclusion}.
-
-\begin{figure}[p]
-	\includegraphics[scale=.4]{Hitters_variable_selection.pdf}
-	\caption{Hitters marginal inclusion probablities}
-	\label{fig:Hitters_inclusion}
-\end{figure}
-
-The model ranking scatterplots are presented in Figure \ref{fig:Hitters_model_ranking}.
-
-
-
-\begin{figure}[p]
-	\includegraphics[scale=.4]{code/Model_selection_scatter_plot_1.pdf}
-	\caption{Hitters model ranking scatterplot}
-	\label{fig:Hitters_model_ranking}
-\end{figure}
-
-\subsubsection{Body Fat}
-The Body Fat data set was taken from \citep{Tarr2015}, and is on the relationship between percentage of body
-fat and simple body measurements. The data set consists of 128 observations, and the covariates in the data set
-are:
-
-\begin{tabular}{|ll|}
-	\hline
-	Covariate & Description                                                                  \\
-	\hline
-	Id        & Identifier                                                                   \\
-	Bodyfat   & Bodyfat percentage                                                           \\
-	Age       & Age (years)                                                                  \\
-	Weight    & Weight (kg)                                                                  \\
-	Height    & Height (inches)                                                              \\
-	Neck      & Neck circumference (cm)                                                      \\
-	Chest     & Chest circumference (cm)                                                     \\
-	Abdo      & Abdomen circumference (cm) "at the umbilicus and level with the iliac crest" \\
-	Hip       & Hip circumference (cm)                                                       \\
-	Thigh     & Thigh circumference (cm)                                                     \\
-	Knee      & Knee circumference (cm)                                                      \\
-	Ankle     & Ankle circumference (cm)                                                     \\
-	Bic       & Extended biceps circumference (cm)                                           \\
-	Fore      & Forearm circumference (cm)                                                   \\
-	Wrist     & Wrist circumference (cm) "distal to the styloid processes"                   \\
-	\hline
-\end{tabular}
-
-The marginal covariate inclusion probabilities are presented in Figure \ref{fig:bodyfat_inclusion}.
-
-% \begin{tabular}{|l|lllllllllllll|}
-% 	\hline
-% 	$\vp$ & 0.938 & 0.136 & 0.182 & 0.072 & 0.071 & 0.108 & 0.147 & 1.000 & 0.134 & 0.141 & 0.323 & 0.619 & 0.221 \\
-% 	$\vq$ & 0.939 & 0.136 & 0.182 & 0.071 & 0.070 & 0.107 & 0.146 & 1.000 & 0.134 & 0.140 & 0.323 & 0.620 & 0.221 \\
-% 	\hline
-% \end{tabular}
-
-\begin{figure}[p]
-	\includegraphics[scale=.4]{bodyfat_variable_selection.pdf}
-	\caption{bodyfat marginal inclusion probablities}
-	\label{fig:bodyfat_inclusion}
-\end{figure}
-
-The model ranking scatterplots are presented in Figure \ref{fig:bodyfat_model_ranking}.
-
-\begin{figure}[p]
-	\includegraphics[scale=.4]{code/Model_selection_scatter_plot_2.pdf}
-	\caption{bodyfat model ranking scatterplot}
-	\label{fig:bodyfat_model_ranking}
-\end{figure}
-
-\subsubsection{Wage}
-
-The Wage gap data set was taken from \citep{James:2014:ISL:2517747}, on 3000 workers in the Mid-Atlantic
-region. The data set includes 12 covariates:
-
-\begin{tabular}{|ll|}
-	\hline
-	Covariate        & Description                                                                           \\
-	\hline
-	Year             & Year that the wage information was recorded                                           \\
-	Age              & Age of worker                                                                         \\
-	Sex              & Gender                                                                                \\
-	Marital status   & Marital status -- Never Married, Married, Widowed, Divorced or Seperated              \\
-	Race             & White, Black, Asian or Other                                                          \\
-	Education        & Education level -- Did not graduate high school, Graduated high school, Some College, 
-	College Graduate \\
-	                 & or Advanced College Degree                                                            \\
-	Region           & Region of the country                                                                 \\
-	Job class        & Type of job                                                                           \\
-	Health           & Either Good or Less, or Very Good or Better                                           \\
-	Health insurance & Yes or No                                                                             \\
-	Log of wage      & The log of the worker's wage                                                          \\
-	Wage             & The worker's wage                                                                     \\
-	\hline
-\end{tabular}
-
-The marginal covariate inclusion probabilities are presented in Figure \ref{fig:Wage_inclusion}.
-
-% \begin{tabular}{|l|lllllllllllllllll|}
-% 	\hline
-% 	$\vp$ & 1 & 1 & 0.010 & 0.024 & 1 & 0.054 & 0.083 & 0.019 & 0.011 & 0.010 & 0.013 & 0.014 & 0.011 & 0.014 & 0.057 & 0.042 & 0.033 \\
-% 	$\vq$ & 1 & 1 & 0.010 & 0.024 & 1 & 0.054 & 0.083 & 0.019 & 0.011 & 0.010 & 0.013 & 0.014 & 0.011 & 0.014 & 0.057 & 0.042 & 0.033 \\
-% 	\hline
-% \end{tabular}
-
-\begin{figure}[p]
-	\includegraphics[scale=.4]{Wage_variable_selection.pdf}
-	\caption{Wage marginal inclusion probablities}
-	\label{fig:Wage_inclusion}
-\end{figure}
-
-The model ranking scatterplots are presented in Figure \ref{fig:Wage_model_ranking}.
-
-\begin{figure}[p]
-	\includegraphics[scale=.4]{code/Model_selection_scatter_plot_3.pdf}
-	\caption{Wage model ranking scatterplot}
-	\label{fig:Wage_model_ranking}
-\end{figure}
-
-
-\subsubsection{Graduation Rate}
-
-The Graduation Rate data set was taken from \citep{James:2014:ISL:2517747}. The data is drawn from the 1995
-issue of US News and World Report, and is on a large number of US Colleges. The data set consists of 777
-observations, and includes the following covariates:
-
-\begin{tabular}{|ll|}
-	\hline
-	Covariate   & Description                                                             \\
-	\hline
-	Private     & A factor with levels No and Yes indicating private or public university \\
-	Apps        & Number of applications received                                         \\
-	Accept      & Number of applications accepted                                         \\
-	Enroll      & Number of new students enrolled                                         \\
-	Top10perc   & Percentage of new students from top 10\% of H.S. class                  \\
-	Top25perc   & Percentage of new students from top 25\% of H.S. class                  \\
-	F.Undergrad & Number of fulltime undergraduates                                       \\
-	P.Undergrad & Number of parttime undergraduates                                       \\
-	Outstate    & Out-of-state tuition                                                    \\
-	Room.Board  & Room and board costs                                                    \\
-	Books       & Estimated book costs                                                    \\
-	Personal    & Estimated personal spending                                             \\
-	PhD         & Percentage of faculty with Ph.D.’s                                    \\
-	Terminal    & Percentage of faculty with terminal degree                              \\
-	S.F.Ratio   & Student/faculty ratio                                                   \\
-	perc.alumni & Percentage of alumni who donate                                         \\
-	Expend      & Instructional expenditure per student                                   \\
-	Grad.Rate   & Graduation rate                                                         \\
-	\hline
-\end{tabular}
-
-The marginal covariate inclusion probabilities are presented in Figure \ref{fig:GradRate_inclusion}.
-
-% \begin{tabular}{|l|lllllllllllllllll|}
-% 	\hline
-% 	$\vp$ & 0.913 & 1.000 & 0.090 & 0.108 & 0.110 & 0.602 & 0.127 & 0.945 & 0.999 & 0.999 & 0.201 & 0.864 & 0.262 & 0.105 & 0.146 & 0.977 & 0.437 \\
-% 	$\vq$ & 0.914 & 1.000 & 0.090 & 0.108 & 0.110 & 0.602 & 0.127 & 0.945 & 0.999 & 0.999 & 0.201 & 0.864 & 0.262 & 0.105 & 0.146 & 0.977 & 0.437 \\
-% 	\hline
-% \end{tabular}
-
-\begin{figure}[p]
-	\includegraphics[scale=.4]{GradRate_variable_selection.pdf}
-	\caption{GradRate marginal inclusion probablities}
-	\label{fig:GradRate_inclusion}
-\end{figure}
-
-The model ranking scatterplots are presented in Figure \ref{fig:GradRate_model_ranking}.
-
-\begin{figure}[p]
-	\includegraphics[scale=.4]{code/Model_selection_scatter_plot_4.pdf}
-	\caption{GradRate model ranking scatterplot}
-	\label{fig:GradRate_model_ranking}
-\end{figure}
-
-\subsubsection{US Crime}
-The US Crime data set was taken from the \texttt{MASS} package \citep{Venables2002}, and is on the effect of
-punishment regimes on crime rates. The data set includes 47 states of the United States of America. The
-variables have been re-scaled for convenience, and include the following covariates:
-
-\begin{tabular}{|ll|}
-	\hline
-	Covariate & Description                                                     \\
-	\hline
-	M         & percentage of males aged 14–24.                               \\
-	So        & indicator variable for a Southern state.                        \\
-	Ed        & mean years of schooling.                                        \\
-	Po1       & police expenditure in 1960.                                     \\
-	Po2       & police expenditure in 1959.                                     \\
-	LF        & labour force participation rate.                                \\
-	M.F       & number of males per 1000 females.                               \\
-	Pop       & state population.                                               \\
-	NW        & number of non-whites per 1000 people.                           \\
-	U1        & unemployment rate of urban males 14–24.                       \\
-	U2        & unemployment rate of urban males 35–39.                       \\
-	GDP       & gross domestic product per head.                                \\
-	Ineq      & income inequality.                                              \\
-	Prob      & probability of imprisonment.                                    \\
-	Time      & average time served in state prisons.                           \\
-	y         & rate of crimes in a particular category per head of population. \\
-	\hline
-\end{tabular}
-
-The marginal covariate inclusion probabilities are presented in Figure \ref{fig:USCrime_inclusion}.
-
-% \begin{tabular}{|l|lllllllllllllll|}
-% 	\hline
-% 	$\vp$ & 0.226 & 0.849 & 0.997 & 0.216 & 0.502 & 0.244 & 0.358 & 0.569 & 0.324 & 0.202 & 0.424 & 0.696 & 0.869 & 0.229 & 0.655 \\
-% 	$\vq$ & 0.220 & 0.856 & 0.997 & 0.210 & 0.507 & 0.240 & 0.358 & 0.573 & 0.318 & 0.196 & 0.418 & 0.699 & 0.876 & 0.224 & 0.661 \\
-% 	\hline
-% \end{tabular}
-
-\begin{figure}[p]
-	\includegraphics[scale=.4]{USCrime_variable_selection.pdf}
-	\caption{USCrime marginal inclusion probablities}
-	\label{fig:USCrime_inclusion}
-\end{figure}
-
-The model ranking scatterplots are presented in Figure \ref{fig:USCrime_model_ranking}.
-
-\begin{figure}[p]
-	\includegraphics[scale=.4]{code/Model_selection_scatter_plot_5.pdf}
-	\caption{USCrime model ranking scatterplot}
-	\label{fig:USCrime_model_ranking}
-\end{figure}
-
 \section{Conclusion and Discussion}
 \label{sec:conclusion}
 
+% This is all invalid now
 The Variational Bayes approximation produces results which are almost identical to the exact likelihood.
 The VB metholodology extends naturally to new situations, such as robust model fitting, mixed effects, missing
 data, measurement error and splines. We are able to retain high accuracy with less computational overhead than
@@ -921,5 +897,3 @@ Equation 3.385 of \citep{Gradshteyn1988} is
 
 \noindent provided $\mbox{Re}(\lambda)>0$, $\mbox{Re}(\nu)>0$ and $|\mbox{arg}(1-\beta)|<\pi$.
 
-\section{Derivation of Naive Mean Field Updates}
-\label{sec:appendix}
