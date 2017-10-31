@@ -1,6 +1,49 @@
+% Chapter_4_g_prior_posteriors_old.tex
 \chapter{Posterior distributions of regression model parameters under Maruyama's Beta-Prime prior}
 
-% Chapter_4_g_prior_posteriors
+\section{Introduction}
+
+There has been a large amount of research in recent years into the appropriate choice of suitable 
+and meaningful priors for linear regression models in the context of Bayesian model selection and 
+averaging. Specification of the prior structure of these models must be made with great care in 
+order for Bayesian model selection and averaging procedures to have good theoretical properties. 
+A key problem in this context occurs when the models have differing dimensions and non-common 
+parameters where inferences are typically highly sensitive to the choice of priors for the 
+non-common parameters due to the Jeffreys-Lindley-Bartlett paradox \citep{Lindley1957,Bartlett1957,OrmerodEtal2017}.
+Furthermore, this sensitivity does not necessarily vanish as the sample size 
+grows \cite{Kass1995,Berger2001}.  
+
+Bayes factors in the context of linear model selection 
+\citep{Zellner1980,
+	Zellner1980b,
+	Mitchell1988,
+	George1993,
+	Fernandez2001,
+	Liang2008,
+	Maruyama2011,
+	Bayarri2012}
+have received an 
+enormous amount of attention. A landmark paper in this field is \cite{Liang2008}.
+\cite{Liang2008} considers particular priors structure for the model parameters. 
+It particular they consider a Zellner's $g$-prior \cite{Zellner1980,Zellner1986} 
+the regression coefficients where $g$ is a prior hyperparameter. The parameter $g$
+requires special consideration. If $g$ is set to a large constant post of the posterior
+mass is placed on the null model, a phenomenon they refer to as Bartlett's paradox.
+Due to this problem they consider setting $g=n$ \citep{Kass1995b},  $g=p^2$ \cite{Foster1994},
+and $g=\max(n,p^2)$ \citep{Fernandez2001}. \cite{Liang2008} showed that these choices
+lead to what they call the information paradox where the posterior probability of the
+true model does not tend to 1 as the sample size grows. \cite{Liang2008} also considers
+a local and global empirical Bayes (EB) procedure for selecting $g$. In these cases \cite{Liang2008}
+show that these EB procedures are model selection consistent except when the true model is the null
+model (the model containing the intercept only). The above problems suggest that a prior should
+be placed on $g$.
+
+In this paper we review the prior structures that lead to closed form expressions for Bayes factors for linear models.
+These include the hyper-$g$ prior of \cite{Liang2008}, the beta-prime prior of \cite{Maruyama2011}, the robust 
+prior of \cite{Bayarri2012}, and most recently the cake prior of \cite{OrmerodEtal2017}. We concern ourselves with the efficient, accurate and numerically stable evaluation of Bayes factors, Bayesian model averaging ,
+and Bayesian model selection  for linear models 
+under the above choices of prior structures for the model parameters.
+
 \section{Hyperpriors on $g$}
 
 Here we outline some of the choices of hyperpriors for $g$ used in the literature, their
@@ -87,7 +130,7 @@ p_{g/n}(\vy|\vgamma)
 \end{equation}
 
 \noindent where $u=g/(1+g)$. Employing 
-Equation 3.211 of \cite{Gradshteyn2007} 
+Equation 3.211 of \cite{Gradshteyn1988} 
 $$
 F_1(a,b_1,b_2,c; x,y) = \frac{\Gamma(c)} {\Gamma(a)\Gamma(c-a)} 
 \int_0^1 t^{a-1} (1-t)^{c-a-1} (1-xt)^{-b_1} (1-yt)^{-b_2} \, dt
@@ -100,7 +143,7 @@ leads to
 \end{equation}
 
 \noindent where
-$F_1$ being the Appell hypergeometric function in two variables 
+$F_1$ is the Appell hypergeometric function in two variables 
 \cite{Weisstein2009}. 
 
 
@@ -150,7 +193,7 @@ $$
 %$b$ such that
 %$a+b+2 = (n - p_\vgamma - 1)/2$, implying
 $b = (n - p_\vgamma - 5)/2 - a$, then the exponent of the $(1 + g)$ term in the equation above is zero.
-Using Equation 3.194 (iii) of \cite{Gradshteyn2007}
+Using Equation 3.194 (iii) of \cite{Gradshteyn1988}
 (see Appendix A) we obtain
 \begin{equation}\label{eq:marginalLikelihoodBetaPrime}
 \begin{array}{rl}
@@ -206,7 +249,7 @@ leads to an expression for $p(\vy|\vgamma)$ of the form
 \noindent where $\widehat{\sigma}_\vgamma^2 = 1 - R_\vgamma^2$ is the MLE
 for $\sigma^2$ for model (\ref{eq:linearModel}) when $\mX$ is replaced with $\mX_\vgamma$ under the standardization described in Section 2.
 Using the substitution 
-$x = (1 + L)/(g - L)$ followed by Equation 3.197(5) of \cite{Gradshteyn2007}
+$x = (1 + L)/(g - L)$ followed by Equation 3.197(5) of \cite{Gradshteyn1988}
 (see Appendix A) leads to
 \begin{equation}\label{eq:yGivenGammaRobust}
 \ds \mbox{BF}_{{rob}}(\vgamma)
@@ -233,7 +276,7 @@ Instead suppose we begin with $x = g - L$
 %\ds = \frac{K(n)}{2}\left(\frac{1+n}{1 + p_\vgamma}  \right)^{1/2} %(\widehat{\sigma}_\vgamma^2)^{-(n-1)/2}
 %\int_0^\infty  (1 + L + h)^{(n - p_\vgamma)/2 - 2}\left[  \frac{1 + %L\widehat{\sigma}_\vgamma^2}{\widehat{\sigma}_\vgamma^2} + h \right]^{-(n-1)/2} dh.
 %$$
-and then  employ of Equation 3.197(1) of \cite{Gradshteyn2007} leading to
+and then  employ of Equation 3.197(1) of \cite{Gradshteyn1988} leading to
 \begin{equation}\label{eq:yGivenGammaRobust2}
 \ds \mbox{BF}_{{rob}}(\vgamma)
 \ds = \left( \frac{1 + n}{1 + p_\vgamma} \right)^{(n - p_\vgamma - 1)/2} \frac{\left( 1 + L\widehat{\sigma}_\vgamma^2 \right)^{-(n - 1)/2}}{1 + p_\vgamma}
@@ -388,3 +431,4 @@ Now, we apply the cake prior $\delta(g; h^{1/(1 + p_\vgamma)})$ to obtain
 \[
 	\frac{\Gamma(\frac{n}{2})}{(n \pi)^{n/2}} \frac{(1 + h^{1/(1 + p_\vgamma)})^{(n-p)/2}}{(1 + h^{1/(1 + p_\vgamma)} \hat{\sigma^2_\vgamma})^{n/2} (1 + nh^{1/(1 + p_\vgamma)})^{1/2}}
 \]
+

@@ -1,13 +1,15 @@
-\documentclass{amsart}[12pt]
+% \documentclass{amsart}[12pt]
+% \documentclass{book}[12pt]
+\documentclass[PhD,stats]{usydthesis}[12pt]
 
-\addtolength{\oddsidemargin}{-.75in}%
-\addtolength{\evensidemargin}{-.75in}%
-\addtolength{\textwidth}{1.5in}%
-\addtolength{\textheight}{1.3in}%
-\addtolength{\topmargin}{-.8in}%
-\addtolength{\marginparpush}{-.75in}%
-%\setlength\parindent{0pt}
-%\setlength{\bibsep}{0pt plus 0.3ex}
+% \addtolength{\oddsidemargin}{-.75in}%
+% \addtolength{\evensidemargin}{-.75in}%
+% \addtolength{\textwidth}{1.5in}%
+% \addtolength{\textheight}{1.3in}%
+% \addtolength{\topmargin}{-.8in}%
+% \addtolength{\marginparpush}{-.75in}%
+% \setlength\parindent{0pt}
+% \setlength{\bibsep}{0pt plus 0.3ex}
 
 \usepackage[authoryear]{natbib}
 \usepackage[doublespacing]{setspace}
@@ -26,27 +28,28 @@
 \usepackage{fancyhdr}
 \usepackage{url}
 %\usepackage[all]{xy}
+\usepackage{cancel}
 
-\title{Introduction}
+\title{Using Mean Field Variational Bayes to approximate things unless we can get them exactly. Then we do that.}
 \author{Mark Greenaway}
-\input{include.tex}
-\input{Definitions.tex}
 
-\usepackage[doublespacing]{setspace}
-
-\input{include.tex}
-\input{Definitions.tex}
+\input{include}
+\input{Definitions}
 
 \newcommand{\mgc}[1]{{\color{blue}#1}}
 \newcommand{\joc}[1]{{\color{red}#1}}
 
-
 \begin{document}
+
+\maketitle
+
+\tableofcontents
 
 \include{Chapter_1_preliminary}
 \include{Chapter_2_zero_inflated_models}
-\include{Chapter_3_normal_linear_models}
-\include{Chapter_4_Collapsed_Variational_Bayes}
+\include{Chapter_3_g_prior_posterior}
+\include{Chapter_4_Collapsed_Variational_Approximations}
+\include{Chapter_5_regression_posteriors}
 
 \bibliographystyle{elsarticle-harv}
 \bibliography{references_mendeley}
