@@ -1,55 +1,44 @@
-\documentclass{amsart}[12pt]
-% \documentclass{usydthesis}[12pt]
+\chapter{Collapsed Variational Approximation}
 
-\addtolength{\oddsidemargin}{-.75in}%
-\addtolength{\evensidemargin}{-.75in}%
-\addtolength{\textwidth}{1.5in}%
-\addtolength{\textheight}{1.3in}%
-\addtolength{\topmargin}{-.8in}%
-\addtolength{\marginparpush}{-.75in}%
-%\setlength\parindent{0pt}
-%\setlength{\bibsep}{0pt plus 0.3ex}
-
-\usepackage[authoryear]{natbib}
-\usepackage[doublespacing]{setspace}
-\usepackage{graphicx}
-\usepackage{algorithm,algorithmic}
-\usepackage{color}
-
-\title{Collapsed Variational Approximation}
-\author{Mark Greenaway}
-\input{include.tex}
-\input{Definitions.tex}
-
-\newcommand{\mgc}[1]{{\color{blue}#1}}
-\newcommand{\joc}[1]{{\color{red}#1}}
-
-\begin{document}
 \setlength{\parindent}{0pt}
-\maketitle
-
-\section{Abstract}
-
-Bayesian model selection is computationally expensive, and prone to getting stuck in local minima if the
-posterior likelihood is multi-modal. This issue is particularly acute if the spike-and-slab prior,
-particularly popular for Bayesian model selection, is used. We seek to address both problems by proposing a
-population non-parametric Variational Bayes approximation algorithm - a population-based optimisation
-strategy. Maintaining a population allows the posterior distribution to be explored more thoroughly, finding
-multiple maxima. The variational approximation's lower bound includes an entropy term which ensures diversity
-in the population by penalising similarity (the particles repel each other). This ensures the high probability
-regions of the posterior distribution is thoroughly explored. This better reflects model selection
-uncertainty.
 
 \section{Introduction}
 
 Bayesian model selection is a powerful set of techniques for model selection. These techniques are especially
-useful in problems of high-dimension, such as bioinformatics problems where the model space is complex and
-the optimal model is difficult for statisticians to manually specify.
+useful in problems of high-dimension, such as bioinformatics problems where the model space is complex and the
+optimal model is difficult for statisticians to manually specify. But Bayesian model selection is
+computationally expensive, and prone to getting stuck in local minima if the posterior likelihood is multi-
+modal. This issue is particularly acute if the spike-and-slab prior, particularly popular for Bayesian model
+selection, is used. We seek to address both problems by proposing a population non-parametric Variational
+Bayes approximation algorithm - a population-based optimisation strategy. Maintaining a population of models
+allows the posterior distribution to be explored more thoroughly, finding multiple maxima. The variational
+approximation's lower bound includes an entropy term which ensures diversity in the population by penalising
+similarity,  having the particles in the population repel each other. This ensures the high probability
+regions of the posterior distribution is thoroughly explored, which better reflects model selection
+uncertainty.
 
-In this article, we focus on the important case of model selection for normal linear models
-\[
-	p(\vy | \valpha, \vbeta) = \N_n(\vone^\top \alpha + \mX \vbeta, \mI_n)
-\]
+In this chapter, we focus on the important case of model selection for normal linear models which
+are slightly altered from those introduced in Section \ref{sec:model} to incorporate a zero-centred normal
+prior on $\alpha$ with variance $g \sigma^2$. This allows shrinkage of the intercept as well as the
+non-intercept regression co-efficients, driven by data.
+
+Consider the linear model
+$$
+	\vy | \alpha, \vbeta, \sigma^2, \vgamma \sim \N_n(\vone \alpha + \mX \vbeta, \sigma^2)
+$$
+with priors
+$$
+\begin{array}{rl}
+	\alpha | \sigma^2, g &\sim \N(0, g \sigma^2), \\
+	\vbeta_\vgamma | \sigma^2, g, \vgamma &\sim \N_p(\vzero, g \sigma^2 (\mX_\vgamma^\top \mX_\vgamma)^{-1}), \\
+	p(\vbeta_{-\vgamma}) &= \sum_{j=1}^p \delta(\vbeta_j; 0)^{1 - \vgamma_i}, \\
+	p(\sigma^2) &= \sigma^{-2} \I(\sigma^2 > 0), \text{ and } \\
+	p(g) &= \delta(g; h^{1/(1 + p_\vgamma)}).
+\end{array}
+$$
+We focus on the case where the Cake prior is placed on $g$, as this makes the marginal likelihood of $\vy$,
+$\vgamma | \vy$ and the Bayes Factors of $\vgamma$ tractable for this prior structure.
+
 % Justify choice of prior
 
 \cite{Mitchell1988} initially proposed the spike-and-slab prior distribution on regression co-efficients not
@@ -62,22 +51,22 @@ computational methods for posterior evaluation and exploration in this setting, 
 and Markov Chain Monte Carlo to explore the model space in moderate and large-sized problems respectively.
 More recently, \cite{Ishwaran2005} developed a rescaled spike-and-slab model which improves effective variable
 selection in terms of risk misclassification by using selective shrinkage. We further extend this approach, by
-using the Cake variant of the spike-and-slab prior for model selection, as it avoids the Lindley and Bartlett
-paradoxes. Citation.
+using the Cake variant of the spike-and-slab prior for model selection \cite{OrmerodEtal2017}, as it avoids
+the Lindley and Bartlett paradoxes \cite{Lindley1957}, \cite{Bartlett1957}.
 
-Existing approaches to the problem of model selection focus upon finding a single best model quickly
-(\cite{You2014}, \cite{Rockova2014}). Exploring the model space using only one model at a time will provide a
-misleading view of the uncertainty in the posterior, as it is typically highly multimodal.
+Existing approaches to the problem of model selection focus upon finding a single best model as quickly as
+possible, using the least computational effort (\cite{You2014}, \cite{Rockova2014}). Exploring the model space
+using only one model at a time will provide a misleading view of the uncertainty in the posterior, as it is
+typically highly multimodal.
 
-Many computational schemes for Bayesian model selection exist, using Monte Carlo Markov Chains techniques for 
-computing the posterior distributions of $\vgamma$.
-However, these schemes are both computationally intensive and can become trapped in local maxima of
-the posterior distribution if the distribution is high-dimensional and multi-modal, as is the case with
-popular choices of prior for Bayesian model selection problems, such as spike-and-slab priors. The difficulty
-of becoming trapped in local maxima can be partially mitigated by using population-based MCMC schemes such
-as Jasra et al. 2007, Bottolo and Richardson 2010, Hans et al 2007, Liang and Wong 2000. However, this
-increases the computational cost of sampling from the posterior distributions still further, especially in
-high-dimensional problems.
+Many computational schemes for Bayesian model selection exist, using Monte Carlo Markov Chains techniques to
+compute the posterior distribution of $\vgamma$. However, these schemes are both computationally intensive and
+can become trapped in local maxima of the posterior distribution if the distribution is high-dimensional and
+multi-modal, as is the case with popular choices of prior for Bayesian model selection problems, such as
+spike-and-slab priors. The difficulty of becoming trapped in local maxima can be partially mitigated by using
+population-based MCMC schemes such as Jasra et al. 2007, Bottolo and Richardson 2010, Hans et al 2007, Liang
+and Wong 2000. However, this increases the computational cost of sampling from the posterior distributions
+still further, especially in high-dimensional problems.
 
 \cite{Rockova2016} introduced the notion of Particle EM. Rather than searching for a single optimal model,
 Particle EM instead maintains a population of models (particles). This allows the algorithm to explore more of
@@ -87,13 +76,12 @@ posterior modes together. In Particle EM, this is done by incorporating an ``ent
 lower bound, which ensures diversity amongst the models in the population, preventing all particles from
 simply seeking the global posterior modes. The algorithm is determininistic.
 
-We build upon this work by proposing a fixed-form parametric Variational Bayes approximation of $\vgamma$.
-We adopt a prior structure incorporating the Cake prior for variable selection, which avoids the Lindley
-and Bartlett's paradoxes.
-Our fitting algorithm can be executed efficiently using rank-one updates and downdates.
-
-Difficulty of implementation -- practical model selection
-\cite{Chipman2014}
+We build upon this work by proposing a fixed-form parametric Variational Bayes approximation of $\vgamma$. We
+adopt a prior structure incorporating the Cake prior for variable selection, which avoids the Lindley and
+Bartlett's paradoxes. The difficulties in implementing practical Bayesian model selection schemes have been
+noted in \cite{Chipman2014}. As our marginal likelihood expression is a function only of $n$, $p_\vgamma$ and
+$R^2_\vgamma$, our model selection algorithm can be executed efficiently using rank-one updates and downdates
+to compute $R^2_{\vgamma^*}$ for each of the models $\vgamma^*$ that we consider.
 
 % Collapsed Variational Bayes
 % Collapsed Variational Bayes approaches have proved useful in Bayesian nonparametric settings such as Latent
@@ -132,13 +120,14 @@ discuss our results.
 
 
 \subsubsection{Calculating $p(\vy | \vgamma)$}
-We want to calculate $p(\vy | \vgamma)$ so that we can calculate $p(\vgamma | \vy)$ using Bayes' Rule and rank models against	one another. \\
+We want to calculate $p(\vy | \vgamma)$ so that we can calculate $p(\vgamma | \vy)$ using Bayes' Rule 
+allowing us to rank models against one another and choose which amongst many candidate models is best.
 To do this, we need to calculate
 $$p(\vy | \vgamma) = \int p(\vy | \alpha, \vbeta, \sigma^2, \vgamma) p(\alpha) p(\vbeta | g, \vgamma) p(\sigma^2) p(g) d \alpha d \vbeta d \sigma^2 d g.$$
 We choose our priors so that this integral is tractable, with help from \cite{Gradshteyn1988}.
-The marginal likelihoods behave like BIC. \\
-We found the following closed form expressions.
-Include derivations in the appendices.
+The marginal likelihoods obtained from this integral behave like BIC.
+
+We found the following closed form expressions. Include derivations in the appendices.
 \small
 \begin{itemize}
 	\item Liang et al. 2008 hyper-$g$ prior \cite{Liang2008}
@@ -203,19 +192,33 @@ $\vw$ and $\mGamma$ to make the bound as tight as possible. The optimal value of
 	w_k = \frac{p(\vy, \vgamma_k)}{\sum_{j=1}^K p(\vy, \vgamma_j)} = \frac{p(\vgamma_k) \text{BF}_{\vgamma_k}}{\sum_{j=1}^K p(\vgamma_j) \text{BF}_{\vgamma_j}}.
 \end{align*}
 
-Let $\vgamma_{jk}^{i} = (\vgamma_{1k, }, \ldots, \vgamma_{j-1, k}, i, \vgamma_{j+1, k}, \ldots, \vgamma_{pk})^\top$. The algorithm to fit the approximation is given below.
+Let $\vgamma_{jk}^{(i)} = (\vgamma_{1k, }, \ldots, \vgamma_{j-1, k}, i, \vgamma_{j+1, k}, \ldots, \vgamma_{pk})^\top$. The algorithm to fit the approximation is given in Algorithm \ref{alg:algorithm_cva} below. $\vp$ is the
+vector of probabilities for each of the models in the population, while $H$ is the entropy of the entire
+population. Thus $F_\lambda$ balances the weighted posterior probabilities of the particles in the population
+against the diversity within that population.
 % Re-type this using algorithmic environment
-\begin{enumerate}
-	\item Loop until convergence.
-	\item For $k = 1, \ldots, K$ \\
-	For $j = 1, \ldots, p$
-	$\vgamma_{jk} = \begin{cases}
-	1 &\text{ if } p(\vy, \vgamma_{jk}^{(1)}) > p(\vy, \vgamma_{jk}^{(0)}) \\
-	0 & \text{ otherwise}.
-	\end{cases}$ \\
-	$w_k = p(\vy, \vgamma_k) / \sum_{j=1}^K p(\vy, \vgamma_j)$
-\end{enumerate}
-In order to make the updates efficiently we need to be able to perform rank-one updates and rank-one downdates for the calculation of $\hat{\sigma}_\vgamma^2$.
+
+\begin{algorithm}
+	\caption{The CVA algorithm}
+	\label{alg:algorithm_cva}
+	\begin{algorithmic}
+		\WHILE{$F_\lambda$ is still different from the previous iteration}
+			\FOR{$k = 1, \ldots, K$}
+				\FOR{$j = 1, \ldots, p$}
+					\IF {$p(\vy, \vgamma_{jk}^{(1)}) > p(\vy, \vgamma_{jk}^{(0)})$}
+						\STATE $\vgamma_{jk} = 1$
+					\ELSE
+						\STATE $\vgamma_{jk} = 0$
+					\ENDIF
+				\ENDFOR
+				\STATE $w_k = p(\vy, \vgamma_k) / \sum_{j=1}^K p(\vy, \vgamma_j)$
+			\ENDFOR
+			\STATE Calculate $F_\lambda$ = $\vw^\top \vp + \lambda H$
+		\ENDWHILE
+	\end{algorithmic}
+\end{algorithm}
+In order to make these updates efficient, we can use rank-one updates and downdates for the calculation of
+$\hat{\sigma}_\vgamma^2$.
 
 The main body of the algorithm is a two--stage process. In the first stage, we iterate through the population of
 bitstrings, using a greedy search strategy to attempt to alter each bit in the model bitstring to increase the log likelihood. If the log likelihood for the new bitstring is no higher than the previous bitstring, then the
@@ -283,9 +286,10 @@ challenging, due to the many local optima. In this section, we present a series 
 demonstrate the capability of our algorithm to successfully find the models with high posterior probability in
 such situations.
 
-We first present an example where $n > p$ and $p$ is relatively small ($p = 12$), to allow for the full 
-enumeration of the model space. Later, we show an example for the important $p > n$ case, and compare our results 
-against the xxx algorithm.
+We first present an example where $n > p$ and $p$ is relatively small ($p = 12$), to allow for the full
+enumeration of the model space. Later, we show an example for the important $p > n$ case, and compare our
+results  against the Lasso \cite{Tibshirani1996}, SCAD \cite{Fan2001}, MCP \cite{Zhang2010}, {\tt BMS}
+\cite{Zeugner2015} and Varbvs algorithms.
 
 The results were generated by repeatedly simulating the data set $1,000$ times and fitting the CVA model.
 The median posterior model probability was calculated by taking the median across all of the runs of the
@@ -311,23 +315,23 @@ of success $1/2$.
 
 \subsection{$p > n$}
 
-\begin{table}
-	\caption{Simulation results including the average number of modes located, the average percentage of
-	posterior coverage achieved, and the percentage of times that the global mode was located, for various
-	population sizes $(K=20, 50, 100)$ and choices of repulsion $\lambda=0, 1, 2, 3$}
-	\label{tab:result2}
-	\begin{tabular}{l|llll|llll|llll|llll}
-	\hline
-	 					& \multicolumn{4}{c}{K=20} 	& \multicolumn{4}{c}{K=50} & \multicolumn{4}{c}{K=100} \\
-	$\lambda$ & 0 & 1 & 2 & 3 & 0 & 1 & 2 & 3 & 0 & 1 & 2 & 3 & 0 & 1 & 2 & 3 \\
-	\hline
-	\# Modes & \\
-	\% Posterior & 83.1 & 84.7 & 83.7 & 82.3 & 84.7 & 83.2 & 85.4 & 84.8 & 81.9 & 82.9 & 83.9 & 84.6 & 83.9 & 81.5 & 82.0 & 85.2 \\
-	\% Global Mode & 91 & 90 & 87 & 82 & 86 & 85 & 80 & 90 & 90 & 90 & 86 & 91 & 88 & 91 & 76 & 88 \\
-	\hline
-	\end{tabular}
+% \begin{table}
+% 	\caption{Simulation results including the average number of modes located, the average percentage of
+% 	posterior coverage achieved, and the percentage of times that the global mode was located, for various
+% 	population sizes $(K=20, 50, 100)$ and choices of repulsion $\lambda=0, 1, 2, 3$}
+% 	\label{tab:result2}
+% 	\begin{tabular}{l|llll|llll|llll|llll}
+% 	\hline
+% 	 					& \multicolumn{4}{c}{K=20} 	& \multicolumn{4}{c}{K=50} & \multicolumn{4}{c}{K=100} \\
+% 	$\lambda$ & 0 & 1 & 2 & 3 & 0 & 1 & 2 & 3 & 0 & 1 & 2 & 3 & 0 & 1 & 2 & 3 \\
+% 	\hline
+% 	\# Modes & \\
+% 	\% Posterior & 83.1 & 84.7 & 83.7 & 82.3 & 84.7 & 83.2 & 85.4 & 84.8 & 81.9 & 82.9 & 83.9 & 84.6 & 83.9 & 81.5 & 82.0 & 85.2 \\
+% 	\% Global Mode & 91 & 90 & 87 & 82 & 86 & 85 & 80 & 90 & 90 & 90 & 86 & 91 & 88 & 91 & 76 & 88 \\
+% 	\hline
+% 	\end{tabular}
 
-\end{table}
+% \end{table}
 
 % Show posterior probabilities on the log scale
 As Figure \ref{fig:cva_posterior_models} shows, 
@@ -359,14 +363,14 @@ and then compare this against the model $\hat{\vgamma}$ found by each of the mod
 compared.
 We then calculated the $F_1$ score for $\hat{\vgamma}$,
 where
-$F_1 = 2 * \text{precision} * \text{recall} / (\text{precision} + \text{recall})$ with
+$$F_1 = 2 * \text{precision} * \text{recall} / (\text{precision} + \text{recall})$$ with
 $\text{precision} = \text{true positives} / (\text{true positives} + \text{false positives})$ and
 $\text{recall} = \text{true positives} / (\text{true positives} + \text{false negatives})$.
 
 When running CVA,
 three methods of initialising $\Gamma$ were tried.
 A cold start where each $\gamma_{ij}$ in $\gamma_i$, $1 \leq i \leq K$ was initialised randomly from a
-$\Bernoulli(p)$ distribution, with $p = 10 / |\vgamma|$.
+$\text{Bernoulli}(p)$ distribution, with $p = 10 / |\vgamma|$.
 Two methods of warm start were also tried, to explore whether the CVA algorithm could do better by being
 initialised from another method than by being initialised randomly: 
 a warm start from SCAD where models with more covariates were preferred, and
@@ -489,7 +493,4 @@ population. If so, the addition or removal of the covariate is skipped and the n
 In our implementation, this check is made computationally efficient by maintaining a hash table of the models,
 allowing the check as to whether the model is already in the population to be performed in $\BigO(1)$ time.
 
-\bibliographystyle{elsarticle-harv}
-\bibliography{references_mendeley}
-
-\end{document}
+\section{Conclusion}
