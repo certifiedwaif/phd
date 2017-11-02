@@ -54,7 +54,7 @@ log_p <- function(n, p, vR2, vp_gamma)
 posterior_percentage <- rep(NA, 100)
 for (i in 1:1) {
   cat("i", i, "\n")
-  data <- generate_data(n=50, K=5)
+  data <- generate_data(n=50, K=100)
   n <- data$n
   p <- data$p
   vy <- data$vy
@@ -63,7 +63,7 @@ for (i in 1:1) {
   initial_gamma <- data$initial_gamma
 
   cva_result <- cva(initial_gamma, vy, mX, K, 1.0)
-  corr_result <- correlation::all_correlations_mX(vy, mX, 1, TRUE)
+  corr_result <- correlation::all_correlations_mX(vy, mX, "maruyama", 1, TRUE)
   R2 <- corr_result$vR2
   p_gamma <- corr_result$vp_gamma
   cva_models <- apply(cva_result$models, 1, binary_to_model)
@@ -71,8 +71,15 @@ for (i in 1:1) {
   vlog_p <- log_p(n, p, R2, p_gamma)
   vlog_p.til <- vlog_p - max(vlog_p)
   vp <- exp(vlog_p.til)/sum(exp(vlog_p.til))
-  #plot(vlog_p.til, pch=21, xlab="Model Index", ylab="Log Posterior Model Probability", col="black", bg="black")
-  #points(cva_models, vlog_p.til[cva_models], pch=21, col="red", bg="red")
+  plot(vlog_p.til, pch=21, xlab="Model Index", ylab="Log Posterior Model Probability", col="black", bg="black")
+  points(cva_models, vlog_p.til[cva_models], pch=21, col="red", bg="red")
+  fact <- rep("Non-CVA", length(vlog_p.til))
+  fact[cva_models] <- "CVA"
+  library(tidyverse)
+  dat <- tibble(model=1:length(vlog_p.til), vlog_p=vlog_p.til, cva=fact)
+  pdf("cva_low_dimensional.pdf")
+  ggplot(dat, aes(x=model, y=vlog_p, color=cva)) + geom_point() + xlab("Model Index") + ylab("Log Posterior Model Probability") + labs(color = "Model type")
+  dev.off()
   posterior_percentage[i] <- sum(vp[cva_models])
 }
 mean(posterior_percentage)
@@ -235,3 +242,21 @@ EMVSplot(result2,"both",FALSE)
 EMVSbest(result2)
 library(Matrix)
 image(Matrix(result$models))
+
+# Test the new interface
+corr_result1 <- correlation::all_correlations_mX(vy, mX, "maruyama")
+corr_result2 <- correlation::all_correlations_mX(vy, mX, "BIC")
+corr_result3 <- correlation::all_correlations_mX(vy, mX, "ZE")
+corr_result4 <- correlation::all_correlations_mX(vy, mX, "liang_g1")
+corr_result5 <- correlation::all_correlations_mX(vy, mX, "liang_g2")
+corr_result6 <- correlation::all_correlations_mX(vy, mX, "liang_g3")
+corr_result7 <- correlation::all_correlations_mX(vy, mX, "robust_bayarri1")
+corr_result8 <- correlation::all_correlations_mX(vy, mX, "robust_bayarri2")
+summary(corr_result1$vlogp)
+summary(corr_result2$vlogp)
+summary(corr_result3$vlogp)
+summary(corr_result4$vlogp)
+summary(corr_result5$vlogp)
+summary(corr_result6$vlogp)
+summary(corr_result7$vlogp)
+summary(corr_result8$vlogp)
