@@ -250,6 +250,7 @@ double trapint(const VectorXd& xgrid, const VectorXd& fgrid)
 	for (auto i = 0; i < xgrid.size() - 1; i++) {
 		sum += 0.5 * (xgrid(i + 1) - xgrid(i)) * (fgrid(i) + fgrid(i + 1));
 	}
+	// Rcpp::Rcout << "sum " << sum << std::endl;
 
 	return sum;
 }
@@ -257,16 +258,21 @@ double trapint(const VectorXd& xgrid, const VectorXd& fgrid)
 
 double robust_bayarri1(const int n, const int p, double R2, int p_gamma)
 {
+	// Rcpp::Rcout << "n " << n << " R2 " << R2 << " p_gamma " << p_gamma << std::endl;
 	double r = (1. + n) / (1. + p_gamma);
-	double L = r - 1;
+	double L = r - 1.;
 
 	VectorXd x(10000);
 	VectorXd log_f(10000);
 	for (int i = 0; i < 10000; i++) {
-		x(i) = L + (10000. - L) * i / 10000.; 
-		log_f(i) = -log(2) + 0.5 * log(r) + 0.5 * (n - p_gamma - 4) * log(1 + x(i)) - 0.5 * (n - 1) * log(1 + x(i) * (1 - R2));
+		x(i) = L + (10000. - L) * i / 10000.;
+		log_f(i) = -log(2.) + 0.5 * log(r) + 0.5 * (n - p_gamma - 4.) * log(1. + x(i)) - 0.5 * (n - 1.) * log(1. + x(i) * (1. - R2));
+		// if (i < 10)
+		// 	Rcpp::Rcout << "x(" << i << ") " << x(i) << " log_f(i) " << log_f(i) << std::endl;
 	}
-	return log(trapint(x, log_f.array().exp()));
+	double result = log(trapint(x, log_f.array().exp()));
+	// Rcpp::Rcout << "result " << result << std::endl;
+	return result;
 }
 
 
