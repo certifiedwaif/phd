@@ -18,7 +18,7 @@
 #include "graycode.h"
 #include "correlation.h"
 
-#define DEBUG
+// #define DEBUG
 
 using namespace std;
 using namespace Rcpp;
@@ -161,7 +161,14 @@ double liang_g3(const int n, const int p, double R2, int p_gamma)
 	#ifdef DEBUG
 	Rcpp::Rcout << "log_vp_gprior5 2 " << log_vp_gprior5 << std::endl;
 	#endif
-	log_vp_gprior5 -= 0.5*(n - 1)*log(R2);
+	const auto sigma2 = 1. - R2;
+	#ifdef DEBUG
+	Rcpp::Rcout << "sigma2 " << sigma2 << std::endl;
+	#endif
+	if (sigma2 < 1e-4) {
+		return -INFINITY;
+	}
+	log_vp_gprior5 -= 0.5*(n - 1)*log(sigma2);
 	#ifdef DEBUG
 	Rcpp::Rcout << "log_vp_gprior5 3 " << log_vp_gprior5 << std::endl;
 	#endif
@@ -171,7 +178,7 @@ double liang_g3(const int n, const int p, double R2, int p_gamma)
 	#endif
 	// Check for errors
 	gsl_sf_result result;
-	int error_code = gsl_sf_hyperg_2F1_e( 0.5*(p_gamma+1), 0.5*(n-1), 0.5*(p_gamma+3), (1-1/R2)*(p_gamma+1)/(n+1), &result);
+	int error_code = gsl_sf_hyperg_2F1_e( 0.5*(p_gamma+1), 0.5*(n-1), 0.5*(p_gamma+3), (1-1/sigma2)*(p_gamma+1)/(n+1), &result);
 	#ifdef DEBUG
 	Rcpp::Rcout << "result.val " << result.val << " error_code " << error_code << std::endl;
 	#endif
@@ -195,7 +202,7 @@ double liang_g3(const int n, const int p, double R2, int p_gamma)
 
 
 // Robust Bayarri
-double robust_bayarri1(const int n, const int p, double R2, int p_gamma)
+double robust_bayarri1_old(const int n, const int p, double R2, int p_gamma)
 {
 	#ifdef DEBUG
 	Rcpp::Rcout << "n " << n;
@@ -234,6 +241,39 @@ double robust_bayarri1(const int n, const int p, double R2, int p_gamma)
 }
 
 
+double robust_bayarri1(const int n, const int p, double R2, int p_gamma)
+{
+	double sigma2_hat_gamma = 1. - R2;
+	#ifdef DEBUG
+	Rcpp::Rcout << "sigma2_hat_gamma " << sigma2_hat_gamma << std::endl;
+	#endif
+	double log_robust_bf = -0.5 * p_gamma * log(n + 1);
+	#ifdef DEBUG
+	Rcpp::Rcout << "log_robust_bf 1 " << log_robust_bf << std::endl;
+	#endif
+	log_robust_bf += 0.5 * p_gamma * log(p_gamma + 1);
+	#ifdef DEBUG
+	Rcpp::Rcout << "log_robust_bf 2 " << log_robust_bf << std::endl;
+	#endif
+	log_robust_bf += -0.5 * (n - 1.) * sigma2_hat_gamma;
+	#ifdef DEBUG
+	Rcpp::Rcout << "log_robust_bf 3 " << log_robust_bf << std::endl;
+	#endif
+	log_robust_bf -= log(p_gamma + 1.);
+	#ifdef DEBUG
+	Rcpp::Rcout << "log_robust_bf 4 " << log_robust_bf << std::endl;
+	#endif
+	// This expression is numerically unstable, because the last argument will be outside the radius of
+	// convergence of 2F1 for small sigma2_hat_gamma.
+	log_robust_bf += log(gsl_sf_hyperg_2F1( 0.5*(n-1), 1., 0.5 * (p_gamma + 3.), 
+																					((1. - 1./sigma2_hat_gamma) * (p_gamma + 1.))/(1. + n)));
+	#ifdef DEBUG
+	Rcpp:Rcout << "log_robust_bf 5 " << log_robust_bf << std::endl;
+	#endif
+	return log_robust_bf;	
+}
+
+
 double robust_bayarri2(const int n, const int p, double R2, int p_gamma)
 {
 	#ifdef DEBUG
@@ -260,11 +300,12 @@ double robust_bayarri2(const int n, const int p, double R2, int p_gamma)
 	#ifdef DEBUG
 	Rcpp::Rcout << " log_vp_gprior7 1 " << log_vp_gprior7 << std::endl;
 	#endif
-	log_vp_gprior7 -= log (p_gamma + 1);
+	double R2_gamma_tilde = R2 / (1. + L * sigma2);
+	log_vp_gprior7 -= log(2 * R2_gamma_tilde * (1. - R2_gamma_tilde));
 	#ifdef DEBUG
 	Rcpp::Rcout << " log_vp_gprior7 1 " << log_vp_gprior7 << std::endl;
 	#endif
-	log_vp_gprior7 += log(gsl_sf_hyperg_2F1( 0.5*(n-1), 1, 0.5*(p_gamma + 3), z));
+	log_vp_gprior7 += ::Rf_pbeta(R2_gamma_tilde, 0.5 * (p_gamma + 1.), 0.5 * (n - p_gamma - 2.), true, false) / ::Rf_dbeta(R2_gamma_tilde, 0.5 * (p_gamma + 1.), 0.5 * (n - p_gamma - 2.), false);
 	#ifdef DEBUG
 	Rcpp::Rcout << " log_vp_gprior7 1 " << log_vp_gprior7 << std::endl;
 	#endif
