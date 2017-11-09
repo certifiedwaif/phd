@@ -241,36 +241,32 @@ double robust_bayarri1_old(const int n, const int p, double R2, int p_gamma)
 }
 
 
+// Trapezoidal integration over a potentially irregular grid
+double trapint(const VectorXd& xgrid, const VectorXd& fgrid)
+{
+	auto sum = 0.0;
+
+	#pragma omp parallel for simd reduction(+:sum)
+	for (auto i = 0; i < xgrid.size() - 1; i++) {
+		sum += 0.5 * (xgrid(i + 1) - xgrid(i)) * (fgrid(i) + fgrid(i + 1));
+	}
+
+	return sum;
+}
+
+
 double robust_bayarri1(const int n, const int p, double R2, int p_gamma)
 {
-	double sigma2_hat_gamma = 1. - R2;
-	#ifdef DEBUG
-	Rcpp::Rcout << "sigma2_hat_gamma " << sigma2_hat_gamma << std::endl;
-	#endif
-	double log_robust_bf = -0.5 * p_gamma * log(n + 1);
-	#ifdef DEBUG
-	Rcpp::Rcout << "log_robust_bf 1 " << log_robust_bf << std::endl;
-	#endif
-	log_robust_bf += 0.5 * p_gamma * log(p_gamma + 1);
-	#ifdef DEBUG
-	Rcpp::Rcout << "log_robust_bf 2 " << log_robust_bf << std::endl;
-	#endif
-	log_robust_bf += -0.5 * (n - 1.) * sigma2_hat_gamma;
-	#ifdef DEBUG
-	Rcpp::Rcout << "log_robust_bf 3 " << log_robust_bf << std::endl;
-	#endif
-	log_robust_bf -= log(p_gamma + 1.);
-	#ifdef DEBUG
-	Rcpp::Rcout << "log_robust_bf 4 " << log_robust_bf << std::endl;
-	#endif
-	// This expression is numerically unstable, because the last argument will be outside the radius of
-	// convergence of 2F1 for small sigma2_hat_gamma.
-	log_robust_bf += log(gsl_sf_hyperg_2F1( 0.5*(n-1), 1., 0.5 * (p_gamma + 3.), 
-																					((1. - 1./sigma2_hat_gamma) * (p_gamma + 1.))/(1. + n)));
-	#ifdef DEBUG
-	Rcpp:Rcout << "log_robust_bf 5 " << log_robust_bf << std::endl;
-	#endif
-	return log_robust_bf;	
+	double r = (1. + n) / (1. + p_gamma);
+	double L = r - 1;
+
+	VectorXd x(10000);
+	VectorXd log_f(10000);
+	for (int i = 0; i < 10000; i++) {
+		x(i) = L + (10000. - L) * i / 10000.; 
+		log_f(i) = -log(2) + 0.5 * log(r) + 0.5 * (n - p_gamma - 4) * log(1 + x(i)) - 0.5 * (n - 1) * log(1 + x(i) * (1 - R2));
+	}
+	return log(trapint(x, log_f.array().exp()));
 }
 
 
