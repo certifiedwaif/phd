@@ -307,7 +307,7 @@ double robust_bayarri2(const int n, const int p, double R2, int p_gamma)
 	#ifdef DEBUG
 	Rcpp::Rcout << " log_vp_gprior7 1 " << log_vp_gprior7 << std::endl;
 	#endif
-	log_vp_gprior7 += ::Rf_pbeta(R2_gamma_tilde, 0.5 * (p_gamma + 1.), 0.5 * (n - p_gamma - 2.), true, true) / ::Rf_dbeta(R2_gamma_tilde, 0.5 * (p_gamma + 1.), 0.5 * (n - p_gamma - 2.), true);
+	log_vp_gprior7 += ::Rf_pbeta(R2_gamma_tilde, 0.5 * (p_gamma + 1.), 0.5 * (n - p_gamma - 2.), true, true) - ::Rf_dbeta(R2_gamma_tilde, 0.5 * (p_gamma + 1.), 0.5 * (n - p_gamma - 2.), true);
 	#ifdef DEBUG
 	Rcpp::Rcout << " log_vp_gprior7 1 " << log_vp_gprior7 << std::endl;
 	#endif
