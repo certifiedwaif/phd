@@ -71,14 +71,14 @@ for (i in 1:1) {
   vlog_p <- log_p(n, p, R2, p_gamma)
   vlog_p.til <- vlog_p - max(vlog_p)
   vp <- exp(vlog_p.til)/sum(exp(vlog_p.til))
-  plot(vlog_p.til, pch=21, xlab="Model Index", ylab="Log Posterior Model Probability", col="black", bg="black")
-  points(cva_models, vlog_p.til[cva_models], pch=21, col="red", bg="red")
+  #plot(vlog_p.til, pch=21, xlab="Model Index", ylab="Log Posterior Model Probability", col="black", bg="black")
+  #points(cva_models, vlog_p.til[cva_models], pch=21, col="red", bg="red")
   fact <- rep("Non-CVA", length(vlog_p.til))
   fact[cva_models] <- "CVA"
   library(tidyverse)
   dat <- tibble(model=1:length(vlog_p.til), vlog_p=vlog_p.til, cva=fact)
   pdf("cva_low_dimensional.pdf")
-  ggplot(dat, aes(x=model, y=vlog_p, color=cva)) + geom_point() + xlab("Model Index") + ylab("Log Posterior Model Probability") + labs(color = "Model type")
+  ggplot(dat, aes(x=model, y=vlog_p, color=cva)) + geom_point() + ylim(-21, 2) + xlab("Model Index") + ylab("Log Posterior Model Probability") + labs(color = "Model type") + scale_color_brewer(palette="Set1")
   dev.off()
   posterior_percentage[i] <- sum(vp[cva_models])
 }

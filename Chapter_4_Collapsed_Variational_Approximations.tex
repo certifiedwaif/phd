@@ -32,10 +32,13 @@ $$
 	\alpha | \sigma^2, g &\sim \N(0, g \sigma^2), \\
 	\vbeta_\vgamma | \sigma^2, g, \vgamma &\sim \N_p(\vzero, g \sigma^2 (\mX_\vgamma^\top \mX_\vgamma)^{-1}), \\
 	p(\vbeta_{-\vgamma}) &= \sum_{j=1}^p \delta(\vbeta_j; 0)^{1 - \vgamma_i}, \\
-	p(\sigma^2) &= \sigma^{-2} \I(\sigma^2 > 0), \text{ and } \\
-	p(g) &= \delta(g; h^{1/(1 + p_\vgamma)}).
+	p(\sigma^2) &= \sigma^{-2} \I(\sigma^2 > 0), \\
+	\gamma_j | \rho &\sim \text{Bern}(\rho), 1 \leq j \leq p \\
+	\rho &\sim \text{Beta}(u, v) \text{ and } \\
+	p(g) &= \delta(g; h^{1/(1 + p_\vgamma)}). \\
 \end{array}
 $$
+where $u = 1$ and $v = p^c$, $c > 1$, following \cite{Castillo2015}.
 We focus on the case where the Cake prior is placed on $g$, as this makes the marginal likelihood of $\vy$,
 $\vgamma | \vy$ and the Bayes Factors of $\vgamma$ tractable for this prior structure.
 
@@ -192,10 +195,11 @@ $\vw$ and $\mGamma$ to make the bound as tight as possible. The optimal value of
 	w_k = \frac{p(\vy, \vgamma_k)}{\sum_{j=1}^K p(\vy, \vgamma_j)} = \frac{p(\vgamma_k) \text{BF}_{\vgamma_k}}{\sum_{j=1}^K p(\vgamma_j) \text{BF}_{\vgamma_j}}.
 \end{align*}
 
-Let $\vgamma_{jk}^{(i)} = (\vgamma_{1k, }, \ldots, \vgamma_{j-1, k}, i, \vgamma_{j+1, k}, \ldots, \vgamma_{pk})^\top$. The algorithm to fit the approximation is given in Algorithm \ref{alg:algorithm_cva} below. $\vp$ is the
-vector of probabilities for each of the models in the population, while $H$ is the entropy of the entire
-population. Thus $F_\lambda$ balances the weighted posterior probabilities of the particles in the population
-against the diversity within that population.
+Let $\vgamma_{jk}^{(i)} = (\vgamma_{1k, }, \ldots, \vgamma_{j-1, k}, i, \vgamma_{j+1, k}, \ldots,
+\vgamma_{pk})^\top$. The algorithm to fit the approximation is given in Algorithm \ref{alg:algorithm_cva}
+below. $\vp$ is the vector of posterior probabilities for each of the models in the population, while $H$ is
+the entropy of the entire population. Thus $F_\lambda$ balances the weighted posterior probabilities of the
+particles in the population against the diversity within that population.
 % Re-type this using algorithmic environment
 
 \begin{algorithm}
@@ -253,29 +257,32 @@ $\vepsilon \sim \N_n(\vzero, \mI_n)$.
 
 \subsection{$n < p$, High dimensional example, Particle EM}
 
-\begin{figure}\label{fig:highdim_warm_start_covariates}
-\caption{$F_1$ scores for CVA on the simulated high dimensional data with $\Gamma$ initialised from the SCAD models, with models with more covariates preferred. $K=20, 50, 100$ respectively}
-% \includegraphics[scale=0.33]{code/QLT/results/20_generate_data_high_dimensional_warm_start_covariates_log_prob1.pdf}
-% \includegraphics[scale=0.33]{code/QLT/results/50_generate_data_high_dimensional_warm_start_covariates_log_prob1.pdf}
-% \includegraphics[scale=0.33]{code/QLT/results/100_generate_data_high_dimensional_warm_start_covariates_log_prob1.pdf}
+\begin{figure}
+% \includegraphics[scale=0.33]{code/QTL/results/20_generate_data_high_dimensional_warm_start_covariates_log_prob1.pdf}
+% \includegraphics[scale=0.33]{code/QTL/results/50_generate_data_high_dimensional_warm_start_covariates_log_prob1.pdf}
+% \includegraphics[scale=0.33]{code/QTL/results/100_generate_data_high_dimensional_warm_start_covariates_log_prob1.pdf}
 \includegraphics[scale=0.5]{highdimensional_covariates_logprob1.pdf}
+\label{fig:highdim_warm_start_covariates}
+\caption{$F_1$ scores for CVA on the simulated high dimensional data with $\Gamma$ initialised from the SCAD models, with models with more covariates preferred. $K=20, 50, 100$ respectively}
 \end{figure}
 
-\begin{figure}\label{fig:highdim_warm_start_likelihood}
-\caption{$F_1$ scores for CVA on the simulated high dimensional data with $\Gamma$ initialised from the SCAD models, with models with higher likelihood preferred. $K=20, 50, 100$ respectively}
-% \includegraphics[scale=0.33]{code/QLT/results/20_generate_data_high_dimensional_warm_start_likelihood_log_prob1.pdf}
-% \includegraphics[scale=0.33]{code/QLT/results/50_generate_data_high_dimensional_warm_start_likelihood_log_prob1.pdf}
-% \includegraphics[scale=0.33]{code/QLT/results/100_generate_data_high_dimensional_warm_start_likelihood_log_prob1.pdf}
+\begin{figure}
+% \includegraphics[scale=0.33]{code/QTL/results/20_generate_data_high_dimensional_warm_start_likelihood_log_prob1.pdf}
+% \includegraphics[scale=0.33]{code/QTL/results/50_generate_data_high_dimensional_warm_start_likelihood_log_prob1.pdf}
+% \includegraphics[scale=0.33]{code/QTL/results/100_generate_data_high_dimensional_warm_start_likelihood_log_prob1.pdf}
 \includegraphics[scale=0.5]{highdimensional_likelihood_logprob1.pdf}
+\label{fig:highdim_warm_start_likelihood}
+\caption{$F_1$ scores for CVA on the simulated high dimensional data with $\Gamma$ initialised from the SCAD models, with models with higher likelihood preferred. $K=20, 50, 100$ respectively}
 \end{figure}
 
-\begin{figure}\label{fig:highdim_cold_start}
+\begin{figure}
+% \includegraphics[scale=0.33]{code/QTL/results/20_generate_data_high_dimensional_cold_start_log_prob1.pdf}
+% \includegraphics[scale=0.33]{code/QTL/results/50_generate_data_high_dimensional_cold_start_log_prob1.pdf}
+% \includegraphics[scale=0.33]{code/QTL/results/100_generate_data_high_dimensional_cold_start_log_prob1.pdf}
+\includegraphics[scale=0.5]{highdimensional_cold_logprob1.pdf}
+\label{fig:highdim_cold_start}
 \caption{$F_1$ scores for CVA on the simulated high-dimensional data with $\Gamma$ initialised randomly.
 					K=20, 50 and 100 respectively}
-% \includegraphics[scale=0.33]{code/QLT/results/20_generate_data_high_dimensional_cold_start_log_prob1.pdf}
-% \includegraphics[scale=0.33]{code/QLT/results/50_generate_data_high_dimensional_cold_start_log_prob1.pdf}
-% \includegraphics[scale=0.33]{code/QLT/results/100_generate_data_high_dimensional_cold_start_log_prob1.pdf}
-\includegraphics[scale=0.5]{highdimensional_cold_logprob1.pdf}
 \end{figure}
 
 \subsection{Exploration of the posterior model space}
@@ -307,10 +314,11 @@ $K = 20$ particles was randomly initialised from a sequencial of independent Ber
 of success $1/2$.
 
 \begin{figure}	
-	\caption{Posterior model probabilities when $p = 12$. Red triangles denote models visited by the CVA
-						algorithm, while black triangles are models that were not visited.}
-	\label{fig:cva_posterior_models}
 	\includegraphics[scale=0.5]{code/correlation/cva_low_dimensional.pdf}
+	\caption{Posterior model probabilities when $p = 12$. Red points denote models visited by the CVA
+						algorithm, while blue points are models that were not visited. Note that the CVA algorithm
+						visits the highest posterior probability points first}
+	\label{fig:cva_posterior_models}
 \end{figure}
 
 \subsection{$p > n$}
@@ -363,7 +371,7 @@ and then compare this against the model $\hat{\vgamma}$ found by each of the mod
 compared.
 We then calculated the $F_1$ score for $\hat{\vgamma}$,
 where
-$$F_1 = 2 * \text{precision} * \text{recall} / (\text{precision} + \text{recall})$$ with
+$$F_1 = 2 \times \text{precision} \times \text{recall} / (\text{precision} + \text{recall})$$ with
 $\text{precision} = \text{true positives} / (\text{true positives} + \text{false positives})$ and
 $\text{recall} = \text{true positives} / (\text{true positives} + \text{false negatives})$.
 
@@ -381,46 +389,47 @@ The results of the algorithm were found to be insensitive to the choice of prior
 For each combination of population size, data set, and prior the experiment was repeated 50 times.
 
 \subsubsection{QTL example}
-The QTL example is taken from \cite{Xu2007}. A BC population of $n=600$ was simulated for a single large
-chromosome of $1800$ cM. This chromosome was covered by 121 evenly spaced markers. Nine of the markers
-overlapped with QTL of the main effects and 13 out of the $\binom{121} 2 = 7,260$ possible marker pairs had
-interaction effects.
+The Quantitative Trait Locus (QTL) example is taken from \cite{Xu2007}. A BC population of $n=600$ was
+simulated for a single large chromosome of $1800$ cM. This chromosome was covered by 121 evenly spaced
+markers. Nine of the markers overlapped with QTL of the main effects and 13 out of the $\binom{121} 2 = 7,260$
+possible marker pairs had interaction effects.
 
-consistently achieving higher $F_1$ scores than the competing methods that we examined
 When initialising $\Gamma$ with a warm start from SCAD preferring models with more covariates or with higher
 likelihood, CVA performed poorly with a lower number of particles (K=$20$). Performance improved as the number
 of particles in the population was increased, as can be seen in Figures
 \ref{fig:highdim_warm_start_covariates} and \ref{fig:highdim_warm_start_likelihood}. Performance was better
-when $\Gamma$ was initialised randomly, for all population sizes $K=20$, $50$ or $100$. This indicates that
-the CVA algorithm is sensitive to its' initialisation, and that as SCAD does poorly on these problems, CVA
-also does poorly comparatively with a warm start from SCAD, although still better than SCAD alone.
+when $\Gamma$ was initialised randomly, for all population sizes $K=20$, $50$ or $100$.  CVA consistently
+achieved higher $F_1$ scores than the competing methods that we examined. This indicates that the CVA
+algorithm is sensitive to its' initialisation, and that as SCAD does poorly on these problems, CVA also does
+poorly comparatively with a warm start from SCAD, although still better than SCAD alone.
 
-\begin{figure}\label{fig:QLT_warm_start_covariates}
-\caption{$F_1$ scores for CVA on the simulated QLT data with $\Gamma$ initialised from the SCAD models, with
-models with more covariates preferred. $K=20, 50, 100$ respectively}
+\begin{figure}
 \includegraphics[scale=0.5]{QTL_covariates_maruyama.pdf}
-
-% \includegraphics[scale=0.33]{code/QLT/results/20_generate_data_QTL_warm_start_covariates_log_prob1.pdf}
-% \includegraphics[scale=0.33]{code/QLT/results/50_generate_data_QTL_warm_start_covariates_log_prob1.pdf}
-% \includegraphics[scale=0.33]{code/QLT/results/100_generate_data_QTL_warm_start_covariates_log_prob1.pdf}
+\label{fig:QTL_warm_start_covariates}
+\caption{$F_1$ scores for CVA on the simulated QTL data with $\Gamma$ initialised from the SCAD models, with
+models with more covariates preferred. $K=20, 50, 100$ respectively}
+% \includegraphics[scale=0.33]{code/QTL/results/20_generate_data_QTL_warm_start_covariates_log_prob1.pdf}
+% \includegraphics[scale=0.33]{code/QTL/results/50_generate_data_QTL_warm_start_covariates_log_prob1.pdf}
+% \includegraphics[scale=0.33]{code/QTL/results/100_generate_data_QTL_warm_start_covariates_log_prob1.pdf}
 \end{figure}
 
-\begin{figure}\label{fig:QLT_warm_start_covariates}
-\caption{$F_1$ scores for CVA on the simulated QLT data with $\Gamma$ initialised from the SCAD models, with
-models with higher likelihood preferred. $K=20, 50, 100$ respectively}
+\begin{figure}
 \includegraphics[scale=0.5]{QTL_likelihood_maruyama.pdf}
+\label{fig:QTL_warm_start_likelihood}
+\caption{$F_1$ scores for CVA on the simulated QTL data with $\Gamma$ initialised from the SCAD models, with
+models with higher likelihood preferred. $K=20, 50, 100$ respectively}
 \end{figure}
 
 
 Initialising $\Gamma$ randomly, CVA performed poorly by comparison with either of the warm start methods
-above, as can be seen from \ref{fig:QLT_cold_start}.
-\begin{figure}\label{fig:QLT_cold_start}
-\caption{$F_1$ scores for CVA on the simulated QLT data with $\Gamma$ initialised randomly. $K=20, 50, 100$ respectively}
+above, as can be seen from Figure \ref{fig:QTL_cold_start}.
+\begin{figure}
 \includegraphics[scale=0.5]{QTL_cold_maruyama.pdf}
-
-% \includegraphics[scale=0.33]{code/QLT/results/20_generate_data_QTL_cold_start_log_prob1.pdf}
-% \includegraphics[scale=0.33]{code/QLT/results/50_generate_data_QTL_cold_start_log_prob1.pdf}
-% \includegraphics[scale=0.33]{code/QLT/results/100_generate_data_QTL_cold_start_log_prob1.pdf}
+\label{fig:QTL_cold_start}
+\caption{$F_1$ scores for CVA on the simulated QTL data with $\Gamma$ initialised randomly. $K=20, 50, 100$ respectively}
+% \includegraphics[scale=0.33]{code/QTL/results/20_generate_data_QTL_cold_start_log_prob1.pdf}
+% \includegraphics[scale=0.33]{code/QTL/results/50_generate_data_QTL_cold_start_log_prob1.pdf}
+% \includegraphics[scale=0.33]{code/QTL/results/100_generate_data_QTL_cold_start_log_prob1.pdf}
 \end{figure}
 
 
@@ -428,7 +437,7 @@ above, as can be seen from \ref{fig:QLT_cold_start}.
 When initialising $\Gamma$ with a warm start from SCAD preferring models with higher likelihood,
 CVA performed less well on the QTL example than SCAD preferring models with more covariates, but still
 better than other competing methods except for MCP,
-as can be seen from Figure \ref{fig:QLT_warm_start_likelihood}
+as can be seen from Figure \ref{fig:QTL_warm_start_likelihood}
 
 \section{Variable inclusion for small data sets}
 
@@ -451,10 +460,7 @@ marginal had a large impact on the $F_1$ score obtained.
 Variables with low posterior probability are truncated to 0, as CVA seeks higher posterior probability models,
 ignoring the lower posterior probability models.
 
-\begin{table}\label{tab:variable_inclusion_rel_error}
-\caption{Relative error of the variable inclusion probability estimated by CVA to the
-					exact variable inclusion probability, partitioned by exact probability under or equal to $0.5$ and
-					over $0.5$}
+\begin{table}
 \begin{tabular}{|ll|rrr|rrr|}
 	\hline
 	Dataset & Prior & & $<=0.5$ & & & $>0.5$ &\\
@@ -482,6 +488,10 @@ ignoring the lower posterior probability models.
 	&ZE&0.69&0.47&0.32&0&0&0\\
 	\hline
 \end{tabular}
+\label{tab:variable_inclusion_rel_error}
+\caption{Relative error of the variable inclusion probability estimated by CVA to the
+					exact variable inclusion probability, partitioned by exact probability under or equal to $0.5$ and
+					over $0.5$}
 \end{table}
 
 \section{Implementation techniques}
@@ -494,3 +504,5 @@ In our implementation, this check is made computationally efficient by maintaini
 allowing the check as to whether the model is already in the population to be performed in $\BigO(1)$ time.
 
 \section{Conclusion}
+The population-based strategy used in this model selection algorithm represents a significant improvement over
+simpler algorithms based on step-search.

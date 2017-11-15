@@ -1,7 +1,7 @@
 doBAS <- FALSE
-doBMS <- FALSE
+doBMS <- TRUE
 doEMVS <- FALSE
-doVARBVS <- FALSE
+doVARBVS <- TRUE
 
 library(ncvreg)
 if (doBAS) {
@@ -624,7 +624,7 @@ QLT <- function(K, data_fn, start, prior, bUnique=TRUE)
       # initial_gamma <- matrix(0, K, ncol(mX.til))
       a4 <- proc.time()[3]
       cat(c(K, 1, prior, "\n"))
-      cva.res <- cva (initial_gamma, y.n, mX.n, K, 1, prior, bUnique)
+      cva.res <- cva(initial_gamma, y.n, mX.n, K, 1, prior, bUnique)
       cat("covariates in models ", apply(cva.res$models, 1, sum), "\n")
       
       vlog_p <- model_likelihood(cva.res$models, y.n, mX.n)

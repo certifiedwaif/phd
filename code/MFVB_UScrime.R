@@ -116,7 +116,7 @@ for (j in 1:p) {
 vy <- y.n
 mX <- X.n
 
-source("~/Dropbox/phd/code/functions.R")
+source("~/Dropbox/phd/code/functions.Rs")
 
 res = normalize(vy,mX) 
 vy = res$vy

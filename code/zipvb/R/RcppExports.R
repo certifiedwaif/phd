@@ -2,14 +2,14 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 fastdiag <- function(lambda, C) {
-    .Call('zipvb_fastdiag', PACKAGE = 'zipvb', lambda, C)
+    .Call('_zipvb_fastdiag', PACKAGE = 'zipvb', lambda, C)
 }
 
 fastdiag2 <- function(R, C) {
-    .Call('zipvb_fastdiag2', PACKAGE = 'zipvb', R, C)
+    .Call('_zipvb_fastdiag2', PACKAGE = 'zipvb', R, C)
 }
 
 fastsolve <- function(R, C) {
-    .Call('zipvb_fastsolve', PACKAGE = 'zipvb', R, C)
+    .Call('_zipvb_fastsolve', PACKAGE = 'zipvb', R, C)
 }
 

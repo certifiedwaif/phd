@@ -17,16 +17,18 @@ if (!(start %in% allowable_start)) {
 	stop(paste0("Second argument must be one of ", allowable_start))
 }
 
-allowable_prior <- c("log_prob1", "BIC", "ZE", "3", "4", "5", "6", "7")
+allowable_prior <- c("maruyama", "BIC", "ZE", "liang_g1", "liang_g2", "liang_g3", "robust_bayarri1", "robust_bayarri2")
 prior <- args[4]
 if (!(prior %in% allowable_prior)) {
 	stop(paste0("Second argument must be one of ", allowable_prior))
 }
 
 if (data_fn == "generate_data_QTL") {
-	dat <- QLT(K, generate_data_QTL, start, prior)
-} else {
+	dat <- QLT(K, generate_data_QLT, start, prior)
+} else if (data_fn == "generate_data_high_dimensional" ) {
 	dat <- QLT(K, generate_data_high_dimensional, start, prior)
+} else {
+	stop("I don't recognise that data_fn.")
 }
 
 pdf(sprintf("results/%s_%s_%s_%s.pdf", K, data_fn, start, prior))

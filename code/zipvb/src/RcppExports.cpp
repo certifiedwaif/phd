@@ -9,7 +9,7 @@ using namespace Rcpp;
 
 // fastdiag
 VectorXd fastdiag(const MapMatd lambda, const MapMatd C);
-RcppExport SEXP zipvb_fastdiag(SEXP lambdaSEXP, SEXP CSEXP) {
+RcppExport SEXP _zipvb_fastdiag(SEXP lambdaSEXP, SEXP CSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -21,7 +21,7 @@ END_RCPP
 }
 // fastdiag2
 VectorXd fastdiag2(const MapMatd R, const MapMatd C);
-RcppExport SEXP zipvb_fastdiag2(SEXP RSEXP, SEXP CSEXP) {
+RcppExport SEXP _zipvb_fastdiag2(SEXP RSEXP, SEXP CSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -33,7 +33,7 @@ END_RCPP
 }
 // fastsolve
 VectorXd fastsolve(const MapMatd R, const MapMatd C);
-RcppExport SEXP zipvb_fastsolve(SEXP RSEXP, SEXP CSEXP) {
+RcppExport SEXP _zipvb_fastsolve(SEXP RSEXP, SEXP CSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -45,9 +45,9 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"zipvb_fastdiag", (DL_FUNC) &zipvb_fastdiag, 2},
-    {"zipvb_fastdiag2", (DL_FUNC) &zipvb_fastdiag2, 2},
-    {"zipvb_fastsolve", (DL_FUNC) &zipvb_fastsolve, 2},
+    {"_zipvb_fastdiag", (DL_FUNC) &_zipvb_fastdiag, 2},
+    {"_zipvb_fastdiag2", (DL_FUNC) &_zipvb_fastdiag2, 2},
+    {"_zipvb_fastsolve", (DL_FUNC) &_zipvb_fastsolve, 2},
     {NULL, NULL, 0}
 };
 

@@ -9,7 +9,7 @@ using namespace Rcpp;
 
 // cva
 List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, const int K, const double lambda, std::string log_lik, const bool bUnique);
-RcppExport SEXP correlation_cva(SEXP gamma_initialSEXP, SEXP vy_inSEXP, SEXP mX_inSEXP, SEXP KSEXP, SEXP lambdaSEXP, SEXP log_likSEXP, SEXP bUniqueSEXP) {
+RcppExport SEXP _correlation_cva(SEXP gamma_initialSEXP, SEXP vy_inSEXP, SEXP mX_inSEXP, SEXP KSEXP, SEXP lambdaSEXP, SEXP log_likSEXP, SEXP bUniqueSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -25,43 +25,45 @@ BEGIN_RCPP
 END_RCPP
 }
 // all_correlations_mX
-List all_correlations_mX(NumericVector vy, NumericMatrix mX, int intercept_col, bool bNatural_Order, bool bIntercept, bool bCentre, int cores);
-RcppExport SEXP correlation_all_correlations_mX(SEXP vySEXP, SEXP mXSEXP, SEXP intercept_colSEXP, SEXP bNatural_OrderSEXP, SEXP bInterceptSEXP, SEXP bCentreSEXP, SEXP coresSEXP) {
+List all_correlations_mX(NumericVector vy, NumericMatrix mX, std::string g_prior, int intercept_col, bool bNatural_Order, bool bIntercept, bool bCentre, int cores);
+RcppExport SEXP _correlation_all_correlations_mX(SEXP vySEXP, SEXP mXSEXP, SEXP g_priorSEXP, SEXP intercept_colSEXP, SEXP bNatural_OrderSEXP, SEXP bInterceptSEXP, SEXP bCentreSEXP, SEXP coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type vy(vySEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type mX(mXSEXP);
+    Rcpp::traits::input_parameter< std::string >::type g_prior(g_priorSEXP);
     Rcpp::traits::input_parameter< int >::type intercept_col(intercept_colSEXP);
     Rcpp::traits::input_parameter< bool >::type bNatural_Order(bNatural_OrderSEXP);
     Rcpp::traits::input_parameter< bool >::type bIntercept(bInterceptSEXP);
     Rcpp::traits::input_parameter< bool >::type bCentre(bCentreSEXP);
     Rcpp::traits::input_parameter< int >::type cores(coresSEXP);
-    rcpp_result_gen = Rcpp::wrap(all_correlations_mX(vy, mX, intercept_col, bNatural_Order, bIntercept, bCentre, cores));
+    rcpp_result_gen = Rcpp::wrap(all_correlations_mX(vy, mX, g_prior, intercept_col, bNatural_Order, bIntercept, bCentre, cores));
     return rcpp_result_gen;
 END_RCPP
 }
 // all_correlations_mX_mZ
-List all_correlations_mX_mZ(NumericVector vy, NumericMatrix mX, NumericMatrix mZ, int intercept_col, bool bNatural_Order, bool bIntercept, bool bCentre, int cores);
-RcppExport SEXP correlation_all_correlations_mX_mZ(SEXP vySEXP, SEXP mXSEXP, SEXP mZSEXP, SEXP intercept_colSEXP, SEXP bNatural_OrderSEXP, SEXP bInterceptSEXP, SEXP bCentreSEXP, SEXP coresSEXP) {
+List all_correlations_mX_mZ(NumericVector vy, NumericMatrix mX, NumericMatrix mZ, std::string g_prior, int intercept_col, bool bNatural_Order, bool bIntercept, bool bCentre, int cores);
+RcppExport SEXP _correlation_all_correlations_mX_mZ(SEXP vySEXP, SEXP mXSEXP, SEXP mZSEXP, SEXP g_priorSEXP, SEXP intercept_colSEXP, SEXP bNatural_OrderSEXP, SEXP bInterceptSEXP, SEXP bCentreSEXP, SEXP coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type vy(vySEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type mX(mXSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type mZ(mZSEXP);
+    Rcpp::traits::input_parameter< std::string >::type g_prior(g_priorSEXP);
     Rcpp::traits::input_parameter< int >::type intercept_col(intercept_colSEXP);
     Rcpp::traits::input_parameter< bool >::type bNatural_Order(bNatural_OrderSEXP);
     Rcpp::traits::input_parameter< bool >::type bIntercept(bInterceptSEXP);
     Rcpp::traits::input_parameter< bool >::type bCentre(bCentreSEXP);
     Rcpp::traits::input_parameter< int >::type cores(coresSEXP);
-    rcpp_result_gen = Rcpp::wrap(all_correlations_mX_mZ(vy, mX, mZ, intercept_col, bNatural_Order, bIntercept, bCentre, cores));
+    rcpp_result_gen = Rcpp::wrap(all_correlations_mX_mZ(vy, mX, mZ, g_prior, intercept_col, bNatural_Order, bIntercept, bCentre, cores));
     return rcpp_result_gen;
 END_RCPP
 }
 // graycode
 IntegerMatrix graycode(unsigned int varying, unsigned int fixed);
-RcppExport SEXP correlation_graycode(SEXP varyingSEXP, SEXP fixedSEXP) {
+RcppExport SEXP _correlation_graycode(SEXP varyingSEXP, SEXP fixedSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -70,4 +72,17 @@ BEGIN_RCPP
     rcpp_result_gen = Rcpp::wrap(graycode(varying, fixed));
     return rcpp_result_gen;
 END_RCPP
+}
+
+static const R_CallMethodDef CallEntries[] = {
+    {"_correlation_cva", (DL_FUNC) &_correlation_cva, 7},
+    {"_correlation_all_correlations_mX", (DL_FUNC) &_correlation_all_correlations_mX, 8},
+    {"_correlation_all_correlations_mX_mZ", (DL_FUNC) &_correlation_all_correlations_mX_mZ, 9},
+    {"_correlation_graycode", (DL_FUNC) &_correlation_graycode, 2},
+    {NULL, NULL, 0}
+};
+
+RcppExport void R_init_correlation(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
 }

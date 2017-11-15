@@ -421,7 +421,7 @@ calculate.model.posteriors <- function(vy,mX,CHECK)
 	n = length(vy)
 	p = ncol(mX)
 	
-	vR2 = correlation::all_correlations_mX(vy, mX)$vR2
+	vR2 = correlation::all_correlations_mX(vy, mX, "maruyama")$vR2
 	M = length(vR2)
 	
 	mGamma = graycode(p,0)

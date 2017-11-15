@@ -16,7 +16,7 @@
 #'					of the populations of models for each iteration of the algorithm until it converged
 #' @export
 cva <- function(gamma_initial, vy_in, mX_in, K, lambda = 1., log_lik = "maruyama", bUnique = TRUE) {
-    .Call('correlation_cva', PACKAGE = 'correlation', gamma_initial, vy_in, mX_in, K, lambda, log_lik, bUnique)
+    .Call('_correlation_cva', PACKAGE = 'correlation', gamma_initial, vy_in, mX_in, K, lambda, log_lik, bUnique)
 }
 
 #' @importFrom Rcpp evalCpp
@@ -27,16 +27,21 @@ NULL
 #'
 #' @param vy Vector of responses
 #' @param mX Covariate matrix
+#' @param g_prior The g-prior to use. The choices of g-prior available are "maruyama", "BIC", "ZE",
+#' "liang_g1", "liang_g2", "liang_g3", "robust_bayarri1" and "robust_bayarri2"
 #' @param intercept_col The index of the column in mX containing the intercept, if any
 #' @param bNatural_Order Whether to return the results in natural order or graycode order. Defaults to graycode order.
 #' @param bIntercept Logical value indicating whether there is an intercept column or not
 #' @param bCentre Logical value indicating whether to centre the response vector and covariance matrix or not
 #' @param cores The number of cores to use
-#' @return A list containing vR2, the vector of correlations for each model and vp_gamma, the vector of
-#' number of covariates for each model
+#' @return A list containing 
+#' vR2, the vector of correlations for each model
+#' vp_gamma, the vector of number of covariates for each model
+#' vlogp, the vector of logs of the likelihoods of each model
+#' vinclusion_prob, the vector of inclusion probabilities for each of the covariates
 #' @export
-all_correlations_mX <- function(vy, mX, intercept_col = 1L, bNatural_Order = FALSE, bIntercept = FALSE, bCentre = FALSE, cores = 1L) {
-    .Call('correlation_all_correlations_mX', PACKAGE = 'correlation', vy, mX, intercept_col, bNatural_Order, bIntercept, bCentre, cores)
+all_correlations_mX <- function(vy, mX, g_prior, intercept_col = 1L, bNatural_Order = FALSE, bIntercept = FALSE, bCentre = FALSE, cores = 1L) {
+    .Call('_correlation_all_correlations_mX', PACKAGE = 'correlation', vy, mX, g_prior, intercept_col, bNatural_Order, bIntercept, bCentre, cores)
 }
 
 #' Calculate the correlation of all the sub-models mX/mZ and vy, where mX is fixed in every model and the sub-models of mZ are included
@@ -44,16 +49,21 @@ all_correlations_mX <- function(vy, mX, intercept_col = 1L, bNatural_Order = FAL
 #' @param vy Vector of responses
 #' @param mX Fixed covariate matrix
 #' @param mZ Varying covariate matrix
+#' @param g_prior The g-prior to use. The choices of g-prior available are "maruyama", "BIC", "ZE",
+#' "liang_g1", "liang_g2", "liang_g3", "robust_bayarri1" and "robust_bayarri2"
 #' @param intercept_col The index of the column in mX containing the intercept, if any
 #' @param bNatural_Order Whether to return the results in natural order or graycode order. Defaults to graycode order.
 #' @param bIntercept Logical value indicating whether there is an intercept column or not
 #' @param bCentre Logical value indicating whether to centre the response vector and covariance matrix or not
 #' @param cores The number of cores to use
-#' @return A list containing vR2, the vector of correlations and vp_gamma, the vector of number of covariates
-#' for each model
+#' @return A list containing 
+#' vR2, the vector of correlations for each model
+#' vp_gamma, the vector of number of covariates for each model
+#' vlogp, the vector of logs of the likelihoods of each model
+#' vinclusion_prob, the vector of inclusion probabilities for each of the covariates
 #' @export
-all_correlations_mX_mZ <- function(vy, mX, mZ, intercept_col = 1L, bNatural_Order = FALSE, bIntercept = FALSE, bCentre = FALSE, cores = 1L) {
-    .Call('correlation_all_correlations_mX_mZ', PACKAGE = 'correlation', vy, mX, mZ, intercept_col, bNatural_Order, bIntercept, bCentre, cores)
+all_correlations_mX_mZ <- function(vy, mX, mZ, g_prior, intercept_col = 1L, bNatural_Order = FALSE, bIntercept = FALSE, bCentre = FALSE, cores = 1L) {
+    .Call('_correlation_all_correlations_mX_mZ', PACKAGE = 'correlation', vy, mX, mZ, g_prior, intercept_col, bNatural_Order, bIntercept, bCentre, cores)
 }
 
 #' Return the graycode matrix
@@ -65,6 +75,6 @@ all_correlations_mX_mZ <- function(vy, mX, mZ, intercept_col = 1L, bNatural_Orde
 #' set of covariates is included or not.
 #' @export
 graycode <- function(varying, fixed = 0L) {
-    .Call('correlation_graycode', PACKAGE = 'correlation', varying, fixed)
+    .Call('_correlation_graycode', PACKAGE = 'correlation', varying, fixed)
 }
 

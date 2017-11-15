@@ -18,7 +18,8 @@ using namespace std;
 //'
 //' @param vy Vector of responses
 //' @param mX Covariate matrix
-//' @param log_lik The g-prior to use
+//' @param g_prior The g-prior to use. The choices of g-prior available are "maruyama", "BIC", "ZE",
+//' "liang_g1", "liang_g2", "liang_g3", "robust_bayarri1" and "robust_bayarri2"
 //' @param intercept_col The index of the column in mX containing the intercept, if any
 //' @param bNatural_Order Whether to return the results in natural order or graycode order. Defaults to graycode order.
 //' @param bIntercept Logical value indicating whether there is an intercept column or not
@@ -31,7 +32,7 @@ using namespace std;
 //' vinclusion_prob, the vector of inclusion probabilities for each of the covariates
 //' @export
 // [[Rcpp::export]]
-List all_correlations_mX(NumericVector vy, NumericMatrix mX, std::string log_lik, int intercept_col = 1,
+List all_correlations_mX(NumericVector vy, NumericMatrix mX, std::string g_prior, int intercept_col = 1,
 													bool bNatural_Order = false, bool bIntercept = false, bool bCentre = false,
 													int cores = 1) {
 	Map<VectorXd> vy_m = as< Map<VectorXd> >(vy);
@@ -39,7 +40,7 @@ List all_correlations_mX(NumericVector vy, NumericMatrix mX, std::string log_lik
 	#if defined(_OPENMP)
 		omp_set_num_threads(cores);
 	#endif;
-	List result = all_correlations_mX_cpp(vy_m, mX_m, log_lik, intercept_col - 1, bNatural_Order, bIntercept,
+	List result = all_correlations_mX_cpp(vy_m, mX_m, g_prior, intercept_col - 1, bNatural_Order, bIntercept,
 								bCentre);
 	return result;
 }
@@ -49,7 +50,8 @@ List all_correlations_mX(NumericVector vy, NumericMatrix mX, std::string log_lik
 //' @param vy Vector of responses
 //' @param mX Fixed covariate matrix
 //' @param mZ Varying covariate matrix
-//' @param log_lik The g-prior to use
+//' @param g_prior The g-prior to use. The choices of g-prior available are "maruyama", "BIC", "ZE",
+//' "liang_g1", "liang_g2", "liang_g3", "robust_bayarri1" and "robust_bayarri2"
 //' @param intercept_col The index of the column in mX containing the intercept, if any
 //' @param bNatural_Order Whether to return the results in natural order or graycode order. Defaults to graycode order.
 //' @param bIntercept Logical value indicating whether there is an intercept column or not
@@ -62,7 +64,7 @@ List all_correlations_mX(NumericVector vy, NumericMatrix mX, std::string log_lik
 //' vinclusion_prob, the vector of inclusion probabilities for each of the covariates
 //' @export
 // [[Rcpp::export]]
-List all_correlations_mX_mZ(NumericVector vy, NumericMatrix mX, NumericMatrix mZ, std::string log_lik,
+List all_correlations_mX_mZ(NumericVector vy, NumericMatrix mX, NumericMatrix mZ, std::string g_prior,
                             int intercept_col = 1,
                             bool bNatural_Order = false, bool bIntercept = false, bool bCentre = false,
                             int cores = 1) {
@@ -72,7 +74,7 @@ List all_correlations_mX_mZ(NumericVector vy, NumericMatrix mX, NumericMatrix mZ
 	#if defined(_OPENMP)
 		omp_set_num_threads(cores);
 	#endif;
-	List result = all_correlations_mX_mZ_cpp(vy_m, mX_m, mZ_m, log_lik, intercept_col - 1, bNatural_Order, bIntercept, bCentre);
+	List result = all_correlations_mX_mZ_cpp(vy_m, mX_m, mZ_m, g_prior, intercept_col - 1, bNatural_Order, bIntercept, bCentre);
 	return result;
 }
 

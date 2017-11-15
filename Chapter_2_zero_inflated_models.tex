@@ -1,6 +1,6 @@
 \chapter{Zero-inflated models}
 
-\begin{abstract}
+% \begin{abstract}
 	\noindent We consider variational inference for zero--inflated Poisson regression models using a latent
 	variable representation. The model is extended to include random effects which allow simple incorporation of
 	spline and other modelling structures. Several variational approximations to the resulting set of models are
@@ -8,7 +8,7 @@
 	of the approximate posterior density for the random effects. This parameterisation improves upon the
 	computational cost and numerical stability of previous methods. We demonstrate these approximations on
 	simulated and real data sets.
-\end{abstract}
+% \end{abstract}
  
 \noindent Keywords: Approximate Bayesian inference ; mixed model ; Markov chain Monte Carlo ; Stan ; penalized splines.
 
@@ -326,8 +326,10 @@ fit using a Gaussian Variational Approximation for $\vbeta$ and $\vu$ jointly, a
 	enhance their numerical stability.
 		
 	\subsection{Laplace-Variational Approximation}
-	The Laplace-Variational Approximation method is based on Laplace's method of approximating integrals.
-	The variational lower bound  is approximated by a Gaussian centred at its' mode.
+	The Laplace-Variational Approximation method is based on Laplace's method of approximating integrals, as
+	introduced in \S \ref{sec:laplace_approximation}. The variational lower bound  is approximated by a Gaussian
+	centred at its' mode.
+
 	% Laplace's method of
 	% approximation uses the second order Taylor expansion of the full log likelihood of the  model around the
 	% mode to find a Gaussian approximation to the full posterior. Taylor expanding the full log likelihood
