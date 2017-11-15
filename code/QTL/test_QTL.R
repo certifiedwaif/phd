@@ -3,7 +3,7 @@
 library(tidyverse)
 library(optparse)
 library(latex2exp)
-source("QLT.R")
+source("QTL.R")
 
 
 generate_F_1_data <- function(K, data_fn, start, prior, bUnique)
