@@ -186,13 +186,26 @@ double robust_bayarri1(const int n, const int p, double R2, int p_gamma)
 	double r = (1. + n) / (1. + p_gamma);
 	double L = r - 1.;
 
-	VectorXd x(10000);
-	VectorXd log_f(10000);
-	for (int i = 0; i < 10000; i++) {
-		x(i) = L + (10000. - L) * i / 10000.;
+	const int NUM_POINTS = 10000;
+	VectorXd x(NUM_POINTS);
+	x.setLinSpaced(NUM_POINTS, L, 10000);
+
+	double sigma2 = 1 - R2;
+	double beta   = (1 + sigma2*L)/sigma2;
+
+	VectorXd log_f(NUM_POINTS);
+	for (int i = 0; i < NUM_POINTS; i++) {
 		log_f(i) = -log(2.) + 0.5 * log(r) + 0.5 * (n - p_gamma - 4.) * log(1. + x(i)) - 0.5 * (n - 1.) * log(1. + x(i) * (1. - R2));
-		// if (i < 10)
-		// 	Rcpp::Rcout << "x(" << i << ") " << x(i) << " log_f(i) " << log_f(i) << std::endl;
+		// log_f(i) = -log(2.) + 0.5 * log(r) - 0.5 * (n - 1.)*log(sigma2) + 0.5 * (n - p_gamma - 4.) * log(r + x[i]) - 0.5 * (n - 1.) * log(beta + x[i]);
+		// #ifdef DEBUG
+		// Rcpp::Rcout << "-log(2) " << -log(2) << std::endl;
+		// Rcpp::Rcout << "0.5 * log(r) " << 0.5 * log(r) << std::endl;
+		// Rcpp::Rcout << "-0.5 * (n - 1) * log(sigma2) " << -0.5 * (n - 1) * log(sigma2) << std::endl;
+		// Rcpp::Rcout << "0.5 * (n - p_gamma - 4) * log(r + x[i]) " << 0.5 * (n - p_gamma - 4) * log(r + x[i]) << std::endl;
+		// Rcpp::Rcout << "0.5 * (n - 1.) * log(beta + x[i])	" << 0.5 * (n - 1.) * log(beta + x[i])	<< std::endl;
+		// // if (i < 10)
+		// // 	Rcpp::Rcout << "x(" << i << ") " << x(i) << " log_f(i) " << log_f(i) << std::endl;
+		// #endif
 	}
 	double result = log(trapint(x, log_f.array().exp()));
 	// Rcpp::Rcout << "result " << result << std::endl;
