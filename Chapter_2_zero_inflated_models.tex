@@ -126,7 +126,7 @@ function.
 $\text{Bernoulli}(\pi)$ denotes the probability distribution $\pi^k (1 - \pi)^{1-k}$ and
 $\text{Inverse Wishart}(\mPsi, v)$ denotes the probability distribution
 $$\tfrac{|\mPsi|^\frac{v}{2}}{2^{\frac{vp}{2}} \Gamma_p{(\tfrac{v}{2})}} |\mX|^{-\tfrac{v + p + 1}{2}}
-\exp{[-\frac{1}{2} \tr{(\mPsi \mX^{-1})}]}$$ where $\Gamma_p{(x)}$ denotes the multivariate gamma function and $\tr$
+\exp{\{-\frac{1}{2} \tr{(\mPsi \mX^{-1})}\}}$$ where $\Gamma_p{(x)}$ denotes the multivariate gamma function and $\tr$
 is the trace function.
 
 \subsection{Modelling zero-inflated Poisson data}
@@ -279,11 +279,11 @@ The optimal approximation \joc{(reword: the ``optimal approximation'' might be c
 $\vr$ is
 \[
 \begin{array}{rl}
-	q(\vr) & \propto \exp \left [ \bE_{-q(\vr)}\vy^\top\mR(\mC\vmu) - \vr^\top\exp{(\mC\vnu)}-\frac{1}{2} \vnu^\top \mSigma_{\vu \vu} \vnu \right ]                                                  \\ [1ex]
-	       & = \exp{ \left\{ \vy^\top\mR\mC \vmu - \vr^\top \exp{[\mC \vmu + \frac{1}{2} \text{diag}(\mC \mLambda \mC^\top)]} - \frac{1}{2} \vmu^\top \mD \vmu - \frac{1}{2} \text{tr}(\mLambda \mD ) \right\} } 
+	q(\vr) & \propto \exp \left \{ \bE_{-q(\vr)}\vy^\top\mR(\mC\vmu) - \vr^\top\exp{(\mC\vnu)}-\frac{1}{2} \vnu^\top \mSigma_{\vu \vu} \vnu \right \}                                                  \\ [1ex]
+	       & = \exp{ \left[ \vy^\top\mR\mC \vmu - \vr^\top \exp{\{\mC \vmu + \frac{1}{2} \text{diag}(\mC \mLambda \mC^\top)\}} - \frac{1}{2} \vmu^\top \mD \vmu - \frac{1}{2} \text{tr}(\mLambda \mD ) \right] } 
 \end{array}
 \]
-\noindent where $\mD = \left[ (\mPsi + \sum_{i=1}^m \vmu_i \vmu_i^\top + \mLambda_{\vu_i\vu_i}) / (v - p - 1) \right]^{-1}$. 
+\noindent where $\mD = \left\{ (\mPsi + \sum_{i=1}^m \vmu_i \vmu_i^\top + \mLambda_{\vu_i\vu_i}) / (v - p - 1) \right\}^{-1}$. 
 
 We observe that this expression is close in form to the likelihood of a Poisson regression model with random
 effects. Poisson regression models are non-conjugate with normal priors, and hence the mean field updates for
@@ -303,11 +303,11 @@ fit using a Gaussian Variational Approximation for $\vbeta$ and $\vu$ jointly, a
 			\STATE Optimise $\vmu$ and $\mLambda$ using $\vy, \mC, \vp$ and $\mSigma_{\vu \vu}$ \\[1ex]
 			% \vp
 			\STATE $\beta_{q(\rho)} \leftarrow \beta_\rho + n - \vone^\top\vp$ \\[1ex]
-			\STATE $\eta \leftarrow -\exp \left [ \mC \vmu + \frac{1}{2} \diag{(\mC\mLambda\mC^\top)} \right ] + \psi{(\alpha_{q{(\rho)}})} - \psi{(\beta_{q{(\rho)}})}$ \\[1ex]
+			\STATE $\eta \leftarrow -\exp \left \{ \mC \vmu + \frac{1}{2} \diag{(\mC\mLambda\mC^\top)} \right \} + \psi{(\alpha_{q{(\rho)}})} - \psi{(\beta_{q{(\rho)}})}$ \\[1ex]
 			\STATE $\vp_{q(\vr_0)} \leftarrow \text{expit}{(\eta)}$ \\[1ex]
 			% \mSigma_{\vu \vu}
 			\STATE $\mPsi_{q(\mSigma_{\vu \vu})} \leftarrow \Psi + \sum_{i=1}^m (\vmu_i \vmu_i^\top + \mLambda_{{\vu}_i {\vu}_i})$ \\[1ex]
-			\STATE $\mSigma_{\vu\vu} \leftarrow [\mPsi_{q(\mSigma_{\vu \vu})}/(v - d - 1)]^{-1}$
+			\STATE $\mSigma_{\vu\vu} \leftarrow \{\mPsi_{q(\mSigma_{\vu \vu})}/(v - d - 1)\}^{-1}$
 		\ENDWHILE
 	\end{algorithmic}
 \end{algorithm}
@@ -370,14 +370,14 @@ fit using a Gaussian Variational Approximation for $\vbeta$ and $\vu$ jointly, a
 			% Fit \vmu, \mLambda using Laplace approximation
 			\WHILE{the increase in $\log \underline{p}(\vmu, \mLambda; \vy)$ is significant}
 			% \vmu, \mLambda
-			\STATE $\mLambda \leftarrow \left [\mP \mC^\top \text{diag}(\exp{(\mC \vmu)}) \mC + \mSigma^{-1} \right ]^{-1}$ \\ [1ex] 
+			\STATE $\mLambda \leftarrow \left \{\mP \mC^\top \text{diag}(\exp{(\mC \vmu)}) \mC + \mSigma^{-1} \right \}^{-1}$ \\ [1ex] 
 			If $\mLambda$ cannot be inverted, or any diagonal element of $\mLambda$ is negative, revert to previous
 			$\mLambda$ and break \\ [1ex]
 			\STATE $\frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \mLambda}
 			\leftarrow - \mC^\top \text{diag}(\vp e^{(\mC \vmu)}) \mC - \mSigma^{-1}$ \\ [1ex]
 			If any element of $\frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \mLambda}$ is NaN or $\infty$,
 			break
-			\STATE $\vmu \leftarrow \vmu + \mLambda \left [ \frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \vmu} \right ]$ \\ [1ex]
+			\STATE $\vmu \leftarrow \vmu + \mLambda \left \{ \frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \vmu} \right \}$ \\ [1ex]
 			\ENDWHILE
 		\end{algorithmic}
 	\end{algorithm}
@@ -407,7 +407,7 @@ fit using a Gaussian Variational Approximation for $\vbeta$ and $\vu$ jointly, a
 	We fit the Gaussian component of our approximation in Algorithm \ref{alg:algorithm_one} by maximising 
 	the variational lower bound	
 	\begin{align*}
-		\log \underline{p}(\vmu, \mLambda; \vy) & = \quad \vy^\top\mP \mC \vmu - \vp^\top \exp[\mC \vmu + \frac{1}{2} \text{diag}(\mC \mLambda \mC^\top)] - \frac{1}{2} \vmu^\top \mSigma^{-1} \vmu - \frac{1}{2} \tr{(\mSigma^{-1} \mLambda)} + \log{|\mR|} \\
+		\log \underline{p}(\vmu, \mLambda; \vy) & = \quad \vy^\top\mP \mC \vmu - \vp^\top \exp\{\mC \vmu + \frac{1}{2} \text{diag}(\mC \mLambda \mC^\top)\} - \frac{1}{2} \vmu^\top \mSigma^{-1} \vmu - \frac{1}{2} \tr{(\mSigma^{-1} \mLambda)} + \log{|\mR|} \\
 		                                        & \quad - \tfrac{p}{2} \log{(2 \pi)} + \frac{1}{2} \log{|\mSigma^{-1}|} + \tfrac{p}{2} \log{(2 \pi)} + \tfrac{p}{2}                                                                              
 	\end{align*}
 	\noindent with respect to $\vmu, \mLambda$, keeping $\vp$, $\mSigma$, and $\rho$ fixed.
@@ -422,31 +422,31 @@ fit using a Gaussian Variational Approximation for $\vbeta$ and $\vu$ jointly, a
 	% numerically evaluating an integral for greatly increased accuracy in the approximating posterior
 	% distribution. 
 	\begin{align*}
-		\log \underline{p}(\vmu, \mLambda; \vy) & = \quad \vy^\top\mP \mC \vmu - \vp^\top \exp[\mC \vmu + \frac{1}{2} \text{diag}(\mC \mLambda \mC^\top)] - \frac{1}{2} \vmu^\top \mSigma^{-1} \vmu - \frac{1}{2} \tr{(\mSigma^{-1} \mLambda)} + \log{|\mR|} \\
+		\log \underline{p}(\vmu, \mLambda; \vy) & = \quad \vy^\top\mP \mC \vmu - \vp^\top \exp\{\mC \vmu + \frac{1}{2} \text{diag}(\mC \mLambda \mC^\top)\} - \frac{1}{2} \vmu^\top \mSigma^{-1} \vmu - \frac{1}{2} \tr{(\mSigma^{-1} \mLambda)} + \log{|\mR|} \\
 		                                        & \quad - \tfrac{p}{2} \log{(2 \pi)} + \frac{1}{2} \log{|\mSigma^{-1}|} + \tfrac{p}{2} \log{(2 \pi)} + \tfrac{p}{2}                                                                              
 	\end{align*}
 	can be optimised with L-BFGS-B using the derivatives in Appendix \ref{sec:appendix_derivatives_gva}.
 	
 	\begin{figure}[p]
-		\includegraphics[scale=.25]{mX_mZ_mLambda.pdf}
+		\includegraphics[width=0.95 \textwidth]{mX_mZ_mLambda.pdf}
 		\caption{\tiny Covariance matrix -- Fixed effects before random effects}
 		\label{fig:covfixedrandom}
 	\end{figure}
 		
 	\begin{figure}[p]
-		\includegraphics[scale=.25]{mZ_mX_mLambda.pdf}
+		\includegraphics[width=0.95 \textwidth]{mZ_mX_mLambda.pdf}
 		\caption{\tiny Covariance matrix -- Random effects before fixed effects}
 		\label{fig:covrandomfixed}
 	\end{figure}
 							      				      			      			      			      	
 	\begin{figure}[p]
-		\includegraphics[scale=.25]{mX_mZ_cholesky.pdf}
+		\includegraphics[width=0.95 \textwidth]{mX_mZ_cholesky.pdf}
 		\caption{\tiny Cholesky factor -- Fixed effects before random effects}
 		\label{fig:cholfixedrandom}
 	\end{figure}
 		
 	\begin{figure}[p]
-		\includegraphics[scale=.25]{mZ_mX_cholesky.pdf}
+		\includegraphics[width=0.95 \textwidth]{mZ_mX_cholesky.pdf}
 		\caption{\tiny Cholesky factor -- Random effects before fixed effects}
 		\label{fig:cholrandomfixed}
 	\end{figure}
@@ -460,7 +460,7 @@ fit using a Gaussian Variational Approximation for $\vbeta$ and $\vu$ jointly, a
 	
 	The Gaussian variational lower bound in this parameterisation is
 	\begin{align*}
-		\log \underline{p}(\vmu, \mLambda; \vy) & = \quad \vy\mP\mC \vmu - \vp^\top \exp(\mC \vmu + \frac{1}{2} \text{diag}(\mC \mLambda \mC^\top)) - \frac{1}{2} \vmu^\top \mSigma^{-1} \vmu - \frac{1}{2} \tr{(\mSigma^{-1} \mLambda)} \\
+		\log \underline{p}(\vmu, \mLambda; \vy) & = \quad \vy\mP\mC \vmu - \vp^\top \exp\{\mC \vmu + \frac{1}{2} \text{diag}(\mC \mLambda \mC^\top)\} - \frac{1}{2} \vmu^\top \mSigma^{-1} \vmu - \frac{1}{2} \tr{(\mSigma^{-1} \mLambda)} \\
 		                                        & \quad- \tfrac{p}{2} \log{(2 \pi)} + \frac{1}{2} \log{|\mSigma^{-1}|} + \tfrac{p}{2} \log{(2 \pi)} + \tfrac{p}{2} - \log{|\mR|}                                             
 	\end{align*}
 			
@@ -483,7 +483,7 @@ fit using a Gaussian Variational Approximation for $\vbeta$ and $\vu$ jointly, a
 	bound. We optimise the same variational lower bound as in the covariance parameterisation above, using the
 	derivatives below. The steps are presented in Algorithm \ref{alg:algorithm_nr} where	
 	\begin{align*}
-		\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu}     & = \quad \mC^\top\vp \left [\vy - \mC\exp(\mC \vmu + \frac{1}{2} \text{diag}(\mC \mLambda \mC^\top)) \right ] - \mSigma^{-1} \vmu \text{ and} \\
+		\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu}     & = \quad \mC^\top\vp \left \{\vy - \mC\exp(\mC \vmu + \frac{1}{2} \text{diag}(\mC \mLambda \mC^\top)) \right \} - \mSigma^{-1} \vmu \text{ and} \\
 		\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda} & = -\mC^\top \text{diag}(\vp^\top \exp(\mC \vmu +\frac{1}{2} \text{diag}(\mC \mLambda \mC^\top))) - \mSigma^{-1}.                             
 	\end{align*}
 	As this algorithm involves a simple Newton-Raphson style update step, it is computationally simple to
@@ -517,11 +517,11 @@ fit using a Gaussian Variational Approximation for $\vbeta$ and $\vu$ jointly, a
 			% Fit \vmu, \mLambda using Laplace approximation
 			\WHILE{the increase in $\log{\underline{p}}(\vmu, \mLambda; \vy)$ is significant}
 			% \vmu, \mLambda
-			\STATE $\mLambda^{-1} = \left [ \mP^\top \mC^\top \exp(\mC \vmu + \frac{1}{2} \text{diag}(\mC \mLambda \mC^\top)) \mC \mP \right ]$ \\ [1ex]
+			\STATE $\mLambda^{-1} = \left \{ \mP^\top \mC^\top \exp(\mC \vmu + \frac{1}{2} \text{diag}(\mC \mLambda \mC^\top)) \mC \mP \right \}$ \\ [1ex]
 			Calculate \STATE $\mLambda \leftarrow \left (\mLambda^{-1} \right )^{-1}$  using the block inverse formula \\ [1ex]
 			If $\mLambda_{\vu \vu}$ cannot be inverted in the above calculation, revert to $\vmu$ and $\mLambda$ from the previous iteration \\ [1ex]
-			\STATE $\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu} = -\mC^\top \text{diag}(\vp^\top \exp(\mC \vmu + \frac{1}{2} \text{diag}(\mC \mLambda \mC^\top))) - \mSigma^{-1}$ \\ [1ex]
-			\STATE $\vmu \leftarrow \vmu + \mLambda \left [ \frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu} \right ]$ \\ [1ex]
+			\STATE $\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu} = -\mC^\top \text{diag}[\vp^\top \exp\{\mC \vmu + \frac{1}{2} \text{diag}(\mC \mLambda \mC^\top)\}] - \mSigma^{-1}$ \\ [1ex]
+			\STATE $\vmu \leftarrow \vmu + \mLambda \left \{ \frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu} \right \}$ \\ [1ex]
 			If any element of $\vmu$ is NaN, revert to $\vmu$ and $\mLambda$ from the previous iteration
 			\ENDWHILE
 		\end{algorithmic}
@@ -573,7 +573,7 @@ fit using a Gaussian Variational Approximation for $\vbeta$ and $\vu$ jointly, a
 		e^t & = &       &             & \quad 2a  \\
 	\end{array}
 	$$
-	to obtain $a = e^t / 2$, $b = (1 - t) e^t$ and $c = [1 - t^2/2 - (1 - t) t] e^t$.
+	to obtain $a = e^t / 2$, $b = (1 - t) e^t$ and $c = \{1 - t^2/2 - (1 - t) t\} e^t$.
 	
 	We also addressed the overflow problem by working with the Cholesky factorisation of $\mLambda^{-1}$
 	rather than $\mLambda$, allowing us to solve a system of equations rather than invert and multiply by a
@@ -730,7 +730,7 @@ fit using a Gaussian Variational Approximation for $\vbeta$ and $\vu$ jointly, a
 			% Figure: Median accuracy graph intercept
 			\begin{figure}
 				\begin{center}
-					\includegraphics[width=0.7\textwidth, height=100mm]{code/results/median_accuracy_combined_intercept.pdf}
+					\includegraphics[width=0.95\textwidth, height=100mm]{code/results/median_accuracy_combined_intercept.pdf}
 					\caption{Median accuracy of random intercept}
 					\label{fig:median_accuracy_intercept}
 				\end{center}
@@ -738,7 +738,7 @@ fit using a Gaussian Variational Approximation for $\vbeta$ and $\vu$ jointly, a
 					
 			% Figure: Median accuracy graph slope
 			\begin{figure}
-				\includegraphics[width=120mm, height=120mm]{code/results/median_accuracy_combined_slope.pdf}
+				\includegraphics[width=0.95\textwidth, height=120mm]{code/results/median_accuracy_combined_slope.pdf}
 				\caption{Median accuracy of slope}
 				\label{fig:median_accuracy_slope}
 			\end{figure}
@@ -795,7 +795,7 @@ fit using a Gaussian Variational Approximation for $\vbeta$ and $\vu$ jointly, a
 			\begin{figure}
 				\label{fig:spline}
 				\caption{Comparison of VB and MCMC spline fits with the true function}
-				\includegraphics[width=100mm, height=100mm]{code/results/accuracy_plots_spline_gva2.pdf}
+				\includegraphics[width=0.95 \textwidth, height=100mm]{code/results/accuracy_plots_spline_gva2.pdf}
 			\end{figure}
 					
 			% Graphs - exactly what sort of graphs do we need?
@@ -820,7 +820,7 @@ fit using a Gaussian Variational Approximation for $\vbeta$ and $\vu$ jointly, a
 			threshold.
 			
 			\begin{figure}
-				\includegraphics{code/stability_intercept.pdf}
+				\includegraphics[width=0.95 \textwidth]{code/stability_intercept.pdf}
 				\label{fig:stability_accuracy}
 				\caption{Accuracy of approximation of parameters versus the safe exponential threshold}
 			\end{figure}
@@ -867,8 +867,8 @@ fit using a Gaussian Variational Approximation for $\vbeta$ and $\vu$ jointly, a
 			not used, as can be seen from Figure \ref{fig:stability_locations_gva}. % FIXME: Add error counts
 					
 			\begin{figure}
-				\includegraphics[scale=0.4]{code/safe_exp_stability.pdf}
-				\includegraphics[scale=0.4]{code/no_safe_exp_stability.pdf}
+				\includegraphics[width=0.95 \textwidth]{code/safe_exp_stability.pdf}
+				\includegraphics[width=0.95 \textwidth]{code/no_safe_exp_stability.pdf}
 				\label{fig:stability_locations_gva}
 				\caption{Starting locations which caused the GVA fitting algorithm to fail with numeric errors. The true model had fixed parameters $\vbeta = (2, 1)^\top$ and random intercepts. There were ten groups in the
 					hierarchical model each	with ten individuals $(m=10, n_i=10)$}
@@ -885,7 +885,7 @@ fit using a Gaussian Variational Approximation for $\vbeta$ and $\vu$ jointly, a
 			are accurately estimated.
 
 			\begin{figure}
-				\includegraphics[scale=0.4]{code/local_solutions_gva_nr_error_locations_no_protections.pdf}
+				\includegraphics[width=0.95 \textwidth]{code/local_solutions_gva_nr_error_locations_no_protections.pdf}
 				\label{fig:stability_locations_nr}
 				\caption{Starting locations which caused the NR fitting algorithm to fail with numeric errors. The true model 						had fixed parameters $\vbeta = (2, 1)^\top$ and random intercepts. There were ten groups in the
 					hierarchical model each	with ten individuals $(m=10, n_i=10)$}
@@ -918,7 +918,7 @@ fit using a Gaussian Variational Approximation for $\vbeta$ and $\vu$ jointly, a
 			\ref{tab:application_police_stops}. Figure \ref{fig:police_stops}
 			
 			\begin{figure}
-			\includegraphics[scale=0.3]{code/results/accuracy_plots_application2_GVA_inv_par-highlights-nup.pdf}
+			\includegraphics[width=0.95 \textwidth]{code/results/accuracy_plots_application2_GVA_inv_par-highlights-nup.pdf}
 			\caption{Accuracy of parameter estimates for police stops}
 			\label{fig:police_stops}
 			\end{figure}
@@ -1039,7 +1039,7 @@ fit using a Gaussian Variational Approximation for $\vbeta$ and $\vu$ jointly, a
 				\centering
 				% \includepdf[width=75mm,height=75mm,pages={1,2,3,16},nup=2x2]{code/results/accuracy_plots_application_GVA2.pdf}
 				\begin{tabular}{@{}c@{\hspace{.5cm}}c@{}}
-				\includegraphics[scale=0.3]{code/results/accuracy_plots_application_GVA_inv_param-highlights-nup.pdf}
+				\includegraphics[width=0.95 \textwidth]{code/results/accuracy_plots_application_GVA_inv_param-highlights-nup.pdf}
 				\end{tabular}
 				\caption{Accuracy graphs for roach model}
 				\label{fig:accuracy_roach}
@@ -1082,7 +1082,7 @@ fit using a Gaussian Variational Approximation for $\vbeta$ and $\vu$ jointly, a
 			number of parameters being fit, we are able to estimate all of the parameters with great accuracy.
 
 			\begin{figure}
-			\includegraphics[scale=0.3]{code/results/accuracy_plots_application_biochemists_GVA_inv_param-nup.pdf}
+			\includegraphics[width=0.95 \textwidth]{code/results/accuracy_plots_application_biochemists_GVA_inv_param-nup.pdf}
 			\label{fig:biochemists}
 			\caption{Accuracy of the approximations of the parameters fit to the biochemists data}
 			\end{figure}
@@ -1131,7 +1131,7 @@ fit using a Gaussian Variational Approximation for $\vbeta$ and $\vu$ jointly, a
 			inverse parameterisations -- the inverse parameterisation is 
 
 			\begin{figure}
-				\includegraphics[scale=0.3]{code/results/accuracy_plots_application_owls_GVA_inv_param-highlights-nup.pdf}
+				\includegraphics[width=0.95 \textwidth]{code/results/accuracy_plots_application_owls_GVA_inv_param-highlights-nup.pdf}
 				\caption{Accuracy of the approximations of the parameters fit to the Owls data}
 				\label{fig:owls}
 			\end{figure}
@@ -1238,17 +1238,17 @@ fit using a Gaussian Variational Approximation for $\vbeta$ and $\vu$ jointly, a
 			\subsection{Calculation of the Variational Lower bound}
 			% Where are the priors for \vbeta and \vu
 					
-			The variational lower bound is equal to $\bE_q[\log{p(\vy, \vtheta)} - \log{q(\vtheta)}] = T_1 + T_2 + T_3$,
+			The variational lower bound is equal to $\bE_q\{\log{p(\vy, \vtheta)} - \log{q(\vtheta)}\} = T_1 + T_2 + T_3$,
 			where
 			% This is the new T_1
 			$$
 			\begin{array}{rl}
 				T_1 & = \quad \bE_q[\log{p(\vy, \vnu)} - \log{q(\vnu)}]                                                                                                                                                  \\
-				    & = \quad \vy \mP \mC \vmu - \vp^\top \exp{\left[ \mC \vmu + \frac{1}{2} \text{diag} (\mC \mLambda \mC^\top) \right]} - \vone^\top\log \Gamma{(\vy + \vone)}                                               \\
+				    & = \quad \vy \mP \mC \vmu - \vp^\top \exp{\left\{ \mC \vmu + \frac{1}{2} \text{diag} (\mC \mLambda \mC^\top) \right\}} - \vone^\top\log \Gamma{(\vy + \vone)}                                               \\
 				    & \quad + \frac{p + m}{2} (1 + \log{2 \pi}) + \frac{1}{2} \log{|\mLambda|},                                                                                                                                \\
-				T_2 & = \quad {\textbf E}_q \left[ \log p(\mSigma_{\vu \vu}) - \log q(\mSigma_{\vu \vu}) \right]                                                                                                                 \\
-				    & = \quad {\textbf E}_q \big[ v/2(\log |\Psi| - \log |\Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu}|) + \frac{1}{2} \log 2 + \frac{1}{2} \log|\mSigma_{\vu \vu}| + \log \Gamma_{p+1}(v/2) - \log \Gamma_{p}(v/2)    \\
-				    & \quad + \frac{1}{2} \tr((\vmu_{\vu} \vmu_{\vu}^\top + \mLambda_{\vu \vu}) \mSigma_{\vu \vu}^{-1}) \big]                                                                                                  \\
+				T_2 & = \quad \bE_q \left\{ \log p(\mSigma_{\vu \vu}) - \log q(\mSigma_{\vu \vu}) \right\}                                                                                                                 \\
+				    & = \quad \bE_q \big\{ v/2(\log |\Psi| - \log |\Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu}|) + \frac{1}{2} \log 2 + \frac{1}{2} \log|\mSigma_{\vu \vu}| + \log \Gamma_{p+1}(v/2) - \log \Gamma_{p}(v/2)    \\
+				    & \quad + \frac{1}{2} \tr((\vmu_{\vu} \vmu_{\vu}^\top + \mLambda_{\vu \vu}) \mSigma_{\vu \vu}^{-1}) \big\}                                                                                                  \\
 				    & = \quad v/2\big(\log |\Psi| - \log |\Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu}|\big) + \frac{1}{2} \log 2 + \frac{1}{2} \bE_q \log |\mSigma_{\vu \vu}| + \log \Gamma_{p+1}(v/2) - \log \Gamma_{p}(v/2) \\
 				    & \quad + \frac{1}{2} \tr\big(\mI_m + \Psi(\Psi+ \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu})^{-1}/(v + p + 2)\big)                                                                                        \\
 				T_3 & = - \vp^\top \log \vp - (\vone - \vp)^\top \log (\vone - \vp) - \log \Beta (\alpha_\rho, \beta_\rho) + \log \Beta (\alpha_q, \beta_q)                                                              
@@ -1269,6 +1269,6 @@ fit using a Gaussian Variational Approximation for $\vbeta$ and $\vu$ jointly, a
 			\label{sec:appendix_derivatives_gva}
 			\begin{align*}
 				\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu}     & = \mP \mC (\vy - \mC^\top \exp(\mC \vmu + \frac{1}{2} \text{diag}{(\mC \mLambda \mC^\top)})) - \mSigma^{-1} \vmu \text{ and}                \\
-				\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda} & = \left [\mLambda^{-1} - \mP \mC^\top \exp(\mC \vmu + \frac{1}{2} \text{diag}(\mC \mLambda \mC^\top)) \mP \mC) - \mSigma^{-1} \right ] \mR. 
+				\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda} & = \left \{\mLambda^{-1} - \mP \mC^\top \exp(\mC \vmu + \frac{1}{2} \text{diag}(\mC \mLambda \mC^\top)) \mP \mC) - \mSigma^{-1} \right \} \mR. 
 			\end{align*}
 
