@@ -125,8 +125,8 @@ function.
 
 $\text{Bernoulli}(\pi)$ denotes the probability distribution $\pi^k (1 - \pi)^{1-k}$ and
 $\text{Inverse Wishart}(\mPsi, v)$ denotes the probability distribution
-$$\tfrac{|\mPsi|^\frac{v}{2}}{2^{\frac{vp}{2}} \Gamma_p{(\tfrac{v}{2})}} |\mX|^{-\tfrac{v + p + 1}{2}}
-\exp{\{-\frac{1}{2} \tr{(\mPsi \mX^{-1})}\}}$$ where $\Gamma_p{(x)}$ denotes the multivariate gamma function and $\tr$
+$$\tfrac{|\mPsi|^\frac{v}{2}}{2^{\frac{vp}{2}} \Gamma_p{\left(\tfrac{v}{2}\right)}} |\mX|^{-\tfrac{v + p + 1}{2}}
+\exp{\left\{-\frac{1}{2} \tr{(\mPsi \mX^{-1})}\right\}}$$ where $\Gamma_p{(x)}$ denotes the multivariate gamma function and $\tr$
 is the trace function.
 
 \subsection{Modelling zero-inflated Poisson data}
@@ -981,7 +981,7 @@ fit using a Gaussian Variational Approximation for $\vbeta$ and $\vu$ jointly, a
 				\end{cases} \\
 				R_i &\sim \text{Bernoulli}(\rho), \\
 				\rho &\sim \text{Beta}(a, b), \\
-				\vbeta &\sim \\text{N}(\vzero, \sigma^2_\vbeta \mI), \\
+				\vbeta &\sim \text{N}(\vzero, \sigma^2_\vbeta \mI), \\
 				\vu &\sim \text{N}(\vzero, \mSigma), \text{and} \\
 				\mSigma &\sim \text{Inverse-Wishart}(\mPsi, v)
 			\end{align*}
@@ -1112,7 +1112,7 @@ fit using a Gaussian Variational Approximation for $\vbeta$ and $\vu$ jointly, a
 
 			The model fit was
 			\[
-			y_i = R_i e^{\vbeta_1 + \vbeta_2 \text{Satiated} + \vbeta_3 \text{Arrival Time} + u_n}
+			y_i = R_i e^{\vbeta_2 \text{Food Treatment = Satiated} + \vbeta_3 \text{Arrival Time} + u_n}
 			\]
 			where $n$ is the $n$-th nest, with priors
 			\begin{align*}
@@ -1141,14 +1141,16 @@ fit using a Gaussian Variational Approximation for $\vbeta$ and $\vu$ jointly, a
 					\hline
 					Covariate          & Posterior Mean & Lower 95\% CI & Upper 95\% CI & Accuracy \\
 					\hline
-					Intercept & \\
-					Female & \\
-					Married & \\
-					Children under age 6 & \\
-					PhD & \\
+					Satiated & -0.217 & -0.212 & -0.2144 & 97\% \\
+					Arrival Time & -0.070 & -0.070 & -0.070 & 73\% \\
+					Random intercept (nest) & 0.338 & & & 84\% \\
+					$\sigma_{\vu_1}^2$ & 7.90 & 3.213 & 468.123 & 94\% \\
+					$\rho$ & 0.739 & 0.703 & 0.774 & 99\% \\
 					\hline
 				\end{tabular}			
 				\label{tab:owls_results}
+				\caption{The posterior means, 95\% confidence intervals and accuracy of the fixed and random
+									effects, $\sigma_{\vu_1}^2$ and $\rho$ for the Owls model.}
 			\end{table}
 
 			\begin{table}
@@ -1156,13 +1158,13 @@ fit using a Gaussian Variational Approximation for $\vbeta$ and $\vu$ jointly, a
 				\hline
 				Algorithm & Time in seconds \\
 				\hline
-				Laplace & 0.988 \\
-				GVA covariance parameterisation & 46.014 \\
-				GVA inverse parameterisation & 2.056 \\
-				GVA fixed point & 0.580 \\
+				Laplace & 0.709 \\
+				GVA covariance parameterisation & 5.661 \\
+				GVA inverse parameterisation & 1.879 \\
+				GVA fixed point & 0.177 \\
 				\hline
 				\end{tabular}
-				\caption{}
+				\caption{The runtimes of the fitting algorithms for the Owls model in seconds.}
 				\label{tab:owls_times}
 			\end{table}
 
@@ -1257,7 +1259,7 @@ fit using a Gaussian Variational Approximation for $\vbeta$ and $\vu$ jointly, a
 					
 			\noindent with $\bE_q \log |\mSigma_{\vu \vu}| = m \log 2 + \log \left | \Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu} \right | + \sum_{i=1}^m \Psi \left ( \frac{v - i + 1}{2} \right )$
 
-			\section{Appendix}
+			\appendix{Appendix}
 			\subsection{Derivatives for Laplace-Gaussian Variational Approximation}
 			\label{sec:appendix_derivatives_laplace}
 			\begin{align*}
