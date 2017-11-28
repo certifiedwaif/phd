@@ -717,8 +717,6 @@ model can be fit using Algorithm \ref{alg:algorithm_one} below.
 			To assess the speed of each approach, a test case was constructed of a random slope model with $m=50$ groups,	each containing $n_i = 100$ individuals. A model was then fit to this data set ten times using each algorithm, and the results averaged. They are presented in Table \ref{tab:application_slope_speed}.
 
 			\begin{table}
-				\caption{Table of results - Speed}
-				\label{tab:application_slope_speed}
 				\begin{tabular}{|l|rr|}
 					\hline
 					Algorithm & Mean (seconds) & Standard deviation (seconds) \\
@@ -730,6 +728,8 @@ model can be fit using Algorithm \ref{alg:algorithm_one} below.
 					GVA fixed point & 0.05 & 0.07 \\
 					\hline
 				\end{tabular}
+				\caption{Table of results - Speed}
+				\label{tab:application_slope_speed}
 			\end{table}
 
 			% The stability of the algorithms was confirmed by running them on 10,000 different data sets that were randomly
@@ -756,8 +756,6 @@ model can be fit using Algorithm \ref{alg:algorithm_one} below.
 					
 			% Table of accuracy results - intercept model
 			\begin{table}
-				\caption{Table of accuracy - Random intercept model}
-				\label{tab:accuracy_int}
 				\begin{tabular}{|l|rrrr|}
 					\hline
 					                   & Laplace's Method & GVA $(\mLambda = \mR \mR^\top)$ & GVA NP $(\mLambda = (\mR \mR^\top)^{-1})$ & GVA FP \\
@@ -769,11 +767,11 @@ model can be fit using Algorithm \ref{alg:algorithm_one} below.
 					$\rho$             & $99\%$           & $99\%$                          & $99\%$                                    & $99\%$ \\ 
 					\hline
 				\end{tabular}
+				\caption{Table of accuracy - Random intercept model}
+				\label{tab:accuracy_int}
 			\end{table}
 					
 			\begin{table}
-				\caption{Table of accuracy - Random slope model}
-				\label{tab:accuracy_slope}
 				\begin{tabular}{|l|rrrr|}
 					\hline
 					                   & Laplace's Method & GVA $(\mLambda = \mR \mR^\top)$ & GVA $(\mLambda = (\mR \mR^\top)^{-1})$ & GVA FP \\
@@ -786,6 +784,8 @@ model can be fit using Algorithm \ref{alg:algorithm_one} below.
 					$\rho$             & 91\%             & 90\%                            & 90\%                                   & 90\%   \\
 					\hline
 				\end{tabular}
+				\caption{Table of accuracy - Random slope model}
+				\label{tab:accuracy_slope}
 			\end{table}
 					
 			% \begin{table}
@@ -908,8 +908,11 @@ model can be fit using Algorithm \ref{alg:algorithm_one} below.
 			\subsection{Poisson example without zero-inflated component -- Police stops}
 			The data set used for this example was the police stop example from Chapter 15 of \citep{Gelman2007}.
 			The model fit was
+			$$
+				\vy_{ep}        \sim \text{Poisson}(n_{ep} e^\vnu)
+			$$
+			where $\vnu = {\beta_0 + \beta_e \text{ethnicity}_e + \alpha_{c} \text{crime} + \vu_p}$, with priors
 			\begin{align*}
-				\vy_{ep}        & \sim \text{Poisson}(n_{ep} e^{\beta_0 + \beta_e \text{ethnicity}_e + \alpha_{c} \text{crime} + \vu_p}), \\
 				\valpha				& \sim \N(0, \sigma_\valpha^2),	\\
 				\vbeta        & \sim \N(0, \sigma_\vbeta^2), \text{ and }\\
 				\vu_p         & \sim \N(0, \sigma_\vu^2)
@@ -936,8 +939,6 @@ model can be fit using Algorithm \ref{alg:algorithm_one} below.
 
 			% Table of results
 			\begin{table}
-				\caption{Table of results - Police stops}
-				\label{tab:application_police_stops}
 				\begin{tabular}{|l|rrrr|}
 					\hline
 					Covariate                     & Posterior Mean & Lower 95\% CI & Upper 95\% CI & Accuracy \\
@@ -952,6 +953,8 @@ model can be fit using Algorithm \ref{alg:algorithm_one} below.
 					$\sigma^2_{\vu}$              & 8.57          & 1.02           & 24.35         & 49\%     \\
 					\hline
 				\end{tabular}
+				\caption{Table of results - Police stops}
+				\label{tab:application_police_stops}
 			\end{table}
 			
 			% Table of speeds
@@ -972,24 +975,26 @@ model can be fit using Algorithm \ref{alg:algorithm_one} below.
 			
 			% TODO: You need to describe the data set and the model.
 			\subsection{Zero--inflated example -- Cockroaches in Apartments data set from Gelman}
-			The model described in this section was fit
-			 to the cockroach data set from \S 6.7 of \citep{Gelman2007}, taken from a study
-			on the effect of integrated pest management in controlling cockroach levels in urban apartments. The data
-			set contains data on 160 treatment and 104 control apartments, along with the response $y_i$ in each
-			apartment of the number of cockroaches caught in a set of traps. The apartments had the traps deployed for
-			different numbers of days, referred to as trap days, which was handled by using a log offset
-			\citep{Agresti2002}. The predictors in the data set included the pre-treatment roach level, a treatment
-			indicator, the time of the observation and an indicator for whether the apartment is in a senior building
-			restricted to the elderly.
+			The model described in this section was fit  to the cockroach data set from Section 6.7 of
+			\cite{Gelman2007}, taken from a study on the effect of integrated pest management in controlling
+			cockroach levels in urban apartments. The data set contains data on 160 treatment and 104 control
+			apartments, along with the response $y_i$ in each apartment of the number of cockroaches caught in a set
+			of traps. The apartments had the traps deployed for different numbers of days, referred to as trap days,
+			which was handled by using a log offset \cite{Agresti2002}. The predictors in the data set included the
+			pre-treatment roach level, a treatment indicator, the time of the observation and an indicator for
+			whether the apartment is in a senior building restricted to the elderly.
 					
 			In the example application presented in this paper, the zero component represents an apartment completely free of roaches, while the non-zero component represents an apartment where roaches have been able to live and reproduce, possibly in spite of pest control treatment aimed at preventing them from doing so.
 
 			The model fit was
-			\begin{align*}
-				y_i &= \begin{cases}
+			$$
+				y_i = \begin{cases}
 				0 \phantom{-} \text{if} \phantom{-} R_i = 0 \\
 				\text{Poisson}(e^{\mX_i \vbeta + \mZ_i \vu}) \phantom{-} \text{if} \phantom{-} R_i = 1,
-				\end{cases} \\
+				\end{cases}
+			$$
+			with priors
+			\begin{align*}
 				R_i &\sim \text{Bernoulli}(\rho), \\
 				\rho &\sim \text{Beta}(a, b), \\
 				\vbeta &\sim \text{N}(\vzero, \sigma^2_\vbeta \mI), \\
@@ -1003,7 +1008,7 @@ model can be fit using Algorithm \ref{alg:algorithm_one} below.
 			for variation between the apartment buildings was included.
 					
 			The GVA algorithm with the $\mLambda = (\mR^\top \mR)^{-1}$ parameterisation was used to fit a random
-			intercept model to the Roaches data set provided by Andrew Gelman. The fitted co-efficients and accuracy
+			intercept model to the Roaches data set provided \cite{Gelman2007}. The fitted co-efficients and accuracy
 			results are presented in Table \ref{tab:application_roaches}.
 					
 			%       lci  uci
@@ -1042,7 +1047,7 @@ model can be fit using Algorithm \ref{alg:algorithm_one} below.
 					$\rho$             & 0.51           & 0.50          & 0.55          & 62\%     \\
 					\hline
 				\end{tabular}
-				\caption{The posterior means, 95\% confidence intervals and accuracy of the fixed and random
+				\caption{The posterior means, 95\% credible intervals and accuracy of the fixed and random
 									effects, $\sigma_{\vu_1}^2$ and $\rho$ for the Roach model.}
 				\label{tab:application_roaches}
 			\end{table}
@@ -1089,8 +1094,8 @@ model can be fit using Algorithm \ref{alg:algorithm_one} below.
 			\[
 				y_i = \begin{cases}
 				\begin{array}{ll}
-				0 &\phantom{-} \text{if} \phantom{-} R_i = 0, \\
-				\text{Poisson}(e^{\vbeta_1 + \vbeta_2 \text{female} + \vbeta_3 \text{married} + \vbeta_4 \text{children under age 6} + \vbeta_5 \text{PhD}}) &\phantom{-} \text{if} \phantom{-} R_i = 1,
+				0 &,\phantom{-} \text{if} \phantom{-} R_i = 0, \\
+				\text{Poisson}(e^{\vbeta_1 + \vbeta_2 \text{female} + \vbeta_3 \text{married} + \vbeta_4 \text{children under age 6} + \vbeta_5 \text{PhD}}) &,\phantom{-} \text{if} \phantom{-} R_i = 1,
 				\end{array}
 				\end{cases}
 			\]
@@ -1119,15 +1124,15 @@ model can be fit using Algorithm \ref{alg:algorithm_one} below.
 					\hline
 					Covariate          & Posterior Mean & Lower 95\% CI & Upper 95\% CI & Accuracy \\
 					\hline
-					Intercept & 0.86 & 0.65 & 1.06 &  95.17\% \\
-					Female & -0.18 & -0.29 & -0.08 &  95.05\% \\
-					Married & 0.06 & -0.05 & 0.18 & 95.66\% \\
-					Children under age 6 & -0.08 & -0.15 & -0.01 & 96.71\% \\
-					PhD & 0.03 & -0.02 & -0.01 & 96.91\% \\
+					Intercept & 0.86 & 0.65 & 1.06 &  95\% \\
+					Female & -0.18 & -0.29 & -0.08 &  95\% \\
+					Married & 0.06 & -0.05 & 0.18 & 96\% \\
+					Children under age 6 & -0.08 & -0.15 & -0.01 & 97\% \\
+					PhD & 0.03 & -0.02 & -0.01 & 97\% \\
 					\hline
 				\end{tabular}			
 				\label{tab:biochemists_results}
-				\caption{The posterior means, 95\% confidence intervals and accuracy of the fixed effects for the 
+				\caption{The posterior means, 95\% credible intervals and accuracy of the fixed effects for the 
 									Biochemists model.}
 			\end{table}
 
@@ -1192,7 +1197,7 @@ model can be fit using Algorithm \ref{alg:algorithm_one} below.
 					\hline
 				\end{tabular}			
 				\label{tab:owls_results}
-				\caption{The posterior means, 95\% confidence intervals and accuracy of the fixed and random
+				\caption{The posterior means, 95\% credible intervals and accuracy of the fixed and random
 									effects, $\sigma_{\vu_1}^2$ and $\rho$ for the Owls model.}
 			\end{table}
 
@@ -1214,17 +1219,20 @@ model can be fit using Algorithm \ref{alg:algorithm_one} below.
 			\section{Discussion}
 			\label{sec:discussion}
 					
-			We have described a Variational Bayes approximation to Zero-Inflated Poisson regression models which allows
-			such models to be fit with considerable generality. We have also devised and extensively tested a number of
-			alternative approaches for fitting such models, and extended one of these alternative approaches with a new
-			parameterisation. Using MCMC methods as the gold standard to test against, we have assessed the accuracy and
-			computational speed of these algoritms.
+			We have described a Variational Bayes approximation to Zero-Inflated Poisson regression models which
+			allows such models to be fit with considerable generality. We have also devised and extensively tested a
+			number of alternative approaches for fitting such models, and extended one of these alternative
+			approaches with a new parameterisation. Using MCMC methods as the gold standard to test against, we have
+			assessed the accuracy and computational speed of these algoritms.
 					
-			The use of Mean Field Variational Bayes allows estimation of Bayesian ZIP models in a fraction of the time taken to fit the same model using even the best MCMC methods available, with only a small loss of accuracy.
-			This is of great utility in applications where speed matters, such as model selection or when applied
-			statisticians are choosing amongst many candidate models, as is typical in practice.
+			The use of Mean Field Variational Bayes allows estimation of Bayesian ZIP models in a fraction of the
+			time taken to fit the same model using even the best MCMC methods available, with only a small loss of
+			accuracy. This is of great utility in applications where speed matters, such as model selection or when
+			applied statisticians are choosing amongst many candidate models, as is typical in practice.
 					
-			The new parameterisation of Gaussian Variational Approximation using the Cholesky factorisation of the inverse of $\mLambda$ presented in Section \ref{sec:param} provides significant advantages.  It is well known that the inverse of a sparse matrix need not be sparse. 
+			The new parameterisation of Gaussian Variational Approximation using the Cholesky factorisation of the
+			inverse of $\mLambda$ presented in Section \ref{sec:param} provides significant advantages.  It is well
+			known that the inverse of a sparse matrix need not be sparse.
 
 			Mixed models have covariance matrices with a block structure, due to the dependence structure of the
 			random effects. The precision parameterisation presented in this chapter is able to preserve this
