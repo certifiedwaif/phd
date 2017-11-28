@@ -381,18 +381,18 @@ model can be fit using Algorithm \ref{alg:algorithm_one} below.
 		\caption{Laplace scheme for optimising $\log \underline{p}(\vmu, \mLambda; \vy)$}
 		\label{alg:laplace_alg}
 		\begin{algorithmic}
-			\REQUIRE $\frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \mLambda} \approx - \mC^\top \text{diag}(\vp e^{(\mC \vmu)}) \mC - \mSigma^{-1}$.
+			\REQUIRE $\mH \leftarrow [- \mC^\top \text{diag}(\vp e^{(\mC \vmu)}) \mC - \mSigma^{-1}]^{-1}$.
 			% Fit \vmu, \mLambda using Laplace approximation
 			\WHILE{the increase in $\log \underline{p}(\vmu, \mLambda; \vy)$ is significant}
 			% \vmu, \mLambda
 			\STATE $\mLambda \leftarrow \left \{\mP \mC^\top \text{diag}(\exp{(\mC \vmu)}) \mC + \mSigma^{-1} \right \}^{-1}$ \\ [1ex] 
 			If $\mLambda$ cannot be inverted, or any diagonal element of $\mLambda$ is negative, revert to previous
 			$\mLambda$ and break \\ [1ex]
-			\STATE $\frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \mLambda}
-			\leftarrow - \mC^\top \text{diag}(\vp e^{(\mC \vmu)}) \mC - \mSigma^{-1}$ \\ [1ex]
-			If any element of $\frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \mLambda}$ is NaN or $\infty$,
+			\STATE $\mH
+			\leftarrow [- \mC^\top \text{diag}(\vp e^{(\mC \vmu)}) \mC - \mSigma^{-1}]^{-1}$ \\ [1ex]
+			If any element of $\mH$ is NaN or $\infty$,
 			break
-			\STATE $\vmu \leftarrow \vmu + \mLambda \left \{ \frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \vmu} \right \}$ \\ [1ex]
+			\STATE $\vmu \leftarrow \vmu + \mLambda g$ \\ [1ex]
 			\ENDWHILE
 		\end{algorithmic}
 	\end{algorithm}
@@ -438,7 +438,7 @@ model can be fit using Algorithm \ref{alg:algorithm_one} below.
 	% distribution. 
 	\begin{align*}
 		\log \underline{p}(\vmu, \mLambda; \vy) & = \quad \vy^\top\mP \mC \vmu - \vp^\top \exp\{\mC \vmu + \tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top)\} - \tfrac{1}{2} \vmu^\top \mSigma^{-1} \vmu - \tfrac{1}{2} \tr{(\mSigma^{-1} \mLambda)} + \log{|\mR|} \\
-		                                        & \quad - \tfrac{p}{2} \log{(2 \pi)} + \tfrac{1}{2} \log{|\mSigma^{-1}|} + \tfrac{p}{2} \log{(2 \pi)} + \tfrac{p}{2}                                                                              
+		                                        & \quad - \tfrac{p}{2} \log{(2 \pi)} + \tfrac{1}{2} \log{|\mSigma^{-1}|} + \tfrac{p}{2} \log{(2 \pi)} + \tfrac{p}{2},                                                                              
 	\end{align*}
 	can be optimised with L-BFGS-B using the derivatives in Appendix \ref{sec:appendix_derivatives_gva}.
 	
@@ -476,7 +476,7 @@ model can be fit using Algorithm \ref{alg:algorithm_one} below.
 	The Gaussian variational lower bound in this parameterisation is
 	\begin{align*}
 		\log \underline{p}(\vmu, \mLambda; \vy) & = \quad \vy\mP\mC \vmu - \vp^\top \exp\{\mC \vmu + \tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top)\} - \tfrac{1}{2} \vmu^\top \mSigma^{-1} \vmu - \tfrac{1}{2} \tr{(\mSigma^{-1} \mLambda)} \\
-		                                        & \quad- \tfrac{p}{2} \log{(2 \pi)} + \tfrac{1}{2} \log{|\mSigma^{-1}|} + \tfrac{p}{2} \log{(2 \pi)} + \tfrac{p}{2} - \log{|\mR|}                                             
+		                                        & \quad- \tfrac{p}{2} \log{(2 \pi)} + \tfrac{1}{2} \log{|\mSigma^{-1}|} + \tfrac{p}{2} \log{(2 \pi)} + \tfrac{p}{2} - \log{|\mR|}.                                             
 	\end{align*}
 			
 	\noindent The derivative with respect to $\vmu$ is the same as that in the first variant of the algorithm, but 
@@ -521,22 +521,21 @@ model can be fit using Algorithm \ref{alg:algorithm_one} below.
 	improved the stability of the algorithm.
 	
 	\begin{algorithm}
-		\caption[Algorithm GVA NR]{Iterative scheme for obtaining optimal $\vmu$ and $\mLambda$
-			given $\vy$, $\mC$ and $\vp$}
-		\label{alg:algorithm_nr}
 		\begin{algorithmic}
-			\REQUIRE $\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu} = \mP \mC (\vy - \mC^\top \exp(\mC \vmu + \frac{1}{2} \text{diag}{(\mC \mLambda \mC^\top)})) - \mSigma^{-1} \vmu$.
+			\REQUIRE $g = \mP \mC (\vy - \mC^\top \exp(\mC \vmu + \frac{1}{2} \text{diag}{(\mC \mLambda \mC^\top)})) - \mSigma^{-1} \vmu$.
 			% Fit \vmu, \mLambda using Laplace approximation
 			\WHILE{the increase in $\log{\underline{p}}(\vmu, \mLambda; \vy)$ is significant}
-			% \vmu, \mLambda
-			\STATE $\mLambda^{-1} = \left \{ \mP^\top \mC^\top \exp(\mC \vmu + \frac{1}{2} \text{diag}(\mC \mLambda \mC^\top)) \mC \mP \right \}$ \\ [1ex]
-			Calculate \STATE $\mLambda \leftarrow \left (\mLambda^{-1} \right )^{-1}$  using the block inverse formula \\ [1ex]
-			If $\mLambda_{\vu \vu}$ cannot be inverted in the above calculation, revert to $\vmu$ and $\mLambda$ from the previous iteration \\ [1ex]
-			\STATE $\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu} = -\mC^\top \text{diag}[\vp^\top \exp\{\mC \vmu + \frac{1}{2} \text{diag}(\mC \mLambda \mC^\top)\}] - \mSigma^{-1}$ \\ [1ex]
-			\STATE $\vmu \leftarrow \vmu + \mLambda \left \{ \frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu} \right \}$ \\ [1ex]
-			If any element of $\vmu$ is NaN, revert to $\vmu$ and $\mLambda$ from the previous iteration
+				\STATE $\vg \leftarrow \mC^\top \vp [\vy - \{ \exp(\mC \vmu + \tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top)) \}] - \mSigma^{-1} \vmu$ \\
+				\STATE $\mH \leftarrow -\mC^\top \text{diag}(\vp^\top \exp(\mC \vmu + \tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top))) - \mSigma^{-1}$ \\
+				\STATE $\mLambda \leftarrow (-\mH)^{-1} \text{ using block inversion on } \mH$ \\
+				If the inversion fails, revert to previous $\vmu$ and $\mLambda$ and exit the loop \\
+				\STATE $\vmu \leftarrow \vmu + \mLambda \vg$ \\
+				If any element of $\vmu$ is $\infty$ or NaN, revert to previous $\vmu$ and $\mLambda$ and exit the loop
 			\ENDWHILE
 		\end{algorithmic}
+		\caption{The GVA Newton-Raphson fixed point iterative scheme for obtaining the optimal $\vmu$ and $\mLambda$
+			given $\vy$, $\mC$ and $\vp$.}
+		\label{alg:algorithm_nr}
 	\end{algorithm}
 			
 	% Splines
