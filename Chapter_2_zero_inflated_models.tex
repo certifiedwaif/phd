@@ -1,13 +1,13 @@
 \chapter{Zero-inflated models}
 
 % \begin{abstract}
-	\noindent We consider variational inference for zero--inflated Poisson regression models using a latent
-	variable representation. The model is extended to include random effects which allow simple incorporation of
-	spline and other modelling structures. Several variational approximations to the resulting set of models are
-	presented, including a novel approach based on the inverse covariance matrix rather than the covariance matrix
-	of the approximate posterior density for the random effects. This parameterisation improves upon the
-	computational cost and numerical stability of previous methods. We demonstrate these approximations on
-	simulated and real data sets.
+\noindent We consider variational inference for zero--inflated Poisson regression models using a latent
+variable representation. The model is extended to include random effects which allow simple incorporation of
+spline and other modelling structures. Several variational approximations to the resulting set of models are
+presented, including a novel approach based on the inverse covariance matrix rather than the covariance matrix
+of the approximate posterior density for the random effects. This parameterisation improves upon the
+computational cost and numerical stability of previous methods. We demonstrate these approximations on
+simulated and real data sets.
 % \end{abstract}
  
 % \noindent Keywords: Approximate Bayesian inference ; mixed model ; Markov chain Monte Carlo ; Stan ; penalized splines.
@@ -42,9 +42,9 @@ combined with a multivariate mixed model regression framework, an extremely rich
 allowing a broad range of applications to be addressed. Often the transition from zero to non-zero has a
 direct interpretation in the area of application, and is interesting in its' own right.
 
-Bayesian estimation methods for zero-inflated models was developed in \citep{Ghosh2006} using MCMC
-implemented with WinBUGS, and in \citep{Vatsa2014} using a Variational Bayes solution to the inverse zero-
-inflated Poisson regression problem. While simple forms of these models are easy to fit with standard  maximum
+Bayesian estimation methods for zero-inflated models was developed in \citep{Ghosh2006} using MCMC implemented
+with WinBUGS, and in \citep{Vatsa2014} using a Variational Bayes solution to the inverse zero- inflated
+Poisson regression problem. While simple forms of these models are easy to fit with standard  maximum
 likelihood techniques, more general models incorporating random effects, splines and missing data  typically
 have no closed form solutions and hence present a greater computational challenge to fit.
 
@@ -100,8 +100,8 @@ An appendix contains details of the derivation of the variational lower bound fo
 \label{sec:model}
 
 In this section we present a Bayesian zero-inflated Poisson model for count data with extra zeroes. After
-introducing the latent variable representation of Bayesian zero-inflated models, we first extend this to
-a model incorporating fixed effects regression modelling, and extend the model again to a more flexible mixed 
+introducing the latent variable representation of Bayesian zero-inflated models, we first extend this to a
+model incorporating fixed effects regression modelling, and extend the model again to a more flexible mixed
 model approach incorporating both fixed and random effects.
 
 \subsection{Definitions}
@@ -160,9 +160,9 @@ Bernoulli process that determines whether the data is definitely zero, and a sec
 generated from a Poisson distribution which may be zero.
 
 Note that this allows zeros to be generated from the model in one of two ways -- either from the Bernoulli
-process generating a zero or from the Bernoulli process generating a Poisson sample which is then zero.
-A latent variable representation of this parameterization introduces the latent variables $r_i$ which
-equal $1$ when $y_i>0$ and $0$ otherwise. This leads to the specification
+process generating a zero or from the Bernoulli process generating a Poisson sample which is then zero. A
+latent variable representation of this parameterization introduces the latent variables $r_i$ which equal $1$
+when $y_i>0$ and $0$ otherwise. This leads to the specification
 $$
 \begin{array}{rl}
 	P(Y_i=y_i|r_i) &= \frac{\exp(-\lambda r_i)(\lambda r_i)^{y_i}}{y_i!} \quad \mbox{and} \\
@@ -174,7 +174,7 @@ We can extend the model naturally to a multiple covariate regression model by us
 response variable and replacing the parameter $\lambda$ in the model above with $\vx_i^\top \vbeta$ to specify
 the mean, where $\vx_i,\vbeta \in \R^p$, with $\vx_i$ the vector of observed predictors and $\vbeta$ the
 vector of regression coefficients. Letting $\vr = (r_1,\ldots,r_n)$, the model becomes
-\[%\label{eq:main}
+$$%\label{eq:main}
 	\begin{array}{rl}
 		\log p(\vy|\vr, \vbeta) 
 		    & = \vy^\top \mR (\mX\vbeta)                           
@@ -182,7 +182,7 @@ vector of regression coefficients. Letting $\vr = (r_1,\ldots,r_n)$, the model b
 		- \vone^\top \log{\Gamma{(\vy + \vone)}}, \quad \mbox{ and }\\ [1ex]
 		r_i | \rho & \sim \text{Bernoulli}(1-\rho), \quad 1 \leq i \leq n \\
 	\end{array}
-\]
+$$
 
 \noindent where $\mX$ is the $n\times p$ matrix whose $i$th row equals $\vx_i$ and $\mR = \diag{(\vr)}$.
 
@@ -209,13 +209,13 @@ n_i}]^\top$ as the response vector. Vectors $\vy_1, \ldots, \vy_m$ are assumed t
 
 We develop a zero-inflated regression model incorporating both fixed effects $\vbeta$ and random effects
 $\vu$. The log-likelihood for one observation is then
-\[
+$$
 	\begin{array}{rl}
 		\log p(\vy_{ij} | \vr_{ij}, \vbeta, \vu) & = \vy_{ij} \vr_{ij} (\vx_i^\top \vbeta + \vz_{ij}^\top \vu) - \vr_{ij} \exp (\vx_{ij}^\top \vbeta + \vz_{ij}^\top \vu) - \log \Gamma (\vy_{ij} + 1), \\
 		\vr_{ij} | \rho                  & \sim \text{Bernoulli}(\rho), 1 \leq i \leq m, 1 \leq j \leq n, \text{ and }                                                              \\
 		\rho                        & \sim \text{Beta}(\alpha, \beta).                                                                                              \\
 	\end{array}
-\]
+$$
 
 \noindent We now extend this to multiple observations. Let $\mC = [\mX, \mZ]$ and $\vnu = [\vbeta^\top, \vu^\top]^\top$. The multivariate model with multiple observations is then
 \begin{equation}\label{eq:main}
@@ -328,963 +328,967 @@ model can be fit using Algorithm \ref{alg:algorithm_one} below.
 \end{algorithm}
 						
 \section{Optimising the Gaussian Part of the Model}
-	\label{sec:gaussian}
+\label{sec:gaussian}
 
-	The most computationally and numerically difficult part of Algorithm \ref{alg:algorithm_one} above is
-	optimising the mean and covariance of the Gaussian approximation to the regression co-efficients $[\vbeta,
-	\vu]^\top$. In this section, we compare the accuracy, stability and speed of four different algorithms for
-	fitting the Gaussian component of our model, $q(\vmu, \mLambda)$ in Algorithm \ref{alg:algorithm_one}.  We
-	compare these approaches for accuracy, computational complexity and stability.
+The most computationally and numerically difficult part of Algorithm \ref{alg:algorithm_one} above is
+optimising the mean and covariance of the Gaussian approximation to the regression co-efficients $[\vbeta,
+\vu]^\top$. In this section, we compare the accuracy, stability and speed of four different algorithms for
+fitting the Gaussian component of our model, $q(\vmu, \mLambda)$ in Algorithm \ref{alg:algorithm_one}.  We
+compare these approaches for accuracy, computational complexity and stability.
 
-	Our first attempts at implementation of some of these algorithms were prone to numerical stability problems
-	when initialised from some starting points. We also discuss the modifications we made to these algorithms to
-	enhance their numerical stability.
-		
-	\subsection{Laplace-Variational Approximation}
-	The Laplace-Variational Approximation method is based on Laplace's method of approximating integrals, as
-	introduced in Section \ref{sec:laplace_approximation}. The variational lower bound  is approximated by a
-	Gaussian centred at its' mode.
-
-	% Laplace's method of
-	% approximation uses the second order Taylor expansion of the full log likelihood of the  model around the
-	% mode to find a Gaussian approximation to the full posterior. Taylor expanding the full log likelihood
-	% once around the mode yields the following approximation.
-	This yields the approximation to the variational lower bound below:
-	% The algorithm is very quick to execute, but the resulting approximate posterior
-	% distributions are not as accurate as those produced by the other algorithms considered in this article.
-	% NR
-	% Detail the function and its derivatives
-	\begin{align*}
-		\log \underline{p}(\vmu, \mLambda; \vy) \approx \vy^\top\mP\mC\vmu - \vp^\top\exp \left (\mC \vmu \right ) - \tfrac{1}{2} \vmu^\top \mSigma^{-1} \vmu. 
-	\end{align*}
-			
-	\noindent This expression can be iteratively optimised with respect to $\vmu$ and $\mLambda$ using the
-	Newton-Raphson method, with the derivatives for $\vmu$ and $\mLambda$ given in Appendix
-	\ref{sec:appendix_derivatives_laplace}. The steps of the algorithm are shown in Algorithm \ref{alg:laplace_alg}.
-			
-	Upon implementing the algorithm and performing numerical experiments, we observed numerical issues which had to be dealt with in 
-	order for the algorithm to successfully complete.
-	% Describe the iteration
-	We implemented checks for error conditions, and steps to recover from the error conditions should
-	they arise.
-
-	If during an iteration of the Laplace-Variational approximation algorithm the inversion  of $\mLambda$
-	fails, or the diagonal elements of $\mLambda$ become negative when $\mLambda$ must be positive-definite,
-	then $\vmu$ and $\mLambda$ were reverted to the previous iteration's $\vmu$ and $\mLambda$ values and
-	the algorithm was terminated.
-
-	If after calculating the gradient of the Gaussian Variational lower bound with respect to $\vmu$, any of
-	its' elements were NaN or $\infty$, then $\vmu$ and $\mLambda$ were reverted to the previous iteration's
-	$\vmu$ and $\mLambda$ values and the algorithm was terminated.
-			
-	\begin{algorithm}
-		\caption{Laplace scheme for optimising $\log \underline{p}(\vmu, \mLambda; \vy)$}
-		\label{alg:laplace_alg}
-		\begin{algorithmic}
-			\REQUIRE $\mH \leftarrow [- \mC^\top \text{diag}(\vp e^{(\mC \vmu)}) \mC - \mSigma^{-1}]^{-1}$.
-			% Fit \vmu, \mLambda using Laplace approximation
-			\WHILE{the increase in $\log \underline{p}(\vmu, \mLambda; \vy)$ is significant}
-			% \vmu, \mLambda
-			\STATE $\mLambda \leftarrow \left \{\mP \mC^\top \text{diag}(\exp{(\mC \vmu)}) \mC + \mSigma^{-1} \right \}^{-1}$ \\ [1ex] 
-			If $\mLambda$ cannot be inverted, or any diagonal element of $\mLambda$ is negative, revert to previous
-			$\mLambda$ and break \\ [1ex]
-			\STATE $\mH
-			\leftarrow [- \mC^\top \text{diag}(\vp e^{(\mC \vmu)}) \mC - \mSigma^{-1}]^{-1}$ \\ [1ex]
-			If any element of $\mH$ is NaN or $\infty$,
-			break
-			\STATE $\vmu \leftarrow \vmu + \mLambda g$ \\ [1ex]
-			\ENDWHILE
-		\end{algorithmic}
-	\end{algorithm}
-			
-	\subsection{Gaussian Variational Approximation}
-			
-	% Detail techniques used for fitting models.
-	The full variational likelihood for a Generalised Linear Mixed model is computationally difficult to
-	compute, requiring the evaluation of a high dimensional integral. However, \citep{Ormerod2012} devised
-	an accurate approximation to the full variational likelihood, the Gaussian Variational Lower Bound,
-	which only requires the evaluation of a substantially simpler univariate integral.
-		
-	To optimise the Gaussian component of the lower bound in each iteration of Algorithm
-	\ref{alg:algorithm_one}, optimal $\vmu$ and $\mLambda$ values must be found while keeping the other
-	variational parameters fixed. The variational lower bound is not necessarily unimodal if $\vp$ and
-	$\mSigma$ are free to vary, leading to potential difficulty in optimising to the global maximum.
-	However, for fixed $\vp$ and $\mSigma$, the variational lower bound is log-concave with respect to
-	$\vmu$ and $\mLambda$, and so standard optimisation methods such as L-BFGS-B as described in, for
-	example, \citep{Liu1989} \citep{Nocedal2006}, work well. This leads to an extremely accurate
-	approximation of the true posterior at the expense of some additional computational effort. Care must be
-	taken in the parameterisation of $\mLambda$, as it is both of high dimension $(p + mb)^2$ and
-	constrained to be semi- positive definite. We present and compare two approaches to parameterising the
-	covariance matrix $\mLambda$ below.
-		
-	\subsubsection{Covariance parameterisation $\mLambda = \mR^\top \mR$}
+Our first attempts at implementation of some of these algorithms were prone to numerical stability problems
+when initialised from some starting points. We also discuss the modifications we made to these algorithms to
+enhance their numerical stability.
 	
-	We fit the Gaussian component of our approximation in Algorithm \ref{alg:algorithm_one} by maximising 
-	the variational lower bound	
-	\begin{align*}
-		\log \underline{p}(\vmu, \mLambda; \vy) & = \quad \vy^\top\mP \mC \vmu - \vp^\top \exp\{\mC \vmu + \tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top)\} - \tfrac{1}{2} \vmu^\top \mSigma^{-1} \vmu - \tfrac{1}{2} \tr{(\mSigma^{-1} \mLambda)} + \log{|\mR|} \\
-		                                        & \quad - \tfrac{p}{2} \log{(2 \pi)} + \tfrac{1}{2} \log{|\mSigma^{-1}|} + \tfrac{p}{2} \log{(2 \pi)} + \tfrac{p}{2}                                                                              
-	\end{align*}
-	\noindent with respect to $\vmu, \mLambda$, keeping $\vp$, $\mSigma$, and $\rho$ fixed.
-			
-	The first variant of the Gaussian Variational Approximation algorithm that we present optimises the
-	Gaussian variational lower bound of the log likelihood with respect to $\vmu$ and the Cholesky decomposition
-	$\mR$ of $\mLambda$, that is, $\mLambda = \mR \mR^\top$. This ensures that $\mLambda$ remains positive
-	definite, and reduces the number of parameters we have to optimise over in order to optimise $\mLambda$
-	to the $(p + 1) p / 2$, as $\mR$ is lower triangular.	We refer to this as the covariance
-	parameterisation. The resulting function
-	% This algorithm trades the computational complexity of
-	% numerically evaluating an integral for greatly increased accuracy in the approximating posterior
-	% distribution. 
-	\begin{align*}
-		\log \underline{p}(\vmu, \mLambda; \vy) & = \quad \vy^\top\mP \mC \vmu - \vp^\top \exp\{\mC \vmu + \tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top)\} - \tfrac{1}{2} \vmu^\top \mSigma^{-1} \vmu - \tfrac{1}{2} \tr{(\mSigma^{-1} \mLambda)} + \log{|\mR|} \\
-		                                        & \quad - \tfrac{p}{2} \log{(2 \pi)} + \tfrac{1}{2} \log{|\mSigma^{-1}|} + \tfrac{p}{2} \log{(2 \pi)} + \tfrac{p}{2},                                                                              
-	\end{align*}
-	can be optimised with L-BFGS-B using the derivatives in Appendix \ref{sec:appendix_derivatives_gva}.
-	
-	\begin{figure}[p]
-		\includegraphics[width=0.95 \textwidth]{mX_mZ_mLambda.pdf}
-		\caption{Covariance matrix -- Fixed effects before random effects}
-		\label{fig:covfixedrandom}
-	\end{figure}
-		
-	\begin{figure}[p]
-		\includegraphics[width=0.95 \textwidth]{mZ_mX_mLambda.pdf}
-		\caption{Covariance matrix -- Random effects before fixed effects}
-		\label{fig:covrandomfixed}
-	\end{figure}
-							      				      			      			      			      	
-	\begin{figure}[p]
-		\includegraphics[width=0.95 \textwidth]{mX_mZ_cholesky.pdf}
-		\caption{Cholesky factor -- Fixed effects before random effects}
-		\label{fig:cholfixedrandom}
-	\end{figure}
-		
-	\begin{figure}[p]
-		\includegraphics[width=0.95 \textwidth]{mZ_mX_cholesky.pdf}
-		\caption{Cholesky factor -- Random effects before fixed effects}
-		\label{fig:cholrandomfixed}
-	\end{figure}
-		
-	\subsubsection{Precision parameterisation $\mLambda = (\mR^\top \mR)^{-1}$}
-			
-	\noindent The second variant of the Gaussian Variational Approximation algorithm is similiar to the first, but
-	instead of optimising the Gaussian variational lower bound with respect to $\vmu$ and the Cholesky factor
-	$\mR$ of $\mLambda$, we instead optimise the Cholesky factor of the inverse of $\mLambda$ i.e. $\mLambda =
-	(\mR \mR^\top)^{-1}$.
-	
-	The Gaussian variational lower bound in this parameterisation is
-	\begin{align*}
-		\log \underline{p}(\vmu, \mLambda; \vy) & = \quad \vy\mP\mC \vmu - \vp^\top \exp\{\mC \vmu + \tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top)\} - \tfrac{1}{2} \vmu^\top \mSigma^{-1} \vmu - \tfrac{1}{2} \tr{(\mSigma^{-1} \mLambda)} \\
-		                                        & \quad- \tfrac{p}{2} \log{(2 \pi)} + \tfrac{1}{2} \log{|\mSigma^{-1}|} + \tfrac{p}{2} \log{(2 \pi)} + \tfrac{p}{2} - \log{|\mR|}.                                             
-	\end{align*}
-			
-	\noindent The derivative with respect to $\vmu$ is the same as that in the first variant of the algorithm, but 
-	as the parameterisation of $\mLambda$ has changed, the  derivative with respect to $\mLambda$ becomes
-	\begin{align*}
-		\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda}
-		  & = \hphantom{-}(\mLambda^{-1} + \mH)(-\mLambda \mR \mLambda) \\
-		  & = -(\mI + \mH\mLambda)\mR\mLambda                           \\
-		  & = - (\mR\mLambda + \mH\mLambda\mR\mLambda)                  
-	\end{align*} 
-			
-	\noindent where $\mH = (\mP \mC)^\top \text{diag}(\exp(\mC \vmu + \frac{1}{2} \mC \mLambda \mC^\top)) \mP \mC - \mSigma^{-1}$.
-			
-	\subsubsection{GVA fixed point} 	% Fixed point update of \mLambda
-	This variant of the algorithm uses Newton-Raphson-like fixed point updates on the Gaussian variational lower
-	bound. We optimise the same variational lower bound as in the covariance parameterisation above, using the
-	derivatives below. The steps are presented in Algorithm \ref{alg:algorithm_nr} where	
-	\begin{align*}
-		\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu}     & = \quad \mC^\top\vp \left \{\vy - \mC\exp(\mC \vmu + \tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top)) \right \} - \mSigma^{-1} \vmu \text{ and} \\
-		\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda} & = -\mC^\top \text{diag}(\vp^\top \exp(\mC \vmu +\tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top))) - \mSigma^{-1}.                             
-	\end{align*}
-	As this algorithm involves a simple Newton-Raphson style update step, it is computationally simple to
-	implement, but potentially unstable as there is no adaptation of step size, as in L-BFGS-B.
+\subsection{Laplace-Variational Approximation}
+The Laplace-Variational Approximation method is based on Laplace's method of approximating integrals, as
+introduced in Section \ref{sec:laplace_approximation}. The variational lower bound  is approximated by a
+Gaussian centred at its' mode.
 
-	For efficiency, the inversion of $\mLambda$ within the algorithm was implemented using the block inverse 
-	formula, where	the matrix was partitioned
-	\[
-		\mLambda =
-		\begin{pmatrix}
-			\mLambda_{\vbeta \vbeta} & \mLambda_{\vbeta \vu} \\
-			\mLambda_{\vbeta \vu}^\top & \mLambda_{\vu \vu}
-		\end{pmatrix}
-	\]
-	where $\mLambda_{\vbeta \vbeta}$ is the $p \times p$ approximation of the fixed effects covariance, $\mLambda_{\vbeta \vu}$ is the $p \times mb$
-	approximation of the covariances between the fixed and random effects and $\mLambda_{\vu \vu}$ is the $mb \times mb$
-	approximation of the random effects covariance.
+% Laplace's method of
+% approximation uses the second order Taylor expansion of the full log likelihood of the  model around the
+% mode to find a Gaussian approximation to the full posterior. Taylor expanding the full log likelihood
+% once around the mode yields the following approximation.
+This yields the approximation to the variational lower bound below:
+% The algorithm is very quick to execute, but the resulting approximate posterior
+% distributions are not as accurate as those produced by the other algorithms considered in this article.
+% NR
+% Detail the function and its derivatives
+\begin{align*}
+	\log \underline{p}(\vmu, \mLambda; \vy) \approx \vy^\top\mP\mC\vmu - \vp^\top\exp \left (\mC \vmu \right ) - \tfrac{1}{2} \vmu^\top \mSigma^{-1} \vmu. 
+\end{align*}
+		
+\noindent This expression can be iteratively optimised with respect to $\vmu$ and $\mLambda$ using the
+Newton-Raphson method, with the derivatives for $\vmu$ and $\mLambda$ given in Appendix
+\ref{sec:appendix_derivatives_laplace}. The steps of the algorithm are shown in Algorithm \ref{alg:laplace_alg}.
+		
+Upon implementing the algorithm and performing numerical experiments, we observed numerical issues which had to be dealt with in 
+order for the algorithm to successfully complete.
+% Describe the iteration
+We implemented checks for error conditions, and steps to recover from the error conditions should
+they arise.
 
-	Sometimes in the course of  executing the algorithm, we observed numerical issues which had to be dealt
-	with in order for the algorithm to successfully complete. If the block $\mLambda_{\vu \vu}$ cannot be inverted on an
-	iteration, we reverted to $\vmu$ and $\mLambda$ from the previous iteration. If after updating $\vmu$
-	any element is NaN, we reverted to the $\vmu$ and $\mLambda$ from the previous iteration. This greatly
-	improved the stability of the algorithm.
+If during an iteration of the Laplace-Variational approximation algorithm the inversion  of $\mLambda$
+fails, or the diagonal elements of $\mLambda$ become negative when $\mLambda$ must be positive-definite,
+then $\vmu$ and $\mLambda$ were reverted to the previous iteration's $\vmu$ and $\mLambda$ values and
+the algorithm was terminated.
+
+If after calculating the gradient of the Gaussian Variational lower bound with respect to $\vmu$, any of
+its' elements were NaN or $\infty$, then $\vmu$ and $\mLambda$ were reverted to the previous iteration's
+$\vmu$ and $\mLambda$ values and the algorithm was terminated.
+		
+\begin{algorithm}
+	\caption{Laplace scheme for optimising $\log \underline{p}(\vmu, \mLambda; \vy)$}
+	\label{alg:laplace_alg}
+	\begin{algorithmic}
+		\REQUIRE $\mH \leftarrow [- \mC^\top \text{diag}(\vp e^{(\mC \vmu)}) \mC - \mSigma^{-1}]^{-1}$.
+		% Fit \vmu, \mLambda using Laplace approximation
+		\WHILE{the increase in $\log \underline{p}(\vmu, \mLambda; \vy)$ is significant}
+		% \vmu, \mLambda
+		\STATE $\mLambda \leftarrow \left \{\mP \mC^\top \text{diag}(\exp{(\mC \vmu)}) \mC + \mSigma^{-1} \right \}^{-1}$ \\ [1ex] 
+		If $\mLambda$ cannot be inverted, or any diagonal element of $\mLambda$ is negative, revert to previous
+		$\mLambda$ and break \\ [1ex]
+		\STATE $\mH
+		\leftarrow [- \mC^\top \text{diag}(\vp e^{(\mC \vmu)}) \mC - \mSigma^{-1}]^{-1}$ \\ [1ex]
+		If any element of $\mH$ is NaN or $\infty$,
+		break
+		\STATE $\vmu \leftarrow \vmu + \mLambda g$ \\ [1ex]
+		\ENDWHILE
+	\end{algorithmic}
+\end{algorithm}
+		
+\subsection{Gaussian Variational Approximation}
+		
+% Detail techniques used for fitting models.
+The full variational likelihood for a Generalised Linear Mixed model is computationally difficult to
+compute, requiring the evaluation of a high dimensional integral. However, \citep{Ormerod2012} devised
+an accurate approximation to the full variational likelihood, the Gaussian Variational Lower Bound,
+which only requires the evaluation of a substantially simpler univariate integral.
 	
-	\begin{algorithm}
-		\begin{algorithmic}
-			\REQUIRE $g = \mP \mC (\vy - \mC^\top \exp(\mC \vmu + \frac{1}{2} \text{diag}{(\mC \mLambda \mC^\top)})) - \mSigma^{-1} \vmu$.
-			% Fit \vmu, \mLambda using Laplace approximation
-			\WHILE{the increase in $\log{\underline{p}}(\vmu, \mLambda; \vy)$ is significant}
-				\STATE $\vg \leftarrow \mC^\top \vp [\vy - \{ \exp(\mC \vmu + \tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top)) \}] - \mSigma^{-1} \vmu$ \\
-				\STATE $\mH \leftarrow -\mC^\top \text{diag}(\vp^\top \exp(\mC \vmu + \tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top))) - \mSigma^{-1}$ \\
-				\STATE $\mLambda \leftarrow (-\mH)^{-1} \text{ using block inversion on } \mH$ \\
-				If the inversion fails, revert to previous $\vmu$ and $\mLambda$ and exit the loop \\
-				\STATE $\vmu \leftarrow \vmu + \mLambda \vg$ \\
-				If any element of $\vmu$ is $\infty$ or NaN, revert to previous $\vmu$ and $\mLambda$ and exit the loop
-			\ENDWHILE
-		\end{algorithmic}
-		\caption{The GVA Newton-Raphson fixed point iterative scheme for obtaining the optimal $\vmu$ and $\mLambda$
-			given $\vy$, $\mC$ and $\vp$.}
-		\label{alg:algorithm_nr}
-	\end{algorithm}
-			
-	% Splines
-			
-	\section{Parameterisations and computational cost of Gaussian Variational Approximation approaches}
-	\label{sec:param}
-	\subsection{Covariance parameterisation of $\mLambda$}
+To optimise the Gaussian component of the lower bound in each iteration of Algorithm
+\ref{alg:algorithm_one}, optimal $\vmu$ and $\mLambda$ values must be found while keeping the other
+variational parameters fixed. The variational lower bound is not necessarily unimodal if $\vp$ and
+$\mSigma$ are free to vary, leading to potential difficulty in optimising to the global maximum.
+However, for fixed $\vp$ and $\mSigma$, the variational lower bound is log-concave with respect to
+$\vmu$ and $\mLambda$, and so standard optimisation methods such as L-BFGS-B as described in, for
+example, \citep{Liu1989} \citep{Nocedal2006}, work well. This leads to an extremely accurate
+approximation of the true posterior at the expense of some additional computational effort. Care must be
+taken in the parameterisation of $\mLambda$, as it is both of high dimension $(p + mb)^2$ and
+constrained to be semi- positive definite. We present and compare two approaches to parameterising the
+covariance matrix $\mLambda$ below.
 	
-	To ensure symmetry of $\mLambda$, we parameterise the optimisation problem in terms of $\mLambda$'s
-	Cholesky factor  $\mLambda = \mR^\top \mR$. We optimise over the space $(\vmu, \overline{\mR})$, where $\vmu
-	\in \R^{p + m}b$ and $\overline{\mR}$ is a lower-triangular $(p + mb) \times (p + mb)$ matrix. Then
-			
-	\begin{equation*}
-		\mR_{ij} =
-		\begin{cases}
-			\exp(\overline{\mR}_{ij}), & i = j             \\
-			\overline{\mR}_{ij},       & i > j             \\
-			0,                         & \text{otherwise}, 
-		\end{cases}
-	\end{equation*}
-			
-	\noindent exponentiating the diagonal to ensure positive-definiteness of $\mR$. We parameterise $\mLambda$
-	as $\mLambda = \mR \mR^\top$ so that is is guaranteed to be symmetric, and we only have $p(p-1)/2$ 
-	parameters to deal with instead of $p^2$ parameters, some of which are constrained. 
+\subsubsection{Covariance parameterisation $\mLambda = \mR^\top \mR$}
+
+We fit the Gaussian component of our approximation in Algorithm \ref{alg:algorithm_one} by maximising 
+the variational lower bound	
+\begin{align*}
+	\log \underline{p}(\vmu, \mLambda; \vy) & = \quad \vy^\top\mP \mC \vmu - \vp^\top \exp\{\mC \vmu + \tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top)\} - \tfrac{1}{2} \vmu^\top \mSigma^{-1} \vmu - \tfrac{1}{2} \tr{(\mSigma^{-1} \mLambda)} + \log{|\mR|} \\
+	                                        & \quad - \tfrac{p}{2} \log{(2 \pi)} + \tfrac{1}{2} \log{|\mSigma^{-1}|} + \tfrac{p}{2} \log{(2 \pi)} + \tfrac{p}{2}                                                                              
+\end{align*}
+\noindent with respect to $\vmu, \mLambda$, keeping $\vp$, $\mSigma$, and $\rho$ fixed.
+		
+The first variant of the Gaussian Variational Approximation algorithm that we present optimises the
+Gaussian variational lower bound of the log likelihood with respect to $\vmu$ and the Cholesky decomposition
+$\mR$ of $\mLambda$, that is, $\mLambda = \mR \mR^\top$. This ensures that $\mLambda$ remains positive
+definite, and reduces the number of parameters we have to optimise over in order to optimise $\mLambda$
+to the $(p + 1) p / 2$, as $\mR$ is lower triangular.	We refer to this as the covariance
+parameterisation. The resulting function
+% This algorithm trades the computational complexity of
+% numerically evaluating an integral for greatly increased accuracy in the approximating posterior
+% distribution. 
+\begin{align*}
+	\log \underline{p}(\vmu, \mLambda; \vy) & = \quad \vy^\top\mP \mC \vmu - \vp^\top \exp\{\mC \vmu + \tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top)\} - \tfrac{1}{2} \vmu^\top \mSigma^{-1} \vmu - \tfrac{1}{2} \tr{(\mSigma^{-1} \mLambda)} + \log{|\mR|} \\
+	                                        & \quad - \tfrac{p}{2} \log{(2 \pi)} + \tfrac{1}{2} \log{|\mSigma^{-1}|} + \tfrac{p}{2} \log{(2 \pi)} + \tfrac{p}{2},                                                                              
+\end{align*}
+can be optimised with L-BFGS-B using the derivatives in Appendix \ref{sec:appendix_derivatives_gva}.
+
+\begin{figure}[p]
+	\includegraphics[width=0.95 \textwidth]{mX_mZ_mLambda.pdf}
+	\caption{Inverse Covariance matrix of approximate posterior for $\vnu$ -- Fixed effects before random effects}
+	\label{fig:covfixedrandom}
+\end{figure}
 	
-	This parameterisation can lead to numeric overflow when the diagonals of $\overline{\mR}$ become moderately
-	large, which can lead to singular matrices when attempting to invert $\mLambda$. We dealt with this by
-	defining a piecewise function which is exponential for arguments less than $t$, and quadratic for arguments
-	greater than or equal to $t$
-	$$
-	f(r_{ij}) =
+\begin{figure}[p]
+	\includegraphics[width=0.95 \textwidth]{mZ_mX_mLambda.pdf}
+	\caption{Inverse Covariance matrix of approximate posterior for $\vnu$ -- Random effects before fixed effects}
+	\label{fig:covrandomfixed}
+\end{figure}
+						      				      			      			      			      	
+\begin{figure}[p]
+	\includegraphics[width=0.95 \textwidth]{mX_mZ_cholesky.pdf}
+	\caption{Cholesky factor of Inverse Covariance matrix of approximate posterior for $\vnu$ -- Fixed effects before random effects}
+	\label{fig:cholfixedrandom}
+\end{figure}
+	
+\begin{figure}[p]
+	\includegraphics[width=0.95 \textwidth]{mZ_mX_cholesky.pdf}
+	\caption{Cholesky factor of Inverse Covariance matrix of approximate posterior for $\vnu$ -- Random effects before fixed effects}
+	\label{fig:cholrandomfixed}
+\end{figure}
+	
+\subsubsection{Precision parameterisation $\mLambda = (\mR^\top \mR)^{-1}$}
+		
+\noindent The second variant of the Gaussian Variational Approximation algorithm is similiar to the first, but
+instead of optimising the Gaussian variational lower bound with respect to $\vmu$ and the Cholesky factor
+$\mR$ of $\mLambda$, we instead optimise the Cholesky factor of the inverse of $\mLambda$ i.e. $\mLambda =
+(\mR \mR^\top)^{-1}$.
+
+The Gaussian variational lower bound in this parameterisation is
+\begin{align*}
+	\log \underline{p}(\vmu, \mLambda; \vy) & = \quad \vy\mP\mC \vmu - \vp^\top \exp\{\mC \vmu + \tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top)\} - \tfrac{1}{2} \vmu^\top \mSigma^{-1} \vmu - \tfrac{1}{2} \tr{(\mSigma^{-1} \mLambda)} \\
+	                                        & \quad- \tfrac{p}{2} \log{(2 \pi)} + \tfrac{1}{2} \log{|\mSigma^{-1}|} + \tfrac{p}{2} \log{(2 \pi)} + \tfrac{p}{2} - \log{|\mR|}.                                             
+\end{align*}
+		
+\noindent The derivative with respect to $\vmu$ is the same as that in the first variant of the algorithm, but 
+as the parameterisation of $\mLambda$ has changed, the  derivative with respect to $\mLambda$ becomes
+\begin{align*}
+	\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda}
+	  & = \hphantom{-}(\mLambda^{-1} + \mH)(-\mLambda \mR \mLambda) \\
+	  & = -(\mI + \mH\mLambda)\mR\mLambda                           \\
+	  & = - (\mR\mLambda + \mH\mLambda\mR\mLambda)                  
+\end{align*} 
+		
+\noindent where $\mH = (\mP \mC)^\top \text{diag}(\exp(\mC \vmu + \frac{1}{2} \mC \mLambda \mC^\top)) \mP \mC - \mSigma^{-1}$.
+		
+\subsubsection{GVA fixed point} 	% Fixed point update of \mLambda
+This variant of the algorithm uses Newton-Raphson-like fixed point updates on the Gaussian variational lower
+bound. We optimise the same variational lower bound as in the covariance parameterisation above, using the
+derivatives below. The steps are presented in Algorithm \ref{alg:algorithm_nr} where	
+\begin{align*}
+	\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu}     & = \quad \mC^\top\vp \left \{\vy - \mC\exp(\mC \vmu + \tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top)) \right \} - \mSigma^{-1} \vmu \text{ and} \\
+	\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda} & = -\mC^\top \text{diag}(\vp^\top \exp(\mC \vmu +\tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top))) - \mSigma^{-1}.                             
+\end{align*}
+As this algorithm involves a simple Newton-Raphson style update step, it is computationally simple to
+implement, but potentially unstable as there is no adaptation of step size, as in L-BFGS-B.
+
+For efficiency, the inversion of $\mLambda$ within the algorithm was implemented using the block inverse 
+formula, where	the matrix was partitioned
+\[
+	\mLambda =
+	\begin{pmatrix}
+		\mLambda_{\vbeta \vbeta} & \mLambda_{\vbeta \vu} \\
+		\mLambda_{\vbeta \vu}^\top & \mLambda_{\vu \vu}
+	\end{pmatrix}
+\]
+where $\mLambda_{\vbeta \vbeta}$ is the $p \times p$ approximation of the fixed effects covariance, $\mLambda_{\vbeta \vu}$ is the $p \times mb$
+approximation of the covariances between the fixed and random effects and $\mLambda_{\vu \vu}$ is the $mb \times mb$
+approximation of the random effects covariance.
+
+Sometimes in the course of  executing the algorithm, we observed numerical issues which had to be dealt
+with in order for the algorithm to successfully complete. If the block $\mLambda_{\vu \vu}$ cannot be inverted on an
+iteration, we reverted to $\vmu$ and $\mLambda$ from the previous iteration. If after updating $\vmu$
+any element is NaN, we reverted to the $\vmu$ and $\mLambda$ from the previous iteration. This greatly
+improved the stability of the algorithm.
+
+\begin{algorithm}
+	\begin{algorithmic}
+		\REQUIRE $g = \mP \mC (\vy - \mC^\top \exp(\mC \vmu + \frac{1}{2} \text{diag}{(\mC \mLambda \mC^\top)})) - \mSigma^{-1} \vmu$.
+		% Fit \vmu, \mLambda using Laplace approximation
+		\WHILE{the increase in $\log{\underline{p}}(\vmu, \mLambda; \vy)$ is significant}
+			\STATE $\vg \leftarrow \mC^\top \vp [\vy - \{ \exp(\mC \vmu + \tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top)) \}] - \mSigma^{-1} \vmu$ \\
+			\STATE $\mH \leftarrow -\mC^\top \text{diag}(\vp^\top \exp(\mC \vmu + \tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top))) - \mSigma^{-1}$ \\
+			\STATE $\mLambda \leftarrow (-\mH)^{-1} \text{ using block inversion on } \mH$ \\
+			If the inversion fails, revert to previous $\vmu$ and $\mLambda$ and exit the loop \\
+			\STATE $\vmu \leftarrow \vmu + \mLambda \vg$ \\
+			If any element of $\vmu$ is $\infty$ or NaN, revert to previous $\vmu$ and $\mLambda$ and exit the loop
+		\ENDWHILE
+	\end{algorithmic}
+	\caption{The GVA Newton-Raphson fixed point iterative scheme for obtaining the optimal $\vmu$ and $\mLambda$
+		given $\vy$, $\mC$ and $\vp$.}
+	\label{alg:algorithm_nr}
+\end{algorithm}
+		
+% Splines
+		
+\section{Parameterisations and computational cost of Gaussian Variational Approximation approaches}
+\label{sec:param}
+\subsection{Covariance parameterisation of $\mLambda$}
+
+To ensure symmetry of $\mLambda$, we parameterise the optimisation problem in terms of $\mLambda$'s
+Cholesky factor  $\mLambda = \mR^\top \mR$. We optimise over the space $(\vmu, \overline{\mR})$, where $\vmu
+\in \R^{p + m}b$ and $\overline{\mR}$ is a lower-triangular $(p + mb) \times (p + mb)$ matrix. Then
+		
+\begin{equation*}
+	\mR_{ij} =
 	\begin{cases}
-		e^{r_{ij}}, r_{ij} < t                   \\
-		a r_{ij}^2 + b r_{ij} + c, r_{ij} \geq t 
+		\exp(\overline{\mR}_{ij}), & i = j             \\
+		\overline{\mR}_{ij},       & i > j             \\
+		0,                         & \text{otherwise}, 
 	\end{cases}
-	$$
-	and then choosing the co-efficients $a$, $b$ and $c$ such that the function, first and second derivatives would
-	agree at $r_{ij} = t$.
+\end{equation*}
+		
+\noindent exponentiating the diagonal to ensure positive-definiteness of $\mR$. We parameterise $\mLambda$
+as $\mLambda = \mR \mR^\top$ so that is is guaranteed to be symmetric, and we only have $p(p-1)/2$ 
+parameters to deal with instead of $p^2$ parameters, some of which are constrained. 
+
+This parameterisation can lead to numeric overflow when the diagonals of $\overline{\mR}$ become moderately
+large, which can lead to singular matrices when attempting to invert $\mLambda$. We dealt with this by
+defining a piecewise function which is exponential for arguments less than $t$, and quadratic for arguments
+greater than or equal to $t$
+$$
+f(r_{ij}) =
+\begin{cases}
+	e^{r_{ij}}, r_{ij} < t                   \\
+	a r_{ij}^2 + b r_{ij} + c, r_{ij} \geq t 
+\end{cases}
+$$
+and then choosing the co-efficients $a$, $b$ and $c$ such that the function, first and second derivatives would
+agree at $r_{ij} = t$.
+
+To find the co-efficients $a$, $b$ and $c$, we solved the system of equations formed by repeatedly 
+differentiating the quadratic at $r_{ij} =  t$ and equating it with $e^t$
+$$
+\begin{array}{lllll}
+	e^t & = & a t^2 & + \quad b t & + \quad c \\
+	e^t & = &       & \quad 2a t  & + \quad b \\
+	e^t & = &       &             & \quad 2a  \\
+\end{array}
+$$
+to obtain $a = e^t / 2$, $b = (1 - t) e^t$ and $c = \{1 - t^2/2 - (1 - t) t\} e^t$.
+
+We also addressed the overflow problem by working with the Cholesky factorisation of $\mLambda^{-1}$
+rather than $\mLambda$, allowing us to solve a system of equations rather than invert and multiply by a
+matrix, which is also faster and more numerically stable. We use knowledge of the regression  model we are
+fitting to specify a sparse matrix structure, greatly reducing the dimension of   the problem and thus
+improving both computational speed and numeric accuracy.
+
+% \noindent By noticing that the lower rows of the product depend on the higher rows of the Cholesky factor, we
+% observe that by re-ordering the fixed and random effects in $\mLambda$ so that the , we arrive at a covariance structure which is sparse in the first diagonal block. Thus the Cholesky factor of $\mLambda$ that we optimise over is as sparse as possible. This reduces the dimension of the optimisation problem we have to solve from
+% $\BigO(np^2)$ to $\BigO(np)$.
 	
-	To find the co-efficients $a$, $b$ and $c$, we solved the system of equations formed by repeatedly 
-	differentiating the quadratic at $r_{ij} =  t$ and equating it with $e^t$
-	$$
-	\begin{array}{lllll}
-		e^t & = & a t^2 & + \quad b t & + \quad c \\
-		e^t & = &       & \quad 2a t  & + \quad b \\
-		e^t & = &       &             & \quad 2a  \\
+Any symmetric matrix $\mLambda$ can be written as a product of its' Cholesky factors, $\mLambda =
+\mR \mR^\top$ where $\mR$ is lower triangular. $\mR$ is unique if $\mR_{ii} \geq 0$.
+	
+\begin{align*}
+	&\begin{pmatrix}
+	\mR_{11}          & 0                                    & 0                                     \\
+	\mR_{21}          & \mR_{22}                             & 0                                     \\
+	\mR_{31}          & \mR_{32}                             & \mR_{33}                              
+	\end{pmatrix}
+	\begin{pmatrix}
+	\mR_{11}          & \mR_{21}                             & \mR_{31}                              \\
+	0                 & \mR_{22}                             & \mR_{32}                              \\
+	0                 & 0                                    & \mR_{33}                              
+	\end{pmatrix}
+	\\
+	=& \begin{pmatrix}
+	\mR_{11}^2        &                                      & \text{symmetric}                      \\
+	\mR_{21}\mR_{11} & \mR_{21}^2 + \mR_{22}^2 \\
+	\mR_{31} \mR_{11} & \mR_{31}\mR_{21} + \mR_{32} \mR_{22} & \mR_{31}^2 + \mR_{32} ^2 + \mR_{33}^2 
+	\end{pmatrix}.
+\end{align*}
+
+\noindent We exploit this structure. By interchanging the fixed and random effects in the design matrix $\mC = [\mX \mZ]$ to $\mC = [\mZ \mX]$, and re-ordering the dimensions of $\vmu, \mLambda$ and $\mSigma$ in the same manner, the independence between the
+blocks relating to the random effects in $\mZ$ induce sparsity in the Cholesky factor $\mR$ of
+$\mLambda^{-1}$, as can be seen in Figures \ref{fig:covfixedrandom}, \ref{fig:covrandomfixed},
+\ref{fig:cholfixedrandom} and \ref{fig:cholrandomfixed}. Thus the Gaussian $q(\vnu) \sim \N(\vmu, \mLambda)$ can be optimised over a space of dimension $\frac{1}{2} p (p + 1) + pq + \frac{1}{2} q (q + 1)$ rather than dimension
+$\frac{1}{2} (p + mq) (p + mq + 1)$ as in the dense parameterisation. This leads to subtantial performance gains
+when $m$ is large, as is typically the case in problems of practical importance such as longitudinal or 
+clinical trials with many subjects or the application presented in Section \ref{sec:application}.
+		
+By re-ordering the fixed and random effects in $\mLambda$, we end up with a covariance structure which is 
+sparse in the first diagonal block.
+
+\subsection{Precision parameterisation}
+
+We optimise over the space $(\vmu, \overline{\mR})$ as before, but now 
+		
+\begin{equation*}
+	\mR_{ij} =
+	\begin{cases}
+		\exp(-\overline{\mR}_{ij}), & i = j             \\
+		\overline{\mR}_{ij},        & i > j             \\
+		0,                          & \text{otherwise}, 
+	\end{cases}
+\end{equation*}
+	
+\noindent This new choice of parameterisation allows us to calculate $\frac{1}{2} \text{diag}(\mC \mLambda
+\mC^\top)$ by solving the linear systems $\mR \va = \mC_{i}, i=1, \ldots, n$ for   $\va$ and then calculating
+$\va^\top\va$ where $\mC_{i} = $ the $i$th row of $\mC$, rather than calculating $\text{diag}(\mC \mLambda
+\mC^\top)$ directly.
+	
+% TODO: We fixed this using safe-exp
+The implementation of these algorithms was not without its' challenges, chiefly numerical issues encountered during testing and verification of the accuracy of the model fitting. Using the exponential function to parameterise the main diagonal coupled with L-BFGS-B's unconstrained line search and \texttt{optim()}'s lack of robustness to infinities lead to many overflow problems which may have been lessened or dealt with entirely by using a function with a less aggressive growth rate, such as an appropriate piecewise quadratic.
+	
+The main computational cost is the evaluation of the variational lower bound and its' derivatives. By
+virtue of their dimension, the expressions involving $\mLambda$ dominate the computational cost. The key
+term is $\frac{1}{2} \diag(\mC \mLambda \mC^\top)$. This can be naively calculate by ignoring the
+symmetry in the expression and simply calculating the product $\mC \mLambda \mC^\top$, taking $2 n
+\times (p + m b)^2$ floating point operations, and retaining the diagonal entries of the result. This is
+obviously wasteful, as the off--diagonal entries of the resulting product that has just been computed
+are immediately discarded.
+	
+By parameterising $\mLambda$ in terms of its' Cholesky factors and realising that
+	
+\[
+	\mC \mLambda \mC^\top = \mC \mR \mR^\top \mC^\top
+\]
+	
+\noindent and that
+	
+\[
+	\diag(\mC \mLambda \mC^\top)_{ii} = \mC_{i .} \mR \mR^\top \mC_{i .}^\top, 1 \leq i \leq n
+\]
+	
+\noindent we can calculate the products $\mC_{i .} \mR, 1 \leq i \leq n$, using $n \times \frac{1}{2}(p + m
+b)(p + m b   + 1)$ floating point operations, and storing the results of the $i$th product in the $i$th
+element of the   vector $\va$ and then calculate $\diag(\mC \mLambda \mC^\top) = \va^\top \va$.
+	
+Moreover, mixed models typically have sparse design matrices, allowing us to encode $\mR$ as a sparse matrix, and	further reduce   this depending on the model. For example, in the random intercept case, only the diagonals of the random effects block need to be non-zero, and hence the above expression can be calculated in
+$\BigO(n)$ floating point operations.
+	
+% $\log |\mR|$ can be calculated using only $p + m b$ floating point operations, as $\mR$ is lower triangular.
+	
+For the precision parameterisation, we observe that in this parameterisation
+\[
+	\diag(\mC \mLambda \mC^\top)_{ii} = \mC_{i .} \mR^{-\top} \mR^{-1} \mC_{i .}^\top, 1 \leq i \leq n,
+\]
+	
+\noindent and so by solving $\mR \va = \mC_{i .}^\top$ for $\va$ for all $i$ at a cost of $n \times
+\frac{1}{2} (p + m b) (p + m b + 1)$ floating point operations, and then calculating
+\[
+	\diag(\mC \mLambda \mC^\top)_{ii} = \va^\top \va, 1 \leq i \leq n,
+\]
+	
+\noindent we can then calculate $\diag(\mC \mLambda \mC^\top)$.
+	
+As above, by using our knowledge of the model being fit we can encode $\mR$ sparsely to decrease
+the required   computation still further. In the random intercept model case, the computational cost will drop
+to   $n \times [m + \frac{1}{2} p (p + 1) + p \times m b]$.
+			
+\section{Numerical results}
+\label{sec:results}
+		
+The accuracy of each model fitting algorithms presented in Section \ref{sec:gaussian} was assessed by
+comparing the approximating distribution of each parameter with the posterior distribution of Monte
+Carlo Markov Chain samples of that parameter. 1 million Monte Carlo Markov Chain samples were generated
+using Stan. The accuracy of examples of random intercept, random slope and spline models were evaluated
+using this method.
+		
+\subsection{Simulated data}
+		
+For each of these simulations, the model is as presented in Section \ref{sec:model}.
+		
+Several common application scenarios were simulated and their accuracy evaluated. A random intercept
+model was simulated with $\vbeta = (2, 1)^\top$, $\rho = 0.5$, $m = 20$, $n_i = 10$ and $b = 1$. The
+results are presented in Table \ref{tab:accuracy_int}. A random slope model was simulated with $\vbeta =
+(2, 1)^\top$, $\rho = 0.5$, $m = 20$, $n_i = 10$ and $b = 2$. The results are presented in Table
+\ref{tab:accuracy_slope}. Spline model was fit to a data set generated from the function $3 + 3
+\sin{(\pi x)}$ on the interval $[-1, 1]$. The resulting model fits are presented in Figure
+\ref{fig:spline}.
+		
+To assess the speed of each approach, a test case was constructed of a random slope model with $m=50$
+groups, each containing $n_i = 100$ individuals. A model was then fit to this data set ten times using
+each algorithm, and the results averaged. They are presented in Table \ref{tab:application_slope_speed}.
+
+\begin{table}
+	\begin{tabular}{|l|rr|}
+		\hline
+		Algorithm & Mean (seconds) & Standard deviation (seconds) \\
+		\hline
+		Laplace's method & $0.37$ & $0.07$ \\
+		GVA covariance parameterisation & $2.04$ & $1.24$ \\
+		% Why is this slower?
+		GVA inverse parameterisation & $0.38$ & $0.66$ \\
+		GVA fixed point & $0.05$ & $0.07$ \\
+		\hline
+	\end{tabular}
+	\caption{Table of results - Speed}
+	\label{tab:application_slope_speed}
+\end{table}
+
+% The stability of the algorithms was confirmed by running them on 10,000 different data sets that were randomly
+% generated after having initialised the random number generator with different seeds.
+		
+Median accuracy of the algorithms was assessed by running them on 100 randomly generated data sets. The	results are presented in Figure \ref{fig:median_accuracy_intercept} and Figure
+\ref{fig:median_accuracy_slope}.
+		
+% Figure: Median accuracy graph intercept
+\begin{figure}
+	\begin{center}
+		\includegraphics[width=0.95\textwidth, height=100mm]{code/results/median_accuracy_combined_intercept.pdf}
+		\caption{Median accuracy of random intercept}
+		\label{fig:median_accuracy_intercept}
+	\end{center}
+\end{figure}
+		
+% Figure: Median accuracy graph slope
+\begin{figure}
+	\includegraphics[width=0.95\textwidth, height=120mm]{code/results/median_accuracy_combined_slope.pdf}
+	\caption{Median accuracy of slope}
+	\label{fig:median_accuracy_slope}
+\end{figure}
+		
+% Table of accuracy results - intercept model
+\begin{table}
+	\begin{tabular}{|l|rrrr|}
+		\hline
+		                   & Laplace's Method & GVA $(\mLambda = \mR \mR^\top)$ & GVA NP $(\mLambda = (\mR \mR^\top)^{-1})$ & GVA FP \\
+		\hline
+		$\vbeta_1$         & $85\%$           & $90\%$                          & $91\%$                                    & $90\%$ \\ 
+		$\vbeta_2$         & $76\%$           & $98\%$                          & $99\%$                                    & $99\%$ \\ 
+		Mean of $\vu$      & $81\%$           & $94\%$                          & $94\%$                                    & $94\%$ \\
+		$\sigma^2_{\vu_1}$ & $66\%$           & $66\%$                          & $66\%$                                    & $66\%$ \\ 
+		$\rho$             & $99\%$           & $99\%$                          & $99\%$                                    & $99\%$ \\ 
+		\hline
+	\end{tabular}
+	\caption{Table of accuracy - Random intercept model}
+	\label{tab:accuracy_int}
+\end{table}
+		
+\begin{table}
+	\begin{tabular}{|l|rrrr|}
+		\hline
+		                   & Laplace's Method & GVA $(\mLambda = \mR \mR^\top)$ & GVA $(\mLambda = (\mR \mR^\top)^{-1})$ & GVA FP \\
+		\hline
+		$\vbeta_1$         & $67\%$             & $88\%$                            & $88\%$                                   & $88\%$   \\
+		$\vbeta_2$         & $70\%$             & $89\%$                            & $88\%$                                   & $89\%$   \\
+		Mean of $\vu$      & $70\%$             & $91\%$                            & $91\%$                                   & $91\%$   \\
+		$\sigma^2_{\vu_1}$ & $71\%$             & $73\%$                            & $73\%$                                   & $73\%$   \\
+		$\sigma^2_{\vu_2}$ & $68\%$             & $69\%$                            & $69\%$                                   & $69\%$   \\
+		$\rho$             & $91\%$             & $90\%$                            & $90\%$                                   & $90\%$   \\
+		\hline
+	\end{tabular}
+	\caption{Table of accuracy - Random slope model}
+	\label{tab:accuracy_slope}
+\end{table}
+		
+% \begin{table}
+% \caption{Table of accuracy - Splines}
+% \label{tab:accuracy_spline}
+% \begin{tabular}{|l|l|}
+% \hline
+% Approximation & Accuracy \\
+% \hline
+% Laplace's Method & 0.969 \\
+% GVA & 0.969 \\
+% GVA NP & 0.969 \\
+% GVA NR & 0.969 \\
+% \hline
+% \end{tabular}
+% \end{table}
+		
+\begin{figure}
+	\label{fig:spline}
+	\caption{Comparison of VB and MCMC spline fits with the true function}
+	\includegraphics[width=0.95 \textwidth, height=100mm]{code/results/accuracy_plots_spline_gva2.pdf}
+\end{figure}
+		
+% Graphs - exactly what sort of graphs do we need?
+% Median accuracy
+% Increase in lower bound
+% MCMC posterior, with approximating posterior for at least one or two of the
+% key parameters, such as, say, vbeta[2]
+		
+\subsection{Numerical stability of the parameterisation}
+
+In the process of performing numerical experiments, we discovered that our model fitting software was
+prone to numeric overflow due to the log link in our model and the exponentiation of the diagonals of
+the Cholesky factors in the covariance parameterisation of the Gaussian Variational Approximation of
+$\vnu$.
+
+We dealt with this difficulty by developing a 'safe exponential' parameterisation for the diagonals of
+the Cholesky factors. The parameterisation is exponential up to a threshold $t$, and then quadratic
+beyond that threshold.
+
+The stability of this scheme was tested by calculating the accuracy of the approximations fit with a
+range of safe exponential thresholds, the results of which are presented in Figure
+\ref{fig:stability_accuracy}. The variational approximation was found to be stable, with the accuracy
+largely insensitive to the choice of threshold.
+
+\begin{figure}
+	\includegraphics[width=0.95 \textwidth]{code/stability_intercept.pdf}
+	\label{fig:stability_accuracy}
+	\caption{Accuracy of approximation of parameters versus the safe exponential threshold}
+\end{figure}
+
+We repeated our numerical experiments with the new parameterisation, varying the threshold within
+reasonable bounds and found that the numerical experiments no longer resulted in overflow, and that the
+numerical accuracy of the approximation was still very good.
+
+The stability of the GVA algorithm with the parameterisation $\mLambda = (\mR^\top \mR)^{-1}$ depends on
+the threshold chosen for the safe exponential function. When the threshold is set to $2$, the algorithm
+is stable for all starting points within the grid except $6$. When the threshold is set to $\infty$,
+equivalent to using the naive $\exp$ parameterisation, the algorithm encounters numerical errors for
+every starting point on the  grid.
+	
+\subsection{Stability of the GVA precision parameterisation algorithm for different starting points}
+		
+The numerical stability of each fitting algorithm in Section \ref{sec:gaussian} was assessed by
+initialising each algorithm from a range of different starting points. Errors due to numerical
+instability and the fitted $\vmu$ were recorded for each starting point.
+		
+A data set of 100 individuals in ten groups ($m=10$) was generated from a model with a fixed intercept
+and slope, and a random intercept. $\vmu$ was initialised from a grid of points on the interval $[-4.5,
+5]$ for intercept and slope, spaced $0.1$ apart. The error counts are presented in Table
+\ref{tab:stability_results}. Plots of the starting locations which resulted in numerical errors when the
+fitting algorithm was run are presented in \ref{fig:stability_locations_gva}.
+		
+\begin{table}
+	\begin{tabular}{|l|r|}
+		\hline
+		Algorithm                            & Error count \\
+		\hline
+		Laplace's algorithm                  & $12$          \\
+		GVA $\mLambda = \mR^\top \mR$        & $1306$       \\
+		GVA $\mLambda = (\mR^\top \mR)^{-1}$ & $6$           \\
+		GVA NR fixed point                   & $992$         \\
+		\hline
+	\end{tabular}
+	\caption{Count of numerical errors for each algorithm during stability tests}
+	\label{tab:stability_results}
+\end{table}
+
+The GVA algorithm with the $\mLambda = (\mR \mR^\top)^{-1}$ parameterisation was less prone to
+instability due to starting point when the safe exponential parameterisation was used then when it was
+not used, as can be seen from Figure \ref{fig:stability_locations_gva}. % FIXME: Add error counts
+		
+\begin{figure}
+	\includegraphics[width=0.45 \textwidth]{code/safe_exp_stability.pdf}
+	\includegraphics[width=0.45 \textwidth]{code/no_safe_exp_stability.pdf}
+	\label{fig:stability_locations_gva}
+	\caption{Starting locations which caused the GVA fitting algorithm to fail with numeric errors. The true model had fixed parameters $\vbeta = (2, 1)^\top$ and random intercepts. There were ten groups in the hierarchical model each	with ten individuals $(m=10, n_i=10)$. In the left figure the starting points which lead to numeric errors when the safe exponential was used are shown, while in the right figure the starting points which lead to numeric errors when the safe exponential was not used are plotted.}
+\end{figure}
+
+\subsection{Stability of the GVA fixed point algorithm for different starting points}
+The naive fixed point algorithm was extremely unstable for many starting points, as can be seen from
+Figure \ref{fig:stability_locations_nr}. The variant of the algorithm which checked whether the
+inversion of the $\mLambda_{\vu \vu}$ block of $\mLambda$ was performed successfully was much more
+stable, and did not suffer from any numeric errors at all over the range of starting points we tested.
+The algorithm is able to abort safely, and allow the Variational Bayes algorithm to update the other
+parameters before trying to fit the Gaussian component of the model again until the correct parameters
+are accurately estimated.
+
+\begin{figure}
+	\includegraphics[width=0.95 \textwidth]{code/local_solutions_gva_nr_error_locations_no_protections.pdf}
+	\label{fig:stability_locations_nr}
+	\caption{Starting locations which caused the NR fitting algorithm to fail with numeric errors. The true model had fixed parameters $\vbeta = (2, 1)^\top$ and random intercepts. There were ten groups in the
+	hierarchical model each	with ten individuals $(m=10, n_i=10)$}
+\end{figure}
+
+\section{Application}
+\label{sec:application}
+
+\subsection{Poisson example without zero-inflated component -- Police stops}
+\label{sec:police_stops}
+The data set used for this example was the police stop example from Chapter 15 of \citep{Gelman2007}.
+The model fit was
+$$
+	\vy_{ep}        \sim \text{Poisson}(n_{ep} e^\vnu)
+$$
+where $\vnu = {\beta_0 + \beta_e \text{ethnicity}_e + \alpha_{c} \text{crime} + \vu_p}$, with priors
+\begin{align*}
+	\valpha				& \sim \N(0, \sigma_\valpha^2),	\\
+	\vbeta        & \sim \N(0, \sigma_\vbeta^2), \text{ and }\\
+	\vu_p         & \sim \N(0, \sigma_\vu^2)
+\end{align*}
+where $p$ is the $p$-th precinct, and $e$ is the $e$-th ethnicity (blacks, hispanics or whites), and $c$ is
+the $c$-th category of crime (violent crimes, weapons crimes, propery crimes, drug crimes). The random
+intercepts $u_p$ allow for variation in the base rates of stops across precincts, the co-efficients $\beta_j$
+measure the effect of ethnicity on the rate of police stops and the co-efficients $\alpha_k$ measure the
+effect of each type of crime on the rate. The model finds the relationship between the number of police stops
+in each precinct and  ethnicity for each type of crime.
+
+The model was fit using the GVA algorithm with the $\mLambda = (\mR^\top \mR)^{-1}$ parameterisation, using
+the prior $a_\rho = 3$, $b_\rho = 1$ on $\rho$. Accuracy of the approximation was assessed by comparing the
+fitted distribution for each parameter to a kernel density estimate of the parameter's distribution from 1
+million samples from the equivalent model fitted using Stan. The results are presented in Table
+\ref{tab:application_police_stops}. Figure \ref{fig:police_stops}
+
+\begin{figure}
+\includegraphics[width=0.95 \textwidth]{code/results/accuracy_plots_application2_GVA_inv_par-highlights-nup.pdf}
+\caption{Accuracy of parameter estimates for police stops}
+\label{fig:police_stops}
+\end{figure}
+
+% Table of results
+\begin{table}
+	\begin{tabular}{|l|rrrr|}
+		\hline
+		Covariate                     & Posterior Mean & Lower 95\% CI & Upper 95\% CI & Accuracy \\
+		\hline
+		Intercept [African-Americans] & $4.04$          & $3.98$           & $4.07$          & 82\%   \\
+		$\beta_2$ [hispanics]         & $-0.45$         & $-0.46$          & $-0.43$         & 98\%   \\
+		$\beta_3$ [whites]            & $-1.38$         & $-1.40$          & $-1.37$         & 99\%   \\
+		$\alpha_1$ [weapons crimes]   & $0.58$          & $0.57$           & $0.59$          & 89\%   \\
+		$\alpha_2$ [property crimes]  & $-0.19$         & $-0.21$          & $-0.17$         & 92\%   \\
+		$\alpha_3$ [drug crimes]      & $-0.75$        & $-0.77$          & $-0.73$         & 95\%   \\
+		Random intercept              & $1.32$         & $-0.19$         & $2.20$         & 87\%   \\
+		$\sigma^2_{\vu}$              & $8.57$          & $1.02$           & $24.35$         & 49\%     \\
+		\hline
+	\end{tabular}
+	\caption{Table of results - Police stops}
+	\label{tab:application_police_stops}
+\end{table}
+
+% Table of speeds
+\begin{table}
+	\begin{tabular}{|ll|}
+		\hline
+		Algorithm & Time  in seconds \\
+		\hline
+		Laplace & $0.24$ \\
+		GVA covariance parameterisation & $6.02$ \\
+		GVA inverse paramaterisation & $3.92$ \\
+		GVA fixed point & $0.18$ \\
+		\hline
+	\end{tabular}
+	\caption{Table of speeds - Police stops}
+	\label{tab:police_stop_speeds}
+\end{table}
+
+% TODO: You need to describe the data set and the model.
+\subsection{Zero--inflated example -- Cockroaches in apartments}
+\label{sec:cockroaches}
+The model described in this section was fit  to the cockroach data set from Section 6.7 of
+\cite{Gelman2007}, taken from a study on the effect of integrated pest management in controlling
+cockroach levels in urban apartments. The data set contains data on 160 treatment and 104 control
+apartments, along with the response $y_i$ in each apartment of the number of cockroaches caught in a set
+of traps. The apartments had the traps deployed for different numbers of days, referred to as trap days,
+which was handled by using a log offset \cite{Agresti2002}. The predictors in the data set included the
+pre-treatment roach level, a treatment indicator, the time of the observation and an indicator for
+whether the apartment is in a senior building restricted to the elderly.
+		
+In the example application presented in this paper, the zero component represents an apartment completely free of roaches, while the non-zero component represents an apartment where roaches have been able to live and reproduce, possibly in spite of pest control treatment aimed at preventing them from doing so.
+
+The model fit was
+$$
+	y_i = \begin{cases}
+	0, \phantom{-} \text{if} \phantom{-} R_i = 0 \\
+	\text{Poisson}(e^{\mX_i \vbeta + \mZ_i \vu}), \phantom{-} \text{if} \phantom{-} R_i = 1,
+	\end{cases}
+$$
+with priors
+\begin{align*}
+	R_i &\sim \text{Bernoulli}(\rho), \\
+	\rho &\sim \text{Beta}(a, b), \\
+	\vbeta &\sim \text{N}(\vzero, \sigma^2_\vbeta \mI), \\
+	\vu &\sim \text{N}(\vzero, \mSigma), \text{and} \\
+	\mSigma &\sim \text{Inverse-Wishart}(\mPsi, v)
+\end{align*}
+with prior parameters $a = 1$, $b = 1$, $\sigma^2_\vbeta = 10^5$, $\mPsi = 10^{-5} \mI$ and $v = 2$.
+These priors were chosen to be vaguely informative for the variance components and a uniform prior for
+the zero-inflation proportion latent variable $\rho$. The fixed effects covariates included in the
+model were time in days and time in days $\times$ pest control treatment. A random intercept to account
+for variation between the apartment buildings was included.
+		
+The GVA algorithm with the $\mLambda = (\mR^\top \mR)^{-1}$ parameterisation was used to fit a random
+intercept model to the Roaches data set provided \cite{Gelman2007}. The fitted co-efficients and accuracy
+results are presented in Table \ref{tab:application_roaches}.
+		
+%       lci  uci
+% 1  3.179 3.157 3.201
+% 2 -0.046 -0.053 -0.039
+% 3 -0.420 -0.434 -0.406
+% 1 -0.976 -1.015 -0.936
+% 2 -0.309 -0.323 -0.295
+% 3 -0.947 -0.963 -0.930
+% 4 -2.129 -2.384 -1.874
+% 5 -3.230 -3.490 -2.970
+% 6 -3.099 -3.404 -2.794
+% 7 -1.290 -1.326 -1.255
+% 8 -0.956 -0.991 -0.921
+% 9 -2.404 -2.600 -2.209
+% 10 -1.076 -1.123 -1.029
+% 11 -1.079 -1.107 -1.052
+% 12 -1.681 -1.737 -1.624
+		
+%> round(cbind(fit1$vmu, lci, uci), 3)
+% fit1$a_rho
+% [1] 377.2375
+% > fit1$b_rho
+% [1] 152.7625
+		
+\begin{table}
+	\begin{tabular}{|l|rrrr|}
+		\hline
+		Covariate          & Posterior Mean & Lower 95\% CI & Upper 95\% CI & Accuracy \\
+		\hline
+		Intercept          & $3.42$						& $3.2$ 					& $3.65$          & $95\%$     \\
+		Time               & $-0.14$        & $-0.05$       & $-0.02$       & $96\%$     \\
+		Time:Treatment     & $-0.31$        & $-0.43$       & $-0.14$       & $96\%$     \\
+		Random intercept   & $-1.60$        & $-1.71$       & $-1.49$       & $90\%$     \\
+		$\sigma^2_{\vu_1}$ & $3.29$           & $2.02$          & $8.48$          & $63\%$     \\
+		$\rho$             & $0.51$           & $0.50$          & $0.55$          & $62\%$     \\
+		\hline
+	\end{tabular}
+	\caption{The posterior means, 95\% credible intervals and accuracy of the fixed and random
+						effects, $\sigma_{\vu_1}^2$ and $\rho$ for the Roach model.}
+	\label{tab:application_roaches}
+\end{table}
+
+\begin{table}
+	\begin{tabular}{|lr|}
+	\hline
+	Algorithm & Time in seconds \\
+	\hline
+	Laplace & $0.49$ \\
+	GVA & $1.08$ \\
+	GVA inv. param & $0.81$ \\
+	GVA fixed point & $0.11$ \\
+	\hline
+	\end{tabular}
+	\label{tab:application_roaches_runtime}
+	\caption{The runtimes in seconds for fitting algoritms when fitting the roach model.}
+\end{table}
+		
+\begin{figure}
+	\centering
+	% \includepdf[width=75mm,height=75mm,pages={1,2,3,16},nup=2x2]{code/results/accuracy_plots_application_GVA2.pdf}
+	\begin{tabular}{@{}c@{\hspace{.5cm}}c@{}}
+	\includegraphics[width=0.95 \textwidth]{code/results/accuracy_plots_application_GVA_inv_param-highlights-nup.pdf}
+	\end{tabular}
+	\caption{Accuracy graphs for roach model}
+	\label{fig:accuracy_roach}
+\end{figure}
+		
+\subsection{Example - Biochemists}
+\label{sec:biochemists}
+The model described in this section was fit to the biochemistry data set analysed by
+\cite{10.2307/2579146}. The sample was taken from 915 biochemistry graduate students. The outcome
+$\vy_i$ is the number of articles published in the last three years of the PhD. The covariates were the
+gender of the student, coded $1$ for female and $0$ for male, the marital status of the student ($1$ for
+married, $0$ for unmarried), the number of children under age six and the prestige of the PhD program.
+
+In this example application, the zero component represents the number of biochemists who did not publish
+any articles during the last three years of their PhD. Examination of the data reveals that this number
+is higher than would be expected if the data followed a purely Poisson distribution -- 30\% of
+biochemistry graduate students published no articles in their final years whereas a Poisson distribution
+would predict only 18\%. This justifies our choice of model.
+
+The model fit was
+\[
+	y_i = \begin{cases}
+	\begin{array}{ll}
+	0 &,\phantom{-} \text{if} \phantom{-} R_i = 0, \\
+	\text{Poisson}(e^{\vbeta_1 + \vbeta_2 \text{female} + \vbeta_3 \text{married} + \vbeta_4 \text{children under age 6} + \vbeta_5 \text{PhD}}) &,\phantom{-} \text{if} \phantom{-} R_i = 1,
 	\end{array}
-	$$
-	to obtain $a = e^t / 2$, $b = (1 - t) e^t$ and $c = \{1 - t^2/2 - (1 - t) t\} e^t$.
-	
-	We also addressed the overflow problem by working with the Cholesky factorisation of $\mLambda^{-1}$
-	rather than $\mLambda$, allowing us to solve a system of equations rather than invert and multiply by a
-	matrix, which is also faster and more numerically stable. We use knowledge of the regression  model we are
-	fitting to specify a sparse matrix structure, greatly reducing the dimension of   the problem and thus
-	improving both computational speed and numeric accuracy.
-	
-	% \noindent By noticing that the lower rows of the product depend on the higher rows of the Cholesky factor, we
-	% observe that by re-ordering the fixed and random effects in $\mLambda$ so that the , we arrive at a covariance structure which is sparse in the first diagonal block. Thus the Cholesky factor of $\mLambda$ that we optimise over is as sparse as possible. This reduces the dimension of the optimisation problem we have to solve from
-	% $\BigO(np^2)$ to $\BigO(np)$.
+	\end{cases}
+\]
+
+\noindent with priors
+\begin{align*}
+R_i &\sim \text{Bernoulli}(\rho), \\
+\rho &\sim \text{Beta}(A, B), \text { and } \\
+\vbeta &\sim \text{N}(0, \sigma_\vbeta^2 \mI)
+\end{align*}
+
+\noindent with $A=1$, $B=1$ and $\sigma_\vbeta^2 = 10,000$. The model was fit using the GVA inverse parameterisation algorithm. The resulting model fit is presented in Table \ref{tab:biochemists_results}
+The accuracy of the parameter estimates is presented in Figure
+\ref{fig:biochemists}. As this is a fixed effects model with a large number of samples relative to the
+number of parameters being fit, we are able to estimate all of the parameters with great accuracy.
+
+\begin{figure}
+\includegraphics[width=0.95 \textwidth]{code/results/accuracy_plots_application_biochemists_GVA_inv_param-nup.pdf}
+\label{fig:biochemists}
+\caption{Accuracy of the approximations of the parameters fit to the biochemists data}
+\end{figure}
+
+\begin{table}
+	\begin{tabular}{|l|rrrr|}
+		\hline
+		Covariate          & Posterior Mean & Lower 95\% CI & Upper 95\% CI & Accuracy \\
+		\hline
+		Intercept & $0.86$ & $0.65$ & $1.06$ &  $95\%$ \\
+		Female & $-0.18$ & $-0.29$ & $-0.08$ &  $95\%$ \\
+		Married & $0.06$ & $-0.05$ & $0.18$ & $96\%$ \\
+		Children under age 6 & $-0.08$ & $-0.15$ & $-0.01$ & $97\%$ \\
+		PhD & $0.03$ & $-0.02$ & $-0.01$ & $97\%$ \\
+		\hline
+	\end{tabular}			
+	\label{tab:biochemists_results}
+	\caption{The posterior means, 95\% credible intervals and accuracy of the fixed effects for the 
+						Biochemists model.}
+\end{table}
+
+\begin{table}
+	\begin{tabular}{|l|r|}
+	\hline
+	Algorithm & Time in seconds \\
+	\hline
+	Laplace & $1.01$ \\
+	GVA & $0.96$ \\
+	GVA inv. param & $0.68$ \\
+	GVA fixed point & $0.41$ \\
+	\hline
+	\end{tabular}
+	\label{tab:biochemists_runtime}
+	\caption{The runtimes in seconds for fitting algoritms when fitting the Biochemists model.}
+\end{table}
+
+\subsection{Example - Owls}
+\label{sec:owls}
+The model described in this section was fit to the Owls data set from taken from \cite{zuur_mixed_2009}.
+The sample was 599 observations of owls grouped across 25 nests.The fixed covariates
+fit in the model were food treatment (Deprived or Satiated) and arrival time, a continuous covariate.
+The variation between the 25 different nests sampled from was modelled by a random intercept
+$\vu$.
+
+The model fit was
+\[
+y_i = R_i e^{\vbeta_2 \text{Food Treatment = Satiated} + \vbeta_3 \text{Arrival Time} + u_n}
+\]
+where $n$ is the $n$-th nest, with priors
+\begin{align*}
+R_i &\sim \text{Bernoulli}(\rho), \\
+\rho &\sim \text{Beta}(A, B), \\
+\vbeta &\sim \text{N}(\vzero, \sigma_\vbeta^2 \mI), \\
+\vu &\sim \text{N}(0, \sigma_\vu^2), \text { and } \\
+\sigma_\vu^2 &\sim \text{Inverse-Gamma}(s, t).
+\end{align*}
+where $\sigma_\vbeta^2=10,000$, $A=1$, $B=1$, $s=10^{-2}$ and $r=10^{-2}$.
+
+The model was fit using the GVA inverse parameterisation algorithm. The accuracy of the parameter
+estimates is shown in Figure \ref{fig:owls}. The variance component
+The runtime of the algorithms is shown in Table
+\ref{tab:owls_times}. We draw attention to the difference in run-times between the covariance and
+inverse parameterisations -- the inverse parameterisation is 
+
+\begin{figure}
+	\includegraphics[width=0.95 \textwidth]{code/results/accuracy_plots_application_owls_GVA_inv_param-highlights-nup.pdf}
+	\caption{Accuracy of the approximations of the parameters fit to the Owls data}
+	\label{fig:owls}
+\end{figure}
+
+\begin{table}
+	\begin{tabular}{|l|rrrr|}
+		\hline
+		Covariate          & Posterior Mean & Lower 95\% CI & Upper 95\% CI & Accuracy \\
+		\hline
+		Satiated & $-0.22$ & $-0.21$ & $-0.21$ & $97\%$ \\
+		Arrival Time & $-0.07$ & $-0.07$ & $-0.07$ & $73\%$ \\
+		Random intercept (nest) & $0.34$ & $-5.28$ & $5.96$ & $84\%$ \\
+		$\sigma_{\vu_1}^2$ & $7.90$ & $3.21$ & $468.12$ & $94\%$ \\
+		$\rho$ & $0.74$ & $0.70$ & $0.77$ & $99\%$ \\
+		\hline
+	\end{tabular}			
+	\label{tab:owls_results}
+	\caption{The posterior means, 95\% credible intervals and accuracy of the fixed and random
+						effects, $\sigma_{\vu_1}^2$ and $\rho$ for the Owls model.}
+\end{table}
+
+\begin{table}
+	\begin{tabular}{|l|r|}
+	\hline
+	Algorithm & Time in seconds \\
+	\hline
+	Laplace & $0.71$ \\
+	GVA covariance parameterisation & $5.66$ \\
+	GVA inverse parameterisation & $1.88$ \\
+	GVA fixed point & $0.18$ \\
+	\hline
+	\end{tabular}
+	\caption{The runtimes of the fitting algorithms for the Owls model in seconds.}
+	\label{tab:owls_times}
+\end{table}
+
+\section{Discussion}
+\label{sec:discussion}
 		
-	Any symmetric matrix $\mLambda$ can be written as a product of its' Cholesky factors, $\mLambda =
-	\mR \mR^\top$ where $\mR$ is lower triangular. $\mR$ is unique if $\mR_{ii} \geq 0$.
+We have described a Variational Bayes approximation to Zero-Inflated Poisson regression models which
+allows such models to be fit with considerable generality. We have also devised and extensively tested a
+number of alternative approaches for fitting such models, and extended one of these alternative
+approaches with a new parameterisation. Using MCMC methods as the gold standard to test against, we have
+assessed the accuracy and computational speed of these algoritms.
 		
-	\begin{align*}
-		&\begin{pmatrix}
-		\mR_{11}          & 0                                    & 0                                     \\
-		\mR_{21}          & \mR_{22}                             & 0                                     \\
-		\mR_{31}          & \mR_{32}                             & \mR_{33}                              
-		\end{pmatrix}
-		\begin{pmatrix}
-		\mR_{11}          & \mR_{21}                             & \mR_{31}                              \\
-		0                 & \mR_{22}                             & \mR_{32}                              \\
-		0                 & 0                                    & \mR_{33}                              
-		\end{pmatrix}
-		\\
-		=& \begin{pmatrix}
-		\mR_{11}^2        &                                      & \text{symmetric}                      \\
-		\mR_{21}\mR_{11} & \mR_{21}^2 + \mR_{22}^2 \\
-		\mR_{31} \mR_{11} & \mR_{31}\mR_{21} + \mR_{32} \mR_{22} & \mR_{31}^2 + \mR_{32} ^2 + \mR_{33}^2 
-		\end{pmatrix}.
-	\end{align*}
-	
-	\noindent We exploit this structure. By interchanging the fixed and random effects in the design matrix $\mC = [\mX \mZ]$ to $\mC = [\mZ \mX]$, and re-ordering the dimensions of $\vmu, \mLambda$ and $\mSigma$ in the same manner, the independence between the
-	blocks relating to the random effects in $\mZ$ induce sparsity in the Cholesky factor $\mR$ of
-	$\mLambda^{-1}$, as can be seen in Figures \ref{fig:covfixedrandom}, \ref{fig:covrandomfixed},
-	\ref{fig:cholfixedrandom} and \ref{fig:cholrandomfixed}. Thus the Gaussian $q(\vnu) \sim \N(\vmu, \mLambda)$ can be optimised over a space of dimension $\frac{1}{2} p (p + 1) + pq + \frac{1}{2} q (q + 1)$ rather than dimension
-	$\frac{1}{2} (p + mq) (p + mq + 1)$ as in the dense parameterisation. This leads to subtantial performance gains
-	when $m$ is large, as is typically the case in problems of practical importance such as longitudinal or 
-	clinical trials with many subjects or the application presented in Section \ref{sec:application}.
-			
-	By re-ordering the fixed and random effects in $\mLambda$, we end up with a covariance structure which is 
-	sparse in the first diagonal block.
-	
-	\subsection{Precision parameterisation}
-	
-	We optimise over the space $(\vmu, \overline{\mR})$ as before, but now 
-			
-	\begin{equation*}
-		\mR_{ij} =
-		\begin{cases}
-			\exp(-\overline{\mR}_{ij}), & i = j             \\
-			\overline{\mR}_{ij},        & i > j             \\
-			0,                          & \text{otherwise}, 
-		\end{cases}
-	\end{equation*}
+We applied our model fitting algorithms to a number of data sets to fit a range of models. The Cockroaches
+model \ref{sec:cockroaches} had few fixed covariates, a random intercept for each apartment building and
+incorporated zero-inflation. The Police stops model \ref{sec:police_stops} was a pure Poisson mixed model, no
+zero-inflation and a random intercept for precincts/locality. The Biochemists model \ref{sec:biochemists} was
+zero-inflated with fixed effects. The Owls model \ref{sec:owls} was zero-inflated, random intercepts for
+nests. There were a large number of nests. We were able to estimate the variance component for this model very
+accurately.
+
+The use of Mean Field Variational Bayes allows estimation of Bayesian ZIP models in a fraction of the
+time taken to fit the same model using even the best MCMC methods available, with only a small loss of
+accuracy. This is of great utility in applications where speed matters, such as model selection or when
+applied statisticians are choosing amongst many candidate models, as is typical in practice.
 		
-	\noindent This new choice of parameterisation allows us to calculate $\frac{1}{2} \text{diag}(\mC \mLambda
-	\mC^\top)$ by solving the linear systems $\mR \va = \mC_{i}, i=1, \ldots, n$ for   $\va$ and then calculating
-	$\va^\top\va$ where $\mC_{i} = $ the $i$th row of $\mC$, rather than calculating $\text{diag}(\mC \mLambda
-	\mC^\top)$ directly.
+The new parameterisation of Gaussian Variational Approximation using the Cholesky factorisation of the
+inverse of $\mLambda$ presented in Section \ref{sec:param} provides significant advantages.  It is well
+known that the inverse of a sparse matrix need not be sparse.
+
+Mixed models have covariance matrices with a block structure, due to the dependence structure of the
+random effects. The precision parameterisation presented in this chapter is able to preserve this
+sparsity within the structure of the Cholesky factors of the inverses of the covariance matrices use in
+the variational lower bound by re-ordering the rows and columns of the matrices so that the random
+effects blocks appear first. The Owls example presented in this chapter shows the computational
+advantages of this approach when the number of groups $m$ in the model is large (m=27 in this case) --
+as the covariance parameterisation takes 46 seconds to fit whereas the inverse parameterisation only
+takes 3 seconds. This clearly demonstrates advantage of using sparsity to reduce the dimension of the
+optimisation problem to be solved when models are being fit -- as only the non-zero values in the
+covariance matrices need to be optimised over. This allows models to be fit more quickly, and with
+greatly improved numerical stability and without loss of accuracy.
+
+While all of the fitting algorithms presented in this chapter except the Laplace's approximation
+algorithm were able to fit ZIP random and fixed effects models with high accuracy, and the 
+Gaussian inverse parameterisation and fixed point algorithms were able to do so at high speed, they 
+could be numerically unstable depending on the data the model was being fit to and their starting points.
+In the case of the Gaussian inverse parameterisation algorithm, the source of the problem was tracked down
+to the exponential used in the parameterisation of the diagonal of the Cholesky factor of the precision
+matrix combined with the exponential that arises in the derivation of the Gaussian variational lower
+bound for Poisson mixed models -- leading to frequent numeric overflows during the fitting process. This
+problem, once discovered, was mitigated by replacing the exponential parameterisation of the diagonal
+of the Cholesky factor with a piecewise function which is exponential beneath a threshold and quadratic
+above that threshold. This was shown to greatly increase the numeric stability of the GVA inverse
+parameterisation for a range of starting points.
+
+Some of the algorithms which we experimented with were found to be very sensitive to their starting points.
+While these algorithms are typically initialised with a starting point as close as possible to the final
+solution, this gives some sense of the stability of each algorithm.
+Stability fixes.
+
+This article presents the essential ideas necessary for a performant implementation implementing model fitting
+for ZIP regression models.%, but the performance would be even better if our algorithm was re-implemented in a
+%compiled language with good numeric libraries such as C++ with Eigen.
+The majority of the performance
+improvements over existing approaches come from avoiding unneccessary matrix inversion, which is a
+computationally expensive and numerically unstable process taking $\BigO(p^3)$ flops, and from constructing and 
+calculating	with sparse matrices. The gains of these approaches, particularly from sparse matrix techniques, 
+can be difficult to fully realise in R without expert knowledge of the underlying implementation and libraries.
 		
-	% TODO: We fixed this using safe-exp
-	The implementation of these algorithms was not without its' challenges, chiefly numerical issues encountered during testing and verification of the accuracy of the model fitting. Using the exponential function to parameterise the main diagonal coupled with L-BFGS-B's unconstrained line search and \texttt{optim()}'s lack of robustness to infinities lead to many overflow problems which may have been lessened or dealt with entirely by using a function with a less aggressive growth rate, such as an appropriate piecewise quadratic.
+Our application of these ideas to Andrew Gelman's data showed that the new parameterisation very effectively
+speeds up fitting zero-inflated mixed models to real world data with a large number of groups, while still
+maintaining excellent accuracy versus an MCMC approach. This demonstrates the applicability of the ideas
+presented within this paper to real world data sets.
 		
-	The main computational cost is the evaluation of the variational lower bound and its' derivatives. By
-	virtue of their dimension, the expressions involving $\mLambda$ dominate the computational cost. The key
-	term is $\frac{1}{2} \diag(\mC \mLambda \mC^\top)$. This can be naively calculate by ignoring the
-	symmetry in the expression and simply calculating the product $\mC \mLambda \mC^\top$, taking $2 n
-	\times (p + m b)^2$ floating point operations, and retaining the diagonal entries of the result. This is
-	obviously wasteful, as the off--diagonal entries of the resulting product that has just been computed
-	are immediately discarded.
-		
-	By parameterising $\mLambda$ in terms of its' Cholesky factors and realising that
-		
-	\[
-		\mC \mLambda \mC^\top = \mC \mR \mR^\top \mC^\top
-	\]
-		
-	\noindent and that
-		
-	\[
-		\diag(\mC \mLambda \mC^\top)_{ii} = \mC_{i .} \mR \mR^\top \mC_{i .}^\top, 1 \leq i \leq n
-	\]
-		
-	\noindent we can calculate the products $\mC_{i .} \mR, 1 \leq i \leq n$, using $n \times \frac{1}{2}(p + m
-	b)(p + m b   + 1)$ floating point operations, and storing the results of the $i$th product in the $i$th
-	element of the   vector $\va$ and then calculate $\diag(\mC \mLambda \mC^\top) = \va^\top \va$.
-		
-	Moreover, mixed models typically have sparse design matrices, allowing us to encode $\mR$ as a sparse matrix, and	further reduce   this depending on the model. For example, in the random intercept case, only the diagonals of the random effects block need to be non-zero, and hence the above expression can be calculated in
-	$\BigO(n)$ floating point operations.
-		
-	% $\log |\mR|$ can be calculated using only $p + m b$ floating point operations, as $\mR$ is lower triangular.
-		
-	For the precision parameterisation, we observe that in this parameterisation
-	\[
-		\diag(\mC \mLambda \mC^\top)_{ii} = \mC_{i .} \mR^{-\top} \mR^{-1} \mC_{i .}^\top, 1 \leq i \leq n,
-	\]
-		
-	\noindent and so by solving $\mR \va = \mC_{i .}^\top$ for $\va$ for all $i$ at a cost of $n \times
-	\frac{1}{2} (p + m b) (p + m b + 1)$ floating point operations, and then calculating
-	\[
-		\diag(\mC \mLambda \mC^\top)_{ii} = \va^\top \va, 1 \leq i \leq n,
-	\]
-		
-	\noindent we can then calculate $\diag(\mC \mLambda \mC^\top)$.
-		
-	As above, by using our knowledge of the model being fit we can encode $\mR$ sparsely to decrease
-	the required   computation still further. In the random intercept model case, the computational cost will drop
-	to   $n \times [m + \frac{1}{2} p (p + 1) + p \times m b]$.
-				
-			\section{Numerical results}
-			\label{sec:results}
-					
-			The accuracy of each model fitting algorithms presented in Section \ref{sec:gaussian} was assessed by
-			comparing the approximating distribution of each parameter with the posterior distribution of Monte Carlo
-			Markov Chain samples of that parameter. 1 million Monte Carlo Markov Chain samples were generated using Stan.
-			The accuracy of examples of random intercept, random slope and spline models were evaluated using this method.
-					
-			\subsection{Simulated data}
-					
-			For each of these simulations, the model is as presented in Section \ref{sec:model}.
-					
-			Several common application scenarios were simulated and their accuracy evaluated. A random intercept model was simulated with $\vbeta = (2, 1)^\top$, $\rho = 0.5$, $m = 20$, $n_i = 10$ and $b = 1$. The results are
-			presented in Table \ref{tab:accuracy_int}. A random slope model was simulated with $\vbeta = (2, 1)^\top$,
-			$\rho = 0.5$, $m = 20$, $n_i = 10$ and $b = 2$. The results are presented in Table \ref{tab:accuracy_slope}.
-			Spline model was fit to a data set generated from the function $3 + 3 \sin{(\pi x)}$ on the interval $[-1,
-			1]$. The resulting model fits are presented in Figure \ref{fig:spline}.
-					
-			To assess the speed of each approach, a test case was constructed of a random slope model with $m=50$ groups,	each containing $n_i = 100$ individuals. A model was then fit to this data set ten times using each algorithm, and the results averaged. They are presented in Table \ref{tab:application_slope_speed}.
-
-			\begin{table}
-				\begin{tabular}{|l|rr|}
-					\hline
-					Algorithm & Mean (seconds) & Standard deviation (seconds) \\
-					\hline
-					Laplace's method & 0.37 & 0.07 \\
-					GVA covariance parameterisation & 2.04 & 1.24 \\
-					% Why is this slower?
-					GVA inverse parameterisation & 0.38 & 0.66 \\
-					GVA fixed point & 0.05 & 0.07 \\
-					\hline
-				\end{tabular}
-				\caption{Table of results - Speed}
-				\label{tab:application_slope_speed}
-			\end{table}
-
-			% The stability of the algorithms was confirmed by running them on 10,000 different data sets that were randomly
-			% generated after having initialised the random number generator with different seeds.
-					
-			Median accuracy of the algorithms was assessed by running them on 100 randomly generated data sets. The	results are presented in Figure \ref{fig:median_accuracy_intercept} and Figure
-			\ref{fig:median_accuracy_slope}.
-					
-			% Figure: Median accuracy graph intercept
-			\begin{figure}
-				\begin{center}
-					\includegraphics[width=0.95\textwidth, height=100mm]{code/results/median_accuracy_combined_intercept.pdf}
-					\caption{Median accuracy of random intercept}
-					\label{fig:median_accuracy_intercept}
-				\end{center}
-			\end{figure}
-					
-			% Figure: Median accuracy graph slope
-			\begin{figure}
-				\includegraphics[width=0.95\textwidth, height=120mm]{code/results/median_accuracy_combined_slope.pdf}
-				\caption{Median accuracy of slope}
-				\label{fig:median_accuracy_slope}
-			\end{figure}
-					
-			% Table of accuracy results - intercept model
-			\begin{table}
-				\begin{tabular}{|l|rrrr|}
-					\hline
-					                   & Laplace's Method & GVA $(\mLambda = \mR \mR^\top)$ & GVA NP $(\mLambda = (\mR \mR^\top)^{-1})$ & GVA FP \\
-					\hline
-					$\vbeta_1$         & $85\%$           & $90\%$                          & $91\%$                                    & $90\%$ \\ 
-					$\vbeta_2$         & $76\%$           & $98\%$                          & $99\%$                                    & $99\%$ \\ 
-					Mean of $\vu$      & $81\%$           & $94\%$                          & $94\%$                                    & $94\%$ \\
-					$\sigma^2_{\vu_1}$ & $66\%$           & $66\%$                          & $66\%$                                    & $66\%$ \\ 
-					$\rho$             & $99\%$           & $99\%$                          & $99\%$                                    & $99\%$ \\ 
-					\hline
-				\end{tabular}
-				\caption{Table of accuracy - Random intercept model}
-				\label{tab:accuracy_int}
-			\end{table}
-					
-			\begin{table}
-				\begin{tabular}{|l|rrrr|}
-					\hline
-					                   & Laplace's Method & GVA $(\mLambda = \mR \mR^\top)$ & GVA $(\mLambda = (\mR \mR^\top)^{-1})$ & GVA FP \\
-					\hline
-					$\vbeta_1$         & 67\%             & 88\%                            & 88\%                                   & 88\%   \\
-					$\vbeta_2$         & 70\%             & 89\%                            & 88\%                                   & 89\%   \\
-					Mean of $\vu$      & 70\%             & 91\%                            & 91\%                                   & 91\%   \\
-					$\sigma^2_{\vu_1}$ & 71\%             & 73\%                            & 73\%                                   & 73\%   \\
-					$\sigma^2_{\vu_2}$ & 68\%             & 69\%                            & 69\%                                   & 69\%   \\
-					$\rho$             & 91\%             & 90\%                            & 90\%                                   & 90\%   \\
-					\hline
-				\end{tabular}
-				\caption{Table of accuracy - Random slope model}
-				\label{tab:accuracy_slope}
-			\end{table}
-					
-			% \begin{table}
-			% \caption{Table of accuracy - Splines}
-			% \label{tab:accuracy_spline}
-			% \begin{tabular}{|l|l|}
-			% \hline
-			% Approximation & Accuracy \\
-			% \hline
-			% Laplace's Method & 0.969 \\
-			% GVA & 0.969 \\
-			% GVA NP & 0.969 \\
-			% GVA NR & 0.969 \\
-			% \hline
-			% \end{tabular}
-			% \end{table}
-					
-			\begin{figure}
-				\label{fig:spline}
-				\caption{Comparison of VB and MCMC spline fits with the true function}
-				\includegraphics[width=0.95 \textwidth, height=100mm]{code/results/accuracy_plots_spline_gva2.pdf}
-			\end{figure}
-					
-			% Graphs - exactly what sort of graphs do we need?
-			% Median accuracy
-			% Increase in lower bound
-			% MCMC posterior, with approximating posterior for at least one or two of the
-			% key parameters, such as, say, vbeta[2]
-					
-			\subsection{Numerical stability of the parameterisation}
-			
-			In the process of performing numerical experiments, we discovered that our model fitting software was 
-			prone to numeric overflow due to the log link in our model and the exponentiation of the diagonals of the
-			Cholesky factors in the covariance parameterisation of the Gaussian Variational Approximation of $\vnu$.
-			
-			We dealt with this difficulty by developing a 'safe exponential' parameterisation for the diagonals of the
-			Cholesky factors. The parameterisation is exponential up to a threshold $t$, and then quadratic beyond that
-			threshold.
-			
-			The stability of this scheme was tested by calculating the accuracy of the approximations fit with a range
-			of safe exponential thresholds, the results of which are presented in Figure \ref{fig:stability_accuracy}.
-			The variational approximation was found to be stable, with the accuracy largely insensitive to the choice of
-			threshold.
-			
-			\begin{figure}
-				\includegraphics[width=0.95 \textwidth]{code/stability_intercept.pdf}
-				\label{fig:stability_accuracy}
-				\caption{Accuracy of approximation of parameters versus the safe exponential threshold}
-			\end{figure}
-			
-			We repeated our numerical experiments with the new parameterisation, varying the threshold within reasonable
-			bounds and found that the numerical experiments no longer resulted in overflow, and that the numerical accuracy
-			of the approximation was still very good.
-			
-			The stability of the GVA algorithm with the parameterisation $\mLambda = (\mR^\top \mR)^{-1}$ depends on the
-			threshold chosen for the safe exponential function. When the threshold is set to $2$, the algorithm is stable
-			for all starting points within the grid except $6$. When the threshold is set to $\infty$, equivalent to using
-			the naive $\exp$ parameterisation, the algorithm encounters numerical errors for every starting point on the 
-			grid.
-				
-			\subsection{Stability of the GVA precision parameterisation algorithm for different starting points}
-					
-			The numerical stability of each fitting algorithm in Section \ref{sec:gaussian} was assessed by initialising
-			each algorithm from a range of different starting points. Errors due to numerical instability and the fitted
-			$\vmu$ were recorded for each starting point.
-					
-			A data set of 100 individuals in ten groups ($m=10$) was generated from a model with a fixed intercept and
-			slope, and a random intercept. $\vmu$ was initialised from a grid of points on the interval $[-4.5, 5]$ for
-			intercept and slope, spaced $0.1$ apart. The error counts are presented in Table
-			\ref{tab:stability_results}. Plots of the starting locations which resulted in numerical errors when the
-			fitting algorithm was run are presented in \ref{fig:stability_locations_gva}.
-					
-			\begin{table}
-				\begin{tabular}{|l|r|}
-					\hline
-					Algorithm                            & Error count \\
-					\hline
-					Laplace's algorithm                  & 12          \\
-					GVA $\mLambda = \mR^\top \mR$        & 1,306       \\
-					GVA $\mLambda = (\mR^\top \mR)^{-1}$ & 6           \\
-					GVA NR fixed point                   & 992         \\
-					\hline
-				\end{tabular}
-				\caption{Count of numerical errors for each algorithm during stability tests}
-				\label{tab:stability_results}
-			\end{table}
-
-			The GVA algorithm with the $\mLambda = (\mR \mR^\top)^{-1}$ parameterisation was less prone to
-			instability due to starting point when the safe exponential parameterisation was used then when it was
-			not used, as can be seen from Figure \ref{fig:stability_locations_gva}. % FIXME: Add error counts
-					
-			\begin{figure}
-				\includegraphics[width=0.95 \textwidth]{code/safe_exp_stability.pdf}
-				\includegraphics[width=0.95 \textwidth]{code/no_safe_exp_stability.pdf}
-				\label{fig:stability_locations_gva}
-				\caption{Starting locations which caused the GVA fitting algorithm to fail with numeric errors. The true model had fixed parameters $\vbeta = (2, 1)^\top$ and random intercepts. There were ten groups in the
-					hierarchical model each	with ten individuals $(m=10, n_i=10)$}
-			\end{figure}
-
-			\subsection{Stability of the GVA fixed point algorithm for different starting points}
-
-			The naive fixed point algorithm was extremely unstable for many starting points, as can be seen from
-			Figure \ref{fig:stability_locations_nr}. The variant of the algorithm which checked whether the
-			inversion of the $\mLambda_{\vu \vu}$ block of $\mLambda$ was performed successfully was much more
-			stable, and did not suffer from any numeric errors at all over the range of starting points we tested.
-			The algorithm is able to abort safely, and allow the Variational Bayes algorithm to update the other
-			parameters before trying to fit the Gaussian component of the model again until the correct parameters
-			are accurately estimated.
-
-			\begin{figure}
-				\includegraphics[width=0.95 \textwidth]{code/local_solutions_gva_nr_error_locations_no_protections.pdf}
-				\label{fig:stability_locations_nr}
-				\caption{Starting locations which caused the NR fitting algorithm to fail with numeric errors. The true model 						had fixed parameters $\vbeta = (2, 1)^\top$ and random intercepts. There were ten groups in the
-					hierarchical model each	with ten individuals $(m=10, n_i=10)$}
-			\end{figure}
-			
-			\section{Application}
-			\label{sec:application}
-			
-			\subsection{Poisson example without zero-inflated component -- Police stops}
-			The data set used for this example was the police stop example from Chapter 15 of \citep{Gelman2007}.
-			The model fit was
-			$$
-				\vy_{ep}        \sim \text{Poisson}(n_{ep} e^\vnu)
-			$$
-			where $\vnu = {\beta_0 + \beta_e \text{ethnicity}_e + \alpha_{c} \text{crime} + \vu_p}$, with priors
-			\begin{align*}
-				\valpha				& \sim \N(0, \sigma_\valpha^2),	\\
-				\vbeta        & \sim \N(0, \sigma_\vbeta^2), \text{ and }\\
-				\vu_p         & \sim \N(0, \sigma_\vu^2)
-			\end{align*}
-			where $p$ is the $p$-th precinct, and $e$ is the $e$-th ethnicity (blacks, hispanics or whites), and $c$ is
-			the $c$-th category of crime (violent crimes, weapons crimes, propery crimes, drug crimes). The random 
-			intercepts $u_p$ allow for variation in the base rates of stops across precincts,
-			the co-efficients $\beta_j$ measure the effect of ethnicity on the rate of police stops and
-			the co-efficients $\alpha_k$ measure the effect of each type of crime on the rate.
-			The model finds the relationship between the number of police stops in each precinct and 
-			ethnicity	for each type of crime.
-			
-			The model was fit using the GVA algorithm with the $\mLambda = (\mR^\top \mR)^{-1}$ parameterisation, using
-			the prior $a_\rho = 3$, $b_\rho = 1$ on $\rho$. Accuracy of the approximation was assessed by comparing the
-			fitted distribution for each parameter to a kernel density estimate of the parameter's distribution from
-			1 million samples from the equivalent model fitted using Stan. The results are presented in Table
-			\ref{tab:application_police_stops}. Figure \ref{fig:police_stops}
-			
-			\begin{figure}
-			\includegraphics[width=0.95 \textwidth]{code/results/accuracy_plots_application2_GVA_inv_par-highlights-nup.pdf}
-			\caption{Accuracy of parameter estimates for police stops}
-			\label{fig:police_stops}
-			\end{figure}
-
-			% Table of results
-			\begin{table}
-				\begin{tabular}{|l|rrrr|}
-					\hline
-					Covariate                     & Posterior Mean & Lower 95\% CI & Upper 95\% CI & Accuracy \\
-					\hline
-					Intercept [African-Americans] & 4.04          & 3.98           & 4.07          & 82.4\%   \\
-					$\beta_2$ [hispanics]         & -0.45         & -0.46          & -0.43         & 98.1\%   \\
-					$\beta_3$ [whites]            & -1.38         & -1.40          & -1.37         & 98.5\%   \\
-					$\alpha_1$ [weapons crimes]   & 0.58          & 0.57           & 0.59          & 89.2\%   \\
-					$\alpha_2$ [property crimes]  & -0.19         & -0.21          & -0.17         & 92.2\%   \\
-					$\alpha_3$ [drug crimes]      & -0.750        & -0.77          & -0.73         & 94.9\%   \\
-					Random intercept              & 1.321         & -0.190         & 2.202         & 86.7\%   \\
-					$\sigma^2_{\vu}$              & 8.57          & 1.02           & 24.35         & 49\%     \\
-					\hline
-				\end{tabular}
-				\caption{Table of results - Police stops}
-				\label{tab:application_police_stops}
-			\end{table}
-			
-			% Table of speeds
-			\begin{table}
-				\begin{tabular}{|ll|}
-					\hline
-					Algorithm & Time  in seconds \\
-					\hline
-					Laplace & 0.24 \\
-					GVA covariance parameterisation & 6.02 \\
-					GVA inverse paramaterisation & 3.92 \\
-					GVA fixed point & 0.18 \\
-					\hline
-				\end{tabular}
-				\caption{Table of speeds - Police stops}
-				\label{tab:police_stop_speeds}
-			\end{table}
-			
-			% TODO: You need to describe the data set and the model.
-			\subsection{Zero--inflated example -- Cockroaches in Apartments data set from Gelman}
-			The model described in this section was fit  to the cockroach data set from Section 6.7 of
-			\cite{Gelman2007}, taken from a study on the effect of integrated pest management in controlling
-			cockroach levels in urban apartments. The data set contains data on 160 treatment and 104 control
-			apartments, along with the response $y_i$ in each apartment of the number of cockroaches caught in a set
-			of traps. The apartments had the traps deployed for different numbers of days, referred to as trap days,
-			which was handled by using a log offset \cite{Agresti2002}. The predictors in the data set included the
-			pre-treatment roach level, a treatment indicator, the time of the observation and an indicator for
-			whether the apartment is in a senior building restricted to the elderly.
-					
-			In the example application presented in this paper, the zero component represents an apartment completely free of roaches, while the non-zero component represents an apartment where roaches have been able to live and reproduce, possibly in spite of pest control treatment aimed at preventing them from doing so.
-
-			The model fit was
-			$$
-				y_i = \begin{cases}
-				0 \phantom{-} \text{if} \phantom{-} R_i = 0 \\
-				\text{Poisson}(e^{\mX_i \vbeta + \mZ_i \vu}) \phantom{-} \text{if} \phantom{-} R_i = 1,
-				\end{cases}
-			$$
-			with priors
-			\begin{align*}
-				R_i &\sim \text{Bernoulli}(\rho), \\
-				\rho &\sim \text{Beta}(a, b), \\
-				\vbeta &\sim \text{N}(\vzero, \sigma^2_\vbeta \mI), \\
-				\vu &\sim \text{N}(\vzero, \mSigma), \text{and} \\
-				\mSigma &\sim \text{Inverse-Wishart}(\mPsi, v)
-			\end{align*}
-			with prior parameters $a = 1$, $b = 1$, $\sigma^2_\vbeta = 10^5$, $\mPsi = 10^{-5} \mI$ and $v = 2$.
-			These priors were chosen to be vaguely informative for the variance components and a uniform prior for
-			the zero-inflation proportion latent variable $\rho$. The fixed effects covariates included in the
-			model were time in days and time in days $\times$ pest control treatment. A random intercept to account
-			for variation between the apartment buildings was included.
-					
-			The GVA algorithm with the $\mLambda = (\mR^\top \mR)^{-1}$ parameterisation was used to fit a random
-			intercept model to the Roaches data set provided \cite{Gelman2007}. The fitted co-efficients and accuracy
-			results are presented in Table \ref{tab:application_roaches}.
-					
-			%       lci  uci
-			% 1  3.179 3.157 3.201
-			% 2 -0.046 -0.053 -0.039
-			% 3 -0.420 -0.434 -0.406
-			% 1 -0.976 -1.015 -0.936
-			% 2 -0.309 -0.323 -0.295
-			% 3 -0.947 -0.963 -0.930
-			% 4 -2.129 -2.384 -1.874
-			% 5 -3.230 -3.490 -2.970
-			% 6 -3.099 -3.404 -2.794
-			% 7 -1.290 -1.326 -1.255
-			% 8 -0.956 -0.991 -0.921
-			% 9 -2.404 -2.600 -2.209
-			% 10 -1.076 -1.123 -1.029
-			% 11 -1.079 -1.107 -1.052
-			% 12 -1.681 -1.737 -1.624
-					
-			%> round(cbind(fit1$vmu, lci, uci), 3)
-			% fit1$a_rho
-			% [1] 377.2375
-			% > fit1$b_rho
-			% [1] 152.7625
-					
-			\begin{table}
-				\begin{tabular}{|l|rrrr|}
-					\hline
-					Covariate          & Posterior Mean & Lower 95\% CI & Upper 95\% CI & Accuracy \\
-					\hline
-					Intercept          & 3.42						& 3.2 					& 3.65          & 95\%     \\
-					Time               & $-$0.14        & $-$0.05       & $-$0.02       & 96\%     \\
-					Time:Treatment     & $-$0.31        & $-$0.43       & $-$0.14       & 96\%     \\
-					Random intercept   & $-$1.60        & $-$1.71       & $-$1.49       & 90\%     \\
-					$\sigma^2_{\vu_1}$ & 3.29           & 2.02          & 8.48          & 63\%     \\
-					$\rho$             & 0.51           & 0.50          & 0.55          & 62\%     \\
-					\hline
-				\end{tabular}
-				\caption{The posterior means, 95\% credible intervals and accuracy of the fixed and random
-									effects, $\sigma_{\vu_1}^2$ and $\rho$ for the Roach model.}
-				\label{tab:application_roaches}
-			\end{table}
-
-			\begin{table}
-				\begin{tabular}{|lr|}
-				\hline
-				Algorithm & Time in seconds \\
-				\hline
-				Laplace & 0.49 \\
-				GVA & 1.08 \\
-				GVA inv. param & 0.81 \\
-				GVA fixed point & 0.11 \\
-				\hline
-				\end{tabular}
-				\label{tab:application_roaches_runtime}
-				\caption{The runtimes in seconds for fitting algoritms when fitting the roach model.}
-			\end{table}
-					
-			\begin{figure}
-				\centering
-				% \includepdf[width=75mm,height=75mm,pages={1,2,3,16},nup=2x2]{code/results/accuracy_plots_application_GVA2.pdf}
-				\begin{tabular}{@{}c@{\hspace{.5cm}}c@{}}
-				\includegraphics[width=0.95 \textwidth]{code/results/accuracy_plots_application_GVA_inv_param-highlights-nup.pdf}
-				\end{tabular}
-				\caption{Accuracy graphs for roach model}
-				\label{fig:accuracy_roach}
-			\end{figure}
-					
-			\subsection{Example - Biochemists}
-			The model described in this section was fit to the biochemistry data set analysed by
-			\cite{10.2307/2579146}. The sample was taken from 915 biochemistry graduate students. The outcome
-			$\vy_i$ is the number of articles published in the last three years of the PhD. The covariates were the
-			gender of the student, coded $1$ for female and $0$ for male, the marital status of the student ($1$ for
-			married, $0$ for unmarried), the number of children under age six and the prestige of the PhD program.
-
-			In this example application, the zero component represents the number of biochemists who did not publish
-			any articles during the last three years of their PhD. Examination of the data reveals that this number
-			is higher than would be expected if the data followed a purely Poisson distribution -- 30\% of
-			biochemistry graduate students published no articles in their final years whereas a Poisson distribution
-			would predict only 18\%. This justifies our choice of model.
-
-			The model fit was
-			\[
-				y_i = \begin{cases}
-				\begin{array}{ll}
-				0 &,\phantom{-} \text{if} \phantom{-} R_i = 0, \\
-				\text{Poisson}(e^{\vbeta_1 + \vbeta_2 \text{female} + \vbeta_3 \text{married} + \vbeta_4 \text{children under age 6} + \vbeta_5 \text{PhD}}) &,\phantom{-} \text{if} \phantom{-} R_i = 1,
-				\end{array}
-				\end{cases}
-			\]
-
-
-			\noindent with priors
-			\begin{align*}
-			R_i &\sim \text{Bernoulli}(\rho), \\
-			\rho &\sim \text{Beta}(A, B), \text { and } \\
-			\vbeta &\sim \text{N}(0, \sigma_\vbeta^2 \mI)
-			\end{align*}
-
-			\noindent with $A=1$, $B=1$ and $\sigma_\vbeta^2 = 10,000$. The model was fit using the GVA inverse parameterisation algorithm. The resulting model fit is presented in Table \ref{tab:biochemists_results}
-			The accuracy of the parameter estimates is presented in Figure
-			\ref{fig:biochemists}. As this is a fixed effects model with a large number of samples relative to the
-			number of parameters being fit, we are able to estimate all of the parameters with great accuracy.
-
-			\begin{figure}
-			\includegraphics[width=0.95 \textwidth]{code/results/accuracy_plots_application_biochemists_GVA_inv_param-nup.pdf}
-			\label{fig:biochemists}
-			\caption{Accuracy of the approximations of the parameters fit to the biochemists data}
-			\end{figure}
-
-			\begin{table}
-				\begin{tabular}{|l|rrrr|}
-					\hline
-					Covariate          & Posterior Mean & Lower 95\% CI & Upper 95\% CI & Accuracy \\
-					\hline
-					Intercept & 0.86 & 0.65 & 1.06 &  95\% \\
-					Female & -0.18 & -0.29 & -0.08 &  95\% \\
-					Married & 0.06 & -0.05 & 0.18 & 96\% \\
-					Children under age 6 & -0.08 & -0.15 & -0.01 & 97\% \\
-					PhD & 0.03 & -0.02 & -0.01 & 97\% \\
-					\hline
-				\end{tabular}			
-				\label{tab:biochemists_results}
-				\caption{The posterior means, 95\% credible intervals and accuracy of the fixed effects for the 
-									Biochemists model.}
-			\end{table}
-
-			\begin{table}
-				\begin{tabular}{|l|r|}
-				\hline
-				Algorithm & Time in seconds \\
-				\hline
-				Laplace & 1.01 \\
-				GVA & 0.96 \\
-				GVA inv. param & 0.68 \\
-				GVA fixed point & 0.41 \\
-				\hline
-				\end{tabular}
-				\label{tab:biochemists_runtime}
-				\caption{The runtimes in seconds for fitting algoritms when fitting the Biochemists model.}
-			\end{table}
-			
-			\subsection{Example - Owls}
-			The model described in this section was fit to the Owls data set from taken from \cite{zuur_mixed_2009}.
-			The sample was 599 observations of owls grouped across 25 nests.The fixed covariates
-			fit in the model were food treatment (Deprived or Satiated) and arrival time, a continuous covariate.
-			The variation between the 25 different nests sampled from was modelled by a random intercept
-			$\vu$.
-
-			The model fit was
-			\[
-			y_i = R_i e^{\vbeta_2 \text{Food Treatment = Satiated} + \vbeta_3 \text{Arrival Time} + u_n}
-			\]
-			where $n$ is the $n$-th nest, with priors
-			\begin{align*}
-			R_i &\sim \text{Bernoulli}(\rho), \\
-			\rho &\sim \text{Beta}(A, B), \\
-			\vbeta &\sim \text{N}(\vzero, \sigma_\vbeta^2 \mI), \\
-			\vu &\sim \text{N}(0, \sigma_\vu^2), \text { and } \\
-			\sigma_\vu^2 &\sim \text{Inverse-Gamma}(s, t).
-			\end{align*}
-			where $\sigma_\vbeta^2=10,000$, $A=1$, $B=1$, $s=10^{-2}$ and $r=10^{-2}$.
-
-			The model was fit using the GVA inverse parameterisation algorithm. The accuracy of the parameter
-			estimates is shown in Figure \ref{fig:owls}. The variance component
-			The runtime of the algorithms is shown in Table
-			\ref{tab:owls_times}. We draw attention to the difference in run-times between the covariance and
-			inverse parameterisations -- the inverse parameterisation is 
-
-			\begin{figure}
-				\includegraphics[width=0.95 \textwidth]{code/results/accuracy_plots_application_owls_GVA_inv_param-highlights-nup.pdf}
-				\caption{Accuracy of the approximations of the parameters fit to the Owls data}
-				\label{fig:owls}
-			\end{figure}
-
-			\begin{table}
-				\begin{tabular}{|l|rrrr|}
-					\hline
-					Covariate          & Posterior Mean & Lower 95\% CI & Upper 95\% CI & Accuracy \\
-					\hline
-					Satiated & -0.217 & -0.212 & -0.214 & 97\% \\
-					Arrival Time & -0.070 & -0.070 & -0.070 & 73\% \\
-					Random intercept (nest) & 0.338 & -5.283 & 5.959 & 84\% \\
-					$\sigma_{\vu_1}^2$ & 7.90 & 3.213 & 468.123 & 94\% \\
-					$\rho$ & 0.739 & 0.703 & 0.774 & 99\% \\
-					\hline
-				\end{tabular}			
-				\label{tab:owls_results}
-				\caption{The posterior means, 95\% credible intervals and accuracy of the fixed and random
-									effects, $\sigma_{\vu_1}^2$ and $\rho$ for the Owls model.}
-			\end{table}
-
-			\begin{table}
-				\begin{tabular}{|l|r|}
-				\hline
-				Algorithm & Time in seconds \\
-				\hline
-				Laplace & 0.71 \\
-				GVA covariance parameterisation & 5.66 \\
-				GVA inverse parameterisation & 1.88 \\
-				GVA fixed point & 0.18 \\
-				\hline
-				\end{tabular}
-				\caption{The runtimes of the fitting algorithms for the Owls model in seconds.}
-				\label{tab:owls_times}
-			\end{table}
-
-			\section{Discussion}
-			\label{sec:discussion}
-					
-			We have described a Variational Bayes approximation to Zero-Inflated Poisson regression models which
-			allows such models to be fit with considerable generality. We have also devised and extensively tested a
-			number of alternative approaches for fitting such models, and extended one of these alternative
-			approaches with a new parameterisation. Using MCMC methods as the gold standard to test against, we have
-			assessed the accuracy and computational speed of these algoritms.
-					
-			The use of Mean Field Variational Bayes allows estimation of Bayesian ZIP models in a fraction of the
-			time taken to fit the same model using even the best MCMC methods available, with only a small loss of
-			accuracy. This is of great utility in applications where speed matters, such as model selection or when
-			applied statisticians are choosing amongst many candidate models, as is typical in practice.
-					
-			The new parameterisation of Gaussian Variational Approximation using the Cholesky factorisation of the
-			inverse of $\mLambda$ presented in Section \ref{sec:param} provides significant advantages.  It is well
-			known that the inverse of a sparse matrix need not be sparse.
-
-			Mixed models have covariance matrices with a block structure, due to the dependence structure of the
-			random effects. The precision parameterisation presented in this chapter is able to preserve this
-			sparsity within the structure of the Cholesky factors of the inverses of the covariance matrices use in
-			the variational lower bound by re-ordering the rows and columns of the matrices so that the random
-			effects blocks appear first. The Owls example presented in this chapter shows the computational
-			advantages of this approach when the number of groups $m$ in the model is large (m=27 in this case) --
-			as the covariance parameterisation takes 46 seconds to fit whereas the inverse parameterisation only
-			takes 3 seconds. This clearly demonstrates advantage of using sparsity to reduce the dimension of the
-			optimisation problem to be solved when models are being fit -- as only the non-zero values in the
-			covariance matrices need to be optimised over. This allows models to be fit more quickly, and with
-			greatly improved numerical stability and without loss of accuracy.
-
-			While all of the fitting algorithms presented in this chapter except the Laplace's approximation
-			algorithm were able to fit ZIP random and fixed effects models with high accuracy, and the 
-			Gaussian inverse parameterisation and fixed point algorithms were able to do so at high speed, they 
-			could be numerically unstable depending on the data the model was being fit to and their starting points.
-			In the case of the Gaussian inverse parameterisation algorithm, the source of the problem was tracked down
-			to the exponential used in the parameterisation of the diagonal of the Cholesky factor of the precision
-			matrix combined with the exponential that arises in the derivation of the Gaussian variational lower
-			bound for Poisson mixed models -- leading to frequent numeric overflows during the fitting process. This
-			problem, once discovered, was mitigated by replacing the exponential parameterisation of the diagonal
-			of the Cholesky factor with a piecewise function which is exponential beneath a threshold and quadratic
-			above that threshold. This was shown to greatly increase the numeric stability of the GVA inverse
-			parameterisation for a range of starting points.
-
-			Stability fixes.
-
-			Cockroaches - few fixed covariates, random intercept for apartment buildings, zero-inflation
-			The Cockroaches model had few fixed covariates, a random intercept for each apartment building
-			and incorporated zero-inflation.
-
-			Police stops - Pure Poisson model, no zero-inflation, random intercept for precincts/locality
-			Biochemists - Zero-inflated, fixed effects
-			Owls - Zero-inflated, random intercepts for nests, large number of nests, able to estimate variance 
-			component very accurately
-				
-			Some of the algorithms which we experimented with were found to be very sensitive to their starting points.
-			While these algorithms are typically initialised with a starting point as close as possible to the final
-			solution, this gives some sense of the stability of each algorithm.
-					
-			This article presents the essential ideas necessary for a performant implementation implementing model fitting
-			for ZIP regression models.%, but the performance would be even better if our algorithm was re-implemented in a
-			%compiled language with good numeric libraries such as C++ with Eigen.
-			The majority of the performance
-			improvements over existing approaches come from avoiding unneccessary matrix inversion, which is a
-			computationally expensive and numerically unstable process taking $\BigO(p^3)$ flops, and from constructing and 
-			calculating	with sparse matrices. The gains of these approaches, particularly from sparse matrix techniques, 
-			can be difficult to fully realise in R without expert knowledge of the underlying implementation and libraries.
-					
-			Our application of these ideas to Andrew Gelman's data showed that the new parameterisation very effectively
-			speeds up fitting zero-inflated mixed models to real world data with a large number of groups, while still
-			maintaining excellent accuracy versus an MCMC approach. This demonstrates the applicability of the ideas
-			presented within this paper to real world data sets.
-					
