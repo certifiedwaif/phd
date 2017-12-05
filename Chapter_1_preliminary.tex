@@ -13,11 +13,8 @@ new challenges which modern statisticians must be ready to meet. This realisatio
 interest in data science, incorporating ideas from both statistics and computer science, in recent years.
 Machine learning problems are being tackled with algorithms which use probability models for the data --
 leading to the new field of statistical learning which combines many of the best elements of statistics and
-machine  learning.
-\citep{James:2014:ISL:2517747}
-\citep{MacKay:2002:ITI:971143}
-\citep{hastie01statisticallearning}
-\citep{Murphy:2012:MLP:2380985}
+machine  learning \cite{James:2014:ISL:2517747} \cite{MacKay:2002:ITI:971143}
+\cite{hastie01statisticallearning} \cite{Murphy:2012:MLP:2380985}.
 
 \section{Motivation}
 Approaches to modelling data are needed which can handle large volumes of data in a computationally
@@ -26,7 +23,23 @@ learning that leads to a rigorous underlying theory for inference.
 
 \section{Approach (in broad terms)}
 Gaussian Variational approximation for linear mixed models.
+
+Generalised linear mixed models are an appealing way to model data, as they are flexible enough to model a
+range of data types and situations. But the Bayesian versions of these models typically required 
+computationally demanding MCMC, which can also be prone to convergence problems. Instead, we consider approximate Bayesian inference tecniques, which are computationally efficient and deterministic. It is
+desirable to use normal priors for the reegression co-efficients of these models, as these are easily
+interpreted. But for Generalised Linear Mixed Models with a non-normal response, these priors are
+non-conjugate, making VB difficult to apply as the required mean field updates are intractable. We apply
+Gaussian Variational Bayes -- an extension to Variational Bayes, to fit a multivariate normal distribution
+to the regression co-efficients of our models.
+
 Exact inference for model selection for linear models with normal priors.
+
+
+
+Exhaustively exploring the search space is not efficient, and often not computationally feasible. So we adopt
+a population-based technique inspired by Rockova's work on population-based EM to efficiently explore the
+posterior model space.
 
 \section{Why Bayesian?}
 The difference between frequentist and Bayesian approaches begins with a difference in philosophy.
@@ -235,7 +248,7 @@ For any given set of knots, the B-spline for approximating a given function is a
 of B-spline basis functions with the basis functions defined as:
 $$
 \begin{array}{rl}
-	B_{m, i}(x; \vkappa) &= (\kappa_{i + m  + 1} - \kappa_{i})[\kappa_i, \ldots, \kappa_{i + m + 1}])(. - x)^m_+ \\
+	B_{m, i}(x; \vkappa) &= (\kappa_{i + m  + 1} - \kappa_{i})[\kappa_i, \ldots, \kappa_{i + m + 1}](. - x)^m_+ \\
 	&= \frac{x - \kappa_i}{\kappa_{i + 1} - \kappa_i} Q_{i, k-1} (x; \vkappa) + 
 										\frac{\kappa_{i + k + 1} - x}{\kappa_{i + k + 1} - \kappa_{i + 1}} Q_{i, k-1} (x; \vkappa)
 \end{array}
@@ -776,7 +789,7 @@ before it is as mature as other approximation methods like Variational Bayes and
 \begin{itemize}
 	\item Gaussian Variational Approximation to Zero-Inflated Models. Parameterisation of the covariance structure.
 
-	In our first chapter, we present a Gaussian Variational Approximation to a Zero-Inflated Poisson mixed model
+	In our second chapter, we present a Gaussian Variational Approximation to a Zero-Inflated Poisson mixed model
 	which can flexibly incorporate both fixed and random effects. This allows it to fit complicated models
 	to the data incorporating random intercepts and slopes and additive models using O'Sullivan-penalised splines.
 	The model is fit by optimising the conditional likelihood of the Gaussian component of the model given the
@@ -811,5 +824,21 @@ before it is as mature as other approximation methods like Variational Bayes and
 	Liang's hyper-$g/n$ prior \citep{Liang2008},
 	Bayarri's robust $g$ prior \citep{Bayarri2012} and the 
 	Maruyama and George Beta-Prime \citep{Maruyama2011}prior.	
+
+	\item CVA
+	
+	For moderate to large $p$, the entire model space can be too large to perform model selection by
+	exhaustively searching the model space. Instead, approximate methods can be used to search the parts of the
+	model space for which the posterior model likelihood is the highest. We propose a population-based algorithm,
+	which works by adding or removing a covariate at a time to each of the fitted models in the population.
+	We implement this algorithm for a number of model selection priors from the literature:
+	the Liang's hyper-$g$ prior,
+	the Liang's hyper-$g/n$ prior \citep{Liang2008},
+	Bayarri's robust $g$ prior \citep{Bayarri2012} and the 
+	Maruyama and George Beta-Prime \citep{Maruyama2011} prior.	
+
+	We are able to implement this algorithm efficiently by using rank-one updates and downdates and the closed
+	forms of the posteriors for the model selection priors that we consider. The population-based approach allows
+	us to estimate the uncertainty in the model selection process.
 
 \end{itemize}
