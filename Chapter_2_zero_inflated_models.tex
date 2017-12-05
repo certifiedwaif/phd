@@ -286,8 +286,9 @@ $$p_i =
 
 %$\propto \exp{\left \{-r_i \bE_{-r_i} [\exp{(c_i^\top\vnu)}] + r_i [\psi(\alpha_\rho) - \psi(\beta_\rho)] \right \} }.\\$
 
-The optimal approximation \joc{(reword: the ``optimal approximation'' might be called the true posterior)} for
-$\vr$ is
+The optimal approximation 
+% \joc{(reword: the ``optimal approximation'' might be called the true posterior)}
+for $\vr$ is
 \[
 \begin{array}{rl}
 	q(\vr) & \propto \exp \left \{ \bE_{-q(\vr)}\vy^\top\mR(\mC\vmu) - \vr^\top\exp{(\mC\vnu)}-\frac{1}{2} \vnu^\top \mSigma_{\vu \vu} \vnu \right \}                                                  \\ [1ex]
@@ -490,13 +491,10 @@ as the parameterisation of $\mLambda$ has changed, the  derivative with respect 
 \subsubsection{GVA fixed point} 	% Fixed point update of \mLambda
 This variant of the algorithm uses Newton-Raphson-like fixed point updates on the Gaussian variational lower
 bound. We optimise the same variational lower bound as in the covariance parameterisation above, using the
-derivatives below. The steps are presented in Algorithm \ref{alg:algorithm_nr} where	
-\begin{align*}
-	\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu}     & = \quad \mC^\top\vp \left [\vy - \mC\exp\{\mC \vmu + \tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top)\} \right ] - \mSigma^{-1} \vmu \text{ and} \\
-	\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda} & = -\mC^\top \text{diag}[\vp^\top \exp\{\mC \vmu +\tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top)\}] - \mSigma^{-1}.                             
-\end{align*}
-As this algorithm involves a simple Newton-Raphson style update step, it is computationally simple to
-implement, but potentially unstable as there is no adaptation of step size, as in L-BFGS-B.
+derivatives below. The steps are presented in Algorithm \ref{alg:algorithm_nr} where   the derivatives are as
+presented in Appendix \ref{sec:appendix_derivatives_gva_fixed_point}. As this algorithm involves a simple
+Newton-Raphson style update step, it is computationally simple to implement, but potentially unstable as there
+is no adaptation of step size, as in L-BFGS-B.
 
 For efficiency, the inversion of $\mLambda$ within the algorithm was implemented using the block inverse 
 formula, where	the matrix was partitioned
@@ -691,16 +689,16 @@ For the precision parameterisation, we observe that in this parameterisation
 	
 As above, by using our knowledge of the model being fit we can encode $\mR$ sparsely to decrease
 the required   computation still further. In the random intercept model case, the computational cost will drop
-to   $n \times [m + \frac{1}{2} p (p + 1) + p \times m b]$.
+to   $n \times \{m + \frac{1}{2} p (p + 1) + p \times m b\}$.
 			
 \section{Numerical results}
 \label{sec:results}
 		
 The accuracy of each model fitting algorithms presented in Section \ref{sec:gaussian} was assessed by
-comparing the approximating distribution of each parameter with the posterior distribution of Monte
-Carlo Markov Chain samples of that parameter. 1 million Monte Carlo Markov Chain samples were generated
-using Stan. The accuracy of examples of random intercept, random slope and spline models were evaluated
-using this method.
+comparing the approximating distribution of each parameter with the posterior distribution of Monte Carlo
+Markov Chain samples of that parameter. 1 million Monte Carlo Markov Chain samples were generated using
+\texttt{RStan}, as described in \cite{Carpenter2016} and \cite{StanDevelopmentTeam2016}. The accuracy of
+examples of random intercept, random slope and spline models were evaluated using this method.
 		
 \subsection{Simulated data}
 		
@@ -743,16 +741,20 @@ Median accuracy of the algorithms was assessed by running them on 100 randomly g
 % Figure: Median accuracy graph intercept
 \begin{figure}
 	\begin{center}
-		\includegraphics[width=0.95\textwidth, height=100mm]{code/results/median_accuracy_combined_intercept.pdf}
-		\caption{Median accuracy of random intercept}
+		\includegraphics[width=0.95\textwidth]{code/results/median_accuracy_combined_intercept.pdf}
+		\caption{Boxplots of accuracies of the parameter estimates for a random intercept model after 100 repeated
+							runs on simulated data. We see that the accuracy of the parameter estimates is quite stable,
+							and the median accuracies are high.}
 		\label{fig:median_accuracy_intercept}
 	\end{center}
 \end{figure}
 		
 % Figure: Median accuracy graph slope
 \begin{figure}
-	\includegraphics[width=0.95\textwidth, height=120mm]{code/results/median_accuracy_combined_slope.pdf}
-	\caption{Median accuracy of slope}
+	\includegraphics[width=0.95\textwidth]{code/results/median_accuracy_combined_slope.pdf}
+	\caption{Boxplots of accuracies of the parameter estimates for a random slope model after 100 repeated
+							runs on simulated data. We see that the accuracy of the parameter estimates is quite stable,
+							and the median accuracies are high.}
 	\label{fig:median_accuracy_slope}
 \end{figure}
 		
@@ -991,8 +993,8 @@ In the example application presented in this paper, the zero component represent
 The model fit was
 $$
 	y_i = \begin{cases}
-	0, \phantom{-} \text{if} \phantom{-} R_i = 0 \\
-	\text{Poisson}(e^{\mX_i \vbeta + \mZ_i \vu}), \phantom{-} \text{if} \phantom{-} R_i = 1,
+	0, \phantom{-} \text{if} \phantom{-} R_i = 0, \\
+	\text{Poisson}(e^{\mX_i \vbeta + \mZ_i \vu}), \phantom{-} \text{if} \phantom{-} R_i = 1
 	\end{cases}
 $$
 with priors
