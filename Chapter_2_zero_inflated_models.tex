@@ -12,28 +12,28 @@ simulated and real data sets.
  
 % \noindent Keywords: Approximate Bayesian inference ; mixed model ; Markov chain Monte Carlo ; Stan ; penalized splines.
 
-\joc{
-	Comments: 
-	\begin{itemize}
-		\item Need to organize in terms of a flow of ideas. What are we approximating?		      		      		      		      
-		\item I believe that we are using a semiparametric mean field variational Bayes approach discussed by Rohde \& Wand (2015).
-		      However, I am not sure that we are using the their formalisms. (see page 3-6 of Rohde and Wand 2015).
-	\end{itemize}	
-}
+% \joc{
+% 	Comments: 
+% 	\begin{itemize}
+% 		\item Need to organize in terms of a flow of ideas. What are we approximating?		      		      		      		      
+% 		\item I believe that we are using a semiparametric mean field variational Bayes approach discussed by Rohde \& Wand (2015).
+% 		      However, I am not sure that we are using the their formalisms. (see page 3-6 of Rohde and Wand 2015).
+% 	\end{itemize}	
+% }
 
 \section{Introduction}
 \label{sec:introduction}
 
-\mgc{This section is too short}
+% \mgc{This section is too short}
 
 Count data with a large number of zero counts arises in many areas of application, such as data arising from
 physical activity studies, insurance claims, hospital visits or defects in manufacturing processes. Zero
 inflation is a frequent cause of overdispersion in Poisson data, and not accounting for the extra zeroes may
 lead to biased parameter estimates. These models have been used for many applications, including defects in
-manufacturing in \citep{lambert1992}, horticulture in \citep{BIOM:BIOM1030} and \citep{BIOM:BIOM1030}, length
-of stay data from hospital admissions in \citep{BIMJ:BIMJ200390024}, psychology in \citep{JOFP:rethink},
-pharmaceutical studies in \citep{Min01042005}, traffic accidents on roadways in \citep{Shankar1997829} and
-longitudinal studies in \citep{LeeWangScottYauMcLachlan2006}.
+manufacturing in \cite{lambert1992}, horticulture in \cite{BIOM:BIOM1030} and \cite{BIOM:BIOM1030}, length
+of stay data from hospital admissions in \cite{BIMJ:BIMJ200390024}, psychology in \cite{JOFP:rethink},
+pharmaceutical studies in \cite{Min01042005}, traffic accidents on roadways in \cite{Shankar1997829} and
+longitudinal studies in \cite{LeeWangScottYauMcLachlan2006}.
 
 The strength of this approach derives from modelling the zero and non-zero count data seperately as a mixture
 of distributions for the zero and non-zero components, allowing analysis of both the proportion of zeroes in
@@ -42,14 +42,14 @@ combined with a multivariate mixed model regression framework, an extremely rich
 allowing a broad range of applications to be addressed. Often the transition from zero to non-zero has a
 direct interpretation in the area of application, and is interesting in its' own right.
 
-Bayesian estimation methods for zero-inflated models was developed in \citep{Ghosh2006} using MCMC implemented
-with WinBUGS, and in \citep{Vatsa2014} using a Variational Bayes solution to the inverse zero- inflated
+Bayesian estimation methods for zero-inflated models was developed in \cite{Ghosh2006} using MCMC implemented
+with WinBUGS, and in \cite{Vatsa2014} using a Variational Bayes solution to the inverse zero- inflated
 Poisson regression problem. While simple forms of these models are easy to fit with standard  maximum
 likelihood techniques, more general models incorporating random effects, splines and missing data  typically
 have no closed form solutions and hence present a greater computational challenge to fit.
 
-In this chapter, we build upon the earlier work on Bayesian zero-inflated models by \citep{Ghosh2006} and
-\citep{Vatsa2014}. While simple forms of these models are easy to fit with standard maximum likelihood
+In this chapter, we build upon the earlier work on Bayesian zero-inflated models by \cite{Ghosh2006} and
+\cite{Vatsa2014}. While simple forms of these models are easy to fit with standard maximum likelihood
 techniques, more general models incorporating random effects, splines and missing data typically have no
 closed form solutions and hence present a greater computational challenge to fit.
 
@@ -70,11 +70,11 @@ not symmetric, as is the case for Poisson regression models.
 
 We build upon a latent variable representation of these models to allow a tractable semiparametric mean field
 Variational Bayes approximation to be derived. Semiparametric Mean Field Variational Bayes is an approximate
-Bayesian inference method as detailed in \citep{Ormerod2010} and \citep{Rohde2015}, which allows us to fit
+Bayesian inference method as detailed in \cite{Ormerod2010} and \cite{Rohde2015}, which allows us to fit
 close approximations to these models using a deterministic  algorithm which converges much more quickly.
 
 We allow a flexible regression modelling approach incorporating both fixed and random effects by using a
-Gaussian Variational Approximation as defined in \citep{Ormerod2012} on the regression parameters to allow a
+Gaussian Variational Approximation as defined in \cite{Ormerod2012} on the regression parameters to allow a
 non- conjugate Gaussian prior to be used, making the resulting Gaussian posterior distribution of the
 regression parameters easy to interpret. We adopt a Mean Field  Variational Bayes (VB) approach on the other
 parameters in the model to derive the rest of the approximation.
@@ -95,7 +95,6 @@ application of our zero-inflated Poisson model fitting method to a multi-level l
 control in apartments. Finally, in Section \ref{sec:discussion} we conclude with a discussion of the results.
 An appendix contains details of the derivation of the variational lower bound for our model.
 
-\mgc{Is this section the same as the previous section?}
 \section{Zero--inflated models}
 \label{sec:model}
 
@@ -103,42 +102,6 @@ In this section we present a Bayesian zero-inflated Poisson model for count data
 introducing the latent variable representation of Bayesian zero-inflated models, we first extend this to a
 model incorporating fixed effects regression modelling, and extend the model again to a more flexible mixed
 model approach incorporating both fixed and random effects.
-
-\subsection{Definitions}
-
-Let $p$ be the dimension of the space of fixed effects, $m$ be the number of individuals in the random effects
-and $b$ be the block size for each of those individuals. We use $\vone_p$ and $\vzero_p$ to denote the $p
-\times 1$ column vectors with all entries equal to 1 or 0, respectively.
-
-Let $\vy$ be the $n \times 1$ vector. The norm of a column vector $\vv$, defined to be $\sqrt{\vv^\top \vv}$,
-is  denoted by $\|\vv\|$. For a $p \times 1$ vector $\va$, we let $\diag{(\va)}$ denote the $p \times p$
-matrix with the elements of $\va$ along its' diagonal.
-
-We denote the design matrix of fixed effects with dimensions $n \times p$ as $\mX$ is , and the design matrix
-of random  effects with dimensions $n \times m b$ as $\mZ$. The combined design matrix $\mC$ is formed by
-appending the columns of $\mX$ to the columns of $\mZ$, giving $\mC = [ \mX, \mZ ]$.
-
-Let $\vtheta$ is the vector of all parameters.
-Let $\vbeta$ be the $p \times 1$ column vector of fixed
-effects, and $\vu$ the $m b \times 1$ column vector of random effects. $\vnu$ is the
-concatenation of these vectors $[\vbeta^\top, \vu^\top]$.
-% Let $\vp$ be the $n \times 1$ column vector of probabilities that each observation in $\vy$ is
-% non-zero.
-
-Let $\mSigma$ be the covariance matrix of the random effects $\vu$,
-and 
-$\mPsi$ the covariance matrix prior on $\mSigma$.
-These matrices are all of dimension $(p + m b) \times (p + m b)$.
-
-
-$\text{expit}(x)$ denotes the function $\tfrac{1}{1 + \exp(-x)}$ which is the inverse of the logit
-function.
-
-$\text{Bernoulli}(\pi)$ denotes the probability distribution $\pi^k (1 - \pi)^{1-k}$ and
-$\text{Inverse Wishart}(\mPsi, v)$ denotes the probability distribution
-$$\tfrac{|\mPsi|^\frac{v}{2}}{2^{\frac{vp}{2}} \Gamma_p{\left(\tfrac{v}{2}\right)}} |\mX|^{-\tfrac{v + p + 1}{2}}
-\exp{\left\{-\frac{1}{2} \tr{(\mPsi \mX^{-1})}\right\}}$$ where $\Gamma_p{(x)}$ denotes the multivariate gamma function and $\tr$
-is the trace function.
 
 \subsection{Modelling zero-inflated Poisson data}
 
@@ -165,10 +128,38 @@ latent variable representation of this parameterization introduces the latent va
 when $y_i>0$ and $0$ otherwise. This leads to the specification
 $$
 \begin{array}{rl}
-	P(Y_i=y_i|r_i) &= \frac{\exp(-\lambda r_i)(\lambda r_i)^{y_i}}{y_i!} \quad \mbox{and} \\
-	r_i &\sim \mbox{Bernoulli}(1-\rho).
+	P(Y_i=y_i|r_i) = & \frac{\exp(-\lambda r_i)(\lambda r_i)^{y_i}}{y_i!} \quad \mbox{and} \\
+	r_i \sim & \mbox{Bernoulli}(1-\rho)
 \end{array}
 $$
+where $\text{Bernoulli}(\pi)$ denotes the probability distribution $\pi^k (1 - \pi)^{1-k}$.
+
+Let $p$ be the dimension of the space of fixed effects, $m$ be the number of individuals in the random effects
+and $b$ be the block size for each of those individuals. We use $\vone_p$ and $\vzero_p$ to denote the $p
+\times 1$ column vectors with all entries equal to 1 or 0, respectively.
+
+Let $\vy$ be the $n \times 1$ vector. The norm of a column vector $\vv$, defined to be $\sqrt{\vv^\top \vv}$,
+is  denoted by $\|\vv\|$. For a $p \times 1$ vector $\va$, we let $\diag{(\va)}$ denote the $p \times p$
+matrix with the elements of $\va$ along its' diagonal.
+
+We denote the design matrix of fixed effects with dimensions $n \times p$ as $\mX$ is , and the design matrix
+of random  effects with dimensions $n \times m b$ as $\mZ$. The combined design matrix $\mC$ is formed by
+appending the columns of $\mX$ to the columns of $\mZ$, giving $\mC = [ \mX, \mZ ]$.
+
+Let $\vtheta$ is the vector of all parameters.
+Let $\vbeta$ be the $p \times 1$ column vector of fixed
+effects, and $\vu$ the $m b \times 1$ column vector of random effects. $\vnu$ is the
+concatenation of these vectors $[\vbeta^\top, \vu^\top]$.
+% Let $\vp$ be the $n \times 1$ column vector of probabilities that each observation in $\vy$ is
+% non-zero.
+
+Let $\mSigma$ be the covariance matrix of the random effects $\vu$,
+and 
+$\mPsi$ the covariance matrix prior on $\mSigma$.
+These matrices are all of dimension $(p + m b) \times (p + m b)$.
+
+$\text{expit}(x)$ denotes the function $\tfrac{1}{1 + \exp(-x)}$ which is the inverse of the logit
+function.
 
 We can extend the model naturally to a multiple covariate regression model by using a log link function on the
 response variable and replacing the parameter $\lambda$ in the model above with $\vx_i^\top \vbeta$ to specify
@@ -189,9 +180,9 @@ $$
 \subsection{Extending to mixed models, incorporating random effects}
 
 To be able to construct multivariate models with as much generality as possible, we wish to specify the full
-model as a General Design Bayesian Generalized Linear Mixed Model, as in \citep{Zhao2006}. This allows for a
+model as a General Design Bayesian Generalized Linear Mixed Model, as in \cite{Zhao2006}. This allows for a
 very rich class of models, which can incorporate such features as random intercepts and slopes, within-subject
-correlation and smoothing splines, as in \citep{Wand2008}, into our models.
+correlation and smoothing splines, as in \cite{Wand2008}, into our models.
 
 The zero-inflated model regression model introduced above can be extended to a flexible mixed model by
 incorporating the latent variable $\vr$ which controls the mixture of the zero and non-zero components from
@@ -236,7 +227,10 @@ $$
 
 \noindent where $\mX$ is $n \times p$, $\mZ$ is $n \times mb$ and $\mSigma_{\vu \vu}$ is $mb \times mb$ and
 $\mPsi$ is $b \times b$. The covariance of $\Cov(\vu) \equiv \blockdiag_{1 \leq i \leq m} (\mSigma) \equiv
-\mI_m \otimes \mSigma$.
+\mI_m \otimes \mSigma$. $\text{Inverse Wishart}(\mPsi, v)$ denotes the probability distribution
+$$\tfrac{|\mPsi|^\frac{v}{2}}{2^{\frac{vp}{2}} \Gamma_p{\left(\tfrac{v}{2}\right)}} |\mX|^{-\tfrac{v + p + 1}{2}}
+\exp{\left\{-\tfrac{1}{2} \tr{(\mPsi \mX^{-1})}\right\}}$$ where $\Gamma_p{(x)}$ denotes the multivariate gamma function and $\tr$
+is the trace function.
 
 The covariance matrix of random effects $\mSigma$ will depend on the mixed model being fit. In the random
 intercept case, $\mSigma = \sigma_u^2 \mI$ while in the random slopes case
@@ -267,9 +261,9 @@ $\BigO(n)$ time. The matrix $\mSigma$ is symmetric, with contents
 		\rho_{\text{intercept} x^3} & \rho_{x x^3} & \rho_{x^2 x^3} & \sigma^2_{x^3} & \ldots \\
 		0                           & \rho_{x (x - \kappa_1)^3_+} & \rho_{x^2 (x-\kappa_1)_+^3} & \rho_{x^3 (x - \kappa_1)_+^3} & \sigma^2_{(x - \kappa_1)_+^3}            & \ldots                        \\
 		0                           & 0                           & \rho_{x^2 (x-\kappa_2)_+^3} & \rho_{x^3 (x-\kappa_2)_+^3}   & \rho_{(x-\kappa_1)_+^3 (x-\kappa_2)_+^3} & \sigma^2_{(x - \kappa_2)_+^3} \\
-		0 & 0 & 0 & \rho_{x^3 (x - \kappa_3)_+^3} & \rho_{(x - \kappa_1)_+^3 (x - \kappa_3)_+^3} & \rho_{(x - \kappa_2)_+^3 (x - \kappa_3)_+^3} \\
-	\end{pmatrix}
-\].
+		0 & 0 & 0 & \rho_{x^3 (x - \kappa_3)_+^3} & \rho_{(x - \kappa_1)_+^3 (x - \kappa_3)_+^3} & \rho_{(x - \kappa_2)_+^3 (x - \kappa_3)_+^3}
+	\end{pmatrix}.
+\]
 
 \subsection{Variational Bayes Approximation to the Zero-Inflated Poisson model}
 
@@ -284,7 +278,11 @@ where we define $\vr_0 = \{ r_i : y_i = 0 \}$. \\
 $q(\vnu) = \N(\vmu, \mLambda)$, \\
 $q(\sigma_{\vu}^2) = \text{Inverse Wishart}\left(\mPsi + \sum_{i=1}^m (\vmu_i \vmu_i^\top + \mLambda_{\vu_i \vu_i}), v + m \right)$ \mbox{and } \\
 $q(r_i) = \text{Bernoulli}{(p_i)}$ with
-$p_i = \text{expit}\left[ \psi{(\alpha_{q(\rho)})} - \psi{(\beta_{q(\rho)})} - \exp{(c_i^\top\vmu + \frac{1}{2} c_i^\top \mLambda c_i)} \right]$ when $\vy_i = 0$, and $1$ otherwise.
+$$p_i = 
+\begin{cases}
+\text{expit}\left\{ \psi{(\alpha_{q(\rho)})} - \psi{(\beta_{q(\rho)})} - \exp{(c_i^\top\vmu + \frac{1}{2} c_i^\top \mLambda c_i)} \right\},& \text{ when } \vy_i = 0\\
+1,& \text{ otherwise.}
+\end{cases}$$
 
 %$\propto \exp{\left \{-r_i \bE_{-r_i} [\exp{(c_i^\top\vnu)}] + r_i [\psi(\alpha_\rho) - \psi(\beta_\rho)] \right \} }.\\$
 
@@ -349,7 +347,7 @@ Gaussian centred at its' mode.
 % approximation uses the second order Taylor expansion of the full log likelihood of the  model around the
 % mode to find a Gaussian approximation to the full posterior. Taylor expanding the full log likelihood
 % once around the mode yields the following approximation.
-This yields the approximation to the variational lower bound below:
+This yields the approximation to the variational lower bound
 % The algorithm is very quick to execute, but the resulting approximate posterior
 % distributions are not as accurate as those produced by the other algorithms considered in this article.
 % NR
@@ -400,32 +398,31 @@ $\vmu$ and $\mLambda$ values and the algorithm was terminated.
 \subsection{Gaussian Variational Approximation}
 		
 % Detail techniques used for fitting models.
-The full variational likelihood for a Generalised Linear Mixed model is computationally difficult to
-compute, requiring the evaluation of a high dimensional integral. However, \citep{Ormerod2012} devised
-an accurate approximation to the full variational likelihood, the Gaussian Variational Lower Bound,
-which only requires the evaluation of a substantially simpler univariate integral.
+The full variational likelihood for a Generalised Linear Mixed model is computationally difficult to compute,
+requiring the evaluation of a high dimensional integral. However, \cite{Ormerod2012} devised an accurate
+approximation to the full variational likelihood, the Gaussian Variational Lower Bound, which only requires
+the evaluation of a substantially simpler univariate integral.
 	
-To optimise the Gaussian component of the lower bound in each iteration of Algorithm
-\ref{alg:algorithm_one}, optimal $\vmu$ and $\mLambda$ values must be found while keeping the other
-variational parameters fixed. The variational lower bound is not necessarily unimodal if $\vp$ and
-$\mSigma$ are free to vary, leading to potential difficulty in optimising to the global maximum.
-However, for fixed $\vp$ and $\mSigma$, the variational lower bound is log-concave with respect to
-$\vmu$ and $\mLambda$, and so standard optimisation methods such as L-BFGS-B as described in, for
-example, \citep{Liu1989} \citep{Nocedal2006}, work well. This leads to an extremely accurate
-approximation of the true posterior at the expense of some additional computational effort. Care must be
-taken in the parameterisation of $\mLambda$, as it is both of high dimension $(p + mb)^2$ and
-constrained to be semi- positive definite. We present and compare two approaches to parameterising the
-covariance matrix $\mLambda$ below.
+To optimise the Gaussian component of the lower bound in each iteration of Algorithm \ref{alg:algorithm_one},
+optimal $\vmu$ and $\mLambda$ values must be found while keeping the other variational parameters fixed. The
+variational lower bound is not necessarily unimodal if $\vp$ and $\mSigma$ are free to vary, leading to
+potential difficulty in optimising to the global maximum. However, for fixed $\vp$ and $\mSigma$, the
+variational lower bound is log-concave with respect to $\vmu$ and $\mLambda$, and so standard optimisation
+methods such as L-BFGS-B as described in, for example, \cite{Liu1989} \cite{Nocedal2006}, work well. This
+leads to an extremely accurate approximation of the true posterior at the expense of some additional
+computational effort. Care must be taken in the parameterisation of $\mLambda$, as it is both of high
+dimension $(p + mb)^2$ and constrained to be semi- positive definite. We present and compare two approaches to
+parameterising the covariance matrix $\mLambda$ below.
 	
 \subsubsection{Covariance parameterisation $\mLambda = \mR^\top \mR$}
 
-We fit the Gaussian component of our approximation in Algorithm \ref{alg:algorithm_one} by maximising 
-the variational lower bound	
+We fit the Gaussian component of our approximation in Algorithm \ref{alg:algorithm_one} by maximising  the
+variational lower bound
 \begin{align*}
 	\log \underline{p}(\vmu, \mLambda; \vy) & = \quad \vy^\top\mP \mC \vmu - \vp^\top \exp\{\mC \vmu + \tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top)\} - \tfrac{1}{2} \vmu^\top \mSigma^{-1} \vmu - \tfrac{1}{2} \tr{(\mSigma^{-1} \mLambda)} + \log{|\mR|} \\
-	                                        & \quad - \tfrac{p}{2} \log{(2 \pi)} + \tfrac{1}{2} \log{|\mSigma^{-1}|} + \tfrac{p}{2} \log{(2 \pi)} + \tfrac{p}{2}                                                                              
+	                                        & \quad + \tfrac{1}{2} \log{|\mSigma^{-1}|}  + \tfrac{p}{2}                                                                              
 \end{align*}
-\noindent with respect to $\vmu, \mLambda$, keeping $\vp$, $\mSigma$, and $\rho$ fixed.
+\noindent with respect to $\vmu$ and $\mLambda$, keeping $\vp$, $\mSigma$ and $\rho$ fixed.
 		
 The first variant of the Gaussian Variational Approximation algorithm that we present optimises the
 Gaussian variational lower bound of the log likelihood with respect to $\vmu$ and the Cholesky decomposition
@@ -438,7 +435,7 @@ parameterisation. The resulting function
 % distribution. 
 \begin{align*}
 	\log \underline{p}(\vmu, \mLambda; \vy) & = \quad \vy^\top\mP \mC \vmu - \vp^\top \exp\{\mC \vmu + \tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top)\} - \tfrac{1}{2} \vmu^\top \mSigma^{-1} \vmu - \tfrac{1}{2} \tr{(\mSigma^{-1} \mLambda)} + \log{|\mR|} \\
-	                                        & \quad - \tfrac{p}{2} \log{(2 \pi)} + \tfrac{1}{2} \log{|\mSigma^{-1}|} + \tfrac{p}{2} \log{(2 \pi)} + \tfrac{p}{2},                                                                              
+	                                        & \quad + \tfrac{1}{2} \log{|\mSigma^{-1}|} + \tfrac{p}{2},                                                                              
 \end{align*}
 can be optimised with L-BFGS-B using the derivatives in Appendix \ref{sec:appendix_derivatives_gva}.
 
@@ -476,7 +473,7 @@ $\mR$ of $\mLambda$, we instead optimise the Cholesky factor of the inverse of $
 The Gaussian variational lower bound in this parameterisation is
 \begin{align*}
 	\log \underline{p}(\vmu, \mLambda; \vy) & = \quad \vy\mP\mC \vmu - \vp^\top \exp\{\mC \vmu + \tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top)\} - \tfrac{1}{2} \vmu^\top \mSigma^{-1} \vmu - \tfrac{1}{2} \tr{(\mSigma^{-1} \mLambda)} \\
-	                                        & \quad- \tfrac{p}{2} \log{(2 \pi)} + \tfrac{1}{2} \log{|\mSigma^{-1}|} + \tfrac{p}{2} \log{(2 \pi)} + \tfrac{p}{2} - \log{|\mR|}.                                             
+	                                        & \quad+ \tfrac{1}{2} \log{|\mSigma^{-1}|} + \tfrac{p}{2} - \log{|\mR|}.                                             
 \end{align*}
 		
 \noindent The derivative with respect to $\vmu$ is the same as that in the first variant of the algorithm, but 
@@ -495,8 +492,8 @@ This variant of the algorithm uses Newton-Raphson-like fixed point updates on th
 bound. We optimise the same variational lower bound as in the covariance parameterisation above, using the
 derivatives below. The steps are presented in Algorithm \ref{alg:algorithm_nr} where	
 \begin{align*}
-	\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu}     & = \quad \mC^\top\vp \left \{\vy - \mC\exp(\mC \vmu + \tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top)) \right \} - \mSigma^{-1} \vmu \text{ and} \\
-	\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda} & = -\mC^\top \text{diag}(\vp^\top \exp(\mC \vmu +\tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top))) - \mSigma^{-1}.                             
+	\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu}     & = \quad \mC^\top\vp \left [\vy - \mC\exp\{\mC \vmu + \tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top)\} \right ] - \mSigma^{-1} \vmu \text{ and} \\
+	\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda} & = -\mC^\top \text{diag}[\vp^\top \exp\{\mC \vmu +\tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top)\}] - \mSigma^{-1}.                             
 \end{align*}
 As this algorithm involves a simple Newton-Raphson style update step, it is computationally simple to
 implement, but potentially unstable as there is no adaptation of step size, as in L-BFGS-B.
@@ -638,7 +635,7 @@ We optimise over the space $(\vmu, \overline{\mR})$ as before, but now
 	\begin{cases}
 		\exp(-\overline{\mR}_{ij}), & i = j             \\
 		\overline{\mR}_{ij},        & i > j             \\
-		0,                          & \text{otherwise}, 
+		0,                          & \text{otherwise}.
 	\end{cases}
 \end{equation*}
 	
@@ -911,7 +908,7 @@ are accurately estimated.
 
 \subsection{Poisson example without zero-inflated component -- Police stops}
 \label{sec:police_stops}
-The data set used for this example was the police stop example from Chapter 15 of \citep{Gelman2007}.
+The data set used for this example was the police stop example from Chapter 15 of \cite{Gelman2007}.
 The model fit was
 $$
 	\vy_{ep}        \sim \text{Poisson}(n_{ep} e^\vnu)
@@ -923,7 +920,7 @@ where $\vnu = {\beta_0 + \beta_e \text{ethnicity}_e + \alpha_{c} \text{crime} + 
 	\vu_p         & \sim \N(0, \sigma_\vu^2)
 \end{align*}
 where $p$ is the $p$-th precinct, and $e$ is the $e$-th ethnicity (blacks, hispanics or whites), and $c$ is
-the $c$-th category of crime (violent crimes, weapons crimes, propery crimes, drug crimes). The random
+the $c$-th category of crime (violent crimes, weapons crimes, propery crimes or drug crimes). The random
 intercepts $u_p$ allow for variation in the base rates of stops across precincts, the co-efficients $\beta_j$
 measure the effect of ethnicity on the rate of police stops and the co-efficients $\alpha_k$ measure the
 effect of each type of crime on the rate. The model finds the relationship between the number of police stops
@@ -1003,7 +1000,7 @@ with priors
 	R_i &\sim \text{Bernoulli}(\rho), \\
 	\rho &\sim \text{Beta}(a, b), \\
 	\vbeta &\sim \text{N}(\vzero, \sigma^2_\vbeta \mI), \\
-	\vu &\sim \text{N}(\vzero, \mSigma), \text{and} \\
+	\vu &\sim \text{N}(\vzero, \mSigma) \text{ and } \\
 	\mSigma &\sim \text{Inverse-Wishart}(\mPsi, v)
 \end{align*}
 with prior parameters $a = 1$, $b = 1$, $\sigma^2_\vbeta = 10^5$, $\mPsi = 10^{-5} \mI$ and $v = 2$.
@@ -1097,19 +1094,19 @@ biochemistry graduate students published no articles in their final years wherea
 would predict only 18\%. This justifies our choice of model.
 
 The model fit was
-\[
+$$
 	y_i = \begin{cases}
 	\begin{array}{ll}
-	0 &,\phantom{-} \text{if} \phantom{-} R_i = 0, \\
-	\text{Poisson}(e^{\vbeta_1 + \vbeta_2 \text{female} + \vbeta_3 \text{married} + \vbeta_4 \text{children under age 6} + \vbeta_5 \text{PhD}}) &,\phantom{-} \text{if} \phantom{-} R_i = 1,
+	0, & \text{if} R_i = 0, \\
+	\text{Poisson}(e^\vnu), & \text{if} \phantom{-} R_i = 1,
 	\end{array}
 	\end{cases}
-\]
+$$
 
-\noindent with priors
+\noindent where $\vnu = \vbeta_1 + \vbeta_2 \text{female} + \vbeta_3 \text{married} + \vbeta_4 \text{children under age 6} + \vbeta_5 \text{PhD}$, with priors
 \begin{align*}
 R_i &\sim \text{Bernoulli}(\rho), \\
-\rho &\sim \text{Beta}(A, B), \text { and } \\
+\rho &\sim \text{Beta}(A, B) \text { and } \\
 \vbeta &\sim \text{N}(0, \sigma_\vbeta^2 \mI)
 \end{align*}
 
@@ -1165,15 +1162,20 @@ The variation between the 25 different nests sampled from was modelled by a rand
 $\vu$.
 
 The model fit was
-\[
-y_i = R_i e^{\vbeta_2 \text{Food Treatment = Satiated} + \vbeta_3 \text{Arrival Time} + u_n}
-\]
-where $n$ is the $n$-th nest, with priors
+$$
+	y_i = \begin{cases}
+	\begin{array}{ll}
+	0, & \text{if} R_i = 0, \\
+	\text{Poisson}(e^\vnu), & \text{if} \phantom{-} R_i = 1,
+	\end{array}
+	\end{cases}
+$$
+where $\vnu = {\vbeta_2 \text{Food Treatment = Satiated} + \vbeta_3 \text{Arrival Time} + \vu_n}$ and $n$ is the $n$-th nest, with priors
 \begin{align*}
 R_i &\sim \text{Bernoulli}(\rho), \\
 \rho &\sim \text{Beta}(A, B), \\
 \vbeta &\sim \text{N}(\vzero, \sigma_\vbeta^2 \mI), \\
-\vu &\sim \text{N}(0, \sigma_\vu^2), \text { and } \\
+\vu &\sim \text{N}(0, \sigma_\vu^2) \text { and } \\
 \sigma_\vu^2 &\sim \text{Inverse-Gamma}(s, t).
 \end{align*}
 where $\sigma_\vbeta^2=10,000$, $A=1$, $B=1$, $s=10^{-2}$ and $r=10^{-2}$.
@@ -1182,7 +1184,8 @@ The model was fit using the GVA inverse parameterisation algorithm. The accuracy
 estimates is shown in Figure \ref{fig:owls}. The variance component
 The runtime of the algorithms is shown in Table
 \ref{tab:owls_times}. We draw attention to the difference in run-times between the covariance and
-inverse parameterisations -- the inverse parameterisation is 
+inverse parameterisations. The inverse parameterisation is significantly faster -- $1.88$ seconds versus
+$5.66$ seconds for the covariance parameterisation.
 
 \begin{figure}
 	\includegraphics[width=0.95 \textwidth]{code/results/accuracy_plots_application_owls_GVA_inv_param-highlights-nup.pdf}
@@ -1222,73 +1225,3 @@ inverse parameterisations -- the inverse parameterisation is
 	\label{tab:owls_times}
 \end{table}
 
-\section{Discussion}
-\label{sec:discussion}
-		
-We have described a Variational Bayes approximation to Zero-Inflated Poisson regression models which
-allows such models to be fit with considerable generality. We have also devised and extensively tested a
-number of alternative approaches for fitting such models, and extended one of these alternative
-approaches with a new parameterisation. Using MCMC methods as the gold standard to test against, we have
-assessed the accuracy and computational speed of these algoritms.
-		
-We applied our model fitting algorithms to a number of data sets to fit a range of models. The Cockroaches
-model \ref{sec:cockroaches} had few fixed covariates, a random intercept for each apartment building and
-incorporated zero-inflation. The Police stops model \ref{sec:police_stops} was a pure Poisson mixed model, no
-zero-inflation and a random intercept for precincts/locality. The Biochemists model \ref{sec:biochemists} was
-zero-inflated with fixed effects. The Owls model \ref{sec:owls} was zero-inflated, random intercepts for
-nests. There were a large number of nests. We were able to estimate the variance component for this model very
-accurately.
-
-The use of Mean Field Variational Bayes allows estimation of Bayesian ZIP models in a fraction of the
-time taken to fit the same model using even the best MCMC methods available, with only a small loss of
-accuracy. This is of great utility in applications where speed matters, such as model selection or when
-applied statisticians are choosing amongst many candidate models, as is typical in practice.
-		
-The new parameterisation of Gaussian Variational Approximation using the Cholesky factorisation of the
-inverse of $\mLambda$ presented in Section \ref{sec:param} provides significant advantages.  It is well
-known that the inverse of a sparse matrix need not be sparse.
-
-Mixed models have covariance matrices with a block structure, due to the dependence structure of the
-random effects. The precision parameterisation presented in this chapter is able to preserve this
-sparsity within the structure of the Cholesky factors of the inverses of the covariance matrices use in
-the variational lower bound by re-ordering the rows and columns of the matrices so that the random
-effects blocks appear first. The Owls example presented in this chapter shows the computational
-advantages of this approach when the number of groups $m$ in the model is large (m=27 in this case) --
-as the covariance parameterisation takes 46 seconds to fit whereas the inverse parameterisation only
-takes 3 seconds. This clearly demonstrates advantage of using sparsity to reduce the dimension of the
-optimisation problem to be solved when models are being fit -- as only the non-zero values in the
-covariance matrices need to be optimised over. This allows models to be fit more quickly, and with
-greatly improved numerical stability and without loss of accuracy.
-
-While all of the fitting algorithms presented in this chapter except the Laplace's approximation
-algorithm were able to fit ZIP random and fixed effects models with high accuracy, and the 
-Gaussian inverse parameterisation and fixed point algorithms were able to do so at high speed, they 
-could be numerically unstable depending on the data the model was being fit to and their starting points.
-In the case of the Gaussian inverse parameterisation algorithm, the source of the problem was tracked down
-to the exponential used in the parameterisation of the diagonal of the Cholesky factor of the precision
-matrix combined with the exponential that arises in the derivation of the Gaussian variational lower
-bound for Poisson mixed models -- leading to frequent numeric overflows during the fitting process. This
-problem, once discovered, was mitigated by replacing the exponential parameterisation of the diagonal
-of the Cholesky factor with a piecewise function which is exponential beneath a threshold and quadratic
-above that threshold. This was shown to greatly increase the numeric stability of the GVA inverse
-parameterisation for a range of starting points.
-
-Some of the algorithms which we experimented with were found to be very sensitive to their starting points.
-While these algorithms are typically initialised with a starting point as close as possible to the final
-solution, this gives some sense of the stability of each algorithm.
-Stability fixes.
-
-This article presents the essential ideas necessary for a performant implementation implementing model fitting
-for ZIP regression models.%, but the performance would be even better if our algorithm was re-implemented in a
-%compiled language with good numeric libraries such as C++ with Eigen.
-The majority of the performance
-improvements over existing approaches come from avoiding unneccessary matrix inversion, which is a
-computationally expensive and numerically unstable process taking $\BigO(p^3)$ flops, and from constructing and 
-calculating	with sparse matrices. The gains of these approaches, particularly from sparse matrix techniques, 
-can be difficult to fully realise in R without expert knowledge of the underlying implementation and libraries.
-		
-Our application of these ideas to Andrew Gelman's data showed that the new parameterisation very effectively
-speeds up fitting zero-inflated mixed models to real world data with a large number of groups, while still
-maintaining excellent accuracy versus an MCMC approach. This demonstrates the applicability of the ideas
-presented within this paper to real world data sets.
-		
