@@ -30,6 +30,39 @@ using namespace std;
 //' vp_gamma, the vector of number of covariates for each model
 //' vlogp, the vector of logs of the likelihoods of each model
 //' vinclusion_prob, the vector of inclusion probabilities for each of the covariates
+//' @examples
+//' library(MASS)
+//'
+//' mD <- UScrime
+//' notlog <- c(2,ncol(UScrime))
+//' mD[,-notlog] <- log(mD[,-notlog])
+//'
+//' for (j in 1:ncol(mD)) {
+//'   mD[,j] <- (mD[,j] - mean(mD[,j]))/sd(mD[,j])
+//' }
+//'
+//' varnames <- c(
+//'   "log(AGE)",
+//'   "S",
+//'   "log(ED)",
+//'   "log(Ex0)",
+//'   "log(Ex1)",
+//'   "log(LF)",
+//'   "log(M)",
+//'   "log(N)",
+//'   "log(NW)",
+//'   "log(U1)",
+//'   "log(U2)",
+//'   "log(W)",
+//'   "log(X)",
+//'   "log(prison)",
+//'   "log(time)")
+//'
+//' y.t <- mD$y
+//' X.f <- data.matrix(cbind(mD[1:15]))
+//' colnames(X.f) <- varnames 
+//' corr_result <- all_correlations_mX(vy, mX, "maruyama")
+//' 
 //' @export
 // [[Rcpp::export]]
 List all_correlations_mX(NumericVector vy, NumericMatrix mX, std::string g_prior, int intercept_col = 1,
