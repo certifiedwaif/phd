@@ -691,6 +691,62 @@ As above, by using our knowledge of the model being fit we can encode $\mR$ spar
 the required   computation still further. In the random intercept model case, the computational cost will drop
 to   $n \times \{m + \frac{1}{2} p (p + 1) + p \times m b\}$.
 			
+\subsubsection{Justification of Cholesky factor of the precision matrix as the parameterisation}
+
+The Gaussian Variational Approximation is parameterised by a mean vector $\vmu$ and a covariance matrix
+$\mLambda$. The most straightforward parameterisation of $\vmu$ is the natural parameterisation.
+But the covariance matrix has many possible parameterisations.
+Covariance matrices are positive semi-definite, and hence symmetric, so they have a unique Cholesky
+factorisation. Parameterising the covariance matrix in terms of the Cholesky factor allows us to represent
+the square covariance matrix using only a lower triangular matrix with half as many non-zero elements.
+Thus the Cholesky factor is a convenient way to parameterise covariance matrices.
+
+While the most obvious choice for parameterising the covariance matrix is simply the covariance matrix itself,
+this is not the only available parameterisation. Another choice worth considering is parameterising the
+covariance matrix using the Cholesky factor of the precision matrix.
+
+The variational lower bound of a Gaussian Variational Approximation takes the form
+\begin{align*}
+\log \underline{p}(\vy; \vmu, \mLambda) =& \vy^\top \mC \vmu - \vone^\top B(\mC \vmu, \text{diag}(\mC \mLambda \mC^\top)) + \vone^\top c(\vy) \\
+&- \tfrac{1}{2} \vmu^\top \mSigma^{-1} \vmu - \tfrac{1}{2} \tr(\mSigma^{-1} \mLambda) \\
+&+ \tfrac{1}{2} \log |\mLambda| - \tfrac{1}{2} \log |\mSigma| + \tfrac{d}{2}
+\end{align*}
+
+Let $\mOmega = \mLambda^{-1}$, the precision matrix. Then if we reparameterise in terms of $\mOmega$ the
+variational lower bound becomes
+\begin{align*}
+F(\mOmega) =& \vy^\top \mC \vmu - \vone^\top B(\mC \vmu, \text{diag}(\mC \mOmega^{-1} \mC^\top)) + \vone^\top c(\vy) \\
+&- \tfrac{1}{2} \vmu^\top \mSigma^{-1} \vmu - \tfrac{1}{2} \tr(\mSigma^{-1} \mOmega^{-1}) \\
+&- \tfrac{1}{2} \log |\mOmega| - \tfrac{1}{2} \log |\mSigma| + \tfrac{d}{2}
+\end{align*}
+Then
+\begin{align*}
+\tfrac{\partial F}{\partial \mOmega_{jk}} &= -\tfrac{1}{2} \tr(\mOmega^{-1} \tfrac{\partial \mOmega}{\partial \mOmega_{jk}}) + \tfrac{1}{2} \tr(\mSigma^{-1} \mOmega^{-1} \tfrac{\partial \mOmega}{\partial \mOmega_{jk}} \mOmega^{-1})
+-\tfrac{1}{2} \tr\{\mC^\top \text{diag}(B^{(2)}) \mC \mOmega^{-1} \tfrac{\partial \mOmega}{\partial \mOmega_{jk}} \mOmega^{-1}\} \\
+&=-\tfrac{1}{2} \tr(\mOmega^{-1} \mOmega \mOmega^{-1} \tfrac{\partial \mOmega}{\partial \mOmega_{jk}}) + \tfrac{1}{2} \tr(\mSigma^{-1} \mOmega^{-1} \tfrac{\partial \mOmega}{\partial \mOmega_{jk}} \mOmega^{-1})
++ \tfrac{1}{2} \tr\{\mOmega^{-1} \mC^\top \text{diag}(B^{(2)}) \mC \mOmega^{-1} \tfrac{\partial \mOmega}{\partial \mOmega_{jk}}\} \\
+&= -\tfrac{1}{2} \tr[\mOmega^{-1}\{ \mOmega - \mC^\top \text{diag}(B^{(2)}) \mC - \mSigma^{-1} \} \mOmega^{-1} \tfrac{\partial \mOmega}{\partial \mOmega_{jk}}]
+\end{align*}
+using matrix calculus and the properties of trace.
+
+By the first-order optimality conditions, $\tfrac{\partial F}{\partial \mOmega_{jk}} = 0$. As $\mOmega^{-1}
+\ne 0$ and $\tfrac{\partial \mOmega}{\partial \mOmega_{jk}} \ne 0$, this implies $\mOmega = \mC^\top
+\text{diag}(B^{(2)}) \mC + \mSigma^{-1}$. Hence the sparsity of $\mOmega$ depends on the structure of $\mC$
+and $\mSigma$, which depends on the model specified.
+
+The covariance matrix contains the marginal covariances between random variables in $\vmu$, while the
+precision matrix contains the conditional covariance. In generalised linear mixed models, fixed and random
+effects are conditionally independent, implying sparsity in the precision matrix although not necessarily in
+the covariance matrix.
+
+Matrix multiplication and back substitution are both equally numerically accurate and stable --- see
+\cite{Golub:1996:MC:248979} \S2.7.8 and \S3.1.2 or \cite{trefethen97} Lecture 17. Moreoever, as the precision
+matrix will be sparse due to the specification of the mixed model/conditional independence, implying the
+numerical accuracy of the inversion will be higher as there are fewer non-zero entries in the Cholesky factor
+of the precision matrix than of the Cholesky factor of the covariance matrix. Thus parameterising the
+variational lower bound in terms of the precision matrix will have the same or better numerical accuracy than
+parameterising in terms of the covariance matrix.
+
 \section{Numerical results}
 \label{sec:results}
 		
@@ -810,7 +866,7 @@ Median accuracy of the algorithms was assessed by running them on 100 randomly g
 \begin{figure}
 	\label{fig:spline}
 	\caption{Comparison of VB and MCMC spline fits with the true function}
-	\includegraphics[width=0.95 \textwidth, height=100mm]{code/results/accuracy_plots_spline_gva2.pdf}
+	\includegraphics[width=0.95 \textwidth]{code/results/accuracy_plots_spline_gva2.pdf}
 \end{figure}
 		
 % Graphs - exactly what sort of graphs do we need?
