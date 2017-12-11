@@ -16,6 +16,7 @@
 #include <fstream>
 #include <vector>
 #include <string>
+#include <sstream>
 #include <boost/tokenizer.hpp>
 
 using namespace boost;
@@ -539,25 +540,31 @@ List all_correlations_main(const Graycode& graycode, VectorXd vy, MatrixXd mX, s
 			p_star++;
 	}
 
-	std::function<double (const int n, const int p, double vR2, int vp_gamma)> logp;
+	std::function<double (const int n, const int p, double vR2, int vp_gamma)> log_prob;
 	if (g_prior == "maruyama") {
-		logp = maruyama;
+		log_prob = maruyama;
 	} else if (g_prior == "BIC") {
-		logp = BIC;
+		log_prob = BIC;
 	} else if (g_prior == "ZE") {
-		logp = ZE;
+		log_prob = ZE;
 	} else if (g_prior == "liang_g1") {
-		logp = liang_g1;
+		log_prob = liang_g1;
 	} else if (g_prior == "liang_g2") {
-		logp = liang_g2;
-	} else if (g_prior == "liang_g3") {
-		logp = liang_g3;
+		log_prob = liang_g2;
+	} else if (g_prior == "liang_g_n_appell") {
+		log_prob = liang_g_n_appell;
+	} else if (g_prior == "liang_g_n_approx") {
+		log_prob = liang_g_n_approx;
+	} else if (g_prior == "liang_g_n_quad") {
+		log_prob = liang_g_n_quad;
 	} else if (g_prior == "robust_bayarri1") {
-		logp = robust_bayarri1;
+		log_prob = robust_bayarri1;
 	} else if (g_prior == "robust_bayarri2") {
-		logp = robust_bayarri2;
+		log_prob = robust_bayarri2;
 	} else {
-		logp = maruyama;
+		stringstream ss;
+		ss << "Prior " << g_prior << " unknown";
+		Rcpp::stop(ss.str());
 	}
 
 	// auto M = logp(n, p, R2_full, p_star); // Maximum log-likelihood
@@ -565,13 +572,13 @@ List all_correlations_main(const Graycode& graycode, VectorXd vy, MatrixXd mX, s
 	VectorXd vlogp_all(max_iterations);				 // Vector of model likelihoods
 	VectorXd vinclusion_prob(p);							 // Vector of variable inclusion likelihoods
 	for (auto i = 1; i < max_iterations; i++) {
-		vlogp_all(i) = logp(n, p, vR2_all(i), vpgamma_all(i)) - M;
+		vlogp_all(i) = log_prob(n, p, vR2_all(i), vpgamma_all(i)) - M;
 	}
 	for (auto p_idx = 0; p_idx < p; p_idx++) {
 		vinclusion_prob(p_idx) = 0.;
 		for (auto i = 1; i < max_iterations; i++) {
 			if (graycode[i][p_idx])
-				vinclusion_prob(p_idx) += exp(logp(n, p, vR2_all(i), vpgamma_all(i)) - M);
+				vinclusion_prob(p_idx) += exp(log_prob(n, p, vR2_all(i), vpgamma_all(i)) - M);
 		}
 	}
 	vinclusion_prob = vinclusion_prob.array() / vinclusion_prob.sum();
