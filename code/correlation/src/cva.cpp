@@ -145,23 +145,29 @@ double liang_g2(const int n, const int p, double R2, int p_gamma)
 }
 
 
-// Liang's g prior
-double liang_g3(const int n, const int p, double R2, int p_gamma)
+// Liang's g/n prior Appell
+double liang_g_n_appell(const int n, const int p, double R2, int p_gamma)
 {
-	#ifdef DEBUG
-	Rcpp::Rcout << "n " << n << " p " << p << " R2 " << R2 << " p_gamma " << p_gamma << std::endl;
-	#endif
-	double a = 3.;
-	double shape1 = 0.5 * (p_gamma + a - 2.);
-	double shape2 = 0.5 * (n - p_gamma - a + 1.);
-	double val = -log(R2);
-	val -= log(1 - R2);
-	val += ::Rf_pbeta(R2, shape1, shape2, true, true);
-	val -= ::Rf_dbeta(R2, shape1, shape2, true);
-	if (R2 == 0.)
-		val = 0.;
-	double log_y = log(a - 2.) - log(2.) + val;
-	return log_y;
+	auto a = 3.;
+	
+	Rcpp::Environment appell("package:appell");
+	Rcpp::Function appellf1_r = appell["appellf1"];
+	Rcpp::ComplexVector val;
+	try {
+		Rcpp::List res = appellf1_r(Rcpp::_["a"] = 1.,
+																Rcpp::_["b1"] = a / 2.,
+																Rcpp::_["b2"] = (n - 1.)/2., 
+																Rcpp::_["c"] = (p_gamma + a) / 2., 
+																Rcpp::_["x"] = 1. - 1. / n,
+																Rcpp::_["y"] = R2);
+		val = res["val"];
+	} catch (...) {
+		val = Rcpp::ComplexVector(1);
+		val(0).r = NA_REAL;
+		val(0).i = NA_REAL;
+	}
+
+	return (a - 2.) / (n * (p_gamma + a - 2.)) * val(0).r;
 }
 
 
@@ -177,6 +183,42 @@ double trapint(const VectorXd& xgrid, const VectorXd& fgrid)
 	// Rcpp::Rcout << "sum " << sum << std::endl;
 
 	return sum;
+}
+
+
+// Liang's g/n prior quadrature
+double liang_g_n_quad(const int n, const int p, double R2, int p_gamma)
+{
+	auto a = 3.;
+	const int NUM_POINTS = 10000;
+	VectorXd xgrid(NUM_POINTS);
+	VectorXd fgrid(NUM_POINTS);
+	for (int i = 0; i < NUM_POINTS; i++) {
+		double u = static_cast<double>(i / NUM_POINTS);
+		xgrid(i) = u;
+		fgrid(i) = exp((p_gamma / 2. + a / 2. - 2.) * log(1 - u) + -a/2. * log(1. - u * (1. - 1. / n)) + (-(n-1.)/2.) * log(1 - u*R2));
+	}
+	return (a - 2.) / (2. * n) * trapint(xgrid, fgrid);
+}
+
+
+// Liang's g/n prior approximation
+double liang_g_n_approx(const int n, const int p, double R2, int p_gamma)
+{
+	#ifdef DEBUG
+	Rcpp::Rcout << "n " << n << " p " << p << " R2 " << R2 << " p_gamma " << p_gamma << std::endl;
+	#endif
+	double a = 3.;
+	double shape1 = 0.5 * (p_gamma + a - 2.);
+	double shape2 = 0.5 * (n - p_gamma - a + 1.);
+	double val = -log(R2);
+	val -= log(1 - R2);
+	val += ::Rf_pbeta(R2, shape1, shape2, true, true);
+	val -= ::Rf_dbeta(R2, shape1, shape2, true);
+	if (R2 == 0.)
+		val = 0.;
+	double log_y = log(a - 2.) - log(2.) + val;
+	return log_y;
 }
 
 
@@ -390,14 +432,20 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 		log_prob = liang_g1;
 	} else if (log_lik == "liang_g2") {
 		log_prob = liang_g2;
-	} else if (log_lik == "liang_g3") {
-		log_prob = liang_g3;
+	} else if (log_lik == "liang_g_n_appell") {
+		log_prob = liang_g_n_appell;
+	} else if (log_lik == "liang_g_n_approx") {
+		log_prob = liang_g_n_approx;
+	} else if (log_lik == "liang_g_n_quad") {
+		log_prob = liang_g_n_quad;
 	} else if (log_lik == "robust_bayarri1") {
 		log_prob = robust_bayarri1;
 	} else if (log_lik == "robust_bayarri2") {
 		log_prob = robust_bayarri2;
 	} else {
-		log_prob = maruyama;
+		stringstream ss;
+		ss << "Prior " << log_lik << " unknown";
+		Rcpp::stop(ss.str());
 	}
 	// Initialise population of K particles randomly
 	// Rcpp::Rcout << "Generated" << std::endl;
