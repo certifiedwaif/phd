@@ -152,7 +152,7 @@ double liang_g_n_appell(const int n, const int p, double R2, int p_gamma)
 	
 	Rcpp::Environment appell("package:appell");
 	Rcpp::Function appellf1_r = appell["appellf1"];
-	Rcpp::ComplexVector val;
+	Rcpp::ComplexVector val(1);
 	try {
 		Rcpp::List res = appellf1_r(Rcpp::_["a"] = 1.,
 																Rcpp::_["b1"] = a / 2.,
@@ -160,14 +160,18 @@ double liang_g_n_appell(const int n, const int p, double R2, int p_gamma)
 																Rcpp::_["c"] = (p_gamma + a) / 2., 
 																Rcpp::_["x"] = 1. - 1. / n,
 																Rcpp::_["y"] = R2);
-		val = res["val"];
+		val(0) = res["val"];
 	} catch (...) {
 		val = Rcpp::ComplexVector(1);
 		val(0).r = NA_REAL;
 		val(0).i = NA_REAL;
 	}
 
-	return (a - 2.) / (n * (p_gamma + a - 2.)) * val(0).r;
+	auto result = (a - 2.) / (n * (p_gamma + a - 2.)) * val(0).r;
+	#ifdef DEBUG
+	Rcpp::Rcout << "liang_g_n_appell(" << n << ", " << p << ", " << R2 << ", " << p_gamma << ") = " << result << std::endl;
+	#endif
+	return result;
 }
 
 
@@ -194,31 +198,51 @@ double liang_g_n_quad(const int n, const int p, double R2, int p_gamma)
 	VectorXd xgrid(NUM_POINTS);
 	VectorXd fgrid(NUM_POINTS);
 	for (int i = 0; i < NUM_POINTS; i++) {
-		double u = static_cast<double>(i / NUM_POINTS);
+		double u = static_cast<double>(i) / static_cast<double>(NUM_POINTS);
 		xgrid(i) = u;
 		fgrid(i) = exp((p_gamma / 2. + a / 2. - 2.) * log(1 - u) + -a/2. * log(1. - u * (1. - 1. / n)) + (-(n-1.)/2.) * log(1 - u*R2));
+		if (i < 10) {
+			#ifdef DEBUG
+			Rcpp::Rcout << "u " << u << " xgrid(" << i << ") " << xgrid(i) << " fgrid(" << i << ") " << fgrid(i) << std::endl;
+			#endif
+		}
 	}
-	return (a - 2.) / (2. * n) * trapint(xgrid, fgrid);
+	auto result = (a - 2.) / (2. * n) * trapint(xgrid, fgrid);
+	#ifdef DEBUG
+	Rcpp::Rcout << "liang_g_n_quad(" << n << ", " << p << ", " << R2 << ", " << p_gamma << ") = " << result << std::endl;
+	#endif
+	return result;
 }
 
 
 // Liang's g/n prior approximation
 double liang_g_n_approx(const int n, const int p, double R2, int p_gamma)
 {
-	#ifdef DEBUG
+	// #ifdef DEBUG
 	Rcpp::Rcout << "n " << n << " p " << p << " R2 " << R2 << " p_gamma " << p_gamma << std::endl;
-	#endif
+	// #endif
+	if (p_gamma == 0)
+		return 0;
+	if (p_gamma == 1 || p_gamma == 2)
+		return liang_g_n_quad(n, p, R2, p_gamma);
 	double a = 3.;
-	double shape1 = 0.5 * (p_gamma + a - 2.);
-	double shape2 = 0.5 * (n - p_gamma - a + 1.);
-	double val = -log(R2);
-	val -= log(1 - R2);
+	double shape1 = 0.5 * (p_gamma - 2.);
+	double shape2 = 0.5 * (n - p_gamma - 1.);
+	Rcpp::Rcout << "shape1 " << shape1 << " shape2 " << shape2 << std::endl;
+	double val = log(a - 2.);
+	Rcpp::Rcout << "val 1 " << val << std::endl;
+	val += log(2.) - log(n) - log(R2) - log(1. - R2);
+	Rcpp::Rcout << "val 2 " << val << std::endl;
 	val += ::Rf_pbeta(R2, shape1, shape2, true, true);
+	Rcpp::Rcout << "val 3 " << val << std::endl;
 	val -= ::Rf_dbeta(R2, shape1, shape2, true);
+	Rcpp::Rcout << "val 4 " << val << std::endl;
 	if (R2 == 0.)
 		val = 0.;
-	double log_y = log(a - 2.) - log(2.) + val;
-	return log_y;
+	// #ifdef DEBUG
+	Rcpp::Rcout << "liang_g_n_approx(" << n << ", " << p << ", " << R2 << ", " << p_gamma << ") = " << val << std::endl;
+	// #endif
+	return val;
 }
 
 
