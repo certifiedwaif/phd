@@ -1,3 +1,4 @@
+\chapter{Zero-inflated models formula sheet}
 \section{Univariate model} 
 
 \subsection{Model}
@@ -20,7 +21,7 @@
 We are now in a position to calculate the mean field update equations for the factorised
 variational approximation for the univariate zero-inflated model.
 
-First, we find the approximation for $\lambda$. Assuming that $q(r_i) \sim \Bernoulli{(p_i)}$,
+First, we find the approximation for $\lambda$. Assuming that $q(r_i) \sim \text{Bernoulli}{(p_i)}$,
 % Mean field update for q(\lambda)
 \[
 \begin{array}{rl}
@@ -36,7 +37,7 @@ First, we find the approximation for $\lambda$. Assuming that $q(r_i) \sim \Bern
 	  &                                                                    
 	\propto \lambda^{\alpha_\lambda+\vone^T\vy - 1} \exp{\left \{-(\beta_\lambda + \vone^T\vp)\lambda \right \} } 
 	\\
-	  & = \myGamma{(\alpha_\lambda+\vone^T\vy, \beta_\lambda+\vone^T\vp)}, 
+	  & = \text{Gamma}{(\alpha_\lambda+\vone^T\vy, \beta_\lambda+\vone^T\vp)}, 
 \end{array}
 \]
 
@@ -137,7 +138,7 @@ $$
 	q(\rho) &\sim \text{Beta}(\alpha_{q(\rho)}, \beta_{q(\rho)}) \text{ and } \\
 	q(r_i) &= 1 \text{ if } y_i \ne 0,\text{ and } p_i \text{ if } y_i = 0,
 \end{align*}
-where $p_i$ is calculated for each iteration as specified in Algorithm \ref{algorithm1}.
+where $p_i$ is calculated for each iteration as specified in Algorithm \ref{alg:algorithm_one}.
 
 The lower bound can be calculated directly to be
 \[
@@ -217,7 +218,7 @@ where
 \[
 	\begin{array}{rl}
 		  & \E_{-q(\vr)} [\vy^\top\mR(C\vnu) - \vr^\top\exp{(\mC\vnu)}- \frac{1}{2} \vnu^\top \text{diag}(\sigma_{\vu}^2)^{-1} \vnu]                                                 \\
-		= & \vy^\top\mR\mC \vmu - \vp^\top \exp{\{\mC \vmu +  \frac{1}{2} \text{diag}(\mC \mLambda \mC^\top)\}} -  \frac{1}{2} \vmu^\top \hat{\mD} \vmu - \half \text{tr}(\mLambda \hat{\mD} )) 
+		= & \vy^\top\mR\mC \vmu - \vp^\top \exp{\{\mC \vmu +  \frac{1}{2} \text{diag}(\mC \mLambda \mC^\top)\}} -  \frac{1}{2} \vmu^\top \hat{\mD} \vmu - \frac{1}{2} \text{tr}(\mLambda \hat{\mD} )) 
 	\end{array}
 \]
 
