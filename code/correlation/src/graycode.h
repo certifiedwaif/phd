@@ -31,7 +31,7 @@ struct Graycode {
 	uint gray_to_binary(const uint num) const;
 	VectorXd binary_to_vec(const uint num);
 	VectorXd gray_vec(const uint i);
-	MatrixXi to_MatrixXi();
+	MatrixXi to_MatrixXi() const;
 	dbitset operator[](const uint idx) const;
 	void change(const dbitset& gamma_prime, const dbitset& gamma,
 						 	bool& update, uint& diff_idx, uint& min_idx,

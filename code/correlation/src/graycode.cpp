@@ -48,7 +48,7 @@ VectorXd Graycode::gray_vec(uint i)
 }
 
 
-MatrixXi Graycode::to_MatrixXi()
+MatrixXi Graycode::to_MatrixXi() const
 {
 	uint rows = 1 << varying;
 	MatrixXi result(rows, size);
