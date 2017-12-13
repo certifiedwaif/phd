@@ -159,7 +159,9 @@ double liang_g_n_appell(const int n, const int p, double R2, int p_gamma)
 																Rcpp::_["b2"] = (n - 1.)/2., 
 																Rcpp::_["c"] = (p_gamma + a) / 2., 
 																Rcpp::_["x"] = 1. - 1. / n,
-																Rcpp::_["y"] = R2);
+																Rcpp::_["y"] = R2,
+																Rcpp::_["userflag"] = 1,
+																Rcpp::_["hyp2f1"] = "michel.stoitsov");
 		val(0) = res["val"];
 	} catch (...) {
 		val = Rcpp::ComplexVector(1);
@@ -167,7 +169,7 @@ double liang_g_n_appell(const int n, const int p, double R2, int p_gamma)
 		val(0).i = NA_REAL;
 	}
 
-	auto result = (a - 2.) / (n * (p_gamma + a - 2.)) * val(0).r;
+	auto result = log(a - 2.) - log(n) - log(p_gamma + a - 2.) + log(val(0).r);
 	#ifdef DEBUG
 	Rcpp::Rcout << "liang_g_n_appell(" << n << ", " << p << ", " << R2 << ", " << p_gamma << ") = " << result << std::endl;
 	#endif
@@ -207,7 +209,7 @@ double liang_g_n_quad(const int n, const int p, double R2, int p_gamma)
 			#endif
 		}
 	}
-	auto result = (a - 2.) / (2. * n) * trapint(xgrid, fgrid);
+	auto result = log(a - 2.) - log(2. * n) + log(trapint(xgrid, fgrid));
 	#ifdef DEBUG
 	Rcpp::Rcout << "liang_g_n_quad(" << n << ", " << p << ", " << R2 << ", " << p_gamma << ") = " << result << std::endl;
 	#endif
@@ -219,30 +221,26 @@ double liang_g_n_quad(const int n, const int p, double R2, int p_gamma)
 double liang_g_n_approx(const int n, const int p, double R2, int p_gamma)
 {
 	// #ifdef DEBUG
-	Rcpp::Rcout << "n " << n << " p " << p << " R2 " << R2 << " p_gamma " << p_gamma << std::endl;
+	// Rcpp::Rcout << "n " << n << " p " << p << " R2 " << R2 << " p_gamma " << p_gamma << std::endl;
 	// #endif
 	if (p_gamma == 0)
-		return 0;
+		return 0.;
 	if (p_gamma == 1 || p_gamma == 2)
 		return liang_g_n_quad(n, p, R2, p_gamma);
-	double a = 3.;
-	double shape1 = 0.5 * (p_gamma - 2.);
-	double shape2 = 0.5 * (n - p_gamma - 1.);
-	Rcpp::Rcout << "shape1 " << shape1 << " shape2 " << shape2 << std::endl;
-	double val = log(a - 2.);
-	Rcpp::Rcout << "val 1 " << val << std::endl;
-	val += log(2.) - log(n) - log(R2) - log(1. - R2);
-	Rcpp::Rcout << "val 2 " << val << std::endl;
-	val += ::Rf_pbeta(R2, shape1, shape2, true, true);
-	Rcpp::Rcout << "val 3 " << val << std::endl;
-	val -= ::Rf_dbeta(R2, shape1, shape2, true);
-	Rcpp::Rcout << "val 4 " << val << std::endl;
-	if (R2 == 0.)
-		val = 0.;
-	// #ifdef DEBUG
-	Rcpp::Rcout << "liang_g_n_approx(" << n << ", " << p << ", " << R2 << ", " << p_gamma << ") = " << val << std::endl;
-	// #endif
-	return val;
+
+	auto a = 3.;
+	
+	auto shape1 = 0.5*(p_gamma - 1.);
+	auto shape2 = 0.5*(n - p_gamma + 1.);
+
+	auto log_y = log(a - 2) - log(n) - log(R2) - log(1 - R2);
+	log_y = log_y + ::Rf_pbeta(R2,shape1,shape2,true,true);
+  log_y = log_y - ::Rf_dbeta(R2,shape1,shape2,true);
+
+	#ifdef DEBUG
+	Rcpp::Rcout << "liang_g_n_approx(" << n << ", " << p << ", " << R2 << ", " << p_gamma << ") = " << log_y << std::endl;
+	#endif
+	return log_y;
 }
 
 
