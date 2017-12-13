@@ -203,11 +203,6 @@ double liang_g_n_quad(const int n, const int p, double R2, int p_gamma)
 		double u = static_cast<double>(i) / static_cast<double>(NUM_POINTS);
 		xgrid(i) = u;
 		fgrid(i) = exp((p_gamma / 2. + a / 2. - 2.) * log(1 - u) + -a/2. * log(1. - u * (1. - 1. / n)) + (-(n-1.)/2.) * log(1 - u*R2));
-		if (i < 10) {
-			#ifdef DEBUG
-			Rcpp::Rcout << "u " << u << " xgrid(" << i << ") " << xgrid(i) << " fgrid(" << i << ") " << fgrid(i) << std::endl;
-			#endif
-		}
 	}
 	auto result = log(a - 2.) - log(2. * n) + log(trapint(xgrid, fgrid));
 	#ifdef DEBUG
