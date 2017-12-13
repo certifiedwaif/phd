@@ -126,11 +126,11 @@ cat("GVA", Sys.time() - now, "\n")
 
 now <- Sys.time()
 fit3 <- zipvb(mult, method="gva2", verbose=FALSE, glm_init=FALSE)
-cat("GVA2", Sys.time() - now, "\n")
+cat("GVA inv. param", Sys.time() - now, "\n")
 
 now <- Sys.time()
 fit4 <- zipvb(mult, method="gva_nr", verbose=FALSE, glm_init=FALSE)
-cat("GVA_NR", Sys.time() - now, "\n")
+cat("GVA fixed point", Sys.time() - now, "\n")
 
 # Check accuracy
 # save <- TRUE
@@ -258,10 +258,24 @@ apply(mcmc_samples$vbeta, 2, sd)
 apply(mcmc_samples$vu, 2, sd)
 sqrt(diag(fit2$mLambda))
 
+fit1 <- zipvb(mult, method="laplace", verbose=FALSE, glm_init=TRUE)
+cat("Laplace", Sys.time() - now, "\n")
+
+now <- Sys.time()
 var_accuracy1 <- calculate_accuracies("application_owls", mult, mcmc_samples, fit1, "laplace", plot_flag=TRUE)
+cat("Laplace", Sys.time() - now, "\n")
+
+now <- Sys.time()
 var_accuracy2 <- calculate_accuracies("application_owls", mult, mcmc_samples, fit2, "GVA", plot_flag=TRUE)
+cat("GVA", Sys.time() - now, "\n")
+
+now <- Sys.time()
 var_accuracy3 <- calculate_accuracies("application_owls", mult, mcmc_samples, fit3, "GVA inv param", plot_flag=TRUE)
+cat("GVA inv param", Sys.time() - now, "\n")
+
+now <- Sys.time()
 var_accuracy4 <- calculate_accuracies("application_owls", mult, mcmc_samples, fit4, "GVA fixed point", plot_flag=TRUE)
+cat("GVA fixed point", Sys.time() - now, "\n")
 
 # Biochemists ----
 library(zipvb)
@@ -278,10 +292,23 @@ mX <- matrix_bioChemists[, 1:5]
 mult <- create_mult(vy, mX, mZ, 1e5, mPsi=NULL, m=0, blocksize=1, v=2)
 options(safe_exp=FALSE)
 options(threshold=2)
+
+now <- Sys.time()
 fit1 <- zipvb(mult, method="laplace", verbose=TRUE, glm_init=TRUE)
+cat("Laplace", Sys.time() - now, "\n")
+
+now <- Sys.time()
 fit2 <- zipvb(mult, method="gva", verbose=TRUE, glm_init=TRUE)
+cat("GVA", Sys.time() - now, "\n")
+
+now <- Sys.time()
 fit3 <- zipvb(mult, method="gva2", verbose=TRUE, glm_init=TRUE)
+cat("GVA inv param", Sys.time() - now, "\n")
+
+now <- Sys.time()
 fit4 <- zipvb(mult, method="gva_nr", verbose=TRUE, glm_init=TRUE)
+cat("GVA fixed point", Sys.time() - now, "\n")
+
 save <- FALSE
 if (save) {
   mcmc_result <- mcmc(mult, p=5, iterations=1e6, warmup=1e5, mc.cores = 1,
