@@ -1,3 +1,4 @@
+library(tidyverse)
 library(correlation)
 library(Matrix)
 
@@ -65,125 +66,38 @@ sum(corr_result_robust_bayarri1$vlogp - vlogp_robust_bayarri_1)
 sum(corr_result_robust_bayarri2$vlogp - vlogp_robust_bayarri_2)
 
 # Timings
-timings <- function(vy, mX)
-{
-  
-  
-  a1 <- proc.time()[3]
-  correlation::all_correlations_mX(vy, mX, "maruyama")
-  b1 <- proc.time()[3]
-  t1 <- b1 - a1
-  cat("maruyama", t1, "\n")
-
-  a2 <- proc.time()[3]
-  correlation::all_correlations_mX(vy, mX, "BIC")
-  b2 <- proc.time()[3]
-  t2 <- b2 - a2
-  cat("BIC", t2, "\n")
-  
-  a3 <- proc.time()[3]
-  correlation::all_correlations_mX(vy, mX, "ZE")
-  b3 <- proc.time()[3]
-  t3 <- b3 - a3
-  cat("ZE", t3, "\n")
-  
-  a4 <- proc.time()[3]
-  correlation::all_correlations_mX(vy, mX, "liang_g1")
-  b4 <- proc.time()[3]
-  t4 <- b4 - a4
-  cat("liang_g1", t4, "\n")
-  
-  a5 <- proc.time()[3]
-  correlation::all_correlations_mX(vy, mX, "liang_g2")
-  b5 <- proc.time()[3]
-  t5 <- b5 - a5
-  cat("liang_g2", t5, "\n")
-  
-  a6 <- proc.time()[3]
-  correlation::all_correlations_mX(vy, mX, "liang_g3")
-  b6 <- proc.time()[3]
-  t6 <- b6 - a6
-  cat("liang_g3", t6, "\n")
-  
-  a7 <- proc.time()[3]
-  correlation::all_correlations_mX(vy, mX, "robust_bayarri1")
-  b7 <- proc.time()[3]
-  t7 <- b7 - a7
-  cat("robust_bayarri1", t7, "\n")
-  
-  a8 <- proc.time()[3]
-  correlation::all_correlations_mX(vy, mX, "robust_bayarri2")
-  b8 <- proc.time()[3]
-  t8 <- b8 - a8
-  cat("robust_bayarri2", t8, "\n")
-}
-
-
-timings2 <- function(y, X)
-{
-  # Package, prior
-  packages <- c("BLMA",
-                "BLMA",
-                "BAS",
-                "BAS",
-                "BVS",
-                "BMS",
-                "BLMA",
-                "BLMA",
-                "BAS",
-                "BLMA",
-                "BLMA",
-                "BLMA",
-                "BVS",
-                "BLMA")
-
-  priors <- c("BIC",
-              "ZE",
-              "hyper_g",
-              "hyper_g_laplace",
-              "hyper_g",
-              "g",
-              "liang_g1",
-              "liang_g2",
-              "hyper_g_n",
-              "liang_g3",
-              "quad",
-              "approx",
-              "Robust",
-              "Robust")
-
-  tbl <- tibble(package=packages, prior=priors)
-  tbl$time <- map2_dbl(tbl$package, tbl$prior, function(package, prior.val) {
-    start_time <- proc.time()[3]
-    if (package == "BAS") {
-      library(BAS)
-      bas.lm(y~X, prior=prior.val, model=uniform())
-    }
-    if (package == "BVS") {
-      library(BayesVarSelect)
-      Bvs(formula="y~.", data=data.frame(y=y, X=X), prior.betas=prior.val, prior.models="Constant",
-          time.test=FALSE, n.keep=50000)
-    }
-    if (package == "BMS") {
-      library(BMS)
-      bms(cbind(y, X), nmodel=50000, mcmc="enumerate", g="hyper=3", mprior="uniform")
-    }
-    if (package == "BLMA") {
-      library(correlation)
-      all_correlations_mX(vy, mX, prior.val)
-    }
-    end_time <- proc.time()[3]
-    end_time - start_time
-  })
-  tbl
-}
-
-
 library(MASS)
-dat <- UScrime
-vy <- UScrime$y
-mX <- as.matrix(UScrime[,-16])
-tbl <- timings2(vy, mX)
+
+mD <- UScrime
+notlog <- c(2,ncol(UScrime))
+mD[,-notlog] <- log(mD[,-notlog])
+
+for (j in 1:ncol(mD)) {
+  mD[,j] <- (mD[,j] - mean(mD[,j]))/sd(mD[,j])
+}
+
+varnames <- c(
+  "log(AGE)",
+  "S",
+  "log(ED)",
+  "log(Ex0)",
+  "log(Ex1)",
+  "log(LF)",
+  "log(M)",
+  "log(N)",
+  "log(NW)",
+  "log(U1)",
+  "log(U2)",
+  "log(W)",
+  "log(X)",
+  "log(prison)",
+  "log(time)")
+
+y.t <- mD$y
+X.f <- data.matrix(cbind(mD[1:15]))
+colnames(X.f) <- varnames 
+UScrime_tbl <- correlation::timings(y.t, X.f)
+print(UScrime_tbl)
 
 library(Ecdat)
 
@@ -191,10 +105,12 @@ dat = read.csv("Kakadu.csv")
 vy <- as.vector(dat$income)
 mX <- dat[,c(2:21,23)]  
 mX <- model.matrix(~.,data=mX)[,-1]
-timings(vy, mX)
+kakadu_tbl <- timings(vy, mX)
+print(kakadu_tbl)
 
 dat <- VietNamI
 y.t <- as.vector(dat$lnhhexp)
 X.f <- dat[,-2]  
 X.f <- model.matrix(~.,data=X.f)[,-1]
-timings(vy, mX)
+VietNamI_tbl <- timings(vy, mX)
+print(VietNamI_tbl)
