@@ -567,21 +567,21 @@ List all_correlations_main(const Graycode& graycode, VectorXd vy, MatrixXd mX, s
 		Rcpp::stop(ss.str());
 	}
 
-	// auto M = logp(n, p, R2_full, p_star); // Maximum log-likelihood
-	auto M = 0.;
+	// auto M = 0.;
 	VectorXd vlogp_all(max_iterations);				 // Vector of model likelihoods
 	VectorXd vinclusion_prob(p);							 // Vector of variable inclusion likelihoods
 	for (auto i = 1; i < max_iterations; i++) {
-		vlogp_all(i) = log_prob(n, p, vR2_all(i), vpgamma_all(i)) - M;
+		vlogp_all(i) = log_prob(n, p, vR2_all(i), vpgamma_all(i));
 	}
-	for (auto p_idx = 0; p_idx < p; p_idx++) {
-		vinclusion_prob(p_idx) = 0.;
-		for (auto i = 1; i < max_iterations; i++) {
-			if (graycode[i][p_idx])
-				vinclusion_prob(p_idx) += exp(log_prob(n, p, vR2_all(i), vpgamma_all(i)) - M);
-		}
-	}
-	vinclusion_prob = vinclusion_prob.array() / vinclusion_prob.sum();
+	auto M = vlogp_all.array().maxCoeff(); // Maximum log-likelihood
+	// Rcpp::Rcout << "M " << M << std::endl;
+	VectorXd vmodel_prob = (vlogp_all.array() - M).array().exp() / (vlogp_all.array() - M).array().exp().sum();
+	// If we have memory problems, this can be recoded so that we don't have to construct the entire mGamma
+	// matrix
+	MatrixXd mGamma = graycode.to_MatrixXi().cast<double>();
+	vinclusion_prob = mGamma.transpose() * vmodel_prob;
+	// Rcpp::Rcout << "vmodel_prob " << vmodel_prob << std::endl;
+	// Rcpp::Rcout << "vinclusion_prob " << vinclusion_prob << std::endl;
 
 	if (!bNatural_Order) {
 		return List::create(Named("vR2") = vR2_all,
