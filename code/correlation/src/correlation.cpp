@@ -376,7 +376,7 @@ double logp2(int n, double R2, int p)
 
 
 // Calculate the correlations for every subset of the covariates in mX
-List all_correlations_main(const Graycode& graycode, VectorXd vy, MatrixXd mX, std::string g_prior,
+List all_correlations_main(const Graycode& graycode, VectorXd vy, MatrixXd mX, std::string prior,
 	const uint fixed, const uint intercept_col, const uint max_iterations, const bool bNatural_Order = false,
 	const bool bIntercept = false,
 	const bool bCentre = true)
@@ -541,29 +541,29 @@ List all_correlations_main(const Graycode& graycode, VectorXd vy, MatrixXd mX, s
 	}
 
 	std::function<double (const int n, const int p, double vR2, int vp_gamma)> log_prob;
-	if (g_prior == "maruyama") {
+	if (prior == "maruyama") {
 		log_prob = maruyama;
-	} else if (g_prior == "BIC") {
+	} else if (prior == "BIC") {
 		log_prob = BIC;
-	} else if (g_prior == "ZE") {
+	} else if (prior == "ZE") {
 		log_prob = ZE;
-	} else if (g_prior == "liang_g1") {
+	} else if (prior == "liang_g1") {
 		log_prob = liang_g1;
-	} else if (g_prior == "liang_g2") {
+	} else if (prior == "liang_g2") {
 		log_prob = liang_g2;
-	} else if (g_prior == "liang_g_n_appell") {
+	} else if (prior == "liang_g_n_appell") {
 		log_prob = liang_g_n_appell;
-	} else if (g_prior == "liang_g_n_approx") {
+	} else if (prior == "liang_g_n_approx") {
 		log_prob = liang_g_n_approx;
-	} else if (g_prior == "liang_g_n_quad") {
+	} else if (prior == "liang_g_n_quad") {
 		log_prob = liang_g_n_quad;
-	} else if (g_prior == "robust_bayarri1") {
+	} else if (prior == "robust_bayarri1") {
 		log_prob = robust_bayarri1;
-	} else if (g_prior == "robust_bayarri2") {
+	} else if (prior == "robust_bayarri2") {
 		log_prob = robust_bayarri2;
 	} else {
 		stringstream ss;
-		ss << "Prior " << g_prior << " unknown";
+		ss << "Prior " << prior << " unknown";
 		Rcpp::stop(ss.str());
 	}
 
@@ -606,7 +606,7 @@ List all_correlations_main(const Graycode& graycode, VectorXd vy, MatrixXd mX, s
 }
 
 // [[Rcpp:export]]
-List all_correlations_mX_cpp(VectorXd vy, MatrixXd mX, std::string g_prior, const uint intercept_col,
+List all_correlations_mX_cpp(VectorXd vy, MatrixXd mX, std::string prior, const uint intercept_col,
 const bool bNatural_Order, const bool bIntercept, const bool bCentre)
 {
 	const uint p = mX.cols();
@@ -614,14 +614,14 @@ const bool bNatural_Order, const bool bIntercept, const bool bCentre)
 	const uint max_iterations = 1 << p;
 
 	Graycode graycode(p);
-	return all_correlations_main(graycode, vy, mX, g_prior, fixed, intercept_col, max_iterations, bNatural_Order,
+	return all_correlations_main(graycode, vy, mX, prior, fixed, intercept_col, max_iterations, bNatural_Order,
 																bIntercept, bCentre);
 }
 
 
 // Calculate the correlations for every subset of the covariates in mX
 // [[Rcpp:export]]
-List all_correlations_mX_mZ_cpp(VectorXd vy, MatrixXd mX, MatrixXd mZ, std::string g_prior,
+List all_correlations_mX_mZ_cpp(VectorXd vy, MatrixXd mX, MatrixXd mZ, std::string prior,
 																const uint intercept_col, const bool bNatural_Order, const bool bIntercept,
 																const bool bCentre)
 {
@@ -635,7 +635,7 @@ List all_correlations_mX_mZ_cpp(VectorXd vy, MatrixXd mX, MatrixXd mZ, std::stri
 	mC.leftCols(p1) = mX;
 	mC.rightCols(p2) = mZ;
 	Graycode graycode(p1, p2);
-	return all_correlations_main(graycode, vy, mC, g_prior, p1, intercept_col, max_iterations, bNatural_Order, 
+	return all_correlations_main(graycode, vy, mC, prior, p1, intercept_col, max_iterations, bNatural_Order, 
 																bIntercept, bCentre);
 }
 

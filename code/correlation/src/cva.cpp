@@ -402,16 +402,63 @@ void gamma_to_NumericMatrix(const vector< dbitset >& gamma, NumericMatrix& nm)
 //' @param mX Matrix of covariates
 //' @param K The number of particles in the population
 //' @param lambda The weighting factor for the entropy in f_lambda. Defaults to 1.
-//' @param log_lik The log likelihood function to use in ranking models. One of
-//' 							 "log_prob1" "BIC" "ZE" "3" "4" "5" "6" "7".
+//' @param prior The prior to use. The choices of g-prior available are "maruyama", "BIC", "ZE",
+//' "liang_g1", "liang_g2", "liang_g_n_appell", "liang_g_approx", "liang_g_n_quad",
+//' "robust_bayarri1" and "robust_bayarri2"
 //' @param bUnique Whether to ensure uniqueness in the population of particles or not. Defaults to true.
 //' @return A list containing the named element models, which is a K by p matrix of the models
 //'					selected by the algorithm, and the named element trajectory, which includes a list
 //'					of the populations of models for each iteration of the algorithm until it converged
+//' @examples
+//' library(MASS)
+//'
+//' mD <- UScrime
+//' notlog <- c(2,ncol(UScrime))
+//' mD[,-notlog] <- log(mD[,-notlog])
+//'
+//' for (j in 1:ncol(mD)) {
+//'   mD[,j] <- (mD[,j] - mean(mD[,j]))/sd(mD[,j])
+//' }
+//'
+//' varnames <- c(
+//'   "log(AGE)",
+//'   "S",
+//'   "log(ED)",
+//'   "log(Ex0)",
+//'   "log(Ex1)",
+//'   "log(LF)",
+//'   "log(M)",
+//'   "log(N)",
+//'   "log(NW)",
+//'   "log(U1)",
+//'   "log(U2)",
+//'   "log(W)",
+//'   "log(X)",
+//'   "log(prison)",
+//'   "log(time)")
+//'
+//' y.t <- mD$y
+//' X.f <- data.matrix(cbind(mD[1:15]))
+//' colnames(X.f) <- varnames 
+//' K <- 100
+//' p <- ncol(X.f)
+//' initial_gamma <- matrix(rbinom(K * p, 1, .5), K, p)
+//' cva_result <- cva(initial_gamma, y.t, X.f, K, lambda = 1.0, prior = "maruyama")
+//' > str(cva_result)
+//' List of 3
+//'  $ models          : num [1:100, 1:15] 1 0 0 0 0 0 0 0 0 1 ...
+//'  $ trajectory      :List of 6
+//'   ..$ : num [1:100, 1:15] 1 0 1 1 0 1 1 0 0 1 ...
+//'   ..$ : num [1:100, 1:15] 1 0 0 0 1 1 0 0 0 0 ...
+//'   ..$ : num [1:100, 1:15] 1 0 0 0 0 0 0 0 0 1 ...
+//'   ..$ : num [1:100, 1:15] 1 0 0 0 0 0 0 0 0 1 ...
+//'   ..$ : num [1:100, 1:15] 1 0 0 0 0 0 0 0 0 1 ...
+//'   ..$ : num [1:100, 1:15] 1 0 0 0 0 0 0 0 0 1 ...
+//'  $ trajectory_probs: num [1:100, 1:6] 4.20e-07 1.74e-06 4.77e-12 2.80e-13 1.02e-05 ...
 //' @export
 // [[Rcpp::export]]
 List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, const int K,
-				 const double lambda = 1., std::string log_lik = "maruyama", const bool bUnique = true)
+				 const double lambda = 1., std::string prior = "maruyama", const bool bUnique = true)
 {
 	VectorXd vy(vy_in.length());   // = Rcpp::as<Eigen::Map<Eigen::VectorXd>>(vy_in);
 	for (auto i = 0; i < vy_in.length(); i++) vy[i] = vy_in[i];
@@ -439,29 +486,29 @@ List cva(NumericMatrix gamma_initial, NumericVector vy_in, NumericMatrix mX_in, 
 	const auto EPSILON = 1e-8;
 
 	std::function<double (const int n, const int p, double vR2, int vp_gamma)> log_prob;
-	if (log_lik == "maruyama") {
+	if (prior == "maruyama") {
 		log_prob = maruyama;
-	} else if (log_lik == "BIC") {
+	} else if (prior == "BIC") {
 		log_prob = BIC;
-	} else if (log_lik == "ZE") {
+	} else if (prior == "ZE") {
 		log_prob = ZE;
-	} else if (log_lik == "liang_g1") {
+	} else if (prior == "liang_g1") {
 		log_prob = liang_g1;
-	} else if (log_lik == "liang_g2") {
+	} else if (prior == "liang_g2") {
 		log_prob = liang_g2;
-	} else if (log_lik == "liang_g_n_appell") {
+	} else if (prior == "liang_g_n_appell") {
 		log_prob = liang_g_n_appell;
-	} else if (log_lik == "liang_g_n_approx") {
+	} else if (prior == "liang_g_n_approx") {
 		log_prob = liang_g_n_approx;
-	} else if (log_lik == "liang_g_n_quad") {
+	} else if (prior == "liang_g_n_quad") {
 		log_prob = liang_g_n_quad;
-	} else if (log_lik == "robust_bayarri1") {
+	} else if (prior == "robust_bayarri1") {
 		log_prob = robust_bayarri1;
-	} else if (log_lik == "robust_bayarri2") {
+	} else if (prior == "robust_bayarri2") {
 		log_prob = robust_bayarri2;
 	} else {
 		stringstream ss;
-		ss << "Prior " << log_lik << " unknown";
+		ss << "Prior " << prior << " unknown";
 		Rcpp::stop(ss.str());
 	}
 	// Initialise population of K particles randomly
