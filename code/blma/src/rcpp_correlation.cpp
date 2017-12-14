@@ -12,13 +12,13 @@ using namespace Rcpp;
 using namespace std;
 
 //' @importFrom Rcpp evalCpp
-//' @useDynLib correlation
+//' @useDynLib blma
 
 //' Perform Bayesian Linear Model Averaging over all of the possible linear models where vy is the response
 //' and the covariates are in mX.
 //' @param vy Vector of responses
 //' @param mX Covariate matrix
-//' @param prior The g-prior to use. The choices of g-prior available are "maruyama", "BIC", "ZE",
+//' @param prior The prior to use. The choices of prior available are "maruyama", "BIC", "ZE",
 //' "liang_g1", "liang_g2", "liang_g_n_appell", "liang_g_approx", "liang_g_n_quad",
 //' "robust_bayarri1" and "robust_bayarri2"
 //' @param intercept_col The index of the column in mX containing the intercept, if any
@@ -90,7 +90,7 @@ List blma(NumericVector vy, NumericMatrix mX, std::string prior, int intercept_c
 //' @param vy Vector of responses
 //' @param mX Fixed covariate matrix
 //' @param mZ Varying covariate matrix
-//' @param prior The g-prior to use. The choices of g-prior available are "maruyama", "BIC", "ZE",
+//' @param prior The prior to use. The choices of prior available are "maruyama", "BIC", "ZE",
 //' "liang_g1", "liang_g2", "liang_g_n_appell", "liang_g_approx", "liang_g_n_quad",
 //' "robust_bayarri1" and "robust_bayarri2"
 //' @param intercept_col The index of the column in mX containing the intercept, if any

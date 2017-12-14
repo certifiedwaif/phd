@@ -14,7 +14,7 @@ cva(gamma_initial, vy_in, mX_in, K, lambda = 1, prior = "maruyama",
 
 \item{lambda}{The weighting factor for the entropy in f_lambda. Defaults to 1.}
 
-\item{prior}{The prior to use. The choices of g-prior available are "maruyama", "BIC", "ZE",
+\item{prior}{The prior to use. The choices of prior available are "maruyama", "BIC", "ZE",
 "liang_g1", "liang_g2", "liang_g_n_appell", "liang_g_approx", "liang_g_n_quad",
 "robust_bayarri1" and "robust_bayarri2"}
 

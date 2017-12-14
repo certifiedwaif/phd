@@ -402,7 +402,7 @@ void gamma_to_NumericMatrix(const vector< dbitset >& gamma, NumericMatrix& nm)
 //' @param mX Matrix of covariates
 //' @param K The number of particles in the population
 //' @param lambda The weighting factor for the entropy in f_lambda. Defaults to 1.
-//' @param prior The prior to use. The choices of g-prior available are "maruyama", "BIC", "ZE",
+//' @param prior The prior to use. The choices of prior available are "maruyama", "BIC", "ZE",
 //' "liang_g1", "liang_g2", "liang_g_n_appell", "liang_g_approx", "liang_g_n_quad",
 //' "robust_bayarri1" and "robust_bayarri2"
 //' @param bUnique Whether to ensure uniqueness in the population of particles or not. Defaults to true.

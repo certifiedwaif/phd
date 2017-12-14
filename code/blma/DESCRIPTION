@@ -1,4 +1,4 @@
-Package: correlation
+Package: blma
 Type: Package
 Title: Calculate correlations of a lot of linear models.
 Version: 0.1

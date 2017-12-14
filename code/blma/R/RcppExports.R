@@ -8,7 +8,7 @@
 #' @param mX Matrix of covariates
 #' @param K The number of particles in the population
 #' @param lambda The weighting factor for the entropy in f_lambda. Defaults to 1.
-#' @param prior The prior to use. The choices of g-prior available are "maruyama", "BIC", "ZE",
+#' @param prior The prior to use. The choices of prior available are "maruyama", "BIC", "ZE",
 #' "liang_g1", "liang_g2", "liang_g_n_appell", "liang_g_approx", "liang_g_n_quad",
 #' "robust_bayarri1" and "robust_bayarri2"
 #' @param bUnique Whether to ensure uniqueness in the population of particles or not. Defaults to true.
@@ -63,18 +63,18 @@
 #'  $ trajectory_probs: num [1:100, 1:6] 4.20e-07 1.74e-06 4.77e-12 2.80e-13 1.02e-05 ...
 #' @export
 cva <- function(gamma_initial, vy_in, mX_in, K, lambda = 1., prior = "maruyama", bUnique = TRUE) {
-    .Call('_correlation_cva', PACKAGE = 'correlation', gamma_initial, vy_in, mX_in, K, lambda, prior, bUnique)
+    .Call('_blma_cva', PACKAGE = 'blma', gamma_initial, vy_in, mX_in, K, lambda, prior, bUnique)
 }
 
 #' @importFrom Rcpp evalCpp
-#' @useDynLib correlation
+#' @useDynLib blma
 NULL
 
 #' Perform Bayesian Linear Model Averaging over all of the possible linear models where vy is the response
 #' and the covariates are in mX.
 #' @param vy Vector of responses
 #' @param mX Covariate matrix
-#' @param prior The g-prior to use. The choices of g-prior available are "maruyama", "BIC", "ZE",
+#' @param prior The prior to use. The choices of prior available are "maruyama", "BIC", "ZE",
 #' "liang_g1", "liang_g2", "liang_g_n_appell", "liang_g_approx", "liang_g_n_quad",
 #' "robust_bayarri1" and "robust_bayarri2"
 #' @param intercept_col The index of the column in mX containing the intercept, if any
@@ -127,7 +127,7 @@ NULL
 #'  $ vinclusion_prob: num [1:15] 0.284 0.054 0.525 0.679 0.344 ...
 #' @export
 blma <- function(vy, mX, prior, intercept_col = 1L, bNatural_Order = FALSE, bIntercept = FALSE, bCentre = FALSE, cores = 1L) {
-    .Call('_correlation_blma', PACKAGE = 'correlation', vy, mX, prior, intercept_col, bNatural_Order, bIntercept, bCentre, cores)
+    .Call('_blma_blma', PACKAGE = 'blma', vy, mX, prior, intercept_col, bNatural_Order, bIntercept, bCentre, cores)
 }
 
 #' Perform Bayesian Linear Model Averaging over all of the possible linear models where vy is the response,
@@ -136,7 +136,7 @@ blma <- function(vy, mX, prior, intercept_col = 1L, bNatural_Order = FALSE, bInt
 #' @param vy Vector of responses
 #' @param mX Fixed covariate matrix
 #' @param mZ Varying covariate matrix
-#' @param prior The g-prior to use. The choices of g-prior available are "maruyama", "BIC", "ZE",
+#' @param prior The prior to use. The choices of prior available are "maruyama", "BIC", "ZE",
 #' "liang_g1", "liang_g2", "liang_g_n_appell", "liang_g_approx", "liang_g_n_quad",
 #' "robust_bayarri1" and "robust_bayarri2"
 #' @param intercept_col The index of the column in mX containing the intercept, if any
@@ -191,7 +191,7 @@ blma <- function(vy, mX, prior, intercept_col = 1L, bNatural_Order = FALSE, bInt
 #' 
 #' @export
 blma_fixed <- function(vy, mX, mZ, prior, intercept_col = 1L, bNatural_Order = FALSE, bIntercept = FALSE, bCentre = FALSE, cores = 1L) {
-    .Call('_correlation_blma_fixed', PACKAGE = 'correlation', vy, mX, mZ, prior, intercept_col, bNatural_Order, bIntercept, bCentre, cores)
+    .Call('_blma_blma_fixed', PACKAGE = 'blma', vy, mX, mZ, prior, intercept_col, bNatural_Order, bIntercept, bCentre, cores)
 }
 
 #' Return the graycode matrix
@@ -203,6 +203,6 @@ blma_fixed <- function(vy, mX, mZ, prior, intercept_col = 1L, bNatural_Order = F
 #' set of covariates is included or not.
 #' @export
 graycode <- function(varying, fixed = 0L) {
-    .Call('_correlation_graycode', PACKAGE = 'correlation', varying, fixed)
+    .Call('_blma_graycode', PACKAGE = 'blma', varying, fixed)
 }
 
