@@ -606,8 +606,8 @@ List all_correlations_main(const Graycode& graycode, VectorXd vy, MatrixXd mX, s
 }
 
 // [[Rcpp:export]]
-List all_correlations_mX_cpp(VectorXd vy, MatrixXd mX, std::string prior, const uint intercept_col,
-const bool bNatural_Order, const bool bIntercept, const bool bCentre)
+List blma_cpp(VectorXd vy, MatrixXd mX, std::string prior, const uint intercept_col,
+							const bool bNatural_Order, const bool bIntercept, const bool bCentre)
 {
 	const uint p = mX.cols();
 	const uint fixed = 0;
@@ -621,9 +621,9 @@ const bool bNatural_Order, const bool bIntercept, const bool bCentre)
 
 // Calculate the correlations for every subset of the covariates in mX
 // [[Rcpp:export]]
-List all_correlations_mX_mZ_cpp(VectorXd vy, MatrixXd mX, MatrixXd mZ, std::string prior,
-																const uint intercept_col, const bool bNatural_Order, const bool bIntercept,
-																const bool bCentre)
+List blma_fixed_cpp(VectorXd vy, MatrixXd mX, MatrixXd mZ, std::string prior,
+										const uint intercept_col, const bool bNatural_Order, const bool bIntercept,
+										const bool bCentre)
 {
 	const uint n = mX.rows();
 	const uint p1 = mX.cols();

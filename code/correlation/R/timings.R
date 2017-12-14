@@ -64,8 +64,8 @@ timings <- function(y, X)
     if (package == "BLMA") {
       library(correlation)
       library(appell)
-      corr_result <- all_correlations_mX(y, X, prior.val)
-      vinclusion_prob <- corr_result$vinclusion_prob
+      blma_result <- blma(y, X, prior.val)
+      vinclusion_prob <- blma_result$vinclusion_prob
     }
     end_time <- proc.time()[3]
     time <- end_time - start_time

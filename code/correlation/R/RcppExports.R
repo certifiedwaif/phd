@@ -8,27 +8,75 @@
 #' @param mX Matrix of covariates
 #' @param K The number of particles in the population
 #' @param lambda The weighting factor for the entropy in f_lambda. Defaults to 1.
-#' @param log_lik The log likelihood function to use in ranking models. One of
-#' 							 "log_prob1" "BIC" "ZE" "3" "4" "5" "6" "7".
+#' @param prior The prior to use. The choices of g-prior available are "maruyama", "BIC", "ZE",
+#' "liang_g1", "liang_g2", "liang_g_n_appell", "liang_g_approx", "liang_g_n_quad",
+#' "robust_bayarri1" and "robust_bayarri2"
 #' @param bUnique Whether to ensure uniqueness in the population of particles or not. Defaults to true.
 #' @return A list containing the named element models, which is a K by p matrix of the models
 #'					selected by the algorithm, and the named element trajectory, which includes a list
 #'					of the populations of models for each iteration of the algorithm until it converged
+#' @examples
+#' library(MASS)
+#'
+#' mD <- UScrime
+#' notlog <- c(2,ncol(UScrime))
+#' mD[,-notlog] <- log(mD[,-notlog])
+#'
+#' for (j in 1:ncol(mD)) {
+#'   mD[,j] <- (mD[,j] - mean(mD[,j]))/sd(mD[,j])
+#' }
+#'
+#' varnames <- c(
+#'   "log(AGE)",
+#'   "S",
+#'   "log(ED)",
+#'   "log(Ex0)",
+#'   "log(Ex1)",
+#'   "log(LF)",
+#'   "log(M)",
+#'   "log(N)",
+#'   "log(NW)",
+#'   "log(U1)",
+#'   "log(U2)",
+#'   "log(W)",
+#'   "log(X)",
+#'   "log(prison)",
+#'   "log(time)")
+#'
+#' y.t <- mD$y
+#' X.f <- data.matrix(cbind(mD[1:15]))
+#' colnames(X.f) <- varnames 
+#' K <- 100
+#' p <- ncol(X.f)
+#' initial_gamma <- matrix(rbinom(K * p, 1, .5), K, p)
+#' cva_result <- cva(initial_gamma, y.t, X.f, K, lambda = 1.0, prior = "maruyama")
+#' > str(cva_result)
+#' List of 3
+#'  $ models          : num [1:100, 1:15] 1 0 0 0 0 0 0 0 0 1 ...
+#'  $ trajectory      :List of 6
+#'   ..$ : num [1:100, 1:15] 1 0 1 1 0 1 1 0 0 1 ...
+#'   ..$ : num [1:100, 1:15] 1 0 0 0 1 1 0 0 0 0 ...
+#'   ..$ : num [1:100, 1:15] 1 0 0 0 0 0 0 0 0 1 ...
+#'   ..$ : num [1:100, 1:15] 1 0 0 0 0 0 0 0 0 1 ...
+#'   ..$ : num [1:100, 1:15] 1 0 0 0 0 0 0 0 0 1 ...
+#'   ..$ : num [1:100, 1:15] 1 0 0 0 0 0 0 0 0 1 ...
+#'  $ trajectory_probs: num [1:100, 1:6] 4.20e-07 1.74e-06 4.77e-12 2.80e-13 1.02e-05 ...
 #' @export
-cva <- function(gamma_initial, vy_in, mX_in, K, lambda = 1., log_lik = "maruyama", bUnique = TRUE) {
-    .Call('_correlation_cva', PACKAGE = 'correlation', gamma_initial, vy_in, mX_in, K, lambda, log_lik, bUnique)
+cva <- function(gamma_initial, vy_in, mX_in, K, lambda = 1., prior = "maruyama", bUnique = TRUE) {
+    .Call('_correlation_cva', PACKAGE = 'correlation', gamma_initial, vy_in, mX_in, K, lambda, prior, bUnique)
 }
 
 #' @importFrom Rcpp evalCpp
 #' @useDynLib correlation
 NULL
 
-#' Calculate the correlation of all the sub-models of mX and vy
-#'
+#' Perform Bayesian Linear Model Averaging over all of the possible linear models where vy is the response
+#' and the covariates are in mX.
 #' @param vy Vector of responses
 #' @param mX Covariate matrix
-#' @param g_prior The g-prior to use. The choices of g-prior available are "maruyama", "BIC", "ZE",
-#' "liang_g1", "liang_g2", "liang_g3", "robust_bayarri1" and "robust_bayarri2"
+#' @param prior The g-prior to use. The choices of g-prior available are "maruyama", "BIC", "ZE",
+#' "liang_g1", "liang_g2", "liang_g_n_appell", "liang_g_approx", "liang_g_n_quad",
+#' "robust_bayarri1" and "robust_bayarri2"
 #' @param intercept_col The index of the column in mX containing the intercept, if any
 #' @param bNatural_Order Whether to return the results in natural order or graycode order. Defaults to graycode order.
 #' @param bIntercept Logical value indicating whether there is an intercept column or not
@@ -39,18 +87,58 @@ NULL
 #' vp_gamma, the vector of number of covariates for each model
 #' vlogp, the vector of logs of the likelihoods of each model
 #' vinclusion_prob, the vector of inclusion probabilities for each of the covariates
+#' @examples
+#' library(MASS)
+#'
+#' mD <- UScrime
+#' notlog <- c(2,ncol(UScrime))
+#' mD[,-notlog] <- log(mD[,-notlog])
+#'
+#' for (j in 1:ncol(mD)) {
+#'   mD[,j] <- (mD[,j] - mean(mD[,j]))/sd(mD[,j])
+#' }
+#'
+#' varnames <- c(
+#'   "log(AGE)",
+#'   "S",
+#'   "log(ED)",
+#'   "log(Ex0)",
+#'   "log(Ex1)",
+#'   "log(LF)",
+#'   "log(M)",
+#'   "log(N)",
+#'   "log(NW)",
+#'   "log(U1)",
+#'   "log(U2)",
+#'   "log(W)",
+#'   "log(X)",
+#'   "log(prison)",
+#'   "log(time)")
+#'
+#' y.t <- mD$y
+#' X.f <- data.matrix(cbind(mD[1:15]))
+#' colnames(X.f) <- varnames 
+#' blma_result <- blma(y.t, X.f, "maruyama")
+#' > str(blma_result)
+#' List of 4
+#'  $ vR2            : num [1:32768] 0 0.00759 0.01 0.00822 0.13921 ...
+#'  $ vp_gamma       : int [1:32768] 0 1 2 1 2 3 2 1 2 3 ...
+#'  $ vlogp          : num [1:32768] 6.92e-310 -8.51 -1.30e+01 -8.50 -9.74 ...
+#'  $ vinclusion_prob: num [1:15] 0.284 0.054 0.525 0.679 0.344 ...
 #' @export
-all_correlations_mX <- function(vy, mX, g_prior, intercept_col = 1L, bNatural_Order = FALSE, bIntercept = FALSE, bCentre = FALSE, cores = 1L) {
-    .Call('_correlation_all_correlations_mX', PACKAGE = 'correlation', vy, mX, g_prior, intercept_col, bNatural_Order, bIntercept, bCentre, cores)
+blma <- function(vy, mX, prior, intercept_col = 1L, bNatural_Order = FALSE, bIntercept = FALSE, bCentre = FALSE, cores = 1L) {
+    .Call('_correlation_blma', PACKAGE = 'correlation', vy, mX, prior, intercept_col, bNatural_Order, bIntercept, bCentre, cores)
 }
 
-#' Calculate the correlation of all the sub-models mX/mZ and vy, where mX is fixed in every model and the sub-models of mZ are included
+#' Perform Bayesian Linear Model Averaging over all of the possible linear models where vy is the response,
+#' covariates that may be included are in mZ and covariates which are always included are in mX.
 #'
 #' @param vy Vector of responses
 #' @param mX Fixed covariate matrix
 #' @param mZ Varying covariate matrix
-#' @param g_prior The g-prior to use. The choices of g-prior available are "maruyama", "BIC", "ZE",
-#' "liang_g1", "liang_g2", "liang_g3", "robust_bayarri1" and "robust_bayarri2"
+#' @param prior The g-prior to use. The choices of g-prior available are "maruyama", "BIC", "ZE",
+#' "liang_g1", "liang_g2", "liang_g_n_appell", "liang_g_approx", "liang_g_n_quad",
+#' "robust_bayarri1" and "robust_bayarri2"
 #' @param intercept_col The index of the column in mX containing the intercept, if any
 #' @param bNatural_Order Whether to return the results in natural order or graycode order. Defaults to graycode order.
 #' @param bIntercept Logical value indicating whether there is an intercept column or not
@@ -61,9 +149,49 @@ all_correlations_mX <- function(vy, mX, g_prior, intercept_col = 1L, bNatural_Or
 #' vp_gamma, the vector of number of covariates for each model
 #' vlogp, the vector of logs of the likelihoods of each model
 #' vinclusion_prob, the vector of inclusion probabilities for each of the covariates
+#' @examples
+#' library(MASS)
+#'
+#' mD <- UScrime
+#' notlog <- c(2,ncol(UScrime))
+#' mD[,-notlog] <- log(mD[,-notlog])
+#'
+#' for (j in 1:ncol(mD)) {
+#'   mD[,j] <- (mD[,j] - mean(mD[,j]))/sd(mD[,j])
+#' }
+#'
+#' varnames <- c(
+#'   "log(AGE)",
+#'   "S",
+#'   "log(ED)",
+#'   "log(Ex0)",
+#'   "log(Ex1)",
+#'   "log(LF)",
+#'   "log(M)",
+#'   "log(N)",
+#'   "log(NW)",
+#'   "log(U1)",
+#'   "log(U2)",
+#'   "log(W)",
+#'   "log(X)",
+#'   "log(prison)",
+#'   "log(time)")
+#'
+#' y.t <- mD$y
+#' X.f <- data.matrix(cbind(mD[, 1:10]))
+#' colnames(X.f) <- varnames 
+#' Z.f <- data.matrix(cbind(mD[, 11:15]))
+#' blma_result <- blma_fixed(y.t, X.f, Z.f, "maruyama")
+#' > str(blma_result)
+#' List of 4
+#'  $ vR2            : num [1:32] 0 0.719 0.724 0.688 0.771 ...
+#'  $ vp_gamma       : int [1:32] 0 11 12 11 12 13 12 11 12 13 ...
+#'  $ vlogp          : num [1:32] 9.56e-316 -1.21e+01 -1.40e+01 -1.46e+01 -9.60 ...
+#'  $ vinclusion_prob: num [1:15] 1 1 1 1 1 1 1 1 1 1 ...
+#' 
 #' @export
-all_correlations_mX_mZ <- function(vy, mX, mZ, g_prior, intercept_col = 1L, bNatural_Order = FALSE, bIntercept = FALSE, bCentre = FALSE, cores = 1L) {
-    .Call('_correlation_all_correlations_mX_mZ', PACKAGE = 'correlation', vy, mX, mZ, g_prior, intercept_col, bNatural_Order, bIntercept, bCentre, cores)
+blma_fixed <- function(vy, mX, mZ, prior, intercept_col = 1L, bNatural_Order = FALSE, bIntercept = FALSE, bCentre = FALSE, cores = 1L) {
+    .Call('_correlation_blma_fixed', PACKAGE = 'correlation', vy, mX, mZ, prior, intercept_col, bNatural_Order, bIntercept, bCentre, cores)
 }
 
 #' Return the graycode matrix

@@ -20,10 +20,10 @@ using Eigen::MatrixBase;
 using std::string;
 
 MatrixXd parseCSVfile_double(string infilename);
-List all_correlations_mX_mZ_cpp(VectorXd vy, MatrixXd mX, MatrixXd mZ, std::string log_lik, const uint intercept_col,
-																		const bool bNatural_Order = false, const bool bIntercept = false, const bool bCentre = true);
-List all_correlations_mX_cpp(VectorXd vy, MatrixXd mX, std::string log_lik, const uint intercept_col,
-																		const bool bNatural_Order = false, const bool bIntercept = false, const bool bCentre = true);
+List blma_fixed_cpp(VectorXd vy, MatrixXd mX, MatrixXd mZ, std::string log_lik, const uint intercept_col,
+										const bool bNatural_Order = false, const bool bIntercept = false, const bool bCentre = true);
+List blma_cpp(VectorXd vy, MatrixXd mX, std::string log_lik, const uint intercept_col,
+							const bool bNatural_Order = false, const bool bIntercept = false, const bool bCentre = true);
 template <typename Derived1, typename Derived2>
 Eigen::MatrixBase<Derived2>& get_cols(const Eigen::MatrixBase<Derived1>& m1, const dbitset& gamma, Eigen::MatrixBase<Derived2>& m2);
 template <typename Derived1, typename Derived2>

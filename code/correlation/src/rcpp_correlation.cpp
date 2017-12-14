@@ -14,8 +14,8 @@ using namespace std;
 //' @importFrom Rcpp evalCpp
 //' @useDynLib correlation
 
-//' Calculate the correlation of all the sub-models of mX and vy
-//'
+//' Perform Bayesian Linear Model Averaging over all of the possible linear models where vy is the response
+//' and the covariates are in mX.
 //' @param vy Vector of responses
 //' @param mX Covariate matrix
 //' @param prior The g-prior to use. The choices of g-prior available are "maruyama", "BIC", "ZE",
@@ -62,8 +62,8 @@ using namespace std;
 //' y.t <- mD$y
 //' X.f <- data.matrix(cbind(mD[1:15]))
 //' colnames(X.f) <- varnames 
-//' corr_result <- all_correlations_mX(y.t, X.f, "maruyama")
-//' > str(corr_result)
+//' blma_result <- blma(y.t, X.f, "maruyama")
+//' > str(blma_result)
 //' List of 4
 //'  $ vR2            : num [1:32768] 0 0.00759 0.01 0.00822 0.13921 ...
 //'  $ vp_gamma       : int [1:32768] 0 1 2 1 2 3 2 1 2 3 ...
@@ -71,20 +71,21 @@ using namespace std;
 //'  $ vinclusion_prob: num [1:15] 0.284 0.054 0.525 0.679 0.344 ...
 //' @export
 // [[Rcpp::export]]
-List all_correlations_mX(NumericVector vy, NumericMatrix mX, std::string prior, int intercept_col = 1,
-													bool bNatural_Order = false, bool bIntercept = false, bool bCentre = false,
-													int cores = 1) {
+List blma(NumericVector vy, NumericMatrix mX, std::string prior, int intercept_col = 1,
+					bool bNatural_Order = false, bool bIntercept = false, bool bCentre = false,
+					int cores = 1) {
 	Map<VectorXd> vy_m = as< Map<VectorXd> >(vy);
 	Map<MatrixXd> mX_m = as< Map<MatrixXd> >(mX);
 	#if defined(_OPENMP)
 		omp_set_num_threads(cores);
 	#endif;
-	List result = all_correlations_mX_cpp(vy_m, mX_m, prior, intercept_col - 1, bNatural_Order, bIntercept,
-								bCentre);
+	List result = blma_cpp(vy_m, mX_m, prior, intercept_col - 1, bNatural_Order, bIntercept,
+													bCentre);
 	return result;
 }
 
-//' Calculate the correlation of all the sub-models mX/mZ and vy, where mX is fixed in every model and the sub-models of mZ are included
+//' Perform Bayesian Linear Model Averaging over all of the possible linear models where vy is the response,
+//' covariates that may be included are in mZ and covariates which are always included are in mX.
 //'
 //' @param vy Vector of responses
 //' @param mX Fixed covariate matrix
@@ -134,8 +135,8 @@ List all_correlations_mX(NumericVector vy, NumericMatrix mX, std::string prior, 
 //' X.f <- data.matrix(cbind(mD[, 1:10]))
 //' colnames(X.f) <- varnames 
 //' Z.f <- data.matrix(cbind(mD[, 11:15]))
-//' corr_result <- all_correlations_mX_mZ(y.t, X.f, Z.f, "maruyama")
-//' > str(corr_result)
+//' blma_result <- blma_fixed(y.t, X.f, Z.f, "maruyama")
+//' > str(blma_result)
 //' List of 4
 //'  $ vR2            : num [1:32] 0 0.719 0.724 0.688 0.771 ...
 //'  $ vp_gamma       : int [1:32] 0 11 12 11 12 13 12 11 12 13 ...
@@ -144,17 +145,17 @@ List all_correlations_mX(NumericVector vy, NumericMatrix mX, std::string prior, 
 //' 
 //' @export
 // [[Rcpp::export]]
-List all_correlations_mX_mZ(NumericVector vy, NumericMatrix mX, NumericMatrix mZ, std::string prior,
-                            int intercept_col = 1,
-                            bool bNatural_Order = false, bool bIntercept = false, bool bCentre = false,
-                            int cores = 1) {
+List blma_fixed(NumericVector vy, NumericMatrix mX, NumericMatrix mZ, std::string prior,
+                int intercept_col = 1,
+                bool bNatural_Order = false, bool bIntercept = false, bool bCentre = false,
+                int cores = 1) {
 	Map<VectorXd> vy_m = as< Map<VectorXd> >(vy);
 	Map<MatrixXd> mX_m = as< Map<MatrixXd> >(mX);
 	Map<MatrixXd> mZ_m = as< Map<MatrixXd> >(mZ);
 	#if defined(_OPENMP)
 		omp_set_num_threads(cores);
 	#endif;
-	List result = all_correlations_mX_mZ_cpp(vy_m, mX_m, mZ_m, prior, intercept_col - 1, bNatural_Order, bIntercept, bCentre);
+	List result = blma_fixed_cpp(vy_m, mX_m, mZ_m, prior, intercept_col - 1, bNatural_Order, bIntercept, bCentre);
 	return result;
 }
 

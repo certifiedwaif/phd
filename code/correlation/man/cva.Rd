@@ -4,7 +4,7 @@
 \alias{cva}
 \title{Run a Collapsed Variational Approximation to find the K best linear models}
 \usage{
-cva(gamma_initial, vy_in, mX_in, K, lambda = 1, log_lik = "maruyama",
+cva(gamma_initial, vy_in, mX_in, K, lambda = 1, prior = "maruyama",
   bUnique = TRUE)
 }
 \arguments{
@@ -14,8 +14,9 @@ cva(gamma_initial, vy_in, mX_in, K, lambda = 1, log_lik = "maruyama",
 
 \item{lambda}{The weighting factor for the entropy in f_lambda. Defaults to 1.}
 
-\item{log_lik}{The log likelihood function to use in ranking models. One of
-"log_prob1" "BIC" "ZE" "3" "4" "5" "6" "7".}
+\item{prior}{The prior to use. The choices of g-prior available are "maruyama", "BIC", "ZE",
+"liang_g1", "liang_g2", "liang_g_n_appell", "liang_g_approx", "liang_g_n_quad",
+"robust_bayarri1" and "robust_bayarri2"}
 
 \item{bUnique}{Whether to ensure uniqueness in the population of particles or not. Defaults to true.}
 
@@ -30,4 +31,51 @@ A list containing the named element models, which is a K by p matrix of the mode
 }
 \description{
 Run a Collapsed Variational Approximation to find the K best linear models
+}
+\examples{
+library(MASS)
+
+mD <- UScrime
+notlog <- c(2,ncol(UScrime))
+mD[,-notlog] <- log(mD[,-notlog])
+
+for (j in 1:ncol(mD)) {
+  mD[,j] <- (mD[,j] - mean(mD[,j]))/sd(mD[,j])
+}
+
+varnames <- c(
+  "log(AGE)",
+  "S",
+  "log(ED)",
+  "log(Ex0)",
+  "log(Ex1)",
+  "log(LF)",
+  "log(M)",
+  "log(N)",
+  "log(NW)",
+  "log(U1)",
+  "log(U2)",
+  "log(W)",
+  "log(X)",
+  "log(prison)",
+  "log(time)")
+
+y.t <- mD$y
+X.f <- data.matrix(cbind(mD[1:15]))
+colnames(X.f) <- varnames 
+K <- 100
+p <- ncol(X.f)
+initial_gamma <- matrix(rbinom(K * p, 1, .5), K, p)
+cva_result <- cva(initial_gamma, y.t, X.f, K, lambda = 1.0, prior = "maruyama")
+> str(cva_result)
+List of 3
+ $ models          : num [1:100, 1:15] 1 0 0 0 0 0 0 0 0 1 ...
+ $ trajectory      :List of 6
+  ..$ : num [1:100, 1:15] 1 0 1 1 0 1 1 0 0 1 ...
+  ..$ : num [1:100, 1:15] 1 0 0 0 1 1 0 0 0 0 ...
+  ..$ : num [1:100, 1:15] 1 0 0 0 0 0 0 0 0 1 ...
+  ..$ : num [1:100, 1:15] 1 0 0 0 0 0 0 0 0 1 ...
+  ..$ : num [1:100, 1:15] 1 0 0 0 0 0 0 0 0 1 ...
+  ..$ : num [1:100, 1:15] 1 0 0 0 0 0 0 0 0 1 ...
+ $ trajectory_probs: num [1:100, 1:6] 4.20e-07 1.74e-06 4.77e-12 2.80e-13 1.02e-05 ...
 }
