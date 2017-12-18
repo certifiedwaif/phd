@@ -1622,30 +1622,21 @@ are explained below.
 		(\ref{eq:yGivenGammaRobust2}).
 	
 	\end{itemize}
-	\item {\tt intercept\_col} --	The index of the column in mX containing the intercept, if any.
-	
-	\item {\tt bNatural\_Order} --
-	Whether to return the results in natural order or Gray code order. 
-	Defaults to Gray code order.
-	
-	\item {\tt bIntercept} -- Logical value indicating whether there is an intercept column or not.
-	
-	\item {\tt bCentre} --	
-	Logical value indicating whether to centre the response vector and covariance matrix or not. Default is {\tt TRUE}.
-	
+
 	\item {\tt cores} -- the number of computer cores to use.
 \end{itemize}
 
 \noindent 
-The object returned is a 
-list containing a {\tt vR2} -- the vector $R$-square values for each model; 
-{\tt vp\_gamma} -- the vector of number of covariates for each model;
-{\tt vlogp} -- the vector of logs of the likelihoods of each model; 
-{\tt vinclusion\_prob} -- the vector of inclusion probabilities for each of the covariates. Note that we do not return the fitted values of 
-$\widehat{\vbeta}_{\vgamma}$ which should only be calculated
-for a subset of models. We also do not return $\mGamma$, the Gray code matrix
-which we provide a separate function to calculate. We made these decisions
-to reduce the memory overhead.
+The object returned is a list containing
+\begin{itemize}
+\item {\tt vR2} -- the vector $R$-square values for each model; 
+\item {\tt vp\_gamma} -- the vector of number of covariates for each model;
+\item {\tt vlogp} -- the vector of logs of the likelihoods of each model; 
+\item {\tt vinclusion\_prob} -- the vector of inclusion probabilities for each of the covariates. Note that we do not return the fitted values of 
+\end{itemize}
+We do not return $\widehat{\vbeta}_{\vgamma}$ which should only be calculated for a subset of models. We also
+do not return $\mGamma$, the Gray code matrix which we provide a separate function to calculate. We made these
+decisions to reduce the memory overhead.
 
 A short example fitting the {\tt USCrime} data described in Section 
 \ref{sec:BLMA} is found below.
@@ -1653,6 +1644,7 @@ A short example fitting the {\tt USCrime} data described in Section
 \begin{verbatim}
 library(MASS)
 dat <- UScrime
+notlog <- c(2,ncol(UScrime))
 dat[,-notlog] <- log(dat[,-c(2,ncol(UScrime))])
 vy <- dat$y
 mX <- data.matrix(cbind(dat[1:15]))
