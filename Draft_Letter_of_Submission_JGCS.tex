@@ -1,34 +1,74 @@
-\documentclass{letter}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                   %
+%   University of New South Wales letter template   %
+%                                                   %
+%      Customized for M.P. Wand                     %
+%                                                   %  
+%       Last changed: 14th January, 2003            %
+%                                                   %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+\documentclass[11pt]{article}
+\usepackage{graphicx,verbatim,amsfonts}
+
+\include{GrandMacros}
+\include{BibMacros}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{geometry}
+\geometry{verbose,a4paper,tmargin=1in,bmargin=1.5in,lmargin=1in,rmargin=1in}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \begin{document}
-25th of October, 2017
-Journal of Graphical and Computational Statistics
 
-To the Editors,
-Could you please consider our paper:
-Numerical aspects of Bayesian linear model averaging using mixture $g$-priors
-by Mark Greenaway and John T. Ormerod
-for publication in the Journal of Graphical and Computational Statistics?
+\rightline{\today}
 
-We confirm that this work is original and has not been published elsewhere nor is it currently under
-consideration for publication elsewhere.
+\noindent Journal of Graphical and Computational Statistics \\
 
-In this article, we report on Bayesian linear model averaging using new analytic expressions for the
-posterior model probablity when using g priors. This is significant because of the substantial computational
-advantages to our approach. The paper should be of interest to readers in the area of Bayesian model selection
+
+
+ 
+ 
+
+\vskip5mm \noindent To the Editors,
+
+\vskip5mm \noindent Could you please consider our paper:
+\vskip5mm
+\centerline{\bf Numerical aspects of Bayesian linear model averaging using mixture $g$-priors}
+\medskip 
+ 
+\vskip5mm
+\centerline{\sf by Mark Greenaway and John T. Ormerod}
+
+\vskip5mm \noindent for publication in the {\it Journal of Graphical and Computational Statistics}?
+
+
+
+\medskip 
+In this article, we report on Bayesian linear model averaging using new analytic expressions for Bayes factors when under several mixture $g$-priors, usually in terms of the Gaussian hypergeometric function.
+We derive numerically stable methods for evaluating these Bayes factors.
+This is significant because it leads to the most efficient
+and numerically stable approach to exact Bayesian model averaging
+to date. We develop an R package implementing these ideas,
+which is available on GitHub which exploits parallel computation.
+Our package outperforms other Bayesian model averaging software
+in the literature on several standard example data sets. 
+
+
+
+\medskip 
+The paper should be of interest to readers in the area of Bayesian model selection
 and Bayesian model averaging.
 
-We derive new closed form expressions for the model probability posteriors in terms of special functions.
-We show that the expressions we have derived are numerically stable when evaluated. We demonstrate that when 
-combined with a scheme for averaging over the models efficiently using rank-one updates and downdates,
-our approach has significant computational advantages, outperforming other Bayesian model averaging software
-in the literature on several standard example data sets. We develop an R package implementing these ideas,
-which is available on GitHub.
 
-We believe our paper is making a strong contribution to problems that are over 30 years old
-making it ideal for the audience of the Journal of Graphical and Computational Statistics.
+\medskip 
+Finally, we confirm that this work is original and has not been published elsewhere nor is it currently under
+consideration for publication elsewhere.
 
-We eagerly await your response.
 
-Yours sincerely,
-Mark Greenaway, John T. Ormerod
+\vskip5mm \noindent We eagerly await your response.
+
+\vskip5mm \noindent Yours sincerely,
+
+\vskip5mm \noindent Mark Greenaway and John T. Ormerod
 \end{document}
