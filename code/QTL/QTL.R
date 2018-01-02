@@ -127,7 +127,7 @@ generate_data_Hitters <- function()
 	mX <- X.n
 	colnames(mX) <- varnames
 	
-	return(list(vy=vy, mX=mX, n=n, p=p))
+	return(list(vbeta=NULL, vy=vy, mX=mX, n=n, p=p))
 } 
 
 
@@ -286,6 +286,35 @@ generate_data_USCrime <- function()
 	return(list(vy=vy, mX=mX, n=n, p=p))
 }
 
+
+generate_data_comData <- function()
+{
+	cat("Start of generate_data_comData\n")
+	load("~/Dropbox/phd/code/comData.Rdata")
+	sum.na <- function(x)
+	{
+	  sum(is.na(x))
+	}
+	inds = which(apply(X,2,sum.na)==0)
+	mX = X[,inds]
+	i <- 1
+	vy = Y[,i]
+
+	full_fit <- lm(vy~mX)
+	summ <- summary(full_fit)
+
+	vbeta <- coef(full_fit)
+	vbeta[summ$coefficients[,4] >= .05] <- 0.
+	vbeta <- vbeta[2:102]
+	n <- nrow(mX)
+	p <- ncol(mX)
+	cat("vbeta ", length(vbeta), " p ", p, "\n")
+	# initial_gamma <- matrix(rbinom(K * p, 1, .5), K, p)
+	# cva_result <- cva(initial_gamma, vy, mX, K)
+	vf <- mX%*%matrix(vbeta)
+
+	return(list(vbeta=vbeta, vy=vy, mX=mX, vf=vf, n=n, p=p))
+}
 
 ################################################################################
 
@@ -506,12 +535,12 @@ QTL <- function(K, data_fn, start, prior, bUnique=TRUE, seed=1)
 	vnum <- c()
 
 	doBAS <- TRUE
-	doBMS <- TRUE
+	doBMS <- FALSE
 	doEMVS <- FALSE
-	doVARBVS <- TRUE
+	doVARBVS <- FALSE
 	doVB <- TRUE
 	doVBscreen <- TRUE
-	doCVA <- FALSE
+	doCVA <- TRUE
 
 	start_iter <- 1
 	for (trials in start_iter:TRIALS) 
@@ -644,6 +673,7 @@ QTL <- function(K, data_fn, start, prior, bUnique=TRUE, seed=1)
         vbeta.hat[vgamma.hat.inds] <- vbeta.hat.inds
         vy.hat      <- mX.n %*%  vbeta.hat
       }
+      cat("vgamma ", vgamma, " vgamma.hat ", vgamma.hat, "\n")
       scores.cva 	<- CalcSelectionScores(c(vgamma),c(vgamma.hat)) 
       b4 <- proc.time()[3]     
       print(scores.cva)
@@ -687,7 +717,7 @@ QTL <- function(K, data_fn, start, prior, bUnique=TRUE, seed=1)
 		#############################################################################
 
 		if (doBMS) {
-		
+			cat("Entering doBMS branch\n")
 		
 			
 			res.init.lasso   <- ncvreg(mX,vy,penalty="lasso",dfmax=n)
@@ -748,15 +778,15 @@ QTL <- function(K, data_fn, start, prior, bUnique=TRUE, seed=1)
 		}
 
 		dat <- cbind(
-					# as.numeric(SCORES.lasso[10,] ),
-					# as.numeric(SCORES.scad[10,] ),
-					# as.numeric(SCORES.mcp[10,] ),
-					# as.numeric(SCORES.emvs[10,] ),
-					as.numeric(SCORES.bms[10,] ),
-					as.numeric(SCORES.varbvs[10,] )
+					as.numeric(SCORES.lasso[10,] ),
+					as.numeric(SCORES.scad[10,] ),
+					as.numeric(SCORES.mcp[10,] ),
+					as.numeric(SCORES.emvs[10,] ),
+					# as.numeric(SCORES.bms[10,] ),
+					# as.numeric(SCORES.varbvs[10,] )
 					# as.numeric(SCORES.bms[10,] ),
 					# as.numeric(SCORES.varbvs[10,] ),
-					#as.numeric(SCORES.cva[10,] )
+					as.numeric(SCORES.cva[10,] )
 					)
 					
 		#dev.off()
