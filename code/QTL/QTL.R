@@ -491,6 +491,7 @@ QTL <- function(K, data_fn, start, prior, bUnique=TRUE, seed=1)
 	t.varbvs <- rep(0,TRIALS)
 	t.bms <- rep(0,TRIALS)
 	t.cva <- rep(0,TRIALS)
+	t.bas <- rep(0,TRIALS)
 
 	SCORES.lasso <- NULL
 	SCORES.mcp   <- NULL
@@ -717,9 +718,6 @@ QTL <- function(K, data_fn, start, prior, bUnique=TRUE, seed=1)
 		#############################################################################
 
 		if (doBMS) {
-			cat("Entering doBMS branch\n")
-		
-			
 			res.init.lasso   <- ncvreg(mX,vy,penalty="lasso",dfmax=n)
 			mbeta.lasso      <- res.init.lasso$beta[-1,]
 			screening.lasso <- as.vector(which(mbeta.lasso[,ncol(mbeta.lasso)]>0))
@@ -777,6 +775,23 @@ QTL <- function(K, data_fn, start, prior, bUnique=TRUE, seed=1)
 		    SCORES.varbvs <- cbind(SCORES.varbvs,scores.varbvs)
 		}
 
+		if (doBAS) {
+		  a4 <- proc.time()[3]
+			bas.res <- bas.lm(vy ~ mX, prior="g-prior", modelprior=uniform(), initprobs="uniform", MCMC.iterations=1e7)
+			vgamma.hat <- rep(0, length(vgamma))
+			vgamma.hat[ bas.res$which[[which.max(bas.res$logmarg)]] ] <- 1
+			vbeta.hat <- bas.res$mle[[which.max(bas.res$logmarg)]]
+			vy.hat <- mX.til[, bas.res$which[[which.max(bas.res$logmarg)]] ] %*%  vbeta.hat[2:length(vbeta.hat)] + vbeta.hat[1]
+			scores.bas <- CalcSelectionScores(c(vgamma),c(vgamma.hat)) 
+			b4 <- proc.time()[3]     
+	    print(b4-a4) 
+	    t.bas[trials] <- b4-a4 
+	    MSE.bas[trials]  <- sum((vf - vy.hat)^2)
+	    bias.bas[trials] <- sum((vbeta.hat - vbeta.til)^2)  
+	    SCORES.bas <- cbind(SCORES.bas,scores.bas)
+		}
+
+
 		dat <- cbind(
 					as.numeric(SCORES.lasso[10,] ),
 					as.numeric(SCORES.scad[10,] ),
@@ -786,6 +801,7 @@ QTL <- function(K, data_fn, start, prior, bUnique=TRUE, seed=1)
 					# as.numeric(SCORES.varbvs[10,] )
 					# as.numeric(SCORES.bms[10,] ),
 					# as.numeric(SCORES.varbvs[10,] ),
+					as.numeric(SCORES.bas[10,] ),
 					as.numeric(SCORES.cva[10,] )
 					)
 					
