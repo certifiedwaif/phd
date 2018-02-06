@@ -332,3 +332,32 @@ var_accuracy2 <- calculate_accuracies("application_biochemists", mult, mcmc_samp
 var_accuracy3 <- calculate_accuracies("application_biochemists", mult, mcmc_samples, fit3, "GVA inv par.", plot_flag=TRUE)
 var_accuracy4 <- calculate_accuracies("application_biochemists", mult, mcmc_samples, fit4, "GVA fixed point", plot_flag=TRUE)
 
+# Epilepsy
+library(robustbase)
+data(epilepsy)
+
+n <- 59
+m <- 5
+
+vy <- rep(0, n * m)
+mX <- matrix(0, n * m, 2)
+mZ_m <- model.matrix(~factor(epilepsy$ID))
+mZ <- matrix(0, n * m, n)
+
+for (i in 1:59) {
+  for (j in 1:5) {
+    idx <- (i - 1) * m + j
+    if (j == 1) vy[idx] <- epilepsy[i, "Base"]
+    if (j == 2) vy[idx] <- epilepsy[i, "Y1"]
+    if (j == 3) vy[idx] <- epilepsy[i, "Y2"]
+    if (j == 4) vy[idx] <- epilepsy[i, "Y3"]
+    if (j == 5) vy[idx] <- epilepsy[i, "Y4"]
+    mX[idx, 1] <- 1
+    if (epilepsy[i, "Trt"] == "progabide") mX[idx, 2] <- 1
+    mZ[idx, ] <- mZ_m[i, ]
+  }
+}
+mult <- create_mult(vy, mX, mZ, 1e5, m=60, blocksize=1, v=2)
+start <- Sys.time()
+fit_epilepsy <- zipvb(mult, method="gva2", verbose=FALSE, glm_init=FALSE)
+Sys.time() - start
