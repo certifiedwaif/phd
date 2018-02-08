@@ -5,31 +5,56 @@
 \begin{document}
 \maketitle
 
+% Abstract
+\section{Abstract}
 In this thesis, we examine several complicated Bayesian models which applied statisticians wish to fit
 to data. These models are typically fit with Monte Carlo Markov Chains, but these techniques are
 computationally expensive and prone to convergence problems. These models can be fit much faster with Variational 
 Bayes.
 
-In the first chapter, we consider variational inference for zero--inflated Poisson regression models using a
-latent   variable representation. The model is extended to include random effects which allow simple
-incorporation of   spline and other modelling structures. Several variational approximations to the resulting
-set of models are   presented, including a novel approach based on the inverse covariance matrix rather than
-the covariance matrix   of the approximate posterior density for the random effects. This parameterisation
-improves upon the   computational cost and numerical stability of previous methods. We demonstrate these
-approximations on   simulated and real data sets.
+Bayesian models offer great flexibility, but can be computationally demanding to fit. The gold standard for
+fitting Bayesian models are Monte Carlo Markov Chain methods, but these can be slow and prone to convergence
+problems. Approximate methods of fitting Bayesian models allow these models to be fit using deterministic
+algorithms in substantially less time. Variational Bayes (VB) is a method for approximating the posterior
+distributions of the model parameters with only a slight loss of accuracy.
+Zero-inflated models have many
+applications in areas such as manufacturing and public health.
+We apply VB to Zero-Inflated Poisson mixed
+models with a Gaussian prior using the Gaussian Variational Approximation and a latent variable representation.
+The model is extended to include random effects which allow simple
+incorporation of spline and other modelling structures. 
+We demonstrate that this
+approximation is accurate and fast on a number of simulated and real data sets. We also incorporate a novel
+parameterisation of the covariance of the Gaussian Variational Approximation using the Cholesky factor of the
+precision matrix, as in \cite{Tan2016}, and discuss the computational advantages of this parameterisation due
+to the sparsity of the precision matrix for mixed models, improving upon the computational cost and numerical stability of previous methods.
 
-In the second chapter, we develop mean field and structured variational Bayes approximations for Bayesian
-model selection on linear models using a special case of the prior proposed in \cite{Maruyama2011}. We show
-that both approaches only depend on a single variational parameter $\tau_g$ and the sample size, model
-dimension and the $R^2$ value of the linear model. An algorithm is developed which allows these models to be
-fit in parallel. Applications to a range of data sets are presented, showing  empirically that our method
-performs comparably to other methods on real-world data. Our method is computationally more efficient  than
-the exact Bayesian model.
+Model selection is a task of central importance in modern statistics, and  Bayesian model selection has the
+advantage of incorporating the uncertainty of the model selection process itself which propagates to the
+estimates of the model  parameters. Linear regression models with normal priors are ubiquitous in applied
+statistics due to their ease of fitting and interpretation. We use the popular $g$-prior \cite{Zellner1986}
+for model selection of linear models with normal priors. As \cite{Liang2008} points out, this raises the
+question of how best to choose $g$. They show that a fixed choice of $g$ leads to model selection paradoxes,
+such as Bartlett's Paradox and the Information Paradox. These paradoxes can be avoided by putting a prior on
+$g$. Using several popular priors on $g$, we derive exact expressions for the model selection Bayes Factors in
+terms of special functions depending only on $n$, $p$ and $R_\vgamma^2$. We show that these expressions are
+accurate, fast to evaluate and numerically stable. An R package {\texttt blma} for doing Bayesian linear model
+averaging using these exact expressions has been  released on GitHub.
 
-In the third chapter, we approach model selection from a different, population-based perspective, by developed
-a Collapsed Variational Approximation which uses a population-based approach to explore the model space for
-a normal linear model selection problem. We compare the results of this approximation to the 
-previously published EMVS approach in \cite{Rockova2014}.
+For data sets with a small number of covariates, it is computationally feasible to calculate $R_\vgamma^2$ for
+every $\vgamma \in \mGamma$, and so perform exact model selection. As the number of covariates increases the
+model space becomes too large to explore exhaustively. \cite{Rockova2016} introduced Particle EM, a
+population-based method for efficiently exploring a  subset of the model space with high posterior
+probability. The population-based method allows the method to seek multiple local modes, and captures greater
+total posterior mass from the model space than choosing a single model would. We extend this method using
+Collapsed Variational Bayes and the exact posterior marginal likelihood expressions to derive a
+computationally efficient algorithm for model selection on data sets with a large number of covariates. We
+demonstrate the algorithm's performance on a number of data sets for different combinations of $g$-prior,
+model selection prior and population size. We also compare our method to the existing methods lasso, SCAD, MCP
+and PEM using the $F_1$ score,  and show that our method outperforms these. We also show that total posterior
+mass increases and mean marginal variable error decreases, as the number of models in the population
+increases.
+
 \bibliographystyle{elsarticle-harv-nourl}
 \bibliography{references_mendeley}
 
