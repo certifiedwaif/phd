@@ -1,4 +1,4 @@
-# test_QLT.R
+# test_QTL.R
 
 library(tidyverse)
 library(optparse)
@@ -6,12 +6,12 @@ library(latex2exp)
 source("QTL.R")
 
 
-generate_F_1_data <- function(K, data_fn, start, prior, bUnique)
+generate_F_1_data <- function(K, data_fn, start, prior, bUnique, seed)
 {
-  if (data_fn == "QLT") {
-    dat <- QLT(K, generate_data_QLT, start, prior, bUnique=bUnique)
+  if (data_fn == "QTL") {
+    dat <- QTL(K, generate_data_QTL, start, prior, bUnique=bUnique, seed=seed)
   } else if (data_fn == "high_dimensional") {
-    dat <- QLT(K, generate_data_high_dimensional, start, prior, bUnique=bUnique)
+    dat <- QTL(K, generate_data_high_dimensional, start, prior, bUnique=bUnique, seed=seed)
   } else {
   	stop("data_fn unknown")
   }
@@ -300,7 +300,7 @@ relative_error_plots <- function()
 build_f_1_db <- function()
 {
 	library(stringr)
-	path <- "~/Dropbox/phd/code/QLT/results/"
+	path <- "~/Dropbox/phd/code/QTL/results/"
 
 	# Load CVA F_1 data
 	orig_fnames = list.files(path = path, pattern = "*.dat$")
@@ -329,18 +329,18 @@ build_f_1_db <- function()
 	})
 	
 	# Load acomparison data
-	load("~/Dropbox/phd/code/QLT/results/QLT_comparison.dat")
-	QLT_dat <- dat[, 1:5]
-	loaded <- load("~/Dropbox/phd/code/QLT/results/high_dimensional_comparison.dat")
-	high_dimensional_dat <- dat[, 1:5]
+	load("~/Dropbox/phd/code/QTL/results/QTL_comparison.dat")
+	QTL_dat <- dat
+	loaded <- load("~/Dropbox/phd/code/QTL/results/high_dimensional_comparison.dat")
+	high_dimensional_dat <- dat
 	columns <- c("Lasso", "Scad", "Mcp", "Bms", "Varbvs")
-	colnames(QLT_dat) <- columns
-	QLT_list <- map(.x=columns, ~QLT_dat[,.x])
+	colnames(QTL_dat) <- columns
+	QTL_list <- map(.x=columns, ~QTL_dat[,.x])
 	colnames(high_dimensional_dat) <- columns
 	high_dim_list <- map(.x=columns, ~high_dimensional_dat[,.x])
-	QLT_tbl <- tibble(data="QLT", method=columns, f_1=QLT_list)
+	QTL_tbl <- tibble(data="QTL", method=columns, f_1=QTL_list)
 	high_dim_tbl <- tibble(data="highdimensional", method=columns, f_1=high_dim_list)
-	comparison_tbl <- QLT_tbl %>% bind_rows(high_dim_tbl)
+	comparison_tbl <- QTL_tbl %>% bind_rows(high_dim_tbl)
 
 	# Some CVA data got mixed in with this, so seperate that out and combine with the rest of the CVA data
 	#cva_k1000_tbl <- comparison_tbl %>% filter(method == "CVA_K1000") %>% dplyr::select(-method)
@@ -385,17 +385,17 @@ generate_boxplots <- function()
 {
   dbs <- build_f_1_db()
   
-  setwd("~/Dropbox/phd/code/QLT")
+  setwd("~/Dropbox/phd/code/QTL")
   pdf("results/QTL_cold_maruyama.pdf")
-  generate_boxplot("QLT", "maruyama", "cold", dbs$cva_tbl, dbs$comparison_tbl)
+  generate_boxplot("QTL", "maruyama", "cold", dbs$cva_tbl, dbs$comparison_tbl)
   dev.off()
   
   pdf("results/QTL_likelihood_maruyama.pdf")
-  generate_boxplot("QLT", "maruyama", "likelihood", dbs$cva_tbl, dbs$comparison_tbl)
+  generate_boxplot("QTL", "maruyama", "likelihood", dbs$cva_tbl, dbs$comparison_tbl)
   dev.off()
   
   pdf("results/QTL_covariates_maruyama.pdf")
-  generate_boxplot("QLT", "maruyama", "covariates", dbs$cva_tbl, dbs$comparison_tbl)
+  generate_boxplot("QTL", "maruyama", "covariates", dbs$cva_tbl, dbs$comparison_tbl)
   dev.off()
   
   pdf("results/highdimensional_cold_logprob1.pdf")
@@ -445,9 +445,11 @@ main <- function()
   option_list <- list(make_option("--k", type="integer"),
   										make_option("--data"),
   										make_option("--prior"),
-  										make_option("--start"))
+  										make_option("--start"),
+                      make_option("--seed", type="integer"))
   opt <- parse_args(OptionParser(option_list=option_list))
   print(str(opt))
-  generate_F_1_data(opt$k, opt$data, opt$start, opt$prior)
+  dat <- generate_F_1_data(opt$k, opt$data, opt$start, opt$prior, TRUE, opt$seed)
+  save(dat, file=paste0("bms_varbvs_", opt$seed, ".dat"))
 }
-main()
+#main()
