@@ -651,7 +651,7 @@ QTL <- function(K, data_fn, start, prior, bUnique=TRUE, seed=1)
       # initial_gamma <- matrix(0, K, ncol(mX.til))
       a4 <- proc.time()[3]
       cat(c(K, 1, prior, "\n"))
-      cva.res <- cva(initial_gamma, y.n, mX.n, K, lambda = 1., prior = "maruyama", bUnique = TRUE)
+      cva.res <- cva(y.n, mX.n, initial_gamma, prior)
       cat("covariates in models ", apply(cva.res$models, 1, sum), "\n")
       
       vlog_p <- model_likelihood(cva.res$models, y.n, mX.n)
