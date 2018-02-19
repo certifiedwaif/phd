@@ -12,6 +12,8 @@ generate_F_1_data <- function(K, data_fn, start, prior, bUnique, seed)
     dat <- QTL(K, generate_data_QTL, start, prior, bUnique=bUnique, seed=seed)
   } else if (data_fn == "high_dimensional") {
     dat <- QTL(K, generate_data_high_dimensional, start, prior, bUnique=bUnique, seed=seed)
+  } else if (data_fn == "comData") {
+    dat <- QTL(K, generate_data_comData, start, prior, bUnique=bUnique, seed=seed)
   } else {
   	stop("data_fn unknown")
   }

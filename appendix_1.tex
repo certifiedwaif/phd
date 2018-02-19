@@ -1,6 +1,5 @@
-\appendix{Appendix} 
+\section{Calculation of the Variational Lower bound} 
 % TODO: Mean field updates?
-\subsection{Calculation of the Variational Lower bound}
 % Where are the priors for \vbeta and \vu
 		
 The variational lower bound is equal to $\bE_q\{\log{p(\vy, \vtheta)} - \log{q(\vtheta)}\} = T_1 + T_2 + T_3$,
@@ -22,7 +21,7 @@ $$
 		
 \noindent with $\bE_q \log |\mSigma_{\vu \vu}| = m \log 2 + \log \left | \Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu} \right | + \sum_{i=1}^m \Psi \left ( \frac{v - i + 1}{2} \right )$
 
-\appendix{Appendix}
+\section{Calculation of Derivatives for the Gaussian Variational Approximations}
 \subsection{Derivatives for Laplace-Gaussian Variational Approximation}
 \label{sec:appendix_derivatives_laplace}
 \begin{align*}
@@ -35,4 +34,11 @@ $$
 \begin{align*}
 	\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu}     & = \mP \mC (\vy - \mC^\top \exp(\mC \vmu + \frac{1}{2} \text{diag}{(\mC \mLambda \mC^\top)})) - \mSigma^{-1} \vmu \text{ and}                \\
 	\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda} & = \left \{\mLambda^{-1} - \mP \mC^\top \exp(\mC \vmu + \frac{1}{2} \text{diag}(\mC \mLambda \mC^\top)) \mP \mC) - \mSigma^{-1} \right \} \mR. 
+\end{align*}
+
+\subsection{Derivatives for Gaussian Variational Approximation fixed point}
+\label{sec:appendix_derivatives_gva_fixed_point}
+\begin{align*}
+	\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu}     & = \quad \mC^\top\vp \left [\vy - \mC\exp\{\mC \vmu + \tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top)\} \right ] - \mSigma^{-1} \vmu \text{ and} \\
+	\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda} & = -\mC^\top \text{diag}[\vp^\top \exp\{\mC \vmu +\tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top)\}] - \mSigma^{-1}.                             
 \end{align*}

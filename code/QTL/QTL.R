@@ -127,7 +127,7 @@ generate_data_Hitters <- function()
 	mX <- X.n
 	colnames(mX) <- varnames
 	
-	return(list(vy=vy, mX=mX, n=n, p=p))
+	return(list(vbeta=NULL, vy=vy, mX=mX, n=n, p=p))
 } 
 
 
@@ -286,6 +286,35 @@ generate_data_USCrime <- function()
 	return(list(vy=vy, mX=mX, n=n, p=p))
 }
 
+
+generate_data_comData <- function()
+{
+	cat("Start of generate_data_comData\n")
+	load("~/Dropbox/phd/code/comData.Rdata")
+	sum.na <- function(x)
+	{
+	  sum(is.na(x))
+	}
+	inds = which(apply(X,2,sum.na)==0)
+	mX = X[,inds]
+	i <- 1
+	vy = Y[,i]
+
+	full_fit <- lm(vy~mX)
+	summ <- summary(full_fit)
+
+	vbeta <- coef(full_fit)
+	vbeta[summ$coefficients[,4] >= .05] <- 0.
+	vbeta <- vbeta[2:102]
+	n <- nrow(mX)
+	p <- ncol(mX)
+	cat("vbeta ", length(vbeta), " p ", p, "\n")
+	# initial_gamma <- matrix(rbinom(K * p, 1, .5), K, p)
+	# cva_result <- cva(initial_gamma, vy, mX, K)
+	vf <- mX%*%matrix(vbeta)
+
+	return(list(vbeta=vbeta, vy=vy, mX=mX, vf=vf, n=n, p=p))
+}
 
 ################################################################################
 
@@ -462,6 +491,7 @@ QTL <- function(K, data_fn, start, prior, bUnique=TRUE, seed=1)
 	t.varbvs <- rep(0,TRIALS)
 	t.bms <- rep(0,TRIALS)
 	t.cva <- rep(0,TRIALS)
+	t.bas <- rep(0,TRIALS)
 
 	SCORES.lasso <- NULL
 	SCORES.mcp   <- NULL
@@ -506,9 +536,9 @@ QTL <- function(K, data_fn, start, prior, bUnique=TRUE, seed=1)
 	vnum <- c()
 
 	doBAS <- TRUE
-	doBMS <- TRUE
+	doBMS <- FALSE
 	doEMVS <- FALSE
-	doVARBVS <- TRUE
+	doVARBVS <- FALSE
 	doVB <- TRUE
 	doVBscreen <- TRUE
 	doCVA <- TRUE
@@ -644,6 +674,7 @@ QTL <- function(K, data_fn, start, prior, bUnique=TRUE, seed=1)
         vbeta.hat[vgamma.hat.inds] <- vbeta.hat.inds
         vy.hat      <- mX.n %*%  vbeta.hat
       }
+      cat("vgamma ", vgamma, " vgamma.hat ", vgamma.hat, "\n")
       scores.cva 	<- CalcSelectionScores(c(vgamma),c(vgamma.hat)) 
       b4 <- proc.time()[3]     
       print(scores.cva)
@@ -687,9 +718,6 @@ QTL <- function(K, data_fn, start, prior, bUnique=TRUE, seed=1)
 		#############################################################################
 
 		if (doBMS) {
-		
-		
-			
 			res.init.lasso   <- ncvreg(mX,vy,penalty="lasso",dfmax=n)
 			mbeta.lasso      <- res.init.lasso$beta[-1,]
 			screening.lasso <- as.vector(which(mbeta.lasso[,ncol(mbeta.lasso)]>0))
@@ -747,6 +775,22 @@ QTL <- function(K, data_fn, start, prior, bUnique=TRUE, seed=1)
 		    SCORES.varbvs <- cbind(SCORES.varbvs,scores.varbvs)
 		}
 
+		if (doBAS) {
+		  a4 <- proc.time()[3]
+			bas.res <- bas.lm(vy ~ mX, prior="g-prior", modelprior=uniform(), initprobs="uniform", MCMC.iterations=1e7)
+			vgamma.hat <- rep(0, length(vgamma))
+			vgamma.hat[ bas.res$which[[which.max(bas.res$logmarg)]] ] <- 1
+			vbeta.hat <- bas.res$mle[[which.max(bas.res$logmarg)]]
+			vy.hat <- mX.til[, bas.res$which[[which.max(bas.res$logmarg)]] ] %*%  vbeta.hat[2:length(vbeta.hat)] + vbeta.hat[1]
+			scores.bas <- CalcSelectionScores(c(vgamma),c(vgamma.hat)) 
+			b4 <- proc.time()[3]     
+	    print(b4-a4) 
+	    t.bas[trials] <- b4-a4 
+	    MSE.bas[trials]  <- sum((vf - vy.hat)^2)
+	    bias.bas[trials] <- sum((vbeta.hat - vbeta.til)^2)  
+	    SCORES.bas <- cbind(SCORES.bas,scores.bas)
+		}
+
 		dat <- cbind(
 					as.numeric(SCORES.lasso[10,] ),
 					as.numeric(SCORES.scad[10,] ),
@@ -754,6 +798,7 @@ QTL <- function(K, data_fn, start, prior, bUnique=TRUE, seed=1)
 					as.numeric(SCORES.emvs[10,] ),
 					as.numeric(SCORES.bms[10,] ),
 					as.numeric(SCORES.varbvs[10,] )
+					as.numeric(SCORES.bas[10,] ),
 					as.numeric(SCORES.cva[10,] )
 					)
 					

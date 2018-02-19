@@ -8,7 +8,7 @@ Bayesian model selection is a powerful set of techniques for model selection. Th
 useful in problems of high-dimension, such as bioinformatics problems where the model space is complex and the
 optimal model is difficult for statisticians to manually specify. But Bayesian model selection is
 computationally expensive, and prone to getting stuck in local minima if the posterior likelihood is multi-
-modal. This issue is particularly acute if the spike-and-slab prior, particularly popular for Bayesian model
+modal. This issue is particularly acute if the spike-and-slab prior, popular for Bayesian model
 selection, is used. We seek to address both problems by proposing a population non-parametric Variational
 Bayes approximation algorithm - a population-based optimisation strategy. Maintaining a population of models
 allows the posterior distribution to be explored more thoroughly, finding multiple maxima. The variational
@@ -33,7 +33,7 @@ $$
 	\vbeta_\vgamma | \sigma^2, g, \vgamma &\sim \N_p(\vzero, g \sigma^2 (\mX_\vgamma^\top \mX_\vgamma)^{-1}), \\
 	p(\vbeta_{-\vgamma}) &= \sum_{j=1}^p \delta(\vbeta_j; 0)^{1 - \vgamma_i}, \\
 	p(\sigma^2) &= \sigma^{-2} \I(\sigma^2 > 0), \\
-	\gamma_j | \rho &\sim \text{Bern}(\rho), 1 \leq j \leq p \\
+	\gamma_j | \rho &\sim \text{Bern}(\rho), 1 \leq j \leq p, \\
 	\rho &\sim \text{Beta}(u, v) \text{ and } \\
 	p(g) &= \delta(g; h^{1/(1 + p_\vgamma)}). \\
 \end{array}
@@ -98,77 +98,79 @@ Our variational approximation is a fixed form parametric approximation which pla
 
 Our main contributions are:
 
-i) Our algorithm searches over the binary strings $\vgamma$ directly, as the estimates of $\vbeta$ are available 
-in closed form once $\vgamma$ is known.
+\begin{enumerate}
+	\item Our algorithm searches over the binary strings $\vgamma$ directly, as the estimates of $\vbeta$ are available 
+	in closed form once $\vgamma$ is known.
 
-ii) We make use of a population--based optimisation scheme to search the model space. We take advantage of the
-population of solutions by incorporating a penalty for lack of entropy, which ensures diversity in the
-population of solutions.
+	\item We make use of a population--based optimisation scheme to search the model space. We take advantage of the
+	population of solutions by incorporating a penalty for lack of entropy, which ensures diversity in the
+	population of solutions.
 
-iii) The entire trajectory of particles gives far more information about variable selection than a single
-snapshot of the final best decision.
+	\item The entire trajectory of particles gives far more information about variable selection than a single
+	snapshot of the final best decision.
 
-iv) Our model incorporates the Cake prior, which avoids Lindley's and Bartlett's paradoxes by selecting the
-prior based on sample size.
+	\item Our model incorporates the Cake prior, which avoids Lindley's and Bartlett's paradoxes by selecting the
+	prior based on sample size.
+\end{enumerate}
 
 This article is organised as follows. In Section 2, we detail the derivation of our approximation and fitting
 algorithms. In Section 3, we discuss computational issues with implementing our algorithm efficiently. In
 Section 4, we present the results of our numerical experiments. In Section 5, we present our conclusions and
 discuss our results.
 
-\section{Method}
+% \section{Method}
 
-\subsection{Posterior distributions of $g$-priors in terms of special functions}
-% Things we derived
+% \subsection{Posterior distributions of $g$-priors in terms of special functions}
+% % Things we derived
 
 
-\subsubsection{Calculating $p(\vy | \vgamma)$}
-We want to calculate $p(\vy | \vgamma)$ so that we can calculate $p(\vgamma | \vy)$ using Bayes' Rule 
-allowing us to rank models against one another and choose which amongst many candidate models is best.
-To do this, we need to calculate
-$$p(\vy | \vgamma) = \int p(\vy | \alpha, \vbeta, \sigma^2, \vgamma) p(\alpha) p(\vbeta | g, \vgamma) p(\sigma^2) p(g) d \alpha d \vbeta d \sigma^2 d g.$$
-We choose our priors so that this integral is tractable, with help from \cite{Gradshteyn1988}.
-The marginal likelihoods obtained from this integral behave like BIC.
+% \subsubsection{Calculating $p(\vy | \vgamma)$}
+% We want to calculate $p(\vy | \vgamma)$ so that we can calculate $p(\vgamma | \vy)$ using Bayes' Rule 
+% allowing us to rank models against one another and choose which amongst many candidate models is best.
+% To do this, we need to calculate
+% $$p(\vy | \vgamma) = \int p(\vy | \alpha, \vbeta, \sigma^2, \vgamma) p(\alpha) p(\vbeta | g, \vgamma) p(\sigma^2) p(g) d \alpha d \vbeta d \sigma^2 d g.$$
+% We choose our priors so that this integral is tractable, with help from \cite{Gradshteyn1988}.
+% The marginal likelihoods obtained from this integral behave like BIC.
 
-We found the following closed form expressions. Include derivations in the appendices.
-\small
-\begin{itemize}
-	\item Liang et al. 2008 hyper-$g$ prior \cite{Liang2008}
-		$p(\vy | \vgamma) = \frac{K(n) (a - 2)}{p_\vgamma + a  - 2} {}_2 F_1 \left( \frac{n-1}{2}, 1; \frac{p_\vgamma + a}{2}; R_\vgamma^2 \right)$
-	\item Liang et al. 2008 hyper-$g/n$ prior \cite{Liang2008}
-		$p(\vy | \vgamma) = \frac{K(n) (a - 2)}{n (p_\vgamma + a  - 2)} F_1 \left( 1, \frac{a}{2}, \frac{n-1}{2}; \frac{p_\vgamma + a}{2}; 1 - \frac{1}{n}, R_\vgamma^2 \right)$
-\end{itemize}
-These expressions are numerically stable to evaluate.
+% We found the following closed form expressions. Include derivations in the appendices.
+% \small
+% \begin{itemize}
+% 	\item Liang et al. 2008 hyper-$g$ prior \cite{Liang2008}
+% 		$p(\vy | \vgamma) = \frac{K(n) (a - 2)}{p_\vgamma + a  - 2} {}_2 F_1 \left( \frac{n-1}{2}, 1; \frac{p_\vgamma + a}{2}; R_\vgamma^2 \right)$
+% 	\item Liang et al. 2008 hyper-$g/n$ prior \cite{Liang2008}
+% 		$p(\vy | \vgamma) = \frac{K(n) (a - 2)}{n (p_\vgamma + a  - 2)} F_1 \left( 1, \frac{a}{2}, \frac{n-1}{2}; \frac{p_\vgamma + a}{2}; 1 - \frac{1}{n}, R_\vgamma^2 \right)$
+% \end{itemize}
+% These expressions are numerically stable to evaluate.
 
-We want to be able to calculate the marginal likelihood of the data given $\vgamma$, so that we can
-calculate the posterior probability of $\vgamma$ and rank models against one another. To do this, we
-need to calculate the following integral.
-We choose our priors so that this integral is tractable, with help from the book Table of Integrals and
-Series by Gradshteyn. The marginal likelihoods behave like BIC.
-We found closed form expressions for the marginal likelihood for the hyper-$g$ and hyper-$g/n$ priors.
+% We want to be able to calculate the marginal likelihood of the data given $\vgamma$, so that we can
+% calculate the posterior probability of $\vgamma$ and rank models against one another. To do this, we
+% need to calculate the following integral.
+% We choose our priors so that this integral is tractable, with help from the book Table of Integrals and
+% Series by Gradshteyn. The marginal likelihoods behave like BIC.
+% We found closed form expressions for the marginal likelihood for the hyper-$g$ and hyper-$g/n$ priors.
 
-\subsubsection{Calculating $p(\vy | \vgamma)$ for Bayarri's robust prior}
-\begin{itemize}
-	\item Bayarri calculated the marginal likelihood given $\vgamma$ for the Robust Bayarri prior
-	 	in \cite{Bayarri2012} 
-		\tiny
-		$p(\vy | \vgamma) = K(n) \left(\frac{n + 1}{1 + p_\vgamma}\right)^{-p_\vgamma/2} \frac{(1 - R^2_\vgamma)^{-(n-1)/2}}{p_\vgamma + 1} {}_2 F_1 \left[ \frac{n-1}{2}, \frac{p_\vgamma+1}{2}; \frac{p_\vgamma + 3}{2}; \frac{[1 - 1/(1 - R^2_\vgamma)](p_\vgamma + 1)}{1 + n} \right]$.
-	\small
-	\item But this expression is not numerically well-behaved, because the second argument of the
-				${}_2 F_1$ function is greater than $1$.
-	\item Using a trick that's available when ${}_2 F_1(., 1; .; .)$ ... is numerically
-				well-behaved, we derived the new expression
-		\tiny
-		$p(\vy | \vgamma) = K(n) \left(\frac{n + 1}{1 + p_\vgamma}\right)^{(n-p_\vgamma-1)/2} \frac{[1 + L (1 - R^2_\vgamma)]^{-(n-1)/2}}{p_\vgamma + 1} {}_2 F_1 \left[ \frac{n-1}{2}, 1; \frac{p_\vgamma + 3}{2}; 
-		\frac{R^2_\vgamma}{1 + L(1 - R^2_\vgamma)} \right]$ \\
-		\small
-		where $L = (1 + n)/(1 + p_\vgamma) - 1$.
-\end{itemize}
+% \subsubsection{Calculating $p(\vy | \vgamma)$ for Bayarri's robust prior}
+% \begin{itemize}
+% 	\item Bayarri calculated the marginal likelihood given $\vgamma$ for the Robust Bayarri prior
+% 	 	in \cite{Bayarri2012} 
+% 		\tiny
+% 		$p(\vy | \vgamma) = K(n) \left(\frac{n + 1}{1 + p_\vgamma}\right)^{-p_\vgamma/2} \frac{(1 - R^2_\vgamma)^{-(n-1)/2}}{p_\vgamma + 1} {}_2 F_1 \left[ \frac{n-1}{2}, \frac{p_\vgamma+1}{2}; \frac{p_\vgamma + 3}{2}; \frac{[1 - 1/(1 - R^2_\vgamma)](p_\vgamma + 1)}{1 + n} \right]$.
+% 	\small
+% 	\item But this expression is not numerically well-behaved, because the second argument of the
+% 				${}_2 F_1$ function is greater than $1$.
+% 	\item Using a trick that's available when ${}_2 F_1(., 1; .; .)$ ... is numerically
+% 				well-behaved, we derived the new expression
+% 		\tiny
+% 		$p(\vy | \vgamma) = K(n) \left(\frac{n + 1}{1 + p_\vgamma}\right)^{(n-p_\vgamma-1)/2} \frac{[1 + L (1 - R^2_\vgamma)]^{-(n-1)/2}}{p_\vgamma + 1} {}_2 F_1 \left[ \frac{n-1}{2}, 1; \frac{p_\vgamma + 3}{2}; 
+% 		\frac{R^2_\vgamma}{1 + L(1 - R^2_\vgamma)} \right]$ \\
+% 		\small
+% 		where $L = (1 + n)/(1 + p_\vgamma) - 1$.
+% \end{itemize}
 
-Bayarri calculated the marginal likelihood given $\vgamma$ for the Robust Bayarri prior.
-But this expression is not numerically well-behaved.
-We used Euler's transformation and properties of the hypergeometric function to derive a new,
-numerically stable function.
+% Bayarri calculated the marginal likelihood given $\vgamma$ for the Robust Bayarri prior.
+% But this expression is not numerically well-behaved.
+% We used Euler's transformation and properties of the hypergeometric function to derive a new,
+% numerically stable function.
 
 
 \subsection{Collapsed Variational Approximation}
@@ -222,7 +224,7 @@ particles in the population against the diversity within that population.
 	\end{algorithmic}
 \end{algorithm}
 In order to make these updates efficient, we can use rank-one updates and downdates for the calculation of
-$\hat{\sigma}_\vgamma^2$.
+$\widehat{\sigma}_\vgamma^2$.
 
 The main body of the algorithm is a two--stage process. In the first stage, we iterate through the population of
 bitstrings, using a greedy search strategy to attempt to alter each bit in the model bitstring to increase the log likelihood. If the log likelihood for the new bitstring is no higher than the previous bitstring, then the
@@ -242,7 +244,12 @@ which is the sum of the weighted log-likelihood of the population and the entrop
 These two stages repeat until the lower bound converges.
 
 \section{Results}
+\subsection{$n < p$, High dimensional example, Particle EM}
 
+We first present an example where $n > p$ and $p$ is relatively small ($p = 12$), to allow for the full
+enumeration of the model space. Later, we show an example for the important $p > n$ case. We compare our
+results  against the Lasso (\cite{Tibshirani1996}), SCAD (\cite{Fan2001}), MCP (\cite{Zhang2010}), {\tt BMS}
+(\cite{Zeugner2015}) and {\tt VARBVS} (\cite{Carbonetto2012}) algorithms.
 
 Our first numerical experiment is designed to show that our algorithm successfully finds the posterior models
 of high probability, overcoming the difficulties of optimising over the multi-modal spike-and-slab posterior.
@@ -255,37 +262,41 @@ The true model is $\vbeta_0 = (1.3, 0, 0, 1.3, 0, 0, 1.3, 0, 0, 1.3, 0, 0)^\top$
 The responses are then generated from $\vy = \mX \vbeta_0 + \vepsilon$, where
 $\vepsilon \sim \N_n(\vzero, \mI_n)$.
 
-\subsection{$n < p$, High dimensional example, Particle EM}
+% Is this used anywhere?
+The results were generated by repeatedly simulating the data set $1,000$ times and fitting the CVA model.
+The median posterior model probability was calculated by taking the median across all of the runs of the
+total posterior probability of all of the models discovered by the CVA algorithm during that run. The global
+percentage was the proportion of the runs where the CVA algorithm successfully found the global mode.
 
 \begin{figure}
 % \includegraphics[scale=0.33]{code/QTL/results/20_generate_data_high_dimensional_warm_start_covariates_log_prob1.pdf}
 % \includegraphics[scale=0.33]{code/QTL/results/50_generate_data_high_dimensional_warm_start_covariates_log_prob1.pdf}
 % \includegraphics[scale=0.33]{code/QTL/results/100_generate_data_high_dimensional_warm_start_covariates_log_prob1.pdf}
-\includegraphics[scale=0.5]{highdimensional_covariates_logprob1.pdf}
+\includegraphics[width=0.95 \textwidth]{highdimensional_covariates_logprob1.pdf}
 \label{fig:highdim_warm_start_covariates}
-\caption{$F_1$ scores for CVA on the simulated high dimensional data with $\Gamma$ initialised from the SCAD models, with models with more covariates preferred. $K=20, 50, 100$ respectively}
+\caption{$F_1$ scores for CVA on the simulated high dimensional data with $\Gamma$ initialised from the SCAD models, with models with more covariates preferred. Here $K=20$, $50$ and $100$ respectively.}
 \end{figure}
 
 \begin{figure}
 % \includegraphics[scale=0.33]{code/QTL/results/20_generate_data_high_dimensional_warm_start_likelihood_log_prob1.pdf}
 % \includegraphics[scale=0.33]{code/QTL/results/50_generate_data_high_dimensional_warm_start_likelihood_log_prob1.pdf}
 % \includegraphics[scale=0.33]{code/QTL/results/100_generate_data_high_dimensional_warm_start_likelihood_log_prob1.pdf}
-\includegraphics[scale=0.5]{highdimensional_likelihood_logprob1.pdf}
+\includegraphics[width=0.95 \textwidth]{highdimensional_likelihood_logprob1.pdf}
 \label{fig:highdim_warm_start_likelihood}
-\caption{$F_1$ scores for CVA on the simulated high dimensional data with $\Gamma$ initialised from the SCAD models, with models with higher likelihood preferred. $K=20, 50, 100$ respectively}
+\caption{$F_1$ scores for CVA on the simulated high dimensional data with $\Gamma$ initialised from the SCAD models, with models with higher likelihood preferred. Here $K=20$, $50$ and $100$ respectively.}
 \end{figure}
 
 \begin{figure}
 % \includegraphics[scale=0.33]{code/QTL/results/20_generate_data_high_dimensional_cold_start_log_prob1.pdf}
 % \includegraphics[scale=0.33]{code/QTL/results/50_generate_data_high_dimensional_cold_start_log_prob1.pdf}
 % \includegraphics[scale=0.33]{code/QTL/results/100_generate_data_high_dimensional_cold_start_log_prob1.pdf}
-\includegraphics[scale=0.5]{highdimensional_cold_logprob1.pdf}
+\includegraphics[width=0.95 \textwidth]{highdimensional_cold_logprob1.pdf}
 \label{fig:highdim_cold_start}
 \caption{$F_1$ scores for CVA on the simulated high-dimensional data with $\Gamma$ initialised randomly.
-					K=20, 50 and 100 respectively}
+					Here $K=20$, $50$ and $100$ respectively}
 \end{figure}
 
-\subsection{Exploration of the posterior model space}
+\subsubsection{Exploration of the posterior model space}
 
 If the covariates in a model selection problem are highly collinear then the posterior distribution will be
 highly multi-modal when a spike-and-slab prior structure is used. This can make seeking the optimal model very
@@ -293,28 +304,17 @@ challenging, due to the many local optima. In this section, we present a series 
 demonstrate the capability of our algorithm to successfully find the models with high posterior probability in
 such situations.
 
-We first present an example where $n > p$ and $p$ is relatively small ($p = 12$), to allow for the full
-enumeration of the model space. Later, we show an example for the important $p > n$ case, and compare our
-results  against the Lasso \cite{Tibshirani1996}, SCAD \cite{Fan2001}, MCP \cite{Zhang2010}, {\tt BMS}
-\cite{Zeugner2015} and Varbvs algorithms.
-
-The results were generated by repeatedly simulating the data set $1,000$ times and fitting the CVA model.
-The median posterior model probability was calculated by taking the median across all of the runs of the
-total posterior probability of all of the models discovered by the CVA algorithm during that run. The global
-percentage was the proportion of the runs where the CVA algorithm successfully found the global mode.
-
-\subsubsection{$p < n$}
 Figure \ref{fig:cva_posterior_models} shows all $4,096$ posterior model probabilities ordered by the model's bit
 strings. We can clearly see a few peaks in the full posterior distribution. Our experiment aims to show that
 most of these posterior peaks are successfully identified by our algorithm.
 
 We begin by using the setting $\lambda = 1$, allowing particle repulsion between each of the models within the
-population. Our population of bit strings $\mGamma^{(0)} = [\vgamma_1^{(0)}, \ldots, \vgamma_K^{(0)}]$ with
+population. Our population of bit strings $\mGamma^{(0)} = (\vgamma_1^{(0)}, \ldots, \vgamma_K^{(0)})$ with
 $K = 20$ particles was randomly initialised from a sequencial of independent Bernoulli trials with probability
 of success $1/2$.
 
 \begin{figure}	
-	\includegraphics[scale=0.5]{code/correlation/cva_low_dimensional.pdf}
+	\includegraphics[width=0.95 \textwidth]{code/correlation/cva_low_dimensional.pdf}
 	\caption{Posterior model probabilities when $p = 12$. Red points denote models visited by the CVA
 						algorithm, while blue points are models that were not visited. Note that the CVA algorithm
 						visits the highest posterior probability points first}
@@ -348,7 +348,7 @@ highest probability models first, then spreading through the medium and low prob
 plots we can see that once $K$ is high enough, there is a good variety of high, medium and low posterior
 probability models in the population of particles. The coverage of the posterior probability distribution
 by the population of particles is high, as the particles tend to cluster towards the higher posterior
-probability models as CVA's greedy search algorithms proceeds.
+probability models as CVA's greedy search algorithm proceeds.
 
 \subsection{Comparison of CVA against other model selection methods on simulated data sets}
 
@@ -367,9 +367,9 @@ probability models as CVA's greedy search algorithms proceeds.
 
 The method used to assess the quality of the variable selection was to generate data from a known true model
 $\vgamma$,
-and then compare this against the model $\hat{\vgamma}$ found by each of the model selection methods that we 
+and then compare this against the model $\widehat{\vgamma}$ found by each of the model selection methods that we 
 compared.
-We then calculated the $F_1$ score for $\hat{\vgamma}$,
+We then calculated the $F_1$ score for $\widehat{\vgamma}$,
 where
 $$F_1 = 2 \times \text{precision} \times \text{recall} / (\text{precision} + \text{recall})$$ with
 $\text{precision} = \text{true positives} / (\text{true positives} + \text{false positives})$ and
@@ -388,52 +388,57 @@ The experiments were repeated with Maruyama's prior, Liang's hyper-g prior and B
 The results of the algorithm were found to be insensitive to the choice of prior.
 For each combination of population size, data set, and prior the experiment was repeated 50 times.
 
-\subsubsection{QTL example}
+\subsubsection{High-dimensional example $p > n$, Quantitative Trait Locus}
 The Quantitative Trait Locus (QTL) example is taken from \cite{Xu2007}. A BC population of $n=600$ was
 simulated for a single large chromosome of $1800$ cM. This chromosome was covered by 121 evenly spaced
 markers. Nine of the markers overlapped with QTL of the main effects and 13 out of the $\binom{121} 2 = 7,260$
 possible marker pairs had interaction effects.
 
+The CVA method was compared against Lasso, SCAD, Mcp, BMS and VARBVS. The {\tt BMS} method was run with
+$1,000,000$ iterations. While the $F_1$ scores from this method were excellent, the runtimes of the BMS method
+with this number of iterations were prohibively long - from 10 minutes to half an hour. When the number of
+iterations was reduced to $100,000$ less, the resulting $F_1$ scores were much poorer. The {\tt VARBVS} method
+was run with $\sigma = 10.0$ and $sa = 10.0$, which improved the $F_1$ score obtained.
+
 When initialising $\Gamma$ with a warm start from SCAD preferring models with more covariates or with higher
 likelihood, CVA performed poorly with a lower number of particles (K=$20$). Performance improved as the number
-of particles in the population was increased, as can be seen in Figures
-\ref{fig:highdim_warm_start_covariates} and \ref{fig:highdim_warm_start_likelihood}. Performance was better
-when $\Gamma$ was initialised randomly, for all population sizes $K=20$, $50$ or $100$.  CVA consistently
-achieved higher $F_1$ scores than the competing methods that we examined. This indicates that the CVA
-algorithm is sensitive to its' initialisation, and that as SCAD does poorly on these problems, CVA also does
-poorly comparatively with a warm start from SCAD, although still better than SCAD alone.
+of particles in the population was increased, as can be seen in Figures \ref{fig:QTL_warm_start_covariates}
+and \ref{fig:QTL_warm_start_likelihood}. Performance was better when $\Gamma$ was initialised randomly, for
+all population sizes $K=20$, $50$ or $100$.  CVA consistently achieved $F_1$ scores that were either
+competitive with or higher than the competing methods that we examined. This indicates that the CVA algorithm
+is sensitive to its' initialisation, and that as SCAD does poorly on these problems, CVA also does poorly
+comparatively with a warm start from SCAD, although still better than SCAD alone.
 
 \begin{figure}
-\includegraphics[scale=0.5]{QTL_covariates_maruyama.pdf}
+\includegraphics[width=0.95 \textwidth]{QTL_covariates_maruyama.pdf}
 \label{fig:QTL_warm_start_covariates}
 \caption{$F_1$ scores for CVA on the simulated QTL data with $\Gamma$ initialised from the SCAD models, with
-models with more covariates preferred. $K=20, 50, 100$ respectively}
+models with more covariates preferred. Here $K=20$, $50$ and $100$ respectively}
 % \includegraphics[scale=0.33]{code/QTL/results/20_generate_data_QTL_warm_start_covariates_log_prob1.pdf}
 % \includegraphics[scale=0.33]{code/QTL/results/50_generate_data_QTL_warm_start_covariates_log_prob1.pdf}
 % \includegraphics[scale=0.33]{code/QTL/results/100_generate_data_QTL_warm_start_covariates_log_prob1.pdf}
 \end{figure}
 
 \begin{figure}
-\includegraphics[scale=0.5]{QTL_likelihood_maruyama.pdf}
+\includegraphics[width=0.95 \textwidth]{QTL_likelihood_maruyama.pdf}
 \label{fig:QTL_warm_start_likelihood}
 \caption{$F_1$ scores for CVA on the simulated QTL data with $\Gamma$ initialised from the SCAD models, with
-models with higher likelihood preferred. $K=20, 50, 100$ respectively}
+models with higher likelihood preferred. Here $K=20$, $50$ and $100$ respectively}
 \end{figure}
 
 
 Initialising $\Gamma$ randomly, CVA performed poorly by comparison with either of the warm start methods
 above, as can be seen from Figure \ref{fig:QTL_cold_start}.
 \begin{figure}
-\includegraphics[scale=0.5]{QTL_cold_maruyama.pdf}
+\includegraphics[width=0.95 \textwidth]{QTL_cold_maruyama.pdf}
 \label{fig:QTL_cold_start}
-\caption{$F_1$ scores for CVA on the simulated QTL data with $\Gamma$ initialised randomly. $K=20, 50, 100$ respectively}
+\caption{$F_1$ scores for CVA on the simulated QTL data with $\Gamma$ initialised randomly.
+					Here $K=20$, $50$ and $100$ respectively}
 % \includegraphics[scale=0.33]{code/QTL/results/20_generate_data_QTL_cold_start_log_prob1.pdf}
 % \includegraphics[scale=0.33]{code/QTL/results/50_generate_data_QTL_cold_start_log_prob1.pdf}
 % \includegraphics[scale=0.33]{code/QTL/results/100_generate_data_QTL_cold_start_log_prob1.pdf}
 \end{figure}
 
-
-\subsubsection{High-dimensional example $p > n$}
 When initialising $\Gamma$ with a warm start from SCAD preferring models with higher likelihood,
 CVA performed less well on the QTL example than SCAD preferring models with more covariates, but still
 better than other competing methods except for MCP,
@@ -453,6 +458,7 @@ and the results of these comparisons are presented in Table \ref{tab:variable_in
 The number of particles in the population $K$ affected the
 variable inclusion probability in the variables selected by CVA, while the marginal probability
 $p(\vgamma | \vy)$ used to weight models in $\Gamma$ seemed to have only a very minor impact.
+% Is this still true?
 When the robust Bayarri prior is chosen to rank models in CVA,
 the marginal probability $p(\vgamma | \vy)$ changes a lot as opposed to ranking models with other priors.
 From the previous section, we see that changing the CVA model ranking
@@ -466,26 +472,26 @@ ignoring the lower posterior probability models.
 	Dataset & Prior & & $<=0.5$ & & & $>0.5$ &\\
 	& & $K = 20$ & $K = 50$ & $K = 100$ & $K = 20$ & $K = 50$ & $K = 100$ \\
 	\hline
-	Bodyfat&BIC&0.63&0.48&0.37&0.07&0.01&0.02\\
-	&g.safe&0.66&0.52&0.42&0.07&0.01&0.02\\
-	&Robust&0.65&0.52&0.4&0.07&0.01&0.02\\
-	&ZE&0.65&0.51&0.39&0.06&0.01&0.02\\
-	College&BIC&0.7&0.58&0.49&0.03&0.02&0.03\\
-	&g.safe&0.9&0.78&0.64&0.06&0.06&0.06\\
-	&Robust&0.88&0.78&0.63&0.06&0.06&0.06\\
-	&ZE&0.82&0.66&0.57&0.03&0.06&0.06\\
-	Hitters&BIC&0.74&0.64&0.5&0.12&0.07&0.06\\
-	&g.safe&NA&0.81&0.83&NA&0.17&0.07\\
-	&Robust&0.84&0.81&0.75&0.29&0.17&0.07\\
-	&ZE&0.79&0.72&0.67&0.27&0.13&0.05\\
-	USCrime&BIC&0.82&0.7&0.64&0.47&0.15&0.12\\
-	&g.safe&0.76&0.71&0.64&0.45&0.16&0.12\\
-	&Robust&0.79&0.7&0.61&0.35&0.14&0.08\\
-	&ZE&0.76&0.7&0.64&0.45&0.16&0.13\\
-	Wage&BIC&0.67&0.49&0.35&0&0&0\\
-	&g.safe&0.69&0.47&0.33&0&0&0\\
-	&Robust&0.69&0.47&0.32&0&0&0\\
-	&ZE&0.69&0.47&0.32&0&0&0\\
+	Bodyfat&BIC&$0.63$&$0.48$&$0.37$&$0.07$&$0.01$&$0.02$\\
+	&g$.$safe&$0.66$&$0.52$&$0.42$&$0.07$&$0.01$&$0.02$\\
+	&Robust&$0.65$&$0.52$&$0.4$&$0.07$&$0.01$&$0.02$\\
+	&ZE&$0.65$&$0.51$&$0.39$&$0.06$&$0.01$&$0.02$\\
+	College&BIC&$0.7$&$0.58$&$0.49$&$0.03$&$0.02$&$0.03$\\
+	&g$.$safe&$0.9$&$0.78$&$0.64$&$0.06$&$0.06$&$0.06$\\
+	&Robust&$0.88$&$0.78$&$0.63$&$0.06$&$0.06$&$0.06$\\
+	&ZE&$0.82$&$0.66$&$0.57$&$0.03$&$0.06$&$0.06$\\
+	Hitters&BIC&$0.74$&$0.64$&$0.5$&$0.12$&$0.07$&$0.06$\\
+	&g$.$safe&NA&$0.81$&$0.83$&NA&$0.17$&$0.07$\\
+	&Robust&$0.84$&$0.81$&$0.75$&$0.29$&$0.17$&$0.07$\\
+	&ZE&$0.79$&$0.72$&$0.67$&$0.27$&$0.13$&$0.05$\\
+	USCrime&BIC&$0.82$&$0.7$&$0.64$&$0.47$&$0.15$&$0.12$\\
+	&g$.$safe&$0.76$&$0.71$&$0.64$&$0.45$&$0.16$&$0.12$\\
+	&Robust&$0.79$&$0.7$&$0.61$&$0.35$&$0.14$&$0.08$\\
+	&ZE&$0.76$&$0.7$&$0.64$&$0.45$&$0.16$&$0.13$\\
+	Wage&BIC&$0.67$&$0.49$&$0.35$&$0$&$0$&$0$\\
+	&g$.$safe&$0.69$&$0.47$&$0.33$&$0$&$0$&$0$\\
+	&Robust&$0.69$&$0.47$&$0.32$&$0$&$0$&$0$\\
+	&ZE&$0.69$&$0.47$&$0.32$&$0$&$0$&$0$\\
 	\hline
 \end{tabular}
 \label{tab:variable_inclusion_rel_error}
@@ -503,6 +509,3 @@ population. If so, the addition or removal of the covariate is skipped and the n
 In our implementation, this check is made computationally efficient by maintaining a hash table of the models,
 allowing the check as to whether the model is already in the population to be performed in $\BigO(1)$ time.
 
-\section{Conclusion}
-The population-based strategy used in this model selection algorithm represents a significant improvement over
-simpler algorithms based on step-search.
