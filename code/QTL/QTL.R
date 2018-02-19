@@ -18,7 +18,7 @@ library(varbvs)
 ################################################################################
 
 
-generate_data_QLT <- function()
+generate_data_QTL <- function()
 {
 	response <- read.table("phe_simulat.csv",header=FALSE,sep=",")
 	covariates <- read.table("gen_simulat.csv",header=FALSE,sep=",")
@@ -433,7 +433,7 @@ initialise_gamma <- function(start, K, p, y.n, mX.n, models=NULL)
 }
 
 
-QLT <- function(K, data_fn, start, prior, bUnique=TRUE)
+QTL <- function(K, data_fn, start, prior, bUnique=TRUE, seed=1)
 {
 	cat(K, start, prior, "\n")
 	# Check parameters
@@ -450,7 +450,7 @@ QLT <- function(K, data_fn, start, prior, bUnique=TRUE)
 		stop("prior must be one of BIC, ZE, 3, 4, 5, 6 and 7")
 	}
 
-	TRIALS <- 50
+	TRIALS <- 1
 
 	t.lasso <- rep(0,TRIALS)
 	t.mcp   <- rep(0,TRIALS)
@@ -511,13 +511,13 @@ QLT <- function(K, data_fn, start, prior, bUnique=TRUE)
 	doVARBVS <- TRUE
 	doVB <- TRUE
 	doVBscreen <- TRUE
-	doCVA <- FALSE
+	doCVA <- TRUE
 
 	start_iter <- 1
 	for (trials in start_iter:TRIALS) 
 	{
 		#############################################################################
-	  set.seed(trials)
+	  set.seed(seed)
 		
 		res.gen <- data_fn()
 		mX <- res.gen$mX
@@ -592,7 +592,7 @@ QLT <- function(K, data_fn, start, prior, bUnique=TRUE)
     
     if (doCVA) {
       cat("Start of CVA section\n")
-      library(correlation)
+      library(blma)
       
       # Normalise
       n <- nrow(mX)
@@ -708,7 +708,7 @@ QLT <- function(K, data_fn, start, prior, bUnique=TRUE)
 			
 		
 			a3 <- proc.time()[3]
-			res.bms <- bms(cbind(vy,mX), burn = 1000, iter = 1000, nmodel = 1000, mcmc = "bd", start.value = start.value,
+			res.bms <- bms(cbind(vy,mX), burn = 1000, iter = 1000000, nmodel = 1000, mcmc = "bd", start.value = start.value,
 			    g = "hyper=3", mprior = "random", mprior.size = NA, user.int = TRUE, g.stats = TRUE, logfile = TRUE, logstep = 100, 
 			    force.full.ols = FALSE, fixed.reg=numeric(0))	
 			fit        <- predict(res.bms, exact=TRUE)
@@ -734,7 +734,7 @@ QLT <- function(K, data_fn, start, prior, bUnique=TRUE)
 		
 		if (doVARBVS) {
 			a3 <- proc.time()[3]
-			varbvs.res  <- varbvs (X=mX.til, Z=NULL, y=vy, family = "gaussian", sigma=1, sa=1, logodds=log(0.01/0.99))
+			varbvs.res  <- varbvs (X=mX.til, Z=NULL, y=vy, family = "gaussian", sigma=10.0, sa=10.0, logodds=log(0.001/0.999))
 			vgamma.hat  <- round(varbvs.res$alpha[-1])
 			vbeta.hat   <- varbvs.res$mu
 			vy.hat      <- mX.til %*%  vbeta.hat
@@ -751,12 +751,10 @@ QLT <- function(K, data_fn, start, prior, bUnique=TRUE)
 					as.numeric(SCORES.lasso[10,] ),
 					as.numeric(SCORES.scad[10,] ),
 					as.numeric(SCORES.mcp[10,] ),
-					# as.numeric(SCORES.emvs[10,] ),
+					as.numeric(SCORES.emvs[10,] ),
 					as.numeric(SCORES.bms[10,] ),
-					as.numeric(SCORES.varbvs[10,] ),
-					as.numeric(SCORES.bms[10,] ),
-					as.numeric(SCORES.varbvs[10,] ),
-					#as.numeric(SCORES.cva[10,] )
+					as.numeric(SCORES.varbvs[10,] )
+					as.numeric(SCORES.cva[10,] )
 					)
 					
 		#dev.off()
