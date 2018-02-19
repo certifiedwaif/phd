@@ -656,12 +656,12 @@ QTL <- function(K, data_fn, start, prior, bUnique=TRUE, seed=1)
       cva.res <- cva(y.n, mX.n, initial_gamma, prior, modelprior, modelprior_vec)
       cat("covariates in models ", apply(cva.res$models, 1, sum), "\n")
       
-      vlog_p <- model_likelihood(cva.res$models, y.n, mX.n)
+      vlog_p <- model_likelihood(cva.res$mGamma, y.n, mX.n)
       cat("vlog_p ", vlog_p, "\n")
       
       # Get gamma with maximum likelihood
-      vgamma.hat  <- cva.res$models[which.max(vlog_p), ]
-      vgamma.hat  <- apply(vlog_p * cva.res$models, 2, sum) / sum(vlog_p)
+      vgamma.hat  <- cva.res$mGamma[which.max(vlog_p), ]
+      vgamma.hat  <- apply(vlog_p * cva.res$mGamma, 2, sum) / sum(vlog_p)
       vgamma.hat.inds <- which(vgamma.hat > 0.5)
       cat("vgamma.hat.inds ", vgamma.hat.inds, "\n")
       if (length(vgamma.hat.inds) == 0) {
