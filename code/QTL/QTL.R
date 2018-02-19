@@ -794,7 +794,7 @@ QTL <- function(K, data_fn, start, prior, bUnique=TRUE, seed=1)
 					as.numeric(SCORES.mcp[10,] ),
 					as.numeric(SCORES.emvs[10,] ),
 					as.numeric(SCORES.bms[10,] ),
-					as.numeric(SCORES.varbvs[10,] )
+					as.numeric(SCORES.varbvs[10,] ),
 					as.numeric(SCORES.bas[10,] ),
 					as.numeric(SCORES.cva[10,] )
 					)
