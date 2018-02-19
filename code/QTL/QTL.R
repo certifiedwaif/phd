@@ -1,5 +1,5 @@
-doBAS <- FALSE
-doBMS <- TRUE
+doBAS <- TRUE
+doBMS <- FALSE
 doEMVS <- FALSE
 doVARBVS <- TRUE
 
@@ -13,6 +13,7 @@ if (doBMS) {
 library(Matrix)
 #library(EMVS)
 library(varbvs)
+library(ncvreg)
  
 
 ################################################################################
@@ -332,29 +333,23 @@ ebic.ncvreg <- function(vy,mX,penalty)
 	best <- which.min(ebic)
 	return(list(beta=res$beta[,best],rss=res$loss[best],res=res))
 }
-################################################################################
-
-transfer <- function(mX,vbeta)
-{ #mX without intcpt
-  vmean <- apply(mX,2,mean)
-  vsd   <- apply(mX,2,sd)
-  new.vbeta   <- vbeta / vsd
-  new.intcpt  <- -(vmean / vsd) %*% vbeta
-  return (c(new.intcpt,new.vbeta)) 
-}
 
 ################################################################################
 
-EMVSbest.my <- function (result) 
+EMVSbest.my <- function(result) 
 {
     posts = result$log_g_function
     posts[is.finite(posts) == F] = NaN
     which <- which.max(posts)
     logpost <- posts[which]
     print("Best Model Found")
-    list(log_g_function = logpost, indices = (1:dim(result$betas)[2])[result$prob_inclusion[which, 
-        ] > 0.5], beta.hat = result$betas[which, ], gamma.hat <- result$prob_inclusion[which, ])
+    gamma.hat <- result$prob_inclusion[which, ]
+    return(list(log_g_function=logpost, 
+        	indices = (1:dim(result$betas)[2])[result$prob_inclusion[which, ] > 0.5], 
+        	beta.hat = result$betas[which, ], 
+        	gamma.hat=gamma.hat))
 }
+
 ################################################################################
 
 CalcSelectionScores <- function(vgamma,vgamma.hat) 
@@ -479,7 +474,7 @@ QTL <- function(K, data_fn, start, prior, bUnique=TRUE, seed=1)
 		stop("prior must be one of BIC, ZE, 3, 4, 5, 6 and 7")
 	}
 
-	TRIALS <- 1
+	TRIALS <- 20
 
 	t.lasso <- rep(0,TRIALS)
 	t.mcp   <- rep(0,TRIALS)
@@ -542,6 +537,8 @@ QTL <- function(K, data_fn, start, prior, bUnique=TRUE, seed=1)
 	doVB <- TRUE
 	doVBscreen <- TRUE
 	doCVA <- TRUE
+	
+	vtimes = c()
 
 	start_iter <- 1
 	for (trials in start_iter:TRIALS) 
@@ -622,7 +619,7 @@ QTL <- function(K, data_fn, start, prior, bUnique=TRUE, seed=1)
     
     if (doCVA) {
       cat("Start of CVA section\n")
-      library(correlation)
+      library(blma)
       
       # Normalise
       n <- nrow(mX)
@@ -654,7 +651,7 @@ QTL <- function(K, data_fn, start, prior, bUnique=TRUE, seed=1)
       # initial_gamma <- matrix(0, K, ncol(mX.til))
       a4 <- proc.time()[3]
       cat(c(K, 1, prior, "\n"))
-      cva.res <- cva(initial_gamma, y.n, mX.n, K, 1, prior, bUnique)
+      cva.res <- cva(initial_gamma, y.n, mX.n, K, lambda = 1., prior = "maruyama", bUnique = TRUE)
       cat("covariates in models ", apply(cva.res$models, 1, sum), "\n")
       
       vlog_p <- model_likelihood(cva.res$models, y.n, mX.n)
@@ -787,7 +784,7 @@ QTL <- function(K, data_fn, start, prior, bUnique=TRUE, seed=1)
 	    print(b4-a4) 
 	    t.bas[trials] <- b4-a4 
 	    MSE.bas[trials]  <- sum((vf - vy.hat)^2)
-	    bias.bas[trials] <- sum((vbeta.hat - vbeta.til)^2)  
+	    #bias.bas[trials] <- sum((vbeta.hat - vbeta.til)^2)  
 	    SCORES.bas <- cbind(SCORES.bas,scores.bas)
 		}
 
@@ -809,6 +806,12 @@ QTL <- function(K, data_fn, start, prior, bUnique=TRUE, seed=1)
 		
 	 
 	}
+	
+	mTimes = cbind(t.lasso,t.mcp,t.scad,t.emvs,t.varbvs,t.bas,t.cva)
 
-	return(dat)
+	return(list(dat=dat,bas.res=bas.res,mTimes=mTimes,vgamma.hat=vgamma.hat,vgamma=vgamma))
 }
+
+
+
+ 
