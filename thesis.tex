@@ -1,16 +1,29 @@
 % \documentclass{amsart}[12pt]
 % \documentclass{book}[12pt]
+\RequirePackage{rotating}
 \documentclass[PhD,stats]{usydthesis}[12pt]
 % \documentclass{ociamthesis}
 
-\addtolength{\oddsidemargin}{-.75in}%
-\addtolength{\evensidemargin}{-.75in}%
-\addtolength{\textwidth}{1.5in}%
-\addtolength{\textheight}{1.3in}%
-\addtolength{\topmargin}{-.8in}%
-\addtolength{\marginparpush}{-.75in}%
-\setlength\parindent{0pt}
+%\addtolength{\oddsidemargin}{-.75in}%
+%\addtolength{\evensidemargin}{-.75in}%
+%\addtolength{\textwidth}{1.5in}%
+%\addtolength{\textheight}{1.3in}%
+%\addtolength{\topmargin}{-.8in}%
+%\addtolength{\marginparpush}{-.75in}%
+
 % \setlength{\bibsep}{0pt plus 0.3ex}
+
+%\addtolength{\oddsidemargin}{-.5in}%
+%\addtolength{\evensidemargin}{-.5in}%
+%\addtolength{\textwidth}{1in}%
+%\addtolength{\textheight}{-.3in}%
+%\addtolength{\topmargin}{-.8in}%
+
+\usepackage{geometry}
+\geometry{verbose,a4paper,tmargin=1in,bmargin=1.5in,lmargin=1in,rmargin=1in}
+
+%\setlength\parindent{0pt}
+%\setlength{\parskip}{1em}
 
 \usepackage[authoryear]{natbib}
 \usepackage[doublespacing]{setspace}
@@ -31,7 +44,9 @@
 %\usepackage[all]{xy}
 \usepackage{cancel}
 
-\title{Using Mean Field Variational Bayes to approximate things unless we can get them exactly. Then we do that.}
+\usepackage{graphicx,rotating,booktabs}
+
+\title{Mean Field Variational Bayes Approximation and Exact Calculation of Complex Regression Models}
 \author{Mark Greenaway}
 
 \input{include}
@@ -40,21 +55,61 @@
 \newcommand{\mgc}[1]{{\color{blue}#1}}
 \newcommand{\joc}[1]{{\color{red}#1}}
 
+
+\usepackage{titlesec}
+
+
+\titleformat{\section}{\normalfont\Large\bfseries}{\thesection}{1em}{ }
+\titleformat{\subsection}{\normalfont\large\bfseries\leftskip 0ex}{\thesubsection}{1em}{ }
+\titleformat{\subsubsection}{\normalfont\large\bfseries\leftskip 0ex}{\thesubsubsection}{1em}{}
+%\titleformat{\paragraph}[runin]{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+%\titleformat{\subparagraph}[runin]{\normalfont\normalsize\bfseries}{\thesubparagraph}{1em}{}
+
+
+%\usepackage{indentfirst}
+%\let\@afterindentfalse\@afterindenttrue
+%\@afterindenttrue
+ 
+%\titlespacing\section{0pt}{12pt plus 4pt minus 2pt}{2pt plus 2pt minus 2pt}
+%\titlespacing\subsection{0pt}{12pt plus 4pt minus 2pt}{2pt plus 2pt minus 2pt}
+
+ 
+\renewcommand{\baselinestretch}{1.6}
+
+
+%\makeatletter
+%\renewcommand\section{\@startsection {section}{1}{\z@}%
+%	{-3.5ex \@plus -1ex \@minus -.2ex}%
+%	{2.3ex \@plus.2ex}%
+%	{\normalfont\Large\bfseries}}% from \Large
+%\renewcommand\subsection{\@startsection{subsection}{2}{\z@}%
+%	{-3.25ex\@plus -1ex \@minus -.2ex}%
+%	{1.5ex \@plus .2ex}%
+%	{\normalfont\Large\bfseries}}% from \large
+%\renewcommand\subsubsection{\@startsection{subsubsection}{3}{\z@}%
+%	{-3.25ex\@plus -1ex \@minus -.2ex}%
+%	{1.5ex \@plus .2ex}%
+%	{\normalfont\large\bfseries}}% from \normalsize
+
 \begin{document}
 
 \makeatletter
-\renewcommand\section{\@startsection {section}{1}{\z@}%
-                                   {-3.5ex \@plus -1ex \@minus -.2ex}%
-                                   {2.3ex \@plus.2ex}%
-                                   {\normalfont\LARGE\bfseries}}% from \Large
-\renewcommand\subsection{\@startsection{subsection}{2}{\z@}%
-                                     {-3.25ex\@plus -1ex \@minus -.2ex}%
-                                     {1.5ex \@plus .2ex}%
-                                     {\normalfont\Large\bfseries}}% from \large
-\renewcommand\subsubsection{\@startsection{subsubsection}{3}{\z@}%
-                                     {-3.25ex\@plus -1ex \@minus -.2ex}%
-                                     {1.5ex \@plus .2ex}%
-                                     {\normalfont\large\bfseries}}% from \normalsize
+%\renewcommand\section{\@startsection {section}{1}{\z@}%
+%                                  {-0.1ex \@plus -0.1ex \@minus -.1ex}%
+%                                  {0.1ex \@plus.1ex}%
+%                                  {\normalfont\Large\bfseries}}% from \Large
+ 
+ 
+%\renewcommand\subsection{\@startsection{subsection}{2}{\z@}%
+%                                     {-1.25ex\@plus -1ex \@minus -.2ex}%
+%                                     {0.1ex \@plus .2ex}%
+%                                     {\normalfont\Large\bfseries}}% from \large
+%\renewcommand\subsubsection{\@startsection{subsubsection}{3}{\z@}%
+ %                                    {-1.25ex\@plus -1ex \@minus -.2ex}%
+%                                     {1.5ex \@plus .2ex}%
+%                                     {\normalfont\large\bfseries}}% from \normalsize
+
+
 \makeatother
 
 \maketitle
@@ -63,10 +118,51 @@
 \listoffigures
 \listoftables
 
+% Abstract
+\section{Abstract}
+Bayesian models offer great flexibility, but can be computationally demanding to fit. The gold standard for
+fitting Bayesian models are Monte Carlo Markov Chain methods, but these can be slow and prone to convergence
+problems. Approximate methods of fitting Bayesian models allow these models to be fit using deterministic
+algorithms in substantially less time. Variational Bayes (VB) is a method for approximating the posterior
+distributions of the model parameters with only a slight loss of accuracy.  Zero-inflated models have many
+applications in areas such as manufacturing and public health. We apply VB to Zero-Inflated Poisson mixed
+models with a Gaussian prior using the Gaussian Variational Approximation. We demonstrate that this
+approximation is accurate and fast on a number of simulated and real data sets. We also incorporate a novel
+parameterisation of the covariance of the Gaussian Variational Approximation using the Cholesky factor of the
+precision matrix, as in \cite{Tan2016}, and discuss the computational advantages of this parameterisation due
+to the sparsity of the precision matrix for mixed models.
+
+Model selection is a task of central importance in modern statistics, and  Bayesian model selection has the
+advantage of incorporating the uncertainty of the model selection process itself which propagates to the
+estimates of the model  parameters. Linear regression models with normal priors are ubiquitous in applied
+statistics due to their ease of fitting and interpretation. We use the popular $g$-prior \cite{Zellner1986}
+for model selection of linear models with normal priors. As \cite{Liang2008} points out, this raises the
+question of how best to choose $g$. They show that a fixed choice of $g$ leads to model selection paradoxes,
+such as Bartlett's Paradox and the Information Paradox. These paradoxes can be avoided by putting a prior on
+$g$. Using several popular priors on $g$, we derive exact expressions for the model selection Bayes Factors in
+terms of special functions depending only on $n$, $p$ and $R_\vgamma^2$. We show that these expressions are
+accurate, fast to evaluate and numerically stable. An R package {\texttt blma} for doing Bayesian linear model
+averaging using these exact expressions has been  released on GitHub.
+
+For data sets with a small number of covariates, it is computationally feasible to calculate $R_\vgamma^2$ for
+every $\vgamma \in \mGamma$, and so perform exact model selection. As the number of covariates increases the
+model space becomes too large to explore exhaustively. \cite{Rockova2016} introduced Particle EM, a
+population-based method for efficiently exploring a  subset of the model space with high posterior
+probability. The population-based method allows the method to seek multiple local modes, and captures greater
+total posterior mass from the model space than choosing a single model would. We extend this method using
+Collapsed Variational Bayes and the exact posterior marginal likelihood expressions to derive a
+computationally efficient algorithm for model selection on data sets with a large number of covariates. We
+demonstrate the algorithm's performance on a number of data sets for different combinations of $g$-prior,
+model selection prior and population size. We also compare our method to the existing methods lasso, SCAD, MCP
+and PEM using the $F_1$ score,  and show that our method outperforms these. We also show that total posterior
+mass increases and mean marginal variable error decreases, as the number of models in the population
+increases.
+
 \include{Chapter_1_preliminary}
+
 \include{Chapter_2_zero_inflated_models}
 % % \include{Chapter_2_zero_inflated_models_formula_sheet}
-\include{Chapter_3_g_prior_posterior}
+\include{Chapter_3_g_prior_posterior_JO_edits}
 \include{Chapter_4_Collapsed_Variational_Approximations}
 \include{Chapter_5_Conclusion}
 % \include{Chapter_5_regression_posteriors}
