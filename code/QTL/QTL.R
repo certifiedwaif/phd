@@ -471,7 +471,7 @@ QTL <- function(K, data_fn, start, prior, bUnique=TRUE, seed=1)
 	}
 
 	if (!(prior %in% c("maruyama", "BIC", "ZE", "liang_g1", "liang_g2", "liang_g3", "robust_bayarri1", "robust_bayarri2"))) {
-		stop("prior must be one of BIC, ZE, 3, 4, 5, 6 and 7")
+		stop("prior must be one of BIC, ZE, liang_g1, liang_g2, liang_g3, robust_bayarri1 and robust_bayarri2")
 	}
 
 	TRIALS <- 20
@@ -544,7 +544,7 @@ QTL <- function(K, data_fn, start, prior, bUnique=TRUE, seed=1)
 	for (trials in start_iter:TRIALS) 
 	{
 		#############################################################################
-	  set.seed(seed)
+	  set.seed(seed + trials)
 		
 		res.gen <- data_fn()
 		mX <- res.gen$mX
@@ -651,12 +651,13 @@ QTL <- function(K, data_fn, start, prior, bUnique=TRUE, seed=1)
       # initial_gamma <- matrix(0, K, ncol(mX.til))
       a4 <- proc.time()[3]
       cat(c(K, 1, prior, "\n"))
-      modelprior <- "uniform"
-      modelprior_vec <- NULL
-      cva.res <- cva(y.n, mX.n, initial_gamma, prior, modelprior, modelprior_vec)
-      cat("covariates in models ", apply(cva.res$models, 1, sum), "\n")
+      modelprior <- "beta-binomial"
+      modelprior_vec <- c(1, p)
+      cva.res <- cva(y.n, mX.n, initial_gamma, prior, modelprior, modelprior_vec, cores=48)
+      cat("covariates in models ", apply(cva.res$mGamma, 1, sum), "\n")
       
-      vlog_p <- model_likelihood(cva.res$mGamma, y.n, mX.n)
+      #vlog_p <- model_likelihood(cva.res$mGamma, y.n, mX.n)
+      vlog_p <- cva.res$posterior_model_probabilities
       cat("vlog_p ", vlog_p, "\n")
       
       # Get gamma with maximum likelihood
@@ -673,10 +674,10 @@ QTL <- function(K, data_fn, start, prior, bUnique=TRUE, seed=1)
         vbeta.hat[vgamma.hat.inds] <- vbeta.hat.inds
         vy.hat      <- mX.n %*%  vbeta.hat
       }
-      cat("vgamma ", vgamma, " vgamma.hat ", vgamma.hat, "\n")
+      #cat("vgamma ", vgamma, " vgamma.hat ", vgamma.hat, "\n")
       scores.cva 	<- CalcSelectionScores(c(vgamma),c(vgamma.hat)) 
       b4 <- proc.time()[3]     
-      print(scores.cva)
+      cat("F1", scores.cva$F1, "\n")
       print(b4-a4) 
       t.cva[trials] <- b4-a4 
       MSE.cva[trials]  <- sum((vf - vy.hat)^2)
@@ -694,7 +695,7 @@ QTL <- function(K, data_fn, start, prior, bUnique=TRUE, seed=1)
 		sigma_init=1  
 		
 		if (doEMVS) { 
-		
+			cat("Start of EMVS section\n")
 			a3 <- proc.time()[3]
 		    res.emvs <- EMVS(vy.cent, mX.til[,-1], v0=v0,v1=v1,type="betabinomial",beta_init=beta_init,sigma_init=1,epsilon=epsilon,a=a,b=b)
 		    res.emvs.best <- EMVSbest.my(res.emvs)
@@ -717,6 +718,7 @@ QTL <- function(K, data_fn, start, prior, bUnique=TRUE, seed=1)
 		#############################################################################
 
 		if (doBMS) {
+			cat("Start of BMS section\n")
 			res.init.lasso   <- ncvreg(mX,vy,penalty="lasso",dfmax=n)
 			mbeta.lasso      <- res.init.lasso$beta[-1,]
 			screening.lasso <- as.vector(which(mbeta.lasso[,ncol(mbeta.lasso)]>0))
@@ -760,6 +762,7 @@ QTL <- function(K, data_fn, start, prior, bUnique=TRUE, seed=1)
 		###############################################################################
 		
 		if (doVARBVS) {
+			cat("Start of VARBVS section\n")
 			a3 <- proc.time()[3]
 			varbvs.res  <- varbvs (X=mX.til, Z=NULL, y=vy, family = "gaussian", sigma=10.0, sa=10.0, logodds=log(0.001/0.999))
 			vgamma.hat  <- round(varbvs.res$alpha[-1])
@@ -775,13 +778,15 @@ QTL <- function(K, data_fn, start, prior, bUnique=TRUE, seed=1)
 		}
 
 		if (doBAS) {
+			cat("Start of BAS section\n")
 		  a4 <- proc.time()[3]
-			bas.res <- bas.lm(vy ~ mX, prior="g-prior", modelprior=uniform(), initprobs="uniform", MCMC.iterations=1e7)
+			bas.res <- bas.lm(vy ~ mX, prior="g-prior", modelprior=beta.binomial(1, p), initprobs="uniform", method="MCMC", bestmodel=NULL, MCMC.iterations=1e5)
 			vgamma.hat <- rep(0, length(vgamma))
 			vgamma.hat[ bas.res$which[[which.max(bas.res$logmarg)]] ] <- 1
 			vbeta.hat <- bas.res$mle[[which.max(bas.res$logmarg)]]
 			vy.hat <- mX.til[, bas.res$which[[which.max(bas.res$logmarg)]] ] %*%  vbeta.hat[2:length(vbeta.hat)] + vbeta.hat[1]
 			scores.bas <- CalcSelectionScores(c(vgamma),c(vgamma.hat)) 
+			cat("F1", scores.bas$F1, "\n")
 			b4 <- proc.time()[3]     
 	    print(b4-a4) 
 	    t.bas[trials] <- b4-a4 
@@ -800,7 +805,7 @@ QTL <- function(K, data_fn, start, prior, bUnique=TRUE, seed=1)
 					as.numeric(SCORES.bas[10,] ),
 					as.numeric(SCORES.cva[10,] )
 					)
-					
+		colnames(dat) <- c("lasso", "scad", "mcp", "bas", "cva")		
 		#dev.off()
 		
 	 
