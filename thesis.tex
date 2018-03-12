@@ -46,7 +46,9 @@
 
 \usepackage{graphicx,rotating,booktabs}
 
-\title{Mean Field Variational Bayes Approximation and Exact Calculation of Complex Regression Models}
+\title{Numerically stable approximate Bayesian methods
+    	 for Generalized Linear Mixed Models
+			 and Linear Model Selection}
 \author{Mark Greenaway}
 
 \input{include}
@@ -116,10 +118,11 @@
 
 \tableofcontents
 \listoffigures
-\listoftables
+% \listoftables
 
 % Abstract
 \section{Abstract}
+
 Bayesian models offer great flexibility, but can be computationally demanding to fit. The gold standard for
 fitting Bayesian models are Monte Carlo Markov Chain methods, but these can be slow and prone to convergence
 problems. Approximate methods of fitting Bayesian models allow these models to be fit using deterministic
@@ -146,7 +149,7 @@ averaging using these exact expressions has been  released on GitHub.
 
 For data sets with a small number of covariates, it is computationally feasible to calculate $R_\vgamma^2$ for
 every $\vgamma \in \mGamma$, and so perform exact model selection. As the number of covariates increases the
-model space becomes too large to explore exhaustively. \cite{Rockova2016} introduced Particle EM, a
+model space becomes too large to explore exhaustively. \cite{Rockova2017} introduced Particle EM, a
 population-based method for efficiently exploring a  subset of the model space with high posterior
 probability. The population-based method allows the method to seek multiple local modes, and captures greater
 total posterior mass from the model space than choosing a single model would. We extend this method using
@@ -164,7 +167,7 @@ increases.
 % % \include{Chapter_2_zero_inflated_models_formula_sheet}
 \include{Chapter_3_g_prior_posterior_JO_edits}
 \include{Chapter_4_Collapsed_Variational_Approximations}
-\include{Chapter_5_Conclusion}
+\include{Chapter_5_Conclusion_backup}
 % \include{Chapter_5_regression_posteriors}
 
 \backmatter
