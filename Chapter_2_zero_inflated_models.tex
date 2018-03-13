@@ -110,12 +110,10 @@ Poisson model, but the sample is otherwise well--modelled by a Poisson distribut
 parameterizations for modelling such data. The first approach models the probability of a zero by $\rho$ and
 adjusts for counts greater than zero. This model uses the probability distribution
 $$
-\begin{array}{rll}
-	P(Y_j = y_i) = \begin{cases}
-	\rho + e^{-\lambda}, &y_i = 0\\
-	\left( \frac{1 - \rho}{1 - e^{-\lambda}} \right) \frac{\lambda^{y_i} e^{-\lambda}} {y_i!}, &y_i \ge 1.
-	\end{cases}
-\end{array}
+	P(Y_j = y_i) = \left\{ \begin{array}{ll}
+	\rho + e^{-\lambda},  & y_i = 0 \\
+	\left( \frac{1 - \rho}{1 - e^{-\lambda}} \right) \frac{\lambda^{y_i} e^{-\lambda}} {y_i!},  &y_i \ge 1.
+	\end{array} \right.
 $$
 
 A second approach using latent variables views the data as the product of two data--generating processes, a
@@ -409,7 +407,7 @@ optimal $\vmu$ and $\mLambda$ values must be found while keeping the other varia
 variational lower bound is not necessarily unimodal if $\vp$ and $\mSigma$ are free to vary, leading to
 potential difficulty in optimising to the global maximum. However, for fixed $\vp$ and $\mSigma$, the
 variational lower bound is log-concave with respect to $\vmu$ and $\mLambda$, and so standard optimisation
-methods such as L-BFGS-B as described in, for example, \cite{Liu1989} \cite{Nocedal2006}, work well. This
+methods such as L-BFGS-B as described in, for example, \cite{Liu1989} and \cite{Nocedal2006}, work well. This
 leads to an extremely accurate approximation of the true posterior at the expense of some additional
 computational effort. Care must be taken in the parameterisation of $\mLambda$, as it is both of high
 dimension $(p + mb)^2$ and constrained to be semi- positive definite. We present and compare two approaches to
@@ -440,25 +438,25 @@ parameterisation. The resulting function
 \end{align*}
 can be optimised with L-BFGS-B using the derivatives in Appendix \ref{sec:appendix_derivatives_gva}.
 
-\begin{figure}[p]
+\begin{figure}[h!]
 	\includegraphics[width=0.95 \textwidth]{mX_mZ_mLambda.pdf}
 	\caption{Inverse Covariance matrix of approximate posterior for $\vnu$ -- Fixed effects before random effects}
 	\label{fig:covfixedrandom}
 \end{figure}
 	
-\begin{figure}[p]
+\begin{figure}[h!]
 	\includegraphics[width=0.95 \textwidth]{mZ_mX_mLambda.pdf}
 	\caption{Inverse Covariance matrix of approximate posterior for $\vnu$ -- Random effects before fixed effects}
 	\label{fig:covrandomfixed}
 \end{figure}
 						      				      			      			      			      	
-\begin{figure}[p]
+\begin{figure}[h!]
 	\includegraphics[width=0.95 \textwidth]{mX_mZ_cholesky.pdf}
 	\caption{Cholesky factor of Inverse Covariance matrix of approximate posterior for $\vnu$ -- Fixed effects before random effects}
 	\label{fig:cholfixedrandom}
 \end{figure}
 	
-\begin{figure}[p]
+\begin{figure}[h!]
 	\includegraphics[width=0.95 \textwidth]{mZ_mX_cholesky.pdf}
 	\caption{Cholesky factor of Inverse Covariance matrix of approximate posterior for $\vnu$ -- Random effects before fixed effects}
 	\label{fig:cholrandomfixed}
@@ -654,13 +652,11 @@ obviously wasteful, as the off--diagonal entries of the resulting product that h
 are immediately discarded.
 	
 By parameterising $\mLambda$ in terms of its' Cholesky factors and realising that
-	
 \[
 	\mC \mLambda \mC^\top = \mC \mR \mR^\top \mC^\top
 \]
 	
 \noindent and that
-	
 \[
 	\diag(\mC \mLambda \mC^\top)_{ii} = \mC_{i .} \mR \mR^\top \mC_{i .}^\top, 1 \leq i \leq n
 \]
@@ -795,7 +791,7 @@ Median accuracy of the algorithms was assessed by running them on 100 randomly g
 \ref{fig:median_accuracy_slope}.
 		
 % Figure: Median accuracy graph intercept
-\begin{figure}
+\begin{figure}[h]
 	\begin{center}
 		\includegraphics[width=0.95\textwidth]{code/results/median_accuracy_combined_intercept.pdf}
 		\caption{Boxplots of accuracies of the parameter estimates for a random intercept model after 100 repeated
@@ -806,7 +802,7 @@ Median accuracy of the algorithms was assessed by running them on 100 randomly g
 \end{figure}
 		
 % Figure: Median accuracy graph slope
-\begin{figure}
+\begin{figure}[h]
 	\includegraphics[width=0.95\textwidth]{code/results/median_accuracy_combined_slope.pdf}
 	\caption{Boxplots of accuracies of the parameter estimates for a random slope model after 100 repeated
 							runs on simulated data. We see that the accuracy of the parameter estimates is quite stable,
@@ -863,7 +859,7 @@ Median accuracy of the algorithms was assessed by running them on 100 randomly g
 % \end{tabular}
 % \end{table}
 		
-\begin{figure}
+\begin{figure}[h]
 	\label{fig:spline}
 	\caption{Comparison of VB and MCMC spline fits with the true function}
 	\includegraphics[width=0.95 \textwidth]{code/results/accuracy_plots_spline_gva2.pdf}
@@ -891,7 +887,7 @@ range of safe exponential thresholds, the results of which are presented in Figu
 \ref{fig:stability_accuracy}. The variational approximation was found to be stable, with the accuracy
 largely insensitive to the choice of threshold.
 
-\begin{figure}
+\begin{figure}[h]
 	\includegraphics[width=0.95 \textwidth]{code/stability_intercept.pdf}
 	\label{fig:stability_accuracy}
 	\caption{Accuracy of approximation of parameters versus the safe exponential threshold}
@@ -938,7 +934,7 @@ The GVA algorithm with the $\mLambda = (\mR \mR^\top)^{-1}$ parameterisation was
 instability due to starting point when the safe exponential parameterisation was used then when it was
 not used, as can be seen from Figure \ref{fig:stability_locations_gva}. % FIXME: Add error counts
 		
-\begin{figure}
+\begin{figure}[h]
 	\includegraphics[width=0.45 \textwidth]{code/safe_exp_stability.pdf}
 	\includegraphics[width=0.45 \textwidth]{code/no_safe_exp_stability.pdf}
 	\label{fig:stability_locations_gva}
@@ -954,7 +950,7 @@ The algorithm is able to abort safely, and allow the Variational Bayes algorithm
 parameters before trying to fit the Gaussian component of the model again until the correct parameters
 are accurately estimated.
 
-\begin{figure}
+\begin{figure}[h]
 	\includegraphics[width=0.95 \textwidth]{code/local_solutions_gva_nr_error_locations_no_protections.pdf}
 	\label{fig:stability_locations_nr}
 	\caption{Starting locations which caused the NR fitting algorithm to fail with numeric errors. The true model had fixed parameters $\vbeta = (2, 1)^\top$ and random intercepts. There were ten groups in the
@@ -990,7 +986,7 @@ fitted distribution for each parameter to a kernel density estimate of the param
 million samples from the equivalent model fitted using Stan. The results are presented in Table
 \ref{tab:application_police_stops}. Figure \ref{fig:police_stops}
 
-\begin{figure}
+\begin{figure}[h]
 \includegraphics[width=0.95 \textwidth]{code/results/accuracy_plots_application2_GVA_inv_par-highlights-nup.pdf}
 \caption{Accuracy of parameter estimates for police stops}
 \label{fig:police_stops}
@@ -1127,7 +1123,7 @@ results are presented in Table \ref{tab:application_roaches}.
 	\caption{The runtimes in seconds for fitting algoritms when fitting the roach model.}
 \end{table}
 		
-\begin{figure}
+\begin{figure}[h]
 	\centering
 	% \includepdf[width=75mm,height=75mm,pages={1,2,3,16},nup=2x2]{code/results/accuracy_plots_application_GVA2.pdf}
 	\begin{tabular}{@{}c@{\hspace{.5cm}}c@{}}
@@ -1173,7 +1169,7 @@ The accuracy of the parameter estimates is presented in Figure
 \ref{fig:biochemists}. As this is a fixed effects model with a large number of samples relative to the
 number of parameters being fit, we are able to estimate all of the parameters with great accuracy.
 
-\begin{figure}
+\begin{figure}[h]
 \includegraphics[width=0.95 \textwidth]{code/results/accuracy_plots_application_biochemists_GVA_inv_param-nup.pdf}
 \label{fig:biochemists}
 \caption{Accuracy of the approximations of the parameters fit to the biochemists data}
@@ -1245,7 +1241,7 @@ The runtime of the algorithms is shown in Table
 inverse parameterisations. The inverse parameterisation is significantly faster -- $1.88$ seconds versus
 $5.66$ seconds for the covariance parameterisation.
 
-\begin{figure}
+\begin{figure}[h]
 	\includegraphics[width=0.95 \textwidth]{code/results/accuracy_plots_application_owls_GVA_inv_param-highlights-nup.pdf}
 	\caption{Accuracy of the approximations of the parameters fit to the Owls data}
 	\label{fig:owls}

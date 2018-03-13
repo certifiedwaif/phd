@@ -12,8 +12,8 @@ new challenges which modern statisticians must be ready to meet. This realisatio
 interest in data science, incorporating ideas from both statistics and computer science, in recent years.
 Machine learning problems are being tackled with algorithms which use probability models for the data --
 leading to the new field of statistical learning which combines many of the best elements of statistics and
-machine  learning \cite{James:2014:ISL:2517747} \cite{MacKay:2002:ITI:971143}
-\cite{hastie01statisticallearning} \cite{Murphy:2012:MLP:2380985}.
+machine learning \citep{James:2014:ISL:2517747} \citep{MacKay:2002:ITI:971143}
+\citep{hastie01statisticallearning} \citep{Murphy:2012:MLP:2380985}.
 
 \section{Motivation}
 
@@ -21,8 +21,7 @@ Approaches to modelling data are needed which can handle large volumes of data i
 efficient manner while retaining the probabilistic underpinning of classical statistics and statistical machine
 learning that leads to a rigorous underlying theory for inference.
 
-\section{Approach (in broad terms)}
-Gaussian Variational approximation for linear mixed models.
+\section{Approach}
 
 Generalised linear mixed models are an appealing way to model data, as they are flexible enough to model a
 range of data types and situations. But the Bayesian versions of these models typically required 
@@ -33,11 +32,11 @@ non-conjugate, making VB difficult to apply as the required mean field updates a
 Gaussian Variational Bayes -- an extension to Variational Bayes, to fit a multivariate normal distribution
 to the regression co-efficients of our models.
 
-Exact inference for model selection for linear models with normal priors.
-
-Exhaustively exploring the search space is not efficient, and often not computationally feasible. So we adopt
-a population-based technique inspired by Rockova's work on population-based EM to efficiently explore the
-posterior model space.
+Exact inference for model selection for linear models with normal priors is computationally feasible when the
+number of  covariates is small, with $p$ below 40. But exhaustively exploring the search space is not
+efficient, and often not computationally feasible for a larger number of covariates. In this situation, we
+adopt a population- based technique inspired by Rockova's work on population-based EM to efficiently explore
+the posterior model space.
 
 \section{Why Bayesian?}
 The difference between frequentist and Bayesian approaches begins with a difference in philosophy.
@@ -51,27 +50,26 @@ parameters using Bayes' Rule,
 \[
 	p(\vtheta | \vy) = \frac{p(\vy | \vtheta) p(\vtheta)}{\int p(\vy | \vtheta) p(\vtheta) d \vtheta}
 \]
-providing the resulting integral can be evaluated or approximated. There are many models which are difficult to
-fit under the frequentist paradigm, as the likelihood is difficult to maximise.
-Furthermore, as the Bayesian paradigm treats each of the parameters in a model as uncertain, the full
-uncertainty associated with all of the parameters can be estimated in the uncertainty in the posterior distribution.
-Avoid pitfalls such as significance testing, p-values.
-\citep{Janes2014}
+providing the resulting integral can be evaluated or approximated. There are many models which are difficult
+to fit under the frequentist paradigm, as the likelihood is difficult to maximise. Furthermore, as the
+Bayesian paradigm treats each of the parameters in a model as uncertain, the full uncertainty associated with
+all of the parameters can be estimated in the uncertainty in the posterior distribution. This approach avoids
+many of the pitfalls of statistical inference encountered with the frequentist approach using significance
+testing and p-values \citep{Cox2005}.
+
 
 The ability to build a model a part at a time and have the uncertainty propagate makes Bayesian modelling 
 particularly appropriate for mixed and hierarchical models.
 Uncertainty regarding model selection is taken into account
 
 \section{What problems in thesis}
-\subsection{Model selection}
-While new types of model are continually being developed, linear models with normal priors remain a popular
-and essential modelling tool owing to the ease of fitting these models, statistical inference on the
-parameters and, most importantly, the ease which which these models can be interpreted. But for a data set
-with a moderate or large number of parameters, the question is immediately raised of which covariates we should
-include in our model. One of the problems that we address in this thesis is \emph{model selection} on linear
-models with normal priors.
+
+In this section, we introduce the major problems that will be addressed in this thesis. The themes of flexible
+modelling of data using Generalised Linear Mixed Models and model selection of linear models with normal
+priors  will be explored.
 
 \subsection{GLMM}
+
 Generalised Linear Mixed Models, an extension of Generalised Linear Models to include both fixed and
 random effects, are flexible to many complicated modelling situations. The standard technique for fitting
 Bayesian versions of these models is to use Monte Carlo Markov Chains techniques such as Gibbs sampling.
@@ -95,14 +93,21 @@ errors, which have associated variance. The data is modelled as a combination of
 random errors. In the Bayesian paradigm, the uncertainty enters the model by assuming parameters are random
 variables, while the data is fixed.
 
-\subsection{Structure of GLMMs}
+\subsection{Model selection}
+
+While new types of model are continually being developed, linear models with normal priors remain a popular
+and essential modelling tool owing to the ease of fitting these models, statistical inference on the
+parameters and, most importantly, the ease which which these models can be interpreted. But for a data set
+with a moderate or large number of parameters, the question is immediately raised of which covariates we should
+include in our model. One of the problems that we address in this thesis is \emph{model selection} on linear
+models with normal priors.
 
 \section{Generalised Linear Mixed models}
 All of the models considered in this thesis belong to the family of generalised linear mixed models - a
 flexible set of models which can model continuous or discrete responses and incorporate both fixed and
 random effects.
 
-\subsection{Exponential family}
+\subsection{Exponential family and the canonical form of linear regresison models}
 
 An exponential family is a set of probability distributions of the form
 \[
@@ -111,29 +116,27 @@ An exponential family is a set of probability distributions of the form
 
 Most commonly used probability distributions in statistics such as the normal, exponential, gamma,
 chi-squared, beta, Dirichlet, Bernoulli, categorical, Poisson, Wishart and Inverse Wishart distributions can
-be represented in this form.
-
-\subsubsection{Canonical form}
+be represented in this form. A canonical form of generalised linear regression models is
 \[
-	\log p(\vnu; \vy) = \vy^\top \mC \vnu - b(\mC \vnu)
+	\log p(\vnu; \vy) = \vy^\top \mC \vnu - b(\mC \vnu).
 \]
 
-Different choices of the function $b:\R \to \R$ lead to different generalised linear mixed models. A set
-of available functions and corresponding distributions is presented in Table \ref{tab:b_functions}.
+Different choices of the function $b:\R \to \R$ lead to different generalised linear mixed models
+assuming the probability distribution for $y$ is one of the probability distributions mentioned above.
 
-\begin{table}
-	\caption{Table of b functions}
-	\label{tab:b_functions}
-	\begin{tabular}{|l|lll|}
-		\hline
-		Distribution                         & Parameter & Natural parameter       & Inverse parameter mapping \\
-		\hline
-		Bernoulli distribution               & $p$       & $\log{\frac{p}{1 - p}}$ & $\frac{1}{1 + e^\eta}$    \\
-		Poisson distribution                 & $\lambda$ & $\log \lambda$          & $e^\eta$                  \\
-		Normal distribution (known variance) & $\mu$     & $\frac{\mu}{\sigma}$    & $\sigma \eta$             \\
-		\hline
-	\end{tabular}
-\end{table}
+% \begin{table}
+% 	\caption{Table of b functions}
+% 	\label{tab:b_functions}
+% 	\begin{tabular}{|l|lll|}
+% 		\hline
+% 		Distribution                         & Parameter & Natural parameter       & Inverse parameter mapping \\
+% 		\hline
+% 		Bernoulli distribution               & $p$       & $\log{\frac{p}{1 - p}}$ & $\frac{1}{1 + e^\eta}$    \\
+% 		Poisson distribution                 & $\lambda$ & $\log \lambda$          & $e^\eta$                  \\
+% 		Normal distribution (known variance) & $\mu$     & $\frac{\mu}{\sigma}$    & $\sigma \eta$             \\
+% 		\hline
+% 	\end{tabular}
+% \end{table}
 
 \subsection{Mixed Models}
 
@@ -191,14 +194,13 @@ $\hat{f}_O(x; \lambda) = \mB_x \hat{\vnu}_O$, where
 $\hat{\vnu}_O = (\mB^\top \mB + \lambda \mOmega)^{-1} \mB^\top \vy$.
 
 $\mOmega$ is defined in this way to penalise oscillation, which is measured by the second derivative.
-
 The penalty differs from P-splines in that the P-spline penalty matrix is $\mD_2^\top \mD_2$ where $\mD_2$ is
 the second-order differencing matrix.
 
 % Divided difference notation?
 % Lagrange's interpolating polynomials?
 % Semiparametric regression / Connection to mixed models
-We follow the discussion of semiparametric regression in \cite{RuppertWandCarroll}.
+We follow the discussion of semiparametric regression in \cite{ruppert_wand_carroll_2003}.
 Using a mixed models setup to fit spline models protects against overfitting.
 Constructing an $\mZ$ matrix with the appropriate B-Spline function evaluations in each of the rows, where
 each column corresponds to a knot.
@@ -225,20 +227,19 @@ more general smoother matrices which can be used to fit models involving splines
 % \subsubsection{Penalised spline}
 % \subsubsection{B-splines}
 \subsection{B-Splines}
+
 % This is taken from the Wikipedia page on the subject
 There are many families of basis functions which can be conveniently used for function approximation,
-including orthogonal polynomials.
-The B-spline basis \citep{DeBoor1972} is numerically stable and efficient to computationally evaluate.
-A B-Spline is a piecewise polynomial function of degree $< n$ in a variable $x$.
-It is defined over a
-domain $t_0 \leq x \leq t_m, m=n$. The points where $x = t_j$ are known as knots or break-points. The
-number of internal knots is equal to the degree of the polynomial if there are no knot multiplicities.
-The knots must be in ascending order. The number of knots is the minimum for the degree of the B-spline,
-which has a non-zero value in the range between the first and last knot. Each piece of the function is a
-polynomial of degree $< n$ between and including adjacent knots. A B-Spline is a continuous function at the
-knots. When all internal knots are distinct its derivatives are also continuous up to the derivative of degree
-$n - 1$. If internal knots are coincident at a given value of x, the continuity of derivative order is reduced
-by 1 for each additional knot.
+including orthogonal polynomials. The B-spline basis \citep{DeBoor1972} is numerically stable and efficient to
+computationally evaluate. A B-Spline is a piecewise polynomial function of degree $< n$ in a variable $x$. It
+is defined over a domain $t_0 \leq x \leq t_m, m=n$. The points where $x = t_j$ are known as knots or break-
+points. The number of internal knots is equal to the degree of the polynomial if there are no knot
+multiplicities. The knots must be in ascending order. The number of knots is the minimum for the degree of the
+B-spline, which has a non-zero value in the range between the first and last knot. Each piece of the function
+is a polynomial of degree $< n$ between and including adjacent knots. A B-Spline is a continuous function at
+the knots. When all internal knots are distinct its derivatives are also continuous up to the derivative of
+degree $n - 1$. If internal knots are coincident at a given value of x, the continuity of derivative order is
+reduced by 1 for each additional knot.
 
 For any given set of knots, the B-spline for approximating a given function is a unique linear combination
 of B-spline basis functions with the basis functions defined as:
@@ -369,7 +370,7 @@ infeasible for models involving even moderate numbers of observations and covari
 for fitting Bayesian models such as Monte Carlo Markov Chains (henceforth referred to as MCMC) are still
 extremely computationally intensive.
 
-Variational Bayes (see \citep{Ormerod2010}) is a computationally
+Variational Bayes (see \cite{Ormerod2010}) is a computationally
 efficient, deterministic method of fitting Bayesian models to data. Variational Bayes approximates the true
 posterior $p(\vy, \vtheta)$ by minimising the KL divergence between the posterior and the  approximating
 distribution $q(\vtheta)$.
@@ -389,6 +390,9 @@ be preferred. There are many ways of choosing a prior on $g$. Using a mixture of
 of adapting the degree of shrinkage to the prior model dependent on the data.
 
 \section{Models and Assumptions}
+
+We now introduce the models that will be considered in this thesis, and the assumptions which will be made
+when using these models.
 
 % Non-Bayesian
 \subsection{Frequentist Approachs to Model Selection}
@@ -415,20 +419,20 @@ ranked, and the best model chosen from those available. Thus the optimal model s
 criteria is $\gamma^* = \min_\gamma f(\gamma)$. These functions typically attempt to balance log likelihood
 against the complexity of the model, achieving a compromise between each.
 
-\mgc{AIC, BIC, DIC, Mallow's $C_p$}
+% \mgc{AIC, BIC, DIC, Mallow's $C_p$}
 
-Information criteria are frequently used to compare amongst models. Let $\vgamma$ denote the candidate model.
-The Information Criteria take the form "-2 times the log-likelihood plus a term penalising for complexity of
+Information criteria are frequently used to compare amongst models. Letting $\vgamma$ denote the candidate model,
+Information Criteria take the form "-2 times the log-likelihood plus a term penalising for complexity of
 the model"
 \[
 	\text{Information Criteria} = -2 \log p(\vy | \hat{\vtheta}_\vgamma) + \text{complexity penalty}
 \]
 
-where $\log p(\vy | \hat{\vtheta_\gamma})$ is the log-likelihood of the model and the complexity penalty is
-a function of the sample size $n$ and the number of parameters $p$ of the model. Information criteria attempt
-to successfully compromise between goodness of fit and model complexity.
+\noindent where $\log p(\vy | \hat{\vtheta_\gamma})$ is the log-likelihood of the model and the complexity
+penalty is a function of the sample size $n$ and the number of parameters $p$ of the model. Information
+criteria attempt to successfully compromise between goodness of fit and model complexity.
 
-The most popular of the information criteria is the Akaike Information Criterion (AIC) \cite{Akaike1974}. AIC
+The most popular of the information criteria is the Akaike Information Criterion (AIC) \citep{Akaike1974}. AIC
 calculates an estimate of the information lost when a given model is used to represent the process that
 generates the data and so is an estimator of the Kullback-Leibler divergence of the true model from the fitted
 model. The AIC of the model $\vgamma$ is defined as
@@ -436,8 +440,8 @@ model. The AIC of the model $\vgamma$ is defined as
 	\text{AIC}(\vgamma) = -2 \log p(\vy | \hat{\vtheta}_\vgamma) + 2 p_\vgamma
 \]
 
-where $|\vgamma|$ is the number of parameters in the model $\vgamma$. The model with the lowest AIC is selected
-as the `best`.
+\noindent where $|\vgamma|$ is the number of parameters in the model $\vgamma$. The model with the lowest AIC
+is selected as the `best`.
 
 Of a similiar form as the AIC, but derived via a more Bayesian framework is the Bayesian Information Criterion
 or BIC. The BIC approximates the posterior probability of the candidate model $\vgamma$. The BIC is defined as
@@ -445,32 +449,9 @@ or BIC. The BIC approximates the posterior probability of the candidate model $\
 	\text{BIC}(\vgamma) = -2 \log p(\vy | \hat{\vtheta}_\vgamma) + p_\vgamma \log(n).
 \]
 
-This is a more severe penalty for model complexity than in the Akaike's Information Criteria when $n$ is
-greater than $8$. BIC can be shown to be approximately equivalent to model selection using Bayes Factors
-in certain contexts, as shown by \cite{Kass1993}.
-\subsection{Bayesian Approaches to Model Selection}
-An alternative to model selection criterion is to select models based on their posterior probability. In a
-Bayesian context, this can be accomplished by comparing the posterior likelihoods of the candidate models to
-see which is most probable given the observed data. This can be done, for example, by using Bayes Factors as
-in \cite{Kass1993}. Rather than selecting one candidate model, several models can be combined together using
-Bayesian model averaging, as in \cite{Hoeting1999}, \cite{Raftery1997}, \cite{Fernandez2001} or
-\cite{Papaspiliopoulos2016}.
-
-The problem of model selection can also be considered within a Bayesian framework.
-Within this framework, candidate models can be selected by comparing their posterior likelihoods to see
-which is most probable given the observed data, as in \cite{Kass1993}. Bayesian model selection approaches
-can incorporate prior information, such as the prior probability of selecting each candidate model $\vgamma$.
-
-A special case of model selection is variable selection, where the focus is on selecting individual
-covariates, rather than entire models. Variable selection approaches search over the
-variables in the model space for the best covariates to include in the candidate model. Due to the large
-number of possible combinations of covariates -- typically $2^p$ where $p$ is the number of covariates, such
-searches are often stochastic. This approach can either be Fully Bayesian or Empirically Bayesian as in
-\cite{Cui2008}.  This search can be driven by posterior probabilities, as in \cite{Casella2006}, or by Gibbs
-sampling approaches such as in \cite{George1993}. These two approaches of model selection and variable
-selection can be combined, as in \cite{Geweke1996}. Variable selection can also be accomplished by selecting
-the median probability model, consisting of those models whose posterior inclusion probability is at least
-$1/2$, as in \cite{Barbieri2004}.
+\noindent This is a more severe penalty for model complexity than in the Akaike's Information Criteria when
+$n$ is greater than $8$. BIC can be shown to be approximately equivalent to model selection using Bayes
+Factors in certain contexts, as shown by \cite{Kass1993}.
 
 \subsection{Penalised regression}
 Penalised regression methods trade introducing some bias in the estimator for reducing the variance and thus
@@ -505,43 +486,65 @@ model selection process itself, as Bayesian model selection methods do.
 
 \subsubsection{Ridge regression}
 Ridge regression is another penalised regression method, which predates lasso regression
-\cite{Hoerl2017}. The penalty on the regression co-efficients shrinks the estimated co-efficients towards
+\cite{Hoerl1970}. The penalty on the regression co-efficients shrinks the estimated co-efficients towards
 zero, ensuring sparsity of the fitted model.
 $$
 \widehat{\vbeta}_{\text{lasso}} = \argmin_\vbeta \|\vy - \mX \vbeta\|_2^2 \text{ subject to } \|\vbeta\|_2 \leq \lambda
 $$
 
-\subsubsection{Linear regression with normal prior and $g$ hyperprior}
+\subsection{Bayesian Approaches to Model Selection}
+An alternative to model selection criterion is to select models based on their posterior probability. In a
+Bayesian context, this can be accomplished by comparing the posterior likelihoods of the candidate models to
+see which is most probable given the observed data. This can be done, for example, by using Bayes Factors as
+in \cite{Kass1993}. Rather than selecting one candidate model, several models can be combined together using
+Bayesian model averaging, as in \cite{Hoeting1999}, \cite{Raftery1997}, \cite{Fernandez2001} or
+\cite{Papaspiliopoulos2016}.
 
-Zellner's g-prior, first introduced in \cite{Zellner1986},
+The problem of model selection can also be considered within a Bayesian framework. Within this framework,
+candidate models can be selected by comparing their posterior likelihoods or Bayes Factors to see which is
+most probable given the observed data, as in \cite{Kass1993}. Bayesian model selection approaches can
+incorporate prior information, such as the prior probability of selecting each candidate model $\vgamma$.
 
-\[
-	\vbeta_\vgamma | \sigma^2, \mathcal{M}_\vgamma \sim \N(\vzero, g \sigma^2 (\mX^\top \mX)^{-1})
-\]
+A special case of model selection is variable selection, where the focus is on selecting individual
+covariates, rather than entire models. Variable selection approaches search over the
+variables in the model space for the best covariates to include in the candidate model. Due to the large
+number of possible combinations of covariates -- typically $2^p$ where $p$ is the number of covariates, such
+searches are often stochastic. This approach can either be Fully Bayesian or Empirically Bayesian as in
+\cite{Cui2008}.  This search can be driven by posterior probabilities, as in \cite{Casella2006}, or by Gibbs
+sampling approaches such as in \cite{George1993}. These two approaches of model selection and variable
+selection can be combined, as in \cite{Geweke1996}. Variable selection can also be accomplished by selecting
+the median probability model, consisting of those models whose posterior inclusion probability is at least
+$1/2$, as in \cite{Barbieri2004}.
 
-is widely used for variable selection in linear models with normal priors owing to its'
-computational efficiency in evaluating marginal likelihoods and model selection and
-conceptually simple interpretation.
-which scales the Fisher information $\sigma^2 (\mX^\top \mX)^{-1}$ by $g$,
+% \subsubsection{Linear regression with normal prior and $g$ hyperprior}
 
-This model specification performs shrinkage on the regression co-efficients,
-and so has the advantage of performing well on model selection problems where the true model is sparse in
-the sense that the number of true non-zero covariates $p$ is less than the number of samples $n$.
-As stated in \cite{Hastie2015}, it is best to `best on sparsity': ``Use a procedure that does well in sparse 
-problems, since no procedure does well in dense problems.''.
+% Zellner's g-prior
 
-With different choices of hyper-prior on $g$, this shrinkage can be made to behave like Bayesian versions of
-the lasso, ridge regression or generalisations of these.
+% \[
+% 	\vbeta_\vgamma | \sigma^2, \mathcal{M}_\vgamma \sim \N(\vzero, g \sigma^2 (\mX^\top \mX)^{-1})
+% \]
 
-\begin{itemize}
-\item Sparsity
-\item Ease of interpretation from fewer regression co-efficients
-\item Computational convenience
-\item Convex optimisation problem
-\item Does not take model selection uncertainty into account
-\item Bias-Variance trade-off -- trade some bias in the estimator for a decrease in variance
-\item Deal with collinearity
-\end{itemize}
+% \noindent which scales the Fisher information $\sigma^2 (\mX^\top \mX)^{-1}$ by $g$, was first introduced in
+% \cite{Zellner1986}. It is widely used for variable selection in linear models with normal priors owing to its'
+% computational efficiency in evaluating marginal likelihoods and model selection and conceptually simple
+% interpretation.
+
+% This model specification performs shrinkage on the regression co-efficients. As stated in \cite{Hastie2015},
+% it is best to `bet on sparsity': ``Use a procedure that does well in sparse  problems, since no procedure does
+% well in dense problems.''. With different choices of hyper- prior on $g$, this shrinkage can be made to behave
+% like Bayesian versions of the lasso, ridge regression or generalisations of these \citep{Hahn2015}.  Thus this
+% model specification has the advantage of performing well on model selection problems where the true model is
+% sparse in the sense that the number of true non-zero covariates $p$ is less than the number of samples $n$.
+
+% \begin{itemize}
+% % \item Sparsity
+% % \item Ease of interpretation from fewer regression co-efficients
+% % \item Computational convenience
+% \item Convex optimisation problem
+% % \item Does not take model selection uncertainty into account
+% \item Bias-Variance trade-off -- trade some bias in the estimator for a decrease in variance
+% \item Deal with collinearity
+% \end{itemize}
 
 
 \section{Approximate inference}
@@ -559,12 +562,13 @@ being almost as accurate.
 
  
 \subsection{Variational Bayes}
+\label{sec:vb}
 
- 
-\section{Variational approximations}
+We now introduce Variational Bayes, the popular approximate inference method for Bayesian models. It is used
+to accelerate Bayesian model fitting by tens or hundreds of times, with only minor loss in accuracy for some
+models. This method plays a central role in this thesis, particularly in the second and fourth chapters.
 
- 
-\subsection{Definition}
+\subsubsection{Definition}
 
 Much of Bayesian inference is based on the posterior distribution of a model's parameters given observed data 
 defined by $p(\vtheta|\vy) = p(\vy|\vtheta)p(\vtheta)/p(\vy)$ where $\vy$ is a vector of observed data,
@@ -668,8 +672,6 @@ in this paper. These methods are generally difficult to apply in practice, as th
 optimisation of many parameters over high-dimensional, constrained spaces whose constraints cannot be simply
 expressed.
 
-\section{Variational Bayes}
-\label{sec:vb}
 
 % General Design Bayesian Generalized Linear Mixed Model, as in \citep{zhao06}. This allows us to incorporate
 % within-subject correlation, and smoothing splines (as in \citep{Wand2008}) in our models.
@@ -677,22 +679,22 @@ expressed.
 % Idea: We can use an approximation of the from q(\beta, \u, \Sigma) q(\rho) \Product q(r_i)
 % and use GVA on q(\beta, \u, \Sigma) and mean field updates on \rho and r_i
 
-\subsection{Semiparametric Mean Field Variational Bayes}
+% \subsection{Semiparametric Mean Field Variational Bayes}
 
 
-\subsubsection{Definitions}
+% \subsubsection{Definitions}
 
 
-Two strategies for selecting a suitable class of approximating distributions $q$ such that
-an optimal distribution $q^*(\vtheta)$ can be found are
-(A) specifying the parametric form of $q$; or 
-(B) choosing $q$ to be of the factored form $q(\vtheta) = \prod_{i=1}^M q(\theta_i)$.
-For the second alternative,
-it can be shown (see Ormerod \& Wand, 2010, for example) that the optimal form of the
-approximating distributions $q_i$ for each parameter are of the form
-\begin{equation}\label{eq:consistency}
-	q_i^*(\theta_i) \propto \exp{\{ \bE_{-q(\theta_i)} \log p(\vy, \vtheta) \}},  \quad 1\le i\le M.
-\end{equation}
+% Two strategies for selecting a suitable class of approximating distributions $q$ such that
+% an optimal distribution $q^*(\vtheta)$ can be found are
+% (A) specifying the parametric form of $q$; or 
+% (B) choosing $q$ to be of the factored form $q(\vtheta) = \prod_{i=1}^M q(\theta_i)$.
+% For the second alternative,
+% it can be shown (see Ormerod \& Wand, 2010, for example) that the optimal form of the
+% approximating distributions $q_i$ for each parameter are of the form
+% \begin{equation}\label{eq:consistency}
+% 	q_i^*(\theta_i) \propto \exp{\{ \bE_{-q(\theta_i)} \log p(\vy, \vtheta) \}},  \quad 1\le i\le M.
+% \end{equation}
 
 %This approach works well for classes of models where all of the parameters are conjugate. For more general
 %classes of models, mean field updates are not analytically tractable and general gradient-based optimisation
@@ -726,38 +728,36 @@ Consider an exponential integral of the form
 	\int_a^b e^{M f(x)} dx
 \]
 
-where $f(x)$ is twice differentiable and $f''(x_0) < 0$, $M \in \R$ and $a, b \in \R \cup \{-\infty, \infty\}$.
-
-Let $f(x)$ have a unique global maximum at $x_0$. Then, Taylor expanding about $x_0$, we have
+\noindent where $f(x)$ is twice differentiable and $f''(x_0) < 0$, $M \in \R$ and $a, b \in \R \cup \{-\infty,
+\infty\}$. Let $f(x)$ have a unique global maximum at $x_0$. Then, Taylor expanding about $x_0$, we have
 
 \[
 	f(x) = f(x_0) + f'(x_0) (x - x_0) + \frac{1}{2} f''(x_0) (x - x_0)^2 + R
 \]
 
-where $R = \BigO((x - x_0)^3)$.
+\noindent where $R = \BigO((x - x_0)^3)$. As $f$ has a global maximum at $x_0$, the first derivative of $f$ is
+zero at $x_0$. Thus, the function $f(x)$ may be approximated by
 
-As $f$ has a global maximum at $x_0$, the first derivative of $f$ is zero at $x_0$. Thus, the function $f(x)$
-may be approximated by
 \[
 	f(x) \approx f(x_0) - \frac{1}{2} |f''(x_0)| (x - x_0)^2
 \]
 
-for $x$ sufficiently close to $x_0$, as the second derivative is negative at $x_0$. This ensures the
+\noindent for $x$ sufficiently close to $x_0$, as the second derivative is negative at $x_0$. This ensures the
 the approximation of the integral
 
 \[
 	\int_a^b e^{M f(x)} dx \approx e^{M f(x_0)} \int_a^b e^{-M |f''(x_0)|(x - x_0)^2} dx
 \]
 
-is accurate. This is a Gaussian integral, and thus we find that
+\noindent is accurate. This is a Gaussian integral, and thus we find that
 
 \[
 	\int_a^b e^{M f(x)} dx \approx \sqrt{\frac{2 \pi}{M |f''(x_0)|}} e^{M f(x_0)}
 \]
 
  % See the Relative error section of the Wikipedia page, for instance.
-Thus we have approximated our integral by a closed form expression. The error in the approximation is
-$O(1/M)$. The approximation can be made more accurate by using a Taylor expansion beyond second order.
+\noindent Thus we have approximated our integral by a closed form expression. The error in the approximation
+is $O(1/M)$. The approximation can be made more accurate by using a Taylor expansion beyond second order.
 
 \subsubsection{Extending to multiple dimensions}
 This approach to approximating integrals extends naturally to multiple dimensions.
@@ -766,16 +766,17 @@ $$
 \log f(\vtheta) \approx f(\vtheta_m) + (\vtheta - \vtheta_m) \nabla \log f(\vtheta) + \frac{1}{2} (\vtheta - \vtheta_m)^\top \mH_{\log f}(\vtheta_m) (\vtheta - \vtheta_m) + \sO(\|\vtheta - \vtheta_m\|^3).
 $$
 
-Assuming that $\vtheta$ is a stationary point of $\log f$, then $\nabla f(\vtheta) = \vzero$ and so
+\noindent Assuming that $\vtheta$ is a stationary point of $\log f$, then $\nabla f(\vtheta) = \vzero$ and so
 $$
 \log f(\vtheta) \approx f(\vtheta_m) + \frac{1}{2} (\vtheta - \vtheta_m)^\top \mH_{\log f}(\vtheta_m) (\vtheta - \vtheta_m) + \sO(\|\vtheta - \vtheta_m\|^3)
 $$
 
-at such a point. The quadratic form in $\vtheta$ in the approximate expression for the log likelihood above
-leads to a Gaussian approximation for the likelihood $\N(\vtheta_m, \mH_{\log f}(\vtheta_m)^{-1})$.
+\noindent at such a point. The quadratic form in $\vtheta$ in the approximate expression for the log
+likelihood above leads to a Gaussian approximation for the likelihood $\N(\vtheta_m, \mH_{\log
+f}(\vtheta_m)^{-1})$. The approximation is crude but can be quite accurate if the likelihood is symmetric and
+unimodal.
 
-The approximation is crude but can be quite accurate if the likelihood is symmetric and unimodal.
-\subsection{Other methods: Expectation Propagation (in broad terms)}
+\subsection{Other methods: Expectation Propagation}
 Expectation Propagation is an approximate Bayesian inference method, first proposed in \citep{Minka2001}.
 It relies on minimising the reverse KL divergence $\text{KL}(p || q)$ between the true and approximaing
 disitrbutions $p$ and $q$. A factorised form of the distribution
@@ -792,64 +793,65 @@ the information already in the other factors
 The factors are cycled through several times until convergence is achieved.
 
 While promising, Expectation Propagation is a relatively new technique.
-Unlike in Variatioal Bayes, there is no guarantee of convergence, and there is still much work to be done
+Unlike with Variatioal Bayes, there is no guarantee of convergence, and there is still much work to be done
 before it is as mature as other approximation methods like Variational Bayes and Laplace approximation.
 
 \section{Our Contributions}
-\subsection{Outline}
 % \begin{itemize}
 % 	\item Gaussian Variational Approximation to Zero-Inflated Models. Parameterisation of the covariance structure.
 
-	In our second chapter, we present a Gaussian Variational Approximation to a Zero-Inflated Poisson mixed model
-	which can flexibly incorporate both fixed and random effects. This allows it to fit complicated models
-	to the data incorporating random intercepts and slopes and additive models using O'Sullivan-penalised splines.
-	The model is fit by optimising the conditional likelihood of the Gaussian component of the model given the
-	parameters governing zero-inflation and the covariance matrix $\mSigma$.
-	We present a new parameterisation for the covariance matrix of the Gaussian based on the Cholesky
-	factorisation of the precision matrix, and detail computation and numerical advantages of this
-	factorisation, owing to its sparsity when the form of the covariance matrix of the Gaussian is known due to
-	knowledge of the random effects in the model.
+In this section, we briefly outline the major contributions in this thesis.
 
-	% \item Exact inference for some regression parameters for regression model with Maruyama and George prior on $g$.
+In our second chapter, we present a Gaussian Variational Approximation to a Zero-Inflated Poisson mixed model
+which can flexibly incorporate both fixed and random effects. This allows it to fit complicated models
+to the data incorporating random intercepts and slopes and additive models using O'Sullivan-penalised splines.
+The model is fit by optimising the conditional likelihood of the Gaussian component of the model given the
+parameters governing zero-inflation and the covariance matrix $\mSigma$.
+We present a new parameterisation for the covariance matrix of the Gaussian based on the Cholesky
+factorisation of the precision matrix, and detail computation and numerical advantages of this
+factorisation, owing to its sparsity when the form of the covariance matrix of the Gaussian is known due to
+knowledge of the random effects in the model.
 
-	A popular choice of Bayesian model selection is to use regression models with $g$-priors. For the Maruyama
-	and George Beta Prime prior \citep{Maruyama2011} we were able to derive closed form expressions for the
-	posterior distributions of most of the parameters of the model in terms of the hypergeometric function.
+% \item Exact inference for some regression parameters for regression model with Maruyama and George prior on $g$.
 
-	% \item Exact moments for $\vbeta$ for the regression model with the Maruyama and George prior.
+A popular choice of Bayesian model selection is to use regression models with $g$-priors. For the Maruyama
+and George Beta Prime prior \citep{Maruyama2011} we were able to derive closed form expressions for the
+posterior distributions of most of the parameters of the model in terms of the hypergeometric function.
 
-	% We were unable to derive a closed expression for the non-intercept regression parameters $\vbeta$, so instead
-	% we focused on the first and second moments. We were able to obtain closed form expressions for these,
-	% again in terms of the hypergeometric function. We were also able to obtain an approximation for the
-	% regression co-efficients which is multivariate normal using the Laplace approximation method, showing
-	% that the first and second moments of $\vbeta$ characterise the posterior distribution well.
+% \item Exact moments for $\vbeta$ for the regression model with the Maruyama and George prior.
 
-	% \item Posterior distribution of $g$ for different g-priors - Liang's hyper-$g$ prior, Liang's hyper-$g/n$ prior,
-	% Bayarri's robust $g$ prior and the Maruyama and George Beta-Prime prior.
+% We were unable to derive a closed expression for the non-intercept regression parameters $\vbeta$, so instead
+% we focused on the first and second moments. We were able to obtain closed form expressions for these,
+% again in terms of the hypergeometric function. We were also able to obtain an approximation for the
+% regression co-efficients which is multivariate normal using the Laplace approximation method, showing
+% that the first and second moments of $\vbeta$ characterise the posterior distribution well.
 
-	An important consideration in model selection is being able to compare models against one another.
-	Calculation of the Bayes Factors for comparing models requires being able to compute the posterior
-	distribution of $g$. In our third chapter, we derive closed form expressions in terms of special functions for the posterior
-	distributions of $g$ for a number of choices of $g$ prior from the literature:
-	Liang's hyper-$g$ prior,
-	Liang's hyper-$g/n$ prior \citep{Liang2008},
-	Bayarri's robust $g$ prior \citep{Bayarri2012} and the 
-	Maruyama and George Beta-Prime \citep{Maruyama2011}prior.	
+% \item Posterior distribution of $g$ for different g-priors - Liang's hyper-$g$ prior, Liang's hyper-$g/n$ prior,
+% Bayarri's robust $g$ prior and the Maruyama and George Beta-Prime prior.
 
-	% \item CVA
-	
-	For moderate to large $p$, the entire model space can be too large to perform model selection by
-	exhaustively searching the model space. Instead, approximate methods can be used to search the parts of the
-	model space for which the posterior model likelihood is the highest. In our fourth chapter, propose a population-based algorithm,
-	which works by adding or removing a covariate at a time to each of the fitted models in the population.
-	We implement this algorithm for a number of model selection priors from the literature:
-	the Liang's hyper-$g$ prior,
-	the Liang's hyper-$g/n$ prior \citep{Liang2008},
-	Bayarri's robust $g$ prior \citep{Bayarri2012} and the 
-	Maruyama and George Beta-Prime \citep{Maruyama2011} prior.	
+An important consideration in model selection is being able to compare models against one another.
+Calculation of the Bayes Factors for comparing models requires being able to compute the posterior
+distribution of $g$. In our third chapter, we derive closed form expressions in terms of special functions for the posterior
+distributions of $g$ for a number of choices of $g$ prior from the literature:
+Liang's hyper-$g$ prior,
+Liang's hyper-$g/n$ prior \citep{Liang2008},
+Bayarri's robust $g$ prior \citep{Bayarri2012} and the 
+Maruyama and George Beta-Prime \citep{Maruyama2011}prior.	
 
-	We are able to implement this algorithm efficiently by using rank-one updates and downdates and the closed
-	forms of the posteriors for the model selection priors that we consider. The population-based approach allows
-	us to estimate the uncertainty in the model selection process.
+% \item CVA
+
+For moderate to large $p$, the entire model space can be too large to perform model selection by
+exhaustively searching the model space. Instead, approximate methods can be used to search the parts of the
+model space for which the posterior model likelihood is the highest. In our fourth chapter, propose a population-based algorithm,
+which works by adding or removing a covariate at a time to each of the fitted models in the population.
+We implement this algorithm for a number of model selection priors from the literature:
+the Liang's hyper-$g$ prior,
+the Liang's hyper-$g/n$ prior \citep{Liang2008},
+Bayarri's robust $g$ prior \citep{Bayarri2012} and the 
+Maruyama and George Beta-Prime \citep{Maruyama2011} prior.	
+
+We are able to implement this algorithm efficiently by using rank-one updates and downdates and the closed
+forms of the posteriors for the model selection priors that we consider. The population-based approach allows
+us to estimate the uncertainty in the model selection process.
 
 % \end{itemize}

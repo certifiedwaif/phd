@@ -744,7 +744,7 @@ year = {2013}
 }
 @article{Challis2013,
 abstract = {We investigate Gaussian Kullback-Leibler (G-KL) variational approximate inference techniques for Bayesian generalised linear models and various extensions. In particular we make the fol-lowing novel contributions: sufficient conditions for which the G-KL objective is differentiable and convex are described; constrained parameterisations of Gaussian covariance that make G-KL methods fast and scalable are provided; the lower bound to the normalisation constant provided by G-KL methods is proven to dominate those provided by local lower bounding methods; complexity and model applicability issues of G-KL versus other Gaussian approximate inference methods are discussed. Numerical results comparing G-KL and other deterministic Gaussian approximate in-ference methods are presented for: robust Gaussian process regression models with either Student-t or Laplace likelihoods, large scale Bayesian binary logistic regression models, and Bayesian sparse linear models for sequential experimental design.},
-author = {Challis, Edward and BARBER, David},
+author = {Challis, Edward and Barber, David},
 file = {:home/markg/.local/share/data/Mendeley Ltd./Mendeley Desktop/Downloaded/Challis, Barber DBARBER - 2013 - Gaussian Kullback-Leibler Approximate Inference.pdf:pdf},
 journal = {Journal of Machine Learning Research},
 keywords = {Gaussian processes,active learning,experimental design,generalised linear models,large scale inference,latent linear models,sparse learning,variational approximate inference},
@@ -3795,4 +3795,92 @@ pages = {1--482},
 pmid = {2688543},
 title = {{A family of algorithms for approximate Bayesian inference}},
 year = {2001}
+}
+
+@misc{Tierney1986,
+abstract = {This article describes approximations to the posterior means and variances of positive functions of a real or vector-valued parameter, and to the marginal posterior densities of arbitrary (i.e., not necessarily positive) parameters. These approximations can also be used to compute approximate predictive densities. To apply the proposed method, one only needs to be able to maximize slightly modified likelihood functions and to evaluate the observed information at the maxima. Nevertheless, the resulting approximations are generally as accurate and in some cases more accurate than approximations based on third-order expansions of the likelihood and requiring the evaluation of third derivatives. The approximate marginal posterior densities behave very much like saddle-point approximations for sampling distributions. The principal regularity condition required is that the likelihood times prior be unimodal.},
+author = {Tierney, Luke and Kadane, Joseph B.},
+booktitle = {Journal of the American Statistical Association},
+doi = {10.1080/01621459.1986.10478240},
+file = {:home/markg/.local/share/data/Mendeley Ltd./Mendeley Desktop/Downloaded/Tierney, Kadane - 1986 - Accurate approximations for posterior moments and marginal densities.pdf:pdf},
+isbn = {0162-1459},
+issn = {1537274X},
+keywords = {Asymptotic expansions,Bayesian inference,Computation of integrals,Laplace method},
+number = {393},
+pages = {82--86},
+title = {{Accurate approximations for posterior moments and marginal densities}},
+volume = {81},
+year = {1986}
+}
+
+@article{Rue2009,
+abstract = {Structured additive regression models are perhaps the most commonly used class of models in statistical applications. It includes, among others, (generalized) linear models, (gener- alized) additive models, smoothing spline models, state space models, semiparametric regres- sion, spatial and spatiotemporal models, log-Gaussian Cox processes and geostatistical and geoadditive models.We consider approximate Bayesian inference in a popular subset of struc- tured additive regression models, latent Gaussian models, where the latent field is Gaussian, controlled by a few hyperparameters and with non-Gaussian response variables.The posterior marginals are not available in closed form owing to the non-Gaussian response variables. For such models, Markov chain Monte Carlo methods can be implemented, but they are not without problems, in terms of both convergence and computational time. In some practical applications, the extent of these problems is such that Markov chain Monte Carlo sampling is simply not an appropriate tool for routine analysis.We show that, by using an integrated nested Laplace approximation and its simplified version, we can directly compute very accurate approximations to the posterior marginals. The main benefit of these approximations is computational: where Markov chain Monte Carlo algorithms need hours or days to run, our approximations provide more precise estimates in seconds or minutes. Another advantage with our approach is its gen- erality, which makes it possible to performBayesian analysis in an automatic, streamlined way, and to compute model comparison criteria and various predictive measures so that models can be compared and the model under study can be challenged.},
+archivePrefix = {arXiv},
+arxivId = {arXiv:1405.0913v5},
+author = {Rue, H{\aa}vard and Martino, Sara and Chopin, Nicolas},
+doi = {10.1111/j.1467-9868.2008.00700.x},
+eprint = {arXiv:1405.0913v5},
+file = {:home/markg/.local/share/data/Mendeley Ltd./Mendeley Desktop/Downloaded/Rue, Martino, Chopin - 2009 - Approximate Bayesian inference for latent Gaussian models by using integrated nested Laplace approximation.pdf:pdf},
+isbn = {1369-7412},
+issn = {13697412},
+journal = {Journal of the Royal Statistical Society. Series B: Statistical Methodology},
+keywords = {Approximate Bayesian inference,Gaussian Markov random fields,Generalized additive mixed models,Laplace approximation,Parallel computing,Sparse matrices,Structured additive regression models},
+number = {2},
+pages = {319--392},
+title = {{Approximate Bayesian inference for latent Gaussian models by using integrated nested Laplace approximations}},
+volume = {71},
+year = {2009}
+}
+
+@article{Minka2013,
+abstract = {This paper presents a new deterministic approximation technique in Bayesian networks. This method, "Expectation Propagation", unifies two previous techniques: assumed-density filtering, an extension of the Kalman filter, and loopy belief propagation, an extension of belief propagation in Bayesian networks. All three algorithms try to recover an approximate distribution which is close in KL divergence to the true distribution. Loopy belief propagation, because it propagates exact belief states, is useful for a limited class of belief networks, such as those which are purely discrete. Expectation Propagation approximates the belief states by only retaining certain expectations, such as mean and variance, and iterates until these expectations are consistent throughout the network. This makes it applicable to hybrid networks with discrete and continuous nodes. Expectation Propagation also extends belief propagation in the opposite direction - it can propagate richer belief states that incorporate correlations between nodes. Experiments with Gaussian mixture models show Expectation Propagation to be convincingly better than methods with similar computational cost: Laplace's method, variational Bayes, and Monte Carlo. Expectation Propagation also provides an efficient algorithm for training Bayes point machine classifiers.},
+archivePrefix = {arXiv},
+arxivId = {1301.2294},
+author = {Minka, Thomas P.},
+eprint = {1301.2294},
+file = {:home/markg/.local/share/data/Mendeley Ltd./Mendeley Desktop/Downloaded/Minka - 2013 - Expectation Propagation for approximate Bayesian inference.pdf:pdf},
+isbn = {1-55860-800-1},
+title = {{Expectation Propagation for approximate Bayesian inference}},
+url = {http://arxiv.org/abs/1301.2294},
+year = {2013}
+}
+
+@article{Barber2016,
+archivePrefix = {arXiv},
+arxivId = {arXiv:1503.08337v1},
+author = {Barber, Rina Foygel and Drton, Mathias and Tan, Kean Ming},
+doi = {10.1007/978-3-319-27099-9_2},
+eprint = {arXiv:1503.08337v1},
+file = {:home/markg/.local/share/data/Mendeley Ltd./Mendeley Desktop/Downloaded/Barber, Drton, Tan - 2016 - Laplace approximation in high-dimensional Bayesian regression.pdf:pdf},
+isbn = {9783319270975},
+issn = {21978549},
+journal = {Abel Symposia},
+keywords = {and phrases,bayesian inference,generalized linear models,laplace ap-,logistic regression,model selection,proximation,variable selection},
+number = {2012},
+pages = {15--36},
+title = {{Laplace approximation in high-dimensional Bayesian regression}},
+volume = {11},
+year = {2016}
+}
+
+@article{KimWand2017,
+author = {Kim, Andy S. I. Kim and Wand, M. P.},
+file = {:home/markg/.local/share/data/Mendeley Ltd./Mendeley Desktop/Downloaded/Kim, Wand - 2017 - On Expectation Propagation for Generalized , Linear and Mixed Models.pdf:pdf},
+keywords = {bayesian computing,factor graphs,infer,mean field variational bayes,net},
+pages = {1--27},
+title = {{On Expectation Propagation for Generalized , Linear and Mixed Models}},
+year = {2017}
+}
+
+@article{Sinica2017,
+author = {Hall, P and Ormerod, Jt and Wand, Mp},
+file = {:home/markg/.local/share/data/Mendeley Ltd./Mendeley Desktop/Downloaded/Hall, Ormerod, Wand - 2011 - Theory of Gaussian variational approximation for a Poisson mixed model.pdf:pdf},
+issn = {10170405},
+journal = {Statistica Sinica},
+keywords = {and phrases,asymptotic theory,generalized linear mixed models,kullback-,liebler divergence,longitudinal data analysis,maximum likelihood estimation},
+number = {1},
+pages = {369--389},
+title = {{Theory of Gaussian variational approximation for a Poisson mixed model}},
+volume = {21},
+year = {2011}
 }
