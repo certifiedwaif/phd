@@ -702,17 +702,17 @@ The variational lower bound of a Gaussian Variational Approximation takes the fo
 Let $\mOmega = \mLambda^{-1}$, the precision matrix. Then if we reparameterise the variational lower bound in
 terms of $\mOmega$ it becomes
 \begin{align*}
-F(\mOmega) =& \vy^\top \mC \vmu - \vone^\top B(\mC \vmu, \text{diag}(\mC \mOmega^{-1} \mC^\top)) + \vone^\top c(\vy) \\
+F(\mOmega) =& \quad \vy^\top \mC \vmu - \vone^\top B(\mC \vmu, \text{diag}(\mC \mOmega^{-1} \mC^\top)) + \vone^\top c(\vy) \\
 &- \tfrac{1}{2} \vmu^\top \mSigma^{-1} \vmu - \tfrac{1}{2} \tr(\mSigma^{-1} \mOmega^{-1}) \\
 &- \tfrac{1}{2} \log |\mOmega| - \tfrac{1}{2} \log |\mSigma| + \tfrac{d}{2}
 \end{align*}
 When the variational lower bound is optimised, by the first-order optimality conditions, $\tfrac{\partial
 F}{\partial \mOmega_{jk}} = \vzero$. Then using matrix calculus and the properties of the trace operator
 \begin{align*}
-\tfrac{\partial F}{\partial \mOmega_{jk}} &= -\tfrac{1}{2} \tr(\mOmega^{-1} \tfrac{\partial \mOmega}{\partial \mOmega_{jk}}) + \tfrac{1}{2} \tr(\mSigma^{-1} \mOmega^{-1} \tfrac{\partial \mOmega}{\partial \mOmega_{jk}} \mOmega^{-1})
--\tfrac{1}{2} \tr\{\mC^\top \text{diag}(B^{(2)}(\mC \vmu, \text{diag}(\mC \mOmega^{-1} \mC^\top))) \mC \mOmega^{-1} \tfrac{\partial \mOmega}{\partial \mOmega_{jk}} \mOmega^{-1}\} \\
-&=-\tfrac{1}{2} [ \tr(\mOmega^{-1} \mOmega \mOmega^{-1} \tfrac{\partial \mOmega}{\partial \mOmega_{jk}}) - \tr(\mSigma^{-1} \mOmega^{-1} \tfrac{\partial \mOmega}{\partial \mOmega_{jk}} \mOmega^{-1})
-+ \tr\{\mOmega^{-1} \mC^\top \text{diag}(B^{(2)}(\mC \vmu, \text{diag}(\mC \mOmega^{-1} \mC^\top))) \mC \mOmega^{-1} \tfrac{\partial \mOmega}{\partial \mOmega_{jk}}\} ] \\
+\tfrac{\partial F}{\partial \mOmega_{jk}} &= -\tfrac{1}{2} \tr(\mOmega^{-1} \tfrac{\partial \mOmega}{\partial \mOmega_{jk}}) + \tfrac{1}{2} \tr(\mSigma^{-1} \mOmega^{-1} \tfrac{\partial \mOmega}{\partial \mOmega_{jk}} \mOmega^{-1}) \\
+&\quad -\tfrac{1}{2} \tr\{\mC^\top \text{diag}(B^{(2)}(\mC \vmu, \text{diag}(\mC \mOmega^{-1} \mC^\top))) \mC \mOmega^{-1} \tfrac{\partial \mOmega}{\partial \mOmega_{jk}} \mOmega^{-1}\} \\
+&=-\tfrac{1}{2} [ \tr(\mOmega^{-1} \mOmega \mOmega^{-1} \tfrac{\partial \mOmega}{\partial \mOmega_{jk}}) - \tr(\mSigma^{-1} \mOmega^{-1} \tfrac{\partial \mOmega}{\partial \mOmega_{jk}} \mOmega^{-1}) \\
+&\quad + \tr\{\mOmega^{-1} \mC^\top \text{diag}(B^{(2)}(\mC \vmu, \text{diag}(\mC \mOmega^{-1} \mC^\top))) \mC \mOmega^{-1} \tfrac{\partial \mOmega}{\partial \mOmega_{jk}}\} ] \\
 &= -\tfrac{1}{2} \tr[\mOmega^{-1}\{ \mOmega - \mC^\top \text{diag}(B^{(2)}(\mC \vmu, \text{diag}(\mC \mOmega^{-1} \mC^\top))) \mC - \mSigma^{-1} \} \mOmega^{-1} \tfrac{\partial \mOmega}{\partial \mOmega_{jk}}]
 \end{align*}
 
@@ -746,15 +746,13 @@ examples of random intercept, random slope and spline models were evaluated usin
 		
 \subsection{Simulated data}
 		
-For each of these simulations, the model is as presented in Section \ref{sec:model}.
-		
-Several common application scenarios were simulated and their accuracy evaluated. A random intercept
-model was simulated with $\vbeta = (2, 1)^\top$, $\rho = 0.5$, $m = 20$, $n_i = 10$ and $b = 1$. The
-results are presented in Table \ref{tab:accuracy_int}. A random slope model was simulated with $\vbeta =
-(2, 1)^\top$, $\rho = 0.5$, $m = 20$, $n_i = 10$ and $b = 2$. The results are presented in Table
-\ref{tab:accuracy_slope}. Spline model was fit to a data set generated from the function $3 + 3
-\sin{(\pi x)}$ on the interval $[-1, 1]$. The resulting model fits are presented in Figure
-\ref{fig:spline}.
+For each of these simulations, the model is as presented in Section \ref{sec:model}. Several common
+application scenarios were simulated and their accuracy evaluated. A random intercept model was simulated with
+$\vbeta = (2, 1)^\top$, $\rho = 0.5$, $m = 20$, $n_i = 10$ and $b = 1$. The results are presented in Table
+\ref{tab:accuracy_int}. A random slope model was simulated with $\vbeta = (2, 1)^\top$, $\rho = 0.5$, $m =
+20$, $n_i = 10$ and $b = 2$. The results are presented in Table \ref{tab:accuracy_slope}. Spline model was fit
+to a data set generated from the function $3 + 3 \sin{(\pi x)}$ on the interval $[-1, 1]$. The resulting model
+fits are presented in Figure \ref{fig:spline}.
 		
 To assess the speed of each approach, a test case was constructed of a random slope model with $m=50$
 groups, each containing $n_i = 100$ individuals. A model was then fit to this data set ten times using
@@ -942,7 +940,7 @@ The algorithm is able to abort safely, and allow the Variational Bayes algorithm
 parameters before trying to fit the Gaussian component of the model again until the correct parameters
 are accurately estimated.
 
-\begin{figure}[h]
+\begin{figure}[h!]
 	\includegraphics[width=0.95 \textwidth]{code/local_solutions_gva_nr_error_locations_no_protections.pdf}
 	\label{fig:stability_locations_nr}
 	\caption{Starting locations which caused the NR fitting algorithm to fail with numeric errors. The true model had fixed parameters $\vbeta = (2, 1)^\top$ and random intercepts. There were ten groups in the
@@ -950,6 +948,9 @@ are accurately estimated.
 \end{figure}
 
 \section{Application}
+We now present numerical results for the application of our model fitting algorithms to several real-world
+data sets.
+
 \label{sec:application}
 
 \subsection{Poisson example without zero-inflated component -- Police stops}
@@ -1128,7 +1129,7 @@ results are presented in Table \ref{tab:application_roaches}.
 \subsection{Example - Biochemists}
 \label{sec:biochemists}
 The model described in this section was fit to the biochemistry data set analysed by
-\cite{10.2307/2579146}. The sample was taken from 915 biochemistry graduate students. The outcome
+\cite{Long1990}. The sample was taken from 915 biochemistry graduate students. The outcome
 $\vy_i$ is the number of articles published in the last three years of the PhD. The covariates were the
 gender of the student, coded $1$ for female and $0$ for male, the marital status of the student ($1$ for
 married, $0$ for unmarried), the number of children under age six and the prestige of the PhD program.
