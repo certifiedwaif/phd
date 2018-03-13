@@ -437,30 +437,6 @@ parameterisation. The resulting function
 	                                        & \quad + \tfrac{1}{2} \log{|\mSigma^{-1}|} + \tfrac{p}{2},                                                                              
 \end{align*}
 can be optimised with L-BFGS-B using the derivatives in Appendix \ref{sec:appendix_derivatives_gva}.
-
-\begin{figure}[h!]
-	\includegraphics[width=0.95 \textwidth]{mX_mZ_mLambda.pdf}
-	\caption{Inverse Covariance matrix of approximate posterior for $\vnu$ -- Fixed effects before random effects}
-	\label{fig:covfixedrandom}
-\end{figure}
-	
-\begin{figure}[h!]
-	\includegraphics[width=0.95 \textwidth]{mZ_mX_mLambda.pdf}
-	\caption{Inverse Covariance matrix of approximate posterior for $\vnu$ -- Random effects before fixed effects}
-	\label{fig:covrandomfixed}
-\end{figure}
-						      				      			      			      			      	
-\begin{figure}[h!]
-	\includegraphics[width=0.95 \textwidth]{mX_mZ_cholesky.pdf}
-	\caption{Cholesky factor of Inverse Covariance matrix of approximate posterior for $\vnu$ -- Fixed effects before random effects}
-	\label{fig:cholfixedrandom}
-\end{figure}
-	
-\begin{figure}[h!]
-	\includegraphics[width=0.95 \textwidth]{mZ_mX_cholesky.pdf}
-	\caption{Cholesky factor of Inverse Covariance matrix of approximate posterior for $\vnu$ -- Random effects before fixed effects}
-	\label{fig:cholrandomfixed}
-\end{figure}
 	
 \subsubsection{Precision parameterisation $\mLambda = (\mR^\top \mR)^{-1}$}
 		
@@ -613,14 +589,30 @@ Any symmetric matrix $\mLambda$ can be written as a product of its' Cholesky fac
 
 \noindent We exploit this structure. By interchanging the fixed and random effects in the design matrix $\mC = [\mX \mZ]$ to $\mC = [\mZ \mX]$, and re-ordering the dimensions of $\vmu, \mLambda$ and $\mSigma$ in the same manner, the independence between the
 blocks relating to the random effects in $\mZ$ induce sparsity in the Cholesky factor $\mR$ of
-$\mLambda^{-1}$, as can be seen in Figures \ref{fig:covfixedrandom}, \ref{fig:covrandomfixed},
-\ref{fig:cholfixedrandom} and \ref{fig:cholrandomfixed}. Thus the Gaussian $q(\vnu) \sim \N(\vmu, \mLambda)$ can be optimised over a space of dimension $\frac{1}{2} p (p + 1) + pq + \frac{1}{2} q (q + 1)$ rather than dimension
+$\mLambda^{-1}$, as can be seen in Figures \ref{fig:covfixedrandom} and
+\ref{fig:cholfixedrandom}. Thus the Gaussian $q(\vnu) \sim \N(\vmu, \mLambda)$ can be optimised over a space of dimension $\frac{1}{2} p (p + 1) + pq + \frac{1}{2} q (q + 1)$ rather than dimension
 $\frac{1}{2} (p + mq) (p + mq + 1)$ as in the dense parameterisation. This leads to subtantial performance gains
 when $m$ is large, as is typically the case in problems of practical importance such as longitudinal or 
 clinical trials with many subjects or the application presented in Section \ref{sec:application}.
 		
 By re-ordering the fixed and random effects in $\mLambda$, we end up with a covariance structure which is 
 sparse in the first diagonal block.
+
+\begin{figure}[h!]
+	\includegraphics[width=0.45 \textwidth]{mX_mZ_mLambda.pdf}
+	\includegraphics[width=0.45 \textwidth]{mZ_mX_mLambda.pdf}
+	\caption{Inverse Covariance matrix of approximate posterior for $\vnu$ -- Fixed effects before random effects
+						and random before fixed effects.}
+	\label{fig:covfixedrandom}
+\end{figure}
+	
+\begin{figure}[h!]
+	\includegraphics[width=0.45 \textwidth]{mX_mZ_cholesky.pdf}
+	\includegraphics[width=0.45 \textwidth]{mZ_mX_cholesky.pdf}
+	\caption{Cholesky factor of Inverse Covariance matrix of approximate posterior for $\vnu$ -- Fixed effects 
+						before random effects and random before fixed effects.}
+	\label{fig:cholfixedrandom}
+\end{figure}
 
 \subsection{Precision parameterisation}
 
