@@ -13,9 +13,9 @@ We applied our model fitting algorithms to a number of data sets to fit a range 
 model \ref{sec:cockroaches} had few fixed covariates, a random intercept for each apartment building and
 incorporated zero-inflation. The Police stops model \ref{sec:police_stops} was a pure Poisson mixed model, no
 zero-inflation and a random intercept for precincts/locality. The Biochemists model \ref{sec:biochemists} was
-zero-inflated with fixed effects. The Owls model \ref{sec:owls} was zero-inflated, random intercepts for
-nests. There were a large number of nests. We were able to estimate the variance component for this model very
-accurately.
+zero-inflated with fixed effects. The Owls model \ref{sec:owls} was zero-inflated,  with a random intercepts
+each nest. There were a large number of nests (m=27). We were able to estimate the variance component for this
+model very accurately.
 
 The use of Mean Field Variational Bayes allows estimation of Bayesian ZIP models in a fraction of the
 time taken to fit the same model using even the best MCMC methods available, with only a small loss of
@@ -38,38 +38,59 @@ optimisation problem to be solved when models are being fit -- as only the non-z
 covariance matrices need to be optimised over. This allows models to be fit more quickly, and with
 greatly improved numerical stability and without loss of accuracy.
 
-While all of the fitting algorithms presented in this chapter except the Laplace's approximation
-algorithm were able to fit ZIP random and fixed effects models with high accuracy, and the 
-Gaussian inverse parameterisation and fixed point algorithms were able to do so at high speed, they 
-could be numerically unstable depending on the data the model was being fit to and their starting points.
-In the case of the Gaussian inverse parameterisation algorithm, the source of the problem was tracked down
-to the exponential used in the parameterisation of the diagonal of the Cholesky factor of the precision
-matrix combined with the exponential that arises in the derivation of the Gaussian variational lower
-bound for Poisson mixed models -- leading to frequent numeric overflows during the fitting process. This
-problem, once discovered, was mitigated by replacing the exponential parameterisation of the diagonal
-of the Cholesky factor with a piecewise function which is exponential beneath a threshold and quadratic
-above that threshold. This was shown to greatly increase the numeric stability of the GVA inverse
-parameterisation for a range of starting points.
+While all of the fitting algorithms presented in this chapter except the Laplace's approximation algorithm
+were able to fit ZIP random and fixed effects models with high accuracy, and the  Gaussian inverse
+parameterisation and fixed point algorithms were able to do so at high speed, they  could be numerically
+unstable depending on the data the model was being fit to and their starting points. In the case of the
+Gaussian inverse parameterisation algorithm, the source of the problem was tracked down to the exponential
+function used in the parameterisation of the diagonal of the Cholesky factor of the precision matrix combined
+with the exponential that arises in the derivation of the Gaussian variational lower bound for Poisson mixed
+models -- leading to frequent numeric overflows during the fitting process. This problem, once discovered, was
+mitigated by replacing the exponential parameterisation of the diagonal of the Cholesky factor with a
+piecewise function which is exponential beneath a threshold and quadratic above that threshold. This was shown
+to greatly increase the numeric stability of the GVA inverse parameterisation for a range of starting points.
 
 Some of the algorithms which we experimented with were found to be very sensitive to their starting points.
 While these algorithms are typically initialised with a starting point as close as possible to the final
-solution, this gives some sense of the stability of each algorithm.
-Stability fixes.
+solution, this gives some sense of the stability of each algorithm. We were able to develop a variant of the
+algorithm that employs a parameterisation which is much more numerically stable.
 
-This article presents the essential ideas necessary for a performant implementation implementing model fitting
-for ZIP regression models.%, but the performance would be even better if our algorithm was re-implemented in a
+This thesis chapter presents the essential ideas necessary for a performant implementation implementing model 
+fitting for ZIP regression models.
+%, but the performance would be even better if our algorithm was re-implemented in a
 %compiled language with good numeric libraries such as C++ with Eigen.
-The majority of the performance
-improvements over existing approaches come from avoiding unneccessary matrix inversion, which is a
-computationally expensive and numerically unstable process taking $\BigO(p^3)$ flops, and from constructing and 
-calculating	with sparse matrices. The gains of these approaches, particularly from sparse matrix techniques, 
-can be difficult to fully realise in R without expert knowledge of the underlying implementation and libraries.
+The majority of the performance improvements over existing approaches come from avoiding unneccessary matrix
+inversion, which is a computationally expensive and numerically unstable process taking $\BigO(p^3)$ flops,
+and  from constructing and calculating with sparse matrices. The gains of these approaches, particularly from
+sparse  matrix techniques, can be difficult to fully realise in R without expert knowledge of the underlying
+implementation and libraries.
 		
 Our application of these ideas to Andrew Gelman's data showed that the new parameterisation very effectively
 speeds up fitting zero-inflated mixed models to real world data with a large number of groups, while still
 maintaining excellent accuracy versus an MCMC approach. This demonstrates the applicability of the ideas
-presented within this paper to real world data sets.
+presented within this chapter to real world data sets.
 		
+Directions for future research stemming from this chapter would include generalising the approximation to
+other zero-inflated models, such as the zero-inflated negative binomial model. Furthermore, more exploration
+could be done alternative parameterisations of the covariance matrix in the Gaussian Variational
+Approximation.
+
+\section{$g$-prior Conclusion}
+
+We have reviewed the prior structures that lead to closed form expressions for Bayes factors for linear
+models. We have described ways that each of these priors, except for the hyper-g/n prior can be evaluated in a
+numerically stable manner and have implemented a package \texttt{blma} for performing full exact Bayesian
+model averaging using this methodology. Our package is competitive with \texttt{BAS} and \texttt{BMS} in terms
+of computational speed, is numerically more stable and accurate, and offers some different priors structures
+not offered in \texttt{BAS}. Our package is much faster than \texttt{BayesVarSelect} and is also numerically
+more stable and accurate.
+
+We are currently working on several extensions to this work. Firstly, we are working on a parallel
+implementation of the package which will allow for exact Bayesian inference for problems roughly the size $p
+\approx 30$. Secondly, we are currently implementing Markov Chain Monte Carlo (MCMC) and population based MCMC
+methods for exploring the model space when $p > 30$. Lastly, we are deriving exact expressions for parameter
+posterior distributions under some of the prior structures we have considered here.
+
 \section{CVA Conclusion}
 
 We have proposed a deterministic Bayesian model selection algorithm which is computationally efficient
@@ -78,10 +99,16 @@ diversity of that population to explore the uncertainty of the selected model. T
 about the model selection process than simply choosing one best model. However, whereas Particle EM uses
 a spike-and-slab prior for the regression co-efficients, our approach uses a g-prior, which avoids 
 the Bartlett's Paradox and Information Paradox. Importantly, both approaches can be implemented using rank-one
-updates and downdates and the model selection posterior probabilities are available in closed form.
+updates and downdates and the model selection posterior probabilities are available in closed form,
+which allows the algorithm to be implemented in a computionally efficient manner.
 
 While previously model selection algorithms using the Maruyama, Liang-g and robust Bayarri priors have
 typically been implemented using Monte Carlo Markov Chains, our algorithm allows the advantages of these
-priors while using a deterministic algorithm.
+priors while using a deterministic algorithm. The CVA algorithm  presented in this chapter is implemented in
+the {\tt blma} package in the {\tt cva} function.
 
-The CVA algorithm is implemented in the {\tt blma} package in the {\tt cva} function.
+There are several planned future extensions to this work. Firstly, we would like to generalise the CVA
+approach to generalised linear models as well as linear models, to be able to perform model selection for
+regression models applicable to a wider range of types of data. Although the algorithm already runs in
+parallel on multicore CPUs using \texttt{OpenMP}, we believe even greater gains in performance could be
+achieved by porting the algorithm to run on GPUs, or by using distributed computing such as \texttt{OpenMPI}.
