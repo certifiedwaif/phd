@@ -109,12 +109,13 @@ We consider a sample of counts $y_i$, $1 \le i\le n$, where there are an excessi
 Poisson model, but the sample is otherwise well--modelled by a Poisson distribution. There are two main
 parameterizations for modelling such data. The first approach models the probability of a zero by $\rho$ and
 adjusts for counts greater than zero. This model uses the probability distribution
-$$
+
+\begin{equation}
 	P(Y_j = y_i) = \left\{ \begin{array}{ll}
 	\rho + e^{-\lambda},  & y_i = 0 \\
 	\left( \frac{1 - \rho}{1 - e^{-\lambda}} \right) \frac{\lambda^{y_i} e^{-\lambda}} {y_i!},  &y_i \ge 1.
 	\end{array} \right.
-$$
+\end{equation}
 
 A second approach using latent variables views the data as the product of two data--generating processes, a
 Bernoulli process that determines whether the data is definitely zero, and a second process where data is
@@ -124,12 +125,14 @@ Note that this allows zeros to be generated from the model in one of two ways --
 process generating a zero or from the Bernoulli process generating a Poisson sample which is then zero. A
 latent variable representation of this parameterization introduces the latent variables $r_i$ which equal $1$
 when $y_i>0$ and $0$ otherwise. This leads to the specification
-$$
+
+\begin{equation}
 \begin{array}{rl}
 	P(Y_i=y_i|r_i) = & \frac{\exp(-\lambda r_i)(\lambda r_i)^{y_i}}{y_i!} \quad \mbox{and} \\
 	r_i \sim & \mbox{Bernoulli}(1-\rho)
 \end{array}
-$$
+\end{equation}
+
 where $\text{Bernoulli}(\pi)$ denotes the probability distribution $\pi^k (1 - \pi)^{1-k}$.
 
 Let $p$ be the dimension of the space of fixed effects, $m$ be the number of individuals in the random effects
@@ -163,7 +166,8 @@ We can extend the model naturally to a multiple covariate regression model by us
 response variable and replacing the parameter $\lambda$ in the model above with $\vx_i^\top \vbeta$ to specify
 the mean, where $\vx_i,\vbeta \in \R^p$, with $\vx_i$ the vector of observed predictors and $\vbeta$ the
 vector of regression coefficients. Letting $\vr = (r_1,\ldots,r_n)$, the model becomes
-$$%\label{eq:main}
+
+\begin{equation}%\label{eq:main}
 	\begin{array}{rl}
 		\log p(\vy|\vr, \vbeta) 
 		    & = \vy^\top \mR (\mX\vbeta)                           
@@ -171,7 +175,7 @@ $$%\label{eq:main}
 		- \vone^\top \log{\Gamma{(\vy + \vone)}}, \quad \mbox{ and }\\ [1ex]
 		r_i | \rho & \sim \text{Bernoulli}(1-\rho), \quad 1 \leq i \leq n \\
 	\end{array}
-$$
+\end{equation}
 
 \noindent where $\mX$ is the $n\times p$ matrix whose $i$th row equals $\vx_i$ and $\mR = \diag{(\vr)}$.
 
@@ -198,6 +202,7 @@ n_i}]^\top$ as the response vector. Vectors $\vy_1, \ldots, \vy_m$ are assumed t
 
 We develop a zero-inflated regression model incorporating both fixed effects $\vbeta$ and random effects
 $\vu$. The log-likelihood for one observation is then
+
 $$
 	\begin{array}{rl}
 		\log p(\vy_{ij} | \vr_{ij}, \vbeta, \vu) & = \vy_{ij} \vr_{ij} (\vx_i^\top \vbeta + \vz_{ij}^\top \vu) - \vr_{ij} \exp (\vx_{ij}^\top \vbeta + \vz_{ij}^\top \vu) - \log \Gamma (\vy_{ij} + 1), \\
@@ -207,12 +212,13 @@ $$
 $$
 
 \noindent We now extend this to multiple observations. Let $\mC = [\mX, \mZ]$ and $\vnu = [\vbeta^\top, \vu^\top]^\top$. The multivariate model with multiple observations is then
-\begin{equation}\label{eq:main}
+$$
+%\label{eq:main}
 	\begin{array}{rl}
 		\log{p(\vy|\vr, \vbeta, \vu)} & = \vy^\top \mR (\mC\vnu) - \vr^\top \exp{(\mC\vnu)} - \vone^\top \log{\Gamma{(\vy + \vone)}}, \quad \mbox{ and } \\ [1ex]
 		r_i                           & \sim \text{Bernoulli}(\rho), 1 \leq i \leq n                                                                     \\
 	\end{array}
-\end{equation}
+$$
 
 % \joc{(The prior structure will depend on the structure of the random effects model)}
 \noindent with priors
@@ -287,12 +293,12 @@ $$p_i =
 The optimal approximation 
 % \joc{(reword: the ``optimal approximation'' might be called the true posterior)}
 for $\vr$ is
-\[
+\begin{equation}
 \begin{array}{rl}
 	q(\vr) & \propto \exp \left \{ \bE_{-q(\vr)}\vy^\top\mR(\mC\vmu) - \vr^\top\exp{(\mC\vnu)}-\frac{1}{2} \vnu^\top \mSigma_{\vu \vu} \vnu \right \}                                                  \\ [1ex]
 	       & = \exp{ \left[ \vy^\top\mR\mC \vmu - \vr^\top \exp{\{\mC \vmu + \frac{1}{2} \text{diag}(\mC \mLambda \mC^\top)\}} - \frac{1}{2} \vmu^\top \mD \vmu - \frac{1}{2} \text{tr}(\mLambda \mD ) \right] } 
 \end{array}
-\]
+\end{equation}
 \noindent where $\mD = \left\{ (\mPsi + \sum_{i=1}^m \vmu_i \vmu_i^\top + \mLambda_{\vu_i\vu_i}) / (v - p - 1) \right\}^{-1}$. 
 
 We observe that this expression is close in form to the likelihood of a Poisson regression model with random
@@ -351,9 +357,12 @@ This yields the approximation to the variational lower bound
 % distributions are not as accurate as those produced by the other algorithms considered in this article.
 % NR
 % Detail the function and its derivatives
-\begin{align*}
+
+\begin{equation}
+\begin{array}{ll}
 	\log \underline{p}(\vmu, \mLambda; \vy) \approx \vy^\top\mP\mC\vmu - \vp^\top\exp \left (\mC \vmu \right ) - \tfrac{1}{2} \vmu^\top \mSigma^{-1} \vmu. 
-\end{align*}
+\end{array}
+\end{equation}
 		
 \noindent This expression can be iteratively optimised with respect to $\vmu$ and $\mLambda$ using the
 Newton-Raphson method, with the derivatives for $\vmu$ and $\mLambda$ given in Appendix
@@ -417,10 +426,14 @@ parameterising the covariance matrix $\mLambda$ below.
 
 We fit the Gaussian component of our approximation in Algorithm \ref{alg:algorithm_one} by maximising  the
 variational lower bound
-\begin{align*}
+
+\begin{equation}
+\begin{array}{ll}
 	\log \underline{p}(\vmu, \mLambda; \vy) & = \quad \vy^\top\mP \mC \vmu - \vp^\top \exp\{\mC \vmu + \tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top)\} - \tfrac{1}{2} \vmu^\top \mSigma^{-1} \vmu - \tfrac{1}{2} \tr{(\mSigma^{-1} \mLambda)} + \log{|\mR|} \\
 	                                        & \quad + \tfrac{1}{2} \log{|\mSigma^{-1}|}  + \tfrac{p}{2}                                                                              
-\end{align*}
+\end{array}
+\end{equation}
+
 \noindent with respect to $\vmu$ and $\mLambda$, keeping $\vp$, $\mSigma$ and $\rho$ fixed.
 		
 The first variant of the Gaussian Variational Approximation algorithm that we present optimises the
@@ -432,10 +445,14 @@ parameterisation. The resulting function
 % This algorithm trades the computational complexity of
 % numerically evaluating an integral for greatly increased accuracy in the approximating posterior
 % distribution. 
-\begin{align*}
+
+\begin{equation}
+\begin{array}
 	\log \underline{p}(\vmu, \mLambda; \vy) & = \quad \vy^\top\mP \mC \vmu - \vp^\top \exp\{\mC \vmu + \tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top)\} - \tfrac{1}{2} \vmu^\top \mSigma^{-1} \vmu - \tfrac{1}{2} \tr{(\mSigma^{-1} \mLambda)} + \log{|\mR|} \\
 	                                        & \quad + \tfrac{1}{2} \log{|\mSigma^{-1}|} + \tfrac{p}{2},                                                                              
-\end{align*}
+\end{array}
+\end{equation}
+
 can be optimised with L-BFGS-B using the derivatives in Appendix \ref{sec:appendix_derivatives_gva}.
 	
 \subsubsection{Precision parameterisation $\mLambda = (\mR^\top \mR)^{-1}$}
@@ -446,19 +463,25 @@ $\mR$ of $\mLambda$, we instead optimise the Cholesky factor of the inverse of $
 (\mR \mR^\top)^{-1}$.
 
 The Gaussian variational lower bound in this parameterisation is
-\begin{align*}
+
+\begin{equation}
+\begin{array}{ll}
 	\log \underline{p}(\vmu, \mLambda; \vy) & = \quad \vy\mP\mC \vmu - \vp^\top \exp\{\mC \vmu + \tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top)\} - \tfrac{1}{2} \vmu^\top \mSigma^{-1} \vmu - \tfrac{1}{2} \tr{(\mSigma^{-1} \mLambda)} \\
 	                                        & \quad+ \tfrac{1}{2} \log{|\mSigma^{-1}|} + \tfrac{p}{2} - \log{|\mR|}.                                             
-\end{align*}
+\end{array}
+\end{equation}
 		
 \noindent The derivative with respect to $\vmu$ is the same as that in the first variant of the algorithm, but 
 as the parameterisation of $\mLambda$ has changed, the  derivative with respect to $\mLambda$ becomes
-\begin{align*}
+
+\begin{equation}
+\begin{array}{ll}
 	\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda}
 	  & = \hphantom{-}(\mLambda^{-1} + \mH)(-\mLambda \mR \mLambda) \\
 	  & = -(\mI + \mH\mLambda)\mR\mLambda                           \\
 	  & = - (\mR\mLambda + \mH\mLambda\mR\mLambda)                  
-\end{align*} 
+\end{array}
+\end{equation}
 		
 \noindent where $\mH = (\mP \mC)^\top \text{diag}(\exp(\mC \vmu + \frac{1}{2} \mC \mLambda \mC^\top)) \mP \mC - \mSigma^{-1}$.
 		
@@ -491,7 +514,7 @@ improved the stability of the algorithm.
 
 \begin{algorithm}
 	\begin{algorithmic}
-		\REQUIRE $g = \mP \mC (\vy - \mC^\top \exp(\mC \vmu + \frac{1}{2} \text{diag}{(\mC \mLambda \mC^\top)})) - \mSigma^{-1} \vmu$.
+		\REQUIRE $g = \mP \mC (\vy - \mC^\top \exp(\mC \vmu + \tfrac{1}{2} \text{diag}{(\mC \mLambda \mC^\top)})) - \mSigma^{-1} \vmu$.
 		% Fit \vmu, \mLambda using Laplace approximation
 		\WHILE{the increase in $\log{\underline{p}}(\vmu, \mLambda; \vy)$ is significant}
 			\STATE $\vg \leftarrow \mC^\top \vp [\vy - \{ \exp(\mC \vmu + \tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top)) \}] - \mSigma^{-1} \vmu$ \\
@@ -534,25 +557,29 @@ This parameterisation can lead to numeric overflow when the diagonals of $\overl
 large, which can lead to singular matrices when attempting to invert $\mLambda$. We dealt with this by
 defining a piecewise function which is exponential for arguments less than $t$, and quadratic for arguments
 greater than or equal to $t$
-$$
+
+\begin{equation}
 f(r_{ij}) =
 \begin{cases}
 	e^{r_{ij}}, r_{ij} < t                   \\
 	a r_{ij}^2 + b r_{ij} + c, r_{ij} \geq t 
 \end{cases}
-$$
+\end{equation}
+
 and then choosing the co-efficients $a$, $b$ and $c$ such that the function, first and second derivatives would
 agree at $r_{ij} = t$.
 
 To find the co-efficients $a$, $b$ and $c$, we solved the system of equations formed by repeatedly 
 differentiating the quadratic at $r_{ij} =  t$ and equating it with $e^t$
-$$
+
+\begin{equation}
 \begin{array}{lllll}
 	e^t & = & a t^2 & + \quad b t & + \quad c \\
 	e^t & = &       & \quad 2a t  & + \quad b \\
 	e^t & = &       &             & \quad 2a  \\
 \end{array}
-$$
+\end{equation}
+
 to obtain $a = e^t / 2$, $b = (1 - t) e^t$ and $c = \{1 - t^2/2 - (1 - t) t\} e^t$.
 
 We also addressed the overflow problem by working with the Cholesky factorisation of $\mLambda^{-1}$
@@ -568,7 +595,8 @@ improving both computational speed and numeric accuracy.
 Any symmetric matrix $\mLambda$ can be written as a product of its' Cholesky factors, $\mLambda =
 \mR \mR^\top$ where $\mR$ is lower triangular. $\mR$ is unique if $\mR_{ii} \geq 0$.
 	
-\begin{align*}
+\begin{equation}
+\begin{array}{lll}
 	&\begin{pmatrix}
 	\mR_{11}          & 0                                    & 0                                     \\
 	\mR_{21}          & \mR_{22}                             & 0                                     \\
@@ -585,7 +613,8 @@ Any symmetric matrix $\mLambda$ can be written as a product of its' Cholesky fac
 	\mR_{21}\mR_{11} & \mR_{21}^2 + \mR_{22}^2 \\
 	\mR_{31} \mR_{11} & \mR_{31}\mR_{21} + \mR_{32} \mR_{22} & \mR_{31}^2 + \mR_{32} ^2 + \mR_{33}^2 
 	\end{pmatrix}.
-\end{align*}
+\end{array}
+\end{equation}
 
 \noindent We exploit this structure. By interchanging the fixed and random effects in the design matrix $\mC = [\mX \mZ]$ to $\mC = [\mZ \mX]$, and re-ordering the dimensions of $\vmu, \mLambda$ and $\mSigma$ in the same manner, the independence between the
 blocks relating to the random effects in $\mZ$ induce sparsity in the Cholesky factor $\mR$ of
@@ -618,14 +647,14 @@ sparse in the first diagonal block.
 
 We optimise over the space $(\vmu, \overline{\mR})$ as before, but now 
 		
-\begin{equation*}
+\begin{equation}
 	\mR_{ij} =
 	\begin{cases}
 		\exp(-\overline{\mR}_{ij}), & i = j             \\
 		\overline{\mR}_{ij},        & i > j             \\
 		0,                          & \text{otherwise}.
 	\end{cases}
-\end{equation*}
+\end{equation}
 	
 \noindent This new choice of parameterisation allows us to calculate $\frac{1}{2} \text{diag}(\mC \mLambda
 \mC^\top)$ by solving the linear systems $\mR \va = \mC_{i}, i=1, \ldots, n$ for   $\va$ and then calculating
@@ -644,14 +673,16 @@ obviously wasteful, as the off--diagonal entries of the resulting product that h
 are immediately discarded.
 	
 By parameterising $\mLambda$ in terms of its' Cholesky factors and realising that
-\[
+
+\begin{equation}
 	\mC \mLambda \mC^\top = \mC \mR \mR^\top \mC^\top
-\]
+\end{equation}
 	
 \noindent and that
-\[
+
+\begin{equation}
 	\diag(\mC \mLambda \mC^\top)_{ii} = \mC_{i .} \mR \mR^\top \mC_{i .}^\top, 1 \leq i \leq n
-\]
+\end{equation}
 	
 \noindent we can calculate the products $\mC_{i .} \mR, 1 \leq i \leq n$, using $n \times \frac{1}{2}(p + m
 b)(p + m b   + 1)$ floating point operations, and storing the results of the $i$th product in the $i$th
@@ -663,15 +694,15 @@ $\BigO(n)$ floating point operations.
 % $\log |\mR|$ can be calculated using only $p + m b$ floating point operations, as $\mR$ is lower triangular.
 	
 For the precision parameterisation, we observe that in this parameterisation
-\[
+\begin{equation}
 	\diag(\mC \mLambda \mC^\top)_{ii} = \mC_{i .} \mR^{-\top} \mR^{-1} \mC_{i .}^\top, 1 \leq i \leq n,
-\]
+\end{equation}
 	
 \noindent and so by solving $\mR \va = \mC_{i .}^\top$ for $\va$ for all $i$ at a cost of $n \times
 \frac{1}{2} (p + m b) (p + m b + 1)$ floating point operations, and then calculating
-\[
+\begin{equation}
 	\diag(\mC \mLambda \mC^\top)_{ii} = \va^\top \va, 1 \leq i \leq n,
-\]
+\end{equation}
 	
 \noindent we can then calculate $\diag(\mC \mLambda \mC^\top)$.
 	
@@ -693,28 +724,37 @@ this is not the only available parameterisation. Another choice worth considerin
 covariance matrix using the Cholesky factor of the precision matrix.
 
 The variational lower bound of a Gaussian Variational Approximation takes the form
-\begin{align*}
+\begin{equation}
+\begin{array}{ll}
 \log \underline{p}(\vy; \vmu, \mLambda) =& \vy^\top \mC \vmu - \vone^\top B(\mC \vmu, \text{diag}(\mC \mLambda \mC^\top)) + \vone^\top c(\vy) \\
 &- \tfrac{1}{2} \vmu^\top \mSigma^{-1} \vmu - \tfrac{1}{2} \tr(\mSigma^{-1} \mLambda) \\
 &+ \tfrac{1}{2} \log |\mLambda| - \tfrac{1}{2} \log |\mSigma| + \tfrac{d}{2}
-\end{align*}
+\end{array}
+\end{equation}
 
 Let $\mOmega = \mLambda^{-1}$, the precision matrix. Then if we reparameterise the variational lower bound in
 terms of $\mOmega$ it becomes
-\begin{align*}
+
+\begin{equation}
+\begin{array}{ll}
 F(\mOmega) =& \quad \vy^\top \mC \vmu - \vone^\top B(\mC \vmu, \text{diag}(\mC \mOmega^{-1} \mC^\top)) + \vone^\top c(\vy) \\
 &- \tfrac{1}{2} \vmu^\top \mSigma^{-1} \vmu - \tfrac{1}{2} \tr(\mSigma^{-1} \mOmega^{-1}) \\
 &- \tfrac{1}{2} \log |\mOmega| - \tfrac{1}{2} \log |\mSigma| + \tfrac{d}{2}
-\end{align*}
+\end{array}
+\end{equation}
+
 When the variational lower bound is optimised, by the first-order optimality conditions, $\tfrac{\partial
 F}{\partial \mOmega_{jk}} = \vzero$. Then using matrix calculus and the properties of the trace operator
-\begin{align*}
+
+\begin{equation}
+\begin{array}{ll}
 \tfrac{\partial F}{\partial \mOmega_{jk}} &= -\tfrac{1}{2} \tr(\mOmega^{-1} \tfrac{\partial \mOmega}{\partial \mOmega_{jk}}) + \tfrac{1}{2} \tr(\mSigma^{-1} \mOmega^{-1} \tfrac{\partial \mOmega}{\partial \mOmega_{jk}} \mOmega^{-1}) \\
 &\quad -\tfrac{1}{2} \tr\{\mC^\top \text{diag}(B^{(2)}(\mC \vmu, \text{diag}(\mC \mOmega^{-1} \mC^\top))) \mC \mOmega^{-1} \tfrac{\partial \mOmega}{\partial \mOmega_{jk}} \mOmega^{-1}\} \\
 &=-\tfrac{1}{2} [ \tr(\mOmega^{-1} \mOmega \mOmega^{-1} \tfrac{\partial \mOmega}{\partial \mOmega_{jk}}) - \tr(\mSigma^{-1} \mOmega^{-1} \tfrac{\partial \mOmega}{\partial \mOmega_{jk}} \mOmega^{-1}) \\
 &\quad + \tr\{\mOmega^{-1} \mC^\top \text{diag}(B^{(2)}(\mC \vmu, \text{diag}(\mC \mOmega^{-1} \mC^\top))) \mC \mOmega^{-1} \tfrac{\partial \mOmega}{\partial \mOmega_{jk}}\} ] \\
 &= -\tfrac{1}{2} \tr[\mOmega^{-1}\{ \mOmega - \mC^\top \text{diag}(B^{(2)}(\mC \vmu, \text{diag}(\mC \mOmega^{-1} \mC^\top))) \mC - \mSigma^{-1} \} \mOmega^{-1} \tfrac{\partial \mOmega}{\partial \mOmega_{jk}}]
-\end{align*}
+\end{array}
+\end{equation}
 
 As $\mOmega^{-1} \ne \vzero$ and $\tfrac{\partial \mOmega}{\partial \mOmega_{jk}} \ne \vzero$, this implies
 $\mOmega = \mC^\top \text{diag}(B^{(2)}) \mC + \mSigma^{-1}$. Thus the sparsity of $\mOmega$ depends on the
