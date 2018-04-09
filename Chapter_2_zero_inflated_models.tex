@@ -109,7 +109,7 @@ We consider a sample of counts $y_i$, $1 \le i\le n$, where there are an excessi
 Poisson model, but the sample is otherwise well--modelled by a Poisson distribution. There are two main
 parameterizations for modelling such data. The first approach models the probability of a zero by $\rho$ and
 adjusts for counts greater than zero. This model uses the probability distribution specified in
-Equation \ref{eq:zero_infl_first_param}.
+Equation (\ref{eq:zero_infl_first_param}).
 
 \begin{equation}
 \label{eq:zero_infl_first_param}
@@ -127,7 +127,7 @@ Note that this allows zeros to be generated from the model in one of two ways --
 process generating a zero or from the Bernoulli process generating a Poisson sample which is then zero. A
 latent variable representation of this parameterization introduces the latent variables $r_i$ which equal $1$
 when $y_i>0$ and $0$ otherwise. This leads to the specification for the probability distribution used in
-Equation \ref{eq:zero_infl_second_param}.
+Equation (\ref{eq:zero_infl_second_param}).
 
 \begin{equation}
 \label{eq:zero_infl_second_param}
@@ -294,7 +294,7 @@ $$p_i =
 
 %$\propto \exp{\left \{-r_i \bE_{-r_i} [\exp{(c_i^\top\vnu)}] + r_i [\psi(\alpha_\rho) - \psi(\beta_\rho)] \right \} }.\\$
 
-The optimal approximation is given in Equation \ref{eq:optimal_approximation}
+The optimal approximation is given in Equation (\ref{eq:optimal_approximation})
 % \joc{(reword: the ``optimal approximation'' might be called the true posterior)}
 for $\vr$ is
 \begin{equation}
@@ -357,7 +357,7 @@ Gaussian centred at its' mode.
 % approximation uses the second order Taylor expansion of the full log likelihood of the  model around the
 % mode to find a Gaussian approximation to the full posterior. Taylor expanding the full log likelihood
 % once around the mode yields the following approximation.
-This yields the approximation to the variational lower bound in \ref{eq:laplace_variational_lower_bound}.
+This yields the approximation to the variational lower bound in (\ref{eq:laplace_variational_lower_bound}).
 % The algorithm is very quick to execute, but the resulting approximate posterior
 % distributions are not as accurate as those produced by the other algorithms considered in this article.
 % NR
@@ -430,7 +430,7 @@ parameterising the covariance matrix $\mLambda$ below.
 \subsubsection{Covariance parameterisation $\mLambda = \mR^\top \mR$}
 
 We fit the Gaussian component of our approximation in Algorithm \ref{alg:algorithm_one} by maximising  the
-variational lower bound is presented in Equation \ref{eq:gva_lower_bound}
+variational lower bound is presented in Equation (\ref{eq:gva_lower_bound})
 \begin{equation}
 \label{eq:gva_lower_bound}
 \begin{array}{ll}
@@ -447,7 +447,7 @@ Gaussian variational lower bound of the log likelihood with respect to $\vmu$ an
 $\mR$ of $\mLambda$, that is, $\mLambda = \mR \mR^\top$. This ensures that $\mLambda$ remains positive
 definite, and reduces the number of parameters we have to optimise over in order to optimise $\mLambda$
 to the $(p + 1) p / 2$, as $\mR$ is lower triangular.	We refer to this as the covariance
-parameterisation. The resulting function presented in Equation \ref{eq:gva_lower_bound_cov_param}
+parameterisation. The resulting function presented in Equation (\ref{eq:gva_lower_bound_cov_param})
 % This algorithm trades the computational complexity of
 % numerically evaluating an integral for greatly increased accuracy in the approximating posterior
 % distribution. 
@@ -470,7 +470,7 @@ $\mR$ of $\mLambda$, we instead optimise the Cholesky factor of the inverse of $
 (\mR \mR^\top)^{-1}$.
 
 The Gaussian variational lower bound in this parameterisation is presented in Equation
-\ref{eq:gva_lower_bound_precision_param}.
+(\ref{eq:gva_lower_bound_precision_param}).
 
 \begin{equation}
 \label{eq:gva_lower_bound_precision_param}
@@ -483,7 +483,7 @@ The Gaussian variational lower bound in this parameterisation is presented in Eq
 		
 \noindent The derivative with respect to $\vmu$ is the same as that in the first variant of the algorithm, but 
 as the parameterisation of $\mLambda$ has changed, the  derivative with respect to $\mLambda$ is given in
-\ref{eq:gva_lower_bound_precision_deriv}.
+(\ref{eq:gva_lower_bound_precision_deriv}).
 \begin{equation}
 \label{eq:gva_lower_bound_precision_deriv}
 \begin{array}{ll}
@@ -566,7 +566,7 @@ parameters to deal with instead of $p^2$ parameters, some of which are constrain
 
 This parameterisation can lead to numeric overflow when the diagonals of $\overline{\mR}$ become moderately
 large, which can lead to singular matrices when attempting to invert $\mLambda$. We dealt with this by
-defining the piecewise function Equation \ref{eq:piecewise_function} which is exponential for arguments less
+defining the piecewise function Equation (\ref{eq:piecewise_function}) which is exponential for arguments less
 than $t$, and quadratic for arguments greater than or equal to $t$
 \begin{equation}
 \label{eq:piecewise_function}
@@ -581,7 +581,7 @@ f(r_{ij}) =
 derivatives would agree at $r_{ij} = t$.
 
 To find the co-efficients $a$, $b$ and $c$, we solved the system of equations presented in
-\ref{eq:system_of_equations} formed by repeatedly  differentiating the quadratic at $r_{ij} =  t$ and equating
+(\ref{eq:system_of_equations}) formed by repeatedly  differentiating the quadratic at $r_{ij} =  t$ and equating
 it with $e^t$
 \begin{equation}
 \label{eq:system_of_equations}
@@ -734,7 +734,7 @@ this is not the only available parameterisation. Another choice worth considerin
 covariance matrix using the Cholesky factor of the precision matrix.
 
 The variational lower bound of a Gaussian Variational Approximation takes the form given in Equation
-\ref{eq:gva_lower_bound_precision_param}.
+(\ref{eq:gva_lower_bound_precision_param}).
 \begin{equation}
 \label{eq:gva_lower_bound_precision_param}
 \begin{array}{ll}
@@ -745,7 +745,7 @@ The variational lower bound of a Gaussian Variational Approximation takes the fo
 \end{equation}
 
 Let $\mOmega = \mLambda^{-1}$, the precision matrix. Then if we reparameterise the variational lower bound in
-terms of $\mOmega$ we obtain the function in Equation \ref{eq:gva_lower_bound_precision_param_omega}.
+terms of $\mOmega$ we obtain the function in Equation (\ref{eq:gva_lower_bound_precision_param_omega}).
 \begin{equation}
 \label{eq:gva_lower_bound_precision_param_omega}
 \begin{array}{ll}
