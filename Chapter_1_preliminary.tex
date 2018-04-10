@@ -175,55 +175,6 @@ $f$ as unknown, and attempt to estimate it purely from the data available to us.
 is a difficult problem to solve, but the problem can be simplified by pre-specifying the points at which the
 function may change curvature, the so-called knots.
 
-\subsection{O'Sullivan Splines}
-
-Let $B_1$, \ldots, $B_{K+4}$ be the cubic B-spline basis functions defined by the knots $\kappa_1$ to
-$\kappa_{K+4}$
-
-$B_{ik} = B_k (x)$
-$B_x = [B_1(x), \ldots, B_K+4(x)]$
-
-O'Sullivan splines are penalised splines which are penalised using the $\mOmega$ matrix.
-
-Let $\mOmega$ be the $(K+4) \times (K+4)$ matrix where the $(k, k')-th$ element is
-\[
-	\mOmega_{k k'} = \int_a^b B''_k(x) B''_{k'}(x) dx.
-\]
-Then the O'Sullivan spline estimate of the true function $f$ at the point $x$ is
-$\hat{f}_O(x; \lambda) = \mB_x \hat{\vnu}_O$, where
-$\hat{\vnu}_O = (\mB^\top \mB + \lambda \mOmega)^{-1} \mB^\top \vy$.
-
-$\mOmega$ is defined in this way to penalise oscillation, which is measured by the second derivative.
-The penalty differs from P-splines in that the P-spline penalty matrix is $\mD_2^\top \mD_2$ where $\mD_2$ is
-the second-order differencing matrix.
-
-% Divided difference notation?
-% Lagrange's interpolating polynomials?
-% Semiparametric regression / Connection to mixed models
-We follow the discussion of semiparametric regression in \cite{ruppert_wand_carroll_2003}.
-Using a mixed models setup to fit spline models protects against overfitting.
-Constructing an $\mZ$ matrix with the appropriate B-Spline function evaluations in each of the rows, where
-each column corresponds to a knot.
-
-  
-\subsection{Degrees of freedom}
-
-% From Section 2.5.2, Semiparametric regression
-
-Consider the fixed effects model $\vy = \mX \vbeta$ where $\mX \in \R^{n \times p}$. If the hat matrix is
-defined as $\mH = \mX (\mX^\top\mX)^{-1} \mX^\top$ then
-
-\begin{align*}
-	\tr(\mH) & = \tr[\mX(\mX^\top\mX)^{-1}\mX^\top]  \\
-	         & = \tr[\mX^\top\mX (\mX^\top\mX)^{-1}] \\
-	         & = \tr(\mI_p)                          \\
-	         & = p                                   
-\end{align*}
-
-which is the number of parameters in the fixed effects model. Thus we use the trace of the hat matrix as
-the definition of the effective degrees of freedom of the model. This definition then naturally extends to
-more general smoother matrices which can be used to fit models involving splines or other kinds of smoothing.
-
 % \subsubsection{Penalised spline}
 % \subsubsection{B-splines}
 \subsection{B-Splines}
@@ -260,7 +211,7 @@ $$
 	% 									\frac{\kappa_{i + k + 1} - x}{\kappa_{i + k + 1} - \kappa_{i + 1}} Q_{i, k-1} (x). 
 \end{align*}
 
-where "[]" denoting the divided difference and
+\noindent where "[]" denotes the divided difference and
 % B-Splines
 $$
 Q_{m, i}(x; \kappa) =
@@ -276,6 +227,51 @@ $\vkappa$
 $$
 a = \kappa_1 = \kappa_2 = \kappa_3 = \kappa_4 < \kappa_5 < \ldots < \kappa_{K+5} = \kappa_{K+6} = \kappa_{K+7} = \kappa_{K+8} = b.
 $$
+
+\subsection{O'Sullivan Splines}
+
+% $B_{ik} = B_k (x)$
+% $B_x = [B_1(x), \ldots, B_K+4(x)]$
+Let $B_1$, \ldots, $B_{K+4}$ be the cubic B-spline basis functions defined by the knots $\kappa_1$ to
+$\kappa_{K+4}$. O'Sullivan splines are penalised splines which are penalised using the $\mOmega$ matrix.
+Let $\mOmega$ be the $(K+4) \times (K+4)$ matrix where the $(k, k')-th$ element is
+\[
+	\mOmega_{k k'} = \int_a^b B''_k(x) B''_{k'}(x) dx.
+\]
+Then the O'Sullivan spline estimate of the true function $f$ at the point $x$ is
+$\hat{f}_O(x; \lambda) = \mB_x \hat{\vnu}_O$, where
+$\hat{\vnu}_O = (\mB^\top \mB + \lambda \mOmega)^{-1} \mB^\top \vy$.
+
+$\mOmega$ is defined in this way to penalise oscillation, which is measured by the second derivative.
+The penalty differs from P-splines in that the P-spline penalty matrix is $\mD_2^\top \mD_2$ where $\mD_2$ is
+the second-order differencing matrix.
+
+% Divided difference notation?
+% Lagrange's interpolating polynomials?
+% Semiparametric regression / Connection to mixed models
+We follow the discussion of semiparametric regression in \cite{ruppert_wand_carroll_2003}.
+Using a mixed models setup to fit spline models protects against overfitting.
+Constructing a $\mZ$ matrix with the appropriate B-Spline function evaluations in each of the rows, where
+each column corresponds to a knot.
+
+  
+\subsection{Degrees of freedom}
+
+% From Section 2.5.2, Semiparametric regression
+
+Consider the fixed effects model $\vy = \mX \vbeta$ where $\mX \in \R^{n \times p}$. If the hat matrix is
+defined as $\mH = \mX (\mX^\top\mX)^{-1} \mX^\top$ then
+
+\begin{align*}
+	\tr(\mH) & = \tr[\mX(\mX^\top\mX)^{-1}\mX^\top]  \\
+	         & = \tr[\mX^\top\mX (\mX^\top\mX)^{-1}] \\
+	         & = \tr(\mI_p)                          \\
+	         & = p                                   
+\end{align*}
+
+which is the number of parameters in the fixed effects model. Thus we use the trace of the hat matrix as
+the definition of the effective degrees of freedom of the model. This definition then naturally extends to
+more general smoother matrices which can be used to fit models involving splines or other kinds of smoothing.
 
 % \subsection{Crossed effects}
 % \subsection{Spatial structure}
@@ -836,7 +832,7 @@ distributions of $g$ for a number of choices of $g$ prior from the literature:
 Liang's hyper-$g$ prior,
 Liang's hyper-$g/n$ prior \citep{Liang2008},
 Bayarri's robust $g$ prior \citep{Bayarri2012} and the 
-Maruyama and George Beta-Prime \citep{Maruyama2011}prior.	
+Maruyama and George Beta-Prime \citep{Maruyama2011} prior.	
 
 % \item CVA
 
