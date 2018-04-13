@@ -5,40 +5,48 @@
 The variational lower bound is equal to $\bE_q\{\log{p(\vy, \vtheta)} - \log{q(\vtheta)}\} = T_1 + T_2 + T_3$,
 where
 % This is the new T_1
-$$
+\begin{equation*}
 \begin{array}{rl}
-	T_1 & = \quad \bE_q[\log{p(\vy, \vnu)} - \log{q(\vnu)}]                                                                                                                                                  \\
-	    & = \quad \vy \mP \mC \vmu - \vp^\top \exp{\left\{ \mC \vmu + \frac{1}{2} \text{diag} (\mC \mLambda \mC^\top) \right\}} - \vone^\top\log \Gamma{(\vy + \vone)}                                               \\
-	    & \quad + \frac{p + m}{2} (1 + \log{2 \pi}) + \frac{1}{2} \log{|\mLambda|},                                                                                                                                \\
-	T_2 & = \quad \bE_q \left\{ \log p(\mSigma_{\vu \vu}) - \log q(\mSigma_{\vu \vu}) \right\}                                                                                                                 \\
-	    & = \quad \bE_q \big\{ v/2(\log |\Psi| - \log |\Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu}|) + \frac{1}{2} \log 2 + \frac{1}{2} \log|\mSigma_{\vu \vu}| + \log \Gamma_{p+1}(v/2) - \log \Gamma_{p}(v/2)    \\
-	    & \quad + \frac{1}{2} \tr((\vmu_{\vu} \vmu_{\vu}^\top + \mLambda_{\vu \vu}) \mSigma_{\vu \vu}^{-1}) \big\}                                                                                                  \\
-	    & = \quad v/2\big(\log |\Psi| - \log |\Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu}|\big) + \frac{1}{2} \log 2 + \frac{1}{2} \bE_q \log |\mSigma_{\vu \vu}| + \log \Gamma_{p+1}(v/2) - \log \Gamma_{p}(v/2) \\
-	    & \quad + \frac{1}{2} \tr\big(\mI_m + \Psi(\Psi+ \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu})^{-1}/(v + p + 2)\big)                                                                                        \\
+	T_1 & = \quad \bE_q[\log{p(\vy, \vnu)} - \log{q(\vnu)}]\\
+	    & = \quad \vy \mP \mC \vmu - \vp^\top \exp{\left\{ \mC \vmu + \frac{1}{2} \text{diag} (\mC \mLambda \mC^\top) \right\}} - \vone^\top\log \Gamma{(\vy + \vone)}\\
+	    & \quad + \frac{p + m}{2} (1 + \log{2 \pi}) + \frac{1}{2} \log{|\mLambda|},\\
+	T_2 & = \quad \bE_q \left\{ \log p(\mSigma_{\vu \vu}) - \log q(\mSigma_{\vu \vu}) \right\}\\
+	    & = \quad \bE_q \big\{ v/2(\log |\Psi| - \log |\Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu}|) + \frac{1}{2} \log 2 + \frac{1}{2} \log|\mSigma_{\vu \vu}| \\
+	    & \qquad \hphantom{\bE_q \{} + \log \Gamma_{p+1}(v/2) - \log \Gamma_{p}(v/2)    
+	    + \frac{1}{2} \tr((\vmu_{\vu} \vmu_{\vu}^\top + \mLambda_{\vu \vu}) \mSigma_{\vu \vu}^{-1}) \big\} \\
+	    & = \quad v/2\big(\log |\Psi| - \log |\Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu}|\big) + \frac{1}{2} \log 2 \\
+	    & \quad + \frac{1}{2} \bE_q \log |\mSigma_{\vu \vu}| + \log \Gamma_{p+1}(v/2) - \log \Gamma_{p}(v/2) \\
+	    & \quad + \frac{1}{2} \tr\big[\mI_m + \Psi(\Psi+ \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu})^{-1}/(v + p + 2)\big] \\
 	T_3 & = - \vp^\top \log \vp - (\vone - \vp)^\top \log (\vone - \vp) - \log \Beta (\alpha_\rho, \beta_\rho) + \log \Beta (\alpha_q, \beta_q)                                                              
 \end{array}
-$$
+\end{equation*}
 		
 \noindent with $\bE_q \log |\mSigma_{\vu \vu}| = m \log 2 + \log \left | \Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu} \right | + \sum_{i=1}^m \Psi \left ( \frac{v - i + 1}{2} \right )$
 
 \section{Calculation of Derivatives for the Gaussian Variational Approximations}
 \subsection{Derivatives for Laplace-Gaussian Variational Approximation}
 \label{sec:appendix_derivatives_laplace}
-\begin{align*}
+\begin{equation*}
+\begin{array}{ll}
 	\frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \vmu}     & \approx \mP \mC (\vy - \exp{(\mC \vmu)}) - \mSigma^{-1} \vmu \text{ and} \\
 	\frac{\partial \log p(\vmu, \mLambda; \vy)}{\partial \mLambda} & \approx - \mC^\top \text{diag}(\vp e^{(\mC \vmu)}) \mC - \mSigma^{-1}.   
-\end{align*}
+\end{array}
+\end{equation*}
 		
 \subsection{Derivatives for Gaussian Variational Approximation with parameterisation $\mLambda = \mR \mR^\top$}
 \label{sec:appendix_derivatives_gva}
-\begin{align*}
+\begin{equation*}
+\begin{array}{ll}
 	\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu}     & = \mP \mC (\vy - \mC^\top \exp(\mC \vmu + \frac{1}{2} \text{diag}{(\mC \mLambda \mC^\top)})) - \mSigma^{-1} \vmu \text{ and}                \\
 	\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda} & = \left \{\mLambda^{-1} - \mP \mC^\top \exp(\mC \vmu + \frac{1}{2} \text{diag}(\mC \mLambda \mC^\top)) \mP \mC) - \mSigma^{-1} \right \} \mR. 
-\end{align*}
+\end{array}
+\end{equation*}
 
 \subsection{Derivatives for Gaussian Variational Approximation fixed point}
 \label{sec:appendix_derivatives_gva_fixed_point}
-\begin{align*}
+\begin{equation*}
+\begin{array}{ll}
 	\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \vmu}     & = \quad \mC^\top\vp \left [\vy - \mC\exp\{\mC \vmu + \tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top)\} \right ] - \mSigma^{-1} \vmu \text{ and} \\
 	\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda} & = -\mC^\top \text{diag}[\vp^\top \exp\{\mC \vmu +\tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top)\}] - \mSigma^{-1}.                             
-\end{align*}
+\end{array}
+\end{equation*}
