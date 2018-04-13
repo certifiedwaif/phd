@@ -172,16 +172,11 @@ double sd(const VectorXd& x)
 void centre(VectorXd& v)
 {
 	const auto n = v.size();
-	VectorXd v_bar(n);
-	v_bar.fill(v.mean());
-	auto sd_v = sd(v);
+	auto v_norm = v.norm();
 
-	if (sd_v > 0.0) {
-		VectorXd centred_v = v - v_bar;
-		v = centred_v / sd_v;
-	}
-	else {
-		// If sd_v is zero, the data is constant. So leave it alone.
+	if (v_norm > 0.0) {
+		VectorXd centred_v = v.array() - v.mean();
+		v = centred_v * sqrt(n) / v_norm;
 	}
 }
 
@@ -377,6 +372,7 @@ double logp2(int n, double R2, int p)
 
 // Calculate the correlations for every subset of the covariates in mX
 List all_correlations_main(const Graycode& graycode, VectorXd vy, MatrixXd mX, std::string prior,
+	std::string modelprior, VectorXd modelpriorvec,
 	const uint fixed, const uint intercept_col, const uint max_iterations, const bool bNatural_Order = false,
 	const bool bIntercept = false,
 	const bool bCentre = true)
@@ -606,7 +602,9 @@ List all_correlations_main(const Graycode& graycode, VectorXd vy, MatrixXd mX, s
 }
 
 // [[Rcpp:export]]
-List blma_cpp(VectorXd vy, MatrixXd mX, std::string prior, const uint intercept_col,
+List blma_cpp(VectorXd vy, MatrixXd mX, std::string prior, std::string modelprior,
+							VectorXd modelpriorvec,
+							const uint intercept_col,
 							const bool bNatural_Order, const bool bIntercept, const bool bCentre)
 {
 	const uint p = mX.cols();
@@ -614,7 +612,8 @@ List blma_cpp(VectorXd vy, MatrixXd mX, std::string prior, const uint intercept_
 	const uint max_iterations = 1 << p;
 
 	Graycode graycode(p);
-	return all_correlations_main(graycode, vy, mX, prior, fixed, intercept_col, max_iterations, bNatural_Order,
+	return all_correlations_main(graycode, vy, mX, prior, modelprior, modelpriorvec,
+																fixed, intercept_col, max_iterations, bNatural_Order,
 																bIntercept, bCentre);
 }
 
@@ -622,6 +621,7 @@ List blma_cpp(VectorXd vy, MatrixXd mX, std::string prior, const uint intercept_
 // Calculate the correlations for every subset of the covariates in mX
 // [[Rcpp:export]]
 List blma_fixed_cpp(VectorXd vy, MatrixXd mX, MatrixXd mZ, std::string prior,
+										std::string modelprior, VectorXd modelpriorvec,
 										const uint intercept_col, const bool bNatural_Order, const bool bIntercept,
 										const bool bCentre)
 {
@@ -635,7 +635,8 @@ List blma_fixed_cpp(VectorXd vy, MatrixXd mX, MatrixXd mZ, std::string prior,
 	mC.leftCols(p1) = mX;
 	mC.rightCols(p2) = mZ;
 	Graycode graycode(p1, p2);
-	return all_correlations_main(graycode, vy, mC, prior, p1, intercept_col, max_iterations, bNatural_Order, 
+	return all_correlations_main(graycode, vy, mC, prior, modelprior, modelpriorvec,
+																p1, intercept_col, max_iterations, bNatural_Order, 
 																bIntercept, bCentre);
 }
 

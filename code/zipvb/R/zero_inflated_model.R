@@ -163,7 +163,7 @@ calculate_lower_bound <- function(mult, verbose=FALSE)
 zipvb <- function(mult, method="gva", verbose=FALSE, plot_lower_bound=FALSE, glm_init=TRUE)
 {
   # browser()
-  MAXITER <- 5
+  MAXITER <- 10
 
   # Initialise variables from mult
   N <- length(mult$vy)

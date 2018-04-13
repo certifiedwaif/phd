@@ -1,6 +1,7 @@
 library(tidyverse)
-library(correlation)
+library(blma)
 library(Matrix)
+library(here)
 
 # Generate the data
 set.seed(1)
@@ -96,20 +97,22 @@ varnames <- c(
 y.t <- mD$y
 X.f <- data.matrix(cbind(mD[1:15]))
 colnames(X.f) <- varnames 
-UScrime_tbl <- correlation::timings(y.t, X.f)
+UScrime_tbl <- blma::timings(y.t, X.f)
 print(UScrime_tbl)
-blma_result <- all_correlations_mX(y.t, X.f, "maruyama")
+blma_result <- blma(y.t, X.f, "maruyama")
+blma_result <- blma(y.t, X.f, "maruyama", "beta-binomial", c(1, 1))
+blma_result <- blma(y.t, X.f, "maruyama", "bernoulli", rep(1/15, 15))
 str(blma_result)
 
 y.t <- mD$y
 X.f <- data.matrix(cbind(mD[, 1:10]))
 colnames(X.f) <- varnames 
 Z.f <- data.matrix(cbind(mD[, 11:15]))
-blma_result <- all_correlations_mX_mZ(y.t, X.f, Z.f, "maruyama")
+blma_result <- blma_fixed(y.t, X.f, Z.f, "maruyama")
 
 library(Ecdat)
 
-dat = read.csv("Kakadu.csv")
+dat = read.csv(here("../Kakadu.csv"))
 vy <- as.vector(dat$income)
 mX <- dat[,c(2:21,23)]  
 mX <- model.matrix(~.,data=mX)[,-1]
@@ -120,5 +123,27 @@ dat <- VietNamI
 y.t <- as.vector(dat$lnhhexp)
 X.f <- dat[,-2]  
 X.f <- model.matrix(~.,data=X.f)[,-1]
-VietNamI_tbl <- timings(vy, mX)
+VietNamI_tbl <- timings(y.t, X.f)
 print(VietNamI_tbl)
+
+#
+sum.na <- function(x)
+{
+  sum(is.na(x))
+}
+apply(X, 1, sumNA)
+apply(X, 2, sumNA)
+
+inds = which(apply(X,2,sum.na)==0)
+mX = X[,inds]
+i <- 1
+vy = Y[,i]
+
+full_fit <- lm(vy~mX)
+summ <- summary(full_fit)
+
+true_model <- summ$coefficients[summ$coefficients[,4] < .05, ]
+p <- ncol(mX)
+K <- 20
+initial_gamma <- matrix(rbinom(K * p, 1, .5), K, p)
+cva_result <- cva(initial_gamma, vy, mX, K)

@@ -77,16 +77,20 @@ NULL
 #' @param prior The prior to use. The choices of prior available are "maruyama", "BIC", "ZE",
 #' "liang_g1", "liang_g2", "liang_g_n_appell", "liang_g_approx", "liang_g_n_quad",
 #' "robust_bayarri1" and "robust_bayarri2"
+#' @param modelprior
+#' @param modelpriorvec
 #' @param intercept_col The index of the column in mX containing the intercept, if any
 #' @param bNatural_Order Whether to return the results in natural order or graycode order. Defaults to graycode order.
 #' @param bIntercept Logical value indicating whether there is an intercept column or not
 #' @param bCentre Logical value indicating whether to centre the response vector and covariance matrix or not
 #' @param cores The number of cores to use
 #' @return A list containing 
-#' vR2, the vector of correlations for each model
-#' vp_gamma, the vector of number of covariates for each model
-#' vlogp, the vector of logs of the likelihoods of each model
-#' vinclusion_prob, the vector of inclusion probabilities for each of the covariates
+#' \describe{
+#' \item{vR2}{the vector of correlations for each model}
+#' \item{vp_gamma}{the vector of number of covariates for each model}
+#' \item{vlogp}{the vector of logs of the likelihoods of each model}
+#' \item{vinclusion_prob}{the vector of inclusion probabilities for each of the covariates}
+#' }
 #' @examples
 #' library(MASS)
 #'
@@ -126,8 +130,8 @@ NULL
 #'  $ vlogp          : num [1:32768] 6.92e-310 -8.51 -1.30e+01 -8.50 -9.74 ...
 #'  $ vinclusion_prob: num [1:15] 0.284 0.054 0.525 0.679 0.344 ...
 #' @export
-blma <- function(vy, mX, prior, intercept_col = 1L, bNatural_Order = FALSE, bIntercept = FALSE, bCentre = FALSE, cores = 1L) {
-    .Call('_blma_blma', PACKAGE = 'blma', vy, mX, prior, intercept_col, bNatural_Order, bIntercept, bCentre, cores)
+blma <- function(vy, mX, prior, modelprior, modelpriorvec, intercept_col = 1L, bNatural_Order = FALSE, bIntercept = FALSE, bCentre = FALSE, cores = 1L) {
+    .Call('_blma_blma', PACKAGE = 'blma', vy, mX, prior, modelprior, modelpriorvec, intercept_col, bNatural_Order, bIntercept, bCentre, cores)
 }
 
 #' Perform Bayesian Linear Model Averaging over all of the possible linear models where vy is the response,
@@ -139,16 +143,20 @@ blma <- function(vy, mX, prior, intercept_col = 1L, bNatural_Order = FALSE, bInt
 #' @param prior The prior to use. The choices of prior available are "maruyama", "BIC", "ZE",
 #' "liang_g1", "liang_g2", "liang_g_n_appell", "liang_g_approx", "liang_g_n_quad",
 #' "robust_bayarri1" and "robust_bayarri2"
+#' @param modelprior
+#' @param modelpriorvec
 #' @param intercept_col The index of the column in mX containing the intercept, if any
 #' @param bNatural_Order Whether to return the results in natural order or graycode order. Defaults to graycode order.
 #' @param bIntercept Logical value indicating whether there is an intercept column or not
 #' @param bCentre Logical value indicating whether to centre the response vector and covariance matrix or not
 #' @param cores The number of cores to use
 #' @return A list containing 
-#' vR2, the vector of correlations for each model
-#' vp_gamma, the vector of number of covariates for each model
-#' vlogp, the vector of logs of the likelihoods of each model
-#' vinclusion_prob, the vector of inclusion probabilities for each of the covariates
+#' \describe{
+#' \item{vR2}{the vector of correlations for each model}
+#' \item{vp_gamma}{the vector of number of covariates for each model}
+#' \item{vlogp}{the vector of logs of the likelihoods of each model}
+#' \item{vinclusion_prob}{the vector of inclusion probabilities for each of the covariates}
+#' }
 #' @examples
 #' library(MASS)
 #'
@@ -190,8 +198,8 @@ blma <- function(vy, mX, prior, intercept_col = 1L, bNatural_Order = FALSE, bInt
 #'  $ vinclusion_prob: num [1:15] 1 1 1 1 1 1 1 1 1 1 ...
 #' 
 #' @export
-blma_fixed <- function(vy, mX, mZ, prior, intercept_col = 1L, bNatural_Order = FALSE, bIntercept = FALSE, bCentre = FALSE, cores = 1L) {
-    .Call('_blma_blma_fixed', PACKAGE = 'blma', vy, mX, mZ, prior, intercept_col, bNatural_Order, bIntercept, bCentre, cores)
+blma_fixed <- function(vy, mX, mZ, prior, modelprior, modelpriorvec, intercept_col = 1L, bNatural_Order = FALSE, bIntercept = FALSE, bCentre = FALSE, cores = 1L) {
+    .Call('_blma_blma_fixed', PACKAGE = 'blma', vy, mX, mZ, prior, modelprior, modelpriorvec, intercept_col, bNatural_Order, bIntercept, bCentre, cores)
 }
 
 #' Return the graycode matrix

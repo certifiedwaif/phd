@@ -286,7 +286,7 @@ median_accuracy_graph_all <- function(test) {
   legend("bottomright", c("Laplace",
                           latex2exp("GVA $\\Lambda = R^T R$"),
                           latex2exp("GVA $\\Lambda = (R^T R)^{-1}$"),
-                          "GVA NP"), lty=1, col=gray((1:4)/(2:5)))
+                          "GVA fixed point"), lty=1, col=gray((1:4)/(2:5)))
   title(sprintf("Combined median accuracy graph - %s", test))
   dev.off()
   # TODO: Label the axes better

@@ -25,26 +25,28 @@ BEGIN_RCPP
 END_RCPP
 }
 // blma
-List blma(NumericVector vy, NumericMatrix mX, std::string prior, int intercept_col, bool bNatural_Order, bool bIntercept, bool bCentre, int cores);
-RcppExport SEXP _blma_blma(SEXP vySEXP, SEXP mXSEXP, SEXP priorSEXP, SEXP intercept_colSEXP, SEXP bNatural_OrderSEXP, SEXP bInterceptSEXP, SEXP bCentreSEXP, SEXP coresSEXP) {
+List blma(NumericVector vy, NumericMatrix mX, std::string prior, std::string modelprior, NumericVector modelpriorvec, int intercept_col, bool bNatural_Order, bool bIntercept, bool bCentre, int cores);
+RcppExport SEXP _blma_blma(SEXP vySEXP, SEXP mXSEXP, SEXP priorSEXP, SEXP modelpriorSEXP, SEXP modelpriorvecSEXP, SEXP intercept_colSEXP, SEXP bNatural_OrderSEXP, SEXP bInterceptSEXP, SEXP bCentreSEXP, SEXP coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< NumericVector >::type vy(vySEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type mX(mXSEXP);
     Rcpp::traits::input_parameter< std::string >::type prior(priorSEXP);
+    Rcpp::traits::input_parameter< std::string >::type modelprior(modelpriorSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type modelpriorvec(modelpriorvecSEXP);
     Rcpp::traits::input_parameter< int >::type intercept_col(intercept_colSEXP);
     Rcpp::traits::input_parameter< bool >::type bNatural_Order(bNatural_OrderSEXP);
     Rcpp::traits::input_parameter< bool >::type bIntercept(bInterceptSEXP);
     Rcpp::traits::input_parameter< bool >::type bCentre(bCentreSEXP);
     Rcpp::traits::input_parameter< int >::type cores(coresSEXP);
-    rcpp_result_gen = Rcpp::wrap(blma(vy, mX, prior, intercept_col, bNatural_Order, bIntercept, bCentre, cores));
+    rcpp_result_gen = Rcpp::wrap(blma(vy, mX, prior, modelprior, modelpriorvec, intercept_col, bNatural_Order, bIntercept, bCentre, cores));
     return rcpp_result_gen;
 END_RCPP
 }
 // blma_fixed
-List blma_fixed(NumericVector vy, NumericMatrix mX, NumericMatrix mZ, std::string prior, int intercept_col, bool bNatural_Order, bool bIntercept, bool bCentre, int cores);
-RcppExport SEXP _blma_blma_fixed(SEXP vySEXP, SEXP mXSEXP, SEXP mZSEXP, SEXP priorSEXP, SEXP intercept_colSEXP, SEXP bNatural_OrderSEXP, SEXP bInterceptSEXP, SEXP bCentreSEXP, SEXP coresSEXP) {
+List blma_fixed(NumericVector vy, NumericMatrix mX, NumericMatrix mZ, std::string prior, std::string modelprior, NumericVector modelpriorvec, int intercept_col, bool bNatural_Order, bool bIntercept, bool bCentre, int cores);
+RcppExport SEXP _blma_blma_fixed(SEXP vySEXP, SEXP mXSEXP, SEXP mZSEXP, SEXP priorSEXP, SEXP modelpriorSEXP, SEXP modelpriorvecSEXP, SEXP intercept_colSEXP, SEXP bNatural_OrderSEXP, SEXP bInterceptSEXP, SEXP bCentreSEXP, SEXP coresSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -52,12 +54,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericMatrix >::type mX(mXSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type mZ(mZSEXP);
     Rcpp::traits::input_parameter< std::string >::type prior(priorSEXP);
+    Rcpp::traits::input_parameter< std::string >::type modelprior(modelpriorSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type modelpriorvec(modelpriorvecSEXP);
     Rcpp::traits::input_parameter< int >::type intercept_col(intercept_colSEXP);
     Rcpp::traits::input_parameter< bool >::type bNatural_Order(bNatural_OrderSEXP);
     Rcpp::traits::input_parameter< bool >::type bIntercept(bInterceptSEXP);
     Rcpp::traits::input_parameter< bool >::type bCentre(bCentreSEXP);
     Rcpp::traits::input_parameter< int >::type cores(coresSEXP);
-    rcpp_result_gen = Rcpp::wrap(blma_fixed(vy, mX, mZ, prior, intercept_col, bNatural_Order, bIntercept, bCentre, cores));
+    rcpp_result_gen = Rcpp::wrap(blma_fixed(vy, mX, mZ, prior, modelprior, modelpriorvec, intercept_col, bNatural_Order, bIntercept, bCentre, cores));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -76,8 +80,8 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_blma_cva", (DL_FUNC) &_blma_cva, 7},
-    {"_blma_blma", (DL_FUNC) &_blma_blma, 8},
-    {"_blma_blma_fixed", (DL_FUNC) &_blma_blma_fixed, 9},
+    {"_blma_blma", (DL_FUNC) &_blma_blma, 10},
+    {"_blma_blma_fixed", (DL_FUNC) &_blma_blma_fixed, 11},
     {"_blma_graycode", (DL_FUNC) &_blma_graycode, 2},
     {NULL, NULL, 0}
 };

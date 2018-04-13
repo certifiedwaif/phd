@@ -21,16 +21,20 @@ using namespace std;
 //' @param prior The prior to use. The choices of prior available are "maruyama", "BIC", "ZE",
 //' "liang_g1", "liang_g2", "liang_g_n_appell", "liang_g_approx", "liang_g_n_quad",
 //' "robust_bayarri1" and "robust_bayarri2"
+//' @param modelprior
+//' @param modelpriorvec
 //' @param intercept_col The index of the column in mX containing the intercept, if any
 //' @param bNatural_Order Whether to return the results in natural order or graycode order. Defaults to graycode order.
 //' @param bIntercept Logical value indicating whether there is an intercept column or not
 //' @param bCentre Logical value indicating whether to centre the response vector and covariance matrix or not
 //' @param cores The number of cores to use
 //' @return A list containing 
-//' vR2, the vector of correlations for each model
-//' vp_gamma, the vector of number of covariates for each model
-//' vlogp, the vector of logs of the likelihoods of each model
-//' vinclusion_prob, the vector of inclusion probabilities for each of the covariates
+//' \describe{
+//' \item{vR2}{the vector of correlations for each model}
+//' \item{vp_gamma}{the vector of number of covariates for each model}
+//' \item{vlogp}{the vector of logs of the likelihoods of each model}
+//' \item{vinclusion_prob}{the vector of inclusion probabilities for each of the covariates}
+//' }
 //' @examples
 //' library(MASS)
 //'
@@ -71,16 +75,17 @@ using namespace std;
 //'  $ vinclusion_prob: num [1:15] 0.284 0.054 0.525 0.679 0.344 ...
 //' @export
 // [[Rcpp::export]]
-List blma(NumericVector vy, NumericMatrix mX, std::string prior, int intercept_col = 1,
-					bool bNatural_Order = false, bool bIntercept = false, bool bCentre = false,
+List blma(NumericVector vy, NumericMatrix mX, std::string prior, std::string modelprior, NumericVector modelpriorvec,
+					int intercept_col = 1, bool bNatural_Order = false, bool bIntercept = false, bool bCentre = false,
 					int cores = 1) {
 	Map<VectorXd> vy_m = as< Map<VectorXd> >(vy);
 	Map<MatrixXd> mX_m = as< Map<MatrixXd> >(mX);
+	Map<VectorXd> modelpriorvec_m = as< Map<VectorXd> >(modelpriorvec);
 	#if defined(_OPENMP)
 		omp_set_num_threads(cores);
 	#endif;
-	List result = blma_cpp(vy_m, mX_m, prior, intercept_col - 1, bNatural_Order, bIntercept,
-													bCentre);
+	List result = blma_cpp(vy_m, mX_m, prior, modelprior, modelpriorvec_m, intercept_col - 1, bNatural_Order,
+													bIntercept, bCentre);
 	return result;
 }
 
@@ -93,16 +98,20 @@ List blma(NumericVector vy, NumericMatrix mX, std::string prior, int intercept_c
 //' @param prior The prior to use. The choices of prior available are "maruyama", "BIC", "ZE",
 //' "liang_g1", "liang_g2", "liang_g_n_appell", "liang_g_approx", "liang_g_n_quad",
 //' "robust_bayarri1" and "robust_bayarri2"
+//' @param modelprior
+//' @param modelpriorvec
 //' @param intercept_col The index of the column in mX containing the intercept, if any
 //' @param bNatural_Order Whether to return the results in natural order or graycode order. Defaults to graycode order.
 //' @param bIntercept Logical value indicating whether there is an intercept column or not
 //' @param bCentre Logical value indicating whether to centre the response vector and covariance matrix or not
 //' @param cores The number of cores to use
 //' @return A list containing 
-//' vR2, the vector of correlations for each model
-//' vp_gamma, the vector of number of covariates for each model
-//' vlogp, the vector of logs of the likelihoods of each model
-//' vinclusion_prob, the vector of inclusion probabilities for each of the covariates
+//' \describe{
+//' \item{vR2}{the vector of correlations for each model}
+//' \item{vp_gamma}{the vector of number of covariates for each model}
+//' \item{vlogp}{the vector of logs of the likelihoods of each model}
+//' \item{vinclusion_prob}{the vector of inclusion probabilities for each of the covariates}
+//' }
 //' @examples
 //' library(MASS)
 //'
@@ -145,17 +154,18 @@ List blma(NumericVector vy, NumericMatrix mX, std::string prior, int intercept_c
 //' 
 //' @export
 // [[Rcpp::export]]
-List blma_fixed(NumericVector vy, NumericMatrix mX, NumericMatrix mZ, std::string prior,
-                int intercept_col = 1,
-                bool bNatural_Order = false, bool bIntercept = false, bool bCentre = false,
-                int cores = 1) {
+List blma_fixed(NumericVector vy, NumericMatrix mX, NumericMatrix mZ, std::string prior, std::string modelprior,
+								NumericVector modelpriorvec, int intercept_col = 1, bool bNatural_Order = false,
+								bool bIntercept = false, bool bCentre = false, int cores = 1) {
 	Map<VectorXd> vy_m = as< Map<VectorXd> >(vy);
 	Map<MatrixXd> mX_m = as< Map<MatrixXd> >(mX);
 	Map<MatrixXd> mZ_m = as< Map<MatrixXd> >(mZ);
+	Map<VectorXd> modelpriorvec_m = as< Map<VectorXd> >(modelpriorvec);
 	#if defined(_OPENMP)
 		omp_set_num_threads(cores);
 	#endif;
-	List result = blma_fixed_cpp(vy_m, mX_m, mZ_m, prior, intercept_col - 1, bNatural_Order, bIntercept, bCentre);
+	List result = blma_fixed_cpp(vy_m, mX_m, mZ_m, prior, modelprior, modelpriorvec_m, intercept_col - 1, 
+																bNatural_Order, bIntercept, bCentre);
 	return result;
 }
 

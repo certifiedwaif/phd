@@ -13,7 +13,7 @@ timings <- function(y, X)
                 "BLMA",
                 "BAS",
                 "BAS",
-                "BVS",
+                #"BVS",
                 "BMS",
                 "BLMA",
                 "BLMA",
@@ -29,7 +29,7 @@ timings <- function(y, X)
               "ZE",
               "hyper-g",
               "hyper-g-laplace",
-              "Liangetal",
+              #"Liangetal",
               "g",
               "liang_g1",
               "liang_g2",
@@ -62,9 +62,9 @@ timings <- function(y, X)
       vinclusion_prob <- coef(bms_result, order.by.pip=FALSE)[,1]
     }
     if (package == "BLMA") {
-      library(correlation)
+      library(blma)
       library(appell)
-      blma_result <- blma(y, X, prior.val)
+      blma_result <- blma(y, X, prior.val, "uniform", NULL)
       vinclusion_prob <- blma_result$vinclusion_prob
     }
     end_time <- proc.time()[3]
