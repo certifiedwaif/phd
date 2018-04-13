@@ -179,7 +179,8 @@ function may change curvature, the so-called knots.
 % \subsubsection{B-splines}
 \subsection{B-Splines}
 
-% This is taken from the Wikipedia page on the subject
+% This is taken from the Wikipedia page on the subject. Yet somehow, I've managed to avoid including anything
+% that's interesting or useful about B-Splines.
 There are many families of basis functions which can be conveniently used for function approximation,
 including orthogonal polynomials. The B-spline basis \citep{DeBoor1972} is numerically stable and efficient to
 computationally evaluate. A B-Spline is a piecewise polynomial function of degree $< n$ in a variable $x$. It
@@ -261,7 +262,6 @@ each column corresponds to a knot.
 
 Consider the fixed effects model $\vy = \mX \vbeta$ where $\mX \in \R^{n \times p}$. If the hat matrix is
 defined as $\mH = \mX (\mX^\top\mX)^{-1} \mX^\top$ then
-
 \begin{align*}
 	\tr(\mH) & = \tr[\mX(\mX^\top\mX)^{-1}\mX^\top]  \\
 	         & = \tr[\mX^\top\mX (\mX^\top\mX)^{-1}] \\
@@ -269,9 +269,10 @@ defined as $\mH = \mX (\mX^\top\mX)^{-1} \mX^\top$ then
 	         & = p                                   
 \end{align*}
 
-which is the number of parameters in the fixed effects model. Thus we use the trace of the hat matrix as
-the definition of the effective degrees of freedom of the model. This definition then naturally extends to
-more general smoother matrices which can be used to fit models involving splines or other kinds of smoothing.
+\noindent which is the number of parameters in the fixed effects model. Thus we use the trace of the hat
+matrix as the definition of the effective degrees of freedom of the model. This definition then naturally
+extends to more general smoother matrices which can be used to fit models involving splines or other kinds of
+smoothing.
 
 % \subsection{Crossed effects}
 % \subsection{Spatial structure}
