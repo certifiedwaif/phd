@@ -213,7 +213,7 @@ posterior expectation of $\vgamma$ is given by
 $\bE(\vgamma|\vy) = \sum_{\vgamma} \vgamma \cdot p(\vgamma|\vy)$.
 
 If one is required to select a single model, say $\vgamma^*$, two common choices are the 
-highest posterior model (HPM) which uses $\vgamma^* = \vgamma_{\mbox{\tiny HPM}} = \max_\vgamma \{ \, p(\vy,\vgamma) \, \}$, or the
+highest posterior model (HPM) which uses $\vgamma^* = \vgamma_{\mbox{\tiny HPM}} = \argmax_\vgamma \{ \, p(\vy,\vgamma) \, \}$, or the
 median posterior model (MPM) where $\vgamma^*$ is obtained by
 rounding each element of $\bE(\vgamma|\vy)$ to the nearest integer.
 The MPM has predictive optimality properties \citep{barbieri2004}.
