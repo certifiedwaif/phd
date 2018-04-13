@@ -1,61 +1,85 @@
-\documentclass{article}
+\documentclass[11pt]{article}
+
 \usepackage{natbib}
-\title{Abstract}
+
+\title{Numerically stable approximate Bayesian methods 
+	for Generalized Linear Mixed Models and  Linear Model Selection}
+
 \author{Mark Greenaway}
+
+\input{include}
+%\input{Definitions}
+
+
+\usepackage{geometry}
+\geometry{verbose,a4paper,tmargin=1in,bmargin=1.5in,lmargin=1in,rmargin=1in}
+
+\renewcommand{\baselinestretch}{1.5}
+
 \begin{document}
 \maketitle
 
-% Abstract
-\section{Abstract}
-In this thesis, we examine several complicated Bayesian models which applied statisticians wish to fit
-to data. These models are typically fit with Monte Carlo Markov Chains, but these techniques are
-computationally expensive and prone to convergence problems. These models can be fit much faster with Variational 
-Bayes.
+\section*{Abstract}
 
-Bayesian models offer great flexibility, but can be computationally demanding to fit. The gold standard for
-fitting Bayesian models are Monte Carlo Markov Chain methods, but these can be slow and prone to convergence
-problems. Approximate methods of fitting Bayesian models allow these models to be fit using deterministic
-algorithms in substantially less time. Variational Bayes (VB) is a method for approximating the posterior
-distributions of the model parameters with only a slight loss of accuracy.
-Zero-inflated models have many
-applications in areas such as manufacturing and public health.
-We apply VB to Zero-Inflated Poisson mixed
-models with a Gaussian prior using the Gaussian Variational Approximation and a latent variable representation.
-The model is extended to include random effects which allow simple
-incorporation of spline and other modelling structures. 
-We demonstrate that this
-approximation is accurate and fast on a number of simulated and real data sets. We also incorporate a novel
-parameterisation of the covariance of the Gaussian Variational Approximation using the Cholesky factor of the
-precision matrix, as in \cite{Tan2016}, and discuss the computational advantages of this parameterisation due
-to the sparsity of the precision matrix for mixed models, improving upon the computational cost and numerical stability of previous methods.
+Bayesian modelling offers enormous flexibility but fitting such models can be computationally 
+difficult in practice. In this thesis we examine two computationally challenging Bayesian models: 
+Generalized Linear Mixed Models (GLMM), and model selection via linear regression with spike and 
+slab priors. Both of these models are computationally difficult to fit efficiently in a numerically 
+stable way, key issues for applied statisticians who wish to fit these models to data. These models 
+are typically fit with Monte Carlo Markov Chain (MCMC) methodology. While MCMC is useful in 
+obtaining gold standard solutions it is computationally expensive and prone to convergence problems. 
+Approximate Bayesian inference methods such as variational approximation allow these models to be 
+fit using deterministic algorithms in substantially less time, sometimes with only a slight loss of 
+accuracy. In this thesis we explore variational approximation methodology for these problems and 
+address the numerical stability issues that arise as they appear.
 
-Model selection is a task of central importance in modern statistics, and  Bayesian model selection has the
-advantage of incorporating the uncertainty of the model selection process itself which propagates to the
-estimates of the model  parameters. Linear regression models with normal priors are ubiquitous in applied
-statistics due to their ease of fitting and interpretation. We use the popular $g$-prior \cite{Zellner1986}
-for model selection of linear models with normal priors. As \cite{Liang2008} points out, this raises the
-question of how best to choose $g$. They show that a fixed choice of $g$ leads to model selection paradoxes,
-such as Bartlett's Paradox and the Information Paradox. These paradoxes can be avoided by putting a prior on
-$g$. Using several popular priors on $g$, we derive exact expressions for the model selection Bayes Factors in
-terms of special functions depending only on $n$, $p$ and $R_\vgamma^2$. We show that these expressions are
-accurate, fast to evaluate and numerically stable. An R package {\texttt blma} for doing Bayesian linear model
-averaging using these exact expressions has been  released on GitHub.
+As a special case of a GLMM we will consider Zero-Inflated Poisson mixed models which have many
+applications in areas such as manufacturing and public health. We explore a multivariate Gaussian 
+latent variable framework that allows for various random effect structure and the simple 
+incorporation of spline and other smoothing techniques. To these models we apply a combination of VB 
+and Gaussian Variational Approximation (GVA). We also incorporate a novel parametrisation of the 
+covariance of the GVA using a sparse representation of the Cholesky factor of the precision matrix
+similar to used \cite{Tan2018}. We identify a particular source of numerical instability that
+arises in such settings and devise a further parametrisation which effectively addresses the problem.
+We demonstrate that this approximation is accurate and fast on a number of simulated and real data 
+sets.
 
-For data sets with a small number of covariates, it is computationally feasible to calculate $R_\vgamma^2$ for
-every $\vgamma \in \mGamma$, and so perform exact model selection. As the number of covariates increases the
-model space becomes too large to explore exhaustively. \cite{Rockova2016} introduced Particle EM, a
-population-based method for efficiently exploring a  subset of the model space with high posterior
-probability. The population-based method allows the method to seek multiple local modes, and captures greater
-total posterior mass from the model space than choosing a single model would. We extend this method using
-Collapsed Variational Bayes and the exact posterior marginal likelihood expressions to derive a
-computationally efficient algorithm for model selection on data sets with a large number of covariates. We
-demonstrate the algorithm's performance on a number of data sets for different combinations of $g$-prior,
-model selection prior and population size. We also compare our method to the existing methods lasso, SCAD, MCP
-and PEM using the $F_1$ score,  and show that our method outperforms these. We also show that total posterior
-mass increases and mean marginal variable error decreases, as the number of models in the population
-increases.
+The second problem considered in this thesis is that of model selection in linear models.
+Model selection is a task of central importance in modern statistics. Model selection in the Bayesian
+inference paradigm has the advantage of incorporating the uncertainty of the model selection process 
+itself and allowing this uncertainty to propagate through to the estimates of the model parameters. 
+In this context the appropriate selection of prior distributions is particularly delicate.
+We adopt the popular $g$-prior \cite{Zellner1986} for regression coefficients where $g$ is a prior
+hyperparameter. However, this raises the question of how best to choose $g$.
+\cite{Liang2008}  show that a fixed choice of $g$ leads to model selection paradoxes,
+such as Bartlett's Paradox and the Information Paradox. These paradoxes can be avoided by putting a 
+prior on $g$. We consider several priors on $g$ for which we are able to derive closed form expressions of the corresponding Bayes Factors in terms of special functions. 
+These include the hyper-$g$ and hyper-$g/n$ priors of \cite{Liang2008}, the beta-prime prior of 
+\cite{Maruyama2011}, the robust prior of \cite{Bayarri2012}, and the cake prior of \cite{OrmerodEtal2017}. 
+Using properties of these special
+functions we show how several of such Bayes factors can be evaluated in an accurate, efficient, and 
+numerically stable manner. An {\tt R} package {\texttt blma} for performing exact Bayesian linear 
+model averaging has been released on {\tt GitHub}.
 
+When the number of potential covariates becomes large an exhaustive enumeration of all possible 
+models is infeasible and approximation is required. Recently, several papers have considered 
+deterministic approximate Bayesian inference as alternatives to MCMC and stochastic search methods.
+These include EM or EM-like methods  \citep{Rockova2014,Rockova2017}, variational Bayes
+\citep{Logsdon2010,Carbonetto2011,wandormerod2011,ormerod2017},
+and expectation propagation \citep{HernandezLobato2015}. These approaches are often very fast, but 
+like the above MCMC and stochastic search methods are possibly even more prone to local maxima 
+problems. In this thesis we draw upon \cite{Rockova2017} introduced  Particle EM (PEM), a 
+particle based EM-like method for efficiently exploring a subset of the model space with high 
+posterior probability which somewhat mitigates the problem of local maxima. We exploit the key 
+concept and use a novel particle based collapsed variational approximation (PVA) which can any 
+linear model/prior combination leading to closed form expressions of Bayes factors. We demonstrate 
+empirically that PVA outperforms the model selection performance compared to penalized regression
+methods and PEM on several simulation studies. An implementation which exploits parallel computation
+is incorporated into the  {\texttt blma} package.
+ 
+{\small 
 \bibliographystyle{elsarticle-harv-nourl}
 \bibliography{references_mendeley}
+}
 
 \end{document}
