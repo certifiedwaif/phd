@@ -416,8 +416,8 @@ In order to keep our exposition as general as possible we will assume a prior st
 the from 
 $p(\alpha,\vbeta_{\vgamma}|\vgamma)p(\vgamma)$ but,
 for
-the time being, we will leave the specific fom of $p(\alpha,\vbeta_{\vgamma}|\vgamma)$ and $p(\vgamma)$ unspecified. 
-We adopt the a prior on $\vbeta_{-\vgamma}$  
+the time being, we will leave the specific form of $p(\alpha,\vbeta_{\vgamma}|\vgamma)$ and $p(\vgamma)$ unspecified. 
+We adopt a prior on $\vbeta_{-\vgamma}$  
 of the form
 \begin{equation}
 \label{eq:spikeAndSlab}
@@ -497,7 +497,7 @@ For the time being we will defer specification of $p(g)$ and $p(\vgamma)$.
 We will now justify each element of the above prior structure.
 
 The priors on $\alpha$ and $\sigma^2$ are improper Jeffreys priors and have been justified 
-in \cite{Berger1998}. In the context Bayesian model selection, model averaging or hypothesis 
+in \cite{Berger1998}. In the context of Bayesian model selection, model averaging or hypothesis 
 testing $\alpha$ and $\sigma^2$ appear in all models 
 so that when comparing models the proportionality constants in the corresponding
 Bayes factors cancel.
@@ -795,7 +795,7 @@ F_1(1,b_1,b_2,c; 1,y)
 = (c - 1) \frac{\, _2F_1(1,b_2;c-b_1;y)}{c-b_1-1}.
 $$
  
-\noindent and the the approximation $F_1(1,b_1,b_2,c; 1-1/n,y)  \approx F_1(1,b_1,b_2,c; 1,y)$
+\noindent and the approximation $F_1(1,b_1,b_2,c; 1-1/n,y)  \approx F_1(1,b_1,b_2,c; 1,y)$
 (which should be reasonable for large $n$),
 for $p_\vgamma > 2$ we obtain
 \begin{equation}\label{eq:hyperGonNmarginalApprox}
@@ -945,7 +945,7 @@ which is the same expression as Equation 26 of \cite{Bayarri2012}
 modulo notation.
 
 The expression (\ref{eq:yGivenGammaRobust}) is difficult to deal with numerically for two reasons. Firstly, if either of the first 
-two arguments of the ${}_2F_1$ function are large relative to the third will often lead to numerical overflow problems. Secondly,
+two arguments of the ${}_2F_1$ function are large relative to the third this will often lead to numerical overflow problems. Secondly,
 and more problematically, when $\widehat{\sigma}_\vgamma^2$ becomes small the last argument
 of ${}_2F_1$ function can become less than $-1$ which falls outside the radius of convergence
 of the ${}_2F_1$ function. The {\tt BayesVarSel} package which implements
@@ -1160,7 +1160,7 @@ $$
 \cite{Maruyama2011}.
 
 
-Note that (\ref{eq:marginalLikelihoodBetaPrime}) proportional
+Note that (\ref{eq:marginalLikelihoodBetaPrime}) is proportional
 to a special case of the prior structure considered by \cite{Maruyama2011}
 who refer to this special case as ZE as a model selection criterion (after Zellner's $g$ prior). This choice of $b$ also ensures that $g = O(n)$ so that $\mbox{tr}\{\mbox{Var}(\vbeta | g, \sigma^2)\} = O(1)$, preventing Bartlett's paradox. 
 Note that in comparison to previously discussed priors
@@ -1237,7 +1237,7 @@ matrix algebraic simplifications.
 For ease of use we 
 implemented an {\tt R} package called {\tt BLMA}.
 The internals of {\tt BLMA} are implemented
-in {\tt C++} and uses the {\tt R} packages \texttt{Rcpp} and \texttt{RcppEigen} to enhance
+in {\tt C++} and use the {\tt R} packages \texttt{Rcpp} and \texttt{RcppEigen} to enhance
 computational performance. The library {\tt OpenMP} was used to
 exploit parallel computation.
 
@@ -1328,8 +1328,8 @@ Then the updates for the model inverse matrix, coefficient estimates, and $R^2$ 
 \begin{enumerate}
 	\item Calculate $\widehat{\vz} = (\mX_{\vgamma_i}^T\mX_{\vgamma_i})^{-1}\mX_{\vgamma_i}^T\vz$, 
 	$\kappa 
-	= 
-	1/(\vz^T(\mI - \mX_{\vgamma_i}(\mX_{\vgamma_i}^T\mX_{\vgamma_i})^{-1}\mX_{\vgamma_i}^T)\vz) 
+	%= 
+	%1/(\vz^T(\mI - \mX_{\vgamma_i}(\mX_{\vgamma_i}^T\mX_{\vgamma_i})^{-1}\mX_{\vgamma_i}^T)\vz) 
 	= 1/(n - \vz^T\widehat{\vz})$, and  $s = \vy^T(\vz - \widehat{\vz})$.
 	
 	\item The model inverse matrix can be updated via  
@@ -1459,11 +1459,11 @@ Then the downdates for model summary values are given by the following steps.
 	%\end{array} \right]^{-1}
 	$$
 	
-	\noindent The model inverse matrix downdate can be obtained
-	via   $(\mX_{\vgamma_{i+1}}^T\mX_{\vgamma_{i+1}})^{-1} = \mA - c^{-1}\vb\vb^T$.
+	\noindent Calculate the model inverse matrix  
+	by   $(\mX_{\vgamma_{i+1}}^T\mX_{\vgamma_{i+1}})^{-1} = \mA - c^{-1}\vb\vb^T$.
 	
 	\item Calculate
-	$\widehat{\vz} = (\mX_{\vgamma_{i+1}}^T\mX_{\vgamma_{i+1}})^{-1}\mX_{\vgamma_{i+1}}^T\vz$ using step 1.,
+	$\widehat{\vz} = (\mX_{\vgamma_{i+1}}^T\mX_{\vgamma_{i+1}})^{-1}\mX_{\vgamma_{i+1}}^T\vz$,
 	$\kappa = 1/(n - \vz^T\widehat{\vz})$,
 	and $s = \vy^T(\vz - \widehat{\vz})$.
 	
@@ -1530,7 +1530,7 @@ numerical quadrature approach.
 
 \begin{figure}[h!]
 	\centering
-	\includegraphics[width=0.95\linewidth]{BayesFactors}
+	\includegraphics[width=0.99\linewidth]{BayesFactors}
 	\caption{Cake prior or BIC (black), 
 		beta-prime prior (blue), 
 		hyper-$g$ prior (red),
@@ -1603,7 +1603,7 @@ are explained below.
 		\item {\tt "BIC"} -- the Bayesian information criterion obtained by using the cake prior 
 		of \cite{OrmerodEtal2017}. 
 		
-		\item {\tt "ZE"} -- special case of the prior structure described by \cite{Maruyama2011}.
+		\item {\tt "ZE"} -- special case of the prior structure in \cite{Maruyama2011}.
 		
 		\item {\tt "liang\_g1"} -- the mixture $g$-prior of \cite{Liang2008} with prior hyperparameter $a=3$
 		evaluated directly using (\ref{eq:hyperGmarginal}) where the Gaussian hypergeometric function is evaluated using the {\tt gsl} library. Note: this option can lead to numerical problems and is only meant to be used for comparative purposes.
@@ -1619,11 +1619,11 @@ are explained below.
 		\item {\tt "liang\_g\_n\_quad"} -- the mixture $g/n$-prior of \cite{Liang2008} with prior hyperparameter $a=3$ evaluated using a composite trapezoid rule.
 		
 		\item {\tt "robust\_bayarri1"} -- the robust prior of \cite{Bayarri2012}
-		using default prior hyper parameter choices evaluated directly using 
+		using default prior hyperparameter choices evaluated directly using 
 		(\ref{eq:yGivenGammaRobust}) with the {\tt gsl} library.
 		
 		\item {\tt "robust\_bayarri2"} -- the robust prior of \cite{Bayarri2012}
-		using their default choices of prior hyperparameters evaluated directly using 
+		using default prior hyperparameter choices evaluated directly using
 		(\ref{eq:yGivenGammaRobust2}).
 	
 	\end{itemize}
@@ -1637,12 +1637,12 @@ are explained below.
     	\ds p(\vgamma) = \prod_{j=1}^p \rho^{\gamma_j} (1 - \rho)^{1 - \gamma_j} \qquad \mbox{and} \qquad \rho \sim \mbox{Beta}(a,b),
     	$$
     	
-    	\noindent or after marginalization of $\rho$ we have
+    	\noindent where $\rho$ is the prior probability a variable is included in the mode, and $a$ and $b$ are fixed prior hyperparameters. After marginalizing out $\rho$ we have
     	$$
     	p(\vgamma) = \frac{\mbox{Beta}(a + |\vgamma|,b + p - |\vgamma|)}{\mbox{Beta}(a,b)},
     	$$
     	
-    	\noindent which is a beta-binomial distribution. Note $a=b=1$ is a uniform prior on the prior
+    	\noindent which is a beta-binomial distribution. Note $a=b=1$ corresponds to a uniform prior on the prior
     	variable inclusion probability. The values of $a$ and $b$ should be set to be the
     	first and second elements of the {\tt modelpriorvec} argument respectively (see below).
     	
@@ -1652,7 +1652,7 @@ are explained below.
     	$$
     	
     	\noindent where the $\rho_j\in(0,1)$. The $\rho_j$ values are specified by
-    	{\tt modelpriorvec} (see below). The values $\rho_j = 1/2$ corresponds to 
+    	{\tt modelpriorvec} (see below). Using $\rho_j = 1/2$, $1\le j\le p$ corresponds to 
     	{\tt mprior=="uniform"}.
 	\end{itemize}
 
@@ -1666,10 +1666,23 @@ are explained below.
 
 \noindent 
 The object returned is a 
-list containing a {\tt vR2} -- the vector $R$-square values for each model; 
-{\tt vp\_gamma} -- the vector of number of covariates for each model;
-{\tt vlogp} -- the vector of logs of the likelihoods of each model; 
-{\tt vinclusion\_prob} -- the vector of posterior inclusion probabilities for each of the covariates. Note that we do not return the fitted values of 
+list containing:
+\begin{itemize}
+	\item 
+{\tt vR2} -- the vector $R$-square values for each model; 
+
+	\item 
+	{\tt vp\_gamma} -- the vector of number of covariates for each model;
+
+	\item 
+	{\tt vlogp} -- the vector of logs of the marginal likelihoods of each model; and
+
+	\item 
+	{\tt vinclusion\_prob} -- the vector of posterior inclusion probabilities for each of the covariates. 
+\end{itemize}
+
+\noindent 
+Note that we do not return the fitted values of 
 $\widehat{\vbeta}_{\vgamma}$ which should only be calculated
 for a subset of models. We also do not return $\mGamma$, the Gray code matrix 
 which we provide a separate function to calculate. We made the decisions
