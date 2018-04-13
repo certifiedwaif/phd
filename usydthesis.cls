@@ -79,7 +79,7 @@
 \def\chapter{%
   \clearpage
   \thispagestyle{plain}\global\@topnum\z@
-  \@afterindenttrue \secdef\@chapter\@schapter}
+  \@afterindentfalse  \secdef\@chapter\@schapter}
 
 % section numbers in appendices shouldn't have a dot in them
 \def\appendix{\par
@@ -123,7 +123,7 @@
       \rlap{\vbox to\z@{\vss
           \centerline{\normalsize\mdseries
               \@xp{\scshape\chaptername}\enspace\thechapter}
-          \vskip 3pc}}\hskip\leftskip\fi
+          \vskip 5pc}}\hskip\leftskip\fi
      #1\par \endgroup
   \skip@34\p@ \advance\skip@-\normalbaselineskip
   \vskip\skip@ }
