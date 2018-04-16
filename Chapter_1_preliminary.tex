@@ -11,8 +11,8 @@ data -- so-called Big Data which is so large that it is difficult to process on 
 new challenges which modern statisticians must be ready to meet. This realisation has lead to an explosion of
 interest in data science, incorporating ideas from both statistics and computer science, in recent years.
 Machine learning problems are being tackled with algorithms which use probability models for the data --
-leading to the new field of statistical learning which combines many of the best elements of statistics and
-machine learning \citep{James:2014:ISL:2517747} \citep{MacKay:2002:ITI:971143}
+leading to the new field of statistical learning which combines many of the best elements of Statistics and
+Machine Learning \citep{James:2014:ISL:2517747} \citep{MacKay:2002:ITI:971143}
 \citep{hastie01statisticallearning} \citep{Murphy:2012:MLP:2380985}.
 
 \section{Motivation}
@@ -26,7 +26,7 @@ learning that leads to a rigorous underlying theory for inference.
 Generalised linear mixed models are an appealing way to model data, as they are flexible enough to model a
 range of data types and situations. But the Bayesian versions of these models typically required 
 computationally demanding MCMC, which can also be prone to convergence problems. Instead, we consider approximate Bayesian inference tecniques, which are computationally efficient and deterministic. It is
-desirable to use normal priors for the reegression co-efficients of these models, as these are easily
+desirable to use normal priors for the regression co-efficients of these models, as these are easily
 interpreted. But for Generalised Linear Mixed Models with a non-normal response, these priors are
 non-conjugate, making VB difficult to apply as the required mean field updates are intractable. We apply
 Gaussian Variational Bayes -- an extension to Variational Bayes, to fit a multivariate normal distribution
@@ -41,7 +41,7 @@ the posterior model space.
 \section{Why Bayesian?}
 The difference between frequentist and Bayesian approaches begins with a difference in philosophy.
 Frequentists define an event's probability as its' relative frequency after a large number of trials.
-while Bayesians view probability as our reasonable expectation about an event, representing our state of knowledge about the event.
+While Bayesians view probability as our reasonable expectation about an event, representing our state of knowledge about the event.
 
 There are many practical reasons to choose Bayesian approaches to modelling data.
 It is flexible to complications. Complicated models can be built by chaining together multiple levels of
@@ -50,17 +50,17 @@ parameters using Bayes' Rule,
 \[
 	p(\vtheta | \vy) = \frac{p(\vy | \vtheta) p(\vtheta)}{\int p(\vy | \vtheta) p(\vtheta) d \vtheta}
 \]
-providing the resulting integral can be evaluated or approximated. There are many models which are difficult
-to fit under the frequentist paradigm, as the likelihood is difficult to maximise. Furthermore, as the
-Bayesian paradigm treats each of the parameters in a model as uncertain, the full uncertainty associated with
-all of the parameters can be estimated in the uncertainty in the posterior distribution. This approach avoids
-many of the pitfalls of statistical inference encountered with the frequentist approach using significance
-testing and p-values \citep{Cox2005}.
+where $\vtheta$ is the vector of parameters and $\vy$ is the vector of observations, providing the resulting
+integral can be evaluated or approximated. There are many models which are difficult to fit under the
+frequentist paradigm, as the likelihood is difficult to maximise. Furthermore, as the Bayesian paradigm treats
+each of the parameters in a model as uncertain, the full uncertainty associated with all of the parameters can
+be estimated in the uncertainty in the posterior distribution. This approach avoids many of the pitfalls of
+statistical inference encountered with the frequentist approach using significance testing and p-values
+\citep{Cox2005}.
 
-
-The ability to build a model a part at a time and have the uncertainty propagate makes Bayesian modelling 
-particularly appropriate for mixed and hierarchical models.
-Uncertainty regarding model selection is taken into account
+The ability to build a model one component at a time and have the uncertainty propagate through the model makes Bayesian
+modelling  particularly appropriate for mixed and hierarchical models. Uncertainty regarding model selection
+is taken into account
 
 \section{What problems in thesis}
 
@@ -68,25 +68,25 @@ In this section, we introduce the major problems that will be addressed in this 
 modelling of data using Generalised Linear Mixed Models and model selection of linear models with normal
 priors  will be explored.
 
-\subsection{GLMM}
+\subsection{Generalised Linear Mixed Models}
 
-Generalised Linear Mixed Models, an extension of Generalised Linear Models to include both fixed and
-random effects, are flexible to many complicated modelling situations. The standard technique for fitting
-Bayesian versions of these models is to use Monte Carlo Markov Chains techniques such as Gibbs sampling.
-Linear and generalised linear regression models are the standard tools used by applied statisticians to
-explain the relationship between an outcome variable and one or more explanatory variables. They provide a
-general method  to analyse quantified relationships between variables within a data set in an easily
-interpretable way. A standard assumption is that the outcomes are independent, and that the effect of the
-explanatory variables on the outcome is fixed. But if the outcomes are dependent and this assumption is not
-met, then linear and generalised linear models can be extended to linear mixed models. These allow us to
-incorporate dependencies amongst the  observations via the assumption of a more complicated covariance
-structure, including random effects for  different subgroups or longitudinal data and other extensions such as
-splines, missing data and measurement error. This additional flexibility makes their application popular in
-many fields, such as public health, psychology and agriculture.
+Generalised Linear Mixed Models, an extension of Generalised Linear Models to include both fixed and random
+effects, are flexible to many complicated modelling situations. The standard technique for fitting Bayesian
+versions of these models is to use Monte Carlo Markov Chains techniques. Linear and generalised linear
+regression models are the standard tools used by applied statisticians to explain the relationship between an
+outcome variable and one or more explanatory variables. They provide a general method  to analyse quantified
+relationships between variables within a data set in an easily interpretable way. A standard assumption is
+that the outcomes are independent, and that the effect of the explanatory variables on the outcome is fixed.
+But if the outcomes are dependent and this assumption is not met, then linear and generalised linear models
+can be extended to linear mixed models. These allow us to incorporate dependencies amongst the  observations
+via the assumption of a more complicated covariance structure, including random effects for  different
+subgroups or longitudinal data and other extensions such as splines, missing data and measurement error. This
+additional flexibility makes their application popular in many fields, such as public health, psychology and
+agriculture.
 
 While mixed models are very useful for gaining insight into a data set, fitting them can be computationally
 challenging. For all but the simplest situations, fitting these models involves computing high-dimensional
-integrals which are often analytically and computationally intractable. Thus, approximations must be used.
+integrals which are often analytically and computationally intractable. Thus, approximation must be used.
 
 In the frequentist paradigm, model parameters are fixed and uncertainty enters the model through random
 errors, which have associated variance. The data is modelled as a combination of these fixed parameters and
@@ -107,36 +107,35 @@ All of the models considered in this thesis belong to the family of generalised 
 flexible set of models which can model continuous or discrete responses and incorporate both fixed and
 random effects.
 
-\subsection{Exponential family and the canonical form of linear regresison models}
+\subsection{Exponential family and the canonical form of linear regression models}
 
-An exponential family is a set of probability distributions of the form
-\[
-	f_X(x|\vtheta) = h(x) g(\theta) \exp(\eta(\theta)^\top T(x)).
-\]
+The concept of the exponential family of probability distributions was first introduced by \cite{Koopman1935}
+and \cite{pitman_1936}. 
+\begin{equation}
+	p(\vy | \vtheta) = h(\vy) \exp \{ \vtheta^\top T(\vy) - A(\vtheta) \}
+\end{equation}
+for a parameter vector $\vtheta$, and observed data $\vy$. , The sufficient statistic $T$ and $h$ are
+functions of the observed data, while the cumulant function $A(\vtheta)$ is a function of the parameter
+$\vtheta$. The cumulant function is the logarithm of the normalisation constant.
 
-Most commonly used probability distributions in statistics such as the normal, exponential, gamma,
-chi-squared, beta, Dirichlet, Bernoulli, categorical, Poisson, Wishart and Inverse Wishart distributions can
-be represented in this form. A canonical form of generalised linear regression models is
-\[
-	\log p(\vnu; \vy) = \vy^\top \mC \vnu - b(\mC \vnu).
-\]
+Many commonly used probability distributions of practical interest, such as the Gaussian, Bernoulli, Poisson,
+Exponential and Gamma probability distributions, can be expressed as an exponential family by making an
+appropriate choice of $h$, $T$ and $A$ functions. The exponential family of distributions have several
+appealing statistical and computational properties, which derive from the convexity of the parameter space
+$\Theta$ for which the exponential family distribution is defined and the convexity of the cumulant function,
+as shown in \cite{Jordan2010}. The mean of an exponential family distribution can be obtained by calculating
+the first derivative of the cumulant function, while the variance can be obtained by calculating the second
+derivatives of the cumulant function.
 
-Different choices of the function $b:\R \to \R$ lead to different generalised linear mixed models
-assuming the probability distribution for $y$ is one of the probability distributions mentioned above.
-
-% \begin{table}
-% 	\caption{Table of b functions}
-% 	\label{tab:b_functions}
-% 	\begin{tabular}{|l|lll|}
-% 		\hline
-% 		Distribution                         & Parameter & Natural parameter       & Inverse parameter mapping \\
-% 		\hline
-% 		Bernoulli distribution               & $p$       & $\log{\frac{p}{1 - p}}$ & $\frac{1}{1 + e^\eta}$    \\
-% 		Poisson distribution                 & $\lambda$ & $\log \lambda$          & $e^\eta$                  \\
-% 		Normal distribution (known variance) & $\mu$     & $\frac{\mu}{\sigma}$    & $\sigma \eta$             \\
-% 		\hline
-% 	\end{tabular}
-% \end{table}
+The exponential family of distributions allow us to extend linear models to more general situations where the
+response variable is not normally distributed but may be categorical, discrete or continuous.  By choosing the
+parameterisation $\vtheta = \mX \vbeta$ where $\mX$ is the matrix of observed covariates in $\R^{n \times p}$
+and $\vbeta$ are regression parameters in $\R^p$, for $n$ the sample size and $p$ the number of covariates, a
+canonical form of generalised linear regression models may be written as
+\begin{equation}
+	\log p(\vy | \vtheta) \propto \vy^\top \mX \vtheta - \log A(\mX \vtheta).
+\end{equation}
+The relationship between the response and the explanatory variables need not be of simple linear form.
 
 \subsection{Mixed Models}
 
