@@ -21,22 +21,6 @@ Approaches to modelling data are needed which can handle large volumes of data i
 efficient manner while retaining the probabilistic underpinning of classical statistics and statistical machine
 learning that leads to a rigorous underlying theory for inference.
 
-\section{Approach}
-
-Generalised linear mixed models are an appealing way to model data, as they are flexible enough to model a
-range of data types and situations. But the Bayesian versions of these models typically required 
-computationally demanding MCMC, which can also be prone to convergence problems. Instead, we consider approximate Bayesian inference tecniques, which are computationally efficient and deterministic. It is
-desirable to use normal priors for the regression co-efficients of these models, as these are easily
-interpreted. But for Generalised Linear Mixed Models with a non-normal response, these priors are
-non-conjugate, making VB difficult to apply as the required mean field updates are intractable. We apply
-Gaussian Variational Bayes -- an extension to Variational Bayes, to fit a multivariate normal distribution
-to the regression co-efficients of our models.
-
-Exact inference for model selection for linear models with normal priors is computationally feasible when the
-number of  covariates is small, with $p$ below 40. But exhaustively exploring the search space is not
-efficient, and often not computationally feasible for a larger number of covariates. In this situation, we
-adopt a population- based technique inspired by Rockova's work on population-based EM to efficiently explore
-the posterior model space.
 
 \section{Why Bayesian?}
 The difference between frequentist and Bayesian approaches begins with a difference in philosophy.
@@ -169,9 +153,9 @@ The most general form of the univariate regression problem is
 	y_i = f(x_i)
 \]
 
-where $f: \R \to \R$ is unknown, and we wish to estimate it as $\hat{f}$. We treat the functional form of
-$f$ as unknown, and attempt to estimate it purely from the data available to us. Fully non-parametric regression
-is a difficult problem to solve, but the problem can be simplified by pre-specifying the points at which the
+\noindent where $f: \R \to \R$ is unknown, and we wish to estimate it. We treat the functional form of $f$ as
+unknown, and attempt to estimate it purely from the data available to us. Fully non-parametric regression is a
+difficult problem to solve, but the problem can be simplified by pre-specifying the points at which the
 function may change curvature, the so-called knots.
 
 % \subsubsection{Penalised spline}
@@ -192,26 +176,31 @@ the knots. When all internal knots are distinct its derivatives are also continu
 degree $n - 1$. If internal knots are coincident at a given value of x, the continuity of derivative order is
 reduced by 1 for each additional knot.
 
-For any given set of knots, the B-spline for approximating a given function is a unique linear combination
-of B-spline basis functions with the basis functions defined as:
+For any given set of knots, the B-spline for approximating a given function is a unique linear combination of
+B-spline basis functions with the basis functions is recursively defined in terms of divided differences as
 $$
 \begin{array}{rl}
-	B_{m, i}(x; \vkappa) &= (\kappa_{i + m  + 1} - \kappa_{i})[\kappa_i, \ldots, \kappa_{i + m + 1}](. - x)^m_+ \\
-	&= \frac{x - \kappa_i}{\kappa_{i + 1} - \kappa_i} Q_{i, k-1} (x; \vkappa) + 
-										\frac{\kappa_{i + k + 1} - x}{\kappa_{i + k + 1} - \kappa_{i + 1}} Q_{i, k-1} (x; \vkappa)
-\end{array}
-$$
-
-\begin{align*}
 	B_{i, 0}(x) & := \begin{cases}                                                                                                        
 	1           & \text{if } \kappa_i \leq x < \kappa_{i+1}                                                                                         \\
 	0           & \text{otherwise}                                                                                                        
 	\end{cases}
 	% B_{i, k}(x) & := \frac{x - \kappa_i}{\kappa_{i + 1} - \kappa_i} Q_{i, k-1} (x) + 
 	% 									\frac{\kappa_{i + k + 1} - x}{\kappa_{i + k + 1} - \kappa_{i + 1}} Q_{i, k-1} (x). 
-\end{align*}
+\end{array}
+$$
 
-\noindent where "[]" denotes the divided difference and
+\noindent for $i = 1, \ldots, K + 2M -1$ and
+
+$$
+\begin{array}{rl}
+	B_{k, i}(x; \vkappa) &= \frac{x - \kappa_i}{\kappa_{i + 1} - \kappa_i} B_{i, k-1} (x; \vkappa) + 
+										\frac{\kappa_{i + k + 1} - x}{\kappa_{i + k + 1} - \kappa_{i + 1}} B_{i, k-1} (x; \vkappa)
+\end{array}
+$$
+
+\noindent for $i = 1, \ldots, K + 2 M - m$.
+
+\noindent where
 % B-Splines
 $$
 Q_{m, i}(x; \kappa) =
@@ -254,37 +243,12 @@ Using a mixed models setup to fit spline models protects against overfitting.
 Constructing a $\mZ$ matrix with the appropriate B-Spline function evaluations in each of the rows, where
 each column corresponds to a knot.
 
-  
-\subsection{Degrees of freedom}
-
-% From Section 2.5.2, Semiparametric regression
-
-Consider the fixed effects model $\vy = \mX \vbeta$ where $\mX \in \R^{n \times p}$. If the hat matrix is
-defined as $\mH = \mX (\mX^\top\mX)^{-1} \mX^\top$ then
-\begin{align*}
-	\tr(\mH) & = \tr[\mX(\mX^\top\mX)^{-1}\mX^\top]  \\
-	         & = \tr[\mX^\top\mX (\mX^\top\mX)^{-1}] \\
-	         & = \tr(\mI_p)                          \\
-	         & = p                                   
-\end{align*}
-
-\noindent which is the number of parameters in the fixed effects model. Thus we use the trace of the hat
-matrix as the definition of the effective degrees of freedom of the model. This definition then naturally
-extends to more general smoother matrices which can be used to fit models involving splines or other kinds of
-smoothing.
-
-% \subsection{Crossed effects}
-% \subsection{Spatial structure}
-
 \section{Model selection}
-% Given a full data matrix $\mX \in \R^{n \times p}$, we may wish to find the subset of variables $\gamma \in \{
-% 1 \ldots p \}$ such that $\mX_\gamma \vbeta_\gamma$ describe the data in $\vy$ best.
-
 The problem of selecting a statistical model from a set of candidate models given a data set, hence referred
 to as \emph{model selection}, is one of the most important problems encountered in practice by applied
-statistical practitioners. It is one of the central tasks of applied statistical analysis, and there is a
-correspondingly large literature on the subject.The problem of model selection for normal linear models is
-particularly well studied, owing to the popularity and importance of normal linear models in applications.
+statistical practitioners. It is one of the central tasks of science, and there is a correspondingly large
+literature on the subject.The problem of model selection for normal linear models is particularly well
+studied, owing to the popularity and importance of normal linear models in applications.
 
 The bias-variance trade-off is one of the central issues in statistical learning. The guise this issue takes
 in model selection is balancing the quality of the model fit against the complexity of the model, in an
@@ -301,49 +265,11 @@ space more efficiently but still find an optimal or near-optimal model within a 
 major motivation for this field of research is the need for a computationally feasible approach to performing
 model selection on large scale problems where the number of covariates is large.
 
-Many approaches to model selection have been investigated, with various model selection criteria
-proposed to attempt to balance model likelihood against model complexity. One approach to model selection is
-to select between entire models, using a model selection criterion. These criterion may have a fixed penalty
-for model complexity, such as Akaike's Information Criterion \citep{Akaike1974}, the Risk Inflation Criterion
-\citep{Foster1994}, the Schwarz criterion or Bayesian Information Criterion \citep{Schwarz1978}, the Deviance
-Information Criterion \citep{Spiegelhalter2016} or the Principle of Minimum Description Length
-\citep{Hansen2001}. Alternatively, the penalty may be adaptive/data--dependent as in \citep{George2000}. An
-alternative to model selection criterion is to select models based on their posterior probability, such as by
-selecting the median probability model as in \citep{Barbieri2004}. In a Bayesian context is to use Bayes
-factors to compare the posterior likelihoods of the candidate models to see which is most probable given the
-observed data. This can be done, for example, by using Bayes Factors as in \citep{Kass1993}. Rather than
-selecting one candidate model, several models can be combined together using Bayesian model  averaging, as in
-\citep{Hoeting1999}, \citep{Raftery1997}, \citep{Fernandez2001} or \citep{Papaspiliopoulos2016}. Or model
-selection can be made implicit in the model fitting process itself, as in ridge regression \citep{Casella1980},
-of which the well-known lasso is a special case \citep{Tibshirani1996}. As \citep{Breiman1996} and
-\citep{Efron2013} showed, while  the standard formulation of a linear model is unbiased, the goodness of fit of
-these models is numerically  unstable. Breiman showed that by introducing a penalty on the size of the
-regression co- efficients such as  in ridge regression, this numerical instability can be avoided. This
-reduces the variances of the co-efficient estimates, at the expense of introducing some bias --- 
-which is another instance of the bias--variance trade--off.
-
-Many approaches to model selection have been investigated, with various model selection criteria proposed to
-attempt to balance model likelihood against model complexity. One approach to model selection is to select
-between entire models, using a model selection criterion. These criterion may have a fixed penalty for model
-complexity, such as Akaike's Information Criterion \citep{Akaike1974}, the Risk Inflation Criterion
-\citep{Foster1994}, the Schwarz criterion or Bayesian Information Criterion \citep{Schwarz1978}, the Deviance
-Information Criterion \citep{Spiegelhalter2016} or the Principle of Minimum Description Length
-\citep{Hansen2001}. Alternatively, the penalty may be adaptive/data--dependent as in \citep{George2000}.
-
-An alternative to model selection criterion is to select models based on their posterior probability. In a
-Bayesian context, this can be accomplished by comparing the posterior likelihoods of the candidate models to
-see which is most probable given the observed data. This can be done, for example, by using Bayes Factors as
-in \citep{Kass1993}. Alternately, rather than selecting one candidate model, several models can be combined together using Bayesian model  averaging, as in \citep{Hoeting1999}, \citep{Raftery1997}, \citep{Fernandez2001} or \citep{Papaspiliopoulos2016}.
-
-Model selection can also be made implicit in the model fitting process itself, as in ridge regression
-\citep{Casella1980}, of which the well-known lasso is a special case \citep{Tibshirani1996}.
-
-As shown in
-papers by \citep{Breiman1996} and \citep{Efron2013} showed, while  the standard formulation of a linear model
-is unbiased, the goodness of fit of these models is numerically  unstable. Breiman showed that by introducing
-a penalty on the size of the regression co- efficients such as  in ridge regression or the lasso, this numerical
-instability can be avoided. This reduces the variances of the co-efficient estimates, at the expense of
-introducing some bias --- the bias-- variance trade--off.
+As shown in papers by \citep{Breiman1996} and \citep{Efron2013} showed, while the standard formulation of a
+linear model is unbiased, the goodness of fit of these models is numerically  unstable. Breiman showed that by
+introducing a penalty on the size of the regression co- efficients such as  in ridge regression or the lasso,
+this numerical instability can be avoided. This reduces the variances of the co-efficient estimates, at the
+expense of introducing some bias --- the bias-- variance trade--off.
 
 A special case of model selection is variable selection, where the focus is on selecting individual
 covariates, rather than entire models. This approach can either be Fully Bayesian or Empirically Bayesian as
@@ -366,30 +292,6 @@ infeasible for models involving even moderate numbers of observations and covari
 for fitting Bayesian models such as Monte Carlo Markov Chains (henceforth referred to as MCMC) are still
 extremely computationally intensive.
 
-Variational Bayes (see \cite{Ormerod2010}) is a computationally
-efficient, deterministic method of fitting Bayesian models to data. Variational Bayes approximates the true
-posterior $p(\vy, \vtheta)$ by minimising the KL divergence between the posterior and the  approximating
-distribution $q(\vtheta)$.
-
-A linear model with normal priors allows exact inference on the regression and model selection parameters in
-closed form, which might appear to negate the beenfits of a variational approximation to the model. However,
-the performance of our variational approximation should remain similiar if the priors are altered to cater for
-complications such as robustness, while exact Bayesian inference calculations are no longer possible in closed
-form in these situations.
-
-\cite{Zellner1986} suggested a particular form of conjugate Normal-Gamma family where the Bayes factors have a
-relatively simple form, incorporating a parameter $g$ to control mixing between the model fit from the data
-and a prior specification of model fit. This immediately raises the question of how $g$ should be chosen, and
-whether it should be fixed or have a prior specification. \cite{Liang2008} showed that fixed choices of $g$
-lead to paradoxes such as Bartlett's Paradox and the Information Paradox, and so a prior specification should
-be preferred. There are many ways of choosing a prior on $g$. Using a mixture of $g$-priors has the advantage
-of adapting the degree of shrinkage to the prior model dependent on the data.
-
-\section{Models and Assumptions}
-
-We now introduce the models that will be considered in this thesis, and the assumptions which will be made
-when using these models.
-
 % Non-Bayesian
 \subsection{Frequentist Approachs to Model Selection}
 Many approaches to model selection have been investigated, with various model selection criteria proposed to
@@ -399,6 +301,16 @@ complexity, such as Akaike's Information Criterion \cite{Akaike1974}, the Risk I
 \cite{Foster1994}, the Schwarz criterion or Bayesian Information Criterion \cite{Schwarz1978}, the Deviance
 Information Criterion \cite{Spiegelhalter2016} or the Principle of Minimum Description Length
 \cite{Hansen2001}. Alternatively, the penalty may be adaptive/data--dependent as in \cite{George2000}.
+
+Many approaches to model selection have been investigated, with various model selection criteria proposed to
+attempt to balance model likelihood against model complexity. One approach to model selection is to select
+between entire models, using a model selection criterion. These criterion may have a fixed penalty for model
+complexity, such as Akaike's Information Criterion \citep{Akaike1974}, the Risk Inflation Criterion
+\citep{Foster1994}, the Schwarz criterion or Bayesian Information Criterion \citep{Schwarz1978}, the Deviance
+Information Criterion \citep{Spiegelhalter2016} or the Principle of Minimum Description Length
+\citep{Hansen2001}. Alternatively, the penalty may be adaptive/data--dependent as in \citep{George2000}. An
+alternative to model selection criterion is to select models based on their posterior probability, such as by
+selecting the median probability model as in \citep{Barbieri2004}.
 
 Model selection can also be made implicit in the model fitting process itself, as in ridge regression
 \cite{Casella1980}, of which the well-known lasso is a special case \cite{Tibshirani1996}. As shown in
@@ -489,6 +401,19 @@ $$
 $$
 
 \subsection{Bayesian Approaches to Model Selection}
+Parallel to the frequentist approaches, model selection can be performed using a Bayesian approach by using
+Bayes factors to compare the posterior likelihoods of the candidate models to see which is most probable given
+the observed data. This can be done, for example, by using Bayes Factors as in \citep{Kass1993}. Rather than
+selecting one candidate model, several models can be combined together using Bayesian model  averaging, as in
+\citep{Hoeting1999}, \citep{Raftery1997}, \citep{Fernandez2001} or \citep{Papaspiliopoulos2016}. Or model
+selection can be made implicit in the model fitting process itself, as in ridge regression
+\citep{Casella1980}, of which the well-known lasso is a special case \citep{Tibshirani1996}. As
+\citep{Breiman1996} and \citep{Efron2013} showed, while  the standard formulation of a linear model is
+unbiased, the goodness of fit of these models is numerically  unstable. Breiman showed that by introducing a
+penalty on the size of the regression co- efficients such as  in ridge regression, this numerical instability
+can be avoided. This reduces the variances of the co-efficient estimates, at the expense of introducing some
+bias -- which is another instance of the bias--variance trade-- off.
+
 An alternative to model selection criterion is to select models based on their posterior probability. In a
 Bayesian context, this can be accomplished by comparing the posterior likelihoods of the candidate models to
 see which is most probable given the observed data. This can be done, for example, by using Bayes Factors as
@@ -791,6 +716,37 @@ The factors are cycled through several times until convergence is achieved.
 While promising, Expectation Propagation is a relatively new technique.
 Unlike with Variatioal Bayes, there is no guarantee of convergence, and there is still much work to be done
 before it is as mature as other approximation methods like Variational Bayes and Laplace approximation.
+
+A linear model with normal priors allows exact inference on the regression and model selection parameters in
+closed form, which might appear to negate the beenfits of a variational approximation to the model. However,
+the performance of our variational approximation should remain similiar if the priors are altered to cater for
+complications such as robustness, while exact Bayesian inference calculations are no longer possible in closed
+form in these situations.
+
+\cite{Zellner1986} suggested a particular form of conjugate Normal-Gamma family where the Bayes factors have a
+relatively simple form, incorporating a parameter $g$ to control mixing between the model fit from the data
+and a prior specification of model fit. This immediately raises the question of how $g$ should be chosen, and
+whether it should be fixed or have a prior specification. \cite{Liang2008} showed that fixed choices of $g$
+lead to paradoxes such as Bartlett's Paradox and the Information Paradox, and so a prior specification should
+be preferred. There are many ways of choosing a prior on $g$. Using a mixture of $g$-priors has the advantage
+of adapting the degree of shrinkage to the prior model dependent on the data.
+
+\section{Approach}
+
+Generalised linear mixed models are an appealing way to model data, as they are flexible enough to model a
+range of data types and situations. But the Bayesian versions of these models typically required 
+computationally demanding MCMC, which can also be prone to convergence problems. Instead, we consider approximate Bayesian inference tecniques, which are computationally efficient and deterministic. It is
+desirable to use normal priors for the regression co-efficients of these models, as these are easily
+interpreted. But for Generalised Linear Mixed Models with a non-normal response, these priors are
+non-conjugate, making VB difficult to apply as the required mean field updates are intractable. We apply
+Gaussian Variational Bayes -- an extension to Variational Bayes, to fit a multivariate normal distribution
+to the regression co-efficients of our models.
+
+Exact inference for model selection for linear models with normal priors is computationally feasible when the
+number of  covariates is small, with $p$ below 40. But exhaustively exploring the search space is not
+efficient, and often not computationally feasible for a larger number of covariates. In this situation, we
+adopt a population- based technique inspired by Rockova's work on population-based EM to efficiently explore
+the posterior model space.
 
 \section{Our Contributions}
 % \begin{itemize}
