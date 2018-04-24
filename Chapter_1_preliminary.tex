@@ -470,7 +470,6 @@ being almost as accurate.
  
 \subsection{Variational Bayes}
 \label{sec:vb}
-
 We now introduce Variational Bayes, the popular approximate inference method for Bayesian models. It is used
 to accelerate Bayesian model fitting by tens or hundreds of times, with only minor loss in accuracy for some
 models. This method plays a central role in this thesis, particularly in the second and fourth chapters.
@@ -490,55 +489,47 @@ exists for the posterior distribution and so an approximation is required. Varia
 class of methods for transforming the problem of approximating a distribution $p(x)$ by another more
 convenient distribution $q(x)$. Variational approximation can be viewed as minimising the Kullback- Leibler
 divergence between the true posterior $p(\vtheta|\vy)$ and an approximating distribution $q(\vtheta)$,
-sometimes called a $q$-density. Suppose that a class of candidate approximating distributions
-$q(\vtheta)$ is parameterised by $\vxi$ and write $q(\vtheta)\equiv q(\vtheta;\vxi)$. We attempt to find an 
-optimal approximating distribution $q^*(\vtheta)$ such that
-\[
-	\ds q^*(\vtheta) = \argmin_{\vxi \in \Xi} \text{KL} \{ {q(\vtheta;\vxi) || p(\vtheta|\vy)} \}.
-\]
+sometimes called a $q$-density. 
 
 The density function of a random vector $\vu$ is denoted by $p(\vu)$.  The conditional density function of a
 random vector $\vu$ given $\vv$ is denoted by $p(\vu|\vv)$. Consider a generic Bayesian model with parameter
 vector $\vtheta \in \Theta$. Throughout this section we assume that $\vy$ and $\vtheta$ are continuous random
 vectors. The KL divergence between the probability distributions $p$ and $q$ is defined as
-\[
+$$
 	\KL(q || p) \equiv \int q(\vtheta) \log \left \{ \frac{q(\vtheta)}{p(\vtheta | \vy)} \right \} d \vtheta.
-\]
+$$
 
 Consider a model $p(\vtheta|\vy)$ which is of interest to us but computationally difficult or intractable to 
 fit. We may be able to gain much of the same insight from a given data set by fitting an accurate approximation 
 of the model, allowing us to summarise the data and perform statistical inference.
 
-Let us denote the approximating model $q(\theta)$. Then we seek a $q(\theta)$ which approximates
-$p(\vtheta|\vy)$ as closely as possible in some sense. 
-We may seek a best approximating distribution $q^*(\vtheta)$ to a given posterior distribution
-$p(\vtheta|\vy)$ from a parameteric family of approximating distributions $Q$ by finding
-\[
-	q^*(\vtheta) = \argmin_{q \in Q} \KL \{ {q(\vtheta) || p(\vtheta|\vy)} \}.
-\]
+Suppose that a class of candidate approximating distributions $q(\vtheta)$ is parameterised by a vector
+variational parameters $\vxi$ and write $q(\vtheta)\equiv q(\vtheta;\vxi)$. We attempt to find an  optimal
+approximating distribution $q^*(\vtheta)$ such that
+$$
+	\ds q^*(\vtheta) = \argmin_{\vxi \in \Xi} \text{KL} \{ {q(\vtheta;\vxi) || p(\vtheta|\vy)} \}.
+$$
 
-If $\vtheta$ is partitioned into $M$ partitions $\vtheta_1$, $\vtheta_2$, \ldots, $\vtheta_M$ then a 
+\noindent If $\vtheta$ is partitioned into $M$ partitions $\vtheta_1$, $\vtheta_2$, \ldots, $\vtheta_M$ then a 
 simple form of approximation to adopt is the factored approximation of the form
-\[
+$$
 	q(\vtheta) = \Pi_{i=1}^M q(\vtheta_i)
-\]
+$$
 
-where each of the density $q(\vtheta_i)$ is a member of a parametric family of density functions. This form of
-approximation is computationally convenient, but assumes that the partitions of $\vtheta$ are completely
-independent of one another.
+\noindent where each of the density $q(\vtheta_i)$ is a member of a parametric family of density functions.
+This form of approximation is computationally convenient, but assumes that the partitions of $\vtheta$ are
+completely independent of one another.
 
 The optimal mean field update for each of the parameters $\vtheta_i$ can be shown to be
-\[
+$$
 	q^*(\vtheta_i) \propto \exp \{ \E [\log p(\vy; \vtheta)] \}.
-\]
+$$
 
-For details of the proof, and a more thorough introduction to the topic of variational approximations, see
-\cite{Ormerod2010}.
-
-\noindent It can easily be shown that
-\[
+\noindent For details of the proof, and a more thorough introduction to the topic of variational
+\approximations, see cite{Ormerod2010}. It can easily be shown that
+$$
 	\ds \log p(\vy) = \int q(\vtheta;\vxi)\frac{p(\vy|\vtheta)p(\vtheta)}{q(\vtheta;\vxi)} d\vtheta + \text{KL}(q(\vtheta;\vxi)||p(\vtheta|\vy)).
-\]
+$$
 
 \noindent As the Kullback-Leibler divergence is strictly positive, the first term on the right hand side
 is a lower bound on the marginal log-likelihood which we will define by
