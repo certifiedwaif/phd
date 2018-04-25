@@ -211,15 +211,13 @@ $$
 
 % $B_{ik} = B_k (x)$
 % $B_x = [B_1(x), \ldots, B_K+4(x)]$
-Let $B_1$, \ldots, $B_{K+4}$ be the cubic B-spline basis functions defined by the knots $\kappa_1$ to
-$\kappa_{K+4}$. O'Sullivan splines are penalised splines which are penalised using the $\mOmega$ matrix.
-Let $\mOmega$ be the $(K+4) \times (K+4)$ matrix where the $(k, k')-th$ element is
-\[
-	\mOmega_{k k'} = \int_a^b B''_k(x) B''_{k'}(x) dx.
-\]
-Then the O'Sullivan spline estimate of the true function $f$ at the point $x$ is
-$\hat{f}_O(x; \lambda) = \mB_x \hat{\vnu}_O$, where
-$\hat{\vnu}_O = (\mB^\top \mB + \lambda \mOmega)^{-1} \mB^\top \vy$.
+O'Sullivan introduced a class of penalised splines based on the B-spline basis functions in
+\cite{OSullivan1986} which are a direct generalisation of smoothing splines. Let $B_1$, \ldots, $B_{K+4}$ be
+the cubic B-spline basis functions defined by the knots $\kappa_1$ to $\kappa_{K+4}$. O'Sullivan splines are
+penalised splines which are penalised using the $\mOmega$ matrix. Let $\mOmega$ be the $(K+4) \times (K+4)$
+matrix where the $(k, k')-th$ element is \[   \mOmega_{k k'} = \int_a^b B''_k(x) B''_{k'}(x) dx. \] Then the
+O'Sullivan spline estimate of the true function $f$ at the point $x$ is $\hat{f}_O(x; \lambda) = \mB_x
+\hat{\vnu}_O$, where $\hat{\vnu}_O = (\mB^\top \mB + \lambda \mOmega)^{-1} \mB^\top \vy$.
 
 $\mOmega$ is defined in this way to penalise oscillation, which is measured by the second derivative.
 The penalty differs from P-splines in that the P-spline penalty matrix is $\mD_2^\top \mD_2$ where $\mD_2$ is
@@ -233,7 +231,7 @@ Using a mixed models setup to fit spline models protects against overfitting.
 Constructing a $\mZ$ matrix with the appropriate B-Spline function evaluations in each of the rows, where
 each column corresponds to a knot.
 
-\subsection{Model selection}
+\section{Model selection}
 The problem of selecting a statistical model from a set of candidate models given a data set, hence referred
 to as \emph{model selection}, is one of the most important problems encountered in practice by applied
 statistical practitioners. It is one of the central tasks of science, and there is a correspondingly large
@@ -281,75 +279,36 @@ against the complexity of the model, achieving a compromise between each.
 Information criteria are frequently used to compare amongst models. Letting $\vgamma$ denote the candidate model,
 Information Criteria take the form "-2 times the log-likelihood plus a term penalising for complexity of
 the model"
-\[
+$$
 	\text{Information Criteria} = -2 \log p(\vy | \hat{\vtheta}_\vgamma) + \text{complexity penalty}
-\]
+$$
 
-\noindent where $\log p(\vy | \hat{\vtheta_\gamma})$ is the log-likelihood of the model and the complexity
-penalty is a function of the sample size $n$ and the number of parameters $p$ of the model. Information
-criteria attempt to successfully compromise between goodness of fit and model complexity.
+\noindent where $\hat{\vtheta_\gamma}$ is the maximum likelihood estimate of the model parameters $\vtheta$
+for the model $\vgamma$ and $\log p(\vy | \hat{\vtheta_\gamma})$ is the log-likelihood of that model with that
+parameter estimate and the complexity penalty is a function of the sample size $n$ and the number of
+parameters $p$ of the model. Information criteria attempt to successfully compromise between goodness of fit
+and model complexity.
 
 The most popular of the information criteria is the Akaike Information Criterion (AIC) \citep{Akaike1974}. AIC
 calculates an estimate of the information lost when a given model is used to represent the process that
 generates the data and so is an estimator of the Kullback-Leibler divergence of the true model from the fitted
 model. The AIC of the model $\vgamma$ is defined as
-\[
+$$
 	\text{AIC}(\vgamma) = -2 \log p(\vy | \hat{\vtheta}_\vgamma) + 2 p_\vgamma
-\]
+$$
 
-\noindent where $|\vgamma|$ is the number of parameters in the model $\vgamma$. The model with the lowest AIC
+\noindent where $p_\vgamma$ is the number of parameters in the model $\vgamma$. The model with the lowest AIC
 is selected as the `best`.
 
 Of a similiar form as the AIC, but derived via a more Bayesian framework is the Bayesian Information Criterion
 or BIC. The BIC approximates the posterior probability of the candidate model $\vgamma$. The BIC is defined as
-\[
+$$
 	\text{BIC}(\vgamma) = -2 \log p(\vy | \hat{\vtheta}_\vgamma) + p_\vgamma \log(n).
-\]
+$$
 
 \noindent This is a more severe penalty for model complexity than in the Akaike's Information Criteria when
 $n$ is greater than $8$. BIC can be shown to be approximately equivalent to model selection using Bayes
 Factors in certain contexts, as shown by \cite{Kass1993}.
-
-\subsubsection{Variable selection}
-A special case of model selection is variable selection, where the focus is on selecting individual
-covariates, rather than entire models. This approach can either be Fully Bayesian or Empirically Bayesian as
-in \citep{Cui2008}. Variable selection approaches involve a stochastic search over the variables in the model
-space. This search can be driven by posterior probabilities, as in \citep{Casella2006}, or by Gibbs sampling
-approaches such as in \citep{George1993}. These two approaches of model selection and variable selection can
-be combined, as in \citep{Geweke1996}. Variable selection can also be accomplished by selecting the median
-probability model, consisting of those models whose posterior inclusion probability is at least $1/2$, as in
-\citep{Barbieri2004}.
-
-A challenge to applying this method of model selection is that exact model fitting may be computationally
-infeasible for models involving even moderate numbers of observations and covariates, and popular alternatives
-for fitting Bayesian models such as Monte Carlo Markov Chains (henceforth referred to as MCMC) are still
-extremely computationally intensive.
-
-Many approaches to model selection have been investigated, with various model selection criteria proposed to
-attempt to balance model likelihood against model complexity. One approach to model selection is to select
-between entire models, using a model selection criterion. These criterion may have a fixed penalty for model
-complexity, such as Akaike's Information Criterion \cite{Akaike1974}, the Risk Inflation Criterion
-\cite{Foster1994}, the Schwarz criterion or Bayesian Information Criterion \cite{Schwarz1978}, the Deviance
-Information Criterion \cite{Spiegelhalter2016} or the Principle of Minimum Description Length
-\cite{Hansen2001}. Alternatively, the penalty may be adaptive/data--dependent as in \cite{George2000}.
-
-Many approaches to model selection have been investigated, with various model selection criteria proposed to
-attempt to balance model likelihood against model complexity. One approach to model selection is to select
-between entire models, using a model selection criterion. These criterion may have a fixed penalty for model
-complexity, such as Akaike's Information Criterion \citep{Akaike1974}, the Risk Inflation Criterion
-\citep{Foster1994}, the Schwarz criterion or Bayesian Information Criterion \citep{Schwarz1978}, the Deviance
-Information Criterion \citep{Spiegelhalter2016} or the Principle of Minimum Description Length
-\citep{Hansen2001}. Alternatively, the penalty may be adaptive/data--dependent as in \citep{George2000}. An
-alternative to model selection criterion is to select models based on their posterior probability, such as by
-selecting the median probability model as in \citep{Barbieri2004}.
-
-Model selection can also be made implicit in the model fitting process itself, as in ridge regression
-\cite{Casella1980}, of which the well-known lasso is a special case \cite{Tibshirani1996}. As shown in
-papers by \cite{Breiman1996} and \cite{Efron2013} showed, while  the standard formulation of a linear model
-is unbiased, the goodness of fit of these models is numerically  unstable. Breiman showed that by introducing
-a penalty on the size of the regression co- efficients such as  in ridge regression, this numerical
-instability can be avoided. This reduces the variances of the co-efficient estimates, at the expense of
-introducing some bias -- the bias- variance trade--off.
 
 \subsubsection{Penalised regression}
 Penalised regression methods trade introducing some bias in the estimator for reducing the variance and thus
@@ -426,6 +385,47 @@ sampling approaches such as in \cite{George1993}. These two approaches of model 
 selection can be combined, as in \cite{Geweke1996}. Variable selection can also be accomplished by selecting
 the median probability model, consisting of those models whose posterior inclusion probability is at least
 $1/2$, as in \cite{Barbieri2004}.
+
+\subsubsection{Variable selection}
+A special case of model selection is variable selection, where the focus is on selecting individual
+covariates, rather than entire models. This approach can either be Fully Bayesian or Empirically Bayesian as
+in \citep{Cui2008}. Variable selection approaches involve a stochastic search over the variables in the model
+space. This search can be driven by posterior probabilities, as in \citep{Casella2006}, or by Gibbs sampling
+approaches such as in \citep{George1993}. These two approaches of model selection and variable selection can
+be combined, as in \citep{Geweke1996}. Variable selection can also be accomplished by selecting the median
+probability model, consisting of those models whose posterior inclusion probability is at least $1/2$, as in
+\citep{Barbieri2004}.
+
+A challenge to applying this method of model selection is that exact model fitting may be computationally
+infeasible for models involving even moderate numbers of observations and covariates, and popular alternatives
+for fitting Bayesian models such as Monte Carlo Markov Chains (henceforth referred to as MCMC) are still
+extremely computationally intensive.
+
+Many approaches to model selection have been investigated, with various model selection criteria proposed to
+attempt to balance model likelihood against model complexity. One approach to model selection is to select
+between entire models, using a model selection criterion. These criterion may have a fixed penalty for model
+complexity, such as Akaike's Information Criterion \cite{Akaike1974}, the Risk Inflation Criterion
+\cite{Foster1994}, the Schwarz criterion or Bayesian Information Criterion \cite{Schwarz1978}, the Deviance
+Information Criterion \cite{Spiegelhalter2016} or the Principle of Minimum Description Length
+\cite{Hansen2001}. Alternatively, the penalty may be adaptive/data--dependent as in \cite{George2000}.
+
+Many approaches to model selection have been investigated, with various model selection criteria proposed to
+attempt to balance model likelihood against model complexity. One approach to model selection is to select
+between entire models, using a model selection criterion. These criterion may have a fixed penalty for model
+complexity, such as Akaike's Information Criterion \citep{Akaike1974}, the Risk Inflation Criterion
+\citep{Foster1994}, the Schwarz criterion or Bayesian Information Criterion \citep{Schwarz1978}, the Deviance
+Information Criterion \citep{Spiegelhalter2016} or the Principle of Minimum Description Length
+\citep{Hansen2001}. Alternatively, the penalty may be adaptive/data--dependent as in \citep{George2000}. An
+alternative to model selection criterion is to select models based on their posterior probability, such as by
+selecting the median probability model as in \citep{Barbieri2004}.
+
+Model selection can also be made implicit in the model fitting process itself, as in ridge regression
+\cite{Casella1980}, of which the well-known lasso is a special case \cite{Tibshirani1996}. As shown in
+papers by \cite{Breiman1996} and \cite{Efron2013} showed, while  the standard formulation of a linear model
+is unbiased, the goodness of fit of these models is numerically  unstable. Breiman showed that by introducing
+a penalty on the size of the regression co- efficients such as  in ridge regression, this numerical
+instability can be avoided. This reduces the variances of the co-efficient estimates, at the expense of
+introducing some bias -- the bias- variance trade--off.
 
 % \subsubsection{Linear regression with normal prior and $g$ hyperprior}
 
@@ -611,57 +611,56 @@ approximation relative to the factored approximation.
 \subsection{Laplace Method of approximation}
 \label{sec:laplace_approximation}
 Laplace's method of approximation, as described in \cite{butler_2007} or \cite{MacKay:2002:ITI:971143}, is
-used to approximate integrals of a unimodal function with negative second derivative at the mode, indicating
-that the function is decreasing rapidly away from this point. The essential idea is that if the function is
-decreasing rapidly away from the mode, the bulk of the area under the function will be within a neighbourhood
-of the mode. Thus the integral of the function can be well approximated by an integral over the neighbourhood
-of the mode. How large that neighbourhood needs to be is estimated using how fast the function is changing at
-the mode, which is estimated by $|f''(x_0)|$.
+used to approximate integrals of a unimodal function $f$ with negative second derivative at the mode,
+indicating that the function is decreasing rapidly away from this point. The essential idea is that if the
+function is decreasing rapidly away from the mode, the bulk of the area under the function will be within a
+neighbourhood of the mode. Thus the integral of the function can be well approximated by an integral over the
+neighbourhood of the mode. How large that neighbourhood needs to be is estimated using how fast the function
+is changing at the mode $x_m$, which is estimated by $|f''(x_m)|$.
 
 Consider an exponential integral of the form
 $$
 	\int_a^b e^{M f(x)} dx
 $$
-
 \noindent where $f(x)$ is twice differentiable and $f''(x_0) < 0$, $M \in \R$ and $a, b \in \R \cup \{-\infty,
-\infty\}$. Let $f(x)$ have a unique global maximum at $x_0$. Then, Taylor expanding about $x_0$, we have
+\infty\}$. Let $f(x)$ have a unique mode at $x_m$. Then, Taylor expanding about $x_m$, we have
 $$
-	f(x) = f(x_0) + f'(x_0) (x - x_0) + \frac{1}{2} f''(x_0) (x - x_0)^2 + R
+	f(x) = f(x_m) + f'(x_m) (x - x_m) + \frac{1}{2} f''(x_m) (x - x_m)^2 + \BigO\left((x - x_m)^3\right).
+$$
+\noindent As $f$ has a global maximum at $x_m$, the first derivative of $f$ is zero at $x_m$. Thus, the
+function $f(x)$ may be approximated by
+$$
+	f(x) \approx f(x_m) - \frac{1}{2} |f''(x_m)| (x - x_m)^2
 $$
 
-\noindent where $R = \BigO((x - x_0)^3$. As $f$ has a global maximum at $x_0$, the first derivative of $f$ is
-zero at $x_0$. Thus, the function $f(x)$ may be approximated by
-$$
-	f(x) \approx f(x_0) - \frac{1}{2} |f''(x_0)| (x - x_0)^2
-$$
-
-\noindent for $x$ sufficiently close to $x_0$, as the second derivative is negative at $x_0$. This ensures the
+\noindent for $x$ sufficiently close to $x_m$, as the second derivative is negative at $x_m$. This ensures the
 the approximation of the integral
 $$
-	\int_a^b e^{M f(x)} dx \approx e^{M f(x_0)} \int_a^b e^{-M |f''(x_0)|(x - x_0)^2} dx
+	\int_a^b e^{M f(x)} dx \approx e^{M f(x_m)} \int_a^b e^{-M |f''(x_m)|(x - x_m)^2} dx
 $$
 
-\noindent is accurate. This is a Gaussian integral, and thus we find that
+\noindent is accurate. The integral on the right-hand side of the equality is a Gaussian integral, and thus we
+find that
 $$
-	\int_a^b e^{M f(x)} dx \approx \sqrt{\frac{2 \pi}{M |f''(x_0)|}} e^{M f(x_0)}
+	\int_a^b e^{M f(x)} dx \approx \sqrt{\frac{2 \pi}{M |f''(x_m)|}} e^{M f(x_m)}.
 $$
 
  % See the Relative error section of the Wikipedia page, for instance.
 \noindent Thus we have approximated our integral by a closed form expression. The error in the approximation
-is $O(1/M)$. The approximation can be made more accurate by using a Taylor expansion beyond second order.
+is $\BigO(1/M)$. The approximation can be made more accurate by using a Taylor expansion beyond second order.
 
 \subsubsection{Extending to multiple dimensions}
-This approach to approximating integrals extends naturally to multiple dimensions.
-Consider the second order Taylor expansion of $\log f(\vtheta)$ around the mode $\vtheta_m$
+This approach to approximating integrals extends naturally to multiple dimensions. Consider the second order
+Taylor expansion of $\log f(\vtheta): \R^p \to \R$ around the mode $\vtheta_m \in \R^p$
 $$
-\log f(\vtheta) \approx f(\vtheta_m) + (\vtheta - \vtheta_m) \nabla \log f(\vtheta) + \frac{1}{2} (\vtheta - \vtheta_m)^\top \mH_{\log f}(\vtheta_m) (\vtheta - \vtheta_m) + \sO(\|\vtheta - \vtheta_m\|^3).
+\log f(\vtheta) \approx f(\vtheta_m) + (\vtheta - \vtheta_m) \nabla \log f(\vtheta_m) + \frac{1}{2} (\vtheta - \vtheta_m)^\top \mH_{\log f}(\vtheta_m) (\vtheta - \vtheta_m) + \BigO(\|\vtheta - \vtheta_m\|^3).
 $$
-
-\noindent Assuming that $\vtheta$ is a stationary point of $\log f$, then $\nabla f(\vtheta) = \vzero$ and so
+where $\nabla \log f(\vtheta_m)$ is the gradient of the log-likelihood at $\vtheta_m$ and $\mH_{\log
+f}(\vtheta_m)$ is the Hessian matrix of the log-likelihood at $\vtheta_m$. Assuming that $\vtheta$ is a
+stationary point of $\log f$, then $\nabla f(\vtheta) = \vzero$ and so
 $$
-\log f(\vtheta) \approx f(\vtheta_m) + \frac{1}{2} (\vtheta - \vtheta_m)^\top \mH_{\log f}(\vtheta_m) (\vtheta - \vtheta_m) + \sO(\|\vtheta - \vtheta_m\|^3)
+\log f(\vtheta) \approx f(\vtheta_m) + \frac{1}{2} (\vtheta - \vtheta_m)^\top \mH_{\log f}(\vtheta_m) (\vtheta - \vtheta_m) + \BigO(\|\vtheta - \vtheta_m\|^3)
 $$
-
 \noindent at such a point. The quadratic form in $\vtheta$ in the approximate expression for the log
 likelihood above leads to a Gaussian approximation for the likelihood $\N(\vtheta_m, \mH_{\log
 f}(\vtheta_m)^{-1})$. The approximation is crude but can be quite accurate if the likelihood is symmetric and
