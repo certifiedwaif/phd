@@ -157,13 +157,16 @@ the number of covariates increases the model space becomes too large to explore 
 \cite{Rockova2017} introduced Particle EM, a population-based method for efficiently exploring a  subset of
 the model space with high posterior probability. The population-based method allows the method to seek
 multiple local modes, and captures greater total posterior mass from the model space than choosing a single
-model would. We extend this method using Particle Variational Bayes and the exact posterior marginal
+model would. We extend this method using Particle Variational Approximation and the exact posterior marginal
 likelihood expressions to derive a computationally efficient algorithm for model selection on data sets with a
 large number of covariates. We demonstrate the algorithm's performance on a number of data sets for different
 combinations of $g$-prior, model selection prior and population size. We also compare our method to the
-existing methods lasso, SCAD, MCP and PEM using the $F_1$ score,  and show that our method outperforms these.
-We also show that total posterior mass increases and mean marginal variable error decreases, as the number of
-models in the population increases.
+existing methods such as lasso, SCAD, MCP and PEM in terms of model selection performance,  and show that our
+method outperforms these. We also show that total posterior mass increases and mean marginal variable error
+decreases, as the number of models in the population increases.
+% Draw attention to speed 8s on 20 cores for n = 600, p = 7200 sized problem.
+Our algorithm performs very well relative to previous algorithms in the literature, completing in 8 seconds
+on a model selection problem with a sample size of 600 and 7200 covariates.
 
 \include{Chapter_1_preliminary}
 
