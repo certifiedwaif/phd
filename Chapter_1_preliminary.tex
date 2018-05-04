@@ -48,11 +48,6 @@ In this section, we introduce the major problems that will be addressed in this 
 modelling of data using Generalised Linear Mixed Models and model selection of linear models with normal
 priors  will be explored.
 
-\section{Generalised Linear Mixed models}
-All of the models considered in this thesis belong to the family of generalised linear mixed models - a
-flexible set of models which can model continuous or discrete responses and incorporate both fixed and
-random effects.
-
 \subsection{Exponential family and the canonical form of linear regression models}
 
 The concept of the exponential family of probability distributions was first introduced by \cite{Koopman1935}
@@ -111,7 +106,7 @@ effects.  Following the conventions for Generalised Design of \citep{Zhao2006}, 
 for Generalised Linear Mixed Models exponential family with Gaussian random effects take the general form
 $$
 \begin{array}{rl}\label{eq:glmm}
-	\vy | \vbeta, \vu &= \exp{\{ \vy^\top (\mX \vbeta + \mZ \vu) - \vone^\top b(\mX \vbeta + \mZ \vu) + \vone^\top c(\vy) \}}, \\
+	p(\vy | \vbeta, \vu) &= \exp{\{ \vy^\top (\mX \vbeta + \mZ \vu) - \vone^\top b(\mX \vbeta + \mZ \vu) + \vone^\top c(\vy) \}}, \\
 	\vu | \mG &\sim \N(\vzero, \mG),
 \end{array}
 $$
@@ -202,7 +197,7 @@ $$
 We define the BSpline basis this way to remain correct in the case where knots are repeated in $\vkappa$. We
 choose piecewise cubic splines as cubics are numerically well behaved while still capturing the curvature of
 functions we wish to approximate well \citep{Press:2007:NRE:1403886}. Thus we select the knot sequence
-$\vkappa$
+$\vkappa$ to be
 $$
 a = \kappa_1 = \kappa_2 = \kappa_3 = \kappa_4 < \kappa_5 < \ldots < \kappa_{K+5} = \kappa_{K+6} = \kappa_{K+7} = \kappa_{K+8} = b.
 $$
@@ -219,9 +214,9 @@ matrix where the $(k, k')-th$ element is \[   \mOmega_{k k'} = \int_a^b B''_k(x)
 O'Sullivan spline estimate of the true function $f$ at the point $x$ is $\hat{f}_O(x; \lambda) = \mB_x
 \hat{\vnu}_O$, where $\hat{\vnu}_O = (\mB^\top \mB + \lambda \mOmega)^{-1} \mB^\top \vy$.
 
-$\mOmega$ is defined in this way to penalise oscillation, which is measured by the second derivative.
-The penalty differs from P-splines in that the P-spline penalty matrix is $\mD_2^\top \mD_2$ where $\mD_2$ is
-the second-order differencing matrix.
+The matrix $\mOmega$ is defined in this way to penalise oscillation, which is measured by the second
+derivative. The penalty differs from P-splines in that the P-spline penalty matrix is $\mD_2^\top \mD_2$ where
+$\mD_2$ is the second-order differencing matrix.
 
 % Divided difference notation?
 % Lagrange's interpolating polynomials?
@@ -269,32 +264,33 @@ expense of introducing some bias --- the bias-- variance trade--off.
 \subsection{Frequentist Approaches to Model Selection}
 \subsubsection{Information criteria}
 In a frequentist context, there are many functions which can be used to judge which model is best, such as
-AIC, BIC etc. These are functions $f: \gamma \to \R^+$ which allow the models under consideration to be
-ranked, and the best model chosen from those available. Thus the optimal model selected by an information
-criteria is $\gamma^* = \min_\gamma f(\gamma)$. These functions typically attempt to balance log likelihood
-against the complexity of the model, achieving a compromise between each.
+Akaike's Information Criteria and the Bayesian Information Criteria. These are functions $f: \gamma \to \R^+$
+which allow the models under consideration to be ranked, and the best model chosen from those available. Thus
+the optimal model selected by an information criteria is $\gamma^* = \min_\gamma f(\gamma)$. These functions
+typically attempt to balance log likelihood against the complexity of the model, achieving a compromise
+between each.
 
 % \mgc{AIC, BIC, DIC, Mallow's $C_p$}
 
 Information criteria are frequently used to compare amongst models. Letting $\vgamma$ denote the candidate model,
-Information Criteria take the form "-2 times the log-likelihood plus a term penalising for complexity of
-the model"
+Information Criteria take the form ``negative twice times the log-likelihood plus a term penalising for complexity of
+the mode''
 $$
-	\text{Information Criteria} = -2 \log p(\vy | \hat{\vtheta}_\vgamma) + \text{complexity penalty}
+	\text{Information Criteria} = -2 \log p(\vy | \widehat{\vtheta}_\vgamma) + \text{complexity penalty}
 $$
 
-\noindent where $\hat{\vtheta_\gamma}$ is the maximum likelihood estimate of the model parameters $\vtheta$
-for the model $\vgamma$ and $\log p(\vy | \hat{\vtheta_\gamma})$ is the log-likelihood of that model with that
-parameter estimate and the complexity penalty is a function of the sample size $n$ and the number of
-parameters $p$ of the model. Information criteria attempt to successfully compromise between goodness of fit
-and model complexity.
+\noindent where $\widehat{\vtheta_\gamma}$ is the maximum likelihood estimate of the model parameters
+$\vtheta$ for the model $\vgamma$ and $\log p(\vy | \widehat{\vtheta_\gamma})$ is the log-likelihood of that
+model with that parameter estimate and the complexity penalty is a function of the sample size $n$ and the
+number of parameters $p$ of the model. Information criteria attempt to successfully compromise between
+goodness of fit and model complexity.
 
 The most popular of the information criteria is the Akaike Information Criterion (AIC) \citep{Akaike1974}. AIC
 calculates an estimate of the information lost when a given model is used to represent the process that
 generates the data and so is an estimator of the Kullback-Leibler divergence of the true model from the fitted
 model. The AIC of the model $\vgamma$ is defined as
 $$
-	\text{AIC}(\vgamma) = -2 \log p(\vy | \hat{\vtheta}_\vgamma) + 2 p_\vgamma
+	\text{AIC}(\vgamma) = -2 \log p(\vy | \widehat{\vtheta}_\vgamma) + 2 p_\vgamma,
 $$
 
 \noindent where $p_\vgamma$ is the number of parameters in the model $\vgamma$. The model with the lowest AIC
@@ -303,59 +299,14 @@ is selected as the `best`.
 Of a similiar form as the AIC, but derived via a more Bayesian framework is the Bayesian Information Criterion
 or BIC. The BIC approximates the posterior probability of the candidate model $\vgamma$. The BIC is defined as
 $$
-	\text{BIC}(\vgamma) = -2 \log p(\vy | \hat{\vtheta}_\vgamma) + p_\vgamma \log(n).
+	\text{BIC}(\vgamma) = -2 \log p(\vy | \widehat{\vtheta}_\vgamma) + p_\vgamma \log(n).
 $$
 
 \noindent This is a more severe penalty for model complexity than in the Akaike's Information Criteria when
 $n$ is greater than $8$. BIC can be shown to be approximately equivalent to model selection using Bayes
 Factors in certain contexts, as shown by \cite{Kass1993}.
 
-\subsubsection{Penalised regression}
-Penalised regression methods trade introducing some bias in the estimator for reducing the variance and thus
-fitting a more parsimonious model. The major advantages are that a model with fewer covariates will be
-correspondingly easier to interpret, and that the variance of the estimator will be less. In penalised
-regression, the regression co-efficients are subjected to a penalty or constraint.
-$$
-\widehat{\vbeta}_{\text{penalised}} = \argmin_\vbeta \|\vy - \mX \vbeta\|_2^2 + \text{penalty}(\vbeta)
-$$
-
-From a Bayesian perspective, the penalty can be considered as a prior distribution on the regression 
-co-efficients where smaller values of $\vbeta$ are given more weight than larger ones. Here the penalised
-estimate of the regression co-efficients is the mode of their posterior distribution.
-
-\subsubsection{Lasso regression}
-Lasso regression is a penalised regression method developed by \citep{Tibshirani1996}, which was directly
-inspired by ridge regression. It follows from Minkowski's inequality that this function is convex, and thus
-can be the optimisation problem is convex, and can be solved using standard methods from convex optimisation
-\citep{Boyd2010}.
-$$
-\widehat{\vbeta}_{\text{lasso}} = \argmin_\vbeta \|\vy - \mX \vbeta\|_2^2 \text{ subject to } \|\vbeta\|_1 \leq \lambda
-$$
-
-The constraint on the $l_1$ norm has the effect of shrinking the co-efficients, and setting some of them to
-zero. This forces the models fit by lasso regression to be sparse, providing model selection as part of the
-model-fitting process.
-
-A disadvantage of lasso regression are that the constraint on the regression co-efficients depends on the
-tuning parameter which must be selected a priori or through cross-validation. But a much greater issue is that
-the model selection process intrinsic to lasso regression does not take into account the uncertainty of the
-model selection process itself, as Bayesian model selection methods do.
-
-\subsubsection{Ridge regression}
-Ridge regression is another penalised regression method, which predates lasso regression
-\cite{Hoerl1970}. The penalty on the regression co-efficients shrinks the estimated co-efficients towards
-zero, ensuring sparsity of the fitted model.
-$$
-\widehat{\vbeta}_{\text{lasso}} = \argmin_\vbeta \|\vy - \mX \vbeta\|_2^2 \text{ subject to } \|\vbeta\|_2 \leq \lambda
-$$
-
-\subsection{Bayesian Approaches to Model Selection}
-Parallel to the frequentist approaches, model selection can be performed using a Bayesian approach by using
-Bayes factors to compare the posterior likelihoods of the candidate models to see which is most probable given
-the observed data. This can be done, for example, by using Bayes Factors as in \citep{Kass1993}. Rather than
-selecting one candidate model, several models can be combined together using Bayesian model  averaging, as in
-\citep{Hoeting1999}, \citep{Raftery1997}, \citep{Fernandez2001} or \citep{Papaspiliopoulos2016}. Or model
-selection can be made implicit in the model fitting process itself, as in ridge regression
+Or model selection can be made implicit in the model fitting process itself, as in ridge regression
 \citep{Casella1980}, of which the well-known lasso is a special case \citep{Tibshirani1996}. As
 \citep{Breiman1996} and \citep{Efron2013} showed, while  the standard formulation of a linear model is
 unbiased, the goodness of fit of these models is numerically  unstable. Breiman showed that by introducing a
@@ -363,18 +314,52 @@ penalty on the size of the regression co- efficients such as  in ridge regressio
 can be avoided. This reduces the variances of the co-efficient estimates, at the expense of introducing some
 bias -- which is another instance of the bias--variance trade-- off.
 
-An alternative to model selection criterion is to select models based on their posterior probability. In a
-Bayesian context, this can be accomplished by comparing the posterior likelihoods of the candidate models to
-see which is most probable given the observed data. This can be done, for example, by using Bayes Factors as
-in \cite{Kass1993}. Rather than selecting one candidate model, several models can be combined together using
-Bayesian model averaging, as in \cite{Hoeting1999}, \cite{Raftery1997}, \cite{Fernandez2001} or
-\cite{Papaspiliopoulos2016}.
+\subsubsection{Penalised regression}
+Penalised regression methods trade introducing some bias in the estimator for reducing the variance and thus
+fitting a more parsimonious model. The major advantages are that a model with fewer covariates will be
+correspondingly easier to interpret, and that the variance of the estimator will be less. In penalised
+regression, the regression co-efficients are subjected to a penalty or constraint
+$$
+\widehat{\vbeta}_{\text{penalised}} = \argmin_\vbeta \|\vy - \mX \vbeta\|_2^2 + \text{penalty}(\vbeta).
+$$
 
-The problem of model selection can also be considered within a Bayesian framework. Within this framework,
-candidate models can be selected by comparing their posterior likelihoods or Bayes Factors to see which is
-most probable given the observed data, as in \cite{Kass1993}. Bayesian model selection approaches can
-incorporate prior information, such as the prior probability of selecting each candidate model $\vgamma$.
+From a Bayesian perspective, the penalty can be considered as a prior distribution on the regression 
+co-efficients where smaller values of $\vbeta$ are given more weight than larger ones. Here the penalised
+estimate of the regression co-efficients is the mode of their posterior distribution.
 
+\subsubsection{Ridge regression}
+Ridge regression is another penalised regression method, which predates lasso regression
+\cite{Hoerl1970}. The penalty on the regression co-efficients shrinks the estimated co-efficients towards
+zero, ensuring sparsity of the fitted model
+$$
+\widehat{\vbeta}_{\text{lasso}} = \argmin_\vbeta \|\vy - \mX \vbeta\|_2^2 \text{ subject to } \|\vbeta\|_2 \leq \lambda.
+$$
+
+\subsubsection{Lasso regression}
+Lasso regression is a penalised regression method developed by \citep{Tibshirani1996}, which was directly
+inspired by ridge regression. It follows from Minkowski's inequality that this function is convex, and thus
+can be the optimisation problem is convex, and can be solved using standard methods from convex optimisation
+\citep{Boyd2010}.
+$$
+\widehat{\vbeta}_{\text{lasso}} = \argmin_\vbeta \|\vy - \mX \vbeta\|_2^2 \text{ subject to } \|\vbeta\|_1 \leq \lambda,
+$$
+where $\lambda$ is a pre-specified free parameter specifying the amount of regulation. The constraint on the
+$l_1$ norm has the effect of shrinking the co-efficients, and setting some of them to zero. This forces the
+models fit by lasso regression to be sparse, providing model selection as part of the model-fitting process.
+
+A disadvantage of lasso regression are that the constraint on the regression co-efficients depends on the free
+tuning parameter which must be selected a priori or through cross-validation. But a much greater issue is that
+the model selection process intrinsic to lasso regression does not take into account the uncertainty of the
+model selection process itself, as Bayesian model selection methods do.
+
+\subsection{Bayesian Approaches to Model Selection}
+Parallel to the frequentist approaches, model selection can be performed using a Bayesian approach by using
+Bayes factors to compare the posterior likelihoods of the candidate models to see which is most probable given
+the observed data. This can be done, for example, by using Bayes Factors as in \citep{Kass1993}. Rather than
+selecting one candidate model, several models can be combined together using Bayesian model  averaging, as in
+\citep{Hoeting1999}, \citep{Raftery1997}, \citep{Fernandez2001} or \citep{Papaspiliopoulos2016}.
+
+\subsubsection{Variable selection}
 A special case of model selection is variable selection, where the focus is on selecting individual
 covariates, rather than entire models. Variable selection approaches search over the
 variables in the model space for the best covariates to include in the candidate model. Due to the large
@@ -386,46 +371,10 @@ selection can be combined, as in \cite{Geweke1996}. Variable selection can also 
 the median probability model, consisting of those models whose posterior inclusion probability is at least
 $1/2$, as in \cite{Barbieri2004}.
 
-\subsubsection{Variable selection}
-A special case of model selection is variable selection, where the focus is on selecting individual
-covariates, rather than entire models. This approach can either be Fully Bayesian or Empirically Bayesian as
-in \citep{Cui2008}. Variable selection approaches involve a stochastic search over the variables in the model
-space. This search can be driven by posterior probabilities, as in \citep{Casella2006}, or by Gibbs sampling
-approaches such as in \citep{George1993}. These two approaches of model selection and variable selection can
-be combined, as in \citep{Geweke1996}. Variable selection can also be accomplished by selecting the median
-probability model, consisting of those models whose posterior inclusion probability is at least $1/2$, as in
-\citep{Barbieri2004}.
-
 A challenge to applying this method of model selection is that exact model fitting may be computationally
 infeasible for models involving even moderate numbers of observations and covariates, and popular alternatives
 for fitting Bayesian models such as Monte Carlo Markov Chains (henceforth referred to as MCMC) are still
 extremely computationally intensive.
-
-Many approaches to model selection have been investigated, with various model selection criteria proposed to
-attempt to balance model likelihood against model complexity. One approach to model selection is to select
-between entire models, using a model selection criterion. These criterion may have a fixed penalty for model
-complexity, such as Akaike's Information Criterion \cite{Akaike1974}, the Risk Inflation Criterion
-\cite{Foster1994}, the Schwarz criterion or Bayesian Information Criterion \cite{Schwarz1978}, the Deviance
-Information Criterion \cite{Spiegelhalter2016} or the Principle of Minimum Description Length
-\cite{Hansen2001}. Alternatively, the penalty may be adaptive/data--dependent as in \cite{George2000}.
-
-Many approaches to model selection have been investigated, with various model selection criteria proposed to
-attempt to balance model likelihood against model complexity. One approach to model selection is to select
-between entire models, using a model selection criterion. These criterion may have a fixed penalty for model
-complexity, such as Akaike's Information Criterion \citep{Akaike1974}, the Risk Inflation Criterion
-\citep{Foster1994}, the Schwarz criterion or Bayesian Information Criterion \citep{Schwarz1978}, the Deviance
-Information Criterion \citep{Spiegelhalter2016} or the Principle of Minimum Description Length
-\citep{Hansen2001}. Alternatively, the penalty may be adaptive/data--dependent as in \citep{George2000}. An
-alternative to model selection criterion is to select models based on their posterior probability, such as by
-selecting the median probability model as in \citep{Barbieri2004}.
-
-Model selection can also be made implicit in the model fitting process itself, as in ridge regression
-\cite{Casella1980}, of which the well-known lasso is a special case \cite{Tibshirani1996}. As shown in
-papers by \cite{Breiman1996} and \cite{Efron2013} showed, while  the standard formulation of a linear model
-is unbiased, the goodness of fit of these models is numerically  unstable. Breiman showed that by introducing
-a penalty on the size of the regression co- efficients such as  in ridge regression, this numerical
-instability can be avoided. This reduces the variances of the co-efficient estimates, at the expense of
-introducing some bias -- the bias- variance trade--off.
 
 % \subsubsection{Linear regression with normal prior and $g$ hyperprior}
 
@@ -517,7 +466,7 @@ $$
 \noindent If $\vtheta$ is partitioned into $M$ partitions $\vtheta_1$, $\vtheta_2$, \ldots, $\vtheta_M$ then a 
 simple form of approximation to adopt is the factored approximation of the form
 $$
-	q(\vtheta) = \Pi_{i=1}^M q(\vtheta_i)
+	q(\vtheta) = \prod_{i=1}^M q(\vtheta_i)
 $$
 
 \noindent where each of the density $q(\vtheta_i)$ is a member of a parametric family of density functions.
@@ -530,7 +479,7 @@ $$
 $$
 
 \noindent For details of the proof, and a more thorough introduction to the topic of variational
-approximations, see cite{Ormerod2010}. It can easily be shown that
+approximations, see \cite{Ormerod2010}. It can easily be shown that
 $$
 	\ds \log p(\vy) = \int q(\vtheta;\vxi)\frac{p(\vy|\vtheta)p(\vtheta)}{q(\vtheta;\vxi)} d\vtheta + \text{KL}(q(\vtheta;\vxi)||p(\vtheta|\vy)).
 $$
@@ -653,7 +602,7 @@ is $\BigO(1/M)$. The approximation can be made more accurate by using a Taylor e
 This approach to approximating integrals extends naturally to multiple dimensions. Consider the second order
 Taylor expansion of $\log f(\vtheta): \R^p \to \R$ around the mode $\vtheta_m \in \R^p$
 $$
-\log f(\vtheta) \approx f(\vtheta_m) + (\vtheta - \vtheta_m) \nabla \log f(\vtheta_m) + \frac{1}{2} (\vtheta - \vtheta_m)^\top \mH_{\log f}(\vtheta_m) (\vtheta - \vtheta_m) + \BigO(\|\vtheta - \vtheta_m\|^3).
+\log f(\vtheta) \approx f(\vtheta_m) + (\vtheta - \vtheta_m) \nabla \log f(\vtheta_m) + \tfrac{1}{2} (\vtheta - \vtheta_m)^\top \mH_{\log f}(\vtheta_m) (\vtheta - \vtheta_m) + \BigO(\|\vtheta - \vtheta_m\|^3).
 $$
 where $\nabla \log f(\vtheta_m)$ is the gradient of the log-likelihood at $\vtheta_m$ and $\mH_{\log
 f}(\vtheta_m)$ is the Hessian matrix of the log-likelihood at $\vtheta_m$. Assuming that $\vtheta$ is a
@@ -671,7 +620,7 @@ Expectation Propagation is an approximate Bayesian inference method, first propo
 It relies on minimising the reverse KL divergence $\text{KL}(p || q)$ between the true and approximaing
 disitrbutions $p$ and $q$. A factorised form of the distribution
 \[
-	q(\vtheta) = \Pi_{i=1}^n q(\vtheta_i)
+	q(\vtheta) = \prod_{i=1}^n q(\vtheta_i)
 \]
 is assumed. In general, fully minimising the KL divergence between $p$ and $q$ is intractable, so Expectation
 Propagation approximates this by minimising the KL divergence of each of the factors individually.
