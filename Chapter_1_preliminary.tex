@@ -2,10 +2,13 @@
 
 % Outline that John suggested
 \section{Real world problems}
-
 The advent of digital computers and the Internet have lead to an explosion in the volume of data being
-collected. With technological progress marching on, this trend seems only set to continue and accelerate. But
-this data is only of value if it can be analysed and understood.  This incredible increase in the volume of
+collected. With technological progress marching on, this trend seems only set to continue and accelerate. In
+the future, ever more data will be able to be stored, and so more data will be stored \citep{Gandomi2015}. But
+this data is only of value if it can be analysed and understood.
+
+
+This incredible increase in the volume of
 data has lead to corresponding computational difficulties in processing and modelling such large amounts of
 data -- so-called Big Data which is so large that it is difficult to process on one computer. This data raises
 new challenges which modern statisticians must be ready to meet. Approaches to modelling data were needed
@@ -15,8 +18,7 @@ underlying theory for inference. This realisation has lead to an explosion of in
 incorporating ideas from both statistics and computer science, in recent years. Machine learning problems are
 being tackled with algorithms which use probability models for the data -- leading to the new field of
 statistical learning which combines many of the best elements of Statistics and Machine Learning
-\citep{James:2014:ISL:2517747} \citep{MacKay:2002:ITI:971143} \citep{hastie01statisticallearning}
-\citep{Murphy:2012:MLP:2380985}.
+\citep{James:2014:ISL:2517747, MacKay:2002:ITI:971143, hastie01statisticallearning, Murphy:2012:MLP:2380985}.
 
 \section{Why Bayesian?}
 The difference between frequentist and Bayesian approaches begins with a difference in philosophy.
@@ -30,17 +32,22 @@ parameters using Bayes' Rule,
 \[
 	p(\vtheta | \vy) = \frac{p(\vy | \vtheta) p(\vtheta)}{\int p(\vy | \vtheta) p(\vtheta) d \vtheta}
 \]
-where $\vtheta$ is the vector of parameters and $\vy$ is the vector of observations, providing the resulting
-integral can be evaluated or approximated. There are many models which are difficult to fit under the
+where $\vy$ is a vector of observed data, $\vtheta$ are the model parameters $p(\vy|\vtheta)$ is the model
+distribution, $p(\vtheta)$ is a prior distribution on $\vtheta$ and $p(\vy)=\int
+p(\vy|\vtheta)p(\vtheta)d\vtheta$. Here the integral is performed over the domain of $\vtheta$. If a subset of
+$\vtheta$ are discrete random variables then the integral over these parameters is replaced with a
+combinatorial sum over all possible values of these discrete random variables.
+
+There are many models which are difficult to fit under the
 frequentist paradigm, as the likelihood is difficult to maximise. Furthermore, as the Bayesian paradigm treats
 each of the parameters in a model as uncertain, the full uncertainty associated with all of the parameters can
 be estimated in the uncertainty in the posterior distribution. This approach avoids many of the pitfalls of
 statistical inference encountered with the frequentist approach using significance testing and p-values
 \citep{Cox2005}.
 
-The ability to build a model one component at a time and have the uncertainty propagate through the model makes Bayesian
-modelling  particularly appropriate for mixed and hierarchical models. Uncertainty regarding model selection
-is taken into account
+The ability to build a model one component at a time and have the uncertainty propagate through the model
+makes Bayesian modelling  particularly appropriate for mixed and hierarchical models. Uncertainty regarding
+model selection is taken into account
 
 \section{What problems in thesis}
 
@@ -51,7 +58,7 @@ priors  will be explored.
 \subsection{Exponential family and the canonical form of linear regression models}
 
 The concept of the exponential family of probability distributions was first introduced by \cite{Koopman1935}
-and \cite{pitman_1936}. 
+and \cite{pitman_1936}. The canonical form of a regression model from the exponential family is
 \begin{equation}\label{eq:exponential_family}
 	p(\vy | \vtheta) = h(\vy) \exp \{ \vtheta^\top T(\vy) - b(\vtheta) \}
 \end{equation}
@@ -65,8 +72,8 @@ appropriate choice of $h$, $T$ and $A$ functions. The exponential family of dist
 appealing statistical and computational properties, which derive from the convexity of the parameter space
 $\Theta$ for which the exponential family distribution is defined and the convexity of the cumulant function,
 as shown in \cite{Jordan2010}. The mean of an exponential family distribution can be obtained by calculating
-the first derivative of the cumulant function, while the variance can be obtained by calculating the second
-derivatives of the cumulant function.
+the first derivative of the cumulant function and then evaluating at zero, while the variance can be obtained
+by calculating the second derivatives of the cumulant function and evaluating at zero.
 
 The exponential family of distributions allow us to extend linear models to more general situations where the
 response variable is not normally distributed but may be categorical, discrete or continuous and the
@@ -77,7 +84,10 @@ of covariates, a canonical form of generalised linear regression models may be w
 \begin{equation}\label{eq:glm}
 	\log p(\vy | \vtheta) \propto \vy^\top \mX \vbeta - \vone^\top b(\mX \vtheta) + \vone^\top c(\vy).
 \end{equation}
-where $c(\vtheta)$ is the log of $h(\vy)$ from Equation \ref{eq:exponential_family}. 
+where $c(\vtheta)$ is the log of $h(\vy)$ from Equation \ref{eq:exponential_family}. A choice of $b(x) = e^x$
+corresponding to the Poisson family of distributions specifies a Poisson linear model appropriate for
+modelling count data, while a choice of $b(x) = \log(1 + e^x)$ corresponding to the logistic family of
+distributions specifies a logistic linear model appropriate to modelling binary data.
 
 \subsection{Generalised Linear Mixed Models}
 Generalised Linear Mixed Models, an extension of Generalised Linear Models to include both fixed and random
@@ -94,7 +104,6 @@ structure, including random effects for  different subgroups or longitudinal dat
 splines, missing data and measurement error. This additional flexibility makes their application popular in
 many fields, such as public health, psychology and agriculture.
 
-
 In the frequentist paradigm, model parameters are fixed and uncertainty enters the model through random
 errors, which have associated variance. The data is modelled as a combination of these fixed parameters and
 random errors. In the Bayesian paradigm, the uncertainty enters the model by assuming parameters are random
@@ -110,13 +119,13 @@ $$
 	\vu | \mG &\sim \N(\vzero, \mG),
 \end{array}
 $$
-where the fixed effects are denoted by the vector $\vbeta$ and the random effects are denoted by $\vu$. The
-design matrix for the fixed effects is denoted by $\mX$ and the design matrix for the random effects are
-denoted by $\mZ$. The choice of the functions $b$ and $c$ allows this general structure to be adapted to
-particular situations -- a choice of $b(x) = e^x$ corresponding to the Poisson family of distributions
-specifies a Poisson linear mixed model appropriate for modelling count data, while a choice of $b(x) = \log(1
-+ e^x)$ corresponding to the logistic family of distributions specifies a logistic linear mixed model
-appropriate to modelling binary data.
+where the fixed effects are denoted by the vector $\vbeta$, the random effects are denoted by $\vu$ and $\mG$
+is the covariance matrix of random effects. The covariance structure in $\mG$ is usually chosen to capture the
+dependencies of interest between the observations in the application, such as the dependency between repeated
+observations on an individual within a longitudinal study, the dependency between observations within a
+cluster in a hierarchical model or the spatial dependency between observations are close to within another
+within a spatial model.The design matrix for the fixed effects is denoted by $\mX$ and the design matrix for
+the random effects are denoted by $\mZ$.
 
 Random effects are very flexible in the variety of models they allow us to fit to our data. Through
 specification of the covariance structures in the matrix $\mG$ with the appropriate data in the design matrix
@@ -133,7 +142,11 @@ high-dimensional integrals which are often analytically and computationally intr
 approximation must be used in order to fit these models within a reasonable timeframe.
 
 \section{Splines and smoothing}
-The most general form of the univariate regression problem is
+While linear models are statistically convenient to work with and easy to interpret once fitted, the
+relationship between the response and explanatory variables may not always be linear in practice. Thus a
+generalisation of linear models to non-linear situations is needed that stil retains the beneficial
+statistical and interpretive properties of linear models as much as possible. The most general form of the
+univariate regression problem is
 $$
 	y_i = f(x_i)
 $$
@@ -203,44 +216,50 @@ a = \kappa_1 = \kappa_2 = \kappa_3 = \kappa_4 < \kappa_5 < \ldots < \kappa_{K+5}
 $$
 
 \subsection{O'Sullivan Splines}
-
 % $B_{ik} = B_k (x)$
 % $B_x = [B_1(x), \ldots, B_K+4(x)]$
+% Divided difference notation?
+% Lagrange's interpolating polynomials?
+% Semiparametric regression / Connection to mixed models
+In this section, we follow the discussion of semiparametric regression in \cite{ruppert_wand_carroll_2003}.
+Using a mixed models setup to fit spline models protects against overfitting. Constructing a $\mZ$ matrix with
+the appropriate B-Spline function evaluations in each of the rows, where each column corresponds to a knot.
+
 O'Sullivan introduced a class of penalised splines based on the B-spline basis functions in
 \cite{OSullivan1986} which are a direct generalisation of smoothing splines. Let $B_1$, \ldots, $B_{K+4}$ be
 the cubic B-spline basis functions defined by the knots $\kappa_1$ to $\kappa_{K+4}$. O'Sullivan splines are
 penalised splines which are penalised using the $\mOmega$ matrix. Let $\mOmega$ be the $(K+4) \times (K+4)$
 matrix where the $(k, k')-th$ element is \[   \mOmega_{k k'} = \int_a^b B''_k(x) B''_{k'}(x) dx. \] Then the
-O'Sullivan spline estimate of the true function $f$ at the point $x$ is $\hat{f}_O(x; \lambda) = \mB_x
-\hat{\vnu}_O$, where $\hat{\vnu}_O = (\mB^\top \mB + \lambda \mOmega)^{-1} \mB^\top \vy$.
+O'Sullivan spline estimate of the true function $f$ at the point $x$ is $\widehat{f}_O(x; \lambda) = \mB_x
+\widehat{\vnu}_O$, where $\widehat{\vnu}_O = (\mB^\top \mB + \lambda \mOmega)^{-1} \mB^\top \vy$,
+as shown in \cite{ruppert_wand_carroll_2003}.
 
 The matrix $\mOmega$ is defined in this way to penalise oscillation, which is measured by the second
 derivative. The penalty differs from P-splines in that the P-spline penalty matrix is $\mD_2^\top \mD_2$ where
 $\mD_2$ is the second-order differencing matrix.
 
-% Divided difference notation?
-% Lagrange's interpolating polynomials?
-% Semiparametric regression / Connection to mixed models
-We follow the discussion of semiparametric regression in \cite{ruppert_wand_carroll_2003}.
-Using a mixed models setup to fit spline models protects against overfitting.
-Constructing a $\mZ$ matrix with the appropriate B-Spline function evaluations in each of the rows, where
-each column corresponds to a knot.
-
 \section{Model selection}
+It is often the case in applied statistics that many covariates are available, but it is unknown a priori
+which covariates explain the response variable of interest. An automatic method of exploring which model among
+many possible candidate models incorporating these covariates explains the explained response variable best
+would relieve the burden of having to fit and compare the performance of many such models manually.
+
 The problem of selecting a statistical model from a set of candidate models given a data set, hence referred
 to as \emph{model selection}, is one of the most important problems encountered in practice by applied
 statistical practitioners. It is one of the central tasks of science, and there is a correspondingly large
-literature on the subject.The problem of model selection for normal linear models is particularly well
-studied, owing to the popularity and importance of normal linear models in applications. While new types of
-model are continually being developed, linear models with normal priors remain a popular and essential
-modelling tool owing to the ease of fitting these models, statistical inference on the parameters and, most
-importantly, the ease which which these models can be interpreted. But for a data set with a moderate or large
-number of parameters, the question is immediately raised of which covariates we should include in our model.
-One of the problems that we address in this thesis is \emph{model selection} on linear models with normal
-priors.
+literature on the subject -- \cite{Claeskens:1251912} gives a comprehensive overview.
 
-The bias-variance trade-off is one of the central issues in statistical learning. The guise this issue takes
-in model selection is balancing the quality of the model fit against the complexity of the model, in an
+The problem of model selection for normal linear models is particularly well studied, owing to the popularity
+and importance of normal linear models in applications. While new types of model are continually being
+developed, linear models with normal priors remain a popular and essential modelling tool owing to the ease of
+fitting these models, statistical inference on the parameters and, most importantly, the ease which which
+these models can be interpreted. But for a data set with a moderate or large number of parameters, the
+question is immediately raised of which covariates we should include in our model. One of the problems that we
+address in this thesis is \emph{model selection} on linear models with normal priors.
+
+The bias-variance trade-off is one of the central issues in statistical learning
+\citep{Murphy:2012:MLP:2380985, Bishop:2006:PRM:1162264, hastie01statisticallearning}. The guise this issue
+takes in model selection is balancing the quality of the model fit against the complexity of the model, in an
 attempt to find a compromise between over-fitting and under-fitting, in the hope that the model fit will
 generalise well beyond the training data we have observed to the general population and that we haven't simply
 learned the noise in the training set.
@@ -249,16 +268,17 @@ There have been many approaches to model selection proposed, including criteria 
 selection, approaches based on functions of the residual sum of squares, penalised regression such as the
 lasso and $L_1$ regression, and Bayesian modelling approaches. Model selection is a difficult problem in high
 --dimensional spaces in general because as the dimension of the space increases, the number of possible models
-increases combinatorially. Many model selection algorithms use heuristics in an attempt to search the model
-space more efficiently but still find an optimal or near-optimal model within a reasonable period of time. A
-major motivation for this field of research is the need for a computationally feasible approach to performing
-model selection on large scale problems where the number of covariates is large.
+increases combinatorially \citep{Schelldorfer2010}. Many model selection algorithms use heuristics in an
+attempt to search the model space more efficiently but still find an optimal or near-optimal model within a
+reasonable period of time. A major motivation for this field of research is the need for a computationally
+feasible approach to performing model selection on large scale problems where the number of covariates is
+large.
 
 As shown in papers by \citep{Breiman1996} and \citep{Efron2013} showed, while the standard formulation of a
 linear model is unbiased, the goodness of fit of these models is numerically  unstable. Breiman showed that by
 introducing a penalty on the size of the regression co- efficients such as  in ridge regression or the lasso,
 this numerical instability can be avoided. This reduces the variances of the co-efficient estimates, at the
-expense of introducing some bias --- the bias-- variance trade--off.
+expense of introducing some bias --- an example of the bias-- variance trade--off.
 
 % Non-Bayesian
 \subsection{Frequentist Approaches to Model Selection}
@@ -428,15 +448,10 @@ to accelerate Bayesian model fitting by tens or hundreds of times, with only min
 models. This method plays a central role in this thesis, particularly in the second and fourth chapters.
 
 \subsubsection{Definition}
-Much of Bayesian inference is based on the posterior distribution of a model's parameters given observed data
-defined by $p(\vtheta|\vy) = p(\vy|\vtheta)p(\vtheta)/p(\vy)$ where $\vy$ is a vector of observed data,
-$\vtheta$ are the model parameters $p(\vy|\vtheta)$ is the model distribution, $p(\vtheta)$ is a prior
-distribution on $\vtheta$ and $p(\vy)=\int p(\vy|\vtheta)p(\vtheta)d\vtheta$. Here the integral is performed
-over the domain of $\vtheta$. If a subset of $\vtheta$ are discrete random variables then the integral over
-these parameters is replaced with a combinatorial sum over all possible values of these discrete random
-variables. Such a model of interest to us may be computationally difficult or intractable to fit.  The
-calculation of the true posterior distribution is often either computationally intractable or no closed form
-exists for the posterior distribution and so an approximation is required.
+As described previously, Bayesian models offer many advantages in flexibility and ease of interpretation. But
+such models may be computationally difficult or intractable to fit.  The calculation of the true posterior
+distribution is often either computationally intractable or no closed form exists for the posterior
+distribution and so an approximation is required.
 
 We may be able to gain much of the same insight from a given data set by fitting an accurate
 approximation  of the model, allowing us to summarise the data and perform statistical inference. Variational
