@@ -46,7 +46,7 @@
 
 \usepackage{graphicx,rotating,booktabs}
 
-\title{Numerically stable approximate Bayesian methods
+\title{Numerically Stable Approximate Bayesian Methods
     	 for Generalized Linear Mixed Models
 			 and Linear Model Selection}
 \author{Mark Greenaway}
@@ -125,32 +125,34 @@
 
 Bayesian models offer great flexibility, but can be computationally demanding to fit. The gold standard for
 fitting Bayesian models, when posterior  distributions are not available analytically, are Monte Carlo Markov
-Chain methods, but these can be slow and prone to convergence problems. Approximate methods of fitting
+Chain methods. However these can be slow and prone to convergence problems. Approximate methods of fitting
 Bayesian models allow these models to be fit using deterministic algorithms in substantially less time.
-Variational Bayes (VB) is a method for approximating the posterior distributions of the model parameters with
-only a slight loss of accuracy.
+Variational Bayes (VB) is a method for approximating the posterior distributions of the model parameters
+sometimes with only a slight loss of accuracy.
 
-We consider these methods to consider two important problems -- zero inflated mixed models and model
-selection. Zero-inflated models have many applications in areas such as manufacturing and public health. We
-apply VB to Zero-Inflated Poisson mixed models with Gaussian distributed random effects using the Gaussian
-Variational Approximation. We demonstrate that this approximation is accurate and fast on a number of
-simulated and real data sets. We also incorporate a novel parameterisation of the covariance of the Gaussian
-Variational Approximation using the Cholesky factor of the precision matrix, as in \cite{Tan2016}, and discuss
-the computational advantages of this parameterisation due to the sparsity of the precision matrix for mixed
-models.
+We consider these methods to consider two important problems -- zero inflated mixed models and variable
+selection for linear models. Zero-inflated models have many applications in areas such as manufacturing and
+public health, but pose numerical issues when fitting them to data. We apply a variational approximation to
+Zero-Inflated Poisson mixed models with Gaussian distributed random effects using a combination of Variational
+Bayes and the Gaussian Variational Approximation. We demonstrate that this approximation is accurate and fast
+on a number of simulated and benchmark data sets. We also incorporate a novel parameterisation of the
+covariance of the Gaussian Variational Approximation using the Cholesky factor of the precision matrix,
+similiar to \cite{Tan2016}, and discuss the computational advantages of this parameterisation due to the
+sparsity of the precision matrix for mixed models and resolve associated numerical difficulties.
 
-Model selection is a task of central importance in modern statistics, and  Bayesian model selection has the
-advantage of incorporating the uncertainty of the model selection process itself which propagates to the
-estimates of the model  parameters. Linear regression models with normal priors are ubiquitous in applied
-statistics due to their ease of fitting and interpretation. We use the popular $g$-prior \cite{Zellner1986}
-for model selection of linear models with normal priors. As \cite{Liang2008} points out, this raises the
-question of how best to choose $g$. They show that a fixed choice of $g$ leads to model selection paradoxes,
-such as Bartlett's Paradox and the Information Paradox. These paradoxes, and other problems, can be avoided by
-putting a prior on $g$. Using several popular priors on $g$, we derive exact expressions for the model
-selection Bayes Factors in terms of special functions depending only on  the sample size, number of covariates
-and correlation of the model being considered. We show that these expressions are accurate, fast to evaluate
-and numerically stable. An R package \texttt{blma} for doing Bayesian linear model averaging using these
-exact expressions has been  released on GitHub.
+The second problem we address is variable selection is a task of central importance in modern statistics, and
+Bayesian model selection has the advantage of incorporating the uncertainty of the model selection process
+itself which propagates to the estimates of the model  parameters. Linear regression models with Gaussian
+priors are ubiquitous in applied statistics due to their ease of fitting and interpretation. We use the
+popular $g$-prior \cite{Zellner1986} for model selection of linear models with normal priors where $g$ is a
+prior hyperparameter. As \cite{Liang2008} points out, this raises the question of how best to choose $g$. They
+show that a fixed choice of $g$ leads to model selection paradoxes, such as Bartlett's Paradox and the
+Information Paradox. These paradoxes, and other problems, can be avoided by putting a prior on $g$. Using
+several popular priors on $g$, we derive exact expressions for the model selection Bayes Factors in terms of
+special functions depending only on  the sample size, number of covariates and correlation of the model being
+considered. We show that these expressions are accurate, fast to evaluate and numerically stable. An R package
+\texttt{blma} for doing Bayesian linear model averaging using these exact expressions has been  released on
+GitHub.
 
 For data sets with a small number of covariates, it is computationally feasible to exact model selection. As
 the number of covariates increases the model space becomes too large to explore exhaustively.
