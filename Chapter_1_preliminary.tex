@@ -20,10 +20,11 @@ and Machine Learning \citep{James:2014:ISL:2517747, MacKay:2002:ITI:971143, hast
 Murphy:2012:MLP:2380985}.
 
 \section{Why Bayesian?}
-The difference between frequentist and Bayesian approaches begins with a difference in philosophy.
-Frequentists define an event's probability as its' relative frequency after a large number of trials. While
-Bayesians view probability as our reasonable expectation about an event, representing our state of knowledge
-about the event.
+How one proceeds given the above needs can be addressed through two inferential approaches: the frequentist
+and Bayesian statistical paradigms. The difference between frequentist and Bayesian approaches begins with a
+difference in philosophy. Frequentists define an event's probability as its' relative frequency after a large
+number of trials. While Bayesians view probability as our reasonable expectation about an event, representing
+our state of knowledge about the event.
 
 There are many practical reasons to choose Bayesian approaches to modelling data. It is flexible in modelling
 statistical complications. Complicated models can be built by chaining together multiple levels of simple
@@ -188,7 +189,6 @@ $$
 $$
 
 \noindent for $i = 1, \ldots, K + 2M -1$ and
-
 $$
 \begin{array}{rl}
 	B_{i, k}(x; \vkappa) &= \frac{x - \kappa_i}{\kappa_{i + k} - \kappa_i} B_{i, k-1} (x; \vkappa) + 
@@ -213,7 +213,7 @@ $\vkappa$ to be
 $$
 a = \kappa_1 = \kappa_2 = \kappa_3 = \kappa_4 < \kappa_5 < \ldots < \kappa_{K+5} = \kappa_{K+6} = \kappa_{K+7} = \kappa_{K+8} = b.
 $$
-where the internal knots are placed using the sample quintiles.
+where the internal knots are chosen using the sample quintiles.
 
 \subsection{O'Sullivan Splines}
 % $B_{ik} = B_k (x)$
@@ -255,7 +255,7 @@ developed, linear models with normal priors remain a popular and essential model
 fitting these models, statistical inference on the parameters and, most importantly, the ease which which
 these models can be interpreted. But for a data set with a moderate or large number of parameters, the
 question is immediately raised of which covariates we should include in our model. One of the problems that we
-address in this thesis is \emph{model selection} on linear models with normal priors.
+address in this thesis is \emph{variable selection} on linear models with normal priors.
 
 The bias-variance trade-off is one of the central issues in statistical learning
 \citep{Murphy:2012:MLP:2380985, Bishop:2006:PRM:1162264, hastie01statisticallearning}. The guise this issue
@@ -266,8 +266,8 @@ learned the noise in the training set.
 
 There have been many approaches to model selection proposed, including criteria based approaches, variable
 selection, approaches based on functions of the residual sum of squares, penalised regression such as the
-lasso and $L_1$ regression, and Bayesian modelling approaches. Model selection is a difficult problem in high
---dimensional spaces in general because as the dimension of the space increases, the number of possible models
+lasso and $L_1$ regression, and Bayesian modelling approaches. Model selection is a difficult problem in
+high-dimensional spaces in general because as the dimension of the space increases, the number of possible models
 increases combinatorially \citep{Schelldorfer2010}. Many model selection algorithms use heuristics in an
 attempt to search the model space more efficiently but still find an optimal or near-optimal model within a
 reasonable period of time. A major motivation for this field of research is the need for a computationally
@@ -276,17 +276,22 @@ large.
 
 As shown by \citep{Breiman1996} and \citep{Efron2013}, while the standard formulation of a linear model is
 unbiased, the goodness of fit of these models is numerically  unstable. Breiman showed that by introducing a
-penalty on the size of the regression co- efficients such as  in ridge regression or the lasso, this numerical
-instability can be avoided. This reduces the variances of the co-efficient estimates, at the expense of
-introducing some bias --- an example of the bias-- variance trade--off.
+penalty on the size of the regression coefficients such as  in ridge regression or the lasso, this numerical
+instability can be avoided. This reduces the variances of the coefficient estimates, at the expense of
+introducing some bias -- an example of the bias-variance trade-off.
 
 % Non-Bayesian
-\subsection{Frequentist Approaches to Model Selection}
+\subsection{Frequentist approaches to model selection}
 \subsubsection{Information criteria}
+% Need to define gamma first before referring to it. Is this the right place for this?
+Let $\vgamma$ be a p-dimensional vector of indicators, where a $1$ in the $p$th position indicates that the
+$p$th covariate is included in the model, while a $0$ indicates it is excluded. Thus $\vgamma$ defines a
+model with covariates drawn from a $p$ column data matrix $\mX$.
+
 In a frequentist context, there are many functions which can be used to judge which model is best, such as
-Akaike's Information Criteria and the Bayesian Information Criteria. These are functions $f: \gamma \to \R^+$
+Akaike's Information Criteria and the Bayesian Information Criteria. These are functions $f: \vgamma \to \R^+$
 which allow the models under consideration to be ranked, and the best model chosen from those available. Thus
-the optimal model selected by an information criteria is $\gamma^* = \min_\gamma f(\gamma)$. These functions
+the optimal model selected by an information criteria is $\vgamma^* = \min_\vgamma f(\vgamma)$. These functions
 typically attempt to balance log likelihood against the complexity of the model, achieving a compromise
 between each.
 
@@ -324,53 +329,54 @@ $$
 
 \noindent This is a more severe penalty for model complexity than in the Akaike's Information Criteria when
 $n$ is greater than $8$. BIC can be shown to be approximately equivalent to model selection using Bayes
-Factors in certain contexts, as shown by \cite{Kass1993}.
+Factors in certain contexts, as in \cite{Kass1993}.
 
 Or model selection can be made implicit in the model fitting process itself, as in ridge regression
 \citep{Casella1980}, of which the well-known lasso is a special case \citep{Tibshirani1996}. As
 \citep{Breiman1996} and \citep{Efron2013} showed, while  the standard formulation of a linear model is
 unbiased, the goodness of fit of these models is numerically  unstable. Breiman showed that by introducing a
-penalty on the size of the regression co- efficients such as  in ridge regression, this numerical instability
-can be avoided. This reduces the variances of the co-efficient estimates, at the expense of introducing some
+penalty on the size of the regression coefficients such as  in ridge regression, this numerical instability
+can be avoided. This reduces the variances of the coefficient estimates, at the expense of introducing some
 bias -- which is another instance of the bias--variance trade-- off.
 
 \subsubsection{Penalised regression}
 Penalised regression methods trade introducing some bias in the estimator for reducing the variance and thus
 fitting a more parsimonious model. The major advantages are that a model with fewer covariates will be
 correspondingly easier to interpret, and that the variance of the estimator will be less. In penalised
-regression, the regression co-efficients are subjected to a penalty or constraint
+regression, the regression coefficients are subjected to a penalty or constraint
 $$
 \widehat{\vbeta}_{\text{penalised}} = \argmin_\vbeta \|\vy - \mX \vbeta\|_2^2 + \text{penalty}(\vbeta).
 $$
 
 From a Bayesian perspective, the penalty can be considered as a prior distribution on the regression 
-co-efficients where smaller values of $\vbeta$ are given more weight than larger ones. Here the penalised
-estimate of the regression co-efficients is the mode of their posterior distribution.
+coefficients where smaller values of $\vbeta$ are given more weight than larger ones. Here the penalised
+estimate of the regression coefficients is the mode of their posterior distribution.
 
 \subsubsection{Ridge regression}
-Ridge regression is another penalised regression method, which predates lasso regression
-\cite{Hoerl1970}. The penalty on the regression co-efficients shrinks the estimated co-efficients towards
-zero, ensuring sparsity of the fitted model
+Ridge regression is a penalised regression method, introduced in \cite{Hoerl1970}. The penalty on the
+regression coefficients shrinks the estimated coefficients towards zero, ensuring sparsity of the fitted
+model
 $$
 \widehat{\vbeta}_{\text{lasso}} = \argmin_\vbeta \|\vy - \mX \vbeta\|_2^2 \text{ subject to } \|\vbeta\|_2 \leq \lambda.
 $$
 
 \subsubsection{Lasso regression}
 Lasso regression is a penalised regression method developed by \citep{Tibshirani1996}, which was directly
-inspired by ridge regression. It follows from Minkowski's inequality that this function is convex, and thus
-can be the optimisation problem is convex, and can be solved using standard methods from convex optimisation
-\citep{Boyd2010}.
+inspired by ridge regression. The constrained optimisation problem solved to fit a regression model by lasso
+is
 $$
 \widehat{\vbeta}_{\text{lasso}} = \argmin_\vbeta \|\vy - \mX \vbeta\|_2^2 \text{ subject to } \|\vbeta\|_1 \leq \lambda,
 $$
-where $\lambda$ is a pre-specified free parameter specifying the amount of regulation. The constraint on the
-$l_1$ norm has the effect of shrinking the co-efficients, and setting some of them to zero. This forces the
-models fit by lasso regression to be sparse, providing model selection as part of the model-fitting process.
+where $\lambda$ is a pre-specified free parameter specifying the amount of regulation.  It follows from
+Minkowski's inequality that the function above is convex, and thus the optimisation problem is convex, and can
+be solved using standard methods from convex optimisation \citep{Boyd2010}.  The constraint on the $l_1$ norm
+has the effect of shrinking the coefficients, and setting some of them to zero. This forces the models fit by
+lasso regression to be sparse, providing model selection as part of the model-fitting process.
 
-A disadvantage of lasso regression are that the constraint on the regression co-efficients depends on the free
+A disadvantage of lasso regression are that the constraint on the regression coefficients depends on the free
 tuning parameter which must be selected a priori or through cross-validation. But a much greater issue is that
 the model selection process intrinsic to lasso regression does not take into account the uncertainty of the
-model selection process itself, as Bayesian model selection methods do.
+model selection process itself, particularly the selection of $\lambda$, as Bayesian model selection methods do.
 
 \subsection{Bayesian Approaches to Model Selection}
 Parallel to the frequentist approaches, model selection can be performed using a Bayesian approach by using
@@ -622,7 +628,7 @@ is $\BigO(1/M)$. The approximation can be made more accurate by using a Taylor e
 This approach to approximating integrals extends naturally to multiple dimensions. Consider the second order
 Taylor expansion of $\log f(\vtheta): \R^p \to \R$ around the mode $\vtheta_m \in \R^p$
 $$
-\log f(\vtheta) \approx f(\vtheta_m) + (\vtheta - \vtheta_m) \nabla \log f(\vtheta_m) + \tfrac{1}{2} (\vtheta - \vtheta_m)^\top \mH_{\log f}(\vtheta_m) (\vtheta - \vtheta_m) + \BigO(\|\vtheta - \vtheta_m\|^3).
+\log f(\vtheta) \approx f(\vtheta_m) + (\vtheta - \vtheta_m)^\top \nabla \log f(\vtheta_m) + \tfrac{1}{2} (\vtheta - \vtheta_m)^\top \mH_{\log f}(\vtheta_m) (\vtheta - \vtheta_m) + \BigO(\|\vtheta - \vtheta_m\|^3).
 $$
 where $\nabla \log f(\vtheta_m)$ is the gradient of the log-likelihood at $\vtheta_m$ and $\mH_{\log
 f}(\vtheta_m)$ is the Hessian matrix of the log-likelihood at $\vtheta_m$. Assuming that $\vtheta$ is a
@@ -679,11 +685,11 @@ In this section, we briefly outline the major contributions in this thesis.
 Generalised linear mixed models are an appealing way to model data, as they are flexible enough to model a
 range of data types and situations. But the Bayesian versions of these models typically required 
 computationally demanding MCMC, which can also be prone to convergence problems. Instead, we consider approximate Bayesian inference tecniques, which are computationally efficient and deterministic. It is
-desirable to use normal priors for the regression co-efficients of these models, as these are easily
+desirable to use normal priors for the regression coefficients of these models, as these are easily
 interpreted. But for Generalised Linear Mixed Models with a non-normal response, these priors are
 non-conjugate, making VB difficult to apply as the required mean field updates are intractable. We apply
 Gaussian Variational Bayes -- an extension to Variational Bayes, to fit a multivariate normal distribution
-to the regression co-efficients of our models.
+to the regression coefficients of our models.
 In our second chapter, we present a Gaussian Variational Approximation to a Zero-Inflated Poisson mixed model
 which can flexibly incorporate both fixed and random effects. This allows it to fit complicated models
 to the data incorporating random intercepts and slopes and additive models using O'Sullivan-penalised splines.
