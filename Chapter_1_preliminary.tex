@@ -191,13 +191,12 @@ $$
 \noindent for $i = 1, \ldots, K + 2M -1$ and
 $$
 \begin{array}{rl}
-	B_{i, k}(x; \vkappa) &= \frac{x - \kappa_i}{\kappa_{i + k} - \kappa_i} B_{i, k-1} (x; \vkappa) + 
-										\frac{\kappa_{i + k + 1} - x}{\kappa_{i + k + 1} - \kappa_{i + 1}} B_{i, k-1} (x; \vkappa)
+	B_{i, k}(x; \vkappa) &= \frac{x - \kappa_i}{\kappa_{i + k} - \kappa_i} Q_{i, k-1} (x; \vkappa) + 
+										\frac{\kappa_{i + k + 1} - x}{\kappa_{i + k + 1} - \kappa_{i + 1}} Q_{i, k-1} (x; \vkappa)
 \end{array}
 $$
 
-\noindent for $i = 1, \ldots, K + 2 M - m$. We then define our BSpline basis in terms of $Q$
-functions below, which are defined in terms of the $B$ functions
+\noindent for $i = 1, \ldots, K + 2 M - m$ with
 % B-Splines
 $$
 Q_{m, i}(x; \kappa) =
@@ -206,14 +205,15 @@ B_{m, i}(x; \kappa),& \kappa_{i + m} > \kappa_i \\
 0, & \text{otherwise}.
 \end{cases}
 $$
-We define the BSpline basis in this way to remain correct in the case where knots are repeated in $\vkappa$. We
-choose piecewise cubic splines as cubics are numerically well behaved while still capturing the curvature of
-functions we wish to approximate well \citep{Press:2007:NRE:1403886}. Thus we select the knot sequence
-$\vkappa$ to be
+We define the BSpline basis in this way so that the definition remains correct in the case where knots are
+repeated in $\vkappa$. We choose piecewise cubic splines as cubics are numerically well behaved while still
+capturing the curvature of functions we wish to approximate well \citep{Press:2007:NRE:1403886}. Thus we
+select the knot sequence $\vkappa$ to be
 $$
 a = \kappa_1 = \kappa_2 = \kappa_3 = \kappa_4 < \kappa_5 < \ldots < \kappa_{K+5} = \kappa_{K+6} = \kappa_{K+7} = \kappa_{K+8} = b.
 $$
-where the internal knots are chosen using the sample quintiles.
+There are many ways of choosing knots for applied statistical problems. A typical approach is to choose the
+internal knots using the sample quintiles of the data set being examined.
 
 \subsection{O'Sullivan Splines}
 % $B_{ik} = B_k (x)$
@@ -247,7 +247,8 @@ would relieve the burden of having to fit and compare the performance of many su
 The problem of selecting a statistical model from a set of candidate models given a data set, hence referred
 to as \emph{model selection}, is one of the most important problems encountered in practice by applied
 statistical practitioners. It is one of the central tasks of science, and there is a correspondingly large
-literature on the subject -- \cite{Claeskens:1251912} gives a comprehensive overview.
+literature on the subject -- \cite{Claeskens:1251912, NengjunYi2013, Johnstone2009} together give a
+comprehensive overview.
 
 The problem of model selection for normal linear models is particularly well studied, owing to the popularity
 and importance of normal linear models in applications. While new types of model are continually being
@@ -337,13 +338,15 @@ Or model selection can be made implicit in the model fitting process itself, as 
 unbiased, the goodness of fit of these models is numerically  unstable. Breiman showed that by introducing a
 penalty on the size of the regression coefficients such as  in ridge regression, this numerical instability
 can be avoided. This reduces the variances of the coefficient estimates, at the expense of introducing some
-bias -- which is another instance of the bias--variance trade-- off.
+bias -- which is another instance of the bias-variance trade-off.
 
 \subsubsection{Penalised regression}
 Penalised regression methods trade introducing some bias in the estimator for reducing the variance and thus
 fitting a more parsimonious model. The major advantages are that a model with fewer covariates will be
 correspondingly easier to interpret, and that the variance of the estimator will be less. In penalised
-regression, the regression coefficients are subjected to a penalty or constraint
+regression, the regression coefficients are subjected to a penalty or constraint. This is typically
+expressed as the minimisation of the sum of a goodness of fit function such as squared Euclidean distance
+and a penalty function
 $$
 \widehat{\vbeta}_{\text{penalised}} = \argmin_\vbeta \|\vy - \mX \vbeta\|_2^2 + \text{penalty}(\vbeta).
 $$
@@ -354,16 +357,21 @@ estimate of the regression coefficients is the mode of their posterior distribut
 
 \subsubsection{Ridge regression}
 Ridge regression is a penalised regression method, introduced in \cite{Hoerl1970}. The penalty on the
-regression coefficients shrinks the estimated coefficients towards zero, ensuring sparsity of the fitted
-model
+regression coefficients is the Euclidean norm of the regression coefficients. This penalty shrinks the
+estimated coefficients towards zero, ensuring sparsity of the fitted model. The ridge regression coefficients
+can thus be estimated by solving the constrained optimisation problem
 $$
-\widehat{\vbeta}_{\text{lasso}} = \argmin_\vbeta \|\vy - \mX \vbeta\|_2^2 \text{ subject to } \|\vbeta\|_2 \leq \lambda.
+\widehat{\vbeta}_{\text{lasso}} = \argmin_\vbeta \|\vy - \mX \vbeta\|_2^2 \text{ subject to } \|\vbeta\|_2 \leq \lambda
 $$
+where $\lambda$ is a pre-specified free parameter specifying the amount of regulation.
+
+% Both functions are quadratic in \vbeta
 
 \subsubsection{Lasso regression}
 Lasso regression is a penalised regression method developed by \citep{Tibshirani1996}, which was directly
-inspired by ridge regression. The constrained optimisation problem solved to fit a regression model by lasso
-is
+inspired by ridge regression. 
+The penalty is the $l_1$ norm of the coefficient vector.
+The lasso regression coefficients can be estimated by solving the constrained optimisation problem
 $$
 \widehat{\vbeta}_{\text{lasso}} = \argmin_\vbeta \|\vy - \mX \vbeta\|_2^2 \text{ subject to } \|\vbeta\|_1 \leq \lambda,
 $$

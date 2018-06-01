@@ -472,7 +472,7 @@ alternatives to MCMC. Relatively accessible material to this area can be found i
 review in the area see \cite{BleiEtal2017}.
 
 Mean field variational Bayes or simply variational Bayes (VB) is a particular 
-varational approximation is based on minimizing the Kullback-Leibler distance between the true posterior distribution and a factorized approximation to the posterior. Let $\vtheta$ be the set of all model parameters and $\vy$ be a vector of observed data then $p(\vtheta|\vy)$ is approximated by $q(\vtheta) = \prod_{k=1}^K q_k(\vtheta_k)$ where $(\vtheta_1,\ldots,\vtheta_K)$ is a partition of $\vtheta$. Then it can	be shown that the 
+varational approximation based on minimizing the Kullback-Leibler distance between the true posterior distribution and a factorized approximation to the posterior. If we let $\vtheta$ be the set of all model parameters and $\vy$ be a vector of observed data then $p(\vtheta|\vy)$ is approximated by $q(\vtheta) = \prod_{k=1}^K q_k(\vtheta_k)$ where $(\vtheta_1,\ldots,\vtheta_K)$ is a partition of $\vtheta$. It can	be shown that the 
 $q_k$ densities, called $q$-densities, which mimimize the Kullback-Leibler divergence between $p(\vtheta|\vy)$ and $q(\vtheta)$ satisfy
 \begin{equation}\label{eq:optimal_q}
 \ds q_k(\vtheta_k) \propto \exp[ \bE_{-q_k(\vtheta_k)} \{ \log p(\vy,\vtheta) \}], \qquad 1\le k\le K,
@@ -499,7 +499,7 @@ between the true value of $\log p(\vy)$ and its lower bound, improving the
 approximation. 
 
 When the $q$-densities satisfy (\ref{eq:optimal_q}) the form of the $q$-densities
-are chosen nonparametrically through  (\ref{eq:optimal_q}) is a nonparametric VB
+are chosen through  (\ref{eq:optimal_q}) is a nonparametric VB
 approach,
 whereas when $q_k(\vtheta_k)$ is chosen to have a particular parametric form
 this can be viewed as a type of parametric VB. Recently, \cite{Wand2017} considers
@@ -602,7 +602,7 @@ $$
 
 \noindent which is generic to the  prior distribution specification for 
 $p(\alpha,\vbeta,\sigma^2,g|\vgamma)$ and $p(\vgamma)$. 
-Our approach is to collapse over $\alpha$, $\vbeta$, $\sigma^2$ and $g$,
+Our approach is to collapse over $\alpha$, $\vbeta$, $\sigma^2$, and $g$,
 and then apply a variational approximation over $\vgamma$.
 This can be done using any combination of the prior specifications
 described in Section \ref{sec:blma}.
@@ -647,7 +647,7 @@ $p(\vy)$. It can be shown that the difference between $\log p(\vy)$ and
 $\log \underline{p}(\vy;\vw,\mGamma)$ is the Kullback-Leibler divergence between $p(\vgamma|\vy)$
 and $q(\vgamma)$.
 
-The second term in the second term of (\ref{eq:variationalLowerBound})
+The second term of (\ref{eq:variationalLowerBound})
 is related to the entropy of $q$. Following \cite{Rockova2017} 
 the variational lower bound for
 $\log p(\vy)$
@@ -666,13 +666,13 @@ The main body of the algorithm to optimize
 $\log \underline{p}(\vy;\vw,\mGamma)$ is a two--stage process. 
 
 In the first stage, we iterate through the population of
-bitstrings, using a greedy search strategy to attempt to alter each bit in the model bitstring to increase the log likelihood. If the log likelihood for the new bitstring is no higher than the previous bitstring, then the
+bitstrings, using a greedy search strategy in an attempt to alter each bit in the model bitstring to increase the log likelihood. If the log likelihood for the new bitstring is no higher than the previous bitstring, then the
 alteration is rejected and the next alteration tried. The alterations are also rejected if the new bitstring
 already exists within the population, ensuring that the constraint that all models in the population are
 unique is maintained.
 
 In the second stage, we re--calculate the weights for each individual in the population, based on the
-likelihood of that model relative to the data $p(\vy; \vbeta_\vgamma)$ and the use this to re--calculate the
+likelihood of that model relative to the data $p(\vy; \vbeta_\vgamma)$ and use this to re--calculate the
 probability--based weights $w_i$ for each bitstring in the population. This is then used to re--calculate the
 lower bound
 \[
@@ -771,7 +771,7 @@ against exact
 Bayesian model averaging for four small examples with $p<30$ against exact Bayesian
 model averaging via the {\tt R} package {\tt blma} using the implementation outlined 
 in Greenaway \& Ormerod (2018). All of the following results were obtained in the 
-{\tt R} version 3.4.2 CITE R and all figures were developed using the {\tt R} 
+{\tt R} version 3.4.2 \citep{CiteR} and all figures were developed using the {\tt R} 
 package {\tt ggplot2}.
 In sections \ref{sec:highdimensional}--\ref{sec:QTL}
 we will consider examples with $p>30$ where
@@ -779,7 +779,7 @@ it is infeasible to perform Bayesian model averaging exactly.
 Most simulations were run on the second author's laptop computer (64 bit Windows 10 Intel
 i7-7600MX central processing unit at 2.8GHz with 2 hyperthreaded cores and 32GB of random access memory). 
 Multicore comparisons were run on a dedicated server using E5-2697v2 processors
-with 24 hyperthreaded cores and 512Gbytes of RAM.
+with 24 hyperthreaded cores and 512GB of RAM.
 
 \subsection{Comparing PVA against exact results} 
 \label{sec:exact}
@@ -787,8 +787,8 @@ with 24 hyperthreaded cores and 512Gbytes of RAM.
 We considered several small datasets to illustrate our methodology for situations where
 we could compare PVA against a gold standard. These datasets
 can be found in the {\tt R} packages {\tt MASS} \citep{Venables2002},  {\tt ISLR} \cite{James:2014:ISL:2517747}
-and {\tt Ecdat} \citep{Croissant2016}. Table \ref{tab:datasets} summarizing the sizes,  
-sources, and response variable used for each dataset used.   For each of the datasets some minimal preprocessing was used.
+and {\tt Ecdat} \citep{Croissant2016}. Table \ref{tab:datasets} summarizes the sizes,  
+sources, and response variable for each dataset used.   For each of the datasets some minimal preprocessing was used.
 We first used the {\tt R} command {\tt na.omit()} to remove samples containing missing predictors. 
 For {\tt USCrime} all variables except the predictor {\tt S} were log-transformed. For all datasets
 the {\tt R} command {\tt model.matrix()} was used to construct the design matrix using all 
@@ -883,7 +883,7 @@ setting are implied by the {\tt R} commands below.
 	estimated value of $\vbeta$ for a particular value of $\lambda$ and 
 	$d_\lambda$ is the number of non-zero elements of $\widehat{\vbeta}_\lambda$.
 	This differs from the regular BIC by an addition of a $2 d_\lambda \log(p)$ term. 
-	\cite{Wang2009} showed that this criterion performs well in several contexts.
+	\cite{Wang2007} showed that this criterion performs well in several contexts.
 	
 	\item {\bf Particle EM via the {\tt PEM} package.} We used the following command.
 	\begin{verbatim}
@@ -910,8 +910,8 @@ setting are implied by the {\tt R} commands below.
 
 We used simulated data in each of the sections below in such a way that the true data generating model was known. We used the 
 $F_1$-score \citep[see][]{Van_Rijsbergen1979}
-is used to assess the quality of model selection
-for each of the above models which
+to assess the quality of model selection
+for each of the above models, which is
 defined to be the harmonic mean between precision and recall given by
 $$
 \mbox{F}_1 = \frac{2\cdot TP}{2\cdot TP + FP + FN}

@@ -63,7 +63,7 @@ model (the model containing the intercept only).
 The above problems suggest that a hyperprior should
 be placed on $g$. \cite{Bayarri2012} also discuss in some depth desirable properties
 priors should have in the context of linear model averaging and selection. 
-In this paper we review the prior structures, specifically the hyperpriors on $g$, 
+In this chapter we review the prior structures, specifically the hyperpriors on $g$, 
 that lead to closed form expressions of Bayes factors for linear models.
 These include the hyper-$g$ prior of \cite{Liang2008}, the beta-prime prior of \cite{Maruyama2011}, and the robust 
 prior of \cite{Bayarri2012}, and most recently the cake prior of \cite{OrmerodEtal2017} leads to a Bayes factor which is a simple function of the Bayesian Information Criterion (BIC). We concern ourselves with the efficient, accurate and numerically stable evaluation of Bayes factors, Bayesian model averaging,
@@ -91,7 +91,7 @@ Our main contributions in this paper are as follows.
 	
 	\item We make available a highly efficient and {\it numerically stable} {\tt R}
 	package called
-	{\tt BLMA} available
+	{\tt blma} available
 	for exact Bayesian linear model averaging 
 	using the above prior structures which is available for download from the following web address.
 	
@@ -113,7 +113,7 @@ selection for linear models. Section \ref{sec:model} outlines and justifies our 
 different hyperpriors for $g$ and, wherever possible, describes how these may be evaluated well numerically.
 In Section \ref{sec:implementation}, we discuss details of our implementation which made our implementation 
 computationally feasible.
-In Section \ref{sec:numerical} we perform a series of numerical experiments to show the advantages of our approach. 
+In Section \ref{sec:numerical_g_prior} we perform a series of numerical experiments to show the advantages of our approach. 
 Finally, in Section \ref{sec:conclusion} we provide a conclusion and discuss future
 directions.
 
@@ -213,10 +213,10 @@ posterior expectation of $\vgamma$ is given by
 $\bE(\vgamma|\vy) = \sum_{\vgamma} \vgamma \cdot p(\vgamma|\vy)$.
 
 If one is required to select a single model, say $\vgamma^*$, two common choices are the 
-highest posterior model (HPM) which uses $\vgamma^* = \vgamma_{\mbox{\tiny HPM}} = \argmax_\vgamma \{ \, p(\vy,\vgamma) \, \}$, or the
+highest posterior model (HPM) which uses $\vgamma^* = \vgamma_{\mbox{\tiny HPM}} = \argmax_\vgamma \{ \, p(\vy|\vgamma) \, \}$, or the
 median posterior model (MPM) where $\vgamma^*$ is obtained by
 rounding each element of $\bE(\vgamma|\vy)$ to the nearest integer.
-The MPM has predictive optimality properties \citep{barbieri2004}.
+The MPM has predictive optimality properties \citep{Barbieri2004}.
 If the MPM is used for model selection
 the quantity $\bE(\vgamma|\vy)$ is sometimes referred to as the
 posterior (variable) inclusion probability (PIP) vector.
@@ -266,18 +266,18 @@ The prior on $\vbeta_\vgamma$ combined with the prior on $\vbeta_{-\vgamma}$
 in (\ref{eq:priorStructure}) constitutes one variant of the spike and slab prior for $\vbeta$.
 
 An alternative choice of prior on $\vbeta_\vgamma$ was proposed by \cite{Maruyama2011}. Let
-$p_{\vgamma} = |\vgamma|$. We will now describe their prior on $\vbeta_\vgamma$ for the case where for the case
+$p_{\vgamma} = |\vgamma|$, the number of non-zero elements in $\vgamma$. We will now describe their prior on $\vbeta_\vgamma$ for the case where for the case
 $p_{\vgamma} < n - 1$. Let $\mU\mLambda\mU^T$ be an eigenvalue decomposition of $\mX_\vgamma^T\mX_\vgamma$
 where $\mU$ is an orthonormal $p_{\vgamma} \times p_{\vgamma}$ matrix, and $\mLambda = \mbox{diag}(\lambda_1,\ldots,\lambda_{p_{\vgamma}})$ 
 is a diagonal matrix of eigenvalues with $\lambda_1\ge\ldots,\ge \lambda_{p_{\vgamma}}>0$. Then \cite{Maruyama2011} 
 propose a prior for $\vbeta_\vgamma$ of the form
 \begin{equation}
 	\label{eq:priorBetaMG}
-	\vbeta_\vgamma | \sigma^2, g \sim N(\vzero, \sigma^2 (\mU\mW\mU^T)^{-1}),   
+	\vbeta_\vgamma | \sigma^2, g \sim N(\vzero, \sigma^2 (\mU\mW\mU^\top)^{-1}),   
 \end{equation} 
 
 \noindent where $\mW = \mbox{diag}(w_1,\ldots,w_{p_{\vgamma}})$ with $ w_j = \lambda_j/[\nu_j(1 + g) - 1]$ for 
-some prior hyperparameters $\nu_1 \ge \ldots \ge \nu_q$. \cite{Maruyama2011} suggest as a default 
+some prior hyperparameters $\nu_q < \ldots < \nu_1$. \cite{Maruyama2011} suggest as a default 
 choice for the $\nu_j$'s to use $\nu_j = \lambda_j/\lambda_{p_{\vgamma}}$, for $1\le j \le p_{\vgamma}$. 
 This choice down-weights the prior on the rotated parameter space of $(\mU \vbeta)_j$ when the 
 corresponding eigenvalue $\lambda_j$ is large, which leads to prior standard errors that are 
@@ -523,11 +523,8 @@ $$
 %\int_0^1 t^{a-1} (1-t)^{c-a-1} (1-xt)^{-b_1} (1-yt)^{-b_2} \, dt,
 $$
 
-\noindent provided $\lambda>0$ and $\mu>0$
-where
-$F_1$ is the Appell hypergeometric function in two variables 
-\cite{Weisstein2009} 
-leads to
+\noindent provided $\lambda>0$ and $\mu>0$ where $F_1$ is the Appell hypergeometric function in two variables
+\citep{Weisstein2009} leads to
 \begin{equation}\label{eq:hyperGonNmarginal}
 	\ds \mbox{BF}_{g/n}(\vgamma) =  \frac{a - 2}{n(p_\vgamma + a - 2)} F_1\left( 1, \frac{a}{2}, \frac{n-1}{2}; \frac{p_\vgamma + a}{2}; 1  -  \frac{1}{n}, R_\vgamma^2 \right),
 \end{equation}
@@ -569,7 +566,7 @@ for $p_\vgamma > 2$ we obtain
 \end{equation}
 
 \noindent For the cases where $p\in \{1,2\}$ we
-will use numerical quadrature. When $p=0$ (we also have $R_\vgamma^2= 0$) and $\mbox{BF}_{g/n}(\vgamma) = 1$.
+will use numerical quadrature. When $p=0$, we also have that $R_\vgamma^2= 0$) so $\mbox{BF}_{g/n}(\vgamma) = 1$.
 Figure \ref{fig:gonnapprox} illustrates the differences between ``exact'' values of the $\mbox{BF}_{g/n}$
 (obtained using numerical quadrature) as a function of $n$, $p_\vgamma$, and $R^2$. From this figure we
 see that the approximation has a good relative error except for values close to 1 when the approximation
@@ -643,7 +640,7 @@ $$
 
 
 \noindent 
-Using by Equation 3.197(5) of \cite{Gradshteyn2007}, i.e. (\ref{eq:31975}), 
+Using Equation 3.197(5) of \cite{Gradshteyn2007}, i.e. (\ref{eq:31975}), 
 %\begin{equation}\label{eq:31975}
 %\ds 
 %\int_0^\infty x^{\lambda - 1}(1 + x)^\nu (1 + \alpha x)^\mu dx
@@ -659,10 +656,10 @@ $$
 \quad 
 \alpha \leftrightarrow \frac{(1 + \widehat{\sigma}_\vgamma^2 L)}{(1 + L)\widehat{\sigma}_\vgamma^2},
 \quad \mbox{and} \quad 
-\mu \leftrightarrow -\frac{n-1}{2}.
+\mu \leftrightarrow -\frac{n-1}{2},
 $$
 
-\noindent The conditions required by (\ref{eq:31975}) are satisfied
+\noindent the conditions required by (\ref{eq:31975}) are satisfied
 provided $\alpha \in (-1,1)$ (which is a relatively restrictive condition). 
 %Checking the conditions we have $\lambda > 0$ since $p_\vgamma \ge 0$.
 %The second condition implies 
@@ -741,7 +738,7 @@ $$
 \quad 
 \gamma \leftrightarrow r
 \quad \mbox{and} \quad 
-\varrho \leftrightarrow -(n - p_\vgamma-4)/2.
+\varrho \leftrightarrow -(n - p_\vgamma-4)/2,
 $$
 
 \noindent The conditions of the integral result easily hold.
@@ -918,7 +915,7 @@ $$
 
 Note that (\ref{eq:marginalLikelihoodBetaPrime}) is proportional
 to a special case of the prior structure considered by \cite{Maruyama2011}
-who refer to this special case as ZE as a model selection criterion (after Zellner's $g$ prior). This choice of $b$ also ensures that $g = O(n)$ so that $\mbox{tr}\{\mbox{Var}(\vbeta | g, \sigma^2)\} = O(1)$, preventing Bartlett's paradox. 
+who refer to this as a model selection criterion (after Zellner's $g$ prior). This choice of $b$ also ensures that $g = O(n)$ so that $\mbox{tr}\{\mbox{Var}(\vbeta | g, \sigma^2)\} = O(1)$, preventing Bartlett's paradox. 
 Note that in comparison to previously discussed priors
 marginal likelihood only involves gamma functions which
 are well behaved from a numerical analysis perspective. 
@@ -933,10 +930,10 @@ For derivation of the above properties and further discussion see \cite{Maruyama
 
 \noindent
 \cite{OrmerodEtal2017} develops cake priors which allow for arbitrarily diffuse priors
-whilst avoiding Bartlett's paradox leading Bayes factors equal to the exponential of minus half
+while avoiding Bartlett's paradox leading Bayes factors equal to the exponential of minus half
 the BIC. Cake priors
 can be thought of as a Jefferys prior in the limit
-as the prior becomes increasingly
+as the prior becomes increasingly diffuse
 and enjoy nice theoretical properties including model
 selection consistency. \cite{OrmerodEtal2017} 
 departs from the prior structure (\ref{eq:priorStructure}) and instead uses
@@ -993,8 +990,8 @@ highly optimized software libraries; and (ii) efficient calculation of
 $R$-squared values for all models based on using a Gray code and appropriate
 matrix algebraic simplifications.
 For ease of use we 
-implemented an {\tt R} package called {\tt BLMA}.
-The internals of {\tt BLMA} are implemented
+implemented an {\tt R} package called {\tt blma}.
+The internals of {\tt blma} are implemented
 in {\tt C++} and use the {\tt R} packages \texttt{Rcpp} and \texttt{RcppEigen} to enhance
 computational performance. The library {\tt OpenMP} was used to
 exploit parallel computation.
@@ -1016,11 +1013,11 @@ hypergeometric function to check our results.
 \label{sec:GrayCode}
 
 \noindent
-The Gray code was originally developed to aid in detecting errors in analog to digital conversions in
-communications systems by Frank Gray in 1947 \cite[][Section 22.3]{PressEtal2007}. It is a sequence of binary numbers whose key feature is that
+The Gray code was originally developed by Frank Gray in 1947 \cite[][Section 22.3]{PressEtal2007} to aid in detecting errors in analog to digital conversions in
+communications systems. It is a sequence of binary numbers whose key feature is that
 one and only one binary digit is different between binary numbers in the sequence. 
 Gray codes can be constructed using a sequence of ``reflect'' and ``prefix'' steps.
-Let $\mGamma_1 = (0,1)^T \in \{0,1\}^{2\times 1}$ be the first Gray code matrix matrix and let $\mGamma_k$ be the $k$th Gray code matrix. Then we can obtain the $(k+1)$th Gray code matrix given $\mGamma_k$ via 
+Let $\mGamma_1 = (0,1)^T \in \{0,1\}^{2\times 1}$ be the first Gray code matrix and let $\mGamma_k$ be the $k$th Gray code matrix. Then we can obtain the $(k+1)$th Gray code matrix given $\mGamma_k$ via 
 $$
 \ds \mGamma_{k+1} = \left[\begin{array}{cc}
 \vzero & \mGamma_k \\
@@ -1262,7 +1259,7 @@ the updates for all of the above quantities costs $O(p_{\vgamma_{i}}^2 + n)$ tim
 
 
 \section{Numerical results}
-\label{sec:numerical}
+\label{sec:numerical_g_prior}
 
 We will now compare the different Bayes factors under different hyperpriors on $g$ that we have explored. 
 Firstly we will look at these Bayes factors by comparing them directly.
@@ -1345,7 +1342,7 @@ setting implied by the following commands for each of these methods.
 \end{itemize}
 
 \noindent 
-The syntax for {\tt BLMA} is relatively straightforward:
+The syntax for {\tt blma} is relatively straightforward:
 
 \begin{verbatim}
 blma(vy, mX, prior, mprior, cores = 1L)
@@ -1521,7 +1518,7 @@ The {\tt BVS} package in the table refers to the {\tt BayesVarSelect} {\tt R} pa
 	\begin{center}
 		{\scriptsize 
 			\begin{tabular}{c|r|r|rrrrrr|rrrr|rrr}
-				Package & BLMA   & BLMA   & BAS    & BAS     & BVS    & BMS    & BLMA & BLMA & BAS & BLMA & BLMA & BLMA & BVS & BLMA & BLMA \\ 
+				Package & blma   & blma   & BAS    & BAS     & BVS    & BMS    & blma & blma & BAS & blma & blma & blma & BVS & blma & blma \\ 
 				Prior   & BIC    & ZE     & $g$    & $g$     & $g$    & $g$    & $g$  & $g$ &  $g/n$ & $g/n$ & $g/n$ & $g/n$ & Robust & Robust & Robust \\ 
 				Method  & (\ref{eq:marginalLikelihoodCake})  & (\ref{eq:marginalLikelihoodBetaPrime}) 
 				& (\ref{eq:hyperGmarginal}) & Laplace & (\ref{eq:hyperGmarginal}) & (\ref{eq:hyperGmarginal}) & (\ref{eq:hyperGmarginal}) & (\ref{eq:hyperGmarginal2}) & Laplace & 
@@ -1560,7 +1557,7 @@ The {\tt BVS} package in the table refers to the {\tt BayesVarSelect} {\tt R} pa
 	\begin{center}
 		{\scriptsize 
 			\begin{tabular}{c|r|r|rrrrrr|rrrr|rrr}
-				Package & BLMA   & BLMA   & BAS    & BAS     & BVS    & BMS    & BLMA & BLMA & BAS & BLMA & BLMA & BLMA & BVS & BLMA & BLMA \\ 
+				Package & blma   & blma   & BAS    & BAS     & BVS    & BMS    & blma & blma & BAS & blma & blma & blma & BVS & blma & blma \\ 
 				Prior   & BIC    & ZE     & $g$    & $g$     & $g$    & $g$    & $g$  & $g$ &  $g/n$ & $g/n$ & $g/n$ & $g/n$ & Robust & Robust & Robust \\ 
 				Method  & (\ref{eq:marginalLikelihoodCake})  & (\ref{eq:marginalLikelihoodBetaPrime}) 
 				& (\ref{eq:hyperGmarginal}) & Laplace & (\ref{eq:hyperGmarginal}) & (\ref{eq:hyperGmarginal}) & (\ref{eq:hyperGmarginal}) & (\ref{eq:hyperGmarginal2}) & Laplace & 
@@ -1594,7 +1591,7 @@ The {\tt BVS} package in the table refers to the {\tt BayesVarSelect} {\tt R} pa
 	\begin{center}
 		{\scriptsize 
 			\begin{tabular}{c|r|r|rrrrrr|rrrr|rrr}
-				Package & BLMA   & BLMA   & BAS    & BAS     & BVS    & BMS    & BLMA & BLMA & BAS & BLMA & BLMA & BLMA & BVS & BLMA & BLMA \\ 
+				Package & blma   & blma   & BAS    & BAS     & BVS    & BMS    & blma & blma & BAS & blma & blma & blma & BVS & blma & blma \\ 
 				Prior   & BIC    & ZE     & $g$    & $g$     & $g$    & $g$    & $g$  & $g$ &  $g/n$ & $g/n$ & $g/n$ & $g/n$ & Robust & Robust & Robust \\ 
 				Method  & (\ref{eq:marginalLikelihoodCake})  & (\ref{eq:marginalLikelihoodBetaPrime}) 
 				& (\ref{eq:hyperGmarginal}) & Laplace & (\ref{eq:hyperGmarginal}) & (\ref{eq:hyperGmarginal}) & (\ref{eq:hyperGmarginal}) & (\ref{eq:hyperGmarginal2}) & Laplace & 
@@ -1648,7 +1645,7 @@ the differences between each of the choices of mixture $g$-priors. In terms of s
 the fastest packages and roughly comparable in speed. Both {\tt BMS} and {\tt BayesVarSelect} are not as fast.
 For the mixture $g$-prior we suspect that the package {\tt BAS} replies on Laplace's method for models
 where direct evaluation of (\ref{eq:hyperGmarginal}) becomes numerically problematic, which would explain
-differences between the {\tt BAS} and {\tt BLMA} packages for the {\tt Kakadu} dataset.
+differences between the {\tt BAS} and {\tt blma} packages for the {\tt Kakadu} dataset.
 %Overall our package {\tt BLMA} offers mixture $g$-priors not offered by {\tt BAS}, is arguably more
 %accurate when $n$ is large, and is of comparable speed. 
 
@@ -1658,7 +1655,7 @@ differences between the {\tt BAS} and {\tt BLMA} packages for the {\tt Kakadu} d
 We have reviewed the prior structures that lead to closed form expressions for Bayes factors for
 linear models. We have described ways that each of these priors, except for the hyper-$g/n$ 
 prior can be evaluated in a numerically stable manner and have implemented a package 
-{\tt BLMA} for performing full exact Bayesian model averaging using
+{\tt blma} for performing full exact Bayesian model averaging using
 this methodology. 
 
 We are currently working on several extensions to this work. Firstly, we are working on a
