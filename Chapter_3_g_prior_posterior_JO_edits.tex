@@ -288,7 +288,7 @@ The choice between (\ref{eq:priorBetaMG}) and the prior for $\vbeta$ in (\ref{eq
 represents a trade-off over computational efficiency and desirable statistical properties. We choose
 (\ref{eq:priorStructure}) because it avoids the computational burden of calculating an eigenvalue or a singular 
 value decomposition of a $p_{\vgamma}\times p_{\vgamma}$ matrix for every model considered,
-which typically costs $O(p_{\vgamma}^3)$. 
+which typically can be computed in $O(p_{\vgamma}^3)$ floating point operations.
 It also means that we can 
 exploit efficient matrix updates to traverse the entire model space in a computationally efficient 
 manner allowing this to be done feasibly when $p$ is less than around 30 on a standard 2017 laptop 
@@ -916,9 +916,11 @@ $$
 Note that (\ref{eq:marginalLikelihoodBetaPrime}) is proportional
 to a special case of the prior structure considered by \cite{Maruyama2011}
 who refer to this as a model selection criterion (after Zellner's $g$ prior). This choice of $b$ also ensures that $g = O(n)$ so that $\mbox{tr}\{\mbox{Var}(\vbeta | g, \sigma^2)\} = O(1)$, preventing Bartlett's paradox. 
-Note that in comparison to previously discussed priors
-marginal likelihood only involves gamma functions which
-are well behaved from a numerical analysis perspective. 
+% Note that in comparison to previously discussed priors
+% marginal likelihood only involves gamma functions which
+% are well behaved from a numerical analysis perspective. 
+Note that in comparison to the priors we have previously discussed, this choice of prior yields a marginal
+likelihood that can be expressed entirely with gamma functions, which are well-behaved numerically.
 \cite{Maruyama2011} showed the prior (\ref{eq:betaPrime}) leads to model
 selection consistency.
 For derivation of the above properties and further discussion see \cite{Maruyama2011}.
@@ -929,9 +931,12 @@ For derivation of the above properties and further discussion see \cite{Maruyama
 \subsection{BIC via cake priors}  
 
 \noindent
-\cite{OrmerodEtal2017} develops cake priors which allow for arbitrarily diffuse priors
-while avoiding Bartlett's paradox leading Bayes factors equal to the exponential of minus half
-the BIC. Cake priors
+% \cite{OrmerodEtal2017} develops cake priors which allow for arbitrarily diffuse priors
+% while avoiding Bartlett's paradox leading Bayes factors equal to the exponential of minus half
+% the BIC.
+\cite{OrmerodEtal2017} developed the cake prior, which allows arbitrarily diffuse priors while avoiding
+Bartlett's paradox.
+Cake priors
 can be thought of as a Jefferys prior in the limit
 as the prior becomes increasingly diffuse
 and enjoy nice theoretical properties including model

@@ -611,7 +611,7 @@ it with $e^t$
 \end{equation}
 \noindent to obtain $a = e^t / 2$, $b = (1 - t) e^t$ and $c = \{1 - t^2/2 - (1 - t) t\} e^t$.
 
-We also addressed the overflow problem by working with the Cholesky factorisation of $\mLambda^{-1}$
+We also addressed the problem of numeric overflow by working with the Cholesky factorisation of $\mLambda^{-1}$
 rather than $\mLambda$, allowing us to solve a system of equations rather than invert and multiply by a
 matrix, which is also faster and more numerically stable. We use knowledge of the regression  model we are
 fitting to specify a sparse matrix structure, greatly reducing the dimension of   the problem and thus

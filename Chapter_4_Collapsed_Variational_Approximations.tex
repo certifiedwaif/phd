@@ -6,7 +6,7 @@
 
 Bayesian model selection is a powerful set of techniques for model selection. These techniques are especially
 useful in problems of high-dimension, such as bioinformatics problems where the model space is complex and the
-optimal model is difficult for statisticians to manually specify. But Bayesian model selection is
+optimal model is difficult for statisticians to manually specify. However, Bayesian model selection is
 computationally expensive, and prone to getting stuck in local minima if the posterior likelihood is multi-
 modal. This issue is particularly acute if the spike-and-slab prior, popular for Bayesian model
 selection, is used. We seek to address both problems by proposing a population non-parametric Variational
@@ -70,7 +70,9 @@ addition or removal of the covariate is skipped and the next candidate model con
 % Particle Variational Bayes
 % Particle Variational Bayes approaches have proved useful in Bayesian nonparametric settings such as Latent
 % Dirichlet Allocation \cite{Teh2007}
-Our variational approximation is a fixed form parametric approximation which places a weight on each covariate
+Our variational approximation of the posterior model likelihood is a weighted sum of the indicators of the
+covariates of the model, where the weights are determined by the relative contribution of each covariate to
+the model fit in all particles in the opulation, balanced against the diversity of the particles.
 \[
 	q(\vgamma) = \sum_{k=1}^K w_k \I(\vgamma_k)
 \]
@@ -502,8 +504,10 @@ When the $q$-densities satisfy (\ref{eq:optimal_q}) the form of the $q$-densitie
 are chosen through  (\ref{eq:optimal_q}) is a nonparametric VB
 approach,
 whereas when $q_k(\vtheta_k)$ is chosen to have a particular parametric form
-this can be viewed as a type of parametric VB. Recently, \cite{Wand2017} considers
-a general framework for combining these methods and shows how a general message passing algorithm can be developed using these ideas.
+this can be viewed as a type of parametric VB.
+% Relevance?
+Recently, \cite{Wand2017} considered
+a general framework for combining these methods and showed how a general message passing algorithm could be developed using these ideas.
 
 %\subsection{Particle Variational Approximation}
 
@@ -603,7 +607,7 @@ $$
 \noindent which is generic to the  prior distribution specification for 
 $p(\alpha,\vbeta,\sigma^2,g|\vgamma)$ and $p(\vgamma)$. 
 Our approach is to collapse over $\alpha$, $\vbeta$, $\sigma^2$, and $g$,
-and then apply a variational approximation over $\vgamma$.
+and then use a variational approximation to the posterior likelihood of the model $\vgamma$.
 This can be done using any combination of the prior specifications
 described in Section \ref{sec:blma}.
 This is conceptually equivalent to the collapsed
@@ -1081,9 +1085,9 @@ where $\vvarepsilon = (\varepsilon_1,\ldots,\varepsilon_n)^\top$ and the $\vvare
 are independently drawn with $\vvarepsilon_i \sim N(0,20)$. Similar simulation
 studies were conducted in \cite{Xu2007} and \cite{Karkkainen2012}. This
 process was repeated $50$ times.
-For this simulation setting VB has the best model selection accuracy,
+For this simulation setting PVA has the best model selection accuracy,
 smallest MSEs and smallest parameter biases of all the methods compared.
-The Lasso, SCAD, MCP, EMVS, VB and BMS methods took 1.5, 1.5, 1.8, 1229, 2011, 5327
+The Lasso, SCAD, MCP, EMVS, PVA and BMS methods took 1.5, 1.5, 1.8, 1229, 2011, 5327
 seconds respectively.
 
 A comparison of the performance of PVA for the hyper-$g$, robust Bayarri, Beta-prime and Cake priors on $g$
@@ -1319,6 +1323,6 @@ ignoring the lower posterior probability models.
 % Interpretation of results
 The same general trends were observed in all small data sets. Total posterior probability is higher for the
 beta- binomial model prior than for the uniform model prior, while the variable inclusion error is lower. This
-same general trend is seen regardless of g-prior. Total posterior probability increases with increased
+same general trend is seen regardless of $g$-prior. Total posterior probability increases with increased
 population size $K$, while variable inclusion error decreases. Although the PVA algorithm is deterministic,
 variation in the results amongst the trials is seen due to the random initialisation of $\mGamma$.
