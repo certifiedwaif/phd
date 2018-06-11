@@ -1,4 +1,4 @@
-\chapter{Zero-inflated models}
+\chapter{Gaussian Variational Approximation of Zero-inflated Generalised Linear Mixed Models}
 
 % \begin{abstract}
 \noindent We consider variational inference for zero--inflated Poisson regression models using a latent
@@ -9,6 +9,8 @@ of the approximate posterior density for the random effects. This parameterisati
 computational cost and numerical stability of previous methods. We demonstrate these approximations on
 simulated and real data sets.
 % \end{abstract}
+
+\newpage
  
 % \noindent Keywords: Approximate Bayesian inference ; mixed model ; Markov chain Monte Carlo ; Stan ; penalized splines.
 
@@ -215,15 +217,12 @@ the zero-inflated model above into a Poisson mixed model likelihood.
 When the indicator $\vr_{ij} = 0$, the likelihood is $1$ for $\vy_{ij} = 0$ and $0$ for all $\vy_{ij} > 0$,
 and when the indicator $\vr_{ij} = 1$, the likelihood is a Poisson mixed model regression likelihood for
 $\vy_{ij}$. $\vr_{ij}$ is a Bernoulli indicator with probability $\rho$, allowing a proportion of zero-
-inflation in the observed data to be specified.
-
-The $j$th predictor/response pair for the $i$th group is denoted by $(\vx_{ij}, \vy_{ij}), 1 \leq j \leq n_i, 1 \leq i \leq m$, where $\vx_{ij} \in \R$, and the $\vy_{ij}$ are nonnegative integers.
-
-For each $1 \leq i \leq m$, define the $n_i \times 1$ vectors $\vy_{ij} = [\vy_{i 1}, \ldots, \vy_{i
-n_i}]^\top$ as the response vector. Vectors $\vy_1, \ldots, \vy_m$ are assumed to be independent of each other.
-
-We develop a zero-inflated regression model incorporating both fixed effects $\vbeta$ and random effects
-$\vu$. The log-likelihood for one observation is then
+inflation in the observed data to be specified. The $j$th predictor/response pair for the $i$th group is
+denoted by $(\vx_{ij}, \vy_{ij}), 1 \leq j \leq n_i, 1 \leq i \leq m$, where $\vx_{ij} \in \R$, and the
+$\vy_{ij}$ are nonnegative integers. For each $1 \leq i \leq m$, define the $n_i \times 1$ vectors $\vy_{ij} =
+[\vy_{i 1}, \ldots, \vy_{i n_i}]^\top$ as the response vector. Vectors $\vy_1, \ldots, \vy_m$ are assumed to
+be independent of each other.  We develop a zero-inflated regression model incorporating both fixed effects
+$\vbeta$ and random effects $\vu$. The log-likelihood for one observation is then
 
 $$
 	\begin{array}{rl}
@@ -233,7 +232,8 @@ $$
 	\end{array}
 $$
 
-\noindent We now extend this to multiple observations. Let $\mC = [\mX, \mZ]$ and $\vnu = [\vbeta^\top, \vu^\top]^\top$. The multivariate model with multiple observations is then
+\noindent We now extend this to multiple dimensional random effects. Let $\mC = [\mX, \mZ]$ and
+$\vnu = \left[ \vbeta^\top, \vu^\top \right]^\top$. The multivariate model with multiple observations is then
 $$
 %\label{eq:main}
 	\begin{array}{rl}
@@ -274,10 +274,10 @@ random slopes and $\rho_{\vu_1 \vu_2}$ is the correlation between the random int
 % which is different for the random intercept, slope and spline cases?}
 % \joc{(Perhaps it is wroth spelling out all of the various random effects structures that we will be using. Consider templating from Zhao \etal (2006).))}
 
-In the spline case, we use the cubic spline basis $1$, $x$, $x^3$, $(x - \kappa_1)^3_+$, \ldots, $(x -
-\kappa_K)^3_+$, where $K$ is the number of knots. $\mSigma$ is a $K + 2$ banded matrix, where $K$ is the
+In the spline case, we use the cubic spline basis $1$, $x$, $x^2$, $x^3$, $(x - \kappa_1)^3_+$, \ldots, $(x -
+\kappa_K)^3_+$, where $K$ is the number of knots. Here $\mSigma$ is a $K + 2$ banded matrix, where $K$ is the
 number of knots. Banded matrices are highly sparse, and matrix operations can be performed on them in
-$\BigO(n)$ time. The matrix $\mSigma$ is symmetric, with contents
+$\BigO(K)$ time. The matrix $\mSigma$ is symmetric, with contents
 \[
 	\mSigma =
 	\begin{pmatrix}
@@ -306,7 +306,7 @@ $q(\sigma_{\vu}^2) = \text{Inverse Wishart}\left(\mPsi + \sum_{i=1}^m (\vmu_i \v
 $q(r_i) = \text{Bernoulli}{(p_i)}$ with
 $$p_i = 
 \begin{cases}
-\text{expit}\left\{ \psi{(\alpha_{q(\rho)})} - \psi{(\beta_{q(\rho)})} - \exp{(c_i^\top\vmu + \frac{1}{2} c_i^\top \mLambda c_i)} \right\},& \text{ when } \vy_i = 0\\
+\text{expit}\left\{ \psi{(\alpha_{q(\rho)})} - \psi{(\beta_{q(\rho)})} - \exp{(c_i^\top\vmu + \frac{1}{2} c_i^\top \mLambda c_i)} \right\},& \text{ when } \vy_i = 0\text{ ; and}\\
 1,& \text{ otherwise.}
 \end{cases}$$
 
@@ -369,7 +369,7 @@ enhance their numerical stability.
 \subsection{Laplace-Variational Approximation}
 The Laplace-Variational Approximation method is based on Laplace's method of approximating integrals, as
 introduced in Section \ref{sec:laplace_approximation}. The variational lower bound  is approximated by a
-Gaussian centred at its' mode.
+Gaussian centred at its mode.
 
 % Laplace's method of
 % approximation uses the second order Taylor expansion of the full log likelihood of the  model around the
@@ -578,7 +578,7 @@ Cholesky factor  $\mLambda = \mR^\top \mR$. We optimise over the space $(\vmu, \
 	\end{cases}
 \end{equation*}
 		
-\noindent exponentiating the diagonal to ensure positive-definiteness of $\mR$. We parameterise $\mLambda$
+\noindent We exponentiate the diagonal to ensure positive-definiteness of $\mR$. We parameterise $\mLambda$
 as $\mLambda = \mR \mR^\top$ so that is is guaranteed to be symmetric, and we only have $p(p-1)/2$ 
 parameters to deal with instead of $p^2$ parameters, some of which are constrained. 
 
@@ -621,9 +621,9 @@ improving both computational speed and numeric accuracy.
 % observe that by re-ordering the fixed and random effects in $\mLambda$ so that the , we arrive at a covariance structure which is sparse in the first diagonal block. Thus the Cholesky factor of $\mLambda$ that we optimise over is as sparse as possible. This reduces the dimension of the optimisation problem we have to solve from
 % $\BigO(np^2)$ to $\BigO(np)$.
 	
-Any symmetric matrix $\mLambda$ can be written as a product of its' Cholesky factors, $\mLambda = \mR
-\mR^\top$ where $\mR$ is lower triangular. $\mR$ is unique if $\mR_{ii}
-\geq 0$.
+Any symmetric matrix $\mLambda$ can be written as a product of its Cholesky factors, $\mLambda = \mR
+\mR^\top$ where $\mR$ is lower triangular. The matrix $\mR$ is unique if $\mR_{ii}
+\geq 0$ and
 \begin{equation*}
 \label{eq:cholesky_factorisation}
 \begin{array}{lll}
@@ -646,7 +646,7 @@ Any symmetric matrix $\mLambda$ can be written as a product of its' Cholesky fac
 \end{array}
 \end{equation*}
 
-\noindent We exploit this structure. By interchanging the fixed and random effects in the design matrix $\mC = [\mX \mZ]$ to $\mC = [\mZ \mX]$, and re-ordering the dimensions of $\vmu, \mLambda$ and $\mSigma$ in the same manner, the independence between the
+\noindent We exploit this structure. By interchanging the fixed and random effects in the design matrix $\mC = [\mX, \mZ]$ to $\mC = [\mZ, \mX]$, and re-ordering the dimensions of $\vmu, \mLambda$ and $\mSigma$ in the same manner, the independence between the
 blocks relating to the random effects in $\mZ$ induce sparsity in the Cholesky factor $\mR$ of
 $\mLambda^{-1}$, as can be seen in Figures \ref{fig:covfixedrandom} and
 \ref{fig:cholfixedrandom}. Thus the Gaussian $q(\vnu) \sim \N(\vmu, \mLambda)$ can be optimised over a space of dimension $\frac{1}{2} p (p + 1) + pq + \frac{1}{2} q (q + 1)$ rather than dimension
@@ -698,7 +698,7 @@ The implementation of these algorithms was not without its' challenges, chiefly 
 	
 The main computational cost is the evaluation of the variational lower bound and its' derivatives. By
 virtue of their dimension, the expressions involving $\mLambda$ dominate the computational cost. The key
-term is $\frac{1}{2} \diag(\mC \mLambda \mC^\top)$. This can be naively calculate by ignoring the
+term is $\frac{1}{2} \diag(\mC \mLambda \mC^\top)$. This can be n\"aively calculate by ignoring the
 symmetry in the expression and simply calculating the product $\mC \mLambda \mC^\top$, taking $2 n
 \times (p + m b)^2$ floating point operations, and retaining the diagonal entries of the result. This is
 obviously wasteful, as the off--diagonal entries of the resulting product that has just been computed
@@ -711,7 +711,7 @@ By parameterising $\mLambda$ in terms of its' Cholesky factors and realising tha
 	
 \noindent and that
 \begin{equation*}
-	\diag(\mC \mLambda \mC^\top)_{ii} = \mC_{i .} \mR \mR^\top \mC_{i .}^\top, 1 \leq i \leq n
+	\diag(\mC \mLambda \mC^\top)_{ii} = \mC_{i .} \mR \mR^\top \mC_{i .}^\top,\quad1 \leq i \leq n
 \end{equation*}
 	
 \noindent we can calculate the products $\mC_{i .} \mR, 1 \leq i \leq n$, using $n \times \frac{1}{2}(p + m
@@ -809,7 +809,7 @@ parameterising in terms of the covariance matrix.
 		
 The accuracy of each model fitting algorithms presented in Section \ref{sec:gaussian} was assessed by
 comparing the approximating distribution of each parameter with the posterior distribution of Monte Carlo
-Markov Chain samples of that parameter. 1 million Monte Carlo Markov Chain samples were generated using
+Markov Chain samples of that parameter. One million Monte Carlo Markov Chain samples were generated using
 \texttt{RStan}, as described in \cite{Carpenter2016} and \cite{StanDevelopmentTeam2016}. The accuracy of
 examples of random intercept, random slope and spline models were evaluated using this method.
 		
@@ -1017,8 +1017,8 @@ are accurately estimated.
 \end{figure}
 
 \section{Application}
-We now present numerical results for the application of our model fitting algorithms to several real-world
-data sets.
+We now present numerical results for the application of our model fitting algorithms to several publically
+available data sets.
 
 \label{sec:application}
 
