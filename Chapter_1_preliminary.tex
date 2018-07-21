@@ -7,16 +7,16 @@ collected. With technological progress marching on, this trend seems only set to
 the future, ever more data will be able to be stored, and so more data will be stored \citep{Gandomi2015}. But
 this data is only of value if it can be analysed and understood.
 
-This incredible increase in the volume of data has introdcued new computational difficulties in processing and
-modelling such large amounts of data, so-called Big Data, which is so large that it is difficult to process on
+This incredible increase in the volume of data has introduced new computational difficulties in processing and
+modelling such large amounts of data, so-called \emph{Big Data}, which is so large that it is difficult to process on
 one computer. This data raises new challenges which modern statisticians must be ready to meet. Approaches to
 modelling data are needed which can handle large volumes of data in a computationally efficient manner while
 retaining the probabilistic underpinning of classical statistics and statistical machine learning, providing a
 rigorous underlying theory for inference. This realisation has created an explosion of interest in data
 science, incorporating ideas from both statistics and computer science in recent years. Machine learning
 problems are being tackled with algorithms which use probability models for the data -- motivating the
-development of the new field of statistical learning which combines many of the best elements of Statistics
-and Machine Learning \citep{James:2014:ISL:2517747, MacKay:2002:ITI:971143, hastie01statisticallearning,
+development of the new field of statistical learning which combines many of the best elements of statistics
+and machine learning \citep{James:2014:ISL:2517747, MacKay:2002:ITI:971143, hastie01statisticallearning,
 Murphy:2012:MLP:2380985}.
 
 \section{Choosing an inferential paradigm}
@@ -167,17 +167,17 @@ function may change curvature, which we refer to as \emph{knots}.
 There are many families of basis functions which can be conveniently used for function approximation,
 including orthogonal polynomials. The B-spline basis \citep{DeBoor1972} is numerically stable and efficient to
 computationally evaluate. A B-Spline is a piecewise polynomial function of degree $< n$ in a variable $x$. It
-is defined over a domain $t_0 \leq x \leq t_m, m=n$. The points where $x = t_j$ are known as knots or break-
-points. The number of internal knots is equal to the degree of the polynomial if there are no knot
-multiplicities. The knots must be in ascending order. The number of knots is the minimum for the degree of the
-B-spline, which has a non-zero value in the range between the first and last knot. Each piece of the function
-is a polynomial of degree $< n$ between and including adjacent knots. A B-Spline is a continuous function at
-the knots. When all internal knots are distinct its derivatives are also continuous up to the derivative of
-degree $n - 1$. If internal knots are coincident at a given value of x, the continuity of derivative order is
-reduced by 1 for each additional knot.
+is defined over a domain $\kappa_0 \leq x \leq \kappa_m, m=n$. The points where $x = \kappa_j$ are known as
+knots or break- points. The number of internal knots is equal to the degree of the polynomial if there are no
+knot multiplicities. The knots must be in ascending order. The number of knots is the minimum for the degree
+of the B-spline, which has a non-zero value in the range between the first and last knot. Each piece of the
+function is a polynomial of degree $< n$ between and including adjacent knots. A B-Spline is continuous
+at its' knots. When all internal knots are distinct its derivatives are also continuous up to the
+derivative of degree $n - 1$. If internal knots are coincident at a given value of x, the continuity of
+derivative order is reduced by 1 for each additional knot.
 
 For any given set of knots, the B-spline for approximating a given function is a unique linear combination of
-B-spline basis functions with the basis functions is recursively defined in terms of divided differences as
+basis functions recursively defined as
 $$
 \begin{array}{rl}
 	B_{i, 0}(x) & := \begin{cases}                                                                                                        
@@ -231,8 +231,11 @@ O'Sullivan introduced a class of penalised splines based on the B-spline basis f
 the cubic B-spline basis functions defined by the knots $\kappa_1$ to $\kappa_{K+4}$. O'Sullivan splines are
 penalised splines which are penalised using a penalty matrix. Let $\mOmega$ be the $(K+4) \times (K+4)$ matrix
 where the $(k, k')-th$ element is \[   \mOmega_{k k'} = \int_a^b B''_k(x) B''_{k'}(x) dx. \] Then the
-O'Sullivan spline estimate of the true function $f$ at the point $x$ is $\widehat{f}_O(x; \lambda) = \mB_x
-\widehat{\vnu}_O$, where $\widehat{\vnu}_O = (\mB^\top \mB + \lambda \mOmega)^{-1} \mB^\top \vy$, as shown in
+O'Sullivan spline estimate of the true function $f$ at the point $x$ is
+\begin{equation*}
+\widehat{f}_O(x; \lambda) = \mB_x \widehat{\vnu}_O,
+\end{equation*}
+where $\widehat{\vnu}_O = (\mB^\top \mB + \lambda \mOmega)^{-1} \mB^\top \vy$, as shown in
 \cite{ruppert_wand_carroll_2003}.
 
 The matrix $\mOmega$ is defined in this way to penalise oscillation, which is measured by the second
@@ -254,7 +257,7 @@ comprehensive overview.
 The problem of model selection for normal linear models is particularly well studied, owing to the popularity
 and importance of normal linear models in applications. While new types of model are continually being
 developed, linear models with normal priors remain a popular and essential modelling tool owing to the ease of
-fitting these models, statistical inference on the parameters and, most importantly, the ease which which
+fitting these models, statistical inference on the parameters and, most importantly, the ease which
 these models can be interpreted. But for a data set with a moderate or large number of parameters, the
 question is immediately raised of which covariates we should include in our model. One of the problems that we
 address in this thesis is \emph{variable selection} on linear models with normal priors.
@@ -275,12 +278,6 @@ attempt to search the model space more efficiently but still find an optimal or 
 reasonable period of time. A major motivation for this field of research is the need for a computationally
 feasible approach to performing model selection on large scale problems where the number of covariates is
 large.
-
-As shown by \cite{Breiman1996} and \cite{Efron2013}, while the standard formulation of a linear model is
-unbiased, the goodness of fit of these models is numerically  unstable. Breiman showed that by introducing a
-penalty on the size of the regression coefficients such as  in ridge regression or the lasso, this numerical
-instability can be avoided. This reduces the variances of the coefficient estimates, at the expense of
-introducing some bias -- an example of the bias-variance trade-off.
 
 % Non-Bayesian
 \subsection{Frequentist approaches to model selection}
@@ -303,7 +300,7 @@ Information criteria are frequently used to compare amongst models. Letting $\vg
 Information Criteria take the form ``negative twice times the log-likelihood plus a term penalising for complexity of
 the mode''
 $$
-	\text{Information Criteria} = -2 \log p(\vy | \widehat{\vtheta}_\vgamma) + \text{complexity penalty}
+	\text{Information Criteria} = -2 \log p(\vy | \widehat{\vtheta}_\vgamma) + \text{complexity penalty},
 $$
 
 \noindent where $\widehat{\vtheta_\gamma}$ is the maximum likelihood estimate of the model parameters
@@ -362,9 +359,12 @@ regression coefficients is the Euclidean norm of the regression coefficients. Th
 estimated coefficients towards zero, ensuring sparsity of the fitted model. The ridge regression coefficients
 can thus be estimated by solving the constrained optimisation problem
 $$
-\widehat{\vbeta}_{\text{lasso}} = \argmin_\vbeta \|\vy - \mX \vbeta\|_2^2 \text{ subject to } \|\vbeta\|_2 \leq \lambda
+\widehat{\vbeta}_{\text{ridge}} = \argmin_\vbeta \|\vy - \mX \vbeta\|_2^2 \text{ subject to } \|\vbeta\|_2 \leq \lambda
 $$
-where $\lambda$ is a pre-specified free parameter specifying the amount of regulation.
+where $\lambda$ is a pre-specified free parameter specifying the amount of regulation. This constrained
+optimisation problem can be transformed by the method of Lagrange multipliers into the sum of the
+residual sum of squares and the product of the Lagrange multiplier and the constraint, which acts as a
+penalty on the Euclidean norm of the regression coefficients.
 
 % Both functions are quadratic in \vbeta
 
@@ -376,11 +376,15 @@ The lasso regression coefficients can be estimated by solving the constrained op
 $$
 \widehat{\vbeta}_{\text{lasso}} = \argmin_\vbeta \|\vy - \mX \vbeta\|_2^2 \text{ subject to } \|\vbeta\|_1 \leq \lambda,
 $$
-where $\lambda$ is a pre-specified free parameter specifying the amount of regulation.  It follows from
-Minkowski's inequality that the function above is convex, and thus the optimisation problem is convex, and can
-be solved using standard methods from convex optimisation \citep{Boyd2010}.  The constraint on the $l_1$ norm
-has the effect of shrinking the coefficients, and setting some of them to zero. This forces the models fit by
-lasso regression to be sparse, providing model selection as part of the model-fitting process.
+where $\lambda$ is a pre-specified free parameter specifying the amount of regulation. Similiarly to the
+constrained optimisation problem for ridge regression, the constrained optimisation problem can be transformed
+by the method of Lagrange multipliers into the sum of the residual sum of squares and the product of the
+Lagrange multiplier and the constraint, which acts as a penalty on the $l_1$ norm of the regression
+coefficients. It follows from Minkowski's inequality that the function above is convex, and thus the
+optimisation problem is convex, and can be solved using standard methods from convex optimisation
+\citep{Boyd2010}.  The constraint on the $l_1$ norm has the effect of shrinking the coefficients, and setting
+some of them to zero. This forces the models fit by lasso regression to be sparse, providing model selection
+as part of the model-fitting process.
 
 A disadvantage of lasso regression are that the constraint on the regression coefficients depends on the free
 tuning parameter which must be selected a priori or through cross-validation. But a much greater issue is that
@@ -400,7 +404,7 @@ covariates, rather than entire models. Variable selection approaches search over
 variables in the model space for the best covariates to include in the candidate model. Due to the large
 number of possible combinations of covariates -- typically $2^p$ where $p$ is the number of covariates, such
 searches are often stochastic. This approach can either be Fully Bayesian or Empirically Bayesian 
-\cite{Cui2008}.  This search can be driven by posterior probabilities,  \cite{Casella2006}, or by Gibbs
+\citep{Cui2008}.  This search can be driven by posterior probabilities,  \cite{Casella2006}, or by Gibbs
 sampling approaches such  \cite{George1993}. These two approaches of model selection and variable
 selection can be combined,  \cite{Geweke1996}. Variable selection can also be accomplished by selecting
 the median probability model, consisting of those models whose posterior inclusion probability is at least
@@ -606,7 +610,7 @@ Consider an exponential integral of the form
 $$
 	\int_a^b e^{M f(x)} dx
 $$
-\noindent where $f(x)$ is twice differentiable and $f''(x_0) < 0$, $M \in \R$ and $a, b \in \R \cup \{-\infty,
+\noindent where $f(x)$ is twice differentiable and $f''(x_m) < 0$, $M \in \R$ and $a, b \in \R \cup \{-\infty,
 \infty\}$. Let $f(x)$ have a unique mode at $x_m$. Then, Taylor expanding about $x_m$, we have
 $$
 	f(x) = f(x_m) + f'(x_m) (x - x_m) + \frac{1}{2} f''(x_m) (x - x_m)^2 + \BigO\left((x - x_m)^3\right).
@@ -640,8 +644,8 @@ $$
 \log f(\vtheta) \approx f(\vtheta_m) + (\vtheta - \vtheta_m)^\top \nabla \log f(\vtheta_m) + \tfrac{1}{2} (\vtheta - \vtheta_m)^\top \mH_{\log f}(\vtheta_m) (\vtheta - \vtheta_m) + \BigO(\|\vtheta - \vtheta_m\|^3).
 $$
 where $\nabla \log f(\vtheta_m)$ is the gradient of the log-likelihood at $\vtheta_m$ and $\mH_{\log
-f}(\vtheta_m)$ is the Hessian matrix of the log-likelihood at $\vtheta_m$. Assuming that $\vtheta$ is a
-stationary point of $\log f$, then $\nabla f(\vtheta) = \vzero$ and so
+f}(\vtheta_m)$ is the Hessian matrix of the log-likelihood at $\vtheta_m$. Assuming that $\vtheta_m$ is a
+stationary point of $\log f$, then $\nabla f(\vtheta_m) = \vzero$ and so
 $$
 \log f(\vtheta) \approx f(\vtheta_m) + \frac{1}{2} (\vtheta - \vtheta_m)^\top \mH_{\log f}(\vtheta_m) (\vtheta - \vtheta_m) + \BigO(\|\vtheta - \vtheta_m\|^3)
 $$
@@ -691,29 +695,32 @@ of adapting the degree of shrinkage to the prior model dependent on the data.
 
 In this section, we briefly outline the major contributions in this thesis.
 
-Generalised linear mixed models are an appealing way to model data, as they are flexible enough to model a
-range of data types and situations. But the Bayesian versions of these models typically required 
-computationally demanding MCMC, which can also be prone to convergence problems. Instead, we consider approximate Bayesian inference tecniques, which are computationally efficient and deterministic. It is
+\begin{itemize}
+\item Generalised linear mixed models are an appealing way to model data, as they are flexible enough to model a
+range of data types and situations. But the Bayesian versions of these models typically require
+computationally demanding MCMC, which can also be prone to convergence problems. Instead, we consider approximate Bayesian inference techniques, which are computationally efficient and deterministic.
+\item It is
 desirable to use normal priors for the regression coefficients of these models, as these are easily
 interpreted. But for Generalised Linear Mixed Models with a non-normal response, these priors are
 non-conjugate, making VB difficult to apply as the required mean field updates are intractable. We apply
 Gaussian Variational Bayes -- an extension to Variational Bayes, to fit a multivariate normal distribution
 to the regression coefficients of our models.
-In our second chapter, we present a Gaussian Variational Approximation to a Zero-Inflated Poisson mixed model
-which can flexibly incorporate both fixed and random effects. This allows it to fit complicated models
-to the data incorporating random intercepts and slopes and additive models using O'Sullivan-penalised splines.
-The model is fit by optimising the conditional likelihood of the Gaussian component of the model given the
-parameters governing zero-inflation and the covariance matrix $\mSigma$.
-We present a new parameterisation for the covariance matrix of the Gaussian based on the Cholesky
+\item In our second chapter, we present a Gaussian Variational Approximation to a Zero-Inflated Poisson mixed
+model which can flexibly incorporate both fixed and random effects. This allows us to use our model fitting
+algorithm to fit complicated models to the data incorporating random intercepts and
+slopes and additive models using O'Sullivan-penalised splines.  The model is fit by optimising
+the conditional likelihood of the Gaussian component of the model given the parameters
+governing zero-inflation and the covariance matrix $\mSigma$.
+\item We present a new parameterisation for the covariance matrix of the Gaussian based on the Cholesky
 factorisation of the precision matrix, and detail computation and numerical advantages of this
 factorisation, owing to its sparsity when the form of the covariance matrix of the Gaussian is known due to
 knowledge of the random effects in the model.
 
 % \item Exact inference for some regression parameters for regression model with Maruyama and George prior on $g$.
 
-A popular choice of Bayesian model selection is to use regression models with $g$-priors. For the Maruyama
-and George Beta Prime prior \citep{Maruyama2011} we were able to derive closed form expressions for the
-posterior distributions of most of the parameters of the model in terms of the hypergeometric function.
+\item A popular choice of Bayesian model selection is to use regression models with $g$-priors. For the Beta
+Prime prior \citep{Maruyama2011} we were able to derive closed form expressions for the posterior
+distributions of most of the parameters of the model in terms of the hypergeometric function.
 
 % \item Exact moments for $\vbeta$ for the regression model with the Maruyama and George prior.
 
@@ -725,27 +732,30 @@ posterior distributions of most of the parameters of the model in terms of the h
 
 % \item Posterior distribution of $g$ for different g-priors - Liang's hyper-$g$ prior, Liang's hyper-$g/n$ prior,
 % Bayarri's robust $g$ prior and the Maruyama and George Beta-Prime prior.
-An important consideration in model selection is being able to compare models against one another. Calculation
-of the Bayes Factors for comparing models requires being able to compute the posterior distribution of $g$. In
-our third chapter, we derive closed form expressions in terms of special functions for the posterior
-distributions of $g$ for a number of choices of $g$ prior from the literature: Liang's hyper-$g$ prior,
-Liang's hyper-$g/n$ prior \citep{Liang2008}, Bayarri's robust $g$ prior \citep{Bayarri2012} and the  Maruyama
-and George Beta-Prime \citep{Maruyama2011} prior.
+
+\item An important consideration in model selection is being able to compare models against one another.
+Calculation of the Bayes Factors for comparing models requires being able to compute the posterior
+distribution of $g$. In our third chapter, we derive closed form expressions in terms of special functions for
+the posterior distributions of $g$ for a number of choices of $g$ prior from the literature: Liang's hyper-$g$
+prior, Liang's hyper-$g/n$ prior \citep{Liang2008}, Bayarri's robust $g$ prior \citep{Bayarri2012} and the
+Beta-Prime \citep{Maruyama2011} prior.
 
 % \item CVA
-Exact inference for model selection for linear models with normal priors is computationally feasible when the
-number of  covariates is small, with $p$ below 40. But exhaustively exploring the search space is not
-efficient, and often not computationally feasible for a larger number of covariates. In this situation, we
-adopt a population- based technique inspired by Rockova's work on population-based EM to efficiently explore
-the posterior model space. Instead, approximate methods can be used to search the parts of the model space for
-which the posterior model likelihood is the highest. In our fourth chapter, propose a population-based
-algorithm, which works by adding or removing a covariate at a time to each of the fitted models in the
-population. We implement this algorithm for a number of model selection priors from the literature: the
-Liang's hyper-$g$ prior, the Liang's hyper-$g/n$ prior \citep{Liang2008}, Bayarri's robust $g$ prior
-\citep{Bayarri2012} and the  Maruyama and George Beta-Prime \citep{Maruyama2011} prior.
 
-We are able to implement this algorithm efficiently by using rank-one updates and downdates and the closed
+\item Exact inference for model selection for linear models with normal priors is computationally feasible
+when the number of  covariates is small, with $p$ below 40. But exhaustively exploring the search space is not
+efficient, and often not computationally feasible for a larger number of covariates. To deal with this
+situation, in our fourth chapter, we adopt a population- based technique inspired by Rockova's work on
+population-based EM to efficiently explore the posterior model space. Instead, approximate methods can be used
+to search the parts of the model space for which the posterior model likelihood is the highest. In our fourth
+chapter, propose a population-based algorithm, which works by adding or removing a covariate at a time to each
+of the fitted models in the population. We implement this algorithm for a number of model selection priors
+from the literature: the Liang's hyper-$g$ prior, the Liang's hyper-$g/n$ prior \citep{Liang2008}, Bayarri's
+robust $g$ prior \citep{Bayarri2012} and the  Maruyama and George Beta-Prime \citep{Maruyama2011} prior.
+
+
+\item We are able to implement this algorithm efficiently by using rank-one updates and downdates and the closed
 forms of the posteriors for the model selection priors that we consider. The population-based approach allows
 us to estimate the uncertainty in the model selection process.
 
-% \end{itemize}
+\end{itemize}
