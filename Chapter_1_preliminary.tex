@@ -5,8 +5,9 @@
 
 The advent of digital computers and the internet have lead to an explosion in
 the volume of data being collected. With technological progress marching on,
-this trend seems only set to continue and accelerate. In the future, ever more
-data will be able to be stored, and so more data will be stored
+this trend seems only set to continue and accelerate. In the future, as
+technology continues to advance more data will be able to be stored and
+processed, and so this trend of increasing volumes of data is set to continue
 \citep{Gandomi2015}. But this data is only of value if it can be analysed and
 understood.
 
@@ -37,11 +38,10 @@ probability as our reasonable expectation about an event, representing our state
 of knowledge about the event.
 
 There are many practical reasons to choose Bayesian approaches to modelling
-data. It is flexible in modelling statistical complications. Complicated models
-can be built by chaining together multiple levels of simple models. These models
-can then be fit to data by calculating the posterior probability of the
-parameters using Bayes' Theorem,
-
+data. It is flexible in modelling statistical complications, such as missing or
+hierarchical data, and complicated models can be built by chaining together
+multiple levels of simple models. These models can then be fit to data by
+calculating the posterior probability of the parameters using Bayes' Theorem,
 \[
 	p(\vtheta | \vy) = \frac{p(\vy | \vtheta) p(\vtheta)}{\int p(\vy | \vtheta) p(\vtheta) d \vtheta}
 \]
@@ -300,9 +300,9 @@ $\widehat{\vnu}_O = (\mB^\top \mB + \lambda \mOmega)^{-1} \mB^\top \vy$, as
 shown in \cite{ruppert_wand_carroll_2003}.
 
 The matrix $\mOmega$ is defined in this way to penalise oscillation, which is
-measured by the second derivative. The penalty differs from P-splines in that
-the P-spline penalty matrix is $\mD_2^\top \mD_2$ where $\mD_2$ is the
-second-order differencing matrix.
+measured by the second derivative. This penalty differs from the penalty for
+``penalised B-Splines'' or P-splines in that the P-spline penalty matrix is
+$\mD_2^\top \mD_2$ where $\mD_2$ is the second-order differencing matrix.
 
 \section{Variable selection}
 
@@ -494,13 +494,13 @@ $\lambda$, as Bayesian model selection methods do.
 
 \subsection{Bayesian Approaches to Model Selection}
 
-Parallel to the frequentist approaches, model selection can be performed using a
-Bayesian approach by using Bayes factors to compare the posterior likelihoods of
-the candidate models to see which is most probable given the observed data. This
-can be done, for example, by using Bayes Factors \citep{Kass1993}. Rather than
-selecting one candidate model, several models can be combined together using
-Bayesian model  averaging, \citep{Hoeting1999}, \citep{Raftery1997},
-\citep{Fernandez2001} or \citep{Papaspiliopoulos2016}.
+Parallel to the frequentist approaches, model selection can be performed using
+a Bayesian approach by using Bayes factors to compare the posterior likelihoods
+of the candidate models to see which is most probable given the observed data.
+This can be done, for example, by using Bayes Factors \citep{Kass1993}. Rather
+than selecting one candidate model, several models can be combined together
+using Bayesian model  averaging, \citep{Hoeting1999, Raftery1997,
+Fernandez2001, Papaspiliopoulos2016}.
 
 \subsubsection{Variable selection}
 
@@ -930,7 +930,7 @@ with this situation, in our fourth chapter, we adopt a population- based
 technique inspired by Rockova's work on population-based EM to efficiently
 explore the posterior model space. Instead, approximate methods can be used to
 search the parts of the model space for which the posterior model likelihood is
-the highest. In our fourth chapter, propose a population-based algorithm, which
+the highest. In our fourth chapter, we propose a population-based algorithm, which
 works by adding or removing a covariate at a time to each of the fitted models
 in the population. We implement this algorithm for a number of model selection
 priors from the literature: the Liang's hyper-$g$ prior, the Liang's hyper-$g/n$

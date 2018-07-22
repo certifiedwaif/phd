@@ -25,6 +25,7 @@
 %\setlength\parindent{0pt}
 %\setlength{\parskip}{1em}
 
+\usepackage{float}
 \usepackage[authoryear]{natbib}
 \usepackage[doublespacing]{setspace}
 \usepackage{graphicx}
@@ -43,7 +44,6 @@
 \usepackage{url}
 %\usepackage[all]{xy}
 \usepackage{cancel}
-
 \usepackage{graphicx,rotating,booktabs}
 
 \title{Numerically Stable Approximate Bayesian Methods
@@ -72,10 +72,8 @@
 %\let\@afterindentfalse\@afterindenttrue
 %\@afterindenttrue
  
-%\titlespacing\section{0pt}{12pt plus 4pt minus 2pt}{2pt plus 2pt minus 2pt}
-%\titlespacing\subsection{0pt}{12pt plus 4pt minus 2pt}{2pt plus 2pt minus 2pt}
-
- 
+\titlespacing\section{0pt}{12pt plus 4pt minus 2pt}{2pt plus 2pt minus 2pt}
+\titlespacing\subsection{0pt}{12pt plus 4pt minus 2pt}{2pt plus 2pt minus 2pt}
 \renewcommand{\baselinestretch}{1.6}
 
 
@@ -172,7 +170,6 @@ covariates.
 \include{Chapter_1_preliminary}
 
 \include{Chapter_2_zero_inflated_models}
-\include{appendix_1}
 % % \include{Chapter_2_zero_inflated_models_formula_sheet}
 \include{Chapter_3_g_prior_posterior_JO_edits}
 \include{Chapter_4_Collapsed_Variational_Approximations}
@@ -181,6 +178,7 @@ covariates.
 
 \backmatter
 \appendix
+\include{appendix_1}
 
 \bibliographystyle{elsarticle-harv}
 \bibliography{references_mendeley}

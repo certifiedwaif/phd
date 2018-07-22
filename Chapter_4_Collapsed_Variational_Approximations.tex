@@ -458,56 +458,57 @@ median posterior model  is obtained by
 rounding $\bE(\vgamma|\vy)$ to the nearest integer and has desirable
 optimality properties \citep{Barbieri2004}.
  
-\section{Variational approximation}
-\label{sec:vb}
+% Why is this here?
+% \section{Variational approximation}
+% \label{sec:vb}
 
-Variational approximation is now a relatively commonly used technique used in Statistics
-and Machine Learning. 
-Variational approximation is a general set of techniques where a problem is 
-augmented via the introduction of extra degrees of freedom known as {\it variational parameters}
-in such a way that the augmented problem has a closed form solution. Once such a closed form is found, optimizing the augmented
-problem over the variational parameters leads to an approximate solution to the original problem. 
-While these techniques can be applied in frequentist settings 
-\citep{Ormerod2012}, they are typically used in Bayesian inference as fast, albeit approximate,
-alternatives to MCMC. Relatively accessible material to this area can be found in
-\cite{Bishop2006}, \cite{Ormerod2010}, and \cite{Grimmer2011}. For a recent
-review in the area see \cite{BleiEtal2017}.
+% Variational approximation is now a relatively commonly used technique used in Statistics
+% and Machine Learning. 
+% Variational approximation is a general set of techniques where a problem is 
+% augmented via the introduction of extra degrees of freedom known as {\it variational parameters}
+% in such a way that the augmented problem has a closed form solution. Once such a closed form is found, optimizing the augmented
+% problem over the variational parameters leads to an approximate solution to the original problem. 
+% While these techniques can be applied in frequentist settings 
+% \citep{Ormerod2012}, they are typically used in Bayesian inference as fast, albeit approximate,
+% alternatives to MCMC. Relatively accessible material to this area can be found in
+% \cite{Bishop2006}, \cite{Ormerod2010}, and \cite{Grimmer2011}. For a recent
+% review in the area see \cite{BleiEtal2017}.
 
-Mean field variational Bayes or simply variational Bayes (VB) is a particular 
-varational approximation based on minimizing the Kullback-Leibler distance between the true posterior distribution and a factorized approximation to the posterior. If we let $\vtheta$ be the set of all model parameters and $\vy$ be a vector of observed data then $p(\vtheta|\vy)$ is approximated by $q(\vtheta) = \prod_{k=1}^K q_k(\vtheta_k)$ where $(\vtheta_1,\ldots,\vtheta_K)$ is a partition of $\vtheta$. It can	be shown that the 
-$q_k$ densities, called $q$-densities, which mimimize the Kullback-Leibler divergence between $p(\vtheta|\vy)$ and $q(\vtheta)$ satisfy
-\begin{equation}\label{eq:optimal_q}
-\ds q_k(\vtheta_k) \propto \exp[ \bE_{-q_k(\vtheta_k)} \{ \log p(\vy,\vtheta) \}], \qquad 1\le k\le K,
-\end{equation}
+% Mean field variational Bayes or simply variational Bayes (VB) is a particular 
+% varational approximation based on minimizing the Kullback-Leibler distance between the true posterior distribution and a factorized approximation to the posterior. If we let $\vtheta$ be the set of all model parameters and $\vy$ be a vector of observed data then $p(\vtheta|\vy)$ is approximated by $q(\vtheta) = \prod_{k=1}^K q_k(\vtheta_k)$ where $(\vtheta_1,\ldots,\vtheta_K)$ is a partition of $\vtheta$. It can	be shown that the 
+% $q_k$ densities, called $q$-densities, which mimimize the Kullback-Leibler divergence between $p(\vtheta|\vy)$ and $q(\vtheta)$ satisfy
+% \begin{equation}\label{eq:optimal_q}
+% \ds q_k(\vtheta_k) \propto \exp[ \bE_{-q_k(\vtheta_k)} \{ \log p(\vy,\vtheta) \}], \qquad 1\le k\le K,
+% \end{equation}
 
-\noindent where
-$\bE_{-q_k(\vtheta_k)}$ is the expectation with respect to all densities except $q_k(\vtheta_k)$. For any fixed $q(\vtheta)$ a lower bound for the marginal likelihood for $\vy$ can be obtained by 
-$$
-\ds \log \underline{p}_{\mbox{\scriptsize }}(\vy) = \bE_q\left[ \log \left\{ \frac{p(\vy,\vtheta)}{q(\vtheta)} \right\} \right],
-$$ 
+% \noindent where
+% $\bE_{-q_k(\vtheta_k)}$ is the expectation with respect to all densities except $q_k(\vtheta_k)$. For any fixed $q(\vtheta)$ a lower bound for the marginal likelihood for $\vy$ can be obtained by 
+% $$
+% \ds \log \underline{p}_{\mbox{\scriptsize }}(\vy) = \bE_q\left[ \log \left\{ \frac{p(\vy,\vtheta)}{q(\vtheta)} \right\} \right],
+% $$ 
 
-\noindent where the	underline is used to indicate the quantity is a lower bound on the true value of that quantity. It can be shown that updating $q_k$ via (\ref{eq:optimal_q}) for fixed forms of the remaining $q$-densities results in an increase in the lower bound $\log \underline{p}_{\mbox{\scriptsize }}(\vy)$. Cycling through the updates	for each $q_k$ can be interpreted as a coordinate ascent method for maximizing $\log \underline{p}_{\mbox{\scriptsize }}(\vy)$ which, under mild regularity conditions,  will converge to a local maximizer of the lower bound \citep{LuenbergerYe2008}. 
+% \noindent where the	underline is used to indicate the quantity is a lower bound on the true value of that quantity. It can be shown that updating $q_k$ via (\ref{eq:optimal_q}) for fixed forms of the remaining $q$-densities results in an increase in the lower bound $\log \underline{p}_{\mbox{\scriptsize }}(\vy)$. Cycling through the updates	for each $q_k$ can be interpreted as a coordinate ascent method for maximizing $\log \underline{p}_{\mbox{\scriptsize }}(\vy)$ which, under mild regularity conditions,  will converge to a local maximizer of the lower bound \citep{LuenbergerYe2008}. 
 
-For particular models the normalizing constants associated with the densities
-(\ref{eq:optimal_q}) cannot be found analytically. In such situations
-an alternative to the above approach is to specify the $q$-densities  to have specific
-parametric forms, e.g., $q_k(\vtheta_k) = \phi_{\mSigma_k}(\vtheta - \vmu_k)$
-(which denotes a multivariate Gaussian density with
-mean $\vmu_k$ and covariance matrix $\mSigma_k$). In this case the  
-lower bound for the marginal likelihood is parametrized by the variational
-parameters $\vmu_k$ and $\mSigma_k$. The lower bound can then be maximized
-with respect to the $\vmu_k$ and $\mSigma_k$ values, again tightening the bound
-between the true value of $\log p(\vy)$ and its lower bound, improving the
-approximation. 
+% For particular models the normalizing constants associated with the densities
+% (\ref{eq:optimal_q}) cannot be found analytically. In such situations
+% an alternative to the above approach is to specify the $q$-densities  to have specific
+% parametric forms, e.g., $q_k(\vtheta_k) = \phi_{\mSigma_k}(\vtheta - \vmu_k)$
+% (which denotes a multivariate Gaussian density with
+% mean $\vmu_k$ and covariance matrix $\mSigma_k$). In this case the  
+% lower bound for the marginal likelihood is parametrized by the variational
+% parameters $\vmu_k$ and $\mSigma_k$. The lower bound can then be maximized
+% with respect to the $\vmu_k$ and $\mSigma_k$ values, again tightening the bound
+% between the true value of $\log p(\vy)$ and its lower bound, improving the
+% approximation. 
 
-When the $q$-densities satisfy (\ref{eq:optimal_q}) the form of the $q$-densities
-are chosen through  (\ref{eq:optimal_q}) is a nonparametric VB
-approach,
-whereas when $q_k(\vtheta_k)$ is chosen to have a particular parametric form
-this can be viewed as a type of parametric VB.
-% Relevance?
-Recently, \cite{Wand2017} considered
-a general framework for combining these methods and showed how a general message passing algorithm could be developed using these ideas.
+% When the $q$-densities satisfy (\ref{eq:optimal_q}) the form of the $q$-densities
+% are chosen through  (\ref{eq:optimal_q}) is a nonparametric VB
+% approach,
+% whereas when $q_k(\vtheta_k)$ is chosen to have a particular parametric form
+% this can be viewed as a type of parametric VB.
+% % Relevance?
+% Recently, \cite{Wand2017} considered
+% a general framework for combining these methods and showed how a general message passing algorithm could be developed using these ideas.
 
 %\subsection{Particle Variational Approximation}
 
@@ -791,7 +792,7 @@ with 24 hyperthreaded cores and 512GB of RAM.
 We considered several small datasets to illustrate our methodology for situations where
 we could compare PVA against a gold standard. These datasets
 can be found in the {\tt R} packages {\tt MASS} \citep{Venables2002},  {\tt ISLR} \cite{James:2014:ISL:2517747}
-and {\tt Ecdat} \citep{Croissant2016}. Table \ref{tab:datasets} summarizes the sizes,  
+and {\tt Ecdat} \citep{Croissant2016}. Table \ref{tab:cva_datasets} summarizes the sizes,  
 sources, and response variable for each dataset used.   For each of the datasets some minimal preprocessing was used.
 We first used the {\tt R} command {\tt na.omit()} to remove samples containing missing predictors. 
 For {\tt USCrime} all variables except the predictor {\tt S} were log-transformed. For all datasets
@@ -815,7 +816,7 @@ variables except for the response as predictors.
 		\end{tabular} 
 	\end{center}
 	\caption{A summary of the datasets used in the paper and their respective {\tt R} packages.}
-	\label{tab:datasets}
+	\label{tab:cva_datasets}
 \end{table}
 
 \noindent 
@@ -1091,9 +1092,9 @@ The Lasso, SCAD, MCP, EMVS, PVA and BMS methods took 1.5, 1.5, 1.8, 1229, 2011, 
 seconds respectively.
 
 A comparison of the performance of PVA for the hyper-$g$, robust Bayarri, Beta-prime and Cake priors on $g$
-and the uniform, beta-binomial(1, 1) and beta-binomial(1, p) priors on $\vgamma$ using $F_1$ score is
-presented in Figure \ref{fig:qtlPVA_F1}. A comparison of the performance of the MCP, SCAD, lasso, PVA, BMS,
-BAS and PEM  methods using $F_1$ score is given in Figure \ref{fig:qtlPVA_F1_compare}.
+and the uniform, $\text{beta-binomial}(1, 1)$ and $\text{beta-binomial}(1, p)$ priors on $\vgamma$ using $F_1$
+score is presented in Figure \ref{fig:qtlPVA_F1}. A comparison of the performance of the MCP, SCAD, lasso,
+PVA, BMS, BAS and PEM  methods using $F_1$ score is given in Figure \ref{fig:qtlPVA_F1_compare}.
 
 \begin{figure}[h!]
 	\begin{center}	
@@ -1326,3 +1327,19 @@ beta- binomial model prior than for the uniform model prior, while the variable 
 same general trend is seen regardless of $g$-prior. Total posterior probability increases with increased
 population size $K$, while variable inclusion error decreases. Although the PVA algorithm is deterministic,
 variation in the results amongst the trials is seen due to the random initialisation of $\mGamma$.
+
+\section{Conclusion}
+\label{sec:chapter_4_conclusion}
+We have proposed a deterministic Bayesian model selection algorithm which is computationally efficient
+and simple. Like Particle EM \cite{Rockova2017}, our algorithm maintains a population of solutions and ensures
+diversity of that population to explore the uncertainty of the selected model. This gives far more information
+about the model selection process than simply choosing one best model. However, whereas Particle EM uses
+a spike-and-slab prior for the regression co-efficients, our approach uses a g-prior, which avoids 
+the Bartlett's Paradox and Information Paradox. Importantly, both approaches can be implemented using rank-one
+updates and downdates and the model selection posterior probabilities are available in closed form,
+which allows the algorithm to be implemented in a computionally efficient manner.
+
+While previously model selection algorithms using the Maruyama, Liang-g and robust Bayarri priors have
+typically been implemented using Monte Carlo Markov Chains, our algorithm allows the advantages of these
+priors while using a deterministic algorithm. The PVA algorithm  presented in this chapter is implemented in
+the {\tt blma} package in the {\tt cva} function.

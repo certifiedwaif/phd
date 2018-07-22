@@ -71,7 +71,7 @@ and Bayesian model selection  for linear models
 under the above choices of prior structures for the model parameters.
 
 
-Our main contributions in this paper are as follows.
+Our main contributions in this chapter are as follows.
 \begin{enumerate}
 	\item To the above list of hyperpriors on $g$ leading to closed form Bayes factors
 	we add the  hyper-$g/n$ prior of \cite{Liang2008} for which we
@@ -146,7 +146,7 @@ predictions over different choices of combinations of predictors.
 We consider the linear model for predicting $\vy$ with design matrix $\mX$ via
 \begin{equation}
 	\label{eq:linearModel}
-	\vy | \alpha, \vbeta, \sigma^2 \sim N(\vone\alpha + \mX \vbeta, \sigma^2 \mI),
+	\vy | \alpha, \vbeta, \sigma^2 \sim \N_n(\vone\alpha + \mX \vbeta, \sigma^2 \mI),
 \end{equation} 
 
 
@@ -239,7 +239,7 @@ as follows
 	\begin{array}{c}
 		\ds p(\alpha) \propto 1,  
 		\qquad 
-		\vbeta_\vgamma | \sigma^2, g, \vgamma \sim N_p(\vzero, g \sigma^2 (\mX_\vgamma^T \mX_\vgamma)^{-1})
+		\vbeta_\vgamma | \sigma^2, g, \vgamma \sim \N_p(\vzero, g \sigma^2 (\mX_\vgamma^T \mX_\vgamma)^{-1})
 		\quad \text{ and }  \quad 
 		\ds p(\sigma^2) \propto (\sigma^2)^{-1},                      
 	\end{array}
@@ -273,7 +273,7 @@ is a diagonal matrix of eigenvalues with $\lambda_1\ge\ldots,\ge \lambda_{p_{\vg
 propose a prior for $\vbeta_\vgamma$ of the form
 \begin{equation}
 	\label{eq:priorBetaMG}
-	\vbeta_\vgamma | \sigma^2, g \sim N(\vzero, \sigma^2 (\mU\mW\mU^\top)^{-1}),   
+	\vbeta_\vgamma | \sigma^2, g \sim \N(\vzero, \sigma^2 (\mU\mW\mU^\top)^{-1}),   
 \end{equation} 
 
 \noindent where $\mW = \mbox{diag}(w_1,\ldots,w_{p_{\vgamma}})$ with $ w_j = \lambda_j/[\nu_j(1 + g) - 1]$ for 
@@ -943,7 +943,7 @@ and enjoy nice theoretical properties including model
 selection consistency. \cite{OrmerodEtal2017} 
 departs from the prior structure (\ref{eq:priorStructure}) and instead uses
 \begin{equation}\label{eq:proirs2}
-	\ds \alpha|\sigma^2,g \sim N(0,g\sigma^2), \quad 
+	\ds \alpha|\sigma^2,g \sim \N(0,g\sigma^2), \quad 
 	\ds \vbeta_\vgamma|\sigma^2,g \sim N\left( \vzero,g\sigma^2\left( \tfrac{1}{n}\mX_\vgamma^T\mX_\vgamma\right)^{-1}\right)
 	\quad \mbox{and} \quad
 	p(g|\vgamma_j) = \delta(g; h^{1/(1 + p_\vgamma)})
@@ -1472,7 +1472,7 @@ blma_result <- blma(vy, mX, prior="ZE")
 
 We considered several small datasets to illustrate our methodology. These datasets
 can be found in the {\tt R} packages {\tt MASS} \citep{Venables2002} and 
-{\tt Ecdat} \citep{Croissant2016}. Table \ref{tab:datasets} summarizing the sizes,  
+{\tt Ecdat} \citep{Croissant2016}. Table \ref{tab:g_prior_datasets} summarizing the sizes,  
 sources, and response variable used for each dataset used. 
 We chose {\tt USCrime} data because it is used in most papers in
 the area and is small enough so that n\"aive implementations using special functions will
@@ -1500,7 +1500,7 @@ factors for some of the priors on $g$ considered in this paper.
 		\end{tabular} 
 	\end{center}
 	\caption{A summary of the datasets used in the paper and their respective {\tt R} packages.}
-	\label{tab:datasets}
+	\label{tab:g_prior_datasets}
 \end{table}
 
 For each of the datasets some minimal preprocessing was used.
@@ -1655,25 +1655,16 @@ differences between the {\tt BAS} and {\tt blma} packages for the {\tt Kakadu} d
 %accurate when $n$ is large, and is of comparable speed. 
 
 \section{Conclusion}
-\label{sec:conclusion}
+\label{sec:chapter_3_conclusion}
+We have reviewed the prior structures that lead to closed form expressions for Bayes factors for linear
+models. We have described ways that each of these priors with the exception of the hyper-g/n prior can be
+evaluated in a numerically stable manner and have implemented a package \texttt{blma} for performing full
+exact Bayesian model averaging using this methodology. Our package is competitive with \texttt{BAS} and
+\texttt{BMS} in terms of computational speed, is numerically more stable and accurate, and offers some
+different priors structures not offered in \texttt{BAS}. Our package is much faster than
+\texttt{BayesVarSelect} and is also numerically more stable and accurate.
 
-We have reviewed the prior structures that lead to closed form expressions for Bayes factors for
-linear models. We have described ways that each of these priors, except for the hyper-$g/n$ 
-prior can be evaluated in a numerically stable manner and have implemented a package 
-{\tt blma} for performing full exact Bayesian model averaging using
-this methodology. 
-
-We are currently working on several extensions to this work. Firstly, we are working on a
-parallel implementation of the package which will allow for exact Bayesian inference for
-problems roughly the size $p\approx 30$. Secondly, we are currently implementing  Markov
-Chain Monte Carlo (MCMC) and population based MCMC methods for exploring the model space
-when $p>30$. Lastly, we are deriving exact expressions for parameter posterior distributions
-under some of the prior structures we have considered here.
-
-
-Our package is competitive with {\tt BAS} and {\tt BMS} in terms of computational speed,
-is numerically more stable and accurate, and offers some different priors structures not
-offered in {\tt BAS}. Our package is much faster than {\tt BayesVarSelect} and is also
-numerically more stable and accurate, and represents an advance in the implementation of
-exact Bayesian linear model averaging.
-
+Our package is competitive with {\tt BAS} and {\tt BMS} in terms of computational speed, is numerically more
+stable and accurate, and offers some different priors structures not offered in {\tt BAS}. Our package is much
+faster than {\tt BayesVarSelect} and is also numerically more stable and accurate, and represents an advance
+in the implementation of exact Bayesian linear model averaging.
