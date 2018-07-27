@@ -116,10 +116,10 @@ algorithm which converges much more quickly.
 We allow a flexible regression modelling approach incorporating both fixed and
 random effects by using a Gaussian Variational Approximation as defined in
 \cite{Ormerod2012} on the regression parameters to allow a non- conjugate
-Gaussian prior to be used, making the resulting Gaussian posterior distribution
-of the regression parameters easy to interpret. We adopt a Mean Field
-Variational Bayes (VB) approach on the other parameters in the model to derive
-the rest of the approximation.
+Gaussian prior to be used. This makes the resulting Gaussian posterior
+distribution of the regression parameters easier to interpret. Posterior
+inference on the other parameters are performed with Mean Field Variational
+Bayes.
 % -- End here
 
 % This makes sense in a paper, but not in a thesis chapter.
@@ -197,10 +197,10 @@ for the probability distribution used in Equation
 \noindent where $\text{Bernoulli}(\pi)$ denotes the probability distribution
 $\pi^k (1 - \pi)^{1-k}$.
 
-Let $p$ be the dimension of the space of fixed effects, $m$ be the number of
-individuals in the random effects and $b$ be the block size for each of those
-individuals. We use $\vone_p$ and $\vzero_p$ to denote the $p \times 1$ column
-vectors with all entries equal to 1 or 0, respectively.
+Let $p$ be the number of fixed effects, $m$ be the number of individuals in the
+random effects and $b$ be the block size for each of those individuals. We use
+$\vone_p$ and $\vzero_p$ to denote the $p \times 1$ column vectors with all
+entries equal to 1 or 0, respectively.
 
 Let $\vy$ be the $n \times 1$ vector. The norm of a column vector $\vv$,
 defined to be $\sqrt{\vv^\top \vv}$, is  denoted by $\|\vv\|$. For a $p \times
@@ -212,10 +212,9 @@ $\mX$ is , and the design matrix of random  effects with dimensions $n \times m
 b$ as $\mZ$. The combined design matrix $\mC$ is formed by appending the
 columns of $\mX$ to the columns of $\mZ$, giving $\mC = [ \mX, \mZ ]$.
 
-Let $\vtheta$ is the vector of all parameters.  Let $\vbeta$ be the $p \times
-1$ column vector of fixed effects, and $\vu$ the $m b \times 1$ column vector
-of random effects. $\vnu$ is the concatenation of these vectors $[\vbeta^\top,
-\vu^\top]$.
+Let $\vbeta$ be the $p \times 1$ column vector of fixed effects, and $\vu$ the
+$m b \times 1$ column vector of random effects. $\vnu$ is the concatenation of
+these vectors $[\vbeta^\top, \vu^\top]$.
 % Let $\vp$ be the $n \times 1$ column vector of probabilities that each
 % observation in $\vy$ is non-zero.
 
@@ -302,14 +301,17 @@ multivariate model with multiple observations is then $$
 \end{align*}
 
 \noindent where $\mX$ is $n \times p$, $\mZ$ is $n \times mb$ and $\mSigma_{\vu
-\vu}$ is $mb \times mb$ and $\mPsi$ is $b \times b$. The covariance of
-$\Cov(\vu) \equiv \blockdiag_{1 \leq i \leq m} (\mSigma) \equiv \mI_m \otimes
-\mSigma$. $\text{Inverse Wishart}(\mPsi, v)$ denotes the probability
-distribution $$\tfrac{|\mPsi|^\frac{v}{2}}{2^{\frac{vp}{2}}
+\vu}$ is $mb \times mb$ and $\mPsi$ is $b \times b$. The covariance of $\mG =
+\Cov(\vu) \equiv \blockdiag_{1 \leq i \leq m} (\mSigma_{\vu \vu}) \equiv \mI_m
+\otimes \mSigma_{\vu \vu}$. $\text{Inverse Wishart}(\mPsi, v)$ denotes the
+probability distribution
+\begin{equation*}
+\tfrac{|\mPsi|^\frac{v}{2}}{2^{\frac{vp}{2}}
 \Gamma_p{\left(\tfrac{v}{2}\right)}} |\mX|^{-\tfrac{v + p + 1}{2}}
-\exp{\left\{-\tfrac{1}{2} \tr{(\mPsi \mX^{-1})}\right\}}$$ where
-$\Gamma_p{(x)}$ denotes the multivariate gamma function and $\tr$ is the trace
-function.
+\exp{\left\{-\tfrac{1}{2} \tr{(\mPsi \mX^{-1})}\right\}}
+\end{equation*}
+where $\Gamma_p{(x)}$ denotes the multivariate gamma function and $\tr$ is the
+trace function.
 
 The covariance matrix of random effects $\mSigma$ will depend on the mixed
 model being fit. In the random intercept case, $\mSigma = \sigma_u^2 \mI$ while
@@ -374,7 +376,7 @@ The optimal approximation for $\vr$ is given below % in Equation (\ref{eq:optima
 \label{eq:optimal_approximation}
 \begin{array}{rl}
 	q(\vr) & \propto \exp \left \{ \bE_{-q(\vr)}\vy^\top\mR(\mC\vmu) - \vr^\top\exp{(\mC\vnu)}-\frac{1}{2} \vnu^\top \mSigma_{\vu \vu} \vnu \right \}                                                  \\ [1ex]
-	       & = \exp{ \left[ \vy^\top\mR\mC \vmu - \vr^\top \exp{\{\mC \vmu + \frac{1}{2} \text{diag}(\mC \mLambda \mC^\top)\}} - \frac{1}{2} \vmu^\top \mD \vmu - \frac{1}{2} \text{tr}(\mLambda \mD ) \right] }, 
+	       & = \exp{ \left[ \vy^\top\mR\mC \vmu - \vr^\top \exp{\{\mC \vmu + \frac{1}{2} \text{diag}(\mC \mLambda \mC^\top)\}} \right] }, 
 \end{array}
 \end{equation}
 \noindent where $\mD = \left\{ (\mPsi + \sum_{i=1}^m \vmu_i \vmu_i^\top + \mLambda_{\vu_i\vu_i}) / (v - p - 1) \right\}^{-1}$.
