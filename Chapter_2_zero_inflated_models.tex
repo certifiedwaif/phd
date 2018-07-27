@@ -472,8 +472,9 @@ were reverted to the previous iteration's $\vmu$ and $\mLambda$ values and the
 algorithm was terminated.
 
 If after calculating the gradient of the Gaussian Variational lower bound with
-respect to $\vmu$, any of its' elements were NaN or $\infty$, then $\vmu$ and
-$\mLambda$ were reverted to the previous iteration's $\vmu$ and $\mLambda$
+respect to $\vmu$, any of its' elements were driven to NaN or $\infty$ due to
+numeric overflow followed by matrix inversion during the computation, $\vmu$
+and $\mLambda$ were reverted to the previous iteration's $\vmu$ and $\mLambda$
 values and the algorithm was terminated.
 		
 \begin{algorithm}
