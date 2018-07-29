@@ -2,54 +2,68 @@
 
 \section{Zero-inflated models future directions}
 		
-The first directions for future research stemming from this chapter would be generalising the approximation to
-other zero-inflated models which handle overdispersion in the data without the need for a random intercept, such 
-as the zero-inflated negative binomial model.
+The first directions for future research stemming from this chapter would be
+generalising the approximation to other zero-inflated models which handle
+overdispersion in the data without the need for a random intercept, such as the
+zero-inflated negative binomial model.
 
-Furthermore, much more exploration could be done on alternative parameterisations of the covariance matrix in the 
-Gaussian Variational Approximation. The specific parameterisation of the diagonal of the Cholesky factor as a
-piecewise exponential/quadratic polynomial function was chosen largely for convenience.
+Furthermore, much more exploration could be done on alternative
+parameterisations of the covariance matrix in the Gaussian Variational
+Approximation. The specific parameterisation of the diagonal of the Cholesky
+factor as a piecewise exponential/quadratic polynomial function was chosen
+largely for convenience.
 
-The current mean field update and Gaussian Variational Approximation algorithms use the entire sample. For
-large samples in the Big Data era, this may not be computationally feasible. Other authors such as
-\cite{TanNott2018} have used doubly stochastic algorithms which both sub-sample the data and use noise to
-approximate the integral expression for the expectation of the variational lower bound. The sub-sampling in
-particular is very appealing in a Big Data context. We wish to experiment with this class of algorithm, and
-compare the performance and accuracy of this kind of doubly stochastic algorithm with the more 
-traditional mean field and Gaussian variational algorithms presented in Chapter 2.
+The current mean field update and Gaussian Variational Approximation algorithms
+use the entire sample. For large samples in the Big Data era, this may not be
+computationally feasible. Other authors such as \cite{Tan2018} have used doubly
+stochastic algorithms which both sub-sample the data and use noise to
+approximate the integral expression for the expectation of the variational
+lower bound. The sub-sampling in particular is very appealing in a Big Data
+context. We wish to experiment with this class of algorithm, and compare the
+performance and accuracy of this kind of doubly stochastic algorithm with the
+more traditional mean field and Gaussian variational algorithms presented in
+Chapter 2.
 
 \section{$g$-prior future directions}
 
-We have reviewed the prior structures that lead to
-closed form expressions for Bayes factors for linear models. We have described ways that each of these priors,
-except for the hyper-g/n prior can be evaluated in a numerically stable manner and have implemented a package
-\texttt{blma} for performing full exact Bayesian model averaging using this methodology. Our package is
-competitive with \texttt{BAS} and \texttt{BMS} in terms of computational speed, is numerically more stable and
-accurate, and offers some different priors structures not offered in \texttt{BAS}. Our package is much faster
-than \texttt{BayesVarSelect} and is also numerically more stable and accurate.
+We have reviewed the prior structures that lead to closed form expressions for
+Bayes factors for linear models. We have described ways that each of these
+priors, except for the hyper-g/n prior can be evaluated in a numerically stable
+manner and have implemented a package \texttt{blma} for performing full exact
+Bayesian model averaging using this methodology. Our package is competitive
+with \texttt{BAS} and \texttt{BMS} in terms of computational speed, is
+numerically more stable and accurate, and offers some different priors
+structures not offered in \texttt{BAS}. Our package is much faster than
+\texttt{BayesVarSelect} and is also numerically more stable and accurate.
 
-We are currently working on several extensions to this work. Firstly, we are working on a parallel
-implementation of the package which will allow for exact Bayesian inference for problems roughly the size
-$p\approx 30$.
+We are currently working on several extensions to this work. Firstly, we are
+working on a parallel implementation of the package which will allow for exact
+Bayesian inference for problems roughly the size $p\approx 30$.
 
-Secondly, we are currently implementing  Markov Chain Monte Carlo (MCMC) and population based MCMC methods for
-exploring the model space when $p>30$. Lastly, we are deriving exact expressions for parameter posterior
-distributions under some of the prior structures we have considered here.
+Secondly, we are currently implementing  Markov Chain Monte Carlo (MCMC) and
+population based MCMC methods for exploring the model space when $p>30$.
+Lastly, we are deriving exact expressions for parameter posterior distributions
+under some of the prior structures we have considered here.
 
 \section{PVA future directions}
 
-There are several planned future extensions to this work. Firstly, we would like to generalise the PVA
-approach to generalised linear models as well as linear models, to be able to perform model selection for
-regression models applicable to a wider range of types of data.
+There are several planned future extensions to this work. Firstly, we would
+like to generalise the PVA approach to generalised linear models as well as
+linear models, to be able to perform model selection for regression models
+applicable to a wider range of types of data.
 
-Secondly, although the algorithm already runs in parallel on multicore CPUs using \texttt{OpenMP}, we believe
-even greater gains in performance could be achieved by porting the algorithm to run on GPUs, or by using
-distributed computing such as \texttt{OpenMPI}.
+Secondly, although the algorithm already runs in parallel on multicore CPUs
+using \texttt{OpenMP}, we believe even greater gains in performance could be
+achieved by porting the algorithm to run on GPUs, or by using distributed
+computing such as \texttt{OpenMPI}.
 
-Thirdly, and most excitingly, we could examine modifications to the PVA algorithm itself. The way the algorithm
-currently ensures diversity amongst the particles in the population is to reward increases in entropy,
-weighted by the hyperparameter $\lambda$. The current version of the algorithm hardcodes $\lambda$ to $1$, but
-it would be interesting to alter $\lambda$ and as in the Population EM algorithm \cite{Tan2018} and observe the
-effect on model selection performance. The algorithm also currently maintains diversity in the population by
-maintaining uniqueness of every particle within the population. It would be interesting to relax this
-constraint and compare the effect on model performance.
+Thirdly, and most excitingly, we could examine modifications to the PVA
+algorithm itself. The way the algorithm currently ensures diversity amongst the
+particles in the population is to reward increases in entropy, weighted by the
+hyperparameter $\lambda$. The current version of the algorithm hardcodes
+$\lambda$ to $1$, but it would be interesting to alter $\lambda$ and as in the
+Population EM algorithm \cite{Tan2018} and observe the effect on model
+selection performance. The algorithm also currently maintains diversity in the
+population by maintaining uniqueness of every particle within the population.
+It would be interesting to relax this constraint and compare the effect on
+model performance.

@@ -3,16 +3,18 @@
 
 % \begin{abstract}
 
-\noindent We consider variational inference for zero--inflated Poisson
-    regression models using a latent variable representation. The model is
-    extended to include random effects which allow simple incorporation of
-    spline and other modelling structures. Several variational approximations
-    to the resulting set of models are presented, including a novel approach
-    based on the inverse covariance matrix rather than the covariance matrix of
-    the approximate posterior density for the random effects. This
-    parameterisation improves upon the computational cost and numerical
-    stability of previous methods. We demonstrate these approximations on
-    simulated and real data sets.
+\noindent
+    
+We consider variational inference for zero--inflated Poisson
+regression models using a latent variable representation. The model is
+extended to include random effects which allow simple incorporation of
+spline and other modelling structures. Several variational approximations
+to the resulting set of models are presented, including a novel approach
+based on the inverse covariance matrix rather than the covariance matrix of
+the approximate posterior density for the random effects. This
+parameterisation improves upon the computational cost and numerical
+stability of previous methods. We demonstrate these approximations on
+simulated and real data sets.
 
 % \end{abstract}
 
@@ -129,24 +131,24 @@ regression models accurately, and showing the advantages of our methods to
 previously presented methods. We also investigate stability problems that can
 arise when using naive versions of these methods, and the modifications to the
 fitting methods we devised to mitigate these problems. In Section
-\ref{sec:zero_inflated_model} we define our model and provide a framework for
+~\ref{sec:zero_inflated_model} we define our model and provide a framework for
 our approach incorporating regression modelling and random effects. In Section
-\ref{sec:gaussian} we focus on several approaches to fitting the Gaussian
-component of our model. In Section \ref{sec:param}, we present new
+~\ref{sec:gaussian} we focus on several approaches to fitting the Gaussian
+component of our model. In Section ~\ref{sec:param}, we present new
 parameterisations for use in these algorithms which offers substantial
 advantages in accuracy, numerical stability and computational speed. In Section
-\ref{sec:results} we perform numerical experiments on simulated data which show
-how our approach offers computational advantages over existing approaches -- in
-terms of both speed and stability. In Section \ref{sec:application} we show an
-application of our pure Poisson model fitting method to a hierarchical model
-studying the effect of ethnicity on the rate of police stops, and an
+~\ref{sec:results} we perform numerical experiments on simulated data which
+show how our approach offers computational advantages over existing approaches
+- in terms of both speed and stability. In Section ~\ref{sec:application} we
+show an application of our pure Poisson model fitting method to a hierarchical
+model studying the effect of ethnicity on the rate of police stops, and an
 application of our zero-inflated Poisson model fitting method to a multi- level
 longitudinal study of pest control in apartments. Finally, in Section
-\ref{sec:chapter_2_conclusion} we conclude with a discussion of the results. An
-appendix contains details of the derivation of the variational lower bound for
-our model.
+~\ref{sec:chapter_2_conclusion} we conclude with a discussion of the results.
+An appendix contains details of the derivation of the variational lower bound
+for our model.
 
-\section{Zero--inflated models}
+\section{Zero-inflated models}
 \label{sec:zero_inflated_model}
 
 In this section we present a Bayesian zero-inflated Poisson model for count
@@ -159,33 +161,26 @@ flexible mixed model approach incorporating both fixed and random effects.
 
 We consider a sample of counts $y_i$, $1 \le i\le n$, where there are an
 excessive number of zeros for a Poisson model, but the sample is otherwise
-well--modelled by a Poisson distribution. There are two main parameterizations
-for modelling such data. The first approach models the probability of a zero by
-$\rho$ and adjusts for counts greater than zero. This model uses the
-probability distribution specified in Equation
-(\ref{eq:zero_infl_first_param}).
-
+well-modelled by a Poisson distribution. A popular approach using latent
+variables views the data as the product of two data-generating processes, a
+Bernoulli process that determines whether the data is definitely zero, and a
+second process where data is generated from a Poisson distribution which may be
+zero.
 \begin{equation}
 \label{eq:zero_infl_first_param}
 	P(Y_j = y_i) = \left\{ \begin{array}{ll}
-	\rho + e^{-\lambda},  & y_i = 0 \\
-	\left( \frac{1 - \rho}{1 - e^{-\lambda}} \right) \frac{\lambda^{y_i} e^{-\lambda}} {y_i!},  &y_i \ge 1.
+        \rho + (1 - \rho) e^{-\lambda},  & y_i = 0 \\
+	    (1 - \rho) \frac{\lambda^{y_i} e^{-\lambda}} {y_i!},  &y_i \ge 1.
 	\end{array} \right.
 \end{equation}
 
-A second approach using latent variables views the data as the product of two
-data--generating processes, a Bernoulli process that determines whether the
-data is definitely zero, and a second process where data is generated from a
-Poisson distribution which may be zero.
-
-Note that this allows zeros to be generated from the model in one of two ways
--- either from the Bernoulli process generating a zero or from the Bernoulli
-process generating a Poisson sample which is then zero. A latent variable
-representation of this parameterization introduces the latent variables $r_i$
-which equal $1$ when $y_i>0$ and $0$ otherwise. This leads to the specification
-for the probability distribution used in Equation
-(\ref{eq:zero_infl_second_param}).
-
+This model yields the probability distribution specified in Equation
+(\ref{eq:zero_infl_first_param}).  Note that this allows zeros to be generated
+from the model in one of two ways -- either from the Bernoulli process
+generating a zero or from the Bernoulli process generating a Poisson sample
+which is then zero. A latent variable representation of this parameterization
+introduces the latent variables $r_i$ which equal $1$ when $y_i>0$ and $0$
+otherwise. 
 \begin{equation}
 \label{eq:zero_infl_second_param}
 \begin{array}{rl}
@@ -194,18 +189,19 @@ for the probability distribution used in Equation
 \end{array}
 \end{equation}
 
-\noindent where $\text{Bernoulli}(\pi)$ denotes the probability distribution
-$\pi^k (1 - \pi)^{1-k}$.
+\noindent This leads to the specification for the probability distribution used
+in Equation (\ref{eq:zero_infl_second_param}) where $\text{Bernoulli}(\pi)$
+denotes the probability distribution $\pi^k (1 - \pi)^{1-k}$.
 
-Let $p$ be the number of fixed effects, $m$ be the number of individuals in the
-random effects and $b$ be the block size for each of those individuals. We use
+Let $p$ be the number of fixed effects, $m$ be the number of groups in the
+random effects and $b$ be the block size for each of those groups. We use
 $\vone_p$ and $\vzero_p$ to denote the $p \times 1$ column vectors with all
 entries equal to 1 or 0, respectively.
 
-Let $\vy$ be the $n \times 1$ vector. The norm of a column vector $\vv$,
-defined to be $\sqrt{\vv^\top \vv}$, is  denoted by $\|\vv\|$. For a $p \times
-1$ vector $\va$, we let $\diag{(\va)}$ denote the $p \times p$ matrix with the
-elements of $\va$ along its' diagonal.
+Let $\vy$ be the $n \times 1$ vector. The Euclidean norm of a column vector
+$\vv$, defined to be $\sqrt{\vv^\top \vv}$, is  denoted by $\|\vv\|$. For a $p
+\times 1$ vector $\va$, we let $\diag{(\va)}$ denote the $p \times p$ matrix
+with the elements of $\va$ along its' diagonal.
 
 We denote the design matrix of fixed effects with dimensions $n \times p$ as
 $\mX$ is , and the design matrix of random  effects with dimensions $n \times m
@@ -259,37 +255,37 @@ flexible mixed model by incorporating the latent variable $\vr$ which controls
 the mixture of the zero and non-zero components from the zero-inflated model
 above into a Poisson mixed model likelihood.
 
-When the indicator $\vr_{ij} = 0$, the likelihood is $1$ for $\vy_{ij} = 0$ and
-$0$ for all $\vy_{ij} > 0$, and when the indicator $\vr_{ij} = 1$, the
-likelihood is a Poisson mixed model regression likelihood for $\vy_{ij}$.
-$\vr_{ij}$ is a Bernoulli indicator with probability $\rho$, allowing a
-proportion of zero- inflation in the observed data to be specified. The $j$th
-predictor/response pair for the $i$th group is denoted by $(\vx_{ij},
-\vy_{ij}), 1 \leq j \leq n_i, 1 \leq i \leq m$, where $\vx_{ij} \in \R$, and
-the $\vy_{ij}$ are nonnegative integers. For each $1 \leq i \leq m$, define the
-$n_i \times 1$ vectors $\vy_{ij} = [\vy_{i 1}, \ldots, \vy_{i n_i}]^\top$ as
-the response vector. Vectors $\vy_1, \ldots, \vy_m$ are assumed to be
-independent of each other.  We develop a zero-inflated regression model
-incorporating both fixed effects $\vbeta$ and random effects $\vu$. The
-log-likelihood for one observation is then
-
-$$
+When the indicator $r_{ij} = 0$, the likelihood is $1$ for $y_{ij} = 0$ and $0$
+for all $y_{ij} > 0$, and when the indicator $r_{ij} = 1$, the likelihood is a
+Poisson mixed model regression likelihood for $y_{ij}$.  $r_{ij}$ is a
+Bernoulli indicator with probability $\rho$, allowing a proportion of zero-
+inflation in the observed data to be specified. The $j$th predictor/response
+pair for the $i$th group is denoted by $(x_{ij}, y_{ij}), 1 \leq j \leq n_i, 1
+\leq i \leq m$, where $x_{ij} \in \R$, and the $y_{ij}$ are nonnegative
+integers. For each $1 \leq i \leq m$, define the $n_i \times 1$ vectors $y_{ij}
+= [y_{i 1}, \ldots, y_{i n_i}]^\top$ as the response vector. Vectors $y_1,
+\ldots, y_m$ are assumed to be independent of each other.  We develop a
+zero-inflated regression model incorporating both fixed effects $beta$ and
+random effects $u$. The log-likelihood for one observation is then
+\begin{equation*}
 	\begin{array}{rl}
-		\log p(\vy_{ij} | \vr_{ij}, \vbeta, \vu) & = \vy_{ij} \vr_{ij} (\vx_i^\top \vbeta + \vz_{ij}^\top \vu) - \vr_{ij} \exp (\vx_{ij}^\top \vbeta + \vz_{ij}^\top \vu) - \log \Gamma (\vy_{ij} + 1), \\
-		\vr_{ij} | \rho                  & \sim \text{Bernoulli}(\rho), 1 \leq i \leq m, 1 \leq j \leq n, \text{ and }                                                              \\
+		\log p(y_{ij} | r_{ij}, \vbeta, \vu) & = y_{ij} r_{ij} (\vx_i^\top \vbeta + \vz_{ij}^\top \vu) - r_{ij} \exp (\vx_{ij}^\top \vbeta + \vz_{ij}^\top \vu) - \log \Gamma (y_{ij} + 1), \\
+		r_{ij} | \rho                  & \sim \text{Bernoulli}(\rho), 1 \leq i \leq m, 1 \leq j \leq n, \text{ and }                                                              \\
 		\rho                        & \sim \text{Beta}(\alpha, \beta).                                                                                              \\
 	\end{array}
-$$
+\end{equation*}
 
 \noindent We now extend this to multiple dimensional random effects. Let $\mC =
 [\mX, \mZ]$ and $\vnu = \left[ \vbeta^\top, \vu^\top \right]^\top$. The
-multivariate model with multiple observations is then $$
+multivariate model with multiple observations is then 
 %\label{eq:main}
-    \begin{array}{rl} \log{p(\vy|\vr, \vbeta, \vu)} & = \vy^\top \mR (\mC\vnu)
+\begin{equation*}
+    \begin{array}{rl} \log{p(\vy|\vr, \vbeta, \vu)} &= \vy^\top \mR (\mC\vnu)
         - \vr^\top \exp{(\mC\vnu)} - \vone^\top \log{\Gamma{(\vy + \vone)}},
-        \quad \mbox{ and } \\ [1ex] r_i                           & \sim
-        \text{Bernoulli}(\rho), 1 \leq i \leq n
-        \\ \end{array} $$
+        \quad \mbox{ and } \\
+        [1ex] r_i& \sim \text{Bernoulli}(\rho), 1 \leq i \leq n \\ 
+    \end{array} 
+\end{equation*}
 
 % \joc{(The prior structure will depend on the structure of the random effects model)}
 \noindent with priors
@@ -391,7 +387,7 @@ Variational Approximation for $\vbeta$ and $\vu$ jointly. Techniques for
 efficiently fitting these models are described in \cite{Ormerod2012,
 Challis2013, Opper2009}. Gaussian variational approximations have also been
 shown to have good asymptotic properties in \cite{Sinica2017}. The model can be
-fit using Algorithm \ref{alg:algorithm_one} below. The derivation of the
+fit using Algorithm~\ref{alg:algorithm_one} below. The derivation of the
 variational lower bound is given in \ref{sec:calculation_of_var_lb}.
 
 \begin{algorithm}
@@ -525,15 +521,13 @@ positive definite. We present and compare two approaches to parameterising the
 covariance matrix $\mLambda$ below.
 	
 \subsubsection{Covariance parameterisation $\mLambda = \mR^\top \mR$}
-
 We fit the Gaussian component of our approximation in Algorithm
 \ref{alg:algorithm_one} by maximising  the variational lower bound is
 \begin{equation}
 \label{eq:gva_lower_bound}
 \begin{array}{ll}
 	\log \underline{p}(\vmu, \mLambda; \vy) & = \quad \vy^\top\mP \mC \vmu - \vp^\top \exp\{\mC \vmu + \tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top)\} \\
-	& \quad - \tfrac{1}{2} \vmu^\top \mSigma^{-1} \vmu - \tfrac{1}{2} \tr{(\mSigma^{-1} \mLambda)} + \log{|\mR|}
-	                                        + \tfrac{1}{2} \log{|\mSigma^{-1}|}  + \tfrac{p}{2}
+    & \quad - \tfrac{1}{2} \vmu^\top \mSigma^{-1} \vmu - \tfrac{1}{2} \tr{(\mSigma^{-1} \mLambda)} + \tfrac{1}{2} \log{|\mLambda|} + \tfrac{1}{2} \log{|\mSigma^{-1}|}  + \tfrac{p}{2}
 \end{array}
 \end{equation}
 
@@ -649,18 +643,14 @@ algorithm.
 		given $\vy$, $\mC$ and $\vp$.}
 	\label{alg:algorithm_nr}
 \end{algorithm}
-		
-% Splines
-		
+
 \section{Parameterisations of Gaussian Variational Approximation approaches}
 \label{sec:param}
 \subsection{Covariance parameterisation of $\mLambda$}
-
 To ensure symmetry of $\mLambda$, we parameterise the optimisation problem in
 terms of $\mLambda$'s Cholesky factor  $\mLambda = \mR^\top \mR$. We optimise
 over the space $(\vmu, \overline{\mR})$, where $\vmu \in \R^{p + m}b$ and
 $\overline{\mR}$ is a lower-triangular $(p + mb) \times (p + mb)$ matrix. Then
-		
 \begin{equation*}
 	\mR_{ij} =
 	\begin{cases}
@@ -815,20 +805,16 @@ By parameterising $\mLambda$ in terms of its' Cholesky factors and realising tha
 \begin{equation*}
 	\mC \mLambda \mC^\top = \mC \mR \mR^\top \mC^\top
 \end{equation*}
-	
 \noindent and that
 \begin{equation*}
 	\diag(\mC \mLambda \mC^\top)_{ii} = \mC_{i .} \mR \mR^\top \mC_{i .}^\top,\quad1 \leq i \leq n
 \end{equation*}
-	
 \noindent we can calculate the products $\mC_{i .} \mR, 1 \leq i \leq n$, using $n \times \frac{1}{2}(p + m
 b)(p + m b   + 1)$ floating point operations, and storing the results of the $i$th product in the $i$th
 element of the   vector $\va$ and then calculate $\diag(\mC \mLambda \mC^\top) = \va^\top \va$.
 	
 Moreover, mixed models typically have sparse design matrices, allowing us to encode $\mR$ as a sparse matrix, and	further reduce   this depending on the model. For example, in the random intercept case, only the diagonals of the random effects block need to be non-zero, and hence the above expression can be calculated in
 $\BigO(n)$ floating point operations.
-	
-% $\log |\mR|$ can be calculated using only $p + m b$ floating point operations, as $\mR$ is lower triangular.
 	
 For the precision parameterisation, we observe that in this parameterisation
 \begin{equation*}
@@ -924,7 +910,6 @@ the covariance matrix.
 
 \section{Numerical results}
 \label{sec:results}
-		
 The accuracy of each model fitting algorithms presented in Section
 \ref{sec:gaussian} was assessed by comparing the approximating distribution of
 each parameter with the posterior distribution of Monte Carlo Markov Chain
@@ -934,7 +919,6 @@ generated using \texttt{RStan}, as described in \cite{Carpenter2016} and
 random slope and spline models were evaluated using this method.
 		
 \subsection{Simulated data}
-		
 For each of these simulations, the model is as presented in Section
 \ref{sec:model}. Several common application scenarios were simulated and their
 accuracy evaluated. A random intercept model was simulated with $\vbeta = (2,
@@ -1051,14 +1035,7 @@ generated data sets. The	results are presented in Figure
 	\includegraphics[width=0.95 \textwidth]{code/results/accuracy_plots_spline_gva2.pdf}
 \end{figure}
 		
-% Graphs - exactly what sort of graphs do we need?
-% Median accuracy
-% Increase in lower bound
-% MCMC posterior, with approximating posterior for at least one or two of the
-% key parameters, such as, say, vbeta[2]
-		
 \subsection{Numerical stability of the parameterisation}
-
 In the process of performing numerical experiments, we discovered that our
 model fitting software was prone to numeric overflow due to the log link in our
 model and the exponentiation of the diagonals of the Cholesky factors in the
@@ -1095,7 +1072,6 @@ $\infty$, equivalent to using the naive $\exp$ parameterisation, the algorithm
 encounters numerical errors for every starting point on the  grid.
 	
 \subsection{Stability of the GVA precision parameterisation algorithm for different starting points}
-		
 The numerical stability of each fitting algorithm in Section \ref{sec:gaussian}
 was assessed by initialising each algorithm from a range of different starting
 points. Errors due to numerical instability and the fitted $\vmu$ were recorded
@@ -1128,18 +1104,27 @@ The GVA algorithm with the $\mLambda = (\mR \mR^\top)^{-1}$ parameterisation
 was less prone to instability due to starting point when the safe exponential
 parameterisation was used then when it was not used, as can be seen from Figure
 \ref{fig:stability_locations_gva}. % FIXME: Add error counts
-		
 \begin{figure}[h]
 	\includegraphics[width=0.45 \textwidth]{code/safe_exp_stability.pdf}
 	\includegraphics[width=0.45 \textwidth]{code/no_safe_exp_stability.pdf}
 	\label{fig:stability_locations_gva}
-	\caption{Starting locations which caused the GVA fitting algorithm to fail with numeric errors. The true model had fixed parameters $\vbeta = (2, 1)^\top$ and random intercepts. There were ten groups in the hierarchical model each	with ten individuals $(m=10, n_i=10)$. In the left figure the starting points which lead to numeric errors when the safe exponential was used are shown, while in the right figure the starting points which lead to numeric errors when the safe exponential was not used are plotted.}
-\end{figure}
+	\caption{
+        Starting locations which caused the GVA fitting algorithm to fail with
+        numeric errors. The true model had fixed parameters $\vbeta = (2,
+        1)^\top$ and random intercepts. There were ten groups in the
+        hierarchical model each	with ten individuals $(m=10, n_i=10)$. In the
+        left figure the starting points which lead to numeric errors when the
+        safe exponential was used are shown, while in the right figure the
+        starting points which lead to numeric errors when the safe exponential
+        was not used are plotted.
+    }
+    \end{figure}
 
 \subsection{Stability of the GVA fixed point algorithm for different starting
-points} The naive fixed point algorithm was extremely unstable for many
-starting points, as can be seen from Figure \ref{fig:stability_locations_nr}.
-The variant of the algorithm which checked whether the inversion of the
+points}
+The naive fixed point algorithm was extremely unstable for many starting
+points, as can be seen from Figure \ref{fig:stability_locations_nr}.  The
+variant of the algorithm which checked whether the inversion of the
 $\mLambda_{\vu \vu}$ block of $\mLambda$ was performed successfully was much
 more stable, and did not suffer from any numeric errors at all over the range
 of starting points we tested.  The algorithm is able to abort safely, and allow
