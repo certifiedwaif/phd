@@ -1,3 +1,4 @@
+%! TEX root = thesis.tex
 \chapter{Gaussian Variational Approximation of Zero-inflated Generalised
          Linear Mixed Models}
 
@@ -227,7 +228,6 @@ $\lambda$ in the model above with $\vx_i^\top \vbeta$ to specify the mean,
 where $\vx_i,\vbeta \in \R^p$, with $\vx_i$ the vector of observed predictors
 and $\vbeta$ the vector of regression coefficients. Letting $\vr =
 (r_1,\ldots,r_n)$, the model becomes
-
 \begin{equation*}%\label{eq:main}
 	\begin{array}{rl}
 		\log p(\vy|\vr, \vbeta) 
@@ -345,19 +345,20 @@ them in $\BigO(K)$ time. The matrix $\mSigma$ is symmetric, with contents
 \]
 
 \subsection{Variational Bayes Approximation to the Zero-Inflated Poisson model}
-
 We choose a factored variational approximation for the model of the form 
 \[
 	q(\vnu, \sigma_{\vu}^2,\vr_0, \rho) = q(\vnu) q(\mSigma_{\vu \vu}) q(\vr_0) q(\rho)
 \]
 
-\noindent 
-
-where we define $\vr_0 = \{ r_i : y_i = 0 \}$. \\
+\noindent where we define 
+\begin{align*}
+    \vr_0 &= \{ r_i : y_i = 0 \}. \\
 % The distributions we select are?
-$q(\vnu) = \N(\vmu, \mLambda)$, \\ $q(\sigma_{\vu}^2) = \text{Inverse
-Wishart}\left(\mPsi + \sum_{i=1}^m (\vmu_i \vmu_i^\top + \mLambda_{\vu_i
-\vu_i}), v + m \right)$ \mbox{and } \\ $q(r_i) = \text{Bernoulli}{(p_i)}$ with
+    q(\vnu) &= \N(\vmu, \mLambda), \\ 
+    q(\sigma_{\vu}^2) &= \text{Inverse Wishart}\left(\mPsi + \sum_{i=1}^m (\vmu_i \vmu_i^\top + \mLambda_{\vu_i \vu_i}), v + m \right) \mbox{and } \\ 
+    q(r_i) &= \text{Bernoulli}{(p_i)} 
+\end{align*}
+with
 $$p_i = 
 \begin{cases}
 \text{expit}\left\{ \psi{(\alpha_{q(\rho)})} - \psi{(\beta_{q(\rho)})} - \exp{(c_i^\top\vmu + \frac{1}{2} c_i^\top \mLambda c_i)} \right\},& \text{ when } \vy_i = 0\text{ ; and}\\
@@ -372,10 +373,9 @@ The optimal approximation for $\vr$ is given below % in Equation (\ref{eq:optima
 \label{eq:optimal_approximation}
 \begin{array}{rl}
 	q(\vr) & \propto \exp \left \{ \bE_{-q(\vr)}\vy^\top\mR(\mC\vmu) - \vr^\top\exp{(\mC\vnu)}-\frac{1}{2} \vnu^\top \mSigma_{\vu \vu} \vnu \right \}                                                  \\ [1ex]
-	       & = \exp{ \left[ \vy^\top\mR\mC \vmu - \vr^\top \exp{\{\mC \vmu + \frac{1}{2} \text{diag}(\mC \mLambda \mC^\top)\}} \right] }, 
+	       & = \exp{ \left[ \vy^\top\mR\mC \vmu - \vr^\top \exp{\{\mC \vmu + \frac{1}{2} \text{diag}(\mC \mLambda \mC^\top)\}} \right] }.
 \end{array}
 \end{equation}
-\noindent where $\mD = \left\{ (\mPsi + \sum_{i=1}^m \vmu_i \vmu_i^\top + \mLambda_{\vu_i\vu_i}) / (v - p - 1) \right\}^{-1}$.
 
 We observe that this expression is close in form to the likelihood of a Poisson
 regression model with random effects. Poisson regression models are
@@ -628,15 +628,25 @@ algorithm.
 
 \begin{algorithm}
 	\begin{algorithmic}
-		\REQUIRE $g = \mP \mC (\vy - \mC^\top \exp(\mC \vmu + \tfrac{1}{2} \text{diag}{(\mC \mLambda \mC^\top)})) - \mSigma^{-1} \vmu$.
+		\REQUIRE $g = \mP \mC (\vy - \mC^\top \exp(\mC \vmu
+                      + \tfrac{1}{2} \text{diag}{(\mC \mLambda \mC^\top)})) 
+                      - \mSigma^{-1} \vmu$.
 		% Fit \vmu, \mLambda using Laplace approximation
-		\WHILE{the increase in $\log{\underline{p}}(\vmu, \mLambda; \vy)$ is significant}
-			\STATE $\vg \leftarrow \mC^\top \vp [\vy - \{ \exp(\mC \vmu + \tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top)) \}] - \mSigma^{-1} \vmu$ \\
-			\STATE $\mH \leftarrow -\mC^\top \text{diag}(\vp^\top \exp(\mC \vmu + \tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top))) - \mSigma^{-1}$ \\
-			\STATE $\mLambda \leftarrow (-\mH)^{-1} \text{ using block inversion on } \mH$ \\
-			If the inversion fails, revert to previous $\vmu$ and $\mLambda$ and exit the loop \\
+		\WHILE{the increase in $\log{\underline{p}}(\vmu, \mLambda; \vy)$
+               is significant}
+			\STATE $\vg \leftarrow \mC^\top \vp [\vy - \{ \exp(\mC \vmu
+                    + \tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top)) \}] 
+                    - \mSigma^{-1} \vmu$ \\
+			\STATE $\mH \leftarrow
+                    -\mC^\top \text{diag}(\vp^\top \exp(\mC \vmu 
+                    + \tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top))) - \mSigma^{-1}$ \\
+			\STATE $\mLambda \leftarrow (-\mH)^{-1}
+                    \text{ using block inversion on } \mH$ \\
+			If the inversion fails, revert to previous $\vmu$ and $\mLambda$
+            and exit the loop \\
 			\STATE $\vmu \leftarrow \vmu + \mLambda \vg$ \\
-			If any element of $\vmu$ is $\infty$ or NaN, revert to previous $\vmu$ and $\mLambda$ and exit the loop
+			If any element of $\vmu$ is $\infty$ or NaN, revert to previous 
+            $\vmu$ and $\mLambda$ and exit the loop
 		\ENDWHILE
 	\end{algorithmic}
 	\caption{The GVA Newton-Raphson fixed point iterative scheme for obtaining the optimal $\vmu$ and $\mLambda$
