@@ -1,6 +1,94 @@
 %! TEX root = thesis.tex
 \chapter{Conclusion and Future Directions}
+\label{sec:chapter_2_conclusion}
+		
+We have described a Variational Bayes approximation to Zero-Inflated Poisson
+regression models which allows such models to be fit with considerable
+generality. We have also devised and extensively tested a number of alternative
+approaches for fitting such models, and extended one of these alternative
+approaches with a new parameterisation. Using MCMC methods as the gold standard
+to test against, we have assessed the accuracy and computational speed of these
+algoritms.
+		
+We applied our model fitting algorithms to a number of data sets to fit a range
+of models. The Cockroaches model in Section \ref{sec:cockroaches} had few fixed
+covariates, a random intercept for each apartment building and incorporated
+zero-inflation. The Police stops model in Section \ref{sec:police_stops} was a
+pure Poisson mixed model, with no zero-inflation and a random intercept for
+precincts/locality. The Biochemists model in Section \ref{sec:biochemists} was
+zero-inflated with fixed effects. The Owls model in Section \ref{sec:owls} was
+zero-inflated,  with a random intercepts for each nest. There were a large
+number of nests $(m=27)$. We were able to estimate the variance component for
+this model very accurately.
 
+The use of Mean Field Variational Bayes allows estimation of Bayesian ZIP
+models in a fraction of the time taken to fit the same model using even the
+best MCMC methods available, with only a small loss of accuracy. This is of
+great utility in applications where speed matters, such as when applied
+statisticians are comparing and choosing amongst many candidate models, as is
+typical in practice.
+		
+The new parameterisation of Gaussian Variational Approximation using the
+Cholesky factorisation of the inverse of $\mLambda$ presented in Section
+\ref{sec:param} provides significant advantages when used to estimate mixed
+models.
+
+Mixed models have covariance matrices with a block structure, due to the
+dependence structure of the random effects. The precision parameterisation
+presented in this chapter is able to preserve this sparsity within the
+structure of the Cholesky factors of the inverses of the covariance matrices
+use in the variational lower bound by re-ordering the rows and columns of the
+matrices so that the random effects blocks appear first. The Owls example
+presented in this chapter shows the computational advantages of this approach
+when the number of groups $m$ in the model is large (m=27 in this case) -- as
+the covariance parameterisation takes 46 seconds to fit whereas the inverse
+parameterisation only takes 3 seconds. This clearly demonstrates advantage of
+using sparsity to reduce the dimension of the optimisation problem to be solved
+when models are being fit -- as only the non-zero values in the covariance
+matrices need to be optimised over. This allows models to be fit more quickly,
+and with greatly improved numerical stability and without loss of accuracy.
+
+While all of the fitting algorithms presented in this chapter except the
+Laplace's approximation algorithm were able to fit ZIP random and fixed effects
+models with high accuracy, and the  Gaussian inverse parameterisation and fixed
+point algorithms were able to do so at high speed, they  could be numerically
+unstable depending on the data the model was being fit to and their starting
+points. In the case of the Gaussian inverse parameterisation algorithm, the
+source of the problem was tracked down to the exponential function used in the
+parameterisation of the diagonal of the Cholesky factor of the precision matrix
+combined with the exponential that arises in the derivation of the Gaussian
+variational lower bound for Poisson mixed models -- leading to frequent numeric
+overflows during the fitting process. This problem, once discovered, was
+mitigated by replacing the exponential parameterisation of the diagonal of the
+Cholesky factor with a piecewise function which is exponential beneath a
+threshold and quadratic above that threshold. This was shown to greatly
+increase the numeric stability of the GVA inverse parameterisation for a range
+of starting points.
+
+Some of the algorithms which we experimented with were found to be very
+sensitive to their starting points.  While these algorithms are typically
+initialised with a starting point as close as possible to the final solution,
+this gives some sense of the stability of each algorithm. We were able to
+develop a variant of the algorithm that employs a parameterisation which is
+much more numerically stable.
+
+This thesis chapter presents the essential ideas necessary for a performant
+implementation implementing model fitting for ZIP regression models.
+%, but the performance would be even better if our algorithm was re-implemented
+%in a compiled language with good numeric libraries such as C++ with Eigen.
+The majority of the performance improvements over existing approaches come from
+avoiding unneccessary matrix inversion, which is a computationally expensive
+and numerically unstable process taking $\BigO(p^3)$ flops, and  from
+constructing and calculating with sparse matrices. The gains of these
+approaches, particularly from sparse  matrix techniques, can be difficult to
+fully realise in R without expert knowledge of the underlying implementation
+and libraries.
+		
+Our application of these ideas to Andrew Gelman's data showed that the new
+parameterisation very effectively speeds up fitting zero-inflated mixed models
+to real world data with a large number of groups, while still maintaining
+excellent accuracy versus an MCMC approach. This demonstrates the applicability
+of the ideas presented within this chapter to real world data sets.
 \section{Zero-inflated models future directions}
 		
 The first directions for future research stemming from this chapter would be

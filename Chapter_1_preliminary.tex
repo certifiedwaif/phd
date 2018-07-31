@@ -687,7 +687,40 @@ These methods are generally difficult to apply in practice, as the problems can
 involve the optimisation of many parameters over high-dimensional, constrained
 spaces whose constraints cannot be simply expressed.
 
+% TODO - merge this into the rest of the text
+Recently, several stochastic Variational Bayes approaches to approximation
+problems of this type have emerged.  \cite{Gershman2012} used a uniform
+weighted mixture of isotropic Gaussians to approximate complex posterior
+distributions. The variational lower bound is approximated with first and
+second-order Taylor series expansions, and then optimised with L-BFGS.  In
+\cite{Kingma2013}, the expectations in the expression for the variational lower
+bound are approximated using Monte Carlo integration. The variational lower
+bound is reparameterised in terms of an auxillary noise variable such as a
+standard normal, to reduce the variance of the Monte Carlo estimate.
+\cite{Tan2018} takes an approach closest to the one we will adopt, using a
+Gaussian Variational Approximation.  By parameterising the covariance matrix of
+the Gaussian using Cholesky factors of the precision matrix, the covariance
+matrix is guaranteed to be sparse due to the conditional independence between
+fixed and random effects of the mixed model. The variational lower bound can be
+rewritten so that it does not depend on the variational parameters.  By making
+a transformation in terms of a noise variable to standardise the variational
+parameters, efficient gradient estimators can be derived, then estimated using
+subsampling of the data set. Sampling from the fixed normal distribution on
+each iteration rather than a multivariate normal depending on the variational
+parameters in the current iteration reduces the variance of the estimator.
+Subsampling of the data set and sampling from the noise variable make the
+fitting algorithm doubly stochastic.
 
+Other approximate Bayesian inference techniques exist in the literature, such
+as Laplace approximation \cite{Tierney1986}/ integrated nested Laplace
+approximation \cite{Rue2009} and Expectation Propagation \cite{Minka2013}, and
+these have been applied to the problem of fitting count models
+\cite{Barber2016} \cite{KimWand2017}.  But Expectation Propagation requires
+very difficult algebra to complete the derivations required for the updates,
+and is slow to compute. And Laplace approximation relies on a Gaussian
+approximation to the log-likelihood found by Taylor expanding around the mode,
+which performs poorly when the true posterior is not symmetric, as is the case
+for Poisson regression models.
 % General Design Bayesian Generalized Linear Mixed Model, as in \citep{zhao06}.
 % This allows us to incorporate within-subject correlation, and smoothing
 % splines (as in \citep{Wand2008}) in our models.

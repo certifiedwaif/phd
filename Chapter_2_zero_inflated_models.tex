@@ -58,9 +58,9 @@ of applications to be addressed. Often the transition from zero to non-zero has
 a direct interpretation in the area of application, and is interesting in its'
 own right.
 
-Bayesian estimation methods for zero-inflated models was developed in
+Bayesian estimation methods for zero-inflated models were developed in
 \cite{Ghosh2006} using MCMC implemented with WinBUGS, and in \cite{Vatsa2014}
-using a Variational Bayes solution to the inverse zero- inflated Poisson
+using a Variational Bayes solution to the inverse zero-inflated Poisson
 regression problem. While simple forms of these models are easy to fit with
 standard  maximum likelihood techniques, more general models incorporating
 random effects, splines and missing data  typically have no closed form
@@ -71,43 +71,6 @@ techniques, but these techniques can be computationally intensive and prone to
 convergence problems.  Other fitting methods such as the Variational Bayes
 approach above can be inflexible, not allowing complicated models incorporating
 random effects, splines and missing data.
-
-% This writing doesn't flow well, needs to be improved.  Why is all of this
-% here? This might be better in the first chapter.
-% -- Start here
-Recently, several stochastic Variational Bayes approaches to approximation
-problems of this type have emerged.  \cite{Gershman2012} used a uniform
-weighted mixture of isotropic Gaussians to approximate complex posterior
-distributions. The variational lower bound is approximated with first and
-second-order Taylor series expansions, and then optimised with L-BFGS.  In
-\cite{Kingma2013}, the expectations in the expression for the variational lower
-bound are approximated using Monte Carlo integration. The variational lower
-bound is reparameterised in terms of an auxillary noise variable such as a
-standard normal, to reduce the variance of the Monte Carlo estimate.
-\cite{Tan2018} takes an approach closest to the one we will adopt, using a
-Gaussian Variational Approximation.  By parameterising the covariance matrix of
-the Gaussian using Cholesky factors of the precision matrix, the covariance
-matrix is guaranteed to be sparse due to the conditional independence between
-fixed and random effects of the mixed model. The variational lower bound can be
-rewritten so that it does not depend on the variational parameters.  By making
-a transformation in terms of a noise variable to standardise the variational
-parameters, efficient gradient estimators can be derived, then estimated using
-subsampling of the data set. Sampling from the fixed normal distribution on
-each iteration rather than a multivariate normal depending on the variational
-parameters in the current iteration reduces the variance of the estimator.
-Subsampling of the data set and sampling from the noise variable make the
-fitting algorithm doubly stochastic.
-
-Other approximate Bayesian inference techniques exist in the literature, such
-as Laplace approximation \cite{Tierney1986}/ integrated nested Laplace
-approximation \cite{Rue2009} and Expectation Propagation \cite{Minka2013}, and
-these have been applied to the problem of fitting count models
-\cite{Barber2016} \cite{KimWand2017}.  But Expectation Propagation requires
-very difficult algebra to complete the derivations required for the updates,
-and is slow to compute. And Laplace approximation relies on a Gaussian
-approximation to the log-likelihood found by Taylor expanding around the mode,
-which performs poorly when the true posterior is not symmetric, as is the case
-for Poisson regression models.
 
 We build upon a latent variable representation of these models to allow a
 tractable semiparametric mean field Variational Bayes approximation to be
@@ -908,25 +871,25 @@ matrix although not necessarily in the covariance matrix.
 
 Still another advantage of this parameterisation is its' greater numerical
 accuracy.  Matrix multiplication and back substitution are both equally
-numerically accurate and stable --- see \cite{Golub:1996:MC:248979} \S2.7.8 and
-\S3.1.2 or \cite{trefethen97} Lecture 17. Moreoever, as the precision matrix
+numerically accurate and stable - as shown in \cite{Golub:1996:MC:248979}
+\S2.7.8 and \S3.1.2 or \cite{trefethen97} Lecture 17, and the precision matrix
 will be sparse due to the specification of the mixed model/conditional
-independence, implying the numerical accuracy of the inversion will be higher
-as there are fewer non-zero entries in the Cholesky factor of the precision
-matrix than of the Cholesky factor of the covariance matrix. Thus
+independence. This implies that the numerical accuracy of the inversion will be
+higher as there are fewer non-zero entries in the Cholesky factor of the
+precision matrix than of the Cholesky factor of the covariance matrix. Thus
 parameterising the variational lower bound in terms of the precision matrix
 will have the same or higher numerical accuracy than parameterising in terms of
 the covariance matrix.
 
 \section{Numerical results}
 \label{sec:results}
-The accuracy of each model fitting algorithms presented in Section
+The accuracy of each of the model fitting algorithms presented in Section
 \ref{sec:gaussian} was assessed by comparing the approximating distribution of
 each parameter with the posterior distribution of Monte Carlo Markov Chain
 samples of that parameter. One million Monte Carlo Markov Chain samples were
-generated using \texttt{RStan}, as described in \cite{Carpenter2016} and
-\cite{StanDevelopmentTeam2016}. The accuracy of examples of random intercept,
-random slope and spline models were evaluated using this method.
+generated using \texttt{RStan} \cite{Carpenter2016, StanDevelopmentTeam2016}.
+The accuracy of examples using random intercept, random slope and spline models
+were evaluated using this method.
 		
 \subsection{Simulated data}
 For each of these simulations, the model is as presented in Section
@@ -1246,9 +1209,7 @@ In the example application presented in this paper, the zero component
 represents an apartment completely free of roaches, while the non-zero
 component represents an apartment where roaches have been able to live and
 reproduce, possibly in spite of pest control treatment aimed at preventing them
-from doing so.
-
-The model fit was
+from doing so. The model fit was
 $$
 	y_i = \begin{cases}
 	0, \phantom{-} \text{if} \phantom{-} R_i = 0, \text{ and } \\
@@ -1357,9 +1318,7 @@ their PhD. Examination of the data reveals that this number is higher than
 would be expected if the data followed a purely Poisson distribution -- 30\% of
 biochemistry graduate students published no articles in their final years
 whereas a Poisson distribution would predict only 18\%. This justifies our
-choice of model.
-
-The model fit was
+choice of model. The model fit was
 $$
 	y_i = \begin{cases}
 	\begin{array}{ll}
@@ -1434,9 +1393,7 @@ from \cite{zuur_mixed_2009}.  The sample was 599 observations of owls grouped
 across 25 nests.The fixed covariates fit in the model were food treatment
 (Deprived or Satiated) and arrival time, a continuous covariate.  The variation
 between the 25 different nests sampled from was modelled by a random intercept
-$\vu$.
-
-The model fit was
+$\vu$. The model fit was
 $$
 	y_i = \begin{cases}
 	\begin{array}{ll}
@@ -1446,7 +1403,7 @@ $$
 	\end{cases}
 $$
 
-where $\vnu = {\vbeta_2 \text{Food Treatment = Satiated} + \vbeta_3
+\noindent where $\vnu = {\vbeta_2 \text{Food Treatment = Satiated} + \vbeta_3
 \text{Arrival Time} + \vu_n}$ and $n$ is the $n$-th nest, with priors
 \begin{align*}
 R_i &\sim \text{Bernoulli}(\rho), \\
@@ -1455,7 +1412,8 @@ R_i &\sim \text{Bernoulli}(\rho), \\
 \vu &\sim \text{N}(0, \sigma_\vu^2) \quad \text{ and } \\
 \sigma_\vu^2 &\sim \text{Inverse-Gamma}(s, t).
 \end{align*}
-where $\sigma_\vbeta^2=10,000$, $A=1$, $B=1$, $s=10^{-2}$ and $r=10^{-2}$.
+\noindent where $\sigma_\vbeta^2=10,000$, $A=1$, $B=1$, $s=10^{-2}$ and
+$r=10^{-2}$.
 
 The model was fit using the GVA inverse parameterisation algorithm. The
 accuracy of the parameter estimates is shown in Figure \ref{fig:owls}. The
@@ -1504,93 +1462,3 @@ parameterisation.
 	\label{tab:owls_times}
 \end{table}
 
-\section{Conclusion}
-\label{sec:chapter_2_conclusion}
-		
-We have described a Variational Bayes approximation to Zero-Inflated Poisson
-regression models which allows such models to be fit with considerable
-generality. We have also devised and extensively tested a number of alternative
-approaches for fitting such models, and extended one of these alternative
-approaches with a new parameterisation. Using MCMC methods as the gold standard
-to test against, we have assessed the accuracy and computational speed of these
-algoritms.
-		
-We applied our model fitting algorithms to a number of data sets to fit a range
-of models. The Cockroaches model \ref{sec:cockroaches} had few fixed
-covariates, a random intercept for each apartment building and incorporated
-zero-inflation. The Police stops model \ref{sec:police_stops} was a pure
-Poisson mixed model, no zero-inflation and a random intercept for
-precincts/locality. The Biochemists model \ref{sec:biochemists} was
-zero-inflated with fixed effects. The Owls model \ref{sec:owls} was
-zero-inflated,  with a random intercepts each nest. There were a large number
-of nests (m=27). We were able to estimate the variance component for this model
-very accurately.
-
-The use of Mean Field Variational Bayes allows estimation of Bayesian ZIP
-models in a fraction of the time taken to fit the same model using even the
-best MCMC methods available, with only a small loss of accuracy. This is of
-great utility in applications where speed matters, such as model selection or
-when applied statisticians are choosing amongst many candidate models, as is
-typical in practice.
-		
-The new parameterisation of Gaussian Variational Approximation using the
-Cholesky factorisation of the inverse of $\mLambda$ presented in Section
-\ref{sec:param} provides significant advantages.  It is well known that the
-inverse of a sparse matrix need not be sparse.
-
-Mixed models have covariance matrices with a block structure, due to the
-dependence structure of the random effects. The precision parameterisation
-presented in this chapter is able to preserve this sparsity within the
-structure of the Cholesky factors of the inverses of the covariance matrices
-use in the variational lower bound by re-ordering the rows and columns of the
-matrices so that the random effects blocks appear first. The Owls example
-presented in this chapter shows the computational advantages of this approach
-when the number of groups $m$ in the model is large (m=27 in this case) -- as
-the covariance parameterisation takes 46 seconds to fit whereas the inverse
-parameterisation only takes 3 seconds. This clearly demonstrates advantage of
-using sparsity to reduce the dimension of the optimisation problem to be solved
-when models are being fit -- as only the non-zero values in the covariance
-matrices need to be optimised over. This allows models to be fit more quickly,
-and with greatly improved numerical stability and without loss of accuracy.
-
-While all of the fitting algorithms presented in this chapter except the
-Laplace's approximation algorithm were able to fit ZIP random and fixed effects
-models with high accuracy, and the  Gaussian inverse parameterisation and fixed
-point algorithms were able to do so at high speed, they  could be numerically
-unstable depending on the data the model was being fit to and their starting
-points. In the case of the Gaussian inverse parameterisation algorithm, the
-source of the problem was tracked down to the exponential function used in the
-parameterisation of the diagonal of the Cholesky factor of the precision matrix
-combined with the exponential that arises in the derivation of the Gaussian
-variational lower bound for Poisson mixed models -- leading to frequent numeric
-overflows during the fitting process. This problem, once discovered, was
-mitigated by replacing the exponential parameterisation of the diagonal of the
-Cholesky factor with a piecewise function which is exponential beneath a
-threshold and quadratic above that threshold. This was shown to greatly
-increase the numeric stability of the GVA inverse parameterisation for a range
-of starting points.
-
-Some of the algorithms which we experimented with were found to be very
-sensitive to their starting points.  While these algorithms are typically
-initialised with a starting point as close as possible to the final solution,
-this gives some sense of the stability of each algorithm. We were able to
-develop a variant of the algorithm that employs a parameterisation which is
-much more numerically stable.
-
-This thesis chapter presents the essential ideas necessary for a performant
-implementation implementing model fitting for ZIP regression models.
-%, but the performance would be even better if our algorithm was re-implemented
-%in a compiled language with good numeric libraries such as C++ with Eigen.
-The majority of the performance improvements over existing approaches come from
-avoiding unneccessary matrix inversion, which is a computationally expensive
-and numerically unstable process taking $\BigO(p^3)$ flops, and  from
-constructing and calculating with sparse matrices. The gains of these
-approaches, particularly from sparse  matrix techniques, can be difficult to
-fully realise in R without expert knowledge of the underlying implementation
-and libraries.
-		
-Our application of these ideas to Andrew Gelman's data showed that the new
-parameterisation very effectively speeds up fitting zero-inflated mixed models
-to real world data with a large number of groups, while still maintaining
-excellent accuracy versus an MCMC approach. This demonstrates the applicability
-of the ideas presented within this chapter to real world data sets.
