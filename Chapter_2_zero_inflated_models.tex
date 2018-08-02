@@ -6,6 +6,7 @@
 
 \noindent
     
+\section{Abstract}
 We consider variational inference for zero--inflated Poisson
 regression models using a latent variable representation. The model is
 extended to include random effects which allow simple incorporation of
@@ -17,25 +18,9 @@ parameterisation improves upon the computational cost and numerical
 stability of previous methods. We demonstrate these approximations on
 simulated and real data sets.
 
-% \end{abstract}
-
-\newpage
- 
-% \noindent Keywords: Approximate Bayesian inference ; mixed model ; Markov chain Monte Carlo ; Stan ; penalized splines.
-
-% \joc{
-% 	Comments: 
-% 	\begin{itemize}
-% 		\item Need to organize in terms of a flow of ideas. What are we approximating?		      		      		      		      
-% 		\item I believe that we are using a semiparametric mean field variational Bayes approach discussed by Rohde \& Wand (2015).
-% 		      However, I am not sure that we are using the their formalisms. (see page 3-6 of Rohde and Wand 2015).
-% 	\end{itemize}	
-% }
-
 \section{Introduction}
 \label{sec:introduction}
 
-% \mgc{This section is too short}
 Count data with a large number of zeroes arises in many areas of application,
 such as data arising from physical activity studies, insurance claims, hospital
 visits or defects in manufacturing processes. Zero inflation is a frequent
@@ -86,9 +71,6 @@ Gaussian prior to be used. This makes the resulting Gaussian posterior
 distribution of the regression parameters easier to interpret. Posterior
 inference on the other parameters are performed with Mean Field Variational
 Bayes.
-% -- End here
-
-% This makes sense in a paper, but not in a thesis chapter.
 
 The focus of this chapter is on developing methods of fitting flexible ZIP
 regression models accurately, and showing the advantages of our methods to
@@ -228,7 +210,7 @@ pair for the $i$th group is denoted by $(x_{ij}, y_{ij}), 1 \leq j \leq n_i, 1
 integers. For each $1 \leq i \leq m$, define the $n_i \times 1$ vectors $y_{ij}
 = [y_{i 1}, \ldots, y_{i n_i}]^\top$ as the response vector. Vectors $y_1,
 \ldots, y_m$ are assumed to be independent of each other.  We develop a
-zero-inflated regression model incorporating both fixed effects $beta$ and
+zero-inflated regression model incorporating both fixed effects $\vbeta$ and
 random effects $u$. The log-likelihood for one observation is then
 \begin{equation*}
 	\begin{array}{rl}
@@ -267,7 +249,7 @@ probability distribution
 \begin{equation*}
 \tfrac{|\mPsi|^\frac{v}{2}}{2^{\frac{vp}{2}}
 \Gamma_p{\left(\tfrac{v}{2}\right)}} |\mX|^{-\tfrac{v + p + 1}{2}}
-\exp{\left\{-\tfrac{1}{2} \tr{(\mPsi \mX^{-1})}\right\}}
+\exp{\left[-\tfrac{1}{2} \tr{(\mPsi \mX^{-1})}\right]}
 \end{equation*}
 where $\Gamma_p{(x)}$ denotes the multivariate gamma function and $\tr$ is the
 trace function.
@@ -318,13 +300,13 @@ We choose a factored variational approximation for the model of the form
     \vr_0 &= \{ r_i : y_i = 0 \}. \\
 % The distributions we select are?
     q(\vnu) &= \N(\vmu, \mLambda), \\ 
-    q(\sigma_{\vu}^2) &= \text{Inverse Wishart}\left(\mPsi + \sum_{i=1}^m (\vmu_i \vmu_i^\top + \mLambda_{\vu_i \vu_i}), v + m \right) \mbox{and } \\ 
+    q(\sigma_{\vu}^2) &= \text{Inverse Wishart}\left(\mPsi + \sum_{i=1}^m (\vmu_i \vmu_i^\top + \mLambda_{\vu_i \vu_i}), v + m \right) \mbox{, and } \\ 
     q(r_i) &= \text{Bernoulli}{(p_i)} 
 \end{align*}
 with
 $$p_i = 
 \begin{cases}
-\text{expit}\left\{ \psi{(\alpha_{q(\rho)})} - \psi{(\beta_{q(\rho)})} - \exp{(c_i^\top\vmu + \frac{1}{2} c_i^\top \mLambda c_i)} \right\},& \text{ when } \vy_i = 0\text{ ; and}\\
+    \text{expit}\left[ \psi{(\alpha_{q(\rho)})} - \psi{(\beta_{q(\rho)})} - \exp{(c_i^\top\vmu + \frac{1}{2} c_i^\top \mLambda c_i)} \right],& \text{ when } \vy_i = 0\text{ ; and}\\
 1,& \text{ otherwise.}
 \end{cases}$$
 
@@ -335,8 +317,8 @@ The optimal approximation for $\vr$ is given below % in Equation (\ref{eq:optima
 \begin{equation}
 \label{eq:optimal_approximation}
 \begin{array}{rl}
-	q(\vr) & \propto \exp \left \{ \bE_{-q(\vr)}\vy^\top\mR(\mC\vmu) - \vr^\top\exp{(\mC\vnu)}-\frac{1}{2} \vnu^\top \mSigma_{\vu \vu} \vnu \right \}                                                  \\ [1ex]
-	       & = \exp{ \left[ \vy^\top\mR\mC \vmu - \vr^\top \exp{\{\mC \vmu + \frac{1}{2} \text{diag}(\mC \mLambda \mC^\top)\}} \right] }.
+    q(\vr) & \propto \exp \left[ \bE_{-q(\vr)}\vy^\top\mR(\mC\vmu) - \vr^\top\exp{(\mC\vnu)}-\frac{1}{2} \vnu^\top \mSigma_{\vu \vu} \vnu \right] \\ [1ex]
+           & = \exp{ \left\{ \vy^\top\mR\mC \vmu - \vr^\top \exp{[\mC \vmu + \frac{1}{2} \text{diag}(\mC \mLambda \mC^\top)]} \right\} }.
 \end{array}
 \end{equation}
 
@@ -351,7 +333,7 @@ efficiently fitting these models are described in \cite{Ormerod2012,
 Challis2013, Opper2009}. Gaussian variational approximations have also been
 shown to have good asymptotic properties in \cite{Sinica2017}. The model can be
 fit using Algorithm~\ref{alg:algorithm_one} below. The derivation of the
-variational lower bound is given in \ref{sec:calculation_of_var_lb}.
+variational lower bound is given in Appendix \ref{sec:calculation_of_var_lb}.
 
 \begin{algorithm}
 	\caption[Algorithm 1]{Iterative scheme for obtaining the parameters in the
@@ -364,11 +346,11 @@ variational lower bound is given in \ref{sec:calculation_of_var_lb}.
 			\STATE Optimise $\vmu$ and $\mLambda$ using $\vy, \mC, \vp$ and $\mSigma_{\vu \vu}$ \\[1ex]
 			% \vp
 			\STATE $\beta_{q(\rho)} \leftarrow \beta_\rho + n - \vone^\top\vp$ \\[1ex]
-			\STATE $\veta \leftarrow -\exp \left \{ \mC \vmu + \frac{1}{2} \diag{(\mC\mLambda\mC^\top)} \right \} + (\psi{(\alpha_{q{(\rho)}})} - \psi{(\beta_{q{(\rho)}})}) \vone_n$ \\[1ex]
+            \STATE $\veta \leftarrow -\exp \left [ \mC \vmu + \frac{1}{2} \diag{(\mC\mLambda\mC^\top)} \right ] + (\psi{(\alpha_{q{(\rho)}})} - \psi{(\beta_{q{(\rho)}})}) \vone_n$ \\[1ex]
 			\STATE $\vp_{q(\vr_0)} \leftarrow \text{expit}{(\eta)}$ \\[1ex]
 			% \mSigma_{\vu \vu}
 			\STATE $\mPsi_{q(\mSigma_{\vu \vu})} \leftarrow \mPsi + \sum_{i=1}^m (\vmu_i \vmu_i^\top + \mLambda_{{\vu}_i {\vu}_i})$ \\[1ex]
-			\STATE $\mSigma_{\vu\vu} \leftarrow \{\mPsi_{q(\mSigma_{\vu \vu})}/(v - d - 1)\}^{-1}$
+            \STATE $\mSigma_{\vu\vu} \leftarrow [\mPsi_{q(\mSigma_{\vu \vu})}/(v - d - 1)]^{-1}$
 		\ENDWHILE
 	\end{algorithmic}
 \end{algorithm}
@@ -446,7 +428,7 @@ values and the algorithm was terminated.
 		\STATE $\mH \leftarrow [- \mC^\top \text{diag}(\vp e^{(\mC \vmu)}) \mC - \mSigma^{-1}]^{-1}$ \\ [1ex]
 		\WHILE{the increase in $\log \underline{p}(\vmu, \mLambda; \vy)$ is significant}
 		% \vmu, \mLambda
-		\STATE $\mLambda \leftarrow \left \{\mP \mC^\top \text{diag}(\exp{(\mC \vmu)}) \mC + \mSigma^{-1} \right \}^{-1}$ \\ [1ex] 
+        \STATE $\mLambda \leftarrow \left [\mP \mC^\top \text{diag}(\exp{(\mC \vmu)}) \mC + \mSigma^{-1} \right ]^{-1}$ \\ [1ex] 
 		If $\mLambda$ cannot be inverted, or any diagonal element of $\mLambda$ is negative, revert to previous
 		$\mLambda$ and break \\ [1ex]
 		\STATE $\mH
@@ -462,7 +444,7 @@ values and the algorithm was terminated.
 		
 % Detail techniques used for fitting models.
 The full variational likelihood for a Generalised Linear Mixed model is
-computationally difficult to compute, requiring the evaluation of a high
+computationally difficult to calculate, requiring the evaluation of a high
 dimensional integral. However, \cite{Ormerod2012} devised an accurate
 approximation to the full variational likelihood, the Gaussian Variational
 Lower Bound, which only requires the evaluation of a substantially simpler
@@ -560,7 +542,7 @@ changed, the  derivative with respect to $\mLambda$ is
 This variant of the algorithm uses Newton-Raphson-like fixed point updates on
 the Gaussian variational lower bound. We optimise the same variational lower
 bound as in the covariance parameterisation above, using the derivatives below.
-The steps are presented in Algorithm \ref{alg:algorithm_nr} where   the
+The steps are detailed in Algorithm \ref{alg:algorithm_nr} where the
 derivatives are as presented in Appendix
 \ref{sec:appendix_derivatives_gva_fixed_point}. As this algorithm involves a
 simple Newton-Raphson style update step, it is computationally simple to
@@ -576,18 +558,18 @@ implemented using the block inverse formula, where	the matrix was partitioned
 		\mLambda_{\vbeta \vu}^\top & \mLambda_{\vu \vu}
 	\end{pmatrix}
 \]
-where $\mLambda_{\vbeta \vbeta}$ is the $p \times p$ approximation of the fixed
-effects covariance, $\mLambda_{\vbeta \vu}$ is the $p \times mb$ approximation
+with $\mLambda_{\vbeta \vbeta}$ the $p \times p$ approximation of the fixed
+effects covariance, $\mLambda_{\vbeta \vu}$ the $p \times mb$ approximation
 of the covariances between the fixed and random effects and $\mLambda_{\vu
-\vu}$ is the $mb \times mb$ approximation of the random effects covariance.
+\vu}$ the $mb \times mb$ approximation of the random effects covariance.
 
 Sometimes in the course of  executing the algorithm, we observed numerical
 issues which had to be dealt with in order for the algorithm to successfully
-complete. If the block $\mLambda_{\vu \vu}$ cannot be inverted on an iteration,
-we reverted to $\vmu$ and $\mLambda$ from the previous iteration. If after
-updating $\vmu$ any element is NaN, we reverted to the $\vmu$ and $\mLambda$
-from the previous iteration. This greatly improved the stability of the
-algorithm.
+complete. If the block $\mLambda_{\vu \vu}$ could not be inverted on an
+iteration, we reverted to $\vmu$ and $\mLambda$ from the previous iteration. If
+after updating $\vmu$ any element of the vector was NaN, we reverted to the
+$\vmu$ and $\mLambda$ from the previous iteration. This greatly improved the
+numerical stability of the algorithm.
 
 \begin{algorithm}
 	\begin{algorithmic}
@@ -597,8 +579,8 @@ algorithm.
 		% Fit \vmu, \mLambda using Laplace approximation
 		\WHILE{the increase in $\log{\underline{p}}(\vmu, \mLambda; \vy)$
                is significant}
-			\STATE $\vg \leftarrow \mC^\top \vp [\vy - \{ \exp(\mC \vmu
-                    + \tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top)) \}] 
+               \STATE $\vg \leftarrow \mC^\top \vp \{\vy - [ \exp(\mC \vmu
+                   + \tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top))]\} 
                     - \mSigma^{-1} \vmu$ \\
 			\STATE $\mH \leftarrow
                     -\mC^\top \text{diag}(\vp^\top \exp(\mC \vmu 
@@ -620,8 +602,8 @@ algorithm.
 \section{Parameterisations of Gaussian Variational Approximation approaches}
 \label{sec:param}
 \subsection{Covariance parameterisation of $\mLambda$}
-To ensure symmetry of $\mLambda$, we parameterise the optimisation problem in
-terms of $\mLambda$'s Cholesky factor  $\mLambda = \mR^\top \mR$. We optimise
+To ensure symmetry of $\mLambda$, we parameterise the covariance matrix in
+terms of $\mLambda$'s Cholesky factor  $\mR$. We optimise
 over the space $(\vmu, \overline{\mR})$, where $\vmu \in \R^{p + m}b$ and
 $\overline{\mR}$ is a lower-triangular $(p + mb) \times (p + mb)$ matrix. Then
 \begin{equation*}
