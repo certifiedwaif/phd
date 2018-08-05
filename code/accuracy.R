@@ -197,7 +197,7 @@ calculate_accuracies <- function(test, mult, mcmc_samples, var_result, approxima
       vbeta_accuracy[i] <- calculate_accuracy(mcmc_samples$vbeta[,i], dnorm,
                                               var_result$vmu[i], sqrt(var_result$mLambda[i,i]))
       vbeta_means[i] <- mean(mcmc_samples$vbeta[, i])
-      title <- TeX(sprintf("%s $\\textbf{\\beta_%d}$ accuracy: %2.1f%%", approximation, i, vbeta_accuracy[i]))
+      title <- TeX(sprintf("%s $\\textbf{\\beta_%d}$ accuracy: %2.0f%%", approximation, i, vbeta_accuracy[i]))
       if (print_flag) print(title)
       if (plot_flag) accuracy_plot(title, mcmc_samples$vbeta[,i], dnorm,
                                    var_result$vmu[i], sqrt(var_result$mLambda[i,i]))
@@ -221,7 +221,7 @@ calculate_accuracies <- function(test, mult, mcmc_samples, var_result, approxima
         vu_means[i] <- mean(mcmc_samples$vu[, m_idx, b_idx])
         vu_sd <- sqrt(var_result$mLambda[i + mult$p, i + mult$p])
         vu_accuracy[i] <- calculate_accuracy(mcmc_samples$vu[, m_idx, b_idx], dnorm, vu_mean, vu_sd)
-        title <- TeX(sprintf("%s $\\textbf{u}_{%d}$ accuracy: %2.1f%%", approximation, i, vu_accuracy[i]))
+        title <- TeX(sprintf("%s $\\textbf{u}_{%d}$ accuracy: %2.0f%%", approximation, i, vu_accuracy[i]))
         if (print_flag) print(title)
         if (plot_flag) accuracy_plot(title, mcmc_samples$vu[, m_idx, b_idx], dnorm, vu_mean, vu_sd)
 
@@ -235,7 +235,7 @@ calculate_accuracies <- function(test, mult, mcmc_samples, var_result, approxima
         vu_sd <- sqrt(var_result$mLambda[i + mult$p, i + mult$p])
         vu_accuracy[i] <- calculate_accuracy(mcmc_samples$vu[, i], dnorm, vu_mean, vu_sd)
         vu_means[i] <- mean(mcmc_samples$vu[, i])
-        title <- sprintf("%s vu[%d] accuracy: %2.1f%%", approximation, i, vu_accuracy[i], "\n")
+        title <- sprintf("%s vu[%d] accuracy: %2.0f%%", approximation, i, vu_accuracy[i], "\n")
         if (print_flag) print(title)
         if (plot_flag) accuracy_plot(title, mcmc_samples$vu[, i], dnorm, vu_mean, vu_sd)
       }
