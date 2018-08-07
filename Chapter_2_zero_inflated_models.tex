@@ -4,9 +4,8 @@
 
 % \begin{abstract}
 
-\noindent
-    
-\section{Abstract}
+\section{Introduction}
+\label{sec:introduction}
 We consider variational inference for zero--inflated Poisson
 regression models using a latent variable representation. The model is
 extended to include random effects which allow simple incorporation of
@@ -17,9 +16,6 @@ the approximate posterior density for the random effects. This
 parameterisation improves upon the computational cost and numerical
 stability of previous methods. We demonstrate these approximations on
 simulated and real data sets.
-
-\section{Introduction}
-\label{sec:introduction}
 
 Count data with a large number of zeroes arises in many areas of application,
 such as data arising from physical activity studies, insurance claims, hospital
@@ -617,8 +613,8 @@ $\overline{\mR}$ is a lower-triangular $(p + mb) \times (p + mb)$ matrix. Then
 		
 \noindent We exponentiate the diagonal to ensure positive-definiteness of
 $\mR$. We parameterise $\mLambda$ as $\mLambda = \mR \mR^\top$ so that is is
-guaranteed to be symmetric, and we only have $p(p-1)/2$ parameters to deal with
-instead of $p^2$ parameters, some of which are constrained. 
+guaranteed to be symmetric, and the number of parameters is reduced from $p^2$
+to $p(p-1)/2$, some of which are constrained. 
 
 This parameterisation can lead to numeric overflow when the diagonals of
 $\overline{\mR}$ become moderately large, which can lead to singular matrices
@@ -629,8 +625,8 @@ quadratic for arguments greater than or equal to $t$
 \label{eq:piecewise_function}
 f(r_{ij}) =
 \begin{cases}
-	e^{r_{ij}}, r_{ij} < t                   \\
-	a r_{ij}^2 + b r_{ij} + c, r_{ij} \geq t 
+    e^{r_{ij}}, & r_{ij} < t                   \\
+    a r_{ij}^2 + b r_{ij} + c, & r_{ij} \geq t 
 \end{cases}
 \end{equation}
 
@@ -648,7 +644,8 @@ presented below formed by repeatedly  differentiating the quadratic at $r_{ij}
 	e^t & = &       &             & \quad 2a  \\
 \end{array}
 \end{equation}
-\noindent to obtain $a = e^t / 2$, $b = (1 - t) e^t$ and $c = \{1 - t^2/2 - (1 - t) t\} e^t$.
+\noindent to obtain $a = e^t / 2$, $b = (1 - t) e^t$ and $c = [1 - t^2/2 - (1 -
+t) t] e^t$.
 
 We also addressed the problem of numeric overflow by working with the Cholesky
 factorisation of $\mLambda^{-1}$ rather than $\mLambda$, allowing us to solve a
@@ -782,9 +779,10 @@ For the precision parameterisation, we observe that in this parameterisation
 \end{equation*}
 \noindent we can then calculate $\diag(\mC \mLambda \mC^\top)$.
 	
-As above, by using our knowledge of the model being fit we can encode $\mR$ sparsely to decrease the required
-computation still further. In the random intercept model case, the computational cost will drop to $n \times
-\{m + \frac{1}{2} p (p + 1) + p \times m b\}$.
+As above, by using our knowledge of the model being fit we can encode $\mR$
+sparsely to decrease the required computation still further. In the random
+intercept model case, the computational cost will drop to $n \times [m +
+\frac{1}{2} p (p + 1) + p \times m b]$.
 			
 \subsubsection{Justification of Cholesky factor of the precision matrix as the
 parameterisation} The Gaussian Variational Approximation is fit by maximising
@@ -834,7 +832,7 @@ matrix calculus and the properties of the trace operator
 &\quad -\tfrac{1}{2} \tr\{\mC^\top \text{diag}(B^{(2)}(\mC \vmu, \text{diag}(\mC \mOmega^{-1} \mC^\top))) \mC \mOmega^{-1} \tfrac{\partial \mOmega}{\partial \mOmega_{jk}} \mOmega^{-1}\} \\
 &=-\tfrac{1}{2} [ \tr(\mOmega^{-1} \mOmega \mOmega^{-1} \tfrac{\partial \mOmega}{\partial \mOmega_{jk}}) - \tr(\mSigma^{-1} \mOmega^{-1} \tfrac{\partial \mOmega}{\partial \mOmega_{jk}} \mOmega^{-1}) \\
 &\quad + \tr\{\mOmega^{-1} \mC^\top \text{diag}(B^{(2)}(\mC \vmu, \text{diag}(\mC \mOmega^{-1} \mC^\top))) \mC \mOmega^{-1} \tfrac{\partial \mOmega}{\partial \mOmega_{jk}}\} ] \\
-&= -\tfrac{1}{2} \tr[\mOmega^{-1}\{ \mOmega - \mC^\top \text{diag}(B^{(2)}(\mC \vmu, \text{diag}(\mC \mOmega^{-1} \mC^\top))) \mC - \mSigma^{-1} \} \mOmega^{-1} \tfrac{\partial \mOmega}{\partial \mOmega_{jk}}]
+&= -\tfrac{1}{2} \tr\{\mOmega^{-1}[\mOmega - \mC^\top \text{diag}(B^{(2)}(\mC \vmu, \text{diag}(\mC \mOmega^{-1} \mC^\top))) \mC - \mSigma^{-1} ] \mOmega^{-1} \tfrac{\partial \mOmega}{\partial \mOmega_{jk}}\}
 \end{array}
 \end{equation*}
 
@@ -899,7 +897,7 @@ results averaged. They are presented in Table
 		Laplace's method & $0.37$ & $0.07$ \\
 		GVA covariance parameterisation & $2.04$ & $1.24$ \\
 		% Why is this slower?
-		GVA inverse parameterisation & $0.38$ & $0.66$ \\
+		GVA precision parameterisation & $0.38$ & $0.66$ \\
 		GVA fixed point & $0.05$ & $0.07$ \\
 		\hline
 	\end{tabular}
@@ -1168,7 +1166,7 @@ Figure \ref{fig:police_stops}
 		\hline
 		Laplace & $0.24$ \\
 		GVA covariance parameterisation & $6.02$ \\
-		GVA inverse paramaterisation & $3.92$ \\
+		GVA precision paramaterisation & $3.92$ \\
 		GVA fixed point & $0.18$ \\
 		\hline
 	\end{tabular}
@@ -1317,13 +1315,15 @@ $R_i \sim \text{Bernoulli}(\rho),
 \rho \sim \text{Beta}(A, B) \text{ and } 
 \vbeta \sim \text{N}(0, \sigma_{\vbeta}^2 \mI)$
 and $A=1$, $B=1$ and $\sigma_\vbeta^2 = 10,000$. The model was fit
-using the GVA inverse parameterisation algorithm. The resulting model fit is
+using the GVA precision parameterisation algorithm. The resulting model fit is
 presented in Table \ref{tab:biochemists_results} The accuracy of the parameter
 estimates is presented in Figure \ref{fig:biochemists}. As this is a fixed
 effects model with a large number of samples relative to the number of
 parameters being fit, we are able to estimate all of the parameters with great
 accuracy.
 
+% This diagram looks a bit dodgy. It's correct, but the titles are missing
+% from the edges. Perhaps you should regenerate it.
 \begin{figure}[h]
 \centering
 % \includegraphics{code/results/accuracy_plots_application_biochemists_GVA_inv_param-nup.pdf}
@@ -1367,12 +1367,12 @@ accuracy.
 \subsection{Example - Owls}
 \label{sec:owls}
 
-The model described in this section was fit to the Owls data set from taken
-from \cite{zuur_mixed_2009}.  The sample was 599 observations of owls grouped
-across 25 nests.The fixed covariates fit in the model were food treatment
-(Deprived or Satiated) and arrival time, a continuous covariate.  The variation
-between the 25 different nests sampled from was modelled by a random intercept
-$\vu$. The model fit was
+The model described in this section was fit to the Owls data set taken from
+\cite{zuur_mixed_2009}.  The sample consists of 599 observations made of owls
+grouped across 25 nests.The fixed covariates fit in the model were food
+treatment (Deprived or Satiated), a categorical variable, and arrival time, a
+continuous covariate.  The variation between the 25 different nests sampled
+from was modelled by a random intercept $\vu$. The model fit was
 \begin{equation*}
 	y_i = \begin{cases}
 	\begin{array}{ll}
@@ -1383,19 +1383,20 @@ $\vu$. The model fit was
 \end{equation*}
 
 \noindent where $\vnu = {\vbeta_2 \I(\text{Food Treatment = Satiated}) +
-\vbeta_3 \I(\text{Arrival Time}) + \vu_n}$ and $n$ is the $n$-th nest, with
-priors $R_i \sim \text{Bernoulli}(\rho), \rho \sim \text{Beta}(A, B), \vbeta
-\sim \text{N}(\vzero, \sigma_{\vbeta}^2 \mI), \vu \sim \text{N}(0,
-\sigma_{\vu}^2) \text{ and } \sigma_\vu^2 \sim \text{Inverse-Gamma}(s, t)$ with
-$\sigma_\vbeta^2=10,000$, $A=1$, $B=1$, $s=10^{-2}$ and $r=10^{-2}$.
+\vbeta_3 \I(\text{Arrival Time}) + \vu_n}$ and $n$ is the $n$-th nest.  We
+specified the priors $R_i \sim \text{Bernoulli}(\rho)$, $\rho \sim
+\text{Beta}(A, B)$, $\vbeta \sim \text{N}(\vzero, \sigma_{\vbeta}^2 \mI)$, $\vu
+\sim \text{N}(0, \sigma_{\vu}^2)$ and $\sigma_\vu^2 \sim
+\text{Inverse-Gamma}(s, t)$ with $\sigma_\vbeta^2=10,000$, $A=1$, $B=1$,
+$s=10^{-2}$ and $r=10^{-2}$ on the parameters in the model.
 
-The model was fit using the GVA inverse parameterisation algorithm. The
-accuracy of the parameter estimates is shown in Figure \ref{fig:owls}. The
-variance component The runtime of the algorithms is shown in Table
-\ref{tab:owls_times}. We draw attention to the difference in run-times between
-the covariance and inverse parameterisations. The inverse parameterisation is
-significantly faster with a runtime of $1.88$ seconds versus $5.66$ seconds for
-the covariance parameterisation.
+The model was fit using the GVA precision parameterisation algorithm. The
+accuracy of the parameter estimates is shown in Figure \ref{fig:owls}, while
+the runtime of the algorithms is shown in Table \ref{tab:owls_times}. We draw
+attention to the difference in run-times between the covariance and precision
+parameterisations. The algorithm using the precision parameterisation fits the
+model significantly faster with a runtime of $1.88$ seconds versus $5.66$
+seconds for the covariance parameterisation.
 
 \begin{figure}[h]
 	\centering
@@ -1428,7 +1429,7 @@ the covariance parameterisation.
 	\hline
 	Laplace & $0.71$ \\
 	GVA covariance parameterisation & $5.66$ \\
-	GVA inverse parameterisation & $1.88$ \\
+	GVA precision parameterisation & $1.88$ \\
 	GVA fixed point & $0.18$ \\
 	\hline
 	\end{tabular}

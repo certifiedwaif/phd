@@ -113,13 +113,13 @@ calculating the posterior probability of the parameters using Bayes' Theorem,
 	p(\vtheta | \vy) = \frac{p(\vy | \vtheta) p(\vtheta)}{\int p(\vy | \vtheta) p(\vtheta) d \vtheta}
 \]
 
-where $\vy$ is a vector of observed data, $\vtheta$ are the model parameters
-$p(\vy|\vtheta)$ is the marginal distribution, $p(\vtheta)$ is a prior
-distribution on $\vtheta$, and $p(\vy)=\int p(\vy|\vtheta)p(\vtheta)d\vtheta$.
-Here the integral is performed over the domain of $\vtheta$. If a subset of
-$\vtheta$ are discrete random variables then the integral over these parameters
-is replaced with a combinatorial sum over all possible values of these discrete
-random variables.
+\noindent where $\vy$ is a vector of observed data, $\vtheta$ are the model
+parameters $p(\vy|\vtheta)$ is the marginal distribution, $p(\vtheta)$ is a
+prior distribution on $\vtheta$, and $p(\vy)=\int
+p(\vy|\vtheta)p(\vtheta)d\vtheta$.  Here the integral is performed over the
+domain of $\vtheta$. If a subset of $\vtheta$ are discrete random variables
+then the integral over these parameters is replaced with a combinatorial sum
+over all possible values of these discrete random variables.
 
 There are many models which are difficult to fit under the frequentist paradigm,
 as the likelihood can be difficult to maximise for complex models. Furthermore,
