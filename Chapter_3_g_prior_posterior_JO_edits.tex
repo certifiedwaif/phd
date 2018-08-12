@@ -8,8 +8,19 @@
 
 
 \noindent
-In this chapter, we consider the numerical evaluation of Bayes factors for linear models using different mixture g-priors. In particular, we consider hyperpriors for $g$ leading to closed-form expressions for the Bayes factor including the hyper-$g$ and hyper-$g/n$ priors of \cite{Liang2008}, the beta-prime prior of \cite{Maruyama2011}, the robust prior of \cite{Bayarri2012}, and the cake prior of \cite{OrmerodEtal2017}. In particular, we describe how each of these Bayes factors, except for Bayes factor under the hyper-$g/n$ prior, can be evaluated in efficient, accurate and numerically stable manner. We also derive a closed form expression for the Bayes factor under
-the hyper-$g/n$ for which we develop a convenient numerical approximation. We implement an R package for Bayesian linear model averaging, and discuss some associated computational issues. We illustrate the advantages of our implementation over several existing packages on several small datasets.
+In this chapter, we consider the numerical evaluation of Bayes factors for
+linear models using different mixture g-priors. In particular, we consider
+hyperpriors for $g$ leading to closed-form expressions for the Bayes factor
+including the hyper-$g$ and hyper-$g/n$ priors of \cite{Liang2008}, the
+beta-prime prior of \cite{Maruyama2011}, the robust prior of
+\cite{Bayarri2012}, and the cake prior of \cite{OrmerodEtal2017}. In
+particular, we describe how each of these Bayes factors, except for Bayes
+factor under the hyper-$g/n$ prior, can be evaluated in efficient, accurate and
+numerically stable manner. We also derive a closed form expression for the
+Bayes factor under the hyper-$g/n$ for which we develop a convenient numerical
+approximation. We implement an R package for Bayesian linear model averaging,
+and discuss some associated computational issues. We illustrate the advantages
+of our implementation over several existing packages on several small datasets.
 
 
 \vfill
@@ -26,15 +37,18 @@ the hyper-$g/n$ for which we develop a convenient numerical approximation. We im
 \section{Introduction}
 
  
-There has been a large amount of research in recent years into the appropriate choice of suitable 
-and meaningful priors for linear regression models in the context of Bayesian model selection and 
-averaging. Specification of the prior structure of these models must be made with great care in 
-order for Bayesian model selection and averaging procedures to have good theoretical properties. 
-A key problem in this context occurs when the models have differing dimensions and non-common 
-parameters where inferences are typically highly sensitive to the choice of priors for the 
-non-common parameters due to the Jeffreys-Lindley-Bartlett paradox \citep{Lindley1957,Bartlett1957,OrmerodEtal2017}.
-Furthermore, this sensitivity does not necessarily vanish as the sample size 
-grows \citep{Kass1995,Berger2001}.  
+There has been a large amount of research in recent years into the appropriate
+choice of suitable and meaningful priors for linear regression models in the
+context of Bayesian model selection and averaging. Specification of the prior
+structure of these models must be made with great care in order for Bayesian
+model selection and averaging procedures to have good theoretical properties.
+A key problem in this context occurs when the models have differing dimensions
+and non-common parameters where inferences are typically highly sensitive to
+the choice of priors for the non-common parameters due to the
+Jeffreys-Lindley-Bartlett paradox
+\citep{Lindley1957,Bartlett1957,OrmerodEtal2017}.  Furthermore, this
+sensitivity does not necessarily vanish as the sample size grows
+\citep{Kass1995,Berger2001}.  
 
 Bayes factors in the context of linear model selection 
 \citep{Zellner1980,
@@ -45,56 +59,64 @@ Bayes factors in the context of linear model selection
 	Liang2008,
 	Maruyama2011,
 	Bayarri2012}
-have received an 
-enormous amount of attention. A landmark paper in this field is \cite{Liang2008}.
-\cite{Liang2008} considers a particular prior structure for the model parameters. 
-In particular they consider a Zellner's $g$-prior \citep{Zellner1980,Zellner1986} 
-for the regression coefficients where $g$ is a prior hyperparameter. The parameter $g$
-requires special consideration. If $g$ is set to a large constant most of the posterior
-mass is placed on the null model, a phenomenon sometimes referred to as Bartlett's paradox.
-Due to this problem they discuss previous approaches which set $g$ to a constant, e.g., setting $g=n$ \citep{Kass1995b},  $g=p^2$ \citep{Foster1994},
-and $g=\max(n,p^2)$ \citep{Fernandez2001}. However, \cite{Liang2008} showed that 
-all of these choices
-lead to what they call the information paradox, where the posterior probability of the
-true model does not tend to 1 as the sample size grows. Finally, \cite{Liang2008} also consider
-a local and global empirical Bayes (EB) procedure for selecting $g$. In these cases \cite{Liang2008}
-show that these EB procedures are model selection consistent except when the true model is the null
-model (the model containing the intercept only). 
+have received an enormous amount of attention. A landmark paper in this field
+is \cite{Liang2008}.  \cite{Liang2008} considers a particular prior structure
+for the model parameters.  In particular they consider a Zellner's $g$-prior
+\citep{Zellner1980,Zellner1986} for the regression coefficients where $g$ is a
+prior hyperparameter. The parameter $g$ requires special consideration. If $g$
+is set to a large constant most of the posterior mass is placed on the null
+model, a phenomenon sometimes referred to as Bartlett's paradox.  Due to this
+problem they discuss previous approaches which set $g$ to a constant, e.g.,
+setting $g=n$ \citep{Kass1995b},  $g=p^2$ \citep{Foster1994}, and
+$g=\max(n,p^2)$ \citep{Fernandez2001}. However, \cite{Liang2008} showed that
+all of these choices lead to what they call the information paradox, where the
+posterior probability of the true model does not tend to 1 as the sample size
+grows. Finally, \cite{Liang2008} also consider a local and global empirical
+Bayes (EB) procedure for selecting $g$. In these cases \cite{Liang2008} show
+that these EB procedures are model selection consistent except when the true
+model is the null model (the model containing the intercept only). 
 
-The above problems suggest that a hyperprior should
-be placed on $g$. \cite{Bayarri2012} also discuss in some depth desirable properties
-priors should have in the context of linear model averaging and selection. 
-In this chapter we review the prior structures, specifically the hyperpriors on $g$, 
-that lead to closed form expressions of Bayes factors for linear models.
-These include the hyper-$g$ prior of \cite{Liang2008}, the beta-prime prior of \cite{Maruyama2011}, and the robust 
-prior of \cite{Bayarri2012}, and most recently the cake prior of \cite{OrmerodEtal2017} leads to a Bayes factor which is a simple function of the Bayesian Information Criterion (BIC). We concern ourselves with the efficient, accurate and numerically stable evaluation of Bayes factors, Bayesian model averaging,
-and Bayesian model selection  for linear models 
-under the above choices of prior structures for the model parameters.
+The above problems suggest that a hyperprior should be placed on $g$.
+\cite{Bayarri2012} also discuss in some depth desirable properties priors
+should have in the context of linear model averaging and selection.  In this
+chapter we review the prior structures, specifically the hyperpriors on $g$,
+that lead to closed form expressions of Bayes factors for linear models.  These
+include the hyper-$g$ prior of \cite{Liang2008}, the beta-prime prior of
+\cite{Maruyama2011}, and the robust prior of \cite{Bayarri2012}, and most
+recently the cake prior of \cite{OrmerodEtal2017} leads to a Bayes factor which
+is a simple function of the Bayesian Information Criterion (BIC). We concern
+ourselves with the efficient, accurate and numerically stable evaluation of
+Bayes factors, Bayesian model averaging, and Bayesian model selection  for
+linear models under the above choices of prior structures for the model
+parameters.
 
 
 Our main contributions in this chapter are as follows.
 \begin{enumerate}
-	\item To the above list of hyperpriors on $g$ leading to closed form Bayes factors
-	we add the  hyper-$g/n$ prior of \cite{Liang2008} for which we
-	derive a new closed form expression for the Bayes factor in terms
-	of the Appell hypergeometric function.
+
+    \item To the above list of hyperpriors on $g$ leading to closed form Bayes
+        factors we add the  hyper-$g/n$ prior of \cite{Liang2008} for which we
+        derive a new closed form expression for the Bayes factor in terms of
+        the Appell hypergeometric function.
 	
-	\item We derive an alternative expression for the Bayes factor when using the
-	robust prior of \cite{Bayarri2012} in terms of the Gaussian hypergeometric function.
+    \item We derive an alternative expression for the Bayes factor when using
+        the robust prior of \cite{Bayarri2012} in terms of the Gaussian
+        hypergeometric function.
 	
-	\item We describe how the  Bayes factors corresponding to the hyper-$g$ prior of \cite{Liang2008} 
-	and robust prior of \cite{Bayarri2012} can be calculated in an efficient, accurate and numerically 
-	stable manner without the need for special software or approximation.
+    \item We describe how the  Bayes factors corresponding to the hyper-$g$
+        prior of \cite{Liang2008} and robust prior of \cite{Bayarri2012} can be
+        calculated in an efficient, accurate and numerically stable manner
+        without the need for special software or approximation.
 	
-	\item We derive a reasonably accurate approximation for the Appell hypergeometric function
-	which can be calculated in an efficient and numerically 
-	stable manner when the number of non-zero coefficients in a particular model is strictly greater than 2.
+    \item We derive a reasonably accurate approximation for the Appell
+        hypergeometric function which can be calculated in an efficient and
+        numerically stable manner when the number of non-zero coefficients in a
+        particular model is strictly greater than 2.
 	
-	\item We make available a highly efficient and {\it numerically stable} {\tt R}
-	package called
-	{\tt blma} available
-	for exact Bayesian linear model averaging 
-	using the above prior structures which is available for download from the following web address.
+    \item We make available a highly efficient and {\it numerically stable}
+        {\tt R} package called {\tt blma} available for exact Bayesian linear
+        model averaging using the above prior structures which is available for
+        download from the following web address.
 	
 	\begin{center}
 		\url{http://github.com/certifiedwaif/blma}
@@ -102,47 +124,33 @@ Our main contributions in this chapter are as follows.
 
 \end{enumerate}
 
-\noindent 
-We demonstrate the advantages of our implementation of exact Bayesian model
-averaging over some existing {\tt R}
-packages using several small datasets.
+\noindent We demonstrate the advantages of our implementation of exact Bayesian
+model averaging over some existing {\tt R} packages using several small
+datasets.
 
 
-The chapter is organised as follows. Section \ref{sec:bma} describes Bayesian model averaging and model
-selection for linear models. Section \ref{sec:model} outlines and justifies our chosen model and prior structure for the linear regression model parameters. Section 
-\ref{sec:hyperpriors} derives closed form expressions for various marginal likelihoods using 
-different hyperpriors for $g$ and, wherever possible, describes how these may be evaluated well numerically.
-In Section \ref{sec:implementation}, we discuss details of our implementation which made our implementation 
-computationally feasible.
-In Section \ref{sec:numerical_g_prior} we perform a series of numerical experiments to show the advantages of our approach. 
-Finally, in Section \ref{sec:conclusion} we provide a conclusion and discuss future
-directions.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+The chapter is organised as follows. Section \ref{sec:bma} describes Bayesian
+model averaging and model selection for linear models. Section \ref{sec:model}
+outlines and justifies our chosen model and prior structure for the linear
+regression model parameters. Section \ref{sec:hyperpriors} derives closed form
+expressions for various marginal likelihoods using different hyperpriors for
+$g$ and, wherever possible, describes how these may be evaluated well
+numerically.  In Section \ref{sec:implementation}, we discuss details of our
+implementation which made our implementation computationally feasible.  In
+Section \ref{sec:numerical_g_prior} we perform a series of numerical
+experiments to show the advantages of our approach. 
+%Finally, in Section \ref{sec:conclusion} we provide a conclusion and discuss
+%future directions.
 
 \section{Bayesian linear model selection and averaging}
 \label{sec:bma}
 
-
-
-Suppose $\vy = (y_1,\ldots,y_n)^T$ is a response vector of length $n$, $\mX$ is an $n$ by $p$ matrix 
-of covariates where we anticipate a linear relationship between $\vy$ and $\mX$, but do not know
-which of the columns of $\mX$ are important to the prediction of $\vy$.
-Bayesian model averaging seeks to improve prediction by averaging over multiple
-predictions over different choices of combinations of predictors.
+Suppose $\vy = (y_1,\ldots,y_n)^T$ is a response vector of length $n$, $\mX$ is
+an $n \times p$ matrix of covariates where we anticipate a linear relationship
+between $\vy$ and $\mX$, but do not know which of the columns of $\mX$ are
+important to the prediction of $\vy$.  Bayesian model averaging seeks to
+improve prediction by averaging over multiple predictions over different
+choices of combinations of predictors.
 
 We consider the linear model for predicting $\vy$ with design matrix $\mX$ via
 \begin{equation}
@@ -151,256 +159,222 @@ We consider the linear model for predicting $\vy$ with design matrix $\mX$ via
 \end{equation} 
 
 
-\noindent where $\alpha$ is the model intercept, $\vbeta$ is a coefficient vector of length $p$, 
-$\sigma^2$ is the residual variance, and $\mI$ is the $n \times n$ identity matrix. 
-Without loss of generality, to simplify later calculations, we will standardize $\vy$ and $\mX$ 
-so that $\overline{y} = 0$, 
-$\|\vy\|^2 = \vy^T\vy = n$, $\mX_j^T\vone = 0$,  and $\|\mX_j\|^2 = n$ where $\mX_j$ is the $j$th 
-column of $\mX$. 
+\noindent where $\alpha$ is the model intercept, $\vbeta$ is a coefficient
+vector of length $p$, $\sigma^2$ is the residual variance, and $\mI$ is the $n
+\times n$ identity matrix.  Without loss of generality, to simplify later
+calculations, we will standardize $\vy$ and $\mX$ so that $\overline{y} = 0$,
+$\|\vy\|^2 = \vy^T\vy = n$, $\mX_j^T\vone = 0$,  and $\|\mX_j\|^2 = n$ where
+$\mX_j$ is the $j$th column of $\mX$. 
 
 
-Suppose that we wish to perform Bayesian model selection, model averaging or hypothesis 
-testing where we are interested in comparing how different subsets of predictors 
-(which correspond to different columns of the matrix $\mX$) have on the response $\vy$. To this end, 
-let $\vgamma \in \{0, 1\}^p$ be a binary vector of indicators for the inclusion of the $p$th column 
-of $\mX$ in the model where $\mX_\vgamma$ denotes the design matrix formed by including only the 
-$j$th column of $\mX$ when $\gamma_j = 1$, and excluding it otherwise. 
+Suppose that we wish to perform Bayesian model selection, model averaging or
+hypothesis testing where we are interested in comparing how different subsets
+of predictors (which correspond to different columns of the matrix $\mX$) have
+on the response $\vy$. To this end, let $\vgamma \in \{0, 1\}^p$ be a binary
+vector of indicators for the inclusion of the $p$th column of $\mX$ in the
+model where $\mX_\vgamma$ denotes the design matrix formed by including only
+the $j$th column of $\mX$ when $\gamma_j = 1$, and excluding it otherwise. 
 
-In order to keep our exposition as general as possible we will assume a prior structure of
-the from 
-$p(\alpha,\vbeta_{\vgamma}|\vgamma)p(\vgamma)$ but,
-for
-the time being, we will leave the specific form of $p(\alpha,\vbeta_{\vgamma}|\vgamma)$ and $p(\vgamma)$ unspecified. 
-We adopt a prior on $\vbeta_{-\vgamma}$  
-of the form
+In order to keep our exposition as general as possible we will assume a prior
+structure of $p(\alpha,\vbeta_{\vgamma}|\vgamma)p(\vgamma)$ but, for the time
+being, we will leave the specific form of $p(\alpha,\vbeta_{\vgamma}|\vgamma)$
+and $p(\vgamma)$ unspecified.  We adopt a prior on $\vbeta_{-\vgamma}$  of the
+form
 \begin{equation}
 	\label{eq:spikeAndSlab}
 	\ds p(\vbeta_{-\vgamma}|\vgamma) = \prod_{j=1}^p \delta(\beta_j;0)^{1-\gamma_j},
 \end{equation} 
 
-\noindent where $\delta(x;a)$ is the Dirac delta function with location $a$.  
-The prior on $\vbeta_{-\vgamma}$ in (\ref{eq:spikeAndSlab}) is the spike 
-in a spike and slab prior where the prior on $\vbeta_{\vgamma}$ is assumed to be flat (the slab). There are
-several variants of the spike and slab prior initially used in
-\cite{Mitchell1988}
-and later refined in
-\cite{George1993}. 
-The above structure implies 
-that $p(\vbeta_{-\vgamma}|\vy)$ is a point mass at $\vzero$
-and leads to
-algebraic and computational simplifications for components of $\vbeta$ when corresponding elements of $\vgamma$ are zero.
-Thus, $\gamma_j=0$ is equivalent to excluding the corresponding predictor $\mX_j$ from the model.
+\noindent where $\delta(x;a)$ is the Dirac delta function with location $a$.
+The prior on $\vbeta_{-\vgamma}$ in (\ref{eq:spikeAndSlab}) is the spike in a
+spike and slab prior where the prior on $\vbeta_{\vgamma}$ is assumed to be
+flat (the slab). There are several variants of the spike and slab prior
+initially used in \cite{Mitchell1988} and later refined in \cite{George1993}.
+The above structure implies that $p(\vbeta_{-\vgamma}|\vy)$ is a point mass at
+$\vzero$ and leads to algebraic and computational simplifications for
+components of $\vbeta$ when corresponding elements of $\vgamma$ are zero.
+Thus, $\gamma_j=0$ is equivalent to excluding the corresponding predictor
+$\mX_j$ from the model.
 
 
-Exact Bayesian model averaging revolves around the posterior
-probability of a model $\vgamma$ using Bayes theorem
-$$
+Exact Bayesian model averaging revolves around the posterior probability of a
+model $\vgamma$ using Bayes theorem
+\begin{equation*}
 \ds p(\vgamma|\vy) = \frac{p(\vy|\vgamma)p(\vgamma)}{\sum_{\vgamma'} p(\vy|\vgamma')p(\vgamma')} = \frac{p(\vgamma)\mbox{BF}(\vgamma)}{\sum_{\vgamma'} p(\vgamma')\mbox{BF}(\vgamma')}
 \quad \mbox{where} \quad 
 p(\vy|\vgamma) = \int p(\vy,\vtheta|\vgamma) \, d\vtheta,
-$$
+\end{equation*}
 
-\noindent letting $\vtheta = (\alpha,\vbeta,\sigma^2)$, using $\sum_{\vgamma}$ to denote a combinatorial sum over all
-$2^p$ possible values of $\vgamma$, and $\mbox{BF}(\vgamma) = p(\vy|\vgamma)/p(\vy|\vzero)$
-is the null based Bayes factor for model $\vgamma$.
-Note that the Bayes factor is a statistic commonly used in Bayesian hypothesis testing 
-\citep{Kass1995,OrmerodEtal2017}.
-Prediction is based on the 
-the posterior distributions of $\alpha$ and $\vbeta$ where
-$p(\vbeta|\vy) = \sum_{\vgamma} p(\vbeta|\vy,\vgamma) \cdot p(\vgamma|\vy)$
-(with similar expressions for $\alpha$ and $\sigma^2$).
-The 
-posterior expectation of $\vgamma$ is given by
-$\bE(\vgamma|\vy) = \sum_{\vgamma} \vgamma \cdot p(\vgamma|\vy)$.
+\noindent letting $\vtheta = (\alpha,\vbeta,\sigma^2)$, using $\sum_{\vgamma}$
+to denote a combinatorial sum over all $2^p$ possible values of $\vgamma$, and
+$\mbox{BF}(\vgamma) = p(\vy|\vgamma)/p(\vy|\vzero)$ is the null based Bayes
+factor for model $\vgamma$.  Note that the Bayes factor is a statistic commonly
+used in Bayesian hypothesis testing \citep{Kass1995,OrmerodEtal2017}.
+Prediction is based on the the posterior distributions of $\alpha$ and $\vbeta$
+where $p(\vbeta|\vy) = \sum_{\vgamma} p(\vbeta|\vy,\vgamma) \cdot
+p(\vgamma|\vy)$ (with similar expressions for $\alpha$ and $\sigma^2$).  The
+posterior expectation of $\vgamma$ is given by $\bE(\vgamma|\vy) =
+\sum_{\vgamma} \vgamma \cdot p(\vgamma|\vy)$.
 
-If one is required to select a single model, say $\vgamma^*$, two common choices are the 
-highest posterior model (HPM) which uses $\vgamma^* = \vgamma_{\mbox{\tiny HPM}} = \argmax_\vgamma \{ \, p(\vy|\vgamma) \, \}$, or the
-median posterior model (MPM) where $\vgamma^*$ is obtained by
-rounding each element of $\bE(\vgamma|\vy)$ to the nearest integer.
-The MPM has predictive optimality properties \citep{Barbieri2004}.
-If the MPM is used for model selection
-the quantity $\bE(\vgamma|\vy)$ is sometimes referred to as the
+If one is required to select a single model, say $\vgamma^*$, two common
+choices are the highest posterior model (HPM) which uses $\vgamma^* =
+\vgamma_{\mbox{\tiny HPM}} = \argmax_\vgamma \{ \, p(\vy|\vgamma) \, \}$, or
+the median posterior model (MPM) where $\vgamma^*$ is obtained by rounding each
+element of $\bE(\vgamma|\vy)$ to the nearest integer.  The MPM has predictive
+optimality properties \citep{Barbieri2004}.  If the MPM is used for model
+selection the quantity $\bE(\vgamma|\vy)$ is sometimes referred to as the
 posterior (variable) inclusion probability (PIP) vector.
 
 Ignoring for the moment the problems associated with specifying
-$p(\alpha,\vbeta_{-\vgamma},\vgamma)$, all of the above quantities are conceptually
-straightforward. In practice the computation of the quantities $p(\vgamma|\vy)$, $p(\vbeta|\vy)$ and 
-$\bE(\vgamma|\vy)$ are only feasible for small values of $p$ (say around $p=30$). For large values of $p$ we need to pursue
-alternatives to exact inference.
+$p(\alpha,\vbeta_{-\vgamma},\vgamma)$, all of the above quantities are
+conceptually straightforward. In practice the computation of the quantities
+$p(\vgamma|\vy)$, $p(\vbeta|\vy)$ and $\bE(\vgamma|\vy)$ are only feasible for
+small values of $p$ (say around $p=30$). For large values of $p$ we need to
+pursue alternatives to exact inference.
 
 
 
 \section{Prior specification for linear model parameters}
 \label{sec:model}
 
-We will specify the prior $p(\alpha,\vbeta,\sigma^2|\vgamma)$.
-as follows
+We will specify the prior $p(\alpha,\vbeta,\sigma^2|\vgamma)$ as follows
 \begin{equation}
 	\label{eq:priorStructure}
 	\begin{array}{c}
 		\ds p(\alpha) \propto 1,  
 		\qquad 
-		\vbeta_\vgamma | \sigma^2, g, \vgamma \sim \N_p(\vzero, g \sigma^2 (\mX_\vgamma^T \mX_\vgamma)^{-1})
+		\vbeta_\vgamma | \sigma^2, g, \vgamma \sim \N_p(\vzero, g \sigma^2 (\mX_\vgamma^T \mX_\vgamma)^{-1}),
 		\quad \text{ and }  \quad 
 		\ds p(\sigma^2) \propto (\sigma^2)^{-1},                      
 	\end{array}
 \end{equation} 
 
-\noindent where we have introduced a new prior hyperparameter $g$.
-For the time being we will defer specification of $p(g)$ and $p(\vgamma)$.
-We will now justify each element of the above prior structure.
+\noindent where we have introduced a new prior hyperparameter $g$.  For the
+time being we will defer specification of $p(g)$ and $p(\vgamma)$.  We will now
+justify each element of the above prior structure.
 
-The priors on $\alpha$ and $\sigma^2$ are improper Jeffreys priors and have been justified 
-in \cite{Berger1998}. In the context of Bayesian model selection, model averaging or hypothesis 
-testing $\alpha$ and $\sigma^2$ appear in all models 
-so that when comparing models the proportionality constants in the corresponding
-Bayes factors cancel.
+The priors on $\alpha$ and $\sigma^2$ are improper Jeffreys priors and have
+been justified in \cite{Berger1998}. In the context of Bayesian model
+selection, model averaging or hypothesis testing $\alpha$ and $\sigma^2$ appear
+in all models so that when comparing models the proportionality constants in
+the corresponding Bayes factors cancel.
 
-The prior on $\vbeta_\vgamma$ is Zellner's $g$-prior \citep[see for example,][]{Zellner1986} with prior 
-hyperparameter $g$. This family of priors for a Gaussian regression model where the prior covariance 
-matrix of $\vbeta_\vgamma$ is taken to be a multiple of $g$ with the Fisher information matrix for $\vbeta$. 
-This places the most prior mass for $\vbeta_\vgamma$ on the section of the parameter space where the data is 
-least informative, and makes the marginal likelihood of the model scale-invariant. Furthermore, this 
-choice of prior removes a log-determinant of $\mX_\vgamma^T\mX_\vgamma$ term from the expression for the marginal 
-likelihood, which is an additional computational burden to calculate.
-The prior on $\vbeta_\vgamma$ combined with the prior on $\vbeta_{-\vgamma}$
-in (\ref{eq:priorStructure}) constitutes one variant of the spike and slab prior for $\vbeta$.
+The prior on $\vbeta_\vgamma$ is Zellner's $g$-prior \citep[see for
+example,][]{Zellner1986} with prior hyperparameter $g$. This family of priors
+for a Gaussian regression model where the prior covariance matrix of
+$\vbeta_\vgamma$ is taken to be a multiple of $g$ with the Fisher information
+matrix for $\vbeta$.  This places the most prior mass for $\vbeta_\vgamma$ on
+the section of the parameter space where the data is least informative, and
+makes the marginal likelihood of the model scale-invariant. Furthermore, this
+choice of prior removes a log-determinant of $\mX_\vgamma^T\mX_\vgamma$ term
+from the expression for the marginal likelihood, which is an additional
+computational burden to calculate.  The prior on $\vbeta_\vgamma$ combined with
+the prior on $\vbeta_{-\vgamma}$ in (\ref{eq:priorStructure}) constitutes one
+variant of the spike and slab prior for $\vbeta$.
 
-An alternative choice of prior on $\vbeta_\vgamma$ was proposed by \cite{Maruyama2011}. Let
-$p_{\vgamma} = |\vgamma|$, the number of non-zero elements in $\vgamma$. We will now describe their prior on $\vbeta_\vgamma$ for the case where for the case
-$p_{\vgamma} < n - 1$. Let $\mU\mLambda\mU^T$ be an eigenvalue decomposition of $\mX_\vgamma^T\mX_\vgamma$
-where $\mU$ is an orthonormal $p_{\vgamma} \times p_{\vgamma}$ matrix, and $\mLambda = \mbox{diag}(\lambda_1,\ldots,\lambda_{p_{\vgamma}})$ 
-is a diagonal matrix of eigenvalues with $\lambda_1\ge\ldots,\ge \lambda_{p_{\vgamma}}>0$. Then \cite{Maruyama2011} 
-propose a prior for $\vbeta_\vgamma$ of the form
-\begin{equation}
-	\label{eq:priorBetaMG}
-	\vbeta_\vgamma | \sigma^2, g \sim \N(\vzero, \sigma^2 (\mU\mW\mU^\top)^{-1}),   
-\end{equation} 
+An alternative choice of prior on $\vbeta_\vgamma$ was proposed by
+\cite{Maruyama2011}. Let $p_{\vgamma} = |\vgamma|$, the number of non-zero
+elements in $\vgamma$. We will now describe their prior on $\vbeta_\vgamma$ for
+the case where for the case $p_{\vgamma} < n - 1$. Let $\mU\mLambda\mU^T$ be an
+eigenvalue decomposition of $\mX_\vgamma^T\mX_\vgamma$ where $\mU$ is an
+orthonormal $p_{\vgamma} \times p_{\vgamma}$ matrix, and $\mLambda =
+\mbox{diag}(\lambda_1,\ldots,\lambda_{p_{\vgamma}})$ is a diagonal matrix of
+eigenvalues with $\lambda_1\ge\ldots,\ge \lambda_{p_{\vgamma}}>0$. Then
+\cite{Maruyama2011} propose a prior for $\vbeta_\vgamma$ of the form
+\begin{equation} \label{eq:priorBetaMG} \vbeta_\vgamma | \sigma^2, g \sim
+\N(\vzero, \sigma^2 (\mU\mW\mU^\top)^{-1}),   \end{equation} 
 
-\noindent where $\mW = \mbox{diag}(w_1,\ldots,w_{p_{\vgamma}})$ with $ w_j = \lambda_j/[\nu_j(1 + g) - 1]$ for 
-some prior hyperparameters $\nu_q < \ldots < \nu_1$. \cite{Maruyama2011} suggest as a default 
-choice for the $\nu_j$'s to use $\nu_j = \lambda_j/\lambda_{p_{\vgamma}}$, for $1\le j \le p_{\vgamma}$. 
-This choice down-weights the prior on the rotated parameter space of $(\mU \vbeta)_j$ when the 
-corresponding eigenvalue $\lambda_j$ is large, which leads to prior standard errors that are 
-approximately the same size. Note that when $\nu_1 = \ldots = \nu_{p_{\vgamma}} = 1$ the prior 
-(\ref{eq:priorBetaMG}) reduces to the prior for $\vbeta$ in (\ref{eq:priorStructure}). 
+\noindent where $\mW = \mbox{diag}(w_1,\ldots,w_{p_{\vgamma}})$ with $ w_j =
+\lambda_j/[\nu_j(1 + g) - 1]$ for some prior hyperparameters $\nu_q < \ldots <
+\nu_1$. \cite{Maruyama2011} suggest as a default choice for the $\nu_j$'s to
+use $\nu_j = \lambda_j/\lambda_{p_{\vgamma}}$, for $1\le j \le p_{\vgamma}$.
+This choice down-weights the prior on the rotated parameter space of $(\mU
+\vbeta)_j$ when the corresponding eigenvalue $\lambda_j$ is large, which leads
+to prior standard errors that are approximately the same size. Note that when
+$\nu_1 = \ldots = \nu_{p_{\vgamma}} = 1$ the prior (\ref{eq:priorBetaMG})
+reduces to the prior for $\vbeta$ in (\ref{eq:priorStructure}). 
 
-The choice between (\ref{eq:priorBetaMG}) and the prior for $\vbeta$ in (\ref{eq:priorStructure}) 
-represents a trade-off over computational efficiency and desirable statistical properties. We choose
-(\ref{eq:priorStructure}) because it avoids the computational burden of calculating an eigenvalue or a singular 
-value decomposition of a $p_{\vgamma}\times p_{\vgamma}$ matrix for every model considered,
-which typically can be computed in $O(p_{\vgamma}^3)$ floating point operations.
-It also means that we can 
-exploit efficient matrix updates to traverse the entire model space in a computationally efficient 
-manner allowing this to be done feasibly when $p$ is less than around 30 on a standard 2017 laptop 
-(see Section \ref{sec:implementation} for details).
+The choice between (\ref{eq:priorBetaMG}) and the prior for $\vbeta$ in
+(\ref{eq:priorStructure}) represents a trade-off over computational efficiency
+and desirable statistical properties. We choose (\ref{eq:priorStructure})
+because it avoids the computational burden of calculating an eigenvalue or a
+singular value decomposition of a $p_{\vgamma}\times p_{\vgamma}$ matrix for
+every model considered, which typically can be computed in $O(p_{\vgamma}^3)$
+floating point operations.  It also means that we can exploit efficient matrix
+updates to traverse the entire model space in a computationally efficient
+manner allowing this to be done feasibly when $p$ is less than around 30 on a
+standard 2017 laptop (see Section \ref{sec:implementation} for details).
 
 
-The marginal likelihood for the
-model  (\ref{eq:linearModel}) and under prior structure
-(\ref{eq:priorStructure}). 
-%Integrating out $\alpha$ and $\vbeta$ from 
-%$p(\vy,\alpha,\vbeta|\sigma^2,g)$ we find
-%\begin{equation}\label{eq:yGivenSigma2andG}
-%\begin{array}{rl}
-%\ds p(\vy|\sigma^2,g)
-%& \ds = \int \exp\left[
-%- \tfrac{n}{2}\log(2\pi\sigma^2) 
-%- \tfrac{1}{2\sigma^2}\|\vy - \vone\alpha - \mX\vbeta\|^2
-%- \tfrac{p}{2}\log(2\pi g\sigma^2) 
-%+ \tfrac{1}{2}\log|\mX^T\mX|
-%- \tfrac{1}{2g\sigma^2}\vbeta^T\mX^T\mX\vbeta  
-%\right] d\alpha d\vbeta
-%\\
-%& \ds = \int \exp\left[
-%- \tfrac{n}{2}\log(2\pi\sigma^2) 
-%- \tfrac{n}{2\sigma^2}
-%- \tfrac{n\alpha^2}{2\sigma^2} 
-%+ \sigma^{-2}\vy^T\mX\vbeta
-%- \tfrac{1}{2\sigma^2}(1 + g^{-1})\vbeta^T\mX^T\mX\vbeta 
-%- \tfrac{p}{2}\log(2\pi g\sigma^2) 
-%+ \tfrac{1}{2}\log|\mX^T\mX|
-%\right] d\alpha d\vbeta
-%\\
-%& \ds = \int \exp\left[
-%- \tfrac{n-1}{2}\log(2\pi\sigma^2) 
-%- \tfrac{1}{2}\log(n)
-%- \tfrac{n}{2\sigma^2}
-%+ \sigma^{-2}\vy^T\mX\vbeta
-%- \tfrac{1}{2\sigma^2}(1 + g^{-1})\vbeta^T\mX^T\mX\vbeta 
-%- \tfrac{p}{2}\log(2\pi g\sigma^2) 
-%+ \tfrac{1}{2}\log|\mX^T\mX|
-%\right]  d\vbeta
-%\\
-%& 
-%\ds = \exp\left[
-%- \tfrac{n-1}{2}\log(2\pi\sigma^2) 
-%- \tfrac{1}{2}\log(n)
-%- \tfrac{p}{2}\log(1 + g)
-%- \tfrac{n}{2 \sigma^2} \left( 1 - \tfrac{g}{1 + g} R^2 \right)  
-%\right],
-%\end{array} 
-%\end{equation}
+The marginal likelihood for the model  (\ref{eq:linearModel}) and under prior
+structure (\ref{eq:priorStructure}). 
+%Integrating out $\alpha$ and $\vbeta$ from $p(\vy,\alpha,\vbeta|\sigma^2,g)$
+%we find \begin{equation}\label{eq:yGivenSigma2andG} \begin{array}{rl} \ds
+%p(\vy|\sigma^2,g) & \ds = \int \exp\left[ - \tfrac{n}{2}\log(2\pi\sigma^2) -
+%\tfrac{1}{2\sigma^2}\|\vy - \vone\alpha - \mX\vbeta\|^2 -
+%\tfrac{p}{2}\log(2\pi g\sigma^2) + \tfrac{1}{2}\log|\mX^T\mX| -
+%\tfrac{1}{2g\sigma^2}\vbeta^T\mX^T\mX\vbeta  \right] d\alpha d\vbeta \\ & \ds
+%= \int \exp\left[ - \tfrac{n}{2}\log(2\pi\sigma^2) - \tfrac{n}{2\sigma^2} -
+%\tfrac{n\alpha^2}{2\sigma^2} + \sigma^{-2}\vy^T\mX\vbeta -
+%\tfrac{1}{2\sigma^2}(1 + g^{-1})\vbeta^T\mX^T\mX\vbeta - \tfrac{p}{2}\log(2\pi
+%g\sigma^2) + \tfrac{1}{2}\log|\mX^T\mX| \right] d\alpha d\vbeta \\ & \ds =
+%\int \exp\left[ - \tfrac{n-1}{2}\log(2\pi\sigma^2) - \tfrac{1}{2}\log(n) -
+%\tfrac{n}{2\sigma^2} + \sigma^{-2}\vy^T\mX\vbeta - \tfrac{1}{2\sigma^2}(1 +
+%g^{-1})\vbeta^T\mX^T\mX\vbeta - \tfrac{p}{2}\log(2\pi g\sigma^2) +
+%\tfrac{1}{2}\log|\mX^T\mX| \right]  d\vbeta \\ & \ds = \exp\left[ -
+%\tfrac{n-1}{2}\log(2\pi\sigma^2) - \tfrac{1}{2}\log(n) - \tfrac{p}{2}\log(1 +
+%g) - \tfrac{n}{2 \sigma^2} \left( 1 - \tfrac{g}{1 + g} R^2 \right)  \right],
+%\end{array} \end{equation}
 %
-%\noindent 
-%\joc{
-%	Derivation of the above expression uses the identity
-%	$
-%	\int \exp\left\{ -\tfrac{1}{2}\vx^T\mA\vx + \vb^T\vx \right\} d \vx = |2\pi\mSigma|^{1/2} \exp\left\{ \tfrac{1}{2}\vmu^T\mSigma^{-1}\vmu \right\}
-%	$
-%	where $\vmu = \mA^{-1}\vb$, and $\mSigma = \mA^{-1}$.
-%	It also uses the identities: $|c\mA| = c^d|\mA|$ and $|\mA^{-1}| = |\mA|^{-1}$ when $\mA \in\R^{d\times d}$.
-%}
-Integrating out $\alpha$, $\vbeta$, and $\sigma^2$ from $p(\vy,\alpha,\vbeta,\sigma^2|g,\vgamma)$ we
-obtain
-\begin{equation}\label{eq:yGivenG}
-	\begin{array}{rl}
-		\ds p(\vy|g,\vgamma)
-		%& \ds = \int \exp\left[
-		%- \tfrac{n-1}{2}\log(2\pi) 
-		%- \tfrac{1}{2}\log(n)
-		%- \tfrac{p}{2}\log(1 + g)
-		%- \left( \tfrac{n-1}{2} + 1\right)\log(\sigma^2) 
-		%- \left( \tfrac{n}{2} \tfrac{1 + g(1-R^2)}{1 + g} \right)\sigma^{-2} 
-		%\right]  d\sigma^2
-		%\\
-		%& 
-		\ds = K(n)
-		(1 + g)^{(n - p_\vgamma - 1)/2}(1 + g (1 - R_\vgamma^2))^{-(n-1)/2},
-	\end{array} 
-\end{equation}
+%\noindent \joc{ Derivation of the above expression uses the identity $ \int
+%\exp\left\{ -\tfrac{1}{2}\vx^T\mA\vx + \vb^T\vx \right\} d \vx =
+%|2\pi\mSigma|^{1/2} \exp\left\{ \tfrac{1}{2}\vmu^T\mSigma^{-1}\vmu \right\} $
+%where $\vmu = \mA^{-1}\vb$, and $\mSigma = \mA^{-1}$.  It also uses the
+%identities: $|c\mA| = c^d|\mA|$ and $|\mA^{-1}| = |\mA|^{-1}$ when $\mA
+%\in\R^{d\times d}$.  }
+Integrating out $\alpha$, $\vbeta$, and $\sigma^2$ from
+$p(\vy,\alpha,\vbeta,\sigma^2|g,\vgamma)$ we obtain
+\begin{equation}\label{eq:yGivenG} \begin{array}{rl} \ds p(\vy|g,\vgamma)
+        %& \ds = \int \exp\left[ - \tfrac{n-1}{2}\log(2\pi) -
+    %\tfrac{1}{2}\log(n) - \tfrac{p}{2}\log(1 + g) - \left( \tfrac{n-1}{2} +
+    %1\right)\log(\sigma^2) - \left( \tfrac{n}{2} \tfrac{1 + g(1-R^2)}{1 + g}
+    %\right)\sigma^{-2} \right]  d\sigma^2 \\
+        %& 
+        \ds = K(n) (1 + g)^{(n - p_\vgamma - 1)/2}(1 + g (1 -
+    R_\vgamma^2))^{-(n-1)/2}, \end{array} \end{equation}
 
 \noindent where $K(n) = [\Gamma( (n-1)/2 )]/[\sqrt{n}(n\pi)^{(n-1)/2}]$, and
-$R_\vgamma^2 = \vy^T\mX_\vgamma^T(\mX_\vgamma^T\mX_\vgamma)^{-1}\mX_\vgamma^T\vy/n$ is 
-the the usual R-squared statistic for model $\vgamma$.
-This is the same expression as \cite{Liang2008} Equation (5) 
-after simplification. Note that
-when $\vgamma = \vzero$, i.e., the null model, then $p_\vgamma = 0$, and
-$R_\vgamma^2 = 0$ leading to the simplification $p(\vy|g,\vzero) = K(n)$
-for all $g$. Hence, $p(\vy|\vzero) = K(n)$ provided the hyperprior for $g$ is a proper density. We will now discuss the specification of $g$.
+$R_\vgamma^2 =
+\vy^T\mX_\vgamma^T(\mX_\vgamma^T\mX_\vgamma)^{-1}\mX_\vgamma^T\vy/n$ is the the
+usual R-squared statistic for model $\vgamma$.  This is the same expression as
+\cite{Liang2008} Equation (5) after simplification. Note that when $\vgamma =
+\vzero$, i.e., the null model, then $p_\vgamma = 0$, and $R_\vgamma^2 = 0$
+leading to the simplification $p(\vy|g,\vzero) = K(n)$ for all $g$. Hence,
+$p(\vy|\vzero) = K(n)$ provided the hyperprior for $g$ is a proper density. We
+will now discuss the specification of $g$.
 
 
 \section{Hyperpriors on $g$}
 \label{sec:hyperpriors}
 
-Here we outline some of the choices of hyperpriors for $g$ used in the literature, their
-properties, and where possible how to implement these in an efficient, 
-accurate, and
-numerically stable manner. We cover the 
-the hyper-$g$ and hyper-$g/n$ priors of \cite{Liang2008}, the beta-prime prior
-of \cite{Maruyama2011}, the robust prior of \cite{Bayarri2012}, and the cake
-prior of \cite{OrmerodEtal2017}.
-We also considered the prior structure implied by \cite{Zellner1980}, but were able to make no
-meaningful progress on existing methodology for this case.
+Here we outline some of the choices of hyperpriors for $g$ used in the
+literature, their properties, and where possible how to implement these in an
+efficient, accurate, and numerically stable manner. We cover the the hyper-$g$
+and hyper-$g/n$ priors of \cite{Liang2008}, the beta-prime prior of
+\cite{Maruyama2011}, the robust prior of \cite{Bayarri2012}, and the cake prior
+of \cite{OrmerodEtal2017}.  We also considered the prior structure implied by
+\cite{Zellner1980}, but were able to make no meaningful progress on existing
+methodology for this case.
 
-We show that many of the hyperpriors on $g$ result in Bayes factors which can be expressed
-in terms of the Gaussian hypergeometric function denoted 
-${}_2F_1(\,\cdot\,,\,\cdot\,;\,\cdot\,;\,\cdot\,)$ \citep[see for example Chapter 15 of ][]{Abramowitz1972}.
-The Gaussian hypergeometric function is notoriously prone 
-to overflow and numerical instability \citep{Pearson2017}. 
-When such numerical issues arise 
-\cite{Liang2008} derive a Laplace approximation to ${}_2F_1$ implemented in the {\tt R} package {\tt BAS}.
-Key to achieving accuracy, efficiency and numerical stability for several different mixture $g$-priors is the following result.
+We show that many of the hyperpriors on $g$ result in Bayes factors which can
+be expressed in terms of the Gaussian hypergeometric function denoted
+${}_2F_1(\,\cdot\,,\,\cdot\,;\,\cdot\,;\,\cdot\,)$ \citep[see for example
+Chapter 15 of ][]{Abramowitz1972}.  The Gaussian hypergeometric function is
+notoriously prone to overflow and numerical instability \citep{Pearson2017}.
+When such numerical issues arise \cite{Liang2008} derive a Laplace
+approximation to ${}_2F_1$ implemented in the {\tt R} package {\tt BAS}.  Key
+to achieving accuracy, efficiency and numerical stability for several different
+mixture $g$-priors is the following result.
 
  
 \noindent 
@@ -417,9 +391,9 @@ Key to achieving accuracy, efficiency and numerical stability for several differ
 \noindent 
 {\bf Proof:} Using identity 2.5.23 of \cite{Abramowitz1972} the cdf of the beta distribution
 can be written as
-$$
+\begin{equation*}
 \mbox{pbeta}(x;a,b) = \frac{x^a}{a\mbox{Beta}(a,b)} \cdot {}_2F_1(a,1-b;a+1;x) 
-$$
+\end{equation*}
 
 \noindent where 
 $\mbox{Beta}(a,b)$ is the beta function.
@@ -436,43 +410,39 @@ $$
 %{}_2F_1(a+b,1;a+1;x)  = \frac{\mbox{pbeta}(x;a,b)a\mbox{Beta}(a,b)}{x^a(1 - x)^b} = \frac{a}{x(1-x)}\frac{\mbox{pbeta}(x;a,b)}{\mbox{dbeta}(x;a,b)}
 %$$
 
-\noindent Numerical overflow can be avoided
-since standard libraries exist for evaluating $\mbox{pbeta}(x,a,b)$ and $\mbox{dbeta}(x,a,b)$
-on the log scale. Recently, \cite{Nadarajah2015} stated an equivalent result
-originally derived in \cite{PrudnikovEtal1986}. 
-
-
-
+\noindent Numerical overflow can be avoided since standard libraries exist for
+evaluating $\mbox{pbeta}(x,a,b)$ and $\mbox{dbeta}(x,a,b)$ on the log scale.
+Recently, \cite{Nadarajah2015} stated an equivalent result originally derived
+in \cite{PrudnikovEtal1986}. 
 
 \subsection{The hyper-$g$ prior}
 
-\noindent 
-Initially, \cite{Liang2008} suggest the hyper $g$-prior where
+\noindent Initially, \cite{Liang2008} suggest the hyper $g$-prior where
 \begin{equation}\label{eq:hyperG}
 	\ds p_{g}(g) = \frac{a - 2}{2}(1 + g)^{-a/2},
 \end{equation}
 
-\noindent for $a>2$ and $g>0$. Combining (\ref{eq:yGivenG}) with (\ref{eq:hyperG}), we have
+\noindent for $a>2$ and $g>0$. Combining (\ref{eq:yGivenG}) with
+(\ref{eq:hyperG}), we have
 \begin{equation}\label{eq:hyperGmarginalIntegral}
 	p_{g}(\vy|\vgamma) = K(n) \frac{a - 2}{2}  \int_0^\infty 
 	\left( 1 + g \right)^{-a/2}
 	(1 + g)^{(n-p_\vgamma-1)/2} \left[ 1 + g (1 - R_\vgamma^2) \right]^{-(n-1)/2}  dg.
 \end{equation}
 
-\noindent After applying 
-3.197(5) of \cite{Gradshteyn2007}, i.e.,
+\noindent After applying 3.197(5) of \cite{Gradshteyn2007}, i.e.,
 \begin{equation}\label{eq:31975}
 	\ds 
 	\int_0^\infty x^{\lambda - 1}(1 + x)^\nu (1 + \alpha x)^\mu dx
 	=\mbox{Beta}(\lambda,-\mu-\nu-\lambda){}_2F_1(-\mu,\lambda;-\mu-\nu; 1 - \alpha),
 \end{equation}
-\noindent (which holds provided $-(\mu  + \nu) > \lambda > 0$),
-leads to
+\noindent (which holds provided $-(\mu  + \nu) > \lambda > 0$), leads to
 \begin{equation}\label{eq:hyperGmarginal}
 	\ds \mbox{BF}_{g}(\vgamma) = \frac{p_{g}(\vy|\vgamma)}{p_{g}(\vy|\vzero)} =  \left( \frac{a - 2}{p_\vgamma + a - 2} \right) \cdot {}_2F_1\left( \frac{n-1}{2}, 1; \frac{p_\vgamma + a}{2}; R_\vgamma^2 \right).
 \end{equation}
 
-\noindent Using Result 1 the Bayes factor under the hyper-$g$ prior can be written as
+\noindent Using Result 1 the Bayes factor under the hyper-$g$ prior can be
+written as
 \begin{equation}\label{eq:hyperGmarginal2}
 	\ds \mbox{BF}_{g}(\vgamma) 
 	=  
@@ -481,28 +451,23 @@ leads to
 		\mbox{dbeta}\left(R_\vgamma^2,\tfrac{p_\vgamma + a - 2}{2},\tfrac{n-p_\vgamma - a+1}{2}\right)}.
 \end{equation}
 
-
-\noindent 
-Unfortunately, \cite{Liang2008} also showed that
-(\ref{eq:hyperGmarginal}) is not model selection consistent when the
-true model is the null model (the model only containing the intercept) and so alternative hyperpriors for $g$ should be used.
-
-
-
+\noindent Unfortunately, \cite{Liang2008} also showed that
+(\ref{eq:hyperGmarginal}) is not model selection consistent when the true model
+is the null model (the model only containing the intercept) and so alternative
+hyperpriors for $g$ should be used.
 
 \subsection{The hyper-$g/n$ prior}
 
-Given the problems with the hyper-$g$ prior, \cite{Liang2008} 
-proposed a modified variant of the hyper-$g$ prior which uses
+Given the problems with the hyper-$g$ prior, \cite{Liang2008} proposed a
+modified variant of the hyper-$g$ prior which uses
 \begin{equation}\label{eq:hyperGonN}
 	\ds p_{g/n}(g) = \frac{a - 2}{2n}\left( 1 + \frac{g}{n} \right)^{-a/2},
 \end{equation}
 
 \noindent which they call the hyper-$g/n$ prior where again $a>2$ and $g>0$.
-They show that this prior leads to model selection consistency.
-Combining (\ref{eq:yGivenG}) with (\ref{eq:hyperGonN}), and using the transform
-$g = u/(1 - x)$, the quantity $p(\vy|\vgamma)$ 
-can be expressed as the integral
+They show that this prior leads to model selection consistency.  Combining
+(\ref{eq:yGivenG}) with (\ref{eq:hyperGonN}), and using the transform $g = u/(1
+- x)$, the quantity $p(\vy|\vgamma)$ can be expressed as the integral
 \begin{equation}\label{eq:hyperGonNmarginalIntegral}
 	\begin{array}{rl}
 		p_{g/n}(\vy|\vgamma) 
@@ -516,30 +481,28 @@ can be expressed as the integral
 	\end{array} 
 \end{equation}
 
-\noindent  Employing 
-Equation 3.211 of \cite{Gradshteyn2007}, i.e.,
+\noindent  Employing Equation 3.211 of \cite{Gradshteyn2007}, i.e.,
 $$
 \int_0^1 x^{\lambda-1}(1 - x)^{\mu - 1}(1 - u x)^{-\delta}(1 - vx)^{-\sigma} dx = \mbox{Beta}(\mu,\lambda) F_1(\lambda,\delta,\sigma,\lambda+\mu;u,v) 
 %F_1(a,b_1,b_2,c; x,y) = \frac{\Gamma(c)} {\Gamma(a)\Gamma(c-a)} 
 %\int_0^1 t^{a-1} (1-t)^{c-a-1} (1-xt)^{-b_1} (1-yt)^{-b_2} \, dt,
 $$
 
-\noindent provided $\lambda>0$ and $\mu>0$ where $F_1$ is the Appell hypergeometric function in two variables
-\citep{Weisstein2009} leads to
+\noindent provided $\lambda>0$ and $\mu>0$ where $F_1$ is the Appell
+hypergeometric function in two variables \citep{Weisstein2009} leads to
 \begin{equation}\label{eq:hyperGonNmarginal}
 	\ds \mbox{BF}_{g/n}(\vgamma) =  \frac{a - 2}{n(p_\vgamma + a - 2)} F_1\left( 1, \frac{a}{2}, \frac{n-1}{2}; \frac{p_\vgamma + a}{2}; 1  -  \frac{1}{n}, R_\vgamma^2 \right),
 \end{equation}
 
-\noindent which is to our knowledge a new expression for the Bayes factor under the hyper $g/n$-prior.
+\noindent which is to our knowledge a new expression for the Bayes factor under
+the hyper $g/n$-prior.
 
 
 Unfortunately, the expression (\ref{eq:hyperGonNmarginal}) is extremely
-difficult to evaluate numerically since the second last argument of the above 
+difficult to evaluate numerically since the second last argument of the above
 $F_1$ is asymptotically close to the radius of convergence of the $F_1$
-function.
-\cite{Liang2008} again suggest Laplace approximation 
-for this choice of prior. We now derive an alternative approximation.
-Using the fact that
+function.  \cite{Liang2008} again suggest Laplace approximation for this choice
+of prior. We now derive an alternative approximation.  Using the fact that
 $$
 F_1(1,b_1,b_2,c; 1,y) 
 = (c - 1)
@@ -547,9 +510,9 @@ F_1(1,b_1,b_2,c; 1,y)
 = (c - 1) \frac{\, _2F_1(1,b_2;c-b_1;y)}{c-b_1-1}
 $$
 
-\noindent and the approximation $F_1(1,b_1,b_2,c; 1-1/n,y)  \approx F_1(1,b_1,b_2,c; 1,y)$
-(which should be reasonable for large $n$),
-for $p_\vgamma > 2$ we obtain
+\noindent and the approximation $F_1(1,b_1,b_2,c; 1-1/n,y)  \approx
+F_1(1,b_1,b_2,c; 1,y)$ (which should be reasonable for large $n$), for
+$p_\vgamma > 2$ we obtain
 \begin{equation}\label{eq:hyperGonNmarginalApprox}
 	%\begin{array}{rl}
 	\ds \mbox{BF}_{g/n}(\vgamma) 
@@ -566,15 +529,16 @@ for $p_\vgamma > 2$ we obtain
 	%\end{array}
 \end{equation}
 
-\noindent For the cases where $p\in \{1,2\}$ we
-will use numerical quadrature. When $p=0$, we also have that $R_\vgamma^2= 0$) so $\mbox{BF}_{g/n}(\vgamma) = 1$.
-Figure \ref{fig:gonnapprox} illustrates the differences between ``exact'' values of the $\mbox{BF}_{g/n}$
-(obtained using numerical quadrature) as a function of $n$, $p_\vgamma$, and $R^2$. From this figure we
-see that the approximation has a good relative error except for values close to 1 when the approximation
-overestimates the true value of the log Bayes factor. We found numerical quadrature to be more reliable
-than using (\ref{eq:hyperGonNmarginal}) evaluated using the {\tt appell} function in the package 
-{\tt Appell}.
-
+\noindent For the cases where $p\in \{1,2\}$ we will use numerical quadrature.
+When $p=0$, we also have that $R_\vgamma^2= 0$ so $\mbox{BF}_{g/n}(\vgamma) =
+1$.  Figure \ref{fig:gonnapprox} illustrates the differences between ``exact''
+values of the $\mbox{BF}_{g/n}$ (obtained using numerical quadrature) as a
+function of $n$, $p_\vgamma$, and $R^2$. From this figure we see that the
+approximation has a good relative error except for values close to 1 when the
+approximation overestimates the true value of the log Bayes factor. We found
+numerical quadrature to be more reliable than using
+(\ref{eq:hyperGonNmarginal}) evaluated using the {\tt appell} function in the
+package {\tt Appell}.
 
 \begin{figure}
 	\centering
@@ -589,29 +553,27 @@ than using (\ref{eq:hyperGonNmarginal}) evaluated using the {\tt appell} functio
 
 \subsection{Robust prior}  
 
-\noindent
-Next we will consider the robust hyperprior for $g$ as proposed by \cite{Bayarri2012} designed to have several nice theoretical
-properties outlined there. Using the default parameter
-choices the hyperprior 
-for $g$ used by \cite{Bayarri2012} corresponds to:
+\noindent Next we will consider the robust hyperprior for $g$ as proposed by
+\cite{Bayarri2012} designed to have several nice theoretical properties
+outlined there. Using the default parameter choices the hyperprior for $g$ used
+by \cite{Bayarri2012} corresponds to:
 \begin{equation}\label{eq:robustPrior}
 	p_{{rob}}(g) = \tfrac{1}{2}r^{1/2} (1 + g)^{-3/2},
 \end{equation}
 
-\noindent for $g>L$  where $L = r - 1$ and $r = (1 + n)/(1 + p_\vgamma)$. 
-Combining (\ref{eq:yGivenG}) with (\ref{eq:robustPrior})
-leads to an expression for $p(\vy|\vgamma)$ of the form
+\noindent for $g>L$  where $L = r - 1$ and $r = (1 + n)/(1 + p_\vgamma)$.
+Combining (\ref{eq:yGivenG}) with (\ref{eq:robustPrior}) leads to an expression
+for $p(\vy|\vgamma)$ of the form
 \begin{equation}\label{eq:marginalLikelihoodRobust}
 	\ds p_{rob}(\vy|\vgamma)
 	\ds = K(n) \tfrac{1}{2} r^{1/2} 
 	\int_L^\infty  (1 + g)^{(n - p_\vgamma)/2 - 2}(  1 + g \widehat{\sigma}_\vgamma^2)^{-(n-1)/2} dg,
 \end{equation}
 
-\noindent where $\widehat{\sigma}_\vgamma^2 = 1 - R_\vgamma^2$ is the MLE
-for $\sigma^2$ for model (\ref{eq:linearModel}) when $\mX$ is replaced with $\mX_\vgamma$ under the standardization described in Section 2.
-Using the substitution 
-$x = r/(g - L)$ and some minor algebraic
-manipulation leads to
+\noindent where $\widehat{\sigma}_\vgamma^2 = 1 - R_\vgamma^2$ is the MLE for
+$\sigma^2$ for model (\ref{eq:linearModel}) when $\mX$ is replaced with
+$\mX_\vgamma$ under the standardization described in Section 2.  Using the
+substitution $x = r/(g - L)$ and some minor algebraic manipulation leads to
 %$$
 %x = r/(g - L),
 %\quad 
@@ -660,8 +622,8 @@ $$
 \mu \leftrightarrow -\frac{n-1}{2},
 $$
 
-\noindent the conditions required by (\ref{eq:31975}) are satisfied
-provided $\alpha \in (-1,1)$ (which is a relatively restrictive condition). 
+\noindent the conditions required by (\ref{eq:31975}) are satisfied provided
+$\alpha \in (-1,1)$ (which is a relatively restrictive condition). 
 %Checking the conditions we have $\lambda > 0$ since $p_\vgamma \ge 0$.
 %The second condition implies 
 %$$
@@ -693,20 +655,21 @@ This leads to
 \end{equation}
 
 
-\noindent 
-which is the same expression as Equation 26 of \cite{Bayarri2012}
+\noindent which is the same expression as Equation 26 of \cite{Bayarri2012}
 modulo notation.
 
-The expression (\ref{eq:yGivenGammaRobust}) is difficult to deal with numerically for two reasons. Firstly, if either of the first 
-two arguments of the ${}_2F_1$ function are large relative to the third this will often lead to numerical overflow problems. Secondly,
-and more problematically, when $\widehat{\sigma}_\vgamma^2$ becomes small the last argument
-of ${}_2F_1$ function can become less than $-1$ which falls outside the radius of convergence
-of the ${}_2F_1$ function. The {\tt BayesVarSel} package which implements
-this choice of prior deals with these problems using numerical
+The expression (\ref{eq:yGivenGammaRobust}) is difficult to deal with
+numerically for two reasons. Firstly, if either of the first two arguments of
+the ${}_2F_1$ function are large relative to the third this will often lead to
+numerical overflow problems. Secondly, and more problematically, when
+$\widehat{\sigma}_\vgamma^2$ becomes small the last argument of ${}_2F_1$
+function can become less than $-1$ which falls outside the radius of
+convergence of the ${}_2F_1$ function. The {\tt BayesVarSel} package which
+implements this choice of prior deals with these problems using numerical
 quadrature.
 
-Instead suppose we begin with the substitution $x = g - L$ which after minor algebraic manipulation
-leads to
+Instead suppose we begin with the substitution $x = g - L$ which after minor
+algebraic manipulation leads to
 $$
 %\begin{array}{rl}
 \ds \mbox{BF}_{{rob}}(\vgamma)
@@ -729,7 +692,8 @@ $$
 {}_2F_1(\mu,\nu;\mu+\varrho; 1 - \gamma/\beta),
 $$
 
-\noindent (which holds provided $\nu>0$, $\mu > \nu - \varrho$), with the mappings
+\noindent (which holds provided $\nu>0$, $\mu > \nu - \varrho$), with the
+mappings
 $$
 \nu \leftrightarrow 1,
 \quad 
@@ -744,50 +708,43 @@ $$
 
 \noindent The conditions of the integral result easily hold.
 %
-%\noindent The condition $\nu>0$ holds. The condition
-%$\mu > \nu - \varrho$ requires
-%$$
-%\begin{array}{l}
-%(n-1)/2 > 1 + (n - p_\vgamma-4)/2
-%\quad \Rightarrow \quad p_\vgamma > - 1,
-%\end{array}  
-%$$
-%\noindent so that the second condition also holds. 
-%Hence,
-%$$
-%\begin{array}{rl}
-%\ds p_{rob}(\vy|\vgamma)
-%& \ds = K(n) \tfrac{1}{2} r^{1/2} \left( \widehat{\sigma}_\vgamma^2\right)^{-(n-1)/2} 
-%\left( \frac{1 +  \widehat{\sigma}_\vgamma^2L}{\widehat{\sigma}_\vgamma^2} \right)^{-(n-1)/2}
-%r^{1 + (n - p_\vgamma-4)/2} 
-%\\
-%& \ds \qquad \times 
-%\mbox{Beta}\left( 1, \frac{n-1}{2} - 1 - \frac{n - p_\vgamma - 4}{2} \right)
-%{}_2F_1\left( \frac{n-1}{2}, 1; \frac{n-1}{2} - \frac{n - p_\vgamma - 4}{2}; 1 - \frac{1 + L}{\frac{1 +  \widehat{\sigma}_\vgamma^2L}{\widehat{\sigma}_\vgamma^2}} \right),
+%\noindent The condition $\nu>0$ holds. The condition $\mu > \nu - \varrho$
+%requires $$ \begin{array}{l} (n-1)/2 > 1 + (n - p_\vgamma-4)/2 \quad
+%\Rightarrow \quad p_\vgamma > - 1, \end{array}  $$ \noindent so that the
+%second condition also holds.  Hence, $$ \begin{array}{rl} \ds
+%p_{rob}(\vy|\vgamma) & \ds = K(n) \tfrac{1}{2} r^{1/2} \left(
+%\widehat{\sigma}_\vgamma^2\right)^{-(n-1)/2} \left( \frac{1 +
+%\widehat{\sigma}_\vgamma^2L}{\widehat{\sigma}_\vgamma^2} \right)^{-(n-1)/2}
+%r^{1 + (n - p_\vgamma-4)/2} \\ & \ds \qquad \times \mbox{Beta}\left( 1,
+%\frac{n-1}{2} - 1 - \frac{n - p_\vgamma - 4}{2} \right) {}_2F_1\left(
+%\frac{n-1}{2}, 1; \frac{n-1}{2} - \frac{n - p_\vgamma - 4}{2}; 1 - \frac{1 +
+%L}{\frac{1 +  \widehat{\sigma}_\vgamma^2L}{\widehat{\sigma}_\vgamma^2}}
+%\right),
 %
-%\\
-%& \ds = K(n) \frac{1}{2} r^{(n - p_\vgamma-1)/2} 
-%\left(  1 +  \widehat{\sigma}_\vgamma^2L  \right)^{-(n-1)/2}
-%\mbox{Beta}\left( 1, \frac{p_\vgamma+1}{2} \right)
-%{}_2F_1\left( \frac{n-1}{2}, 1; \frac{p_\vgamma + 3}{2}; \frac{1  - \widehat{\sigma}_\vgamma^2}{1 +  \widehat{\sigma}_\vgamma^2L} \right),
+%\\ & \ds = K(n) \frac{1}{2} r^{(n - p_\vgamma-1)/2} \left(  1 +
+%\widehat{\sigma}_\vgamma^2L  \right)^{-(n-1)/2} \mbox{Beta}\left( 1,
+%\frac{p_\vgamma+1}{2} \right) {}_2F_1\left( \frac{n-1}{2}, 1; \frac{p_\vgamma
+%+ 3}{2}; \frac{1  - \widehat{\sigma}_\vgamma^2}{1 +
+%\widehat{\sigma}_\vgamma^2L} \right),
 %
 %\\
 %
-%& \ds = K(n) \frac{r^{(n - p_\vgamma-1)/2}}{1 + p_\vgamma} 
-%\left(  1 +  \widehat{\sigma}_\vgamma^2L  \right)^{-(n-1)/2}
-%{}_2F_1\left( \frac{n-1}{2}, 1; \frac{p_\vgamma + 3}{2}; \frac{1  - \widehat{\sigma}_\vgamma^2}{1 +  \widehat{\sigma}_\vgamma^2L} \right),
+%& \ds = K(n) \frac{r^{(n - p_\vgamma-1)/2}}{1 + p_\vgamma} \left(  1 +
+%\widehat{\sigma}_\vgamma^2L  \right)^{-(n-1)/2} {}_2F_1\left( \frac{n-1}{2},
+%1; \frac{p_\vgamma + 3}{2}; \frac{1  - \widehat{\sigma}_\vgamma^2}{1 +
+%\widehat{\sigma}_\vgamma^2L} \right),
 %
-%\end{array} 
-%$$
-%$$
-%\ds p_{{rob}}(\vy|\vgamma)
-%\ds = \frac{K(n)}{2}\left(\frac{1+n}{1 + p_\vgamma}  \right)^{1/2} %(\widehat{\sigma}_\vgamma^2)^{-(n-1)/2}
-%\int_0^\infty  (1 + L + h)^{(n - p_\vgamma)/2 - 2}\left[  \frac{1 + %L\widehat{\sigma}_\vgamma^2}{\widehat{\sigma}_\vgamma^2} + h \right]^{-(n-1)/2} dh.
-%$$
+%\end{array} $$ $$ \ds p_{{rob}}(\vy|\vgamma) \ds =
+%\frac{K(n)}{2}\left(\frac{1+n}{1 + p_\vgamma}  \right)^{1/2}
+%%(\widehat{\sigma}_\vgamma^2)^{-(n-1)/2} \int_0^\infty  (1 + L + h)^{(n -
+p_\vgamma)/2 - 2}\left[  \frac{1 +
+    %L\widehat{\sigma}_\vgamma^2}{\widehat{\sigma}_\vgamma^2} + h
+\right]^{-(n-1)/2} dh.  $$
 %
 %\noindent 
 Hence, after some algebraic manipulation and applying Result 1, and letting
-$\widetilde{R}_\vgamma^2 = R_\vgamma^2/(1 + L\widehat{\sigma}_\vgamma^2)$ we obtain
+$\widetilde{R}_\vgamma^2 = R_\vgamma^2/(1 + L\widehat{\sigma}_\vgamma^2)$ we
+obtain
 \begin{equation}\label{eq:yGivenGammaRobust2}
 	%\begin{array}{rl}
 	\ds \mbox{BF}_{{rob}}(\vgamma)
@@ -813,18 +770,13 @@ $\widetilde{R}_\vgamma^2 = R_\vgamma^2/(1 + L\widehat{\sigma}_\vgamma^2)$ we obt
 	}.
 	%\end{array}
 \end{equation}
-
-
 %Then
 %$(1 + L\widehat{\sigma}_\vgamma^2) = %R_\vgamma^2/\widetilde{R}_\vgamma^2$.
 
-
-\noindent 
-This expression is numerically far easier to evaluate efficiently and accurately in a numerically stable manner. Due to simplifications
-we have $0\le \widehat{\sigma}_\vgamma^2<1$, we also have $L>0$ so that the last argument
-of the ${}_2F_1$ above is bounded in the unit interval.  
-
-
+\noindent This expression is numerically far easier to evaluate efficiently and
+accurately in a numerically stable manner. Due to simplifications we have $0\le
+\widehat{\sigma}_\vgamma^2<1$, we also have $L>0$ so that the last argument of
+the ${}_2F_1$ above is bounded in the unit interval.  
 %$$
 %\int_0^\infty x^{\nu - 1}(\beta + x)^{-\mu}(x + \gamma)^{-\varrho} dx
 %= \beta^{-\mu}\gamma^{\nu - %\varrho}\mbox{Beta}(\nu,\mu-\nu + \varrho)
@@ -847,23 +799,19 @@ of the ${}_2F_1$ above is bounded in the unit interval.
 %\varrho = - (n - p_\vgamma - 4)/2
 %$$
 
-
-
-
 \subsection{Beta-prime prior} 
 
-\noindent
-Next we will consider the prior 
+\noindent Next we will consider the prior 
 \begin{equation}\label{eq:betaPrime}
 	\ds p_{bp}(g) = \frac{g^{b}(1 + g)^{-(a+b+2)}}{\mbox{Beta}(a+1,b+1)},
 \end{equation}
 
-\noindent proposed by \cite{Maruyama2011} where $g>0$, $a>-1$ and $b>-1$. 
-This is a Pearson Type VI or beta-prime distribution. More specifically, 
-$g\sim \mbox{Beta-prime}(b+1,a+1)$ using the usual parametrization of 
-the beta-prime distribution \citep{Johnson1995}.
-Then combining (\ref{eq:yGivenG}) with (\ref{eq:betaPrime}) the quantity $p(\vy|\vgamma)$ 
-can be expressed as the integral
+\noindent proposed by \cite{Maruyama2011} where $g>0$, $a>-1$ and $b>-1$.  This
+is a Pearson Type VI or beta-prime distribution. More specifically, $g\sim
+\mbox{Beta-prime}(b+1,a+1)$ using the usual parametrization of the beta-prime
+distribution \citep{Johnson1995}.  Then combining (\ref{eq:yGivenG}) with
+(\ref{eq:betaPrime}) the quantity $p(\vy|\vgamma)$ can be expressed as the
+integral
 $$
 %\begin{array}{rl}
 \ds p_{bp}(\vy|\vgamma) 
@@ -882,10 +830,10 @@ dg.
 $$
 
 \noindent If we choose 
-%$b$ such that
-%$a+b+2 = (n - p_\vgamma - 1)/2$, implying
-$b = (n - p_\vgamma - 5)/2 - a$, then the exponent of the $(1 + g)$ term in the equation above is zero.
-Using Equation 3.194 (iii) of \cite{Gradshteyn2007}, i.e.,
+%$b$ such that $a+b+2 = (n - p_\vgamma - 1)/2$, implying
+$b = (n - p_\vgamma - 5)/2 - a$, then the exponent of the $(1 + g)$ term in the
+equation above is zero.  Using Equation 3.194 (iii) of \cite{Gradshteyn2007},
+i.e.,
 $$
 \int_0^\infty \frac{ x^{\mu - 1} }{(1 + \beta x)^\nu} dx = \beta^{-\mu} \mbox{Beta}(\mu,\nu - \mu),
 $$
@@ -914,35 +862,33 @@ $$
 \cite{Maruyama2011}.
 
 
-Note that (\ref{eq:marginalLikelihoodBetaPrime}) is proportional
-to a special case of the prior structure considered by \cite{Maruyama2011}
-who refer to this as a model selection criterion (after Zellner's $g$ prior). This choice of $b$ also ensures that $g = O(n)$ so that $\mbox{tr}\{\mbox{Var}(\vbeta | g, \sigma^2)\} = O(1)$, preventing Bartlett's paradox. 
-% Note that in comparison to previously discussed priors
-% marginal likelihood only involves gamma functions which
-% are well behaved from a numerical analysis perspective. 
-Note that in comparison to the priors we have previously discussed, this choice of prior yields a marginal
-likelihood that can be expressed entirely with gamma functions, which are well-behaved numerically.
-\cite{Maruyama2011} showed the prior (\ref{eq:betaPrime}) leads to model
-selection consistency.
-For derivation of the above properties and further discussion see \cite{Maruyama2011}.
-
-
-
+Note that (\ref{eq:marginalLikelihoodBetaPrime}) is proportional to a special
+case of the prior structure considered by \cite{Maruyama2011} who refer to this
+as a model selection criterion (after Zellner's $g$ prior). This choice of $b$
+also ensures that $g = O(n)$ so that $\mbox{tr}\{\mbox{Var}(\vbeta | g,
+\sigma^2)\} = O(1)$, preventing Bartlett's paradox. 
+% Note that in comparison to previously discussed priors marginal likelihood
+% only involves gamma functions which are well behaved from a numerical
+% analysis perspective. 
+Note that in comparison to the priors we have previously discussed, this choice
+of prior yields a marginal likelihood that can be expressed entirely with gamma
+functions, which are well-behaved numerically.  \cite{Maruyama2011} showed the
+prior (\ref{eq:betaPrime}) leads to model selection consistency.  For
+derivation of the above properties and further discussion see
+\cite{Maruyama2011}.
 
 \subsection{BIC via cake priors}  
 
 \noindent
-% \cite{OrmerodEtal2017} develops cake priors which allow for arbitrarily diffuse priors
-% while avoiding Bartlett's paradox leading Bayes factors equal to the exponential of minus half
-% the BIC.
-\cite{OrmerodEtal2017} developed the cake prior, which allows arbitrarily diffuse priors while avoiding
-Bartlett's paradox.
-Cake priors
-can be thought of as a Jefferys prior in the limit
-as the prior becomes increasingly diffuse
-and enjoy nice theoretical properties including model
-selection consistency. \cite{OrmerodEtal2017} 
-departs from the prior structure (\ref{eq:priorStructure}) and instead uses
+% \cite{OrmerodEtal2017} develops cake priors which allow for arbitrarily
+% diffuse priors while avoiding Bartlett's paradox leading Bayes factors equal
+% to the exponential of minus half the BIC.
+\cite{OrmerodEtal2017} developed the cake prior, which allows arbitrarily
+diffuse priors while avoiding Bartlett's paradox.  Cake priors can be thought
+of as a Jefferys prior in the limit as the prior becomes increasingly diffuse
+and enjoy nice theoretical properties including model selection consistency.
+\cite{OrmerodEtal2017} departs from the prior structure
+(\ref{eq:priorStructure}) and instead uses
 \begin{equation}\label{eq:proirs2}
 	\ds \alpha|\sigma^2,g \sim \N(0,g\sigma^2), \quad 
 	\ds \vbeta_\vgamma|\sigma^2,g \sim N\left( \vzero,g\sigma^2\left( \tfrac{1}{n}\mX_\vgamma^T\mX_\vgamma\right)^{-1}\right)
@@ -950,9 +896,9 @@ departs from the prior structure (\ref{eq:priorStructure}) and instead uses
 	p(g|\vgamma_j) = \delta(g; h^{1/(1 + p_\vgamma)})
 \end{equation}
 
-\noindent where $h$ is a common prior hyperparameter for all models. After marginalizing
-out $\alpha$, $\vbeta$, $\sigma^2$ and $g$ the null based Bayes factor 
-for model $\vgamma$ is of the form
+\noindent where $h$ is a common prior hyperparameter for all models. After
+marginalizing out $\alpha$, $\vbeta$, $\sigma^2$ and $g$ the null based Bayes
+factor for model $\vgamma$ is of the form
 $$
 \begin{array}{rl}
 \ds \log\mbox{BF}(\vgamma;h)
@@ -972,13 +918,14 @@ $$
 	\right] = \exp\left[ \, -\tfrac{1}{2}\mbox{BIC}(\vgamma) \,\right]
 \end{equation}
 
-\noindent where $\mbox{BIC}(\vgamma) = n\log\left( 1 - R_\vgamma^2 \right) + p_\vgamma \log(n)$. 
+\noindent where $\mbox{BIC}(\vgamma) = n\log\left( 1 - R_\vgamma^2 \right) +
+p_\vgamma \log(n)$. 
 %Note that as $h\to\infty$ the parameter %posteriors become
 %$$\alpha|\vy,\vgamma \sim %t_n(0,\widehat{\sigma}_{\vgamma}^2/n), \quad
-%\vbeta_{\vgamma}|\vy,\vgamma \sim t_n( %\widehat{\vbeta}_{\vgamma}, \widehat{\sigma}_{\vgamma}^2 \left(\mX_\vgamma^T\mX_\vgamma  \right)^{-1} ),
-%\quad \mbox{and} \quad  
-%\sigma^2|\vy,\vgamma \sim \mbox{IG}\left( \tfrac{n}{2}, \tfrac{n}{2}\widehat{\sigma}_{\vgamma}^2 \right),
-%$$
+%\vbeta_{\vgamma}|\vy,\vgamma \sim t_n( %\widehat{\vbeta}_{\vgamma},
+%\widehat{\sigma}_{\vgamma}^2 \left(\mX_\vgamma^T\mX_\vgamma  \right)^{-1} ),
+%\quad \mbox{and} \quad  \sigma^2|\vy,\vgamma \sim \mbox{IG}\left(
+%\tfrac{n}{2}, \tfrac{n}{2}\widehat{\sigma}_{\vgamma}^2 \right), $$
 
 %\noindent 
 %where $\widehat{\vbeta}_{\vgamma}$
@@ -989,41 +936,39 @@ $$
 \section{Implementation}
 \label{sec:implementation}
 
-\noindent
-Key to the feasibility of the model selection and averaging is an efficient implementation of these procedures. We employ two main 
-strategies to achieve computational efficiency (i) efficient software implementation using
+\noindent Key to the feasibility of the model selection and averaging is an
+efficient implementation of these procedures. We employ two main strategies to
+achieve computational efficiency (i) efficient software implementation using
 highly optimized software libraries; and (ii) efficient calculation of
 $R$-squared values for all models based on using a Gray code and appropriate
-matrix algebraic simplifications.
-For ease of use we 
-implemented an {\tt R} package called {\tt blma}.
-The internals of {\tt blma} are implemented
-in {\tt C++} and use the {\tt R} packages \texttt{Rcpp} and \texttt{RcppEigen} to enhance
-computational performance. The library {\tt OpenMP} was used to
-exploit parallel computation.
+matrix algebraic simplifications.  For ease of use we implemented an {\tt R}
+package called {\tt blma}.  The internals of {\tt blma} are implemented in {\tt
+C++} and use the {\tt R} packages \texttt{Rcpp} and \texttt{RcppEigen} to
+enhance computational performance. The library {\tt OpenMP} was used to exploit
+parallel computation.
 
-There are two main special functions used in the paper -- the 
-Gaussian hypergeometric function, and the Appell hypergeometric function
-of two variables. During the 
-implementation process we tried several packages which implemented the
-Gaussian hypergeometric function.
-We found that the {\tt R} package {\tt gsl} \citep{Hankin2006} was the most accurate, numerically
-stable implementation amongst the packages we tried. The {\tt R} package {\tt appell}
-implements the Appell
-hypergeometric function \citep{Bove2013}. We also developed our own numerical quadrature routine to evaluate the Appell
+There are two main special functions used in the paper -- the Gaussian
+hypergeometric function, and the Appell hypergeometric function of two
+variables. During the implementation process we tried several packages which
+implemented the Gaussian hypergeometric function.  We found that the {\tt R}
+package {\tt gsl} \citep{Hankin2006} was the most accurate, numerically stable
+implementation amongst the packages we tried. The {\tt R} package {\tt Appell}
+implements the Appell hypergeometric function \citep{Bove2013}. We also
+developed our own numerical quadrature routine to evaluate the Appell
 hypergeometric function to check our results.
-
-
 
 \subsection{Gray code} 
 \label{sec:GrayCode}
 
-\noindent
-The Gray code was originally developed by Frank Gray in 1947 \cite[][Section 22.3]{PressEtal2007} to aid in detecting errors in analog to digital conversions in
-communications systems. It is a sequence of binary numbers whose key feature is that
-one and only one binary digit is different between binary numbers in the sequence. 
-Gray codes can be constructed using a sequence of ``reflect'' and ``prefix'' steps.
-Let $\mGamma_1 = (0,1)^T \in \{0,1\}^{2\times 1}$ be the first Gray code matrix and let $\mGamma_k$ be the $k$th Gray code matrix. Then we can obtain the $(k+1)$th Gray code matrix given $\mGamma_k$ via 
+\noindent The Gray code was originally developed by Frank Gray in 1947
+\cite[][Section 22.3]{PressEtal2007} to aid in detecting errors in analog to
+digital conversions in communications systems. It is a sequence of binary
+numbers whose key feature is that one and only one binary digit is different
+between binary numbers in the sequence.  Gray codes can be constructed using a
+sequence of ``reflect'' and ``prefix'' steps.  Let $\mGamma_1 = (0,1)^T \in
+\{0,1\}^{2\times 1}$ be the first Gray code matrix and let $\mGamma_k$ be the
+$k$th Gray code matrix. Then we can obtain the $(k+1)$th Gray code matrix given
+$\mGamma_k$ via 
 $$
 \ds \mGamma_{k+1} = \left[\begin{array}{cc}
 \vzero & \mGamma_k \\
@@ -1031,24 +976,24 @@ $$
 \end{array} \right]
 $$ 
 
-\noindent where $\mbox{reflect}(\mGamma_k)$ is the matrix obtained by reversing the order of rows of $\mGamma_k$, and the $\vzero$ and $\vone$ are vectors of zeros and ones
-of length $2^k$ respectively. In {\tt C} and {\tt C++} these Gray codes can be efficiently constructed
-using bit-shift operations on binary strings in such a way that $\mGamma_{k}$
-matrices are never computed and stored explicitly.
+\noindent where $\mbox{reflect}(\mGamma_k)$ is the matrix obtained by reversing
+the order of rows of $\mGamma_k$, and the $\vzero$ and $\vone$ are vectors of
+zeros and ones of length $2^k$ respectively. In {\tt C} and {\tt C++} these
+Gray codes can be efficiently constructed using bit-shift operations on binary
+strings in such a way that $\mGamma_{k}$ matrices are never computed and stored
+explicitly.
 
-Gray codes allow the enumeration of the entire model space in an order which only adds
-or removes one covariate from the previous model at a time. We can then use standard matrix
-inverse results to perform rank
-one updates and downdates in the calculation of the $R^2$, $(\mX^T\mX)^{-1}$ and
-$\widehat{\vbeta}$ values for each model in the
-model space.
-
+Gray codes allow the enumeration of the entire model space in an order which
+only adds or removes one covariate from the previous model at a time. We can
+then use standard matrix inverse results to perform rank one updates and
+downdates in the calculation of the $R^2$, $(\mX^T\mX)^{-1}$ and
+$\widehat{\vbeta}$ values for each model in the model space.
 
 \subsection{Model updates and downdates} 
 
-\noindent
-Both updates and downdates depend on the fact that
-the inverse of a real symmetric matrix can be written as
+\noindent Both updates and downdates depend on the fact that the inverse of a
+real symmetric matrix can be written as
+
 \begin{eqnarray}
 	\ds \left[ \begin{array}{cc}
 		\mA   & \mB \\
@@ -1078,16 +1023,22 @@ the inverse of a real symmetric matrix can be written as
 \end{eqnarray}
 
 \noindent where $\widetilde{\mA} = \left(\mA-\mB\mC^{-1}\mB^T\right)^{-1}$
-provided all inverses in (\ref{eq:blockdiag1}) and
-(\ref{eq:blockdiag2}) exist. 
+provided all inverses in (\ref{eq:blockdiag1}) and (\ref{eq:blockdiag2}) exist.
 For both the update and downdate formula we assume that the quantities
-$\mX^T\vy$, $\mX^T\mX$ have been precalculated, and that the $(\mX_{\vgamma_i}^T\mX_{\vgamma_i})^{-1}$, 
-$\widehat{\vbeta}_{\vgamma_i}$ and $R_{\vgamma_i}^2$ values have been computed from the previous step.
+$\mX^T\vy$, $\mX^T\mX$ have been precalculated, and that the
+$(\mX_{\vgamma_i}^T\mX_{\vgamma_i})^{-1}$, $\widehat{\vbeta}_{\vgamma_i}$ and
+$R_{\vgamma_i}^2$ values have been computed from the previous step.
 
-We want to update the model inverse matrix, coefficient vector and $R^2$ values for the model $\vgamma_{i+1}$ where $\mX_{\vgamma_{i+1}}$ is the matrix given by $\mX_{\vgamma_i}$ with a column $\vz$ inserted into the appropriate position.
-For clarity of exposition we will assume that the column $\vz$ is located in the last column of $\mX_{\vgamma_{i+1}}$, i.e., $\mX_{\vgamma_{i+1}} = [\mX_{\vgamma_{i}},\vz]$. This can be achieved, if necessary, by appropriate permuting  columns of various matrices.
+We want to update the model inverse matrix, coefficient vector and $R^2$ values
+for the model $\vgamma_{i+1}$ where $\mX_{\vgamma_{i+1}}$ is the matrix given
+by $\mX_{\vgamma_i}$ with a column $\vz$ inserted into the appropriate
+position.  For clarity of exposition we will assume that the column $\vz$ is
+located in the last column of $\mX_{\vgamma_{i+1}}$, i.e., $\mX_{\vgamma_{i+1}}
+= [\mX_{\vgamma_{i}},\vz]$. This can be achieved, if necessary, by appropriate
+permuting  columns of various matrices.
 
-The updates for the model inverse matrix, coefficient estimates, and $R^2$ values can be obtained by following the steps bellow.
+The updates for the model inverse matrix, coefficient estimates, and $R^2$
+values can be obtained by following the steps bellow.
 \begin{enumerate}
 	\item Calculate $\widehat{\vz} = (\mX_{\vgamma_i}^T\mX_{\vgamma_i})^{-1}\mX_{\vgamma_i}^T\vz$, 
 	$\kappa 
@@ -1192,17 +1143,17 @@ The updates for the model inverse matrix, coefficient estimates, and $R^2$ value
 	%$D_{\mbox{\tiny update}} = D/c$.
 \end{enumerate}
 
-\noindent Presuming relevant summary quantities have been precomputed
-the above updates costs $O(p_{\vgamma_{i}}^2 + n)$ time.
+\noindent Presuming relevant summary quantities have been precomputed the above
+updates costs $O(p_{\vgamma_{i}}^2 + n)$ time.
 
 Suppose want to downdate the model summary quantities for the model
-$\vgamma_{i+1}$ where $\mX_{\vgamma_{i+1}}$ is the matrix given by 
+$\vgamma_{i+1}$ where $\mX_{\vgamma_{i+1}}$ is the matrix given by
 $\mX_{\vgamma_i}$ with a column $\vz$ removed from the appropriate position.
-Similarly as for updates for clarity of exposition we will assume that
-$\vz$ will be removed from the last column of $\mX_{\vgamma_i}$, i.e., we assume that
-$\mX_{\vgamma_{i}} = [\mX_{\vgamma_{i+1}}, \vz]$. 
-Again, this can be achieved by permuting the columns of various matrices.
-Then the downdates for model summary values are given by the following steps.
+Similarly as for updates for clarity of exposition we will assume that $\vz$
+will be removed from the last column of $\mX_{\vgamma_i}$, i.e., we assume that
+$\mX_{\vgamma_{i}} = [\mX_{\vgamma_{i+1}}, \vz]$.  Again, this can be achieved
+by permuting the columns of various matrices.  Then the downdates for model
+summary values are given by the following steps.
 \begin{enumerate}
 	\item 
 	%The downdate for the model inverse matrix to obtain $(\mX_{\vgamma_{i+1}}^T\mX_{\vgamma_{i+1}})^{-1}$
@@ -1258,38 +1209,33 @@ Then the downdates for model summary values are given by the following steps.
 \end{enumerate}
 
 \noindent Again, presuming relevant summary quantities have been precomputed
-the updates for all of the above quantities costs $O(p_{\vgamma_{i}}^2 + n)$ time.
-
-
-
-
+the updates for all of the above quantities costs $O(p_{\vgamma_{i}}^2 + n)$
+time.
 
 \section{Numerical results}
 \label{sec:numerical_g_prior}
 
-We will now compare the different Bayes factors under different hyperpriors on $g$ that we have explored. 
-Firstly we will look at these Bayes factors by comparing them directly.
-We will then compare the results based on exact Bayesian linear model
-averaging on some available datasets.
-
+We will now compare the different Bayes factors under different hyperpriors on
+$g$ that we have explored.  Firstly we will look at these Bayes factors by
+comparing them directly.  We will then compare the results based on exact
+Bayesian linear model averaging on some available datasets.
 
 \subsection{Numerical comparison of $g$ hyperpriors}
 
-Note that
-each of the Bayes factors is a function of three quantities $R^2$, $p_\vgamma$ 
-and $n$. Figure \ref{fig:bayesfactors} illustrates various log Bayes factors
-over a grid of $p_\vgamma$ values from 1 to 20 and $R^2\in\{0.1,0.5,0.9\}$
-and $n \in \{100,500,1000\}$. In the context of Bayesian hypothesis testing
-values above the $y$-axis value 0 indicate that the alternative model is
-preferred, while lines below 0 indicate the null model is preferred. Note that
-cake priors (BIC) have the strongest penalty for larger $p_\vgamma$, followed
-by the beta-prime prior (ZE), the robust prior, hyper-$g/n$ prior and lastly
-the hyper-$g$ prior. Increasing $n$ and/or $R^2$ leads to all of the different
-Bayes factors becoming increasingly close to one another. We also see that 
-the {\tt appell()} function becomes unstable as $n$ and/or $R^2$ becomes large.
-For the Bayes factor corresponding to the hyper-$g/n$ prior our approximation
-tracks very closely to the methods using the {\tt appell()} function and our
-numerical quadrature approach.
+Note that each of the Bayes factors is a function of three quantities $R^2$,
+$p_\vgamma$ and $n$. Figure \ref{fig:bayesfactors} illustrates various log
+Bayes factors over a grid of $p_\vgamma$ values from 1 to 20 and
+$R^2\in\{0.1,0.5,0.9\}$ and $n \in \{100,500,1000\}$. In the context of
+Bayesian hypothesis testing values above the $y$-axis value 0 indicate that the
+alternative model is preferred, while lines below 0 indicate the null model is
+preferred. Note that cake priors (BIC) have the strongest penalty for larger
+$p_\vgamma$, followed by the beta-prime prior (ZE), the robust prior,
+hyper-$g/n$ prior and lastly the hyper-$g$ prior. Increasing $n$ and/or $R^2$
+leads to all of the different Bayes factors becoming increasingly close to one
+another. We also see that the {\tt appell()} function becomes unstable as $n$
+and/or $R^2$ becomes large.  For the Bayes factor corresponding to the
+hyper-$g/n$ prior our approximation tracks very closely to the methods using
+the {\tt appell()} function and our numerical quadrature approach.
 
 \begin{figure}[h!]
 	\centering
@@ -1306,22 +1252,24 @@ numerical quadrature approach.
 
 \subsection{Settings for {\tt R} packages} 
 
-We will now compare three different popular {\tt R} implementations of Bayesian model averaging on 
-several small datasets. We compare the {\tt R} packages {\tt BAS} \citep{Clyde2017}, 
-{\tt BayesVarSelect} \citep{Garcia-Donato2016}, and  {\tt BMS} \citep{Zeugner2015}. For each method
-we assumed a uniform prior on the model space, i.e. $p(\vgamma)\propto 2^{-p}$. We used the
-setting implied by the following commands for each of these methods.
+We will now compare three different popular {\tt R} implementations of Bayesian
+model averaging on several small datasets. We compare the {\tt R} packages {\tt
+BAS} \citep{Clyde2017}, {\tt BayesVarSelect} \citep{Garcia-Donato2016}, and
+{\tt BMS} \citep{Zeugner2015}. For each method we assumed a uniform prior on
+the model space, i.e. $p(\vgamma)\propto 2^{-p}$. We used the setting implied
+by the following commands for each of these methods.
 \begin{itemize}
 	\item {\tt BAS}: We used the command
 	\begin{verbatim}
 	bas.lm(y~X,prior=prior.val,modelprior=uniform())
 	\end{verbatim}
 	
-	where \verb|prior.val| takes the value \verb|"hyper-g"|, \verb|"hyper-g-laplace"| or \verb|"hyper-g-n"|.
-	These correspond to a direct implementation of (\ref{eq:hyperGmarginal}),
-	a Laplace approximation of (\ref{eq:hyperGmarginalIntegral}), and the 
-	Laplace approximation of (\ref{eq:hyperGonNmarginalIntegral}) respectively. The
-	value $a=3$ is implicitly used.
+    where \verb|prior.val| takes the value \verb|"hyper-g"|,
+    \verb|"hyper-g-laplace"| or \verb|"hyper-g-n"|.  These correspond to a
+    direct implementation of (\ref{eq:hyperGmarginal}), a Laplace approximation
+    of (\ref{eq:hyperGmarginalIntegral}), and the Laplace approximation of
+    (\ref{eq:hyperGonNmarginalIntegral}) respectively. The value $a=3$ is
+    implicitly used.
 	
 	\item {\tt BayesVarSelect}: We used the command
 	\begin{verbatim}
@@ -1330,12 +1278,12 @@ setting implied by the following commands for each of these methods.
 	\end{verbatim}
 	
 	
-	\noindent where \verb|prior.val| takes the value \verb|"Liangetal"| or \verb|"Robust"|.
-	These 
-	correspond to a direct implementation of (\ref{eq:hyperGmarginal}) with $a=3$, and a hybrid approach which
-	uses (\ref{eq:yGivenGammaRobust}) directly and numerical quadrature based on (\ref{eq:marginalLikelihoodRobust}) if this fails respectively. 
-	Again, the value
-	$a=3$ is implicitly used.
+    \noindent where \verb|prior.val| takes the value \verb|"Liangetal"| or
+    \verb|"Robust"|.  These correspond to a direct implementation of
+    (\ref{eq:hyperGmarginal}) with $a=3$, and a hybrid approach which uses
+    (\ref{eq:yGivenGammaRobust}) directly and numerical quadrature based on
+    (\ref{eq:marginalLikelihoodRobust}) if this fails respectively.  Again, the
+    value $a=3$ is implicitly used.
 	
 	\item {\tt BMS}: We used the command
 	\begin{verbatim}
@@ -1343,12 +1291,11 @@ setting implied by the following commands for each of these methods.
 	mprior="uniform")	
 	\end{verbatim}
 	
-	\noindent which uses a direct implementation of (\ref{eq:hyperGmarginal}) for the hyper-$g$
-	prior with $a=3$.
+    \noindent which uses a direct implementation of (\ref{eq:hyperGmarginal})
+    for the hyper-$g$ prior with $a=3$.
 \end{itemize}
 
-\noindent 
-The syntax for {\tt blma} is relatively straightforward:
+\noindent The syntax for {\tt blma} is relatively straightforward:
 
 \begin{verbatim}
 blma(vy, mX, prior, mprior, cores = 1L)
@@ -1357,72 +1304,96 @@ blma(vy, mX, prior, mprior, cores = 1L)
 \noindent where the arguments of {\tt blma}
 are explained below.
 \begin{itemize}
-	\item {\tt vy} -- a vector of length $n$ of responses (this vector does not need to be standardized).
+    \item {\tt vy} -- a vector of length $n$ of responses (this vector does not
+        need to be standardized).
 	
-	\item {\tt mX} -- a design matrix with $n$ rows and $p$ columns (the columns of ${\tt mX}$ do not need to be standardized).
+    \item {\tt mX} -- a design matrix with $n$ rows and $p$ columns (the
+        columns of ${\tt mX}$ do not need to be standardized).
 	
-	\item {\tt prior} -- the choice of mixture $g$-prior used to perform Bayesian model averaging. The choices available include:
+    \item {\tt prior} -- the choice of mixture $g$-prior used to perform
+        Bayesian model averaging. The choices available include:
 	\begin{itemize}
-		\item {\tt "BIC"} -- the Bayesian information criterion obtained by using the cake prior 
-		of \cite{OrmerodEtal2017}. 
+        \item {\tt "BIC"} -- the Bayesian information criterion obtained by
+            using the cake prior of \cite{OrmerodEtal2017}. 
 		
-		\item {\tt "ZE"} -- special case of the prior structure in \cite{Maruyama2011}.
+        \item {\tt "ZE"} -- special case of the prior structure in
+            \cite{Maruyama2011}.
 		
-		\item {\tt "liang\_g1"} -- the mixture $g$-prior of \cite{Liang2008} with prior hyperparameter $a=3$
-		evaluated directly using (\ref{eq:hyperGmarginal}) where the Gaussian hypergeometric function is evaluated using the {\tt gsl} library. Note: this option can lead to numerical problems and is only meant to be used for comparative purposes.
+        \item {\tt "liang\_g1"} -- the mixture $g$-prior of \cite{Liang2008}
+            with prior hyperparameter $a=3$ evaluated directly using
+            (\ref{eq:hyperGmarginal}) where the Gaussian hypergeometric
+            function is evaluated using the {\tt gsl} library. Note: this
+            option can lead to numerical problems and is only meant to be used
+            for comparative purposes.
 		
-		\item {\tt "liang\_g2"} -- the mixture $g$-prior of \cite{Liang2008} with prior hyperparameter $a=3$
-		evaluated directly using (\ref{eq:hyperGmarginal2}).
+        \item {\tt "liang\_g2"} -- the mixture $g$-prior of \cite{Liang2008}
+            with prior hyperparameter $a=3$ evaluated directly using
+            (\ref{eq:hyperGmarginal2}).
 		
-		\item {\tt "liang\_g\_n\_appell"} -- the mixture $g/n$-prior of \cite{Liang2008} with prior hyperparameter $a=3$ evaluated using the {\tt appell R} package.
+        \item {\tt "liang\_g\_n\_appell"} -- the mixture $g/n$-prior of
+            \cite{Liang2008} with prior hyperparameter $a=3$ evaluated using
+            the {\tt appell R} package.
 		
-		\item {\tt "liang\_g\_approx"} -- the mixture $g/n$-prior of \cite{Liang2008} with prior hyperparameter $a=3$ using the approximation (\ref{eq:hyperGonNmarginalApprox}) for $p_\vgamma >2$ and
-		numerical quadrature (see below) ofr $p_\vgamma\in \{1,2\}$.
+        \item {\tt "liang\_g\_approx"} -- the mixture $g/n$-prior of
+            \cite{Liang2008} with prior hyperparameter $a=3$ using the
+            approximation (\ref{eq:hyperGonNmarginalApprox}) for $p_\vgamma >2$
+            and numerical quadrature (see below) ofr $p_\vgamma\in \{1,2\}$.
 		
-		\item {\tt "liang\_g\_n\_quad"} -- the mixture $g/n$-prior of \cite{Liang2008} with prior hyperparameter $a=3$ evaluated using a composite trapezoid rule.
+        \item {\tt "liang\_g\_n\_quad"} -- the mixture $g/n$-prior of
+            \cite{Liang2008} with prior hyperparameter $a=3$ evaluated using a
+            composite trapezoid rule.
 		
-		\item {\tt "robust\_bayarri1"} -- the robust prior of \cite{Bayarri2012}
-		using default prior hyperparameter choices evaluated directly using 
-		(\ref{eq:yGivenGammaRobust}) with the {\tt gsl} library.
+        \item {\tt "robust\_bayarri1"} -- the robust prior of
+            \cite{Bayarri2012} using default prior hyperparameter choices
+            evaluated directly using (\ref{eq:yGivenGammaRobust}) with the {\tt
+            gsl} library.
 		
-		\item {\tt "robust\_bayarri2"} -- the robust prior of \cite{Bayarri2012}
-		using default prior hyperparameter choices evaluated directly using
-		(\ref{eq:yGivenGammaRobust2}).
+        \item {\tt "robust\_bayarri2"} -- the robust prior of
+            \cite{Bayarri2012} using default prior hyperparameter choices
+            evaluated directly using (\ref{eq:yGivenGammaRobust2}).
 		
 	\end{itemize}
-	\item {\tt mprior} -- the prior to be imposed on the model space. The choices available include:
+    \item {\tt mprior} -- the prior to be imposed on the model space. The
+        choices available include:
 	\begin{itemize}
-		\item {\tt "uniform"} -- corresponds to the prior $p(\vgamma) = 2^{-p}$ where $p$ is the number of columns of $\mX$, .i.e.,
-		a uniform prior on the model space.
+        \item {\tt "uniform"} -- corresponds to the prior $p(\vgamma) = 2^{-p}$
+            where $p$ is the number of columns of $\mX$, .i.e., a uniform prior
+            on the model space.
 		
-		\item {\tt "beta-binomial"} -- corresponds to a prior of the form
+        \item {\tt "beta-binomial"} -- corresponds to a prior of the form
 		$$
 		\ds p(\vgamma) = \prod_{j=1}^p \rho^{\gamma_j} (1 - \rho)^{1 - \gamma_j} \qquad \mbox{and} \qquad \rho \sim \mbox{Beta}(a,b),
 		$$
 		
-		\noindent where $\rho$ is the prior probability a variable is included in the mode, and $a$ and $b$ are fixed prior hyperparameters. After marginalizing out $\rho$ we have
+        \noindent where $\rho$ is the prior probability a variable is included
+        in the mode, and $a$ and $b$ are fixed prior hyperparameters. After
+        marginalizing out $\rho$ we have
 		$$
 		p(\vgamma) = \frac{\mbox{Beta}(a + |\vgamma|,b + p - |\vgamma|)}{\mbox{Beta}(a,b)},
 		$$
 		
-		\noindent which is a beta-binomial distribution. Note $a=b=1$ corresponds to a uniform prior on the prior
-		variable inclusion probability. The values of $a$ and $b$ should be set to be the
-		first and second elements of the {\tt modelpriorvec} argument respectively (see below).
+        \noindent which is a beta-binomial distribution. Note $a=b=1$
+        corresponds to a uniform prior on the prior variable inclusion
+        probability. The values of $a$ and $b$ should be set to be the first
+        and second elements of the {\tt modelpriorvec} argument respectively
+        (see below).
 		
 		\item {\tt "bernoulli"} -- corresponds to a prior of the form 
 		$$
 		p(\vgamma) = \prod_{j=1}^p \rho_j^{\gamma_j} (1 - \rho_j)^{1 - \gamma_j}
 		$$
 		
-		\noindent where the $\rho_j\in(0,1)$. The $\rho_j$ values are specified by
-		{\tt modelpriorvec} (see below). Using $\rho_j = 1/2$, $1\le j\le p$ corresponds to 
-		{\tt mprior=="uniform"}.
+        \noindent where the $\rho_j\in(0,1)$. The $\rho_j$ values are specified
+        by {\tt modelpriorvec} (see below). Using $\rho_j = 1/2$, $1\le j\le p$
+        corresponds to {\tt mprior=="uniform"}.
 	\end{itemize}
 	
-	\item {\tt modelpriorvec} -- A vector of additional parameters. If {\tt mprior=="uniform"} this argument is ignored.
-	If {\tt mprior=="beta-binomial"} this should be a postive vector of length 2 corresponding to the shape parameters
-	of a Beta distribution (the values $a$ and $b$ above). If {\tt mprior=="bernoulli"} this should be a vector of length $p$ 
-	with values on the interval $(0,1)$.
+    \item {\tt modelpriorvec} -- A vector of additional parameters. If {\tt
+        mprior=="uniform"} this argument is ignored.
+    If {\tt mprior=="beta-binomial"} this should be a postive vector of length
+    2 corresponding to the shape parameters of a Beta distribution (the values
+    $a$ and $b$ above). If {\tt mprior=="bernoulli"} this should be a vector of
+    length $p$ with values on the interval $(0,1)$.
 	
 	\item {\tt cores} -- the number of computer cores to use.
 \end{itemize}
@@ -1444,14 +1415,13 @@ list containing:
 	{\tt vinclusion\_prob} -- the vector of posterior inclusion probabilities for each of the covariates. 
 \end{itemize}
 
-\noindent 
-Note that we do not return the fitted values of 
-$\widehat{\vbeta}_{\vgamma}$ which should only be calculated
-for a subset of models. We also do not return $\mGamma$, the Gray code matrix 
-which we provide a separate function to calculate. We made the decisions
-not to return these quantities to reduce the memory overhead.
+\noindent Note that we do not return the fitted values of
+$\widehat{\vbeta}_{\vgamma}$ which should only be calculated for a subset of
+models. We also do not return $\mGamma$, the Gray code matrix which we provide
+a separate function to calculate. We made the decisions not to return these
+quantities to reduce the memory overhead.
 
-A short example fitting the {\tt USCrime} data described in Section 
+A short example fitting the {\tt USCrime} data described in Section
 \ref{sec:BLMA} is found below.
 
 \begin{verbatim}
@@ -1466,23 +1436,23 @@ colnames(mX) <- c("log(AGE)","S","log(ED)","log(Ex0)","log(Ex1)",
 blma_result <- blma(vy, mX, prior="ZE")
 \end{verbatim}
 
-\noindent Results for the above example are summarised as part of the result within Section 
-\ref{sec:BLMA}.
+\noindent Results for the above example are summarised as part of the result
+within Section \ref{sec:BLMA}.
 
 \subsection{Bayesian linear model averaging on data}\label{sec:BLMA}
 
-We considered several small datasets to illustrate our methodology. These datasets
-can be found in the {\tt R} packages {\tt MASS} \citep{Venables2002} and 
-{\tt Ecdat} \citep{Croissant2016}. Table \ref{tab:g_prior_datasets} summarizing the sizes,  
-sources, and response variable used for each dataset used. 
-We chose {\tt USCrime} data because it is used in most papers in
-the area and is small enough so that n\"aive implementations using special functions will
-not lead to numerical issues. The 
+We considered several small datasets to illustrate our methodology. These
+datasets can be found in the {\tt R} packages {\tt MASS} \citep{Venables2002}
+and {\tt Ecdat} \citep{Croissant2016}. Table \ref{tab:g_prior_datasets}
+summarizing the sizes,  sources, and response variable used for each dataset
+used.  We chose {\tt USCrime} data because it is used in most papers in the
+area and is small enough so that n\"aive implementations using special
+functions will not lead to numerical issues. The 
 %{\tt Hitters} nad
-{\tt Kakadu} dataset is chosen to
-be large enough to begin to strain the resources of a typical 2018 laptop so that
-relative differences in speeds between different packages becomes apparent. Finally, the
-{\tt Kakadu} dataset is chosen to lead numerical instability in the direct evaluation of Bayes
+{\tt Kakadu} dataset is chosen to be large enough to begin to strain the
+resources of a typical 2018 laptop so that relative differences in speeds
+between different packages becomes apparent. Finally, the {\tt Kakadu} dataset
+is chosen to lead numerical instability in the direct evaluation of Bayes
 factors for some of the priors on $g$ considered in this paper.
 
 \begin{table}[h]
@@ -1504,21 +1474,20 @@ factors for some of the priors on $g$ considered in this paper.
 	\label{tab:g_prior_datasets}
 \end{table}
 
-For each of the datasets some minimal preprocessing was used.
-We first used the {\tt R} command {\tt na.omit()} to remove samples containing missing predictors. 
-For {\tt USCrime} all variables except the predictor {\tt S} were log-transformed. For all datasets
-the {\tt R} command {\tt model.matrix()} was used to construct the design matrix using all 
-variables except for the response as predictors.
+For each of the datasets some minimal preprocessing was used.  We first used
+the {\tt R} command {\tt na.omit()} to remove samples containing missing
+predictors.  For {\tt USCrime} all variables except the predictor {\tt S} were
+log-transformed. For all datasets the {\tt R} command {\tt model.matrix()} was
+used to construct the design matrix using all variables except for the response
+as predictors.
 
-Tables \ref{tab:UScrime}, \ref{tab:VietNamI}, and \ref{tab:Kakadu} summarise the times and variable 
-inclusion probabilities, i.e., $\bE(\vgamma|\vy)$, for all of the mixture $g$-prior structures we have considered here under a uniform prior
-on the model space.  
-All times are based on running {\tt R} code on a dedicated server with 48 cores,
-each running at 2.70GHz, with a total of 512GB of RAM.
-The {\tt BVS} package in the table refers to the {\tt BayesVarSelect} {\tt R} package where we have used a this acronym to save space in the tables. 
-
-
-
+Tables \ref{tab:UScrime}, \ref{tab:VietNamI}, and \ref{tab:Kakadu} summarise
+the times and variable inclusion probabilities, i.e., $\bE(\vgamma|\vy)$, for
+all of the mixture $g$-prior structures we have considered here under a uniform
+prior on the model space.  All times are based on running {\tt R} code on a
+dedicated server with 48 cores, each running at 2.70GHz, with a total of 512GB
+of RAM.  The {\tt BVS} package in the table refers to the {\tt BayesVarSelect}
+{\tt R} package where we have used a this acronym to save space in the tables. 
 
 \begin{sidewaystable}[h!]
 	\begin{center}
@@ -1553,9 +1522,13 @@ The {\tt BVS} package in the table refers to the {\tt BayesVarSelect} {\tt R} pa
 			\end{tabular}
 		}
 	\end{center}
-	\caption{Variable inclusion probabilities (as a percentage) and computational times (in seconds) for the {\tt UScrime} dataset.
-		The first to third line indicates the package, mixture $g$-prior and evaluation method used respectively. Bracketed terms
-		refer to equations in the paper. NaN entries indicate numerical issues for the prior/implementation pair. The acronym BVS refers to the {\tt BayesVarSelect} package.}
+    \caption{Variable inclusion probabilities (as a percentage) and
+        computational times (in seconds) for the {\tt UScrime} dataset.  The
+        first to third line indicates the package, mixture $g$-prior and
+        evaluation method used respectively. Bracketed terms refer to equations
+    in the paper. NaN entries indicate numerical issues for the
+prior/implementation pair. The acronym BVS refers to the {\tt BayesVarSelect}
+package.}
 	\label{tab:UScrime}
 \end{sidewaystable}
 
@@ -1587,9 +1560,13 @@ The {\tt BVS} package in the table refers to the {\tt BayesVarSelect} {\tt R} pa
 			\end{tabular}
 		}
 	\end{center}
-	\caption{Variable inclusion probabilities (as a percentage) and computational times (in seconds) for the {\tt VietNamI} dataset.
-		The first to third line indicates the package, mixture $g$-prior and evaluation method used respectively. Bracketed terms
-		refer to equations in the paper. NaN entries indicate numerical issues for the prior/implementation pair. The acronym BVS refers to the {\tt BayesVarSelect} package.}
+    \caption{Variable inclusion probabilities (as a percentage) and
+        computational times (in seconds) for the {\tt VietNamI} dataset.  The
+        first to third line indicates the package, mixture $g$-prior and
+        evaluation method used respectively. Bracketed terms refer to equations
+    in the paper. NaN entries indicate numerical issues for the
+prior/implementation pair. The acronym BVS refers to the {\tt BayesVarSelect}
+package.}
 	\label{tab:VietNamI}
 \end{sidewaystable}
 
@@ -1635,37 +1612,51 @@ The {\tt BVS} package in the table refers to the {\tt BayesVarSelect} {\tt R} pa
 			\end{tabular}
 		}
 	\end{center}
-	\caption{Variable inclusion probabilities (as a percentage) and computational times (in seconds) for the {\tt Kakadu} dataset.
-		The first to third line indicates the package, mixture $g$-prior and evaluation method used respectively. Bracketed terms
-		refer to equations in the paper. NaN entries indicate numerical issues for the prior/implementation pair. The acronym BVS refers to the {\tt BayesVarSelect} package. Note that 
-		the {\tt BayesVarSelect} method ran out of RAM for this example.}
+    \caption{Variable inclusion probabilities (as a percentage) and
+        computational times (in seconds) for the {\tt Kakadu} dataset.  The
+        first to third line indicates the package, mixture $g$-prior and
+        evaluation method used respectively. Bracketed terms refer to equations
+    in the paper. NaN entries indicate numerical issues for the
+prior/implementation pair. The acronym BVS refers to the {\tt BayesVarSelect}
+package. Note that the {\tt BayesVarSelect} method ran out of RAM for this
+example.}
 	\label{tab:Kakadu}
 \end{sidewaystable}
 
 
-For Table \ref{tab:UScrime} we see that all of the ``exact'' methods agree with one another to the first 2 decimal 
-places. We note that the Laplace approximation is quite accurate and appears superior to  the method
-``(\ref{eq:hyperGonNmarginalApprox})'' for the mixture $g/n$-prior. However, for both of these approximation
-methods the discrepancies to their exact counterparts is roughly the same size, or perhaps even less, than
-the differences between each of the choices of mixture $g$-priors. In terms of speed {\tt BAS} and {\tt BMLA} are
-the fastest packages and roughly comparable in speed. Both {\tt BMS} and {\tt BayesVarSelect} are not as fast.
-For the mixture $g$-prior we suspect that the package {\tt BAS} replies on Laplace's method for models
-where direct evaluation of (\ref{eq:hyperGmarginal}) becomes numerically problematic, which would explain
-differences between the {\tt BAS} and {\tt blma} packages for the {\tt Kakadu} dataset.
-%Overall our package {\tt BLMA} offers mixture $g$-priors not offered by {\tt BAS}, is arguably more
-%accurate when $n$ is large, and is of comparable speed. 
+For Table \ref{tab:UScrime} we see that all of the ``exact'' methods agree with
+one another to the first 2 decimal places. We note that the Laplace
+approximation is quite accurate and appears superior to  the method
+``(\ref{eq:hyperGonNmarginalApprox})'' for the mixture $g/n$-prior. However,
+for both of these approximation methods the discrepancies to their exact
+counterparts is roughly the same size, or perhaps even less, than the
+differences between each of the choices of mixture $g$-priors. In terms of
+speed {\tt BAS} and {\tt BMLA} are the fastest packages and roughly comparable
+in speed. Both {\tt BMS} and {\tt BayesVarSelect} are not as fast.  For the
+mixture $g$-prior we suspect that the package {\tt BAS} replies on Laplace's
+method for models where direct evaluation of (\ref{eq:hyperGmarginal}) becomes
+numerically problematic, which would explain differences between the {\tt BAS}
+and {\tt blma} packages for the {\tt Kakadu} dataset.
+%Overall our package {\tt BLMA} offers mixture $g$-priors not offered by {\tt
+%BAS}, is arguably more accurate when $n$ is large, and is of comparable speed. 
 
 \section{Conclusion}
 \label{sec:chapter_3_conclusion}
-We have reviewed the prior structures that lead to closed form expressions for Bayes factors for linear
-models. We have described ways that each of these priors with the exception of the hyper-g/n prior can be
-evaluated in a numerically stable manner and have implemented a package \texttt{blma} for performing full
-exact Bayesian model averaging using this methodology. Our package is competitive with \texttt{BAS} and
-\texttt{BMS} in terms of computational speed, is numerically more stable and accurate, and offers some
-different priors structures not offered in \texttt{BAS}. Our package is much faster than
-\texttt{BayesVarSelect} and is also numerically more stable and accurate.
 
-Our package is competitive with {\tt BAS} and {\tt BMS} in terms of computational speed, is numerically more
-stable and accurate, and offers some different priors structures not offered in {\tt BAS}. Our package is much
-faster than {\tt BayesVarSelect} and is also numerically more stable and accurate, and represents an advance
-in the implementation of exact Bayesian linear model averaging.
+We have reviewed the prior structures that lead to closed form expressions for
+Bayes factors for linear models. We have described ways that each of these
+priors with the exception of the hyper-g/n prior can be evaluated in a
+numerically stable manner and have implemented a package \texttt{blma} for
+performing full exact Bayesian model averaging using this methodology. Our
+package is competitive with \texttt{BAS} and \texttt{BMS} in terms of
+computational speed, is numerically more stable and accurate, and offers some
+different priors structures not offered in \texttt{BAS}. Our package is much
+faster than \texttt{BayesVarSelect} and is also numerically more stable and
+accurate.
+
+Our package is competitive with {\tt BAS} and {\tt BMS} in terms of
+computational speed, is numerically more stable and accurate, and offers some
+different priors structures not offered in {\tt BAS}. Our package is much
+faster than {\tt BayesVarSelect} and is also numerically more stable and
+accurate, and represents an advance in the implementation of exact Bayesian
+linear model averaging.

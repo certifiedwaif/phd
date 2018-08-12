@@ -114,7 +114,7 @@ calculating the posterior probability of the parameters using Bayes' Theorem,
 \]
 
 \noindent where $\vy$ is a vector of observed data, $\vtheta$ are the model
-parameters $p(\vy|\vtheta)$ is the marginal distribution, $p(\vtheta)$ is a
+parameters, $p(\vy|\vtheta)$ is the marginal distribution, $p(\vtheta)$ is a
 prior distribution on $\vtheta$, and $p(\vy)=\int
 p(\vy|\vtheta)p(\vtheta)d\vtheta$.  Here the integral is performed over the
 domain of $\vtheta$. If a subset of $\vtheta$ are discrete random variables
@@ -288,14 +288,14 @@ evaluate. A B-Spline is a piecewise polynomial function of degree $< n$ in a
 variable $x$. It is defined over a domain $\kappa_0 \leq x \leq \kappa_m, m=n$.
 The points where $x = \kappa_j$ are known as knots or break- points. The number
 of internal knots is equal to the degree of the polynomial if there are no knot
-multiplicities. The knots must be in ascending order. The number of knots is the
-minimum for the degree of the B-spline, which has a non-zero value in the range
-between the first and last knot. Each piece of the function is a polynomial of
-degree $< n$ between and including adjacent knots. A B-Spline is continuous at
-its' knots. When all internal knots are distinct its derivatives are also
-continuous up to the derivative of degree $n - 1$. If internal knots are
-coincident at a given value of x, the continuity of derivative order is reduced
-by 1 for each additional knot.
+multiplicities. The knots must be in ascending order. The number of knots is
+the minimum for the degree of the B-spline, which has a non-zero value in the
+range between the first and last knot. Each piece of the function is a
+polynomial of degree $< n$ between and including adjacent knots. A B-Spline is
+continuous at its' knots. When all internal knots are distinct its derivatives
+are also continuous up to the derivative of degree $n - 1$. If internal knots
+are coincident at a given value of $x$, the continuity of derivative order is
+reduced by 1 for each additional knot.
 
 For any given set of knots, the B-spline for approximating a given function is a
 unique linear combination of basis functions recursively defined as
@@ -350,21 +350,23 @@ the data set being examined.
 
 In this section, we follow the discussion of semiparametric regression in
 \cite{ruppert_wand_carroll_2003}.  Using a mixed models setup to fit spline
-models protects against overfitting. Constructing a $\mZ$ matrix with the
-appropriate B-Spline function evaluations in each of the rows, where each column
-corresponds to a knot.
+models protects against overfitting, we construct a $\mZ$ matrix with the
+appropriate B-Spline function evaluations in each of row of the matrix, where
+each column in the matrix corresponds to one of the knots we have selected.
 
 O'Sullivan introduced a class of penalised splines based on the B-spline basis
-functions in \cite{OSullivan1986} which are a direct generalisation of smoothing
-splines. Let $B_1$, \ldots, $B_{K+4}$ be the cubic B-spline basis functions
-defined by the knots $\kappa_1$ to $\kappa_{K+4}$. O'Sullivan splines are
-penalised splines which are penalised using a penalty matrix. Let $\mOmega$ be
-the $(K+4) \times (K+4)$ matrix where the $(k, k')-th$ element is \[
-\mOmega_{k k'} = \int_a^b B''_k(x) B''_{k'}(x) dx. \] Then the O'Sullivan spline
-estimate of the true function $f$ at the point $x$ is \begin{equation*}
-\widehat{f}_O(x; \lambda) = \mB_x \widehat{\vnu}_O, \end{equation*} where
-$\widehat{\vnu}_O = (\mB^\top \mB + \lambda \mOmega)^{-1} \mB^\top \vy$, as
-shown in \cite{ruppert_wand_carroll_2003}.
+functions in \cite{OSullivan1986} which are a direct generalisation of
+smoothing splines. Let $B_1$, \ldots, $B_{K+4}$ be the cubic B-spline basis
+functions defined by the knots $\kappa_1$ to $\kappa_{K+4}$. O'Sullivan splines
+are splines which are penalised using the penalty matrix $\mOmega$. Let
+$\mOmega$ be the $(K+4) \times (K+4)$ matrix where the $(k, k')-th$ element is
+\[ \mOmega_{k k'} = \int_a^b B''_k(x) B''_{k'}(x) dx. \] Then the O'Sullivan
+spline estimate of the true function $f$ at the point $x$ is
+\begin{equation*}
+\widehat{f}_O(x; \lambda) = \mB_x \widehat{\vnu}_O,
+\end{equation*}
+where $\widehat{\vnu}_O = (\mB^\top \mB + \lambda \mOmega)^{-1} \mB^\top \vy$,
+as shown in \cite{ruppert_wand_carroll_2003}.
 
 The matrix $\mOmega$ is defined in this way to penalise oscillation, which is
 measured by the second derivative. This penalty differs from the penalty for
@@ -422,13 +424,13 @@ covariates is large.
 
 % Non-Bayesian
 \subsection{Frequentist approaches to model selection}
-\subsubsection{Information criteria}
+\subsubsection{Information Criteria}
 % Need to define gamma first before referring to it. Is this the right place for this?
 
-Let $\vgamma$ be a p-dimensional vector of indicators, where a $1$ in the $p$th
-position indicates that the $p$th covariate is included in the model, while a
-$0$ indicates it is excluded. Thus $\vgamma$ defines a model with covariates
-drawn from a $p$ column data matrix $\mX$.
+Let $\vgamma$ be a $p$-dimensional vector of indicators, where a $1$ in the
+$j$th position indicates that the $j$th covariate is included in the model,
+while a $0$ indicates it is excluded. Thus $\vgamma$ defines a model with
+covariates drawn from a $p$ column data matrix $\mX$.
 
 In a frequentist context, there are many functions which can be used to judge
 which model is best, such as Akaike's Information Criteria and the Bayesian
@@ -441,7 +443,7 @@ compromise between each.
 
 % \mgc{AIC, BIC, DIC, Mallow's $C_p$}
 
-Information criteria are frequently used to compare amongst models. Letting
+Information Criteria are frequently used to compare amongst models. Letting
 $\vgamma$ denote the candidate model, Information Criteria take the form
 ``negative twice times the log-likelihood plus a term penalising for complexity
 of the mode''
@@ -456,7 +458,7 @@ parameter estimate and the complexity penalty is a function of the sample size
 $n$ and the number of parameters $p$ of the model. Information criteria attempt
 to successfully compromise between goodness of fit and model complexity.
 
-The most popular of the information criteria is the Akaike Information Criterion
+The most popular of the Information Criteria is the Akaike Information Criterion
 (AIC) \citep{Akaike1974}. AIC calculates an estimate of the information lost
 when a given model is used to represent the process that generates the data and
 so is an estimator of the Kullback-Leibler divergence of the true model from the
@@ -478,17 +480,18 @@ $$
 \noindent This is a more severe penalty for model complexity than in the
 Akaike's Information Criteria when $n$ is greater than $8$. BIC can be shown to
 be approximately equivalent to model selection using Bayes Factors in certain
-contexts, \cite{Kass1993}.
+contexts, \citep{Kass1993}.
 
-Or model selection can be made implicit in the model fitting process itself,
-ridge regression \citep{Casella1980}, of which the well-known lasso is a special
-case \citep{Tibshirani1996}. As \citep{Breiman1996} and \citep{Efron2013}
-showed, while  the standard formulation of a linear model is unbiased, the
-goodness of fit of these models is numerically  unstable. Breiman showed that by
-introducing a penalty on the size of the regression coefficients such as  in
-ridge regression, this numerical instability can be avoided. This reduces the
-variances of the coefficient estimates, at the expense of introducing some bias
--- which is another instance of the bias-variance trade-off.
+Or the process of model selection can be made implicit in the model fitting
+process itself, ridge regression \citep{Casella1980}, of which the well-known
+lasso is a special case \citep{Tibshirani1996}. As \citep{Breiman1996} and
+\citep{Efron2013} showed, while  the standard formulation of a linear model is
+unbiased, the goodness of fit of these models is numerically  unstable. Breiman
+showed that by introducing a penalty on the size of the regression coefficients
+such as  in ridge regression, this numerical instability can be avoided. This
+reduces the variances of the coefficient estimates, at the expense of
+introducing some bias -- which is another instance of the bias-variance
+trade-off.
 
 \subsubsection{Penalised regression}
 
@@ -662,12 +665,10 @@ to summarise the data and perform statistical inference. Variational Bayes aims
 to approximate a true, possibly intractable probability distribution $p(x)$ by a
 simpler, more tractable distribution $q(x)$ of known form.
 
-Variational approximation is a class of methods for transforming the problem of
-approximating a distribution $p(x)$ by another more convenient distribution
-$q(x)$. Variational approximation can be viewed as minimising the Kullback-
-Leibler divergence between the true posterior $p(\vtheta|\vy)$ and an
-approximating distribution $q(\vtheta)$, sometimes called a $q$-density. For an
-introduction, see \cite{Ormerod2010}.
+Variational approximation can be viewed as minimising the Kullback- Leibler
+divergence between the true posterior $p(\vtheta|\vy)$ and an approximating
+distribution $q(\vtheta)$, sometimes called a $q$-density. For an introduction,
+see \cite{Ormerod2010}.
 
 % John says this is repetitive
 % The density function of a random vector $\vu$ is denoted by $p(\vu)$.  The conditional density function of a
@@ -739,16 +740,17 @@ $q(\vtheta)$.
 
 The variational lower bound is maximised iteratively. On each iteration, the
 value of each parameter in the model is calculated as the expectation of the
-full likelihood relative to the other parameters in the model, which is referred
-to as the mean field update. This is done for each parameter in the model in
-turn until the variational lower bound's increase is negligible and convergence
-is achieved. Note that a combination of (A) and (B) can be used which has
-recently been formalized by \cite{Rohde2015}.
+full likelihood relative to the other parameters in the model, which is
+referred to as the mean field update. This is done for each parameter in the
+model in turn until the variational lower bound's increase is negligible and
+convergence is achieved. Note that this approach can be extended to a wide
+range of models such as semiparametric models as has been formalized by
+\cite{Rohde2015}.
 
 This approach works well for classes of models where all of the parameters are
 conjugate. For more general classes of models, the mean field updates are not
 analytically tractable and general gradient-based optimisation methods must be
-used, such as for the Gaussian Variational Approximation \cite{Ormerod2012}.
+used, such as for the Gaussian Variational Approximation \citep{Ormerod2012}.
 These methods are generally difficult to apply in practice, as the problems can
 involve the optimisation of many parameters over high-dimensional, constrained
 spaces whose constraints cannot be simply expressed.
@@ -778,15 +780,15 @@ Subsampling of the data set and sampling from the noise variable make the
 fitting algorithm doubly stochastic.
 
 Other approximate Bayesian inference techniques exist in the literature, such
-as Laplace approximation \cite{Tierney1986}/ integrated nested Laplace
-approximation \cite{Rue2009} and Expectation Propagation \cite{Minka2013}, and
-these have been applied to the problem of fitting count models
-\cite{Barber2016} \cite{KimWand2017}.  But Expectation Propagation requires
-very difficult algebra to complete the derivations required for the updates,
-and is slow to compute. And Laplace approximation relies on a Gaussian
-approximation to the log-likelihood found by Taylor expanding around the mode,
-which performs poorly when the true posterior is not symmetric, as is the case
-for Poisson regression models.
+as Laplace approximation \citep{Tierney1986}/ integrated nested Laplace
+approximation \citep{Rue2009} and Expectation Propagation \citep{Minka2013}.
+These have been applied to the problem of fitting count models
+\citep{Barber2016, KimWand2017}.  But Expectation Propagation requires very
+difficult algebra to complete the derivations required for the updates, and is
+slow to compute. Laplace approximation relies on a Gaussian approximation to
+the log-likelihood found by Taylor expanding around the mode, which performs
+poorly when the true posterior is not symmetric, as is the case for Poisson
+regression models.
 % General Design Bayesian Generalized Linear Mixed Model, as in \citep{zhao06}.
 % This allows us to incorporate within-subject correlation, and smoothing
 % splines (as in \citep{Wand2008}) in our models.
@@ -907,7 +909,7 @@ is crude but can be quite accurate if the likelihood is symmetric and unimodal.
 
 Expectation Propagation is an approximate Bayesian inference method, first
 proposed in \citep{Minka2001}.  It relies on minimising the reverse KL
-divergence $\text{KL}(p || q)$ between the true and approximaing distributions
+divergence $\text{KL}(p || q)$ between the true and approximating distributions
 $p$ and $q$. A factorised form of the distribution
 
 \[
@@ -918,7 +920,7 @@ is assumed. In general, fully minimising the KL divergence between $p$ and $q$
 is intractable, so Expectation Propagation approximates this by minimising the
 KL divergence of each of the factors individually.  It does this by cycling
 through each of the factors matching the sufficient statistics of each,
-incorporating the information already in the other factors
+incorporating the information already in the other factors.
 
 \[
 	\bE_{-q_i} [\text{KL}(p || q)]
@@ -959,7 +961,7 @@ In this section, we briefly outline the major contributions in this thesis.
 
 \begin{itemize}
 
-\item Generalised linear mixed models are an appealing way to model data, as
+\item Generalised Linear Mixed Models are an appealing way to model data, as
 they are flexible enough to model a range of data types and situations. But the
 Bayesian versions of these models typically require computationally demanding
 MCMC, which can also be prone to convergence problems. Instead, we consider
@@ -1023,19 +1025,21 @@ Beta-Prime \citep{Maruyama2011} prior.
 % \item CVA
 
 \item Exact inference for model selection for linear models with normal priors
-is computationally feasible when the number of  covariates is small, with $p$
-below 40. But exhaustively exploring the search space is not efficient, and
-often not computationally feasible for a larger number of covariates. To deal
-with this situation, in our fourth chapter, we adopt a population- based
-technique inspired by Rockova's work on population-based EM to efficiently
-explore the posterior model space. Instead, approximate methods can be used to
-search the parts of the model space for which the posterior model likelihood is
-the highest. In our fourth chapter, we propose a population-based algorithm, which
-works by adding or removing a covariate at a time to each of the fitted models
-in the population. We implement this algorithm for a number of model selection
-priors from the literature: the Liang's hyper-$g$ prior, the Liang's hyper-$g/n$
-prior \citep{Liang2008}, Bayarri's robust $g$ prior \citep{Bayarri2012} and the
-Maruyama and George Beta-Prime \citep{Maruyama2011} prior.
+    is computationally feasible when the number of  covariates is small, with
+    $p$ below 40. But exhaustively exploring the search space is not efficient,
+    and often not computationally feasible for a larger number of covariates.
+    To deal with this situation, in our fourth chapter, we adopt a population-
+    based technique inspired by Ro\v{c}kov\'{a}'s work on population-based EM
+    \citep{Rockova2017} to efficiently explore the posterior model space.
+    Instead, approximate methods can be used to search the parts of the model
+    space for which the posterior model likelihood is the highest. In our
+    fourth chapter, we propose a population-based algorithm, which works by
+    adding or removing a covariate at a time to each of the fitted models in
+    the population. We implement this algorithm for a number of model selection
+    priors from the literature: the Liang's hyper-$g$ prior, the Liang's
+    hyper-$g/n$ prior \citep{Liang2008}, Bayarri's robust $g$ prior
+    \citep{Bayarri2012} and the Maruyama and George Beta-Prime
+    \citep{Maruyama2011} prior.
 
 
 \item We are able to implement this algorithm efficiently by using rank-one

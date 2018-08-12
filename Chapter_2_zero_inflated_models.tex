@@ -6,7 +6,7 @@
 
 \section{Introduction}
 \label{sec:introduction}
-We consider variational inference for zero--inflated Poisson
+We consider variational inference for zero-inflated Poisson (ZIP)
 regression models using a latent variable representation. The model is
 extended to include random effects which allow simple incorporation of
 spline and other modelling structures. Several variational approximations
@@ -54,7 +54,7 @@ approach above can be inflexible, not allowing complicated models incorporating
 random effects, splines and missing data.
 
 We build upon a latent variable representation of these models to allow a
-tractable semiparametric mean field Variational Bayes approximation to be
+tractable Semiparametric Mean Field Variational Bayes approximation to be
 derived. Semiparametric Mean Field Variational Bayes is an approximate Bayesian
 inference method as detailed in \cite{Ormerod2010} and \cite{Rohde2015}, which
 allows us to fit close approximations to these models using a deterministic
@@ -80,10 +80,9 @@ component of our model. In Section ~\ref{sec:param}, we present new
 parameterisations for use in these algorithms which offers substantial
 advantages in accuracy, numerical stability and computational speed. In Section
 ~\ref{sec:results} we perform numerical experiments on simulated data which
-show how our approach offers computational advantages over existing approaches
-- in terms of both speed and stability. In Section ~\ref{sec:application} we
-show an application of our pure Poisson model fitting method to a hierarchical
-model studying the effect of ethnicity on the rate of police stops, and an
+demonstrate that these advantages. In Section ~\ref{sec:application} we show an
+application of our pure Poisson model fitting method to a hierarchical model
+studying the effect of ethnicity on the rate of police stops, and an
 application of our zero-inflated Poisson model fitting method to a multi- level
 longitudinal study of pest control in apartments. Finally, in Section
 ~\ref{sec:chapter_2_conclusion} we conclude with a discussion of the results.
@@ -146,9 +145,9 @@ $\vv$, defined to be $\sqrt{\vv^\top \vv}$, is  denoted by $\|\vv\|$. For a $p
 with the elements of $\va$ along its' diagonal.
 
 We denote the design matrix of fixed effects with dimensions $n \times p$ as
-$\mX$ is , and the design matrix of random  effects with dimensions $n \times m
-b$ as $\mZ$. The combined design matrix $\mC$ is formed by appending the
-columns of $\mX$ to the columns of $\mZ$, giving $\mC = [ \mX, \mZ ]$.
+$\mX$, and the design matrix of random  effects with dimensions $n \times m b$
+as $\mZ$. The combined design matrix $\mC$ is formed by appending the columns
+of $\mX$ to the columns of $\mZ$, giving $\mC = [ \mX, \mZ ]$.
 
 Let $\vbeta$ be the $p \times 1$ column vector of fixed effects, and $\vu$ the
 $m b \times 1$ column vector of random effects. $\vnu$ is the concatenation of
@@ -187,7 +186,7 @@ and $\mR = \diag{(\vr)}$.
 To be able to construct multivariate models with as much generality as
 possible, we wish to specify the full model as a General Design Bayesian
 Generalized Linear Mixed Model, as in \cite{Zhao2006}. This allows for a very
-rich class of models, which can incorporate such features as random intercepts
+rich class of models, which can incorporate features such as random intercepts
 and slopes, within-subject correlation and smoothing splines, as in
 \cite{Wand2008}, into our models.
 
@@ -269,9 +268,9 @@ $\sigma_{\vu_2}^2$ is the variance of the random slopes and $\rho_{\vu_1
 
 In the spline case, we use the cubic spline basis $1$, $x$, $x^2$, $x^3$, $(x -
 \kappa_1)^3_+$, \ldots, $(x - \kappa_K)^3_+$, where $K$ is the number of knots.
-Here $\mSigma$ is a $K + 2$ banded matrix, where $K$ is the number of knots.
-Banded matrices are highly sparse, and matrix operations can be performed on
-them in $\BigO(K)$ time. The matrix $\mSigma$ is symmetric, with contents
+Here $\mSigma$ is a $K + 2$ banded matrix.  Banded matrices are highly sparse,
+and matrix operations can be performed on them in $\BigO(K)$ time. The matrix
+$\mSigma$ is symmetric, with contents
 \[
 	\mSigma =
 	\begin{pmatrix}
@@ -288,16 +287,16 @@ them in $\BigO(K)$ time. The matrix $\mSigma$ is symmetric, with contents
 \subsection{Variational Bayes Approximation to the Zero-Inflated Poisson model}
 We choose a factored variational approximation for the model of the form 
 \[
-	q(\vnu, \sigma_{\vu}^2,\vr_0, \rho) = q(\vnu) q(\mSigma_{\vu \vu}) q(\vr_0) q(\rho)
+	q(\vnu, \sigma_{\vu}^2,\vr_0, \rho) = q(\vnu) q(\mSigma_{\vu \vu}) q(\vr_0) q(\rho),
 \]
 
 \noindent where we define 
 \begin{align*}
-    \vr_0 &= \{ r_i : y_i = 0 \}. \\
+    \vr_0 &= \{ r_i : y_i = 0 \}, \\
 % The distributions we select are?
     q(\vnu) &= \N(\vmu, \mLambda), \\ 
     q(\sigma_{\vu}^2) &= \text{Inverse Wishart}\left(\mPsi + \sum_{i=1}^m (\vmu_i \vmu_i^\top + \mLambda_{\vu_i \vu_i}), v + m \right) \mbox{, and } \\ 
-    q(r_i) &= \text{Bernoulli}{(p_i)} 
+    q(r_i) &= \text{Bernoulli}{(p_i)},
 \end{align*}
 with
 $$p_i = 
@@ -326,7 +325,7 @@ multivariate normal distribution for the regression co-efficients parameterised
 by $\vmu$ and $\mLambda$, the model can still be fit using a Gaussian
 Variational Approximation for $\vbeta$ and $\vu$ jointly. Techniques for
 efficiently fitting these models are described in \cite{Ormerod2012,
-Challis2013, Opper2009}. Gaussian variational approximations have also been
+Challis2013, Opper2009}. Gaussian Variational Approximations have also been
 shown to have good asymptotic properties in \cite{Sinica2017}. The model can be
 fit using Algorithm~\ref{alg:algorithm_one} below. The derivation of the
 variational lower bound is given in Appendix \ref{sec:calculation_of_var_lb}.
@@ -745,17 +744,19 @@ calculating $\text{diag}(\mC \mLambda \mC^\top)$ directly.
 % TODO: We fixed this using safe-exp
 The implementation of these algorithms was not without its' challenges, chiefly numerical issues encountered during testing and verification of the accuracy of the model fitting. Using the exponential function to parameterise the main diagonal coupled with L-BFGS-B's unconstrained line search and \texttt{optim()}'s lack of robustness to infinities lead to many overflow problems which may have been lessened or dealt with entirely by using a function with a less aggressive growth rate, such as an appropriate piecewise quadratic.
 	
-The main computational cost is the evaluation of the variational lower bound and its' derivatives. By
-virtue of their dimension, the expressions involving $\mLambda$ dominate the computational cost. The key
-term is $\frac{1}{2} \diag(\mC \mLambda \mC^\top)$. This can be n\"aively calculate by ignoring the
-symmetry in the expression and simply calculating the product $\mC \mLambda \mC^\top$, taking $2 n
-\times (p + m b)^2$ floating point operations, and retaining the diagonal entries of the result. This is
-obviously wasteful, as the off--diagonal entries of the resulting product that has just been computed
+The main computational cost is the evaluation of the variational lower bound
+and its' derivatives. By virtue of their dimension, the expressions involving
+$\mLambda$ dominate the computational cost. The key term is $\frac{1}{2}
+\diag(\mC \mLambda \mC^\top)$. This can be n\"aively calculated by ignoring the
+symmetry in the expression and simply calculating the product $\mC \mLambda
+\mC^\top$, taking $2 n \times (p + m b)^2$ floating point operations, and
+retaining the diagonal entries of the result. This is obviously wasteful, as
+the off--diagonal entries of the resulting product that has just been computed
 are immediately discarded.
 	
 By parameterising $\mLambda$ in terms of its' Cholesky factors and realising that
 \begin{equation*}
-	\mC \mLambda \mC^\top = \mC \mR \mR^\top \mC^\top
+	\mC \mLambda \mC^\top = \mC \mR \mR^\top \mC^\top,
 \end{equation*}
 \noindent and that
 \begin{equation*}
@@ -785,21 +786,18 @@ intercept model case, the computational cost will drop to $n \times [m +
 \frac{1}{2} p (p + 1) + p \times m b]$.
 			
 \subsubsection{Justification of Cholesky factor of the precision matrix as the
-parameterisation} The Gaussian Variational Approximation is fit by maximising
-the Gaussian Variational Lower Bound, which is parameterised by a mean vector
-$\vmu$ and a covariance matrix $\mLambda$. The most straightforward
-parameterisation of $\vmu$ is the natural parameterisation. But the covariance
-matrix has many possible parameterisations. Covariance matrices are positive
-semi-definite, and hence symmetric, so they have a unique Cholesky
-factorisation. Parameterising the covariance matrix in terms of the Cholesky
-factor allows us to represent the square covariance matrix using only a lower
-triangular matrix with half as many non-zero elements. Thus the Cholesky factor
-is a convenient way to parameterise covariance matrices.
+parameterisation}
 
-While the most obvious choice for parameterising the covariance matrix is
-simply the covariance matrix itself, this is not the only available
-parameterisation. Another choice worth considering is parameterising the
-covariance matrix using the Cholesky factor of the precision matrix.
+The Gaussian Variational Approximation is fit by maximising the Gaussian
+Variational Lower Bound, which is parameterised by a mean vector $\vmu$ and a
+covariance matrix $\mLambda$. The simplest parameterisation of $\vmu$ is the
+natural parameterisation, but the covariance matrix has many possible
+parameterisations. Covariance matrices are positive semi-definite, and hence
+symmetric, so they have a unique Cholesky factorisation. Parameterising the
+covariance matrix in terms of the Cholesky factor allows us to represent the
+square covariance matrix using only a lower triangular matrix with half as many
+non-zero elements. Thus the Cholesky factor is a convenient way to parameterise
+covariance matrices.
 
 The variational lower bound of a Gaussian Variational Approximation takes the
 form given below.
@@ -867,7 +865,7 @@ The accuracy of each of the model fitting algorithms presented in Section
 \ref{sec:gaussian} was assessed by comparing the approximating distribution of
 each parameter with the posterior distribution of Monte Carlo Markov Chain
 samples of that parameter. One million Monte Carlo Markov Chain samples were
-generated using \texttt{RStan} \cite{Carpenter2016, StanDevelopmentTeam2016}.
+generated using \texttt{RStan} \citep{Carpenter2016, StanDevelopmentTeam2016}.
 The accuracy of examples using random intercept, random slope and spline models
 were evaluated using this method.
 		
@@ -1185,7 +1183,7 @@ The data set contains data on 160 treatment and 104 control apartments, along
 with the response $y_i$ in each apartment of the number of cockroaches caught
 in a set of traps. The apartments had the traps deployed for different numbers
 of days, referred to as trap days, which was handled by using a log offset
-\cite{Agresti2002}. The predictors in the data set included the pre-treatment
+\citep{Agresti2002}. The predictors in the data set included the pre-treatment
 roach level, a treatment indicator, the time of the observation and an
 indicator for whether the apartment is in a senior building restricted to the
 elderly.
