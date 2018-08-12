@@ -271,16 +271,18 @@ In the spline case, we use the cubic spline basis $1$, $x$, $x^2$, $x^3$, $(x -
 Here $\mSigma$ is a $K + 2$ banded matrix.  Banded matrices are highly sparse,
 and matrix operations can be performed on them in $\BigO(K)$ time. The matrix
 $\mSigma$ is symmetric, with contents
+% I produced this using the following program
+% https://gist.github.com/certifiedwaif/d9c7fd207b54a3fccae5f577c17f95d3
 \[
 	\mSigma =
 	\begin{pmatrix}
-		\sigma^2_{\text{intercept}} & \ldots                      &                             &                               &                                          & \text{symmetric}              \\
-		\rho_{\text{intercept} x} & \sigma^2_x & \ldots\\
-		\rho_{\text{intercept} x^2} & \rho_{x x^2} & \sigma^2_{x^2} & \ldots \\
-		\rho_{\text{intercept} x^3} & \rho_{x x^3} & \rho_{x^2 x^3} & \sigma^2_{x^3} & \ldots \\
-		0                           & \rho_{x (x - \kappa_1)^3_+} & \rho_{x^2 (x-\kappa_1)_+^3} & \rho_{x^3 (x - \kappa_1)_+^3} & \sigma^2_{(x - \kappa_1)_+^3}            & \ldots                        \\
-		0                           & 0                           & \rho_{x^2 (x-\kappa_2)_+^3} & \rho_{x^3 (x-\kappa_2)_+^3}   & \rho_{(x-\kappa_1)_+^3 (x-\kappa_2)_+^3} & \sigma^2_{(x - \kappa_2)_+^3} \\
-		0 & 0 & 0 & \rho_{x^3 (x - \kappa_3)_+^3} & \rho_{(x - \kappa_1)_+^3 (x - \kappa_3)_+^3} & \rho_{(x - \kappa_2)_+^3 (x - \kappa_3)_+^3}
+        \sigma^2_{\text{intercept}}&\rho_{\text{intercept} x}&\rho_{\text{intercept} x^2}&\rho_{\text{intercept} x^3}&0&0&0\\
+        \rho_{\text{intercept} x}&\sigma^2_x&\rho_{x x^2}&\rho_{x x^3}&\rho_{x (x - \kappa_1)^3_+}&0&0\\
+        \rho_{\text{intercept} x^2}&\rho_{x x^2}&\sigma^2_{x^2}&\rho_{x^2 x^3}&\rho_{x^2 (x-\kappa_1)_+^3}&\rho_{x^2 (x-\kappa_2)_+^3}&0\\
+        \rho_{\text{intercept} x^3}&\rho_{x x^3}&\rho_{x^2 x^3}&\sigma^2_{x^3}&\rho_{x^3 (x - \kappa_1)_+^3}&\rho_{x^3 (x-\kappa_2)_+^3}&\rho_{x^3 (x - \kappa_3)_+^3}\\
+        0&\rho_{x (x - \kappa_1)^3_+}&\rho_{x^2 (x-\kappa_1)_+^3}&\rho_{x^3 (x - \kappa_1)_+^3}&\sigma^2_{(x - \kappa_1)_+^3}&\rho_{(x-\kappa_1)_+^3 (x-\kappa_2)_+^3}&\rho_{(x - \kappa_1)_+^3 (x - \kappa_3)_+^3}\\
+        0&0&\rho_{x^2 (x-\kappa_2)_+^3}&\rho_{x^3 (x-\kappa_2)_+^3}&\rho_{(x-\kappa_1)_+^3 (x-\kappa_2)_+^3}&\sigma^2_{(x - \kappa_2)_+^3}&\rho_{(x - \kappa_2)_+^3 (x - \kappa_3)_+^3}\\
+        0&0&0&\rho_{x^3 (x - \kappa_3)_+^3}&\rho_{(x - \kappa_1)_+^3 (x - \kappa_3)_+^3}&\rho_{(x - \kappa_2)_+^3 (x - \kappa_3)_+^3}&\sigma^2_{(x - \kappa_3)_+^3}\\
 	\end{pmatrix}.
 \]
 
