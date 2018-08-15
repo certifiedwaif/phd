@@ -4,20 +4,20 @@
 \documentclass[PhD,stats]{usydthesis}[12pt]
 % \documentclass{ociamthesis}
 
-%\addtolength{\oddsidemargin}{-.75in}%
-%\addtolength{\evensidemargin}{-.75in}%
-%\addtolength{\textwidth}{1.5in}%
-%\addtolength{\textheight}{1.3in}%
-%\addtolength{\topmargin}{-.8in}%
-%\addtolength{\marginparpush}{-.75in}%
+\addtolength{\oddsidemargin}{-.75in}%
+\addtolength{\evensidemargin}{-.75in}%
+\addtolength{\textwidth}{1.5in}%
+\addtolength{\textheight}{1.3in}%
+\addtolength{\topmargin}{-.8in}%
+\addtolength{\marginparpush}{-.75in}%
 
 % \setlength{\bibsep}{0pt plus 0.3ex}
 
-%\addtolength{\oddsidemargin}{-.5in}%
-%\addtolength{\evensidemargin}{-.5in}%
-%\addtolength{\textwidth}{1in}%
-%\addtolength{\textheight}{-.3in}%
-%\addtolength{\topmargin}{-.8in}%
+\addtolength{\oddsidemargin}{-.5in}%
+\addtolength{\evensidemargin}{-.5in}%
+\addtolength{\textwidth}{1in}%
+\addtolength{\textheight}{-.3in}%
+\addtolength{\topmargin}{-.8in}%
 
 \usepackage{geometry}
 % \geometry{verbose,a4paper,tmargin=1in,bmargin=1.5in,lmargin=1in,rmargin=1in}
@@ -38,13 +38,18 @@
 \usepackage{latexsym,amssymb,amsmath,amsfonts}
 %\usepackage{tabularx}
 \usepackage{theorem}
-\usepackage{verbatim,array,multicol,palatino}
+% \usepackage{verbatim,array,multicol,palatino}
+\usepackage{verbatim}
+\usepackage{array}
+\usepackage{multicol}
+\usepackage{palatino}
 \usepackage{graphics}
 \usepackage{fancyhdr}
 \usepackage{url}
 %\usepackage[all]{xy}
 \usepackage{cancel}
 \usepackage{graphicx,rotating,booktabs}
+\usepackage{appendix}
 
 \title{Numerically Stable Approximate Bayesian Methods for Generalized Linear
        Mixed Models and Linear Model Selection}
@@ -58,12 +63,12 @@
 \newcommand{\joc}[1]{{\color{red}#1}}
 
 
-\usepackage{titlesec}
+% \usepackage{titlesec}
 
 
-\titleformat{\section}{\normalfont\Large\bfseries}{\thesection}{1em}{ }
-\titleformat{\subsection}{\normalfont\large\bfseries\leftskip 0ex}{\thesubsection}{1em}{ }
-\titleformat{\subsubsection}{\normalfont\large\bfseries\leftskip 0ex}{\thesubsubsection}{1em}{}
+% \titleformat{\section}{\normalfont\Large\bfseries}{\thesection}{1em}{ }
+% \titleformat{\subsection}{\normalfont\large\bfseries\leftskip 0ex}{\thesubsection}{1em}{ }
+% \titleformat{\subsubsection}{\normalfont\large\bfseries\leftskip 0ex}{\thesubsubsection}{1em}{}
 %\titleformat{\paragraph}[runin]{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
 %\titleformat{\subparagraph}[runin]{\normalfont\normalsize\bfseries}{\thesubparagraph}{1em}{}
 
@@ -122,16 +127,17 @@
 \include{include}
 \include{Definitions}
 \include{Chapter_1_preliminary}
-\include{Chapter_2_zero_inflated_models}
 % % \include{Chapter_2_zero_inflated_models_formula_sheet}
 \include{Chapter_3_g_prior_posterior_JO_edits}
 \include{Chapter_4_Collapsed_Variational_Approximations}
+\include{Chapter_2_zero_inflated_models}
+\begin{subappendices}
+    \include{appendix_1}
+\end{subappendices}
 \include{Chapter_5_Conclusion_backup}
 % \include{Chapter_5_regression_posteriors}
 
 \backmatter
-\appendix
-\include{appendix_1}
 
 \bibliographystyle{elsarticle-harv}
 \bibliography{references_mendeley}

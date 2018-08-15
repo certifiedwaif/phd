@@ -13,7 +13,7 @@ linear models using different mixture g-priors. In particular, we consider
 hyperpriors for $g$ leading to closed-form expressions for the Bayes factor
 including the hyper-$g$ and hyper-$g/n$ priors of \cite{Liang2008}, the
 beta-prime prior of \cite{Maruyama2011}, the robust prior of
-\cite{Bayarri2012}, and the cake prior of \cite{OrmerodEtal2017}. In
+\cite{Bayarri2012}, and the Cake prior of \cite{OrmerodEtal2017}. In
 particular, we describe how each of these Bayes factors, except for Bayes
 factor under the hyper-$g/n$ prior, can be evaluated in efficient, accurate and
 numerically stable manner. We also derive a closed form expression for the
@@ -83,7 +83,7 @@ chapter we review the prior structures, specifically the hyperpriors on $g$,
 that lead to closed form expressions of Bayes factors for linear models.  These
 include the hyper-$g$ prior of \cite{Liang2008}, the beta-prime prior of
 \cite{Maruyama2011}, and the robust prior of \cite{Bayarri2012}, and most
-recently the cake prior of \cite{OrmerodEtal2017} leads to a Bayes factor which
+recently the Cake prior of \cite{OrmerodEtal2017} leads to a Bayes factor which
 is a simple function of the Bayesian Information Criterion (BIC). We concern
 ourselves with the efficient, accurate and numerically stable evaluation of
 Bayes factors, Bayesian model averaging, and Bayesian model selection  for
@@ -361,7 +361,7 @@ Here we outline some of the choices of hyperpriors for $g$ used in the
 literature, their properties, and where possible how to implement these in an
 efficient, accurate, and numerically stable manner. We cover the the hyper-$g$
 and hyper-$g/n$ priors of \cite{Liang2008}, the beta-prime prior of
-\cite{Maruyama2011}, the robust prior of \cite{Bayarri2012}, and the cake prior
+\cite{Maruyama2011}, the robust prior of \cite{Bayarri2012}, and the Cake prior
 of \cite{OrmerodEtal2017}.  We also considered the prior structure implied by
 \cite{Zellner1980}, but were able to make no meaningful progress on existing
 methodology for this case.
@@ -737,9 +737,9 @@ $$
 %\end{array} $$ $$ \ds p_{{rob}}(\vy|\vgamma) \ds =
 %\frac{K(n)}{2}\left(\frac{1+n}{1 + p_\vgamma}  \right)^{1/2}
 %%(\widehat{\sigma}_\vgamma^2)^{-(n-1)/2} \int_0^\infty  (1 + L + h)^{(n -
-p_\vgamma)/2 - 2}\left[  \frac{1 +
+%p_\vgamma)/2 - 2}\left[  \frac{1 +
     %L\widehat{\sigma}_\vgamma^2}{\widehat{\sigma}_\vgamma^2} + h
-\right]^{-(n-1)/2} dh.  $$
+%\right]^{-(n-1)/2} dh.  $$
 %
 %\noindent 
 Hence, after some algebraic manipulation and applying Result 1, and letting
@@ -877,13 +877,13 @@ prior (\ref{eq:betaPrime}) leads to model selection consistency.  For
 derivation of the above properties and further discussion see
 \cite{Maruyama2011}.
 
-\subsection{BIC via cake priors}  
+\subsection{BIC via Cake priors}  
 
 \noindent
-% \cite{OrmerodEtal2017} develops cake priors which allow for arbitrarily
+% \cite{OrmerodEtal2017} develops Cake priors which allow for arbitrarily
 % diffuse priors while avoiding Bartlett's paradox leading Bayes factors equal
 % to the exponential of minus half the BIC.
-\cite{OrmerodEtal2017} developed the cake prior, which allows arbitrarily
+\cite{OrmerodEtal2017} developed the Cake prior, which allows arbitrarily
 diffuse priors while avoiding Bartlett's paradox.  Cake priors can be thought
 of as a Jefferys prior in the limit as the prior becomes increasingly diffuse
 and enjoy nice theoretical properties including model selection consistency.
@@ -1228,7 +1228,7 @@ Bayes factors over a grid of $p_\vgamma$ values from 1 to 20 and
 $R^2\in\{0.1,0.5,0.9\}$ and $n \in \{100,500,1000\}$. In the context of
 Bayesian hypothesis testing values above the $y$-axis value 0 indicate that the
 alternative model is preferred, while lines below 0 indicate the null model is
-preferred. Note that cake priors (BIC) have the strongest penalty for larger
+preferred. Note that Cake priors (BIC) have the strongest penalty for larger
 $p_\vgamma$, followed by the beta-prime prior (ZE), the robust prior,
 hyper-$g/n$ prior and lastly the hyper-$g$ prior. Increasing $n$ and/or $R^2$
 leads to all of the different Bayes factors becoming increasingly close to one
@@ -1314,7 +1314,7 @@ are explained below.
         Bayesian model averaging. The choices available include:
 	\begin{itemize}
         \item {\tt "BIC"} -- the Bayesian information criterion obtained by
-            using the cake prior of \cite{OrmerodEtal2017}. 
+            using the Cake prior of \cite{OrmerodEtal2017}. 
 		
         \item {\tt "ZE"} -- special case of the prior structure in
             \cite{Maruyama2011}.
@@ -1631,9 +1631,9 @@ approximation is quite accurate and appears superior to  the method
 for both of these approximation methods the discrepancies to their exact
 counterparts is roughly the same size, or perhaps even less, than the
 differences between each of the choices of mixture $g$-priors. In terms of
-speed {\tt BAS} and {\tt BMLA} are the fastest packages and roughly comparable
+speed, {\tt BAS} and {\tt BMLA} are the fastest packages and roughly comparable
 in speed. Both {\tt BMS} and {\tt BayesVarSelect} are not as fast.  For the
-mixture $g$-prior we suspect that the package {\tt BAS} replies on Laplace's
+mixture $g$-prior we suspect that the package {\tt BAS} relies on Laplace's
 method for models where direct evaluation of (\ref{eq:hyperGmarginal}) becomes
 numerically problematic, which would explain differences between the {\tt BAS}
 and {\tt blma} packages for the {\tt Kakadu} dataset.
@@ -1645,7 +1645,7 @@ and {\tt blma} packages for the {\tt Kakadu} dataset.
 
 We have reviewed the prior structures that lead to closed form expressions for
 Bayes factors for linear models. We have described ways that each of these
-priors with the exception of the hyper-g/n prior can be evaluated in a
+priors with the exception of the hyper-$g/n$ prior can be evaluated in a
 numerically stable manner and have implemented a package \texttt{blma} for
 performing full exact Bayesian model averaging using this methodology. Our
 package is competitive with \texttt{BAS} and \texttt{BMS} in terms of

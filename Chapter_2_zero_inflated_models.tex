@@ -273,6 +273,7 @@ and matrix operations can be performed on them in $\BigO(K)$ time. The matrix
 $\mSigma$ is symmetric, with contents
 % I produced this using the following program
 % https://gist.github.com/certifiedwaif/d9c7fd207b54a3fccae5f577c17f95d3
+\footnotesize{
 \[
 	\mSigma =
 	\begin{pmatrix}
@@ -285,6 +286,7 @@ $\mSigma$ is symmetric, with contents
         0&0&0&\rho_{x^3 (x - \kappa_3)_+^3}&\rho_{(x - \kappa_1)_+^3 (x - \kappa_3)_+^3}&\rho_{(x - \kappa_2)_+^3 (x - \kappa_3)_+^3}&\sigma^2_{(x - \kappa_3)_+^3}\\
 	\end{pmatrix}.
 \]
+}
 
 \subsection{Variational Bayes Approximation to the Zero-Inflated Poisson model}
 We choose a factored variational approximation for the model of the form 
@@ -1071,7 +1073,7 @@ parameterisation was used then when it was not used, as can be seen from Figure
         starting points which lead to numeric errors when the safe exponential
         was not used are plotted.
     }
-    \end{figure}
+\end{figure}
 
 \subsection{Stability of the GVA fixed point algorithm for different starting
 points}
@@ -1085,6 +1087,7 @@ the Variational Bayes algorithm to update the other parameters before trying to
 fit the Gaussian component of the model again until the correct parameters are
 accurately estimated.
 
+% FIXME: This is a horrendously ugly plot! You can do better than this.
 \begin{figure}[h!]
 	\includegraphics[width=0.95 \textwidth]{code/local_solutions_gva_nr_error_locations_no_protections.pdf}
 	\label{fig:stability_locations_nr}
@@ -1128,12 +1131,12 @@ Figure \ref{fig:police_stops}
 
 \begin{figure}
 \centering
-\includegraphics[page=1,scale=0.34]{code/results/accuracy_plots_application2_GVA.pdf}
-\includegraphics[page=2,scale=0.34]{code/results/accuracy_plots_application2_GVA.pdf}
-\includegraphics[page=3,scale=0.34]{code/results/accuracy_plots_application2_GVA.pdf}
-\includegraphics[page=7,scale=0.34]{code/results/accuracy_plots_application2_GVA.pdf}
-\includegraphics[page=81,scale=0.34]{code/results/accuracy_plots_application2_GVA.pdf}
-\includegraphics[page=82,scale=0.34]{code/results/accuracy_plots_application2_GVA.pdf}
+  \includegraphics[page=1,scale=0.34]{code/results/accuracy_plots_application2_GVA.pdf}
+  \includegraphics[page=2,scale=0.34]{code/results/accuracy_plots_application2_GVA.pdf}
+  \includegraphics[page=3,scale=0.34]{code/results/accuracy_plots_application2_GVA.pdf}
+  \includegraphics[page=7,scale=0.34]{code/results/accuracy_plots_application2_GVA.pdf}
+  \includegraphics[page=81,scale=0.34]{code/results/accuracy_plots_application2_GVA.pdf}
+  \includegraphics[page=82,scale=0.34]{code/results/accuracy_plots_application2_GVA.pdf}
 \caption{Accuracy of parameter estimates for police stops.}
 \label{fig:police_stops}
 \end{figure}
@@ -1275,8 +1278,13 @@ in Table \ref{tab:application_roaches}.
 		
 \begin{figure}[h]
 	\centering
-	% \includepdf[width=75mm,height=75mm,pages={1,2,3,16},nup=2x2]{code/results/accuracy_plots_application_GVA2.pdf}
-	\includegraphics[width=1.1 \columnwidth]{code/results/accuracy_plots_application_GVA_inv_param-highlights-nup.pdf}
+	%\includepdf[width=75mm,height=75mm,pages={1,2,3,16},nup=2x2]{code/results/accuracy_plots_application_GVA2.pdf}
+	\includegraphics[page=1,scale=0.34]{code/results/accuracy_plots_application_GVA_inv_param.pdf}
+	\includegraphics[page=2,scale=0.34]{code/results/accuracy_plots_application_GVA_inv_param.pdf}
+	\includegraphics[page=3,scale=0.34]{code/results/accuracy_plots_application_GVA_inv_param.pdf}
+	\includegraphics[page=4,scale=0.34]{code/results/accuracy_plots_application_GVA_inv_param.pdf}
+	\includegraphics[page=16,scale=0.34]{code/results/accuracy_plots_application_GVA_inv_param.pdf}
+	\includegraphics[page=17,scale=0.34]{code/results/accuracy_plots_application_GVA_inv_param.pdf}
 	\caption{Accuracy graphs for roach model}
 	\label{fig:accuracy_roach}
 \end{figure}
@@ -1326,8 +1334,13 @@ accuracy.
 % from the edges. Perhaps you should regenerate it.
 \begin{figure}[h]
 \centering
-% \includegraphics{code/results/accuracy_plots_application_biochemists_GVA_inv_param-nup.pdf}
-\makebox[0pt]{\includegraphics[width=1.05 \columnwidth]{code/results/accuracy_plots_application_biochemists_GVA_inv_param-nup.pdf}}
+ % \includegraphics{code/results/accuracy_plots_application_biochemists_GVA_inv_param-nup.pdf}
+	\includegraphics[page=1,scale=0.34]{code/results/accuracy_plots_application_biochemists_GVA_inv_param.pdf}
+	\includegraphics[page=2,scale=0.34]{code/results/accuracy_plots_application_biochemists_GVA_inv_param.pdf}
+	\includegraphics[page=3,scale=0.34]{code/results/accuracy_plots_application_biochemists_GVA_inv_param.pdf}
+	\includegraphics[page=4,scale=0.34]{code/results/accuracy_plots_application_biochemists_GVA_inv_param.pdf}
+	\includegraphics[page=5,scale=0.34]{code/results/accuracy_plots_application_biochemists_GVA_inv_param.pdf}
+	\includegraphics[page=6,scale=0.34]{code/results/accuracy_plots_application_biochemists_GVA_inv_param.pdf}
 \label{fig:biochemists}
 \caption{Accuracy of the approximations of the parameters fit to the biochemists data}
 \end{figure}
@@ -1400,7 +1413,13 @@ seconds for the covariance parameterisation.
 
 \begin{figure}[h]
 	\centering
-	\makebox[0pt]{\includegraphics[width=1.05 \columnwidth]{code/results/accuracy_plots_application_owls_GVA_inv_param-highlights-nup.pdf}}
+	%\makebox[0pt]{\includegraphics[width=1.05 \columnwidth]{code/results/accuracy_plots_application_owls_GVA_inv_param-highlights-nup.pdf}}
+	\includegraphics[page=1,scale=0.34]{code/results/accuracy_plots_application_owl_GVA_inv_param.pdf}
+	\includegraphics[page=2,scale=0.34]{code/results/accuracy_plots_application_owl_GVA_inv_param.pdf}
+	\includegraphics[page=3,scale=0.34]{code/results/accuracy_plots_application_owl_GVA_inv_param.pdf}
+	\includegraphics[page=4,scale=0.34]{code/results/accuracy_plots_application_owl_GVA_inv_param.pdf}
+	\includegraphics[page=30,scale=0.34]{code/results/accuracy_plots_application_owl_GVA_inv_param.pdf}
+	\includegraphics[page=31,scale=0.34]{code/results/accuracy_plots_application_owl_GVA_inv_param.pdf}
 	\caption{Accuracy of the approximations of the parameters fit to the Owls data}
 	\label{fig:owls}
 \end{figure}
