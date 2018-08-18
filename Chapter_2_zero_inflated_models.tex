@@ -621,11 +621,13 @@ to $p(p-1)/2$, some of which are constrained.
 
 This parameterisation can lead to numeric overflow when the diagonals of
 $\overline{\mR}$ become moderately large, which can lead to singular matrices
-when attempting to invert $\mLambda$. 
-
-We dealt with this by defining the piecewise function below, which is
-exponential for arguments less than $t$, and quadratic for arguments greater
-than or equal to $t$
+when attempting to invert $\mLambda$.  We addressed this issue by defining 
+a new parameterisation using
+the
+piecewise function below, which is exponential for arguments less than 
+a threshold
+$t$, and
+quadratic for arguments greater than or equal to $t$
 \begin{equation}
 \label{eq:piecewise_function}
 f(r_{ij}) =
@@ -640,9 +642,9 @@ function, first and second derivatives would agree at $r_{ij} = t$. This
 ensured that the function did not grow too quickly as the parameters varied,
 mitigating the issue of numerical overflow for this parameterisation.
 
-To find the co-efficients $a$, $b$ and $c$, we solved the system of equations
-presented below formed by repeatedly  differentiating the quadratic at $r_{ij}
-=  t$ and equating it with $e^t$
+To find the co-efficients $a$, $b$ and $c$ for the above function, we solved
+the system of equations presented below formed by repeatedly  differentiating
+the quadratic at $r_{ij} =  t$ and equating it with $e^t$
 \begin{equation}
 \label{eq:system_of_equations}
 \begin{array}{lllll}
@@ -657,7 +659,7 @@ t) t] e^t$.
 We also addressed the problem of numeric overflow by working with the Cholesky
 factorisation of $\mLambda^{-1}$ rather than $\mLambda$, allowing us to solve a
 system of equations rather than invert and multiply by a matrix, which is also
-faster and more numerically stable. We use knowledge of the regression  model
+faster and more numerically stable. We used knowledge of the regression  model
 we are fitting to specify a sparse matrix structure, greatly reducing the
 dimension of   the problem and thus improving both computational speed and
 numeric accuracy.
@@ -670,9 +672,9 @@ numeric accuracy.
 % reduces the dimension of the optimisation problem we have to solve from
 % $\BigO(np^2)$ to $\BigO(np)$.
 	
-Any symmetric matrix $\mLambda$ can be written as a product of its Cholesky
-factors, $\mLambda = \mR \mR^\top$ where $\mR$ is lower triangular. The matrix
-$\mR$ is unique if $\mR_{ii} \geq 0$ and
+Recall that any symmetric matrix $\mLambda$ can be written as a product of its
+Cholesky factors, $\mLambda = \mR \mR^\top$ where $\mR$ is lower triangular.
+The matrix $\mR$ is unique if $\mR_{ii} \geq 0$ and
 \begin{equation*}
 \label{eq:cholesky_factorisation}
 \begin{array}{lll}
@@ -695,19 +697,19 @@ $\mR$ is unique if $\mR_{ii} \geq 0$ and
 \end{array}
 \end{equation*}
 
-\noindent We exploit this structure. By interchanging the fixed and random
+\noindent We exploit this structure, by interchanging the fixed and random
 effects in the design matrix $\mC = [\mX, \mZ]$ to $\mC = [\mZ, \mX]$, and
 re-ordering the dimensions of $\vmu, \mLambda$ and $\mSigma$ in the same
-manner, the independence between the blocks relating to the random effects in
-$\mZ$ induce sparsity in the Cholesky factor $\mR$ of $\mLambda^{-1}$, as can
-be seen in Figures \ref{fig:covfixedrandom} and \ref{fig:cholfixedrandom}. Thus
-the Gaussian $q(\vnu) \sim \N(\vmu, \mLambda)$ can be optimised over a space of
-dimension $\frac{1}{2} p (p + 1) + pq + \frac{1}{2} q (q + 1)$ rather than
-dimension $\frac{1}{2} (p + mq) (p + mq + 1)$ as in the dense parameterisation.
-This leads to subtantial performance gains when $m$ is large, as is typically
-the case in problems of practical importance such as longitudinal or clinical
-trials with many subjects or the application presented in Section
-\ref{sec:application}.
+manner, using the independence between the blocks relating to the random
+effects in $\mZ$ to induce sparsity in the Cholesky factor $\mR$ of
+$\mLambda^{-1}$, as can be seen in Figures \ref{fig:covfixedrandom} and
+\ref{fig:cholfixedrandom}. Thus the Gaussian $q(\vnu) \sim \N(\vmu, \mLambda)$
+can be optimised over a space of dimension $\tfrac{1}{2} p (p + 1) + pq +
+\tfrac{1}{2} q (q + 1)$ rather than dimension $\tfrac{1}{2} (p + mq) (p + mq +
+1)$ as in the dense parameterisation.  This leads to subtantial performance
+gains when $m$ is large, as is typically the case in problems of practical
+importance such as longitudinal or clinical trials with many subjects or the
+application presented in Section \ref{sec:application}.
 		
 By re-ordering the fixed and random effects in $\mLambda$, we end up with a
 covariance structure which is sparse in the first diagonal block.
@@ -729,26 +731,6 @@ covariance structure which is sparse in the first diagonal block.
 \end{figure}
 
 \subsection{Precision parameterisation}
-
-We optimise over the space $(\vmu, \overline{\mR})$ as before, but now the
-elements of the Cholesky factor are parameterised as
-		
-\begin{equation*}
-\label{eq:cholesky_element_precision_param}
-	\mR_{ij} =
-	\begin{cases}
-		\exp(-\overline{\mR}_{ij}), & i = j             \\
-		\overline{\mR}_{ij},        & i > j             \\
-		0,                          & \text{otherwise}.
-	\end{cases}
-\end{equation*}
-	
-\noindent This new choice of parameterisation allows us to calculate
-$\frac{1}{2} \text{diag}(\mC \mLambda \mC^\top)$ by solving the linear systems
-$\mR \va = \mC_{i}, i=1, \ldots, n$ for   $\va$ and then calculating
-$\va^\top\va$ where $\mC_{i} = $ the $i$th row of $\mC$, rather than
-calculating $\text{diag}(\mC \mLambda \mC^\top)$ directly.
-	
 
 The Gaussian Variational Approximation is fit by maximising the Gaussian
 Variational Lower Bound, which is parameterised by a mean vector $\vmu$ and a
@@ -802,24 +784,43 @@ As $\mOmega^{-1} \ne \vzero$ and $\tfrac{\partial \mOmega}{\partial
 depends on the structure of $\mC$ and $\mSigma$, which depends on the model
 specified.
 
-Another argument in favour of parameterising using the precision matrix is that
+We optimise over the space $(\vmu, \overline{\mR})$ as in the Section
+\ref{sec:param}, but now the elements of the Cholesky factor are parameterised
+as
+\begin{equation*}
+\label{eq:cholesky_element_precision_param}
+	\mR_{ij} =
+	\begin{cases}
+		\exp(-\overline{\mR}_{ij}), & i = j             \\
+		\overline{\mR}_{ij},        & i > j             \\
+		0,                          & \text{otherwise}.
+	\end{cases}
+\end{equation*}
+	
+\noindent This new choice of parameterisation allows us to calculate
+$\frac{1}{2} \text{diag}(\mC \mLambda \mC^\top)$ by solving the linear systems
+$\mR \va = \mC_{i}, i=1, \ldots, n$ for   $\va$ and then calculating
+$\va^\top\va$ where $\mC_{i} = $ the $i$th row of $\mC$, rather than
+calculating $\text{diag}(\mC \mLambda \mC^\top)$ directly.
+	
+Another advantage of parameterising using the precision matrix is that
 the covariance matrix contains the marginal covariances between the elements of
 $\vnu$, while the precision matrix contains the conditional covariances
-betweenm those elements. In generalised linear mixed models, fixed and random
+between those elements. In generalised linear mixed models, fixed and random
 effects are conditionally independent, implying sparsity in the precision
 matrix although not necessarily in the covariance matrix.
 
-Still another advantage of this parameterisation is its' greater numerical
-accuracy.  Matrix multiplication and back substitution are both equally
-numerically accurate and stable - as shown in \cite{Golub:1996:MC:248979}
-\S2.7.8 and \S3.1.2 or \cite{trefethen97} Lecture 17, and the precision matrix
-will be sparse due to the specification of the mixed model/conditional
-independence. This implies that the numerical accuracy of the inversion will be
-higher as there are fewer non-zero entries in the Cholesky factor of the
-precision matrix than of the Cholesky factor of the covariance matrix. Thus
-parameterising the variational lower bound in terms of the precision matrix
-will have the same or higher numerical accuracy than parameterising in terms of
-the covariance matrix.
+A final advantage of this parameterisation is its' greater numerical accuracy.
+Matrix multiplication and back substitution are both equally numerically
+accurate and stable - as shown in \cite{Golub:1996:MC:248979} \S2.7.8 and
+\S3.1.2 or \cite{trefethen97} Lecture 17, and the precision matrix will be
+sparse due to the specification of the mixed model/conditional independence.
+This implies that the numerical accuracy of the inversion will be higher as
+there are fewer non-zero entries in the Cholesky factor of the precision matrix
+than of the Cholesky factor of the covariance matrix. Thus parameterising the
+variational lower bound in terms of the precision matrix will have the same or
+higher numerical accuracy than parameterising in terms of the covariance
+matrix.
 
 \section{Numerical results}
 \label{sec:results}
