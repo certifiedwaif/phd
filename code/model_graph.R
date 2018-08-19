@@ -22,7 +22,7 @@ digraph boxes_and_circles {
 }
 ")
 
-grViz('
+grViz("
 digraph zip {
   layout = dot
   node [shape = circle]
@@ -34,4 +34,4 @@ digraph zip {
   x->beta; x->u
   beta->sigmabeta
   u->sigmau
-}')
+}")

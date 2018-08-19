@@ -43,13 +43,13 @@ Bayesian estimation methods for zero-inflated models were developed in
 \cite{Ghosh2006} using MCMC implemented with WinBUGS, and in \cite{Vatsa2014}
 using a Variational Bayes solution to the inverse zero-inflated Poisson
 regression problem. While simple forms of these models are easy to fit with
-standard  maximum likelihood techniques, more general models incorporating
-random effects, splines and missing data  typically have no closed form
+standard maximum likelihood techniques, more general models incorporating
+random effects, splines and missing data typically have no closed form
 solutions and hence present a greater computational challenge to fit.
 
 Fitting these models is typically done with Monte Carlo Markov Chain
 techniques, but these techniques can be computationally intensive and prone to
-convergence problems.  Other fitting methods such as the Variational Bayes
+convergence problems. Other fitting methods such as the Variational Bayes
 approach above can be inflexible, not allowing complicated models incorporating
 random effects, splines and missing data.
 
@@ -116,7 +116,7 @@ zero.
 \end{equation}
 
 This model yields the probability distribution specified in Equation
-(\ref{eq:zero_infl_first_param}).  Note that this allows zeros to be generated
+(\ref{eq:zero_infl_first_param}). Note that this allows zeros to be generated
 from the model in one of two ways -- either from the Bernoulli process
 generating a zero or from the Bernoulli process generating a Poisson sample
 which is then zero. A latent variable representation of this parameterization
@@ -140,12 +140,12 @@ $\vone_p$ and $\vzero_p$ to denote the $p \times 1$ column vectors with all
 entries equal to 1 or 0, respectively.
 
 Let $\vy$ be the $n \times 1$ vector. The Euclidean norm of a column vector
-$\vv$, defined to be $\sqrt{\vv^\top \vv}$, is  denoted by $\|\vv\|$. For a $p
+$\vv$, defined to be $\sqrt{\vv^\top \vv}$, is denoted by $\|\vv\|$. For a $p
 \times 1$ vector $\va$, we let $\diag{(\va)}$ denote the $p \times p$ matrix
 with the elements of $\va$ along its' diagonal.
 
 We denote the design matrix of fixed effects with dimensions $n \times p$ as
-$\mX$, and the design matrix of random  effects with dimensions $n \times m b$
+$\mX$, and the design matrix of random effects with dimensions $n \times m b$
 as $\mZ$. The combined design matrix $\mC$ is formed by appending the columns
 of $\mX$ to the columns of $\mZ$, giving $\mC = [ \mX, \mZ ]$.
 
@@ -156,7 +156,7 @@ these vectors $[\vbeta^\top, \vu^\top]$.
 % observation in $\vy$ is non-zero.
 
 Let $\mSigma$ be the covariance matrix of the random effects $\vu$, and $\mPsi$
-the covariance matrix prior on $\mSigma$.  These matrices are all of dimension
+the covariance matrix prior on $\mSigma$. These matrices are all of dimension
 $(p + m b) \times (p + m b)$.
 
 $\text{expit}(x)$ denotes the function $\tfrac{1}{1 + \exp(-x)}$ which is the
@@ -197,14 +197,14 @@ above into a Poisson mixed model likelihood.
 
 When the indicator $r_{ij} = 0$, the likelihood is $1$ for $y_{ij} = 0$ and $0$
 for all $y_{ij} > 0$, and when the indicator $r_{ij} = 1$, the likelihood is a
-Poisson mixed model regression likelihood for $y_{ij}$.  $r_{ij}$ is a
+Poisson mixed model regression likelihood for $y_{ij}$. $r_{ij}$ is a
 Bernoulli indicator with probability $\rho$, allowing a proportion of zero-
 inflation in the observed data to be specified. The $j$th predictor/response
 pair for the $i$th group is denoted by $(x_{ij}, y_{ij}), 1 \leq j \leq n_i, 1
 \leq i \leq m$, where $x_{ij} \in \R$, and the $y_{ij}$ are nonnegative
 integers. For each $1 \leq i \leq m$, define the $n_i \times 1$ vectors $y_{ij}
 = [y_{i 1}, \ldots, y_{i n_i}]^\top$ as the response vector. Vectors $y_1,
-\ldots, y_m$ are assumed to be independent of each other.  We develop a
+\ldots, y_m$ are assumed to be independent of each other. We develop a
 zero-inflated regression model incorporating both fixed effects $\vbeta$ and
 random effects $u$. The log-likelihood for one observation is then
 \begin{equation*}
@@ -847,7 +847,7 @@ interval $[-1, 1]$. The resulting model fits are presented in Figure
 To assess the speed of each approach, a test case was constructed of a random
 slope model with $m=50$ groups, each containing $n_i = 100$ individuals. A
 model was then fit to this data set ten times using each algorithm, and the
-results averaged. They are presented in Table
+results averaged. These results are presented in Table
 \ref{tab:application_slope_speed}.
 
 \begin{table}
@@ -870,8 +870,8 @@ results averaged. They are presented in Table
 % different data sets that were randomly generated after having initialised the
 % random number generator with different seeds.
 		
-Median accuracy of the algorithms was assessed by running them on 100 randomly
-generated data sets. The	results are presented in Figure
+The median accuracy of the algorithms was assessed by running them on 100
+randomly generated data sets. The	results are presented in Figure
 \ref{fig:median_accuracy_intercept} and Figure \ref{fig:median_accuracy_slope}.
 		
 % Figure: Median accuracy graph intercept
@@ -1008,6 +1008,7 @@ The GVA algorithm with the $\mLambda = (\mR \mR^\top)^{-1}$ parameterisation
 was less prone to instability due to starting point when the safe exponential
 parameterisation was used then when it was not used, as can be seen from Figure
 \ref{fig:stability_locations_gva}. % FIXME: Add error counts
+% TODO: I hate this graph. Re-do it.
 \begin{figure}[h]
 	\includegraphics[width=0.45 \textwidth]{code/safe_exp_stability.pdf}
 	\includegraphics[width=0.45 \textwidth]{code/no_safe_exp_stability.pdf}
@@ -1036,11 +1037,11 @@ the Variational Bayes algorithm to update the other parameters before trying to
 fit the Gaussian component of the model again until the correct parameters are
 accurately estimated.
 
-% FIXME: This is a horrendously ugly plot! You can do better than this.
+% Generated by Rscript code/plot_local_solutions.R -i code/local_solutions_gva_nr_error_locations_no_protections.csv -o code/local_solutions_gva_nr_error_locations_no_protections.pdf
 \begin{figure}[h!]
 	\includegraphics[width=0.95 \textwidth]{code/local_solutions_gva_nr_error_locations_no_protections.pdf}
 	\label{fig:stability_locations_nr}
-	\caption{Starting locations which caused the NR fitting algorithm to fail with numeric errors. The true model had fixed parameters $\vbeta = (2, 1)^\top$ and random intercepts. There were ten groups in the
+    \caption{Starting locations which caused the fixed point fitting algorithm to fail with numeric errors. The true model had fixed parameters $\vbeta = (2, 1)^\top$ and random intercepts. There were ten groups in the
 	hierarchical model each	with ten individuals $(m=10, n_i=10)$}
 \end{figure}
 
@@ -1116,10 +1117,10 @@ Figure \ref{fig:police_stops}
 		\hline
 		Algorithm & Time  in seconds \\
 		\hline
-		Laplace & $0.24$ \\
-		GVA covariance parameterisation & $6.02$ \\
-		GVA precision paramaterisation & $3.92$ \\
-		GVA fixed point & $0.18$ \\
+		Laplace & $0.065$ \\
+		%GVA covariance parameterisation & $6.02$ \\ % TODO: Did not run
+		GVA precision paramaterisation & $0.898$ \\
+		GVA fixed point & $0.058$ \\
 		\hline
 	\end{tabular}
 	\caption{Table of speeds - Police stops}
@@ -1215,10 +1216,10 @@ in Table \ref{tab:application_roaches}.
 	\hline
 	Algorithm & Time in seconds \\
 	\hline
-	Laplace & $0.49$ \\
-	GVA & $1.08$ \\
-	GVA inv. param & $0.81$ \\
-	GVA fixed point & $0.11$ \\
+	Laplace & $0.684$ \\
+	GVA & $2.024$ \\
+	GVA inv. param & $1.701$ \\
+	GVA fixed point & $0.168$ \\
 	\hline
 	\end{tabular}
 	\label{tab:application_roaches_runtime}
@@ -1316,10 +1317,10 @@ accuracy.
 	\hline
 	Algorithm & Time in seconds \\
 	\hline
-	Laplace & $1.01$ \\
-	GVA & $0.96$ \\
-	GVA inv. param & $0.68$ \\
-	GVA fixed point & $0.41$ \\
+	Laplace & $0.119$ \\
+	GVA & $0.598$ \\
+	GVA inv. param & $0.525$ \\
+	GVA fixed point & $0.069$ \\
 	\hline
 	\end{tabular}
 	\label{tab:biochemists_runtime}
@@ -1395,10 +1396,10 @@ seconds for the covariance parameterisation.
 	\hline
 	Algorithm & Time in seconds \\
 	\hline
-	Laplace & $0.71$ \\
-	GVA covariance parameterisation & $5.66$ \\
-	GVA precision parameterisation & $1.88$ \\
-	GVA fixed point & $0.18$ \\
+	Laplace & $0.778$ \\
+	GVA covariance parameterisation & $13.949$ \\
+	GVA precision parameterisation & $2.146$ \\
+	GVA fixed point & $0.248$ \\
 	\hline
 	\end{tabular}
 	\caption{The runtimes of the fitting algorithms for the Owls model in seconds.}

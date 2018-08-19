@@ -1,38 +1,38 @@
 library(gsl)
 
-R2 = .5
+R2 = 0.5
 n = 100
 p = 10
 
-g = seq(0,150,,10000)
+g = seq(0, 150, , 10000)
 
 a = -0.75
 b = (n - p - 5)/2 - a
 c = (n - 1)/2
 d = p/2 + a
 
-log.f = (b + 1)*log(1 - R2) + b*log(g) - (d + b + 2)*log(1 + g*(1 - R2)) - lbeta(d+1,b+1)
+log.f = (b + 1) * log(1 - R2) + b * log(g) - (d + b + 2) * log(1 + g * (1 - R2)) - 
+    lbeta(d + 1, b + 1)
 
-plot(g,exp(log.f),type="l")
+plot(g, exp(log.f), type = "l")
 
 
-trapint <- function(xgrid, fgrid) 
-{
-	ng <- length(xgrid)
-	xvec <- xgrid[2:ng] - xgrid[1:(ng - 1)]
-	fvec <- fgrid[1:(ng - 1)] + fgrid[2:ng]
-	integ <- sum(xvec * fvec)/2
-	return(integ)
+trapint <- function(xgrid, fgrid) {
+    ng <- length(xgrid)
+    xvec <- xgrid[2:ng] - xgrid[1:(ng - 1)]
+    fvec <- fgrid[1:(ng - 1)] + fgrid[2:ng]
+    integ <- sum(xvec * fvec)/2
+    return(integ)
 }
 
-print(trapint(g,exp(log.f)))
+print(trapint(g, exp(log.f)))
 
-N = 1e5
-vB = rbeta(N,b+1,d+1)
+N = 1e+05
+vB = rbeta(N, b + 1, d + 1)
 vg.tilde = vB/(1 - vB)
 vg = vg.tilde/(1 - R2)
 
-lines(density(vg),col="red")
+lines(density(vg), col = "red")
 
 
 
@@ -42,68 +42,75 @@ lines(density(vg),col="red")
 library(gsl)
 
 
-vsigma2 = seq(0.1,1.5,,1000)
+vsigma2 = seq(0.1, 1.5, , 1000)
 
-log.f = c*log(n/2)
-log.f = log.f + (b + 1)*log(1 - R2)
+log.f = c * log(n/2)
+log.f = log.f + (b + 1) * log(1 - R2)
 log.f = log.f - lgamma(c)
-log.f = log.f - (c + 1)*log(vsigma2)
-log.f = log.f - 0.5*n/vsigma2
-log.f = log.f + log( hyperg_1F1(b + 1, c, 0.5*n*R2/vsigma2, give=FALSE, strict=TRUE) )
+log.f = log.f - (c + 1) * log(vsigma2)
+log.f = log.f - 0.5 * n/vsigma2
+log.f = log.f + log(hyperg_1F1(b + 1, c, 0.5 * n * R2/vsigma2, give = FALSE, strict = TRUE))
 
 
-plot(vsigma2,exp(log.f),type="l")
+plot(vsigma2, exp(log.f), type = "l")
 
-print(trapint(vsigma2,exp(log.f)))
+print(trapint(vsigma2, exp(log.f)))
 
 
-vsigma2.post = 1/rgamma(N,c,0.5*n*(1 - R2*vg/(1 + vg)))
-lines(density(vsigma2.post),col="red")
+vsigma2.post = 1/rgamma(N, c, 0.5 * n * (1 - R2 * vg/(1 + vg)))
+lines(density(vsigma2.post), col = "red")
 
-dinvgamma <- function(x,a,b) {
-	log.f = a*log(b) - lgamma(a) - (a + 1)*log(x) - b/x
-	return(exp(log.f))
+dinvgamma <- function(x, a, b) {
+    log.f = a * log(b) - lgamma(a) - (a + 1) * log(x) - b/x
+    return(exp(log.f))
 }
 
-vf = 0*exp(log.f)
+vf = 0 * exp(log.f)
 for (i in 1:N) {
-	vf = vf + (1/N)*dinvgamma(vsigma2,c,0.5*n*(1 - R2*vg[i]/(1 + vg[i])))
+    vf = vf + (1/N) * dinvgamma(vsigma2, c, 0.5 * n * (1 - R2 * vg[i]/(1 + vg[i])))
 }
 
-lines(vsigma2,vf,col="blue")
+lines(vsigma2, vf, col = "blue")
 
 # Rao-Blackwellised alpha|y
-valpha <- seq(-0.3, 0.3,, 1e5)
+valpha <- seq(-0.3, 0.3, , 1e+05)
 vf_alpha = 0 * exp(log.f)
 for (i in 1:N) {
-	vf_alpha = vf_alpha + (1 / N) * dnorm(valpha, 0, sqrt(vsigma2.post[i]) / sqrt(n))
+    vf_alpha = vf_alpha + (1/N) * dnorm(valpha, 0, sqrt(vsigma2.post[i])/sqrt(n))
 }
-plot(valpha,vf_alpha,col="blue",type="l")
+plot(valpha, vf_alpha, col = "blue", type = "l")
 
-analytic <- exp(lgamma(c + 0.5) + (b + 1) * log(1 - R2) - lgamma(c) - 0.5 * log(pi) -n/2 * log(1 + valpha^2)) * hyperg_2F1(b + 1, c + 0.5, c, R2 / (1 + valpha^2))
-lines(valpha, analytic, col="red")
-legend("topright", lty=1, legend = c("Rao-Blackwellised estimator", "Analytic expression"), col = c("blue", "red"))
+analytic <- exp(lgamma(c + 0.5) + (b + 1) * log(1 - R2) - lgamma(c) - 0.5 * log(pi) - 
+    n/2 * log(1 + valpha^2)) * hyperg_2F1(b + 1, c + 0.5, c, R2/(1 + valpha^2))
+lines(valpha, analytic, col = "red")
+legend("topright", lty = 1, legend = c("Rao-Blackwellised estimator", "Analytic expression"), 
+    col = c("blue", "red"))
 
 # Rao-Blackwellised E[beta|y]
 E_beta <- 0
 for (i in 1:N) {
-	E_beta = E_beta + (1 / N) * vg[i] / (1 + vg[i])
+    E_beta = E_beta + (1/N) * vg[i]/(1 + vg[i])
 }
 E_beta
 
-log_K <- (b + 1) * log(1-R2) - lbeta(p/2 + a + 1, b + 1)
-analytic <- exp(log_K + lbeta(p / 2 + a + 1, b + 2)) * hyperg_2F1(n/2, b + 2, n / 2 + 1, R2)
-# analytic <- exp(log_K + lbeta(p / 2 + a + 1, b + 2)) * hyperg_2F1(p/2 + a + 1, 1, n / 2 + 1, R2)
-analytic <- beta(p / 2 + a + 1, b + 2) * (1-R2)^(b+1) / beta(p/2 + a + 1, b + 1)  * hyperg_2F1(n/2, b + 2, n / 2 + 1, R2)
-analytic <- (b + 1) * hyperg_2F1(d + 1, 1, c+1, R2) / c
+log_K <- (b + 1) * log(1 - R2) - lbeta(p/2 + a + 1, b + 1)
+analytic <- exp(log_K + lbeta(p/2 + a + 1, b + 2)) * hyperg_2F1(n/2, b + 2, n/2 + 
+    1, R2)
+# analytic <- exp(log_K + lbeta(p / 2 + a + 1, b + 2)) * hyperg_2F1(p/2 + a + 1,
+# 1, n / 2 + 1, R2)
+analytic <- beta(p/2 + a + 1, b + 2) * (1 - R2)^(b + 1)/beta(p/2 + a + 1, b + 1) * 
+    hyperg_2F1(n/2, b + 2, n/2 + 1, R2)
+analytic <- (b + 1) * hyperg_2F1(d + 1, 1, c + 1, R2)/c
 analytic
 
 # M2
 E_beta2 <- 0
 for (i in 1:N) {
-	E_beta2 = E_beta2 + (1 / N) * vg[i]^2 / (1 + vg[i])^2
+    E_beta2 = E_beta2 + (1/N) * vg[i]^2/(1 + vg[i])^2
 }
 E_beta2
-analytic <- beta(p / 2 + a + 1, b + 3) * (1-R2)^(b+1) / beta(p/2 + a + 1, b + 1)  * hyperg_2F1(n/2, b + 3, n / 2 + 2, R2)
-analytic <- beta(p / 2 + a + 1, b + 3) / beta(p/2 + a + 1, b + 1)  * hyperg_2F1(p/2 + a + 1, 2, n / 2 + 2, R2)
+analytic <- beta(p/2 + a + 1, b + 3) * (1 - R2)^(b + 1)/beta(p/2 + a + 1, b + 1) * 
+    hyperg_2F1(n/2, b + 3, n/2 + 2, R2)
+analytic <- beta(p/2 + a + 1, b + 3)/beta(p/2 + a + 1, b + 1) * hyperg_2F1(p/2 + 
+    a + 1, 2, n/2 + 2, R2)
 analytic
