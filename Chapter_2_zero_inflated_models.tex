@@ -1053,8 +1053,8 @@ algorithms to several publically available data sets.
 
 \subsection{Poisson example without zero-inflated component -- Police stops}
 \label{sec:police_stops}
-The data set used for this example was the police stop example from Chapter 15 of \cite{Gelman2007}.
-The model fit was
+The data set used for this example was the police stop example from Chapter 15
+of \cite{Gelman2007}.  The model fit was
 \begin{equation*}
 	\vy_{ep}        \sim \text{Poisson}(n_{ep} e^\vnu)
 \end{equation*}
@@ -1097,14 +1097,14 @@ Figure \ref{fig:police_stops}
 		\hline
 		Covariate                     & Posterior Mean & Lower 95\% CI & Upper 95\% CI & Accuracy \\
 		\hline
-		Intercept [African-Americans] & $4.04$          & $3.98$           & $4.07$          & 82\%   \\
-		$\beta_2$ [hispanics]         & $-0.45$         & $-0.46$          & $-0.43$         & 98\%   \\
+		Intercept [African-Americans] & $4.04$          & $3.98$           & $4.07$          & 85\%   \\
+		$\beta_2$ [hispanics]         & $-0.45$         & $-0.46$          & $-0.43$         & 99\%   \\
 		$\beta_3$ [whites]            & $-1.38$         & $-1.40$          & $-1.37$         & 99\%   \\
-		$\alpha_1$ [weapons crimes]   & $0.58$          & $0.57$           & $0.59$          & 89\%   \\
+		$\alpha_1$ [weapons crimes]   & $0.58$          & $0.57$           & $0.59$          & 90\%   \\
 		$\alpha_2$ [property crimes]  & $-0.19$         & $-0.21$          & $-0.17$         & 92\%   \\
 		$\alpha_3$ [drug crimes]      & $-0.75$        & $-0.77$          & $-0.73$         & 95\%   \\
 		Random intercept              & $1.32$         & $-0.19$         & $2.20$         & 87\%   \\
-		$\sigma^2_{\vu}$              & $8.57$          & $1.02$           & $24.35$         & 49\%     \\
+		$\sigma^2_{\vu}$              & $8.57$          & $1.02$           & $24.35$         & 67\%     \\
 		\hline
 	\end{tabular}
 	\caption{Table of results - Police stops}
@@ -1127,7 +1127,6 @@ Figure \ref{fig:police_stops}
 	\label{tab:police_stop_speeds}
 \end{table}
 
-% TODO: You need to describe the data set and the model.
 \subsection{Zero--inflated example -- Cockroaches in apartments}
 \label{sec:cockroaches}
 
@@ -1198,12 +1197,12 @@ in Table \ref{tab:application_roaches}.
 		\hline
 		Covariate          & Posterior Mean & Lower 95\% CI & Upper 95\% CI & Accuracy \\
 		\hline
-		Intercept          & $3.42$						& $3.2$ 					& $3.65$          & $95\%$     \\
-		Time               & $-0.14$        & $-0.05$       & $-0.02$       & $96\%$     \\
-		Time:Treatment     & $-0.31$        & $-0.43$       & $-0.14$       & $96\%$     \\
-		Random intercept   & $-1.60$        & $-1.71$       & $-1.49$       & $90\%$     \\
-		$\sigma^2_{\vu_1}$ & $3.29$           & $2.02$          & $8.48$          & $63\%$     \\
-		$\rho$             & $0.51$           & $0.50$          & $0.55$          & $62\%$     \\
+		Intercept          & $3.42$						& $3.2$ 					& $3.65$          & $96\%$     \\
+		Time               & $-0.14$        & $-0.05$       & $-0.02$       & $98\%$     \\
+		Time:Treatment     & $-0.31$        & $-0.43$       & $-0.14$       & $99\%$     \\
+		Random intercept   & $-1.60$        & $-1.71$       & $-1.49$       & $98\%$     \\
+		$\sigma^2_{\vu_1}$ & $3.29$           & $2.02$          & $8.48$          & $64\%$     \\
+		$\rho$             & $0.51$           & $0.50$          & $0.55$          & $63\%$     \\
 		\hline
 	\end{tabular}
 	\caption{The posterior means, 95\% credible intervals and accuracy of the fixed and random
@@ -1379,10 +1378,10 @@ seconds for the covariance parameterisation.
 		\hline
 		Covariate          & Posterior Mean & Lower 95\% CI & Upper 95\% CI & Accuracy \\
 		\hline
-		Satiated & $-0.22$ & $-0.21$ & $-0.21$ & $97\%$ \\
-		Arrival Time & $-0.07$ & $-0.07$ & $-0.07$ & $73\%$ \\
-		Random intercept (nest) & $0.34$ & $-5.28$ & $5.96$ & $84\%$ \\
-		$\sigma_{\vu_1}^2$ & $7.90$ & $3.21$ & $468.12$ & $94\%$ \\
+		Satiated & $-0.22$ & $-0.21$ & $-0.21$ & $93\%$ \\
+		Arrival Time & $-0.07$ & $-0.07$ & $-0.07$ & $80\%$ \\
+		Random intercept (nest) & $0.34$ & $-5.28$ & $5.96$ & $82\%$ \\
+		$\sigma_{\vu_1}^2$ & $7.90$ & $3.21$ & $468.12$ & $87\%$ \\
 		$\rho$ & $0.74$ & $0.70$ & $0.77$ & $99\%$ \\
 		\hline
 	\end{tabular}			
