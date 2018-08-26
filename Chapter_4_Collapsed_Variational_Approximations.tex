@@ -10,10 +10,10 @@ These techniques are especially useful in problems of high-dimension, such as
 bioinformatics problems where the model space is complex and the optimal model
 is difficult for statisticians to manually specify. However, Bayesian model
 selection is computationally expensive, and prone to getting stuck in local
-minima if the posterior likelihood is multi- modal. This issue is particularly
+minima if the posterior likelihood is multimodal. This issue is particularly
 acute if the spike-and-slab prior, popular for Bayesian model selection, is
 used. We seek to address both problems by proposing a population non-parametric
-Variational Bayes approximation algorithm - a population-based optimisation
+Variational Bayes approximation algorithm -- a population-based optimisation
 strategy. Maintaining a population of models allows the posterior distribution
 to be explored more thoroughly, finding multiple maxima. The variational
 approximation's lower bound includes an entropy term which ensures diversity in
@@ -48,7 +48,7 @@ by using selective shrinkage.
 
 Existing approaches to the problem of model selection focus upon finding a
 single best model as quickly as possible, using the least computational effort
-(\cite{You2014}, \cite{Rockova2014}). Exploring the model space using only one
+\citep{You2014,Rockova2014}. Exploring the model space using only one
 model at a time will provide a misleading view of the uncertainty in the
 posterior, as it is typically highly multimodal.
 
@@ -186,7 +186,7 @@ model selection paradoxes which arise when a fixed choice of $g$ is made.
 % Euler's transformation and properties of the hypergeometric function to
 % derive a new, numerically stable function.
 
-
+\newpage 
 \section{Bayesian linear model averaging}
 \label{sec:blma}
 
@@ -644,7 +644,7 @@ desirable optimality properties \citep{Barbieri2004}.
 %to have specific parametric forms. In the next section we employ such
 %a strategy.
 
-\section{Particle based Variational Approximation}
+\section{Particle based variational approximation}
 \label{sec:pb-pva}
 
 We will now present a population based variational collapsed Bayes
@@ -885,7 +885,7 @@ variables except for the response as predictors.
 			%VietNamI	& 27765 & 11 & lnhhexp & {\tt Ecdat}  \\ 
 			Kakadu	& 1827 & 22 & {\tt income} & {\tt Ecdat}   \\  
 		\end{tabular} 
-	\end{center}
+	\end{center} \bigskip 
 	\caption{A summary of the datasets used in the paper and their respective {\tt R} packages.}
 	\label{tab:cva_datasets}
 \end{table}

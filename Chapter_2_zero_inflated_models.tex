@@ -126,7 +126,7 @@ otherwise.
 \label{eq:zero_infl_second_param}
 \begin{array}{rl}
 	P(Y_i=y_i|r_i) = & \ds  \frac{\exp(-\lambda r_i)(\lambda r_i)^{y_i}}{y_i!} \quad \mbox{and} \\
-	r_i \sim & \mbox{Bernoulli}(1-\rho)
+	r_i \sim & \mbox{Bernoulli}(1-\rho).
 \end{array}
 \end{equation}
 
@@ -169,7 +169,7 @@ and $\vbeta$ the vector of regression coefficients. Letting $\vr =
 		    & = \vy^\top \mR (\mX\vbeta)                           
 		- \vr^\top \exp{(\mX\vbeta)} 
 		- \vone^\top \log{\Gamma{(\vy + \vone)}}, \quad \mbox{ and }\\ [1ex]
-		r_i | \rho & \sim \text{Bernoulli}(1-\rho), \quad 1 \leq i \leq n \\
+		r_i | \rho & \sim \text{Bernoulli}(1-\rho), \quad 1 \leq i \leq n, \\
 	\end{array}
 \end{equation*}
 
@@ -285,7 +285,8 @@ $\mSigma$ is symmetric, with contents
 }
 }
 
-\subsection{Variational Bayes Approximation to the Zero-Inflated Poisson model}
+\subsection{Variational Bayes approximation to the zero-inflated Poisson model}
+
 We choose a factored variational approximation for the model of the form 
 \[
 	q(\vnu, \sigma_{\vu}^2,\vr_0, \rho) = q(\vnu) q(\mSigma_{\vu \vu}) q(\vr_0) q(\rho),
@@ -308,7 +309,7 @@ $$p_i =
 
 %$\propto \exp{\left \{-r_i \bE_{-r_i} [\exp{(c_i^\top\vnu)}] + r_i [\psi(\alpha_\rho) - \psi(\beta_\rho)] \right \} }.\\$
 
-The optimal approximation for $\vr$ is given below % in Equation (\ref{eq:optimal_approximation})
+The  approximation for $\vr$ is given by % in Equation (\ref{eq:optimal_approximation})
 % \joc{(reword: the ``optimal approximation'' might be called the true posterior)}
 \begin{equation}
 \label{eq:optimal_approximation}
@@ -351,7 +352,7 @@ variational lower bound is given in Appendix \ref{sec:calculation_of_var_lb}.
 	\end{algorithmic}
 \end{algorithm}
 						
-\section{Optimising the Gaussian Part of the Model}
+\section{Optimising the approximation over the regression coefficients}
 \label{sec:gaussian}
 
 The most computationally and numerically difficult part of Algorithm
@@ -629,7 +630,7 @@ quadratic for arguments greater than or equal to $t$
 \label{eq:piecewise_function}
 f(r_{ij}) =
 \begin{cases}
-    e^{r_{ij}}, & r_{ij} < t;                   \\
+    e^{r_{ij}}, & r_{ij} < t;         \quad \mbox{and}           \\
     a r_{ij}^2 + b r_{ij} + c, & r_{ij} \geq t; 
 \end{cases}
 \end{equation}
@@ -641,7 +642,7 @@ mitigating the issue of numerical overflow for this parameterisation.
 
 To find the coefficients $a$, $b$ and $c$ for the above function, we solved
 the system of equations presented below formed by repeatedly  differentiating
-the quadratic at $r_{ij} =  t$ and equating it with $e^t$
+the quadratic at $r_{ij} =  t$ and equating it with $e^t$ we have
 \begin{equation}
 \label{eq:system_of_equations}
 \begin{array}{lllll}
@@ -849,7 +850,7 @@ results averaged. These results are presented in Table
 \ref{tab:application_slope_speed}.
 
 \begin{table}
-{\scriptsize
+{\footnotesize 
 	\begin{tabular}{|l|rr|}
 		\hline
 		Algorithm & Mean (seconds) & Standard deviation (seconds) \\
@@ -897,14 +898,14 @@ randomly generated data sets. The	results are presented in Figure
 		
 % Table of accuracy results - intercept model
 \begin{table}
-{\scriptsize
+{\footnotesize
 	\begin{tabular}{|l|rrrr|}
 		\hline
 		                   & Laplace's Method & GVA $(\mLambda = \mR \mR^\top)$ & GVA NP $(\mLambda = (\mR \mR^\top)^{-1})$ & GVA FP \\
 		\hline
 		$\vbeta_1$         & $85\%$           & $90\%$                          & $91\%$                                    & $90\%$ \\ 
 		$\vbeta_2$         & $76\%$           & $98\%$                          & $99\%$                                    & $99\%$ \\ 
-		Mean of $\vu$      & $81\%$           & $94\%$                          & $94\%$                                    & $94\%$ \\
+		Mean of $\vu$'s      & $81\%$           & $94\%$                          & $94\%$                                    & $94\%$ \\
 		$\sigma^2_{\vu_1}$ & $66\%$           & $66\%$                          & $66\%$                                    & $66\%$ \\ 
 		$\rho$             & $99\%$           & $99\%$                          & $99\%$                                    & $99\%$ \\ 
 		\hline
@@ -915,7 +916,7 @@ randomly generated data sets. The	results are presented in Figure
 \end{table}
 		
 \begin{table}
-	{\scriptsize
+	{\footnotesize
 	\begin{tabular}{|l|rrrr|}
 		\hline
 		                   & Laplace's Method & GVA $(\mLambda = \mR \mR^\top)$ & GVA $(\mLambda = (\mR \mR^\top)^{-1})$ & GVA FP \\
@@ -1092,7 +1093,7 @@ $\rho$. Accuracy of the approximation was assessed by comparing the fitted
 distribution for each parameter to a kernel density estimate of the parameter's
 distribution from 1 million samples from the equivalent model fitted using
 Stan. The results are presented in Table \ref{tab:application_police_stops} and
-Figure \ref{fig:police_stops}
+Figure \ref{fig:police_stops}.
 
 \begin{figure}
 \centering
@@ -1108,7 +1109,7 @@ Figure \ref{fig:police_stops}
 
 % Table of results
 \begin{table}
-	{\scriptsize 
+	{\footnotesize 
 	\begin{tabular}{|l|rrrr|}
 		\hline
 		Covariate                     & Posterior Mean & Lower 95\% CI & Upper 95\% CI & Accuracy \\
@@ -1221,6 +1222,7 @@ in Table \ref{tab:application_roaches}.
 % [1] 152.7625
 		
 \begin{table}
+	{\footnotesize
 	\begin{tabular}{|l|rrrr|}
 		\hline
 		Covariate          & Posterior Mean & Lower 95\% CI & Upper 95\% CI & Accuracy \\
@@ -1232,13 +1234,16 @@ in Table \ref{tab:application_roaches}.
 		$\sigma^2_{\vu_1}$ & $3.29$           & $2.02$          & $8.48$          & $64\%$     \\
 		$\rho$             & $0.51$           & $0.50$          & $0.55$          & $63\%$     \\
 		\hline
-	\end{tabular}\bigskip
+	\end{tabular}
+}
+\bigskip
 	\caption{The posterior means, 95\% credible intervals and accuracy of the fixed and random
 						effects, $\sigma_{\vu_1}^2$ and $\rho$ for the Roach model.}
 	\label{tab:application_roaches}
 \end{table}
 
 \begin{table}
+	{\footnotesize
 	\begin{tabular}{|lr|}
 	\hline
 	Algorithm & Time in seconds \\
@@ -1249,6 +1254,7 @@ in Table \ref{tab:application_roaches}.
 	GVA fixed point & $0.17$ \\
 	\hline
 	\end{tabular}
+}
 	\label{tab:application_roaches_runtime}\bigskip
 	\caption{The runtimes in seconds for fitting algorithms when fitting the roach model.}
 \end{table}
@@ -1323,7 +1329,7 @@ accuracy.
 \end{figure}
 
 \begin{table}
-	{\scriptsize 
+	{\footnotesize 
 	\begin{tabular}{|l|rrrr|}
 		\hline
 		Covariate          & Posterior Mean & Lower 95\% CI & Upper 95\% CI & Accuracy \\
@@ -1342,6 +1348,7 @@ accuracy.
 \end{table}
 
 \begin{table}
+	{\footnotesize
 	\begin{tabular}{|l|r|}
 	\hline
 	Algorithm & Time in seconds \\
@@ -1352,6 +1359,7 @@ accuracy.
 	GVA fixed point & $0.07$ \\
 	\hline
 	\end{tabular}
+}
 	\label{tab:biochemists_runtime}\bigskip
 	\caption{The run times in seconds for fitting algorithms when fitting the Biochemists model.}
 \end{table}
@@ -1404,7 +1412,7 @@ seconds for the covariance parameterisation.
 \end{figure}
 
 \begin{table}
-	{\scriptsize
+	{\footnotesize
 	\begin{tabular}{|l|rrrr|}
 		\hline
 		Covariate          & Posterior Mean & Lower 95\% CI & Upper 95\% CI & Accuracy \\
@@ -1423,6 +1431,7 @@ seconds for the covariance parameterisation.
 \end{table}
 
 \begin{table}
+	{\footnotesize
 	\begin{tabular}{|l|r|}
 	\hline
 	Algorithm & Time in seconds \\
@@ -1432,7 +1441,7 @@ seconds for the covariance parameterisation.
 	GVA precision parameterisation & $2.15$ \\
 	GVA fixed point & $0.25$ \\
 	\hline
-	\end{tabular}\bigskip
+	\end{tabular}}\bigskip
 	\caption{The run times of the fitting algorithms for the Owls model in seconds.}
 	\label{tab:owls_times}
 \end{table}
