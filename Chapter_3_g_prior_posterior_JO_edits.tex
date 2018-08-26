@@ -1,7 +1,7 @@
 %! TEX root = thesis.tex
 % %\maketitle
 
-\chapter{Numerical aspects of calculating Bayes factors for linear models using
+\chapter{Calculating Bayes factors for linear models using
 	mixture $g$-priors
 	}
 
@@ -376,7 +376,7 @@ approximation to ${}_2F_1$ implemented in the {\tt R} package {\tt BAS}.  Key
 to achieving accuracy, efficiency and numerical stability for several different
 mixture $g$-priors is the following result.
 
- 
+\smallskip 
 \noindent 
 {\bf Result 1:} {\it For $x\in(0,1)$, $c>1$, and $b +1 > c$ we have}
 \begin{equation}\label{eq:logGuassHypergeometric2}
@@ -425,9 +425,14 @@ in \cite{PrudnikovEtal1986}.
 \noindent for $a>2$ and $g>0$. Combining (\ref{eq:yGivenG}) with
 (\ref{eq:hyperG}), we have
 \begin{equation}\label{eq:hyperGmarginalIntegral}
-	p_{g}(\vy|\vgamma) = K(n) \frac{a - 2}{2}  \int_0^\infty 
+\begin{array}{rl} 
+	p_{g}(\vy|\vgamma) 
+	& \ds = K(n) \frac{a - 2}{2}  
+	\\
+	& \ds \qquad \times \int_0^\infty 
 	\left( 1 + g \right)^{-a/2}
 	(1 + g)^{(n-p_\vgamma-1)/2} \left[ 1 + g (1 - R_\vgamma^2) \right]^{-(n-1)/2}  dg.
+\end{array} 
 \end{equation}
 
 \noindent After applying 3.197(5) of \cite{Gradshteyn2007}, i.e.,
@@ -476,7 +481,9 @@ They show that this prior leads to model selection consistency.  Combining
 		%\left( 1 + \frac{g}{n} \right)^{-a/2}
 		%(1 + g)^{(n-p_\vgamma-1)/2} \left[ 1 + g (1 - R_\vgamma^2) \right]^{-(n-1)/2}  dg
 		%\\ [2ex]
-		& \ds = K(n) \frac{a - 2}{2n}  \int_0^1 
+		& \ds = K(n) \frac{a - 2}{2n}  
+		\\ [2ex]
+		& \ds \qquad \times \int_0^1 
 		(1 - u)^{p/2 + a/2 - 2  } \left(  1 - u \left(1  -  \tfrac{1}{n} \right) \right)^{-a/2} \left(  1 - u R^2\right)^{-(n-1)/2} du.
 	\end{array} 
 \end{equation}
@@ -537,7 +544,7 @@ function of $n$, $p_\vgamma$, and $R^2$. From this figure we see that the
 approximation has a good relative error except for values close to 1 when the
 approximation overestimates the true value of the log Bayes factor. We found
 numerical quadrature to be more reliable than using
-(\ref{eq:hyperGonNmarginal}) evaluated using the {\tt appell} function in the
+(\ref{eq:hyperGonNmarginal}) evaluated using the {\tt appell()} function in the
 package {\tt Appell}.
 
 \begin{figure}
@@ -587,17 +594,19 @@ substitution $x = r/(g - L)$ and some minor algebraic manipulation leads to
 %$$
 %
 $$
-%\begin{array}{rl}
+\begin{array}{rl}
 \ds \mbox{BF}_{{rob}}(\vgamma)
 %& \ds = \tfrac{1}{2} r^{3/2} 
 %\int_0^\infty x^{-2}   (r + r/x)^{(n - p_\vgamma - %4)/2}(  1 + \widehat{\sigma}_\vgamma^2  (L + %r/x))^{-(n-1)/2}  dx
 %\\ 
-%& 
+& 
 \ds = \tfrac{1}{2} r^{ - p_\vgamma/2} (\widehat{\sigma}_\vgamma^2)^{-(n-1)/2}
-\int_0^\infty x^{(p_\vgamma-1)/2} 
+
+\\
+& \ds \qquad \times \int_0^\infty x^{(p_\vgamma-1)/2} 
 (1 + x)^{(n - p_\vgamma - 4)/2}
-\left( 1 + \tfrac{(1 + \widehat{\sigma}_\vgamma^2 L)x}{(1 + L)\widehat{\sigma}_\vgamma^2}  \right)^{-(n-1)/2}  dx.
-%\end{array} 
+\left( 1 + \frac{(1 + \widehat{\sigma}_\vgamma^2 L)x}{(1 + L)\widehat{\sigma}_\vgamma^2}  \right)^{-(n-1)/2}  dx.
+\end{array} 
 $$
 
 
@@ -890,10 +899,13 @@ and enjoy nice theoretical properties including model selection consistency.
 \cite{OrmerodEtal2017} departs from the prior structure
 (\ref{eq:priorStructure}) and instead uses
 \begin{equation}\label{eq:proirs2}
+\begin{array}{c}
 	\ds \alpha|\sigma^2,g \sim \N(0,g\sigma^2), \quad 
-	\ds \vbeta_\vgamma|\sigma^2,g \sim N\left( \vzero,g\sigma^2\left( \tfrac{1}{n}\mX_\vgamma^T\mX_\vgamma\right)^{-1}\right)
-	\quad \mbox{and} \quad
+	\ds \vbeta_\vgamma|\sigma^2,g \sim N\left( \vzero,g\sigma^2\left( \tfrac{1}{n}\mX_\vgamma^T\mX_\vgamma\right)^{-1}\right) \\ [2ex]
+	%\quad 
+	\mbox{and} \quad
 	p(g|\vgamma_j) = \delta(g; h^{1/(1 + p_\vgamma)})
+\end{array} 
 \end{equation}
 
 \noindent where $h$ is a common prior hyperparameter for all models. After
@@ -1090,7 +1102,12 @@ values can be obtained by following the steps bellow.
 	%are given by
 	$ 
 	\ds \widehat{\vbeta}_{\vgamma_{i}} = (\mX_{\vgamma_{i}}^T\mX_{\vgamma_{i}})^{-1}\mX_{\vgamma_{i}}^T\vy$,
-	and $\ds \widehat{\vbeta}_{\vgamma_{i+1}}  = (\mX_{\vgamma_{i+1}}^T\mX_{\vgamma_{i+1}})^{-1}\mX_{\vgamma_{i+1}}^T\vy$.  
+	and 
+	$$
+	\ds \widehat{\vbeta}_{\vgamma_{i+1}}  = (\mX_{\vgamma_{i+1}}^T\mX_{\vgamma_{i+1}})^{-1}\mX_{\vgamma_{i+1}}^T\vy.
+	$$
+	
+	\noindent   
 	Then using the block inverse formula we have
 	the relation
 	$$
@@ -1264,6 +1281,7 @@ by the following commands for each of these methods.
 	bas.lm(y~X,prior=prior.val,modelprior=uniform())
 	\end{verbatim}
 	
+	\noindent 
     where \verb|prior.val| takes the value \verb|"hyper-g"|,
     \verb|"hyper-g-laplace"| or \verb|"hyper-g-n"|.  These correspond to a
     direct implementation of (\ref{eq:hyperGmarginal}), a Laplace approximation
@@ -1273,8 +1291,9 @@ by the following commands for each of these methods.
 	
 	\item {\tt BayesVarSelect}: We used the command
 	\begin{verbatim}
-	Bvs(formula="y~.",data=data.frame(y=y,X=X),prior.betas=prior.val,
-	prior.models="Constant",time.test=FALSE,n.keep=50000)
+	Bvs(formula="y~.",data=data.frame(y=y,X=X),
+	    prior.betas=prior.val,prior.models="Constant",
+	    time.test=FALSE,n.keep=50000)
 	\end{verbatim}
 	
 	
@@ -1287,8 +1306,8 @@ by the following commands for each of these methods.
 	
 	\item {\tt BMS}: We used the command
 	\begin{verbatim}
-	bms(cbind(y,X),nmodel=50000,mcmc="enumerate",g="hyper=3",
-	mprior="uniform")	
+	bms(cbind(y,X),nmodel=50000,mcmc="enumerate",
+	    g="hyper=3",mprior="uniform")	
 	\end{verbatim}
 	
     \noindent which uses a direct implementation of (\ref{eq:hyperGmarginal})
@@ -1385,10 +1404,11 @@ are explained below.
 		
         \noindent where the $\rho_j\in(0,1)$. The $\rho_j$ values are specified
         by {\tt modelpriorvec} (see below). Using $\rho_j = 1/2$, $1\le j\le p$
-        corresponds to {\tt mprior=="uniform"}.
+        corresponds to \\ {\tt mprior=="uniform"}.
 	\end{itemize}
 	
-    \item {\tt modelpriorvec} -- A vector of additional parameters. If {\tt
+    \item {\tt modelpriorvec} -- A vector of additional parameters. If 
+    {\tt
         mprior=="uniform"} this argument is ignored.
     If {\tt mprior=="beta-binomial"} this should be a postive vector of length
     2 corresponding to the shape parameters of a Beta distribution (the values
@@ -1422,7 +1442,7 @@ a separate function to calculate. We made the decisions not to return these
 quantities to reduce the memory overhead.
 
 A short example fitting the {\tt USCrime} data described in Section
-\ref{sec:BLMA} is found below.
+\ref{sec:BLMA}  below.
 
 \begin{verbatim}
 library(blma); library(MASS)
@@ -1430,9 +1450,10 @@ dat <- UScrime
 dat[,-c(2,ncol(UScrime))] <- log(dat[,-c(2,ncol(UScrime))])
 vy <- dat$y
 mX <- data.matrix(cbind(dat[1:15]))
-colnames(mX) <- c("log(AGE)","S","log(ED)","log(Ex0)","log(Ex1)",
-"log(LF)","log(M)","log(N)","log(NW)","log(U1)","log(U2)","log(W)",
-"log(X)","log(prison)","log(time)") 
+colnames(mX) <- c("log(AGE)","S","log(ED)","log(Ex0)",
+    "log(Ex1)","log(LF)","log(M)","log(N)","log(NW)",
+    "log(U1)","log(U2)","log(W)","log(X)","log(prison)",
+    "log(time)") 
 blma_result <- blma(vy, mX, prior="ZE")
 \end{verbatim}
 
@@ -1469,7 +1490,7 @@ factors for some of the priors on $g$ considered in this paper.
 			VietNamI	& 27765 & 11 & lnhhexp & {\tt Ecdat}  \\ 
 			Kakadu	& 1827 & 22 & income & {\tt Ecdat}   \\  
 		\end{tabular} 
-	\end{center}
+	\end{center}\bigskip 
 	\caption{A summary of the datasets used in the paper and their respective {\tt R} packages.}
 	\label{tab:g_prior_datasets}
 \end{table}
@@ -1521,7 +1542,7 @@ of RAM.  The {\tt BVS} package in the table refers to the {\tt BayesVarSelect}
 				\hline		
 			\end{tabular}
 		}
-	\end{center}
+	\end{center}\bigskip
     \caption{Variable inclusion probabilities (as a percentage) and
         computational times (in seconds) for the {\tt UScrime} dataset.  The
         first to third line indicates the package, mixture $g$-prior and
@@ -1534,7 +1555,7 @@ package.}
 
 \begin{sidewaystable}[h!]
 	\begin{center}
-		{\scriptsize 
+		{\tiny 
 			\begin{tabular}{c|r|r|rrrrrr|rrrr|rrr}
 				Package & blma   & blma   & BAS    & BAS     & BVS    & BMS    & blma & blma & BAS & blma & blma & blma & BVS & blma & blma \\ 
 				Prior   & BIC    & ZE     & $g$    & $g$     & $g$    & $g$    & $g$  & $g$ &  $g/n$ & $g/n$ & $g/n$ & $g/n$ & Robust & Robust & Robust \\ 
@@ -1559,7 +1580,7 @@ package.}
 				Time (s) & 0.03 & 0.02 & 0.88 & 0.33  &       &  5.89 & 0.02 & 0.02 & 0.08 & 84.73 & 2.69 & 0.10    & *        & 2.18 & 0.01 \\	\hline	
 			\end{tabular}
 		}
-	\end{center}
+	\end{center}\bigskip
     \caption{Variable inclusion probabilities (as a percentage) and
         computational times (in seconds) for the {\tt VietNamI} dataset.  The
         first to third line indicates the package, mixture $g$-prior and
@@ -1572,7 +1593,7 @@ package.}
 
 \begin{sidewaystable}[h!]
 	\begin{center}
-		{\scriptsize 
+		{\tiny 
 			\begin{tabular}{c|r|r|rrrrrr|rrrr|rrr}
 				Package & blma   & blma   & BAS    & BAS     & BVS    & BMS    & blma & blma & BAS & blma & blma & blma & BVS & blma & blma \\ 
 				Prior   & BIC    & ZE     & $g$    & $g$     & $g$    & $g$    & $g$  & $g$ &  $g/n$ & $g/n$ & $g/n$ & $g/n$ & Robust & Robust & Robust \\ 
@@ -1611,7 +1632,7 @@ package.}
 				\hline
 			\end{tabular}
 		}
-	\end{center}
+	\end{center}\bigskip
     \caption{Variable inclusion probabilities (as a percentage) and
         computational times (in seconds) for the {\tt Kakadu} dataset.  The
         first to third line indicates the package, mixture $g$-prior and

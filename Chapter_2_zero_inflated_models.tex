@@ -30,7 +30,7 @@ accidents on roadways in \cite{Shankar1997829} and longitudinal studies in
 \cite{LeeWangScottYauMcLachlan2006}.
 
 The strength of this approach derives from modelling the zero and non-zero
-count data seperately as a mixture of distributions for the zero and non-zero
+count data separately as a mixture of distributions for the zero and non-zero
 components, allowing analysis of both the proportion of zeroes in the data set
 and the conditions for the transition from zero observations to non-zero
 observations. When combined with a multivariate mixed model regression
@@ -61,7 +61,7 @@ allows us to fit close approximations to these models using a deterministic
 algorithm which converges much more quickly.
 
 We allow a flexible regression modelling approach incorporating both fixed and
-random effects by using a Gaussian Variational Approximation as defined in
+random effects by using a Gaussian Variational Approximation as defined in \\
 \cite{Ormerod2012} on the regression parameters to allow a non- conjugate
 Gaussian prior to be used. This makes the resulting Gaussian posterior
 distribution of the regression parameters easier to interpret. Posterior
@@ -119,47 +119,42 @@ This model yields the probability distribution specified in Equation
 (\ref{eq:zero_infl_first_param}). Note that this allows zeros to be generated
 from the model in one of two ways -- either from the Bernoulli process
 generating a zero or from the Bernoulli process generating a Poisson sample
-which is then zero. A latent variable representation of this parameterization
+which is then zero. A latent variable representation of this parameterisation
 introduces the latent variables $r_i$ which equal $1$ when $y_i>0$ and $0$
 otherwise. 
 \begin{equation}
 \label{eq:zero_infl_second_param}
 \begin{array}{rl}
-	P(Y_i=y_i|r_i) = & \frac{\exp(-\lambda r_i)(\lambda r_i)^{y_i}}{y_i!} \quad \mbox{and} \\
+	P(Y_i=y_i|r_i) = & \ds  \frac{\exp(-\lambda r_i)(\lambda r_i)^{y_i}}{y_i!} \quad \mbox{and} \\
 	r_i \sim & \mbox{Bernoulli}(1-\rho)
 \end{array}
 \end{equation}
 
 \noindent This leads to the specification for the probability distribution used
-in Equation (\ref{eq:zero_infl_second_param}) where $\text{Bernoulli}(\pi)$
+in  (\ref{eq:zero_infl_second_param}) where $\text{Bernoulli}(\pi)$
 denotes the probability distribution $\pi^k (1 - \pi)^{1-k}$.
 
 Let $p$ be the number of fixed effects, $m$ be the number of groups in the
 random effects and $b$ be the block size for each of those groups. We use
 $\vone_p$ and $\vzero_p$ to denote the $p \times 1$ column vectors with all
 entries equal to 1 or 0, respectively.
-
 Let $\vy$ be the $n \times 1$ vector. The Euclidean norm of a column vector
 $\vv$, defined to be $\sqrt{\vv^\top \vv}$, is denoted by $\|\vv\|$. For a $p
 \times 1$ vector $\va$, we let $\diag{(\va)}$ denote the $p \times p$ matrix
 with the elements of $\va$ along its' diagonal.
-
 We denote the design matrix of fixed effects with dimensions $n \times p$ as
 $\mX$, and the design matrix of random effects with dimensions $n \times m b$
 as $\mZ$. The combined design matrix $\mC$ is formed by appending the columns
 of $\mX$ to the columns of $\mZ$, giving $\mC = [ \mX, \mZ ]$.
-
 Let $\vbeta$ be the $p \times 1$ column vector of fixed effects, and $\vu$ the
 $m b \times 1$ column vector of random effects. $\vnu$ is the concatenation of
 these vectors $[\vbeta^\top, \vu^\top]$.
 % Let $\vp$ be the $n \times 1$ column vector of probabilities that each
 % observation in $\vy$ is non-zero.
-
 Let $\mSigma$ be the covariance matrix of the random effects $\vu$, and $\mPsi$
 the covariance matrix prior on $\mSigma$. These matrices are all of dimension
 $(p + m b) \times (p + m b)$.
-
-$\text{expit}(x)$ denotes the function $\tfrac{1}{1 + \exp(-x)}$ which is the
+The function $\text{expit}(x)$ denotes the function $1/(1 + \exp(-x))$ which is the
 inverse of the logit function.
 
 We can extend the model naturally to a multiple covariate regression model by
@@ -201,7 +196,7 @@ Poisson mixed model regression likelihood for $y_{ij}$. $r_{ij}$ is a
 Bernoulli indicator with probability $\rho$, allowing a proportion of zero-
 inflation in the observed data to be specified. The $j$th predictor/response
 pair for the $i$th group is denoted by $(x_{ij}, y_{ij}), 1 \leq j \leq n_i, 1
-\leq i \leq m$, where $x_{ij} \in \R$, and the $y_{ij}$ are nonnegative
+\leq i \leq m$, where $x_{ij} \in \R$, and the $y_{ij}$ are non-negative
 integers. For each $1 \leq i \leq m$, define the $n_i \times 1$ vectors $y_{ij}
 = [y_{i 1}, \ldots, y_{i n_i}]^\top$ as the response vector. Vectors $y_1,
 \ldots, y_m$ are assumed to be independent of each other. We develop a
@@ -210,7 +205,7 @@ random effects $u$. The log-likelihood for one observation is then
 \begin{equation*}
 	\begin{array}{rl}
 		\log p(y_{ij} | r_{ij}, \vbeta, \vu) & = y_{ij} r_{ij} (\vx_i^\top \vbeta + \vz_{ij}^\top \vu) - r_{ij} \exp (\vx_{ij}^\top \vbeta + \vz_{ij}^\top \vu) - \log \Gamma (y_{ij} + 1), \\
-		r_{ij} | \rho                  & \sim \text{Bernoulli}(\rho), 1 \leq i \leq m, 1 \leq j \leq n, \text{ and }                                                              \\
+		r_{ij} | \rho                  & \sim \text{Bernoulli}(\rho), 1 \leq i \leq m, 1 \leq j \leq n, \qquad \text{ and }                                                              \\
 		\rho                        & \sim \text{Beta}(\alpha, \beta).                                                                                              \\
 	\end{array}
 \end{equation*}
@@ -223,7 +218,7 @@ multivariate model with multiple observations is then
     \begin{array}{rl} \log{p(\vy|\vr, \vbeta, \vu)} &= \vy^\top \mR (\mC\vnu)
         - \vr^\top \exp{(\mC\vnu)} - \vone^\top \log{\Gamma{(\vy + \vone)}},
         \quad \mbox{ and } \\
-        [1ex] r_i& \sim \text{Bernoulli}(\rho), 1 \leq i \leq n \\ 
+        [1ex] r_i& \sim \text{Bernoulli}(\rho), 1 \leq i \leq n, \\ 
     \end{array} 
 \end{equation*}
 
@@ -232,8 +227,8 @@ multivariate model with multiple observations is then
 \begin{align*}
 	\log{p(\mSigma_{\vu \vu})} & = \text{Inverse Wishart}(\mPsi, v),    \\
 	\rho                       & \sim \Beta(\alpha, \beta),             \\
-	\vbeta|\sigma^2_\vbeta     & \sim \N_p(\vzero, \sigma^2_\vbeta \mI) \text{ and } \\
-	\vu|\mG       & \sim \N_{mb}(\vzero, \mG)              
+	\vbeta|\sigma^2_\vbeta     & \sim \N_p(\vzero, \sigma^2_\vbeta \mI), \qquad  \text{ and } \\
+	\vu|\mG       & \sim \N_{mb}(\vzero, \mG),             
 \end{align*}
 
 \noindent where $\mX$ is $n \times p$, $\mZ$ is $n \times mb$ and $\mSigma_{\vu
@@ -242,7 +237,7 @@ multivariate model with multiple observations is then
 \otimes \mSigma_{\vu \vu}$. $\text{Inverse Wishart}(\mPsi, v)$ denotes the
 probability distribution
 \begin{equation*}
-\tfrac{|\mPsi|^\frac{v}{2}}{2^{\frac{vp}{2}}
+\ds \frac{|\mPsi|^\frac{v}{2}}{2^{\frac{vp}{2}}
 \Gamma_p{\left(\tfrac{v}{2}\right)}} |\mX|^{-\tfrac{v + p + 1}{2}}
 \exp{\left[-\tfrac{1}{2} \tr{(\mPsi \mX^{-1})}\right]}
 \end{equation*}
@@ -273,7 +268,8 @@ and matrix operations can be performed on them in $\BigO(K)$ time. The matrix
 $\mSigma$ is symmetric, with contents
 % I produced this using the following program
 % https://gist.github.com/certifiedwaif/d9c7fd207b54a3fccae5f577c17f95d3
-\footnotesize{
+{
+\tiny{
 \[
 	\mSigma =
 	\begin{pmatrix}
@@ -286,6 +282,7 @@ $\mSigma$ is symmetric, with contents
         0&0&0&\rho_{x^3 (x - \kappa_3)_+^3}&\rho_{(x - \kappa_1)_+^3 (x - \kappa_3)_+^3}&\rho_{(x - \kappa_2)_+^3 (x - \kappa_3)_+^3}&\sigma^2_{(x - \kappa_3)_+^3}\\
 	\end{pmatrix}.
 \]
+}
 }
 
 \subsection{Variational Bayes Approximation to the Zero-Inflated Poisson model}
@@ -325,7 +322,7 @@ We observe that this expression is close in form to the likelihood of a Poisson
 regression model with random effects. Poisson regression models are
 non-conjugate with normal priors, and hence the mean field updates for the
 regression parameters do not have closed form expressions. But by assuming a
-multivariate normal distribution for the regression co-efficients parameterised
+multivariate normal distribution for the regression coefficients parameterised
 by $\vmu$ and $\mLambda$, the model can still be fit using a Gaussian
 Variational Approximation for $\vbeta$ and $\vu$ jointly. Techniques for
 efficiently fitting these models are described in \cite{Ormerod2012,
@@ -359,7 +356,7 @@ variational lower bound is given in Appendix \ref{sec:calculation_of_var_lb}.
 
 The most computationally and numerically difficult part of Algorithm
 \ref{alg:algorithm_one} above is optimising the mean and covariance of the
-Gaussian approximation to the regression co-efficients $[\vbeta, \vu]^\top$. In
+Gaussian approximation to the regression coefficients $[\vbeta, \vu]^\top$. In
 this section, we compare the accuracy, stability and speed of four different
 algorithms for fitting the Gaussian component of our model, $q(\vmu, \mLambda)$
 in Algorithm \ref{alg:algorithm_one}.  We compare these approaches for
@@ -471,7 +468,7 @@ We fit the Gaussian component of our approximation in Algorithm
 \label{eq:gva_lower_bound}
 \begin{array}{ll}
 	\log \underline{p}(\vmu, \mLambda; \vy) & = \quad \vy^\top\mP \mC \vmu - \vp^\top \exp\{\mC \vmu + \tfrac{1}{2} \text{diag}(\mC \mLambda \mC^\top)\} \\
-    & \quad - \tfrac{1}{2} \vmu^\top \mSigma^{-1} \vmu - \tfrac{1}{2} \tr{(\mSigma^{-1} \mLambda)} + \tfrac{1}{2} \log{|\mLambda|} + \tfrac{1}{2} \log{|\mSigma^{-1}|}  + \tfrac{p}{2}
+    & \quad - \tfrac{1}{2} \vmu^\top \mSigma^{-1} \vmu - \tfrac{1}{2} \tr{(\mSigma^{-1} \mLambda)} + \tfrac{1}{2} \log{|\mLambda|} + \tfrac{1}{2} \log{|\mSigma^{-1}|}  + \tfrac{p}{2},
 \end{array}
 \end{equation}
 
@@ -504,10 +501,10 @@ Appendix \ref{sec:appendix_derivatives_gva}.
 \subsubsection{Precision parameterisation $\mLambda = (\mR^\top \mR)^{-1}$}
 		
 \noindent The second variant of the Gaussian Variational Approximation
-algorithm is similiar to the first, but instead of optimising the Gaussian
+algorithm is similar to the first, but instead of optimising the Gaussian
 variational lower bound with respect to $\vmu$ and the Cholesky factor $\mR$ of
 $\mLambda$, we instead optimise the Cholesky factor of the inverse of
-$\mLambda$ i.e. $\mLambda = (\mR \mR^\top)^{-1}$.
+$\mLambda$, i.e., $\mLambda = (\mR \mR^\top)^{-1}$.
 
 The Gaussian variational lower bound in this parameterisation is
 
@@ -526,7 +523,7 @@ changed, the  derivative with respect to $\mLambda$ is
 \begin{equation}
 \label{eq:gva_lower_bound_precision_deriv}
 \begin{array}{ll}
-	\frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda}
+	\ds \frac{\partial \log \underline{p}(\vmu, \mLambda; \vy)}{\partial \mLambda}
 	  & = \hphantom{-}(\mLambda^{-1} + \mH)(-\mLambda \mR \mLambda) \\
 	  & = -(\mI + \mH\mLambda)\mR\mLambda \\
 	  & = - (\mR\mLambda + \mH\mLambda\mR\mLambda),
@@ -632,17 +629,17 @@ quadratic for arguments greater than or equal to $t$
 \label{eq:piecewise_function}
 f(r_{ij}) =
 \begin{cases}
-    e^{r_{ij}}, & r_{ij} < t                   \\
-    a r_{ij}^2 + b r_{ij} + c, & r_{ij} \geq t 
+    e^{r_{ij}}, & r_{ij} < t;                   \\
+    a r_{ij}^2 + b r_{ij} + c, & r_{ij} \geq t; 
 \end{cases}
 \end{equation}
 
-\noindent and then choosing the co-efficients $a$, $b$ and $c$ such that the
+\noindent and then choosing the coefficients $a$, $b$ and $c$ such that the
 function, first and second derivatives would agree at $r_{ij} = t$. This
 ensured that the function did not grow too quickly as the parameters varied,
 mitigating the issue of numerical overflow for this parameterisation.
 
-To find the co-efficients $a$, $b$ and $c$ for the above function, we solved
+To find the coefficients $a$, $b$ and $c$ for the above function, we solved
 the system of equations presented below formed by repeatedly  differentiating
 the quadratic at $r_{ij} =  t$ and equating it with $e^t$
 \begin{equation}
@@ -677,8 +674,8 @@ Cholesky factors, $\mLambda = \mR \mR^\top$ where $\mR$ is lower triangular.
 The matrix $\mR$ is unique if $\mR_{ii} \geq 0$ and
 \begin{equation*}
 \label{eq:cholesky_factorisation}
-\begin{array}{lll}
-	&\begin{pmatrix}
+\begin{array}{l}
+	\begin{pmatrix}
 	\mR_{11}          & 0                                    & 0                                     \\
 	\mR_{21}          & \mR_{22}                             & 0                                     \\
 	\mR_{31}          & \mR_{32}                             & \mR_{33}                              
@@ -689,7 +686,7 @@ The matrix $\mR$ is unique if $\mR_{ii} \geq 0$ and
 	0                 & 0                                    & \mR_{33}                              
 	\end{pmatrix}
 	\\
-	=& \begin{pmatrix}
+	\qquad \qquad  =\begin{pmatrix}
 	\mR_{11}^2        &                                      & \text{symmetric}                      \\
 	\mR_{21}\mR_{11} & \mR_{21}^2 + \mR_{22}^2 \\
 	\mR_{31} \mR_{11} & \mR_{31}\mR_{21} + \mR_{32} \mR_{22} & \mR_{31}^2 + \mR_{32} ^2 + \mR_{33}^2 
@@ -706,7 +703,7 @@ $\mLambda^{-1}$, as can be seen in Figures \ref{fig:covfixedrandom} and
 \ref{fig:cholfixedrandom}. Thus the Gaussian $q(\vnu) \sim \N(\vmu, \mLambda)$
 can be optimised over a space of dimension $\tfrac{1}{2} p (p + 1) + pq +
 \tfrac{1}{2} q (q + 1)$ rather than dimension $\tfrac{1}{2} (p + mq) (p + mq +
-1)$ as in the dense parameterisation.  This leads to subtantial performance
+1)$ as in the dense parameterisation.  This leads to substantial performance
 gains when $m$ is large, as is typically the case in problems of practical
 importance such as longitudinal or clinical trials with many subjects or the
 application presented in Section \ref{sec:application}.
@@ -725,6 +722,7 @@ covariance structure which is sparse in the first diagonal block.
 \begin{figure}[h!]
 	\includegraphics[width=0.45 \textwidth]{mX_mZ_cholesky.pdf}
 	\includegraphics[width=0.45 \textwidth]{mZ_mX_cholesky.pdf}
+	\bigskip 
 	\caption{Cholesky factor of Inverse Covariance matrix of approximate posterior for $\vnu$ -- Fixed effects 
 						before random effects and random before fixed effects.}
 	\label{fig:cholfixedrandom}
@@ -740,7 +738,7 @@ parameterisations. Covariance matrices are positive semi-definite, and hence
 symmetric, so they have a unique Cholesky factorisation. Parameterising the
 covariance matrix in terms of the Cholesky factor allows us to represent the
 square covariance matrix using only a lower triangular matrix with half as many
-non-zero elements. Thus the Cholesky factor is a convenient way to parameterise
+non-zero elements. Thus the Cholesky factor is a convenient way to parameterising
 covariance matrices.
 
 The variational lower bound of a Gaussian Variational Approximation takes the
@@ -851,6 +849,7 @@ results averaged. These results are presented in Table
 \ref{tab:application_slope_speed}.
 
 \begin{table}
+{\scriptsize
 	\begin{tabular}{|l|rr|}
 		\hline
 		Algorithm & Mean (seconds) & Standard deviation (seconds) \\
@@ -862,7 +861,8 @@ results averaged. These results are presented in Table
 		GVA fixed point & $0.05$ & $0.07$ \\
 		\hline
 	\end{tabular}
-	\caption{Table of results - Speed}
+}\bigskip
+	\caption{Table of results - Speed.}
 	\label{tab:application_slope_speed}
 \end{table}
 
@@ -877,7 +877,8 @@ randomly generated data sets. The	results are presented in Figure
 % Figure: Median accuracy graph intercept
 \begin{figure}[h]
 	\begin{center}
-		\includegraphics[width=0.95\textwidth]{code/results/median_accuracy_combined_intercept.pdf}
+		\includegraphics[width=0.99\textwidth]{code/results/median_accuracy_combined_intercept.pdf}
+		\bigskip
 		\caption{Boxplots of accuracies of the parameter estimates for a random intercept model after 100 repeated
 							runs on simulated data. We see that the accuracy of the parameter estimates is quite stable,
 							and the median accuracies are high.}
@@ -887,7 +888,7 @@ randomly generated data sets. The	results are presented in Figure
 		
 % Figure: Median accuracy graph slope
 \begin{figure}[h]
-	\includegraphics[width=0.95\textwidth]{code/results/median_accuracy_combined_slope.pdf}
+	\includegraphics[width=\textwidth]{code/results/median_accuracy_combined_slope.pdf}\bigskip 
 	\caption{Boxplots of accuracies of the parameter estimates for a random slope model after 100 repeated
 							runs on simulated data. We see that the accuracy of the parameter estimates is quite stable,
 							and the median accuracies are high.}
@@ -896,6 +897,7 @@ randomly generated data sets. The	results are presented in Figure
 		
 % Table of accuracy results - intercept model
 \begin{table}
+{\scriptsize
 	\begin{tabular}{|l|rrrr|}
 		\hline
 		                   & Laplace's Method & GVA $(\mLambda = \mR \mR^\top)$ & GVA NP $(\mLambda = (\mR \mR^\top)^{-1})$ & GVA FP \\
@@ -907,11 +909,13 @@ randomly generated data sets. The	results are presented in Figure
 		$\rho$             & $99\%$           & $99\%$                          & $99\%$                                    & $99\%$ \\ 
 		\hline
 	\end{tabular}
-	\caption{Table of accuracy - Random intercept model}
+}\bigskip
+	\caption{Table of accuracy - Random intercept model.}
 	\label{tab:accuracy_int}
 \end{table}
 		
 \begin{table}
+	{\scriptsize
 	\begin{tabular}{|l|rrrr|}
 		\hline
 		                   & Laplace's Method & GVA $(\mLambda = \mR \mR^\top)$ & GVA $(\mLambda = (\mR \mR^\top)^{-1})$ & GVA FP \\
@@ -924,7 +928,8 @@ randomly generated data sets. The	results are presented in Figure
 		$\rho$             & $91\%$             & $90\%$                            & $90\%$                                   & $90\%$   \\
 		\hline
 	\end{tabular}
-	\caption{Table of accuracy - Random slope model}
+}\bigskip
+	\caption{Table of accuracy - Random slope model.}
 	\label{tab:accuracy_slope}
 \end{table}
 		
@@ -944,10 +949,14 @@ randomly generated data sets. The	results are presented in Figure
 % \end{table}
 		
 \begin{figure}[h]
-	\label{fig:spline}
-	\caption{Comparison of VB and MCMC spline fits with the true function}
-	\includegraphics[width=0.95 \textwidth]{code/results/accuracy_plots_spline_gva2.pdf}
+
+	\includegraphics[width=  \textwidth]{code/results/accuracy_plots_spline_gva2.pdf}
+	
+	\label{fig:spline}  
+\caption{Comparison of VB and MCMC spline fits with the true function.}	
 \end{figure}
+
+  
 		
 \subsection{Numerical stability of the parameterisation}
 
@@ -960,7 +969,7 @@ the choice of threshold.
 \begin{figure}[h]
 	\includegraphics[width=0.95 \textwidth]{code/stability_intercept.pdf}
 	\label{fig:stability_accuracy}
-	\caption{Accuracy of approximation of parameters versus the safe exponential threshold}
+	\caption{Accuracy of approximation of parameters versus the safe exponential threshold.}
 \end{figure}
 
 We repeated our numerical experiments with the new parameterisation, varying
@@ -999,8 +1008,8 @@ numerical errors when the fitting algorithm was run are presented in
 		GVA $\mLambda = (\mR^\top \mR)^{-1}$ & $6$           \\
 		GVA NR fixed point                   & $992$         \\
 		\hline
-	\end{tabular}
-	\caption{Count of numerical errors for each algorithm during stability tests}
+	\end{tabular}\bigskip
+	\caption{Count of numerical errors for each algorithm during stability tests.}
 	\label{tab:stability_results}
 \end{table}
 
@@ -1012,7 +1021,7 @@ parameterisation was used then when it was not used, as can be seen from Figure
 \begin{figure}[h]
 	\includegraphics[width=0.45 \textwidth]{code/safe_exp_stability.pdf}
 	\includegraphics[width=0.45 \textwidth]{code/no_safe_exp_stability.pdf}
-	\label{fig:stability_locations_gva}
+	\label{fig:stability_locations_gva}\bigskip
 	\caption{
         Starting locations which caused the GVA fitting algorithm to fail with
         numeric errors. The true model had fixed parameters $\vbeta = (2,
@@ -1039,15 +1048,15 @@ accurately estimated.
 
 % Generated by Rscript code/plot_local_solutions.R -i code/local_solutions_gva_nr_error_locations_no_protections.csv -o code/local_solutions_gva_nr_error_locations_no_protections.pdf
 \begin{figure}[h!]
-	\includegraphics[width=0.95 \textwidth]{code/local_solutions_gva_nr_error_locations_no_protections.pdf}
-	\label{fig:stability_locations_nr}
+	\includegraphics[width=0.99 \textwidth]{code/local_solutions_gva_nr_error_locations_no_protections.pdf}
+	\label{fig:stability_locations_nr} \bigskip 
     \caption{Starting locations which caused the fixed point fitting algorithm to fail with numeric errors. The true model had fixed parameters $\vbeta = (2, 1)^\top$ and random intercepts. There were ten groups in the
-	hierarchical model each	with ten individuals $(m=10, n_i=10)$}
+	hierarchical model each	with ten individuals $(m=10, n_i=10)$.}
 \end{figure}
 
-\section{Application}
+\section{Applications}
 We now present numerical results for the application of our model fitting
-algorithms to several publically available data sets.
+algorithms to several publicly available data sets.
 
 \label{sec:application}
 
@@ -1058,16 +1067,22 @@ of \cite{Gelman2007}.  The model fit was
 \begin{equation*}
 	\vy_{ep}        \sim \text{Poisson}(n_{ep} e^\vnu)
 \end{equation*}
-\noindent where $\vnu = {\beta_0 + \beta_e \text{ethnicity}_e + \alpha_{c} \text{crime} + \vu_p}$, with priors
-	$\valpha \sim \N(0, \sigma_\valpha^2)$,	
-	$\vbeta \sim \N(0, \sigma_\vbeta^2)$, and
-	$\vu_p \sim \N(0, \sigma_\vu^2)$.
-$p$ is the index of the precinct, $e$ is the index of ethnicity
+\noindent where $\vnu = {\beta_0 + \beta_e \text{ethnicity}_e + \alpha_{c} \text{crime} + \vu_p}$, 
+with priors
+$$
+\valpha \sim \N(0, \sigma_\valpha^2), 
+\qquad 	
+\vbeta \sim \N(0, \sigma_\vbeta^2), \quad \mbox{ and } \quad 
+	\vu_p \sim \N(0, \sigma_\vu^2),
+$$
+
+\noindent the index
+$p$ corresponds to each precinct, $e$ is the index of ethnicity
 (African-Americans, hispanics or whites), and $c$ is the index of category of
-crime (violent crimes, weapons crimes, propery crimes or drug crimes). The
+crime (violent crimes, weapons crimes, property crimes or drug crimes). The
 random intercepts $u_p$ allow for variation in the base rates of stops across
-precincts, the co-efficients $\beta_j$ measure the effect of ethnicity on the
-rate of police stops and the co-efficients $\alpha_k$ measure the effect of
+precincts, the coefficients $\beta_j$ measure the effect of ethnicity on the
+rate of police stops and the coefficients $\alpha_k$ measure the effect of
 each type of crime on the rate. The model finds the relationship between the
 number of police stops in each precinct and  ethnicity for each type of crime.
 
@@ -1081,18 +1096,19 @@ Figure \ref{fig:police_stops}
 
 \begin{figure}
 \centering
-  \includegraphics[page=1,scale=0.34]{code/results/accuracy_plots_application2_GVA.pdf}
-  \includegraphics[page=2,scale=0.34]{code/results/accuracy_plots_application2_GVA.pdf}
-  \includegraphics[page=3,scale=0.34]{code/results/accuracy_plots_application2_GVA.pdf}
-  \includegraphics[page=7,scale=0.34]{code/results/accuracy_plots_application2_GVA.pdf}
-  \includegraphics[page=81,scale=0.34]{code/results/accuracy_plots_application2_GVA.pdf}
-  \includegraphics[page=82,scale=0.34]{code/results/accuracy_plots_application2_GVA.pdf}
+  \includegraphics[page=1,scale=0.45]{code/results/accuracy_plots_application2_GVA.pdf}
+  \includegraphics[page=2,scale=0.45]{code/results/accuracy_plots_application2_GVA.pdf}
+  \includegraphics[page=3,scale=0.45]{code/results/accuracy_plots_application2_GVA.pdf}
+  \includegraphics[page=7,scale=0.45]{code/results/accuracy_plots_application2_GVA.pdf}
+  \includegraphics[page=81,scale=0.45]{code/results/accuracy_plots_application2_GVA.pdf}
+  \includegraphics[page=82,scale=0.45]{code/results/accuracy_plots_application2_GVA.pdf}
 \caption{Accuracy of parameter estimates for police stops.}
 \label{fig:police_stops}
 \end{figure}
 
 % Table of results
 \begin{table}
+	{\scriptsize 
 	\begin{tabular}{|l|rrrr|}
 		\hline
 		Covariate                     & Posterior Mean & Lower 95\% CI & Upper 95\% CI & Accuracy \\
@@ -1107,7 +1123,8 @@ Figure \ref{fig:police_stops}
 		$\sigma^2_{\vu}$              & $8.57$          & $1.02$           & $24.35$         & 67\%     \\
 		\hline
 	\end{tabular}
-	\caption{Table of results - Police stops}
+}\bigskip
+	\caption{Table of results - Police stops.}
 	\label{tab:application_police_stops}
 \end{table}
 
@@ -1117,13 +1134,13 @@ Figure \ref{fig:police_stops}
 		\hline
 		Algorithm & Time  in seconds \\
 		\hline
-		Laplace & $0.065$ \\
+		Laplace & $0.07$ \\
 		%GVA covariance parameterisation & $6.02$ \\ % TODO: Did not run
-		GVA precision paramaterisation & $0.898$ \\
-		GVA fixed point & $0.058$ \\
+		GVA precision paramaterisation & $0.90$ \\
+		GVA fixed point & $0.06$ \\
 		\hline
-	\end{tabular}
-	\caption{Table of speeds - Police stops}
+	\end{tabular}\bigskip
+	\caption{Table of speeds - Police stops.}
 	\label{tab:police_stop_speeds}
 \end{table}
 
@@ -1150,13 +1167,24 @@ from doing so. The model fit was
 \begin{equation*}
     y_i = \begin{cases}
         0, &\text{ if } R_i = 0, \text{ and } \\
-        \text{Poisson}(e^{\mX_i \vbeta + \mZ_i \vu}), & \text{ if } R_i = 1
+        \text{Poisson}(e^{\mX_i \vbeta + \mZ_i \vu}), & \text{ if } R_i = 1,
 	\end{cases}
 \end{equation*}
-with priors $R_i \sim \text{Bernoulli}(\rho), \rho \sim \text{Beta}(a, b),
-\quad \vbeta \sim \text{N}(\vzero, \sigma^2_{\vbeta} \mI), \vu \sim
-\text{N}(\vzero, \mSigma) \text{ and } \mSigma \sim
-\text{Inverse-Wishart}(\mPsi, v)$ and prior parameters $a = 1$, $b = 1$,
+with priors 
+$$
+\begin{array}{c} 
+R_i \sim \text{Bernoulli}(\rho), 
+\quad 
+\rho \sim \text{Beta}(a, b),
+\quad \vbeta \sim \text{N}(\vzero, \sigma^2_{\vbeta} \mI), 
+\\
+\quad \vu \sim
+\text{N}(\vzero, \mSigma) \quad \text{ and } \quad \mSigma \sim
+\text{Inverse-Wishart}(\mPsi, v)
+\end{array} 
+$$
+
+\noindent and prior hyperparameters $a = 1$, $b = 1$,
 $\sigma^2_\vbeta = 10^5$, $\mPsi = 10^{-5} \mI$ and $v = 2$.  These priors were
 chosen to be vaguely informative for the variance components and a uniform
 prior for the zero-inflation proportion latent variable $\rho$. The fixed
@@ -1197,14 +1225,14 @@ in Table \ref{tab:application_roaches}.
 		\hline
 		Covariate          & Posterior Mean & Lower 95\% CI & Upper 95\% CI & Accuracy \\
 		\hline
-		Intercept          & $3.42$						& $3.2$ 					& $3.65$          & $96\%$     \\
+		Intercept          & $3.42$						& $3.20$ 					& $3.65$          & $96\%$     \\
 		Time               & $-0.14$        & $-0.05$       & $-0.02$       & $98\%$     \\
 		Time:Treatment     & $-0.31$        & $-0.43$       & $-0.14$       & $99\%$     \\
 		Random intercept   & $-1.60$        & $-1.71$       & $-1.49$       & $98\%$     \\
 		$\sigma^2_{\vu_1}$ & $3.29$           & $2.02$          & $8.48$          & $64\%$     \\
 		$\rho$             & $0.51$           & $0.50$          & $0.55$          & $63\%$     \\
 		\hline
-	\end{tabular}
+	\end{tabular}\bigskip
 	\caption{The posterior means, 95\% credible intervals and accuracy of the fixed and random
 						effects, $\sigma_{\vu_1}^2$ and $\rho$ for the Roach model.}
 	\label{tab:application_roaches}
@@ -1215,26 +1243,26 @@ in Table \ref{tab:application_roaches}.
 	\hline
 	Algorithm & Time in seconds \\
 	\hline
-	Laplace & $0.684$ \\
-	GVA & $2.024$ \\
-	GVA inv. param & $1.701$ \\
-	GVA fixed point & $0.168$ \\
+	Laplace & $0.68$ \\
+	GVA & $2.02$ \\
+	GVA inv. param & $1.70$ \\
+	GVA fixed point & $0.17$ \\
 	\hline
 	\end{tabular}
-	\label{tab:application_roaches_runtime}
+	\label{tab:application_roaches_runtime}\bigskip
 	\caption{The runtimes in seconds for fitting algorithms when fitting the roach model.}
 \end{table}
 		
 \begin{figure}[h]
 	\centering
 	%\includepdf[width=75mm,height=75mm,pages={1,2,3,16},nup=2x2]{code/results/accuracy_plots_application_GVA2.pdf}
-	\includegraphics[page=1,scale=0.34]{code/results/accuracy_plots_application_GVA_inv_param.pdf}
-	\includegraphics[page=2,scale=0.34]{code/results/accuracy_plots_application_GVA_inv_param.pdf}
-	\includegraphics[page=3,scale=0.34]{code/results/accuracy_plots_application_GVA_inv_param.pdf}
-	\includegraphics[page=4,scale=0.34]{code/results/accuracy_plots_application_GVA_inv_param.pdf}
-	\includegraphics[page=16,scale=0.34]{code/results/accuracy_plots_application_GVA_inv_param.pdf}
-	\includegraphics[page=17,scale=0.34]{code/results/accuracy_plots_application_GVA_inv_param.pdf}
-	\caption{Accuracy graphs for roach model}
+	\includegraphics[page=1,scale=0.45]{code/results/accuracy_plots_application_GVA_inv_param.pdf}
+	\includegraphics[page=2,scale=0.45]{code/results/accuracy_plots_application_GVA_inv_param.pdf}
+	\includegraphics[page=3,scale=0.45]{code/results/accuracy_plots_application_GVA_inv_param.pdf}
+	\includegraphics[page=4,scale=0.45]{code/results/accuracy_plots_application_GVA_inv_param.pdf}
+	\includegraphics[page=16,scale=0.45]{code/results/accuracy_plots_application_GVA_inv_param.pdf}
+	\includegraphics[page=17,scale=0.45]{code/results/accuracy_plots_application_GVA_inv_param.pdf}
+	\caption{Accuracy graphs for roach model.}
 	\label{fig:accuracy_roach}
 \end{figure}
 		
@@ -1284,17 +1312,18 @@ accuracy.
 \begin{figure}[h]
 \centering
  % \includegraphics{code/results/accuracy_plots_application_biochemists_GVA_inv_param-nup.pdf}
-	\includegraphics[page=1,scale=0.34]{code/results/accuracy_plots_application_biochemists_GVA_inv_param.pdf}
-	\includegraphics[page=2,scale=0.34]{code/results/accuracy_plots_application_biochemists_GVA_inv_param.pdf}
-	\includegraphics[page=3,scale=0.34]{code/results/accuracy_plots_application_biochemists_GVA_inv_param.pdf}
-	\includegraphics[page=4,scale=0.34]{code/results/accuracy_plots_application_biochemists_GVA_inv_param.pdf}
-	\includegraphics[page=5,scale=0.34]{code/results/accuracy_plots_application_biochemists_GVA_inv_param.pdf}
-	\includegraphics[page=6,scale=0.34]{code/results/accuracy_plots_application_biochemists_GVA_inv_param.pdf}
+	\includegraphics[page=1,scale=0.45]{code/results/accuracy_plots_application_biochemists_GVA_inv_param.pdf}
+	\includegraphics[page=2,scale=0.45]{code/results/accuracy_plots_application_biochemists_GVA_inv_param.pdf}
+	\includegraphics[page=3,scale=0.45]{code/results/accuracy_plots_application_biochemists_GVA_inv_param.pdf}
+	\includegraphics[page=4,scale=0.45]{code/results/accuracy_plots_application_biochemists_GVA_inv_param.pdf}
+	\includegraphics[page=5,scale=0.45]{code/results/accuracy_plots_application_biochemists_GVA_inv_param.pdf}
+	\includegraphics[page=6,scale=0.45]{code/results/accuracy_plots_application_biochemists_GVA_inv_param.pdf}
 \label{fig:biochemists}
-\caption{Accuracy of the approximations of the parameters fit to the biochemists data}
+\caption{Accuracy of the approximations of the parameters fit to the biochemists data.}
 \end{figure}
 
 \begin{table}
+	{\scriptsize 
 	\begin{tabular}{|l|rrrr|}
 		\hline
 		Covariate          & Posterior Mean & Lower 95\% CI & Upper 95\% CI & Accuracy \\
@@ -1305,8 +1334,9 @@ accuracy.
 		Children under age 6 & $-0.08$ & $-0.15$ & $-0.01$ & $97\%$ \\
 		PhD & $0.03$ & $-0.02$ & $-0.01$ & $97\%$ \\
 		\hline
-	\end{tabular}			
-	\label{tab:biochemists_results}
+	\end{tabular}
+}			
+	\label{tab:biochemists_results}\bigskip
 	\caption{The posterior means, 95\% credible intervals and accuracy of the fixed effects for the 
 						Biochemists model.}
 \end{table}
@@ -1316,14 +1346,14 @@ accuracy.
 	\hline
 	Algorithm & Time in seconds \\
 	\hline
-	Laplace & $0.119$ \\
-	GVA & $0.598$ \\
-	GVA inv. param & $0.525$ \\
-	GVA fixed point & $0.069$ \\
+	Laplace & $0.12$ \\
+	GVA & $0.60$ \\
+	GVA inv. param & $0.53$ \\
+	GVA fixed point & $0.07$ \\
 	\hline
 	\end{tabular}
-	\label{tab:biochemists_runtime}
-	\caption{The runtimes in seconds for fitting algoritms when fitting the Biochemists model.}
+	\label{tab:biochemists_runtime}\bigskip
+	\caption{The run times in seconds for fitting algorithms when fitting the Biochemists model.}
 \end{table}
 
 \subsection{Example - Owls}
@@ -1363,17 +1393,18 @@ seconds for the covariance parameterisation.
 \begin{figure}[h]
 	\centering
 	%\makebox[0pt]{\includegraphics[width=1.05 \columnwidth]{code/results/accuracy_plots_application_owls_GVA_inv_param-highlights-nup.pdf}}
-	\includegraphics[page=1,scale=0.34]{code/results/accuracy_plots_application_owl_GVA_inv_param.pdf}
-	\includegraphics[page=2,scale=0.34]{code/results/accuracy_plots_application_owl_GVA_inv_param.pdf}
-	\includegraphics[page=3,scale=0.34]{code/results/accuracy_plots_application_owl_GVA_inv_param.pdf}
-	\includegraphics[page=4,scale=0.34]{code/results/accuracy_plots_application_owl_GVA_inv_param.pdf}
-	\includegraphics[page=30,scale=0.34]{code/results/accuracy_plots_application_owl_GVA_inv_param.pdf}
-	\includegraphics[page=31,scale=0.34]{code/results/accuracy_plots_application_owl_GVA_inv_param.pdf}
-	\caption{Accuracy of the approximations of the parameters fit to the Owls data}
+	\includegraphics[page=1,scale=0.45]{code/results/accuracy_plots_application_owl_GVA_inv_param.pdf}
+	\includegraphics[page=2,scale=0.45]{code/results/accuracy_plots_application_owl_GVA_inv_param.pdf}
+	\includegraphics[page=3,scale=0.45]{code/results/accuracy_plots_application_owl_GVA_inv_param.pdf}
+	\includegraphics[page=4,scale=0.45]{code/results/accuracy_plots_application_owl_GVA_inv_param.pdf}
+	\includegraphics[page=30,scale=0.45]{code/results/accuracy_plots_application_owl_GVA_inv_param.pdf}
+	\includegraphics[page=31,scale=0.45]{code/results/accuracy_plots_application_owl_GVA_inv_param.pdf}
+	\caption{Accuracy of the approximations of the parameters fit to the Owls data.}
 	\label{fig:owls}
 \end{figure}
 
 \begin{table}
+	{\scriptsize
 	\begin{tabular}{|l|rrrr|}
 		\hline
 		Covariate          & Posterior Mean & Lower 95\% CI & Upper 95\% CI & Accuracy \\
@@ -1384,8 +1415,9 @@ seconds for the covariance parameterisation.
 		$\sigma_{\vu_1}^2$ & $7.90$ & $3.21$ & $468.12$ & $87\%$ \\
 		$\rho$ & $0.74$ & $0.70$ & $0.77$ & $99\%$ \\
 		\hline
-	\end{tabular}			
-	\label{tab:owls_results}
+	\end{tabular}	
+}		
+	\label{tab:owls_results}\bigskip
 	\caption{The posterior means, 95\% credible intervals and accuracy of the fixed and random
 						effects, $\sigma_{\vu_1}^2$ and $\rho$ for the Owls model.}
 \end{table}
@@ -1395,13 +1427,13 @@ seconds for the covariance parameterisation.
 	\hline
 	Algorithm & Time in seconds \\
 	\hline
-	Laplace & $0.778$ \\
-	GVA covariance parameterisation & $13.949$ \\
-	GVA precision parameterisation & $2.146$ \\
-	GVA fixed point & $0.248$ \\
+	Laplace & $0.78$ \\
+	GVA covariance parameterisation & $13.95$ \\
+	GVA precision parameterisation & $2.15$ \\
+	GVA fixed point & $0.25$ \\
 	\hline
-	\end{tabular}
-	\caption{The runtimes of the fitting algorithms for the Owls model in seconds.}
+	\end{tabular}\bigskip
+	\caption{The run times of the fitting algorithms for the Owls model in seconds.}
 	\label{tab:owls_times}
 \end{table}
 

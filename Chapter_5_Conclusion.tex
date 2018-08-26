@@ -2,13 +2,16 @@
 \chapter{Conclusion and Future Directions}
 \label{sec:chapter_2_conclusion}
 		
+% TODO: This section recounts what we've done. I'm not sure that it
+% communicates what we could do in the future very well.
+
 We have described a Variational Bayes approximation to Zero-Inflated Poisson
 regression models which allows such models to be fit with considerable
 generality. We have also devised and extensively tested a number of alternative
 approaches for fitting such models, and extended one of these alternative
 approaches with a new parameterisation. Using MCMC methods as the gold standard
 to test against, we have assessed the accuracy and computational speed of these
-algoritms.
+algorithms.
 		
 We applied our model fitting algorithms to a number of data sets to fit a range
 of models. The Cockroaches model in Section \ref{sec:cockroaches} had few fixed
@@ -66,18 +69,19 @@ increase the numeric stability of the GVA inverse parameterisation for a range
 of starting points.
 
 Some of the algorithms which we experimented with were found to be very
-sensitive to their starting points.  While these algorithms are typically
+sensitive to their initial conditions.  While these algorithms are typically
 initialised with a starting point as close as possible to the final solution,
 this gives some sense of the stability of each algorithm. We were able to
 develop a variant of the algorithm that employs a parameterisation which is
-much more numerically stable.
+much more numerically stable, and demonstrate this numerical stability for a
+range of models.
 
-This thesis chapter presents the essential ideas necessary for a performant
-implementation implementing model fitting for ZIP regression models.
+This thesis chapter presents the essential ideas necessary for a high performance
+implementation for model fitting of ZIP regression models.
 %, but the performance would be even better if our algorithm was re-implemented
 %in a compiled language with good numeric libraries such as C++ with Eigen.
 The majority of the performance improvements over existing approaches come from
-avoiding unneccessary matrix inversion, which is a computationally expensive
+avoiding unnecessary matrix inversion, which is a computationally expensive
 and numerically unstable process taking $\BigO(p^3)$ flops, and  from
 constructing and calculating with sparse matrices. The gains of these
 approaches, particularly from sparse  matrix techniques, can be difficult to
@@ -89,7 +93,7 @@ parameterisation very effectively speeds up fitting zero-inflated mixed models
 to real world data with a large number of groups, while still maintaining
 excellent accuracy versus an MCMC approach. This demonstrates the applicability
 of the ideas presented within this chapter to real world data sets.
-\section{Zero-inflated models future directions}
+\section{Zero-inflated models via GVA future directions}
 		
 The first directions for future research stemming from this chapter would be
 generalising the approximation to other zero-inflated models which handle
@@ -113,7 +117,7 @@ performance and accuracy of this kind of doubly stochastic algorithm with the
 more traditional mean field and Gaussian variational algorithms presented in
 Chapter 2.
 
-\section{$g$-prior future directions}
+\section{Calculating Bayes factors for $g$-priors future directions}
 
 We have reviewed the prior structures that lead to closed form expressions for
 Bayes factors for linear models. We have described ways that each of these
@@ -127,22 +131,36 @@ structures not offered in \texttt{BAS}. Our package is much faster than
 
 We are currently working on several extensions to this work. Firstly, we are
 working on a parallel implementation of the package which will allow for exact
-Bayesian inference for problems roughly the size $p\approx 30$.
+Bayesian inference for problems roughly the size $p\approx 30$. While a
+prototype of this work has been developed which runs on Linux using
+\texttt{OpenMP}, and displayed good performance as the number of cores used
+increased, we found it difficult to get the parallel code to work reliably on
+Macintosh and Windows computers.  As the majority of R users use these two
+platforms, we feel this is an important technical issue to resolve. Our
+algorithm could also be ported to GPUs.
 
 Secondly, we are currently implementing  Markov Chain Monte Carlo (MCMC) and
 population based MCMC methods for exploring the model space when $p>30$.  We
 can also see several obvious paths to extend this work to Generalised Linear
-Models - either using the approach in \cite{Li2015} or by using Laplace
-approximations.  Lastly, we are deriving exact expressions for parameter
-posterior distributions under some of the prior structures we have considered
-here.
+Models - either using the approach described in \cite{Li2015} or by using
+Laplace approximations.  Lastly, we are deriving exact expressions for
+parameter posterior distributions under some of the prior structures we have
+considered here.
+
+% TODO: I still feel that you're missing something here. Look at Statistical
+% Learning with Sparsity. John calls what we've already done the `building
+% block' for a whole host of other approaches. To write this section, you need
+% to read more of that book, understand what John's comment meant and then
+% write out what you've understood.
 
 \section{PVA future directions}
 
 There are several planned future extensions to this work. Firstly, we would
 like to generalise the PVA approach to generalised linear models as well as
 linear models, to be able to perform model selection for regression models
-applicable to a wider range of types of data.
+applicable to a wider range of types of data. The computational approach would
+again either use the approach described in \cite{Li2015} or by using Laplace
+approximations.  
 
 Secondly, although the algorithm already runs in parallel on multicore CPUs
 using \texttt{OpenMP}, we believe even greater gains in performance could be
@@ -152,7 +170,7 @@ computing such as \texttt{OpenMPI}.
 Thirdly, and most excitingly, we could examine modifications to the PVA
 algorithm itself. The way the algorithm currently ensures diversity amongst the
 particles in the population is to reward increases in entropy, weighted by the
-hyperparameter $\lambda$. The current version of the algorithm hardcodes
+hyperparameter $\lambda$. The current version of the algorithm hard codes
 $\lambda$ to $1$, but it would be interesting to alter $\lambda$ and as in the
 Population EM algorithm \cite{Tan2018} and observe the effect on model
 selection performance. The algorithm also currently maintains diversity in the

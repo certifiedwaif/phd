@@ -1,7 +1,7 @@
 %! TEX root = thesis.tex
 \chapter{Particle Variational Approximation}
 
-\setlength{\parindent}{0pt}
+%\setlength{\parindent}{0pt}
 
 \section{Introduction}
 
@@ -29,7 +29,7 @@ selection for normal linear models with priors as described in Section
 % non-intercept regression co-efficients, driven by data.
 
 \cite{Mitchell1988} initially proposed the spike-and-slab prior distribution on
-regression co-efficients not currently included in the model -- which places a
+regression coefficients not currently included in the model -- which places a
 mixture of a point mass 'spike' at $0$ and a diffuse uniform distribution
 'slab' elsewhere. The approach was further developed by \cite{Madigan1994} to
 incorporate an alternative Bayesian approach that takes full account of the
@@ -59,8 +59,8 @@ become trapped in local maxima of the posterior distribution if the
 distribution is high-dimensional and multi-modal, as is the case with popular
 choices of prior for Bayesian model selection problems, such as spike-and-slab
 priors. The difficulty of becoming trapped in local maxima can be partially
-mitigated by using population-based MCMC schemes such as Jasra et al. 2007,
-Bottolo and Richardson 2010, Hans et al 2007, Liang and Wong 2000. However,
+mitigated by using population-based MCMC schemes such as Jasra et al. (2007),
+Bottolo and Richardson (2010), Hans et al (2007), Liang and Wong (2000). However,
 this increases the computational cost of sampling from the posterior
 distributions still further, especially in high-dimensional problems.
 
@@ -73,7 +73,7 @@ an algorithm involving only a single model. It also allows the particles to
 EM, this is done by incorporating an ``entropy term'' in the variational lower
 bound, which ensures diversity amongst the models in the population, preventing
 all particles from simply seeking the global posterior modes. The algorithm is
-determininistic.
+deterministic.
 
 We build upon this work by proposing a fixed-form parametric Variational Bayes
 approximation of $\vgamma$. We adopt a prior structure incorporating the Cake
@@ -721,7 +721,10 @@ p(\vy)$ is given by
 \end{equation}
 
 \noindent which has been simplified under the assumption that population of
-particles $\vgamma_1,\ldots,\vgamma_K$ contains only unique particles.
+particles $$
+\vgamma_1,\ldots,\vgamma_K$$
+
+\noindent  contains only unique particles.
 
 Since $\log \underline{p}(\vy;\vw,\mGamma)$ is a lower bound we can maximize
 this bound with respect to $\vw$ and $\mGamma$ to make the bound as tight as
@@ -745,6 +748,7 @@ the lower bound
 	\log \underline{p}(\vy; \vw, \Gamma) = \sum_{k=1}^K \vw_k \log p(\vy; \vbeta_{\vgamma_k}) - \vw_k \log \vw_k
 \]
 
+\noindent 
 which is the sum of the weighted log-likelihood of the population and the
 entropy of the probability weights.  These two stages repeat until the lower
 bound converges.
@@ -788,12 +792,12 @@ diversity within that population.
     %is unique.} 
     Since only one component is modified during each iteration of the inner
     loop of the algorithm, model updates and downdates can be efficiently used
-    to implement the Algorithm (\ref{alg:algorithm_pva}) (for details see
-    Section 5.1 of Greenaway \& Ormerod, 2018).
+    to implement the Algorithm \ref{alg:algorithm_pva} (for details see
+    Chapter 2).
     %{\color{red} Population uniqueness can be maintained at a average cost of
     %$O(K)$ whenever we try to change $\gamma_{jk}$ using hashtables.}
 
-\noindent Convergence is declared for a particular particle when no element of
+ Convergence is declared for a particular particle when no element of
 the particle is updated over $j=1,\ldots,p$. Convergence of the algorithm is
 declared when all particles have been converged. Note that optimization over
 each of the $\vgamma_k$'s can be performed independently and as such
@@ -845,16 +849,16 @@ the following results were obtained in the {\tt R} version 3.4.2 \citep{CiteR}
 and all figures were developed using the {\tt R} package {\tt ggplot2}.  In
 sections \ref{sec:highdimensional}--\ref{sec:QTL} we will consider examples
 with $p>30$ where it is infeasible to perform Bayesian model averaging exactly.
-Most simulations were run on the second author's laptop computer (64 bit
+Most simulations were run on a 64 bit
 Windows 10 Intel i7-7600MX central processing unit at 2.8GHz with 2
-hyperthreaded cores and 32GB of random access memory).  Multicore comparisons
+hyperthreaded cores and 32GB of random access memory.  Multicore comparisons
 were run on a dedicated server using E5-2697v2 processors with 24 hyperthreaded
 cores and 512GB of RAM.
 
 \subsection{Comparing PVA against exact results} 
 \label{sec:exact}
 
-We considered several small datasets to illustrate our methodology for
+We considered several small \\ datasets to illustrate our methodology for
 situations where we could compare PVA against a gold standard. These datasets
 can be found in the {\tt R} packages {\tt MASS} \citep{Venables2002},  {\tt
 ISLR} \cite{James:2014:ISL:2517747} and {\tt Ecdat} \citep{Croissant2016}.
@@ -957,9 +961,9 @@ setting are implied by the {\tt R} commands below.
     \item {\bf Particle EM via the {\tt PEM} package.} We used the following
         command.
 	\begin{verbatim}
-	PEM(vy, mX, v0, v1, type="betabinomial", penalty="entropy",
-	    epsilon=1.0E-5, theta=0.5, a=1, b=p, alpha=1, current=t(mGamma), 
-	    weights="FALSE")
+	PEM(vy,mX,v0,v1,type="betabinomial", 
+	    penalty="entropy",epsilon=1.0E-5,theta=0.5, 
+	    a=1,b=p,alpha=1,current=t(mGamma),weights="FALSE")
 	\end{verbatim}
 	
     \noindent where $\gamma_{kj} \sim \mbox{Bernoulli}(\rho)$, $1\le j\le p$,
@@ -974,6 +978,7 @@ setting are implied by the {\tt R} commands below.
     initprobs="uniform", MCMC.iterations=1e7)
 	\end{verbatim}
 	
+	\noindent 
     The estimated median posterior model is used for the purposes of model
     selection.
 	
@@ -997,7 +1002,7 @@ variables.
 \subsection{Simulated high-dimensional example}
 \label{sec:highdimensional} 
 
-We first present an example where $n > p$ and $p$ is relatively small ($p =
+We first present an example \\ where $n > p$ and $p$ is relatively small ($p =
 12$), to allow for the full enumeration of the model space. Later, we show an
 example for the important $p > n$ case. We compare our results  against the
 Lasso \citep{Tibshirani1996}, SCAD \citep{Fan2001}, MCP \citep{Zhang2010}, {\tt
@@ -1087,9 +1092,12 @@ algorithm proceeds.
 \subsection{Communities and crime dataset}
 \label{sec:crime}
 
-We use the {\tt Communities and Crime} dataset obtained from the UCI Machine
-Learning Repository   \\
+We use the {\tt Communities \& Crime} dataset obtained from the UCI Machine
+Learning Repository   
 
+\smallskip 
+
+\noindent 
 \url{http://archive.ics.uci.edu/ml/datasets/Communities+and+Crime}  \\
 
 \noindent The data collected was part of a study by \cite{Redmond2002}
@@ -1168,7 +1176,7 @@ lasso, PVA, BMS, BAS and PEM  methods using $F_1$ score is given in Figure
 
 A comparison of the performance of PVA for the hyper-$g$, robust Bayarri,
 Beta-prime and Cake priors on $g$ and the uniform, $\text{beta-binomial}(1, 1)$
-and $\text{beta-binomial}(1, p)$ priors on $\vgamma$ using $F_1$ score is
+and \\ $\text{beta-binomial}(1, p)$ priors on $\vgamma$ using $F_1$ score is
 presented in Figure \ref{fig:qtlPVA_F1}. A comparison of the performance of the
 MCP, SCAD, lasso, PVA, BMS, BAS and PEM  methods using $F_1$ score is given in
 Figure \ref{fig:qtlPVA_F1_compare}.
@@ -1350,34 +1358,37 @@ Variables with low posterior probability are truncated to 0, as PVA seeks higher
 ignoring the lower posterior probability models.
 
 \begin{table}[!ht]
+{\scriptsize 
 \begin{tabular}{|ll|rrr|rrr|}
 	\hline
 	Dataset & Prior & & $<=0.5$ & & & $>0.5$ &\\
 	& & $K = 20$ & $K = 50$ & $K = 100$ & $K = 20$ & $K = 50$ & $K = 100$ \\
 	\hline
-	Bodyfat&BIC&$0.63$&$0.48$&$0.37$&$0.07$&$0.01$&$0.02$\\
-	&Liang's hyper-$g$ prior&$0.66$&$0.52$&$0.42$&$0.07$&$0.01$&$0.02$\\
-	&Bayarri's robust prior&$0.65$&$0.52$&$0.4$&$0.07$&$0.01$&$0.02$\\
-	&ZE&$0.65$&$0.51$&$0.39$&$0.06$&$0.01$&$0.02$\\
-	College&BIC&$0.7$&$0.58$&$0.49$&$0.03$&$0.02$&$0.03$\\
-	&Liang's hyper-$g$ prior&$0.9$&$0.78$&$0.64$&$0.06$&$0.06$&$0.06$\\
-	&Bayarri's robust prior&$0.88$&$0.78$&$0.63$&$0.06$&$0.06$&$0.06$\\
-	&ZE&$0.82$&$0.66$&$0.57$&$0.03$&$0.06$&$0.06$\\
-	Hitters&BIC&$0.74$&$0.64$&$0.5$&$0.12$&$0.07$&$0.06$\\
-	&Liang's hyper-$g$ prior&NA&$0.81$&$0.83$&NA&$0.17$&$0.07$\\
-	&Bayarri's robust prior&$0.84$&$0.81$&$0.75$&$0.29$&$0.17$&$0.07$\\
-	&ZE&$0.79$&$0.72$&$0.67$&$0.27$&$0.13$&$0.05$\\
-	USCrime&BIC&$0.82$&$0.7$&$0.64$&$0.47$&$0.15$&$0.12$\\
-	&Liang's hyper-$g$ prior&$0.76$&$0.71$&$0.64$&$0.45$&$0.16$&$0.12$\\
-	&Bayarri's robust prior&$0.79$&$0.7$&$0.61$&$0.35$&$0.14$&$0.08$\\
-	&ZE&$0.76$&$0.7$&$0.64$&$0.45$&$0.16$&$0.13$\\
-	Wage&BIC&$0.67$&$0.49$&$0.35$&$0$&$0$&$0$\\
-	&Liang's hyper-$g$ prior&$0.69$&$0.47$&$0.33$&$0$&$0$&$0$\\
-	&Bayarri's robust prior&$0.69$&$0.47$&$0.32$&$0$&$0$&$0$\\
-	&ZE&$0.69$&$0.47$&$0.32$&$0$&$0$&$0$\\
+	Bodyfat    &BIC                     &$0.63$&$0.48$&$0.37$&$0.07$&$0.01$&$0.02$\\
+	           &Liang's hyper-$g$ prior &$0.66$&$0.52$&$0.42$&$0.07$&$0.01$&$0.02$\\
+	           &Bayarri's robust prior  &$0.65$&$0.52$&$0.40$&$0.07$&$0.01$&$0.02$\\
+	           &ZE                      &$0.65$&$0.51$&$0.39$&$0.06$&$0.01$&$0.02$\\
+	College    &BIC                     &$0.70$&$0.58$&$0.49$&$0.03$&$0.02$&$0.03$\\
+	&Liang's hyper-$g$ prior            &$0.90$&$0.78$&$0.64$&$0.06$&$0.06$&$0.06$\\
+	&Bayarri's robust prior             &$0.88$&$0.78$&$0.63$&$0.06$&$0.06$&$0.06$\\
+	&ZE                                 &$0.82$&$0.66$&$0.57$&$0.03$&$0.06$&$0.06$\\
+	Hitters   &BIC                      &$0.74$&$0.64$&$0.50$&$0.12$&$0.07$&$0.06$\\
+	&Liang's hyper-$g$ prior            & NaN  &$0.81$&$0.83$&NaN   &$0.17$&$0.07$\\
+	&Bayarri's robust prior             &$0.84$&$0.81$&$0.75$&$0.29$&$0.17$&$0.07$\\
+	&ZE                                 &$0.79$&$0.72$&$0.67$&$0.27$&$0.13$&$0.05$\\
+	USCrime&BIC                         &$0.82$&$0.70$&$0.64$&$0.47$&$0.15$&$0.12$\\
+	&Liang's hyper-$g$ prior            &$0.76$&$0.71$&$0.64$&$0.45$&$0.16$&$0.12$\\
+	&Bayarri's robust prior             &$0.79$&$0.70$&$0.61$&$0.35$&$0.14$&$0.08$\\
+	&ZE                                 &$0.76$&$0.70$&$0.64$&$0.45$&$0.16$&$0.13$\\
+	Wage&BIC                            &$0.67$&$0.49$&$0.35$&$0.00$&$0.00$&$0.00$\\
+	&Liang's hyper-$g$ prior            &$0.69$&$0.47$&$0.33$&$0.00$&$0.00$&$0.00$\\
+	&Bayarri's robust prior             &$0.69$&$0.47$&$0.32$&$0.00$&$0.00$&$0.00$\\
+	&ZE                                 &$0.69$&$0.47$&$0.32$&$0.00$&$0.00$&$0.00$\\
 	\hline
 \end{tabular}
+}
 \label{tab:variable_inclusion_rel_error}
+\bigskip  
 \caption{Relative error of the variable inclusion probability estimated by PVA to the
 					exact variable inclusion probability, partitioned by exact probability under or equal to $0.5$ and
 					over $0.5$}
@@ -1393,7 +1404,7 @@ ignoring the lower posterior probability models.
 						inclusion probability from every possible sub-model. These were calculated for a range of 
 						population sizes from 25 to 500, in 25 model increments.
 						As the population increases, the total posterior model probability increases while the error in 
-						posterior variable inclusion probabliity decreases.}
+						posterior variable inclusion probability decreases.}
 	\label{fig:kakadu_total_posterior_mass}
 \end{figure}
 
@@ -1414,12 +1425,12 @@ We have proposed a deterministic Bayesian model selection algorithm which is com
 and simple. Like Particle EM \citep{Rockova2017}, our algorithm maintains a population of solutions and ensures
 diversity of that population to explore the uncertainty of the selected model. This gives far more information
 about the model selection process than simply choosing one best model. However, whereas Particle EM uses
-a spike-and-slab prior for the regression co-efficients, our approach uses a $g$-prior, which avoids 
+a spike-and-slab prior for the regression coefficients, our approach uses a $g$-prior, which avoids 
 the Bartlett's Paradox and Information Paradox. Importantly, both approaches can be implemented using rank-one
 updates and downdates and the model selection posterior probabilities are available in closed form,
-which allows the algorithm to be implemented in a computionally efficient manner.
+which allows the algorithm to be implemented in a computationally efficient manner.
 
 While previously model selection algorithms using the Maruyama, Liang-$g$ and robust Bayarri priors have
 typically been implemented using Monte Carlo Markov Chains, our algorithm allows the advantages of these
 priors while using a deterministic algorithm. The PVA algorithm  presented in this chapter is implemented in
-the {\tt blma} package in the {\tt cva} function.
+the {\tt blma} package in the {\tt pva()} function.
