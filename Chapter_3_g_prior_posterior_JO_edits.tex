@@ -7,6 +7,8 @@
 
 
 
+\section*{Abstract}
+
 \noindent
 In this chapter, we consider the numerical evaluation of Bayes factors for
 linear models using different mixture g-priors. In particular, we consider
@@ -21,17 +23,9 @@ Bayes factor under the hyper-$g/n$ for which we develop a convenient numerical
 approximation. We implement an R package for Bayesian linear model averaging,
 and discuss some associated computational issues. We illustrate the advantages
 of our implementation over several existing packages on several small datasets.
-
-
-\vfill
-{\footnotesize
-\noindent	
-	This chapter corresponds to the collaborative paper: \\
-	Greenaway M.J. \& Ormerod J.T (2018).
-	Numerical aspects of calculating Bayes factors for linear models using mixture $g$-priors. Submitted to the Journal of Computational and Graphical Statistics.
-}
-
-\newpage 
+ \footnote{This chapter corresponds to the collaborative paper:  
+ 	Greenaway M.J. \& Ormerod J.T (2018).
+ 	Numerical aspects of calculating Bayes factors for linear models using mixture $g$-priors. Submitted to the Journal of Computational and Graphical Statistics.}
 
  
 \section{Introduction}
@@ -49,6 +43,14 @@ Jeffreys-Lindley-Bartlett paradox
 \citep{Lindley1957,Bartlett1957,OrmerodEtal2017}.  Furthermore, this
 sensitivity does not necessarily vanish as the sample size grows
 \citep{Kass1995,Berger2001}.  
+
+%\vfill
+%{\footnotesize
+%	\noindent	
+%	
+%}
+
+%\newpage 
 
 Bayes factors in the context of linear model selection 
 \citep{Zellner1980,
@@ -75,6 +77,9 @@ grows. Finally, \cite{Liang2008} also consider a local and global empirical
 Bayes (EB) procedure for selecting $g$. In these cases \cite{Liang2008} show
 that these EB procedures are model selection consistent except when the true
 model is the null model (the model containing the intercept only). 
+
+
+
 
 The above problems suggest that a hyperprior should be placed on $g$.
 \cite{Bayarri2012} also discuss in some depth desirable properties priors

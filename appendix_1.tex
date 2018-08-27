@@ -3,7 +3,7 @@
 % TODO: Mean field updates?
 % Where are the priors for \vbeta and \vu
 		
-The variational lower bound is equal to $\bE_q\{\log{p(\vy, \vtheta)} - \log{q(\vtheta)}\} = T_1 + T_2 + T_3$,
+The variational lower bound is $\bE_q\{\log{p(\vy, \vtheta)} - \log{q(\vtheta)}\} = T_1 + T_2 + T_3$,
 where
 % This is the new T_1
 \begin{equation*}
@@ -24,7 +24,7 @@ where
 		
 \noindent with $\bE_q \log |\mSigma_{\vu \vu}| = m \log 2 + \log \left | \Psi + \vmu_\vu \vmu_\vu^\top + \mLambda_{\vu \vu} \right | + \sum_{i=1}^m \Psi \left ( \frac{v - i + 1}{2} \right ).$
 
-\section{Calculation of derivatives for the Gaussian variational approximations}
+\section{Calculation of derivatives}
 \subsection{Derivatives for Laplace-Gaussian variational approximation}
 \label{sec:appendix_derivatives_laplace}
 \begin{equation*}
@@ -34,7 +34,7 @@ where
 \end{array}
 \end{equation*}
 		
-\subsection{Derivatives for Gaussian variational approximation with parameterisation $\mLambda = \mR \mR^\top$}
+\subsection{Derivatives for  parameterisation $\mLambda = \mR \mR^\top$}
 \label{sec:appendix_derivatives_gva}
 \begin{equation*}
 \begin{array}{ll}
@@ -43,7 +43,7 @@ where
 \end{array}
 \end{equation*}
 
-\subsection{Derivatives for Gaussian variational approximation fixed point}
+\subsection{Derivatives for fixed point approach}
 \label{sec:appendix_derivatives_gva_fixed_point}
 \begin{equation*}
 \begin{array}{ll}

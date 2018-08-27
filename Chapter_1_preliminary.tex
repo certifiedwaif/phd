@@ -272,13 +272,14 @@ variables may not always be linear in practice. Thus a generalisation of linear
 models to nonlinear situations is needed that still retains the beneficial
 statistical and interpretive properties of linear models as much as possible.
 The most general form of the univariate regression problem is
-$$ y_i = f(x_i) $$
-
-\noindent where $f: \R \to \R$ is unknown, and we wish to estimate it. We treat
+$ y_i = f(x_i) $
+where $f: \R \to \R$ is unknown, and we wish to estimate it. We treat
 the functional form of $f$ as unknown, and attempt to estimate it purely from
 the data available to us. Fully nonparametric regression is a difficult problem
 to solve, but the problem can be simplified by prespecifying the points at
 which the function may change curvature, which we refer to as \emph{knots}.
+
+\newpage
 
 % \subsubsection{Penalised spline}
 % \subsubsection{B-splines}
@@ -461,7 +462,7 @@ $$
 	\text{Information Criteria} = -2 \log p(\vy | \widehat{\vtheta}_\vgamma) + \text{complexity penalty},
 $$
 
-\noindent where $\widehat{\vtheta_\gamma}$ is the maximum likelihood estimate of
+\noindent where $\widehat{\vtheta}_{\gamma}$ is the maximum likelihood estimate of
 the model parameters $\vtheta$ for the model $\vgamma$ and $\log p(\vy |
 \widehat{\vtheta_\gamma})$ is the log-likelihood of that model with that
 parameter estimate and the complexity penalty is a function of the sample size

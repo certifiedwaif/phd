@@ -3,6 +3,23 @@
 
 %\setlength{\parindent}{0pt}
 
+\section*{Abstract}
+
+Bayesian model averaging  has several desirable properties, it is computationally expensive unless 
+the number of models to be averaged  over is small. Typically the number of models to be averaged
+grows exponentially in the number of covariates and some form of approximation is required. 
+In this paper we explore a novel particle based  collapsed variational approximation 
+for Bayesian model averaging. 
+The resulting objective function can be optimized in a highly
+parallel manner.
+We explore several different prior
+specifications which lead to Bayes factors with closed forms. 
+We show empirically that our approach
+is fast and effective for moderately large problems  on several simulated and publicly available 
+datasets, particularly when parallel computing resources are available. An {\tt R} package is available implementing our approach.
+
+\newpage 
+
 \section{Introduction}
 
 Bayesian model selection is a powerful set of techniques for model selection.
@@ -771,17 +788,25 @@ diversity within that population.
 	\caption{The PVA algorithm}
 	\label{alg:algorithm_pva}
 	\begin{algorithmic}
+		\medskip 
 		\WHILE{$F_\lambda$ is still different from the previous iteration}
+		\medskip
 			\FOR{$k = 1, \ldots, K$}
+				\medskip
 				\FOR{$j = 1, \ldots, p$}
+					\medskip
 					\IF {$p(\vy, \vgamma_{jk}^{(1)}) > p(\vy, \vgamma_{jk}^{(0)})$}
+						\medskip
 						\STATE $\vgamma_{jk} = 1$
 					\ELSE
+					\medskip
 						\STATE $\vgamma_{jk} = 0$
 					\ENDIF
 				\ENDFOR
+				\medskip
 				\STATE $w_k = p(\vy, \vgamma_k) / \sum_{j=1}^K p(\vy, \vgamma_j)$
 			\ENDFOR
+			\medskip
 			\STATE Calculate $F_\lambda$ = $\vw^\top \vp + \lambda H$
 		\ENDWHILE
 	\end{algorithmic}
