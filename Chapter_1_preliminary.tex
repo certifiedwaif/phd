@@ -119,17 +119,17 @@ calculating the posterior probability of the parameters using Bayes' Theorem,
 \]
 
 \noindent where $\vy$ is a vector of observed data, $\vtheta$ are the model
-parameters, $p(\vy|\vtheta)$ is the marginal distribution, $p(\vtheta)$ is a
+parameters, $p(\vy|\vtheta)$ is the likelihood function, $p(\vtheta)$ is a
 prior distribution on $\vtheta$, and $p(\vy)=\int
 p(\vy|\vtheta)p(\vtheta)d\vtheta$.  Here the integral is performed over the
-domain of $\vtheta$. If a subset of $\vtheta$ are discrete random variables
+range of $\vtheta$. If a subset of $\vtheta$ are discrete random variables
 then the integral over these parameters is replaced with a combinatorial sum
 over all possible values of these discrete random variables.
 
 There are many models which are difficult to fit under the frequentist paradigm,
 as the likelihood can be difficult to maximise for complex models. Furthermore,
 as the Bayesian paradigm treats each of the parameters in a model as uncertain,
-the full uncertainty associated with all of the parameters can be estimated in
+the full uncertainty associated with all of the parameters can be estimated via
 the uncertainty in the posterior distribution. This approach avoids many of the
 pitfalls of statistical inference encountered with the frequentist approach
 using significance testing and p-values \citep{Cox2005}.
@@ -141,7 +141,7 @@ model selection is taken into account in the context of model selection. Thus
 for the two classes of problems we consider in this thesis the Bayesian approach
 is more suitable.
 
-\section{The problems in thesis}
+\section{Research problems}
 
 In this section, we introduce the major problems that will be addressed in this
 thesis. The themes of flexible modelling of data using Generalised Linear Mixed
@@ -169,7 +169,7 @@ $h$, $T$ and $b$ functions. The exponential family of distributions have several
 appealing statistical and computational properties which derive from the
 convexity of the parameter space $\Theta$ for which the exponential family
 distribution is defined, and the convexity of the cumulant function
-\cite{Jordan2010}. The mean of an exponential family distribution can be
+\citep{Jordan2010}. The mean of an exponential family distribution can be
 obtained by calculating the first derivative of the cumulant function and then
 evaluating at zero, while the variance can be obtained by calculating the second
 derivatives of the cumulant function and evaluating at zero.
@@ -195,7 +195,7 @@ appropriate to modelling binary data.
 \subsection{Generalised Linear Mixed Models}
 
 Generalised Linear Mixed Models, an extension of Generalised Linear Models to
-include both fixed and random effects, are flexible to many complicated
+include both fixed and random effects, are applicable to many complicated
 modelling situations.
 
 Linear and generalised linear regression models are the standard tools used by
@@ -210,7 +210,7 @@ to incorporate dependencies amongst the  observations via the assumption of a
 more complicated covariance structure, including random effects for  different
 subgroups or longitudinal data and other extensions such as splines. This
 additional flexibility makes their application popular in many fields, such as
-public health, psychology and agriculture.
+public health, psychology and agriculture \citep{Kleinman2004, Lo2015, Kachman2000}.
 
 In the frequentist paradigm, model parameters are fixed and uncertainty enters
 the model through random errors, which have an associated covariance. The data
@@ -222,7 +222,7 @@ random variables, while the data is fixed.
 
 The generalised form for linear models in  (\ref{eq:glm}) can easily be
 extended to include random effects.  Following the conventions for Generalised
-Design of \citep{Zhao2006}, we adopt the canonical form for Generalised Linear
+Design of \cite{Zhao2006}, we adopt the canonical form for Generalised Linear
 Mixed Models exponential family with Gaussian random effects take the general
 form
 $$
@@ -273,11 +273,10 @@ models to nonlinear situations is needed that still retains the beneficial
 statistical and interpretive properties of linear models as much as possible.
 The most general form of the univariate regression problem is
 $ y_i = f(x_i) $
-where $f: \R \to \R$ is unknown, and we wish to estimate it. We treat
-the functional form of $f$ as unknown, and attempt to estimate it purely from
-the data available to us. Fully nonparametric regression is a difficult problem
-to solve, but the problem can be simplified by prespecifying the points at
-which the function may change curvature, which we refer to as \emph{knots}.
+where $f: \R \to \R$ is unknown, and we wish to estimate it.  Fully
+nonparametric regression is a difficult problem to solve, but the problem can
+be simplified by prespecifying the points at which the function may change
+curvature, which we refer to as \emph{knots}.
 
 \newpage
 
@@ -528,16 +527,16 @@ regression coefficients is the mode of their posterior distribution.
 Ridge regression is a penalised regression method, introduced in
 \cite{Hoerl1970}. The penalty on the regression coefficients is the Euclidean
 norm of the regression coefficients. This penalty shrinks the estimated
-coefficients towards zero, ensuring sparsity of the fitted model. The ridge
-regression coefficients can thus be estimated by solving the constrained
-optimisation problem
+coefficients towards zero. The ridge regression coefficients can thus be
+estimated by solving the constrained optimisation problem
+
 $$
 \widehat{\vbeta}_{\text{ridge}} = \argmin_\vbeta \|\vy - \mX \vbeta\|_2^2 \quad \text{ subject to } \quad \|\vbeta\|_2 \leq \lambda
 $$
 
 \noindent 
 where $\lambda$ is a pre-specified free parameter specifying the amount of
-regulation. This constrained optimisation problem can be transformed by the
+regularisation. This constrained optimisation problem can be transformed by the
 method of Lagrange multipliers into the sum of the residual sum of squares and
 the product of the Lagrange multiplier and the constraint, which acts as a
 penalty on the Euclidean norm of the regression coefficients.
@@ -578,12 +577,12 @@ $\lambda$, as Bayesian model selection methods do.
 \subsection{Bayesian approaches to model Selection}
 
 Parallel to the frequentist approaches, model selection can be performed using
-a Bayesian approach by using Bayes factors to compare the posterior likelihoods
-of the candidate models to see which is most probable given the observed data.
-This can be done, for example, by using Bayes Factors \citep{Kass1993}. Rather
-than selecting one candidate model, several models can be combined together
-using Bayesian model  averaging \citep{Hoeting1999, Raftery1997,
-Fernandez2001, Papaspiliopoulos2016}.
+a Bayesian approach. This can be done, for example, by using Bayes Factors  to
+compare the posterior likelihoods of the candidate models to see which is most
+probable given the observed data\citep{Kass1993}. Rather than selecting one
+candidate model, several models can be combined together using Bayesian model
+averaging \citep{Hoeting1999, Raftery1997, Fernandez2001,
+Papaspiliopoulos2016}.
 
 \subsubsection{Variable selection}
 
