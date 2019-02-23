@@ -86,7 +86,7 @@ component of our model. In Section ~\ref{sec:param}, we present new
 parameterisations for use in these algorithms which offers substantial
 advantages in accuracy, numerical stability and computational speed. In Section
 ~\ref{sec:results} we perform numerical experiments on simulated data which
-demonstrate that these advantages. In Section ~\ref{sec:application} we show an
+demonstrate these advantages. In Section ~\ref{sec:application} we show an
 application of our pure Poisson model fitting method to a hierarchical model
 studying the effect of ethnicity on the rate of police stops, and an
 application of our zero-inflated Poisson model fitting method to a multi- level
@@ -109,7 +109,7 @@ flexible mixed model approach incorporating both fixed and random effects.
 \subsection{Modelling zero-inflated Poisson data}
 
 We consider a sample of counts $y_i$, $1 \le i\le n$, where there are an
-excessive number of zeros for a Poisson model, but the sample is otherwise
+excessive number of zeroes for a Poisson model, but the sample is otherwise
 well-modelled by a Poisson distribution. A popular approach using latent
 variables views the data as the product of two data-generating processes, a
 Bernoulli process that determines whether the data is definitely zero, and a
@@ -249,8 +249,8 @@ probability distribution
 \Gamma_p{\left(\tfrac{v}{2}\right)}} |\mX|^{-\tfrac{v + p + 1}{2}}
 \exp{\left[-\tfrac{1}{2} \tr{(\mPsi \mX^{-1})}\right]}
 \end{equation*}
-where $\Gamma_p{(x)}$ denotes the multivariate gamma function and $\tr$ is the
-trace function.
+where $\Gamma_p{(x)}$ denotes the multivariate gamma function and ${\bf tr}$ is
+the trace function.
 
 The covariance matrix of random effects $\mSigma$ will depend on the mixed
 model being fit. In the random intercept case, $\mSigma = \sigma_u^2 \mI$ while
@@ -279,7 +279,7 @@ $$
 \noindent where $K$ is the number of knots.
 Here $\mSigma$ is a $K + 2$ banded matrix.  Banded matrices are highly sparse,
 and matrix operations can be performed on them in $\BigO(K)$ time. The matrix
-$\mSigma$ is symmetric, with contents
+$\mSigma$ is symmetric. For $K = 3$, the contents of $\mSigma$ are
 % I produced this using the following program
 % https://gist.github.com/certifiedwaif/d9c7fd207b54a3fccae5f577c17f95d3
 {
@@ -361,7 +361,7 @@ variational lower bound is given in Appendix \ref{sec:calculation_of_var_lb}.
 			% \vp
 			\STATE $\beta_{q(\rho)} \leftarrow \beta_\rho + n - \vone^\top\vp$ \\[2ex]
             \STATE $\veta \leftarrow -\exp \left [ \mC \vmu + \frac{1}{2} \diag{(\mC\mLambda\mC^\top)} \right ] + (\psi{(\alpha_{q{(\rho)}})} - \psi{(\beta_{q{(\rho)}})}) \vone_n$ \\[2ex]
-			\STATE $\vp_{q(\vr_0)} \leftarrow \text{expit}{(\eta)}$ \\[1ex]
+			\STATE $\vp_{q(\vr_0)} \leftarrow \text{expit}{(\veta)}$ \\[1ex]
 			% \mSigma_{\vu \vu}
 			\STATE $\mPsi_{q(\mSigma_{\vu \vu})} \leftarrow \mPsi + \sum_{i=1}^m (\vmu_i \vmu_i^\top + \mLambda_{{\vu}_i {\vu}_i})$ \\[2ex]
             \STATE $\mSigma_{\vu\vu} \leftarrow [\mPsi_{q(\mSigma_{\vu \vu})}/(v - d - 1)]^{-1}$
@@ -398,7 +398,7 @@ by a Gaussian centred at its mode.
 % approximation uses the second order Taylor expansion of the full log likelihood of the  model around the
 % mode to find a Gaussian approximation to the full posterior. Taylor expanding the full log likelihood
 % once around the mode yields the following approximation.
-This yields the approximation to the variational lower bound is
+This yields the following approximation to the variational lower bound
 % The algorithm is very quick to execute, but the resulting approximate posterior
 % distributions are not as accurate as those produced by the other algorithms considered in this article.
 % NR

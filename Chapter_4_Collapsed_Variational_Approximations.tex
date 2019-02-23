@@ -109,10 +109,10 @@ next candidate model considered.
 % Particle Variational Bayes Particle Variational Bayes approaches have proved
 % useful in Bayesian nonparametric settings such as Latent Dirichlet Allocation
 % \cite{Teh2007}
-Our variational approximation of the posterior model likelihood is a weighted
+Our variational approximation of the posterior model probability is a weighted
 sum of the indicators of the covariates of the model, where the weights are
 determined by the relative contribution of each covariate to the model fit in
-all particles in the opulation, balanced against the diversity of the
+all particles in the population, balanced against the diversity of the
 particles.
 \[
 	q(\vgamma) = \sum_{k=1}^K w_k \I(\vgamma_k)
@@ -499,8 +499,6 @@ model selection paradoxes which arise when a fixed choice of $g$ is made.
 % choice of using a beta-binomial prior with $a=1$ and $b=p$, which we have
 % found to work well on high-dimensional problems in practice.
 
-\subsection{Bayesian model averaging}
-
 
 The Bayes factors introduced in the previous chapter play a key role in
 Bayesian linear model averaging.  Via Bayes theorem the posterior probability
@@ -738,10 +736,7 @@ p(\vy)$ is given by
 \end{equation}
 
 \noindent which has been simplified under the assumption that population of
-particles $$
-\vgamma_1,\ldots,\vgamma_K$$
-
-\noindent  contains only unique particles.
+particles $\vgamma_1,\ldots,\vgamma_K$ contains only unique particles.
 
 Since $\log \underline{p}(\vy;\vw,\mGamma)$ is a lower bound we can maximize
 this bound with respect to $\vw$ and $\mGamma$ to make the bound as tight as
@@ -750,7 +745,7 @@ possible.  The main body of the algorithm to optimize $\log
 
 In the first stage, we iterate through the population of bitstrings, using a
 greedy search strategy in an attempt to alter each bit in the model bitstring
-to increase the log likelihood. If the log likelihood for the new bitstring is
+to increase the log likelihood. If the log-likelihood for the new bitstring is
 no higher than the previous bitstring, then the alteration is rejected and the
 next alteration tried. The alterations are also rejected if the new bitstring
 already exists within the population, ensuring that the constraint that all
@@ -777,9 +772,9 @@ $\vgamma_k$'s. Hence, the first stage optimizes $\log
 over each of the  $\vgamma_k$'s.  To be more concrete, let $\vgamma_{jk}^{(i)}
 = (\gamma_{1k},\ldots,\gamma_{j-1,k},i,\gamma_{j+1,k},\ldots,\gamma_{pk})^T$.
 We optimize $\vw$ and $\vgamma_1,\ldots,\vgamma_K$ by executing the algorithm
-given in Algorithm \ref{alg:algorithm_pva} below. $\vp$ is the vector of
-posterior probabilities for each of the models  in the population, while $H$ is
-the entropy of the entire population. Thus $F_\lambda$ balances the weighted
+given in Algorithm \ref{alg:algorithm_pva} below. Let $\vp$ denote the vector
+of posterior probabilities for each of the models  in the population, while $H$
+is the entropy of the entire population. Thus $F_\lambda$ balances the weighted
 posterior  probabilities of the particles in the population against the
 diversity within that population.
 % Re-type this using algorithmic environment
@@ -830,7 +825,7 @@ implemented in an embarrassingly parallel manner.  There is no need to
 re-optimize $\mGamma$ for different $\vw$ since  the optimal values of the
 $\vgamma_k$'s are independent of $\vw$.
 
-Once the matrix $\mGamma$ is fitted duplicate particles can be discarded.  Let
+Once the matrix $\mGamma$ is fitted, duplicate particles can be discarded.  Let
 ${\vgamma}_1^*,\ldots,{\vgamma}_{K^*}^*$ denote the selected set of $K^*$
 unique particles. Then the optimal value of the $w_k$'s satisfy
 \begin{equation}
@@ -868,17 +863,16 @@ parallel computation.
 
 We will now assess the performance of PVA. In Section \ref{sec:exact} we
 compare PVA against exact Bayesian model averaging for four small examples with
-$p<30$ against exact Bayesian model averaging via the {\tt R} package {\tt
-blma} using the implementation outlined in Greenaway \& Ormerod (2018). All of
-the following results were obtained in the {\tt R} version 3.4.2 \citep{CiteR}
-and all figures were developed using the {\tt R} package {\tt ggplot2}.  In
-sections \ref{sec:highdimensional}--\ref{sec:QTL} we will consider examples
-with $p>30$ where it is infeasible to perform Bayesian model averaging exactly.
-Most simulations were run on a 64 bit
-Windows 10 Intel i7-7600MX central processing unit at 2.8GHz with 2
-hyperthreaded cores and 32GB of random access memory.  Multicore comparisons
-were run on a dedicated server using E5-2697v2 processors with 24 hyperthreaded
-cores and 512GB of RAM.
+$p<30$ via the {\tt R} package {\tt blma} using the implementation outlined in
+Greenaway \& Ormerod (2018). All of the following results were obtained in the
+{\tt R} version 3.4.2 \citep{CiteR} and all figures were developed using the
+{\tt R} package {\tt ggplot2}.  In sections
+\ref{sec:highdimensional}--\ref{sec:QTL} we will consider examples with $p>30$
+where it is infeasible to perform Bayesian model averaging exactly.  Most
+simulations were run on a 64 bit Windows 10 Intel i7-7600MX central processing
+unit at 2.8GHz with 2 hyperthreaded cores and 32GB of random access memory.
+Multicore comparisons were run on a dedicated server using E5-2697v2 processors
+with 24 hyperthreaded cores and 512GB of RAM.
 
 \subsection{Comparing PVA against exact results} 
 \label{sec:exact}
@@ -893,7 +887,8 @@ preprocessing was used.  We first used the {\tt R} command {\tt na.omit()} to
 remove samples containing missing predictors.  For {\tt USCrime} all variables
 except the predictor {\tt S} were log-transformed. For all datasets the {\tt R}
 command {\tt model.matrix()} was used to construct the design matrix using all
-variables except for the response as predictors.
+variables except for the response as predictors. The routines in `blma`
+standardise the response and covariate matrix.
 
 \begin{table}[ht!]
 	\begin{center}
@@ -950,7 +945,7 @@ model is reasonably well approximated.
 \subsection{Competing method settings}
 \label{sec:settings} 
 
-For datasets with $p>30$ it is not feasible to perform exact BMA.  For these
+For data sets with $p>45$ it is not feasible to perform exact BMA.  For these
 examples we instead compare the model selection performance of PVA against the
 Lasso, SCAD and MCP penalized regression methods as implemented by the {\tt R}
 package {\tt ncvreg} \citep{Breheny2011}, PEM using the {\tt R} package {\tt
@@ -1020,9 +1015,8 @@ $$
 
 \noindent with $TP$, $FP$ and $FN$ being the number of true positives, false
 positives and false negatives respectively. Note that $F_1$ is a value between
-0 and 1 and higher values are being preferred. We use this measure avoid
-preference of the two boundary models, that is selecting none or all of the
-variables. 
+0 and 1 and higher values are preferred. We use this measure preference of the
+two boundary models, that is selecting none or all of the variables. 
 
 \subsection{Simulated high-dimensional example}
 \label{sec:highdimensional} 
@@ -1182,8 +1176,8 @@ lasso, PVA, BMS, BAS and PEM  methods using $F_1$ score is given in Figure
     on an experiment on a backcross population of $n=600$ individuals for a
     single large chromosome of 1800 cM. This giant chromosome was covered by
     121 evenly spaced markers from \cite{Xu2007}. Nine of the markers
-    overlapped with QTL ofthe main effects and 13 out of the ${121 \choose 2} =
-    7260$ possible marker pairs had interaction effects. The $\mX$ matrix
+    overlapped with QTL of the main effects and 13 out of the ${121 \choose 2}
+    = 7260$ possible marker pairs had interaction effects. The $\mX$ matrix
     combines the main effects and interaction effects to make a $600\times
     7381$ matrix. The values of the true coefficients are listed in Table 1 of
     \cite{Xu2007} ranging from 0.77 to 4.77 in absolute magnitude and
@@ -1438,24 +1432,30 @@ ignoring the lower posterior probability models.
 % UScrime
 
 % Interpretation of results
-The same general trends were observed in all small data sets. Total posterior probability is higher for the
-beta- binomial model prior than for the uniform model prior, while the variable inclusion error is lower. This
-same general trend is seen regardless of $g$-prior. Total posterior probability increases with increased
-population size $K$, while variable inclusion error decreases. Although the PVA algorithm is deterministic,
-variation in the results amongst the trials is seen due to the random initialisation of $\mGamma$.
+The same general trends were observed in all small data sets. Total posterior
+probability is higher for the beta- binomial model prior than for the uniform
+model prior, while the variable inclusion error is lower. This same general
+trend is seen regardless of $g$-prior. Total posterior probability increases
+with increased population size $K$, while variable inclusion error decreases.
+Although the PVA algorithm is deterministic, variation in the results amongst
+the trials is seen due to the random initialisation of $\mGamma$.
 
 \section{Conclusion}
 \label{sec:chapter_4_conclusion}
-We have proposed a deterministic Bayesian model selection algorithm which is computationally efficient
-and simple. Like Particle EM \citep{Rockova2017}, our algorithm maintains a population of solutions and ensures
-diversity of that population to explore the uncertainty of the selected model. This gives far more information
-about the model selection process than simply choosing one best model. However, whereas Particle EM uses
-a spike-and-slab prior for the regression coefficients, our approach uses a $g$-prior, which avoids 
-the Bartlett's Paradox and Information Paradox. Importantly, both approaches can be implemented using rank-one
-updates and downdates and the model selection posterior probabilities are available in closed form,
-which allows the algorithm to be implemented in a computationally efficient manner.
+We have proposed a deterministic Bayesian model selection algorithm which is
+computationally efficient and simple. Like Particle EM \citep{Rockova2017}, our
+algorithm maintains a population of solutions and ensures diversity of that
+population to explore the uncertainty of the selected model. This gives far
+more information about the model selection process than simply choosing one
+best model. However, whereas Particle EM uses a spike-and-slab prior for the
+regression coefficients, our approach uses a $g$-prior, which avoids the
+Bartlett's Paradox and Information Paradox. Importantly, both approaches can be
+implemented using rank-one updates and downdates and the model selection
+posterior probabilities are available in closed form, which allows the
+algorithm to be implemented in a computationally efficient manner.
 
-While previously model selection algorithms using the Maruyama, Liang-$g$ and robust Bayarri priors have
-typically been implemented using Monte Carlo Markov Chains, our algorithm allows the advantages of these
-priors while using a deterministic algorithm. The PVA algorithm  presented in this chapter is implemented in
-the {\tt blma} package in the {\tt pva()} function.
+While previously model selection algorithms using the Maruyama, Liang-$g$ and
+robust Bayarri priors have typically been implemented using MCMC, our algorithm
+allows the advantages of these priors while using a deterministic algorithm.
+The PVA algorithm  presented in this chapter is implemented in the {\tt blma}
+package in the {\tt pva()} function.

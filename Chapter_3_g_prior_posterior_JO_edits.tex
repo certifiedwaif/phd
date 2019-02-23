@@ -9,16 +9,15 @@
 
 \section*{Abstract}
 
-\noindent
-In this chapter, we consider the numerical evaluation of Bayes factors for
-linear models using different mixture g-priors. In particular, we consider
-hyperpriors for $g$ leading to closed-form expressions for the Bayes factor
-including the hyper-$g$ and hyper-$g/n$ priors of \cite{Liang2008}, the
+\noindent In this chapter, we consider the numerical evaluation of Bayes
+factors for linear models using different mixture g-priors. In particular, we
+consider hyperpriors for $g$ leading to closed-form expressions for the Bayes
+factor including the hyper-$g$ and hyper-$g/n$ priors of \cite{Liang2008}, the
 beta-prime prior of \cite{Maruyama2011}, the robust prior of
 \cite{Bayarri2012}, and the Cake prior of \cite{OrmerodEtal2017}. In
 particular, we describe how each of these Bayes factors, except for Bayes
-factor under the hyper-$g/n$ prior, can be evaluated in efficient, accurate and
-numerically stable manner. We also derive a closed form expression for the
+factor under the hyper-$g/n$ prior, can be evaluated in an efficient, accurate
+and numerically stable manner. We also derive a closed form expression for the
 Bayes factor under the hyper-$g/n$ for which we develop a convenient numerical
 approximation. We implement an R package for Bayesian linear model averaging,
 and discuss some associated computational issues. We illustrate the advantages
@@ -79,8 +78,6 @@ that these EB procedures are model selection consistent except when the true
 model is the null model (the model containing the intercept only). 
 
 
-
-
 The above problems suggest that a hyperprior should be placed on $g$.
 \cite{Bayarri2012} also discuss in some depth desirable properties priors
 should have in the context of linear model averaging and selection.  In this
@@ -88,12 +85,12 @@ chapter we review the prior structures, specifically the hyperpriors on $g$,
 that lead to closed form expressions of Bayes factors for linear models.  These
 include the hyper-$g$ prior of \cite{Liang2008}, the beta-prime prior of
 \cite{Maruyama2011}, and the robust prior of \cite{Bayarri2012}, and most
-recently the Cake prior of \cite{OrmerodEtal2017} leads to a Bayes factor which
-is a simple function of the Bayesian Information Criterion (BIC). We concern
-ourselves with the efficient, accurate and numerically stable evaluation of
-Bayes factors, Bayesian model averaging, and Bayesian model selection  for
-linear models under the above choices of prior structures for the model
-parameters.
+recently the Cake prior of \cite{OrmerodEtal2017}.
+% leads to a Bayes factor which is a simple function of the Bayesian Information Criterion (BIC).
+We concern ourselves with the efficient, accurate and numerically stable
+evaluation of Bayes factors, Bayesian model averaging, and Bayesian model
+selection  for linear models under the above choices of prior structures for
+the model parameters.
 
 
 Our main contributions in this chapter are as follows.
@@ -178,7 +175,9 @@ of predictors (which correspond to different columns of the matrix $\mX$) have
 on the response $\vy$. To this end, let $\vgamma \in \{0, 1\}^p$ be a binary
 vector of indicators for the inclusion of the $p$th column of $\mX$ in the
 model where $\mX_\vgamma$ denotes the design matrix formed by including only
-the $j$th column of $\mX$ when $\gamma_j = 1$, and excluding it otherwise. 
+the $j$th column of $\mX$ when $\gamma_j = 1$, and excluding it otherwise.  Let
+$\vbeta_{-\vgamma}$ denote the elements of the regression co-efficients not
+included in the model $\vgamma$.
 
 In order to keep our exposition as general as possible we will assume a prior
 structure of $p(\alpha,\vbeta_{\vgamma}|\vgamma)p(\vgamma)$ but, for the time
@@ -280,11 +279,11 @@ variant of the spike and slab prior for $\vbeta$.
 An alternative choice of prior on $\vbeta_\vgamma$ was proposed by
 \cite{Maruyama2011}. Let $p_{\vgamma} = |\vgamma|$, the number of non-zero
 elements in $\vgamma$. We will now describe their prior on $\vbeta_\vgamma$ for
-the case where for the case $p_{\vgamma} < n - 1$. Let $\mU\mLambda\mU^T$ be an
-eigenvalue decomposition of $\mX_\vgamma^T\mX_\vgamma$ where $\mU$ is an
-orthonormal $p_{\vgamma} \times p_{\vgamma}$ matrix, and $\mLambda =
+the case where $p_{\vgamma} < n - 1$. Let $\mU\mLambda\mU^T$ be an eigenvalue
+decomposition of $\mX_\vgamma^T\mX_\vgamma$ where $\mU$ is an orthonormal
+$p_{\vgamma} \times p_{\vgamma}$ matrix, and $\mLambda =
 \mbox{diag}(\lambda_1,\ldots,\lambda_{p_{\vgamma}})$ is a diagonal matrix of
-eigenvalues with $\lambda_1\ge\ldots,\ge \lambda_{p_{\vgamma}}>0$. Then
+eigenvalues with $\lambda_1 \ge \cdots \ge \lambda_{p_{\vgamma}}>0$. Then
 \cite{Maruyama2011} propose a prior for $\vbeta_\vgamma$ of the form
 \begin{equation} \label{eq:priorBetaMG} \vbeta_\vgamma | \sigma^2, g \sim
 \N(\vzero, \sigma^2 (\mU\mW\mU^\top)^{-1}),   \end{equation} 
@@ -295,9 +294,10 @@ eigenvalues with $\lambda_1\ge\ldots,\ge \lambda_{p_{\vgamma}}>0$. Then
 use $\nu_j = \lambda_j/\lambda_{p_{\vgamma}}$, for $1\le j \le p_{\vgamma}$.
 This choice down-weights the prior on the rotated parameter space of $(\mU
 \vbeta)_j$ when the corresponding eigenvalue $\lambda_j$ is large, which leads
-to prior standard errors that are approximately the same size. Note that when
-$\nu_1 = \ldots = \nu_{p_{\vgamma}} = 1$ the prior (\ref{eq:priorBetaMG})
-reduces to the prior for $\vbeta$ in (\ref{eq:priorStructure}). 
+to prior standard errors on the regression co-efficients that are approximately
+the same size. Note that when $\nu_1 = \ldots = \nu_{p_{\vgamma}} = 1$ the
+prior (\ref{eq:priorBetaMG}) reduces to the prior for $\vbeta$ in
+(\ref{eq:priorStructure}). 
 
 The choice between (\ref{eq:priorBetaMG}) and the prior for $\vbeta$ in
 (\ref{eq:priorStructure}) represents a trade-off over computational efficiency
@@ -368,7 +368,7 @@ efficient, accurate, and numerically stable manner. We cover the the hyper-$g$
 and hyper-$g/n$ priors of \cite{Liang2008}, the beta-prime prior of
 \cite{Maruyama2011}, the robust prior of \cite{Bayarri2012}, and the Cake prior
 of \cite{OrmerodEtal2017}.  We also considered the prior structure implied by
-\cite{Zellner1980}, but were able to make no meaningful progress on existing
+\cite{Zellner1980}, but were unable to make meaningful progress on existing
 methodology for this case.
 
 We show that many of the hyperpriors on $g$ result in Bayes factors which can
@@ -1685,9 +1685,9 @@ different priors structures not offered in \texttt{BAS}. Our package is much
 faster than \texttt{BayesVarSelect} and is also numerically more stable and
 accurate.
 
-Our package is competitive with {\tt BAS} and {\tt BMS} in terms of
-computational speed, is numerically more stable and accurate, and offers some
-different priors structures not offered in {\tt BAS}. Our package is much
-faster than {\tt BayesVarSelect} and is also numerically more stable and
-accurate, and represents an advance in the implementation of exact Bayesian
-linear model averaging.
+%Our package is competitive with {\tt BAS} and {\tt BMS} in terms of
+%computational speed, is numerically more stable and accurate, and offers some
+%different priors structures not offered in {\tt BAS}. Our package is much
+%faster than {\tt BayesVarSelect} and is also numerically more stable and
+%accurate, and represents an advance in the implementation of exact Bayesian
+%linear model averaging.
