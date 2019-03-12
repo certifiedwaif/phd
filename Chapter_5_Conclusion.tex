@@ -51,13 +51,15 @@ be handled with care.
 
 \section{Particle Variational Approximation}
 
-In Chapter 3 we developed PVA, a fast method for approximate Bayesian model averaging. There are several planned future extensions to this work. Firstly, we would
-like to generalise the PVA approach to generalised linear models as well as
+In Chapter 3 we developed PVA, a fast method for approximate Bayesian model
+averaging. There are several planned future extensions to this work. Firstly,
+we would like to generalise the PVA approach to linear models and generalised
 linear models, to be able to perform model selection for regression models
 applicable to a wider range of types of data. The computational approach would
-again either calculate Bayes factors based on the ideas of \cite{Li2015} or by using Laplace
-approximations. Additional care needs to be exercised for these models as the likelihood can often become irregular for a
-significant portion of models in the process of model selection.
+again either calculate Bayes factors based on the ideas of \cite{Li2015} or by
+using Laplace approximations. Additional care needs to be exercised for these
+models as the likelihood can often become irregular for a significant portion
+of models in the process of model selection.
 
 Secondly, although the algorithm already runs in parallel on multicore CPUs
 using \texttt{OpenMP}, we believe even greater gains in performance could be

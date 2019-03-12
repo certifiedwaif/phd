@@ -22,22 +22,22 @@ simulated and real data sets.
 \label{sec:introduction}
 
 
-Count data with a large number of zeroes arises in many areas of application,
+Count data with a large number of zeros arises in many areas of application,
 such as data arising from physical activity studies, insurance claims, hospital
 visits or defects in manufacturing processes. Zero inflation is a frequent
 cause of overdispersion in Poisson data, and not accounting for the extra
-zeroes may lead to biased parameter estimates. These models have been used for
+zeros may lead to biased parameter estimates. These models have been used for
 many applications, including defects in manufacturing in \cite{lambert1992},
-horticulture in \cite{BIOM:BIOM1030} and \cite{BIOM:BIOM1030}, length of stay
-data from hospital admissions  \citep{BIMJ:BIMJ200390024}, psychology 
+horticulture in \cite{BIOM:BIOM1030}, length of stay data from hospital
+admissions  \citep{BIMJ:BIMJ200390024}, psychology 
 %\citep{JOFP:rethink}, 
-pharmaceutical studies  \citep{Min01042005}, traffic
-accidents on roadways  \citep{Shankar1997829} and longitudinal studies 
+pharmaceutical studies  \citep{Min01042005}, traffic accidents on roadways
+\citep{Shankar1997829} and longitudinal studies
 \citep{LeeWangScottYauMcLachlan2006}.
 
 The strength of this approach derives from modelling the zero and non-zero
 count data separately as a mixture of distributions for the zero and non-zero
-components, allowing analysis of both the proportion of zeroes in the data set
+components, allowing analysis of both the proportion of zeros in the data set
 and the conditions for the transition from zero observations to non-zero
 observations. When combined with a multivariate mixed model regression
 framework, an extremely rich class of models can be fit allowing a broad range
@@ -99,7 +99,7 @@ for our model.
 \label{sec:zero_inflated_model}
 
 In this section we present a Bayesian zero-inflated Poisson model for count
-data with extra zeroes. After introducing the latent variable representation of
+data with extra zeros. After introducing the latent variable representation of
 Bayesian zero-inflated models, we first extend this to a model incorporating
 fixed effects regression modelling, and extend the model again to a more
 flexible mixed model approach incorporating both fixed and random effects.
@@ -109,7 +109,7 @@ flexible mixed model approach incorporating both fixed and random effects.
 \subsection{Modelling zero-inflated Poisson data}
 
 We consider a sample of counts $y_i$, $1 \le i\le n$, where there are an
-excessive number of zeroes for a Poisson model, but the sample is otherwise
+excessive number of zeros for a Poisson model, but the sample is otherwise
 well-modelled by a Poisson distribution. A popular approach using latent
 variables views the data as the product of two data-generating processes, a
 Bernoulli process that determines whether the data is definitely zero, and a
@@ -139,17 +139,19 @@ otherwise.
 \end{equation}
 
 \noindent This leads to the specification for the probability distribution used
-in  (\ref{eq:zero_infl_second_param}) where $\text{Bernoulli}(\pi)$
-denotes the probability distribution $\pi^k (1 - \pi)^{1-k}$.
+in  (\ref{eq:zero_infl_second_param}) where $\text{Bernoulli}(\pi)$ denotes the
+probability distribution $\pi^k (1 - \pi)^{1-k}$, with $k \in \{0, 1\}$ and
+$\pi \in [0, 1]$.
 
 Let $p$ be the number of fixed effects, $m$ be the number of groups in the
 random effects and $b$ be the block size for each of those groups. We use
 $\vone_p$ and $\vzero_p$ to denote the $p \times 1$ column vectors with all
-entries equal to 1 or 0, respectively.
-Let $\vy$ be the $n \times 1$ vector. The Euclidean norm of a column vector
+entries equal to 1 and 0, respectively.
+Let $\vy$ be the $n \times 1$ vector of counts. The Euclidean norm of a column vector
 $\vv$, defined to be $\sqrt{\vv^\top \vv}$, is denoted by $\|\vv\|$. For a $p
 \times 1$ vector $\va$, we let $\diag{(\va)}$ denote the $p \times p$ matrix
 with the elements of $\va$ along its' diagonal.
+
 %We denote the design matrix of fixed effects with dimensions $n \times p$ as
 %$\mX$, and the design matrix of random effects with dimensions $n \times m b$
 %as $\mZ$. The combined design matrix $\mC$ is formed by appending the columns
@@ -176,7 +178,7 @@ and $\vbeta$ the vector of regression coefficients. Letting $\vr =
 		\log p(\vy|\vr, \vbeta) 
 		    & = \vy^\top \mR (\mX\vbeta)                           
 		- \vr^\top \exp{(\mX\vbeta)} 
-		- \vone^\top \log{\Gamma{(\vy + \vone)}}, \quad \mbox{ and }\\ [1ex]
+		- \vone_n^\top \log{\Gamma{(\vy + \vone_n)}}, \quad \mbox{ and }\\ [1ex]
 		r_i | \rho & \sim \text{Bernoulli}(1-\rho), \quad 1 \leq i \leq n, \\
 	\end{array}
 \end{equation*}
@@ -224,7 +226,7 @@ multivariate model with multiple observations is then
 %\label{eq:main}
 \begin{equation*}
     \begin{array}{rl} \log{p(\vy|\vr, \vbeta, \vu)} &= \vy^\top \mR (\mC\vnu)
-        - \vr^\top \exp{(\mC\vnu)} - \vone^\top \log{\Gamma{(\vy + \vone)}},
+        - \vr^\top \exp{(\mC\vnu)} - \vone_n^\top \log{\Gamma{(\vy + \vone_n)}},
         \quad \mbox{ and } \\
         [1ex] r_i& \sim \text{Bernoulli}(\rho), 1 \leq i \leq n, \\ 
     \end{array} 
@@ -470,12 +472,12 @@ To optimise the Gaussian component of the lower bound in each iteration of
 Algorithm \ref{alg:algorithm_one}, optimal $\vmu$ and $\mLambda$ values must be
 found while keeping the other variational parameters fixed. The variational
 lower bound is not necessarily unimodal if $\vp$ and $\mSigma$ are free to
-vary, leading to potential difficulty in optimising to the global maximum.
-However, for fixed $\vp$ and $\mSigma$, the variational lower bound is
-log-concave with respect to $\vmu$ and $\mLambda$, and so standard optimisation
-methods such as L-BFGS-B as described in, for example, \cite{Liu1989} and
-\cite{Nocedal2006}, work well. This leads to an extremely accurate
-approximation of the true posterior at the expense of some additional
+vary, leading to potential problem of optimising to a local rather than the
+globalmaximum.  However, for fixed $\vp$ and $\mSigma$, the variational lower
+bound is log-concave with respect to $\vmu$ and $\mLambda$, and so standard
+optimisation methods such as L-BFGS-B as described in, for example,
+\cite{Liu1989} and \cite{Nocedal2006}, work well. This leads to an extremely
+accurate approximation of the true posterior at the expense of some additional
 computational effort. Care must be taken in the parameterisation of $\mLambda$,
 as it is both of high dimension $(p + mb)^2$ and constrained to be semi-
 positive definite. We present and compare two approaches to parameterising the
@@ -498,7 +500,7 @@ $\rho$ fixed.
 The first variant of the GVA algorithm that we
 present optimises the Gaussian variational lower bound of the log likelihood
 with respect to $\vmu$ and the Cholesky decomposition $\mR$ of $\mLambda$, that
-is, $\mLambda = \mR \mR^\top$. This ensures that $\mLambda$ remains positive
+is, $\mLambda = \mR^\top \mR$. This ensures that $\mLambda$ remains positive
 definite, and reduces the number of parameters we have to optimise over in
 order to optimise $\mLambda$ to the $(p + 1) p / 2$, as $\mR$ is lower
 triangular.	We refer to this as the covariance parameterisation. The resulting
@@ -861,15 +863,15 @@ were evaluated using this method.
 		
 \subsection{Simulated data}
 For each of these simulations, the model is as presented in Section
-\ref{sec:model}. Several common application scenarios were simulated and their
-accuracy evaluated. A random intercept model was simulated with $\vbeta = (2,
-1)^\top$, $\rho = 0.5$, $m = 20$, $n_i = 10$ and $b = 1$. The results are
-presented in Table \ref{tab:accuracy_int}. A random slope model was simulated
-with $\vbeta = (2, 1)^\top$, $\rho = 0.5$, $m = 20$, $n_i = 10$ and $b = 2$.
-The results are presented in Table \ref{tab:accuracy_slope}. Spline model was
-fit to a data set generated from the function $3 + 3 \sin{(\pi x)}$ on the
-interval $[-1, 1]$. The resulting model fits are presented in Figure
-\ref{fig:spline}.
+\ref{sec:zero_inflated_model}. Several common application scenarios were
+simulated and their accuracy evaluated. A random intercept model was simulated
+with $\vbeta = (2, 1)^\top$, $\rho = 0.5$, $m = 20$, $n_i = 10$ and $b = 1$.
+The results are presented in Table \ref{tab:accuracy_int}. A random slope model
+was simulated with $\vbeta = (2, 1)^\top$, $\rho = 0.5$, $m = 20$, $n_i = 10$
+and $b = 2$.  The results are presented in Table \ref{tab:accuracy_slope}.
+Spline model was fit to a data set generated from the function $3 + 3 \sin{(\pi
+x)}$ on the interval $[-1, 1]$. The resulting model fits are presented in
+Figure \ref{fig:spline}.
 		
 To assess the speed of each approach, a test case was constructed of a random
 slope model with $m=50$ groups, each containing $n_i = 100$ individuals. A
