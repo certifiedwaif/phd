@@ -70,15 +70,15 @@ model at a time will provide a misleading view of the uncertainty in the
 posterior, as it is typically highly multimodal.
 
 Many computational schemes for Bayesian model selection exist, using Monte
-Carlo Markov Chains techniques to compute the posterior distribution of
+Carlo Markov Chains techniques to approximate the posterior distribution of
 $\vgamma$. However, these schemes are both computationally intensive and can
 become trapped in local maxima of the posterior distribution if the
 distribution is high-dimensional and multi-modal, as is the case with popular
 choices of prior for Bayesian model selection problems, such as spike-and-slab
 priors. The difficulty of becoming trapped in local maxima can be partially
 mitigated by using population-based MCMC schemes such as Jasra et al. (2007),
-Bottolo and Richardson (2010), Hans et al (2007), Liang and Wong (2000). However,
-this increases the computational cost of sampling from the posterior
+Bottolo and Richardson (2010), Hans et al (2007), Liang and Wong (2000).
+However, this increases the computational cost of sampling from the posterior
 distributions still further, especially in high-dimensional problems.
 
 \cite{Rockova2017} introduced the notion of Particle EM. Rather than searching
@@ -94,17 +94,18 @@ deterministic.
 
 We build upon this work by proposing a fixed-form parametric Variational Bayes
 approximation of $\vgamma$. We adopt a prior structure incorporating the Cake
-prior for variable selection, which avoids the Lindley and Bartlett's
-paradoxes. The difficulties in implementing practical Bayesian model selection
-schemes have been noted in \cite{Chipman2014}. As our marginal likelihood
-expression is a function only of $n$, $p_\vgamma$ and $R^2_\vgamma$, our model
-selection algorithm can be executed efficiently using rank-one updates and
-downdates to compute $R^2_{\vgamma^*}$ for each of the models $\vgamma^*$ that
-we consider. To ensure uniqueness of the $K$ models in the population, before a
-new candidate model with a covariate added or removed is considered, the
-population of existing models is checked to see if it already exists in the
-population. If so, the addition or removal of the covariate is skipped and the
-next candidate model considered.
+prior introduced in \cite{OrmerodEtal2017} for variable selection, which avoids
+the Lindley and Bartlett's paradoxes. The difficulties in implementing
+practical Bayesian model selection schemes have been noted in
+\cite{Chipman2014}. As our marginal likelihood expression is a function only of
+$n$, $p_\vgamma$ and $R^2_\vgamma$, our model selection algorithm can be
+executed efficiently using rank-one updates and downdates to compute
+$R^2_{\vgamma^*}$ for each of the models $\vgamma^*$ that we consider. To
+ensure uniqueness of the $K$ models in the population, before a new candidate
+model with a covariate added or removed is considered, the population of
+existing models is checked to see if it already exists in the population. If
+so, the addition or removal of the covariate is skipped and the next candidate
+model considered.
 
 % Particle Variational Bayes Particle Variational Bayes approaches have proved
 % useful in Bayesian nonparametric settings such as Latent Dirichlet Allocation

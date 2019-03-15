@@ -47,25 +47,26 @@ expressions to derive a computationally efficient algorithm for model selection
 on data sets with a large number of covariates. We demonstrate the algorithm's
 performance on a number of data sets for different combinations of $g$-prior,
 model selection prior and population size. We also compare our method to the
-existing methods such as lasso, SCAD, and MCP penalized regression methods, and PEM in terms of model selection
-performance,  and show that our method outperforms these. We also show that
-total posterior mass increases and mean marginal variable error decreases, as
-the number of models in the population increases.
+existing methods such as lasso, SCAD, and MCP penalized regression methods, and
+PEM in terms of model selection performance,  and show that our method
+outperforms these. We also show that total posterior mass increases and mean
+marginal variable error decreases, as the number of models in the population
+increases.
 % Draw attention to speed 8s on 20 cores
 %For $n = 600$, $p = 7200$ sized problem. 
-Our algorithm performs very well relative
-to previous algorithms in the literature, completing in 8 seconds on a model
-selection problem with a sample size of 600 and 7200 covariates.
+Our algorithm performs very well relative to previous algorithms in the
+literature, completing in 8 seconds on a model selection problem with a sample
+size of 600 and 7200 covariates.
 
-The second problem we address is zero-inflated models have many
-applications in areas such as manufacturing and public health, but pose
-numerical issues when fitting them to data. We apply a variational
-approximation to zero-inflated Poisson mixed models with Gaussian distributed
-random effects using a combination of VB and the Gaussian
-Variational Approximation (GVA). We demonstrate that this approximation is accurate
-and fast on a number of simulated and benchmark data sets. We also incorporate
-a novel parameterisation of the covariance of the GVA using the Cholesky factor of the precision matrix, similar to
-\cite{Tan2018}, and discuss the computational advantages of this
+The second problem we address is zero-inflated models have many applications in
+areas such as manufacturing and public health, but pose numerical issues when
+fitting them to data. We apply a variational approximation to zero-inflated
+Poisson mixed models with Gaussian distributed random effects using a
+combination of VB and the Gaussian Variational Approximation (GVA). We
+demonstrate that this approximation is accurate and fast on a number of
+simulated and benchmark data sets. We also incorporate a novel parameterisation
+of the covariance of the GVA using the Cholesky factor of the precision matrix,
+similar to \cite{Tan2018}, and discuss the computational advantages of this
 parameterisation due to the sparsity of the precision matrix for mixed models
 and resolve associated numerical difficulties.
 
@@ -114,9 +115,9 @@ data. It is flexible in modelling statistical complications, such as missing or
 hierarchical data, and complicated models can be built by chaining together
 multiple levels of simple models. These models can then be fit to data by
 calculating the posterior probability of the parameters using Bayes' Theorem,
-\[
+\begin{equation}\label{eq:bayes_theorem}
 	p(\vtheta | \vy) = \frac{p(\vy | \vtheta) p(\vtheta)}{\int p(\vy | \vtheta) p(\vtheta) d \vtheta}
-\]
+\end{equation}
 
 \noindent where $\vy$ is a vector of observed data, $\vtheta$ are the model
 parameters, $p(\vy|\vtheta)$ is the likelihood function, $p(\vtheta)$ is a
@@ -638,16 +639,18 @@ Bayesian models such as Monte Carlo Markov Chains (MCMC) are still extremely com
 
 \section{Approximate Bayesian inference}
 
-When the prior and model chosen for a Bayesian model is conjugate, the posterior
-distribution is available in closed form and can be easily calculated.  When the
-prior is non-conjugate, the integral to calculate the posterior distribution is
-typically intractable and so numerical methods must be used to calculate it
-approximately.  The gold standard for Bayesian inference is to use MCMC methods such as Metropolis-Hastings or Gibbs sampling. But these
-methods are computationally intensive, to the point where they are simply
-impractical in Big Data situations where $n$ or $p$ are large. Moreover, they
-can be prone to convergence problems.
-Thus there is a need for approximate Bayesian inference methods which are less
-computationally intensive while being almost as accurate.
+When the prior and model chosen for a Bayesian model is conjugate, the
+posterior distribution is available in closed form and can be easily
+calculated.  When the prior is non-conjugate, the integral in Equation
+\ref{eq:bayes_theorem} to calculate the posterior distribution  is typically
+intractable and so numerical methods must be used to calculate it
+approximately.  The gold standard for Bayesian inference is to use MCMC methods
+such as Metropolis-Hastings or Gibbs sampling.  But these methods are
+computationally intensive, to the point where they are simply impractical in
+Big Data situations where $n$ or $p$ are large. Moreover, they can be prone to
+convergence problems.  Thus there is a need for approximate Bayesian inference
+methods which are less computationally intensive while being almost as
+accurate.
 
  
 \subsection{Variational Bayes}
@@ -732,8 +735,7 @@ $$
 $$
 
 \noindent and maximizing $\log \underline{p}(\vy;\vxi)$ with respect to $\vxi$
-is equivalent to minimizing $$\text{KL}(q(\vtheta;\vxi)||p(\vtheta|\vy)).
-$$
+is equivalent to minimizing $\text{KL}(q(\vtheta;\vxi)||p(\vtheta|\vy))$.
 
 \noindent  The term $\log
 \underline{p}(\vy;\vxi)$ is referred to as the variational lower bound.
