@@ -1,0 +1,455 @@
+% Appendix.tex
+
+% TODO: Does this need to be here?
+\section{Hamiltonian Monte Carlo}
+
+% Basic idea: Sample the typical set efficiently by following a contour/level set of the likelihood surface
+% Hamiltonian is a mixture of the position and momentum
+% If you can't write any more clearly than this, then you don't understand well enough yet
+
+The Hamiltonian Monte Carlo algorithm was devised by Simon Duane, A. D. Kennedy, Brian Pendleton and Duncan
+Roweth in 1987 
+Duane, S., Kennedy,A. D., Pendleton, B. J., and Roweth, D. 1987. Hybrid Monte Carlo. Physics Letters B, 195:216–222.
+Earl,
+(found the reference in \cite{Neal2011}).
+
+The Hamiltonian Monte Carlo method is a Metropolis-Hasting method that makes use of gradient information to
+seek states of higher probability in the distribution being sampled from, reducing random walk behaviour. The method uses this information to spend a greater proportion of computational time sampling from the typical set of 
+the distribution.
+
+If the probability distribution that we are interested in sampling from can be written
+\[
+	P(\vx) = \frac{e^{E(\vx)}}{Z}
+\]
+
+then the state space $\vx$ can be considered the current position, and augmented by a momentum variable
+$\vp$. Then the algorithm proceeds by alternating between two types of proposal. The first proposal generates
+a sample for the momentum variable $\vp$, leaving the position variable $\vx$ unaltered. The second proposal
+generates a new position sample for $\vx$ and a new momentum sample $\vp$ using simulated Hamiltonian dynamics
+defined by the Hamiltonian
+\[
+	H(\vx, \vp) = E(\vx) + K(\vp),
+\]
+
+where $K(\vp)$ is the kinetic energy. These two proposals are used to sample from the joint density
+\[
+	P_H(\vx, \vp) = \frac{1}{Z_H} \exp{[-H(\vx, \vp)]} = \frac{1}{Z_H} \exp{[-E(\vx)]} \exp{[ -K(\vp)]}
+\]
+
+As this probability distribution factorises, the marginal distribution of $\vx$ is the distribution that we
+wish to sample from. So, by retaining the $\vx$ samples and discarding the $\vp$ samples, we obtain a sequence
+of samples $\{ \vx^{(t)} \}$ which asymptotically come from $P(x)$.
+
+\subsection{Details of Hamiltonian Monte Carlo}
+
+The first proposal, which can be considered a Gibbs sample, draws a new momentum from the Gaussian density
+$\exp{-K(\vp)}/Z_K$. This proposal is always accepted. During the second, dynamical proposal, the momentum
+variable determines the change in the state $\vx$, and the \emph{gradient} of $E(\vx)$ determines the change
+in the momentum $\vp$, using the equations
+\begin{align*}
+	\dot{\vx} & = \vp                                    \\
+	\dot{\vp} & = -\frac{\partial E(\vx)}{\partial \vx}. 
+\end{align*}
+
+As the change in $\vx$ is always in the direction of the momentum $\vp$ during each dynamical proposal, the
+state of the system tends to move a distance that varies \emph{linearly} with the computational time, rather
+than as the square root as with other sampling methods.
+
+For an introduction to Hamiltonian Monte Carlo, see the chapter in \cite{MacKay:2002:ITI:971143}. A deeper
+and more thorough introduction is provided in \cite{Betancourt2017}.
+
+% TODO: I think this section is unnecessary.
+\section{Matrix calculus}
+
+Matrix calculus is a very elegant and compact notation for the derivatives of functions of vectors and matrices.
+A useful introduction is \cite{Wand2002}, while a more comprehensive treatment can be found in
+\cite{magnus99}.
+
+\subsection{Notation}
+
+Given a function $f:\R^{n \times n} \to \R$ of a matrix $\mLambda$, we denote the matrix derivative of $f$ with 
+respect to $\mLambda$ as $\mD_\mLambda f$, and the Hessian of $f$ with respect to $\mLambda$ as
+$\mH_\mLambda f$ the Hessian with respect to $\mLambda$.
+
+The Hessian matrix is a $d \times d$ matrix whose $(i, j)$-th entry is equal to
+
+\[
+	\frac{\partial^2}{\partial x_i x_j} f(\vx)
+\]
+
+and is denoted by $\mH f(\vx)$.
+
+% TODO: Rewrite.
+\section{Optimisation}
+Fitting a statistical model to data is often done by finding the parameters which maximise the likelihood
+function for that data -- an optimisation problem. If the model is simple, and there are no interdependencies
+between the parameters, then the parameters which maximise the likelihood may be available in closed form. In
+general, however, this is not possible, and the likelihood must be maximised using an iterative optimisation
+algorithm. The nature of the algorithm required depends on the difficult of the problem to be solved. If the
+likelihood is convex in the parameters being maximised, then convex optimisation can be used --
+see \citep{Boyd2010}. For likelihoods which are not convex in the parameters, more general optimisation
+procedures must be employed -- see \citep{Nocedal2006}. These procedures often optimise non-convex functions
+by repeatedly approximating them by convex functions and then using convex optimisation to optimise these.
+
+\subsection{Newton-Raphson}
+
+The Newton-Raphson algorithm is a second-order method where the function to be minimised is approximated
+by a second order Taylor expansion of the function. The resulting quadratic form is convex, and thus can
+be optimised with a Newton-Raphson iteration.
+
+\subsubsection{Definition}
+
+Consider the second order Taylor expansion of $f(\vtheta)$ around $\vtheta_{n}$
+\[
+	f(\vtheta) \approx f(\vtheta_{n}) + \nabla f(\vtheta_{n}) \Delta \vtheta_{n} + \half \Delta \vx^\top \mH_f(\vtheta_{n}) \Delta \vx + \sO((\Delta \vtheta_{n})^3).
+\]
+which is a quadratic form in $\vtheta_n$. This expression attains its' maxima with respect to $\Delta x$ when
+\[
+	\vzero = \mD_{\Delta \vtheta} [f(\vtheta_{n}) + \nabla f(\vtheta_{n}) \Delta \vtheta_{n} + \half \Delta \vtheta^\top \mH_f(\vtheta_{n}) \Delta \vtheta] = \nabla f(\vtheta_n) + \mH_f(\vtheta_n) \Delta \vtheta.
+\]
+
+Thus taking $\Delta \vtheta = -\nabla f(\vtheta_n) [\mH_f(\vtheta_n)]^{-1}$, we perform a Newton-Rapshon
+Iteration by setting $\vtheta_{n + 1} = \vtheta_{n} - \nabla f(\vtheta_n) [\mH_f(\vtheta_n)]^{-1}$ as it will
+be closer to the stationary point of the quadratic form, which will itself be closer to the stationary point
+$\vtheta^*$ of $f$. This calculation of choice of $\vtheta_{n+1}$ is called a Newton-Raphson iteration. By
+repeatedly calculating a sequence of these $\vtheta_n$ through Newton-Raphson iterations, each progressively
+closer to the minima of $f$, we establish an iterative algorithm for finding the minima of $f$. The algorithm
+continues until the step length $\| \vtheta_{n+1} - \vtheta_{n} \| < \epsilon$, for some suitably small choice
+of $\epsilon$, such as $\epsilon = 10^{-8}$, indicating that convergence has been achieved.
+
+\subsubsection{Time and memory complexity}
+
+Execution of this algorithm requires the calculation of a vector addition, dot product and solution of a
+linear system for each iteration. The vector addition and dot product can both be performed in $p$ flops,
+where $p$ is the dimension of the problem. The most expensive part of the computation is the solution of the
+linear system $\mH_f(\vtheta_n) \Delta \vtheta$, which takes $\sO(p^3)$ flops. Even on modern computer
+systems, this can quickly become computationally intractable for problems of modest size. This motivates the
+development of Quasi-Newton algorithms, such as BFGS, L-BFGS and L-BFGS-B, discussed in Section
+\ref{sec:quasi_newton}.
+
+\subsubsection{Radius of convergence and convergence to local solutions}
+
+\subsection{Quasi-Newton Raphson algorithms: BFGS and L-BFGS-B}
+\label{sec:quasi_newton}
+
+\subsubsection{Definition}
+
+% Wolfe conditions
+
+As in Newton-Raphson we seek to find $\min_\vtheta f(\vtheta)$ for some smooth $f: \R^p \to \R$.  Again, we
+calculate a sequence of steps $\theta_n$ with each step approximately solving the subproblem $\min_\alpha
+f(\vx_k + \alpha \vp_k)$
+
+where $\vtheta_n$ is the current best guess, $\vp_n \in \R^p$ is a search direction and $\alpha$ is the
+step length.
+
+The modification to the Newton-Raphson algorithm is that rather than use a true second-order Taylor expansion
+of $f(\vtheta)$ around $\vtheta_n$, we instead approximate it using the model
+\[
+	m_n(\vtheta_n) = f(\vtheta_n) + \nabla f(\vtheta_n)^\top \vtheta_n + \tfrac{1}{2} \vtheta_n^\top \mB_n \vtheta_n
+\]
+where $\mB_n$ has taken the place of $\mH_f(\vtheta_n)$. This allows us to avoid having to calculate the complete 
+Hessian matrix $\mH_f$ for each $\vtheta_n$ at every iteration, instead using $\mB_k$ % TODO: Define B_k
+
+Denote a univariate function $\phi$ restricted to the direction $\vp_k$ as
+$\phi(\alpha) = f(\vx_k + \alpha \vp_k)$. A step length $\alpha_k$ is said to satisfy the \emph{Wolfe conditions}
+if the following two inequalities hold:
+
+\begin{enumerate}
+	\item[(i)] $f(\vx_k + \alpha_k \vp_k) \leq f(\vx_k) + c_1 \alpha_k \vp_k^\top \nabla f(\vx_k)$ \text{(Armijo rule)}
+	\item[(ii)] $\vp_k^\top \nabla f(\vx_k + \alpha_k \vp_k) \geq c_2 \vp_k^\top \nabla f(\vx_k)$ \text{(curvature condition)}
+\end{enumerate}
+
+The first condition ensures that the step length $\alpha_k$ decreases $f$ sufficiently, while the second condition
+ensures that the slope had been sufficiently reduced.
+
+The rationale for imposing the Wolfe conditions in an optimisation algorithm where
+$\vx_{k+1} = x_k + \alpha \vp_k$ is to ensure the convergence of the gradient to zero. In particular, if the
+cosine of the angle between $\vp_k$ and the gradient,
+$$
+\cos \theta_k = \frac{\nabla f(\vx_k)^\top \vp_k}{\|\nabla f(\vx_k)\| \|\vp_k\|}
+$$
+
+is bounded away from zero and the Wolfe conditions hold, then $\nabla f(\vx_k) \to 0$.
+
+An additional motivation, in the case of a quasi-Newton method is that if $\vp_k = - \mB_k^{-1} \nabla f(\vx_k)$,
+where the matrix $\mB_k$ is updated by the BFGS or DFP formula, then if $\mB_k$ is positive definite condition ii
+implies $\mB_{k+1}$ is also positive definite.
+
+\subsubsection{Time and memory complexity}
+
+\section{Approximations and Numerical Methods for Evaluating Integrals}
+In many areas of mathematical statistics, and particularly in Bayesian statistics, many quantities of interest
+are expressed as integrals such as expectations of parameters or posterior probabilities. Frequently, these
+integrals cannot be evaluated analytically and so must be evaluated using other methods, such as by
+approximating the integral or evaluating it numerically by repeatedly evaluating the integrand.
+
+\subsection{Trapezoidal integration}
+
+If an integral cannot be approximated well using Laplace's method or some other method of approximation, then
+it can often be evaluated numerically using a quadrature scheme. Trapezoidal integration is a method of
+numerically computing the integral of a function $f: \R \to \R$ over the interval $(a, b)$. First, the
+interval is partitioned into $x_1, x_2, \ldots, x_{n-1}, x_n$, and then
+% Diagram?
+\[
+	\int_a^b f(x) dx \approx \sum_{i=1}^{n-1} \frac{1}{2} \frac{f(x_i) + f(x_{i+1})}{x_{i+1} - x_i}.
+\]
+
+Note that the points $x_i$ can be chosen arbitrarily within the interval $(a, b)$, and do not need to be
+evenly spaced.
+
+\subsubsection{Error}
+% See https://en.wikipedia.org/wiki/Trapezoidal_rule#Error_analysis
+The error can be shown to be
+\[
+	\text{error} = -\frac{(b - a)^2}{12 n^2}[f'(b) - f'(a)] + \BigO{(n^{-3})}.
+\]
+See \cite{Cruz-Uribe2002}.
+
+\section{Numerical computation}
+
+% In this section, I'd like to talk about floating point representation and its' consequences, numerical
+% analysis/error bounds and in particular their relevance to numerical linear algebra.
+
+% But most of this is overkill, only interesting to you.
+
+% \subsection{Floating point numbers}
+
+% $$\text{sign } \text{significand} \times \text{base}^\text{exponent}$$
+
+% IEEE 754: floating point in modern computers
+
+% On modern computers, IEEE 754 is ubiquitous, and the base is $2$.
+
+% Error bounds on $+, -, *, /, \sqrt{}$
+
+% $$
+% \text{fl}(a \text{ op } b) = (1 + \epsilon) (a \text{ op } b) \text{ provided $\text{fl}(a \text{ op } b)$ neither overflows nor underflows}
+% $$
+
+% where $\epsilon$ is the machine epsilon, the minimum difference between $1$ and the next representable
+% floating point number.
+
+% Exceptional values: $\pm \infty$, $\text{NaN}$
+
+% When doing arithmetic on computers, it is important to understand the full ramifications of this.
+
+% \begin{enumerate}
+% \item All numerical values are in fact approximations within an interval.
+% \item Every arithmetic operation has an associated amount of error, and these errors accumulate as more
+% 			arithmetic operations are performed.
+% \end{enumerate}
+
+% The field of numerical analysis (references Classical and Modern Numerical Analysis,
+% Demmel's course: http://www.cs.berkeley.edu/~demmel/cs267/lecture21/lecture21.html, Kahan) analyses numerical 
+% algorithms to assess their error bounds, and attempt to mitigate these problems as much as possible to allow
+% us to solve numerical problems on modern computers.
+
+% \subsection{Truncation and round-off error}
+% \subsection{Numerical stability}
+% \subsection{Numerical differentiation and integration}
+
+\subsection{Numerical linear algebra}
+\subsubsection{Matrix norms}
+We can define a norm on the space of matrices such that the matrix norms obey the following axioms
+\begin{align*}
+	\|\mA\|        & \geq 0                                                   \\
+	\|\mA\|        & = 0 iff \mA = 0                                          \\
+	\|\alpha \mA\| & = |\alpha| \|\mA\| \forall \alpha \in \R                 \\
+	\|\mA + \mB\|  & \leq \|\mA\| + \|\mB\|\text{ for all matrices } \mA, \mB 
+\end{align*}
+Additionally, for square matrices
+\[
+	\|\mA\mB\| \leq \|\mA\| \|\mB\|
+\]
+\subsubsection{Examples}
+
+\begin{enumerate}
+	\item{The Frobenius Norm:}
+	The Frobenius Norm (Euclidean norm) is a matrix norm on the matrix $\mA$ defined as the square root of the sum
+	of the absolute squares of its elements,
+	\[
+		\|\mA\|_F = \sqrt{\sum_{i=1}^m \sum_{j=1}^n |a_{ij}|^2}.
+	\]
+	
+	\item{The p norm:}
+	The p norm is a matrix norm on the matrix $\mA$ defined as the supremum of the ratio of the norm of
+	$\mA \vx$ divided by the norm of $\vx$ over the set of vectors $\vx \ne \vzero$.
+	\[
+		\|\mA\|_p = \sup_{\vx \ne 0} \frac{\|\mA \vx\|_p}{\|\vx\|_p}.
+	\]
+\end{enumerate}
+
+The $p$-norm of a matrix and its' singular values from its' SVD are connected in the following way.
+
+\cite{Golub:1996:MC:248979} Corollary 2.4.3 % Matrix Computations
+If $\sigma_1$, $\sigma_2$, \ldots, $\sigma_p$ are the ordered descending singular values of the SVD of $\mA
+\in \R^{m \times n}$ where $p = \min{(m, n)}$ then
+\[
+	\|\mA\|_F = \sqrt{\sigma_1^2 + \sigma_2^2 + \ldots + \sigma_p^2} \geq |\sigma_1|
+\]
+
+\subsubsection{Condition numbers}
+In numerical linear algebra, a useful measure for quantifying the sensitivity of numerical procedures such as
+solving linear systems is the \emph{condition number} of A. It depends on the matrix norm used and is defined by
+\[
+	\kappa(\mA) := \|\mA^{-1}\|.\|\mA\| = \frac{\sigma_{\text{max}}(\mA)}{\sigma_{\text{min}}(\mA)}.
+\]
+
+This is a useful tool in characterising the accuracy and stability of numerical linear algebra algorithms.
+\cite{Golub:1996:MC:248979} \S 2.
+
+\subsubsection{LDU decomposition}
+
+If a matrix $\mA$ is square, it can be factored into the product of a lower triangular matrix, a diagonal matrix and
+an upper triangular matrix -- $\mA = \mL \mD \mU$.
+
+\subsubsection{Cholesky decomposition}
+
+If a matrix $\mA$ is square $p \times p$, symmetric and positive definite then it can be factored into the
+product of a lower triangular matrix and its' transpose
+\[
+	\mA = \mL \mL^\top
+\]
+by noting that
+\begin{align*}
+	\mA = \mL^\top \mL &= \begin{pmatrix}
+	\mL_{11}          & 0                                     & 0                                    \\
+	\mL_{21}          & \mL_{22}                              & 0                                    \\
+	\mL_{31}          & \mL_{32}                              & \mL_{33}                             
+	\end{pmatrix}
+	\begin{pmatrix}
+	\mL_{11}          & \mL_{21}                              & \mL_{31}                             \\
+	0                 & \mL_{22}                              & \mL_{32}                             \\
+	0                 & 0                                     & \mL_{33}                             
+	\end{pmatrix}	\\
+	&= \begin{pmatrix}
+	\mL_{11}^2        &                                       & \text{symmetric}                     \\
+	\mL_{21} \mL_{11} & \mL_{21}^2 + \mL_{22}^2               &                                      \\
+	\mL_{31} \mL_{11} & \mL_{31} \mL_{21} + \mL_{32} \mL_{22} & \mL_{31}^2 + \mL_{32}^2 + \mL_{33}^2 
+	\end{pmatrix}
+\end{align*}
+and so
+\begin{align*}
+	\mL_{jj} & = \sqrt{\mA_{jj} - \sum_{k=1}^{j-1} \mL_{jk}^2} \text{ and}                               \\
+	\mL_{ij} & = \frac{1}{\mL_{jj}} (\mA_{ij} - \sum_{k=1}^{j-1} \mL_{ik} \mL_{jk}), \text{ for } i > j. 
+\end{align*}
+
+This can be computed in $\BigO(p^2)$ for a $p \times p$ matrix. Once this form is obtained, it has several
+computational advantages over working with the original matrix $\mA$. Firstly, as $\mL$ is lower triangular
+only the non-zero entries need to be stored. Secondly, the triangular form of $\mL$ allows matrix equations
+involving $\mL$ to be solved in $\BigO{(p^2)}$ using back-substitution and forward-substitution, without using
+Gaussian elmination or calculating a matrix inverse.
+
+\subsection{Difficulty of inverting matrices which are nearly singular}
+In computational statistics, the task of inverting matrices often arises when
+attempting to solve a statistical problem such as fitting a model. While theoretically this task can always be
+done successfully, in practice if the matrix or its' inverse being inverted is close to singular this can be
+difficult or even impossible. This can arise in numerical procedures which are prone to overflow, such as
+Poisson regression, which overflows due to the exponential link function in the formulation of the problem.
+
+\subsubsection{Sensitivity of solving linear systems}
+
+A precise measure of linear system sensitivity can be obtained by considering the parameterised system
+\[
+	(\mA + \epsilon \mF) \vx(\epsilon) = \vb + \epsilon + \vf,  \vx(0) = \vx
+\]
+where $\mF \in \R^{n \times n}$ and $\vf \in \R^n$. If $\mA$ is nonsingular, it is clear that $x(\epsilon)$ is
+differentiable in a neighbourhood of zero. Moreover, $\dot{x}(0) = \mA^{-1} (\vf - \mF \vx)$ and so the
+Taylor series expansion for $\vx$ has the form
+\[
+	x(\epsilon) = x + \epsilon \dot{\vx}(0) + \BigO(\epsilon^2).
+\]
+
+Using any vector norm and consistent matrix norm we obtain
+\[
+	\frac{\|\vx(\epsilon) - \vx\|}{\vx} \leq |\epsilon| \|\mA^{-1}\| \left\{\frac{\|\vf\|}{\|\vx\|} + \|\mF\|\right\} + \BigO(\epsilon^2)
+\]
+
+From \S 2.6.2 of \citep{Golub:1996:MC:248979}
+when solving linear equations in the form $\mA \vx = \vb$
+\[
+	\frac{\|\vx(\epsilon) - \vx\|}{\|\vx\|} \leq \kappa(\mA) (\rho_A + \rho_b) + \BigO(\epsilon^2)
+\]
+where $\rho_A = |\epsilon| \frac{\|\mF\|}{\|\mA\|}$ and $\rho_B = |\epsilon| \frac{\|f\|}{\|b\|}$ represent
+the relative errors in $\mA$ and $\vb$, respectively. Thus the relative error in $\vx$ can be $\kappa(\mA)$
+times the relative error in $\mA$ and $\vb$. In this sense, the condition number $\kappa(\mA)$ quantifies the
+sensitivity of the $\mA \vx = \vb$ problem.
+
+% From \cite{trefethen97}'s section on Conditioning and Condition Numbers, p91
+
+A problem is \emph{well-conditioned} if $\kappa$ is small (e.g. $1$, $10$, $10^2$) and \emph{ill-conditioned}
+if $\kappa$ is large (e.g. $10^6$, $10^{16}$) \cite{trefethen97}.  If a matrix is either close to singular or
+has very large singular values, then it will be ill-conditioned.
+
+An immediate consequence of this is that if either $\mA$ or its' inverse are ill-conditioned, then inversion
+or solution of the linear system will be highly numerically unstable. In our ZIP code, we routinely saw values of 
+at least $10^5$ on the diagonals of our Cholesky factors until we changed the parameterisation to the safe
+exponential parameterisation.
+
+\subsection{The block inverse formula}
+
+% General introduction, computational advantages, consequences
+Consider a block matrix
+\[
+	\begin{pmatrix}
+		\mA & \mB \\
+		\mC & \mD 
+	\end{pmatrix}.
+\]
+Then the inverse of this matrix is given by the block-matrix inverse formula
+%Demonstrate this using
+%the block-inverse formula. Inverting a matrix is an inherently unstable operation. The number of floating
+%point operations involved leads to magnification of error.
+
+%Block inverse formula \\
+\[
+	\begin{pmatrix}
+		\mA & \mB \\
+		\mC & \mD 
+	\end{pmatrix}^{-1}
+	=
+	\begin{pmatrix}
+		\mI           & 0 \\
+		-\mD^{-1} \mC & I 
+	\end{pmatrix}
+	\begin{pmatrix}
+		(\mA - \mB^{-1}\mC)^{-1} & 0        \\
+		0                        & \mD^{-1} 
+	\end{pmatrix}
+	\begin{pmatrix}
+		\mI          & 0   \\
+		-\mB\mD^{-1} & \mI 
+	\end{pmatrix}
+\]
+
+This is frequently useful if the blocks $\mA$ and $\mD$ are substantially easier to invert than the entire
+matrix. This is usually the case because $\mA$ and $\mD$ are smaller in dimension than the original matrix,
+and matrix inversion is in general a $\BigO(p^3)$ process, where $p$ is the dimension of the square matrix
+being inverted. But in the case where $\mA$ or $\mD$ is of a special known form, such as a sparse, triangular
+or banded matrix, then the computational advantage obtained from exploiting this knowledge may be even
+greater.
+
+\subsubsection{Sparsity of the inverse}
+We often wish to work with sparse matrices due to the computational advantages and increased numerical
+stability they provide. But sparse matrices do not necessarily have sparse inverses. 
+
+Consider the block inverse formula presented in the previous section. An immediate consequence of this formula
+is that if any of the blocks of the matrix being inverted is not sparse, then the inverse will not be sparse
+in \emph{any} of the blocks in the computed inverse.
+
+\subsection{Positive semi-definite matrices}
+A matrix $\mA \in \mathcal{R}^{p \times p}$ is \emph{positive semidefinite} if for any $\vx \in \mathcal{R} \ \vzero$,
+$\vx^\top \mA \vx > 0$. Equivalently, all eigenvalues of $\mA$ are strictly positive. Covariance matrices
+$\mSigma = \E[X - \mu_X][X - \mu_X]^\top$ are positive definite, as
+$\vx^\top \E[X - \mu_X][X - \mu_X]^\top \vx = \vu^\top \vu > 0$ for $\vu = \E[(X - \mu_X)^\top \vx]$.
+
+A problem which arises frequently in fitting statistical models with dependence amongst the responses such as mixed
+models is maximising a likelihood function over the set of covariance matrices. This problem can be difficult not
+just because of the high dimension of the parameter space involved, but also due to the constraints upon the
+parameters to ensure that the resulting matrix is still positive definite, and hence a valid covariance matrix. This
+problem can be dealt with through several methods, such as semidefinite programming \citep{Boyd2010}, or parameterising the covariance
+matrix $\mSigma$ in terms of a matrix factorisation such as
+$\mSigma = \mB \mB^\top$ for any unconstrainted matrix $\mB$ or it's Cholesky factors $\mSigma = \mL \mL^\top$.
+The Cholesky factor approach has the advantage that the Cholesky factors are lower triangular, and so quicker to
+compute with.
