@@ -509,18 +509,19 @@ Akaike's Information Criteria when $n$ is greater than $8$. BIC can be shown to
 be approximately equivalent to model selection using Bayes Factors in certain
 contexts \citep{Kass1993}.
 
-Alternatively, the process of model selection can be made implicit in the model fitting
-process itself, ridge regression \citep{Casella1980}, of which the well-known
-lasso is a special case \citep{Tibshirani1996}. As \cite{Breiman1996} and
-\cite{Efron2013} showed, while  the standard formulation of a linear model is
-unbiased, the goodness of fit of these models is numerically  unstable. Breiman
-showed that by introducing a penalty on the size of the regression coefficients
-such as  in ridge regression, this numerical instability can be avoided. This
-reduces the variances of the coefficient estimates, at the expense of
-introducing some bias -- which is another instance of the bias-variance
-trade-off.
-
 \subsubsection{Penalised regression}
+
+Another approach is to make the process of model selection can be made
+implicit in the model fitting process itself. The well-known lasso regression
+method \citep{Tibshirani1996}, which is a special case of ridge regression
+\citep{Casella1980}, takes this approach. As \cite{Breiman1996} and
+\cite{Efron2013} showed, while  the standard formulation of a linear model is
+unbiased, the goodness of fit of these models is numerically  unstable.
+Breiman showed that by introducing a penalty on the size of the regression
+coefficients, as in ridge regression, this numerical instability can be
+avoided. This reduces the variances of the coefficient estimates, at the
+expense of introducing some bias -- which is another instance of the
+bias-variance trade-off.
 
 Penalised regression methods trade introducing some bias in the estimator for
 reducing the variance and thus fitting a more parsimonious model. The major
@@ -568,18 +569,17 @@ $$
 \widehat{\vbeta}_{\text{lasso}} = \argmin_\vbeta \|\vy - \mX \vbeta\|_2^2 \text{ subject to } \|\vbeta\|_1 \leq \lambda,
 $$
 
-\noindent 
-where $\lambda$ is a pre-specified free parameter specifying the amount of
-regulation. Similarly to the constrained optimisation problem for ridge
-regression, the constrained optimisation problem can be transformed by the
-method of Lagrange multipliers into the sum of the residual sum of squares and
-the product of the Lagrange multiplier and the constraint, which acts as a
-penalty on the $l_1$ norm of the regression coefficients. It follows from
-Minkowski's inequality that the function above is convex, and thus the
+\noindent where $\lambda$ is a pre-specified free parameter specifying the
+amount of regularisation. Similarly to the constrained optimisation problem
+for ridge regression, the constrained optimisation problem can be transformed
+by the method of Lagrange multipliers into the sum of the residual sum of
+squares and the product of the Lagrange multiplier and the constraint, which
+acts as a penalty on the $l_1$ norm of the regression coefficients. It follows
+from Minkowski's inequality that the function above is convex, and thus the
 optimisation problem is convex, and can be solved using standard methods from
-convex optimisation \citep{Boyd2010}.  The constraint on the $l_1$ norm has the
-effect of shrinking the coefficients, and setting some of them to zero. This
-forces the models fit by lasso regression to be sparse, providing model
+convex optimisation \citep{Boyd2010}.  The constraint on the $l_1$ norm has
+the effect of shrinking the coefficients, and setting some of them to zero.
+This forces the models fit by lasso regression to be sparse, providing model
 selection as part of the model-fitting process.
 
 A disadvantage of lasso regression is that the constraint on the regression
@@ -593,7 +593,7 @@ $\lambda$, as Bayesian model selection methods do.
 
 Parallel to the frequentist approaches, model selection can be performed using
 a Bayesian approach. This can be done, for example, by using Bayes Factors  to
-compare the posterior likelihoods of the candidate models to see which is most
+compare the marginal likelihoods of the candidate models to see which is most
 probable given the observed data\citep{Kass1993}. Rather than selecting one
 candidate model, several models can be combined together using Bayesian model
 averaging \citep{Hoeting1999, Raftery1997, Fernandez2001,
@@ -607,7 +607,7 @@ approaches search over the variables in the model space for the best covariates
 to include in the candidate model. Due to the large number of possible
 combinations of covariates -- typically $2^p$ where $p$ is the number of
 covariates, such searches are often stochastic. This approach can either be
-Fully Bayesian or Empirically Bayesian \citep{Cui2008}.  This search can be
+fully Bayesian or empirically Bayesian \citep{Cui2008}.  This search can be
 driven by posterior probabilities  \citep{Casella2006}, or by Gibbs sampling
 approaches such in \cite{George1993}. These two approaches of model selection and
 variable selection can be combined  \citep{Geweke1996}. Variable selection can
@@ -658,13 +658,13 @@ posterior distribution is available in closed form and can be easily
 calculated. When the prior is non-conjugate, the integral in Equation
 ~\ref{eq:bayes_theorem} to calculate the posterior distribution  is typically
 intractable and so numerical methods must be used to calculate it
-approximately.  The gold standard for Bayesian inference is to use MCMC methods
-such as Metropolis-Hastings or Gibbs sampling.  But these methods are
+approximately.  The gold standard for Bayesian inference is to use MCMC
+methods such as Metropolis-Hastings or Gibbs sampling.  But these methods are
 computationally intensive, to the point where they are simply impractical in
 Big Data situations where $n$ or $p$ are large. Moreover, they can be prone to
 convergence problems.  Thus there is a need for approximate Bayesian inference
-methods which are less computationally intensive while being almost as
-accurate.
+methods which are less computationally intensive while being nearly as
+accurate for some models.
 
 \subsection{Variational Bayes}
 \label{sec:vb}
@@ -708,12 +708,11 @@ $$
 $$
 
 Suppose that a class of candidate approximating distributions $q(\vtheta)$ is
-parameterised by a vector variational parameters $\vxi$ and write
-$q(\vtheta)\equiv q(\vtheta;\vxi)$. We attempt to find an  optimal approximating
-distribution $q^*(\vtheta)$ such that
-$$
-	\ds q^*(\vtheta) = \argmin_{\vxi \in \Xi} \,  \text{KL} \{ {q(\vtheta;\vxi) || p(\vtheta|\vy)} \}.
-$$
+parameterised by a vector of variational parameters $\vxi$ and write
+$q(\vtheta)\equiv q(\vtheta;\vxi)$. We attempt to find an  optimal
+approximating distribution $q^*(\vtheta)$ such that $$ \ds q^*(\vtheta) =
+\argmin_{\vxi \in \Xi} \,  \text{KL} \{ {q(\vtheta;\vxi) || p(\vtheta|\vy)}
+\}.  $$
 
 \noindent If $\vtheta$ is partitioned into $M$ partitions $\vtheta_1$,
 $\vtheta_2$, \ldots, $\vtheta_M$ then a simple form of approximation to adopt is
@@ -894,7 +893,7 @@ $$
 $$
 
 \noindent for $x$ sufficiently close to $x_m$, as the second derivative is
-negative at $x_m$. This ensures the the approximation of the integral
+negative at $x_m$. This ensures the approximation of the integral
 $$
 	\int_a^b e^{M f(x)} dx \approx e^{M f(x_m)} \int_a^b e^{-M |f''(x_m)|(x - x_m)^2} dx
 $$
