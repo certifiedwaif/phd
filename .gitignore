@@ -33,4 +33,5 @@
 *.bin
 *.data
 *.gz
+*.tags
 code/Makefile
