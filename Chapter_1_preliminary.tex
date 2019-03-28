@@ -11,10 +11,9 @@ methods. However, these can be slow and prone to convergence problems.
 Approximate methods of fitting Bayesian models allow these models to be fit
 using deterministic algorithms in substantially less time.  Variational Bayes
 (VB) is a method for approximating the posterior distributions of the model
-parameters sometimes with only a slight loss of accuracy.
-In this thesis, we consider two important problems --  variable selection for linear models, and
-zero inflated mixed
-models. 
+parameters sometimes with only a slight loss of accuracy.  In this thesis, we
+consider two important problems --  variable selection for linear models, and
+zero inflated mixed models. 
 
 The first problem we address is variable selection, a task of central
 importance in modern statistics. Here, Bayesian model selection has the
@@ -103,12 +102,12 @@ hastie01statisticallearning, Murphy:2012:MLP:2380985}.
 \section{Choosing an inferential paradigm}
 
 How one proceeds given the above needs can be addressed through an inferential
-paradigm. The most common of these are  the frequentist and Bayesian statistical
-paradigms. The difference between frequentist and Bayesian approaches begins
-with a difference in philosophy. Frequentists define an event's probability as
-its' relative frequency after a large number of trials. While Bayesians view
-probability as our reasonable expectation about an event, representing our state
-of knowledge about the event.
+paradigm. The most common of these are  the frequentist and Bayesian
+statistical paradigms. The difference between frequentist and Bayesian
+approaches begins with a difference in philosophy. Frequentists define an
+event's probability as its' relative frequency after a large number of trials.
+While Bayesians view probability as our reasonable expectation about an event,
+representing our state of knowledge about the event.
 
 There are many practical reasons to choose Bayesian approaches to modelling
 data. It is flexible in modelling statistical complications, such as missing or
@@ -127,20 +126,37 @@ range of $\vtheta$. If a subset of $\vtheta$ are discrete random variables
 then the integral over these parameters is replaced with a combinatorial sum
 over all possible values of these discrete random variables.
 
-There are many models which are difficult to fit under the frequentist paradigm,
-as the likelihood can be difficult to maximise for complex models. Furthermore,
-as the Bayesian paradigm treats each of the parameters in a model as uncertain,
-the full uncertainty associated with all of the parameters can be estimated via
-the uncertainty in the posterior distribution. This approach avoids many of the
-pitfalls of statistical inference encountered with the frequentist approach
-using significance testing and p-values \citep{Cox2005}.
+There are many models which are difficult to fit under the frequentist
+paradigm, as the likelihood can be difficult to maximise for complex models.
+Furthermore, as the Bayesian paradigm treats each of the parameters in a model
+as uncertain, the full uncertainty associated with all of the parameters can
+be estimated via the uncertainty in the posterior distribution. This approach
+avoids many of the pitfalls of statistical inference encountered with the
+frequentist approach using significance testing and p-values \citep{Cox2005}.
 
 The ability to build a model one component at a time and have the uncertainty
 propagate through the model makes Bayesian modelling  particularly appropriate
-for mixed effects and hierarchical models. In particular, uncertainty regarding
-model selection is taken into account in the context of model selection. Thus
-for the two classes of problems we consider in this thesis the Bayesian approach
-is more suitable.
+for mixed effects and hierarchical models. In particular, uncertainty
+regarding model selection is taken into account in the context of model
+selection. Thus for the two classes of problems we consider in this thesis the
+Bayesian approach is more suitable.
+
+\subsection{Bayes Factors}
+
+In the Bayesian inferential paradigm, two competing hypotheses can be compared
+using Bayes Factors. The Bayes Factor is the ratio of the marginal likelihoods
+under the assumption of each of the models being compared
+
+\begin{equation*}
+	\text{BF}(M_1, M_2)
+	= \frac{P(\vy | M_1)}{P(\vy | M_2)}
+	= \frac{\int P(\vtheta_1|M_1) P(\vy | \vtheta_1, M_1) d \vtheta_1}{\int P(\vtheta_2|M_2) P(\vy | \vtheta_2, M_2) d \vtheta_2}
+	= \frac{P(M_1|\vy) P(M_2)}{P(M_2|\vy) P(M_1)}
+\end{equation*}
+
+\noindent where $\vy$ is the data observed, $M_1$ and $M_2$ are the models
+being compared and $\vtheta_1$ and $\vtheta_2$ are the model parameter vectors
+associated with each model respectively.
 
 \section{Research problems}
 
@@ -233,19 +249,17 @@ $$
 \end{array}
 $$
 
-\noindent 
-where the fixed effects are denoted by the vector $\vbeta$, the random effects
-are denoted by $\vu$ and $\mG$ is the covariance matrix of random effects. The
-covariance structure in $\mG$ is usually chosen to capture the dependencies of
-interest between the observations in the application, such as the dependency
-between repeated observations on an individual within a longitudinal study,
-% TODO(Mark) Rewrite this sentence
-the dependency between observations within a cluster in a hierarchical model or the
-spatial dependency between observations are close to within another within a
-spatial model.
+\noindent where the fixed effects are denoted by the vector $\vbeta$, the
+random effects are denoted by $\vu$ and $\mG$ is the covariance matrix of
+random effects. The covariance structure in $\mG$ is usually chosen to capture
+the dependencies of interest between the observations in the application, such
+as the dependency between repeated observations on an individual within a
+longitudinal study, the dependency between observations within a cluster in a
+hierarchical model or the spatial dependency between observations that are
+close to one another in a spatial model.
 %
-The design matrix for the fixed effects is denoted by $\mX$ and
-the design matrix for the random effects are denoted by $\mZ$.
+The design matrix for the fixed effects is denoted by $\mX$ and the design
+matrix for the random effects are denoted by $\mZ$.
 
 Random effects are very flexible in the variety of models they allow us to fit
 to our data. Through specification of the covariance structures in the matrix
@@ -481,10 +495,10 @@ $$
 $$
 
 \noindent where $p_\vgamma$ is the number of parameters in the model $\vgamma$.
-The model with the lowest AIC is selected as the 'best'.
+The model with the lowest AIC is selected as the `best'.
 
 Of a similar form as the AIC, but derived via a more Bayesian framework is the
-BIC. The BIC approximates the posterior
+BIC\@. The BIC approximates the posterior
 probability of the candidate model $\vgamma$. The BIC is defined as
 $$
 	\text{BIC}(\vgamma) = -2 \log p(\vy | \widehat{\vtheta}_\vgamma) + p_\vgamma \log(n).
@@ -641,8 +655,8 @@ Bayesian models such as Monte Carlo Markov Chains (MCMC) are still extremely com
 
 When the prior and model chosen for a Bayesian model is conjugate, the
 posterior distribution is available in closed form and can be easily
-calculated.  When the prior is non-conjugate, the integral in Equation
-\ref{eq:bayes_theorem} to calculate the posterior distribution  is typically
+calculated. When the prior is non-conjugate, the integral in Equation
+~\ref{eq:bayes_theorem} to calculate the posterior distribution  is typically
 intractable and so numerical methods must be used to calculate it
 approximately.  The gold standard for Bayesian inference is to use MCMC methods
 such as Metropolis-Hastings or Gibbs sampling.  But these methods are
@@ -652,7 +666,6 @@ convergence problems.  Thus there is a need for approximate Bayesian inference
 methods which are less computationally intensive while being almost as
 accurate.
 
- 
 \subsection{Variational Bayes}
 \label{sec:vb}
 

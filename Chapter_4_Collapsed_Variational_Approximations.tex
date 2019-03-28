@@ -34,12 +34,12 @@ Variational Bayes approximation algorithm -- a population-based optimisation
 strategy. Maintaining a population of models allows the posterior distribution
 to be explored more thoroughly, finding multiple maxima. The variational
 approximation's lower bound includes an entropy term which ensures diversity in
-the population by penalising similarity,  having the particles in the
+the population by penalising similarity, having the particles in the
 population repel each other. This ensures the high probability regions of the
 posterior distribution is thoroughly explored, which better reflects model
 selection uncertainty. In this chapter, we focus on the important case of model
 selection for normal linear models with priors as described in Section
-\ref{sec:model}.
+~\ref{sec:model}.
 % which are slightly altered from those introduced in Section \ref{sec:model}
 % to incorporate a zero-centred normal prior on $\alpha$ with variance $g
 % \sigma^2$. This allows shrinkage of the intercept as well as the
@@ -47,8 +47,8 @@ selection for normal linear models with priors as described in Section
 
 \cite{Mitchell1988} initially proposed the spike-and-slab prior distribution on
 regression coefficients not currently included in the model -- which places a
-mixture of a point mass 'spike' at $0$ and a diffuse uniform distribution
-'slab' elsewhere. The approach was further developed by \cite{Madigan1994} to
+mixture of a point mass `spike' at $0$ and a diffuse uniform distribution
+`slab' elsewhere. The approach was further developed by \cite{Madigan1994} to
 incorporate an alternative Bayesian approach that takes full account of the
 true model uncertainty by averaging over a small subset of models, and an
 efficient search algorithm for finding these models. \cite{George1997}
@@ -81,7 +81,7 @@ Bottolo and Richardson (2010), Hans et al (2007), Liang and Wong (2000).
 However, this increases the computational cost of sampling from the posterior
 distributions still further, especially in high-dimensional problems.
 
-\cite{Rockova2017} introduced the notion of Particle EM. Rather than searching
+\cite{Rockova2017} introduced the notion of Particle EM\@. Rather than searching
 for a single optimal model, Particle EM instead maintains a population of
 models (particles). This allows the algorithm to explore more of the posterior
 model space, gaining a better estimate of the variation of the model space than
@@ -166,10 +166,10 @@ model selection paradoxes which arise when a fixed choice of $g$ is made.
 % We found the following closed form expressions. Include derivations in the appendices.
 % \small
 % \begin{itemize}
-% 	\item Liang et al. 2008 hyper-$g$ prior \cite{Liang2008}
-% 		$p(\vy | \vgamma) = \frac{K(n) (a - 2)}{p_\vgamma + a  - 2} {}_2 F_1 \left( \frac{n-1}{2}, 1; \frac{p_\vgamma + a}{2}; R_\vgamma^2 \right)$
-% 	\item Liang et al. 2008 hyper-$g/n$ prior \cite{Liang2008}
-% 		$p(\vy | \vgamma) = \frac{K(n) (a - 2)}{n (p_\vgamma + a  - 2)} F_1 \left( 1, \frac{a}{2}, \frac{n-1}{2}; \frac{p_\vgamma + a}{2}; 1 - \frac{1}{n}, R_\vgamma^2 \right)$
+%	\item Liang et al. 2008 hyper-$g$ prior \cite{Liang2008}
+%		$p(\vy | \vgamma) = \frac{K(n) (a - 2)}{p_\vgamma + a  - 2} {}_2 F_1 \left( \frac{n-1}{2}, 1; \frac{p_\vgamma + a}{2}; R_\vgamma^2 \right)$
+%	\item Liang et al. 2008 hyper-$g/n$ prior \cite{Liang2008}
+%		$p(\vy | \vgamma) = \frac{K(n) (a - 2)}{n (p_\vgamma + a  - 2)} F_1 \left( 1, \frac{a}{2}, \frac{n-1}{2}; \frac{p_\vgamma + a}{2}; 1 - \frac{1}{n}, R_\vgamma^2 \right)$
 % \end{itemize}
 % These expressions are numerically stable to evaluate.
 
@@ -183,20 +183,20 @@ model selection paradoxes which arise when a fixed choice of $g$ is made.
 
 % \subsubsection{Calculating $p(\vy | \vgamma)$ for Bayarri's robust prior}
 % \begin{itemize}
-% 	\item Bayarri calculated the marginal likelihood given $\vgamma$ for the Robust Bayarri prior
-% 	 	in \cite{Bayarri2012} 
-% 		\tiny
-% 		$p(\vy | \vgamma) = K(n) \left(\frac{n + 1}{1 + p_\vgamma}\right)^{-p_\vgamma/2} \frac{(1 - R^2_\vgamma)^{-(n-1)/2}}{p_\vgamma + 1} {}_2 F_1 \left[ \frac{n-1}{2}, \frac{p_\vgamma+1}{2}; \frac{p_\vgamma + 3}{2}; \frac{[1 - 1/(1 - R^2_\vgamma)](p_\vgamma + 1)}{1 + n} \right]$.
-% 	\small
-% 	\item But this expression is not numerically well-behaved, because the second argument of the
-% 				${}_2 F_1$ function is greater than $1$.
-% 	\item Using a trick that's available when ${}_2 F_1(., 1; .; .)$ ... is numerically
-% 				well-behaved, we derived the new expression
-% 		\tiny
-% 		$p(\vy | \vgamma) = K(n) \left(\frac{n + 1}{1 + p_\vgamma}\right)^{(n-p_\vgamma-1)/2} \frac{[1 + L (1 - R^2_\vgamma)]^{-(n-1)/2}}{p_\vgamma + 1} {}_2 F_1 \left[ \frac{n-1}{2}, 1; \frac{p_\vgamma + 3}{2}; 
-% 		\frac{R^2_\vgamma}{1 + L(1 - R^2_\vgamma)} \right]$ \\
-% 		\small
-% 		where $L = (1 + n)/(1 + p_\vgamma) - 1$.
+%	\item Bayarri calculated the marginal likelihood given $\vgamma$ for the Robust Bayarri prior
+%		in \cite{Bayarri2012} 
+%		\tiny
+%		$p(\vy | \vgamma) = K(n) \left(\frac{n + 1}{1 + p_\vgamma}\right)^{-p_\vgamma/2} \frac{(1 - R^2_\vgamma)^{-(n-1)/2}}{p_\vgamma + 1} {}_2 F_1 \left[ \frac{n-1}{2}, \frac{p_\vgamma+1}{2}; \frac{p_\vgamma + 3}{2}; \frac{[1 - 1/(1 - R^2_\vgamma)](p_\vgamma + 1)}{1 + n} \right]$.
+%	\small
+%	\item But this expression is not numerically well-behaved, because the second argument of the
+%				${}_2 F_1$ function is greater than $1$.
+%	\item Using a trick that's available when ${}_2 F_1(., 1; .; .)$ ... is numerically
+%				well-behaved, we derived the new expression
+%		\tiny
+%		$p(\vy | \vgamma) = K(n) \left(\frac{n + 1}{1 + p_\vgamma}\right)^{(n-p_\vgamma-1)/2} \frac{[1 + L (1 - R^2_\vgamma)]^{-(n-1)/2}}{p_\vgamma + 1} {}_2 F_1 \left[ \frac{n-1}{2}, 1; \frac{p_\vgamma + 3}{2}; 
+%		\frac{R^2_\vgamma}{1 + L(1 - R^2_\vgamma)} \right]$ \\
+%		\small
+%		where $L = (1 + n)/(1 + p_\vgamma) - 1$.
 % \end{itemize}
 
 % Bayarri calculated the marginal likelihood given $\vgamma$ for the Robust
@@ -312,128 +312,128 @@ model selection paradoxes which arise when a fixed choice of $g$ is made.
 % hyper-$g/n$ priors can be evaluated an efficient, accurate and numerically
 % stable manner.  We summarise their results in the list below.
 % \begin{itemize}
-% 	\item The {\bf hyper-$g$} prior of \cite{Liang2008} given by
-% 	$p_{g}(g) = \frac{a - 2}{2}(1 + g)^{-a/2}$,
-% 	for $a>2$ and $g>0$ leads to
-% 	\begin{equation}\label{eq:hyperGmarginal2}
-% 	\ds \mbox{BF}_g(\vgamma)
-% 	=  
-% 	\frac{a - 2}{2 R_\vgamma^2(1 - R_\vgamma^2)} 
-% 	\frac{\mbox{pbeta}\left(R_\vgamma^2,\tfrac{p_\vgamma + a - 2}{2},\tfrac{n-p_\vgamma - a+1}{2}\right)}{
-% 		\mbox{dbeta}\left(R_\vgamma^2,\tfrac{p_\vgamma + a - 2}{2},\tfrac{n-p_\vgamma - a+1}{2}\right)},
-% 	\end{equation}
+%	\item The {\bf hyper-$g$} prior of \cite{Liang2008} given by
+%	$p_{g}(g) = \frac{a - 2}{2}(1 + g)^{-a/2}$,
+%	for $a>2$ and $g>0$ leads to
+%	\begin{equation}\label{eq:hyperGmarginal2}
+%	\ds \mbox{BF}_g(\vgamma)
+%	=  
+%	\frac{a - 2}{2 R_\vgamma^2(1 - R_\vgamma^2)} 
+%	\frac{\mbox{pbeta}\left(R_\vgamma^2,\tfrac{p_\vgamma + a - 2}{2},\tfrac{n-p_\vgamma - a+1}{2}\right)}{
+%		\mbox{dbeta}\left(R_\vgamma^2,\tfrac{p_\vgamma + a - 2}{2},\tfrac{n-p_\vgamma - a+1}{2}\right)},
+%	\end{equation}
 	
-% 	where $\mbox{pbeta}(x;a,b)$ and $\mbox{dbeta}(x;a,b)$  are the cdf and pdf
-% 	of the beta distribution respectively. The value $a=3$ is typically used.
-% 	Note that \cite{Liang2008} derived an equivalent expression in terms of the
-% 	Gaussian hypergeometric function ${}_2
-% 	F_{1}(\cdot,\cdot;\cdot,\cdot;\cdot)$. The above expression is numerically
-% 	easier to work with.
+%	where $\mbox{pbeta}(x;a,b)$ and $\mbox{dbeta}(x;a,b)$  are the cdf and pdf
+%	of the beta distribution respectively. The value $a=3$ is typically used.
+%	Note that \cite{Liang2008} derived an equivalent expression in terms of the
+%	Gaussian hypergeometric function ${}_2
+%	F_{1}(\cdot,\cdot;\cdot,\cdot;\cdot)$. The above expression is numerically
+%	easier to work with.
 		
-% 		\item The {\bf robust} hyperprior for $g$ proposed by \cite{Bayarri2012} is designed to have several nice theoretical
-% 		properties outlined there. Using their default parameter
-% 		choices, the hyperprior 
-% 		on $g$ used by \cite{Bayarri2012} corresponds to 
-% 		$p_{{rob}}(g) = \tfrac{1}{2}r^{1/2} (1 + g)^{-3/2} I(g>L)$  where $L = r - 1$ and $r = (1 + n)/(1 + p_\vgamma)$. 
-% 		Letting $\widetilde{R}_\vgamma^2 = R_\vgamma^2/(1 + L\widehat{\sigma}_\vgamma^2)$
-% 		the Bayes factor can be written as
-% 		\begin{equation}\label{eq:yGivenGammaRobust2}
-% 		%\begin{array}{rl}
-% 		\ds \mbox{BF}_{{rob}}(\vgamma)
-% 		%& \ds = \left( \frac{1 + n}{1 + p_\vgamma} \right)^{(n - p_\vgamma - 1)/2} \frac{\left( 1 + L\widehat{\sigma}_\vgamma^2 \right)^{-(n - 1)/2}}{1 + p_\vgamma}
-% 		%{}_2F_1\left(  
-% 		%\frac{n-1}{2}, 1; \frac{p_\vgamma+3}{2}; \frac{1 - \widehat{\sigma}_\vgamma^2}{1 + L\widehat{\sigma}_\vgamma^2}
-% 		% \right)
-% 		%\\
-% 		%& \ds 
-% 		= r^{(n - p_\vgamma - 1)/2} \frac{\left( 1 + L\widehat{\sigma}_\vgamma^2 \right)^{-(n - 1)/2}}{2 \widetilde{R}_\vgamma^2(1 - \widetilde{R}_\vgamma^2)} 
-% 		\frac{
-% 			\mbox{pbeta}\left( 
-% 			\widetilde{R}_\vgamma^2,
-% 			\frac{p_\vgamma +1}{2},
-% 			\frac{n - p_\vgamma - 2}{2} 
-% 			\right)
-% 		}{
-% 			\mbox{dbeta}\left( 
-% 			\widetilde{R}_\vgamma^2,
-% 			\frac{p_\vgamma +1}{2},
-% 			\frac{n - p_\vgamma - 2}{2} 
-% 			\right)
-% 		}.
-% 		%\end{array}
-% 		\end{equation}
+%		\item The {\bf robust} hyperprior for $g$ proposed by \cite{Bayarri2012} is designed to have several nice theoretical
+%		properties outlined there. Using their default parameter
+%		choices, the hyperprior 
+%		on $g$ used by \cite{Bayarri2012} corresponds to 
+%		$p_{{rob}}(g) = \tfrac{1}{2}r^{1/2} (1 + g)^{-3/2} I(g>L)$  where $L = r - 1$ and $r = (1 + n)/(1 + p_\vgamma)$. 
+%		Letting $\widetilde{R}_\vgamma^2 = R_\vgamma^2/(1 + L\widehat{\sigma}_\vgamma^2)$
+%		the Bayes factor can be written as
+%		\begin{equation}\label{eq:yGivenGammaRobust2}
+%		%\begin{array}{rl}
+%		\ds \mbox{BF}_{{rob}}(\vgamma)
+%		%& \ds = \left( \frac{1 + n}{1 + p_\vgamma} \right)^{(n - p_\vgamma - 1)/2} \frac{\left( 1 + L\widehat{\sigma}_\vgamma^2 \right)^{-(n - 1)/2}}{1 + p_\vgamma}
+%		%{}_2F_1\left(  
+%		%\frac{n-1}{2}, 1; \frac{p_\vgamma+3}{2}; \frac{1 - \widehat{\sigma}_\vgamma^2}{1 + L\widehat{\sigma}_\vgamma^2}
+%		% \right)
+%		%\\
+%		%& \ds 
+%		= r^{(n - p_\vgamma - 1)/2} \frac{\left( 1 + L\widehat{\sigma}_\vgamma^2 \right)^{-(n - 1)/2}}{2 \widetilde{R}_\vgamma^2(1 - \widetilde{R}_\vgamma^2)} 
+%		\frac{
+%			\mbox{pbeta}\left( 
+%			\widetilde{R}_\vgamma^2,
+%			\frac{p_\vgamma +1}{2},
+%			\frac{n - p_\vgamma - 2}{2} 
+%			\right)
+%		}{
+%			\mbox{dbeta}\left( 
+%			\widetilde{R}_\vgamma^2,
+%			\frac{p_\vgamma +1}{2},
+%			\frac{n - p_\vgamma - 2}{2} 
+%			\right)
+%		}.
+%		%\end{array}
+%		\end{equation}
 		
-% 		\noindent Again, \cite{Bayarri2012} derived an equivalent expression in terms of ${}_2 F_1$, however
-% 		(\ref{eq:yGivenGammaRobust2}) is numerically easier to work with.
+%		\noindent Again, \cite{Bayarri2012} derived an equivalent expression in terms of ${}_2 F_1$, however
+%		(\ref{eq:yGivenGammaRobust2}) is numerically easier to work with.
  
 		
-% 	\item The {\bf beta-prime} hyperprior on $g$ employed by \cite{Maruyama2011} is given by
-% 	$p_{bp}(g) = g^{b}(1 + g)^{-(a+b+2)}/\mbox{Beta}(a+1,b+1)$,
-% 	where $g>0$, $a>-1$ and $b>-1$, i.e.,
-% 	$g\sim \mbox{Beta-Prime}(b+1,a+1)$ using the typical parametrization of 
-% 	the beta-prime distribution \citep{Johnson1995}. When	 $b = (n - p_\vgamma - 5)/2 - a$ 
-% 	the corresponding Bayes factor simplifies to
-% 	\begin{equation}\label{eq:marginalLikelihoodBetaPrime}
-% 	\begin{array}{rl}
-% 	\ds \mbox{BF}_{bp}(\vgamma) 
-% 	%& \ds =
-% 	%\frac{K(n)}{\mbox{Beta}(a+1,b+1)}
-% 	%\int_0^\infty g^{b} \left[ 1 + g(1-R^2) \right]^{-(n-1)/2}  
-% 	%dg
-% 	%\\ [2ex]
-% 	& \ds 
-% 	=   
-% 	\frac{\mbox{Beta}(p/2 + a + 1,b + 1)}{\mbox{Beta}(a+1,b+1)} (1-R_\vgamma^2)^{-(b + 1)}
-% 	%\\ [2ex]
-% 	%& \ds = \widetilde{K}(n,a)
-% 	%
-% 	%\Gamma(p/2 + a + 1)\Gamma(a + b + 2)
-% 	%(\widehat{\sigma}^2)^{-(b + 1)}
-% 	\end{array}
-% 	\end{equation}	
+%	\item The {\bf beta-prime} hyperprior on $g$ employed by \cite{Maruyama2011} is given by
+%	$p_{bp}(g) = g^{b}(1 + g)^{-(a+b+2)}/\mbox{Beta}(a+1,b+1)$,
+%	where $g>0$, $a>-1$ and $b>-1$, i.e.,
+%	$g\sim \mbox{Beta-Prime}(b+1,a+1)$ using the typical parametrization of 
+%	the beta-prime distribution \citep{Johnson1995}. When	 $b = (n - p_\vgamma - 5)/2 - a$ 
+%	the corresponding Bayes factor simplifies to
+%	\begin{equation}\label{eq:marginalLikelihoodBetaPrime}
+%	\begin{array}{rl}
+%	\ds \mbox{BF}_{bp}(\vgamma) 
+%	%& \ds =
+%	%\frac{K(n)}{\mbox{Beta}(a+1,b+1)}
+%	%\int_0^\infty g^{b} \left[ 1 + g(1-R^2) \right]^{-(n-1)/2}  
+%	%dg
+%	%\\ [2ex]
+%	& \ds 
+%	=   
+%	\frac{\mbox{Beta}(p/2 + a + 1,b + 1)}{\mbox{Beta}(a+1,b+1)} (1-R_\vgamma^2)^{-(b + 1)}
+%	%\\ [2ex]
+%	%& \ds = \widetilde{K}(n,a)
+%	%
+%	%\Gamma(p/2 + a + 1)\Gamma(a + b + 2)
+%	%(\widehat{\sigma}^2)^{-(b + 1)}
+%	\end{array}
+%	\end{equation}	
 	
-% 	\noindent where $\mbox{Beta}(u,v) = \Gamma(u)\Gamma(v)/\Gamma(u+v)$ is the beta function.
-% 	The default value for $a$ chosen by 
-% 	\cite{Maruyama2011} is $a = -3/4$. Note that the prior used in \cite{Maruyama2011} for
-% 	$\vbeta_\vgamma$ is different than from what we use here. Greenaway \& Ormerod (2018) discuss
-% 	these differences and justify our choice.
+%	\noindent where $\mbox{Beta}(u,v) = \Gamma(u)\Gamma(v)/\Gamma(u+v)$ is the beta function.
+%	The default value for $a$ chosen by 
+%	\cite{Maruyama2011} is $a = -3/4$. Note that the prior used in \cite{Maruyama2011} for
+%	$\vbeta_\vgamma$ is different than from what we use here. Greenaway \& Ormerod (2018) discuss
+%	these differences and justify our choice.
 	
-% 	\item The {\bf cake} prior of \cite{OrmerodEtal2017} 
-% 	departs from the prior structure (\ref{eq:priorStructure}) and instead uses
-% 	\begin{equation}\label{eq:proirs2}
-% 	\begin{array}{c}
-% 	\ds \alpha|\sigma^2,g \sim N(0,g\sigma^2), \quad 
-% 	\ds \vbeta_\vgamma|\sigma^2,g \sim N\left( \vzero,g\sigma^2\left( \tfrac{1}{n}\mX_\vgamma^T\mX_\vgamma\right)^{-1}\right)
-% 	\\ \mbox{and} \quad
-% 	p(g|\vgamma_j) = \delta(g; h^{1/(1 + p_\vgamma)})
-% 	\end{array} 
-% 	\end{equation}
+%	\item The {\bf cake} prior of \cite{OrmerodEtal2017} 
+%	departs from the prior structure (\ref{eq:priorStructure}) and instead uses
+%	\begin{equation}\label{eq:proirs2}
+%	\begin{array}{c}
+%	\ds \alpha|\sigma^2,g \sim N(0,g\sigma^2), \quad 
+%	\ds \vbeta_\vgamma|\sigma^2,g \sim N\left( \vzero,g\sigma^2\left( \tfrac{1}{n}\mX_\vgamma^T\mX_\vgamma\right)^{-1}\right)
+%	\\ \mbox{and} \quad
+%	p(g|\vgamma_j) = \delta(g; h^{1/(1 + p_\vgamma)})
+%	\end{array} 
+%	\end{equation}
 	
-% 	\noindent where $h$ is a common prior hyperparameter for all models. This is slightly
-% 	different from (\ref{eq:priorStructure}). The log   Bayes factor
-% 	as a function of $h$ 
-% 	for model $\vgamma$ is of the form
-% 	$$
-% 	\begin{array}{rl}
-% 	\ds \log\mbox{BF}(\vgamma;h)
-% 	=
-% 	-\tfrac{n}{2}\log\left( 1 - \tfrac{h^{1/(1+p_\vgamma)}}{1+h^{1/(1+p_\vgamma)}} R_\vgamma^2 \right) 
-% 	- \tfrac{p_\vgamma}{2}\log\left(n + h^{-1/(1+p_\vgamma)} \right).
-% 	\end{array}
-% 	$$
+%	\noindent where $h$ is a common prior hyperparameter for all models. This is slightly
+%	different from (\ref{eq:priorStructure}). The log   Bayes factor
+%	as a function of $h$ 
+%	for model $\vgamma$ is of the form
+%	$$
+%	\begin{array}{rl}
+%	\ds \log\mbox{BF}(\vgamma;h)
+%	=
+%	-\tfrac{n}{2}\log\left( 1 - \tfrac{h^{1/(1+p_\vgamma)}}{1+h^{1/(1+p_\vgamma)}} R_\vgamma^2 \right) 
+%	- \tfrac{p_\vgamma}{2}\log\left(n + h^{-1/(1+p_\vgamma)} \right).
+%	\end{array}
+%	$$
 	
-% 	\noindent Taking $h\to\infty$ we obtain a null based Bayes factor approaches
-% 	\begin{equation}\label{eq:marginalLikelihoodCake}
-% 	\ds \mbox{BF}_{\mbox{\scriptsize cake}}(\vgamma)
-% 	=
-% 	\exp\left[ \,
-% 	-\tfrac{n}{2}\log\left( 1 - R_\vgamma^2 \right) 
-% 	- \tfrac{p_\vgamma}{2}\log\left(n \right) \,
-% 	\right] = \exp\left[ \, -\tfrac{1}{2}\mbox{BIC}(\vgamma) \,\right]
-% 	\end{equation}
+%	\noindent Taking $h\to\infty$ we obtain a null based Bayes factor approaches
+%	\begin{equation}\label{eq:marginalLikelihoodCake}
+%	\ds \mbox{BF}_{\mbox{\scriptsize cake}}(\vgamma)
+%	=
+%	\exp\left[ \,
+%	-\tfrac{n}{2}\log\left( 1 - R_\vgamma^2 \right) 
+%	- \tfrac{p_\vgamma}{2}\log\left(n \right) \,
+%	\right] = \exp\left[ \, -\tfrac{1}{2}\mbox{BIC}(\vgamma) \,\right]
+%	\end{equation}
 	
-% 	\noindent where $\mbox{BIC}(\vgamma) = n\log\left( 1 - R_\vgamma^2 \right) + p_\vgamma \log(n)$ is the Bayesian 
-% 	Information of \cite{Schwarz1978} modulo constants which only depend on the sample size (and so are common to all models). 
+%	\noindent where $\mbox{BIC}(\vgamma) = n\log\left( 1 - R_\vgamma^2 \right) + p_\vgamma \log(n)$ is the Bayesian 
+%	Information of \cite{Schwarz1978} modulo constants which only depend on the sample size (and so are common to all models). 
 % \end{itemize}
 
 % \noindent All of the above Bayes factors can be evaluated on the log-scale
@@ -682,14 +682,14 @@ $$
 \end{array} 
 $$
 
-\noindent which is generic to the  prior distribution specification for
-$p(\alpha,\vbeta,\sigma^2,g|\vgamma)$ and $p(\vgamma)$.  Our approach is to
+\noindent which is generic to the prior distribution specification for
+$p(\alpha,\vbeta,\sigma^2,g|\vgamma)$ and $p(\vgamma)$. Our approach is to
 collapse over $\alpha$, $\vbeta$, $\sigma^2$, and $g$, and then use a
 variational approximation to the posterior likelihood of the model $\vgamma$.
 This can be done using any combination of the prior specifications described in
-Section \ref{sec:blma}.  This is conceptually equivalent to the collapsed
-variational approximation technique developed by \cite{Teh2006}  who used the
-concept of collapsing over a subset of variables in the context of  Latent
+Section~\ref{sec:blma}. This is conceptually equivalent to the collapsed
+variational approximation technique developed by \cite{Teh2006} who used the
+concept of collapsing over a subset of variables in the context of Latent
 Dirichlet Allocation models.
 
 We specify the $q$-density for $\vgamma$ parametrically by
@@ -773,7 +773,7 @@ $\vgamma_k$'s. Hence, the first stage optimizes $\log
 over each of the  $\vgamma_k$'s.  To be more concrete, let $\vgamma_{jk}^{(i)}
 = (\gamma_{1k},\ldots,\gamma_{j-1,k},i,\gamma_{j+1,k},\ldots,\gamma_{pk})^T$.
 We optimize $\vw$ and $\vgamma_1,\ldots,\vgamma_K$ by executing the algorithm
-given in Algorithm \ref{alg:algorithm_pva} below. Let $\vp$ denote the vector
+given in Algorithm~\ref{alg:algorithm_pva} below. Let $\vp$ denote the vector
 of posterior probabilities for each of the models  in the population, while $H$
 is the entropy of the entire population. Thus $F_\lambda$ balances the weighted
 posterior  probabilities of the particles in the population against the
@@ -813,7 +813,7 @@ diversity within that population.
     %is unique.} 
     Since only one component is modified during each iteration of the inner
     loop of the algorithm, model updates and downdates can be efficiently used
-    to implement the Algorithm \ref{alg:algorithm_pva} (for details see
+    to implement the Algorithm~\ref{alg:algorithm_pva} (for details see
     Chapter 2).
     %{\color{red} Population uniqueness can be maintained at a average cost of
     %$O(K)$ whenever we try to change $\gamma_{jk}$ using hashtables.}
@@ -862,14 +862,14 @@ parallel computation.
 \section{Numerical results}
 \label{sec:numerical}
 
-We will now assess the performance of PVA. In Section \ref{sec:exact} we
+We will now assess the performance of PVA\@. In Section~\ref{sec:exact} we
 compare PVA against exact Bayesian model averaging for four small examples with
 $p<30$ via the {\tt R} package {\tt blma} using the implementation outlined in
 Greenaway \& Ormerod (2018). All of the following results were obtained in the
 {\tt R} version 3.4.2 \citep{CiteR} and all figures were developed using the
-{\tt R} package {\tt ggplot2}.  In sections
-\ref{sec:highdimensional}--\ref{sec:QTL} we will consider examples with $p>30$
-where it is infeasible to perform Bayesian model averaging exactly.  Most
+{\tt R} package {\tt ggplot2}. In sections
+~\ref{sec:highdimensional} -- ~\ref{sec:QTL} we will consider examples with $p>30$
+where it is infeasible to perform Bayesian model averaging exactly. Most
 simulations were run on a 64 bit Windows 10 Intel i7-7600MX central processing
 unit at 2.8GHz with 2 hyperthreaded cores and 32GB of random access memory.
 Multicore comparisons were run on a dedicated server using E5-2697v2 processors
@@ -882,13 +882,13 @@ We considered several small \\ datasets to illustrate our methodology for
 situations where we could compare PVA against a gold standard. These datasets
 can be found in the {\tt R} packages {\tt MASS} \citep{Venables2002},  {\tt
 ISLR} \cite{James:2014:ISL:2517747} and {\tt Ecdat} \citep{Croissant2016}.
-Table \ref{tab:cva_datasets} summarizes the sizes,  sources, and response
+Table~\ref{tab:cva_datasets} summarizes the sizes,  sources, and response
 variable for each dataset used.   For each of the datasets some minimal
 preprocessing was used.  We first used the {\tt R} command {\tt na.omit()} to
 remove samples containing missing predictors.  For {\tt USCrime} all variables
 except the predictor {\tt S} were log-transformed. For all datasets the {\tt R}
 command {\tt model.matrix()} was used to construct the design matrix using all
-variables except for the response as predictors. The routines in `blma`
+variables except for the response as predictors. The routines in `blma'
 standardise the response and covariate matrix.
 
 \begin{table}[ht!]
@@ -896,7 +896,7 @@ standardise the response and covariate matrix.
 		\begin{tabular}{l|r|r|l|l}
 			Dataset	& $n$ & $p$ & Response & {\tt R} package \\ 
 			\hline 
-			UScrime 	& 47 & 15 &  {\tt y} & {\tt MASS} \\  
+			UScrime		& 47 & 15 &  {\tt y} & {\tt MASS} \\  
 			%Bodyfat	& 244  & 13 &  \\ 
 			%	\hline 
 			College &  777   & 17      &  {\tt Grad.Rate}      & {\tt ISLR} \\ 
@@ -914,19 +914,19 @@ standardise the response and covariate matrix.
 \noindent To measure the quality of approximation of PVA to BMA we will use two
 metrics. The total posterior mass (TPM), and the mean marginal variable error
 (MMVE). These are given by $$ \ds \mbox{TPM} = \sum_{k=1}^{K^*}
-p(\vgamma_k^*|\vy) \qquad \mbox{and}  \qquad \mbox{MMVE} = \frac{1}{p}
-\sum_{j=1}^p |\omega_j - \bE(\gamma_j|\vy) |.  $$
+p(\vgamma_k^*|\vy) \qquad \mbox{and} \qquad \mbox{MMVE} = \frac{1}{p}
+\sum_{j=1}^p |\omega_j - \bE(\gamma_j|\vy) |. $$
 
 \noindent Note that the quantities $p(\vgamma_k^*|\vy)$ and $\bE(\gamma_j|\vy)$
 are available as outputs of the function {\tt blma()} from the {\tt R} package
-{\tt blma}.  The average values of TPM and MMVE over 100 random initial values
+{\tt blma}. The average values of TPM and MMVE over 100 random initial values
 of $\mGamma$ for each of the datasets where independently $\gamma_{kj} \sim
 \mbox{Bernoulli}(1/10)$, $1\le j\le p$, $1\le k\le K$ over a grid of $K$ values
 from $K=25$ to $K=500$ are summarised in Figure
-\ref{fig:kakadu_total_posterior_mass}.  From this figure we see that both TPM
+~\ref{fig:kakadu_total_posterior_mass}. From this figure we see that both TPM
 and MMVE increase and decrease with $K$ respectively. For each of the dataset
 at least 50\% of the total posterior mass is captured with less than $K=200$
-particles.  The mean absolute error in posterior inclusion probability with
+particles. The mean absolute error in posterior inclusion probability with
 this value of $K$ is roughly $0.05$ which indicates that the median posterior
 model is reasonably well approximated.
 
@@ -957,20 +957,20 @@ setting are implied by the {\tt R} commands below.
 
     \item {\bf Penalized regression via {\tt ncvreg} package.} We used the
         following command.
-	\begin{verbatim}
-	ncvreg(mX,vy,penalty=penalty)
-	\end{verbatim}
-	
+\begin{verbatim}
+    ncvreg(mX,vy,penalty=penalty)
+\end{verbatim}
+
     \noindent where {\tt penalty} is {\tt "MCP"}, {\tt "SCAD"} or {\tt "lasso"}
     corresponding to the penalties of the same name as described in
     \cite{Breheny2011}.  For these methods we make use of the extended Bayesian
     information criteria (EBIC) \citep{Chen2008} to choose the tuning parameter
     $\lambda$. The EBIC minimizes
-	$$
-	\mbox{EBIC}(\lambda) = n\log(\mbox{RSS}_\lambda/n) + d_\lambda
-	\left[ \log(n) + 2\log(p) \right],
-	$$
-	
+    $$
+    \mbox{EBIC}(\lambda) = n\log(\mbox{RSS}_\lambda/n) + d_\lambda
+    \left[ \log(n) + 2\log(p) \right],
+    $$
+    
     \noindent where $\mbox{RSS}_\lambda$ is the estimated residual sum of
     squares $\|\vy - \mX\widehat{\vbeta}_\lambda\|^2$,
     $\widehat{\vbeta}_\lambda$ is the estimated value of $\vbeta$ for a
@@ -983,8 +983,8 @@ setting are implied by the {\tt R} commands below.
         command.
 	\begin{verbatim}
 	PEM(vy,mX,v0,v1,type="betabinomial", 
-	    penalty="entropy",epsilon=1.0E-5,theta=0.5, 
-	    a=1,b=p,alpha=1,current=t(mGamma),weights="FALSE")
+		penalty="entropy",epsilon=1.0E-5,theta=0.5, 
+		a=1,b=p,alpha=1,current=t(mGamma),weights="FALSE")
 	\end{verbatim}
 	
     \noindent where $\gamma_{kj} \sim \mbox{Bernoulli}(\rho)$, $1\le j\le p$,
@@ -1101,13 +1101,13 @@ algorithm proceeds.
 % We begin by using the setting $\lambda = 1$, allowing particle repulsion between each of the models within the
 % population.
 
-\begin{figure}	
-	\includegraphics[width=0.95 \textwidth]{code/blma/cva_low_dimensional.pdf}
-	\caption{Posterior model probabilities when $p = 12$. Red points denote models visited by the PVA
-						algorithm, while blue points are models that were not visited. Note that the PVA algorithm
-						visits the highest posterior probability points first}
-	\label{fig:PVA_posterior_models}
-\end{figure}
+%\begin{figure}	
+	%\includegraphics[width=0.95 \textwidth]{code/blma/cva_low_dimensional.pdf}
+	%\caption{Posterior model probabilities when $p = 12$. Red points denote models visited by the PVA
+						%algorithm, while blue points are models that were not visited. Note that the PVA algorithm
+						%visits the highest posterior probability points first}
+	%\label{fig:PVA_posterior_models}
+%\end{figure}
 
 \subsection{Communities and crime dataset}
 \label{sec:crime}
@@ -1236,20 +1236,20 @@ Figure \ref{fig:qtlPVA_F1_compare}.
 % \subsection{$p > n$}
 
 % \begin{table}
-% 	\caption{Simulation results including the average number of modes located, the average percentage of
-% 	posterior coverage achieved, and the percentage of times that the global mode was located, for various
-% 	population sizes $(K=20, 50, 100)$ and choices of repulsion $\lambda=0, 1, 2, 3$}
-% 	\label{tab:result2}
-% 	\begin{tabular}{l|llll|llll|llll|llll}
-% 	\hline
-% 	 					& \multicolumn{4}{c}{K=20} 	& \multicolumn{4}{c}{K=50} & \multicolumn{4}{c}{K=100} \\
-% 	$\lambda$ & 0 & 1 & 2 & 3 & 0 & 1 & 2 & 3 & 0 & 1 & 2 & 3 & 0 & 1 & 2 & 3 \\
-% 	\hline
-% 	\# Modes & \\
-% 	\% Posterior & 83.1 & 84.7 & 83.7 & 82.3 & 84.7 & 83.2 & 85.4 & 84.8 & 81.9 & 82.9 & 83.9 & 84.6 & 83.9 & 81.5 & 82.0 & 85.2 \\
-% 	\% Global Mode & 91 & 90 & 87 & 82 & 86 & 85 & 80 & 90 & 90 & 90 & 86 & 91 & 88 & 91 & 76 & 88 \\
-% 	\hline
-% 	\end{tabular}
+%	\caption{Simulation results including the average number of modes located, the average percentage of
+%	posterior coverage achieved, and the percentage of times that the global mode was located, for various
+%	population sizes $(K=20, 50, 100)$ and choices of repulsion $\lambda=0, 1, 2, 3$}
+%	\label{tab:result2}
+%	\begin{tabular}{l|llll|llll|llll|llll}
+%	\hline
+%						& \multicolumn{4}{c}{K=20}	& \multicolumn{4}{c}{K=50} & \multicolumn{4}{c}{K=100} \\
+%	$\lambda$ & 0 & 1 & 2 & 3 & 0 & 1 & 2 & 3 & 0 & 1 & 2 & 3 & 0 & 1 & 2 & 3 \\
+%	\hline
+%	\# Modes & \\
+%	\% Posterior & 83.1 & 84.7 & 83.7 & 82.3 & 84.7 & 83.2 & 85.4 & 84.8 & 81.9 & 82.9 & 83.9 & 84.6 & 83.9 & 81.5 & 82.0 & 85.2 \\
+%	\% Global Mode & 91 & 90 & 87 & 82 & 86 & 85 & 80 & 90 & 90 & 90 & 86 & 91 & 88 & 91 & 76 & 88 \\
+%	\hline
+%	\end{tabular}
 
 % \end{table}
 
@@ -1344,7 +1344,7 @@ For each combination of population size, data set, and prior the experiment was 
 % \includegraphics[width=0.95 \textwidth]{QTL_cold_maruyama.pdf}
 % \label{fig:QTL_cold_start}
 % \caption{$F_1$ scores for PVA on the simulated QTL data with $\Gamma$ initialised randomly.
-% 					Here $K=20$, $50$ and $100$ respectively}
+%					Here $K=20$, $50$ and $100$ respectively}
 % \includegraphics[scale=0.33]{code/QTL/results/20_generate_data_QTL_cold_start_log_prob1.pdf}
 % \includegraphics[scale=0.33]{code/QTL/results/50_generate_data_QTL_cold_start_log_prob1.pdf}
 % \includegraphics[scale=0.33]{code/QTL/results/100_generate_data_QTL_cold_start_log_prob1.pdf}
@@ -1385,9 +1385,9 @@ ignoring the lower posterior probability models.
 	& & $K = 20$ & $K = 50$ & $K = 100$ & $K = 20$ & $K = 50$ & $K = 100$ \\
 	\hline
 	Bodyfat    &BIC                     &$0.63$&$0.48$&$0.37$&$0.07$&$0.01$&$0.02$\\
-	           &Liang's hyper-$g$ prior &$0.66$&$0.52$&$0.42$&$0.07$&$0.01$&$0.02$\\
-	           &Bayarri's robust prior  &$0.65$&$0.52$&$0.40$&$0.07$&$0.01$&$0.02$\\
-	           &ZE                      &$0.65$&$0.51$&$0.39$&$0.06$&$0.01$&$0.02$\\
+			   &Liang's hyper-$g$ prior &$0.66$&$0.52$&$0.42$&$0.07$&$0.01$&$0.02$\\
+			   &Bayarri's robust prior  &$0.65$&$0.52$&$0.40$&$0.07$&$0.01$&$0.02$\\
+			   &ZE                      &$0.65$&$0.51$&$0.39$&$0.06$&$0.01$&$0.02$\\
 	College    &BIC                     &$0.70$&$0.58$&$0.49$&$0.03$&$0.02$&$0.03$\\
 	&Liang's hyper-$g$ prior            &$0.90$&$0.78$&$0.64$&$0.06$&$0.06$&$0.06$\\
 	&Bayarri's robust prior             &$0.88$&$0.78$&$0.63$&$0.06$&$0.06$&$0.06$\\

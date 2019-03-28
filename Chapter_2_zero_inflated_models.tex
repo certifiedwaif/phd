@@ -5,16 +5,15 @@ Variational Approximation of \\ Zero-inflated Mixed Models}
 \section*{Abstract}
 
 
-In this chapter we consider variational inference for zero-inflated Poisson (ZIP)
-regression models using a latent variable representation. The model is
-extended to include random effects which allow simple incorporation of
-spline and other modelling structures. Several variational approximations
-to the resulting set of models are presented, including a novel approach
-based on the inverse covariance matrix rather than the covariance matrix of
-the approximate posterior density for the random effects. This
-parameterisation improves upon the computational cost and numerical
-stability of previous methods. We demonstrate these approximations on
-simulated and real data sets.
+In this chapter we consider variational inference for zero-inflated Poisson
+(ZIP) regression models using a latent variable representation. The model is
+extended to include random effects which allow simple incorporation of spline
+and other modelling structures. Several variational approximations to the
+resulting set of models are presented, including a novel approach based on the
+inverse covariance matrix rather than the covariance matrix of the approximate
+posterior density for the random effects. This parameterisation improves upon
+the computational cost and numerical stability of previous methods. We
+demonstrate these approximations on simulated and real data sets.
 
 \newpage 
 
@@ -380,9 +379,17 @@ The most computationally and numerically difficult part of Algorithm
 \ref{alg:algorithm_one} above is optimising the mean and covariance of the
 Gaussian approximation to the regression coefficients $[\vbeta, \vu]^\top$. In
 this section, we compare the accuracy, stability and speed of four different
-algorithms for fitting the Gaussian component of our model, $q(\vmu, \mLambda)$
-in Algorithm \ref{alg:algorithm_one}.  We compare these approaches for
-accuracy, computational complexity and stability.
+algorithms for fitting the Gaussian component of our model, $q(\vmu,
+\mLambda)$ in Algorithm \ref{alg:algorithm_one}.  We compare these approaches
+for accuracy, computational complexity and stability. The measure of accuracy
+we use to assess our approximations is
+
+\begin{equation*}
+	\text{Accuracy} = 1 - \tfrac{1}{2} \int \| f(\vtheta) - g(\vtheta) \| d\vtheta
+\end{equation*}
+
+\noindent where $f(\vtheta)$ is the true distribution we're approximating and
+$g(\vtheta)$ is the approximating distribution.
 
 Our first attempts at implementation of some of these algorithms were prone to
 numerical stability problems when initialised from some starting points. We
@@ -770,6 +777,13 @@ square covariance matrix using only a lower triangular matrix with half as many
 non-zero elements. Thus the Cholesky factor is a convenient way to parameterising
 covariance matrices.
 
+Another advantage of parameterising using the precision matrix is that
+the covariance matrix contains the marginal covariances between the elements of
+$\vnu$, while the precision matrix contains the conditional covariances
+between those elements. In generalised linear mixed models, fixed and random
+effects are conditionally independent, implying sparsity in the precision
+matrix although not necessarily in the covariance matrix.
+
 The variational lower bound of a GVA takes the
 form given below.
 \begin{equation}
@@ -830,13 +844,6 @@ $\mR \va = \mC_{i}, i=1, \ldots, n$ for   $\va$ and then calculating
 $\va^\top\va$ where $\mC_{i} = $ the $i$th row of $\mC$, rather than
 calculating $\text{diag}(\mC \mLambda \mC^\top)$ directly.
 	
-Another advantage of parameterising using the precision matrix is that
-the covariance matrix contains the marginal covariances between the elements of
-$\vnu$, while the precision matrix contains the conditional covariances
-between those elements. In generalised linear mixed models, fixed and random
-effects are conditionally independent, implying sparsity in the precision
-matrix although not necessarily in the covariance matrix.
-
 A final advantage of this parameterisation is its' greater numerical accuracy.
 Matrix multiplication and back substitution are both equally numerically
 accurate and stable - as shown in \cite{Golub:1996:MC:248979} \S2.7.8 and
@@ -1300,7 +1307,8 @@ in Table \ref{tab:application_roaches}.
 	\includegraphics[page=4,scale=0.35]{code/results/accuracy_plots_application_GVA_inv_param.pdf}
 	\includegraphics[page=16,scale=0.35]{code/results/accuracy_plots_application_GVA_inv_param.pdf}
 	\includegraphics[page=17,scale=0.35]{code/results/accuracy_plots_application_GVA_inv_param.pdf}
-	\caption{Accuracy graphs for roach model.}
+	\caption{Accuracy graphs for roach model. The height of the graphs have
+			 been scaled to be the same height.}
 	\label{fig:accuracy_roach}
 \end{figure}
 		
