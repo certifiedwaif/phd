@@ -14,7 +14,7 @@ Bayesian model averaging.  The resulting objective function can be optimized in
 a highly parallel manner.  We explore several different prior specifications
 which lead to Bayes factors with closed forms.  We show empirically that our
 approach is fast and effective for moderately large problems  on several
-simulated and publicly available datasets, particularly when parallel computing
+simulated and publicly available data sets, particularly when parallel computing
 resources are available. An {\tt R} package is available implementing our
 approach.
 
@@ -27,18 +27,18 @@ These techniques are especially useful in problems of high-dimension, such as
 bioinformatics problems where the model space is complex and the optimal model
 is difficult for statisticians to manually specify. However, Bayesian model
 selection is computationally expensive, and prone to getting stuck in local
-minima if the posterior likelihood is multimodal. This issue is particularly
+minima if the posterior distribution is multimodal. This issue is particularly
 acute if the spike-and-slab prior, popular for Bayesian model selection, is
-used. We seek to address both problems by proposing a population non-parametric
-Variational Bayes approximation algorithm -- a population-based optimisation
-strategy. Maintaining a population of models allows the posterior distribution
-to be explored more thoroughly, finding multiple maxima. The variational
-approximation's lower bound includes an entropy term which ensures diversity in
-the population by penalising similarity, having the particles in the
-population repel each other. This ensures the high probability regions of the
-posterior distribution is thoroughly explored, which better reflects model
-selection uncertainty. In this chapter, we focus on the important case of model
-selection for normal linear models with priors as described in Section
+used. We seek to address both problems by proposing a population
+non-parametric Variational Bayes approximation algorithm -- a population-based
+optimisation strategy. Maintaining a population of models allows the posterior
+distribution to be explored more thoroughly, finding multiple maxima. The
+variational approximation's lower bound includes an entropy term which ensures
+diversity in the population by penalising similarity, having the particles in
+the population repel each other. This ensures the high probability regions of
+the posterior distribution is thoroughly explored, which better reflects model
+selection uncertainty. In this chapter, we focus on the important case of
+model selection for normal linear models with priors as described in Section
 ~\ref{sec:model}.
 % which are slightly altered from those introduced in Section \ref{sec:model}
 % to incorporate a zero-centred normal prior on $\alpha$ with variance $g
@@ -72,24 +72,26 @@ posterior, as it is typically highly multimodal.
 Many computational schemes for Bayesian model selection exist, using Monte
 Carlo Markov Chains techniques to approximate the posterior distribution of
 $\vgamma$. However, these schemes are both computationally intensive and can
-become trapped in local maxima of the posterior distribution if the
+become \\ trapped in local maxima of the posterior distribution if the
 distribution is high-dimensional and multi-modal, as is the case with popular
 choices of prior for Bayesian model selection problems, such as spike-and-slab
 priors. The difficulty of becoming trapped in local maxima can be partially
-mitigated by using population-based MCMC schemes such as Jasra et al. (2007),
-Bottolo and Richardson (2010), Hans et al (2007), Liang and Wong (2000).
-However, this increases the computational cost of sampling from the posterior
-distributions still further, especially in high-dimensional problems.
+mitigated by using population-based Monte Carlo Markov Chains (MCMC) schemes
+such as Jasra et al. (2007), Bottolo and Richardson (2010), Hans et al (2007),
+Liang and Wong (2000).  However, this increases the computational cost of
+sampling from the posterior distributions still further, especially in
+high-dimensional problems.
 
-\cite{Rockova2017} introduced the notion of Particle EM\@. Rather than searching
-for a single optimal model, Particle EM instead maintains a population of
-models (particles). This allows the algorithm to explore more of the posterior
-model space, gaining a better estimate of the variation of the model space than
-an algorithm involving only a single model. It also allows the particles to
-``interact'', searching for the essential posterior modes together. In Particle
-EM, this is done by incorporating an ``entropy term'' in the variational lower
-bound, which ensures diversity amongst the models in the population, preventing
-all particles from simply seeking the global posterior modes. The algorithm is
+\cite{Rockova2017} introduced the notion of Particle Expectation Maximisation
+(EM) \@. Rather than searching for a single optimal model, Particle EM instead
+maintains a population of models (particles). This allows the algorithm to
+explore more of the posterior model space, gaining a better estimate of the
+uncertainty in the model selection process than an algorithm involving only a
+single model.  It also allows the particles to ``interact'', searching for the
+essential posterior modes together. In Particle EM, this is done by
+incorporating an ``entropy term'' in the variational lower bound, which
+ensures diversity amongst the models in the population, preventing all
+particles from simply seeking the global posterior modes. The algorithm is
 deterministic.
 
 We build upon this work by proposing a fixed-form parametric Variational Bayes
@@ -133,8 +135,8 @@ Our main contributions are:
         incorporating a penalty for lack of entropy, which ensures diversity in
         the population of solutions.
 
-    \item The entire trajectory of particles gives far more information about
-        variable selection than a single snapshot of the final best decision.
+    %\item The entire trajectory of particles gives far more information about
+        %variable selection than a single snapshot of the final best decision.
 
     \item Our model can incorporate different hyperpriors on $g$ and $\vgamma$.
 Using a hyperprior on $g$ avoids Lindley's paradox and Bartlett's paradox, the
@@ -685,7 +687,7 @@ $$
 \noindent which is generic to the prior distribution specification for
 $p(\alpha,\vbeta,\sigma^2,g|\vgamma)$ and $p(\vgamma)$. Our approach is to
 collapse over $\alpha$, $\vbeta$, $\sigma^2$, and $g$, and then use a
-variational approximation to the posterior likelihood of the model $\vgamma$.
+variational approximation to the posterior probability of the model $\vgamma$.
 This can be done using any combination of the prior specifications described in
 Section~\ref{sec:blma}. This is conceptually equivalent to the collapsed
 variational approximation technique developed by \cite{Teh2006} who used the
@@ -743,6 +745,9 @@ Since $\log \underline{p}(\vy;\vw,\mGamma)$ is a lower bound we can maximize
 this bound with respect to $\vw$ and $\mGamma$ to make the bound as tight as
 possible.  The main body of the algorithm to optimize $\log
 \underline{p}(\vy;\vw,\mGamma)$ is a two--stage process. 
+This process is similar to that of a tabu search
+\cite{Glover1986}.
+
 
 In the first stage, we iterate through the population of bitstrings, using a
 greedy search strategy in an attempt to alter each bit in the model bitstring
@@ -758,7 +763,7 @@ population, based on the likelihood of that model relative to the data $p(\vy;
 $w_i$ for each bitstring in the population. This is then used to re--calculate
 the lower bound
 \[
-	\log \underline{p}(\vy; \vw, \Gamma) = \sum_{k=1}^K \vw_k \log p(\vy; \vbeta_{\vgamma_k}) - \vw_k \log \vw_k
+	\log \underline{p}(\vy; \vw, \Gamma) = \sum_{k=1}^K \vw_k \log p(\vy; {\vgamma_k}) - \vw_k \log \vw_k
 \]
 
 \noindent 
@@ -775,7 +780,7 @@ over each of the  $\vgamma_k$'s.  To be more concrete, let $\vgamma_{jk}^{(i)}
 We optimize $\vw$ and $\vgamma_1,\ldots,\vgamma_K$ by executing the algorithm
 given in Algorithm~\ref{alg:algorithm_pva} below. Let $\vp$ denote the vector
 of posterior probabilities for each of the models  in the population, while $H$
-is the entropy of the entire population. Thus $F_\lambda$ balances the weighted
+is the entropy of the entire population. Thus $\log \underline{p}(\vy; \vw, \Gamma)$ balances the weighted
 posterior  probabilities of the particles in the population against the
 diversity within that population.
 % Re-type this using algorithmic environment
@@ -785,7 +790,7 @@ diversity within that population.
 	\label{alg:algorithm_pva}
 	\begin{algorithmic}
 		\medskip 
-		\WHILE{$F_\lambda$ is still different from the previous iteration}
+		\WHILE{$\log \underline{p}(\vy; \vw, \mGamma)$ is still different from the previous iteration}
 		\medskip
 			\FOR{$k = 1, \ldots, K$}
 				\medskip
@@ -803,7 +808,7 @@ diversity within that population.
 				\STATE $w_k = p(\vy, \vgamma_k) / \sum_{j=1}^K p(\vy, \vgamma_j)$
 			\ENDFOR
 			\medskip
-			\STATE Calculate $F_\lambda$ = $\vw^\top \vp + \lambda H$
+			\STATE Calculate $\log \underline{p}(\vy; \vw, \mGamma) = \sum_{k=1}^K \vw_k \log p(\vy; {\vgamma_k}) - \vw_k \log \vw_k$
 		\ENDWHILE
 	\end{algorithmic}
 \end{algorithm}
@@ -878,15 +883,15 @@ with 24 hyperthreaded cores and 512GB of RAM.
 \subsection{Comparing PVA against exact results} 
 \label{sec:exact}
 
-We considered several small \\ datasets to illustrate our methodology for
-situations where we could compare PVA against a gold standard. These datasets
+We considered several small \\ data sets to illustrate our methodology for
+situations where we could compare PVA against a gold standard. These data sets
 can be found in the {\tt R} packages {\tt MASS} \citep{Venables2002},  {\tt
 ISLR} \cite{James:2014:ISL:2517747} and {\tt Ecdat} \citep{Croissant2016}.
-Table~\ref{tab:cva_datasets} summarizes the sizes,  sources, and response
-variable for each dataset used.   For each of the datasets some minimal
+Table~\ref{tab:cva_data sets} summarizes the sizes,  sources, and response
+variable for each data set used.   For each of the data sets some minimal
 preprocessing was used.  We first used the {\tt R} command {\tt na.omit()} to
 remove samples containing missing predictors.  For {\tt USCrime} all variables
-except the predictor {\tt S} were log-transformed. For all datasets the {\tt R}
+except the predictor {\tt S} were log-transformed. For all data sets the {\tt R}
 command {\tt model.matrix()} was used to construct the design matrix using all
 variables except for the response as predictors. The routines in `blma'
 standardise the response and covariate matrix.
@@ -907,8 +912,8 @@ standardise the response and covariate matrix.
 			Kakadu	& 1827 & 22 & {\tt income} & {\tt Ecdat}   \\  
 		\end{tabular} 
 	\end{center} \bigskip 
-	\caption{A summary of the datasets used in the paper and their respective {\tt R} packages.}
-	\label{tab:cva_datasets}
+	\caption{A summary of the data sets used in the paper and their respective {\tt R} packages.}
+	\label{tab:cva_data sets}
 \end{table}
 
 \noindent To measure the quality of approximation of PVA to BMA we will use two
@@ -920,11 +925,11 @@ p(\vgamma_k^*|\vy) \qquad \mbox{and} \qquad \mbox{MMVE} = \frac{1}{p}
 \noindent Note that the quantities $p(\vgamma_k^*|\vy)$ and $\bE(\gamma_j|\vy)$
 are available as outputs of the function {\tt blma()} from the {\tt R} package
 {\tt blma}. The average values of TPM and MMVE over 100 random initial values
-of $\mGamma$ for each of the datasets where independently $\gamma_{kj} \sim
+of $\mGamma$ for each of the data sets where independently $\gamma_{kj} \sim
 \mbox{Bernoulli}(1/10)$, $1\le j\le p$, $1\le k\le K$ over a grid of $K$ values
 from $K=25$ to $K=500$ are summarised in Figure
 ~\ref{fig:kakadu_total_posterior_mass}. From this figure we see that both TPM
-and MMVE increase and decrease with $K$ respectively. For each of the dataset
+and MMVE increase and decrease with $K$ respectively. For each of the data set
 at least 50\% of the total posterior mass is captured with less than $K=200$
 particles. The mean absolute error in posterior inclusion probability with
 this value of $K$ is roughly $0.05$ which indicates that the median posterior
@@ -937,7 +942,7 @@ model is reasonably well approximated.
 	% \includegraphics[width=0.48\textwidth]{./plotHitters.pdf} \includegraphics[width=0.48\textwidth]{./plotKakadu.pdf}
 	
 	
-	% \caption{The total posterior mass (TPM) and  mean marginal variable error (MMVE) for four datasets
+	% \caption{The total posterior mass (TPM) and  mean marginal variable error (MMVE) for four data sets
 	% averaged over a 100 random generations of $\mGamma$ with $\gamma_{kj} \sim \mbox{Bernoulli}(1/10)$, $1\le j\le p$,
 	% $1\le k\le K$ over a grid of $K$ values from $K=25$ to $K=500$.}
 	% \label{fig:PVA_posterior_models}
@@ -991,7 +996,7 @@ setting are implied by the {\tt R} commands below.
     $1\le k\le K$ with $K=200$ (noting that the initial population matrix in
     PVA is the transpose of the initial population matrix used by PEM). The
     choices used for {\tt rho}, {\tt v0} and {\tt v1} are different for each
-    dataset and are described in each of the sections below.
+    data set and are described in each of the sections below.
 	
 	\item {\bf MCMC via the {\tt BAS} package}: We used the following command.
 	\begin{verbatim}
@@ -1002,7 +1007,17 @@ setting are implied by the {\tt R} commands below.
 	\noindent 
     The estimated median posterior model is used for the purposes of model
     selection.
-	
+    
+    \item {\bf MCMC via the {\tt BMS} package}: We used the following command.
+    \begin{verbatim}
+res.bms <- bms(cbind(vy,mX), burn = 1000, iter = 1000000, 
+    nmodel = 10000, mcmc = "bd", g = "BRIC", mprior = "random", 
+    mprior.size = NA, user.int = TRUE, start.value = start.value, 
+    g.stats = TRUE, logfile = TRUE, logstep = 100000, 
+    force.full.ols = FALSE, fixed.reg=numeric(0))	
+    \end{verbatim}
+    
+	where {\tt start.value} is the value of $\vgamma$ given by PVA.
 \end{itemize}
 
 We used simulated data in each of the sections below in such a way that the
@@ -1016,13 +1031,14 @@ $$
 
 \noindent with $TP$, $FP$ and $FN$ being the number of true positives, false
 positives and false negatives respectively. Note that $F_1$ is a value between
-0 and 1 and higher values are preferred. We use this measure preference of the
-two boundary models, that is selecting none or all of the variables. 
+0 and 1 and higher values are preferred. We use this measure to avoid
+prefererring either of the two boundary models, that is, selecting none or all
+of the variables. 
 
 \subsection{Simulated high-dimensional example}
 \label{sec:highdimensional} 
 
-We first present an example \\ where $n > p$ and $p$ is relatively small ($p =
+We first present an example  where $n > p$ and $p$ is relatively small ($p =
 12$), to allow for the full enumeration of the model space. Later, we show an
 example for the important $p > n$ case. We compare our results  against the
 Lasso \citep{Tibshirani1996}, SCAD \citep{Fan2001}, MCP \citep{Zhang2010}, {\tt
@@ -1043,31 +1059,37 @@ N_n(\vzero, \mI_n)$.
 A comparison of the performance of PVA for the hyper-$g$, robust Bayarri,
 Beta-prime and Cake priors on $g$ and the uniform, beta-binomial(1, 1) and
 beta-binomial(1, p) priors on $\vgamma$ using $F_1$ score is presented in
+the top panel of
 Figure \ref{fig:highDimPVA_F1}. A comparison of the performance of the MCP,
 SCAD, lasso, PVA, BMS, BAS and PEM  methods using $F_1$ score is given in
-Figure \ref{fig:highDimPVA_F1_compare}.
+the bottom panel of Figure \ref{fig:highDimPVA_F1}.
 
-\begin{figure}[h!]
+\begin{figure}[p!]
 	\begin{center}
-		\includegraphics[width=0.95\textwidth]{./highDimPVA_F1.pdf}  
+		\includegraphics[width=0.9\textwidth]{./highDimPVA_F1.pdf}  
+		
+		\includegraphics[trim={0 4cm 0 0},width=0.9\textwidth]{./highDimPVA_F1_compare_edit.pdf} 
 	\end{center}
-	\caption{Comparison of the performance of the PVA method on the
+	\caption{Top panel: Comparison of the performance of the PVA method on the
 						high-dimensional data set with different $g$ and $\vgamma$ priors using $F_1$ score.
 						The hyper-$g$,
-						robust Bayarri, Beta-prime and Cake priors on $g$ and the uniform, beta-binomial(1, 1) and beta-binomial(1, p) priors on $\vgamma$ are used.}
+						robust Bayarri, Beta-prime and Cake priors on $g$ and the uniform, beta-binomial(1, 1) and beta-binomial(1, p) priors on $\vgamma$ are used.
+					Bottom panel: Comparison of the performance of the MCP, SCAD, lasso, PVA, BMS, BAS and PEM methods on the
+					high-dimensional data set using $F_1$ score. For PVA, the
+					robust Bayarri prior on $g$ and the uniform, beta-binomial(1, 1) and beta-binomial(1, p) priors
+					on $\vgamma$ are used.}
 	\label{fig:highDimPVA_F1}
 \end{figure}
 
-\begin{figure}[h!]
-	\begin{center}	
-		\includegraphics[trim={0 4cm 0 0},width=0.95\textwidth]{./highDimPVA_F1_compare_edit.pdf}  
-	\end{center}
-	\caption{Comparison of the performance of the MCP, SCAD, lasso, PVA, BMS, BAS and PEM methods on the
-						high-dimensional data set using $F_1$ score. For PVA, the
-						robust Bayarri prior on $g$ and the uniform, beta-binomial(1, 1) and beta-binomial(1, p) priors
-						on $\vgamma$ are used.}
-	\label{fig:highDimPVA_F1_compare}
-\end{figure}
+From the top panel of \ref{fig:highDimPVA_F1} we see that 
+beta-binomial(1,1) and beta-binomial(1,p) priors on $\vgamma$
+lead to better performances.
+From th bottom panel we see that PVA 
+with beta-binomial(1,1) or beta-binomial(1,p) priors on $\vgamma$
+performs about better than MCP, SCAD, lasso, 
+and PEM methods, and about the same as BAS.
+PVA with a uniform prior performs similarly
+to BMS.
 
 \subsubsection{Exploration of the posterior model space}
 
@@ -1082,11 +1104,21 @@ Our population of bit strings $\mGamma^{(0)} = (\vgamma_1^{(0)}, \ldots,
 \vgamma_K^{(0)})$ with $K = 20$ particles was randomly initialised from a
 sequence of independent Bernoulli trials with probability of success $1/2$.
 Figure \ref{fig:PVA_posterior_models} shows all $4096$ posterior model
-probabilities ordered by the model's bit strings, represented by blue dots.
+probabilities for a data set simulated from a regression model with 12
+covariates, ordered by the model's bit strings, represented by blue dots.
 Superimposed over this are the models found by PVA, represented by red dots.
 We can clearly see a few peaks in the full posterior distribution. Our
 experiment aims to show that most of these posterior peaks are successfully
 identified by our algorithm.
+
+\begin{figure}[b!]
+	\includegraphics[width=0.6 \textwidth]{code/blma/cva_low_dimensional.pdf}
+	\caption{Posterior model probabilities when $p = 12$. Red points denote models visited by the PVA
+		algorithm, while blue points are models that were not visited. Note that the PVA algorithm
+		visits the highest posterior probability points first}
+	\label{fig:PVA_posterior_models}
+\end{figure}
+
 
 As Figure \ref{fig:PVA_posterior_models} shows, in the plots of the log
 posterior probabilities of the models, the particles can be seen clustering at
@@ -1098,27 +1130,19 @@ distribution by the population of particles is high, as the particles tend to
 cluster towards the higher posterior probability models as PVA's greedy search
 algorithm proceeds.
 
-% We begin by using the setting $\lambda = 1$, allowing particle repulsion between each of the models within the
-% population.
+%We begin by using the setting $\lambda = 1$, allowing particle repulsion between each of the models within the
+%population.
 
-%\begin{figure}	
-	%\includegraphics[width=0.95 \textwidth]{code/blma/cva_low_dimensional.pdf}
-	%\caption{Posterior model probabilities when $p = 12$. Red points denote models visited by the PVA
-						%algorithm, while blue points are models that were not visited. Note that the PVA algorithm
-						%visits the highest posterior probability points first}
-	%\label{fig:PVA_posterior_models}
-%\end{figure}
-
-\subsection{Communities and crime dataset}
+\subsection{Communities and crime data set}
 \label{sec:crime}
 
-We use the {\tt Communities \& Crime} dataset obtained from the UCI Machine
+We use the {\tt Communities \& Crime} data set obtained from the UCI Machine
 Learning Repository   
 
 \smallskip 
 
 \noindent 
-\url{http://archive.ics.uci.edu/ml/datasets/Communities+and+Crime}  \\
+\url{http://archive.ics.uci.edu/ml/data sets/Communities+and+Crime}  \\
 
 \noindent The data collected was part of a study by \cite{Redmond2002}
 combining socio-economic data from the 1990 United States Census, law
@@ -1136,41 +1160,57 @@ values leaving 101 covariates. We also remove the variables {\tt rentLowQ} and
 combinations of the remaining variables (the matrix $\mX$ had two singular
 values approximately $10^{-9}$ when these variables were included).  We use the
 {\tt nonViolPerPop} variable as the response. We then remove any remaining
-samples where the response is missing. The remaining dataset consist of 2118
+samples where the response is missing. The remaining data set consist of 2118
 samples and 99 covariates. Finally, the response and covariates are
 standardized to have mean 0 and standard deviation 1. Empirical correlations
 between variables range from $3.3\times10^{-5}$ to $0.999$.
 
+
+Here we center the $\mX$ matrix and simulate new data from $\vy
+= \mX\vbeta_0 + \vvarepsilon$ where $\vvarepsilon =
+(\varepsilon_1,\ldots,\varepsilon_n)^\top$ and the $\vvarepsilon_i$ are
+independently drawn with $\vvarepsilon_i \sim N(0,\sigma^2)$ where
+$\sigma^2 = \|\vy_{\mbox{\scriptsize raw}} - \mX\vbeta_0\|/n$
+and $\vy_{\mbox{\scriptsize raw}}$ denotes the original response vector.
+The data was fit using a linear model.
+Variables with p-values below 0.05 were considered in the model, i.e, the
+corresponding value of $\vgamma$ was set to 1. The MLE coefficients divided
+by 4 where taken to be the true values of the coefficient in order to make
+the problem more difficult, i.e., we set $\vbeta_0 = \widehat{\vbeta}/4$.
+
 A comparison of the performance of PVA for the hyper-$g$, robust Bayarri,
 Beta-prime and Cake priors on $g$ and the uniform, beta-binomial(1, 1) and
 beta-binomial(1, p) priors on $\vgamma$ using $F_1$ score is presented in
-Figure \ref{fig:commPVA_F1}. A comparison of the performance of the MCP, SCAD,
-lasso, PVA, BMS, BAS and PEM  methods using $F_1$ score is given in Figure
-\ref{fig:commPVA_F1_compare}.
+the top panel of Figure \ref{fig:commPVA_F1}. A comparison of the performance of the MCP, SCAD,
+lasso, PVA, BMS, BAS and PEM  methods using $F_1$ score is given in the bottom panel
+of Figure
+\ref{fig:commPVA_F1}.
 
-\begin{figure}
+\begin{figure}[p!]
 	\begin{center}	
-		\includegraphics[width=0.95\textwidth]{./commPVA_F1.pdf}  
+		\includegraphics[width=0.9\textwidth]{./commPVA_F1.pdf}  
+		
+		\includegraphics[trim={0 4cm 0 0},width=0.9\textwidth]{./commPVA_F1_compare_edit.pdf} 
 	\end{center}
-	\caption{Comparison of the performance of the PVA method on the
+	\caption{Top panel: Comparison of the performance of the PVA method on the
 						Communities and Crime data set with different $g$ and $\vgamma$ priors using $F_1$ score.
 						The hyper-$g$,
-						robust Bayarri, Beta-prime and Cake priors on $g$ and the uniform, beta-binomial(1, 1) and beta-binomial(1, p) priors on $\vgamma$ are used.}
+						robust Bayarri, Beta-prime and Cake priors on $g$ and the uniform, beta-binomial(1, 1) and beta-binomial(1, p) priors on $\vgamma$ are used.
+			Bottom panel: Comparison of the performance of the MCP, SCAD, lasso, PVA, BMS, BAS and PEM methods on the
+			Communities and Crime data set using $F_1$ score. For PVA, the
+			robust Bayarri prior on $g$ and the uniform, beta-binomial(1, 1) and beta-binomial(1, p) priors
+			on $\vgamma$ are used.		}
 	\label{fig:commPVA_F1}
 \end{figure}
 
-\begin{figure}
-	\begin{center}	
-		\includegraphics[trim={0 4cm 0 0},width=0.95\textwidth]{./commPVA_F1_compare_edit.pdf}  
-	\end{center}
-	\caption{Comparison of the performance of the MCP, SCAD, lasso, PVA, BMS, BAS and PEM methods on the
-						Communities and Crime data set using $F_1$ score. For PVA, the
-						robust Bayarri prior on $g$ and the uniform, beta-binomial(1, 1) and beta-binomial(1, p) priors
-						on $\vgamma$ are used.}
-	\label{fig:commPVA_F1_compare}
-\end{figure}
+From the top panel of \ref{fig:commPVA_F1} we see that 
+all model priors
+lead to similar performances.
+From th bottom panel we see that PVA 
+performs similarly to BAS and BMS
+and better than penalized regression and PEM methods.
 
-\subsection{Quantitative trait loci dataset}
+\subsection{Quantitative trait loci data set}
 \label{sec:QTL}
 
     For our final $p>n$ simulation example we will use the design matrix based
@@ -1191,32 +1231,41 @@ lasso, PVA, BMS, BAS and PEM  methods using $F_1$ score is given in Figure
     studies were conducted in \cite{Xu2007} and \cite{Karkkainen2012}. This
     process was repeated $50$ times.  For this simulation setting PVA has the
     best model selection accuracy, smallest MSEs and smallest parameter biases
-    of all the methods compared.  The Lasso, SCAD, MCP, EMVS, PVA and BMS
-    methods took 1.5, 1.5, 1.8, 1229, 2011, 5327 seconds respectively.
+    of all the methods compared.  The Lasso, SCAD, MCP, EMVS, BAS and BMS
+    methods took 1.5, 1.5, 1.8, 1229, 2011, 5327 seconds respectively. Our   implementation is quite fast, e.g.,
+    we fit a $n=600$ and $p\approx 7200$ problem
+    with $K=100$ particles in 1-2 minutes on a standard 2018 laptop using a single core. On a dedicated server with 48 cores the same problem can be fit in around 8 seconds on 20 cores, and as little as around 5 seconds when all cores are used.
 
 A comparison of the performance of PVA for the hyper-$g$, robust Bayarri,
 Beta-prime and Cake priors on $g$ and the uniform, $\text{beta-binomial}(1, 1)$
 and \\ $\text{beta-binomial}(1, p)$ priors on $\vgamma$ using $F_1$ score is
-presented in Figure \ref{fig:qtlPVA_F1}. A comparison of the performance of the
+presented in the top panel of Figure \ref{fig:qtlPVA_F1_compare}. A comparison of the performance of the
 MCP, SCAD, lasso, PVA, BMS, BAS and PEM  methods using $F_1$ score is given in
-Figure \ref{fig:qtlPVA_F1_compare}.
+the bottom panel of Figure \ref{fig:qtlPVA_F1_compare}.
 
-\begin{figure}[h!]
+
+From the top panel of \ref{fig:qtlPVA_F1_compare} we see that 
+$\text{beta-binomial}(1, 1)$
+and   $\text{beta-binomial}(1, p)$
+lead to similar performances.
+From th bottom panel we see that PVA
+with \\ $\text{beta-binomial}(1, 1)$
+and   $\text{beta-binomial}(1, p)$
+performs similarly to BAS 
+and better than penalized regression, PEM 
+and BMS methods.
+
+\begin{figure}[p!]
 	\begin{center}	
-		\includegraphics[width=0.95\textwidth]{./qtlPVA_F1.pdf}  
+		\includegraphics[width=0.9\textwidth]{./qtlPVA_F1.pdf}  
+		
+		\includegraphics[trim={0 4cm 0 0},width=0.9\textwidth]{./qtlPVA_F1_compare_edit.pdf}  
 	\end{center}
-	\caption{Comparison of the performance of the PVA method on the
+	\caption{Top panel: Comparison of the performance of the PVA method on the
 						QTL data set with different $g$ and $\vgamma$ priors using $F_1$ score.
 						The hyper-$g$,
-						robust Bayarri, Beta-prime and Cake priors on $g$ and the uniform, beta-binomial(1, 1) and beta-binomial(1, p) priors on $\vgamma$ are used.}
-	\label{fig:qtlPVA_F1}
-\end{figure}
-
-\begin{figure}[h!]
-	\begin{center}	
-		\includegraphics[trim={0 4cm 0 0},width=0.95\textwidth]{./qtlPVA_F1_compare_edit.pdf}  
-	\end{center}
-	\caption{Comparison of the performance of the MCP, SCAD, lasso, PVA, BMS, BAS and PEM methods on the
+						robust Bayarri, Beta-prime and Cake priors on $g$ and the uniform, beta-binomial(1, 1) and beta-binomial(1, p) priors on $\vgamma$ are used.
+Bottom panel: Comparison of the performance of the MCP, SCAD, lasso, PVA, BMS, BAS and PEM methods on the
 						QTL data set using $F_1$ score. For PVA, the
 						robust Bayarri prior on $g$ and the uniform, beta-binomial(1, 1) and beta-binomial(1, p) priors
 						on $\vgamma$ are used.}
@@ -1372,8 +1421,8 @@ $p(\vgamma | \vy)$ used to weight models in $\Gamma$ seemed to have only a very 
 % Is this still true?
 When the robust Bayarri prior is chosen to rank models in PVA,
 the marginal probability $p(\vgamma | \vy)$ changes a lot as opposed to ranking models with other priors.
-From the previous section, we see that changing the PVA model ranking
-marginal had a large impact on the $F_1$ score obtained.
+%From the previous section, we see that changing the PVA model ranking
+%marginal had a large impact on the $F_1$ score obtained.
 Variables with low posterior probability are truncated to 0, as PVA seeks higher posterior probability models,
 ignoring the lower posterior probability models.
 
@@ -1387,23 +1436,23 @@ ignoring the lower posterior probability models.
 	Bodyfat    &BIC                     &$0.63$&$0.48$&$0.37$&$0.07$&$0.01$&$0.02$\\
 			   &Liang's hyper-$g$ prior &$0.66$&$0.52$&$0.42$&$0.07$&$0.01$&$0.02$\\
 			   &Bayarri's robust prior  &$0.65$&$0.52$&$0.40$&$0.07$&$0.01$&$0.02$\\
-			   &ZE                      &$0.65$&$0.51$&$0.39$&$0.06$&$0.01$&$0.02$\\
+			   &beta-prime prior                       &$0.65$&$0.51$&$0.39$&$0.06$&$0.01$&$0.02$\\
 	College    &BIC                     &$0.70$&$0.58$&$0.49$&$0.03$&$0.02$&$0.03$\\
 	&Liang's hyper-$g$ prior            &$0.90$&$0.78$&$0.64$&$0.06$&$0.06$&$0.06$\\
 	&Bayarri's robust prior             &$0.88$&$0.78$&$0.63$&$0.06$&$0.06$&$0.06$\\
-	&ZE                                 &$0.82$&$0.66$&$0.57$&$0.03$&$0.06$&$0.06$\\
+	&beta-prime prior                                 &$0.82$&$0.66$&$0.57$&$0.03$&$0.06$&$0.06$\\
 	Hitters   &BIC                      &$0.74$&$0.64$&$0.50$&$0.12$&$0.07$&$0.06$\\
 	&Liang's hyper-$g$ prior            & NaN  &$0.81$&$0.83$&NaN   &$0.17$&$0.07$\\
 	&Bayarri's robust prior             &$0.84$&$0.81$&$0.75$&$0.29$&$0.17$&$0.07$\\
-	&ZE                                 &$0.79$&$0.72$&$0.67$&$0.27$&$0.13$&$0.05$\\
+	&beta-prime prior                                  &$0.79$&$0.72$&$0.67$&$0.27$&$0.13$&$0.05$\\
 	USCrime&BIC                         &$0.82$&$0.70$&$0.64$&$0.47$&$0.15$&$0.12$\\
 	&Liang's hyper-$g$ prior            &$0.76$&$0.71$&$0.64$&$0.45$&$0.16$&$0.12$\\
 	&Bayarri's robust prior             &$0.79$&$0.70$&$0.61$&$0.35$&$0.14$&$0.08$\\
-	&ZE                                 &$0.76$&$0.70$&$0.64$&$0.45$&$0.16$&$0.13$\\
+	&beta-prime prior                                  &$0.76$&$0.70$&$0.64$&$0.45$&$0.16$&$0.13$\\
 	Wage&BIC                            &$0.67$&$0.49$&$0.35$&$0.00$&$0.00$&$0.00$\\
 	&Liang's hyper-$g$ prior            &$0.69$&$0.47$&$0.33$&$0.00$&$0.00$&$0.00$\\
 	&Bayarri's robust prior             &$0.69$&$0.47$&$0.32$&$0.00$&$0.00$&$0.00$\\
-	&ZE                                 &$0.69$&$0.47$&$0.32$&$0.00$&$0.00$&$0.00$\\
+	&beta-prime prior                                  &$0.69$&$0.47$&$0.32$&$0.00$&$0.00$&$0.00$\\
 	\hline
 \end{tabular}
 }

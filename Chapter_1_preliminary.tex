@@ -316,7 +316,7 @@ multiplicities. The knots must be in ascending order. The number of knots is
 the minimum for the degree of the B-spline, which has a non-zero value in the
 range between the first and last knot. Each piece of the function is a
 polynomial of degree less than $n$ between and including adjacent knots. A
-B-Spline is continuous at its' knots. When all internal knots are distinct its
+B-Spline is continuous at its knots. When all internal knots are distinct its
 derivatives are also continuous up to the derivative of degree $n - 1$. If
 internal knots coincide at a given value of $x$, the continuity of derivative
 order is reduced by 1 for each additional knot.
@@ -338,7 +338,7 @@ $$
 $$
 \begin{array}{rl}
 	B_{i, k}(x; \vkappa) & \ds = \frac{x - \kappa_i}{\kappa_{i + k} - \kappa_i} Q_{i, k-1} (x; \vkappa) + 
-										\frac{\kappa_{i + k + 1} - x}{\kappa_{i + k + 1} - \kappa_{i + 1}} Q_{i, k-1} (x; \vkappa)
+										\frac{\kappa_{i + k + 1} - x}{\kappa_{i + k + 1} - \kappa_{i + 1}} Q_{i+1, k-1} (x; \vkappa)
 \end{array}
 $$
 
@@ -513,8 +513,7 @@ contexts \citep{Kass1993}.
 
 Another approach is to make the process of model selection can be made
 implicit in the model fitting process itself. The well-known lasso regression
-method \citep{Tibshirani1996}, which is a special case of ridge regression
-\citep{Casella1980}, takes this approach. As \cite{Breiman1996} and
+method \citep{Tibshirani1996}  takes this approach. As \cite{Breiman1996} and
 \cite{Efron2013} showed, while  the standard formulation of a linear model is
 unbiased, the goodness of fit of these models is numerically  unstable.
 Breiman showed that by introducing a penalty on the size of the regression
@@ -594,7 +593,7 @@ $\lambda$, as Bayesian model selection methods do.
 Parallel to the frequentist approaches, model selection can be performed using
 a Bayesian approach. This can be done, for example, by using Bayes Factors  to
 compare the marginal likelihoods of the candidate models to see which is most
-probable given the observed data\citep{Kass1993}. Rather than selecting one
+probable given the observed data \citep{Kass1993}. Rather than selecting one
 candidate model, several models can be combined together using Bayesian model
 averaging \citep{Hoeting1999, Raftery1997, Fernandez2001,
 Papaspiliopoulos2016}.

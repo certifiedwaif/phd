@@ -480,17 +480,18 @@ Algorithm \ref{alg:algorithm_one}, optimal $\vmu$ and $\mLambda$ values must be
 found while keeping the other variational parameters fixed. The variational
 lower bound is not necessarily unimodal if $\vp$ and $\mSigma$ are free to
 vary, leading to potential problem of optimising to a local rather than the
-globalmaximum.  However, for fixed $\vp$ and $\mSigma$, the variational lower
+global maximum.  However, for fixed $\vp$ and $\mSigma$, the variational lower
 bound is log-concave with respect to $\vmu$ and $\mLambda$, and so standard
 optimisation methods such as L-BFGS-B as described in, for example,
 \cite{Liu1989} and \cite{Nocedal2006}, work well. This leads to an extremely
-accurate approximation of the true posterior at the expense of some additional
-computational effort. Care must be taken in the parameterisation of $\mLambda$,
-as it is both of high dimension $(p + mb)^2$ and constrained to be semi-
-positive definite. We present and compare two approaches to parameterising the
-covariance matrix $\mLambda$ below.
+accurate approximation of the posterior probability estimated by MCMC at the
+expense of some additional computational effort. Care must be taken in the
+parameterisation of $\mLambda$, as it is both of high dimension $(p + mb)^2$
+and constrained to be semi- positive definite. We present and compare two
+approaches to parameterising the covariance matrix $\mLambda$ below.
 	
 \subsubsection{Covariance parameterisation $\mLambda = \mR^\top \mR$}
+This parameterization has been used elsewhere, e.g., \cite{pinheiro2000mixedeffects}.
 We fit the Gaussian component of our approximation in Algorithm
 \ref{alg:algorithm_one} by maximising  the variational lower bound is
 \begin{equation}
@@ -628,6 +629,7 @@ numerical stability of the algorithm.
 	\label{alg:algorithm_nr}
 \end{algorithm}
 
+\newpage 
 
 \section{Parameterisations for Gaussian Variational Approximation}
 \label{sec:param}
@@ -855,6 +857,12 @@ than of the Cholesky factor of the covariance matrix. Thus parameterising the
 variational lower bound in terms of the precision matrix will have the same or
 higher numerical accuracy than parameterising in terms of the covariance
 matrix.
+
+Finally, we have outlined several versions of the Gaussian variational approximation.
+Sometimes these give qualitatively different results and the question arises
+how we would choose amongst them. While we do not have theory to support this,
+our pragmatic advice is to choose a method we would choose
+the method (amongst those that converge) is the method that achieves the highest lower bound value.
 
 \section{Numerical results}
 \label{sec:results}
@@ -1487,6 +1495,8 @@ seconds for the covariance parameterisation.
 \end{table}
 
 
+\newpage 
+\
 \newpage 
 
 \section{Conclusion} 
